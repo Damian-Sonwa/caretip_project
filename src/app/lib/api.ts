@@ -5,6 +5,7 @@
  */
 
 import { toUserFriendlyMessage, fallbackMessageForHttpStatus } from "./errorMessages";
+import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 
@@ -50,7 +51,7 @@ async function handleRes<T>(res: Response): Promise<T> {
       url: res.url,
       body: data,
     });
-    const body = data as { message?: string };
+    const body = data as { message?: string; code?: string; canResend?: boolean };
     const bodyMsg = body.message?.trim();
     const fromStatus = fallbackMessageForHttpStatus(res.status);
     const statusText = res.statusText?.trim();
@@ -59,6 +60,9 @@ async function handleRes<T>(res: Response): Promise<T> {
       fromStatus ||
       (statusText && statusText.length > 0 && statusText !== "Unknown" ? statusText : "") ||
       `Request failed (${res.status})`;
+    if (body.code === EMAIL_NOT_VERIFIED_CODE) {
+      throw new ApiRequestError(base, res.status, body.code, body.canResend === true);
+    }
     throw new Error(base);
   }
   return data as T;
@@ -143,6 +147,30 @@ export async function loginAPI(
     credentials: "include",
   });
 }
+
+export async function resendVerificationEmailAPI(
+  email: string,
+  password: string
+): Promise<{ ok: boolean; message: string }> {
+  return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/resend-verification-email"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+    credentials: "include",
+  });
+}
+
+/** While logged in with an unverified account (e.g. check-email page after signup). Uses Bearer token. */
+export async function resendVerificationEmailSessionAPI(): Promise<{ ok: boolean; message: string }> {
+  return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/resend-verification-email/session"), {
+    method: "POST",
+    headers: getHeaders(),
+    body: "{}",
+    credentials: "include",
+  });
+}
+
+export { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, isApiRequestError } from "./apiError";
 
 export async function requestPasswordReset(email: string): Promise<{ ok: boolean; message: string }> {
   return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/forgot-password"), {

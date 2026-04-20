@@ -6,6 +6,7 @@ import { Navigation } from "../../components/Navigation";
 import { Footer } from "../../components/Footer";
 import { useAuth } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
+import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipLogo } from "../../components/CareTipLogo";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
@@ -69,7 +70,11 @@ export function PlatformAdminLoginPage() {
       navigate("/platform-admin/dashboard", { replace: true });
     } catch (err) {
       logClientError("PlatformAdminLoginPage", err);
-      toast.error(toUserFriendlyMessage(err));
+      if (isApiRequestError(err) && err.code === EMAIL_NOT_VERIFIED_CODE) {
+        toast.error(err.message, { duration: 12_000 });
+      } else {
+        toast.error(toUserFriendlyMessage(err));
+      }
     } finally {
       authInFlightRef.current = false;
       setSubmitting(false);

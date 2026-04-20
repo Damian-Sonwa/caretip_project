@@ -13,6 +13,11 @@ import {
   getPasswordStrength,
 } from '../lib/passwordValidation';
 import { toUserFriendlyMessage } from '../lib/errorMessages';
+import {
+  resendVerificationEmailAPI,
+  isApiRequestError,
+  EMAIL_NOT_VERIFIED_CODE,
+} from '../lib/api';
 import { logClientError } from '../lib/clientLog';
 import { toast } from 'sonner';
 
@@ -62,6 +67,8 @@ export function AuthPage() {
   const [inviteCode, setInviteCode] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
+  const [showResendVerification, setShowResendVerification] = useState(false);
+  const [resendBusy, setResendBusy] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -103,6 +110,7 @@ export function AuthPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setShowResendVerification(false);
 
     if (!email || !password) {
       setError('Please enter both email and password.');
@@ -189,6 +197,12 @@ export function AuthPage() {
       }
     } catch (err) {
       logClientError('AuthPage', err);
+      if (isApiRequestError(err) && err.code === EMAIL_NOT_VERIFIED_CODE) {
+        setError(err.message);
+        setShowResendVerification(err.canResend === true);
+        return;
+      }
+      setShowResendVerification(false);
       const raw = err instanceof Error ? err.message : String(err);
       const msg = toUserFriendlyMessage(err);
       if (
@@ -205,11 +219,32 @@ export function AuthPage() {
     }
   };
 
+  const handleResendVerification = async () => {
+    if (!email.trim() || !password) {
+      setError('Enter your password above, then tap resend — we use it to confirm it’s you.');
+      return;
+    }
+    setResendBusy(true);
+    setError('');
+    try {
+      const r = await resendVerificationEmailAPI(email.trim(), password);
+      toast.success(r.message || "We sent a new verification link. Check your inbox.", {
+        style: ROLE_MISMATCH_TOAST_STYLE,
+      });
+    } catch (err) {
+      logClientError('AuthPage.resendVerification', err);
+      setError(toUserFriendlyMessage(err));
+    } finally {
+      setResendBusy(false);
+    }
+  };
+
   const toggleAuthMode = () => {
     const nextLogin = !isLogin;
     setIsLogin(nextLogin);
     navigate(nextLogin ? '/login' : '/signup', { replace: true });
     setError('');
+    setShowResendVerification(false);
     setEmail('');
     setPassword('');
     setName('');
@@ -276,6 +311,7 @@ export function AuthPage() {
     authInFlightRef.current = true;
     setIsSubmitting(true);
     setError('');
+    setShowResendVerification(false);
     try {
       const loggedIn = await loginWithOAuth('google', idToken, {
         isLogin,
@@ -595,6 +631,26 @@ export function AuthPage() {
               <p className="text-sm font-medium text-red-600" role="alert">
                 {error}
               </p>
+            )}
+
+            {isLogin && showResendVerification && error && (
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => void handleResendVerification()}
+                  disabled={resendBusy || isSubmitting}
+                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#197278] bg-white text-sm font-semibold text-[#197278] transition hover:bg-[#197278]/5 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {resendBusy ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                      Sending…
+                    </>
+                  ) : (
+                    'Resend verification email'
+                  )}
+                </button>
+              </div>
             )}
 
             {isLogin && (

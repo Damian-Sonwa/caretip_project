@@ -73,8 +73,24 @@ const ALLOWED_CLIENT_MESSAGES = new Set<string>([
   "Insufficient permissions",
   "Email verification required",
   "Email is not verified.",
+  "Your email is not verified. Please check your inbox and verify your account before logging in.",
+  "Email is already verified.",
+  "We sent a new verification link to your email.",
   "Account pending verification.",
 ]);
+
+/** Thrown from auth login when credentials are valid but `emailVerified` is false. */
+export const EMAIL_NOT_VERIFIED_CODE = "EMAIL_NOT_VERIFIED" as const;
+
+export class EmailNotVerifiedLoginError extends Error {
+  readonly code = EMAIL_NOT_VERIFIED_CODE;
+  readonly canResend = true as const;
+  constructor() {
+    super("Your email is not verified. Please check your inbox and verify your account before logging in.");
+    this.name = "EmailNotVerifiedLoginError";
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
 
 export function logServerError(context: string, err: unknown): void {
   console.error(`[${context}]`, err);

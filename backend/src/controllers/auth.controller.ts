@@ -9,6 +9,7 @@ import {
   logServerError,
   clientSafeMessage,
   CLIENT_FALLBACK,
+  EmailNotVerifiedLoginError,
 } from "../utils/httpErrors.js";
 
 /** Thrown by auth.service.login — always safe to return to the client as 401. */
@@ -23,7 +24,6 @@ const LOGIN_CLIENT_MESSAGES = new Set([
 const LOGIN_FORBIDDEN_MESSAGES = new Set([
   "This account does not have Super Admin permissions.",
   "This account has been disabled.",
-  "Email is not verified.",
 ]);
 
 /** User-safe hint; full error stays in server logs. */
@@ -152,6 +152,13 @@ export async function login(req: Request, res: Response) {
     });
     return res.json(result);
   } catch (err) {
+    if (err instanceof EmailNotVerifiedLoginError) {
+      return res.status(403).json({
+        message: err.message,
+        code: err.code,
+        canResend: err.canResend,
+      });
+    }
     const message = err instanceof Error ? err.message : "Login failed";
     if (
       message === "This account does not have Business permissions." ||
@@ -184,6 +191,63 @@ export async function login(req: Request, res: Response) {
     }
 
     logServerError("auth.login", err);
+    return res.status(503).json({
+      message: CLIENT_FALLBACK.loginUnexpected,
+    });
+  }
+}
+
+export async function resendVerificationEmail(req: Request, res: Response) {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const email = authService.normalizeLoginEmail(
+      typeof body.email === "string" ? body.email : "",
+    );
+    const password = body.password;
+    if (!email || typeof password !== "string") {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+    await authService.resendVerificationEmail({ email, password });
+    return res.json({
+      ok: true,
+      message: "We sent a new verification link to your email.",
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Request failed";
+    if (message === "Invalid email or password") {
+      return res.status(401).json({ message });
+    }
+    if (message === "Email is already verified.") {
+      return res.status(400).json({ message });
+    }
+    logServerError("auth.resendVerificationEmail", err);
+    return res.status(503).json({
+      message: CLIENT_FALLBACK.loginUnexpected,
+    });
+  }
+}
+
+/** POST with Bearer JWT — same success shape as {@link resendVerificationEmail}; no password in body. */
+export async function resendVerificationEmailForSession(req: Request, res: Response) {
+  try {
+    const uid = req.user?.userId ?? req.user?.id;
+    if (!uid || typeof uid !== "string") {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    await authService.resendVerificationEmailForSessionUser(uid);
+    return res.json({
+      ok: true,
+      message: "We sent a new verification link to your email.",
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Request failed";
+    if (message === "Authentication required") {
+      return res.status(401).json({ message });
+    }
+    if (message === "Email is already verified.") {
+      return res.status(400).json({ message });
+    }
+    logServerError("auth.resendVerificationEmailForSession", err);
     return res.status(503).json({
       message: CLIENT_FALLBACK.loginUnexpected,
     });

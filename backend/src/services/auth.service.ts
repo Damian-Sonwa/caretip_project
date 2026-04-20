@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import type { BusinessVerificationStatus, Role, User } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { validatePassword } from "../utils/passwordValidation.js";
+import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { generateUniqueBusinessSlugForName } from "./business.service.js";
 import {
   buildVerifyEmailUrl,
@@ -337,10 +338,55 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   }
 
   if (user.emailVerified !== true) {
-    throw new Error("Email is not verified.");
+    throw new EmailNotVerifiedLoginError();
   }
 
   return authResultForUserRecord(user);
+}
+
+/**
+ * Re-sends the email verification link after the user proves they know the password.
+ * Does not reveal whether the email exists (same errors as a failed password check when appropriate).
+ */
+export async function resendVerificationEmail(input: {
+  email: string;
+  password: string;
+}): Promise<void> {
+  const email = normalizeLoginEmail(input.email);
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, passwordHash: true, emailVerified: true, isActive: true },
+  });
+  if (!user || user.isActive !== true || !user.passwordHash) {
+    throw new Error("Invalid email or password");
+  }
+  const ok = await bcrypt.compare(input.password, user.passwordHash);
+  if (!ok) {
+    throw new Error("Invalid email or password");
+  }
+  if (user.emailVerified === true) {
+    throw new Error("Email is already verified.");
+  }
+  await sendVerificationEmailBestEffort(user.id, email);
+}
+
+/**
+ * Re-sends verification for the currently authenticated user (JWT), without requiring password again.
+ * Used from the check-email screen right after sign-up while the session is still valid.
+ */
+export async function resendVerificationEmailForSessionUser(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, emailVerified: true, isActive: true },
+  });
+  if (!user || user.isActive !== true) {
+    throw new Error("Authentication required");
+  }
+  if (user.emailVerified === true) {
+    throw new Error("Email is already verified.");
+  }
+  const email = normalizeLoginEmail(user.email);
+  await sendVerificationEmailBestEffort(user.id, email);
 }
 
 function mapIntendedToRole(intended: LoginInput["intendedRole"]): Role {

@@ -13,6 +13,17 @@ router.post("/register", authController.register);
 router.post("/login", authLoginLimiter, authController.login);
 /** Same handler as POST /login — preferred name for sign-in clients. */
 router.post("/signin", authLoginLimiter, authController.login);
+router.post(
+  "/resend-verification-email",
+  authLoginLimiter,
+  authController.resendVerificationEmail
+);
+router.post(
+  "/resend-verification-email/session",
+  authLoginLimiter,
+  authMiddleware,
+  authController.resendVerificationEmailForSession
+);
 router.post("/oauth", authLoginLimiter, authController.oauth);
 router.post("/activate-employee", authLoginLimiter, authController.activateEmployee);
 router.get("/verify-email", authController.verifyEmail);

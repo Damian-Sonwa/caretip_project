@@ -3,6 +3,8 @@
  * Technical details stay on the server; the UI only shows safe copy.
  */
 
+import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
+
 /** Use only when the failure type cannot be determined (null/empty/unknown). */
 export const GENERIC_UNKNOWN_ERROR = "Something went wrong. Please try again.";
 
@@ -38,6 +40,8 @@ const ERROR_MAP: Record<string, string> = {
   "Password sign-in is not set for this account. Use Google.":
     "This account only uses Google sign-in. Use “Continue with Google”.",
   "This account has been disabled.": "This account has been disabled. Contact support if you think this is a mistake.",
+  "Email is already verified.": "Your email is already verified. You can sign in.",
+  "We sent a new verification link to your email.": "We sent a new verification link. Check your inbox (and spam).",
   "Restart the Caretip API after editing .env. JWT_SECRET is only loaded when the backend starts — stop it (Ctrl+C) and run npm run dev again.":
     "Sign-in isn’t working on the server right now. If you manage the app, restart the API after setting JWT_SECRET.",
   // Legacy keys
@@ -191,6 +195,10 @@ export function fallbackMessageForHttpStatus(status: number): string | undefined
  */
 export function toUserFriendlyMessage(error: unknown): string {
   if (error == null) return GENERIC_UNKNOWN_ERROR;
+
+  if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
+    return error.message;
+  }
 
   const message = error instanceof Error ? error.message : String(error);
 
