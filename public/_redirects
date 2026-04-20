@@ -1,0 +1,2 @@
+# Netlify (and similar static hosts): SPA fallback so deep links like /qr/table/:id load index.html.
+/*    /index.html   200

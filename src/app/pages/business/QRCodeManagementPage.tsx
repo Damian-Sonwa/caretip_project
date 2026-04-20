@@ -41,7 +41,6 @@ import {
 } from "../../lib/qrBranded";
 import {
   businessDirectoryUrl,
-  getAppPublicBaseUrl,
   qrBusinessUrl,
   qrEmployeeUrl,
   qrLandingUrl,
@@ -232,13 +231,12 @@ export function QRCodeManagementPage() {
     };
   }, [employees, user?.businessId, businessSlug]);
 
-  const publicBase = getAppPublicBaseUrl();
   const tables: Array<{ id: string; name: string; location: string; qrUrl: string; scans: number }> =
     venueTables.map((t) => ({
       id: t.id,
       name: t.name,
       location: t.location?.name ?? "—",
-      qrUrl: publicBase ? qrTableUrl(t.id) : "",
+      qrUrl: qrTableUrl(t.id),
       scans: 0,
     }));
   const locations: Array<{ id: string; name: string; address: string; qrUrl: string; scans: number }> =
@@ -246,7 +244,7 @@ export function QRCodeManagementPage() {
       id: loc.id,
       name: loc.name,
       address: loc.description?.trim() || "—",
-      qrUrl: publicBase ? qrLocationUrl(loc.id) : "",
+      qrUrl: qrLocationUrl(loc.id),
       scans: 0,
     }));
 

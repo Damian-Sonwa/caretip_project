@@ -292,6 +292,13 @@ export async function oauth(req: Request, res: Response) {
     });
     return res.status(isLogin ? 200 : 201).json(result);
   } catch (err) {
+    if (err instanceof EmailNotVerifiedLoginError) {
+      return res.status(403).json({
+        message: err.message,
+        code: err.code,
+        canResend: err.canResend,
+      });
+    }
     const message = err instanceof Error ? err.message : "OAuth sign-in failed";
     if (message.includes("not configured") || message.includes("GOOGLE_CLIENT_ID")) {
       logServerError("auth.oauth", err);

@@ -3,7 +3,7 @@
  *
  * Employee (stable id)
  * - Routes: `/qr/employee/:employeeId` → EmployeeQrEntryPage; API `GET /api/employees/:id` (public)
- * - QR: branded PNG + management UI use `VITE_APP_URL` / `NEXT_PUBLIC_APP_URL` + `/qr/employee/:id`
+ * - QR: branded PNG + management UI use `getAppPublicBaseUrl()` + `/qr/employee/:id` (see appPublicUrl.ts)
  *
  * Business / team directory
  * - Routes: `/business/:businessSlug` → BusinessStaffDirectoryPage; API `GET /api/staff/directory/business/:slug`

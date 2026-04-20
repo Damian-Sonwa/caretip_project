@@ -8,6 +8,8 @@ import {
   type LoginInput,
 } from "./auth.service.js";
 import * as businessService from "./business.service.js";
+import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
+import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 
 /** Social OAuth supported by `/api/auth/oauth` (Google only; Apple removed temporarily). */
 export type OAuthProvider = "google";
@@ -120,7 +122,32 @@ export async function authenticateWithOAuth(
       });
     }
 
-    return authResultForUserRecord(user);
+    const fullUser = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: {
+        business: { select: { id: true, name: true, verificationStatus: true } },
+        employee: { select: { id: true, name: true, avatar: true, businessId: true } },
+      },
+    });
+    if (!fullUser) {
+      throw new Error("No account found for this email. Create an account first.");
+    }
+    let sessionUser = fullUser;
+    if (sessionUser.emailVerified !== true) {
+      await applyEmailVerificationBypassIfEligible(sessionUser);
+      const again = await prisma.user.findUnique({
+        where: { id: user.id },
+        include: {
+          business: { select: { id: true, name: true, verificationStatus: true } },
+          employee: { select: { id: true, name: true, avatar: true, businessId: true } },
+        },
+      });
+      if (again) sessionUser = again;
+    }
+    if (sessionUser.emailVerified !== true) {
+      throw new EmailNotVerifiedLoginError();
+    }
+    return authResultForUserRecord(sessionUser);
   }
 
   /** Sign up */

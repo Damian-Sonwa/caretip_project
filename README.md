@@ -174,7 +174,7 @@ Add your domain in the **Resend dashboard → Domains**, complete the DNS record
 | Variable | Example | Purpose |
 |----------|---------|---------|
 | `VITE_API_URL` | *(omit in local dev)* | If **unset**, Vite **proxies** `/api` and `/socket.io` to `http://localhost:3001`. If set, the browser calls this base URL directly. |
-| `VITE_APP_URL` | `http://localhost:5173` | Public site origin for client-side links / QR helpers where used |
+| `NEXT_PUBLIC_APP_URL` | *(optional)* | Override public origin for QR/share links only if it must differ from the browser’s current origin. Otherwise table QR links use the same host as the open app. |
 | `VITE_GOOGLE_CLIENT_ID` | `*.apps.googleusercontent.com` | Google Sign-In, if enabled in your build |
 
 ---
@@ -274,7 +274,7 @@ cd backend && npm run db:migrate:deploy
 
 ### Split hosting (common)
 
-- **Frontend:** e.g. Vercel / Netlify → set **`VITE_API_URL`** to your **API** public URL and **`VITE_APP_URL`** to the SPA URL.
+- **Frontend:** e.g. Vercel / Netlify → set **`VITE_API_URL`** to your **API** public URL. Table/employee QR links use the SPA origin automatically; set **`NEXT_PUBLIC_APP_URL`** only if you need a fixed public base different from where the page is opened.
 - **Backend:** e.g. Railway, Render, Fly, VPS → set **`FRONTEND_URL`** to the **same SPA origin** users open in the browser (emails and redirects depend on it).
 
 ### Resend

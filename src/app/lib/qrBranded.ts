@@ -1,6 +1,6 @@
 /**
  * Branded QR with CareTip wordmark framing.
- * Encodes [VITE_APP_URL | NEXT_PUBLIC_APP_URL]/qr/employee/[employeeId]
+ * Encodes public origin + `/qr/employee/[employeeId]` (origin from window or NEXT_PUBLIC_APP_URL).
  */
 
 import QRCode from "qrcode";

@@ -12,6 +12,7 @@ import {
 } from "./emailVerification.service.js";
 import * as employeeActivationService from "./employeeActivation.service.js";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
+import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -297,7 +298,7 @@ export async function registerEmployee(input: {
 
 export async function login(input: LoginInput): Promise<AuthResult> {
   const email = normalizeLoginEmail(input.email);
-  const user = await prisma.user.findUnique({
+  let user = await prisma.user.findUnique({
     where: { email },
     include: {
       business: { select: { id: true, name: true, verificationStatus: true } },
@@ -338,7 +339,20 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   }
 
   if (user.emailVerified !== true) {
-    throw new EmailNotVerifiedLoginError();
+    const bypassed = await applyEmailVerificationBypassIfEligible(user);
+    if (!bypassed) {
+      throw new EmailNotVerifiedLoginError();
+    }
+    user = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: {
+        business: { select: { id: true, name: true, verificationStatus: true } },
+        employee: { select: { id: true, name: true, avatar: true, businessId: true } },
+      },
+    });
+    if (!user || user.emailVerified !== true) {
+      throw new EmailNotVerifiedLoginError();
+    }
   }
 
   return authResultForUserRecord(user);
