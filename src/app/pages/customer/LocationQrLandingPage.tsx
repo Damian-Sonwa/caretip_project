@@ -1,0 +1,195 @@
+import { useNavigate, useParams, Link } from "react-router";
+import { useEffect, useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { Building2, Home, MapPin, Search } from "lucide-react";
+import { useTipFlow } from "../../context/TipFlowContext";
+import {
+  getPublicLocationContext,
+  type BusinessDirectoryEmployee,
+  type PublicLocationContextResponse,
+} from "../../lib/api";
+import { toUserFriendlyMessage } from "../../lib/errorMessages";
+import { logClientError } from "../../lib/clientLog";
+import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { ProfileAvatar } from "../../components/ui/profile-avatar";
+import { CareTipLogo } from "../../components/CareTipLogo";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+
+/**
+ * /qr/location/:locationId — Venue QR: business team list in context of one location.
+ */
+export function LocationQrLandingPage() {
+  const navigate = useNavigate();
+  const { locationId } = useParams<{ locationId: string }>();
+  const { setBusinessId, setEmployee, setStaffProfileSlug } = useTipFlow();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [data, setData] = useState<PublicLocationContextResponse | null>(null);
+  const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const raw = locationId?.trim();
+    if (!raw) {
+      setError("Invalid link.");
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const res = await getPublicLocationContext(raw);
+        if (cancelled) return;
+        setData(res);
+        setBusinessId(res.business.id);
+      } catch (e) {
+        logClientError("LocationQrLandingPage", e);
+        if (!cancelled) {
+          setError(toUserFriendlyMessage(e));
+          setData(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [locationId, setBusinessId]);
+
+  const filtered = useMemo(() => {
+    const list = data?.employees ?? [];
+    const q = query.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter(
+      (e) =>
+        e.name.toLowerCase().includes(q) ||
+        e.jobTitle.toLowerCase().includes(q)
+    );
+  }, [data?.employees, query]);
+
+  const pickEmployee = (emp: BusinessDirectoryEmployee) => {
+    if (!data) return;
+    setBusinessId(data.business.id);
+    setEmployee(emp.id, emp.name, emp.avatar ?? undefined);
+    setStaffProfileSlug(emp.slug);
+    const qs = new URLSearchParams({ employeeId: emp.id });
+    if (emp.slug) {
+      qs.set("returnSlug", emp.slug);
+      qs.set("direct", "1");
+    }
+    navigate(`/tip-amount?${qs.toString()}`);
+  };
+
+  if (loading) {
+    return <CareTipPageLoader variant="wait" message="Loading venue…" />;
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? "Not found"}</p>
+        <Link to="/" className="text-primary hover:underline text-sm">
+          Go home
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background pb-16">
+      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
+          <button
+            type="button"
+            onClick={() => navigate("/")}
+            className="rounded-lg p-2 hover:bg-muted transition-colors"
+            aria-label="Home"
+          >
+            <Home className="h-5 w-5 text-foreground" />
+          </button>
+          <CareTipLogo size="xs" className="shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="h-3.5 w-3.5 shrink-0" />
+              {data.location.name}
+            </p>
+            <h1 className="truncate text-lg font-semibold text-foreground">{data.business.name}</h1>
+          </div>
+          <Building2 className="h-8 w-8 shrink-0 text-muted-foreground opacity-80" />
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
+        <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+          <Card className="border-border shadow-sm">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">Venue team</CardTitle>
+              <CardDescription>Choose who you&apos;d like to thank at this location.</CardDescription>
+            </CardHeader>
+          </Card>
+        </motion.div>
+
+        <Card className="border-border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Search</CardTitle>
+            <CardDescription>Filter by name or role</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <input
+                type="search"
+                placeholder="Search by name or role…"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                autoComplete="off"
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-border shadow-sm">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base">Team</CardTitle>
+            <CardDescription>Tap to continue to tip amount</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {filtered.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">No matches.</p>
+            ) : (
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {filtered.map((emp, index) => (
+                  <motion.li
+                    key={emp.id}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => pickEmployee(emp)}
+                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 text-left transition-all hover:border-primary/50 hover:shadow-md"
+                    >
+                      <ProfileAvatar
+                        src={emp.avatar}
+                        displayName={emp.name}
+                        className="h-20 w-20 ring-2 ring-primary/30"
+                      />
+                      <span className="line-clamp-2 text-center text-sm font-semibold leading-tight text-foreground">
+                        {emp.name}
+                      </span>
+                      <span className="line-clamp-2 text-center text-xs text-muted-foreground">{emp.jobTitle}</span>
+                    </button>
+                  </motion.li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

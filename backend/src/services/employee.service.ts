@@ -1,0 +1,893 @@
+import bcrypt from "bcrypt";
+import { Prisma } from "@prisma/client";
+import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
+import { prisma } from "../prisma.js";
+import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
+import * as employeeActivationService from "./employeeActivation.service.js";
+import {
+  buildEmployeeActivationUrl,
+  sendEmployeeActivationEmail,
+} from "./employeeActivationEmail.service.js";
+
+const VERIFICATION_REQUIRED_MSG = "QR code will be available after business verification.";
+
+/** Temporary password for new employees; they should change it on first login. */
+const TEMP_PASSWORD = "Welcome1!";
+
+/** Validates location/tables belong to the business; infers location from tables when unset. */
+export async function resolveStaffAssignments(
+  businessId: string,
+  locationId: string | null | undefined,
+  tableIds: string[]
+): Promise<{ locationId: string | null; tableIds: string[] }> {
+  const uniqueTableIds = [...new Set(tableIds.filter(Boolean))];
+  let locId: string | null =
+    locationId === undefined || locationId === null
+      ? null
+      : String(locationId).trim() || null;
+  if (locId) {
+    const loc = await prisma.location.findFirst({
+      where: { id: locId, businessId },
+    });
+    if (!loc) throw new Error("Invalid location");
+  }
+  if (uniqueTableIds.length === 0) {
+    return { locationId: locId, tableIds: [] };
+  }
+  const rows = await prisma.table.findMany({
+    where: { id: { in: uniqueTableIds } },
+    select: {
+      id: true,
+      locationId: true,
+      location: { select: { businessId: true } },
+    },
+  });
+  if (rows.length !== uniqueTableIds.length) {
+    throw new Error("One or more tables are invalid");
+  }
+  for (const r of rows) {
+    if (r.location.businessId !== businessId) {
+      throw new Error("Table does not belong to this business");
+    }
+  }
+  const uniqueLocIds = [...new Set(rows.map((r) => r.locationId))];
+  if (uniqueLocIds.length > 1) {
+    throw new Error("Selected tables must belong to a single location");
+  }
+  if (locId && uniqueLocIds[0] !== locId) {
+    throw new Error("Selected tables must belong to the assigned location");
+  }
+  if (!locId && uniqueLocIds.length === 1) {
+    locId = uniqueLocIds[0];
+  }
+  return { locationId: locId, tableIds: uniqueTableIds };
+}
+
+export interface CreateEmployeeInput {
+  name: string;
+  jobTitle: string;
+  email: string;
+  phone?: string;
+  businessId: string;
+  /** Optional venue; tables must belong to this location when both are set. */
+  locationId?: string | null;
+  tableIds?: string[];
+}
+
+export interface EmployeeListItem {
+  id: string;
+  slug: string | null;
+  name: string;
+  role: string;
+  avatar: string | null;
+  isActive: boolean;
+  rating: number | null;
+  tips: number;
+  topRated: boolean;
+  email?: string;
+  phone?: string;
+}
+
+/** Dashboard / manager list: read filter only — does not change database rows. */
+export async function getEmployeesByBusinessId(businessId: string): Promise<EmployeeListItem[]> {
+  const employees = await prisma.employee.findMany({
+    where: {
+      businessId,
+      isActive: true,
+      activationStatus: "active",
+    },
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      jobTitle: true,
+      avatar: true,
+      isActive: true,
+      transactions: {
+        where: { status: "success" },
+        select: { amount: true },
+      },
+      user: { select: { email: true } },
+    },
+  });
+
+  const withStats = await Promise.all(
+    employees.map(async (emp) => {
+      const tipCount = emp.transactions.length;
+      const tipsTotal = emp.transactions.reduce((s, t) => s + Number(t.amount), 0);
+      return {
+        id: emp.id,
+        slug: emp.slug,
+        name: emp.name,
+        role: emp.jobTitle,
+        avatar: emp.avatar,
+        isActive: emp.isActive,
+        email: emp.user?.email ?? "", // Handle nullable user/email
+        rating: tipCount > 0 ? 4.8 : null,
+        tips: tipCount,
+        topRated: tipCount > 200,
+      };
+    })
+  );
+
+  return withStats;
+}
+
+export interface EmployeeDetail {
+  id: string;
+  name: string;
+  role: string;
+  avatar: string | null;
+  monthlyGoal: number | null;
+  currentMonthTotal: number;
+  businessId: string;
+}
+
+export async function getEmployeeById(employeeId: string): Promise<EmployeeDetail | null> {
+  const emp = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: {
+      id: true,
+      name: true,
+      jobTitle: true,
+      avatar: true,
+      monthlyGoal: true,
+      isActive: true,
+      activationStatus: true,
+      businessId: true,
+      business: { select: { verificationStatus: true } },
+      transactions: {
+        where: {
+          status: "success",
+          createdAt: {
+            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+            lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+          },
+        },
+        select: { amount: true },
+      },
+    },
+  });
+  if (!emp) {
+    console.warn("[employee.getEmployeeById] no row for scanned id", { scannedRouteId: employeeId });
+    return null;
+  }
+  if (!emp.isActive) {
+    console.warn("[employee.getEmployeeById] employee inactive", {
+      scannedRouteId: employeeId,
+      dbLookupId: emp.id,
+    });
+    return null;
+  }
+  if (emp.activationStatus !== "active") {
+    console.warn("[employee.getEmployeeById] employee not fully onboarded", {
+      scannedRouteId: employeeId,
+      dbLookupId: emp.id,
+      activationStatus: emp.activationStatus,
+    });
+    return null;
+  }
+  if (emp.business.verificationStatus !== "verified") {
+    throw new Error(VERIFICATION_REQUIRED_MSG);
+  }
+  const currentMonthTotal = emp.transactions.reduce((s, t) => s + Number(t.amount), 0);
+  return {
+    id: emp.id,
+    name: emp.name,
+    role: emp.jobTitle,
+    avatar: emp.avatar,
+    monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
+    currentMonthTotal,
+    businessId: emp.businessId,
+  };
+}
+
+export interface UpdateEmployeeInput {
+  name?: string;
+  jobTitle?: string;
+  monthlyGoal?: number | null;
+  isActive?: boolean;
+  email?: string;
+  locationId?: string | null;
+  tableIds?: string[];
+}
+
+export async function updateEmployeeForBusiness(
+  businessId: string,
+  employeeId: string,
+  input: UpdateEmployeeInput
+) {
+  const emp = await prisma.employee.findFirst({
+    where: { id: employeeId, businessId },
+    include: {
+      user: true,
+      tableAssignments: { select: { table: { select: { id: true } } } },
+    },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+
+  const { name, jobTitle, monthlyGoal, isActive, email, locationId, tableIds } = input;
+  const shouldUpdateAssignments =
+    typeof locationId !== "undefined" || typeof tableIds !== "undefined";
+  let resolvedAssignments: { locationId: string | null; tableIds: string[] } | null = null;
+  if (shouldUpdateAssignments) {
+    const nextLocationId =
+      typeof locationId !== "undefined" ? locationId : emp.locationId;
+    const nextTableIds =
+      typeof tableIds !== "undefined"
+        ? tableIds
+        : emp.tableAssignments.map((ta) => ta.table.id);
+    resolvedAssignments = await resolveStaffAssignments(businessId, nextLocationId, nextTableIds);
+  }
+  let slug = emp.slug;
+
+  if (name !== undefined) {
+    const newName = name.trim();
+    if (!newName) {
+      throw new Error("Name cannot be empty");
+    }
+    if (newName !== emp.name) {
+      const baseSlug = generateSlug(newName);
+      slug = await ensureUniqueSlug(baseSlug, async (s) => {
+        const existing = await prisma.employee.findFirst({
+          where: { slug: s, NOT: { id: employeeId } },
+        });
+        return !!existing;
+      });
+    }
+  }
+
+  if (email !== undefined && email.trim()) {
+    const trimmed = email.trim().toLowerCase();
+    // Only update email if employee has been activated (has a user)
+    if (emp.user && trimmed !== emp.user.email) {
+      const taken = await prisma.user.findFirst({
+        where: {
+          email: trimmed,
+          ...(emp.userId ? { NOT: { id: emp.userId } } : {}),
+        },
+      });
+      if (taken) {
+        throw new Error("Email already in use");
+      }
+      await prisma.user.update({
+        where: { id: emp.userId! },
+        data: { email: trimmed },
+      });
+    } else if (!emp.user) {
+      throw new Error("Cannot update email for pending activation employees");
+    }
+  }
+
+  const nameTrimmed = name !== undefined ? name.trim() : undefined;
+  const employeeDisplayName =
+    name !== undefined ? name.trim() : emp.name;
+
+  await prisma.$transaction(async (tx) => {
+    if (isActive !== undefined && emp.userId) {
+      await tx.user.updateMany({
+        where: {
+          OR: [
+            { id: emp.userId },
+            // More robust: sync via relation in case userId is stale/missing in the employee row.
+            { employee: { id: employeeId } },
+          ],
+        },
+        data: { isActive },
+      });
+    }
+
+    await tx.employee.update({
+    where: { id: employeeId },
+    data: {
+      ...(nameTrimmed !== undefined ? { name: nameTrimmed, slug } : {}),
+      ...(jobTitle !== undefined && jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {}),
+      ...(monthlyGoal !== undefined
+        ? { monthlyGoal: monthlyGoal === null ? null : monthlyGoal }
+        : {}),
+      ...(isActive !== undefined ? { isActive } : {}),
+      ...(resolvedAssignments
+        ? {
+            locationId: resolvedAssignments.locationId,
+            tableAssignments: {
+              deleteMany: {},
+              create: resolvedAssignments.tableIds.map((tableId) => ({
+                employeeName: employeeDisplayName,
+                table: { connect: { id: tableId } },
+              })),
+            },
+          }
+        : {}),
+    },
+    });
+  });
+
+  if (
+    nameTrimmed !== undefined &&
+    nameTrimmed !== emp.name &&
+    !resolvedAssignments
+  ) {
+    await prisma.employeeTableAssignment.updateMany({
+      where: { employeeId },
+      data: { employeeName: nameTrimmed },
+    });
+  }
+
+  const updated = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    include: {
+      user: { select: { email: true } },
+      tableAssignments: { select: { table: { select: { id: true } } } },
+    },
+  });
+  if (!updated) throw new Error("Update failed");
+
+  emitBusinessDataChanged(businessId, "staff_updated");
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    jobTitle: updated.jobTitle,
+    slug: updated.slug,
+    avatar: updated.avatar,
+    monthlyGoal: updated.monthlyGoal != null ? Number(updated.monthlyGoal) : null,
+    isActive: updated.isActive,
+    email: updated.user?.email ?? "",
+    locationId: updated.locationId,
+    assignedTableIds: updated.tableAssignments.map((ta) => ta.table.id),
+  };
+}
+
+export async function updateEmployeeActiveStatusForBusiness(
+  businessId: string,
+  employeeId: string,
+  isActive: boolean
+) {
+  const updated = await prisma.$transaction(async (tx) => {
+    const emp = await tx.employee.findFirst({
+      where: { id: employeeId, businessId },
+      select: { id: true, userId: true },
+    });
+    if (!emp) {
+      throw new Error("Employee not found");
+    }
+
+    // Keep User.isActive in sync for activated employees (those with a linked user).
+    // Pending-activation employees have no user yet, so only Employee.isActive is updated.
+    await tx.user.updateMany({
+      where: {
+        OR: [
+          ...(emp.userId ? [{ id: emp.userId }] : []),
+          { employee: { id: employeeId } },
+        ],
+      },
+      data: { isActive },
+    });
+
+    return tx.employee.update({
+      where: { id: employeeId },
+      data: { isActive },
+      select: {
+        id: true,
+        name: true,
+        jobTitle: true,
+        slug: true,
+        avatar: true,
+        isActive: true,
+        locationId: true,
+        tableAssignments: { select: { table: { select: { id: true } } } },
+        user: { select: { email: true } },
+        monthlyGoal: true,
+      },
+    });
+  });
+
+  emitBusinessDataChanged(businessId, "staff_updated");
+
+  return {
+    id: updated.id,
+    name: updated.name,
+    jobTitle: updated.jobTitle,
+    slug: updated.slug,
+    avatar: updated.avatar,
+    monthlyGoal: updated.monthlyGoal != null ? Number(updated.monthlyGoal) : null,
+    isActive: updated.isActive,
+    email: updated.user?.email ?? "",
+    locationId: updated.locationId,
+    assignedTableIds: updated.tableAssignments.map((ta) => ta.table.id),
+  };
+}
+
+/** Regenerate a unique staff URL slug (saved to Postgres). Caller must authorize businessId. */
+export async function regenerateEmployeeSlugForBusiness(businessId: string, employeeId: string) {
+  const biz = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { verificationStatus: true },
+  });
+  if (!biz) {
+    throw new Error("Business not found");
+  }
+  if (biz.verificationStatus !== "verified") {
+    throw new Error(VERIFICATION_REQUIRED_MSG);
+  }
+  const emp = await prisma.employee.findFirst({
+    where: { id: employeeId, businessId },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+  const baseSlug = generateSlug(`${emp.name}-${Date.now()}`);
+  const slug = await ensureUniqueSlug(baseSlug, async (s) => {
+    const other = await prisma.employee.findFirst({
+      where: { slug: s, NOT: { id: employeeId } },
+    });
+    return !!other;
+  });
+  await prisma.employee.update({
+    where: { id: employeeId },
+    data: { slug },
+  });
+  const updated = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    include: { user: { select: { email: true } } },
+  });
+  if (!updated) throw new Error("Update failed");
+  emitBusinessDataChanged(businessId, "staff_slug_updated");
+  return {
+    id: updated.id,
+    name: updated.name,
+    jobTitle: updated.jobTitle,
+    slug: updated.slug,
+    avatar: updated.avatar,
+    email: updated.user?.email ?? "",
+  };
+}
+
+export async function deleteEmployeeForBusiness(businessId: string, employeeId: string) {
+  const emp = await prisma.employee.findFirst({
+    where: { id: employeeId, businessId },
+    select: { id: true, userId: true },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+  // Always delete the linked `User` row; Prisma schema cascades remove `employees` and related rows.
+  await prisma.user.delete({ where: { id: emp.userId } });
+  emitBusinessDataChanged(businessId, "staff_deleted");
+}
+
+export async function createEmployee(input: CreateEmployeeInput) {
+  const { name, jobTitle, email, phone, businessId, locationId: locIn, tableIds: tablesIn } = input;
+  if (!name?.trim() || !email?.trim() || !jobTitle?.trim()) {
+    throw new Error("Name, email, and role are required");
+  }
+  const trimmedEmail = email.trim().toLowerCase();
+  const existing = await prisma.user.findUnique({ where: { email: trimmedEmail } });
+  if (existing) {
+    throw new Error("Email already registered");
+  }
+  const business = await prisma.business.findUnique({ where: { id: businessId } });
+  if (!business) {
+    throw new Error("Business not found");
+  }
+  const resolved = await resolveStaffAssignments(
+    businessId,
+    locIn ?? null,
+    tablesIn ?? []
+  );
+  const passwordHash = await bcrypt.hash(TEMP_PASSWORD, 10);
+
+  // Audit: Add Employee touches `users`, `employees`, and optionally `_EmployeeTableAssignments` (join A/B).
+  console.info(
+    "[createEmployee] Prisma models: User → Employee → EmployeeTableAssignment (table _EmployeeTableAssignments)"
+  );
+
+  const result = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email: trimmedEmail,
+        passwordHash,
+        role: "EMPLOYEE",
+        isPlatformAdmin: false,
+        /** Owner-created accounts: inbox not proven here; staff can still sign in with the issued temp password. */
+        emailVerified: true,
+      },
+    });
+    const slug =
+      business.verificationStatus === "verified"
+        ? await (async () => {
+            const baseSlug = generateSlug(name.trim());
+            return ensureUniqueSlug(baseSlug, async (s) => {
+              const existing = await tx.employee.findUnique({ where: { slug: s } });
+              return !!existing;
+            });
+          })()
+        : null;
+
+    const employee = await tx.employee.create({
+      data: {
+        name: name.trim(),
+        slug,
+        jobTitle: jobTitle.trim(),
+        phone: phone ? phone.trim() : null,
+        businessId,
+        userId: user.id,
+        activationStatus: "active",
+        locationId: resolved.locationId,
+        ...(resolved.tableIds.length > 0
+          ? {
+              tableAssignments: {
+                create: resolved.tableIds.map((tableId) => ({
+                  employeeName: name.trim(),
+                  table: { connect: { id: tableId } },
+                })),
+              },
+            }
+          : {}),
+      },
+      include: { tableAssignments: { select: { table: { select: { id: true } } } } },
+    });
+    return {
+      id: employee.id,
+      name: employee.name,
+      jobTitle: employee.jobTitle,
+      avatar: employee.avatar,
+      temporaryPassword: TEMP_PASSWORD,
+      locationId: employee.locationId,
+      assignedTableIds: employee.tableAssignments.map((ta) => ta.table.id),
+    };
+  });
+  emitBusinessDataChanged(businessId, "staff_created");
+  return result;
+}
+
+export interface EmployeeSelfProfile {
+  id: string;
+  name: string;
+  email: string;
+  jobTitle: string;
+  bio: string | null;
+  avatar: string | null;
+  monthlyGoal: number | null;
+  emailNotifications: boolean;
+  pushNotifications: boolean;
+  businessId: string;
+  /** Public staff page / QR URL segment (Postgres `slug`) */
+  slug: string | null;
+}
+
+export async function getEmployeeProfileForUser(userId: string): Promise<EmployeeSelfProfile | null> {
+  const userEmail = { select: { email: true } } as const;
+  const fullSelect = {
+    id: true,
+    name: true,
+    jobTitle: true,
+    bio: true,
+    avatar: true,
+    monthlyGoal: true,
+    emailNotifications: true,
+    pushNotifications: true,
+    businessId: true,
+    slug: true,
+    user: userEmail,
+  } as const;
+  try {
+    const emp = await prisma.employee.findUnique({
+      where: { userId },
+      select: fullSelect,
+    });
+    if (!emp) return null;
+    if (!emp.user) return null;
+    return {
+      id: emp.id,
+      name: emp.name,
+      email: emp.user.email,
+      jobTitle: emp.jobTitle,
+      bio: emp.bio ?? null,
+      avatar: emp.avatar,
+      monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
+      emailNotifications: emp.emailNotifications,
+      pushNotifications: emp.pushNotifications,
+      businessId: emp.businessId,
+      slug: emp.slug ?? null,
+    };
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
+      const emp = await prisma.employee.findUnique({
+        where: { userId },
+        select: {
+          id: true,
+          name: true,
+          jobTitle: true,
+          avatar: true,
+          businessId: true,
+          slug: true,
+          user: userEmail,
+        },
+      });
+      if (!emp) return null;
+      if (!emp.user) return null;
+      return {
+        id: emp.id,
+        name: emp.name,
+        email: emp.user.email,
+        jobTitle: emp.jobTitle,
+        bio: null,
+        avatar: emp.avatar,
+        monthlyGoal: null,
+        emailNotifications: true,
+        pushNotifications: true,
+        businessId: emp.businessId,
+        slug: emp.slug ?? null,
+      };
+    }
+    throw e;
+  }
+}
+
+/** Create a unique staff slug if missing (e.g. legacy rows). Idempotent if slug already set. */
+export async function ensureEmployeeSlugForUser(userId: string): Promise<EmployeeSelfProfile> {
+  const emp = await prisma.employee.findUnique({
+    where: { userId },
+    include: { user: { select: { email: true } }, business: { select: { verificationStatus: true } } },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+  if (emp.business.verificationStatus !== "verified") {
+    throw new Error(VERIFICATION_REQUIRED_MSG);
+  }
+  if (emp.slug) {
+    const profile = await getEmployeeProfileForUser(userId);
+    if (!profile) throw new Error("Profile not found");
+    return profile;
+  }
+  const baseSlug = generateSlug(emp.name.trim() || "staff");
+  const slug = await ensureUniqueSlug(baseSlug, async (s) => {
+    const existing = await prisma.employee.findFirst({
+      where: { slug: s, NOT: { id: emp.id } },
+    });
+    return !!existing;
+  });
+  await prisma.employee.update({
+    where: { id: emp.id },
+    data: { slug },
+  });
+  const updated = await getEmployeeProfileForUser(userId);
+  if (!updated) throw new Error("Update failed");
+  return updated;
+}
+
+export async function updateEmployeeSelf(
+  userId: string,
+  input: {
+    name?: string;
+    bio?: string | null;
+    monthlyGoal?: number | null;
+    emailNotifications?: boolean;
+    pushNotifications?: boolean;
+  }
+): Promise<EmployeeSelfProfile> {
+  const emp = await prisma.employee.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+
+  await prisma.employee.update({
+    where: { id: emp.id },
+    data: {
+      ...(input.name !== undefined ? { name: input.name.trim() } : {}),
+      ...(input.bio !== undefined ? { bio: input.bio?.trim() || null } : {}),
+      ...(input.monthlyGoal !== undefined
+        ? { monthlyGoal: input.monthlyGoal === null ? null : input.monthlyGoal }
+        : {}),
+      ...(input.emailNotifications !== undefined ? { emailNotifications: input.emailNotifications } : {}),
+      ...(input.pushNotifications !== undefined ? { pushNotifications: input.pushNotifications } : {}),
+    },
+  });
+
+  const updated = await getEmployeeProfileForUser(userId);
+  if (!updated) throw new Error("Update failed");
+  return updated;
+}
+
+export async function setEmployeeAvatarUrl(userId: string, avatarUrl: string) {
+  const emp = await prisma.employee.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+  await prisma.employee.update({
+    where: { id: emp.id },
+    data: { avatar: avatarUrl },
+  });
+  return { avatar: avatarUrl };
+}
+
+export async function exportEmployeeData(userId: string) {
+  const emp = await prisma.employee.findUnique({
+    where: { userId },
+    include: {
+      user: { select: { email: true, createdAt: true } },
+      transactions: { where: { status: "success" }, orderBy: { createdAt: "desc" } },
+    },
+  });
+  if (!emp) {
+    throw new Error("Employee not found");
+  }
+  if (!emp.user) {
+    throw new Error("Profile not found");
+  }
+  return {
+    exportedAt: new Date().toISOString(),
+    profile: {
+      name: emp.name,
+      email: emp.user.email,
+      jobTitle: emp.jobTitle,
+      bio: emp.bio,
+      avatar: emp.avatar,
+      monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
+      accountCreatedAt: emp.user.createdAt.toISOString(),
+    },
+    tips: emp.transactions.map((t) => ({
+      id: t.id,
+      amount: Number(t.amount),
+      createdAt: t.createdAt.toISOString(),
+    })),
+  };
+}
+
+export async function deleteEmployeeAccount(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user || user.role !== "EMPLOYEE") {
+    throw new Error("Not allowed");
+  }
+  await prisma.user.delete({ where: { id: userId } });
+}
+
+export interface CreateEmployeeWithActivationInput {
+  name: string;
+  jobTitle: string;
+  email: string;
+  phone?: string;
+  businessId: string;
+  locationId?: string | null;
+  tableIds?: string[];
+}
+
+export interface CreateEmployeeWithActivationResult {
+  id: string;
+  name: string;
+  jobTitle: string;
+  email: string;
+  activationToken: string;
+  expiresAt: Date;
+  locationId: string | null;
+  assignedTableIds: string[];
+}
+
+/**
+ * Creates an employee with activation token and a linked `users` row (password unset until activation).
+ * Every employee row keeps `user_id` set so dashboard, auth, and FK flows stay consistent.
+ */
+export async function createEmployeeWithActivation(
+  input: CreateEmployeeWithActivationInput
+): Promise<CreateEmployeeWithActivationResult> {
+  const { name, jobTitle, email, phone, businessId, locationId: locIn, tableIds: tablesIn } = input;
+  if (!name?.trim() || !email?.trim() || !jobTitle?.trim()) {
+    throw new Error("Name, email, and role are required");
+  }
+  const trimmedEmail = email.trim().toLowerCase();
+
+  // Verify email is not already registered
+  const existing = await prisma.user.findUnique({
+    where: { email: trimmedEmail },
+    select: { id: true },
+  });
+  if (existing) {
+    throw new Error("Email already registered");
+  }
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { verificationStatus: true },
+  });
+  if (!business) {
+    throw new Error("Business not found");
+  }
+
+  const resolved = await resolveStaffAssignments(businessId, locIn ?? null, tablesIn ?? []);
+
+  const employee = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        email: trimmedEmail,
+        passwordHash: null,
+        role: "EMPLOYEE",
+        isPlatformAdmin: false,
+        /** Confirmed when activation completes (password set); see `activateEmployee`. */
+        emailVerified: false,
+      },
+    });
+    return tx.employee.create({
+      data: {
+        name: name.trim(),
+        jobTitle: jobTitle.trim(),
+        phone: phone ? phone.trim() : null,
+        businessId,
+        userId: user.id,
+        locationId: resolved.locationId,
+        activationStatus: "pending_activation",
+        ...(resolved.tableIds.length > 0
+          ? {
+              tableAssignments: {
+                create: resolved.tableIds.map((tableId) => ({
+                  employeeName: name.trim(),
+                  table: { connect: { id: tableId } },
+                })),
+              },
+            }
+          : {}),
+      },
+      include: { tableAssignments: { select: { table: { select: { id: true } } } } },
+    });
+  });
+
+  // Generate activation token
+  const activationToken = await employeeActivationService.createEmployeeActivationToken(
+    employee.id,
+    trimmedEmail,
+    24 // 24 hours expiration
+  );
+
+  const expiresAt = new Date();
+  expiresAt.setHours(expiresAt.getHours() + 24);
+
+  // Send activation email (best-effort; does not block employee creation)
+  await sendEmployeeActivationEmail({
+    to: trimmedEmail,
+    employeeName: employee.name,
+    activationUrl: buildEmployeeActivationUrl(activationToken),
+    expiresInHours: 24,
+  });
+
+  emitBusinessDataChanged(businessId, "staff_created");
+
+  return {
+    id: employee.id,
+    name: employee.name,
+    jobTitle: employee.jobTitle,
+    email: trimmedEmail,
+    activationToken,
+    expiresAt,
+    locationId: employee.locationId,
+    assignedTableIds: employee.tableAssignments.map((ta) => ta.table.id),
+  };
+}

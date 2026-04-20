@@ -1,0 +1,256 @@
+/**
+ * Maps API/technical errors to user-friendly messages.
+ * Technical details stay on the server; the UI only shows safe copy.
+ */
+
+/** Use only when the failure type cannot be determined (null/empty/unknown). */
+export const GENERIC_UNKNOWN_ERROR = "Something went wrong. Please try again.";
+
+const ERROR_MAP: Record<string, string> = {
+  // Auth
+  "Email already registered": "This email is already in use. Try signing in or use a different email.",
+  "Invalid email or password": "Incorrect email or password. Please try again.",
+  "Invalid or expired invite code": "This invite code is invalid or has expired. Ask your manager for a new code.",
+  "Email and password are required": "Please enter your email and password.",
+  "Business name is required": "Please enter your business name.",
+  "Name is required": "Please enter your full name.",
+  "Invite code is required": "Please enter your invite code.",
+  "Invalid role. Use 'business' or 'employee'": "Please choose whether you're a business or staff member.",
+  "intendedRole is required and must be 'business' or 'employee'":
+    "Please choose whether you're signing in as a business or staff member.",
+  "This account does not have Business permissions.":
+    "This account is not registered as a business.",
+  "This account does not have Staff permissions.":
+    "This account is not registered as staff.",
+  "This account does not have Super Admin permissions.":
+    "This account isn’t a platform admin. Use Platform Admin sign-in only for super-admin accounts, or run admin:create.",
+  "Use the Platform Admin sign-in for this account.":
+    "Use the Platform Admin login page (/platform-admin/login) for this account — it’s a platform admin.",
+  "Registration failed": "We couldn't create your account. Please try again.",
+  "Login failed": "We couldn't sign you in. Please check your email and password.",
+  "We couldn't create your account. Please try again.":
+    "We couldn't create your account. Please try again.",
+  "Sign-in is temporarily unavailable. Please try again in a few moments.":
+    "Sign-in isn't available right now. Please try again in a few minutes.",
+  "Sign-in service is temporarily unavailable. Please try again shortly.":
+    "Sign-in isn't available right now. Please try again in a few minutes.",
+  "This account uses Google sign-in.": "This account uses Google sign-in. Use “Continue with Google” instead of a password.",
+  "Password sign-in is not set for this account. Use Google.":
+    "This account only uses Google sign-in. Use “Continue with Google”.",
+  "This account has been disabled.": "This account has been disabled. Contact support if you think this is a mistake.",
+  "Restart the Caretip API after editing .env. JWT_SECRET is only loaded when the backend starts — stop it (Ctrl+C) and run npm run dev again.":
+    "Sign-in isn’t working on the server right now. If you manage the app, restart the API after setting JWT_SECRET.",
+  // Legacy keys
+  "Server is currently unavailable. Please try again in a moment.":
+    "The app is temporarily unavailable. Please try again in a moment.",
+
+  // Password validation
+  "Current and new password are required": "Please enter your current password and a new password.",
+  "Current password is incorrect": "That current password doesn't match our records. Please try again.",
+  "User not found": "We couldn't find your account. Please sign in again.",
+  "Password is required": "Please enter a password.",
+  "Password must be at least 8 characters": "Your password needs to be at least 8 characters long.",
+  "Password must contain at least one uppercase letter": "Your password needs at least one uppercase letter (A–Z).",
+  "Password must contain at least one lowercase letter": "Your password needs at least one lowercase letter (a–z).",
+  "Password must contain at least one number": "Your password needs at least one number (0–9).",
+  "Password must contain at least one special character (e.g. @, #, $, %)":
+    "Your password needs at least one special character (e.g. @, #, $, %).",
+
+  // Business / Invite
+  "Only business owners can generate invite codes.": "Only business owners can generate invite codes.",
+  "Failed to generate invite code.": "We couldn't create an invite code. Please try again in a moment.",
+
+  // Auth (session/token)
+  "Authentication required": "Please sign in to continue.",
+  "Invalid or expired token": "Your session has expired. Please sign in again.",
+  "Insufficient permissions": "You don't have permission to do this.",
+
+  // Business / employees
+  "Only business owners can add employees": "Only business owners can add employees.",
+  "Only business owners can update employees": "Only business owners can update staff.",
+  "Only business owners can remove employees": "Only business owners can remove staff.",
+  "Name, email, and role are required": "Please enter name, email, and role for this team member.",
+  "Email already in use": "That email is already used by another team member.",
+  "Name cannot be empty": "Name can't be empty.",
+  "Update failed": "We couldn't save those changes. Please try again.",
+
+  // Business / data
+  "Business not found": "We couldn't find this business.",
+  "businessId is required": "We’re missing your business context. Open this from your dashboard and try again.",
+  "Profile not found": "We couldn't load your profile. Please try again.",
+  "Staff member not found": "We couldn't find that team member.",
+  "Employee not found": "We couldn't find that team member.",
+  "Slug is required": "Please enter a valid link or code.",
+  "Employee ID is required": "We’re missing which team member this refers to. Please try again.",
+
+  // QR / verification (public + staff)
+  "QR code will be available after business verification.":
+    "QR codes and public tip links unlock after your venue is verified by CareTip.",
+  "QR code generation will be enabled after admin verification.":
+    "QR codes and public tipping unlock after your venue is verified by CareTip.",
+
+  // Locations / tables
+  "Location name is required": "Please enter a location name.",
+  "Table name is required": "Please enter a table name.",
+  "name and locationId are required": "Please enter a table name and choose a location.",
+  "name is required": "Please enter a name.",
+  "Location not found": "We couldn't find that location.",
+  "Table not found": "We couldn't find that table.",
+  "Table not found for this code": "We couldn't find a table for this QR code. Check the link or ask your venue for an updated code.",
+  "locationId is required": "Please open a valid venue or table link.",
+  "tableId is required": "Please open a valid table link.",
+  "qrSlug is required": "Please scan a valid QR code or open a valid link.",
+  "Invalid location": "That location doesn’t belong to your venue or doesn’t exist.",
+  "One or more tables are invalid": "One or more selected tables aren’t valid.",
+  "Table does not belong to this business": "That table doesn’t belong to your venue.",
+  "Selected tables must belong to a single location": "Pick tables from one location only.",
+  "Selected tables must belong to the assigned location": "Those tables must match the selected location.",
+  "This QR slug is already in use": "That QR code ID is already taken. Pick another or leave it blank to auto-generate.",
+  "Could not generate a unique QR slug": "We couldn't generate a unique code for this table. Try again in a moment.",
+  "qrSlug must be 3–128 characters: letters, numbers, hyphens, underscores":
+    "Custom QR codes can only use letters, numbers, hyphens, and underscores (3–128 characters).",
+
+  // Payment / tips
+  "amount, employeeId, and businessId are required": "Please complete your tip details and try again.",
+  "employeeId and businessId are required": "Please choose who you’re tipping and try again.",
+  "amount must be a positive number": "Please enter a tip amount greater than zero.",
+  "Invalid amount": "Please enter a valid tip amount.",
+  "Payment processing is not configured yet.":
+    "Tipping isn’t turned on for this environment yet. The venue needs to finish payment setup.",
+  "Stripe payment processing is not configured": "Payments aren’t set up yet. The venue needs to connect Stripe.",
+  "We couldn't start the payment. Please try again.": "We couldn't start the payment. Please try again.",
+  "We couldn't complete that request. Please try again.":
+    "We couldn't save your changes. Please refresh and try again.",
+  "We couldn't update your password. Please try again.": "We couldn't update your password. Please try again.",
+  "We couldn't upload your photo. Please try again.": "We couldn't upload your photo. Please try again.",
+  "We couldn't export your data. Please try again.": "We couldn't export your data. Please try again.",
+  "We couldn't delete your account. Please try again.": "We couldn't delete your account. Please try again.",
+  "We couldn't find this business.": "We couldn't find this business.",
+  "This email is already in use. Try signing in or use a different email.":
+    "This email is already in use. Try signing in or use a different email.",
+  "Invalid amount or business context": "That tip amount or business details aren’t valid. Please try again.",
+  "Invalid tip amount": "Please enter a valid tip amount.",
+  "Amount too small": "That amount is too small for a tip. Please enter a larger amount.",
+  "Payment provider could not start checkout": "Checkout couldn’t be started. Please try again or use another card.",
+  "sessionId is required": "We’re missing your payment session. Go back to checkout or open the link from your receipt.",
+  "Could not verify payment session.": "We couldn't confirm that payment session. If you just paid, wait a moment and try again.",
+  "Please add a rating or a short note.": "Add a star rating or a short note, or leave the page if you prefer not to.",
+  "rating must be between 1 and 5": "Please choose a rating from 1 to 5 stars.",
+  "comment is too long": "That note is too long. Please shorten it and try again.",
+  "We couldn't save your feedback. Please try again.": "We couldn't save your feedback. Please try again.",
+
+  // Staff goals
+  "goalAmount, goalPeriod, and startDate are required": "Please enter goal amount, period, and start date.",
+  "goalAmount must be a non-negative number": "Goal amount must be zero or more.",
+  "goalPeriod must be daily, weekly, or monthly": "Choose daily, weekly, or monthly for your goal.",
+  "startDate must be YYYY-MM-DD": "Use a start date like 2026-01-15.",
+
+  // Platform admin uploads
+  "id is required": "Please refresh the page and try again — something was missing from that request.",
+  "File is required (multipart field name: file)": "Please choose a file to upload.",
+
+  // OAuth / signup
+  "Invite code is required for staff sign-up.": "Enter the invite code from your manager to join as staff.",
+  "Email already registered. Sign in instead.": "That email already has an account. Sign in instead.",
+  "Google did not return an email for this account.": "Google didn’t share an email for this account. Try another Google account or contact support.",
+
+  "Not allowed": "You’re not allowed to do that with your current account.",
+
+  // Network / generic transport
+  "Failed to fetch": "Unable to connect to the server. Check your connection and try again.",
+  "NetworkError": "Unable to connect to the server. Check your connection and try again.",
+  "Load failed": "Unable to connect to the server. Check your connection and try again.",
+  "Aborted": "The request was cancelled. Please try again.",
+};
+
+/** HTTP status → user message when the response body has no `message` field */
+const STATUS_MESSAGES: Record<number, string> = {
+  400: "That request wasn’t valid. Check your details and try again.",
+  401: "Please sign in to continue.",
+  403: "You don't have permission to do this.",
+  404: "We couldn't find what you're looking for.",
+  408: "The request took too long. Please try again.",
+  409: "This couldn’t be completed yet — try again in a moment.",
+  422: "The information you entered isn't valid. Please check and try again.",
+  429: "Too many requests. Please wait a moment and try again.",
+  500: "Our servers hit a problem. Please try again in a few minutes.",
+  502: "Our servers are temporarily unavailable. Please try again in a few minutes.",
+  503: "This part of the service is temporarily unavailable. Please try again shortly.",
+  504: "The request took too long. Please try again.",
+};
+
+const STATUS_MESSAGE_VALUES = new Set(Object.values(STATUS_MESSAGES));
+
+/** Used by the API client when building an error string before a single pass through {@link toUserFriendlyMessage}. */
+export function fallbackMessageForHttpStatus(status: number): string | undefined {
+  return STATUS_MESSAGES[status];
+}
+
+/**
+ * Converts any error (API, fetch, thrown) into a user-friendly message.
+ */
+export function toUserFriendlyMessage(error: unknown): string {
+  if (error == null) return GENERIC_UNKNOWN_ERROR;
+
+  const message = error instanceof Error ? error.message : String(error);
+
+  const normalized = message.trim();
+  if (!normalized) return GENERIC_UNKNOWN_ERROR;
+
+  const mapped = ERROR_MAP[normalized];
+  if (mapped) return mapped;
+
+  if (Object.values(ERROR_MAP).includes(normalized)) {
+    return normalized;
+  }
+
+  /** Preserves messages already produced by {@link fallbackMessageForHttpStatus} (api.ts handleRes). */
+  if (STATUS_MESSAGE_VALUES.has(normalized)) {
+    return normalized;
+  }
+
+  const requestFailedMatch = normalized.match(/^Request failed \((\d{3})\)$/);
+  if (requestFailedMatch) {
+    const code = parseInt(requestFailedMatch[1], 10);
+    const byCode = STATUS_MESSAGES[code];
+    if (byCode) return byCode;
+  }
+
+  if (/^(502|503|504)\s|Bad Gateway|Gateway Timeout|Service Unavailable/i.test(normalized)) {
+    if (/502|Bad Gateway/i.test(normalized)) return STATUS_MESSAGES[502]!;
+    if (/504|Gateway Timeout/i.test(normalized)) return STATUS_MESSAGES[504]!;
+    if (/503|Service Unavailable/i.test(normalized)) return STATUS_MESSAGES[503]!;
+  }
+
+  const statusMatch = normalized.match(/^(\d{3})/);
+  if (statusMatch) {
+    const status = parseInt(statusMatch[1], 10);
+    const statusMsg = STATUS_MESSAGES[status];
+    if (statusMsg) return statusMsg;
+  }
+
+  if (
+    normalized.includes("Failed to fetch") ||
+    normalized === "Load failed" ||
+    normalized === "NetworkError" ||
+    /failed to load|networkerror|load failed|econnrefused|err_connection_refused|err_network_changed/i.test(
+      normalized,
+    )
+  ) {
+    return ERROR_MAP["Failed to fetch"]!;
+  }
+
+  if (/network request failed|fetch failed|the network connection was lost|timeout/i.test(normalized)) {
+    return ERROR_MAP["Failed to fetch"]!;
+  }
+
+  if (
+    /database|prisma|sql|postgres|can't reach database|invocation:|error occurred during query|connectorerror/i.test(
+      normalized,
+    )
+  ) {
+    return "We couldn't load data right now. Please try again in a few minutes.";
+  }
+
+  return GENERIC_UNKNOWN_ERROR;
+}

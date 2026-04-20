@@ -1,0 +1,81 @@
+import type { Request, Response } from "express";
+import * as tablesService from "../services/tables.service.js";
+import * as tippingContextService from "../services/tippingContext.service.js";
+import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+
+const VERIFICATION_REQUIRED_MSG = "QR code generation will be enabled after admin verification.";
+
+/** GET /api/tipping-context/location/:locationId — public (venue QR). */
+export async function getLocationById(req: Request, res: Response) {
+  try {
+    const { locationId } = req.params;
+    if (!locationId?.trim()) {
+      return res.status(400).json({ message: "locationId is required" });
+    }
+    const ctx = await tippingContextService.getPublicLocationContext(locationId.trim());
+    if (!ctx) {
+      return res.status(404).json({ message: "Location not found" });
+    }
+    if ("locked" in ctx && ctx.locked) {
+      return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
+    }
+    return res.json(ctx);
+  } catch (err) {
+    logServerError("tippingContext.getLocationById", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+/** GET /api/tipping-context/table/:tableId — public (table QR by id). */
+export async function getTableById(req: Request, res: Response) {
+  try {
+    const { tableId } = req.params;
+    if (!tableId?.trim()) {
+      return res.status(400).json({ message: "tableId is required" });
+    }
+    const ctx = await tippingContextService.getPublicTableContextById(tableId.trim());
+    if (!ctx) {
+      return res.status(404).json({ message: "Table not found" });
+    }
+    if ("locked" in ctx && ctx.locked) {
+      return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
+    }
+    return res.json(ctx);
+  } catch (err) {
+    logServerError("tippingContext.getTableById", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function getByQrSlug(req: Request, res: Response) {
+  try {
+    const { qrSlug } = req.params;
+    if (!qrSlug || typeof qrSlug !== "string") {
+      return res.status(400).json({ message: "qrSlug is required" });
+    }
+    const ctx = await tablesService.getTippingContextByQrSlug(qrSlug);
+    if (!ctx) {
+      return res.status(404).json({ message: "Table not found for this code" });
+    }
+    if ("locked" in ctx && ctx.locked) {
+      return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
+    }
+    return res.json({
+      locationName: ctx.locationName,
+      tableName: ctx.tableName,
+      businessId: ctx.businessId,
+      locationId: ctx.locationId,
+      tableId: ctx.tableId,
+      businessName: ctx.businessName,
+    });
+  } catch (err) {
+    logServerError("tippingContext.getByQrSlug", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}

@@ -1,0 +1,345 @@
+// Caretip - PostgreSQL schema via Prisma
+// Stormy Teal #197278 | Tomato Jam #C44536
+//
+// Keep this full schema (User with cuid, Business, Employee, Transaction/tips). A minimal User-only model
+// would break auth, sign-in, and tipping flows.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Single `DATABASE_URL` — Supabase **pooler** only (`*.pooler.supabase.com`). Do not add `directUrl`:
+// the direct host `db.*.supabase.co` often fails from this environment (P1001 / routing).
+//
+// Migrations: `npx prisma migrate deploy` may hang on the transaction pooler (port 6543). If it does, open the
+// matching `prisma/migrations/*/migration.sql` in Supabase → SQL Editor, run it, then (from repo root):
+//   npm run db:migrate:resolve -- --applied <migration_folder_name>
+// or from `backend/` with schema path: `npx prisma migrate resolve --schema prisma/schema.prisma --applied <name>`
+// so Prisma’s migration history matches the database.
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  EMPLOYEE
+  MANAGER
+  SUPER_ADMIN
+}
+
+enum BusinessVerificationStatus {
+  pending
+  verified
+  rejected
+}
+
+enum PayoutStatus {
+  pending
+  processing
+  paid
+  failed
+  not_applicable
+}
+
+enum TipStatus {
+  pending
+  success
+}
+
+enum GoalPeriod {
+  daily
+  weekly
+  monthly
+}
+
+enum EmployeeActivationStatus {
+  /** Fully onboarded staff (tippable / listed for customers as configured). */
+  active
+  /** Added from business dashboard with activation email; awaiting password setup. */
+  pending_activation
+  /** Self-signup via auth (invite code); `User.email_verified` still false until verify-email link. */
+  pending_verification
+}
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  /** Null when the account only uses Google sign-in. */
+  passwordHash    String?  @map("password_hash")
+  /** e.g. google — paired with oauthSubject for IdP lookup. */
+  oauthProvider   String?  @map("oauth_provider")
+  oauthSubject    String?  @map("oauth_subject")
+  role            Role
+  emailVerified   Boolean  @default(false) @map("email_verified")
+  /**
+   * Denormalized flag for platform operators; always true when role is SUPER_ADMIN.
+   */
+  isPlatformAdmin Boolean  @default(false) @map("is_platform_admin")
+  /**
+   * When false, user cannot sign in; used to revoke access without deleting the row.
+   */
+  isActive        Boolean  @default(true) @map("is_active")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  business  Business?
+  employee  Employee?
+  auditLogs AuditLog[]
+  passwordResetTokens PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
+
+  @@unique([oauthProvider, oauthSubject], map: "User_oauth_provider_subject_key")
+}
+
+/// One-time tokens for email password recovery (stores SHA-256 of the secret segment).
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+/// One-time tokens for email verification (stores SHA-256 of the secret segment).
+model EmailVerificationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique @map("token_hash")
+  userId    String   @map("user_id")
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verification_tokens")
+}
+
+/// One-time activation tokens for employee account setup (stores SHA-256 of the secret segment).
+/// Allows employee to set their own password after being added by business.
+model EmployeeActivationToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique @map("token_hash")
+  employeeId String  @map("employee_id")
+  email     String   @db.Text
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([employeeId])
+  @@map("employee_activation_tokens")
+}
+
+/// Security / compliance trail for sensitive actions (especially platform admin).
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String   @map("user_id")
+  metadata  String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model Business {
+  id                  String    @id @default(cuid())
+  name                String
+  /**
+   * Public URL segment for team QR: /business/{slug} — required for directory queries & pooler consistency
+   */
+  slug                String    @unique @map("slug")
+  inviteCode          String?   @unique @map("invite_code")
+  inviteCodeExpiresAt DateTime? @map("invite_code_expires_at")
+  stripeAccountId     String?   @map("stripe_account_id")
+  userId              String    @unique @map("user_id")
+
+  verificationStatus       BusinessVerificationStatus @default(pending) @map("verification_status")
+  taxId                    String?                    @map("tax_id")
+  legalContactName         String?                    @map("legal_contact_name")
+  contactEmail             String?                    @map("contact_email")
+  contactPhone             String?                    @map("contact_phone")
+  registeredAddress        String?                    @map("registered_address") @db.Text
+  /**
+   * Business type selected during sign-up (e.g. "Restaurant", "Salon", "Hotel", etc).
+   */
+  businessType             String?                    @map("business_type")
+  /**
+   * Business location selected during sign-up.
+   */
+  location                 String?                    @map("location")
+  /**
+   * Public URL path served under /uploads (e.g. /uploads/platform/businesses/{id}/logo-….png).
+   */
+  logoPath                 String?                    @map("logo_path")
+  /**
+   * KYC / verification document path under /uploads.
+   */
+  verificationDocumentPath String?                    @map("verification_document_path")
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  employees    Employee[]
+  transactions Transaction[]
+  locations    Location[]
+
+  @@map("businesses")
+}
+
+model Location {
+  id           String        @id @default(cuid())
+  name         String
+  description  String?       @db.Text
+  businessId   String        @map("business_id")
+  business     Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  tables       Table[]
+  transactions Transaction[]
+  employees    Employee[]
+
+  @@map("locations")
+}
+
+model Table {
+  id                       String                    @id @default(cuid())
+  name                     String
+  /**
+   * Unique segment for guest URLs: GET /api/tipping-context/:qrSlug
+   */
+  qrSlug                   String                    @unique @map("qr_slug")
+  locationId               String                    @map("location_id")
+  location                 Location                  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  transactions             Transaction[]
+  employeeTableAssignments EmployeeTableAssignment[]
+
+  @@map("venue_tables")
+}
+
+/// Explicit join for Employee ↔ venue `Table` (Postgres `_EmployeeTableAssignments`, columns A/B).
+/// Named explicitly so Prisma matches `db push` / Supabase — implicit M2M used `_EmployeeToTable` and caused P2021.
+/// `employeeName` denormalizes `employees.name` for audit / SQL without joining `employees`.
+model EmployeeTableAssignment {
+  employeeId   String @map("A")
+  tableId      String @map("B")
+  employeeName String @map("employee_name")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  table    Table    @relation(fields: [tableId], references: [id], onDelete: Cascade)
+
+  @@id([employeeId, tableId])
+  @@index([tableId], map: "_EmployeeTableAssignments_B_index")
+  @@map("_EmployeeTableAssignments")
+}
+
+model Employee {
+  id                 String   @id @default(cuid())
+  name               String
+  slug               String?  @unique
+  jobTitle           String   @map("job_title")
+  bio                String?  @db.Text
+  avatar             String?
+  phone              String?
+  monthlyGoal        Decimal? @map("monthly_goal") @db.Decimal(10, 2)
+  emailNotifications Boolean  @default(true) @map("email_notifications")
+  pushNotifications  Boolean  @default(true) @map("push_notifications")
+  isActive           Boolean  @default(true) @map("is_active")
+  /**
+   * `active` = ready for work flows; `pending_activation` = dashboard invite, needs `/activate`;
+   * `pending_verification` = auth-page invite signup, needs email verification.
+   */
+  activationStatus   EmployeeActivationStatus @default(active) @map("activation_status")
+  businessId         String   @map("business_id")
+  /**
+   * Always set: every staff member has a row in `User` (auth account), including invite/activation flows
+   * before password is chosen. `User.email_verified` may still be false until they verify or complete activation.
+   */
+  userId             String   @unique @map("user_id")
+  /**
+   * Optional venue for multi-QR flows; must belong to the same business.
+   */
+  locationId         String?  @map("location_id")
+
+  business           Business                  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  user               User                      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location           Location?                 @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  transactions       Transaction[]
+  tableAssignments   EmployeeTableAssignment[]
+  employeeGoal       EmployeeGoal?
+  activationTokens   EmployeeActivationToken[]
+
+  @@index([businessId, locationId])
+  @@map("employees")
+}
+
+/// Employee-created tip goal (one row per employee). Business has read-only visibility via stats API.
+model EmployeeGoal {
+  id          String     @id @default(cuid())
+  employeeId  String     @unique @map("employee_id")
+  goalAmount  Decimal    @map("goal_amount") @db.Decimal(10, 2)
+  goalPeriod  GoalPeriod @map("goal_period")
+  startDate   DateTime   @map("start_date") @db.Date
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@map("employee_goals")
+}
+
+/// Payment / tip transaction (Stripe PaymentIntent). DB table remains `tips` for zero-downtime migrations.
+/// Optional locationId/tableId: physical table QR context only — never required for auth.
+model Transaction {
+  id                    String       @id @default(cuid())
+  amount                Decimal      @db.Decimal(10, 2)
+  status                TipStatus    @default(pending)
+  stripePaymentIntentId String?      @map("stripe_payment_intent_id")
+  payoutStatus          PayoutStatus @default(not_applicable) @map("payout_status")
+  employeeId            String       @map("employee_id")
+  businessId            String       @map("business_id")
+  locationId            String?      @map("location_id")
+  tableId               String?      @map("table_id")
+  createdAt             DateTime     @default(now()) @map("created_at")
+
+  employee Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  table    Table?    @relation(fields: [tableId], references: [id], onDelete: SetNull)
+  feedback TipFeedback?
+
+  @@index([businessId])
+  @@index([businessId, status])
+  @@map("tips")
+}
+
+/// Optional customer feedback tied to a *successful* tip transaction.
+/// Public pages submit feedback using the Stripe Checkout session id, which the API
+/// validates and maps to `Transaction` via payment_intent.
+model TipFeedback {
+  id                     String   @id @default(cuid())
+  transactionId          String   @unique @map("transaction_id")
+  businessId             String   @map("business_id")
+  employeeId             String   @map("employee_id")
+  locationId             String?  @map("location_id")
+  tableId                String?  @map("table_id")
+  stripeCheckoutSessionId String? @map("stripe_checkout_session_id")
+
+  rating       Int?     @db.SmallInt
+  comment      String?  @db.Text
+  tags         String[]
+  customerName String?  @map("customer_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([employeeId])
+  @@index([createdAt])
+  @@map("tip_feedback")
+}
