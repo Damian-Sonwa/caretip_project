@@ -100,6 +100,11 @@ const httpServer = createServer(app);
 initSocketServer(httpServer);
 
 void assertEnvForAuth().then(() => {
+  if (process.env.NODE_ENV === "production" && !process.env.RESEND_API_KEY?.trim()) {
+    console.warn(
+      "[env] RESEND_API_KEY is not set — email verification, employee activation, and password reset messages will not be delivered via Resend."
+    );
+  }
   httpServer.listen(PORT, () => {
     console.log(`Caretip API running on http://localhost:${PORT}`);
   });

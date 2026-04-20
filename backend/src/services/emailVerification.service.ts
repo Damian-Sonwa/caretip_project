@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "../prisma.js";
+import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
 const VERIFY_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -22,7 +23,8 @@ export async function createEmailVerificationToken(userId: string): Promise<{
   plainToken: string;
   expiresAt: Date;
 }> {
-  const plainToken = randomBytes(32).toString("base64url");
+  /** Raw token is only sent in email; DB stores SHA-256 hex digest (same shape as employee activation). */
+  const plainToken = randomBytes(32).toString("hex");
   const tokenHash = hashToken(plainToken);
   const expiresAt = new Date(Date.now() + VERIFY_TTL_MS);
 
@@ -48,8 +50,7 @@ export async function sendEmailVerificationEmail(input: {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
 
-  const resendKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM?.trim() ?? "CareTip <onboarding@resend.dev>";
+  const from = getResendFromAddress();
   const expiresInHours = input.expiresInHours ?? 1;
 
   const subject = "Verify your CareTip email";
@@ -74,33 +75,15 @@ ${input.verifyUrl}
 
 This link expires in ${expiresInHours} hour${expiresInHours === 1 ? "" : "s"}.`;
 
-  if (resendKey) {
-    try {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          subject,
-          html,
-          text,
-        }),
-      });
-      if (!r.ok) {
-        const t = await r.text();
-        console.error("[email-verify] Resend error", r.status, t.slice(0, 500));
-      }
-    } catch (e) {
-      console.error("[email-verify] Resend request failed", e);
-    }
-  } else if (process.env.NODE_ENV !== "production") {
-    console.info("[email-verify] (dev) Verify email link — configure RESEND_API_KEY to send email:", input.verifyUrl);
-  } else {
-    console.warn("[email-verify] RESEND_API_KEY not set; verification email was not sent.");
+  const ok = await sendResendEmail(
+    "email-verify",
+    { from, to: [to], subject, html, text },
+  );
+  if (!ok && process.env.NODE_ENV !== "production") {
+    console.info(
+      "[email-verify] (dev) Verify email link — configure RESEND_API_KEY to send email:",
+      input.verifyUrl,
+    );
   }
 }
 

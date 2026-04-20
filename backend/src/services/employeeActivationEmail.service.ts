@@ -1,3 +1,5 @@
+import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
+
 function getFrontendBaseUrl(): string {
   const u = process.env.FRONTEND_URL?.trim();
   if (u) return u.replace(/\/$/, "");
@@ -21,8 +23,7 @@ export async function sendEmployeeActivationEmail(input: {
 
   if (!to) return;
 
-  const resendKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM?.trim() ?? "CareTip <onboarding@resend.dev>";
+  const from = getResendFromAddress();
 
   const subject = "You're invited to join CareTip";
   const greetingName = input.employeeName?.trim() ? input.employeeName.trim() : "there";
@@ -49,36 +50,18 @@ Set your password: ${activationUrl}
 
 This link expires in ${expiresInHours} hours.`;
 
-  if (resendKey) {
-    try {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [to],
-          subject,
-          html,
-          text,
-        }),
-      });
-      if (!r.ok) {
-        const t = await r.text();
-        console.error("[employee-activation] Resend error", r.status, t.slice(0, 500));
-      }
-    } catch (e) {
-      console.error("[employee-activation] Resend request failed", e);
-    }
-  } else if (process.env.NODE_ENV !== "production") {
+  const ok = await sendResendEmail("employee-activation", {
+    from,
+    to: [to],
+    subject,
+    html,
+    text,
+  });
+  if (!ok && process.env.NODE_ENV !== "production") {
     console.info(
       "[employee-activation] (dev) Activation link — configure RESEND_API_KEY to send email:",
-      activationUrl
+      activationUrl,
     );
-  } else {
-    console.warn("[employee-activation] RESEND_API_KEY not set; activation email was not sent.");
   }
 }
 

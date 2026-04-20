@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import { prisma } from "../prisma.js";
 import { normalizeLoginEmail } from "./auth.service.js";
 import { validatePassword } from "../utils/passwordValidation.js";
+import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
 
@@ -50,35 +51,20 @@ export async function requestPasswordReset(rawEmail: string): Promise<void> {
 
   const resetUrl = `${getFrontendBaseUrl()}/reset-password/${encodeURIComponent(plainToken)}`;
 
-  const resendKey = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.RESEND_FROM?.trim() ?? "CareTip <onboarding@resend.dev>";
+  const from = getResendFromAddress();
+  const subject = "Reset your CareTip password";
+  const html = `<p>Hi,</p><p><a href="${resetUrl}">Click here to reset your password</a>.</p><p>This link expires in one hour.</p>`;
+  const text = `Reset your CareTip password (expires in one hour):\n${resetUrl}`;
 
-  if (resendKey) {
-    try {
-      const r = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${resendKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from,
-          to: [email],
-          subject: "Reset your CareTip password",
-          html: `<p>Hi,</p><p><a href="${resetUrl}">Click here to reset your password</a>.</p><p>This link expires in one hour.</p>`,
-        }),
-      });
-      if (!r.ok) {
-        const t = await r.text();
-        console.error("[password-reset] Resend error", r.status, t.slice(0, 500));
-      }
-    } catch (e) {
-      console.error("[password-reset] Resend request failed", e);
-    }
-  } else if (process.env.NODE_ENV !== "production") {
+  const ok = await sendResendEmail("password-reset", {
+    from,
+    to: [email],
+    subject,
+    html,
+    text,
+  });
+  if (!ok && process.env.NODE_ENV !== "production") {
     console.info("[password-reset] (dev) Reset link — configure RESEND_API_KEY to send email:", resetUrl);
-  } else {
-    console.warn("[password-reset] RESEND_API_KEY not set; user requested reset but email was not sent.");
   }
 }
 

@@ -219,8 +219,8 @@ export async function registerBusiness(input: {
     },
   });
 
-  // Managers must verify email for password sign-ups; inbox delivery is best-effort.
-  void sendVerificationEmailBestEffort(created.id, created.email);
+  // Managers must verify email for password sign-ups — await so delivery runs before HTTP response (serverless-safe).
+  await sendVerificationEmailBestEffort(created.id, created.email);
 
   return authResultForUserRecord(created);
 }
@@ -290,7 +290,7 @@ export async function registerEmployee(input: {
     },
   });
 
-  void sendVerificationEmailBestEffort(created.id, created.email);
+  await sendVerificationEmailBestEffort(created.id, created.email);
 
   return authResultForUserRecord(created);
 }
