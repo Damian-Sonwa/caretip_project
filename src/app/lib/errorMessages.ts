@@ -241,6 +241,7 @@ export function toUserFriendlyMessage(error: unknown): string {
     normalized.includes("Failed to fetch") ||
     normalized === "Load failed" ||
     normalized === "NetworkError" ||
+    normalized.includes("NetworkError when attempting to fetch") ||
     /failed to load|networkerror|load failed|econnrefused|err_connection_refused|err_network_changed/i.test(
       normalized,
     )

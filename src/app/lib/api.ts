@@ -68,6 +68,14 @@ async function handleRes<T>(res: Response): Promise<T> {
   return data as T;
 }
 
+function apiConfigHintForFailedFetch(url: string): string {
+  if (!url.startsWith("/api")) return "";
+  if (import.meta.env.DEV) {
+    return " In local dev, relative /api URLs are proxied by Vite to the backend (see vite.config.ts). Start the API on port 3001 (e.g. from the backend folder: npm run dev). If .env sets VITE_API_URL, it must be a reachable http(s) URL or omit it to use the proxy.";
+  }
+  return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com — then trigger a new deploy.";
+}
+
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -75,7 +83,8 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     res = await fetch(url, init);
   } catch (err) {
     logClientError("api.apiRequest", err, { url });
-    throw new Error(toUserFriendlyMessage(err));
+    const baseMsg = toUserFriendlyMessage(err);
+    throw new Error(baseMsg + apiConfigHintForFailedFetch(url));
   }
   return handleRes<T>(res);
 }
@@ -283,8 +292,12 @@ export interface BusinessDashboardStats {
     tipCount: number;
     rating: number | null;
     email?: string;
+    /** Mirrors `User.email_verified`; used with activationStatus for roster display. */
+    emailVerified?: boolean;
+    /** True when `User.password_hash` is set or OAuth is linked — from DB only, never the hash. */
+    passwordIsSet?: boolean;
     isActive?: boolean;
-    /** Present for dashboard staff lists; only `active` rows are returned from API. */
+    /** Venue roster includes deactivated rows until deleted; activation is per-row in DB. */
     activationStatus?: "active" | "pending_activation" | "pending_verification";
     monthlyGoal?: number | null;
     locationId?: string | null;

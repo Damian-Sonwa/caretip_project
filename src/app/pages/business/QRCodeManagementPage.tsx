@@ -106,7 +106,11 @@ export function QRCodeManagementPage() {
   }, [user?.businessId, user?.role, user?.status, updateUser]);
 
   const loadEmployees = useCallback(async () => {
-    if (!user?.businessId) return;
+    if (!user?.businessId) {
+      setEmployees([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const list = await getEmployees(user.businessId);
@@ -529,7 +533,14 @@ export function QRCodeManagementPage() {
     verificationStatus === "verified" ||
     user.status === "APPROVED";
 
-  if (!user.impersonation && verificationStatus === null) {
+  /** Only block the shell while we still expect `fetchBusinessProfile` to set KYC (managers with a business id). */
+  const awaitingBusinessVerification =
+    !user.impersonation &&
+    user.role === "business" &&
+    Boolean(user.businessId) &&
+    verificationStatus === null;
+
+  if (awaitingBusinessVerification) {
     return <CareTipPageLoader message="Loading…" />;
   }
 

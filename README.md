@@ -2,39 +2,217 @@
 
 **Tagline:** *One Scan. Instant Tip.*
 
-CareTip Limited is a **PERN-stack** platform (PostgreSQL, Express, React, Node.js) that closes the loop between in-person hospitality and digital appreciation: **branded QR journeys**, **card-based tips**, and **real-time visibility** for teams and operators.
+CareTip is a **PERN** platform (**PostgreSQL**, **Express**, **React**, **Node.js**) that connects in-person hospitality with digital tipping: **QR journeys**, **card-based tips** (Stripe), and **real-time** updates for staff and businesses.
 
 ---
 
-## Vision
+## Table of contents
 
-A high-end product experience built to bridge **physical service** and **digital gratitude** using URL-based QR routing, Stripe-powered payments, and PostgreSQL-backed reporting so businesses stay audit-ready while staff feel recognized the moment a tip lands.
+1. [What you get](#what-you-get)
+2. [Repository layout](#repository-layout)
+3. [Quick start](#quick-start)
+4. [Environment variables](#environment-variables)
+5. [Transactional email (Resend)](#transactional-email-resend)
+6. [Authentication & verification](#authentication--verification)
+7. [Technical architecture](#technical-architecture)
+8. [Branding & UI](#branding--ui)
+9. [Database & migrations](#database--migrations)
+10. [Useful scripts](#useful-scripts)
+11. [Deployment & production notes](#deployment--production-notes)
+12. [Admin system & security](#admin-system--security)
+13. [Compliance & privacy (product patterns)](#compliance--privacy-product-patterns)
+14. [Troubleshooting](#troubleshooting)
+15. [License & contact](#license--contact)
 
 ---
 
-## Core features (“Soft Life” suite)
+## What you get
 
-### Smart QR routing (URL slugs)
+### Smart QR routing
 
-- **Individual staff:** Each team member has a unique **slug** in PostgreSQL (e.g. `jane-doe`). Scanning opens the public page **`/staff/[slug]`** guests see that employee’s photo, role, bio, and monthly goal before tipping.
-- **Business-level flows:** Venue QR entry points (e.g. business or pool flows) route guests through **select-team → amount → payment** so one code can represent a floor, shift, or brand while still supporting per-person slugs where needed.
+- **Staff slugs:** Each team member can have a public **`/staff/[slug]`** (or equivalent app routes) for tipping.
+- **Business flows:** Venue/table QR paths route guests through **select staff → amount → payment** where the product supports it.
 
-Together, slugs keep links **shareable, printable, and analytics-friendly** without exposing internal IDs.
+### Real-time feedback
 
-### Real-time payouts & notifications
+- **Socket.io** complements REST so clients can receive events such as new tips without constant polling.
 
-- **Socket.io** pairs with the REST API: authenticated clients subscribe to live events (e.g. **`new_tip`**) so **employees see tips as they succeed**, without polling.
-- Designed for **instant feedback** on earnings and monthly-goal progress; connection recovery and JWT-based auth align with mobile dashboards.
+### Operations & trust
 
-### Business intelligence & exports
+- **PostgreSQL** is the system of record for businesses, employees, tips, and Stripe references.
+- **CSV exports** for reconciliation (`json2csv` on the API).
+- **Profile photos** via **Cloudinary** when configured; verification flows for businesses where the product requires them.
 
-- **PostgreSQL** is the system of record for businesses, employees, tips, and payment references.
-- Businesses can **export tip transactions to CSV** (JSON → CSV via `json2csv`) for **payroll, reconciliation, and accounting**—filter-friendly columns include amounts, timestamps, and Stripe payment intent identifiers where applicable.
+---
 
-### Identity & trust
+## Repository layout
 
-- **Profile photos** are encouraged (and gated in-product where required) so guests always tip a **real face**; uploads are handled via **Cloudinary** when configured.
-- **“Verified Staff”** is part of the CareTip identity layer: public staff pages and in-app cues reinforce **trust**—complete profiles and consistent branding signal that the recipient is the right person.
+```
+caretip_project/
+├── src/                      # React 18 SPA (Vite, Tailwind, React Router)
+├── public/                   # Static assets, PWA icons (prebuild may regenerate)
+├── backend/
+│   ├── prisma/               # schema.prisma, migrations, seed
+│   └── src/                  # Express API, services, Socket.io, webhooks
+├── scripts/                  # Root-level helpers (e.g. admin creation wrapper)
+├── package.json              # Frontend scripts
+├── backend/package.json      # API scripts
+├── README.md                 # This file — product + full-stack overview
+└── backend/README.md         # Backend-only: Prisma, migrations, API table
+```
+
+---
+
+## Quick start
+
+### Prerequisites
+
+- **Node.js** 18+ (20 LTS recommended)
+- **PostgreSQL** (local or hosted, e.g. Supabase pooler URL)
+- Optional: **Stripe**, **Cloudinary**, **Resend** (see [Environment variables](#environment-variables))
+
+### 1. Install
+
+```bash
+# Frontend (repo root)
+npm install
+
+# Backend
+cd backend && npm install && cd ..
+```
+
+### 2. Configure environment
+
+- **Backend:** copy `backend/.env.example` → `backend/.env` (and optionally a repo-root `.env`; see [load order](#environment-variables)).
+- **Frontend:** repo-root `.env` or `.env.local` for `VITE_*` variables.
+
+Quick sanity check for the API:
+
+```bash
+cd backend && npm run env:check
+```
+
+### 3. Database
+
+```bash
+cd backend
+npm run db:generate
+# Prefer migrations for anything long-lived:
+npm run db:migrate
+# Or quick dev sync (see backend/README.md for caveats):
+# npm run db:push
+```
+
+### 4. Run locally
+
+**Terminal A — API (default port 3001):**
+
+```bash
+cd backend
+npm run dev
+```
+
+**Terminal B — Vite:**
+
+```bash
+npm run dev
+```
+
+- App: usually `http://localhost:5173`
+- API: `http://localhost:3001` (or `PORT` from `backend/.env`)
+
+If **`VITE_API_URL` is unset**, Vite proxies `/api` and `/socket.io` to `http://localhost:3001`. If you set `VITE_API_URL`, the browser calls that origin directly (configure CORS and use a reachable host for phone/LAN testing).
+
+### 5. Production build (frontend)
+
+```bash
+npm run build
+```
+
+Backend: `cd backend && npm run build && npm start`.
+
+---
+
+## Environment variables
+
+The API loads **repo root `.env` first**, then **`backend/.env`** (backend wins on duplicate keys). See `backend/src/loadEnv.ts` for details.
+
+### Backend — required for auth
+
+| Variable | Purpose |
+|----------|---------|
+| `DATABASE_URL` | PostgreSQL connection string (Supabase **pooler** recommended; see `backend/.env.example`) |
+| `JWT_SECRET` | Secret used to sign JWT access tokens |
+
+### Backend — URLs used in emails and links
+
+| Variable | Purpose |
+|----------|---------|
+| `FRONTEND_URL` | Origin of the SPA (no trailing slash), e.g. `https://your-app.vercel.app`. Used in **password reset**, **email verification**, and **employee activation** links. If wrong, links in emails point at the wrong host. |
+
+### Backend — transactional email (Resend)
+
+| Variable | Purpose |
+|----------|---------|
+| `RESEND_API_KEY` | Resend API key (`re_...`). Without it, the API **does not** send mail; in development it may log links to the console instead. |
+| `RESEND_FROM` | **Sender** for all Resend mail. Must be either a plain email **`you@verified-domain.com`** or a display name plus email **`CareTip <you@verified-domain.com>`**. **Invalid:** a bare domain like `caretip.de` (Resend returns **422**). If invalid, the server falls back to `CareTip <onboarding@resend.dev>` and logs a warning. |
+
+Add your domain in the **Resend dashboard → Domains**, complete the DNS records Resend shows for **that account** (records are not portable between Resend accounts), then set `RESEND_FROM` to an address on that domain.
+
+### Backend — optional
+
+| Variable | Purpose |
+|----------|---------|
+| `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Card payments and webhooks |
+| `CLOUDINARY_*` or `CLOUDINARY_URL` | Avatar / uploads |
+| `PORT` | API port (default **3001**) |
+| `ADMIN_SEED_SECRET` | Required for `npm run admin:create` (≥ 8 characters) |
+| `AUTH_LOGIN_MAX_PER_WINDOW` | Login rate limit tuning |
+
+### Frontend (Vite) — repo root `.env` / `.env.local`
+
+| Variable | Example | Purpose |
+|----------|---------|---------|
+| `VITE_API_URL` | *(omit in local dev)* | If **unset**, Vite **proxies** `/api` and `/socket.io` to `http://localhost:3001`. If set, the browser calls this base URL directly. |
+| `VITE_APP_URL` | `http://localhost:5173` | Public site origin for client-side links / QR helpers where used |
+| `VITE_GOOGLE_CLIENT_ID` | `*.apps.googleusercontent.com` | Google Sign-In, if enabled in your build |
+
+---
+
+## Transactional email (Resend)
+
+All outbound mail goes through **`backend/src/services/resendClient.ts`** (same HTTP pattern as the working password-reset path).
+
+| Flow | Trigger | Link shape in email |
+|------|---------|---------------------|
+| **Email verification** | After password **business** or **employee** signup; resend from login or check-email page | `{FRONTEND_URL}/verify-email?token={RAW_TOKEN}` |
+| **Employee activation** | After owner creates staff with activation (dashboard) | `{FRONTEND_URL}/activate?token={RAW_TOKEN}` |
+| **Password reset** | Forgot-password request | `{FRONTEND_URL}/reset-password/{RAW_TOKEN}` |
+
+**Security model (unchanged):**
+
+- **Database:** stores a **one-way hash** of the token (SHA-256 of the raw secret).
+- **Email:** contains only the **raw** token in the URL (never the hash).
+
+Sign-up and resend paths **await** sending where appropriate so short-lived serverless invocations still complete the Resend request before the HTTP response returns.
+
+---
+
+## Authentication & verification
+
+These are **separate product flows** but they share consistent user state:
+
+| Flow | Who | What happens |
+|------|-----|----------------|
+| **Email verification** | Users who sign up with **email + password** (manager or employee invite signup) | `User.emailVerified` stays false until they open the verification link. Login returns a structured **`EMAIL_NOT_VERIFIED`** response so the UI can show a clear message and **resend** options. |
+| **Employee activation** | Staff invited from the **business dashboard** | User row may exist with **no password** until they complete **`/activate`**. Completing activation sets password, marks **`emailVerified`**, and sets employee **`activationStatus`** to **active**. No separate “verify inbox” step for that path beyond the activation link itself. |
+
+**Resend verification email (API):**
+
+- `POST /api/auth/resend-verification-email` — body `{ email, password }` (proves identity without a session).
+- `POST /api/auth/resend-verification-email/session` — **Bearer JWT**; for the **check-email** screen right after signup.
+
+**Maintenance (optional DB repair):** `npm run db:sync-active-employee-email-verified` in `backend/` fixes legacy rows where an employee is **active** but `email_verified` was still false (see `employeeActivationConsistency.service.ts`).
 
 ---
 
@@ -42,157 +220,93 @@ Together, slugs keep links **shareable, printable, and analytics-friendly** with
 
 | Layer | Stack |
 |--------|--------|
-| **Frontend** | **React 18**, **Vite**, **Tailwind CSS** (Palette 84–aligned tokens), **Lucide** icons, **React Router**, **Socket.io client** |
-| **Backend** | **Node.js**, **Express**, **Socket.io**, JWT auth, **Prisma** |
-| **Database** | **PostgreSQL** with **Prisma ORM** (schema + migrations in `backend/prisma`) |
-| **Payments** | **Stripe** (Payment Intents, webhooks); business records support **Stripe Connect–style** account linkage (`stripeAccountId`) for routed/settled payouts—configure keys per environment |
-| **Media** | **Cloudinary** (optional) for avatar uploads |
+| **Frontend** | React 18, Vite, Tailwind CSS, Lucide, React Router, Socket.io client, PWA (Vite PWA plugin) |
+| **Backend** | Node.js, Express, Socket.io, JWT, Prisma |
+| **Database** | PostgreSQL + Prisma (`backend/prisma`) |
+| **Payments** | Stripe (Payment Intents, webhooks); businesses may store `stripeAccountId` for Connect-style flows |
+| **Media** | Cloudinary (optional) |
 
-> **Note:** The codebase uses **Prisma**, not Sequelize. If you extend the stack, keep migrations and `prisma generate` in your workflow.
+> The ORM is **Prisma** (not Sequelize). After schema or env changes, run **`npm run db:generate`** in `backend/`.
 
 ---
 
-## Branding & UI standards
+## Branding & UI
 
 | Role | Hex | Usage |
 |------|-----|--------|
-| **Stormy Teal** | `#197278` | Primary actions, QR framing, key CTAs |
-| **Dark Slate Grey** | `#283D3B` | Body text, QR dark modules |
+| **Stormy Teal** | `#197278` | Primary actions, QR framing |
+| **Dark Slate Grey** | `#283D3B` | Body text |
 | **Tomato Jam** | `#C44536` | Accent / urgency (sparingly) |
 
-Design direction: **ultra-modern minimalist**—generous whitespace, clear hierarchy, and motion used for feedback (e.g. live tips), not decoration.
+---
+
+## Database & migrations
+
+- **Schema:** `backend/prisma/schema.prisma`
+- **Deep dive (reset vs migrate, baselining, role enum):** **`backend/README.md`**
+
+Typical production deploy:
+
+```bash
+cd backend && npm run db:migrate:deploy
+```
 
 ---
 
-## Repository layout
+## Useful scripts
 
-```
-├── src/                 # React (Vite) application
-├── backend/             # Express API, Prisma, Socket.io, Stripe
-│   ├── prisma/          # schema, migrations, seed
-│   └── src/
-└── README.md
-```
-
----
-
-## Setup & environment
-
-### Prerequisites
-
-- **Node.js** 18+ (20 LTS recommended)
-- **PostgreSQL** (local or hosted, e.g. Supabase)
-- **Stripe** test keys for payments
-- (Optional) **Cloudinary** for production-grade image uploads
-
-### 1. Install dependencies
-
-From the **repository root** (frontend):
-
-```bash
-npm install
-```
-
-From **`backend/`**:
-
-```bash
-cd backend
-npm install
-```
-
-### 2. Environment variables
-
-**Backend** — copy and edit `backend/.env.example` → `backend/.env`. The API loads the **repo root `.env` first**, then **`backend/.env`** (backend wins if the same key appears in both), so you can keep `JWT_SECRET` in either file.
-
-Run `cd backend && npm run env:check` to confirm `JWT_SECRET` and `DATABASE_URL` are seen (prints `set` / `MISSING` only).
-
-| Variable | Purpose |
-|----------|---------|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `JWT_SECRET` | Signing secret for auth tokens |
-| `STRIPE_SECRET_KEY` | Stripe secret API key |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret |
-| `PORT` | API port (default **3001**) |
-| `CLOUDINARY_*` | Optional: `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` |
-
-**Frontend** — create a `.env` or `.env.local` in the **project root** (Vite):
-
-| Variable | Example | Purpose |
+| Location | Command | Purpose |
 |----------|---------|---------|
-| `VITE_API_URL` | *(omit)* or `http://localhost:3001` | If **unset**, Vite proxies `/api` and `/socket.io` to **`http://localhost:3001`** (must match `PORT` in `backend/.env`). If set, the browser calls that origin directly (CORS is open in dev). **LAN / phone testing:** do not use `http://localhost:3001` while opening the app via `http://192.168.x.x:5173`—the browser would call *that device’s* localhost. Either omit `VITE_API_URL` (proxy) or set it to `http://<your-PC-LAN-IP>:3001` with the API listening on `0.0.0.0`. |
-| `VITE_APP_URL` | `http://localhost:5173` or `https://caretip.app` | Public site origin for QR links and share URLs |
+| Root | `npm run dev` | Vite dev server |
+| Root | `npm run build` | Production SPA build |
+| Root | `npm run typecheck` | TypeScript check (frontend) |
+| Root | `npm run dev:api` | Run backend dev from root |
+| `backend/` | `npm run dev` | API + hot reload (`tsx watch`) |
+| `backend/` | `npm run env:check` | Print whether critical env vars are set |
+| `backend/` | `npm run db:generate` | Regenerate Prisma client |
+| `backend/` | `npm run db:migrate` | Dev migrations |
+| `backend/` | `npm run db:migrate:deploy` | CI / production migrations |
+| `backend/` | `npm run db:sync-active-employee-email-verified` | One-off repair: active employees + unverified email |
 
-### 3. Database
+---
 
-```bash
-cd backend
-npx prisma generate
-npx prisma db push
-# or: npm run db:migrate
-```
+## Deployment & production notes
 
-Always run **`npx prisma generate`** (or `npm run db:generate`) after editing `schema.prisma` or `.env` connection strings. Use **`npm run db:prisma:reset-client`** to delete `node_modules/.prisma` and regenerate the client if you see odd Prisma errors.
+### Split hosting (common)
 
-Optional seed:
+- **Frontend:** e.g. Vercel / Netlify → set **`VITE_API_URL`** to your **API** public URL and **`VITE_APP_URL`** to the SPA URL.
+- **Backend:** e.g. Railway, Render, Fly, VPS → set **`FRONTEND_URL`** to the **same SPA origin** users open in the browser (emails and redirects depend on it).
 
-```bash
-npm run db:seed
-```
+### Resend
 
-### 4. Run development servers
+- Set **`RESEND_API_KEY`** and a valid **`RESEND_FROM`** (see [Environment variables](#environment-variables)).
+- On startup, if `NODE_ENV === "production"` and `RESEND_API_KEY` is missing, the API logs a **warning**.
 
-**Terminal A — API (Express + Socket.io):**
+### Vercel (Hobby) + private GitHub
 
-```bash
-cd backend
-npm run dev
-```
-
-**Terminal B — Vite dev server:**
-
-```bash
-# from repository root
-npm run dev
-```
-
-- API: `http://localhost:3001` (or your `PORT`)
-- App: Vite default (e.g. `http://localhost:5173`)
-
-If you set **`VITE_API_URL`**, it must match the API origin (default **`http://localhost:3001`**). If you leave it unset, use the same API port so the Vite proxy can reach the backend.
-
-### 5. Production builds
-
-```bash
-# Frontend
-npm run build
-
-# Backend
-cd backend && npm run build && npm start
-```
+Deployments can be **blocked** if the **commit author** is not the GitHub user linked to the Vercel team. Use a commit email verified on that GitHub account, or upgrade for team collaboration. (This is a Vercel policy, not something enforced in this repo.)
 
 ---
 
 ## Admin system & security
 
-Caretip separates **everyday accounts** (business managers and staff) from **platform operators** who can see global payment data and verification queues. This section explains how that boundary is enforced and how to create an admin safely in development.
+CareTip separates **business / staff** accounts from **platform operators** (`SUPER_ADMIN` + `isPlatformAdmin`).
 
-### Why public admin signup is disabled
+### Why public admin signup does not exist
 
-There is **no** `POST /api/auth/register` path that creates a `SUPER_ADMIN`. Letting anyone self-register as a platform admin would be a critical security flaw. The registration handler **rejects** payloads that try to set `role` to `SUPER_ADMIN`, `SUPER_ADMIN`-like spellings, `isPlatformAdmin: true`, or `isActive: false`. Roles for normal signups are assigned **only** by server logic (`MANAGER` for a new business, `EMPLOYEE` when joining with a valid invite).
+`POST /api/auth/register` **rejects** attempts to create `SUPER_ADMIN`, set `isPlatformAdmin`, or disable `isActive`. Business signups become **`MANAGER`**; employee signups with a valid invite become **`EMPLOYEE`**.
 
-### Role structure (API vs database)
+### Roles (UI vs database)
 
-| What users see in the app | Stored in PostgreSQL (`User.role`) |
-|---------------------------|-------------------------------------|
-| Business / venue owner    | `MANAGER`                           |
-| Staff                     | `EMPLOYEE`                          |
-| Platform operator         | `SUPER_ADMIN`                       |
+| UI / product | `User.role` in PostgreSQL |
+|--------------|---------------------------|
+| Business owner | `MANAGER` |
+| Staff | `EMPLOYEE` |
+| Platform operator | `SUPER_ADMIN` |
 
-The `User` row also has `is_platform_admin` (boolean). For platform routes, the API requires **both** `SUPER_ADMIN` and `isPlatformAdmin`, plus an **`is_active`** flag so access can be revoked without deleting the user.
+Platform routes require **`SUPER_ADMIN`**, **`isPlatformAdmin`**, and **`isActive`**, re-checked from the database (not JWT alone). **`audit_logs`** records sensitive platform access.
 
-### How `SUPER_ADMIN` is created
-
-Use the **seed script**, not the public API:
+### Create the first platform admin
 
 ```bash
 cd backend
@@ -200,59 +314,49 @@ cd backend
 npm run admin:create -- you@example.com 'strong-unique-password'
 ```
 
-From the repo root, `node scripts/createAdmin.js` runs the same script with `cwd` set to `backend` so Prisma and `.env` resolve correctly.
+From repo root you can also use `node scripts/createAdmin.js` (wrapper sets `cwd` to `backend`). In **production**, the script refuses unless **`ALLOW_ADMIN_SEED_IN_PRODUCTION=true`**. By default only **one** `SUPER_ADMIN` exists unless you allow multiples (see `backend/README.md`).
 
-The script **hashes** the password with bcrypt, sets `isPlatformAdmin` and `isActive` to true, and by default **allows only one** `SUPER_ADMIN` unless you set `ALLOW_MULTIPLE_SUPER_ADMINS=true`. In **`NODE_ENV=production`**, the script **refuses to run** unless you set `ALLOW_ADMIN_SEED_IN_PRODUCTION=true` (use only when you deliberately bootstrap an operator on a server).
-
-### How middleware verifies admin access (JWT + database)
-
-JWTs prove *who signed the token*, not *who the user is right now*. For `/api/platform/*`, the stack:
-
-1. **`authMiddleware`** — verifies the JWT and attaches `req.user`.
-2. **`requirePlatformAdmin`** — loads the user from PostgreSQL with `prisma.user.findUnique` and allows the request only if the user **exists**, `role === SUPER_ADMIN`, `isPlatformAdmin === true`, and **`isActive === true`**. If any check fails, the response is **403**. Revoking platform access in the database takes effect on the **next** request, without waiting for token expiry.
-3. **`auditPlatformAccess`** — appends an audit row (method + path) for compliance review.
-
-Login also refuses disabled accounts: after a valid password, if `isActive` is false, sign-in returns **403** with a clear message.
-
-### Security measures at a glance
+### Security measures (summary)
 
 | Measure | Purpose |
 |--------|---------|
-| **`isActive`** | Disable sign-in and platform APIs without deleting the row |
-| **`requirePlatformAdmin` + DB read** | Do not trust JWT claims alone for sensitive routes |
-| **`audit_logs` table** | Append-only trail of platform API access (and other audited actions) |
-| **Rate limiting on `POST /login` and `POST /signin`** | Reduce brute-force attempts (configurable via `AUTH_LOGIN_MAX_PER_WINDOW`) |
-
-### Safe admin creation in development
-
-1. Run migrations or `db:push` so `User.is_active` and `audit_logs` exist.
-2. Add `ADMIN_SEED_SECRET` to `backend/.env` (treat it like a password; do not commit real values).
-3. Run `npm run admin:create -- <email> <password>` from `backend/`.
-4. Sign in through the **Platform Admin** UI using `intendedRole: 'SUPER_ADMIN'` (the frontend already sends this for that flow).
-
-### Production warnings
-
-- **Never** expose `ADMIN_SEED_SECRET` or run admin creation from a public CI log.
-- Prefer creating the first production operator **once** from a controlled environment, then rely on DB updates for additional operators if needed (with `ALLOW_MULTIPLE_SUPER_ADMINS` only when your policy allows multiple `SUPER_ADMIN` users).
-- Keep `JWT_SECRET` long and unique per environment.
+| `isActive` | Revoke access without deleting users |
+| DB-backed platform checks | Do not trust JWT claims alone |
+| `audit_logs` | Compliance trail |
+| Rate limits on `POST /login` and `POST /signin` | Brute-force mitigation (`AUTH_LOGIN_MAX_PER_WINDOW`) |
 
 ---
 
-## Compliance & privacy (GDPR / CCPA–aligned patterns)
+## Compliance & privacy (product patterns)
 
-| Capability | Implementation concept |
+| Capability | Concept in the product |
 |------------|-------------------------|
-| **Data portability** | Authenticated users can **export** their data (e.g. employee JSON export endpoint) for machine-readable backup |
-| **Right to erasure** | **Delete account** flows remove or anonymize user-linked records per product rules |
-| **Secure authentication** | Password policy enforces **minimum 8 characters** with **uppercase, lowercase, number, and special character** requirements (`passwordValidation` on the client; enforce same rules server-side in production) |
+| Data portability | Authenticated exports where implemented |
+| Right to erasure | Account delete flows as designed per route |
+| Password quality | Strong password rules client + server |
 
-*This section describes product-oriented controls; legal review is required for jurisdiction-specific compliance.*
+*Legal wording for your jurisdiction is outside this README.*
+
+---
+
+## Troubleshooting
+
+| Symptom | Things to check |
+|---------|------------------|
+| **422 from Resend** `Invalid from field` | `RESEND_FROM` must be `email@domain` or `Name <email@domain>`, not a bare domain. |
+| **Emails never arrive** | `RESEND_API_KEY`, domain verification in Resend, spam folder, `FRONTEND_URL` correctness (links may still “work” but point to the wrong site). |
+| **Prisma P1001 / DB unreachable** | Pooler URL, Supabase paused project, Windows DNS (`NODE_OPTIONS=--dns-result-order=ipv4first`). |
+| **`Environment variable not found: DATABASE_URL`** | Put `DATABASE_URL` in `backend/.env` or run Prisma via `npm run prisma -- …` / `db:*` scripts so both env files load. |
+| **Login “email not verified”** | Complete `/verify-email`, or use **resend** from the login or check-email UI. |
+| **Stale Prisma client** | `cd backend && npm run db:prisma:reset-client` |
+
+More backend-specific migration and enum recovery steps live in **`backend/README.md`**.
 
 ---
 
 ## License & contact
 
-Proprietary — **CareTip Limited**. For partnerships or support, use the contact channels configured in your deployment (e.g. `legal@caretip.com` / `privacy@caretip.com` as applicable).
+Proprietary — **CareTip Limited**. Use the legal and support contacts configured for your deployment.
 
 ---
 

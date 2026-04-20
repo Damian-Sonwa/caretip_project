@@ -1,14 +1,48 @@
 /**
  * Shared Resend HTTP client (same pattern as password reset — forgot-password flow is the reference).
+ *
+ * Resend requires `from` to be `email@example.com` or `Display Name <email@example.com>` — a bare domain
+ * (e.g. `caretip.de`) returns 422 validation_error.
  */
+
+const DEFAULT_RESEND_FROM = "CareTip <onboarding@resend.dev>";
+
+/** Plain `user@host.tld` or `Name <user@host.tld>`. */
+function isValidResendFromFormat(value: string): boolean {
+  const v = value.trim();
+  if (!v) return false;
+  const plain = /^[^\s<>]+@[^\s<>]+\.[^\s<>]+$/;
+  if (plain.test(v)) return true;
+  const named = /^(.+?)\s*<([^\s<>]+@[^\s<>]+\.[^\s<>]+)>\s*$/;
+  const m = named.exec(v);
+  return m != null && plain.test(m[2]);
+}
+
+let warnedInvalidResendFrom = false;
+
+function getResendFromAddress(): string {
+  const raw = process.env.RESEND_FROM?.trim();
+  if (!raw) {
+    return DEFAULT_RESEND_FROM;
+  }
+  if (isValidResendFromFormat(raw)) {
+    return raw;
+  }
+  if (!warnedInvalidResendFrom) {
+    warnedInvalidResendFrom = true;
+    console.warn(
+      `[resend] RESEND_FROM must be a full address (e.g. "noreply@yourdomain.com" or "CareTip <noreply@yourdomain.com>"). ` +
+        `Got ${JSON.stringify(raw)} — using default ${DEFAULT_RESEND_FROM}. Set RESEND_FROM to a verified sender in Resend.`
+    );
+  }
+  return DEFAULT_RESEND_FROM;
+}
 
 function getResendApiKey(): string | undefined {
   return process.env.RESEND_API_KEY?.trim() || undefined;
 }
 
-export function getResendFromAddress(): string {
-  return process.env.RESEND_FROM?.trim() ?? "CareTip <onboarding@resend.dev>";
-}
+export { getResendFromAddress };
 
 export type ResendMailPayload = {
   from: string;

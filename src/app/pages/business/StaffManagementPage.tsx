@@ -71,6 +71,9 @@ type StaffRow = {
   growth: string;
   isActive: boolean;
   activationStatus?: "active" | "pending_activation" | "pending_verification";
+  emailVerified?: boolean;
+  /** From API: password or OAuth present on `User`. */
+  passwordIsSet?: boolean;
   monthlyGoal: number | null;
   locationId: string | null;
   assignedTableIds: string[];
@@ -78,6 +81,33 @@ type StaffRow = {
 
 function isFullyOnboardedDashboardStaff(emp: StaffRow): boolean {
   return emp.isActive === true && emp.activationStatus === "active";
+}
+
+/**
+ * Onboarding hints only when the database still indicates work left
+ * (do not infer from `activation_status` alone — e.g. script-updated `email_verified` / password rows).
+ */
+function staffRosterStatusNote(emp: StaffRow): string | null {
+  if (!emp.isActive) return "Deactivated";
+  if (isFullyOnboardedDashboardStaff(emp)) return null;
+  const emailOk = emp.emailVerified === true;
+  const pwdOk = emp.passwordIsSet === true;
+
+  if (emp.activationStatus === "pending_verification") {
+    if (!emailOk) return "Awaiting email verification";
+    return null;
+  }
+  if (emp.activationStatus === "pending_activation") {
+    if (!pwdOk) return "Pending password setup";
+    return null;
+  }
+  return null;
+}
+
+function rosterNoteClassName(note: string | null): string {
+  if (!note) return "";
+  if (note === "Deactivated") return "text-xs font-medium text-muted-foreground mt-0.5";
+  return "text-xs font-medium text-amber-700 dark:text-amber-500 mt-0.5";
 }
 
 export function StaffManagementPage() {
@@ -121,8 +151,15 @@ export function StaffManagementPage() {
     Boolean(user?.impersonation) || user?.status === "APPROVED";
 
   const fetchEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
-    if (!user?.businessId) return;
     const quiet = opts?.quiet === true;
+    if (!user?.businessId) {
+      if (!quiet) {
+        setLoading(false);
+        setEmployees([]);
+        setError(null);
+      }
+      return;
+    }
     if (!quiet) {
       setLoading(true);
       setError(null);
@@ -144,11 +181,13 @@ export function StaffManagementPage() {
         growth: "",
         isActive: e.isActive ?? true,
         activationStatus: e.activationStatus,
+        emailVerified: e.emailVerified,
+        passwordIsSet: e.passwordIsSet,
         monthlyGoal: e.monthlyGoal ?? null,
         locationId: e.locationId ?? null,
         assignedTableIds: e.assignedTableIds ?? [],
       }));
-      setEmployees(mapped.filter(isFullyOnboardedDashboardStaff));
+      setEmployees(mapped);
     } catch (err) {
       logClientError("StaffManagementPage", err);
       if (!quiet) {
@@ -192,13 +231,12 @@ export function StaffManagementPage() {
     })();
   }, [isBusiness]);
 
-  const filteredEmployees = employees
-    .filter(isFullyOnboardedDashboardStaff)
-    .filter(
-      (emp) =>
-        String(emp.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
-        String(emp.role).toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const filteredEmployees = employees.filter(
+    (emp) =>
+      String(emp.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(emp.role).toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(emp.email).toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const tablesForAddPicker = tableOptions.filter(
     (t) => !addForm.locationId || t.locationId === addForm.locationId
@@ -404,6 +442,10 @@ export function StaffManagementPage() {
   };
 
   const handleQrDownload = async (employee: StaffRow) => {
+    if (!employee.isActive) {
+      toastErr("Activate this profile before downloading a QR code.");
+      return;
+    }
     if (!canUseQr) {
       toastErr("QR code will be available after business verification.");
       return;
@@ -639,13 +681,20 @@ export function StaffManagementPage() {
                   </td>
                 </tr>
               ) : (
-                filteredEmployees.map((employee, index) => (
+                filteredEmployees.map((employee, index) => {
+                  const rosterNote = staffRosterStatusNote(employee);
+                  return (
                 <motion.tr
                   key={employee.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  className="border-t border-border hover:bg-muted/30 transition-colors"
+                  className={[
+                    "border-t border-border hover:bg-muted/30 transition-colors",
+                    !employee.isActive ? "bg-muted/20 opacity-90" : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
                 >
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -657,6 +706,9 @@ export function StaffManagementPage() {
                       <div>
                         <p className="font-semibold text-foreground">{employee.name}</p>
                         <p className="text-xs text-muted-foreground">Joined {employee.joinedDate}</p>
+                        {rosterNote ? (
+                          <p className={rosterNoteClassName(rosterNote)}>{rosterNote}</p>
+                        ) : null}
                       </div>
                     </div>
                   </td>
@@ -728,17 +780,19 @@ export function StaffManagementPage() {
                       <button
                         type="button"
                         onClick={() => handleQrDownload(employee)}
-                        disabled={!canUseQr}
+                        disabled={!canUseQr || !employee.isActive}
                         className={[
                           "p-2 rounded-lg border border-transparent transition-all",
-                          canUseQr
+                          canUseQr && employee.isActive
                             ? "hover:bg-muted hover:border-border active:scale-95"
                             : "opacity-45 cursor-not-allowed",
                         ].join(" ")}
                         title={
-                          canUseQr
-                            ? "Download branded QR (app URL /qr/employee/…)"
-                            : "QR code will be available after business verification."
+                          !employee.isActive
+                            ? "Activate this profile to enable QR downloads."
+                            : canUseQr
+                              ? "Download branded QR (app URL /qr/employee/…)"
+                              : "QR code will be available after business verification."
                         }
                       >
                         <QrCode className="w-4 h-4 text-foreground" />
@@ -762,7 +816,8 @@ export function StaffManagementPage() {
                     </div>
                   </td>
                 </motion.tr>
-              ))
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -773,13 +828,20 @@ export function StaffManagementPage() {
           {filteredEmployees.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">No staff members yet.</div>
           ) : (
-            filteredEmployees.map((employee, index) => (
+            filteredEmployees.map((employee, index) => {
+              const rosterNote = staffRosterStatusNote(employee);
+              return (
             <motion.div
               key={employee.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="bg-card rounded-xl border border-border p-4"
+              className={[
+                "bg-card rounded-xl border border-border p-4",
+                !employee.isActive ? "border-dashed bg-muted/25 opacity-95" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <div className="flex items-start justify-between mb-4 gap-2">
                 <div className="flex items-center gap-3 min-w-0">
@@ -791,6 +853,9 @@ export function StaffManagementPage() {
                   <div className="min-w-0">
                     <h3 className="font-semibold text-foreground truncate">{employee.name}</h3>
                     <p className="text-sm text-muted-foreground">{employee.role}</p>
+                    {rosterNote ? (
+                      <p className={rosterNoteClassName(rosterNote)}>{rosterNote}</p>
+                    ) : null}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {employee.locationId
                         ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "—"
@@ -848,13 +913,20 @@ export function StaffManagementPage() {
                 <button
                   type="button"
                   onClick={() => handleQrDownload(employee)}
-                  disabled={!canUseQr}
+                  disabled={!canUseQr || !employee.isActive}
                   className={[
                     "flex items-center justify-center gap-2 rounded-lg border-2 border-border px-4 py-2 text-sm font-medium transition-all",
-                    canUseQr
+                    canUseQr && employee.isActive
                       ? "bg-primary/10 text-foreground hover:bg-primary/20 active:scale-[0.98]"
                       : "bg-muted/40 text-muted-foreground cursor-not-allowed opacity-60",
                   ].join(" ")}
+                  title={
+                    !employee.isActive
+                      ? "Activate this profile to enable QR downloads."
+                      : canUseQr
+                        ? "Download branded QR"
+                        : "QR code will be available after business verification."
+                  }
                 >
                   <QrCode className="h-4 w-4" />
                   QR
@@ -877,7 +949,8 @@ export function StaffManagementPage() {
                 </button>
               </div>
             </motion.div>
-            ))
+              );
+            })
           )}
         </div>
       </div>

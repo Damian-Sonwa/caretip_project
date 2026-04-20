@@ -1,6 +1,7 @@
 import type { EmployeeActivationStatus } from "@prisma/client";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
+import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/socketEmitters.js";
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 
 /** Avoid collision with app routes under /business/... */
@@ -42,6 +43,67 @@ export async function ensureBusinessHasSlug(businessId: string): Promise<void> {
 
 export async function getBusinessByUserId(userId: string) {
   return prisma.business.findUnique({ where: { userId } });
+}
+
+/**
+ * Hard-delete a venue and every auth account tied to it:
+ * all staff `User` rows (and their `Employee` rows via FK cascade), then the manager `User` row
+ * (which cascades removal of the `Business` row per `businesses_user_id_fkey`).
+ *
+ * Call this instead of `prisma.business.delete` so staff manager accounts are not left orphaned.
+ */
+export async function deleteBusinessCascadeUsers(businessId: string): Promise<void> {
+  await prisma.$transaction(async (tx) => {
+    const business = await tx.business.findUnique({
+      where: { id: businessId },
+      select: {
+        id: true,
+        userId: true,
+        user: { select: { id: true, role: true, isPlatformAdmin: true } },
+      },
+    });
+    if (!business) {
+      throw new Error("Business not found");
+    }
+    if (business.user.isPlatformAdmin) {
+      throw new Error("Cannot delete a business owned by a platform administrator account");
+    }
+    if (business.user.role !== "MANAGER") {
+      throw new Error("Business owner user has unexpected role; delete aborted");
+    }
+
+    const employees = await tx.employee.findMany({
+      where: { businessId },
+      select: {
+        userId: true,
+        user: { select: { role: true, isPlatformAdmin: true } },
+      },
+    });
+
+    const ownerUserId = business.userId;
+    const staffUserIds: string[] = [];
+    for (const row of employees) {
+      if (row.userId === ownerUserId) {
+        continue;
+      }
+      if (row.user.isPlatformAdmin) {
+        throw new Error("Cannot delete business: a staff account is marked as platform administrator");
+      }
+      if (row.user.role !== "EMPLOYEE") {
+        throw new Error("Business has a staff user with unexpected role; delete aborted");
+      }
+      staffUserIds.push(row.userId);
+    }
+
+    for (const uid of staffUserIds) {
+      await tx.user.delete({ where: { id: uid } });
+    }
+
+    await tx.user.delete({ where: { id: ownerUserId } });
+  });
+
+  emitBusinessDataChanged(businessId, "business_deleted");
+  emitPlatformDataUpdated("business_deleted");
 }
 
 /** Narrow lookup for dashboard — avoids SELECT * on `businesses` (P2022 when DB lags schema). */
@@ -226,7 +288,14 @@ export async function getBusinessStats(
     isActive: true,
     activationStatus: true,
     monthlyGoal: true,
-    user: { select: { email: true } },
+    user: {
+      select: {
+        email: true,
+        emailVerified: true,
+        passwordHash: true,
+        oauthProvider: true,
+      },
+    },
   } as const;
 
   const extendedEmployeeSelect = {
@@ -245,27 +314,33 @@ export async function getBusinessStats(
     isActive: boolean;
     activationStatus: EmployeeActivationStatus;
     monthlyGoal: unknown;
-    user: { email: string };
+    user: {
+      email: string;
+      emailVerified: boolean;
+      passwordHash: string | null;
+      oauthProvider: string | null;
+    };
     locationId?: string | null;
     tableAssignments?: { table: { id: string } }[];
   }>;
 
-  /** Staff lists for owner dashboard (read filter only; pending rows stay in DB). */
-  const dashboardStaffWhere = {
-    businessId,
-    isActive: true,
-    activationStatus: "active" as const,
-  };
+  /**
+   * Owner dashboard / staff-management: every employee row for this business (not deleted),
+   * including deactivated (`is_active` false), so the roster matches the database until removal.
+   */
+  const dashboardStaffWhere = { businessId };
 
   try {
     employees = await prisma.employee.findMany({
       where: dashboardStaffWhere,
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
       select: extendedEmployeeSelect,
     });
   } catch (extendedErr) {
     try {
       employees = await prisma.employee.findMany({
         where: dashboardStaffWhere,
+        orderBy: [{ isActive: "desc" }, { name: "asc" }],
         select: legacyEmployeeSelect,
       });
       console.warn(
@@ -279,6 +354,9 @@ export async function getBusinessStats(
 
   const employeeStats = employees.map((emp) => {
     const agg = tipsByEmp.get(emp.id) ?? { total: 0, count: 0 };
+    const passwordIsSet =
+      (emp.user.passwordHash != null && emp.user.passwordHash.length > 0) ||
+      (emp.user.oauthProvider != null && emp.user.oauthProvider.trim().length > 0);
     return {
       id: emp.id,
       slug: emp.slug,
@@ -289,6 +367,8 @@ export async function getBusinessStats(
       isActive: emp.isActive,
       activationStatus: emp.activationStatus,
       email: emp.user.email,
+      emailVerified: emp.user.emailVerified,
+      passwordIsSet,
       monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
       locationId: emp.locationId ?? null,
       assignedTableIds: emp.tableAssignments?.map((ta) => ta.table.id) ?? [],

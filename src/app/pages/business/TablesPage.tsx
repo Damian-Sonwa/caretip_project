@@ -39,7 +39,12 @@ export function TablesPage() {
   const [locationId, setLocationId] = useState("");
 
   const loadAll = useCallback(async () => {
-    if (!isBusiness) return;
+    if (!isBusiness) {
+      setLocations([]);
+      setTables([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const [locList, tblList] = await Promise.all([fetchLocations(), fetchTables()]);

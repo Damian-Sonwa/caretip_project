@@ -32,6 +32,7 @@ router.get("/transactions", platformController.listTransactions);
 router.get("/audit-logs", platformController.listAuditLogs);
 router.get("/businesses", platformController.listBusinesses);
 router.get("/businesses/:id", platformController.getBusiness);
+router.delete("/businesses/:id", platformController.deleteBusiness);
 router.patch("/businesses/:id/verify", platformController.verifyBusiness);
 router.patch("/businesses/:id", platformController.updateBusiness);
 router.post(

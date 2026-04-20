@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import * as platformService from "../services/platform.service.js";
+import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import {
   logServerError,
@@ -139,6 +140,32 @@ export async function getBusiness(req: Request, res: Response) {
     logServerError("platform.getBusiness", err);
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't load that business. Try again."),
+    });
+  }
+}
+
+/** SuperAdmin: removes the business graph and all manager/staff `User` rows for that venue. */
+export async function deleteBusiness(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    await businessService.deleteBusinessCascadeUsers(id);
+    return res.json({ success: true });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "Business not found") {
+      return res.status(404).json({ message: msg });
+    }
+    if (
+      msg.startsWith("Cannot delete") ||
+      msg.includes("unexpected role") ||
+      msg.includes("delete aborted")
+    ) {
+      return res.status(400).json({ message: msg });
+    }
+    logServerError("platform.deleteBusiness", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't delete that business. Try again."),
     });
   }
 }

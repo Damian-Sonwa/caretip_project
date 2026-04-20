@@ -31,7 +31,11 @@ export function LocationsPage() {
   const [description, setDescription] = useState("");
 
   const load = useCallback(async () => {
-    if (!isBusiness) return;
+    if (!isBusiness) {
+      setLocations([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
       const list = await fetchLocations();
