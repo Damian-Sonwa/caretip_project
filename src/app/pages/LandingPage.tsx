@@ -65,7 +65,7 @@ export function LandingPage() {
               secondaryCtaLabel="How it works"
               secondaryCtaTo="/#how-it-works"
               useAnimatedHero={false}
-              heroBorderBeam={false}
+              heroBorderBeam={true}
             />
           <HospitalityTeamsUnifiedSection />
           <div id="features" className="scroll-mt-[80px]">

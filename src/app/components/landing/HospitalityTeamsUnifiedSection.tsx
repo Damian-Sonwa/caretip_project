@@ -46,10 +46,10 @@ export function HospitalityTeamsUnifiedSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
           >
-            <h2 className="mb-3 text-balance text-3xl font-bold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
+            <h2 className="mb-3 text-balance font-bold leading-[1.05] text-foreground text-[clamp(1.75rem,6vw,3.75rem)]">
               Built for hospitality teams
             </h2>
-            <p className="mx-auto max-w-3xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+            <p className="mx-auto max-w-3xl text-pretty leading-relaxed text-muted-foreground text-[clamp(1rem,2.6vw,1.25rem)]">
               Simple tipping for guests. Clear earnings for staff. Better control for the business.
             </p>
           </motion.div>
