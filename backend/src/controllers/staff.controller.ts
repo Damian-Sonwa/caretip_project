@@ -26,7 +26,12 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
     const employees = await prisma.employee.findMany({
-      where: { businessId: business.id, isActive: true, activationStatus: "active" },
+      where: {
+        businessId: business.id,
+        isActive: true,
+        activationStatus: "active",
+        user: { is: { emailVerified: true } },
+      },
       orderBy: { name: "asc" },
       select: {
         id: true,
@@ -78,13 +83,23 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
   } as const;
   try {
     return prisma.employee.findFirst({
-      where: { slug: trimmedSlug, isActive: true, activationStatus: "active" },
+      where: {
+        slug: trimmedSlug,
+        isActive: true,
+        activationStatus: "active",
+        user: { is: { emailVerified: true } },
+      },
       select: full,
     });
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
       return prisma.employee.findFirst({
-        where: { slug: trimmedSlug, isActive: true, activationStatus: "active" },
+        where: {
+          slug: trimmedSlug,
+          isActive: true,
+          activationStatus: "active",
+          user: { is: { emailVerified: true } },
+        },
         select: {
           id: true,
           name: true,

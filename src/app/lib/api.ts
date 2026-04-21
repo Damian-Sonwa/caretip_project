@@ -9,6 +9,8 @@ import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 
+let refreshInFlight: Promise<string | null> | null = null;
+
 /** Absolute path (starts with /) or full URL; honors Vite proxy when base is empty. */
 function apiPath(path: string): string {
   const base = resolveApiBaseUrl();
@@ -19,6 +21,11 @@ function apiPath(path: string): string {
 
 function getToken(): string | null {
   return localStorage.getItem("caretip_token");
+}
+
+function setToken(token: string | null): void {
+  if (token && token.trim()) localStorage.setItem("caretip_token", token);
+  else localStorage.removeItem("caretip_token");
 }
 
 function getHeaders(): HeadersInit {
@@ -76,6 +83,52 @@ function apiConfigHintForFailedFetch(url: string): string {
   return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com — then trigger a new deploy.";
 }
 
+async function refreshAccessToken(): Promise<string | null> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      try {
+        const res = await fetch(apiPath("/api/auth/refresh"), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        if (!res.ok) return null;
+        const data = (await res.json().catch(() => null)) as unknown;
+        const token =
+          data && typeof data === "object" && typeof (data as any).token === "string"
+            ? String((data as any).token)
+            : null;
+        if (token) setToken(token);
+        return token;
+      } catch (err) {
+        logClientError("api.refreshAccessToken", err);
+        return null;
+      } finally {
+        refreshInFlight = null;
+      }
+    })();
+  }
+  return refreshInFlight;
+}
+
+function withUpdatedBearer(init: RequestInit | undefined, token: string): RequestInit {
+  const next: RequestInit = { ...(init ?? {}) };
+  const headers: Record<string, string> = {};
+  const h = next.headers as HeadersInit | undefined;
+  if (h) {
+    if (h instanceof Headers) {
+      h.forEach((v, k) => (headers[k] = v));
+    } else if (Array.isArray(h)) {
+      for (const [k, v] of h) headers[k] = v;
+    } else {
+      Object.assign(headers, h as Record<string, string>);
+    }
+  }
+  headers["Authorization"] = `Bearer ${token}`;
+  next.headers = headers;
+  return next;
+}
+
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
@@ -86,6 +139,25 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     const baseMsg = toUserFriendlyMessage(err);
     throw new Error(baseMsg + apiConfigHintForFailedFetch(url));
   }
+
+  if (res.status === 401) {
+    const token = getToken();
+    const canAttempt =
+      typeof token === "string" &&
+      token.trim().length > 0 &&
+      (url.startsWith("/api/") || url.startsWith("/uploads/"));
+    const alreadyRetried = (init as { __caretipRetried?: boolean } | undefined)?.__caretipRetried === true;
+    if (canAttempt && !alreadyRetried) {
+      const nextToken = await refreshAccessToken();
+      if (nextToken) {
+        const retriedInit = { ...(withUpdatedBearer(init, nextToken) as any), __caretipRetried: true };
+        res = await fetch(url, retriedInit);
+      } else {
+        setToken(null);
+      }
+    }
+  }
+
   return handleRes<T>(res);
 }
 
@@ -155,6 +227,18 @@ export async function loginAPI(
     }),
     credentials: "include",
   });
+}
+
+export async function logoutAPI(): Promise<void> {
+  try {
+    await fetch(apiPath("/api/auth/logout"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    });
+  } catch (err) {
+    logClientError("api.logoutAPI", err);
+  }
 }
 
 export async function resendVerificationEmailAPI(

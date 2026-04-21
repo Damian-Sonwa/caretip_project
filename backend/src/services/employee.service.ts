@@ -156,6 +156,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       activationStatus: true,
       businessId: true,
       business: { select: { verificationStatus: true } },
+      user: { select: { emailVerified: true } },
       transactions: {
         where: {
           status: "success",
@@ -184,6 +185,13 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       scannedRouteId: employeeId,
       dbLookupId: emp.id,
       activationStatus: emp.activationStatus,
+    });
+    return null;
+  }
+  if (emp.user?.emailVerified !== true) {
+    console.warn("[employee.getEmployeeById] employee email not verified", {
+      scannedRouteId: employeeId,
+      dbLookupId: emp.id,
     });
     return null;
   }

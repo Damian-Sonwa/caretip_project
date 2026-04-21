@@ -4,6 +4,15 @@ import * as authService from "../services/auth.service.js";
 import * as oauthAuthService from "../services/oauthAuth.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as passwordResetService from "../services/passwordReset.service.js";
+import {
+  clearRefreshCookie,
+  issueRefreshToken,
+  parseCookie,
+  refreshCookieName,
+  rotateRefreshToken,
+  revokeRefreshToken,
+  setRefreshCookie,
+} from "../services/refreshToken.service.js";
 import { checkAndIncrementEmailLimit } from "../utils/emailRateLimit.js";
 import {
   logServerError,
@@ -99,6 +108,8 @@ export async function register(req: Request, res: Response) {
         businessType: typeof businessType === "string" ? businessType : undefined,
         location: typeof location === "string" ? location : undefined,
       });
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
       return res.status(201).json(result);
     }
 
@@ -115,6 +126,8 @@ export async function register(req: Request, res: Response) {
         name,
         inviteCode,
       });
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
       return res.status(201).json(result);
     }
 
@@ -150,6 +163,8 @@ export async function login(req: Request, res: Response) {
       password,
       intendedRole,
     });
+    const rt = await issueRefreshToken(result.user.id);
+    setRefreshCookie(res, rt.token);
     return res.json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
@@ -290,6 +305,8 @@ export async function oauth(req: Request, res: Response) {
       businessType,
       location,
     });
+    const rt = await issueRefreshToken(result.user.id);
+    setRefreshCookie(res, rt.token);
     return res.status(isLogin ? 200 : 201).json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
@@ -338,6 +355,45 @@ export async function oauth(req: Request, res: Response) {
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected),
     });
+  }
+}
+
+/** Issues a new access token when the short-lived JWT expires (refresh token rotated each use). */
+export async function refresh(req: Request, res: Response) {
+  try {
+    const cookieHeader = req.headers.cookie;
+    const token = parseCookie(cookieHeader, refreshCookieName());
+    if (!token) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const rotated = await rotateRefreshToken(token);
+    if (!rotated) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Invalid or expired session" });
+    }
+    setRefreshCookie(res, rotated.newToken);
+    const result = await authService.authResultForUserId(rotated.userId);
+    return res.json(result);
+  } catch (err) {
+    logServerError("auth.refresh", err);
+    return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
+  }
+}
+
+/** Logs out by revoking the current refresh token and clearing the cookie. */
+export async function logout(req: Request, res: Response) {
+  try {
+    const cookieHeader = req.headers.cookie;
+    const token = parseCookie(cookieHeader, refreshCookieName());
+    if (token) {
+      await revokeRefreshToken(token);
+    }
+    clearRefreshCookie(res);
+    return res.json({ ok: true });
+  } catch (err) {
+    logServerError("auth.logout", err);
+    clearRefreshCookie(res);
+    return res.status(503).json({ ok: false });
   }
 }
 
@@ -441,6 +497,8 @@ export async function activateEmployee(req: Request, res: Response) {
     }
 
     const result = await authService.activateEmployee(token, password);
+    const rt = await issueRefreshToken(result.user.id);
+    setRefreshCookie(res, rt.token);
     return res.status(200).json(result);
   } catch (err) {
     logServerError("auth.activateEmployee", err);

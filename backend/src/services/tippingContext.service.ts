@@ -33,7 +33,12 @@ const publicEmployeeSelect = {
 
 async function listActiveEmployeesForBusiness(businessId: string): Promise<PublicTippingEmployee[]> {
   return prisma.employee.findMany({
-    where: { businessId, isActive: true, activationStatus: "active" },
+    where: {
+      businessId,
+      isActive: true,
+      activationStatus: "active",
+      user: { is: { emailVerified: true } },
+    },
     orderBy: { name: "asc" },
     select: publicEmployeeSelect,
   });
@@ -45,13 +50,25 @@ async function employeesForLocationQr(
   locationId: string
 ): Promise<PublicTippingEmployee[]> {
   const assigned = await prisma.employee.findMany({
-    where: { businessId, isActive: true, activationStatus: "active", locationId },
+    where: {
+      businessId,
+      isActive: true,
+      activationStatus: "active",
+      locationId,
+      user: { is: { emailVerified: true } },
+    },
     orderBy: { name: "asc" },
     select: publicEmployeeSelect,
   });
   if (assigned.length > 0) return assigned;
   const anyWithLocation = await prisma.employee.count({
-    where: { businessId, locationId: { not: null }, activationStatus: "active" },
+    where: {
+      businessId,
+      locationId: { not: null },
+      activationStatus: "active",
+      isActive: true,
+      user: { is: { emailVerified: true } },
+    },
   });
   if (anyWithLocation === 0) return listActiveEmployeesForBusiness(businessId);
   return [];
@@ -65,13 +82,20 @@ async function employeesForTableQr(businessId: string, tableId: string): Promise
       isActive: true,
       activationStatus: "active",
       tableAssignments: { some: { tableId } },
+      user: { is: { emailVerified: true } },
     },
     orderBy: { name: "asc" },
     select: publicEmployeeSelect,
   });
   if (assigned.length > 0) return assigned;
   const anyWithTable = await prisma.employee.count({
-    where: { businessId, activationStatus: "active", tableAssignments: { some: {} } },
+    where: {
+      businessId,
+      activationStatus: "active",
+      isActive: true,
+      tableAssignments: { some: {} },
+      user: { is: { emailVerified: true } },
+    },
   });
   if (anyWithTable === 0) return listActiveEmployeesForBusiness(businessId);
   return [];

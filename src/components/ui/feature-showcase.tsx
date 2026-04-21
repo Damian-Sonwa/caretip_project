@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { FeatureCarousel } from "@/components/ui/feature-carousel";
 import { CareTipHeroAnimation } from "@/components/ui/caretip-hero-animation";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 export type TabMedia = {
   value: string;
@@ -53,6 +54,11 @@ export type FeatureShowcaseProps = {
   className?: string;
   /** Use animated hero instead of carousel (for CareTip hero section). */
   useAnimatedHero?: boolean;
+  /**
+   * Wrap the media panel in a border-beam card (landing marketing style).
+   * Keeps content inset so the moving edge is clearly visible.
+   */
+  heroBorderBeam?: boolean;
 };
 
 export function FeatureShowcase({
@@ -86,6 +92,7 @@ export function FeatureShowcase({
   secondaryCtaTo = "/how-it-works",
   className,
   useAnimatedHero = false,
+  heroBorderBeam = false,
 }: FeatureShowcaseProps) {
   const carouselImages = React.useMemo(
     () =>
@@ -97,6 +104,8 @@ export function FeatureShowcase({
       })),
     [tabsProp]
   );
+
+  const singleHeroImage = carouselImages.length === 1 ? carouselImages[0] : null;
 
   return (
     <section
@@ -156,13 +165,59 @@ export function FeatureShowcase({
         </div>
 
         <div className="relative min-h-0 md:col-span-6 flex items-center justify-center">
-          <div className="overflow-hidden rounded-xl border border-border/80 bg-muted/20 p-0 shadow-sm sm:rounded-2xl" style={{ maxWidth: "480px", width: "fit-content" }}>
-            {useAnimatedHero ? (
-              <CareTipHeroAnimation />
-            ) : (
-              <FeatureCarousel images={carouselImages} />
-            )}
-          </div>
+          {heroBorderBeam ? (
+            <div className="relative inline-block">
+              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-xl">
+                <BorderBeam
+                  size={260}
+                  duration={14}
+                  borderWidth={1.5}
+                  colorFrom="#EB992C"
+                  colorTo="#000000"
+                  delay={1}
+                />
+                <div className="relative z-[1] bg-muted/10 p-2 sm:p-3">
+                  {useAnimatedHero ? (
+                    <CareTipHeroAnimation />
+                  ) : singleHeroImage ? (
+                    <img
+                      src={singleHeroImage.src}
+                      alt={singleHeroImage.alt}
+                      className="block w-[320px] rounded-xl object-cover object-[60%_center] shadow-sm ring-1 ring-black/5 sm:w-[400px] sm:rounded-2xl md:w-[480px]"
+                      style={{ aspectRatio: "2 / 3" }}
+                      loading="eager"
+                      decoding="async"
+                    />
+                  ) : (
+                    <div className="w-[320px] sm:w-[400px] md:w-[480px]">
+                      <FeatureCarousel images={carouselImages} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div
+              className="overflow-hidden rounded-xl border border-border/80 bg-muted/20 p-0 shadow-sm sm:rounded-2xl"
+              style={{ maxWidth: "480px", width: "100%" }}
+            >
+              {useAnimatedHero ? (
+                <CareTipHeroAnimation />
+              ) : singleHeroImage ? (
+                <div className="w-full p-2 sm:p-3">
+                  <img
+                    src={singleHeroImage.src}
+                    alt={singleHeroImage.alt}
+                    className="block aspect-[2/3] w-full rounded-xl object-cover object-[60%_center] sm:rounded-2xl"
+                    loading="eager"
+                    decoding="async"
+                  />
+                </div>
+              ) : (
+                <FeatureCarousel images={carouselImages} />
+              )}
+            </div>
+          )}
         </div>
       </div>
     </section>

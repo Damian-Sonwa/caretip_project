@@ -428,10 +428,18 @@ export async function getBusinessById(id: string) {
       businessType: true,
       location: true,
       verificationStatus: true,
-      _count: { select: { employees: true } },
     },
   });
   if (!business) return null;
+  // Public-facing count: match directory/QR filters (active + activated + verified).
+  const employeeCount = await prisma.employee.count({
+    where: {
+      businessId: business.id,
+      isActive: true,
+      activationStatus: "active",
+      user: { is: { emailVerified: true } },
+    },
+  });
   return {
     id: business.id,
     name: business.name,
@@ -439,7 +447,7 @@ export async function getBusinessById(id: string) {
     logo: null,
     location: business.location ?? "Downtown",
     type: business.businessType ?? "Restaurant",
-    employeeCount: business._count.employees,
+    employeeCount,
     verificationStatus: business.verificationStatus,
   };
 }

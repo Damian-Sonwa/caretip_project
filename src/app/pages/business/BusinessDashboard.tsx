@@ -209,6 +209,7 @@ export function BusinessDashboard() {
   };
 
   const topEmployees = (stats?.employees ?? [])
+    .filter((e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true)
     .sort((a, b) => b.tipsTotal - a.tipsTotal)
     .slice(0, 5)
     .map((e) => ({

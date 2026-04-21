@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { registerAPI, loginAPI, oauthAPI, type AuthResponse } from "../lib/api";
+import { registerAPI, loginAPI, oauthAPI, logoutAPI, type AuthResponse } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 
 /** API roles plus demo-only values used by admin UI / RoleSwitcher */
@@ -167,6 +167,7 @@ export function useAuth() {
   };
 
   const logout = () => {
+    void logoutAPI();
     setUser(null);
     localStorage.removeItem("caretip_user");
     localStorage.removeItem("caretip_token");

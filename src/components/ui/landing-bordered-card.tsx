@@ -12,6 +12,8 @@ type LandingBorderedCardProps = {
   cardClassName?: string;
   /** Stagger animated border (seconds) per card in a grid */
   beamDelay?: number;
+  /** Disable the moving border-beam animation for this card. */
+  showBeam?: boolean;
 };
 
 /**
@@ -23,6 +25,7 @@ export function LandingBorderedCard({
   className,
   cardClassName,
   beamDelay = 0,
+  showBeam = true,
 }: LandingBorderedCardProps) {
   return (
     <div className={cn("relative h-full w-full", className)}>
@@ -32,14 +35,16 @@ export function LandingBorderedCard({
           cardClassName,
         )}
       >
-        <BorderBeam
-          size={260}
-          duration={14}
-          borderWidth={1.5}
-          colorFrom={LANDING_BRAND_BEAM_FROM}
-          colorTo={LANDING_BRAND_BEAM_TO}
-          delay={beamDelay}
-        />
+        {showBeam ? (
+          <BorderBeam
+            size={260}
+            duration={14}
+            borderWidth={1.5}
+            colorFrom={LANDING_BRAND_BEAM_FROM}
+            colorTo={LANDING_BRAND_BEAM_TO}
+            delay={beamDelay}
+          />
+        ) : null}
         <div className="relative z-[1]">{children}</div>
       </Card>
     </div>

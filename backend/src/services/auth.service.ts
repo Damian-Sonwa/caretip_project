@@ -73,7 +73,8 @@ function getJwtSecret(): string {
 }
 
 function jwtExpiresIn(): SignOptions["expiresIn"] {
-  return (process.env.JWT_EXPIRES_IN?.trim() || "30d") as SignOptions["expiresIn"];
+  // Short-lived access token by default; legacy 30d tokens remain valid until their own exp.
+  return (process.env.JWT_EXPIRES_IN?.trim() || "4h") as SignOptions["expiresIn"];
 }
 
 function impersonationJwtExpiresIn(): SignOptions["expiresIn"] {
@@ -162,6 +163,15 @@ async function loadUserForAuthResult(userId: string): Promise<UserForAuthResult>
     throw new Error("Invalid email or password");
   }
   return row;
+}
+
+/** Used by refresh-token flow to re-issue an access token and user payload. */
+export async function authResultForUserId(userId: string): Promise<AuthResult> {
+  const user = await loadUserForAuthResult(userId);
+  if (!user || user.isActive !== true) {
+    throw new Error("Authentication required");
+  }
+  return authResultForUserRecord(user);
 }
 
 async function sendVerificationEmailBestEffort(userId: string, email: string): Promise<void> {

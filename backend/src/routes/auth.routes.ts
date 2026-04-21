@@ -26,6 +26,8 @@ router.post(
 );
 router.post("/oauth", authLoginLimiter, authController.oauth);
 router.post("/activate-employee", authLoginLimiter, authController.activateEmployee);
+router.post("/refresh", authController.refresh);
+router.post("/logout", authController.logout);
 router.get("/verify-email", authController.verifyEmail);
 router.post("/forgot-password", authForgotPasswordLimiter, authController.forgotPassword);
 router.post("/reset-password", authResetPasswordLimiter, authController.resetPassword);
