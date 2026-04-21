@@ -26,9 +26,7 @@ const SHOWCASE_TABS: TabMedia[] = [
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   return (
-    <div className="relative min-h-screen bg-white">
-      {/* Premium gradient background overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-orange-50/5 to-white pointer-events-none" />
+    <div className="relative min-h-screen bg-[linear-gradient(180deg,#FAF8F4_0%,#FAF8F4_45%,#FCFBF8_78%,#FFFFFF_100%)]">
       <LandingCurvesBackground />
       
       <div className="relative z-10">

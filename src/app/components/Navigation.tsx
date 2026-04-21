@@ -35,7 +35,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
 
   const headerSurface = isDark
     ? "border-b border-white/10 bg-zinc-950/95 backdrop-blur-md shadow-[0_1px_0_rgba(255,255,255,0.04)]"
-    : CARE_TIP_LOGO_SURFACE_CLASS;
+    : "border-b border-border/80 bg-[#FAF8F4]/95 backdrop-blur-md";
 
   const ink = isDark ? "#fafafa" : TEXT_BLACK;
 
@@ -171,7 +171,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                   "absolute left-0 right-0 top-full z-[60] border-b shadow-lg lg:hidden",
                   isDark
                     ? "border-white/10 bg-zinc-950/98 backdrop-blur-md"
-                    : "border-border/80 bg-white"
+                    : "border-border/80 bg-[#FAF8F4]/98 backdrop-blur-md"
                 )}
               >
                 <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">

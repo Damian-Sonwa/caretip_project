@@ -111,7 +111,7 @@ export function FeatureShowcase({
     <section
       id={id}
       className={cn(
-        "w-full bg-white text-foreground pt-20 sm:pt-24",
+        "w-full bg-[linear-gradient(180deg,#FAF8F4_0%,#FAF8F4_45%,#FCFBF8_78%,#FFFFFF_100%)] text-foreground pt-20 sm:pt-24",
         id && "scroll-mt-[80px]",
         className,
       )}

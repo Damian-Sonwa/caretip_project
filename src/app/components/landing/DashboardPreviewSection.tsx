@@ -5,7 +5,7 @@ import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 
 export function DashboardPreviewSection() {
   return (
-    <section className="bg-[#FFFFFF] px-6 py-20 sm:py-28">
+    <section className="bg-transparent px-6 py-20 sm:py-28">
       <div className="max-w-7xl mx-auto space-y-24">
         {/* Business Dashboard Preview */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">

@@ -92,11 +92,15 @@ export default function Component() {
 
           <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={30} gapPx={24}>
             {businesses.map((b) => (
-              <div className="group flex w-80 shrink-0 flex-col sm:w-[26rem]" key={b.name}>
+              <div
+                className="group flex w-80 shrink-0 flex-col sm:w-[26rem]"
+                key={b.name}
+                tabIndex={0}
+              >
                 <div className="relative h-[26rem] w-full overflow-hidden rounded-2xl bg-neutral-100 sm:h-[28rem]">
                   <img
                     alt={b.name}
-                    className="h-full w-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                    className="h-full w-full cursor-pointer object-cover transition-transform duration-300 group-hover:scale-[1.01] group-active:scale-[0.99]"
                     src={b.image}
                     loading="lazy"
                     decoding="async"
@@ -109,7 +113,9 @@ export default function Component() {
                       </span>
                       <div className="min-w-0">
                         <h3 className="truncate font-semibold text-foreground">{b.name}</h3>
-                        <p className="text-sm text-muted-foreground">{b.role}</p>
+                        <p className="mt-0.5 text-sm leading-snug text-muted-foreground">
+                          {b.role}
+                        </p>
                       </div>
                     </div>
                   </div>

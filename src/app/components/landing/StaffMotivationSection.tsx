@@ -28,7 +28,7 @@ export function StaffMotivationSection() {
   ];
 
   return (
-    <section id="employee-section" className="scroll-mt-[80px] bg-[#FFFFFF] px-6 py-20 sm:py-28">
+    <section id="employee-section" className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Visual */}

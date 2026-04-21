@@ -56,7 +56,7 @@ export function QRTippingSection() {
   ];
 
   return (
-    <section className="bg-[#FFFFFF] px-4 py-16 sm:px-6 sm:py-28">
+    <section className="bg-transparent px-4 py-16 sm:px-6 sm:py-28">
       <div className="max-w-7xl mx-auto min-w-0">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center min-w-0">
           {/* Left: Content */}

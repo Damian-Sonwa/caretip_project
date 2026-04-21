@@ -11,7 +11,7 @@ export function SimpleSetupSection() {
   ];
 
   return (
-    <section id="how-it-works" className="scroll-mt-[80px] bg-[#FFFFFF] px-6 py-20 sm:py-28">
+    <section id="how-it-works" className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <motion.div

@@ -13,7 +13,7 @@ const FEATURES = [
   {
     Icon: QrCode,
     title: "Seamless QR payments",
-    text: "Table, location, or staff QR codes—ready to print.",
+    text: "Table, location, or staff QR codes (ready to print).",
   },
   {
     Icon: Users,
@@ -28,13 +28,16 @@ const FEATURES = [
   {
     Icon: Sparkles,
     title: "Clear performance",
-    text: "Top performers and live activity—at a glance.",
+    text: "Top performers and live activity (at a glance).",
   },
 ] as const;
 
 export function HospitalityTeamsUnifiedSection() {
   return (
-    <section id="business-section" className="scroll-mt-[80px] bg-white px-6 py-20 sm:py-24">
+    <section
+      id="business-section"
+      className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-24"
+    >
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 space-y-4 text-center sm:mb-14">
           <motion.div
@@ -43,11 +46,11 @@ export function HospitalityTeamsUnifiedSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
           >
-            <h2 className="mb-3 text-4xl font-bold text-foreground sm:text-5xl lg:text-6xl">
+            <h2 className="mb-3 text-balance text-3xl font-bold text-foreground sm:text-4xl md:text-5xl lg:text-6xl">
               Built for hospitality teams
             </h2>
-            <p className="mx-auto max-w-3xl text-lg leading-relaxed text-muted-foreground sm:text-xl">
-              From restaurants to salons, CareTip helps teams earn more through seamless tipping.
+            <p className="mx-auto max-w-3xl text-pretty text-base leading-relaxed text-muted-foreground sm:text-lg md:text-xl">
+              Simple tipping for guests. Clear earnings for staff. Better control for the business.
             </p>
           </motion.div>
         </div>
