@@ -108,8 +108,12 @@ export async function register(req: Request, res: Response) {
         businessType: typeof businessType === "string" ? businessType : undefined,
         location: typeof location === "string" ? location : undefined,
       });
-      const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      try {
+        const rt = await issueRefreshToken(result.user.id);
+        setRefreshCookie(res, rt.token);
+      } catch (e) {
+        logServerError("auth.register.issueRefreshToken", e);
+      }
       return res.status(201).json(result);
     }
 
@@ -126,8 +130,12 @@ export async function register(req: Request, res: Response) {
         name,
         inviteCode,
       });
-      const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      try {
+        const rt = await issueRefreshToken(result.user.id);
+        setRefreshCookie(res, rt.token);
+      } catch (e) {
+        logServerError("auth.register.issueRefreshToken", e);
+      }
       return res.status(201).json(result);
     }
 
@@ -163,8 +171,12 @@ export async function login(req: Request, res: Response) {
       password,
       intendedRole,
     });
-    const rt = await issueRefreshToken(result.user.id);
-    setRefreshCookie(res, rt.token);
+    try {
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
+    } catch (e) {
+      logServerError("auth.login.issueRefreshToken", e);
+    }
     return res.json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
@@ -305,8 +317,12 @@ export async function oauth(req: Request, res: Response) {
       businessType,
       location,
     });
-    const rt = await issueRefreshToken(result.user.id);
-    setRefreshCookie(res, rt.token);
+    try {
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
+    } catch (e) {
+      logServerError("auth.oauth.issueRefreshToken", e);
+    }
     return res.status(isLogin ? 200 : 201).json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
@@ -497,8 +513,12 @@ export async function activateEmployee(req: Request, res: Response) {
     }
 
     const result = await authService.activateEmployee(token, password);
-    const rt = await issueRefreshToken(result.user.id);
-    setRefreshCookie(res, rt.token);
+    try {
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
+    } catch (e) {
+      logServerError("auth.activateEmployee.issueRefreshToken", e);
+    }
     return res.status(200).json(result);
   } catch (err) {
     logServerError("auth.activateEmployee", err);

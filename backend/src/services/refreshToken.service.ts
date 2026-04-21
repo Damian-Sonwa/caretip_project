@@ -4,13 +4,19 @@ import { prisma } from "../prisma.js";
 const COOKIE_NAME = "caretip_refresh";
 
 // Prisma client typings depend on `prisma generate`. In some Windows setups this can fail locally,
-// but the generated client in CI/production includes this model. Use a narrow cast to avoid blocking builds.
-const refreshTokenModel = (prisma as any).refreshToken as {
-  create: (args: any) => Promise<any>;
-  findUnique: (args: any) => Promise<any>;
-  update: (args: any) => Promise<any>;
-  updateMany: (args: any) => Promise<any>;
-};
+// and if the client is out of date at runtime, `prisma.refreshToken` may be undefined.
+// Treat refresh tokens as an optional capability so sign-in doesn't hard-fail locally.
+function refreshTokenModel():
+  | {
+      create: (args: any) => Promise<any>;
+      findUnique: (args: any) => Promise<any>;
+      update: (args: any) => Promise<any>;
+      updateMany: (args: any) => Promise<any>;
+    }
+  | null {
+  const m = (prisma as any).refreshToken;
+  return m ? (m as any) : null;
+}
 
 function sha256Hex(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
@@ -66,10 +72,16 @@ export function clearRefreshCookie(
 }
 
 export async function issueRefreshToken(userId: string): Promise<{ token: string; expiresAt: Date }> {
+  const model = refreshTokenModel();
+  if (!model) {
+    // No refresh token persistence available (out-of-date client / migrations not applied).
+    // Caller should simply skip setting the cookie and continue with access-token auth.
+    throw new Error("RefreshToken model unavailable");
+  }
   const token = crypto.randomBytes(48).toString("base64url");
   const tokenHash = sha256Hex(token);
   const expiresAt = nowPlusDays(30);
-  await refreshTokenModel.create({
+  await model.create({
     data: {
       tokenHash,
       userId,
@@ -84,8 +96,10 @@ export async function issueRefreshToken(userId: string): Promise<{ token: string
 export async function rotateRefreshToken(
   token: string
 ): Promise<{ userId: string; newToken: string; newExpiresAt: Date } | null> {
+  const model = refreshTokenModel();
+  if (!model) return null;
   const tokenHash = sha256Hex(token);
-  const existing = await refreshTokenModel.findUnique({
+  const existing = await model.findUnique({
     where: { tokenHash },
     select: { id: true, userId: true, expiresAt: true, revokedAt: true },
   });
@@ -95,11 +109,11 @@ export async function rotateRefreshToken(
 
   const { token: newToken, expiresAt: newExpiresAt } = await issueRefreshToken(existing.userId);
   const newHash = sha256Hex(newToken);
-  const newRow = await refreshTokenModel.findUnique({
+  const newRow = await model.findUnique({
     where: { tokenHash: newHash },
     select: { id: true },
   });
-  await refreshTokenModel.update({
+  await model.update({
     where: { id: existing.id },
     data: { revokedAt: new Date(), replacedByTokenId: newRow?.id ?? null },
   });
@@ -108,8 +122,10 @@ export async function rotateRefreshToken(
 }
 
 export async function revokeRefreshToken(token: string): Promise<void> {
+  const model = refreshTokenModel();
+  if (!model) return;
   const tokenHash = sha256Hex(token);
-  await refreshTokenModel.updateMany({
+  await model.updateMany({
     where: { tokenHash, revokedAt: null },
     data: { revokedAt: new Date() },
   });
