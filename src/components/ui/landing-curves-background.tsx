@@ -39,7 +39,7 @@ export function LandingCurvesBackground({ className }: LandingCurvesBackgroundPr
     <div className={cn("pointer-events-none absolute inset-0 overflow-hidden", className)}>
       <CurveSvg className="absolute -right-24 top-24 w-[520px] rotate-0 text-neutral-200/70 blur-[0px]" />
       <CurveSvg className="absolute -left-32 bottom-0 w-[560px] -rotate-12 text-neutral-200/50" />
-      <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/0 to-white" />
+      <div className="absolute inset-0 bg-gradient-to-b from-gray-50/0 via-gray-50/0 to-gray-50" />
     </div>
   );
 }

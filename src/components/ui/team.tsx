@@ -59,32 +59,6 @@ const businesses: HospitalityBusiness[] = [
 export default function Component() {
   return (
     <section className="relative w-full overflow-hidden bg-white py-12 md:py-20">
-      <div>
-        <svg
-          className="absolute bottom-0 right-0 text-neutral-200 dark:text-neutral-800"
-          fill="none"
-          height="154"
-          viewBox="0 0 460 154"
-          width="460"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <g clipPath="url(#clip0_494_1104)">
-            <path
-              d="M-87.463 458.432C-102.118 348.092 -77.3418 238.841 -15.0744 188.274C57.4129 129.408 180.708 150.071 351.748 341.128C278.246 -374.233 633.954 380.602 548.123 42.7707"
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="40"
-            />
-          </g>
-          <defs>
-            <clipPath id="clip0_494_1104">
-              <rect fill="white" height="154" width="460" />
-            </clipPath>
-          </defs>
-        </svg>
-      </div>
-
       <div className="relative z-10 mx-auto max-w-7xl">
         <div className="relative w-full">
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />

@@ -111,7 +111,7 @@ export function FeatureShowcase({
     <section
       id={id}
       className={cn(
-        "w-full bg-[linear-gradient(180deg,#FAF8F4_0%,#FAF8F4_45%,#FCFBF8_78%,#FFFFFF_100%)] text-foreground pt-20 sm:pt-24",
+        "w-full bg-transparent text-foreground pt-20 sm:pt-24",
         id && "scroll-mt-[80px]",
         className,
       )}
@@ -167,7 +167,7 @@ export function FeatureShowcase({
         <div className="relative min-h-0 md:col-span-6 flex items-center justify-center">
           {heroBorderBeam ? (
             <div className="relative inline-block">
-              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-xl">
+              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-gray-50 shadow-xl">
                 <BorderBeam
                   size={260}
                   duration={14}
@@ -176,7 +176,7 @@ export function FeatureShowcase({
                   colorTo="#000000"
                   delay={1}
                 />
-                <div className="relative z-[1] bg-muted/10 p-2 sm:p-3">
+                <div className="relative z-[1] bg-gray-50/80 p-2 sm:p-3">
                   {useAnimatedHero ? (
                     <CareTipHeroAnimation />
                   ) : singleHeroImage ? (
@@ -198,13 +198,13 @@ export function FeatureShowcase({
             </div>
           ) : (
             <div
-              className="overflow-hidden rounded-xl border border-border/80 bg-muted/20 p-0 shadow-sm sm:rounded-2xl"
+              className="overflow-hidden rounded-xl border border-border/80 bg-gray-50 p-0 shadow-sm sm:rounded-2xl"
               style={{ maxWidth: "480px", width: "100%" }}
             >
               {useAnimatedHero ? (
                 <CareTipHeroAnimation />
               ) : singleHeroImage ? (
-                <div className="w-full p-2 sm:p-3">
+                <div className="w-full bg-gray-50/80 p-2 sm:p-3">
                   <img
                     src={singleHeroImage.src}
                     alt={singleHeroImage.alt}

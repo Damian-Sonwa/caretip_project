@@ -2,7 +2,6 @@ import React from "react";
 import { Smartphone } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
-import { LandingCurvesBackground } from "@/components/ui/landing-curves-background";
 import heroTapToTip from "../../../images/caretip-image.png";
 import { QRTippingSection } from "../components/landing/QRTippingSection";
 import { StaffMotivationSection } from "../components/landing/StaffMotivationSection";
@@ -26,9 +25,7 @@ const SHOWCASE_TABS: TabMedia[] = [
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   return (
-    <div className="relative min-h-screen bg-[linear-gradient(180deg,#FAF8F4_0%,#FAF8F4_45%,#FCFBF8_78%,#FFFFFF_100%)]">
-      <LandingCurvesBackground />
-      
+    <div className="relative min-h-screen bg-gray-50">
       <div className="relative z-10">
         <div className="fixed top-0 left-0 right-0 z-50 w-full max-w-[100vw] overflow-x-clip">
           <Navigation />
