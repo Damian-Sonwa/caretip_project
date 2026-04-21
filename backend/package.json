@@ -7,7 +7,7 @@
     "dev": "tsx watch src/index.ts",
     "env:check": "tsx src/checkEnvCli.ts",
     "build": "prisma generate --schema=prisma/schema.prisma && tsc",
-    "start": "node dist/index.js",
+    "start": "node scripts/runMigrateDeploy.mjs && node dist/index.js",
     "prisma": "dotenv -e ../.env -e .env -- prisma",
     "db:generate": "dotenv -e ../.env -e .env -- prisma generate --schema=prisma/schema.prisma",
     "db:prisma:reset-client": "node -e \"require('fs').rmSync(require('path').join('node_modules','.prisma'),{recursive:true,force:true});\" && npm run db:generate",
