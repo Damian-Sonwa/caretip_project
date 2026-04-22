@@ -43,10 +43,7 @@ export function SimpleSetupSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <LandingBorderedCard
-            cardClassName="relative overflow-hidden p-8 sm:p-12 bg-[radial-gradient(1200px_circle_at_0%_0%,rgba(0,0,0,0.04),transparent_55%),radial-gradient(900px_circle_at_100%_0%,rgba(0,0,0,0.03),transparent_50%),linear-gradient(135deg,rgba(0,0,0,0.02)_0%,#FFFFFF_52%,#FFFFFF_100%)] shadow-[0_6px_20px_rgba(0,0,0,0.06)]"
-          >
-          <div
-            className="rounded-2xl border border-[#F0F0F0] bg-white/70 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-md sm:p-6"
+            cardClassName="relative overflow-hidden !border-0 bg-white p-8 !shadow-none outline-none ring-0 ring-offset-0 transition-none hover:!translate-y-0 hover:!shadow-none sm:p-12"
           >
             <div className="space-y-6">
             {steps.map((step, index) => (
@@ -58,7 +55,7 @@ export function SimpleSetupSection() {
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 className="flex items-center gap-4"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground shadow-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground shadow-none">
                   {index + 1}
                 </div>
                 <div className="flex-1 flex items-center justify-between">
@@ -70,7 +67,7 @@ export function SimpleSetupSection() {
             </div>
 
             {/* Bottom Stats */}
-            <div className="grid sm:grid-cols-3 gap-6 mt-10 pt-6 border-t border-[#F0F0F0]">
+            <div className="mt-10 grid gap-6 border-none pt-0 sm:grid-cols-3">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
                 <Clock className="w-6 h-6 text-accent" />
@@ -98,8 +95,7 @@ export function SimpleSetupSection() {
                 <p className="text-sm text-muted-foreground">Support</p>
               </div>
             </div>
-          </div>
-          </div>
+            </div>
           </LandingBorderedCard>
         </motion.div>
       </div>

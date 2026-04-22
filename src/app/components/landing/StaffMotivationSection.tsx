@@ -44,9 +44,9 @@ export function StaffMotivationSection() {
             className="relative order-2 lg:order-1"
           >
             {/* Landscape only: height comes from width x aspect; no min-h so the box never goes portrait in a narrow column */}
-            <div className="relative overflow-hidden rounded-2xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+            <div className="relative overflow-hidden rounded-2xl border border-black/[0.04] bg-[#FAFAFA] shadow-[0_8px_24px_rgba(0,0,0,0.03)]">
               <LandingBorderedCard cardClassName="min-w-0 max-w-full overflow-hidden rounded-xl border-0 p-3 shadow-none">
-                <LandingImageFrame className="relative aspect-[5/4] w-full bg-[#FAFAFA] sm:aspect-[4/3]">
+                <LandingImageFrame className="relative aspect-[5/4] w-full bg-[#FAFAFA] shadow-[0_4px_16px_rgba(0,0,0,0.025)] sm:aspect-[4/3]">
                   <img
                     src={employeeMotivation}
                     alt="Team member, motivated staff with CareTip"
@@ -59,11 +59,11 @@ export function StaffMotivationSection() {
                     whileInView={{ y: 0, opacity: 1, scale: 1 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: 0.35 }}
-                    className="pointer-events-none absolute bottom-3 right-3 z-10 max-w-[calc(100%-1.5rem)] rounded-xl border border-accent/30 bg-white/95 p-3 shadow-lg backdrop-blur-sm sm:bottom-4 sm:right-4 sm:p-4"
+                    className="pointer-events-none absolute bottom-3 right-3 z-10 max-w-[calc(100%-1.5rem)] rounded-xl border border-black/[0.06] bg-white/70 p-3 shadow-[0_2px_12px_rgba(0,0,0,0.04)] backdrop-blur-sm sm:bottom-4 sm:right-4 sm:p-4"
                   >
                     <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-accent to-primary sm:h-10 sm:w-10">
-                        <Trophy className="h-4 w-4 text-primary-foreground sm:h-5 sm:w-5" />
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/12 text-primary sm:h-10 sm:w-10">
+                        <Trophy className="h-4 w-4 sm:h-5 sm:w-5" />
                       </div>
                       <div className="min-w-0">
                         <p className="text-[11px] text-muted-foreground sm:text-xs">Top Performer</p>
@@ -91,7 +91,9 @@ export function StaffMotivationSection() {
               <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground">
                 Motivate your team
                 <br />
-                <span className="text-primary">to excel</span>
+                <span className="font-semibold text-primary/55 sm:text-primary/60">
+                  to excel
+                </span>
               </h2>
               <p className="text-lg leading-relaxed text-muted-foreground">
                 Track staff performance in real time. Set goals and see who’s leading the shift.
