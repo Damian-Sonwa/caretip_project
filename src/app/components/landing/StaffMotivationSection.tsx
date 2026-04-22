@@ -43,13 +43,14 @@ export function StaffMotivationSection() {
             className="relative order-2 lg:order-1"
           >
             {/* Landscape only: height comes from width x aspect; no min-h so the box never goes portrait in a narrow column */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5">
-              <LandingBorderedCard showBeam={false} cardClassName="overflow-hidden p-0 shadow-sm">
-                <div className="relative w-full bg-[#FAFAFA] ring-1 ring-inset ring-[#F0F0F0]">
+            <div className="relative overflow-hidden rounded-2xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
+              <LandingBorderedCard cardClassName="min-w-0 max-w-full overflow-hidden rounded-xl border-0 p-3 shadow-none">
+                {/* Same inset as One scan / Instant tip: p-3 on card, image flush to inner rounded frame */}
+                <div className="relative aspect-[5/4] w-full overflow-hidden rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_2px_8px_rgba(0,0,0,0.03)] sm:aspect-[4/3]">
                   <img
                     src={employeeMotivation}
                     alt="Team member, motivated staff with CareTip"
-                    className="block w-full h-auto"
+                    className="absolute inset-0 h-full w-full object-cover object-center"
                     loading="lazy"
                     decoding="async"
                   />

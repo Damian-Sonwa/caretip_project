@@ -125,11 +125,10 @@ export function QRTippingSection() {
             transition={{ duration: 0.7 }}
             className="relative min-w-0 w-full max-w-full"
           >
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5 shadow-[0_8px_30px_rgba(235,153,44,0.15)]">
+            <div className="relative overflow-hidden rounded-2xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               {/* Split-card visual (guest Pay ↔ staff live notification) */}
               <LandingBorderedCard
-                beamDelay={2}
-                cardClassName="min-w-0 max-w-full rounded-xl p-3 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
+                cardClassName="min-w-0 max-w-full rounded-xl border-0 p-3 shadow-none"
               >
                 <InstantTipSplitIllustration />
                 <div className="mt-4 sm:mt-6 text-center px-0.5">

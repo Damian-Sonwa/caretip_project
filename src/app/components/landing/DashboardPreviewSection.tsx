@@ -89,7 +89,7 @@ export function DashboardPreviewSection() {
             transition={{ duration: 0.7 }}
             className="relative"
           >
-            <LandingBorderedCard beamDelay={1} cardClassName="p-6 shadow-2xl">
+            <LandingBorderedCard cardClassName="p-6 shadow-2xl">
               {/* Dashboard Header */}
               <div className="mb-6 flex items-center justify-between">
                 <div>
@@ -149,10 +149,9 @@ export function DashboardPreviewSection() {
             transition={{ duration: 0.7 }}
             className="relative order-2 lg:order-1"
           >
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5 shadow-[0_8px_30px_rgba(235,153,44,0.15)]">
+            <div className="relative overflow-hidden rounded-2xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <LandingBorderedCard
-                beamDelay={4}
-                cardClassName="space-y-6 rounded-xl border-0 p-3 shadow-[0_2px_8px_rgba(0,0,0,0.03)] sm:p-4"
+                cardClassName="space-y-6 rounded-xl border-0 p-3 shadow-none sm:p-4"
               >
                 {/* Profile Header */}
                 <div className="flex items-center gap-4">

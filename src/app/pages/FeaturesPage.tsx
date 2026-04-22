@@ -71,7 +71,7 @@ export function FeaturesPage() {
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: idx * 0.06 }}
                 >
-                  <LandingBorderedCard showBeam={false} cardClassName="p-6 shadow-sm">
+                  <LandingBorderedCard cardClassName="p-6 shadow-sm">
                     <div className="flex items-start gap-4">
                       <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
                         <f.Icon className="h-6 w-6 text-[hsl(33_82%_55%)]" />

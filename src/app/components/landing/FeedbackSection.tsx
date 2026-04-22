@@ -92,7 +92,7 @@ export function FeedbackSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
-                <LandingBorderedCard beamDelay={0} cardClassName="p-6 shadow-lg">
+                <LandingBorderedCard cardClassName="p-6 shadow-lg">
                   <div className="mb-3 flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star key={star} className="h-5 w-5 fill-accent text-accent" />
@@ -124,7 +124,7 @@ export function FeedbackSection() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.4 }}
               >
-                <LandingBorderedCard beamDelay={2} cardClassName="p-6 shadow-lg">
+                <LandingBorderedCard cardClassName="p-6 shadow-lg">
                   <div className="mb-3 flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star

@@ -43,8 +43,7 @@ export function SimpleSetupSection() {
           transition={{ duration: 0.7, delay: 0.2 }}
         >
           <LandingBorderedCard
-            beamDelay={3}
-            cardClassName="relative overflow-hidden p-8 sm:p-12 bg-[radial-gradient(1200px_circle_at_0%_0%,rgba(235,153,44,0.16),transparent_55%),radial-gradient(900px_circle_at_100%_0%,rgba(235,153,44,0.10),transparent_50%),linear-gradient(135deg,rgba(235,153,44,0.10)_0%,#FFFFFF_52%,#FFFFFF_100%)] shadow-[0_6px_20px_rgba(0,0,0,0.06)]"
+            cardClassName="relative overflow-hidden p-8 sm:p-12 bg-[radial-gradient(1200px_circle_at_0%_0%,rgba(0,0,0,0.04),transparent_55%),radial-gradient(900px_circle_at_100%_0%,rgba(0,0,0,0.03),transparent_50%),linear-gradient(135deg,rgba(0,0,0,0.02)_0%,#FFFFFF_52%,#FFFFFF_100%)] shadow-[0_6px_20px_rgba(0,0,0,0.06)]"
           >
           <div
             className="rounded-2xl border border-[#F0F0F0] bg-white/70 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-md sm:p-6"
