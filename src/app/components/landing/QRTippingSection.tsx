@@ -9,7 +9,7 @@ const IMG_PEOPLE_PAYMENT = newly01Img;
 function InstantTipSplitIllustration() {
   return (
     <div
-      className="relative w-full overflow-hidden rounded-2xl border border-border/30 bg-gray-50 aspect-square min-h-[180px] sm:min-h-[220px]"
+      className="relative w-full overflow-hidden rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_2px_8px_rgba(0,0,0,0.03)] aspect-square min-h-[180px] sm:min-h-[220px]"
       role="img"
       aria-label="People at a table completing a mobile payment"
     >
@@ -20,7 +20,7 @@ function InstantTipSplitIllustration() {
         loading="lazy"
         decoding="async"
       />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/45 via-transparent to-background/10" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-background/5" />
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0">
         <span className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-lg">
           Pay
@@ -125,11 +125,11 @@ export function QRTippingSection() {
             transition={{ duration: 0.7 }}
             className="relative min-w-0 w-full max-w-full"
           >
-            <div className="relative rounded-3xl bg-gradient-to-br from-primary to-accent p-4 shadow-2xl sm:p-8 md:p-12 overflow-hidden">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5 shadow-[0_8px_30px_rgba(235,153,44,0.15)]">
               {/* Split-card visual (guest Pay ↔ staff live notification) */}
               <LandingBorderedCard
                 beamDelay={2}
-                cardClassName="rounded-2xl border-0 bg-white p-4 shadow-xl sm:p-6 sm:p-8 min-w-0 max-w-full"
+                cardClassName="min-w-0 max-w-full rounded-xl p-3 shadow-[0_2px_8px_rgba(0,0,0,0.03)]"
               >
                 <InstantTipSplitIllustration />
                 <div className="mt-4 sm:mt-6 text-center px-0.5">

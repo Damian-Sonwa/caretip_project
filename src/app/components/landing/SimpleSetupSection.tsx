@@ -11,7 +11,10 @@ export function SimpleSetupSection() {
   ];
 
   return (
-    <section id="how-it-works" className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28">
+    <section
+      id="how-it-works"
+      className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28"
+    >
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-16 space-y-4">
           <motion.div
@@ -39,8 +42,14 @@ export function SimpleSetupSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
-          <LandingBorderedCard beamDelay={3} cardClassName="p-8 shadow-xl sm:p-12">
-          <div className="space-y-6">
+          <LandingBorderedCard
+            beamDelay={3}
+            cardClassName="relative overflow-hidden p-8 sm:p-12 bg-[radial-gradient(1200px_circle_at_0%_0%,rgba(235,153,44,0.16),transparent_55%),radial-gradient(900px_circle_at_100%_0%,rgba(235,153,44,0.10),transparent_50%),linear-gradient(135deg,rgba(235,153,44,0.10)_0%,#FFFFFF_52%,#FFFFFF_100%)] shadow-[0_6px_20px_rgba(0,0,0,0.06)]"
+          >
+          <div
+            className="rounded-2xl border border-[#F0F0F0] bg-white/70 p-4 shadow-[0_2px_10px_rgba(0,0,0,0.03)] backdrop-blur-md sm:p-6"
+          >
+            <div className="space-y-6">
             {steps.map((step, index) => (
               <motion.div
                 key={step}
@@ -50,7 +59,7 @@ export function SimpleSetupSection() {
                 transition={{ duration: 0.5, delay: 0.3 + index * 0.1 }}
                 className="flex items-center gap-4"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-bold text-accent-foreground shadow-sm">
                   {index + 1}
                 </div>
                 <div className="flex-1 flex items-center justify-between">
@@ -59,10 +68,10 @@ export function SimpleSetupSection() {
                 </div>
               </motion.div>
             ))}
-          </div>
+            </div>
 
-          {/* Bottom Stats */}
-          <div className="grid sm:grid-cols-3 gap-6 mt-12 pt-8 border-t border-border">
+            {/* Bottom Stats */}
+            <div className="grid sm:grid-cols-3 gap-6 mt-10 pt-6 border-t border-[#F0F0F0]">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
                 <Clock className="w-6 h-6 text-accent" />
@@ -90,6 +99,7 @@ export function SimpleSetupSection() {
                 <p className="text-sm text-muted-foreground">Support</p>
               </div>
             </div>
+          </div>
           </div>
           </LandingBorderedCard>
         </motion.div>

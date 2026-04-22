@@ -173,10 +173,10 @@ export function FeatureShowcase({
                   duration={14}
                   borderWidth={1.5}
                   colorFrom="#EB992C"
-                  colorTo="#000000"
+                  colorTo="#F97316"
                   delay={1}
                 />
-                <div className="relative z-[1] bg-card p-2 sm:p-3">
+                <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
                     <CareTipHeroAnimation />
                   ) : singleHeroImage ? (
@@ -198,13 +198,13 @@ export function FeatureShowcase({
             </div>
           ) : (
             <div
-              className="overflow-hidden rounded-xl border border-border/80 bg-gray-50 p-0 shadow-sm sm:rounded-2xl"
+              className="overflow-hidden rounded-xl border border-border/80 bg-white p-0 shadow-sm sm:rounded-2xl"
               style={{ maxWidth: "480px", width: "100%" }}
             >
               {useAnimatedHero ? (
                 <CareTipHeroAnimation />
               ) : singleHeroImage ? (
-                <div className="w-full bg-gray-50/80 p-2 sm:p-3">
+                <div className="w-full bg-white p-2 sm:p-3">
                   <img
                     src={singleHeroImage.src}
                     alt={singleHeroImage.alt}

@@ -42,22 +42,19 @@ export function Footer({
   const footerLinks = {
     Product: [
       { name: 'For Businesses', to: '/#business-section' },
-      { name: 'For Employees', to: '/#employee-section' },
-      { name: 'Features', to: '/#features' },
-      { name: 'How It Works', to: '/#how-it-works' },
+      { name: 'For Employees', to: '/#for-employees' },
+      { name: 'Features', to: '/features' },
+      { name: 'How It Works', to: '/how-it-works' },
       { name: 'Pricing', to: '/pricing' },
     ],
     Company: [
       { name: 'About Us', to: '/#about-section' },
-      { name: 'Careers', to: '/careers' },
-      { name: 'Blog', to: '/blog' },
       { name: 'Contact', to: '/contact' },
     ],
     Resources: [
       { name: 'Help Center', to: '/help' },
       { name: 'FAQs', to: '/faq' },
-      { name: 'Privacy Policy', to: '/privacy' },
-      { name: 'Terms', to: '/terms' },
+      // Privacy/Terms are already linked in the bottom footer row.
     ],
   };
 
@@ -68,48 +65,16 @@ export function Footer({
 
   return (
     <>
-      {/* CTA Section Above Footer */}
-      <section className="relative py-16 sm:py-24 px-6 overflow-hidden">
-        {/* Background with gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black"></div>
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-accent/10 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
-
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-6 sm:space-y-8">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-white drop-shadow-sm">
-            Ready for simpler
-            <br />
-            digital tipping?
-          </h2>
-          <p className="mx-auto max-w-2xl text-base text-white drop-shadow-sm sm:text-xl">
-            QR tips for guests. Clear payouts for your team.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center pt-2 sm:pt-4">
-            <Link
-              to="/signup"
-              className="group flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 text-sm font-bold text-primary-foreground shadow-lg transition-all hover:bg-primary-hover sm:w-auto sm:px-8 sm:py-4 sm:text-base"
-            >
-              Get Started Free
-              <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1 sm:h-5 sm:w-5" />
-            </Link>
-            <Link
-              to="/#how-it-works"
-              className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-black bg-white px-6 py-3 text-sm font-bold text-black shadow-md transition-all hover:bg-neutral-100 sm:w-auto sm:px-8 sm:py-4 sm:text-base"
-            >
-              See How It Works
-            </Link>
-          </div>
-          <p className="text-xs text-neutral-200 drop-shadow-sm sm:text-sm">
-            No setup fees · Fast payouts · Secure payments
-          </p>
-        </div>
-      </section>
-
       {/* Main Footer */}
-      <footer className="border-t border-white/10 bg-black">
-        <div className="max-w-7xl mx-auto px-6 py-12 sm:py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 sm:gap-12 lg:gap-8 mb-12 sm:mb-16">
+      <footer className="relative overflow-hidden border-t border-white/10">
+        {/* Background with gradient (from the removed CTA section) */}
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl" aria-hidden />
+        <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl" aria-hidden />
+
+        <div className="relative max-w-7xl mx-auto px-6 py-12 sm:py-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-10 gap-8 sm:gap-12 lg:gap-8 mb-12 sm:mb-16">
             {/* Column 1: Brand */}
             <div className="lg:col-span-4 space-y-6">
               <h3 className="text-xl font-bold text-white">Caretip</h3>
@@ -195,28 +160,6 @@ export function Footer({
                   </li>
                 ))}
               </ul>
-            </div>
-
-            {/* Column 5: Newsletter (Optional) */}
-            <div className="lg:col-span-2 space-y-5">
-              <h4 className="font-semibold text-white text-sm uppercase tracking-wider">Stay Updated</h4>
-              <p className="text-sm text-neutral-300">
-                Product news in your inbox.
-              </p>
-              <div className="flex gap-2">
-                <input 
-                  type="email" 
-                  placeholder="Enter email" 
-                  className="flex-1 rounded-lg border border-white/15 bg-white/5 px-4 py-2 text-sm text-white placeholder:text-neutral-300 focus:border-primary focus:outline-none"
-                />
-                <button
-                  type="button"
-                  className="rounded-lg bg-primary px-4 py-2 font-bold text-primary-foreground transition-colors hover:bg-primary-hover"
-                  aria-label="Subscribe"
-                >
-                  <ArrowRight className="h-4 w-4" />
-                </button>
-              </div>
             </div>
           </div>
 

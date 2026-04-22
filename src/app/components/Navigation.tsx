@@ -7,11 +7,9 @@ import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "./CareTipLogo";
 
 const TEXT_BLACK = "#000000";
 
-const FEATURES_TO = { pathname: "/" as const, hash: "features" as const };
-
 const navLinks = [
   { name: "How it Works", to: "/how-it-works" as const },
-  { name: "Features", to: FEATURES_TO },
+  { name: "Features", to: "/features" as const },
   { name: "Fees", to: "/pricing" as const },
 ] as const;
 
@@ -29,13 +27,9 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
   const linkClass =
     "text-sm font-semibold transition-colors hover:opacity-80 active:opacity-70 active:scale-[0.98] rounded-md px-1 py-1";
 
-  const scrollToFeatures = () => {
-    document.getElementById("features")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const headerSurface = isDark
     ? "border-b border-white/10 bg-zinc-950/95 backdrop-blur-md shadow-[0_1px_0_rgba(255,255,255,0.04)]"
-    : "border-b border-gray-200 bg-gray-50/95 backdrop-blur-md";
+    : "border-b border-[#F5F5F5] bg-white/95 backdrop-blur-md";
 
   const ink = isDark ? "#fafafa" : TEXT_BLACK;
 
@@ -70,32 +64,16 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
 
           {/* Desktop nav */}
           <div className="hidden lg:flex items-center gap-10 xl:gap-12">
-            {navLinks.map((link) =>
-              link.name === "Features" ? (
-                <Link
-                  key={link.name}
-                  to={FEATURES_TO}
-                  className={linkClass}
-                  style={{ color: ink }}
-                  onClick={() => {
-                    if (location.pathname === "/") {
-                      scrollToFeatures();
-                    }
-                  }}
-                >
-                  {link.name}
-                </Link>
-              ) : (
-                <Link
-                  key={link.name}
-                  to={link.to as string}
-                  className={linkClass}
-                  style={{ color: ink }}
-                >
-                  {link.name}
-                </Link>
-              )
-            )}
+            {navLinks.map((link) => (
+              <Link
+                key={link.name}
+                to={link.to as string}
+                className={linkClass}
+                style={{ color: ink }}
+              >
+                {link.name}
+              </Link>
+            ))}
           </div>
 
           {/* Desktop auth */}
@@ -171,43 +149,23 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                   "absolute left-0 right-0 top-full z-[60] border-b shadow-lg lg:hidden",
                   isDark
                     ? "border-white/10 bg-zinc-950/98 backdrop-blur-md"
-                    : "border-gray-200 bg-gray-50/98 backdrop-blur-md"
+                    : "border-[#F5F5F5] bg-white/98 backdrop-blur-md"
                 )}
               >
                 <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
                   {navLinks.map((link) =>
-                    link.name === "Features" ? (
-                      <Link
-                        key={link.name}
-                        to={FEATURES_TO}
-                        className={cn(
-                          "rounded-lg px-3 py-3 text-base font-semibold transition-colors",
-                          isDark ? "active:bg-white/10" : "active:bg-muted"
-                        )}
-                        style={{ color: ink }}
-                        onClick={() => {
-                          setMobileMenuOpen(false);
-                          if (location.pathname === "/") {
-                            queueMicrotask(scrollToFeatures);
-                          }
-                        }}
-                      >
-                        {link.name}
-                      </Link>
-                    ) : (
-                      <Link
-                        key={link.name}
-                        to={link.to as string}
-                        className={cn(
-                          "rounded-lg px-3 py-3 text-base font-semibold transition-colors",
-                          isDark ? "active:bg-white/10" : "active:bg-muted"
-                        )}
-                        style={{ color: ink }}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {link.name}
-                      </Link>
-                    )
+                    <Link
+                      key={link.name}
+                      to={link.to as string}
+                      className={cn(
+                        "rounded-lg px-3 py-3 text-base font-semibold transition-colors",
+                        isDark ? "active:bg-white/10" : "active:bg-muted"
+                      )}
+                      style={{ color: ink }}
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      {link.name}
+                    </Link>
                   )}
                   <div
                     className={cn(

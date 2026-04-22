@@ -28,7 +28,10 @@ export function StaffMotivationSection() {
   ];
 
   return (
-    <section id="employee-section" className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28">
+    <section
+      id="staff-motivation"
+      className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28"
+    >
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Visual */}
@@ -40,16 +43,13 @@ export function StaffMotivationSection() {
             className="relative order-2 lg:order-1"
           >
             {/* Landscape only: height comes from width x aspect; no min-h so the box never goes portrait in a narrow column */}
-            <div className="relative rounded-3xl bg-gradient-to-br from-primary to-accent p-5 shadow-2xl sm:p-6 md:p-8">
-              <LandingBorderedCard
-                beamDelay={2}
-                cardClassName="overflow-hidden rounded-2xl border-0 bg-neutral-100 p-0"
-              >
-                <div className="relative w-full aspect-[16/9] lg:aspect-[2/1]">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5">
+              <LandingBorderedCard showBeam={false} cardClassName="overflow-hidden p-0 shadow-sm">
+                <div className="relative w-full bg-[#FAFAFA] ring-1 ring-inset ring-[#F0F0F0]">
                   <img
                     src={employeeMotivation}
                     alt="Team member, motivated staff with CareTip"
-                    className="absolute inset-0 h-full w-full object-cover object-center"
+                    className="block w-full h-auto"
                     loading="lazy"
                     decoding="async"
                   />
@@ -72,11 +72,6 @@ export function StaffMotivationSection() {
                   </motion.div>
                 </div>
               </LandingBorderedCard>
-
-              <div
-                className="absolute -top-4 -right-4 h-20 w-20 rounded-full bg-accent opacity-50 blur-2xl"
-                aria-hidden
-              />
             </div>
           </motion.div>
 

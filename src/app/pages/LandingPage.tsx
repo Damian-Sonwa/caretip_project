@@ -25,7 +25,7 @@ const SHOWCASE_TABS: TabMedia[] = [
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   return (
-    <div className="relative min-h-screen bg-gray-50">
+    <div className="relative min-h-screen bg-white">
       <div className="relative z-10">
         <div className="fixed top-0 left-0 right-0 z-50 w-full max-w-[100vw] overflow-x-clip">
           <Navigation />
@@ -60,9 +60,9 @@ export function LandingPage() {
               primaryCtaLabel="GET STARTED FREE"
               primaryCtaTo="/onboarding"
               secondaryCtaLabel="How it works"
-              secondaryCtaTo="/#how-it-works"
+              secondaryCtaTo="/how-it-works"
               useAnimatedHero={false}
-              heroBorderBeam={true}
+              heroBorderBeam={false}
             />
           <HospitalityTeamsUnifiedSection />
           <div id="features" className="scroll-mt-[80px]">

@@ -27,6 +27,7 @@ import { HelpPage } from './pages/HelpPage';
 import { FAQPage } from './pages/FAQPage';
 import { MobileAppPage } from './pages/MobileAppPage';
 import { HowItWorksPage } from './pages/HowItWorksPage';
+import { FeaturesPage } from './pages/FeaturesPage';
 import HeroSectionDemoPage from './pages/HeroSectionDemoPage';
 import { HeroAnimationDemoPage } from './pages/HeroAnimationDemoPage';
 import { OnboardingSelectionPage } from './pages/OnboardingSelectionPage';
@@ -405,6 +406,11 @@ const routes: RouteObject[] = [
   {
     path: '/mobile-app',
     Component: MobileAppPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/features',
+    Component: FeaturesPage,
     errorElement: <ErrorBoundary />,
   },
   {

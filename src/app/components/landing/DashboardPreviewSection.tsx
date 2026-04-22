@@ -1,11 +1,22 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { BarChart3, Users, DollarSign, TrendingUp, Eye } from "lucide-react";
+import { BarChart3, Users, Euro, TrendingUp, Eye } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
+import {
+  AnimatedCard,
+  CardBody,
+  CardDescription,
+  CardTitle,
+  CardVisual,
+  Visual3,
+} from "@/components/ui/animated-card-chart";
 
 export function DashboardPreviewSection() {
   return (
-    <section className="bg-transparent px-6 py-20 sm:py-28">
+    <section
+      id="for-employees"
+      className="scroll-mt-[80px] bg-transparent px-6 py-20 sm:py-28"
+    >
       <div className="max-w-7xl mx-auto space-y-24">
         {/* Business Dashboard Preview */}
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
@@ -52,7 +63,7 @@ export function DashboardPreviewSection() {
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <DollarSign className="w-4 h-4 text-accent" />
+                  <Euro className="w-4 h-4 text-accent" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Payout reports</h3>
@@ -95,10 +106,10 @@ export function DashboardPreviewSection() {
                 <div className="bg-background rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="w-8 h-8 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <DollarSign className="w-4 h-4 text-accent" />
+                      <Euro className="w-4 h-4 text-accent" />
                     </div>
                   </div>
-                  <p className="text-2xl font-bold text-foreground">$14,520</p>
+                  <p className="text-2xl font-bold text-foreground">€14,520</p>
                   <p className="text-xs text-muted-foreground">Total Tips</p>
                 </div>
                 <div className="bg-background rounded-xl p-4">
@@ -112,29 +123,17 @@ export function DashboardPreviewSection() {
                 </div>
               </div>
 
-              {/* Chart Placeholder */}
-              <div className="bg-background rounded-xl p-4">
-                <div className="h-32 flex items-end gap-2">
-                  {[40, 65, 50, 80, 70, 90, 75].map((height, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ height: 0 }}
-                      whileInView={{ height: `${height}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: i * 0.1 }}
-                      className="flex-1 bg-gradient-to-t from-accent to-primary rounded-t-lg"
-                    ></motion.div>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-2 text-xs text-muted-foreground">
-                  <span>Mon</span>
-                  <span>Tue</span>
-                  <span>Wed</span>
-                  <span>Thu</span>
-                  <span>Fri</span>
-                  <span>Sat</span>
-                  <span>Sun</span>
-                </div>
+              {/* Tips trend (animated card chart) */}
+              <div className="rounded-xl bg-background p-4">
+                <AnimatedCard className="mx-auto w-full max-w-none">
+                  <CardVisual className="h-[230px] w-full">
+                    <Visual3 mainColor="#EB992C" secondaryColor="#F97316" gridColor="#00000010" />
+                  </CardVisual>
+                  <CardBody className="absolute inset-x-0 bottom-0 border-t-0 bg-[#FAFAFA]/85 backdrop-blur-md">
+                    <CardTitle id="card-title">Tips trend</CardTitle>
+                    <CardDescription id="card-description">Live activity preview (this week)</CardDescription>
+                  </CardBody>
+                </AnimatedCard>
               </div>
             </LandingBorderedCard>
           </motion.div>
@@ -150,10 +149,10 @@ export function DashboardPreviewSection() {
             transition={{ duration: 0.7 }}
             className="relative order-2 lg:order-1"
           >
-            <div className="rounded-2xl bg-gradient-to-br from-primary to-accent p-6 shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary to-accent p-1.5 shadow-[0_8px_30px_rgba(235,153,44,0.15)]">
               <LandingBorderedCard
                 beamDelay={4}
-                cardClassName="space-y-6 rounded-xl border-0 bg-white p-6"
+                cardClassName="space-y-6 rounded-xl border-0 p-3 shadow-[0_2px_8px_rgba(0,0,0,0.03)] sm:p-4"
               >
                 {/* Profile Header */}
                 <div className="flex items-center gap-4">
@@ -168,7 +167,7 @@ export function DashboardPreviewSection() {
                 <div className="bg-gradient-to-br from-accent/10 to-primary/10 rounded-xl p-6">
                   <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">Preview</p>
                   <p className="text-sm text-muted-foreground mb-2">Today's Earnings</p>
-                  <p className="text-4xl font-bold text-foreground mb-1">$0.00</p>
+                  <p className="text-4xl font-bold text-foreground mb-1">€0.00</p>
                   <div className="flex items-center gap-1 text-muted-foreground text-sm">
                     <span>No activity yet</span>
                   </div>
@@ -218,7 +217,7 @@ export function DashboardPreviewSection() {
             <div className="space-y-4">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0 mt-1">
-                  <DollarSign className="w-4 h-4 text-primary" />
+                  <Euro className="w-4 h-4 text-primary" />
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-1">Live earnings</h3>
