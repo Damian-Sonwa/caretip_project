@@ -1,15 +1,15 @@
 import { motion } from "motion/react";
 import { Scan, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
+import newly01Img from "../../../../images/newly01.png";
 
 /** Unsplash: people at a table paying with phone / card (original left-panel image) */
-const IMG_PEOPLE_PAYMENT =
-  "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1400&auto=format&fit=crop&q=80";
+const IMG_PEOPLE_PAYMENT = newly01Img;
 
 function InstantTipSplitIllustration() {
   return (
     <div
-      className="relative w-full overflow-hidden rounded-xl border border-primary/15 bg-muted/30 shadow-inner aspect-[16/10] min-h-[200px] sm:min-h-[240px] sm:aspect-[16/9]"
+      className="relative w-full overflow-hidden rounded-2xl border border-border/30 bg-gray-50 aspect-square min-h-[180px] sm:min-h-[220px]"
       role="img"
       aria-label="People at a table completing a mobile payment"
     >

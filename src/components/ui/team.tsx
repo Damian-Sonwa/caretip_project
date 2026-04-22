@@ -1,11 +1,21 @@
 import * as React from "react";
-import { Building2, Coffee, Hotel, Martini, Scissors, UtensilsCrossed } from "lucide-react";
+import {
+  Building2,
+  Coffee,
+  Hotel,
+  Martini,
+  PartyPopper,
+  Scissors,
+  Truck,
+  UtensilsCrossed,
+} from "lucide-react";
 
 import { Marquee } from "@/components/ui/marquee";
 
 import hotelsImg from "../../../images/Hotels.png";
 import barLoungeImg from "../../../images/bar and lounge.png";
 import salonSpaImg from "../../../images/salon and spa.png";
+import beachClubImg from "../../../images/Beach_club.png";
 
 type HospitalityBusiness = {
   image: string;
@@ -36,16 +46,57 @@ const businesses: HospitalityBusiness[] = [
     Icon: Martini,
   },
   {
+    image:
+      "https://images.stockcake.com/public/1/6/d/16ddd8d6-02f0-4219-ac7d-82ffb23be7ad/dj-at-club-stockcake.jpg",
+    name: "Nightclubs",
+    role: "Late-night tipping • fast checkout • live activity",
+    Icon: PartyPopper,
+  },
+  {
     image: hotelsImg,
     name: "Hotels",
     role: "Front desk & concierge • room service • track performance",
     Icon: Hotel,
   },
   {
+    image:
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
+    name: "Resorts",
+    role: "Multiple venues • staff mapping • simple reporting",
+    Icon: Hotel,
+  },
+  {
+    image: beachClubImg,
+    name: "Beach clubs",
+    role: "Outdoor QR tipping • fast service • happy guests",
+    Icon: Martini,
+  },
+  {
     image: salonSpaImg,
     name: "Salons & Spas",
     role: "Personal QR • service-based tipping • staff profiles",
     Icon: Scissors,
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80",
+    name: "Barbershops",
+    role: "Personal QR • repeat clients • staff profiles",
+    Icon: Scissors,
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=1200&q=80",
+    name: "Food trucks",
+    role: "Counter QR • quick tips • no extra hardware",
+    Icon: Truck,
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
+    name: "Event centers",
+    role: "Pop-up QR codes • staff routing • clear earnings",
+    Icon: PartyPopper,
   },
   {
     image:

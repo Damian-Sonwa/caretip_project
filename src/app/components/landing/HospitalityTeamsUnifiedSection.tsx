@@ -55,10 +55,13 @@ export function HospitalityTeamsUnifiedSection() {
           </motion.div>
         </div>
 
-        <div className="grid w-full min-w-0 gap-10 lg:grid-cols-2 lg:items-stretch lg:gap-14">
+        <div className="grid w-full min-w-0 gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-14">
           {/* Mobile: images first */}
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard showBeam={false} cardClassName="p-0 shadow-xl">
+              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-lg border border-gray-200 bg-white/85 px-3 py-2 text-sm font-semibold text-foreground backdrop-blur-sm">
+                Where CareTip Works
+              </div>
               <HospitalityBusinessesMarquee />
             </LandingBorderedCard>
           </div>

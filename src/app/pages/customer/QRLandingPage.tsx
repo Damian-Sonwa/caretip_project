@@ -21,6 +21,7 @@ import { resolveMediaUrl } from "../../lib/mediaUrl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 
 const BRAND_ORANGE = "#EB992C";
 const presetAmounts = [5, 10, 15, 20];
@@ -54,6 +55,13 @@ export function QRLandingPage() {
   const [poolEmployees, setPoolEmployees] = useState<BusinessDirectoryEmployee[] | null>(null);
   const [poolLoading, setPoolLoading] = useState(false);
   const [poolQuery, setPoolQuery] = useState("");
+
+  const [repeatCard, setRepeatCard] = useState<{
+    employee: EmployeeDetail;
+    amount: number;
+    timestamp: number;
+  } | null>(null);
+  const [repeatDismissed, setRepeatDismissed] = useState(false);
 
   useEffect(() => {
     if (!businessId && !employeeIdParam && !qrSlug) {
@@ -156,6 +164,37 @@ export function QRLandingPage() {
       cancelled = true;
     };
   }, [businessData?.slug, selectedEmployee]);
+
+  // Repeat tip: check local last-tip data for this business and validate employee still exists.
+  useEffect(() => {
+    if (!businessData?.id || selectedEmployee || employeeIdParam) {
+      setRepeatCard(null);
+      return;
+    }
+    if (repeatDismissed) return;
+    const d = getRepeatTipDataForBusiness(businessData.id);
+    if (!d) {
+      setRepeatCard(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const emp = await getEmployeeById(d.employeeId);
+        if (cancelled) return;
+        if (!emp || emp.businessId !== businessData.id) {
+          setRepeatCard(null);
+          return;
+        }
+        setRepeatCard({ employee: emp, amount: d.lastAmount, timestamp: d.timestamp });
+      } catch (e) {
+        if (!cancelled) setRepeatCard(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [businessData?.id, selectedEmployee, employeeIdParam, repeatDismissed]);
 
   const filteredPool = useMemo(() => {
     const list = poolEmployees ?? [];
@@ -524,6 +563,64 @@ export function QRLandingPage() {
           <p className="text-center text-sm text-muted-foreground/80 px-2">
             🏠 You are at <span className="font-semibold text-foreground">{tippingLocationName}</span>, <span className="font-semibold text-foreground">{tippingTableName}</span>.
           </p>
+        ) : null}
+
+        {repeatCard ? (
+          <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <Card className="border border-border/40 shadow-md">
+              <CardContent className="p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Welcome back</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Tip{" "}
+                      <span className="font-semibold text-foreground">
+                        {repeatCard.employee.name ?? "Team Member"}
+                      </span>{" "}
+                      again?
+                    </p>
+                    <p className="mt-2 text-xs font-semibold text-orange-700">
+                      Last tip: €{repeatCard.amount.toFixed(2)}
+                    </p>
+                  </div>
+                  <ProfileAvatar
+                    src={repeatCard.employee.avatar}
+                    displayName={repeatCard.employee.name ?? "Team Member"}
+                    className="h-12 w-12 shrink-0 ring-2 ring-orange-200/50"
+                  />
+                </div>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBusinessId(businessData.id);
+                      setEmployee(
+                        repeatCard.employee.id,
+                        repeatCard.employee.name ?? "Team Member",
+                        repeatCard.employee.avatar ?? undefined,
+                      );
+                      setAmount(repeatCard.amount);
+                      markCustomerFlowEntered();
+                      navigate("/payment");
+                    }}
+                    className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95"
+                  >
+                    Tip again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRepeatDismissed(true);
+                      setRepeatCard(null);
+                    }}
+                    className="w-full rounded-2xl border border-border/50 bg-card/60 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-card"
+                  >
+                    Choose different staff
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         ) : null}
 
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>

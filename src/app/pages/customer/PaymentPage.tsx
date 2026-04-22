@@ -7,6 +7,7 @@ import { useTipFlow } from "../../context/TipFlowContext";
 import { createTipCheckoutSession, getEmployeeById } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
+import { setPendingTipFromCheckout } from "../../lib/repeatTip";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CareTipLogo } from "../../components/CareTipLogo";
@@ -153,7 +154,7 @@ export function PaymentPage() {
 
     setProcessing(true);
     try {
-      const { url } = await createTipCheckoutSession({
+      const { sessionId, url } = await createTipCheckoutSession({
         amount: totalAmount,
         employeeId,
         businessId,
@@ -166,6 +167,14 @@ export function PaymentPage() {
         setProcessing(false);
         return;
       }
+      // Store "pending repeat tip" data now; we only promote it after success verification.
+      setPendingTipFromCheckout({
+        sessionId,
+        businessId,
+        employeeId,
+        employeeName: employeeName ?? null,
+        amount: tipAmountVal,
+      });
       window.location.href = url;
     } catch (err) {
       logClientError("PaymentPage.checkout", err);

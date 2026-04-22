@@ -167,7 +167,7 @@ export function FeatureShowcase({
         <div className="relative min-h-0 md:col-span-6 flex items-center justify-center">
           {heroBorderBeam ? (
             <div className="relative inline-block">
-              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-gray-50 shadow-xl">
+              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-xl">
                 <BorderBeam
                   size={260}
                   duration={14}
@@ -176,7 +176,7 @@ export function FeatureShowcase({
                   colorTo="#000000"
                   delay={1}
                 />
-                <div className="relative z-[1] bg-gray-50/80 p-2 sm:p-3">
+                <div className="relative z-[1] bg-card p-2 sm:p-3">
                   {useAnimatedHero ? (
                     <CareTipHeroAnimation />
                   ) : singleHeroImage ? (
