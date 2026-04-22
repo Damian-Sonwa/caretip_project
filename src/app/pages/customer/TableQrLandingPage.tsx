@@ -14,6 +14,8 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipLogo } from "../../components/CareTipLogo";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
+import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 
 /**
  * /qr/table/:tableId — Table QR by id: venue + table context, then same team selection as directory.
@@ -21,11 +23,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 export function TableQrLandingPage() {
   const navigate = useNavigate();
   const { tableId } = useParams<{ tableId: string }>();
-  const { setBusinessId, setEmployee, setStaffProfileSlug, setTippingVenue } = useTipFlow();
+  const { setBusinessId, setEmployee, setStaffProfileSlug, setTippingVenue, setAmount } = useTipFlow();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<PublicTableContextResponse | null>(null);
   const [query, setQuery] = useState("");
+  const [repeatDismissed, setRepeatDismissed] = useState(false);
 
   useEffect(() => {
     const raw = tableId?.trim();
@@ -89,6 +92,15 @@ export function TableQrLandingPage() {
     navigate(`/tip-amount?${qs.toString()}`);
   };
 
+  const repeatCandidate = useMemo(() => {
+    if (!data?.business?.id || repeatDismissed) return null;
+    const d = getRepeatTipDataForBusiness(data.business.id);
+    if (!d) return null;
+    const emp = (data.employees ?? []).find((e) => e.id === d.employeeId) ?? null;
+    if (!emp) return null;
+    return { emp, amount: d.lastAmount };
+  }, [data?.business?.id, data?.employees, repeatDismissed]);
+
   if (loading) {
     return <CareTipPageLoader variant="wait" message="Loading table…" />;
   }
@@ -135,6 +147,62 @@ export function TableQrLandingPage() {
       </div>
 
       <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
+        {repeatCandidate ? (
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <Card className="border border-border shadow-sm">
+              <CardContent className="p-5">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-foreground">Welcome back</p>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Tip{" "}
+                      <span className="font-semibold text-foreground">
+                        {repeatCandidate.emp.name ?? "Team Member"}
+                      </span>{" "}
+                      again?
+                    </p>
+                    <p className="mt-2 text-xs font-semibold text-orange-700">
+                      Last tip: €{repeatCandidate.amount.toFixed(2)}
+                    </p>
+                  </div>
+                  <ProfileAvatar
+                    src={repeatCandidate.emp.avatar}
+                    displayName={repeatCandidate.emp.name ?? "Team Member"}
+                    className="h-12 w-12 shrink-0 ring-2 ring-primary/20"
+                  />
+                </div>
+                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBusinessId(data.business.id);
+                      setEmployee(
+                        repeatCandidate.emp.id,
+                        repeatCandidate.emp.name ?? "Team Member",
+                        repeatCandidate.emp.avatar ?? undefined,
+                      );
+                      setStaffProfileSlug(repeatCandidate.emp.slug);
+                      setAmount(repeatCandidate.amount);
+                      markCustomerFlowEntered();
+                      navigate("/payment");
+                    }}
+                    className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+                  >
+                    Tip again
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRepeatDismissed(true)}
+                    className="w-full rounded-xl border border-border bg-background py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                  >
+                    Choose different staff
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : null}
+
         <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-2">

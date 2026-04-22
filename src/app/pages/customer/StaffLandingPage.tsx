@@ -7,6 +7,8 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
+import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
+import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 
 const BRAND_ORANGE = "#EB992C";
 const BLACK = "#000000";
@@ -21,10 +23,12 @@ export function StaffLandingPage() {
   const [searchParams] = useSearchParams();
   const previewProfile = searchParams.get("preview") === "1";
   const { slug: slugParam } = useParams<{ slug: string }>();
-  const { setBusinessId, setEmployee, setStaffProfileSlug } = useTipFlow();
+  const { setBusinessId, setEmployee, setStaffProfileSlug, setAmount } = useTipFlow();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [staff, setStaff] = useState<StaffBySlugResponse | null>(null);
+  const [showRepeatPrompt, setShowRepeatPrompt] = useState(false);
+  const [repeatAmount, setRepeatAmount] = useState<number | null>(null);
 
   useEffect(() => {
     if (!slugParam?.trim()) {
@@ -44,6 +48,13 @@ export function StaffLandingPage() {
         setEmployee(data.id, data.name, data.avatar ?? undefined);
         setStaffProfileSlug(slug);
         if (!previewProfile) {
+          const d = getRepeatTipDataForBusiness(data.businessId);
+          if (d && d.employeeId === data.id) {
+            setRepeatAmount(d.lastAmount);
+            setShowRepeatPrompt(true);
+            setStaff(data);
+            return;
+          }
           navigate(
             `/tip-amount?employeeId=${encodeURIComponent(data.id)}&returnSlug=${encodeURIComponent(slug)}&direct=1`,
             { replace: true }
@@ -78,6 +89,16 @@ export function StaffLandingPage() {
     navigate(
       `/tip-amount?employeeId=${encodeURIComponent(staff.id)}&returnSlug=${encodeURIComponent(slugParam.trim())}&direct=1`
     );
+  };
+
+  const handleRepeatTip = () => {
+    if (!staff || repeatAmount == null || !slugParam?.trim()) return;
+    setBusinessId(staff.businessId);
+    setEmployee(staff.id, staff.name, staff.avatar ?? undefined);
+    setStaffProfileSlug(slugParam.trim());
+    setAmount(repeatAmount);
+    markCustomerFlowEntered();
+    navigate("/payment");
   };
 
   if (loading) {
@@ -160,14 +181,34 @@ export function StaffLandingPage() {
             </div>
           ) : null}
 
-          <button
-            type="button"
-            onClick={handleLeaveTip}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
-          >
-            <Heart className="w-5 h-5" />
-            Leave a tip
-          </button>
+          {showRepeatPrompt && repeatAmount ? (
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleRepeatTip}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
+              >
+                <Heart className="w-5 h-5" />
+                Tip again (€{repeatAmount.toFixed(2)})
+              </button>
+              <button
+                type="button"
+                onClick={handleLeaveTip}
+                className="w-full rounded-xl border border-border bg-background py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+              >
+                Choose different amount
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleLeaveTip}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
+            >
+              <Heart className="w-5 h-5" />
+              Leave a tip
+            </button>
+          )}
         </div>
       </div>
     </div>

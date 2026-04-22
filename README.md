@@ -33,6 +33,25 @@ CareTip is a **PERN** platform (**PostgreSQL**, **Express**, **React**, **Node.j
 - **Staff slugs:** Each team member can have a public **`/staff/[slug]`** (or equivalent app routes) for tipping.
 - **Business flows:** Venue/table QR paths route guests through **select staff → amount → payment** where the product supports it.
 
+### Repeat tipping (returning guests — no login)
+
+CareTip supports a lightweight **repeat tip** experience for returning guests without accounts:
+
+- **No auth required**: uses a client-side `tipSessionId` (stored locally) to recognize a returning guest.
+- **Stores last successful tip**: after Stripe success verification, the app stores the last tipped staff member and amount.
+- **Welcome-back UI on business QR landing**: when a guest opens the same business QR landing page again, they’ll see:
+  - “Welcome back”
+  - the last tipped employee + amount
+  - a **“Tip again”** button that jumps straight into the existing payment flow
+  - a **“Choose different staff”** option to continue normally
+- **Safe fallback**: if the employee no longer exists or isn’t valid for that business, repeat tip is ignored and the normal QR flow shows.
+
+Implementation is **frontend-only** (no schema changes, no changes to Stripe/auth flows). Local storage keys:
+
+- `caretip_tipSessionId`
+- `caretip_repeatTipData`
+- `caretip_pendingTipData` (temporary; promoted on verified success)
+
 ### Real-time feedback
 
 - **Socket.io** complements REST so clients can receive events such as new tips without constant polling.

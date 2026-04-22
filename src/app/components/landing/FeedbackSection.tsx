@@ -4,7 +4,7 @@ import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 
 export function FeedbackSection() {
   return (
-    <section className="bg-white px-6 py-24 sm:py-32">
+    <section className="bg-gray-50 px-6 py-24 sm:py-32">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Content */}
