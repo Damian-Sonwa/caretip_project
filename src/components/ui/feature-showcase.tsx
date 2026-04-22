@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 import { FeatureCarousel } from "@/components/ui/feature-carousel";
 import { CareTipHeroAnimation } from "@/components/ui/caretip-hero-animation";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 
 export type TabMedia = {
   value: string;
@@ -178,16 +179,19 @@ export function FeatureShowcase({
                 />
                 <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
-                    <CareTipHeroAnimation />
+                    <LandingImageFrame className="w-full max-w-[480px]">
+                      <CareTipHeroAnimation />
+                    </LandingImageFrame>
                   ) : singleHeroImage ? (
-                    <img
-                      src={singleHeroImage.src}
-                      alt={singleHeroImage.alt}
-                      className="block w-[320px] rounded-xl object-cover object-[60%_center] shadow-sm ring-1 ring-black/5 sm:w-[400px] sm:rounded-2xl md:w-[480px]"
-                      style={{ aspectRatio: "2 / 3" }}
-                      loading="eager"
-                      decoding="async"
-                    />
+                    <LandingImageFrame className="w-full max-w-[480px]">
+                      <img
+                        src={singleHeroImage.src}
+                        alt={singleHeroImage.alt}
+                        className="block aspect-[2/3] w-full object-cover object-[60%_center]"
+                        loading="eager"
+                        decoding="async"
+                      />
+                    </LandingImageFrame>
                   ) : (
                     <div className="w-[320px] sm:w-[400px] md:w-[480px]">
                       <FeatureCarousel images={carouselImages} />
@@ -197,26 +201,27 @@ export function FeatureShowcase({
               </div>
             </div>
           ) : (
-            <div
-              className="overflow-hidden rounded-xl border border-border/80 bg-white p-0 shadow-sm sm:rounded-2xl"
-              style={{ maxWidth: "480px", width: "100%" }}
-            >
+            <>
               {useAnimatedHero ? (
-                <CareTipHeroAnimation />
+                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
+                  <CareTipHeroAnimation />
+                </LandingImageFrame>
               ) : singleHeroImage ? (
-                <div className="w-full bg-white p-2 sm:p-3">
+                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
                   <img
                     src={singleHeroImage.src}
                     alt={singleHeroImage.alt}
-                    className="block aspect-[2/3] w-full rounded-xl object-cover object-[60%_center] sm:rounded-2xl"
+                    className="block aspect-[2/3] w-full object-cover object-[60%_center]"
                     loading="eager"
                     decoding="async"
                   />
-                </div>
+                </LandingImageFrame>
               ) : (
-                <FeatureCarousel images={carouselImages} />
+                <div className="w-full" style={{ maxWidth: "480px" }}>
+                  <FeatureCarousel images={carouselImages} />
+                </div>
               )}
-            </div>
+            </>
           )}
         </div>
       </div>

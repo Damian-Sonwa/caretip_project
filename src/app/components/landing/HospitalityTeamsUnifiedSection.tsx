@@ -36,7 +36,7 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="business-section"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-transparent px-4 py-20 sm:px-6 sm:py-24"
+      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gradient-to-b from-[rgba(196,69,54,0.05)] via-[rgba(196,69,54,0.08)] to-transparent px-4 py-24 sm:px-6 sm:py-28"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
         <div className="mb-10 w-full max-w-full space-y-4 text-center sm:mb-14">

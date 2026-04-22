@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Scan, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
+import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import newly01Img from "../../../../images/newly01.png";
 
 /** Unsplash: people at a table paying with phone / card (original left-panel image) */
@@ -8,8 +9,8 @@ const IMG_PEOPLE_PAYMENT = newly01Img;
 
 function InstantTipSplitIllustration() {
   return (
-    <div
-      className="relative w-full overflow-hidden rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_2px_8px_rgba(0,0,0,0.03)] aspect-square min-h-[180px] sm:min-h-[220px]"
+    <LandingImageFrame
+      className="relative w-full bg-[#FAFAFA] aspect-square min-h-[180px] sm:min-h-[220px]"
       role="img"
       aria-label="People at a table completing a mobile payment"
     >
@@ -32,7 +33,7 @@ function InstantTipSplitIllustration() {
           <p className="text-xs font-semibold leading-tight text-foreground sm:text-sm">New tip received</p>
         </div>
       </div>
-    </div>
+    </LandingImageFrame>
   );
 }
 

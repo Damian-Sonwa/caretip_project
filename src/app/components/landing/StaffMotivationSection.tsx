@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Target, Trophy, Star, Award } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
+import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import employeeMotivation from "../../../../images/employee.png";
 
 export function StaffMotivationSection() {
@@ -45,8 +46,7 @@ export function StaffMotivationSection() {
             {/* Landscape only: height comes from width x aspect; no min-h so the box never goes portrait in a narrow column */}
             <div className="relative overflow-hidden rounded-2xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_8px_30px_rgba(0,0,0,0.06)]">
               <LandingBorderedCard cardClassName="min-w-0 max-w-full overflow-hidden rounded-xl border-0 p-3 shadow-none">
-                {/* Same inset as One scan / Instant tip: p-3 on card, image flush to inner rounded frame */}
-                <div className="relative aspect-[5/4] w-full overflow-hidden rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] shadow-[0_2px_8px_rgba(0,0,0,0.03)] sm:aspect-[4/3]">
+                <LandingImageFrame className="relative aspect-[5/4] w-full bg-[#FAFAFA] sm:aspect-[4/3]">
                   <img
                     src={employeeMotivation}
                     alt="Team member, motivated staff with CareTip"
@@ -71,7 +71,7 @@ export function StaffMotivationSection() {
                       </div>
                     </div>
                   </motion.div>
-                </div>
+                </LandingImageFrame>
               </LandingBorderedCard>
             </div>
           </motion.div>

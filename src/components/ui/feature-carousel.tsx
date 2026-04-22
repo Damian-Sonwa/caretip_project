@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { landingImageFrameClassName } from "@/components/ui/landing-image-frame";
 
 export type FeatureCarouselImage = {
   src: string;
@@ -163,7 +164,10 @@ export function FeatureCarousel({
             return (
               <div
                 key={`${image.src}-${index}`}
-                className="absolute flex overflow-hidden rounded-xl bg-muted/15 transition-[transform,opacity,filter,width,height] duration-500 ease-in-out sm:rounded-2xl"
+                className={cn(
+                  landingImageFrameClassName,
+                  "absolute flex bg-neutral-100 transition-[transform,opacity,filter,width,height] duration-500 ease-in-out",
+                )}
                 style={{
                   width: size.w,
                   height: size.h,
@@ -185,7 +189,7 @@ export function FeatureCarousel({
                 <img
                   src={image.src}
                   alt={image.alt}
-                  className="block h-full w-full rounded-xl border border-primary/10 object-cover object-center shadow-md ring-1 ring-black/5 sm:rounded-2xl sm:border sm:shadow-lg"
+                  className="block h-full w-full object-cover object-center"
                   style={image.objectPosition ? { objectPosition: image.objectPosition } : undefined}
                 />
               </div>

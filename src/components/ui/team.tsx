@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 
 import { Marquee } from "@/components/ui/marquee";
+import { cn } from "@/lib/utils";
+import { landingImageFrameClassName } from "@/components/ui/landing-image-frame";
 
 import hotelsImg from "../../../images/Hotels.png";
 import barLoungeImg from "../../../images/bar and lounge.png";
@@ -122,7 +124,12 @@ export default function Component() {
                 key={b.name}
                 tabIndex={0}
               >
-                <div className="relative h-[26rem] w-full overflow-hidden rounded-2xl bg-neutral-100 sm:h-[28rem]">
+                <div
+                  className={cn(
+                    landingImageFrameClassName,
+                    "relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]",
+                  )}
+                >
                   <img
                     alt={b.name}
                     className="h-full w-full cursor-pointer object-cover transition-transform duration-300 group-hover:scale-[1.01] group-active:scale-[0.99]"
