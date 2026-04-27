@@ -77,7 +77,7 @@ export function AuthSwitch({
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.45 }}
-          className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-6 shadow-2xl sm:p-8">
+          className="w-full max-w-md rounded-3xl border border-border/60 bg-card p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-8">
           <div className="mb-6 flex h-16 w-full justify-center overflow-visible px-2">
             <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
           </div>

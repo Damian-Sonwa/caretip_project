@@ -52,7 +52,7 @@ export const CARD_ELEVATION_BASE = 'rounded-2xl border border-gray-200 shadow-sm
  * CTA button utility class
  * Premium-styled call-to-action buttons
  */
-export const CTA_BUTTON_BASE = 'inline-flex items-center gap-2 rounded-xl font-semibold shadow-lg transition-all hover:shadow-xl active:scale-[0.98]';
+export const CTA_BUTTON_BASE = 'inline-flex items-center gap-2 rounded-xl font-semibold shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-all hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:scale-[0.98]';
 
 export default {
   OFFWHITE_COLORS,

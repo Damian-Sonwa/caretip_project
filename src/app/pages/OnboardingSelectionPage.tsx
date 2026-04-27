@@ -90,7 +90,7 @@ export function OnboardingSelectionPage() {
               variants={itemVariants}
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
               whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-xl transition-all duration-300 p-8 text-left"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 p-8 text-left"
               style={{ boxShadow: SHADOWS.SOFT }}
             >
               {/* Premium gradient background overlay */}
@@ -103,7 +103,7 @@ export function OnboardingSelectionPage() {
               <div className="relative z-10">
                 {/* 3D Icon Container */}
                 <motion.div 
-                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-lg border border-orange-200/50"
+                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-md border border-orange-200/50"
                   style={{ boxShadow: SHADOWS.MEDIUM }}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
@@ -148,7 +148,7 @@ export function OnboardingSelectionPage() {
               variants={itemVariants}
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
               whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-xl transition-all duration-300 p-8 text-left"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 p-8 text-left"
               style={{ boxShadow: SHADOWS.SOFT }}
             >
               {/* Premium gradient background overlay */}
@@ -161,7 +161,7 @@ export function OnboardingSelectionPage() {
               <div className="relative z-10">
                 {/* 3D Icon Container */}
                 <motion.div 
-                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-lg border border-orange-200/50"
+                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-md border border-orange-200/50"
                   style={{ boxShadow: SHADOWS.MEDIUM }}
                   whileHover={{ scale: 1.1, rotate: -5 }}
                 >

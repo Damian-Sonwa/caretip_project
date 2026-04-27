@@ -1,8 +1,8 @@
 import React from "react";
 import { Smartphone } from "lucide-react";
+import heroTapToTip from "../../../images/caretip-image.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
-import heroTapToTip from "../../../images/caretip-image.png";
 import { QRTippingSection } from "../components/landing/QRTippingSection";
 import { StaffMotivationSection } from "../components/landing/StaffMotivationSection";
 import { DashboardPreviewSection } from "../components/landing/DashboardPreviewSection";
@@ -31,39 +31,40 @@ export function LandingPage() {
           <Navigation />
         </div>
         <main className="overflow-x-hidden">
-            <FeatureShowcase
-              id="about-section"
-              className="font-sans"
-              eyebrow="CareTip"
-              title="Tip in seconds with a simple QR scan."
-              description="Guests pay from their phone. You see payouts and team performance in one place."
-              stats={["No setup fees", "Fast payouts", "Secure payments"]}
-              steps={[
-                {
-                  id: "s1",
-                  title: "Guests scan your QR",
-                  text: "Table tents or badges. No guest app required.",
-                },
-                {
-                  id: "s2",
-                  title: "You control routing",
-                  text: "Pool by shift or tip individuals. Your rules.",
-                },
-                {
-                  id: "s3",
-                  title: "Clear payout visibility",
-                  text: "Digital records your team can trust.",
-                },
-              ]}
-              tabs={SHOWCASE_TABS}
-              defaultTab="contactless"
-              primaryCtaLabel="GET STARTED FREE"
-              primaryCtaTo="/onboarding"
-              secondaryCtaLabel="How it works"
-              secondaryCtaTo="/how-it-works"
-              useAnimatedHero={false}
-              heroBorderBeam={false}
-            />
+          <FeatureShowcase
+            id="about-section"
+            className="font-sans"
+            eyebrow="CareTip"
+            title="Tip in seconds with a simple QR scan."
+            description="Guests pay from their phone. You see payouts and team performance in one place."
+            stats={["No setup fees", "Fast payouts", "Secure payments"]}
+            steps={[
+              {
+                id: "s1",
+                title: "Guests scan your QR",
+                text: "Table tents or badges. No guest app required.",
+              },
+              {
+                id: "s2",
+                title: "You control routing",
+                text: "Pool by shift or tip individuals. Your rules.",
+              },
+              {
+                id: "s3",
+                title: "Clear payout visibility",
+                text: "Digital records your team can trust.",
+              },
+            ]}
+            tabs={SHOWCASE_TABS}
+            defaultTab="contactless"
+            primaryCtaLabel="GET STARTED FREE"
+            primaryCtaTo="/onboarding"
+            secondaryCtaLabel="How it works"
+            secondaryCtaTo="/how-it-works"
+            variant="cinematic"
+            useAnimatedHero={false}
+            heroBorderBeam={false}
+          />
           <HospitalityTeamsUnifiedSection />
           <div id="features" className="scroll-mt-[80px]">
             <QRTippingSection />

@@ -81,19 +81,19 @@ export const ICON_CONTAINER_PREMIUM = "inline-flex items-center justify-center r
 export const ICON_CONTAINER_DARK = "inline-flex items-center justify-center rounded-xl bg-gray-900/10 p-3 shadow-sm group-hover:shadow-md transition-all duration-300";
 
 /** CTA Button base - premium with hover effects */
-export const CTA_BUTTON_PREMIUM = "inline-flex items-center gap-2 rounded-xl font-semibold px-6 py-3 shadow-lg hover:shadow-xl active:scale-95 transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700";
+export const CTA_BUTTON_PREMIUM = "inline-flex items-center gap-2 rounded-xl font-semibold px-6 py-3 shadow-[0_8px_22px_rgba(235,153,44,0.28)] hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:scale-95 transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700";
 
 /** Badge - premium styled with subtle gradient */
 export const BADGE_PREMIUM = "inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 text-sm font-medium border border-orange-200/50";
 
 /** Banner/Hero section base */
-export const BANNER_PREMIUM = "rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 border border-white/50";
+export const BANNER_PREMIUM = "rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-white/50";
 
 /** Dashboard panel - premium with subtle gradient */
 export const DASHBOARD_PANEL = "rounded-2xl border border-gray-200/50 shadow-sm bg-gradient-to-br from-white via-gray-50/50 to-white p-6 hover:shadow-md transition-all duration-300";
 
 /** Elevated card stack effect */
-export const CARD_STACK = "relative rounded-2xl border border-gray-200/50 shadow-md hover:shadow-lg transition-all duration-300";
+export const CARD_STACK = "relative rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300";
 
 // ============================================
 // COMPOSITE STYLES (Multi-element)
@@ -122,7 +122,7 @@ export const _3D_STYLES = {
   perspective: "perspective-1000",
   
   /** Dimensional card effect */
-  dimensional: "rounded-2xl shadow-lg border-t border-white/50 hover:shadow-xl transition-all",
+  dimensional: "rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.06)] border-t border-white/50 hover:shadow-[0_14px_36px_rgba(0,0,0,0.08)] transition-all",
   
   /** Icon rotation on hover */
   iconHoverRotate: "transition-transform duration-300 group-hover:rotate-3",

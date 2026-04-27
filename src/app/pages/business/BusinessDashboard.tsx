@@ -47,9 +47,9 @@ import {
 } from "recharts";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashPanel, dashStatCard, DASH_ICON_WRAP } from "@/components/ui/dashboard-styles";
 import {
   devMockBusinessEmployeePerformance,
   devMockBusinessTipDistribution,
@@ -57,7 +57,7 @@ import {
 
 import businessDashboardHeroImg from "../../../../images/newly01 (2).png";
 
-const CHART_COLORS = ["#e9932f", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
+const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
 
 const BUSINESS_HERO_HEADLINE = "Your Team's Performance at a Glance";
 const BUSINESS_HERO_SUB =
@@ -422,7 +422,7 @@ export function BusinessDashboard() {
 
           <div className="flex flex-wrap items-center gap-3">
             <LiveConnectionBadge status={connectionStatus} />
-          <div className="flex w-full max-w-full flex-wrap gap-2 rounded-lg border-2 border-border bg-card p-1 sm:w-fit">
+          <div className="flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
             {(["week", "month", "year"] as const).map((period) => (
               <button
                 key={period}
@@ -448,14 +448,13 @@ export function BusinessDashboard() {
               animate={{ y: 0, opacity: 1 }}
               className="relative md:col-span-2 lg:col-span-2"
             >
-              <Card className="relative h-full overflow-hidden border-2 border-border bg-primary text-primary-foreground shadow-sm">
-                <BorderBeam size={240} duration={17} colorFrom="#000000" colorTo="#e9932f" />
+              <Card className={dashStatCard("relative h-full overflow-hidden")}>
                 <CardHeader>
                   <div className="mb-2 flex items-start justify-between">
-                    <div className="rounded-lg border border-black/10 bg-black/10 p-3">
+                    <div className={DASH_ICON_WRAP}>
                       <DollarSign className="h-6 w-6" />
                     </div>
-                    <span className="rounded-full bg-black/10 px-2 py-1 text-xs font-medium">
+                    <span className="rounded-full border border-black/[0.06] bg-white px-2 py-1 text-xs font-medium text-foreground">
                       {timeframe === "week"
                         ? "Week"
                         : timeframe === "month"
@@ -463,15 +462,15 @@ export function BusinessDashboard() {
                           : "Year"}
                     </span>
                   </div>
-                  <CardTitle className="text-3xl font-bold tabular-nums text-primary-foreground">
+                  <CardTitle className="text-3xl font-bold tabular-nums text-foreground">
                     ${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
                   </CardTitle>
-                  <CardDescription className="text-primary-foreground/80">
+                  <CardDescription className="text-muted-foreground">
                     Total tips ({timeframe === "week" ? "this week" : timeframe === "month" ? "this month" : "this year"} view)
                   </CardDescription>
                   {(stats?.totalTips ?? 0) > 0 && (
-                    <div className="mt-3 flex items-center gap-1 text-sm">
-                      <TrendingUp className="h-4 w-4" />
+                    <div className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
+                      <TrendingUp className="h-4 w-4 text-primary" />
                       <span>Keep QR links fresh so guests can tip easily.</span>
                     </div>
                   )}
@@ -484,7 +483,7 @@ export function BusinessDashboard() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.1 }}
             >
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <Users className="h-6 w-6 text-foreground" />
@@ -507,7 +506,7 @@ export function BusinessDashboard() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <Star className="h-6 w-6 text-foreground" />
@@ -537,7 +536,7 @@ export function BusinessDashboard() {
               transition={{ delay: 0.3 }}
               className="md:col-span-2 lg:col-span-1"
             >
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <TrendingUp className="h-6 w-6 text-foreground" />
@@ -560,7 +559,7 @@ export function BusinessDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.35 }}
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <div className="flex items-start gap-3">
                   <div className="rounded-lg border border-border bg-muted p-2">
@@ -626,7 +625,7 @@ export function BusinessDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <CardTitle className="text-lg">Daily tip distribution</CardTitle>
                 <CardDescription>
@@ -653,7 +652,7 @@ export function BusinessDashboard() {
                           color: "#000000",
                         }}
                       />
-                      <Bar dataKey="amount" fill="#e9932f" radius={[8, 8, 0, 0]} />
+                      <Bar dataKey="amount" fill="#EB992C" radius={[8, 8, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
                 )}
@@ -667,7 +666,7 @@ export function BusinessDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <CardTitle className="text-lg">Employee performance</CardTitle>
                 <CardDescription>Tip totals by team member</CardDescription>
@@ -722,7 +721,7 @@ export function BusinessDashboard() {
             transition={{ delay: 0.6 }}
             className="lg:col-span-2"
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <CardTitle className="text-lg">Top performers</CardTitle>
                 <Link
@@ -791,7 +790,7 @@ export function BusinessDashboard() {
             transition={{ delay: 0.7 }}
             className="space-y-4"
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <CardTitle className="text-lg">Quick actions</CardTitle>
                 <CardDescription>Common venue tasks</CardDescription>
@@ -826,7 +825,7 @@ export function BusinessDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="border-2 border-primary/30 bg-muted/30 shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <CardTitle className="text-base">Need help?</CardTitle>
                 <CardDescription>

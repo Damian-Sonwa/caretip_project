@@ -5,7 +5,7 @@
  * (e.g. `caretip.de`) returns 422 validation_error.
  */
 
-const DEFAULT_RESEND_FROM = "CareTip <onboarding@resend.dev>";
+const DEFAULT_RESEND_FROM = "CareTip <no-reply@mail.caretip.com>";
 
 /** Plain `user@host.tld` or `Name <user@host.tld>`. */
 function isValidResendFromFormat(value: string): boolean {
@@ -21,18 +21,19 @@ function isValidResendFromFormat(value: string): boolean {
 let warnedInvalidResendFrom = false;
 
 function getResendFromAddress(): string {
-  const raw = process.env.RESEND_FROM?.trim();
+  // Prefer repo-root `.env` key; keep RESEND_FROM as a backward-compatible alias.
+  const raw = (process.env.RESEND_FROM_EMAIL ?? process.env.RESEND_FROM)?.trim();
   if (!raw) {
     return DEFAULT_RESEND_FROM;
   }
   if (isValidResendFromFormat(raw)) {
-    return raw;
+    return raw.includes("<") ? raw : `CareTip <${raw}>`;
   }
   if (!warnedInvalidResendFrom) {
     warnedInvalidResendFrom = true;
     console.warn(
       `[resend] RESEND_FROM must be a full address (e.g. "noreply@yourdomain.com" or "CareTip <noreply@yourdomain.com>"). ` +
-        `Got ${JSON.stringify(raw)} — using default ${DEFAULT_RESEND_FROM}. Set RESEND_FROM to a verified sender in Resend.`
+        `Got ${JSON.stringify(raw)} — using default ${DEFAULT_RESEND_FROM}. Set RESEND_FROM_EMAIL/RESEND_FROM to a verified sender in Resend.`
     );
   }
   return DEFAULT_RESEND_FROM;

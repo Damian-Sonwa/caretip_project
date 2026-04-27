@@ -19,7 +19,7 @@ export function LandingBorderedCard({
     <div className={cn("relative h-full w-full", className)}>
       <Card
         className={cn(
-          "relative h-full overflow-hidden rounded-xl border border-[#F0F0F0] bg-[#FAFAFA] text-card-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(0,0,0,0.06)]",
+          "relative h-full overflow-hidden rounded-3xl border border-black/[0.06] bg-white text-card-foreground shadow-[0_10px_30px_rgba(0,0,0,0.06)]",
           cardClassName,
         )}
       >

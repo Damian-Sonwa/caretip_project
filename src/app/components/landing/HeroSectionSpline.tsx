@@ -28,7 +28,7 @@ export function HeroSectionSpline() {
             <motion.span
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-4 font-semibold text-white shadow-lg shadow-accent/30 transition-colors hover:bg-accent/90"
+              className="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-accent/90"
             >
               Get Started Free
               <ArrowRight className="h-5 w-5" />

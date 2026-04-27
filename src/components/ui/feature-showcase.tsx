@@ -53,6 +53,11 @@ export type FeatureShowcaseProps = {
   secondaryCtaLabel?: string;
   secondaryCtaTo?: string;
   className?: string;
+  /**
+   * Cinematic hero variant (warm gradient, wide media).
+   * Keeps CareTip orange as the action color.
+   */
+  variant?: "default" | "cinematic" | "splitPattern";
   /** Use animated hero instead of carousel (for CareTip hero section). */
   useAnimatedHero?: boolean;
   /**
@@ -92,6 +97,7 @@ export function FeatureShowcase({
   secondaryCtaLabel = "How it works",
   secondaryCtaTo = "/how-it-works",
   className,
+  variant = "default",
   useAnimatedHero = false,
   heroBorderBeam = false,
 }: FeatureShowcaseProps) {
@@ -107,68 +113,231 @@ export function FeatureShowcase({
   );
 
   const singleHeroImage = carouselImages.length === 1 ? carouselImages[0] : null;
+  const cinematic = variant === "cinematic";
+  const splitPattern = variant === "splitPattern";
 
   return (
     <section
       id={id}
       className={cn(
-        "w-full bg-transparent text-foreground pt-20 sm:pt-24",
+        cinematic
+          ? "relative w-full overflow-hidden bg-white text-gray-900 pt-20 sm:pt-24"
+          : "w-full bg-transparent text-foreground pt-20 sm:pt-24",
         id && "scroll-mt-[80px]",
         className,
       )}
     >
-      <div className="mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14">
-        <div className="relative md:col-span-6">
-          <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
-            {eyebrow}
-          </Badge>
+      {splitPattern ? (
+        <div className="mx-auto w-full max-w-7xl px-6 pt-14 pb-24 md:pt-16 md:pb-32">
+          <div className="relative overflow-hidden rounded-3xl border border-black/[0.06] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
+            <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-stretch">
+              {/* Left: textured canvas */}
+              <div className="relative flex items-center p-8 sm:p-10 lg:p-12">
+                {/* Ambient animated background (no stripes) */}
+                <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#F7F4EC]" />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute -left-28 -top-28 h-[360px] w-[360px] rounded-full blur-3xl"
+                  style={{ background: "rgba(235,153,44,0.20)" }}
+                  animate={{ x: [0, 22, 0], y: [0, 14, 0] }}
+                  transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <motion.div
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-36 right-[-10%] h-[420px] w-[420px] rounded-full blur-3xl"
+                  style={{ background: "rgba(0,0,0,0.08)" }}
+                  animate={{ x: [0, -18, 0], y: [0, -12, 0] }}
+                  transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(900px circle at 30% 45%, rgba(0,0,0,0.06), transparent 64%), radial-gradient(700px circle at 12% 28%, rgba(255,255,255,0.65), transparent 55%)",
+                  }}
+                />
+                <div className="relative z-[1] max-w-xl">
+                  <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
+                    {eyebrow}
+                  </Badge>
 
-          <motion.h1
-            className="text-balance text-4xl font-bold leading-[0.95] sm:text-5xl md:text-6xl"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
-          >
-            {title}
-          </motion.h1>
+                  <motion.h1
+                    className="text-balance text-4xl font-bold leading-[0.95] text-gray-900 sm:text-5xl md:text-6xl"
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.7, ease: "easeOut" }}
+                  >
+                    {title}
+                  </motion.h1>
 
-          {description ? <p className="mt-6 max-w-xl text-muted-foreground">{description}</p> : null}
+                  {description ? (
+                    <p className="mt-6 max-w-xl text-gray-500">
+                      {description}
+                    </p>
+                  ) : null}
 
-          {stats.length > 0 && (
-            <div className="mt-6 flex flex-wrap gap-2">
-              {stats.map((s, i) => (
-                <Badge key={i} variant="secondary" className="bg-muted text-foreground">
-                  {s}
-                </Badge>
-              ))}
-            </div>
-          )}
+                  {stats.length > 0 && (
+                    <div className="mt-6 flex flex-wrap gap-2">
+                      {stats.map((s, i) => (
+                        <Badge key={i} variant="secondary" className="bg-muted text-foreground">
+                          {s}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
 
-          <div className="mt-10 max-w-xl">
-            <Accordion type="single" collapsible className="w-full">
-              {steps.map((step) => (
-                <AccordionItem key={step.id} value={step.id}>
-                  <AccordionTrigger className="text-left text-base font-semibold">{step.title}</AccordionTrigger>
-                  <AccordionContent className="text-sm text-muted-foreground">{step.text}</AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
+                  <div className="mt-10 flex flex-wrap gap-3">
+                    <Button asChild size="lg" className="rounded-2xl font-bold">
+                      <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
+                    </Button>
+                    <Button
+                      asChild
+                      size="lg"
+                      variant="outline"
+                      className="rounded-2xl border-2 border-primary bg-transparent font-semibold"
+                    >
+                      <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button asChild size="lg" className="rounded-full font-bold">
-                <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
-              </Button>
-              <Button asChild size="lg" variant="outline" className="rounded-full border-2 border-primary bg-transparent font-semibold">
-                <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>
-              </Button>
+              {/* Right: brand panel + circular pattern */}
+              <div className="relative flex items-end justify-center overflow-hidden bg-primary/15 p-8 sm:p-10 lg:p-12">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0"
+                  style={{
+                    background:
+                      "radial-gradient(900px circle at 85% 35%, rgba(235,153,44,0.45), transparent 60%), radial-gradient(1200px circle at 30% 75%, rgba(0,0,0,0.06), transparent 62%)",
+                  }}
+                />
+                <div aria-hidden className="pointer-events-none absolute -right-28 -top-28 h-[420px] w-[420px] rounded-full border border-black/10 bg-white/20" />
+                <div aria-hidden className="pointer-events-none absolute -right-10 top-24 h-[360px] w-[360px] rounded-full border border-black/10 bg-white/15" />
+                <div aria-hidden className="pointer-events-none absolute right-24 -bottom-36 h-[520px] w-[520px] rounded-full border border-black/10 bg-white/10" />
+
+                <motion.div
+                  className="relative z-[1] w-full max-w-[520px]"
+                  initial={{ opacity: 0, y: 18 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
+                >
+                  {useAnimatedHero ? (
+                    <LandingImageFrame className="w-full bg-white">
+                      <CareTipHeroAnimation />
+                    </LandingImageFrame>
+                  ) : singleHeroImage ? (
+                    <LandingImageFrame className="w-full bg-white">
+                      <img
+                        src={singleHeroImage.src}
+                        alt={singleHeroImage.alt}
+                        className={cn(
+                          "block h-auto w-full",
+                          singleHeroImage.imageFit === "contain" ? "object-contain" : "object-cover",
+                        )}
+                        style={{ objectPosition: singleHeroImage.objectPosition ?? "center" }}
+                        loading="eager"
+                        decoding="async"
+                      />
+                    </LandingImageFrame>
+                  ) : (
+                    <div className="w-full">
+                      <FeatureCarousel images={carouselImages} />
+                    </div>
+                  )}
+                </motion.div>
+              </div>
             </div>
           </div>
         </div>
+      ) : (
+        <div
+          className={cn(
+            "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14",
+            cinematic && "relative z-[1]",
+          )}
+        >
+        <div className={cn("relative md:col-span-5", cinematic && "md:pt-6")}>
+            <Badge
+              variant="outline"
+              className={cn(
+                "mb-6 border-primary/40",
+              cinematic ? "text-gray-900 border-black/[0.10] bg-white" : "text-foreground",
+              )}
+            >
+              {eyebrow}
+            </Badge>
 
-        <div className="relative min-h-0 md:col-span-6 flex items-center justify-center">
-          {heroBorderBeam ? (
+            <motion.h1
+              className={cn(
+                "text-balance text-4xl font-bold leading-[0.95] sm:text-5xl md:text-6xl",
+              cinematic && "text-gray-900",
+              )}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+            >
+              {title}
+            </motion.h1>
+
+            {description ? (
+            <p className={cn("mt-6 max-w-xl", cinematic ? "text-gray-500" : "text-muted-foreground")}>
+                {description}
+              </p>
+            ) : null}
+
+            {stats.length > 0 && (
+              <div className="mt-6 flex flex-wrap gap-2">
+                {stats.map((s, i) => (
+                  <Badge
+                    key={i}
+                    variant="secondary"
+                    className={cn(
+                    cinematic ? "bg-white text-gray-900 border border-black/[0.08]" : "bg-muted text-foreground",
+                    )}
+                  >
+                    {s}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-10 max-w-xl">
+              {!cinematic ? (
+                <Accordion type="single" collapsible className="w-full">
+                  {steps.map((step) => (
+                    <AccordionItem key={step.id} value={step.id}>
+                      <AccordionTrigger className="text-left text-base font-semibold">{step.title}</AccordionTrigger>
+                      <AccordionContent className="text-sm text-muted-foreground">{step.text}</AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+              ) : null}
+
+              <div className="mt-8 flex flex-wrap gap-3">
+                <Button asChild size="lg" className={cn("rounded-full font-bold", cinematic && "rounded-2xl")}>
+                  <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
+                </Button>
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className={cn(
+                    "rounded-full border-2 border-primary bg-transparent font-semibold",
+                  cinematic && "rounded-2xl border-black/15 text-gray-900 hover:bg-black/5",
+                  )}
+                >
+                  <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+
+        <div className={cn("relative min-h-0 md:col-span-7 flex items-center justify-center", cinematic && "md:justify-end")}>
+            {heroBorderBeam ? (
             <div className="relative inline-block">
-              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-xl">
+              <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
                 <BorderBeam
                   size={260}
                   duration={14}
@@ -207,15 +376,65 @@ export function FeatureShowcase({
                   <CareTipHeroAnimation />
                 </LandingImageFrame>
               ) : singleHeroImage ? (
-                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
-                  <img
-                    src={singleHeroImage.src}
-                    alt={singleHeroImage.alt}
-                    className="block aspect-[2/3] w-full object-cover object-[60%_center]"
-                    loading="eager"
-                    decoding="async"
-                  />
-                </LandingImageFrame>
+                cinematic ? (
+                  <div className="relative w-full max-w-[720px]">
+                    {/* Very subtle brand warmth behind device (stays behind frame + shadow). */}
+                    <div
+                      aria-hidden
+                      className="pointer-events-none absolute left-1/2 top-[44%] z-0 h-[min(280px,52vw)] w-[min(420px,88%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(235,153,44,0.08)] blur-3xl"
+                    />
+                    {/* Floating badges — subtle bounce (staggered). */}
+                    <motion.div
+                      className="absolute left-6 top-10 z-20 hidden rounded-2xl border border-black/[0.10] bg-white px-4 py-3 text-gray-900 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:block"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{
+                        duration: 2.4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    >
+                      <p className="text-xs font-semibold text-gray-500">Milestone unlocked</p>
+                      <p className="mt-1 text-sm font-bold text-gray-900">Fast onboarding</p>
+                    </motion.div>
+                    <motion.div
+                      className="absolute right-6 bottom-8 z-20 hidden rounded-2xl border border-black/[0.10] bg-white px-4 py-3 text-left text-gray-900 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:block"
+                      animate={{ y: [0, -8, 0] }}
+                      transition={{
+                        duration: 2.4,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 0.35,
+                      }}
+                    >
+                      <p className="text-xs font-semibold text-gray-500">This week</p>
+                      <p className="mt-1 text-sm font-bold text-gray-900">Tips rolling in</p>
+                    </motion.div>
+
+                    {/* "Phone" stage — shadow spec: 0 10px 30px rgba(0,0,0,0.06) */}
+                    <div
+                      className="relative z-[1] mx-auto w-[min(520px,92%)] overflow-hidden rounded-[44px] border border-black/[0.10] bg-white"
+                      style={{ boxShadow: "0 10px 30px rgba(0, 0, 0, 0.06)" }}
+                    >
+                      <img
+                        src={singleHeroImage.src}
+                        alt={singleHeroImage.alt}
+                        className="block h-auto w-full object-cover"
+                        loading="eager"
+                        decoding="async"
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
+                    <img
+                      src={singleHeroImage.src}
+                      alt={singleHeroImage.alt}
+                      className="block aspect-[2/3] w-full object-cover object-[60%_center]"
+                      loading="eager"
+                      decoding="async"
+                    />
+                  </LandingImageFrame>
+                )
               ) : (
                 <div className="w-full" style={{ maxWidth: "480px" }}>
                   <FeatureCarousel images={carouselImages} />
@@ -225,6 +444,7 @@ export function FeatureShowcase({
           )}
         </div>
       </div>
+      )}
     </section>
   );
 }

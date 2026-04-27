@@ -42,11 +42,17 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  dashStatCard,
+  DASH_BTN_PRIMARY,
+  DASH_BTN_SECONDARY,
+  DASH_EMPTY_ICON,
+  DASH_EMPTY_STATE,
+} from "@/components/ui/dashboard-styles";
 
-const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
+const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 const TOAST_ERR = { style: { background: "#d4183d", color: "#ffffff" } } as const;
 
 function toastOk(message: string) {
@@ -597,7 +603,7 @@ export function StaffManagementPage() {
 
       <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="space-y-6 py-2">
-          <Card className="border-2 border-border shadow-sm">
+          <Card className="rounded-xl bg-white border border-black/[0.06] shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Search</CardTitle>
               <CardDescription>Filter by name or role</CardDescription>
@@ -610,7 +616,7 @@ export function StaffManagementPage() {
                   placeholder="Search employees…"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full rounded-lg border-2 border-border bg-background py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full rounded-lg border border-black/[0.10] bg-background py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                 />
               </div>
             </CardContent>
@@ -619,8 +625,7 @@ export function StaffManagementPage() {
         {/* Invite Code Card */}
         {inviteCode && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className="relative overflow-hidden border-2 border-border shadow-sm">
-              <BorderBeam size={200} duration={18} colorFrom="#e9932f" colorTo="#000000" />
+            <Card className={dashStatCard("relative overflow-hidden")}>
               <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-muted">
@@ -639,11 +644,11 @@ export function StaffManagementPage() {
                 </div>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" onClick={handleCopyCode}>
+                <Button type="button" variant="outline" onClick={handleCopyCode} className={DASH_BTN_SECONDARY}>
                   <Copy className="mr-2 h-4 w-4" />
                   Copy
                 </Button>
-                <Button type="button" onClick={handleRegenerate} disabled={isGenerating}>
+                <Button type="button" onClick={handleRegenerate} disabled={isGenerating} className={DASH_BTN_PRIMARY}>
                   <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
                   Regenerate
                 </Button>
@@ -654,7 +659,7 @@ export function StaffManagementPage() {
         )}
 
         {/* Desktop Table View */}
-        <div className="hidden overflow-hidden rounded-xl border-2 border-border bg-card lg:block">
+        <div className="hidden overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm lg:block">
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
@@ -676,8 +681,14 @@ export function StaffManagementPage() {
             <tbody>
               {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-12 text-center text-muted-foreground">
-                    No staff members yet. Add employees to get started.
+                  <td colSpan={8} className="px-6 py-12">
+                    <div className={DASH_EMPTY_STATE}>
+                      <Users className={DASH_EMPTY_ICON} />
+                      <p className="text-sm font-medium">No staff members yet.</p>
+                      <p className="mt-1 text-sm text-gray-400">
+                        Add employees to get started.
+                      </p>
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -962,7 +973,7 @@ export function StaffManagementPage() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+            className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
           >
             <div className="shrink-0 border-b border-border px-5 pt-5 pb-3">
               <h2 className="text-xl font-bold text-foreground">Add New Employee</h2>
@@ -1120,7 +1131,7 @@ export function StaffManagementPage() {
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-lg"
+            className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
           >
             <div className="shrink-0 border-b border-border px-5 pt-5 pb-3">
               <h2 className="text-xl font-bold text-foreground">Edit staff member</h2>

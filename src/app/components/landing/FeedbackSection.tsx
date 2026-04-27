@@ -4,7 +4,7 @@ import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 
 export function FeedbackSection() {
   return (
-    <section className="bg-transparent px-6 py-24 sm:py-32">
+    <section className="bg-white px-6 py-24">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Left: Content */}
@@ -13,18 +13,18 @@ export function FeedbackSection() {
             whileInView={{ x: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="space-y-8"
+            className="space-y-8 text-center md:text-left"
           >
             <div className="space-y-4">
-              <span className="inline-block px-4 py-2 bg-accent/10 text-accent rounded-full text-sm font-semibold">
+              <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-semibold">
                 Guest feedback
               </span>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground">
+              <h2 className="text-3xl md:text-5xl font-bold text-black">
                 Turn feedback into
                 <br />
-                <span className="text-accent">better service</span>
+                <span className="text-primary">better service</span>
               </h2>
-              <p className="text-lg leading-relaxed text-muted-foreground">
+              <p className="text-base md:text-lg leading-relaxed text-black/70 max-w-md mx-auto md:mx-0">
                 Ratings after tipping so you can coach and reward fast.
               </p>
             </div>
@@ -32,42 +32,42 @@ export function FeedbackSection() {
             {/* Features */}
             <div className="space-y-6">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <Star className="w-6 h-6 text-accent" />
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <Star className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                  <h3 className="text-lg font-semibold text-black mb-1">
                     Five-star ratings
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-black/70">
                     Quick scores across every shift.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <MessageSquare className="w-6 h-6 text-accent" />
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <MessageSquare className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                  <h3 className="text-lg font-semibold text-black mb-1">
                     Comments
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-black/70">
                     Short notes that show what worked.
                   </p>
                 </div>
               </div>
 
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                  <TrendingUp className="w-6 h-6 text-accent" />
+                <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-foreground mb-1">
+                  <h3 className="text-lg font-semibold text-black mb-1">
                     Actionable insights
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-black/70">
                     Spot trends. Reward wins. Coach gaps.
                   </p>
                 </div>
@@ -91,25 +91,26 @@ export function FeedbackSection() {
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2 }}
+                whileHover={{ y: -5 }}
               >
-                <LandingBorderedCard cardClassName="p-6 shadow-lg">
+                <LandingBorderedCard cardClassName="p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
                   <div className="mb-3 flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className="h-5 w-5 fill-accent text-accent" />
+                      <Star key={star} className="h-5 w-5 fill-primary text-primary" />
                     ))}
                   </div>
-                  <p className="mb-3 text-base leading-relaxed text-foreground">
+                  <p className="mb-3 text-base leading-relaxed text-black">
                     &ldquo;Mercy picked the perfect wine. Our anniversary dinner was unforgettable.&rdquo;
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-accent to-primary" />
+                      <div className="h-8 w-8 rounded-full bg-primary/10 ring-1 ring-black/[0.06]" />
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground/85">Juliet M.</p>
-                        <p className="text-xs text-muted-foreground">2 hours ago</p>
+                        <p className="text-sm font-medium text-black/70">Juliet M.</p>
+                        <p className="text-xs text-black/50">2 hours ago</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-accent">
+                    <div className="flex items-center gap-1 text-primary">
                       <ThumbsUp className="h-4 w-4" />
                       <span className="text-sm font-medium">12</span>
                     </div>
@@ -123,30 +124,31 @@ export function FeedbackSection() {
                 whileInView={{ y: 0, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.4 }}
+                whileHover={{ y: -5 }}
               >
-                <LandingBorderedCard cardClassName="p-6 shadow-lg">
+                <LandingBorderedCard cardClassName="p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
                   <div className="mb-3 flex items-center gap-2">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star
                         key={star}
                         className={`h-5 w-5 ${
-                          star <= 4 ? "fill-accent text-accent" : "text-muted-foreground"
+                          star <= 4 ? "fill-primary text-primary" : "text-black/20"
                         }`}
                       />
                     ))}
                   </div>
-                  <p className="mb-3 text-base leading-relaxed text-foreground">
+                  <p className="mb-3 text-base leading-relaxed text-black">
                     &ldquo;Attentive service. Marcus knew the menu cold.&rdquo;
                   </p>
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent" />
+                      <div className="h-8 w-8 rounded-full bg-primary/10 ring-1 ring-black/[0.06]" />
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground/85">Maria S.</p>
-                        <p className="text-xs text-muted-foreground">5 hours ago</p>
+                        <p className="text-sm font-medium text-black/70">Maria S.</p>
+                        <p className="text-xs text-black/50">5 hours ago</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1 text-accent">
+                    <div className="flex items-center gap-1 text-primary">
                       <ThumbsUp className="h-4 w-4" />
                       <span className="text-sm font-medium">8</span>
                     </div>
@@ -160,33 +162,34 @@ export function FeedbackSection() {
                 whileInView={{ scale: 1, opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="rounded-xl bg-gradient-to-br from-accent to-primary p-6 text-primary-foreground shadow-xl"
+                whileHover={{ y: -5 }}
+                className="rounded-3xl border border-black/[0.06] bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
               >
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="mb-1 text-sm text-primary-foreground/90">Average Rating</p>
-                    <p className="text-4xl font-bold">N/A</p>
+                    <p className="mb-1 text-sm text-black/60">Average Rating</p>
+                    <p className="text-4xl font-bold text-black">N/A</p>
                   </div>
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-foreground/15">
-                    <Star className="h-8 w-8 fill-primary-foreground text-primary-foreground" />
+                  <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary/10">
+                    <Star className="h-8 w-8 fill-primary text-primary" />
                   </div>
                 </div>
                 <div className="flex items-center gap-4 text-sm">
                   <div>
-                    <p className="text-primary-foreground/90">Reviews</p>
-                    <p className="font-semibold">0</p>
+                    <p className="text-black/60">Reviews</p>
+                    <p className="font-semibold text-black">0</p>
                   </div>
-                  <div className="h-8 w-px bg-primary-foreground/25" />
+                  <div className="h-8 w-px bg-primary/15" />
                   <div>
-                    <p className="text-primary-foreground/90">This Month</p>
-                    <p className="font-semibold">N/A</p>
+                    <p className="text-black/60">This Month</p>
+                    <p className="font-semibold text-black">N/A</p>
                   </div>
                 </div>
               </motion.div>
             </div>
 
             {/* Decorative Elements */}
-            <div className="absolute -z-10 top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl"></div>
+            <div className="absolute -z-10 top-0 right-0 h-64 w-64 rounded-full bg-primary/[0.07] blur-3xl" />
           </motion.div>
         </div>
       </div>

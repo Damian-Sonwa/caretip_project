@@ -18,6 +18,7 @@
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
+    "@fontsource/inter": "^5.2.8",
     "@mui/icons-material": "7.3.5",
     "@mui/material": "7.3.5",
     "@number-flow/react": "^0.6.0",
@@ -105,7 +106,7 @@
     "tailwindcss": "4.1.12",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",
-    "vite": "6.3.5",
+    "vite": "6.4.2",
     "vite-plugin-pwa": "^1.2.0"
   },
   "peerDependencies": {
@@ -120,9 +121,13 @@
       "optional": true
     }
   },
+  "overrides": {
+    "serialize-javascript": "7.0.5"
+  },
   "pnpm": {
     "overrides": {
-      "vite": "6.3.5"
+      "vite": "6.4.2",
+      "serialize-javascript": "7.0.5"
     }
   }
 }

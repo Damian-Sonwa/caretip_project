@@ -12,14 +12,14 @@ type AuthRecoveryLayoutProps = {
  */
 export function AuthRecoveryLayout({ children, showFooterLink = true }: AuthRecoveryLayoutProps) {
   return (
-    <div className="min-h-[100dvh] bg-[#F8F9FA] font-['Roboto',ui-sans-serif,system-ui,sans-serif]">
+    <div className="min-h-[100dvh] bg-white font-['Roboto',ui-sans-serif,system-ui,sans-serif]">
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-12">
         <div className="mb-8 flex justify-center">
           <div className="rounded-xl border border-neutral-200/90 bg-white px-4 py-2 shadow-sm">
             <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
           </div>
         </div>
-        <div className="rounded-[24px] border border-neutral-100/80 bg-white p-6 shadow-2xl sm:p-8">
+        <div className="rounded-[24px] border border-neutral-100/80 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-8">
           {children}
         </div>
         {showFooterLink ? (

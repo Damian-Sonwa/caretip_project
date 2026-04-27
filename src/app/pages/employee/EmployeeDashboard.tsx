@@ -41,9 +41,9 @@ import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeMod
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashPanel, dashStatCard, DASH_ICON_WRAP } from "@/components/ui/dashboard-styles";
 import { EmployeeGoalCard } from "../../components/employee/EmployeeGoalCard";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
@@ -416,7 +416,7 @@ export function EmployeeDashboard() {
         <div className="mb-3 flex flex-wrap items-center gap-3">
           <LiveConnectionBadge status={connectionStatus} />
         </div>
-        <div className="flex w-full max-w-md gap-2 rounded-lg border-2 border-border bg-card p-1">
+        <div className="flex w-full max-w-md gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm">
           {(["today", "week", "month"] as const).map((period) => (
             <button
               key={period}
@@ -437,7 +437,7 @@ export function EmployeeDashboard() {
 
         <div className="space-y-6 pb-6 pt-6">
           {!user.avatar && (
-            <div className="flex flex-col gap-3 rounded-xl border-2 border-primary bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col gap-3 rounded-xl border border-black/[0.06] bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <p className="text-sm font-bold text-foreground">Action required</p>
                 <p className="mt-1 text-sm text-muted-foreground">
@@ -457,12 +457,11 @@ export function EmployeeDashboard() {
               transition={{ delay: 0.1 }}
               className="relative col-span-2 lg:col-span-2"
             >
-              <Card className="relative h-full overflow-hidden border-2 border-border shadow-sm">
-                <BorderBeam size={200} duration={16} colorFrom="#EB992C" colorTo="#000000" />
+              <Card className={dashStatCard("relative h-full overflow-hidden")}>
                 <CardHeader>
                   <div className="mb-2 flex items-start justify-between">
-                    <div className="rounded-lg border border-border bg-muted p-3">
-                      <DollarSign className="h-6 w-6 text-foreground" />
+                    <div className={DASH_ICON_WRAP}>
+                      <DollarSign className="h-6 w-6" />
                     </div>
                     <span className="text-xs text-muted-foreground">
                       {timeframe === "today" && "Today"}
@@ -494,7 +493,7 @@ export function EmployeeDashboard() {
             </motion.div>
 
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <TrendingUp className="h-6 w-6 text-foreground" />
@@ -506,7 +505,7 @@ export function EmployeeDashboard() {
             </motion.div>
 
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <Star className="h-6 w-6 text-foreground" />
@@ -522,7 +521,7 @@ export function EmployeeDashboard() {
             </motion.div>
 
             <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }}>
-              <Card className="h-full border-2 border-border shadow-sm">
+              <Card className={dashStatCard("h-full")}>
                 <CardHeader>
                   <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
                     <Target className="h-6 w-6 text-foreground" />
@@ -543,7 +542,7 @@ export function EmployeeDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="border-2 border-border shadow-sm">
+            <Card className={dashPanel("shadow-sm")}>
               <CardHeader>
                 <CardTitle className="text-lg">Earnings timeline</CardTitle>
                 <CardDescription>
@@ -560,8 +559,8 @@ export function EmployeeDashboard() {
                     <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#e9932f" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="#e9932f" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
+                          <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
@@ -596,7 +595,7 @@ export function EmployeeDashboard() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className="border-2 border-border shadow-sm">
+              <Card className={dashPanel("shadow-sm")}>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle className="text-lg">Recent tips</CardTitle>
                   <Link
@@ -637,7 +636,7 @@ export function EmployeeDashboard() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <Card className="border-2 border-border shadow-sm">
+                <Card className={dashPanel("shadow-sm")}>
                   <CardHeader>
                     <CardTitle className="text-lg">Quick actions</CardTitle>
                     <CardDescription>QR and public page</CardDescription>

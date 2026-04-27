@@ -53,11 +53,12 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
 
 /** Dark modules for scannable QR */
 const QR_MODULE_DARK = "#000000";
 
-const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
+const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 export function QRCodeManagementPage() {
   const { user, isBusiness, updateUser } = useRequireAuth();
@@ -379,11 +380,11 @@ export function QRCodeManagementPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="rounded-xl border-2 border-border bg-card p-6 text-foreground shadow-sm"
+      className={dashStatCard("text-foreground")}
     >
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="flex-shrink-0">
-          <div className="flex h-36 w-36 items-center justify-center rounded-lg border-2 border-primary bg-white p-2">
+          <div className="flex h-36 w-36 items-center justify-center rounded-lg border border-black/[0.10] bg-white p-2">
             {previewDataUrl ? (
               <img src={previewDataUrl} alt="" className="h-full w-full object-contain" />
             ) : (
@@ -429,7 +430,7 @@ export function QRCodeManagementPage() {
             )}
           </div>
 
-          <div className="rounded-lg border border-border bg-muted/50 p-3">
+          <div className="rounded-lg border border-black/[0.08] bg-muted/30 p-3">
             <p className="mb-1 text-xs text-muted-foreground">QR code URL</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 truncate font-mono text-xs text-foreground">{item.qrUrl}</code>
@@ -460,6 +461,7 @@ export function QRCodeManagementPage() {
                     type="button"
                     size="sm"
                     onClick={() => downloadBrandedQR(item.id, item.name)}
+                    className={DASH_BTN_PRIMARY}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
@@ -470,6 +472,7 @@ export function QRCodeManagementPage() {
                     variant={item.slug ? "outline" : "default"}
                     onClick={() => item.employeeRow && handleGenerateNew(item.employeeRow)}
                     disabled={regeneratingId === item.id}
+                    className={item.slug ? DASH_BTN_SECONDARY : DASH_BTN_PRIMARY}
                   >
                     {regeneratingId === item.id ? (
                       <LoadingSpinner size="sm" />
@@ -492,6 +495,7 @@ export function QRCodeManagementPage() {
                         previewDataUrl
                       )
                     }
+                    className={DASH_BTN_PRIMARY}
                   >
                     <Download className="mr-2 h-4 w-4" />
                     Download
@@ -511,6 +515,7 @@ export function QRCodeManagementPage() {
                             : `Location — ${item.name}`
                       )
                     }
+                    className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
                     Print

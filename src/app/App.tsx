@@ -5,18 +5,28 @@ import { router } from './routes';
 import { TipFlowProvider } from './context/TipFlowContext';
 import { AppLoadingSplashProvider } from './context/AppLoadingSplashContext';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
+import { ThemeProvider, useTheme } from "./context/ThemeContext";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? '';
 
 export default function App() {
+  const AppTree = () => {
+    const { mode } = useTheme();
+    return (
+      <TipFlowProvider>
+        <AppLoadingSplashProvider>
+          <RouterProvider router={router} />
+          <Toaster theme={mode} position="top-center" closeButton />
+          <PwaInstallPrompt />
+        </AppLoadingSplashProvider>
+      </TipFlowProvider>
+    );
+  };
+
   const tree = (
-    <TipFlowProvider>
-      <AppLoadingSplashProvider>
-        <RouterProvider router={router} />
-        <Toaster theme="light" position="top-center" closeButton />
-        <PwaInstallPrompt />
-      </AppLoadingSplashProvider>
-    </TipFlowProvider>
+    <ThemeProvider>
+      <AppTree />
+    </ThemeProvider>
   );
 
   if (googleClientId) {

@@ -69,7 +69,7 @@ export function SignInCard2({
         >
           <div
             className={cn(
-              "relative overflow-hidden rounded-[24px] bg-white p-6 shadow-2xl sm:p-7",
+              "relative overflow-hidden rounded-[24px] bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-7",
               "border border-neutral-100/80",
             )}
           >

@@ -11,14 +11,14 @@ export function HeroSectionNew() {
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-3xl"></div>
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-primary/30 rounded-full blur-3xl"></div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-6 py-20 w-full">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-20 w-full">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left Content */}
           <motion.div
             initial={{ x: -50, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.7, delay: 0.2 }}
-            className="space-y-8 order-2 lg:order-1"
+            className="space-y-8 order-2 lg:order-1 text-center md:text-left"
           >
             {/* Trust Badge */}
             <motion.div
@@ -46,7 +46,7 @@ export function HeroSectionNew() {
             </div>
 
             {/* Trust Badge */}
-            <p className="text-xs sm:text-sm text-white/70 text-center sm:text-left">
+            <p className="text-xs sm:text-sm text-white/70 text-center md:text-left">
               No setup fees • Instant payouts • 24/7 support
             </p>
           </motion.div>
@@ -92,7 +92,7 @@ export function HeroSectionNew() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-6 sm:px-8 py-3 sm:py-4 bg-accent text-white rounded-xl font-semibold hover:bg-accent/90 transition-all hover:shadow-xl hover:shadow-accent/30 flex items-center gap-2"
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-accent text-white rounded-xl font-semibold hover:bg-accent/90 transition-all hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] flex items-center gap-2"
               >
                 Get Started Free
                 <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />

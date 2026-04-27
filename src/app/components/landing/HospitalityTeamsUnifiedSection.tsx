@@ -36,7 +36,7 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="business-section"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gradient-to-b from-[rgba(196,69,54,0.05)] via-[rgba(196,69,54,0.08)] to-transparent px-4 py-24 sm:px-6 sm:py-28"
+      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-white px-6 py-24"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
         <div className="mb-10 w-full max-w-full space-y-4 text-center sm:mb-14">
@@ -46,10 +46,10 @@ export function HospitalityTeamsUnifiedSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
           >
-            <h2 className="mb-3 max-w-full break-words text-balance font-bold leading-[1.05] text-foreground text-[clamp(1.75rem,6vw,3.75rem)]">
+            <h2 className="mb-3 max-w-full break-words text-balance font-bold leading-[1.05] text-gray-900 text-[clamp(1.75rem,6vw,3.75rem)]">
               Built for hospitality teams
             </h2>
-            <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-muted-foreground text-[clamp(1rem,2.6vw,1.25rem)]">
+            <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-gray-500 text-[clamp(1rem,2.6vw,1.25rem)]">
               Simple tipping for guests. Clear earnings for staff. Better control for the business.
             </p>
           </motion.div>
@@ -58,8 +58,8 @@ export function HospitalityTeamsUnifiedSection() {
         <div className="grid w-full min-w-0 gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-14">
           {/* Mobile: images first */}
           <div className="min-w-0 lg:order-2">
-            <LandingBorderedCard cardClassName="p-0 shadow-[0_6px_20px_rgba(0,0,0,0.06)]">
-              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-lg border border-gray-200 bg-white/85 px-3 py-2 text-sm font-semibold text-foreground backdrop-blur-sm">
+            <LandingBorderedCard cardClassName="p-0">
+              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-full border border-primary/[0.12] bg-white px-4 py-2 text-sm font-semibold text-gray-900">
                 Where CareTip Works
               </div>
               <HospitalityBusinessesMarquee />
@@ -82,10 +82,10 @@ export function HospitalityTeamsUnifiedSection() {
                     <f.Icon className="h-5 w-5" />
                   </div>
                   <div className="min-w-0">
-                    <p className="max-w-full break-words text-lg font-bold tracking-tight text-foreground">
+                    <p className="max-w-full break-words text-lg font-bold tracking-tight text-gray-900">
                       {f.title}
                     </p>
-                    <p className="mt-1 max-w-full break-words text-base leading-relaxed text-muted-foreground">
+                    <p className="mt-1 max-w-full break-words text-base leading-relaxed text-gray-500">
                       {f.text}
                     </p>
                   </div>
