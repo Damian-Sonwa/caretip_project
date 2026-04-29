@@ -60,8 +60,8 @@ export function LandingPage() {
             defaultTab="contactless"
             primaryCtaLabel="Get started"
             primaryCtaTo="/onboarding"
-            secondaryCtaLabel="Create your QR"
-            secondaryCtaTo="/onboarding"
+            secondaryCtaLabel="Request a Demo"
+            secondaryCtaTo="/contact"
             variant="cinematic"
             useAnimatedHero={false}
             heroBorderBeam={false}
