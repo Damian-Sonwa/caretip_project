@@ -67,15 +67,15 @@ export function CheckEmailPage() {
   return (
     <AuthRecoveryLayout showFooterLink={false}>
       <div className="space-y-4 text-center">
-        <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
           Check your email to verify your account
         </h1>
-        <p className="text-sm leading-relaxed text-[#6B7280]">
+        <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
           We sent a verification link to{" "}
-          <span className="font-semibold text-[#1F2937]">{user.email}</span>. Open it on this device
+          <span className="font-semibold text-neutral-900 dark:text-neutral-100">{user.email}</span>. Open it on this device
           (or copy the link into the browser where you use CareTip), then sign in again.
         </p>
-        <p className="text-xs text-[#6B7280]">
+        <p className="text-xs text-neutral-600 dark:text-neutral-400">
           The dashboard stays unavailable until your email is verified.
         </p>
 
@@ -83,7 +83,7 @@ export function CheckEmailPage() {
           <button
             type="button"
             onClick={openInbox}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#197278] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             <Mail className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
             Open my email
@@ -95,7 +95,7 @@ export function CheckEmailPage() {
           </button>
 
           {isWebmail && (
-            <p className="text-[11px] leading-snug text-[#6B7280]">
+            <p className="text-[11px] leading-snug text-neutral-600 dark:text-neutral-400">
               Opens {inboxTarget.providerLabel} in a new tab.
             </p>
           )}
@@ -103,7 +103,7 @@ export function CheckEmailPage() {
           <button
             type="button"
             onClick={() => void copyAddressAndHint()}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-neutral-200 bg-[#F3F4F6] text-sm font-semibold text-[#1F2937] transition hover:bg-neutral-100"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
           >
             <Copy className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
             Go to inbox manually
@@ -113,7 +113,7 @@ export function CheckEmailPage() {
             type="button"
             onClick={() => void handleResendVerification()}
             disabled={resendBusy}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-[#197278]/40 bg-white text-sm font-semibold text-[#197278] transition hover:bg-[#197278]/5 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-900/70"
           >
             {resendBusy ? (
               <>
@@ -125,11 +125,11 @@ export function CheckEmailPage() {
             )}
           </button>
 
-          <p className="pt-1 text-[11px] text-[#6B7280]">
+          <p className="pt-1 text-[11px] text-neutral-600 dark:text-neutral-400">
             Signed out?{" "}
             <Link
               to="/login"
-              className="font-semibold text-[#197278] underline-offset-2 hover:underline"
+              className="font-semibold text-primary underline-offset-2 hover:underline"
               onClick={() => logout()}
             >
               Sign in
@@ -145,9 +145,9 @@ export function CheckEmailPage() {
               logout();
               navigate("/login", { replace: true });
             }}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            I’ve verified — sign in
+            I’ve verified, sign in
           </button>
           <button
             type="button"
@@ -155,7 +155,7 @@ export function CheckEmailPage() {
               logout();
               navigate("/signup", { replace: true });
             }}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-neutral-200 bg-[#F3F4F6] text-sm font-semibold text-[#1F2937] transition hover:bg-neutral-100"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
           >
             Use a different email
           </button>

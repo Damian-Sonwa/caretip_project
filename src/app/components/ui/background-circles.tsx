@@ -19,85 +19,84 @@ interface BackgroundCirclesProps {
 const COLOR_VARIANTS = {
   primary: {
     border: [
-      "border-emerald-500/60",
-      "border-cyan-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-emerald-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#059669/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   secondary: {
     border: [
-      "border-violet-500/60",
-      "border-fuchsia-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-violet-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#7C3AED/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   tertiary: {
     border: [
-      "border-orange-500/60",
-      "border-yellow-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-orange-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#EA580C/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   quaternary: {
     border: [
-      "border-purple-500/60",
-      "border-pink-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-purple-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#7C3AED/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   quinary: {
     border: [
-      "border-red-500/60",
-      "border-rose-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-red-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#DC2626/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   senary: {
     border: [
-      "border-blue-500/60",
-      "border-sky-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-blue-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#2563EB/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   septenary: {
     border: [
-      "border-gray-500/60",
-      "border-gray-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-gray-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#6B7280/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
   octonary: {
     border: [
-      "border-red-500/60",
-      "border-rose-400/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-red-500/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#DC2626/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
-  /** Caretip brand: Stormy Teal #197278 + Tomato Jam #C44536 */
   caretip: {
     border: [
-      "border-[#197278]/60",
-      "border-[#C44536]/50",
-      "border-slate-600/30",
+      "border-gray-200/60 dark:border-neutral-800/60",
+      "border-gray-200/40 dark:border-neutral-800/40",
+      "border-gray-200/25 dark:border-neutral-800/25",
     ],
-    gradient: "from-[#197278]/30",
-    glow: "bg-[radial-gradient(ellipse_at_center,#197278/30%,transparent_70%)]",
+    gradient: "from-primary/20",
+    glow: "bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.25),transparent_70%)]",
   },
 } as const;
 
@@ -170,7 +169,7 @@ export function BackgroundCircles({
     <div
       className={clsx(
         "relative flex min-h-[90vh] w-full items-center justify-center overflow-hidden",
-        variant === "caretip" ? "bg-[#197278]" : "bg-background",
+        variant === "caretip" ? "bg-neutral-950" : "bg-background",
         className
       )}
     >
@@ -240,7 +239,7 @@ export function BackgroundCircles({
             COLOR_VARIANTS.caretip.glow
           )}
         />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,#197278/15%,transparent)] blur-[80px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.18),transparent)] blur-[80px]" />
       </div>
     </div>
   );

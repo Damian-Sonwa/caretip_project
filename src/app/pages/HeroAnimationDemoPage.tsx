@@ -45,8 +45,8 @@ export function HeroAnimationDemoPage() {
             {/* Features Section */}
             <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 mb-4">
-                  <span className="text-orange-600 font-bold">✨</span>
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                  <span className="text-primary font-bold">✨</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Smooth Transitions</h3>
                 <p className="text-gray-600">
@@ -55,8 +55,8 @@ export function HeroAnimationDemoPage() {
               </div>
 
               <div className="text-center">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 mb-4">
-                  <span className="text-orange-600 font-bold">🎬</span>
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                  <span className="text-primary font-bold">🎬</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Premium Animation</h3>
                 <p className="text-gray-600">
@@ -65,8 +65,8 @@ export function HeroAnimationDemoPage() {
               </div>
 
               <div className="text-center">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 mb-4">
-                  <span className="text-orange-600 font-bold">⚡</span>
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 mb-4">
+                  <span className="text-primary font-bold">⚡</span>
                 </div>
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">High Performance</h3>
                 <p className="text-gray-600">
@@ -76,13 +76,13 @@ export function HeroAnimationDemoPage() {
             </div>
 
             {/* Info Box */}
-            <div className="mt-16 bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <h2 className="text-lg font-semibold text-blue-900 mb-3">Component Usage</h2>
-              <p className="text-blue-800 mb-4">
-                The <code className="bg-blue-100 px-2 py-1 rounded">AnimatedHeroPlayer</code> component
+            <div className="mt-16 bg-gray-50 border border-gray-200 rounded-xl p-6">
+              <h2 className="text-lg font-semibold text-neutral-900 mb-3">Component Usage</h2>
+              <p className="text-neutral-600 mb-4">
+                The <code className="bg-white px-2 py-1 rounded border border-gray-200">AnimatedHeroPlayer</code> component
                 is ready to be integrated into your hero sections, landing pages, and showcase areas.
               </p>
-              <ul className="text-blue-800 space-y-2">
+              <ul className="text-neutral-600 space-y-2">
                 <li>✓ Fully responsive and mobile-optimized</li>
                 <li>✓ Customizable animation direction and duration</li>
                 <li>✓ Auto-play and loop controls</li>

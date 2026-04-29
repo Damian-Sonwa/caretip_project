@@ -319,7 +319,7 @@ export function StaffManagementPage() {
       });
       await fetchEmployees();
       const tempMsg = created.temporaryPassword
-        ? ` Their temporary password is "${created.temporaryPassword}" — share it securely so they can log in.`
+        ? ` Their temporary password is "${created.temporaryPassword}". Share it securely so they can log in.`
         : "";
       toastOk(
         created.temporaryPassword
@@ -524,7 +524,7 @@ export function StaffManagementPage() {
             </>
           }
           title="Staff management"
-          description="Invite codes, roles, and activation in one place — same white, black, and yellow system as the rest of your venue tools."
+          description="Invite codes, roles, and activation in one place, same white, black, and yellow system as the rest of your venue tools."
           overview={
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
@@ -729,8 +729,8 @@ export function StaffManagementPage() {
                   <td className="px-6 py-4 max-w-[200px]">
                     <p className="text-sm text-foreground truncate">
                       {employee.locationId
-                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "—"
-                        : "—"}
+                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "N/A"
+                        : "N/A"}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {employee.assignedTableIds.length > 0
@@ -869,7 +869,7 @@ export function StaffManagementPage() {
                     ) : null}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {employee.locationId
-                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "—"
+                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "N/A"
                         : "No venue"}{" "}
                       ·{" "}
                       {employee.assignedTableIds.length > 0

@@ -166,7 +166,7 @@ export function ProfileSettingsPage() {
                     <h2 className="text-2xl font-bold mb-3">Your CareTip account</h2>
                     <p className="text-white/80 mb-4 max-w-xl">
                       Accept one-time tips via QR codes and staff links. Payments use Stripe Payment
-                      Intents — there is no recurring subscription to CareTip on Starter.
+                      Intents. There is no recurring subscription to CareTip on Starter.
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                       <div className="flex items-center gap-3">

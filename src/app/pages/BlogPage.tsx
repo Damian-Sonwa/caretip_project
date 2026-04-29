@@ -8,7 +8,7 @@ const blogPosts = [
   {
     title: "QR tipping 101: what guests see when they scan",
     excerpt:
-      "Walk through the guest flow from camera open to receipt—plus small touches that reduce friction at checkout.",
+      "Walk through the guest flow from camera open to receipt, plus small touches that reduce friction at checkout.",
     category: "Product",
     date: "March 15, 2026",
     readTime: "5 min read",
@@ -26,7 +26,7 @@ const blogPosts = [
   {
     title: "Cashless tips and trust on the floor",
     excerpt:
-      "Why transparent payout timing matters for morale—and how to communicate it in pre-shift lineups.",
+      "Why transparent payout timing matters for morale, and how to communicate it in pre-shift lineups.",
     category: "Culture",
     date: "March 5, 2026",
     readTime: "6 min read",

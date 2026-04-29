@@ -19,7 +19,7 @@ const openPositions = [
     location: "Remote",
     type: "Full-time",
     description:
-      "Craft clear guest tipping journeys and staff tools—from scan to payout—for busy restaurants and hotels.",
+      "Craft clear guest tipping journeys and staff tools, from scan to payout, for busy restaurants and hotels.",
   },
   {
     title: "Customer Success Manager",
@@ -74,7 +74,7 @@ const values = [
   {
     title: "Hospitality first",
     description:
-      "We build for people on the floor—servers, bartenders, housekeepers, and the managers who support them.",
+      "We build for people on the floor: servers, bartenders, housekeepers, and the managers who support them.",
   },
   {
     title: "Move fast, stay grounded",

@@ -134,7 +134,7 @@ export function FeatureShowcase({
               {/* Left: textured canvas */}
               <div className="relative flex items-center p-8 sm:p-10 lg:p-12">
                 {/* Ambient animated background (no stripes) */}
-                <div aria-hidden className="pointer-events-none absolute inset-0 bg-[#F7F4EC]" />
+                <div aria-hidden className="pointer-events-none absolute inset-0 bg-gray-50 dark:bg-neutral-900" />
                 <motion.div
                   aria-hidden
                   className="pointer-events-none absolute -left-28 -top-28 h-[360px] w-[360px] rounded-full blur-3xl"
@@ -383,33 +383,6 @@ export function FeatureShowcase({
                       aria-hidden
                       className="pointer-events-none absolute left-1/2 top-[44%] z-0 h-[min(280px,52vw)] w-[min(420px,88%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(235,153,44,0.08)] blur-3xl"
                     />
-                    {/* Floating badges — subtle bounce (staggered). */}
-                    <motion.div
-                      className="absolute left-6 top-10 z-20 hidden rounded-2xl border border-black/[0.10] bg-white px-4 py-3 text-gray-900 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:block"
-                      animate={{ y: [0, -8, 0] }}
-                      transition={{
-                        duration: 2.4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      <p className="text-xs font-semibold text-gray-500">Milestone unlocked</p>
-                      <p className="mt-1 text-sm font-bold text-gray-900">Fast onboarding</p>
-                    </motion.div>
-                    <motion.div
-                      className="absolute right-6 bottom-8 z-20 hidden rounded-2xl border border-black/[0.10] bg-white px-4 py-3 text-left text-gray-900 shadow-[0_10px_30px_rgba(0,0,0,0.06)] backdrop-blur-md md:block"
-                      animate={{ y: [0, -8, 0] }}
-                      transition={{
-                        duration: 2.4,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: 0.35,
-                      }}
-                    >
-                      <p className="text-xs font-semibold text-gray-500">This week</p>
-                      <p className="mt-1 text-sm font-bold text-gray-900">Tips rolling in</p>
-                    </motion.div>
-
                     {/* "Phone" stage — shadow spec: 0 10px 30px rgba(0,0,0,0.06) */}
                     <div
                       className="relative z-[1] mx-auto w-[min(520px,92%)] overflow-hidden rounded-[44px] border border-black/[0.10] bg-white"

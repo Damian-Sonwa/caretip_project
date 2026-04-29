@@ -1,268 +1,143 @@
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useId, useMemo, useState } from "react";
-import { CheckCircle2, QrCode, Sparkles, UserPlus, Users } from "lucide-react";
+import { motion } from "motion/react";
+import { Bolt, QrCode, Sparkles, UserPlus, Users } from "lucide-react";
+import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 
 export function SimpleSetupSection() {
-  const headingId = useId();
-  const [activeStep, setActiveStep] = useState(0);
-
-  const steps = useMemo(
-    () =>
-      [
-        { title: "Sign up", icon: UserPlus },
-        { title: "Add your team", icon: Users },
-        { title: "Generate QR codes", icon: QrCode },
-        { title: "Start taking tips", icon: CheckCircle2 },
-      ] as const,
-    [],
-  );
-
-  useEffect(() => {
-    const id = window.setInterval(() => {
-      setActiveStep((s) => (s + 1) % steps.length);
-    }, 5000);
-    return () => window.clearInterval(id);
-  }, [steps.length]);
-
-  const progressPct = steps.length <= 1 ? 0 : (activeStep / (steps.length - 1)) * 100;
+  const steps = [
+    {
+      title: "Create your account",
+      description: "Set up your workspace in a minute.",
+      icon: UserPlus,
+    },
+    {
+      title: "Add your team",
+      description: "Invite staff and assign roles in one flow.",
+      icon: Users,
+    },
+    {
+      title: "Generate QR codes",
+      description: "Download, print, and place where guests look.",
+      icon: QrCode,
+    },
+    {
+      title: "Start receiving tips",
+      description: "Guests scan and tip, and your dashboard updates instantly.",
+      icon: Bolt,
+    },
+  ] as const;
 
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] bg-white px-6 py-24"
+      className="scroll-mt-[80px] bg-white px-6 py-24 dark:bg-neutral-950"
     >
       <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ y: 18, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="grid items-start gap-8 md:grid-cols-[1fr_2fr] md:gap-10"
-        >
-          {/* LEFT: Navigation stepper */}
-          <div className="space-y-6 text-center md:text-left">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="inline-flex items-center gap-2 rounded-full border border-primary/[0.12] bg-white px-4 py-2 text-sm font-semibold text-foreground shadow-sm">
-                <Sparkles className="h-4 w-4 text-primary" />
-                Four short steps
-              </span>
-              <span className="inline-flex items-center rounded-full bg-white px-4 py-2 text-sm font-semibold text-gray-500 shadow-sm ring-1 ring-primary/12">
-                Live in minutes
-              </span>
-            </div>
+        <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+          {/* LEFT: Journey step cards */}
+          <div className="order-2 space-y-8 lg:order-1">
+            <motion.div
+              initial={{ opacity: 0, y: 14 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55 }}
+              className="space-y-4"
+            >
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-neutral-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Live in minutes
+                </span>
+                <span className="text-sm font-medium text-neutral-600 dark:text-neutral-400">
+                  No integrations. No complexity.
+                </span>
+              </div>
 
-            <div className="space-y-2">
-              <h2 id={headingId} className="text-3xl md:text-5xl font-bold leading-tight text-black">
-                Live in minutes
+              <h2 className="text-balance text-3xl font-bold leading-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl">
+                A quick journey from setup to tips
               </h2>
-              <p className="max-w-md md:max-w-lg mx-auto md:mx-0 text-base md:text-lg leading-relaxed text-gray-500">
-                Set up your team and start collecting tips in a few clicks.
+              <p className="max-w-xl text-pretty text-base leading-relaxed text-neutral-600 dark:text-neutral-400 md:text-lg">
+                Four moments that get you from “not set up” to “tips rolling in”, fast.
               </p>
-            </div>
+            </motion.div>
 
-            {/* Desktop stepper */}
-            <div className="relative hidden md:block">
-              {/* Progress line (base) */}
-              <div aria-hidden className="absolute left-[18px] top-5 h-[calc(100%-40px)] w-px bg-primary/12" />
-              {/* Progress line (active fill) */}
-              <motion.div
+            <div className="relative">
+              {/* Timeline line */}
+              <div
                 aria-hidden
-                className="absolute left-[18px] top-5 w-px bg-primary"
-                initial={false}
-                animate={{ height: `${progressPct}%` }}
-                transition={{ duration: 0.55, ease: "easeInOut" }}
-                style={{ transformOrigin: "top" }}
+                className="absolute left-[18px] top-2 hidden h-[calc(100%-8px)] w-px bg-primary/20 sm:block"
               />
 
               <div className="space-y-3">
-                {steps.map((step, index) => {
+                {steps.map((step, idx) => {
                   const Icon = step.icon;
-                  const isActive = index === activeStep;
                   return (
-                    <button
+                    <motion.div
                       key={step.title}
-                      type="button"
-                      onClick={() => setActiveStep(index)}
-                      onMouseEnter={() => setActiveStep(index)}
-                      onFocus={() => setActiveStep(index)}
-                      className={[
-                        "group relative flex w-full items-start gap-4 rounded-xl border border-transparent p-4 text-left transition-all",
-                        isActive ? "bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]" : "hover:bg-white/70 hover:shadow-sm",
-                      ].join(" ")}
+                      initial={{ opacity: 0, y: 14 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.45, delay: idx * 0.06 }}
+                      className="group relative rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200/70 transition-shadow hover:shadow-md dark:bg-neutral-950 dark:ring-neutral-800"
                     >
-                      {/* Accent line */}
-                      <span
-                        aria-hidden
-                        className={[
-                          "absolute left-0 top-3 bottom-3 w-1 rounded-full transition-opacity",
-                          isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40",
-                        ].join(" ")}
-                        style={{ background: "#EB992C" }}
-                      />
+                      {/* Orange indicator */}
+                      <div className="hidden sm:block">
+                        <span
+                          aria-hidden
+                          className="absolute left-[10px] top-6 h-4 w-4 rounded-full bg-white ring-2 ring-primary/35 dark:bg-neutral-950"
+                        />
+                        <span
+                          aria-hidden
+                          className="absolute left-[14px] top-[28px] h-2 w-2 rounded-full bg-primary"
+                        />
+                      </div>
 
-                      <span className="relative mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white ring-1 ring-primary/12">
-                        <span className="text-sm font-bold text-foreground">{index + 1}</span>
-                      </span>
-
-                      <span className="min-w-0">
-                        <span className="flex items-center gap-2">
-                          <Icon className={isActive ? "h-4 w-4 text-primary" : "h-4 w-4 text-primary/45"} />
-                          <span className={isActive ? "text-base font-bold text-foreground" : "text-base font-semibold text-foreground"}>
+                      <div className="flex items-start gap-4 sm:pl-8">
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                          <Icon className="h-5 w-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-base font-semibold text-neutral-900 dark:text-neutral-100">
                             {step.title}
-                          </span>
-                        </span>
-                        <span className="mt-1 block text-sm text-gray-500">
-                          Step {index + 1} of {steps.length}
-                        </span>
-                      </span>
-                    </button>
+                          </p>
+                          <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                            {step.description}
+                          </p>
+                        </div>
+                      </div>
+                    </motion.div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Mobile: dots indicator */}
-            <div className="md:hidden">
-              <div className="flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 shadow-sm ring-1 ring-primary/12">
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-gray-500">Step {activeStep + 1} of {steps.length}</p>
-                  <p className="truncate text-base font-semibold text-foreground">{steps[activeStep]?.title}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {steps.map((_, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => setActiveStep(i)}
-                      aria-label={`Go to step ${i + 1}`}
-                      className={[
-                        "h-2.5 w-2.5 rounded-full transition-all",
-                        i === activeStep ? "bg-primary" : "bg-primary/18 hover:bg-primary/28",
-                      ].join(" ")}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
           </div>
 
-          {/* RIGHT: Dynamic preview main stage */}
-          <motion.div className="md:sticky md:top-24" whileHover={{ y: -5 }}>
-            <div className="relative overflow-hidden rounded-3xl border border-primary/[0.12] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
-              {/* Browser-like top bar */}
-              <div className="flex items-center gap-2 border-b border-primary/[0.12] bg-white px-4 py-3">
-                <span className="h-2.5 w-2.5 rounded-full bg-primary/12" />
-                <span className="h-2.5 w-2.5 rounded-full bg-primary/12" />
-                <span className="h-2.5 w-2.5 rounded-full bg-primary/12" />
-                <span className="ml-3 text-xs font-semibold text-gray-500">CareTip</span>
+          {/* RIGHT: Laptop mockup */}
+          <motion.div
+            initial={{ opacity: 0, x: 18 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="relative order-1 mx-auto w-full max-w-2xl lg:order-2"
+            whileHover={{ y: -4 }}
+          >
+            <div className="relative w-full overflow-visible px-1 pb-2 sm:px-0">
+              <LiveInMinutesLaptopDemo videoSrc={import.meta.env.VITE_LIVE_IN_MINUTES_DEMO_VIDEO} />
+
+              <div className="pointer-events-none absolute -right-1 top-2 z-10 hidden sm:block lg:right-0">
+                <div className="rounded-2xl border border-gray-200 bg-white/95 px-3 py-2 text-left shadow-sm backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
+                  <p className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">Setup status</p>
+                  <p className="mt-0.5 text-xs font-bold text-neutral-900 dark:text-neutral-100">Ready to collect tips</p>
+                </div>
               </div>
-
-              <div className="relative p-5 sm:p-7">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={activeStep}
-                    initial={{ opacity: 0, y: 22 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -18 }}
-                    transition={{ duration: 0.45, ease: "easeOut" }}
-                  >
-                    {activeStep === 0 ? (
-                      <div className="space-y-5">
-                        <div className="space-y-2">
-                          <p className="text-sm font-semibold text-primary">Welcome to CareTip</p>
-                          <p className="text-2xl font-bold text-foreground">Create your account</p>
-                          <p className="text-sm text-gray-500">Start collecting tips in minutes.</p>
-                        </div>
-
-                        <div className="grid gap-3">
-                          <div className="grid gap-1">
-                              <span className="text-xs font-semibold text-gray-500">Email</span>
-                            <div className="h-10 rounded-lg bg-[#F6F7F8] ring-1 ring-primary/12" />
-                          </div>
-                          <div className="grid gap-1">
-                              <span className="text-xs font-semibold text-gray-500">Password</span>
-                            <div className="h-10 rounded-lg bg-[#F6F7F8] ring-1 ring-primary/12" />
-                          </div>
-                          <div className="h-11 rounded-lg bg-primary text-white shadow-sm" />
-                        </div>
-                      </div>
-                    ) : activeStep === 1 ? (
-                      <div className="space-y-5">
-                        <div className="rounded-2xl border border-primary/[0.12] bg-white p-5 shadow-sm">
-                          <p className="text-sm font-semibold text-primary">Welcome aboard!</p>
-                          <p className="mt-1 text-xl font-bold text-foreground">Let’s add your team</p>
-                          <p className="mt-2 text-sm text-gray-500">
-                            Invite teammates so everyone can start receiving tips.
-                          </p>
-
-                          <div className="mt-5 grid gap-3">
-                            <div className="flex items-center justify-between rounded-xl bg-[#F6F7F8] px-4 py-3 ring-1 ring-primary/12">
-                              <span className="text-sm font-semibold text-foreground">3 invites sent</span>
-                              <span className="text-xs font-semibold text-gray-500">Today</span>
-                            </div>
-                            <div className="h-11 rounded-xl bg-primary text-white shadow-sm" />
-                          </div>
-
-                          <div className="mt-5">
-                            <div className="flex items-center justify-between text-xs font-semibold text-gray-500">
-                              <span>Progress</span>
-                              <span>1/3</span>
-                            </div>
-                            <div className="mt-2 grid grid-cols-3 gap-2">
-                              <div className="h-2 rounded-full bg-primary/90" />
-                              <div className="h-2 rounded-full bg-primary/12" />
-                              <div className="h-2 rounded-full bg-primary/12" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ) : activeStep === 2 ? (
-                      <div className="space-y-5">
-                        <div className="space-y-2">
-                          <p className="text-sm font-semibold text-primary">QR codes</p>
-                          <p className="text-2xl font-bold text-foreground">Generate in seconds</p>
-                          <p className="text-sm text-gray-500">Print, display, and start receiving tips.</p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-dashed border-primary/20 bg-[#FBFBFC] p-5">
-                            <QrCode className="h-6 w-6 text-primary" />
-                            <p className="mt-3 text-sm font-semibold text-foreground">QR preview</p>
-                          </div>
-                          <div className="rounded-2xl border border-dashed border-primary/20 bg-[#FBFBFC] p-5">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10" />
-                            <p className="mt-3 text-sm font-semibold text-foreground">Download / Print</p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="space-y-5">
-                        <div className="space-y-2">
-                          <p className="text-sm font-semibold text-primary">Analytics</p>
-                          <p className="text-2xl font-bold text-foreground">Track tips in real time</p>
-                          <p className="text-sm text-gray-500">See performance across your team.</p>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2">
-                          <div className="rounded-2xl border border-dashed border-primary/20 bg-[#FBFBFC] p-5">
-                            <div className="flex items-center gap-2">
-                              <div className="h-2.5 w-2.5 rounded-full bg-green-500" />
-                              <p className="text-sm font-semibold text-foreground">Live</p>
-                            </div>
-                          </div>
-                          <div className="rounded-2xl border border-dashed border-primary/20 bg-[#FBFBFC] p-5">
-                            <div className="h-10 w-10 rounded-xl bg-primary/10" />
-                            <p className="mt-3 text-sm font-semibold text-foreground">Payout ready</p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </motion.div>
-                </AnimatePresence>
+              <div className="pointer-events-none absolute bottom-10 left-0 z-10 hidden sm:block">
+                <div className="rounded-2xl border border-gray-200 bg-white/95 px-3 py-2 shadow-sm backdrop-blur-sm dark:border-neutral-800 dark:bg-neutral-950/95">
+                  <p className="text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">Typical time</p>
+                  <p className="mt-0.5 text-xs font-bold text-neutral-900 dark:text-neutral-100">Under 5 minutes</p>
+                </div>
               </div>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

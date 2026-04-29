@@ -103,7 +103,7 @@ export function ProfileAvatar({
             className="max-h-[min(96vh,900px)] w-[min(96vw,1200px)] max-w-[min(96vw,1200px)] translate-x-[-50%] translate-y-[-50%] gap-0 border-0 bg-transparent p-2 shadow-none sm:max-w-[min(96vw,1200px)]"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
-            <DialogTitle className="sr-only">Profile photo — {name}</DialogTitle>
+            <DialogTitle className="sr-only">Profile photo: {name}</DialogTitle>
             <img
               src={resolved}
               alt={alt ?? name}

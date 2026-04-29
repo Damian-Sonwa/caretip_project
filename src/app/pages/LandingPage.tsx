@@ -3,21 +3,22 @@ import { Smartphone } from "lucide-react";
 import heroTapToTip from "../../../images/caretip-image.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
-import { QRTippingSection } from "../components/landing/QRTippingSection";
-import { StaffMotivationSection } from "../components/landing/StaffMotivationSection";
-import { DashboardPreviewSection } from "../components/landing/DashboardPreviewSection";
-import { FeedbackSection } from "../components/landing/FeedbackSection";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
 import { HospitalityTeamsUnifiedSection } from "../components/landing/HospitalityTeamsUnifiedSection";
+import { EmployeeLandingSection } from "../components/landing/EmployeeLandingSection";
+import { BusinessLandingSection } from "../components/landing/BusinessLandingSection";
+import { LandingFeaturesSection } from "../components/landing/LandingFeaturesSection";
+import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSection";
+import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
 
 const SHOWCASE_TABS: TabMedia[] = [
   {
     value: "contactless",
-    label: "Tap to Tip",
+    label: "QR scan",
     Icon: Smartphone,
     src: heroTapToTip,
-    alt: "Phone with CareTip QR code, tap to tip",
+    alt: "Phone showing CareTip QR tipping screen",
     imageFit: "contain",
   },
 ];
@@ -35,44 +36,43 @@ export function LandingPage() {
             id="about-section"
             className="font-sans"
             eyebrow="CareTip"
-            title="Tip in seconds with a simple QR scan."
-            description="Guests pay from their phone. You see payouts and team performance in one place."
-            stats={["No setup fees", "Fast payouts", "Secure payments"]}
+            title="Tip in seconds. Reward great service instantly."
+            description="CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan."
+            stats={["Live in minutes", "No POS integration", "Secure checkout"]}
             steps={[
               {
                 id: "s1",
                 title: "Guests scan your QR",
-                text: "Table tents or badges. No guest app required.",
+                text: "Table tents, badges, or a shareable link, with no guest app required.",
               },
               {
                 id: "s2",
-                title: "You control routing",
-                text: "Pool by shift or tip individuals. Your rules.",
+                title: "Tips route your way",
+                text: "Pool by shift or reward individuals. You stay in control.",
               },
               {
                 id: "s3",
-                title: "Clear payout visibility",
-                text: "Digital records your team can trust.",
+                title: "Everyone sees clarity",
+                text: "Staff see earnings; you see performance, without the busywork.",
               },
             ]}
             tabs={SHOWCASE_TABS}
             defaultTab="contactless"
-            primaryCtaLabel="GET STARTED FREE"
+            primaryCtaLabel="Get started"
             primaryCtaTo="/onboarding"
-            secondaryCtaLabel="How it works"
-            secondaryCtaTo="/how-it-works"
+            secondaryCtaLabel="Create your QR"
+            secondaryCtaTo="/onboarding"
             variant="cinematic"
             useAnimatedHero={false}
             heroBorderBeam={false}
           />
           <HospitalityTeamsUnifiedSection />
-          <div id="features" className="scroll-mt-[80px]">
-            <QRTippingSection />
-            <StaffMotivationSection />
-          </div>
-          <DashboardPreviewSection />
-          <FeedbackSection />
           <SimpleSetupSection />
+          <EmployeeLandingSection />
+          <BusinessLandingSection />
+          <LandingFeaturesSection />
+          <LandingRealLifeSection />
+          <LandingFinalCtaSection />
         </main>
         <Footer />
       </div>

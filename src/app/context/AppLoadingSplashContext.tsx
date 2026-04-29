@@ -60,7 +60,7 @@ function BrandedLoadingSplashOverlay({
     <div
       className={[
         "fixed inset-0 z-[10000] flex flex-col items-center justify-center px-6",
-        "bg-[#FAF9F6] text-foreground",
+        "bg-gray-50 text-foreground dark:bg-neutral-950",
         "transition-[opacity,transform,filter] duration-[480ms] ease-out motion-reduce:transition-none",
         exiting ? "pointer-events-none opacity-0 scale-[0.98]" : "opacity-100 scale-100",
       ].join(" ")}

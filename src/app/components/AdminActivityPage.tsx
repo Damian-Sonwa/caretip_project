@@ -50,15 +50,15 @@ export function AdminActivityPage() {
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'user':
-        return 'bg-blue-100 text-blue-600';
+        return 'bg-gray-50 text-neutral-600 border border-gray-200';
       case 'tip':
-        return 'bg-purple-100 text-purple-600';
+        return 'bg-gray-50 text-neutral-600 border border-gray-200';
       case 'payment':
-        return 'bg-green-100 text-green-600';
+        return 'bg-gray-50 text-neutral-600 border border-gray-200';
       case 'system':
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-gray-50 text-neutral-600 border border-gray-200';
       default:
-        return 'bg-gray-100 text-gray-600';
+        return 'bg-gray-50 text-neutral-600 border border-gray-200';
     }
   };
 

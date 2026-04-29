@@ -19,7 +19,7 @@ import {
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 
-const ACTION_TEAL = "#197278";
+const ACTION_TEAL = "#EB992C";
 
 export function LocationsPage() {
   const { isBusiness } = useRequireAuth();
@@ -167,7 +167,7 @@ export function LocationsPage() {
               <textarea
                 id="loc-desc"
                 className="w-full min-h-[88px] rounded-lg border border-border bg-background px-3 py-2 text-sm resize-y"
-                placeholder="Notes for staff — not shown to guests."
+                placeholder="Notes for staff, not shown to guests."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 autoComplete="off"

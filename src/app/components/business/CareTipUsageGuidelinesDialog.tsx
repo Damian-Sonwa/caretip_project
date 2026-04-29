@@ -9,11 +9,11 @@ import { Users, Printer, TrendingUp } from "lucide-react";
 
 /** Palette 84 — CareTip brand accents */
 const P = {
-  teal: "#197278",
-  deep: "#384D48",
-  sage: "#ACAD94",
-  gray: "#6E7271",
-  tomato: "#C44536",
+  teal: "#EB992C",
+  deep: "#111827",
+  sage: "#F9FAFB",
+  gray: "#6B7280",
+  tomato: "#EB992C",
 } as const;
 
 interface CareTipUsageGuidelinesDialogProps {

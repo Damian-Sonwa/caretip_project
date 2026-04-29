@@ -58,7 +58,7 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
         disableFlipByClick={false}
       >
         {/* Cover Page */}
-        <div className="relative bg-gradient-to-br from-[#384D48] to-[#14BDEB] border rounded-lg p-8 text-white flex flex-col items-center justify-center shadow-2xl cursor-grab">
+        <div className="relative bg-gradient-to-br from-neutral-900 to-neutral-700 border border-gray-200 dark:border-neutral-800 rounded-lg p-8 text-white flex flex-col items-center justify-center shadow-2xl cursor-grab">
           <div className="flex justify-center items-center mb-8">
             <div className="w-20 h-20 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -78,8 +78,8 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
         </div>
 
         {/* Index Page */}
-        <div className="w-full h-full flex justify-center items-center bg-zinc-100 border border-gray-300 box-border">
-          <div className="page-front text-start text-white p-3 bg-[#384D48]">Index</div>
+        <div className="w-full h-full flex justify-center items-center bg-gray-50 border border-gray-200 box-border dark:bg-neutral-900 dark:border-neutral-800">
+          <div className="page-front text-start text-white p-3 bg-neutral-900">Index</div>
           <div className="flex flex-col justify-start items-start p-8 space-y-3">
             <div>
               <ol className="grid grid-cols-2 gap-2">
@@ -87,7 +87,7 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
                   <React.Fragment key={index}>
                     <li
                       onClick={() => handleFlip(index + 2)}
-                      className="flex justify-start items-center text-xs cursor-pointer hover:text-[#14BDEB] transition-colors"
+                      className="flex justify-start items-center text-xs cursor-pointer hover:text-primary transition-colors"
                     >
                       <img
                         src={testimonial.image || ''}
@@ -110,9 +110,9 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
         {testimonials.map((testimonial, index) => (
           <div
             key={index}
-            className="w-full h-full flex justify-center items-center bg-gray-50 border border-gray-300 box-border cursor-grab"
+            className="w-full h-full flex justify-center items-center bg-gray-50 border border-gray-200 box-border cursor-grab dark:bg-neutral-900 dark:border-neutral-800"
           >
-            <div className="page-front text-end text-white p-3 bg-[#384D48]">{index + 2}</div>
+            <div className="page-front text-end text-white p-3 bg-neutral-900">{index + 2}</div>
             <div className="flex justify-center items-center mt-7">
               <img
                 src={testimonial.image || ''}
@@ -135,7 +135,7 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
                   key={i}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="#14BDEB"
+                  fill="#EB992C"
                   className="size-8"
                 >
                   <path
@@ -150,7 +150,7 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
                   key={i}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
-                  fill="#CBD5E1"
+                  fill="#E5E7EB"
                   className="size-8"
                 >
                   <path
@@ -165,7 +165,7 @@ export const BookTestimonial = ({ testimonials }: ComponentProps) => {
         ))}
 
         {/* Thank You Page */}
-        <div className="bg-gradient-to-br from-[#384D48] to-[#14BDEB] border p-8 text-white flex flex-col items-center justify-center">
+        <div className="bg-gradient-to-br from-neutral-900 to-neutral-700 border border-gray-200 dark:border-neutral-800 p-8 text-white flex flex-col items-center justify-center">
           <h1 className="text-4xl font-bold mb-4 text-center font-serif">Thank You!</h1>
           <p className="text-lg text-center">We appreciate your feedback</p>
         </div>

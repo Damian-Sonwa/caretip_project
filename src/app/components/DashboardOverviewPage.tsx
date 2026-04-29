@@ -68,7 +68,7 @@ export function DashboardOverviewPage() {
                   </p>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
                     <Heart className="w-3 h-3" />
-                    One-time tips only — no recurring billing
+                    One-time tips only, no recurring billing
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -101,11 +101,11 @@ export function DashboardOverviewPage() {
                   <div className="p-3 bg-accent/10 rounded-xl">
                     <DollarSign className="w-6 h-6 text-accent" />
                   </div>
-                  <ArrowUpRight className="w-5 h-5 text-green-600" />
+                  <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">$24,800</p>
                 <p className="text-sm text-muted-foreground">Tips this month</p>
-                <p className="text-xs text-green-600 mt-2 font-medium">Sample dashboard data</p>
+                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">Sample dashboard data</p>
               </motion.div>
 
               <motion.div
@@ -115,10 +115,10 @@ export function DashboardOverviewPage() {
                 className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-purple-100 rounded-xl">
-                    <Users className="w-6 h-6 text-purple-600" />
+                  <div className="p-3 bg-primary/10 rounded-xl">
+                    <Users className="w-6 h-6 text-primary" />
                   </div>
-                  <ArrowUpRight className="w-5 h-5 text-green-600" />
+                  <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">18</p>
                 <p className="text-sm text-muted-foreground">Team members on CareTip</p>
@@ -132,14 +132,14 @@ export function DashboardOverviewPage() {
                 className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-green-100 rounded-xl">
-                    <TrendingUp className="w-6 h-6 text-green-600" />
+                  <div className="p-3 bg-primary/10 rounded-xl">
+                    <TrendingUp className="w-6 h-6 text-primary" />
                   </div>
-                  <ArrowUpRight className="w-5 h-5 text-green-600" />
+                  <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">412</p>
                 <p className="text-sm text-muted-foreground">Successful tip payments</p>
-                <p className="text-xs text-green-600 mt-2 font-medium">All one-time charges</p>
+                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">All one-time charges</p>
               </motion.div>
 
               <motion.div
@@ -149,10 +149,10 @@ export function DashboardOverviewPage() {
                 className="bg-card border border-border rounded-xl p-6 hover:shadow-lg transition-shadow"
               >
                 <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-amber-100 rounded-xl">
-                    <Activity className="w-6 h-6 text-amber-600" />
+                  <div className="p-3 bg-primary/10 rounded-xl">
+                    <Activity className="w-6 h-6 text-primary" />
                   </div>
-                  <ArrowUpRight className="w-5 h-5 text-green-600" />
+                  <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">$18.40</p>
                 <p className="text-sm text-muted-foreground">Average tip amount</p>
@@ -176,24 +176,24 @@ export function DashboardOverviewPage() {
                 <AreaChart data={tipsData}>
                   <defs>
                     <linearGradient id="tipsGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#197278" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#197278" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E2E2E2" />
-                  <XAxis dataKey="month" stroke="#6E7271" />
-                  <YAxis stroke="#6E7271" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                  <XAxis dataKey="month" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#D8D4D5",
-                      border: "1px solid #6E7271",
+                      backgroundColor: "#FFFFFF",
+                      border: "1px solid #E5E7EB",
                       borderRadius: "8px",
                     }}
                   />
                   <Area
                     type="monotone"
                     dataKey="tips"
-                    stroke="#197278"
+                    stroke="#EB992C"
                     strokeWidth={3}
                     fill="url(#tipsGradient)"
                   />
@@ -211,7 +211,7 @@ export function DashboardOverviewPage() {
               <h3 className="text-2xl font-semibold text-foreground mb-3">Make tipping effortless</h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
                 Guests scan a QR code, choose an amount, and pay once. Funds route through Stripe as a
-                single payment intent — no subscriptions or invoices.
+                single payment intent, no subscriptions or invoices.
               </p>
               <Link
                 to="/how-it-works"

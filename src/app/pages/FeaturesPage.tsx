@@ -9,7 +9,7 @@ const FEATURES = [
   {
     Icon: QrCode,
     title: "QR Code Tipping",
-    description: "Guests scan and tip in seconds—no app installs, no friction.",
+    description: "Guests scan and tip in seconds, with no app installs and no friction.",
   },
   {
     Icon: Users,
@@ -58,7 +58,7 @@ export function FeaturesPage() {
                 Everything CareTip Can Do
               </h1>
               <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
-                A clear view of the platform—built for hospitality teams and designed for fast tipping.
+                A clear view of the platform, built for hospitality teams and designed for fast tipping.
               </p>
             </motion.div>
 

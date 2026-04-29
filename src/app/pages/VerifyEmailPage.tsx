@@ -44,11 +44,11 @@ export function VerifyEmailPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Email verified</h1>
-          <p className="text-sm text-[#6B7280]">Thanks—redirecting you to sign in…</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Email verified</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Thanks, redirecting you to sign in…</p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             Continue
           </Link>
@@ -61,8 +61,8 @@ export function VerifyEmailPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-3 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Verifying your email…</h1>
-          <p className="text-sm text-[#6B7280]">This will only take a moment.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Verifying your email…</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">This will only take a moment.</p>
         </div>
       </AuthRecoveryLayout>
     );
@@ -71,13 +71,13 @@ export function VerifyEmailPage() {
   return (
     <AuthRecoveryLayout showFooterLink={false}>
       <div className="space-y-4 text-center">
-        <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Verification failed</h1>
-        <p className="text-sm text-[#6B7280]">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Verification failed</h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">
           {error || "This verification link is invalid or has expired."}
         </p>
         <Link
           to="/login"
-          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+          className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
         >
           Back to login
         </Link>

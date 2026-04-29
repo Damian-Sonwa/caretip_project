@@ -26,7 +26,7 @@ const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as
 export type { AuthRole };
 
 const FIELD_CLASS =
-  "w-full rounded-lg border border-neutral-200 bg-[#F3F4F6] px-3 py-2.5 text-sm text-[#1F2937] placeholder:text-[#9CA3AF] shadow-none transition focus:border-[#EB992C] focus:outline-none focus:ring-[3px] focus:ring-[#EB992C]/25 font-['Roboto',ui-sans-serif,system-ui,sans-serif]";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 const FIELD_ICON = `${FIELD_CLASS} pl-10`;
 
@@ -221,7 +221,7 @@ export function AuthPage() {
 
   const handleResendVerification = async () => {
     if (!email.trim() || !password) {
-      setError('Enter your password above, then tap resend — we use it to confirm it’s you.');
+      setError('Enter your password above, then tap resend. We use it to confirm it’s you.');
       return;
     }
     setResendBusy(true);
@@ -355,7 +355,7 @@ export function AuthPage() {
       (role === 'employee' && (!name || !inviteCode)));
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-[#F8F9FA] font-['Roboto',ui-sans-serif,system-ui,sans-serif]">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
 
@@ -370,7 +370,7 @@ export function AuthPage() {
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting}
-            className="flex w-full flex-col gap-4 text-[#1F2937]"
+            className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
             method="post"
             action=""
             noValidate
@@ -411,7 +411,7 @@ export function AuthPage() {
                   animate={{ opacity: 1, x: 0 }}
                   className="relative"
                 >
-                  <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+                  <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400" />
                   <input
                     id="auth-business-name"
                     placeholder="Business name"
@@ -469,7 +469,7 @@ export function AuthPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="relative"
               >
-                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6B7280]" />
+                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400" />
                 <input
                   placeholder="Invite code"
                   type="text"
@@ -525,7 +525,7 @@ export function AuthPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-[#6B7280] transition-colors hover:text-[#1F2937]"
+                className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                 aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -538,10 +538,10 @@ export function AuthPage() {
                       width: `${getPasswordStrength(password).score}%`,
                       backgroundColor:
                         getPasswordStrength(password).strength === 'strong'
-                          ? '#1F2937'
+                          ? '#111827'
                           : getPasswordStrength(password).strength === 'fair'
                             ? '#EB992C'
-                            : '#9CA3AF',
+                            : '#6B7280',
                       opacity: getPasswordStrength(password).strength === 'weak' ? 0.45 : 1,
                     }}
                   />
@@ -565,7 +565,7 @@ export function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-[#6B7280] transition-colors hover:text-[#1F2937]"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                     aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
                     {showConfirmPassword ? (
@@ -575,7 +575,7 @@ export function AuthPage() {
                     )}
                   </button>
                 </div>
-                <ul className="space-y-1 text-[11px] text-[#6B7280]">
+                <ul className="space-y-1 text-[11px] text-neutral-600 dark:text-neutral-400">
                   {[
                     { key: 'minLength', label: 'At least 8 characters', met: getPasswordChecklist(password).minLength },
                     { key: 'upper', label: 'One uppercase letter', met: getPasswordChecklist(password).hasUppercase },
@@ -583,10 +583,10 @@ export function AuthPage() {
                     { key: 'number', label: 'One number', met: getPasswordChecklist(password).hasNumber },
                     { key: 'special', label: 'One special character (@#$%)', met: getPasswordChecklist(password).hasSpecial },
                   ].map(({ key, label, met }) => (
-                    <li key={key} className={`flex items-center gap-2 ${met ? 'text-[#EB992C]' : ''}`}>
+                    <li key={key} className={`flex items-center gap-2 ${met ? 'text-primary' : ''}`}>
                       <span
                         className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${
-                          met ? 'bg-[#EB992C] text-white' : 'bg-neutral-200'
+                          met ? 'bg-primary text-white' : 'bg-neutral-200 dark:bg-neutral-800'
                         }`}
                       >
                         {met ? <Check className="h-2 w-2" strokeWidth={3} /> : null}
@@ -614,7 +614,7 @@ export function AuthPage() {
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-[#6B7280] transition-colors hover:text-[#1F2937]"
+                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                     aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                   >
                     {showConfirmPassword ? (
@@ -639,7 +639,7 @@ export function AuthPage() {
                   type="button"
                   onClick={() => void handleResendVerification()}
                   disabled={resendBusy || isSubmitting}
-                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-[#197278] bg-white text-sm font-semibold text-[#197278] transition hover:bg-[#197278]/5 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-gray-200 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-900/70"
                 >
                   {resendBusy ? (
                     <>
@@ -657,7 +657,7 @@ export function AuthPage() {
               <div className="flex justify-end pt-0.5">
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-[#6B7280] transition-colors hover:text-[#EB992C]"
+                  className="text-xs font-medium text-neutral-600 transition-colors hover:text-primary dark:text-neutral-400"
                 >
                   Forgot password?
                 </Link>
@@ -670,7 +670,7 @@ export function AuthPage() {
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               type="submit"
               disabled={isSubmitting || (!isLogin && signUpDisabled)}
-              className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+              className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {isSubmitting ? (
                 <>
@@ -685,14 +685,14 @@ export function AuthPage() {
             </motion.button>
 
             {isSubmitting && (
-              <p className="text-center text-[11px] font-medium text-[#6B7280]" role="status">
+              <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
                 {isLogin ? 'Please wait…' : 'Creating your account…'}
               </p>
             )}
 
             <div className="relative my-1 flex items-center">
               <div className="flex-grow border-t border-neutral-200" />
-              <span className="mx-3 text-[11px] font-medium uppercase tracking-wide text-[#9CA3AF]">
+              <span className="mx-3 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
                 or
               </span>
               <div className="flex-grow border-t border-neutral-200" />
@@ -708,13 +708,13 @@ export function AuthPage() {
               onGoogleCredential={(t) => void runGoogleOAuth(t)}
             />
 
-            <p className="pt-1 text-center text-xs text-[#6B7280]">
+            <p className="pt-1 text-center text-xs text-neutral-600 dark:text-neutral-400">
               {isLogin ? "Don't have an account? " : 'Already have an account? '}
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={toggleAuthMode}
-                className="font-semibold text-[#1F2937] underline-offset-4 transition-colors hover:text-[#EB992C] hover:underline disabled:opacity-50"
+                className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline disabled:opacity-50 dark:text-neutral-100"
               >
                 {isLogin ? 'Sign up' : 'Sign in'}
               </button>

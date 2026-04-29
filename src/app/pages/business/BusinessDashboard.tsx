@@ -520,7 +520,7 @@ export function BusinessDashboard() {
                                 withRatings.reduce((s, e) => s + (e.rating ?? 0), 0) /
                                 withRatings.length
                               ).toFixed(1)
-                            : "—";
+                            : "N/A";
                         })()
                       : "0"}
                   </CardTitle>
@@ -629,7 +629,7 @@ export function BusinessDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg">Daily tip distribution</CardTitle>
                 <CardDescription>
-                  {timeframe === "week" && "Tips per day (Mon–Sun, current week)"}
+                  {timeframe === "week" && "Tips per day (Mon to Sun, current week)"}
                   {timeframe === "month" && "Tips per day (current month)"}
                   {timeframe === "year" && "Tips per month (current year)"}
                 </CardDescription>

@@ -511,7 +511,7 @@ export function EmployeeDashboard() {
                     <Star className="h-6 w-6 text-foreground" />
                   </div>
                   <CardTitle className="text-2xl font-bold tabular-nums">
-                    {stats.rating != null ? stats.rating : "—"}
+                    {stats.rating != null ? stats.rating : "N/A"}
                   </CardTitle>
                   <CardDescription>
                     {stats.rating != null ? "Avg rating" : "No ratings yet"}
@@ -527,7 +527,7 @@ export function EmployeeDashboard() {
                     <Target className="h-6 w-6 text-foreground" />
                   </div>
                   <CardTitle className="text-2xl font-bold tabular-nums">
-                    {goalPct != null ? `${goalPct}%` : "—"}
+                    {goalPct != null ? `${goalPct}%` : "N/A"}
                   </CardTitle>
                   <CardDescription>
                     {goalPct != null ? "Monthly goal progress" : "No goal set"}

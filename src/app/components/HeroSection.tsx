@@ -23,7 +23,7 @@ export function HeroSection() {
   return (
     <section className="relative min-h-[90vh] flex items-center overflow-hidden">
       {/* Gradient Background */}
-      <div className="absolute inset-0 bg-[#0F172A] z-0"></div>
+      <div className="absolute inset-0 bg-neutral-950 z-0"></div>
 
       {/* Decorative gradient orbs */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-accent/20 rounded-full blur-3xl"></div>
@@ -84,7 +84,7 @@ export function HeroSection() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="group px-6 sm:px-8 py-3 sm:py-4 bg-white text-[#5B4FE8] rounded-2xl font-semibold hover:bg-white/90 transition-all hover:shadow-2xl flex items-center justify-center gap-2 text-sm sm:text-base"
+                className="group px-6 sm:px-8 py-3 sm:py-4 bg-white text-neutral-900 rounded-2xl font-semibold hover:bg-white/90 transition-all hover:shadow-2xl flex items-center justify-center gap-2 text-sm sm:text-base"
               >
                 Get Started
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />

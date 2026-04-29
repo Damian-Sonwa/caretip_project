@@ -6,7 +6,7 @@ import { AuthLikePageBackground } from '../components/AuthLikePageBackground';
 
 export function HowItWorksPage() {
   return (
-    <div className="relative min-h-[100dvh] bg-white">
+    <div className="relative min-h-[100dvh] bg-white dark:bg-neutral-950">
       <AuthLikePageBackground />
       <div className="relative z-10 min-w-0">
         <Navigation />
@@ -35,12 +35,12 @@ export function HowItWorksPage() {
                 <div className="space-y-12">
                   <div className="space-y-8">
                     <div className="flex items-start gap-6">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
-                        <UserPlus className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <UserPlus className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="mb-3 flex items-center gap-3">
-                          <span className="rounded-full bg-[hsl(33_82%_55%_/_0.15)] px-3 py-1 text-xs font-semibold text-[hsl(33_82%_45%)]">
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             STEP 1
                           </span>
                           <h3 className="text-2xl font-semibold text-neutral-900">Create your business</h3>
@@ -57,12 +57,12 @@ export function HowItWorksPage() {
                     </div>
 
                     <div className="flex items-start gap-6">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
-                        <QrCode className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <QrCode className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="mb-3 flex items-center gap-3">
-                          <span className="rounded-full bg-[hsl(33_82%_55%_/_0.15)] px-3 py-1 text-xs font-semibold text-[hsl(33_82%_45%)]">
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             STEP 2
                           </span>
                           <h3 className="text-2xl font-semibold text-neutral-900">Issue QR codes for your team</h3>
@@ -88,12 +88,12 @@ export function HowItWorksPage() {
                     </div>
 
                     <div className="flex items-start gap-6">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
-                        <Smartphone className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <Smartphone className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="mb-3 flex items-center gap-3">
-                          <span className="rounded-full bg-[hsl(33_82%_55%_/_0.15)] px-3 py-1 text-xs font-semibold text-[hsl(33_82%_45%)]">
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             STEP 3
                           </span>
                           <h3 className="text-2xl font-semibold text-neutral-900">Guests scan, tip, and pay</h3>
@@ -110,12 +110,12 @@ export function HowItWorksPage() {
                     </div>
 
                     <div className="flex items-start gap-6">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
-                        <Wallet className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                        <Wallet className="h-6 w-6 text-primary" />
                       </div>
                       <div className="flex-1">
                         <div className="mb-3 flex items-center gap-3">
-                          <span className="rounded-full bg-[hsl(33_82%_55%_/_0.15)] px-3 py-1 text-xs font-semibold text-[hsl(33_82%_45%)]">
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             STEP 4
                           </span>
                           <h3 className="text-2xl font-semibold text-neutral-900">Notify, reconcile, and pay out</h3>
@@ -125,11 +125,11 @@ export function HowItWorksPage() {
                         </p>
                         <div className="grid grid-cols-2 gap-3">
                           <div className="rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-sm">
-                            <p className="text-lg font-semibold text-[hsl(33_82%_55%)]">Live</p>
+                            <p className="text-lg font-semibold text-primary">Live</p>
                             <p className="text-xs text-neutral-600">Tip notifications</p>
                           </div>
                           <div className="rounded-lg border border-neutral-200 bg-white/95 p-3 shadow-sm">
-                            <p className="text-lg font-semibold text-[hsl(33_82%_55%)]">Clear</p>
+                            <p className="text-lg font-semibold text-primary">Clear</p>
                             <p className="text-xs text-neutral-600">Payout visibility</p>
                           </div>
                         </div>
@@ -143,8 +143,8 @@ export function HowItWorksPage() {
                     </h2>
                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                       <div className="rounded-xl border border-neutral-200 bg-white/95 p-6 shadow-sm">
-                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[hsl(33_82%_55%_/_0.12)]">
-                          <Shield className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                          <Shield className="h-6 w-6 text-primary" />
                         </div>
                         <h3 className="mb-2 text-lg font-semibold text-neutral-900">Payments you can stand behind</h3>
                         <p className="text-sm text-neutral-600">
@@ -153,8 +153,8 @@ export function HowItWorksPage() {
                       </div>
 
                       <div className="rounded-xl border border-neutral-200 bg-white/95 p-6 shadow-sm">
-                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-[hsl(33_82%_55%_/_0.12)]">
-                          <Zap className="h-6 w-6 text-[hsl(33_82%_55%)]" />
+                        <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                          <Zap className="h-6 w-6 text-primary" />
                         </div>
                         <h3 className="mb-2 text-lg font-semibold text-neutral-900">Built for busy floors</h3>
                         <p className="text-sm text-neutral-600">
@@ -173,7 +173,7 @@ export function HowItWorksPage() {
                     </p>
                     <Link
                       to="/pricing"
-                      className="inline-flex items-center gap-2 rounded-lg bg-[#EB992C] px-6 py-3 font-semibold text-white transition-colors hover:bg-[hsl(33_82%_48%)]"
+                      className="inline-flex items-center gap-2 rounded-lg bg-primary px-6 py-3 font-semibold text-white transition-colors hover:bg-primary/90"
                     >
                       View pricing
                       <ArrowLeft className="h-4 w-4 rotate-180" />

@@ -80,7 +80,7 @@ function apiConfigHintForFailedFetch(url: string): string {
   if (import.meta.env.DEV) {
     return " In local dev, relative /api URLs are proxied by Vite to the backend (see vite.config.ts). Start the API on port 3001 (e.g. from the backend folder: npm run dev). If .env sets VITE_API_URL, it must be a reachable http(s) URL or omit it to use the proxy.";
   }
-  return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com — then trigger a new deploy.";
+  return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com. Then trigger a new deploy.";
 }
 
 async function refreshAccessToken(): Promise<string | null> {

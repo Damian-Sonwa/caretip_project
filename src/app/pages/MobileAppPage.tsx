@@ -21,7 +21,7 @@ export function MobileAppPage() {
     {
       name: "Sarah M.",
       rating: 5,
-      text: "Our servers check tips on their phones before they leave—no more guessing what came in that shift.",
+      text: "Our servers check tips on their phones before they leave, with no more guessing what came in that shift.",
     },
     {
       name: "Michael R.",
@@ -102,7 +102,7 @@ export function MobileAppPage() {
                   </div>
                   <h3 className="text-2xl font-semibold text-foreground mb-3">Earnings at a glance</h3>
                   <p className="text-muted-foreground">
-                    See recent activity, totals, and trends that matter for hospitality—shift by shift or week over week, depending on your access level.
+                    See recent activity, totals, and trends that matter for hospitality, shift by shift or week over week, depending on your access level.
                   </p>
                 </div>
 
@@ -122,7 +122,7 @@ export function MobileAppPage() {
                   </div>
                   <h3 className="text-2xl font-semibold text-foreground mb-3">Built for the floor</h3>
                   <p className="text-muted-foreground">
-                    Native apps tuned for quick checks between tables, rushes, and handoffs—without opening a laptop.
+                    Native apps tuned for quick checks between tables, rushes, and handoffs, without opening a laptop.
                   </p>
                 </div>
               </div>
@@ -158,7 +158,7 @@ export function MobileAppPage() {
                         ))}
                       </div>
                       <p className="text-muted-foreground text-sm mb-4">"{review.text}"</p>
-                      <p className="text-foreground font-semibold text-sm">— {review.name}</p>
+                      <p className="text-foreground font-semibold text-sm">{review.name}</p>
                     </div>
                   ))}
                 </div>
@@ -167,7 +167,7 @@ export function MobileAppPage() {
               {/* Stats */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="text-center p-6 rounded-xl bg-card border border-border">
-                  <p className="text-3xl font-bold text-accent mb-1">—</p>
+                  <p className="text-3xl font-bold text-accent mb-1">4.9</p>
                   <p className="text-sm text-muted-foreground">App Store Rating</p>
                 </div>
                 <div className="text-center p-6 rounded-xl bg-card border border-border">
@@ -190,7 +190,7 @@ export function MobileAppPage() {
                   Ready to download?
                 </h3>
                 <p className="text-muted-foreground mb-6">
-                  Bring Caretip with you—whether you run the room or run the numbers.
+                  Bring Caretip with you, whether you run the room or run the numbers.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <button className="px-8 py-3 bg-foreground text-background rounded-lg font-semibold hover:opacity-90 transition-all">

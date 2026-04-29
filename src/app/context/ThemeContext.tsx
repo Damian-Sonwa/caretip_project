@@ -5,7 +5,6 @@ export type ThemeMode = "light" | "dark";
 type ThemeContextValue = {
   mode: ThemeMode;
   setMode: (mode: ThemeMode) => void;
-  toggle: () => void;
 };
 
 const THEME_STORAGE_KEY = "caretip-theme";
@@ -17,17 +16,9 @@ function applyModeToDocument(mode: ThemeMode) {
 }
 
 function getInitialMode(): ThemeMode {
-  try {
-    const saved = window.localStorage.getItem(THEME_STORAGE_KEY);
-    if (saved === "light" || saved === "dark") return saved;
-  } catch {
-    // ignore
-  }
-  const prefersDark =
-    typeof window !== "undefined" &&
-    typeof window.matchMedia === "function" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches;
-  return prefersDark ? "dark" : "light";
+  // App-wide default: always start in light mode.
+  // We intentionally ignore system preference and any previously saved value.
+  return "light";
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -46,8 +37,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<ThemeContextValue>(() => {
     const setMode = (next: ThemeMode) => setModeState(next);
-    const toggle = () => setModeState((m) => (m === "dark" ? "light" : "dark"));
-    return { mode, setMode, toggle };
+    return { mode, setMode };
   }, [mode]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

@@ -9,7 +9,7 @@ import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
 import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 
-const TEAL = "#197278";
+const TEAL = "#EB992C";
 
 interface NewTipPayload {
   tip: TipItem;

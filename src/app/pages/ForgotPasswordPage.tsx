@@ -8,7 +8,7 @@ import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
 
 const FIELD =
-  "w-full rounded-lg border border-neutral-200 bg-[#F3F4F6] px-3 py-2.5 text-sm text-[#1F2937] placeholder:text-[#9CA3AF] shadow-none transition focus:border-[#EB992C] focus:outline-none focus:ring-[3px] focus:ring-[#EB992C]/25";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 export function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
@@ -40,14 +40,14 @@ export function ForgotPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Check your inbox</h1>
-          <p className="text-sm leading-relaxed text-[#6B7280]">
-            If an account exists for <span className="font-medium text-[#1F2937]">{email.trim()}</span>, we sent a
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Check your inbox</h1>
+          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+            If an account exists for <span className="font-medium text-neutral-900 dark:text-neutral-100">{email.trim()}</span>, we sent a
             link to reset your password. The link expires in one hour.
           </p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             Back to login
           </Link>
@@ -60,14 +60,14 @@ export function ForgotPasswordPage() {
     <AuthRecoveryLayout>
       <div className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Reset your password</h1>
-          <p className="text-sm leading-relaxed text-[#6B7280]">
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Reset your password</h1>
+          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
             Enter your email and we&apos;ll send you a link to get back into your account.
           </p>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4" noValidate>
           <div>
-            <label htmlFor="forgot-email" className="mb-2 block text-left text-xs font-medium text-[#6B7280]">
+            <label htmlFor="forgot-email" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
               Email address
             </label>
             <input
@@ -92,7 +92,7 @@ export function ForgotPasswordPage() {
             whileHover={submitting ? undefined : { y: -3 }}
             whileTap={submitting ? undefined : { scale: 0.98 }}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? (
               <>

@@ -49,15 +49,15 @@ const getStatusConfig = (status: Transaction['status']) => {
       return {
         icon: Clock,
         label: 'Pending',
-        className: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-        iconClassName: 'text-yellow-600',
+        className: 'bg-gray-50 text-neutral-600 border-gray-200 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-800',
+        iconClassName: 'text-neutral-600 dark:text-neutral-400',
       };
     case 'failed':
       return {
         icon: XCircle,
         label: 'Failed',
-        className: 'bg-red-100 text-red-700 border-red-200',
-        iconClassName: 'text-red-600',
+        className: 'bg-gray-50 text-neutral-600 border-gray-200 dark:bg-neutral-900 dark:text-neutral-400 dark:border-neutral-800',
+        iconClassName: 'text-neutral-600 dark:text-neutral-400',
       };
   }
 };
@@ -67,9 +67,9 @@ const getTypeConfig = (type: Transaction['type']) => {
     case 'tip':
       return { icon: CreditCard, color: 'text-accent' };
     case 'refund':
-      return { icon: ArrowDownRight, color: 'text-orange-600' };
+      return { icon: ArrowDownRight, color: 'text-primary' };
     case 'adjustment':
-      return { icon: ArrowUpRight, color: 'text-purple-600' };
+      return { icon: ArrowUpRight, color: 'text-neutral-600 dark:text-neutral-400' };
   }
 };
 
@@ -139,7 +139,7 @@ export function TransactionsPage() {
                 Transactions & Activity
               </h1>
               <p className="text-muted-foreground">
-                Every row is a one-time tip or related movement — no recurring subscriptions
+                Every row is a one-time tip or related movement, with no recurring subscriptions
               </p>
             </div>
 

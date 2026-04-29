@@ -19,10 +19,10 @@ export type Hero195Props = {
 };
 
 export function Hero195({ className, headlineStats }: Hero195Props) {
-  const tips = headlineStats?.tipsLabel ?? "—";
-  const businesses = headlineStats?.businessesLabel ?? "—";
-  const locations = headlineStats?.locationsLabel ?? "—";
-  const staff = headlineStats?.staffLabel ?? "—";
+  const tips = headlineStats?.tipsLabel ?? "N/A";
+  const businesses = headlineStats?.businessesLabel ?? "N/A";
+  const locations = headlineStats?.locationsLabel ?? "N/A";
+  const staff = headlineStats?.staffLabel ?? "N/A";
 
   return (
     <DashboardHero
@@ -35,9 +35,9 @@ export function Hero195({ className, headlineStats }: Hero195Props) {
         </>
       }
       title="Operate with clarity"
-      description="Global tips, businesses, and staff in one high-contrast workspace. Yellow actions, black type, white surfaces — built for fast decisions."
+      description="Global tips, businesses, and staff in one high-contrast workspace. Yellow actions, black type, white surfaces, built for fast decisions."
       imageSrc={HERO_IMAGE}
-      imageCaption="Live aggregates refresh with your dashboard — same palette on every surface."
+      imageCaption="Live aggregates refresh with your dashboard, same palette on every surface."
       overview={
         <div className="grid grid-cols-2 gap-3 text-center sm:grid-cols-4">
           <div>

@@ -56,7 +56,7 @@ export function TestimonialsSection() {
           <div className="max-w-4xl mx-auto">
             <div className="relative rounded-2xl overflow-hidden bg-card border border-border shadow-2xl group">
               {/* Video Container */}
-              <div className="relative aspect-video bg-gradient-to-br from-[#384D48] to-[#14BDEB]">
+              <div className="relative aspect-video bg-gray-50 dark:bg-neutral-900">
                 {/* Placeholder - Replace with your video */}
                 <video
                   className="w-full h-full object-cover"
@@ -91,7 +91,7 @@ export function TestimonialsSection() {
                   </div>
                   <div className="flex-1">
                     <p className="text-sm sm:text-base text-foreground font-medium mb-1">
-                      "Our guests actually tip more now — QR codes made it effortless. No subscriptions, just simple one-time thanks."
+                      "Our guests actually tip more now. QR codes made it effortless. No subscriptions, just simple one-time thanks."
                     </p>
                     <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
                       <span className="font-semibold">Jessica Martinez</span>

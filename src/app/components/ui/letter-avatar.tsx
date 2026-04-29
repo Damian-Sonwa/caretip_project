@@ -22,7 +22,7 @@ const sizeClasses: Record<string, string> = {
 export function LetterAvatar({ name, className, size = "md", tone = "brand" }: LetterAvatarProps) {
   const letter = (name?.trim() || "?")[0].toUpperCase();
   const isFull = size === "full";
-  const bg = tone === "teal" ? "#197278" : CARETIP_BRAND_ORANGE;
+  const bg = CARETIP_BRAND_ORANGE;
   return (
     <div
       className={cn(

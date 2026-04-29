@@ -31,7 +31,7 @@ const faqData: FAQItem[] = [
     id: 1,
     question: "How do I start accepting tips?",
     answer:
-      "Create a CareTip business account, add your team, and print or display QR codes. Guests scan, pick an amount, and pay once with their card. Each charge is a single Stripe payment intent — not a subscription.",
+      "Create a CareTip business account, add your team, and print or display QR codes. Guests scan, pick an amount, and pay once with their card. Each charge is a single Stripe payment intent, not a subscription.",
     category: "Getting Started",
   },
   {
@@ -45,7 +45,7 @@ const faqData: FAQItem[] = [
     id: 3,
     question: "How do fees work?",
     answer:
-      "CareTip charges transparent processing-style fees per successful tip (see the Fees page). There is no recurring software subscription on Starter — you only pay when a guest completes a tip.",
+      "CareTip charges transparent processing-style fees per successful tip (see the Fees page). There is no recurring software subscription on Starter, you only pay when a guest completes a tip.",
     category: "Pricing",
   },
   {
@@ -59,7 +59,7 @@ const faqData: FAQItem[] = [
     id: 5,
     question: "What if a tip payment fails?",
     answer:
-      "The guest can try again with another card. Failed attempts do not create recurring retries like a subscription — you’ll see the outcome in your tips and activity views.",
+      "The guest can try again with another card. Failed attempts do not create recurring retries like a subscription, you’ll see the outcome in your tips and activity views.",
     category: "Tips",
   },
   {
@@ -105,32 +105,32 @@ const resourceLinks = [
     description: 'Comprehensive guides and API references',
     icon: Book,
     link: '#',
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100',
+    color: 'text-primary',
+    bgColor: 'bg-gray-50',
   },
   {
     title: 'Video Tutorials',
     description: 'Step-by-step video walkthroughs',
     icon: Video,
     link: '#',
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100',
+    color: 'text-primary',
+    bgColor: 'bg-gray-50',
   },
   {
     title: 'API Reference',
     description: 'Complete API documentation',
     icon: FileText,
     link: '#',
-    color: 'text-green-600',
-    bgColor: 'bg-green-100',
+    color: 'text-primary',
+    bgColor: 'bg-gray-50',
   },
   {
     title: 'Community Forum',
     description: 'Connect with other developers',
     icon: MessageCircle,
     link: '#',
-    color: 'text-orange-600',
-    bgColor: 'bg-orange-100',
+    color: 'text-primary',
+    bgColor: 'bg-gray-50',
   },
 ];
 
@@ -383,8 +383,8 @@ export function SupportPage() {
                       animate={{ scale: 1, opacity: 1 }}
                       className="text-center py-8"
                     >
-                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 mb-4">
-                        <CheckCircle className="w-8 h-8 text-green-600" />
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
+                        <CheckCircle className="w-8 h-8 text-primary" />
                       </div>
                       <h4 className="text-lg font-semibold text-foreground mb-2">
                         Message Sent!

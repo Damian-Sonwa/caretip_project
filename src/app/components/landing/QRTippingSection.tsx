@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
-import { Scan, Zap, CheckCircle } from "lucide-react";
+import { Link } from "react-router";
+import { Link2, Smartphone, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import newly01Img from "../../../../images/newly01.png";
@@ -10,7 +11,7 @@ const IMG_PEOPLE_PAYMENT = newly01Img;
 function InstantTipSplitIllustration() {
   return (
     <LandingImageFrame
-      className="relative aspect-square min-h-[180px] w-full bg-white sm:min-h-[220px]"
+      className="relative aspect-square min-h-[180px] w-full bg-white sm:min-h-[220px] dark:bg-neutral-900"
       role="img"
       aria-label="People at a table completing a mobile payment"
     >
@@ -26,7 +27,7 @@ function InstantTipSplitIllustration() {
           Pay
         </span>
       </div>
-      <div className="absolute right-2 top-2 max-w-[min(100%,11rem)] rounded-xl border border-primary/15 bg-white p-2.5 shadow-[0_10px_28px_rgba(0,0,0,0.06)] sm:right-3 sm:top-3 sm:max-w-[13rem] sm:p-3">
+      <div className="absolute right-2 top-2 max-w-[min(100%,11rem)] rounded-xl border border-gray-200 bg-white p-2.5 shadow-[0_10px_28px_rgba(0,0,0,0.06)] sm:right-3 sm:top-3 sm:max-w-[13rem] sm:p-3 dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-start gap-2">
           <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-accent animate-pulse" aria-hidden />
           <p className="text-xs font-semibold leading-tight text-foreground sm:text-sm">New tip received</p>
@@ -39,24 +40,24 @@ function InstantTipSplitIllustration() {
 export function QRTippingSection() {
   const features = [
     {
-      icon: Scan,
-      title: "Scan & pay in seconds",
-      description: "Camera scan. No guest app."
+      icon: Link2,
+      title: "Works with QR codes or link",
+      description: "Print, display, or share a link to meet guests where they are.",
+    },
+    {
+      icon: Smartphone,
+      title: "No downloads required",
+      description: "A web flow that feels native, without another app to install.",
     },
     {
       icon: Zap,
-      title: "Fast checkout",
-      description: "Pick an amount and confirm. Done."
+      title: "Fast and seamless experience",
+      description: "Amount, pay, done, so service never misses a beat.",
     },
-    {
-      icon: CheckCircle,
-      title: "Secure payments",
-      description: "Card processing you can trust."
-    }
   ];
 
   return (
-    <section className="bg-white px-6 py-24">
+    <section id="qr-experience" className="scroll-mt-[80px] bg-white px-6 py-24 dark:bg-neutral-950">
       <div className="max-w-7xl mx-auto min-w-0">
         <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center min-w-0">
           {/* Left: Content */}
@@ -69,15 +70,15 @@ export function QRTippingSection() {
           >
             <div className="space-y-4">
               <span className="inline-block px-4 py-2 bg-primary/10 text-primary rounded-full text-sm font-semibold">
-                QR tipping
+                Guest experience
               </span>
-              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-black">
-                One scan.
+              <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 dark:text-neutral-100">
+                Turn every interaction
                 <br />
-                <span className="text-primary">Instant tip.</span>
+                <span className="text-primary">into an opportunity</span>
               </h2>
-              <p className="text-lg leading-relaxed text-black/70">
-                Guests tip from their phone. No cash. No extra apps.
+              <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
+                Customers scan, tip, and go. No apps, no friction.
               </p>
             </div>
 
@@ -98,10 +99,10 @@ export function QRTippingSection() {
                       <Icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-black mb-1">
+                      <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-1">
                         {feature.title}
                       </h3>
-                      <p className="text-black/70">
+                      <p className="text-neutral-600 dark:text-neutral-400">
                         {feature.description}
                       </p>
                     </div>
@@ -111,9 +112,12 @@ export function QRTippingSection() {
             </div>
 
             <div className="pt-4">
-              <button className="inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-[#D8841F]">
-                Generate Your QR Code
-              </button>
+              <Link
+                to="/onboarding"
+                className="inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
+              >
+                Create your QR
+              </Link>
             </div>
           </motion.div>
 
@@ -126,7 +130,7 @@ export function QRTippingSection() {
             className="relative min-w-0 w-full max-w-full"
             whileHover={{ y: -5 }}
           >
-            <div className="relative overflow-hidden rounded-3xl border border-black/[0.06] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
+            <div className="relative overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)] dark:border-neutral-800 dark:bg-neutral-900">
               {/* Split-card visual (guest Pay ↔ staff live notification) */}
               <LandingBorderedCard
                 cardClassName="min-w-0 max-w-full p-6"
@@ -134,10 +138,10 @@ export function QRTippingSection() {
                 <InstantTipSplitIllustration />
                 <div className="mt-4 sm:mt-6 text-center px-0.5">
                   <p className="mb-1 text-sm font-semibold text-primary">Scan to tip</p>
-                  <p className="text-lg sm:text-xl font-medium text-black/70 break-words">
+                  <p className="text-lg sm:text-xl font-medium text-neutral-600 dark:text-neutral-400 break-words">
                     Schmidt Paul
                   </p>
-                  <p className="text-sm text-black/50">Server • Table 12</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-400">Server • Table 12</p>
                 </div>
               </LandingBorderedCard>
 
@@ -152,15 +156,15 @@ export function QRTippingSection() {
               whileInView={{ y: 0, opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.5 }}
-              className="relative mt-4 sm:absolute sm:mt-0 sm:-bottom-6 sm:-left-6 sm:max-w-[calc(100vw-2rem)] bg-white rounded-3xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-black/[0.06]"
+              className="relative mt-4 sm:absolute sm:mt-0 sm:-bottom-6 sm:-left-6 sm:max-w-[calc(100vw-2rem)] bg-white rounded-3xl p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)] border border-gray-200 dark:border-neutral-800 dark:bg-neutral-900"
             >
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary/10 rounded-2xl flex items-center justify-center">
                   <CheckCircle className="w-5 h-5 text-primary" />
                 </div>
                 <div>
-                  <p className="text-xs text-black/60">Avg. scan time</p>
-                  <p className="text-lg font-bold text-black">3 seconds</p>
+                  <p className="text-xs text-neutral-600 dark:text-neutral-400">Typical guest flow</p>
+                  <p className="text-lg font-bold text-neutral-900 dark:text-neutral-100">Under 10 seconds</p>
                 </div>
               </div>
             </motion.div>

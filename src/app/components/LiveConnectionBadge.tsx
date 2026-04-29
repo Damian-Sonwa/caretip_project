@@ -27,21 +27,21 @@ export function LiveConnectionBadge({
       role="status"
       className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-0.5 text-xs font-medium ${
         ok
-          ? "border-green-600/30 bg-green-500/10 text-green-700 dark:text-green-300"
+          ? "border-gray-200 bg-gray-50 text-neutral-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
           : warn
-            ? "border-amber-500/40 bg-amber-500/10 text-amber-900 dark:text-amber-100"
+            ? "border-gray-200 bg-gray-50 text-neutral-600 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400"
             : "border-border bg-muted text-muted-foreground"
       } ${className}`}
     >
       {ok ? (
         <span className="relative inline-flex h-3 w-3 flex-none items-center justify-center" aria-hidden>
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-50" />
-          <span className="inline-flex h-2.5 w-2.5 rounded-full bg-green-600 ring-2 ring-green-600/20" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
+          <span className="inline-flex h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-primary/20" />
         </span>
       ) : (
         <span
           className={`h-1.5 w-1.5 rounded-full ${
-            warn ? "bg-amber-500 animate-pulse" : "bg-muted-foreground"
+            warn ? "bg-primary animate-pulse" : "bg-muted-foreground"
           }`}
           aria-hidden
         />

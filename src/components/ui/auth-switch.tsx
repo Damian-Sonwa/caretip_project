@@ -66,7 +66,7 @@ export function AuthSwitch({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.12 }}
             className="mt-4 max-w-md text-sm leading-relaxed text-primary-foreground/95 md:text-base">
-            QR codes, instant payouts, and happy teams—built for venues that run on gratitude.
+            QR codes, instant payouts, and happy teams, built for venues that run on gratitude.
           </motion.p>
         </div>
       </div>

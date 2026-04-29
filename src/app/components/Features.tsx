@@ -31,7 +31,7 @@ export function Features() {
       id: "personal-link",
       title: "Personal Tipping Link",
       description:
-        "Get your unique tipping link to share anywhere—social media, email, or business cards. Make it easy for customers to tip you instantly.",
+        "Get your unique tipping link to share anywhere: social media, email, or business cards. Make it easy for customers to tip you instantly.",
       imageSrc:
         "https://images.stockcake.com/public/2/e/a/2ea05fe5-52bb-49ea-9575-77cddf464208_large/focused-content-creator-stockcake.jpg",
       href: "#",
@@ -40,7 +40,7 @@ export function Features() {
       id: "qr-code",
       title: "QR Code Support",
       description:
-        "Display your QR code for customers to scan and tip on the spot. Perfect for in-person interactions—simple, fast, and contactless.",
+        "Display your QR code for customers to scan and tip on the spot. Perfect for in-person interactions: simple, fast, and contactless.",
       imageSrc:
         "https://images.stockcake.com/public/6/d/a/6da6a5d8-cfed-465e-9473-7978eaff661c_large/neon-pricing-tiers-stockcake.jpg",
       href: "#",
@@ -88,7 +88,7 @@ export function Features() {
             Everything you need to receive tips
           </h2>
           <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
-            Simple, powerful tools designed to help you get paid directly by customers—anytime, anywhere.
+            Simple, powerful tools designed to help you get paid directly by customers, anytime, anywhere.
           </p>
         </motion.div>
 

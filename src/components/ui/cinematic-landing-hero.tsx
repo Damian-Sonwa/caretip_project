@@ -124,7 +124,7 @@ const INJECTED_STYLES = `
   }
   .btn-modern-light {
       background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%);
-      color: #0F172A;
+      color: #111827;
       box-shadow: 0 0 0 1px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.1), 0 12px 24px -4px rgba(0,0,0,0.3), inset 0 1px 1px rgba(255,255,255,1), inset 0 -3px 6px rgba(0,0,0,0.06);
   }
   .btn-modern-light:hover {
@@ -185,7 +185,7 @@ export function CinematicHero({
   cardDescription = (
     <>
       <span className="font-semibold text-[hsl(var(--primary))]">CareTip</span> lets guests tip by QR code, split
-      rewards fairly, and pay out staff fast—without cash on the table.
+      rewards fairly, and pay out staff fast, without cash on the table.
     </>
   ),
   metricValue = 100,
@@ -443,7 +443,7 @@ export function CinematicHero({
                   <div className="hardware-btn absolute top-[220px] -left-[3px] z-0 h-[45px] w-[3px] rounded-l-md" aria-hidden="true" />
                   <div className="hardware-btn absolute top-[170px] -right-[3px] z-0 h-[70px] w-[3px] scale-x-[-1] rounded-r-md" aria-hidden="true" />
 
-                  <div className="absolute inset-[7px] z-10 overflow-hidden rounded-[2.5rem] bg-[#050914] text-white shadow-[inset_0_0_15px_rgba(0,0,0,1)]">
+                  <div className="absolute inset-[7px] z-10 overflow-hidden rounded-[2.5rem] bg-neutral-950 text-white shadow-[inset_0_0_15px_rgba(0,0,0,1)]">
                     <div className="screen-glare pointer-events-none absolute inset-0 z-40" aria-hidden="true" />
 
                     <div className="absolute top-[5px] left-1/2 z-50 flex h-[28px] w-[100px] -translate-x-1/2 items-center justify-end rounded-full bg-black px-3 shadow-[inset_0_-1px_2px_rgba(255,255,255,0.1)]">

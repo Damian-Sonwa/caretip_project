@@ -27,7 +27,7 @@ const ERROR_MAP: Record<string, string> = {
   "This account does not have Super Admin permissions.":
     "This account isn’t a platform admin. Use Platform Admin sign-in only for super-admin accounts, or run admin:create.",
   "Use the Platform Admin sign-in for this account.":
-    "Use the Platform Admin login page (/platform-admin/login) for this account — it’s a platform admin.",
+    "Use the Platform Admin login page (/platform-admin/login) for this account. It’s a platform admin.",
   "Registration failed": "We couldn't create your account. Please try again.",
   "Login failed": "We couldn't sign you in. Please check your email and password.",
   "We couldn't create your account. Please try again.":
@@ -54,9 +54,9 @@ const ERROR_MAP: Record<string, string> = {
   "User not found": "We couldn't find your account. Please sign in again.",
   "Password is required": "Please enter a password.",
   "Password must be at least 8 characters": "Your password needs to be at least 8 characters long.",
-  "Password must contain at least one uppercase letter": "Your password needs at least one uppercase letter (A–Z).",
-  "Password must contain at least one lowercase letter": "Your password needs at least one lowercase letter (a–z).",
-  "Password must contain at least one number": "Your password needs at least one number (0–9).",
+  "Password must contain at least one uppercase letter": "Your password needs at least one uppercase letter (A to Z).",
+  "Password must contain at least one lowercase letter": "Your password needs at least one lowercase letter (a to z).",
+  "Password must contain at least one number": "Your password needs at least one number (0 to 9).",
   "Password must contain at least one special character (e.g. @, #, $, %)":
     "Your password needs at least one special character (e.g. @, #, $, %).",
 
@@ -112,7 +112,7 @@ const ERROR_MAP: Record<string, string> = {
   "This QR slug is already in use": "That QR code ID is already taken. Pick another or leave it blank to auto-generate.",
   "Could not generate a unique QR slug": "We couldn't generate a unique code for this table. Try again in a moment.",
   "qrSlug must be 3–128 characters: letters, numbers, hyphens, underscores":
-    "Custom QR codes can only use letters, numbers, hyphens, and underscores (3–128 characters).",
+    "Custom QR codes can only use letters, numbers, hyphens, and underscores (3 to 128 characters).",
 
   // Payment / tips
   "amount, employeeId, and businessId are required": "Please complete your tip details and try again.",
@@ -150,7 +150,7 @@ const ERROR_MAP: Record<string, string> = {
   "startDate must be YYYY-MM-DD": "Use a start date like 2026-01-15.",
 
   // Platform admin uploads
-  "id is required": "Please refresh the page and try again — something was missing from that request.",
+  "id is required": "Please refresh the page and try again. Something was missing from that request.",
   "File is required (multipart field name: file)": "Please choose a file to upload.",
 
   // OAuth / signup
@@ -174,7 +174,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   403: "You don't have permission to do this.",
   404: "We couldn't find what you're looking for.",
   408: "The request took too long. Please try again.",
-  409: "This couldn’t be completed yet — try again in a moment.",
+  409: "This couldn’t be completed yet. Try again in a moment.",
   422: "The information you entered isn't valid. Please check and try again.",
   429: "Too many requests. Please wait a moment and try again.",
   500: "Our servers hit a problem. Please try again in a few minutes.",

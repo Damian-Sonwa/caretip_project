@@ -138,7 +138,7 @@ export function SelectEmployeePage() {
             <CardHeader className="pb-2">
               <CardTitle className="text-base">Choose who you&apos;re tipping</CardTitle>
               <CardDescription>
-                Preset amounts and payment are on the next steps — pick the right person first.
+                Preset amounts and payment are on the next steps. Pick the right person first.
               </CardDescription>
             </CardHeader>
           </Card>

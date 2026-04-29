@@ -57,8 +57,8 @@ const teamTipLeaders = [
     name: 'Maya Chen',
     role: 'Server',
     icon: Heart,
-    iconWrap: 'bg-rose-100',
-    iconColor: 'text-rose-600',
+    iconWrap: 'bg-primary/10',
+    iconColor: 'text-primary',
     periodTotal: '$1,240',
     lastTip: '2h ago',
     shiftNote: 'Top week',
@@ -68,8 +68,8 @@ const teamTipLeaders = [
     name: 'James Okoro',
     role: 'Bartender',
     icon: Heart,
-    iconWrap: 'bg-amber-100',
-    iconColor: 'text-amber-700',
+    iconWrap: 'bg-primary/10',
+    iconColor: 'text-primary',
     periodTotal: '$980',
     lastTip: '5h ago',
     shiftNote: 'Strong bar',
@@ -79,8 +79,8 @@ const teamTipLeaders = [
     name: 'Front desk pool',
     role: 'Shared QR',
     icon: Users,
-    iconWrap: 'bg-blue-100',
-    iconColor: 'text-blue-600',
+    iconWrap: 'bg-primary/10',
+    iconColor: 'text-primary',
     periodTotal: '$2,410',
     lastTip: '1h ago',
     shiftNote: 'Team pool',
@@ -90,8 +90,8 @@ const teamTipLeaders = [
     name: 'Sofia Reyes',
     role: 'Server',
     icon: Heart,
-    iconWrap: 'bg-emerald-100',
-    iconColor: 'text-emerald-700',
+    iconWrap: 'bg-primary/10',
+    iconColor: 'text-primary',
     periodTotal: '$865',
     lastTip: 'Yesterday',
     shiftNote: 'Steady',
@@ -101,8 +101,8 @@ const teamTipLeaders = [
     name: 'Kitchen thank-you',
     role: 'Back-of-house',
     icon: QrCode,
-    iconWrap: 'bg-violet-100',
-    iconColor: 'text-violet-700',
+    iconWrap: 'bg-primary/10',
+    iconColor: 'text-primary',
     periodTotal: '$540',
     lastTip: '3d ago',
     shiftNote: 'QR on pass',
@@ -182,11 +182,11 @@ function MetricCard({ title, value, change, isPositive, icon: Icon, delay, subti
       <p className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">{value}</p>
       <div className="flex items-center gap-1">
         {isPositive ? (
-          <ArrowUpRight className="w-4 h-4 text-green-500" />
+          <ArrowUpRight className="w-4 h-4 text-primary" />
         ) : (
-          <ArrowDownRight className="w-4 h-4 text-red-500" />
+          <ArrowDownRight className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
         )}
-        <span className={`text-sm font-medium ${isPositive ? 'text-green-500' : 'text-red-500'}`}>
+        <span className={`text-sm font-medium ${isPositive ? 'text-primary' : 'text-neutral-600 dark:text-neutral-400'}`}>
           {change}
         </span>
         <span className="text-sm text-muted-foreground">{subtitle || 'vs last month'}</span>
@@ -225,7 +225,7 @@ export function DashboardPage() {
                 Welcome back! 👋
               </h1>
               <p className="text-muted-foreground">
-                Tips, scans, and payouts for your team — one-time payments only
+                Tips, scans, and payouts for your team, one-time payments only
               </p>
             </div>
 
@@ -293,28 +293,28 @@ export function DashboardPage() {
                   <AreaChart data={tipVolumeData}>
                     <defs>
                       <linearGradient id="colorTips" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#14BDEB" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#14BDEB" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#EB992C" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorAvgTip" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#ACAD94" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#ACAD94" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#6B7280" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#6B7280" stopOpacity={0} />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(56, 77, 72, 0.1)" />
-                    <XAxis dataKey="month" stroke="#6E7271" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#6E7271" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,24,39,0.10)" />
+                    <XAxis dataKey="month" stroke="#6B7280" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#6B7280" style={{ fontSize: '12px' }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#D8D4D5',
-                        border: '1px solid rgba(56, 77, 72, 0.1)',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E5E7EB',
                         borderRadius: '8px',
                       }}
                     />
                     <Area
                       type="monotone"
                       dataKey="tips"
-                      stroke="#14BDEB"
+                      stroke="#EB992C"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorTips)"
@@ -323,7 +323,7 @@ export function DashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="avgTip"
-                      stroke="#ACAD94"
+                      stroke="#6B7280"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorAvgTip)"
@@ -353,17 +353,17 @@ export function DashboardPage() {
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={guestScanData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(56, 77, 72, 0.1)" />
-                    <XAxis dataKey="month" stroke="#6E7271" style={{ fontSize: '12px' }} />
-                    <YAxis stroke="#6E7271" style={{ fontSize: '12px' }} />
+                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(17,24,39,0.10)" />
+                    <XAxis dataKey="month" stroke="#6B7280" style={{ fontSize: '12px' }} />
+                    <YAxis stroke="#6B7280" style={{ fontSize: '12px' }} />
                     <Tooltip
                       contentStyle={{
-                        backgroundColor: '#D8D4D5',
-                        border: '1px solid rgba(56, 77, 72, 0.1)',
+                        backgroundColor: '#FFFFFF',
+                        border: '1px solid #E5E7EB',
                         borderRadius: '8px',
                       }}
                     />
-                    <Bar dataKey="scans" fill="#14BDEB" radius={[8, 8, 0, 0]} name="Scans" />
+                    <Bar dataKey="scans" fill="#EB992C" radius={[8, 8, 0, 0]} name="Scans" />
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -446,10 +446,10 @@ export function DashboardPage() {
                         <div
                           className={`w-2 h-2 rounded-full mt-2 ${
                             activity.status === 'success'
-                              ? 'bg-green-500'
+                              ? 'bg-primary'
                               : activity.status === 'failed'
-                              ? 'bg-red-500'
-                              : 'bg-yellow-500'
+                              ? 'bg-neutral-400 dark:bg-neutral-600'
+                              : 'bg-neutral-300 dark:bg-neutral-700'
                           }`}
                         ></div>
                         <div className="flex-1 min-w-0">
@@ -463,10 +463,10 @@ export function DashboardPage() {
                       <span
                         className={`text-sm font-medium ${
                           activity.status === 'success'
-                            ? 'text-green-600'
+                            ? 'text-primary'
                             : activity.status === 'failed'
-                            ? 'text-red-500'
-                            : 'text-amber-600'
+                            ? 'text-neutral-600 dark:text-neutral-400'
+                            : 'text-neutral-600 dark:text-neutral-400'
                         }`}
                       >
                         {activity.amount}

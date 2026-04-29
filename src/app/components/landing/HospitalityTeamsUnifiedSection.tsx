@@ -23,7 +23,7 @@ const FEATURES = [
   {
     Icon: ShieldCheck,
     title: "Secure payments",
-    text: "Stripe-backed checkout with verified webhooks.",
+    text: "Industry-grade checkout with encryption end to end.",
   },
   {
     Icon: Sparkles,
@@ -35,8 +35,8 @@ const FEATURES = [
 export function HospitalityTeamsUnifiedSection() {
   return (
     <section
-      id="business-section"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-white px-6 py-24"
+      id="built-for-hospitality"
+      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 py-24 dark:bg-neutral-900"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
         <div className="mb-10 w-full max-w-full space-y-4 text-center sm:mb-14">
@@ -50,7 +50,8 @@ export function HospitalityTeamsUnifiedSection() {
               Built for hospitality teams
             </h2>
             <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-gray-500 text-[clamp(1rem,2.6vw,1.25rem)]">
-              Simple tipping for guests. Clear earnings for staff. Better control for the business.
+              From restaurants to salons, CareTip helps your team earn more while giving you full visibility into
+              performance.
             </p>
           </motion.div>
         </div>

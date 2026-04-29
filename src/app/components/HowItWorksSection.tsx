@@ -7,7 +7,7 @@ export function HowItWorksSection() {
       icon: Link2,
       step: "1",
       title: "Share your link / QR",
-      description: "Get your unique tipping link and QR code. Share it anywhere—social media, email signature, or print it on business cards.",
+      description: "Get your unique tipping link and QR code. Share it anywhere: social media, email signature, or print it on business cards.",
       color: "from-accent to-primary"
     },
     {

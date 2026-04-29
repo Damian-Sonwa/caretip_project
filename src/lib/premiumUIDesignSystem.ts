@@ -18,38 +18,25 @@ export const BRAND_COLORS = {
 // PREMIUM GRADIENTS
 // ============================================
 export const PREMIUM_GRADIENTS = {
-  // Orange family gradients
-  ORANGE_WARM: "linear-gradient(135deg, #F97316 0%, #FB923C 100%)",
-  ORANGE_CREAM: "linear-gradient(135deg, #EB992C 0%, #FFF7ED 100%)",
-  ORANGE_SOFT: "linear-gradient(135deg, #FB923C 0%, #FED7AA 100%)",
-  
-  // Neutral family gradients (premium backgrounds)
-  CREAM_WHITE: "linear-gradient(135deg, #FFF7ED 0%, #FFFFFF 100%)",
-  WARM_NEUTRAL: "linear-gradient(135deg, #F5F3FF 0%, #FFF7ED 100%)",
-  SOFT_LIGHT: "linear-gradient(135deg, #F9FAFB 0%, #F3F4F6 100%)",
-  
-  // Dark/charcoal gradients (for headers/banners)
-  DARK_WARM: "linear-gradient(135deg, #1F2937 0%, #374151 100%)",
-  CHARCOAL_ORANGE: "linear-gradient(135deg, #1F2937 0%, rgba(235, 153, 44, 0.15) 100%)",
-  
-  // Emerald/Success gradients
-  EMERALD_SOFT: "linear-gradient(135deg, #10B981 0%, #6EE7B7 100%)",
-  
-  // Elevated card gradients
-  CARD_ELEVATED: "linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.98) 100%)",
-  CARD_PREMIUM: "linear-gradient(135deg, #FAFAF8 0%, #F7F5F2 100%)",
+  /**
+   * Color-system compliant gradients.
+   * Only uses: Primary (#EB992C), white, surface (#F9FAFB), border (#E5E7EB), and text tones.
+   */
+  ORANGE_SUBTLE: "linear-gradient(135deg, rgba(235, 153, 44, 0.10) 0%, rgba(235, 153, 44, 0.00) 100%)",
+  SOFT_LIGHT: "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)",
+  DARK_WARM: "linear-gradient(135deg, #111827 0%, #111827 100%)",
 } as const;
 
 // ============================================
 // SUPPORT COLORS
 // ============================================
 export const SUPPORT_COLORS = {
-  SOFT_GRAY: "#F3F4F6",
-  CHARCOAL: "#1F2937",
-  WARM_GOLD: "#F59E0B",
-  SUCCESS_GREEN: "#10B981",
-  ERROR_RED: "#EF4444",
-  WARNING_AMBER: "#F59E0B",
+  SOFT_GRAY: "#F9FAFB",
+  CHARCOAL: "#111827",
+  WARM_GOLD: "#EB992C",
+  SUCCESS_GREEN: "#EB992C",
+  ERROR_RED: "#111827",
+  WARNING_AMBER: "#EB992C",
 } as const;
 
 // ============================================
@@ -69,44 +56,52 @@ export const SHADOWS = {
 // ============================================
 
 /** Premium card base - elevated white/light background */
-export const PREMIUM_CARD_BASE = "rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300 bg-white";
+export const PREMIUM_CARD_BASE =
+  "rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
 /** Premium card with gradient background */
-export const PREMIUM_CARD_GRADIENT = "rounded-2xl border border-gray-200/30 shadow-sm hover:shadow-md transition-all duration-300";
+export const PREMIUM_CARD_GRADIENT =
+  "rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
 /** Icon container - dimensional with elevation */
-export const ICON_CONTAINER_PREMIUM = "inline-flex items-center justify-center rounded-xl bg-gradient-to-br from-orange-100 to-orange-50 p-3 shadow-sm group-hover:shadow-md transition-all duration-300";
+export const ICON_CONTAINER_PREMIUM =
+  "inline-flex items-center justify-center rounded-xl border border-gray-200 bg-primary/10 p-3 shadow-sm transition-all duration-300 group-hover:shadow-md dark:border-neutral-800";
 
 /** Icon container - secondary (darker) */
-export const ICON_CONTAINER_DARK = "inline-flex items-center justify-center rounded-xl bg-gray-900/10 p-3 shadow-sm group-hover:shadow-md transition-all duration-300";
+export const ICON_CONTAINER_DARK =
+  "inline-flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 p-3 shadow-sm transition-all duration-300 group-hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
 /** CTA Button base - premium with hover effects */
-export const CTA_BUTTON_PREMIUM = "inline-flex items-center gap-2 rounded-xl font-semibold px-6 py-3 shadow-[0_8px_22px_rgba(235,153,44,0.28)] hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:scale-95 transition-all duration-200 bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700";
+export const CTA_BUTTON_PREMIUM =
+  "inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-all duration-200 hover:bg-primary/90 hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:scale-95";
 
 /** Badge - premium styled with subtle gradient */
-export const BADGE_PREMIUM = "inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 text-sm font-medium border border-orange-200/50";
+export const BADGE_PREMIUM =
+  "inline-flex items-center gap-1 rounded-full border border-gray-200 bg-primary/10 px-3 py-1 text-sm font-medium text-primary dark:border-neutral-800 dark:bg-primary/10";
 
 /** Banner/Hero section base */
 export const BANNER_PREMIUM = "rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 border border-white/50";
 
 /** Dashboard panel - premium with subtle gradient */
-export const DASHBOARD_PANEL = "rounded-2xl border border-gray-200/50 shadow-sm bg-gradient-to-br from-white via-gray-50/50 to-white p-6 hover:shadow-md transition-all duration-300";
+export const DASHBOARD_PANEL =
+  "rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
 /** Elevated card stack effect */
-export const CARD_STACK = "relative rounded-2xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300";
+export const CARD_STACK =
+  "relative rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
 // ============================================
 // COMPOSITE STYLES (Multi-element)
 // ============================================
 
 export const PREMIUM_SECTION_CONTAINER = {
-  base: "relative w-full bg-white",
-  withGradient: "relative w-full bg-gradient-to-br from-white via-gray-50/30 to-white",
+  base: "relative w-full bg-white dark:bg-neutral-950",
+  withGradient: "relative w-full bg-white dark:bg-neutral-950",
 } as const;
 
 export const PREMIUM_HERO_SECTION = {
   container: "relative w-full py-20 sm:py-24 lg:py-32",
-  gradient: "absolute inset-0 bg-gradient-to-br from-orange-50/30 via-white to-cream-100/20 pointer-events-none",
+  gradient: "absolute inset-0 bg-gradient-to-br from-white via-white to-gray-50 pointer-events-none dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-900",
   content: "relative z-10",
 } as const;
 

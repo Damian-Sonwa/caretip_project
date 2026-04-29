@@ -96,7 +96,7 @@ export function EmployeeQrEntryPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     Tip <span className="font-semibold text-foreground">{emp.name ?? "Team Member"}</span> again?
                   </p>
-                  <p className="mt-2 text-xs font-semibold text-orange-700">Last tip: €{repeatAmount.toFixed(2)}</p>
+                  <p className="mt-2 text-xs font-semibold text-primary">Last tip: €{repeatAmount.toFixed(2)}</p>
                 </div>
                 <ProfileAvatar
                   src={emp.avatar ?? undefined}

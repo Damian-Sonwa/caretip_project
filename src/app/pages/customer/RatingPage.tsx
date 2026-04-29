@@ -243,14 +243,14 @@ export function RatingPage() {
             {rating === 0
               ? "Quick tap, takes 2 seconds."
               : rating === 5
-                ? "Amazing — thank you!"
+                ? "Amazing, thank you!"
                 : rating === 4
-                  ? "Great — thanks!"
+                  ? "Great, thanks!"
                   : rating === 3
-                    ? "Thanks — appreciated."
+                    ? "Thanks, appreciated."
                     : rating === 2
-                      ? "Thanks — we’ll improve."
-                      : "Thanks — we’ll do better."}
+                      ? "Thanks, we’ll improve."
+                      : "Thanks, we’ll do better."}
           </p>
         </motion.div>
 

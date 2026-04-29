@@ -58,8 +58,8 @@ export function GridBackground({
             )}
 
             {showAvailability && (
-              <div className="available-now text-[#20bb5a] text-sm flex items-center justify-center mt-5">
-                <div className="w-2 h-2 bg-[#20bb5a] rounded-full inline-block mr-2 animate-pulse shadow-[0_0_8px_#20bb5a]" />
+              <div className="available-now text-primary text-sm flex items-center justify-center mt-5">
+                <div className="w-2 h-2 bg-primary rounded-full inline-block mr-2 animate-pulse shadow-[0_0_8px_rgba(235,153,44,0.35)]" />
                 Call Now
               </div>
             )}

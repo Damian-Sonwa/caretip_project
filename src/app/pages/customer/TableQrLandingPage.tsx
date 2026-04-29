@@ -161,7 +161,7 @@ export function TableQrLandingPage() {
                       </span>{" "}
                       again?
                     </p>
-                    <p className="mt-2 text-xs font-semibold text-orange-700">
+                    <p className="mt-2 text-xs font-semibold text-primary">
                       Last tip: €{repeatCandidate.amount.toFixed(2)}
                     </p>
                   </div>

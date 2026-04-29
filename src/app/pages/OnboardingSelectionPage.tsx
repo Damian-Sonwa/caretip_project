@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Building2, Users, ArrowRight, X } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
-import { PREMIUM_GRADIENTS, SHADOWS } from '@/lib/premiumUIDesignSystem';
+import { SHADOWS } from '@/lib/premiumUIDesignSystem';
 
 export function OnboardingSelectionPage() {
   const navigate = useNavigate();
@@ -42,7 +42,7 @@ export function OnboardingSelectionPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-white">
+    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950">
       <Navigation />
       
       <div className="relative flex flex-1 flex-col items-center justify-center px-4 py-12">
@@ -52,7 +52,7 @@ export function OnboardingSelectionPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
           onClick={handleClose}
-          className="absolute top-24 right-4 sm:right-6 p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+          className="absolute top-24 right-4 sm:right-6 rounded-lg p-2 text-neutral-600 transition-colors hover:bg-gray-50 hover:text-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-neutral-100"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
@@ -69,10 +69,10 @@ export function OnboardingSelectionPage() {
             className="mb-12 text-center"
             variants={itemVariants}
           >
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-              How do you want to join <span className="text-[#EB992C]">CareTip</span>?
+            <h1 className="mb-4 text-4xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-5xl">
+              How do you want to join <span className="text-primary">CareTip</span>?
             </h1>
-            <p className="text-lg text-gray-600 max-w-lg mx-auto">
+            <p className="mx-auto max-w-lg text-lg text-neutral-600 dark:text-neutral-400">
               Choose your account type to get started with secure tipping and payouts.
             </p>
           </motion.div>
@@ -90,52 +90,46 @@ export function OnboardingSelectionPage() {
               variants={itemVariants}
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
               whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 p-8 text-left"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 text-left transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] dark:border-neutral-800 dark:bg-neutral-900"
               style={{ boxShadow: SHADOWS.SOFT }}
             >
-              {/* Premium gradient background overlay */}
-              <div className="absolute inset-0" style={{ background: PREMIUM_GRADIENTS.CREAM_WHITE, opacity: 0.5 }} />
-              
-              {/* 3D accent glow */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/4 group-hover:scale-120 transition-transform duration-300 blur-2xl" />
-              
               {/* Content */}
               <div className="relative z-10">
                 {/* 3D Icon Container */}
                 <motion.div 
-                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-md border border-orange-200/50"
+                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-200 bg-primary/10 transition-all duration-300 group-hover:shadow-md dark:border-neutral-800"
                   style={{ boxShadow: SHADOWS.MEDIUM }}
                   whileHover={{ scale: 1.1, rotate: 5 }}
                 >
-                  <Building2 className="h-8 w-8 text-[#EB992C]" />
+                  <Building2 className="h-8 w-8 text-primary" />
                 </motion.div>
 
                 {/* Text */}
-                <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#EB992C] transition-colors">
+                <h2 className="mb-3 text-2xl font-bold text-neutral-900 transition-colors group-hover:text-primary dark:text-neutral-100">
                   As a Business
                 </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="mb-6 leading-relaxed text-neutral-600 dark:text-neutral-400">
                   Set up your restaurant, café, salon, or service business to accept tips and manage your team.
                 </p>
 
                 {/* Benefits */}
                 <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Unlimited team members</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>QR code & payment management</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Real-time analytics</span>
                   </li>
                 </ul>
 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-[#EB992C] font-semibold group-hover:translate-x-1 transition-transform">
+                <div className="flex items-center gap-2 font-semibold text-primary transition-transform group-hover:translate-x-1">
                   Get Started
                   <ArrowRight className="h-5 w-5" />
                 </div>
@@ -148,52 +142,46 @@ export function OnboardingSelectionPage() {
               variants={itemVariants}
               whileHover={{ y: -8, transition: { duration: 0.2 } }}
               whileTap={{ scale: 0.98 }}
-              className="group relative overflow-hidden rounded-2xl border border-gray-200/50 bg-white hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] transition-all duration-300 p-8 text-left"
+              className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-8 text-left transition-all duration-300 hover:shadow-[0_10px_30px_rgba(0,0,0,0.08)] dark:border-neutral-800 dark:bg-neutral-900"
               style={{ boxShadow: SHADOWS.SOFT }}
             >
-              {/* Premium gradient background overlay */}
-              <div className="absolute inset-0" style={{ background: PREMIUM_GRADIENTS.CREAM_WHITE, opacity: 0.5 }} />
-              
-              {/* 3D accent glow */}
-              <div className="absolute top-0 right-0 w-40 h-40 bg-gradient-to-bl from-orange-100/40 to-transparent rounded-full -translate-y-1/2 translate-x-1/4 group-hover:scale-120 transition-transform duration-300 blur-2xl" />
-              
               {/* Content */}
               <div className="relative z-10">
                 {/* 3D Icon Container */}
                 <motion.div 
-                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-100 to-orange-50 transition-all duration-300 group-hover:shadow-md border border-orange-200/50"
+                  className="mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl border border-gray-200 bg-primary/10 transition-all duration-300 group-hover:shadow-md dark:border-neutral-800"
                   style={{ boxShadow: SHADOWS.MEDIUM }}
                   whileHover={{ scale: 1.1, rotate: -5 }}
                 >
-                  <Users className="h-8 w-8 text-[#EB992C]" />
+                  <Users className="h-8 w-8 text-primary" />
                 </motion.div>
 
                 {/* Text */}
-                <h2 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-[#EB992C] transition-colors">
+                <h2 className="mb-3 text-2xl font-bold text-neutral-900 transition-colors group-hover:text-primary dark:text-neutral-100">
                   As a Staff / Employee
                 </h2>
-                <p className="text-gray-600 mb-6 leading-relaxed">
+                <p className="mb-6 leading-relaxed text-neutral-600 dark:text-neutral-400">
                   Join your business or organization to receive tips and track your earnings securely.
                 </p>
 
                 {/* Benefits */}
                 <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Fast, secure payouts</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Real-time tip notifications</span>
                   </li>
-                  <li className="flex items-center gap-2 text-sm text-gray-700">
-                    <div className="h-1.5 w-1.5 rounded-full bg-gradient-to-r from-[#EB992C] to-orange-400" />
+                  <li className="flex items-center gap-2 text-sm text-neutral-600 dark:text-neutral-400">
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
                     <span>Performance tracking</span>
                   </li>
                 </ul>
 
                 {/* CTA */}
-                <div className="flex items-center gap-2 text-[#EB992C] font-semibold group-hover:translate-x-1 transition-transform">
+                <div className="flex items-center gap-2 font-semibold text-primary transition-transform group-hover:translate-x-1">
                   Get Started
                   <ArrowRight className="h-5 w-5" />
                 </div>
@@ -203,10 +191,15 @@ export function OnboardingSelectionPage() {
 
           {/* Feature note */}
           <motion.div
-            className="mt-12 text-center text-sm text-gray-600"
+            className="mt-12 text-center text-sm text-neutral-600 dark:text-neutral-400"
             variants={itemVariants}
           >
-            <p>Already have an account? <a href="/login" className="font-semibold text-[#EB992C] hover:underline">Sign in here</a></p>
+            <p>
+              Already have an account?{" "}
+              <a href="/login" className="font-semibold text-primary hover:underline">
+                Sign in here
+              </a>
+            </p>
           </motion.div>
         </motion.div>
       </div>

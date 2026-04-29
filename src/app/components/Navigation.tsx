@@ -1,7 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation } from "react-router";
 import { useState, useEffect } from "react";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "./CareTipLogo";
 import { useTheme } from "../context/ThemeContext";
@@ -17,7 +17,7 @@ export type NavigationVariant = "default" | "dark";
 export function Navigation({ variant = "default" }: { variant?: NavigationVariant }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
-  const { mode, toggle } = useTheme();
+  const { mode } = useTheme();
   const isDark = mode === "dark" || variant === "dark";
 
   useEffect(() => {
@@ -72,15 +72,6 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
 
           {/* Desktop auth */}
           <div className="hidden lg:flex items-center gap-3 shrink-0">
-            <button
-              type="button"
-              onClick={toggle}
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-border bg-card text-foreground shadow-sm transition-colors hover:bg-muted active:scale-[0.98]"
-              aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-              title={mode === "dark" ? "Light mode" : "Dark mode"}
-            >
-              {mode === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-            </button>
             <Link to="/login">
               <button
                 type="button"
@@ -152,27 +143,6 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 )}
               >
                 <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
-                  <div className="mb-2 flex items-center justify-between">
-                    <p className="text-xs font-semibold text-muted-foreground">Appearance</p>
-                    <button
-                      type="button"
-                      onClick={toggle}
-                      className="inline-flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-semibold text-foreground shadow-sm active:scale-[0.98]"
-                      aria-label={mode === "dark" ? "Switch to light mode" : "Switch to dark mode"}
-                    >
-                      {mode === "dark" ? (
-                        <>
-                          <Sun className="h-4 w-4" />
-                          Light
-                        </>
-                      ) : (
-                        <>
-                          <Moon className="h-4 w-4" />
-                          Dark
-                        </>
-                      )}
-                    </button>
-                  </div>
                   {navLinks.map((link) =>
                     <Link
                       key={link.name}

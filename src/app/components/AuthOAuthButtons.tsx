@@ -34,8 +34,12 @@ export function AuthOAuthButtons({
 
   if (!googleClientId?.trim()) {
     return (
-      <p className="text-center text-[11px] text-[#6B7280]">
-        Add <code className="rounded bg-[#F3F4F6] px-1 text-[#1F2937]">VITE_GOOGLE_CLIENT_ID</code> to enable Google.
+      <p className="text-center text-[11px] text-neutral-600 dark:text-neutral-400">
+        Add{" "}
+        <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
+          VITE_GOOGLE_CLIENT_ID
+        </code>{" "}
+        to enable Google.
       </p>
     );
   }

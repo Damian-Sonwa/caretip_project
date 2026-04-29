@@ -35,7 +35,7 @@ export function StatsSection() {
                 See tip volume clearly
               </h2>
               <p className="text-sm sm:text-base text-muted-foreground">
-                Track tips by week or month so you know what landed with your team — no subscription renewals to chase.
+                Track tips by week or month so you know what landed with your team, with no subscription renewals to chase.
               </p>
             </div>
 
@@ -51,14 +51,14 @@ export function StatsSection() {
                     dataKey="month" 
                     axisLine={false}
                     tickLine={false}
-                    tick={{ fill: '#6E7271', fontSize: 12 }}
+                    tick={{ fill: '#6B7280', fontSize: 12 }}
                   />
                   <YAxis hide />
                   <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                     {data.map((entry, index) => (
                       <Cell 
                         key={`cell-${entry.month}-${index}`} 
-                        fill={index === data.length - 1 ? '#14BDEB' : '#ACAD94'} 
+                        fill={index === data.length - 1 ? '#EB992C' : '#6B7280'} 
                       />
                     ))}
                   </Bar>

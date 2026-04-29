@@ -236,7 +236,7 @@ export function QRCodeManagementPage() {
     venueTables.map((t) => ({
       id: t.id,
       name: t.name,
-      location: t.location?.name ?? "—",
+      location: t.location?.name ?? "N/A",
       qrUrl: qrTableUrl(t.id),
       scans: 0,
     }));
@@ -244,7 +244,7 @@ export function QRCodeManagementPage() {
     venueLocations.map((loc) => ({
       id: loc.id,
       name: loc.name,
-      address: loc.description?.trim() || "—",
+      address: loc.description?.trim() || "N/A",
       qrUrl: qrLocationUrl(loc.id),
       scans: 0,
     }));
@@ -511,8 +511,8 @@ export function QRCodeManagementPage() {
                         type === "storefront"
                           ? "Storefront QR"
                           : type === "table"
-                            ? `Table — ${item.name}`
-                            : `Location — ${item.name}`
+                            ? `Table: ${item.name}`
+                            : `Location: ${item.name}`
                       )
                     }
                     className={DASH_BTN_SECONDARY}
@@ -598,7 +598,7 @@ export function QRCodeManagementPage() {
           description={
             businessSlug
               ? `Team directory: ${businessDirectoryUrl(businessSlug)}`
-              : "Generate staff and storefront codes. Black modules on white for clean scans — actions use yellow with black text."
+              : "Generate staff and storefront codes. Black modules on white for clean scans. Actions use yellow with black text."
           }
           overview={
             <div className="grid grid-cols-3 gap-3 text-center">
@@ -612,7 +612,7 @@ export function QRCodeManagementPage() {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase text-muted-foreground">Slug</p>
-                <p className="text-lg font-bold text-foreground">{businessSlug ? "Live" : "—"}</p>
+                <p className="text-lg font-bold text-foreground">{businessSlug ? "Live" : "N/A"}</p>
               </div>
             </div>
           }

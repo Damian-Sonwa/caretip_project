@@ -21,7 +21,7 @@ function PlatformAdminAuthBackground() {
       aria-hidden
     >
       {/* Black base + brand orange wash (not white) */}
-      <div className="absolute inset-0 bg-gradient-to-b from-orange-950/85 via-zinc-950 to-black" />
+      <div className="absolute inset-0 bg-neutral-950" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_100%_70%_at_50%_-25%,hsl(33_82%_48%_/_0.38),transparent_58%)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_45%_at_100%_90%,hsl(33_82%_45%_/_0.14),transparent)]" />
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_40%_35%_at_0%_60%,hsl(33_40%_25%_/_0.2),transparent)]" />

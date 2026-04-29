@@ -9,7 +9,7 @@ import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
 
 const FIELD =
-  "w-full rounded-lg border border-neutral-200 bg-[#F3F4F6] px-3 py-2.5 pr-11 text-sm text-[#1F2937] placeholder:text-[#9CA3AF] shadow-none transition focus:border-[#EB992C] focus:outline-none focus:ring-[3px] focus:ring-[#EB992C]/25";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 pr-11 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 export function ResetPasswordPage() {
   const { token: tokenParam } = useParams<{ token: string }>();
@@ -54,7 +54,7 @@ export function ResetPasswordPage() {
     return (
       <AuthRecoveryLayout>
         <p className="text-center text-sm text-red-600">This reset link is invalid.</p>
-        <Link to="/forgot-password" className="mt-4 block text-center text-sm font-medium text-[#EB992C] hover:underline">
+        <Link to="/forgot-password" className="mt-4 block text-center text-sm font-medium text-primary hover:underline">
           Request a new link
         </Link>
       </AuthRecoveryLayout>
@@ -65,12 +65,12 @@ export function ResetPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Password updated</h1>
-          <p className="text-sm text-[#6B7280]">You can sign in with your new password.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Password updated</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">You can sign in with your new password.</p>
           <button
             type="button"
             onClick={() => navigate("/login", { replace: true })}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
             Back to login
           </button>
@@ -83,12 +83,12 @@ export function ResetPasswordPage() {
     <AuthRecoveryLayout>
       <div className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">Set a new password</h1>
-          <p className="text-sm text-[#6B7280]">Choose a strong password you haven&apos;t used elsewhere.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Set a new password</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Choose a strong password you haven&apos;t used elsewhere.</p>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div>
-            <label htmlFor="reset-new" className="mb-2 block text-left text-xs font-medium text-[#6B7280]">
+            <label htmlFor="reset-new" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
               New password
             </label>
             <div className="relative">
@@ -102,7 +102,7 @@ export function ResetPasswordPage() {
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                 onClick={() => setShowNew(!showNew)}
                 aria-label={showNew ? "Hide password" : "Show password"}
               >
@@ -111,7 +111,7 @@ export function ResetPasswordPage() {
             </div>
           </div>
           <div>
-            <label htmlFor="reset-confirm" className="mb-2 block text-left text-xs font-medium text-[#6B7280]">
+            <label htmlFor="reset-confirm" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
               Confirm new password
             </label>
             <div className="relative">
@@ -125,7 +125,7 @@ export function ResetPasswordPage() {
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#6B7280] hover:text-[#1F2937]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                 onClick={() => setShowConfirm(!showConfirm)}
                 aria-label={showConfirm ? "Hide password" : "Show password"}
               >
@@ -147,7 +147,7 @@ export function ResetPasswordPage() {
             whileHover={canSubmit ? { y: -3 } : undefined}
             whileTap={canSubmit ? { scale: 0.98 } : undefined}
             transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#EB992C] text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
           >
             {submitting ? (
               <>
@@ -159,7 +159,7 @@ export function ResetPasswordPage() {
             )}
           </motion.button>
           {!strong && newPassword.length > 0 ? (
-            <p className="text-center text-xs text-[#6B7280]">
+            <p className="text-center text-xs text-neutral-600 dark:text-neutral-400">
               Use 8+ characters with upper, lower, number, and special (e.g. @#$%).
             </p>
           ) : null}

@@ -37,7 +37,7 @@ import {
 } from "../../components/ui/alert-dialog";
 import { Button } from "../../components/ui/button";
 
-const TEAL = "#197278";
+const TEAL = "#EB992C";
 
 export function EmployeeSettingsPage() {
   const { user, logout, updateUser } = useRequireAuth();

@@ -382,11 +382,11 @@ export function QRLandingPage() {
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
             <Card className="border border-border/50 shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-              <CardContent className="flex items-center gap-5 p-6 sm:p-7 bg-gradient-to-br from-white/50 to-orange-50/20 dark:from-slate-950 dark:to-slate-900/50">
+              <CardContent className="flex items-center gap-5 bg-white p-6 sm:p-7 dark:bg-neutral-900">
                 <ProfileAvatar
                   src={selectedEmployee.avatar}
                   displayName={displayName}
-                  className="h-24 w-24 shrink-0 ring-3 ring-orange-300/60 shadow-lg sm:h-28 sm:w-28"
+                  className="h-24 w-24 shrink-0 ring-2 ring-primary/30 shadow-lg sm:h-28 sm:w-28"
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-muted-foreground/80 mb-1">Tipping</p>
@@ -414,7 +414,7 @@ export function QRLandingPage() {
                         initial={{ width: 0 }}
                         animate={{ width: `${goalProgress}%` }}
                         transition={{ duration: 0.6 }}
-                        className="h-full rounded-full bg-gradient-to-r from-orange-400 to-orange-500 shadow-sm"
+                        className="h-full rounded-full bg-primary shadow-sm"
                       />
                     </div>
                     <p className="mt-3 text-xs text-muted-foreground/80 font-medium">
@@ -447,8 +447,8 @@ export function QRLandingPage() {
                     onClick={() => handleAmountSelect(amount)}
                     className={`p-5 rounded-2xl border-2 text-left transition-all min-h-[110px] flex flex-col justify-center font-semibold ${
                       selectedAmount === amount
-                        ? "border-orange-400 bg-gradient-to-br from-orange-50 to-orange-100/50 shadow-lg text-orange-900 dark:from-orange-950 dark:to-orange-900"
-                        : "border-border/50 bg-card/60 hover:border-orange-300/50 hover:shadow-lg hover:bg-card text-foreground"
+                        ? "border-primary bg-primary/10 shadow-lg text-foreground"
+                        : "border-border/50 bg-card/60 hover:border-primary/40 hover:shadow-lg hover:bg-card text-foreground"
                     }`}
                   >
                     <div className="text-3xl font-bold mb-1">€{amount}</div>
@@ -471,7 +471,7 @@ export function QRLandingPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   onClick={handleCustomClick}
-                  className="w-full p-5 rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 hover:border-orange-300/50 hover:bg-muted/40 transition-all"
+                  className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 transition-all hover:border-primary/40 hover:bg-muted/40"
                 >
                   <DollarSign className="w-7 h-7 text-muted-foreground/50 mx-auto mb-2" />
                   <span className="text-sm text-muted-foreground/80 font-medium">Enter custom amount</span>
@@ -486,7 +486,7 @@ export function QRLandingPage() {
                     placeholder="0.00"
                     value={customAmount}
                     onChange={(e) => handleCustomInput(e.target.value)}
-                    className="w-full pl-11 pr-5 py-5 rounded-2xl border-2 border-orange-300/60 bg-card text-3xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400/80"
+                    className="w-full pl-11 pr-5 py-5 rounded-2xl border-2 border-border/50 bg-card text-3xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary"
                     autoFocus
                     step="0.01"
                     min="0"
@@ -498,11 +498,11 @@ export function QRLandingPage() {
 
           {selectedAmount && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-              <Card className="border border-orange-200/60 bg-gradient-to-br from-orange-50 to-orange-100/40 shadow-lg dark:border-orange-900/40 dark:from-orange-950/50 dark:to-orange-900/20">
+              <Card className="border border-border/50 bg-card shadow-lg">
                 <CardContent className="pt-7 px-6">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-muted-foreground/80">Total Tip</span>
-                    <span className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                    <span className="text-4xl font-bold text-primary">
                       €{selectedAmount.toFixed(2)}
                     </span>
                   </div>
@@ -522,7 +522,7 @@ export function QRLandingPage() {
               <button
                 type="button"
                 onClick={handleContinueToPayment}
-                className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 py-4 text-lg font-bold text-white shadow-lg transition-all hover:shadow-xl"
+                className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl"
               >
                 Continue to Payment
               </button>
@@ -547,7 +547,7 @@ export function QRLandingPage() {
   const businessLogoSrc = resolveMediaUrl(businessData.logo);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-white/95 dark:from-slate-950 dark:to-slate-900/95">
+    <div className="min-h-screen bg-white dark:bg-neutral-950">
       <div className="sticky top-0 z-10 border-b border-border/30 bg-background/95 backdrop-blur-lg shadow-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3.5 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
           <CareTipLogo size="sm" />
@@ -579,14 +579,14 @@ export function QRLandingPage() {
                       </span>{" "}
                       again?
                     </p>
-                    <p className="mt-2 text-xs font-semibold text-orange-700">
+                    <p className="mt-2 text-xs font-semibold text-primary">
                       Last tip: €{repeatCard.amount.toFixed(2)}
                     </p>
                   </div>
                   <ProfileAvatar
                     src={repeatCard.employee.avatar}
                     displayName={repeatCard.employee.name ?? "Team Member"}
-                    className="h-12 w-12 shrink-0 ring-2 ring-orange-200/50"
+                    className="h-12 w-12 shrink-0 ring-2 ring-primary/30"
                   />
                 </div>
                 <div className="mt-4 flex flex-col gap-3 sm:flex-row">
@@ -603,7 +603,7 @@ export function QRLandingPage() {
                       markCustomerFlowEntered();
                       navigate("/payment");
                     }}
-                    className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 py-3.5 text-base font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95"
+                    className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
                   >
                     Tip again
                   </button>
@@ -626,7 +626,7 @@ export function QRLandingPage() {
         <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
           <div className="relative">
             <Card className="overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-shadow duration-300">
-              <div className="relative h-56 bg-gradient-to-br from-orange-400/10 via-orange-300/5 to-slate-100/20 dark:from-orange-900/20 dark:via-orange-800/10 dark:to-slate-900/30">
+              <div className="relative h-56 bg-gray-50 dark:bg-neutral-900">
                 {businessLogoSrc ? (
                   <img
                     src={businessLogoSrc}
@@ -648,17 +648,17 @@ export function QRLandingPage() {
                   <h2 className="mb-3 text-3xl font-bold text-foreground">{businessData.name}</h2>
                   <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground/90">
                     <div className="flex items-center gap-2 font-medium">
-                      <MapPin className="h-5 w-5 shrink-0 text-orange-500" />
+                      <MapPin className="h-5 w-5 shrink-0 text-primary" />
                       <span>{businessData.location}</span>
                     </div>
                     <div className="flex items-center gap-2 font-medium">
-                      <Building2 className="h-5 w-5 shrink-0 text-orange-500" />
+                      <Building2 className="h-5 w-5 shrink-0 text-primary" />
                       <span>{businessData.type}</span>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-orange-50 to-white/50 dark:from-orange-950/30 dark:to-slate-900/50 p-4 border border-orange-200/40 dark:border-orange-900/40">
-                  <Users className="h-6 w-6 shrink-0 text-orange-600 dark:text-orange-400" />
+                <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4">
+                  <Users className="h-6 w-6 shrink-0 text-primary" />
                   <span className="text-sm font-medium text-foreground">
                     {businessData.employeeCount} team members ready to serve you
                   </span>
@@ -703,7 +703,7 @@ export function QRLandingPage() {
                     placeholder="Search by name or role…"
                     value={poolQuery}
                     onChange={(e) => setPoolQuery(e.target.value)}
-                    className="w-full rounded-2xl border border-border/50 bg-card py-3.5 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-orange-400/40 focus:border-orange-400/60 transition-colors"
+                    className="w-full rounded-2xl border border-border/50 bg-card py-3.5 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 transition-colors"
                     autoComplete="off"
                   />
                 </div>
@@ -721,12 +721,12 @@ export function QRLandingPage() {
                         <button
                           type="button"
                           onClick={() => pickEmployeeFromPool(emp)}
-                          className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card/60 p-4 text-center transition-all hover:border-orange-300/60 hover:shadow-lg hover:bg-card active:scale-95"
+                          className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card/60 p-4 text-center transition-all hover:border-primary/40 hover:shadow-lg hover:bg-card active:scale-95"
                         >
                           <ProfileAvatar
                             src={emp.avatar}
                             displayName={emp.name}
-                            className="h-24 w-24 ring-2 ring-orange-200/40 dark:ring-orange-900/40"
+                            className="h-24 w-24 ring-2 ring-primary/30"
                           />
                           <span className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">
                             {emp.name}
@@ -773,7 +773,7 @@ export function QRLandingPage() {
             <button
               type="button"
               onClick={goToSelectEmployee}
-              className="font-semibold text-orange-600 dark:text-orange-400 hover:text-orange-700 dark:hover:text-orange-300 underline underline-offset-2 transition-colors"
+              className="font-semibold text-primary underline underline-offset-2 transition-colors hover:opacity-90"
             >
               Open full directory
             </button>
@@ -787,7 +787,7 @@ export function QRLandingPage() {
             <button
               type="button"
               onClick={goToSelectEmployee}
-              className="w-full rounded-2xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 py-4 text-lg font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95"
+              className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
             >
               {businessData.slug?.trim() ? "Browse All Team Members" : "Select Team Member"}
             </button>
@@ -799,9 +799,9 @@ export function QRLandingPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.15 }}
         >
-          <Card className="border border-border/30 bg-gradient-to-r from-slate-50/50 to-white/30 dark:from-slate-950/50 dark:to-slate-900/30 shadow-sm">
+          <Card className="border border-border/30 bg-gray-50 shadow-sm dark:bg-neutral-900">
             <CardContent className="flex items-center justify-center gap-3 py-5 text-center text-xs text-muted-foreground/70 font-medium">
-              <svg className="h-5 w-5 shrink-0 text-orange-600/60 dark:text-orange-400/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 shrink-0 text-primary/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
