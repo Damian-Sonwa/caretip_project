@@ -147,6 +147,13 @@ export function getPostAuthRedirect(u: User): string {
 export function useAuth() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
+  const [isLoadingUser, setIsLoadingUser] = useState(() => {
+    try {
+      return typeof localStorage !== "undefined" && !!localStorage.getItem("caretip_token");
+    } catch {
+      return false;
+    }
+  });
 
   useEffect(() => {
     const onStorageSync = () => {
@@ -154,6 +161,28 @@ export function useAuth() {
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const run = async () => {
+      try {
+        if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")) {
+          await refreshSessionAPI().then((data) => {
+            const u = persistAuthResponse(data);
+            if (!cancelled) setUser(u);
+          });
+        }
+      } catch (err) {
+        logClientError("useAuth.initialRefresh", err);
+      } finally {
+        if (!cancelled) setIsLoadingUser(false);
+      }
+    };
+    void run();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -286,6 +315,7 @@ export function useAuth() {
 
   return {
     user,
+    isLoadingUser,
     isBusiness,
     isEmployee,
     isPlatformAdmin,

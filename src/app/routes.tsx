@@ -76,7 +76,7 @@ import { StaffManagementPage } from './pages/business/StaffManagementPage';
 import { QRCodeManagementPage } from './pages/business/QRCodeManagementPage';
 import { LocationsPage } from './pages/business/LocationsPage';
 import { TablesPage } from './pages/business/TablesPage';
-import { RoleProtectedRoute } from './components/RoleProtectedRoute';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { BusinessLayout } from './layouts/BusinessLayout';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
@@ -208,9 +208,9 @@ const routes: RouteObject[] = [
   {
     path: '/onboarding',
     element: (
-      <RoleProtectedRoute allowedRoles={['business']}>
+      <ProtectedRoute allowedRoles={['business']}>
         <BusinessOnboardingPage />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
   },
@@ -277,9 +277,9 @@ const routes: RouteObject[] = [
   {
     path: '/verification-pending',
     element: (
-      <RoleProtectedRoute allowedRoles={['business']}>
+      <ProtectedRoute allowedRoles={['business']}>
         <PendingVerificationAllowedGate />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
     children: [{ index: true, Component: PendingVerification }],
@@ -287,9 +287,9 @@ const routes: RouteObject[] = [
   {
     path: '/dashboard',
     element: (
-      <RoleProtectedRoute allowedRoles={['business']}>
+      <ProtectedRoute allowedRoles={['business']}>
         <ApprovedBusinessGate />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
     children: [
@@ -518,27 +518,27 @@ const routes: RouteObject[] = [
   {
     path: '/employee/dashboard',
     element: (
-      <RoleProtectedRoute allowedRoles={['employee']}>
+      <ProtectedRoute allowedRoles={['employee']}>
         <EmployeeDashboard />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/employee/notifications',
     element: (
-      <RoleProtectedRoute allowedRoles={['employee']}>
+      <ProtectedRoute allowedRoles={['employee']}>
         <EmployeeNotificationsPage />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/employee/settings',
     element: (
-      <RoleProtectedRoute allowedRoles={['employee']}>
+      <ProtectedRoute allowedRoles={['employee']}>
         <EmployeeSettingsPage />
-      </RoleProtectedRoute>
+      </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
   },
