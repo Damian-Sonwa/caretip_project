@@ -35,7 +35,7 @@ export function LandingFinalCtaSection() {
           className="mt-10"
         >
           <Link
-            to="/onboarding"
+            to="/get-started"
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
           >
             Get started

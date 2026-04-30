@@ -9,7 +9,7 @@ import { useAuth } from "@/app/hooks/useAuth";
 export function VerifyEmailPage() {
   const [sp] = useSearchParams();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, updateUser } = useAuth();
   const rawToken = sp.get("token")?.trim() ?? "";
 
   const [status, setStatus] = useState<"idle" | "verifying" | "success" | "error">(
@@ -24,10 +24,9 @@ export function VerifyEmailPage() {
       try {
         await verifyEmailWithToken(rawToken);
         if (cancelled) return;
-        // Drop any pre-verification session so the next sign-in loads fresh claims.
-        logout();
+        // Optimistically flip local flag so route guards unlock immediately.
+        if (user?.isVerified === false) updateUser({ emailVerified: true, isVerified: true });
         setStatus("success");
-        window.setTimeout(() => navigate("/login", { replace: true }), 900);
       } catch (err) {
         logClientError("VerifyEmailPage", err);
         if (cancelled) return;
@@ -38,14 +37,14 @@ export function VerifyEmailPage() {
     return () => {
       cancelled = true;
     };
-  }, [logout, navigate, rawToken]);
+  }, [navigate, rawToken, updateUser, user]);
 
   if (status === "success") {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
           <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Email verified</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">Thanks, redirecting you to sign in…</p>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Thanks. Your email is verified.</p>
           <Link
             to="/login"
             className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"

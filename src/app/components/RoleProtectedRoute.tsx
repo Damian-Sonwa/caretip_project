@@ -23,10 +23,10 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
   const r = user.role as UserRole;
 
   const mustVerifyEmail =
-    user.emailVerified === false && (r === "business" || r === "employee");
+    user.isVerified === false && (r === "business" || r === "employee");
 
   if (mustVerifyEmail) {
-    return <Navigate to="/check-email" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/verify-email" replace state={{ from: location.pathname }} />;
   }
 
   if (allowedRoles.includes(r as 'business' | 'employee')) {

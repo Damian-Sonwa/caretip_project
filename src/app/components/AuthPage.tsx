@@ -18,8 +18,10 @@ import {
   isApiRequestError,
   EMAIL_NOT_VERIFIED_CODE,
 } from '../lib/api';
+import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
 import { toast } from 'sonner';
+import { getPostAuthRedirect } from '../hooks/useAuth';
 
 const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as const;
 
@@ -101,6 +103,10 @@ export function AuthPage() {
     if (roleParam === 'employee' || roleParam === 'business') {
       setRole(roleParam as AuthRole);
     }
+    const inviteParam = searchParams.get('inviteCode') || searchParams.get('code');
+    if (inviteParam && inviteParam.trim().length > 0) {
+      setInviteCode(inviteParam.trim());
+    }
   }, [location.search]);
 
   const validateEmail = (email: string) => {
@@ -165,13 +171,7 @@ export function AuthPage() {
     try {
       if (isLogin) {
         const loggedIn = await login(email, password, role as 'business' | 'employee');
-        if (loggedIn.emailVerified === false) {
-          navigate('/check-email', { replace: true });
-        } else if (loggedIn.role === 'business') {
-          navigate('/dashboard', { replace: true });
-        } else {
-          navigate('/employee/dashboard', { replace: true });
-        }
+        navigate(getPostAuthRedirect(loggedIn), { replace: true });
       } else {
         const payload = {
           email,
@@ -183,23 +183,21 @@ export function AuthPage() {
           location: role === 'business' ? businessLocation : undefined,
           inviteCode: role === 'employee' ? inviteCode : undefined,
         };
+        if (role === "employee") {
+          await validateInviteCode(inviteCode);
+        }
         const created = await register(payload);
         toast.success("Account created. Check your email to verify your address.", {
           style: ROLE_MISMATCH_TOAST_STYLE,
         });
-        if (created.emailVerified === false) {
-          navigate('/check-email', { replace: true });
-        } else if (created.role === 'business') {
-          navigate('/dashboard', { replace: true });
-        } else {
-          navigate('/employee/dashboard', { replace: true });
-        }
+        navigate(getPostAuthRedirect(created), { replace: true });
       }
     } catch (err) {
       logClientError('AuthPage', err);
       if (isApiRequestError(err) && err.code === EMAIL_NOT_VERIFIED_CODE) {
         setError(err.message);
         setShowResendVerification(err.canResend === true);
+        // No session is issued for unverified users; keep them here with resend.
         return;
       }
       setShowResendVerification(false);
@@ -322,11 +320,7 @@ export function AuthPage() {
         location: role === 'business' ? businessLocation.trim() : undefined,
         inviteCode: role === 'employee' ? inviteCode.trim() : undefined,
       });
-      if (loggedIn.emailVerified === false) {
-        navigate('/check-email', { replace: true });
-      } else {
-        navigateAfterAuth(loggedIn.role);
-      }
+      navigate(getPostAuthRedirect(loggedIn), { replace: true });
     } catch (err) {
       logClientError('AuthPage.oauth', err);
       const raw = err instanceof Error ? err.message : String(err);

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { registerAPI, loginAPI, oauthAPI, logoutAPI, type AuthResponse } from "../lib/api";
+import { registerAPI, loginAPI, oauthAPI, logoutAPI, refreshSessionAPI, type AuthResponse } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 
 /** API roles plus demo-only values used by admin UI / RoleSwitcher */
@@ -19,6 +19,10 @@ export interface User {
    * Older saved sessions without this field are treated as verified in {@link parseUser}.
    */
   emailVerified?: boolean;
+  /** Preferred alias for UI logic. Always set from `emailVerified`. */
+  isVerified: boolean;
+  /** Used for business users to control whether `/onboarding` should show. */
+  hasCompletedOnboarding: boolean;
   businessId?: string;
   employeeId?: string;
   businessName?: string;
@@ -73,12 +77,15 @@ function parseUser(data: AuthResponse["user"]): User {
   const kyc = data.businessVerificationStatus;
   const emailVerified =
     typeof ext.emailVerified === "boolean" ? ext.emailVerified : true;
+  const isVerified = emailVerified;
   const base: User = {
     id: data.id,
     name: data.name,
     email: data.email,
     role,
     emailVerified,
+    isVerified,
+    hasCompletedOnboarding: role === "business" ? false : true,
     businessId: data.businessId,
     employeeId: data.employeeId,
     avatar: data.avatar ?? undefined,
@@ -91,6 +98,13 @@ function parseUser(data: AuthResponse["user"]): User {
     return { ...base, businessId: undefined, employeeId: undefined, businessName: undefined, status: undefined };
   }
   return base;
+}
+
+export function getPostAuthRedirect(u: User): string {
+  if (!u.isVerified) return "/verify-email";
+  if (u.role === "business" && !u.hasCompletedOnboarding) return "/onboarding";
+  if (u.role === "employee") return "/employee/dashboard";
+  return "/dashboard";
 }
 
 export function useAuth() {
@@ -123,7 +137,15 @@ export function useAuth() {
   ): Promise<User> => {
     const data = await loginAPI(email, password, intendedRole);
     localStorage.setItem("caretip_token", data.token);
-    const u = parseUser(data.user);
+    const u0 = parseUser(data.user);
+    const u: User =
+      user && user.id === u0.id
+        ? {
+            ...u0,
+            hasCompletedOnboarding:
+              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
+          }
+        : u0;
     setUser(u);
     return u;
   };
@@ -131,7 +153,15 @@ export function useAuth() {
   const register = async (payload: RegisterPayload): Promise<User> => {
     const data = await registerAPI(payload);
     localStorage.setItem("caretip_token", data.token);
-    const u = parseUser(data.user);
+    const u0 = parseUser(data.user);
+    const u: User =
+      user && user.id === u0.id
+        ? {
+            ...u0,
+            hasCompletedOnboarding:
+              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
+          }
+        : u0;
     setUser(u);
     return u;
   };
@@ -161,7 +191,15 @@ export function useAuth() {
       inviteCode: options.inviteCode,
     });
     localStorage.setItem("caretip_token", data.token);
-    const u = parseUser(data.user);
+    const u0 = parseUser(data.user);
+    const u: User =
+      user && user.id === u0.id
+        ? {
+            ...u0,
+            hasCompletedOnboarding:
+              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
+          }
+        : u0;
     setUser(u);
     return u;
   };
@@ -205,6 +243,27 @@ export function useAuth() {
     setUser(next);
   }, []);
 
+  const refreshSession = useCallback(async (): Promise<User | null> => {
+    try {
+      const data = await refreshSessionAPI();
+      localStorage.setItem("caretip_token", data.token);
+      const next0 = parseUser(data.user);
+      const next: User =
+        user && user.id === next0.id
+          ? {
+              ...next0,
+              hasCompletedOnboarding:
+                user.hasCompletedOnboarding || next0.hasCompletedOnboarding,
+            }
+          : next0;
+      setUser(next);
+      return next;
+    } catch (err) {
+      logClientError("useAuth.refreshSession", err);
+      return null;
+    }
+  }, [user]);
+
   return {
     user,
     isBusiness,
@@ -214,6 +273,7 @@ export function useAuth() {
     register,
     loginWithOAuth,
     logout,
+    refreshSession,
     switchRole,
     updateUser,
     replaceUser,

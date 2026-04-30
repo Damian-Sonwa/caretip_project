@@ -42,7 +42,31 @@ export async function ensureBusinessHasSlug(businessId: string): Promise<void> {
 }
 
 export async function getBusinessByUserId(userId: string) {
-  return prisma.business.findUnique({ where: { userId } });
+  const existing = await prisma.business.findUnique({ where: { userId } });
+  if (existing) return existing;
+
+  // Auto-heal: legacy or inconsistent rows where a MANAGER exists without a Business record.
+  // This keeps the app usable and prevents "Business not found" / "Only business owners..." errors.
+  const u = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, email: true, role: true, isActive: true, isPlatformAdmin: true },
+  });
+  if (!u || !u.isActive || u.isPlatformAdmin || u.role !== "MANAGER") {
+    return null;
+  }
+
+  const baseName = (u.email.split("@")[0] || "My").trim();
+  const name = `${baseName} venue`;
+  const slug = await generateUniqueBusinessSlugForName(name);
+  return prisma.business.create({
+    data: {
+      userId: u.id,
+      name,
+      slug,
+      businessType: null,
+      location: null,
+    },
+  });
 }
 
 /**
@@ -149,6 +173,17 @@ export async function generateInviteCode(userId: string): Promise<{
     inviteCode,
     expiresAt: expiresAt.toISOString(),
   };
+}
+
+export async function validateInviteCode(code: string): Promise<{ ok: boolean; businessName?: string }> {
+  const c = String(code ?? "").trim();
+  if (!c) return { ok: false };
+  const row = await prisma.business.findFirst({
+    where: { inviteCode: c, inviteCodeExpiresAt: { gt: new Date() } },
+    select: { name: true },
+  });
+  if (!row) return { ok: false };
+  return { ok: true, businessName: row.name };
 }
 
 export type BusinessDashboardTimeframe = "week" | "month" | "year" | "all";

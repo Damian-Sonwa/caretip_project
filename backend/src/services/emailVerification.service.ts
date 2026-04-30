@@ -16,7 +16,7 @@ function getFrontendBaseUrl(): string {
 
 export function buildVerifyEmailUrl(plainToken: string): string {
   const token = String(plainToken ?? "").trim();
-  return `${getFrontendBaseUrl()}/verify-email?token=${encodeURIComponent(token)}`;
+  return `${getFrontendBaseUrl()}/verify?token=${encodeURIComponent(token)}`;
 }
 
 export async function createEmailVerificationToken(userId: string): Promise<{

@@ -332,6 +332,14 @@ export async function oauthAPI(payload: {
   });
 }
 
+export async function refreshSessionAPI(): Promise<AuthResponse> {
+  return apiRequest<AuthResponse>(apiPath("/api/auth/refresh"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+}
+
 // Business
 export async function generateInviteCode(): Promise<{ inviteCode: string; expiresAt: string }> {
   try {
@@ -479,6 +487,15 @@ export async function getBusinessById(businessId: string): Promise<BusinessInfo 
 /** Authenticated manager: returns only the business tied to the JWT (not arbitrary IDs). */
 export async function fetchBusinessProfile(): Promise<BusinessInfo> {
   return apiRequest(apiPath("/api/business/profile"), { headers: getHeaders() });
+}
+
+export async function validateInviteCode(code: string): Promise<{ ok: true; businessName?: string }> {
+  const sp = new URLSearchParams({ code: String(code ?? "").trim() });
+  return apiRequest<{ ok: true; businessName?: string }>(apiPath(`/api/business/invite/validate?${sp.toString()}`), {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
 }
 
 // Employees

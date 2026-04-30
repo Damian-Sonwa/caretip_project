@@ -30,7 +30,8 @@ import { HowItWorksPage } from './pages/HowItWorksPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import HeroSectionDemoPage from './pages/HeroSectionDemoPage';
 import { HeroAnimationDemoPage } from './pages/HeroAnimationDemoPage';
-import { OnboardingSelectionPage } from './pages/OnboardingSelectionPage';
+import { JoinPage } from './pages/JoinPage';
+import { BusinessOnboardingPage } from './pages/BusinessOnboardingPage';
 import { AuthPage } from './components/AuthPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
@@ -206,7 +207,26 @@ const routes: RouteObject[] = [
   },
   {
     path: '/onboarding',
-    Component: OnboardingSelectionPage,
+    element: (
+      <RoleProtectedRoute allowedRoles={['business']}>
+        <BusinessOnboardingPage />
+      </RoleProtectedRoute>
+    ),
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/get-started',
+    element: <Navigate to="/signup?role=business" replace />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/join',
+    Component: JoinPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/join/:code',
+    Component: JoinPage,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -231,12 +251,17 @@ const routes: RouteObject[] = [
   },
   {
     path: '/verify-email',
-    Component: VerifyEmailPage,
+    Component: CheckEmailPage,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/check-email',
-    Component: CheckEmailPage,
+    element: <Navigate to="/verify-email" replace />,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/verify',
+    Component: VerifyEmailPage,
     errorElement: <ErrorBoundary />,
   },
   {

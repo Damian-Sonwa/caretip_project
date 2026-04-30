@@ -58,10 +58,10 @@ export function LandingPage() {
             ]}
             tabs={SHOWCASE_TABS}
             defaultTab="contactless"
-            primaryCtaLabel="Get started"
-            primaryCtaTo="/onboarding"
-            secondaryCtaLabel="Request a Demo"
-            secondaryCtaTo="/contact"
+            primaryCtaLabel="Get Started"
+            primaryCtaTo="/get-started"
+            secondaryCtaLabel="Join your team"
+            secondaryCtaTo="/join"
             variant="cinematic"
             useAnimatedHero={false}
             heroBorderBeam={false}

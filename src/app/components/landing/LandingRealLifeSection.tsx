@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 import tableQrImg from "../../../../images/table_QR.png";
 import atReceptionImg from "../../../../images/At_reception.png";
-import salonImg from "../../../../images/salon and spa.png";
-import beachImg from "../../../../images/Beach_club.png";
+import salonImg from "../../../../images/salon.jpeg";
+import homeImg from "../../../../images/home.jpeg";
 
 const scenarios = [
   {
@@ -26,8 +26,8 @@ const scenarios = [
   {
     headline: "On the go",
     text: "Customers tip from anywhere using a shared link or QR code.",
-    img: beachImg,
-    alt: "Outdoor and mobile service setting",
+    img: homeImg,
+    alt: "Home and mobile service tipping moment",
   },
 ] as const;
 

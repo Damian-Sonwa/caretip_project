@@ -6,6 +6,9 @@ import * as businessController from "../controllers/business.controller.js";
 
 const router = Router();
 
+/** Public: validate an invite code before sign-up. */
+router.get("/invite/validate", businessController.validateInvite);
+
 /** Pending managers may read their own profile to poll KYC status; not gated by isApprovedBusiness. */
 router.get("/profile", authMiddleware, requireRole(Role.MANAGER), businessController.getMyProfile);
 

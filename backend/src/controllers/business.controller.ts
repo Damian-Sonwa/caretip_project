@@ -41,6 +41,23 @@ export async function getMyProfile(req: Request, res: Response) {
   }
 }
 
+export async function validateInvite(req: Request, res: Response) {
+  try {
+    const code = typeof req.query?.code === "string" ? req.query.code : "";
+    const r = await businessService.validateInviteCode(code);
+    if (!r.ok) {
+      return res.status(400).json({ ok: false, message: "Invalid or expired invite code" });
+    }
+    return res.json({ ok: true, businessName: r.businessName });
+  } catch (err) {
+    logServerError("business.validateInvite", err);
+    return res.status(400).json({
+      ok: false,
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
 export async function getById(req: Request, res: Response) {
   try {
     const { businessId } = req.params;

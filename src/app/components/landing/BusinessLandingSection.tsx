@@ -71,7 +71,7 @@ export function BusinessLandingSection() {
           </div>
 
           <Link
-            to="/onboarding"
+            to="/get-started"
             className="inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
           >
             <ArrowRight className="h-5 w-5" />
