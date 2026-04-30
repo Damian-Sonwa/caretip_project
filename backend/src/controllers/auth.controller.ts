@@ -4,6 +4,7 @@ import * as authService from "../services/auth.service.js";
 import * as oauthAuthService from "../services/oauthAuth.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as passwordResetService from "../services/passwordReset.service.js";
+import { prisma } from "../prisma.js";
 import {
   clearRefreshCookie,
   issueRefreshToken,
@@ -495,6 +496,45 @@ export async function changePassword(req: Request, res: Response) {
     return res.json({ success: true });
   } catch (err) {
     logServerError("auth.changePassword", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.changePassword),
+    });
+  }
+}
+
+export async function patchMe(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    const role = req.user?.role ?? req.user?.roleLabel;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const normalizedRole = typeof role === "string" ? role.trim().toUpperCase() : "";
+    if (normalizedRole !== "MANAGER") {
+      return res.status(403).json({ message: "Only business users can update onboarding status." });
+    }
+
+    const body = req.body as Record<string, unknown>;
+    if (typeof body.hasCompletedOnboarding !== "boolean") {
+      return res.status(400).json({ message: "hasCompletedOnboarding must be a boolean" });
+    }
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { hasCompletedOnboarding: body.hasCompletedOnboarding },
+    });
+
+    // Re-issue a fresh auth payload so the client immediately routes correctly.
+    const result = await authService.authResultForUserId(userId);
+    try {
+      const rt = await issueRefreshToken(result.user.id);
+      setRefreshCookie(res, rt.token);
+    } catch (e) {
+      logServerError("auth.patchMe.issueRefreshToken", e);
+    }
+    return res.json(result);
+  } catch (err) {
+    logServerError("auth.patchMe", err);
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.changePassword),
     });

@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
-import { registerAPI, loginAPI, oauthAPI, logoutAPI, refreshSessionAPI, type AuthResponse } from "../lib/api";
+import {
+  registerAPI,
+  loginAPI,
+  oauthAPI,
+  logoutAPI,
+  refreshSessionAPI,
+  patchMyOnboardingStatus,
+  type AuthResponse,
+} from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 
 /** API roles plus demo-only values used by admin UI / RoleSwitcher */
@@ -78,6 +86,8 @@ function parseUser(data: AuthResponse["user"]): User {
   const emailVerified =
     typeof ext.emailVerified === "boolean" ? ext.emailVerified : true;
   const isVerified = emailVerified;
+  const hasCompletedOnboarding =
+    role === "business" ? (typeof ext.hasCompletedOnboarding === "boolean" ? ext.hasCompletedOnboarding : false) : true;
   const base: User = {
     id: data.id,
     name: data.name,
@@ -85,7 +95,7 @@ function parseUser(data: AuthResponse["user"]): User {
     role,
     emailVerified,
     isVerified,
-    hasCompletedOnboarding: role === "business" ? false : true,
+    hasCompletedOnboarding,
     businessId: data.businessId,
     employeeId: data.employeeId,
     avatar: data.avatar ?? undefined,
@@ -239,6 +249,19 @@ export function useAuth() {
     setUser((u) => (u ? { ...u, ...patch } : null));
   }, []);
 
+  const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User | null> => {
+    try {
+      const data = await patchMyOnboardingStatus(next);
+      localStorage.setItem("caretip_token", data.token);
+      const next0 = parseUser(data.user);
+      setUser(next0);
+      return next0;
+    } catch (err) {
+      logClientError("useAuth.setHasCompletedOnboarding", err);
+      return null;
+    }
+  }, []);
+
   const replaceUser = useCallback((next: User) => {
     setUser(next);
   }, []);
@@ -276,6 +299,7 @@ export function useAuth() {
     refreshSession,
     switchRole,
     updateUser,
+    setHasCompletedOnboarding,
     replaceUser,
     exitImpersonation,
   };

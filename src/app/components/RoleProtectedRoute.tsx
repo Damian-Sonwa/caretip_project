@@ -29,6 +29,17 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
     return <Navigate to="/verify-email" replace state={{ from: location.pathname }} />;
   }
 
+  // Onboarding gate for business users.
+  if (r === "business") {
+    const onOnboardingRoute = location.pathname === "/onboarding";
+    if (user.hasCompletedOnboarding === false && !onOnboardingRoute) {
+      return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
+    }
+    if (user.hasCompletedOnboarding === true && onOnboardingRoute) {
+      return <Navigate to="/dashboard" replace />;
+    }
+  }
+
   if (allowedRoles.includes(r as 'business' | 'employee')) {
     return <>{children}</>;
   }

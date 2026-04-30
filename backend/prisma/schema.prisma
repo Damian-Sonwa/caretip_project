@@ -79,6 +79,11 @@ model User {
    * When false, user cannot sign in; used to revoke access without deleting the row.
    */
   isActive        Boolean  @default(true) @map("is_active")
+  /**
+   * Business-only: whether the manager finished onboarding.
+   * Controls post-auth routing to `/onboarding`.
+   */
+  hasCompletedOnboarding Boolean @default(false) @map("has_completed_onboarding")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 

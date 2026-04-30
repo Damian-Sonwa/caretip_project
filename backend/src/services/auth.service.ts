@@ -22,6 +22,8 @@ export interface AuthUserDto {
   name: string;
   /** False until the user completes email verification (password sign-up). */
   emailVerified: boolean;
+  /** Business-only: whether onboarding has been completed. */
+  hasCompletedOnboarding?: boolean;
   businessId?: string;
   employeeId?: string;
   avatar?: string | null;
@@ -141,6 +143,7 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
   if (user.role === "MANAGER" && user.business) {
     dto.businessId = user.business.id;
     dto.businessVerificationStatus = user.business.verificationStatus;
+    dto.hasCompletedOnboarding = (user as any).hasCompletedOnboarding === true;
   }
   if (user.role === "EMPLOYEE" && user.employee) {
     dto.employeeId = user.employee.id;

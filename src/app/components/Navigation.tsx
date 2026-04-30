@@ -83,12 +83,12 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 Log In
               </button>
             </Link>
-            <Link to="/get-started">
+            <Link to="/contact">
               <button
                 type="button"
                 className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary-hover active:scale-[0.98]"
               >
-                Join CareTip
+                Request a Demo
               </button>
             </Link>
           </div>
@@ -173,12 +173,12 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                         Log In
                       </button>
                     </Link>
-                    <Link to="/get-started" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="w-full">
                       <button
                         type="button"
                         className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-hover active:scale-[0.98]"
                       >
-                        Join CareTip
+                        Request a Demo
                       </button>
                     </Link>
                   </div>

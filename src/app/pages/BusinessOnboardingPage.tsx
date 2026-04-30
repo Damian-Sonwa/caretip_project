@@ -1,17 +1,18 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
-import { ArrowRight, Building2, Users, QrCode } from "lucide-react";
+import { ArrowRight, Building2, Users, QrCode, Loader2 } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 
 export function BusinessOnboardingPage() {
   const navigate = useNavigate();
-  const { updateUser } = useAuth();
+  const { setHasCompletedOnboarding } = useAuth();
   const [teamSize, setTeamSize] = useState("");
   const [locations, setLocations] = useState("");
   const [goal, setGoal] = useState("");
+  const [busy, setBusy] = useState(false);
 
   const canContinue = useMemo(() => true, []);
 
@@ -63,20 +64,30 @@ export function BusinessOnboardingPage() {
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
-                onClick={() => {
-                  updateUser({ hasCompletedOnboarding: true });
+                onClick={async () => {
+                  setBusy(true);
+                  await setHasCompletedOnboarding(true);
                   navigate("/dashboard", { replace: true });
+                  setBusy(false);
                 }}
                 disabled={!canContinue}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Continue to dashboard
-                <ArrowRight className="h-4 w-4" />
+                {busy ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    Continue to dashboard
+                    <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
               </button>
               <button
                 type="button"
                 onClick={() => {
-                  updateUser({ hasCompletedOnboarding: true });
                   navigate("/dashboard", { replace: true });
                 }}
                 className="text-sm font-semibold text-neutral-600 underline-offset-2 hover:underline dark:text-neutral-400"

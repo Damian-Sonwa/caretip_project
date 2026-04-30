@@ -170,6 +170,7 @@ export interface AuthResponse {
     role: string;
     name: string;
     emailVerified?: boolean;
+    hasCompletedOnboarding?: boolean;
     businessId?: string;
     employeeId?: string;
     avatar?: string | null;
@@ -494,6 +495,15 @@ export async function validateInviteCode(code: string): Promise<{ ok: true; busi
   return apiRequest<{ ok: true; businessName?: string }>(apiPath(`/api/business/invite/validate?${sp.toString()}`), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    credentials: "include",
+  });
+}
+
+export async function patchMyOnboardingStatus(hasCompletedOnboarding: boolean): Promise<AuthResponse> {
+  return apiRequest<AuthResponse>(apiPath("/api/auth/me"), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({ hasCompletedOnboarding }),
     credentials: "include",
   });
 }

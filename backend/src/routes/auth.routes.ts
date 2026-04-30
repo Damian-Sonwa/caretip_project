@@ -32,5 +32,6 @@ router.get("/verify-email", authController.verifyEmail);
 router.post("/forgot-password", authForgotPasswordLimiter, authController.forgotPassword);
 router.post("/reset-password", authResetPasswordLimiter, authController.resetPassword);
 router.post("/change-password", authMiddleware, authController.changePassword);
+router.patch("/me", authMiddleware, authController.patchMe);
 
 export default router;
