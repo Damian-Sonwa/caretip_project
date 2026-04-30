@@ -137,35 +137,10 @@ function RootLayout() {
 
   /** Single branded “route transition” overlay — not for in-route data fetching. */
   useLayoutEffect(() => {
-    const navBusy = navigation.state !== "idle";
-    const sig = `${location.pathname}${location.search}`;
-
-    if (navBusy) {
-      setRouteTransitionPending(true);
-      return;
-    }
-
-    if (routeSigRef.current === null) {
-      routeSigRef.current = sig;
-      setRouteTransitionPending(false);
-      return;
-    }
-
-    if (routeSigRef.current === sig) {
-      setRouteTransitionPending(false);
-      return;
-    }
-
-    routeSigRef.current = sig;
-    setRouteTransitionPending(true);
-    const id = window.setTimeout(() => setRouteTransitionPending(false), 160);
-    return () => window.clearTimeout(id);
-  }, [
-    navigation.state,
-    location.pathname,
-    location.search,
-    setRouteTransitionPending,
-  ]);
+    // Disable global route-transition spinner overlay.
+    // We use a single, consistent loader via ProtectedRoute / page-level loaders instead.
+    setRouteTransitionPending(false);
+  }, [setRouteTransitionPending]);
 
   return (
     <>

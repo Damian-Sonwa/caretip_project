@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import type { UserRole } from "../hooks/useAuth";
-import { FullPageLoader } from "./FullPageLoader";
+import { CareTipPageLoader } from "./CareTipPageLoader";
 
 export function ProtectedRoute({
   allowedRoles,
@@ -15,7 +15,7 @@ export function ProtectedRoute({
   const location = useLocation();
 
   if (isLoadingUser) {
-    return <FullPageLoader message="Setting things up for you..." />;
+    return <CareTipPageLoader variant="wait" message="Setting things up for you..." />;
   }
 
   if (!user) {
