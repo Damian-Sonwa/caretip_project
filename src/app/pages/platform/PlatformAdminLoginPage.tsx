@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { toast } from "sonner";
-import { Navigation } from "../../components/Navigation";
 import { Footer } from "../../components/Footer";
 import { useAuth } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -85,7 +84,6 @@ export function PlatformAdminLoginPage() {
     <div className="relative flex min-h-[100dvh] flex-col bg-zinc-950">
       <PlatformAdminAuthBackground />
       <div className="relative z-10 flex flex-1 flex-col">
-        <Navigation variant="dark" />
         <main className="flex flex-1 items-center justify-center px-4 py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
