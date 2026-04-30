@@ -11,6 +11,33 @@ import {
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 
+const AUTH_STORAGE_SYNC_EVENT = "caretip-auth-storage-sync";
+
+function loadUserFromStorage(): User | null {
+  try {
+    const saved = localStorage.getItem("caretip_user");
+    if (!saved) return null;
+    return JSON.parse(saved) as User;
+  } catch (err) {
+    logClientError("useAuth.localStorage", err);
+    return null;
+  }
+}
+
+function notifyAuthStorageSync() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent(AUTH_STORAGE_SYNC_EVENT));
+}
+
+/** Persist access token + normalized user to localStorage and sync all `useAuth()` instances. */
+function persistAuthResponse(data: AuthResponse): User {
+  localStorage.setItem("caretip_token", data.token);
+  const u = parseUser(data.user);
+  localStorage.setItem("caretip_user", JSON.stringify(u));
+  notifyAuthStorageSync();
+  return u;
+}
+
 /** API roles plus demo-only values used by admin UI / RoleSwitcher */
 export type UserRole = "business" | "employee" | "platform_admin" | "admin" | "user";
 
@@ -119,17 +146,15 @@ export function getPostAuthRedirect(u: User): string {
 
 export function useAuth() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const saved = localStorage.getItem("caretip_user");
-      if (saved) {
-        return JSON.parse(saved) as User;
-      }
-    } catch (err) {
-      logClientError("useAuth.localStorage", err);
-    }
-    return null;
-  });
+  const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
+
+  useEffect(() => {
+    const onStorageSync = () => {
+      setUser(loadUserFromStorage());
+    };
+    window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
+    return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -140,43 +165,25 @@ export function useAuth() {
     }
   }, [user]);
 
-  const login = async (
+  const login = useCallback(async (
     email: string,
     password: string,
     intendedRole: "business" | "employee" | "platform_admin"
   ): Promise<User> => {
     const data = await loginAPI(email, password, intendedRole);
-    localStorage.setItem("caretip_token", data.token);
-    const u0 = parseUser(data.user);
-    const u: User =
-      user && user.id === u0.id
-        ? {
-            ...u0,
-            hasCompletedOnboarding:
-              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
-          }
-        : u0;
+    const u = persistAuthResponse(data);
     setUser(u);
     return u;
-  };
+  }, []);
 
-  const register = async (payload: RegisterPayload): Promise<User> => {
+  const register = useCallback(async (payload: RegisterPayload): Promise<User> => {
     const data = await registerAPI(payload);
-    localStorage.setItem("caretip_token", data.token);
-    const u0 = parseUser(data.user);
-    const u: User =
-      user && user.id === u0.id
-        ? {
-            ...u0,
-            hasCompletedOnboarding:
-              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
-          }
-        : u0;
+    const u = persistAuthResponse(data);
     setUser(u);
     return u;
-  };
+  }, []);
 
-  const loginWithOAuth = async (
+  const loginWithOAuth = useCallback(async (
     provider: "google",
     idToken: string,
     options: {
@@ -200,28 +207,20 @@ export function useAuth() {
       location: options.location,
       inviteCode: options.inviteCode,
     });
-    localStorage.setItem("caretip_token", data.token);
-    const u0 = parseUser(data.user);
-    const u: User =
-      user && user.id === u0.id
-        ? {
-            ...u0,
-            hasCompletedOnboarding:
-              user.hasCompletedOnboarding || u0.hasCompletedOnboarding,
-          }
-        : u0;
+    const u = persistAuthResponse(data);
     setUser(u);
     return u;
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     void logoutAPI();
-    setUser(null);
     localStorage.removeItem("caretip_user");
     localStorage.removeItem("caretip_token");
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
-  };
+    setUser(null);
+    notifyAuthStorageSync();
+  }, []);
 
   const switchRole = (newRole: UserRole) => {
     if (user) {
@@ -239,7 +238,10 @@ export function useAuth() {
     const backupUser = sessionStorage.getItem("caretip_admin_user_backup");
     if (!backupToken || !backupUser) return;
     localStorage.setItem("caretip_token", backupToken);
-    setUser(JSON.parse(backupUser) as User);
+    const restored = JSON.parse(backupUser) as User;
+    localStorage.setItem("caretip_user", JSON.stringify(restored));
+    setUser(restored);
+    notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
     navigate("/platform-admin/dashboard");
@@ -252,10 +254,9 @@ export function useAuth() {
   const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User | null> => {
     try {
       const data = await patchMyOnboardingStatus(next);
-      localStorage.setItem("caretip_token", data.token);
-      const next0 = parseUser(data.user);
-      setUser(next0);
-      return next0;
+      const u = persistAuthResponse(data);
+      setUser(u);
+      return u;
     } catch (err) {
       logClientError("useAuth.setHasCompletedOnboarding", err);
       return null;
@@ -263,29 +264,25 @@ export function useAuth() {
   }, []);
 
   const replaceUser = useCallback((next: User) => {
+    localStorage.setItem("caretip_user", JSON.stringify(next));
     setUser(next);
+    notifyAuthStorageSync();
   }, []);
 
   const refreshSession = useCallback(async (): Promise<User | null> => {
     try {
       const data = await refreshSessionAPI();
-      localStorage.setItem("caretip_token", data.token);
-      const next0 = parseUser(data.user);
-      const next: User =
-        user && user.id === next0.id
-          ? {
-              ...next0,
-              hasCompletedOnboarding:
-                user.hasCompletedOnboarding || next0.hasCompletedOnboarding,
-            }
-          : next0;
-      setUser(next);
-      return next;
+      const u = persistAuthResponse(data);
+      setUser(u);
+      return u;
     } catch (err) {
       logClientError("useAuth.refreshSession", err);
       return null;
     }
-  }, [user]);
+  }, []);
+
+  /** Re-fetch the current session from the server (same as refreshSession). */
+  const refetchUser = refreshSession;
 
   return {
     user,
@@ -297,6 +294,7 @@ export function useAuth() {
     loginWithOAuth,
     logout,
     refreshSession,
+    refetchUser,
     switchRole,
     updateUser,
     setHasCompletedOnboarding,

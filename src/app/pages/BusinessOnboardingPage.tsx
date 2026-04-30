@@ -5,10 +5,11 @@ import { ArrowRight, Building2, Users, QrCode, Loader2 } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
+import { toast } from "sonner";
 
 export function BusinessOnboardingPage() {
   const navigate = useNavigate();
-  const { setHasCompletedOnboarding } = useAuth();
+  const { setHasCompletedOnboarding, refetchUser } = useAuth();
   const [teamSize, setTeamSize] = useState("");
   const [locations, setLocations] = useState("");
   const [goal, setGoal] = useState("");
@@ -66,9 +67,21 @@ export function BusinessOnboardingPage() {
                 type="button"
                 onClick={async () => {
                   setBusy(true);
-                  await setHasCompletedOnboarding(true);
-                  navigate("/dashboard", { replace: true });
-                  setBusy(false);
+                  try {
+                    const saved = await setHasCompletedOnboarding(true);
+                    if (!saved?.hasCompletedOnboarding) {
+                      toast.error("We could not save onboarding. Please try again.");
+                      return;
+                    }
+                    const refreshed = await refetchUser();
+                    if (!refreshed?.hasCompletedOnboarding) {
+                      toast.error("We could not confirm your account. Please try again.");
+                      return;
+                    }
+                    navigate("/dashboard", { replace: true });
+                  } finally {
+                    setBusy(false);
+                  }
                 }}
                 disabled={!canContinue}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
