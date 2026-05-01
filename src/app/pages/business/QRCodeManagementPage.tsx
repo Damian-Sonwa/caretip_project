@@ -75,6 +75,8 @@ export function QRCodeManagementPage() {
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [bulkPdfLoading, setBulkPdfLoading] = useState(false);
   const [businessSlug, setBusinessSlug] = useState<string | null>(null);
+  const [businessDisplayName, setBusinessDisplayName] = useState<string | null>(null);
+  const [businessLocation, setBusinessLocation] = useState<string | null>(null);
   const [venueLocations, setVenueLocations] = useState<LocationDTO[]>([]);
   const [venueTables, setVenueTables] = useState<TableDTO[]>([]);
   const [venueQrPreview, setVenueQrPreview] = useState<Record<string, string>>({});
@@ -86,6 +88,8 @@ export function QRCodeManagementPage() {
       .then((p) => {
         if (cancelled) return;
         setBusinessSlug(p.slug?.trim() || null);
+        setBusinessDisplayName(String(p.name ?? "").trim() || null);
+        setBusinessLocation(String(p.location ?? "").trim() || null);
         const v = p.verificationStatus ?? "pending";
         setVerificationStatus(v);
         updateUser({
@@ -97,6 +101,8 @@ export function QRCodeManagementPage() {
         logClientError("QRCodeManagementPage", err);
         if (cancelled) return;
         setBusinessSlug(null);
+        setBusinessDisplayName(user?.businessName ?? null);
+        setBusinessLocation(null);
         if (user.status === "APPROVED") setVerificationStatus("verified");
         else if (user.status === "REJECTED") setVerificationStatus("rejected");
         else setVerificationStatus("pending");
@@ -326,7 +332,7 @@ export function QRCodeManagementPage() {
     const safe = item.name.replace(/\s+/g, "-").toLowerCase();
     const prefix =
       type === "storefront"
-        ? "caretip-storefront"
+        ? `caretip-${safe || "business"}`
         : type === "table"
           ? `caretip-table-${safe}-${item.id.slice(0, 8)}`
           : `caretip-location-${safe}-${item.id.slice(0, 8)}`;
@@ -380,17 +386,24 @@ export function QRCodeManagementPage() {
       return;
     }
     try {
+      const displayBusinessName =
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
-        businessName: item.name,
-        location: type === "storefront" ? undefined : type === "table" ? item.location : item.address,
+        businessName: displayBusinessName,
+        location:
+          type === "storefront"
+            ? String(businessLocation ?? "").trim() || null
+            : type === "table"
+              ? item.location
+              : item.address,
         instruction: "Scan to tip instantly",
         fileBaseName:
           type === "storefront"
-            ? `CareTip_QR_Team_${item.name}`
+            ? `CareTip_QR_${displayBusinessName}`
             : type === "table"
-              ? `CareTip_QR_Table_${item.name}`
-              : `CareTip_QR_Location_${item.name}`,
+              ? `CareTip_QR_Table_${displayBusinessName}_${item.name}`
+              : `CareTip_QR_Location_${displayBusinessName}_${item.name}`,
       });
     } catch (err) {
       logClientError("QRCodeManagementPage.printPdf", err);
@@ -572,7 +585,7 @@ export function QRCodeManagementPage() {
                         item,
                         previewDataUrl,
                         type === "storefront"
-                          ? "Storefront QR"
+                          ? String(businessDisplayName ?? "").trim() || user?.businessName || "Business"
                           : type === "table"
                             ? `Table: ${item.name}`
                             : `Location: ${item.name}`
@@ -785,7 +798,7 @@ export function QRCodeManagementPage() {
                   <div>
                     <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                       <Store className="h-4 w-4 text-primary" />
-                      Storefront QR
+                      {String(businessDisplayName ?? "").trim() || user?.businessName || "Business"} QR
                     </h2>
                     <p className="mb-3 text-xs text-muted-foreground">
                       Place at the entrance. Customers scan to choose who to tip.
@@ -799,7 +812,7 @@ export function QRCodeManagementPage() {
                     <QRCard
                       item={{
                         id: "storefront",
-                        name: "Storefront",
+                        name: String(businessDisplayName ?? "").trim() || user?.businessName || "Business",
                         qrUrl: qrLandingUrl(user.businessId),
                         scans: 0,
                       }}
