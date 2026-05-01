@@ -356,7 +356,10 @@ export function QRCodeManagementPage() {
     }
     try {
       const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+        String(businessDisplayName ?? "").trim() ||
+        (type === "storefront" ? String(item.name ?? "").trim() : "") ||
+        String(user?.businessName ?? "").trim() ||
+        "Business";
       const pdf = createBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
@@ -427,7 +430,10 @@ export function QRCodeManagementPage() {
     }
     try {
       const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+        String(businessDisplayName ?? "").trim() ||
+        (type === "storefront" ? String(item.name ?? "").trim() : "") ||
+        String(user?.businessName ?? "").trim() ||
+        "Business";
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
@@ -459,10 +465,12 @@ export function QRCodeManagementPage() {
       return;
     }
     try {
+      const displayBusinessName =
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
       await downloadEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
-        businessName: user?.businessName ?? "CareTip",
+        businessName: displayBusinessName,
         instruction: "Scan to tip",
         fileBaseName: `CareTip_QR_${item.name}`,
       });
