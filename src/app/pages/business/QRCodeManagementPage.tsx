@@ -23,6 +23,7 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
   getEmployees,
   fetchBusinessProfile,
+  regenerateBusinessSlug,
   regenerateEmployeeSlug,
   fetchLocations,
   fetchTables,
@@ -93,7 +94,7 @@ export function QRCodeManagementPage() {
         if (cancelled) return;
         setBusinessSlug(p.slug?.trim() || null);
         setBusinessDisplayName(String(p.name ?? "").trim() || null);
-        setBusinessLocation(String(p.location ?? "").trim() || null);
+        setBusinessLocation(String(p.registeredAddress ?? p.location ?? "").trim() || null);
         const v = p.verificationStatus ?? "pending";
         setVerificationStatus(v);
         updateUser({
@@ -115,6 +116,22 @@ export function QRCodeManagementPage() {
       cancelled = true;
     };
   }, [user?.businessId, user?.role, user?.status, updateUser]);
+
+  const handleRegenerateBusinessQr = async () => {
+    if (qrLocked) return;
+    if (!user?.businessId) return;
+    setRegeneratingId("storefront");
+    try {
+      const r = await regenerateBusinessSlug();
+      setBusinessSlug(r.slug);
+      toast.success("Business QR regenerated.", TOAST_OK);
+    } catch (err) {
+      logClientError("QRCodeManagementPage.regenerateBusinessQr", err);
+      toast.error("Could not regenerate business QR.");
+    } finally {
+      setRegeneratingId(null);
+    }
+  };
 
   const loadEmployees = useCallback(async () => {
     if (!user?.businessId) {
@@ -598,6 +615,23 @@ export function QRCodeManagementPage() {
               )}
               {(type === "storefront" || type === "table" || type === "location") && (
                 <>
+                  {type === "storefront" ? (
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={handleRegenerateBusinessQr}
+                      disabled={qrLocked || regeneratingId === "storefront"}
+                      className={DASH_BTN_SECONDARY}
+                    >
+                      {regeneratingId === "storefront" ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        <RefreshCw className="mr-2 h-4 w-4" />
+                      )}
+                      Regenerate business QR
+                    </Button>
+                  ) : null}
                   <Button
                     type="button"
                     size="sm"

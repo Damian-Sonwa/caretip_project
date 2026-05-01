@@ -84,6 +84,22 @@ export async function patchMyProfile(req: Request, res: Response) {
   }
 }
 
+export async function regenerateBusinessSlug(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const r = await businessService.regenerateManagerBusinessSlug(userId);
+    return res.json(r);
+  } catch (err) {
+    logServerError("business.regenerateBusinessSlug", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
 export async function uploadMyLogo(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? req.user?.id;

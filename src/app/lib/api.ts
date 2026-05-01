@@ -480,6 +480,7 @@ export interface BusinessInfo {
   slug?: string | null;
   logo: string | null;
   location?: string;
+  registeredAddress?: string | null;
   type?: string;
   employeeCount: number;
   verificationStatus?: "pending" | "verified" | "rejected";
@@ -492,6 +493,14 @@ export async function getBusinessById(businessId: string): Promise<BusinessInfo 
 /** Authenticated manager: returns only the business tied to the JWT (not arbitrary IDs). */
 export async function fetchBusinessProfile(): Promise<BusinessInfo> {
   return apiRequest(apiPath("/api/business/profile"), { headers: getHeaders() });
+}
+
+export async function regenerateBusinessSlug(): Promise<{ slug: string }> {
+  return apiRequest<{ slug: string }>(apiPath("/api/business/profile/slug/regenerate"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
 }
 
 export async function validateInviteCode(code: string): Promise<{ ok: true; businessName?: string }> {

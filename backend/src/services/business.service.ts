@@ -510,6 +510,7 @@ export async function getBusinessById(id: string) {
       slug: true,
       businessType: true,
       location: true,
+      registeredAddress: true,
       verificationStatus: true,
     },
   });
@@ -529,8 +530,26 @@ export async function getBusinessById(id: string) {
     slug: business.slug,
     logo: null,
     location: business.location ?? "Downtown",
+    registeredAddress: business.registeredAddress ?? null,
     type: business.businessType ?? "Restaurant",
     employeeCount,
     verificationStatus: business.verificationStatus,
   };
+}
+
+/** Rotate the public business slug so storefront QR becomes a new link. */
+export async function regenerateManagerBusinessSlug(userId: string): Promise<{ slug: string }> {
+  const b = await getBusinessByUserId(userId);
+  if (!b) {
+    throw new Error("Business not found");
+  }
+  // Keep it human-readable, but always create a new unique slug.
+  const base = normalizeBusinessSlugBase(b.name);
+  const slug = await ensureUniqueSlug(`${base}-${Math.random().toString(36).slice(2, 6)}`, async (s) => {
+    const hit = await prisma.business.findFirst({ where: { slug: s } });
+    return !!hit;
+  });
+  await prisma.business.update({ where: { id: b.id }, data: { slug } });
+  emitBusinessDataChanged(b.id, "business_profile_updated");
+  return { slug };
 }

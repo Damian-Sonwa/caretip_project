@@ -36,6 +36,14 @@ router.post(
 );
 
 router.post(
+  "/profile/slug/regenerate",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.regenerateBusinessSlug
+);
+
+router.post(
   "/generate-invite",
   authMiddleware,
   requireVerifiedEmail,
