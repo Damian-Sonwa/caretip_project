@@ -90,7 +90,7 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
  * Renders inside SuperAdminLayout only (no business dashboard UI).
  */
 export function AdminDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { socket, connected, connectionStatus } = useSocket(user?.role === "platform_admin");
 
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
@@ -111,6 +111,7 @@ export function AdminDashboard() {
   }, [businesses, businessSearchQuery]);
 
   useEffect(() => {
+    if (!user || user.role !== "platform_admin") return;
     let cancelled = false;
     void fetchPlatformHealth()
       .then((h) => {
@@ -118,12 +119,18 @@ export function AdminDashboard() {
       })
       .catch((err: unknown) => {
         logClientError("AdminDashboard.fetchPlatformHealth", err);
+        const msg = err instanceof Error ? err.message : "";
+        if (msg.toLowerCase().includes("authentication required") || msg.toLowerCase().includes("unauthorized")) {
+          // Session/token missing: bounce to platform login.
+          void logout();
+          return;
+        }
         if (!cancelled) setHealth({ database: "offline", stripe: "offline" });
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [user, logout]);
 
   const loadDashboardData = useCallback(async () => {
     if (!user || user.role !== "platform_admin") return;
@@ -136,12 +143,16 @@ export function AdminDashboard() {
       );
     } catch (err) {
       logClientError("AdminDashboard", err);
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.toLowerCase().includes("authentication required") || msg.toLowerCase().includes("unauthorized")) {
+        void logout();
+      }
       setStats(null);
       setBusinesses([]);
     } finally {
       setDashLoading(false);
     }
-  }, [user]);
+  }, [user, logout]);
 
   useEffect(() => {
     void loadDashboardData();
@@ -162,6 +173,9 @@ export function AdminDashboard() {
 
   if (user && user.role !== "platform_admin") {
     return <Navigate to="/unauthorized" replace />;
+  }
+  if (!user) {
+    return <Navigate to="/platform-admin/login" replace />;
   }
 
   return (
