@@ -14,8 +14,6 @@ import {
   getEmployeeQrShareUrl,
 } from "../../lib/qrBranded";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipLoadingTitle } from "../CareTipPageLoader";
-import { LoadingSpinner } from "../ui/loading-spinner";
 
 type EmployeeQRCodeModalProps = {
   open: boolean;
@@ -81,9 +79,11 @@ export function EmployeeQRCodeModal({
         <div className="flex flex-col items-center gap-4 py-2">
           <div className="min-h-[280px] flex items-center justify-center w-full bg-muted/30 rounded-xl border border-border p-4">
             {imgLoading ? (
-              <div className="flex flex-col items-center justify-center gap-4 py-6">
-                <CareTipLoadingTitle compact />
-                <LoadingSpinner size="lg" />
+              <div className="w-full max-w-[320px]">
+                <div className="h-[240px] w-full animate-pulse rounded-xl bg-muted" />
+                <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
+                  Loading your QR…
+                </p>
               </div>
             ) : dataUrl ? (
               <img
