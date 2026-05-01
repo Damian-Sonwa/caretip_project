@@ -158,10 +158,9 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
   if (res.status === 401) {
     const token = getToken();
-    const canAttempt =
-      typeof token === "string" &&
-      token.trim().length > 0 &&
-      (url.startsWith("/api/") || url.startsWith("/uploads/"));
+    const tokenIsSet = typeof token === "string" && token.trim().length > 0;
+    const isProtectedPath = url.startsWith("/api/") || url.startsWith("/uploads/");
+    const canAttempt = tokenIsSet && isProtectedPath;
     const alreadyRetried = (init as { __caretipRetried?: boolean } | undefined)?.__caretipRetried === true;
     if (canAttempt && !alreadyRetried) {
       const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
@@ -172,12 +171,26 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
         clearAuthStorage();
       }
     }
-  }
 
-  // If still unauthorized after refresh attempt, fully clear auth so the app can redirect
-  // instead of getting stuck in a 401 loop with a stale `caretip_user`.
-  if (res.status === 401) {
-    clearAuthStorage();
+    // If we're still unauthorized, do a single short-delay retry before clearing auth.
+    // This avoids \"logout on first login\" caused by timing/race conditions around initial auth state.
+    if (canAttempt && res.status === 401) {
+      const alreadyDelayedRetry =
+        (init as { __caretipDelayedRetried?: boolean } | undefined)?.__caretipDelayedRetried === true;
+      if (!alreadyDelayedRetry) {
+        await new Promise((r) => setTimeout(r, 250));
+        const delayedInit = { ...(init as any), __caretipDelayedRetried: true };
+        res = await fetch(url, delayedInit);
+      }
+    }
+
+    // Only clear auth if:
+    // - request is to a protected path
+    // - token is set
+    // - and we still got 401 after retries
+    if (tokenIsSet && isProtectedPath && res.status === 401) {
+      clearAuthStorage();
+    }
   }
 
   return handleRes<T>(res);
