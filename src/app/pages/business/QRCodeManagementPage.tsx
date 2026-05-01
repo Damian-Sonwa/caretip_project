@@ -378,16 +378,16 @@ export function QRCodeManagementPage() {
         (type === "storefront" ? String(item.name ?? "").trim() : "") ||
         String(user?.businessName ?? "").trim() ||
         "Business";
+      const subtext =
+        type === "storefront"
+          ? String(businessLocation ?? "").trim() || null
+          : type === "table" || type === "location"
+            ? String(item.name ?? "").trim() || null
+            : null;
       const pdf = createBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
-        contextLine: type === "table" ? `Table: ${item.name}` : type === "location" ? `Location: ${item.name}` : null,
-        location:
-          type === "storefront"
-            ? String(businessLocation ?? "").trim() || null
-            : type === "table"
-              ? item.location
-              : item.address,
+        subtext,
         instruction: "Scan to tip instantly",
       });
       const blob = pdf.output("blob") as Blob;
@@ -452,16 +452,16 @@ export function QRCodeManagementPage() {
         (type === "storefront" ? String(item.name ?? "").trim() : "") ||
         String(user?.businessName ?? "").trim() ||
         "Business";
+      const subtext =
+        type === "storefront"
+          ? String(businessLocation ?? "").trim() || null
+          : type === "table" || type === "location"
+            ? String(item.name ?? "").trim() || null
+            : null;
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
-        contextLine: type === "table" ? `Table: ${item.name}` : type === "location" ? `Location: ${item.name}` : null,
-        location:
-          type === "storefront"
-            ? String(businessLocation ?? "").trim() || null
-            : type === "table"
-              ? item.location
-              : item.address,
+        subtext,
         instruction: "Scan to tip instantly",
         fileBaseName:
           type === "storefront"
@@ -489,7 +489,6 @@ export function QRCodeManagementPage() {
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
         businessName: displayBusinessName,
-        instruction: "Scan to tip",
         fileBaseName: `CareTip_QR_${item.name}`,
       });
     } catch (err) {
@@ -511,7 +510,6 @@ export function QRCodeManagementPage() {
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
         businessName: displayBusinessName,
-        instruction: "Scan to tip instantly",
       });
       const blob = pdf.output("blob") as Blob;
       const url = URL.createObjectURL(blob);
