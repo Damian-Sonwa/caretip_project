@@ -3,6 +3,9 @@ import { jsPDF } from "jspdf";
 const TEXT_RGB: [number, number, number] = [17, 24, 39]; // slate-900-ish
 const MUTED_RGB: [number, number, number] = [75, 85, 99]; // slate-600-ish
 const SOFT_LINE_RGB: [number, number, number] = [226, 232, 240]; // slate-200-ish
+// Brand: warm orange used across UI accents.
+const BRAND_RGB: [number, number, number] = [233, 147, 47]; // #e9932f
+const BRAND_SOFT_RGB: [number, number, number] = [217, 119, 6]; // amber-600-ish
 
 function safeFileBase(raw: string): string {
   const s = String(raw ?? "").trim();
@@ -29,6 +32,16 @@ function normalizeOptionalText(raw: string | null | undefined): string | null {
   return s ? s : null;
 }
 
+function drawHeartIcon(pdf: jsPDF, x: number, y: number, sizeMm: number, rgb: [number, number, number]) {
+  // Vector heart made from two circles + triangle (no emoji/font dependency).
+  const r = sizeMm * 0.22;
+  pdf.setDrawColor(...rgb);
+  pdf.setFillColor(...rgb);
+  pdf.circle(x + r, y + r, r, "F");
+  pdf.circle(x + r * 3, y + r, r, "F");
+  pdf.triangle(x + r * 0.3, y + r * 1.3, x + r * 3.7, y + r * 1.3, x + r * 2, y + r * 3.9, "F");
+}
+
 /**
  * Single canonical print layout for all QR PDFs.
  * Hierarchy (top → bottom): Header → optional Subtext → QR → Instruction → Footer → Branding.
@@ -52,7 +65,7 @@ function renderStandardQrPdfLayout(params: {
   const header = String(params.header ?? "").trim() || "Tip";
   const subtext = normalizeOptionalText(params.subtext);
   const instruction = String(params.instruction ?? "Scan to tip instantly").trim() || "Scan to tip instantly";
-  const footerText = "Thank you 💖";
+  const footerText = "Thank you";
   const brandText = "Powered by CareTip Limited";
 
   const headerFont = params.size === "card" ? 18 : 26;
@@ -63,7 +76,7 @@ function renderStandardQrPdfLayout(params: {
 
   // Header
   pdf.setFont("helvetica", "bold");
-  pdf.setTextColor(...TEXT_RGB);
+  pdf.setTextColor(...BRAND_RGB);
   pdf.setFontSize(headerFont);
   const headerBaseline = topY + (params.size === "card" ? 10 : 14);
   pdf.text(header, pageW / 2, headerBaseline, { align: "center" });
@@ -140,9 +153,16 @@ function renderStandardQrPdfLayout(params: {
   // Footer
   const footerY = instructionY + (params.size === "card" ? 10 : 12);
   pdf.setFont("helvetica", "normal");
-  pdf.setTextColor(...MUTED_RGB);
+  pdf.setTextColor(...BRAND_SOFT_RGB);
   pdf.setFontSize(footerFont);
-  pdf.text(footerText, pageW / 2, footerY, { align: "center" });
+  // Center "Thank you" with a small heart icon to the right (consistent across PDF viewers).
+  const textW = pdf.getTextWidth(footerText);
+  const heartSize = params.size === "card" ? 6 : 7;
+  const gap = 2.2;
+  const groupW = textW + gap + heartSize;
+  const startX = (pageW - groupW) / 2;
+  pdf.text(footerText, startX, footerY, { align: "left" });
+  drawHeartIcon(pdf, startX + textW + gap, footerY - heartSize * 0.75, heartSize, BRAND_SOFT_RGB);
 
   // Bottom branding (separated)
   const brandY = footerY + gapFooterToBrand;
