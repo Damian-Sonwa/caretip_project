@@ -39,7 +39,11 @@ import {
   downloadQrDataUrlPng,
   printQrDataUrl,
 } from "../../lib/qrBranded";
-import { downloadBusinessQrPrintPdf, downloadEmployeeQrPrintPdf } from "../../lib/qrPrintPdf";
+import {
+  createBusinessQrPrintPdf,
+  downloadBusinessQrPrintPdf,
+  downloadEmployeeQrPrintPdf,
+} from "../../lib/qrPrintPdf";
 import {
   businessDirectoryUrl,
   qrBusinessUrl,
@@ -342,17 +346,52 @@ export function QRCodeManagementPage() {
 
   const handleVenueQrPrint = async (
     item: CardItem,
-    previewDataUrl: string | undefined,
-    heading: string
+    type: "storefront" | "table" | "location",
+    previewDataUrl?: string
   ) => {
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
       toast.error("QR image not ready. Wait a moment and try again.");
       return;
     }
-    const ok = printQrDataUrl(dataUrl, heading);
-    if (!ok) {
-      toast.error("Allow pop-ups to print, or use Download.");
+    try {
+      const displayBusinessName =
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+      const pdf = createBusinessQrPrintPdf({
+        qrPngDataUrl: dataUrl,
+        businessName: displayBusinessName,
+        location:
+          type === "storefront"
+            ? String(businessLocation ?? "").trim() || null
+            : type === "table"
+              ? item.location
+              : item.address,
+        instruction: "Scan to tip instantly",
+      });
+      const blob = pdf.output("blob") as Blob;
+      const url = URL.createObjectURL(blob);
+      const w = window.open(url);
+      if (!w) {
+        URL.revokeObjectURL(url);
+        toast.error("Allow pop-ups to print, or use Download PDF layout.");
+        return;
+      }
+      const timer = window.setInterval(() => {
+        try {
+          if (w.document?.readyState === "complete") {
+            window.clearInterval(timer);
+            w.focus();
+            w.print();
+            window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+          }
+        } catch {
+          window.clearInterval(timer);
+          window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+        }
+      }, 300);
+    } catch (err) {
+      logClientError("QRCodeManagementPage.print", err);
+      toast.error("Could not open print preview.");
     }
   };
 
@@ -539,7 +578,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_SECONDARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Print layout (PDF)
+                    Download PDF layout
                   </Button>
                   <Button
                     type="button"
@@ -580,17 +619,7 @@ export function QRCodeManagementPage() {
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() =>
-                      void handleVenueQrPrint(
-                        item,
-                        previewDataUrl,
-                        type === "storefront"
-                          ? String(businessDisplayName ?? "").trim() || user?.businessName || "Business"
-                          : type === "table"
-                            ? `Table: ${item.name}`
-                            : `Location: ${item.name}`
-                      )
-                    }
+                    onClick={() => void handleVenueQrPrint(item, type as "storefront" | "table" | "location", previewDataUrl)}
                     disabled={qrLocked}
                     className={DASH_BTN_SECONDARY}
                   >
@@ -606,7 +635,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_SECONDARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Print layout (PDF)
+                    Download PDF layout
                   </Button>
                 </>
               )}

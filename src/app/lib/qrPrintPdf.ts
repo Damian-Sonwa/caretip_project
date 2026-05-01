@@ -53,14 +53,13 @@ function textWidth(pdf: jsPDF, text: string) {
   return pdf.getTextWidth(text);
 }
 
-export async function downloadBusinessQrPrintPdf(params: {
+export function createBusinessQrPrintPdf(params: {
   qrPngDataUrl: string;
   businessName: string;
   location?: string | null;
   instruction?: string;
-  fileBaseName?: string;
   size?: PdfSize;
-}): Promise<void> {
+}): jsPDF {
   const pdf = buildPdf(params.size ?? "a4");
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
@@ -107,7 +106,11 @@ export async function downloadBusinessQrPrintPdf(params: {
   // QR (dominant element, 40–50% of page height)
   const qrMaxByWidth = pageW - margin * 2;
   const qrTargetByHeight = pageH * (params.size === "card" ? 0.44 : 0.48);
-  const qrSize = clamp(Math.min(qrMaxByWidth, qrTargetByHeight), params.size === "card" ? 62 : 110, qrMaxByWidth);
+  const qrSize = clamp(
+    Math.min(qrMaxByWidth, qrTargetByHeight),
+    params.size === "card" ? 62 : 110,
+    qrMaxByWidth
+  );
 
   // Compute remaining space and center the QR+text block vertically.
   const instructionFontSize = params.size === "card" ? 12 : 16;
@@ -151,18 +154,29 @@ export async function downloadBusinessQrPrintPdf(params: {
   pdf.text(footerText, footerStartX, footerY, { align: "left" });
   drawHeart(pdf, footerStartX + footerW + footerGap, footerY - heartSize * 0.75, heartSize, [239, 68, 68]); // red-500-ish
 
-  const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${businessName}`);
-  pdf.save(`${base}.pdf`);
+  return pdf;
 }
 
-export async function downloadEmployeeQrPrintPdf(params: {
+export async function downloadBusinessQrPrintPdf(params: {
   qrPngDataUrl: string;
-  employeeName: string;
   businessName: string;
+  location?: string | null;
   instruction?: string;
   fileBaseName?: string;
   size?: PdfSize;
 }): Promise<void> {
+  const pdf = createBusinessQrPrintPdf(params);
+  const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${String(params.businessName ?? "").trim() || "Business"}`);
+  pdf.save(`${base}.pdf`);
+}
+
+export function createEmployeeQrPrintPdf(params: {
+  qrPngDataUrl: string;
+  employeeName: string;
+  businessName: string;
+  instruction?: string;
+  size?: PdfSize;
+}): jsPDF {
   const pdf = buildPdf(params.size ?? "a4");
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
@@ -199,7 +213,11 @@ export async function downloadEmployeeQrPrintPdf(params: {
   // QR (dominant)
   const qrMaxByWidth = pageW - margin * 2;
   const qrTargetByHeight = pageH * (params.size === "card" ? 0.44 : 0.48);
-  const qrSize = clamp(Math.min(qrMaxByWidth, qrTargetByHeight), params.size === "card" ? 62 : 110, qrMaxByWidth);
+  const qrSize = clamp(
+    Math.min(qrMaxByWidth, qrTargetByHeight),
+    params.size === "card" ? 62 : 110,
+    qrMaxByWidth
+  );
 
   const instructionFontSize = params.size === "card" ? 12 : 16;
   const footerFontSize = params.size === "card" ? 12 : 14;
@@ -240,7 +258,19 @@ export async function downloadEmployeeQrPrintPdf(params: {
   pdf.text(footerText, footerStartX, footerY, { align: "left" });
   drawHeart(pdf, footerStartX + footerW + footerGap, footerY - heartSize * 0.75, heartSize, [239, 68, 68]);
 
-  const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${employeeName}`);
+  return pdf;
+}
+
+export async function downloadEmployeeQrPrintPdf(params: {
+  qrPngDataUrl: string;
+  employeeName: string;
+  businessName: string;
+  instruction?: string;
+  fileBaseName?: string;
+  size?: PdfSize;
+}): Promise<void> {
+  const pdf = createEmployeeQrPrintPdf(params);
+  const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${String(params.employeeName ?? "").trim() || "Team_member"}`);
   pdf.save(`${base}.pdf`);
 }
 
