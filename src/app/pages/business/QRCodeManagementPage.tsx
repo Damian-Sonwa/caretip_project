@@ -42,6 +42,7 @@ import {
 } from "../../lib/qrBranded";
 import {
   createBusinessQrPrintPdf,
+  createEmployeeQrPrintPdf,
   downloadBusinessQrPrintPdf,
   downloadEmployeeQrPrintPdf,
 } from "../../lib/qrPrintPdf";
@@ -497,6 +498,48 @@ export function QRCodeManagementPage() {
     }
   };
 
+  const handleEmployeePrint = async (item: CardItem, previewDataUrl?: string) => {
+    const dataUrl = previewDataUrl || qrImages[item.id];
+    if (!dataUrl) {
+      toast.error("QR image not ready. Wait a moment and try again.");
+      return;
+    }
+    try {
+      const displayBusinessName =
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+      const pdf = createEmployeeQrPrintPdf({
+        qrPngDataUrl: dataUrl,
+        employeeName: item.name,
+        businessName: displayBusinessName,
+        instruction: "Scan to tip instantly",
+      });
+      const blob = pdf.output("blob") as Blob;
+      const url = URL.createObjectURL(blob);
+      const w = window.open(url);
+      if (!w) {
+        URL.revokeObjectURL(url);
+        toast.error("Allow pop-ups to print, or use Download PDF layout.");
+        return;
+      }
+      const timer = window.setInterval(() => {
+        try {
+          if (w.document?.readyState === "complete") {
+            window.clearInterval(timer);
+            w.focus();
+            w.print();
+            window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+          }
+        } catch {
+          window.clearInterval(timer);
+          window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
+        }
+      }, 300);
+    } catch (err) {
+      logClientError("QRCodeManagementPage.employeePrint", err);
+      toast.error("Could not open print preview.");
+    }
+  };
+
   const QRCard = ({
     item,
     type,
@@ -586,6 +629,17 @@ export function QRCodeManagementPage() {
             <div className="flex flex-wrap gap-2">
               {type === "employee" && (
                 <>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void handleEmployeePrint(item, previewDataUrl)}
+                    disabled={qrLocked}
+                    className={DASH_BTN_SECONDARY}
+                  >
+                    <Printer className="mr-2 h-4 w-4" />
+                    Print
+                  </Button>
                   <Button
                     type="button"
                     size="sm"
