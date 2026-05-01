@@ -28,6 +28,17 @@ function setToken(token: string | null): void {
   else localStorage.removeItem("caretip_token");
 }
 
+function clearAuthStorage(): void {
+  try {
+    localStorage.removeItem("caretip_token");
+    localStorage.removeItem("caretip_user");
+    // Keep in sync with useAuth.ts
+    window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
+  } catch {
+    // ignore
+  }
+}
+
 function getHeaders(): HeadersInit {
   const headers: HeadersInit = { "Content-Type": "application/json" };
   const token = getToken();
@@ -158,9 +169,15 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
         const retriedInit = { ...(withUpdatedBearer(init, nextToken) as any), __caretipRetried: true };
         res = await fetch(url, retriedInit);
       } else if (shouldClearAccessToken) {
-        setToken(null);
+        clearAuthStorage();
       }
     }
+  }
+
+  // If still unauthorized after refresh attempt, fully clear auth so the app can redirect
+  // instead of getting stuck in a 401 loop with a stale `caretip_user`.
+  if (res.status === 401) {
+    clearAuthStorage();
   }
 
   return handleRes<T>(res);
