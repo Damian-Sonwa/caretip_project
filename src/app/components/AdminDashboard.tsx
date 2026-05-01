@@ -96,6 +96,7 @@ export function AdminDashboard() {
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
   const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
+  const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
   const [dashLoading, setDashLoading] = useState(true);
 
@@ -136,6 +137,7 @@ export function AdminDashboard() {
     if (!user || user.role !== "platform_admin") return;
     setDashLoading(true);
     try {
+      setServiceIssue(null);
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
       setStats(s);
       setBusinesses(
@@ -146,9 +148,20 @@ export function AdminDashboard() {
       const msg = err instanceof Error ? err.message : "";
       if (msg.toLowerCase().includes("authentication required") || msg.toLowerCase().includes("unauthorized")) {
         void logout();
+        return;
       }
-      setStats(null);
-      setBusinesses([]);
+      // Do not wipe the UI on transient outages; keep the last known values.
+      // Surface a clear message instead.
+      if (
+        msg.toLowerCase().includes("service temporarily unavailable") ||
+        msg.toLowerCase().includes("http 503")
+      ) {
+        setServiceIssue("Service temporarily unavailable. Please try again in a moment.");
+        // Best-effort: reflect degraded health badge.
+        setHealth((h) => h ?? { database: "offline", stripe: "offline" });
+      } else {
+        setServiceIssue(msg || "We couldn't load platform data right now.");
+      }
     } finally {
       setDashLoading(false);
     }
@@ -158,7 +171,8 @@ export function AdminDashboard() {
     void loadDashboardData();
   }, [loadDashboardData]);
 
-  useRealtimeFallback(connected, loadDashboardData);
+  // If the API is down (503), don't keep hammering it on a timer.
+  useRealtimeFallback(connected || Boolean(serviceIssue), loadDashboardData);
 
   useEffect(() => {
     if (!socket || user?.role !== "platform_admin") return;
@@ -186,6 +200,12 @@ export function AdminDashboard() {
       <NetworkOverviewHero health={health} />
 
       <TracingBeam>
+        {serviceIssue ? (
+          <div className="mb-6 rounded-xl border border-border bg-muted p-4 text-sm text-foreground">
+            <p className="font-semibold">We’re having trouble loading platform data.</p>
+            <p className="mt-1 text-muted-foreground">{serviceIssue}</p>
+          </div>
+        ) : null}
         <div className="relative mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {dashLoading && (
             <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-sm">
