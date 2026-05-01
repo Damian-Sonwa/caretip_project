@@ -7,10 +7,11 @@ import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import { toast } from "sonner";
 import { patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
+import { toUserFriendlyMessage } from "../lib/errorMessages";
 
 export function BusinessOnboardingPage() {
   const navigate = useNavigate();
-  const { setHasCompletedOnboarding, refetchUser } = useAuth();
+  const { setHasCompletedOnboarding, refetchUser, logout } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
 
   const [legalBusinessName, setLegalBusinessName] = useState("");
@@ -49,6 +50,12 @@ export function BusinessOnboardingPage() {
     if (logoFile) {
       await uploadMyBusinessLogo(logoFile);
     }
+  };
+
+  const handleAuthFailure = () => {
+    logout();
+    toast.error("Your session expired. Please sign in again.");
+    navigate("/login", { replace: true });
   };
 
   return (
@@ -162,10 +169,8 @@ export function BusinessOnboardingPage() {
               <button
                 type="button"
                 onClick={async () => {
-                  if (step === 1) {
-                    navigate("/dashboard", { replace: true });
-                    return;
-                  }
+                  if (busy) return;
+                  if (step === 1) return;
                   setStep((s) => (s === 2 ? 1 : 2));
                 }}
                 className="inline-flex items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-6 py-3.5 text-sm font-bold text-neutral-900 shadow-none transition hover:bg-gray-50 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
@@ -176,6 +181,7 @@ export function BusinessOnboardingPage() {
               <button
                 type="button"
                 onClick={async () => {
+                  if (busy) return;
                   setBusy(true);
                   try {
                     if (!canContinue) return;
@@ -187,13 +193,21 @@ export function BusinessOnboardingPage() {
                     }
 
                     await saveStep(3);
-                    const saved = await setHasCompletedOnboarding(true);
-                    if (!saved?.hasCompletedOnboarding) {
-                      toast.error("We could not finish onboarding. Please try again.");
+                    await setHasCompletedOnboarding(true);
+                    const refreshed = await refetchUser();
+                    if (!refreshed) {
+                      // If refresh failed (e.g., backend temporarily down), still try navigation,
+                      // but avoid trapping the user in a loop by showing a clear message.
+                      toast.success("Saved. Loading your dashboard…");
+                    }
+                    navigate("/dashboard", { replace: true });
+                  } catch (err) {
+                    const msg = err instanceof Error ? err.message : String(err);
+                    if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {
+                      handleAuthFailure();
                       return;
                     }
-                    await refetchUser();
-                    navigate("/dashboard", { replace: true });
+                    toast.error(toUserFriendlyMessage(err));
                   } finally {
                     setBusy(false);
                   }

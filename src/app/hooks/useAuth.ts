@@ -280,7 +280,7 @@ export function useAuth() {
     setUser((u) => (u ? { ...u, ...patch } : null));
   }, []);
 
-  const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User | null> => {
+  const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User> => {
     try {
       const data = await patchMyOnboardingStatus(next);
       const u = persistAuthResponse(data);
@@ -288,7 +288,7 @@ export function useAuth() {
       return u;
     } catch (err) {
       logClientError("useAuth.setHasCompletedOnboarding", err);
-      return null;
+      throw err;
     }
   }, []);
 
