@@ -9,7 +9,7 @@ import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 
-let refreshInFlight: Promise<string | null> | null = null;
+let refreshInFlight: Promise<{ token: string | null; shouldClearAccessToken: boolean }> | null = null;
 
 /** Absolute path (starts with /) or full URL; honors Vite proxy when base is empty. */
 function apiPath(path: string): string {
@@ -83,7 +83,7 @@ function apiConfigHintForFailedFetch(url: string): string {
   return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com. Then trigger a new deploy.";
 }
 
-async function refreshAccessToken(): Promise<string | null> {
+async function refreshAccessToken(): Promise<{ token: string | null; shouldClearAccessToken: boolean }> {
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
@@ -92,17 +92,22 @@ async function refreshAccessToken(): Promise<string | null> {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
         });
-        if (!res.ok) return null;
+        if (!res.ok) {
+          // Only clear local access token when the refresh token is invalid/expired.
+          // For transient backend/network errors (5xx), keep the token to avoid cascading logouts.
+          const shouldClearAccessToken = res.status === 401 || res.status === 403;
+          return { token: null, shouldClearAccessToken };
+        }
         const data = (await res.json().catch(() => null)) as unknown;
         const token =
           data && typeof data === "object" && typeof (data as any).token === "string"
             ? String((data as any).token)
             : null;
         if (token) setToken(token);
-        return token;
+        return { token, shouldClearAccessToken: false };
       } catch (err) {
         logClientError("api.refreshAccessToken", err);
-        return null;
+        return { token: null, shouldClearAccessToken: false };
       } finally {
         refreshInFlight = null;
       }
@@ -148,11 +153,11 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
       (url.startsWith("/api/") || url.startsWith("/uploads/"));
     const alreadyRetried = (init as { __caretipRetried?: boolean } | undefined)?.__caretipRetried === true;
     if (canAttempt && !alreadyRetried) {
-      const nextToken = await refreshAccessToken();
+      const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
       if (nextToken) {
         const retriedInit = { ...(withUpdatedBearer(init, nextToken) as any), __caretipRetried: true };
         res = await fetch(url, retriedInit);
-      } else {
+      } else if (shouldClearAccessToken) {
         setToken(null);
       }
     }
