@@ -47,6 +47,7 @@ import {
 } from "recharts";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
+import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { dashPanel, dashStatCard, DASH_ICON_WRAP } from "@/components/ui/dashboard-styles";
@@ -74,6 +75,35 @@ const GOAL_PERIOD_LABEL: Record<GoalPeriod, string> = {
   weekly: "Weekly",
   monthly: "Monthly",
 };
+
+function StatCard(props: {
+  title: string;
+  value: string;
+  change?: string;
+  icon: React.ElementType;
+  beam?: boolean;
+}) {
+  const Icon = props.icon;
+  return (
+    <Card className="relative h-full overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      {props.beam ? <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" /> : null}
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="rounded-lg border border-border bg-muted p-2">
+            <Icon className="h-5 w-5 text-foreground" />
+          </div>
+        </div>
+        <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {props.title}
+        </CardDescription>
+        <CardTitle className="text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
+          {props.value}
+        </CardTitle>
+        {props.change ? <p className="text-sm leading-snug text-muted-foreground">{props.change}</p> : null}
+      </CardHeader>
+    </Card>
+  );
+}
 
 function goalStatusLabel(s: EmployeeGoalProgressStatus): string {
   if (s === "achieved") return "Achieved";
@@ -442,117 +472,41 @@ export function BusinessDashboard() {
           </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              className="relative md:col-span-2 lg:col-span-2"
-            >
-              <Card className={dashStatCard("relative h-full overflow-hidden")}>
-                <CardHeader>
-                  <div className="mb-2 flex items-start justify-between">
-                    <div className={DASH_ICON_WRAP}>
-                      <DollarSign className="h-6 w-6" />
-                    </div>
-                    <span className="rounded-full border border-black/[0.06] bg-white px-2 py-1 text-xs font-medium text-foreground">
-                      {timeframe === "week"
-                        ? "Week"
-                        : timeframe === "month"
-                          ? "Month"
-                          : "Year"}
-                    </span>
-                  </div>
-                  <CardTitle className="text-3xl font-bold tabular-nums text-foreground">
-                    ${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    Total tips ({timeframe === "week" ? "this week" : timeframe === "month" ? "this month" : "this year"} view)
-                  </CardDescription>
-                  {(stats?.totalTips ?? 0) > 0 && (
-                    <div className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                      <span>Keep QR links fresh so guests can tip easily.</span>
-                    </div>
-                  )}
-                </CardHeader>
-              </Card>
-            </motion.div>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {statsLoading ? (
+                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-sm">
+                  <LoadingSpinner size="sm" />
+                </div>
+              ) : null}
 
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-            >
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <Users className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-3xl font-bold tabular-nums">
-                    {stats?.employeeCount ?? 0}
-                  </CardTitle>
-                  <CardDescription>Active employees</CardDescription>
-                  {topEmployees.length > 0 && (
-                    <p className="mt-2 text-sm font-medium text-foreground">
-                      {topEmployees.length} in top list
-                    </p>
-                  )}
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <Star className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-3xl font-bold tabular-nums">
-                    {topEmployees.length > 0
-                      ? (() => {
-                          const withRatings = topEmployees.filter((e) => e.rating != null);
-                          return withRatings.length > 0
-                            ? (
-                                withRatings.reduce((s, e) => s + (e.rating ?? 0), 0) /
-                                withRatings.length
-                              ).toFixed(1)
-                            : "N/A";
-                        })()
-                      : "0"}
-                  </CardTitle>
-                  <CardDescription>Average rating</CardDescription>
-                  <p className="mt-2 text-sm text-muted-foreground">{stats?.tipCount ?? 0} tips</p>
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="md:col-span-2 lg:col-span-1"
-            >
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <TrendingUp className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-3xl font-bold tabular-nums">
-                    $
-                    {stats?.employeeCount && stats?.totalTips
-                      ? (stats.totalTips / stats.employeeCount).toFixed(0)
-                      : "0"}
-                  </CardTitle>
-                  <CardDescription>Avg tip per employee</CardDescription>
-                  <p className="mt-2 text-sm text-muted-foreground">Coaching metric</p>
-                </CardHeader>
-              </Card>
-            </motion.div>
-          </div>
+              <StatCard
+                title={`Total tips (${timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"})`}
+                value={`$${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+                change={hasTipActivityInPeriod ? "Live totals update as tips land." : "No tips yet for this period."}
+                icon={DollarSign}
+                beam
+              />
+              <StatCard
+                title="Active employees"
+                value={String(stats?.employeeCount ?? 0)}
+                change={topEmployees.length > 0 ? `${topEmployees.length} showing in top list` : undefined}
+                icon={Users}
+              />
+              <StatCard
+                title="Tips count"
+                value={String(stats?.tipCount ?? 0)}
+                change={hasTipActivityInPeriod ? "Includes successful tips in this timeframe." : undefined}
+                icon={Award}
+              />
+              <StatCard
+                title="Avg tip per employee"
+                value={`$${stats?.employeeCount && stats?.totalTips ? (stats.totalTips / stats.employeeCount).toFixed(0) : "0"}`}
+                change="Useful coaching metric"
+                icon={TrendingUp}
+              />
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ y: 20, opacity: 0 }}
