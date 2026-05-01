@@ -192,6 +192,7 @@ model Business {
   legalContactName         String?                    @map("legal_contact_name")
   contactEmail             String?                    @map("contact_email")
   contactPhone             String?                    @map("contact_phone")
+  website                 String?                    @map("website")
   registeredAddress        String?                    @map("registered_address") @db.Text
   /**
    * Business type selected during sign-up (e.g. "Restaurant", "Salon", "Hotel", etc).

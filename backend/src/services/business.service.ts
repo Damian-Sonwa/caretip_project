@@ -453,6 +453,54 @@ export async function getManagerBusinessProfile(userId: string) {
   return getBusinessById(b.id);
 }
 
+export async function updateManagerBusinessProfile(
+  userId: string,
+  data: {
+    legalBusinessName?: string;
+    businessType?: string | null;
+    registeredAddress?: string | null;
+    contactPhone?: string | null;
+    website?: string | null;
+  }
+): Promise<{ id: string }> {
+  const b = await getBusinessByUserId(userId);
+  if (!b) {
+    throw new Error("Business not found");
+  }
+
+  const nextName =
+    typeof data.legalBusinessName === "string" ? data.legalBusinessName.trim() : undefined;
+  const nextType = data.businessType !== undefined ? (data.businessType?.trim() || null) : undefined;
+  const nextAddress =
+    data.registeredAddress !== undefined ? (data.registeredAddress?.trim() || null) : undefined;
+  const nextPhone =
+    data.contactPhone !== undefined ? (data.contactPhone?.trim() || null) : undefined;
+  const nextWebsite =
+    data.website !== undefined ? (data.website?.trim() || null) : undefined;
+
+  // If legal name changes, re-slug to match. This is safe pre-QR launch; later changes can be controlled.
+  let nextSlug: string | undefined;
+  if (nextName && nextName.length > 0 && nextName !== b.name) {
+    nextSlug = await generateUniqueBusinessSlugForName(nextName);
+  }
+
+  await prisma.business.update({
+    where: { id: b.id },
+    data: {
+      ...(nextName !== undefined ? { name: nextName } : {}),
+      ...(nextSlug !== undefined ? { slug: nextSlug } : {}),
+      ...(nextType !== undefined ? { businessType: nextType } : {}),
+      ...(nextAddress !== undefined ? { registeredAddress: nextAddress } : {}),
+      ...(nextPhone !== undefined ? { contactPhone: nextPhone } : {}),
+      ...(nextWebsite !== undefined ? { website: nextWebsite } : {}),
+    },
+    select: { id: true },
+  });
+
+  emitBusinessDataChanged(b.id, "business_profile_updated");
+  return { id: b.id };
+}
+
 export async function getBusinessById(id: string) {
   const business = await prisma.business.findUnique({
     where: { id },

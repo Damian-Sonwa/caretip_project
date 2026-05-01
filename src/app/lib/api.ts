@@ -186,7 +186,6 @@ export async function registerAPI(payload: {
   password: string;
   name?: string;
   role: "business" | "employee";
-  businessName?: string;
   inviteCode?: string;
 }): Promise<AuthResponse> {
   return apiRequest<AuthResponse>(apiPath("/api/auth/register"), {
@@ -504,6 +503,32 @@ export async function patchMyOnboardingStatus(hasCompletedOnboarding: boolean): 
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify({ hasCompletedOnboarding }),
+    credentials: "include",
+  });
+}
+
+export async function patchBusinessProfile(body: {
+  legalBusinessName?: string;
+  businessType?: string | null;
+  registeredAddress?: string | null;
+  contactPhone?: string | null;
+  website?: string | null;
+}): Promise<BusinessInfo> {
+  return apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(body),
+    credentials: "include",
+  });
+}
+
+export async function uploadMyBusinessLogo(file: File): Promise<{ success: boolean; path: string }> {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest(apiPath("/api/business/profile/logo"), {
+    method: "POST",
+    headers: getAuthHeadersOnly(),
+    body: form,
     credentials: "include",
   });
 }
@@ -1114,6 +1139,7 @@ export interface PlatformBusinessRow {
   legalContactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
+  website?: string | null;
   registeredAddress: string | null;
   ownerUserId: string;
   ownerEmail: string;
@@ -1191,6 +1217,7 @@ export async function updatePlatformBusinessKyc(
     legalContactName?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
+    website?: string | null;
     registeredAddress?: string | null;
   }
 ): Promise<{ success: boolean; business: PlatformBusinessRow }> {

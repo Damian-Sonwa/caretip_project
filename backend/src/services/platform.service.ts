@@ -185,6 +185,7 @@ export async function getAllBusinessActivity() {
       legalContactName: b.legalContactName,
       contactEmail: b.contactEmail,
       contactPhone: b.contactPhone,
+      website: (b as any).website ?? null,
       registeredAddress: b.registeredAddress,
       ownerUserId: b.user.id,
       ownerEmail: b.user.email,
@@ -244,6 +245,7 @@ export async function getBusinessForAdmin(businessId: string) {
     legalContactName: b.legalContactName,
     contactEmail: b.contactEmail,
     contactPhone: b.contactPhone,
+    website: (b as any).website ?? null,
     registeredAddress: b.registeredAddress,
     ownerUserId: b.user.id,
     ownerEmail: b.user.email,
@@ -285,6 +287,7 @@ export async function updateBusinessKyc(
     legalContactName?: string | null;
     contactEmail?: string | null;
     contactPhone?: string | null;
+    website?: string | null;
     registeredAddress?: string | null;
   }
 ) {
@@ -294,6 +297,7 @@ export async function updateBusinessKyc(
       ...(data.legalContactName !== undefined && { legalContactName: data.legalContactName }),
       ...(data.contactEmail !== undefined && { contactEmail: data.contactEmail }),
       ...(data.contactPhone !== undefined && { contactPhone: data.contactPhone }),
+      ...(data.website !== undefined && { website: data.website }),
       ...(data.registeredAddress !== undefined && { registeredAddress: data.registeredAddress }),
     },
   });

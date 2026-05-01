@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
+import { businessUploadLogo } from "../middleware/businessUpload.middleware.js";
 
 const router = Router();
 
@@ -11,6 +12,28 @@ router.get("/invite/validate", businessController.validateInvite);
 
 /** Pending managers may read their own profile to poll KYC status; not gated by isApprovedBusiness. */
 router.get("/profile", authMiddleware, requireRole(Role.MANAGER), businessController.getMyProfile);
+router.patch(
+  "/profile",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.patchMyProfile
+);
+router.post(
+  "/profile/logo",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  (req, res, next) =>
+    businessUploadLogo(req, res, (err: unknown) => {
+      if (err) {
+        const msg = err instanceof Error ? err.message : "Upload failed";
+        return res.status(400).json({ message: msg });
+      }
+      next();
+    }),
+  businessController.uploadMyLogo
+);
 
 router.post(
   "/generate-invite",

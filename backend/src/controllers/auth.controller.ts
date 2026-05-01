@@ -75,7 +75,7 @@ function isForbiddenSuperAdminRolePayload(body: Record<string, unknown>): boolea
 export async function register(req: Request, res: Response) {
   try {
     const body = req.body as Record<string, unknown>;
-    const { email, password, name, role, businessName, inviteCode, businessType, location } = req.body;
+    const { email, password, name, role, inviteCode } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password are required" });
@@ -98,16 +98,10 @@ export async function register(req: Request, res: Response) {
     }
 
     if (role === "business") {
-      if (!businessName) {
-        return res.status(400).json({ message: "Business name is required" });
-      }
       const result = await authService.registerBusiness({
         email,
         password,
-        name: name ?? businessName,
-        businessName,
-        businessType: typeof businessType === "string" ? businessType : undefined,
-        location: typeof location === "string" ? location : undefined,
+        name: typeof name === "string" ? name : undefined,
       });
       try {
         const rt = await issueRefreshToken(result.user.id);

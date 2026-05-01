@@ -7,7 +7,6 @@ type AuthOAuthButtonsProps = {
   role: AuthRole;
   formBusy: boolean;
   name: string;
-  businessName: string;
   inviteCode: string;
   onGoogleCredential: (idToken: string) => void;
 };
@@ -21,7 +20,6 @@ export function AuthOAuthButtons({
   role,
   formBusy,
   name,
-  businessName,
   inviteCode,
   onGoogleCredential,
 }: AuthOAuthButtonsProps) {
@@ -29,7 +27,7 @@ export function AuthOAuthButtons({
 
   const canOAuthSignUp =
     isLogin ||
-    (role === "business" && businessName.trim().length > 0 && name.trim().length > 0) ||
+    (role === "business" && true) ||
     (role === "employee" && inviteCode.trim().length > 0 && name.trim().length > 0);
 
   if (!googleClientId?.trim()) {

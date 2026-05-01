@@ -25,6 +25,7 @@ export function BusinessDetailPage() {
     legalContactName: "",
     contactEmail: "",
     contactPhone: "",
+    website: "",
     registeredAddress: "",
   });
 
@@ -53,6 +54,7 @@ export function BusinessDetailPage() {
       legalContactName: row.legalContactName ?? "",
       contactEmail: row.contactEmail ?? "",
       contactPhone: row.contactPhone ?? "",
+      website: row.website ?? "",
       registeredAddress: row.registeredAddress ?? "",
     });
   }, [row]);
@@ -81,6 +83,7 @@ export function BusinessDetailPage() {
         legalContactName: form.legalContactName || null,
         contactEmail: form.contactEmail || null,
         contactPhone: form.contactPhone || null,
+        website: form.website || null,
         registeredAddress: form.registeredAddress || null,
       });
       setRow(business);
@@ -205,6 +208,10 @@ export function BusinessDetailPage() {
                     <dt className="text-muted-foreground">Phone</dt>
                     <dd className="font-medium">{row.contactPhone ?? "N/A"}</dd>
                   </div>
+                  <div>
+                    <dt className="text-muted-foreground">Website</dt>
+                    <dd className="font-medium break-all">{row.website ?? "N/A"}</dd>
+                  </div>
                   <div className="sm:col-span-2">
                     <dt className="text-muted-foreground">Registered address</dt>
                     <dd className="font-medium whitespace-pre-wrap">{row.registeredAddress ?? "N/A"}</dd>
@@ -304,6 +311,14 @@ export function BusinessDetailPage() {
                   className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                   value={form.contactPhone}
                   onChange={(e) => setForm((f) => ({ ...f, contactPhone: e.target.value }))}
+                />
+              </label>
+              <label className="block text-sm">
+                <span className="text-muted-foreground">Website</span>
+                <input
+                  className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
+                  value={form.website}
+                  onChange={(e) => setForm((f) => ({ ...f, website: e.target.value }))}
                 />
               </label>
               <label className="block text-sm">

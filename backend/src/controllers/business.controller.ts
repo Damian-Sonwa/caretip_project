@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import * as businessService from "../services/business.service.js";
+import { prisma } from "../prisma.js";
 import {
   logServerError,
   clientSafeMessage,
@@ -53,6 +54,56 @@ export async function validateInvite(req: Request, res: Response) {
     logServerError("business.validateInvite", err);
     return res.status(400).json({
       ok: false,
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function patchMyProfile(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const body = req.body as Record<string, unknown>;
+    await businessService.updateManagerBusinessProfile(userId, {
+      legalBusinessName: typeof body.legalBusinessName === "string" ? body.legalBusinessName : undefined,
+      businessType: body.businessType === undefined ? undefined : (body.businessType as string | null),
+      registeredAddress:
+        body.registeredAddress === undefined ? undefined : (body.registeredAddress as string | null),
+      contactPhone: body.contactPhone === undefined ? undefined : (body.contactPhone as string | null),
+      website: body.website === undefined ? undefined : (body.website as string | null),
+    });
+    const profile = await businessService.getManagerBusinessProfile(userId);
+    return res.json(profile);
+  } catch (err) {
+    logServerError("business.patchMyProfile", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function uploadMyLogo(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const b = await businessService.getBusinessByUserId(userId);
+    if (!b) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) {
+      return res.status(400).json({ message: "File is required (multipart field name: file)" });
+    }
+    const publicPath = `/uploads/businesses/${b.id}/${file.filename}`;
+    await prisma.business.update({ where: { id: b.id }, data: { logoPath: publicPath } });
+    return res.json({ success: true, path: publicPath });
+  } catch (err) {
+    logServerError("business.uploadMyLogo", err);
+    return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.business),
     });
   }

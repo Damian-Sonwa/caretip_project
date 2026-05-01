@@ -192,10 +192,8 @@ async function sendVerificationEmailBestEffort(userId: string, email: string): P
 export async function registerBusiness(input: {
   email: string;
   password: string;
-  name: string;
-  businessName: string;
-  businessType?: string;
-  location?: string;
+  /** Optional display name for the account (not persisted to Business profile). */
+  name?: string;
 }): Promise<AuthResult> {
   const email = normalizeLoginEmail(input.email);
   const pwCheck = validatePassword(input.password);
@@ -208,7 +206,9 @@ export async function registerBusiness(input: {
     throw new Error("Email already registered");
   }
 
-  const slug = await generateUniqueBusinessSlugForName(input.businessName);
+  const baseName = (email.split("@")[0] || "My").trim();
+  const placeholderBusinessName = `${baseName} venue`;
+  const slug = await generateUniqueBusinessSlugForName(placeholderBusinessName);
   const passwordHash = await bcrypt.hash(input.password, 10);
 
   const created = await prisma.user.create({
@@ -220,10 +220,14 @@ export async function registerBusiness(input: {
       emailVerified: false,
       business: {
         create: {
-          name: input.businessName.trim(),
+          name: placeholderBusinessName,
           slug,
-          businessType: input.businessType?.trim() || null,
-          location: input.location?.trim() || null,
+          businessType: null,
+          location: null,
+          registeredAddress: null,
+          contactPhone: null,
+          contactEmail: null,
+          website: null,
         },
       },
     },

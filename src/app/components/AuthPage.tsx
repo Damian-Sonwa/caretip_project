@@ -6,7 +6,7 @@ import { Footer } from './Footer';
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type UserRole } from '../hooks/useAuth';
-import { Building2, KeyRound, Eye, EyeOff, Check, Loader2 } from 'lucide-react';
+import { KeyRound, Eye, EyeOff, Check, Loader2 } from 'lucide-react';
 import {
   getPasswordChecklist,
   isPasswordStrong,
@@ -34,9 +34,6 @@ const FIELD_ICON = `${FIELD_CLASS} pl-10`;
 
 const FIELD = {
   name: 'fullName',
-  businessName: 'businessName',
-  businessType: 'businessType',
-  location: 'location',
   inviteCode: 'inviteCode',
   email: 'email',
   password: 'password',
@@ -63,9 +60,6 @@ export function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [businessName, setBusinessName] = useState('');
-  const [businessType, setBusinessType] = useState('');
-  const [businessLocation, setBusinessLocation] = useState('');
   const [inviteCode, setInviteCode] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -129,24 +123,9 @@ export function AuthPage() {
     }
 
     if (!isLogin) {
-      if (role === 'business') {
-        if (!businessName) {
-          setError('Please enter your business name.');
-          return;
-        }
-        if (!businessType) {
-          setError('Please select a business type.');
-          return;
-        }
-        if (!businessLocation) {
-          setError('Please enter your business location.');
-          return;
-        }
-      } else {
-        if (!name) {
-          setError('Please enter your full name.');
-          return;
-        }
+      if (role === 'employee' && !name) {
+        setError('Please enter your full name.');
+        return;
       }
       if (password !== confirmPassword) {
         setError('Passwords do not match.');
@@ -176,11 +155,8 @@ export function AuthPage() {
         const payload = {
           email,
           password,
-          name: role === 'employee' ? name : undefined,
+          name: name.trim() ? name : undefined,
           role: role as 'business' | 'employee',
-          businessName: role === 'business' ? businessName : undefined,
-          businessType: role === 'business' ? businessType : undefined,
-          location: role === 'business' ? businessLocation : undefined,
           inviteCode: role === 'employee' ? inviteCode : undefined,
         };
         if (role === "employee") {
@@ -246,9 +222,6 @@ export function AuthPage() {
     setEmail('');
     setPassword('');
     setName('');
-    setBusinessName('');
-    setBusinessType('');
-    setBusinessLocation('');
     setInviteCode('');
     setConfirmPassword('');
     setShowPassword(false);
@@ -261,9 +234,6 @@ export function AuthPage() {
     setRole(newRole);
     setError('');
     setName('');
-    setBusinessName('');
-    setBusinessType('');
-    setBusinessLocation('');
     setInviteCode('');
     setShowPasswordChecklist(false);
     setUnlockedFields(new Set());
@@ -281,20 +251,7 @@ export function AuthPage() {
 
   const runGoogleOAuth = async (idToken: string) => {
     if (!isLogin) {
-      if (role === 'business') {
-        if (!businessName.trim()) {
-          setError('Please enter your business name.');
-          return;
-        }
-        if (!businessType.trim()) {
-          setError('Please select a business type.');
-          return;
-        }
-        if (!businessLocation.trim()) {
-          setError('Please enter your business location.');
-          return;
-        }
-      } else {
+      if (role === 'employee') {
         if (!name.trim()) {
           setError('Please enter your full name.');
           return;
@@ -314,10 +271,7 @@ export function AuthPage() {
       const loggedIn = await loginWithOAuth('google', idToken, {
         isLogin,
         intendedRole: role,
-        name: role === 'employee' ? name.trim() : undefined,
-        businessName: role === 'business' ? businessName.trim() : undefined,
-        businessType: role === 'business' ? businessType.trim() : undefined,
-        location: role === 'business' ? businessLocation.trim() : undefined,
+        name: name.trim() ? name.trim() : undefined,
         inviteCode: role === 'employee' ? inviteCode.trim() : undefined,
       });
       navigate(getPostAuthRedirect(loggedIn), { replace: true });
@@ -345,7 +299,6 @@ export function AuthPage() {
       !validateEmail(email) ||
       !isPasswordStrong(password) ||
       password !== confirmPassword ||
-      (role === 'business' && (!businessName || !businessType || !businessLocation)) ||
       (role === 'employee' && (!name || !inviteCode)));
 
   return (
@@ -395,65 +348,6 @@ export function AuthPage() {
                 onChange={(e) => setName(e.target.value)}
                 className={FIELD_CLASS}
               />
-            )}
-
-            {!isLogin && role === 'business' && (
-              <>
-                <motion.div
-                  key="business"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className="relative"
-                >
-                  <Building2 className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400" />
-                  <input
-                    id="auth-business-name"
-                    placeholder="Business name"
-                    type="text"
-                    name={FIELD.businessName}
-                    autoComplete="organization"
-                    value={businessName}
-                    readOnly={isFieldLocked(FIELD.businessName)}
-                    onFocus={() => unlockField(FIELD.businessName)}
-                    onChange={(e) => setBusinessName(e.target.value)}
-                    className={FIELD_ICON}
-                  />
-                </motion.div>
-                
-                <motion.select
-                  key="businessType"
-                  id="auth-business-type"
-                  name={FIELD.businessType}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  value={businessType}
-                  onChange={(e) => setBusinessType(e.target.value)}
-                  className={FIELD_CLASS}
-                >
-                  <option value="">Select business type</option>
-                  <option value="Restaurant">Restaurant</option>
-                  <option value="Salon">Salon</option>
-                  <option value="Hotel">Hotel</option>
-                  <option value="Spa">Spa</option>
-                  <option value="Lounge">Lounge</option>
-                  <option value="Cafe">Cafe</option>
-                  <option value="Bar">Bar</option>
-                  <option value="Other">Other</option>
-                </motion.select>
-                
-                <motion.input
-                  id="auth-business-location"
-                  key="location"
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  placeholder="Business location"
-                  type="text"
-                  name={FIELD.location}
-                  value={businessLocation}
-                  onChange={(e) => setBusinessLocation(e.target.value)}
-                  className={FIELD_CLASS}
-                />
-              </>
             )}
 
             {!isLogin && role === 'employee' && (
@@ -697,7 +591,6 @@ export function AuthPage() {
               role={role}
               formBusy={isSubmitting}
               name={name}
-              businessName={businessName}
               inviteCode={inviteCode}
               onGoogleCredential={(t) => void runGoogleOAuth(t)}
             />

@@ -29,6 +29,7 @@ export function BusinessVerificationPage() {
     legalContactName: "",
     contactEmail: "",
     contactPhone: "",
+    website: "",
     registeredAddress: "",
   });
 
@@ -117,6 +118,7 @@ export function BusinessVerificationPage() {
       legalContactName: b.legalContactName ?? "",
       contactEmail: b.contactEmail ?? "",
       contactPhone: b.contactPhone ?? "",
+      website: b.website ?? "",
       registeredAddress: b.registeredAddress ?? "",
     });
   };
@@ -128,6 +130,7 @@ export function BusinessVerificationPage() {
         legalContactName: form.legalContactName || null,
         contactEmail: form.contactEmail || null,
         contactPhone: form.contactPhone || null,
+        website: form.website || null,
         registeredAddress: form.registeredAddress || null,
       });
       setRows((prev) => prev.map((r) => (r.id === business.id ? { ...r, ...business } : r)));
