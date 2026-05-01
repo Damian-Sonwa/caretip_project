@@ -13,7 +13,9 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix --report-unused-disable-directives",
-    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{ts,json}\" \"vite.config.ts\""
+    "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{ts,json}\" \"vite.config.ts\"",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -89,6 +91,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.52.0",
     "@tailwindcss/vite": "4.1.12",
     "@types/canvas-confetti": "^1.9.0",
     "@types/node": "^25.5.0",

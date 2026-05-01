@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router";
 import {
   registerAPI,
@@ -9,7 +9,11 @@ import {
   patchMyOnboardingStatus,
   type AuthResponse,
 } from "../lib/api";
+import { deriveAuthSession, type AuthSession } from "../lib/authSession";
+import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
+
+export type { AuthSession } from "../lib/authSession";
 
 const AUTH_STORAGE_SYNC_EVENT = "caretip-auth-storage-sync";
 
@@ -35,6 +39,7 @@ function persistAuthResponse(data: AuthResponse): User {
   const u = parseUser(data.user);
   localStorage.setItem("caretip_user", JSON.stringify(u));
   notifyAuthStorageSync();
+  authDebug("auth_session_updated", { ...deriveAuthSession(u), source: "persist" });
   return u;
 }
 
@@ -267,6 +272,7 @@ export function useAuth() {
     sessionStorage.removeItem("caretip_admin_user_backup");
     setUser(null);
     notifyAuthStorageSync();
+    authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
   }, []);
 
   const switchRole = (newRole: UserRole) => {
@@ -291,6 +297,7 @@ export function useAuth() {
     notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
+    authDebug("auth_session_updated", { ...deriveAuthSession(restored), source: "exit_impersonation" });
     navigate("/platform-admin/dashboard");
   }, [navigate]);
 
@@ -349,4 +356,10 @@ export function useAuth() {
     replaceUser,
     exitImpersonation,
   };
+}
+
+/** Canonical auth flags derived from `useAuth().user` (single model for UI + tests). */
+export function useAuthSession(): AuthSession {
+  const { user } = useAuth();
+  return useMemo(() => deriveAuthSession(user), [user]);
 }

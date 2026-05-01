@@ -1,80 +1,51 @@
-import type { ReactNode } from 'react';
-import { useEffect, useState } from 'react';
-import { Navigate, useLocation } from 'react-router';
-import { useAuth } from '../hooks/useAuth';
-import type { UserRole } from '../hooks/useAuth';
+import type { ReactNode } from "react";
+import { Navigate, useLocation } from "react-router";
+import { useAuth } from "../hooks/useAuth";
+import { resolveAuthenticatedAppGuard } from "../lib/authSession";
+import { authDebug } from "../lib/authDebugLog";
+import { AppLoader } from "./AppLoader";
 
 interface RoleProtectedRouteProps {
-  allowedRoles: Array<'business' | 'employee'>;
+  allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }
 
 /**
- * Requires an authenticated user whose role matches allowedRoles.
- * Prevents employees from opening business URLs (and vice versa) via manual navigation.
+ * Same guard as {@link ProtectedRoute} (single resolver). Uses the global auth loading flag
+ * so session is not double-fetched here.
  */
 export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
-  const { user, refreshSession } = useAuth();
+  const { user, isLoadingUser } = useAuth();
   const location = useLocation();
-  const [sessionChecked, setSessionChecked] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    const run = async () => {
-      try {
-        if (typeof localStorage !== 'undefined' && localStorage.getItem('caretip_token')) {
-          await refreshSession();
-        }
-      } finally {
-        if (!cancelled) setSessionChecked(true);
-      }
-    };
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [refreshSession]);
-
-  if (!sessionChecked) {
-    return null;
+  if (isLoadingUser) {
+    return <AppLoader message="Setting things up for you..." />;
   }
 
   if (!user) {
+    authDebug("route_guard", {
+      decision: "redirect",
+      to: "/login",
+      reason: "not_authenticated",
+      path: location.pathname,
+      scope: "RoleProtectedRoute",
+    });
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  const r = user.role as UserRole;
+  const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles);
 
-  const mustVerifyEmail = user.isVerified === false && (r === "business" || r === "employee");
-
-  if (mustVerifyEmail) {
-    return <Navigate to="/verify-email" replace state={{ from: location.pathname }} />;
+  if (decision.kind === "redirect") {
+    authDebug("route_guard", {
+      decision: "redirect",
+      to: decision.to,
+      reason: decision.reason,
+      path: location.pathname,
+      scope: "RoleProtectedRoute",
+    });
+    return <Navigate to={decision.to} replace state={{ from: location.pathname }} />;
   }
 
-  // Onboarding gate for business users.
-  if (r === "business") {
-    const onOnboardingRoute = location.pathname === "/onboarding";
-    if (user.hasCompletedOnboarding === false && !onOnboardingRoute) {
-      return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
-    }
-    if (user.hasCompletedOnboarding === true && onOnboardingRoute) {
-      return <Navigate to="/dashboard" replace />;
-    }
-  }
-
-  if (allowedRoles.includes(r as 'business' | 'employee')) {
-    return <>{children}</>;
-  }
-
-  if (r === 'platform_admin' || r === 'admin') {
-    return <Navigate to="/platform-admin/dashboard" replace />;
-  }
-  if (r === 'business') {
-    return <Navigate to="/dashboard" replace />;
-  }
-  if (r === 'employee') {
-    return <Navigate to="/employee/dashboard" replace />;
-  }
-
-  return <Navigate to="/login" replace />;
+  authDebug("route_guard", { decision: "allow", path: location.pathname, scope: "RoleProtectedRoute" });
+  return <>{children}</>;
 }

@@ -11,6 +11,7 @@ import {
   verifyEmailWithToken,
 } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
+import { authDebug } from "@/app/lib/authDebugLog";
 import { logClientError } from "@/app/lib/clientLog";
 
 /**
@@ -28,20 +29,25 @@ function VerifyEmailFromToken({ token }: { token: string }) {
       try {
         await verifyEmailWithToken(token);
         if (cancelled) return;
+        authDebug("email_verify", { phase: "api_ok" });
         const hasSession =
           typeof localStorage !== "undefined" && !!localStorage.getItem("caretip_token");
         if (hasSession) {
           const refreshed = await refreshSession();
           if (cancelled) return;
           if (refreshed) {
-            navigate(getPostAuthRedirect(refreshed), { replace: true });
+            const target = getPostAuthRedirect(refreshed);
+            authDebug("email_verify", { phase: "redirect_after_session", to: target });
+            navigate(target, { replace: true });
             return;
           }
         }
+        authDebug("email_verify", { phase: "success_no_session" });
         setPhase("success");
       } catch (e) {
         if (cancelled) return;
         const msg = toUserFriendlyMessage(e);
+        authDebug("email_verify", { phase: "error", message: msg });
         navigate("/verify-email", { replace: true, state: { verifyError: msg } });
       }
     })();

@@ -16,6 +16,8 @@ export default tseslint.config(
       "scripts/**",
       "backend",
       "docs/**",
+      "e2e/**",
+      "playwright.config.ts",
       "eslint.config.js",
       "src/imports/pasted_text/**",
     ],

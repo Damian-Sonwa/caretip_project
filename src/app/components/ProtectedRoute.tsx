@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import type { UserRole } from "../hooks/useAuth";
+import { resolveAuthenticatedAppGuard } from "../lib/authSession";
+import { authDebug } from "../lib/authDebugLog";
 import { AppLoader } from "./AppLoader";
 
 export function ProtectedRoute({
@@ -19,37 +20,27 @@ export function ProtectedRoute({
   }
 
   if (!user) {
+    authDebug("route_guard", {
+      decision: "redirect",
+      to: "/login",
+      reason: "not_authenticated",
+      path: location.pathname,
+    });
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
-  const r = user.role as UserRole;
+  const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles);
 
-  if (user.isVerified === false && (r === "business" || r === "employee")) {
-    return <Navigate to="/verify-email" replace state={{ from: location.pathname }} />;
-  }
-
-  if (r === "business" && user.hasCompletedOnboarding === false && location.pathname !== "/onboarding") {
-    return <Navigate to="/onboarding" replace state={{ from: location.pathname }} />;
-  }
-
-  if (r === "business" && user.hasCompletedOnboarding === true && location.pathname === "/onboarding") {
-    return <Navigate to="/dashboard" replace />;
+  if (decision.kind === "redirect") {
+    authDebug("route_guard", {
+      decision: "redirect",
+      to: decision.to,
+      reason: decision.reason,
+      path: location.pathname,
+    });
+    return <Navigate to={decision.to} replace state={{ from: location.pathname }} />;
   }
 
-  if (allowedRoles.includes(r as "business" | "employee")) {
-    return <>{children}</>;
-  }
-
-  if (r === "platform_admin" || r === "admin") {
-    return <Navigate to="/platform-admin/dashboard" replace />;
-  }
-  if (r === "business") {
-    return <Navigate to="/dashboard" replace />;
-  }
-  if (r === "employee") {
-    return <Navigate to="/employee/dashboard" replace />;
-  }
-
-  return <Navigate to="/login" replace />;
+  authDebug("route_guard", { decision: "allow", path: location.pathname });
+  return <>{children}</>;
 }
-
