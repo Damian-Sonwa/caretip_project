@@ -5,9 +5,31 @@ import { defineConfig, devices } from "@playwright/test";
  * 1) Preferred: `npm run dev` in one terminal, then `npm run test:e2e` here (no auto server).
  * 2) One shot: `npm run test:e2e:with-server` — uses `scripts/playwright-with-server.mjs` (NOT Playwright `webServer`).
  *
+ * Browsers: Playwright 1.52+ expects **chromium** + **chromium-headless-shell** unless you use a system browser:
+ * - `PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH` → custom `chrome.exe` / Chromium path
+ * - `PLAYWRIGHT_USE_SYSTEM_CHROME=true` → use installed Google Chrome (`channel: 'chrome'`)
+ *
+ * `pretest:e2e` runs `scripts/install-playwright.mjs` (skipped when `SKIP_PLAYWRIGHT_INSTALL=true`).
+ *
  * `E2E_BASE_URL` overrides the app origin (default `http://localhost:5173`).
  */
 const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:5173";
+
+const chromiumExe = (process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ?? "").trim();
+const useSystemChrome = process.env.PLAYWRIGHT_USE_SYSTEM_CHROME === "true";
+
+const chromiumUse = chromiumExe
+  ? {
+      launchOptions: {
+        executablePath: chromiumExe,
+      },
+    }
+  : useSystemChrome
+    ? {
+        /** Uses a locally installed Google Chrome (not bundled Chromium). */
+        channel: "chrome" as const,
+      }
+    : {};
 
 export default defineConfig({
   testDir: "e2e",
@@ -24,5 +46,13 @@ export default defineConfig({
     navigationTimeout: 20_000,
     actionTimeout: 15_000,
   },
-  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  projects: [
+    {
+      name: "chromium",
+      use: {
+        ...devices["Desktop Chrome"],
+        ...chromiumUse,
+      },
+    },
+  ],
 });

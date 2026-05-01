@@ -286,6 +286,20 @@ cd backend && npm run db:migrate:deploy
 | `backend/` | `npm run db:migrate` | Dev migrations |
 | `backend/` | `npm run db:migrate:deploy` | CI / production migrations |
 | `backend/` | `npm run db:sync-active-employee-email-verified` | One-off repair: active employees + unverified email |
+| Root | `npm run playwright:install` | Download Playwright browsers (retries, timeouts, cache clear — see script) |
+| Root | `npm run test:e2e` | Playwright E2E (runs `pretest:e2e` install unless `SKIP_PLAYWRIGHT_INSTALL=true`) |
+| Root | `npm run test:e2e:with-server` | Start Vite, then Playwright (see `scripts/playwright-with-server.mjs`) |
+
+### Playwright (E2E)
+
+1. **One-time (or after Playwright upgrades):** `npm run playwright:install`  
+   Uses `scripts/install-playwright.mjs`: tries normal install → `--force` → Azure mirror → full install, with **hard timeout** and **stall detection** (no output for several minutes kills that attempt). Clears `%LOCALAPPDATA%\ms-playwright` (Windows) or the macOS/Linux cache between retries.
+
+2. **Do not block daily dev:** `npm run dev` does **not** install browsers. To skip the automatic step before tests: set **`SKIP_PLAYWRIGHT_INSTALL=true`** in `.env` (then install browsers manually when you want E2E).
+
+3. **Hanging downloads:** free disk space; set **`HTTPS_PROXY` / `HTTP_PROXY`** if required; set **`PLAYWRIGHT_DOWNLOAD_HOST`** (see `.env.example`). Or use **`PLAYWRIGHT_USE_SYSTEM_CHROME=true`** / **`PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH`** so tests use an existing Chrome/Chromium.
+
+4. **Run tests:** Terminal A `npm run dev` → Terminal B `npm run test:e2e`, or a single shot: `npm run test:e2e:with-server`.
 
 ---
 
@@ -368,6 +382,7 @@ From repo root you can also use `node scripts/createAdmin.js` (wrapper sets `cwd
 | **`Environment variable not found: DATABASE_URL`** | Put `DATABASE_URL` in `backend/.env` or run Prisma via `npm run prisma -- …` / `db:*` scripts so both env files load. |
 | **Login “email not verified”** | Complete `/verify-email`, or use **resend** from the login or check-email UI. |
 | **Stale Prisma client** | `cd backend && npm run db:prisma:reset-client` |
+| **Playwright “Executable doesn't exist … headless_shell”** | Run `npm run playwright:install`. If installs hang, see [Playwright (E2E)](#playwright-e2e): proxies, `PLAYWRIGHT_DOWNLOAD_HOST`, system Chrome, or `SKIP_PLAYWRIGHT_INSTALL` + manual install. |
 
 More backend-specific migration and enum recovery steps live in **`backend/README.md`**.
 
