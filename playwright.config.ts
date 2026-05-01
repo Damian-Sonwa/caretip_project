@@ -1,15 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
 /**
- * E2E expects the Vite app already running unless you opt in:
- *   PowerShell: `$env:E2E_START_WEBSERVER='1'; npm run test:e2e`
- *   cmd.exe:     `set E2E_START_WEBSERVER=1&& npm run test:e2e`
+ * Run E2E in one of two ways:
+ * 1) Preferred: `npm run dev` in one terminal, then `npm run test:e2e` here (no auto server).
+ * 2) One shot: `npm run test:e2e:with-server` — uses `scripts/playwright-with-server.mjs` (NOT Playwright `webServer`).
  *
- * Default is NO auto `webServer` — spawning `npm run dev` here often looks “stuck”
- * (slow first compile, port 5173 in use, or Playwright waiting on the wrong host).
+ * `E2E_BASE_URL` overrides the app origin (default `http://localhost:5173`).
  */
 const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:5173";
-const startWebServer = process.env.E2E_START_WEBSERVER === "1";
 
 export default defineConfig({
   testDir: "e2e",
@@ -27,14 +25,4 @@ export default defineConfig({
     actionTimeout: 15_000,
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
-  webServer: startWebServer
-    ? {
-        command: "npm run dev -- --host 127.0.0.1 --port 5173 --strictPort",
-        url: "http://127.0.0.1:5173",
-        reuseExistingServer: !process.env.CI,
-        timeout: 180_000,
-        stdout: "pipe",
-        stderr: "pipe",
-      }
-    : undefined,
 });
