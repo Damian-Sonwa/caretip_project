@@ -56,6 +56,7 @@ function textWidth(pdf: jsPDF, text: string) {
 export function createBusinessQrPrintPdf(params: {
   qrPngDataUrl: string;
   businessName: string;
+  contextLine?: string | null;
   location?: string | null;
   instruction?: string;
   size?: PdfSize;
@@ -65,6 +66,7 @@ export function createBusinessQrPrintPdf(params: {
   const pageH = pdf.internal.pageSize.getHeight();
 
   const businessName = String(params.businessName ?? "").trim() || "Business";
+  const contextLine = String(params.contextLine ?? "").trim();
   const location = String(params.location ?? "").trim();
   const instruction = String(params.instruction ?? "Scan to tip instantly").trim() || "Scan to tip instantly";
 
@@ -87,6 +89,16 @@ export function createBusinessQrPrintPdf(params: {
 
   // Location line with pin icon (centered as a group)
   let contentY = dividerY + (params.size === "card" ? 10 : 14);
+
+  // Context line (e.g., Table name or Location name)
+  if (contextLine) {
+    pdf.setFont("helvetica", "normal");
+    pdf.setTextColor(...MUTED_RGB);
+    pdf.setFontSize(params.size === "card" ? 10 : 12);
+    pdf.text(contextLine, pageW / 2, contentY, { align: "center" });
+    contentY += params.size === "card" ? 9 : 11;
+  }
+
   if (location) {
     pdf.setFont("helvetica", "normal");
     pdf.setTextColor(...MUTED_RGB);
@@ -160,6 +172,7 @@ export function createBusinessQrPrintPdf(params: {
 export async function downloadBusinessQrPrintPdf(params: {
   qrPngDataUrl: string;
   businessName: string;
+  contextLine?: string | null;
   location?: string | null;
   instruction?: string;
   fileBaseName?: string;

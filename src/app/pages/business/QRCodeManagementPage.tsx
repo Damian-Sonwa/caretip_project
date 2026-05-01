@@ -360,6 +360,7 @@ export function QRCodeManagementPage() {
       const pdf = createBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
+        contextLine: type === "table" ? `Table: ${item.name}` : type === "location" ? `Location: ${item.name}` : null,
         location:
           type === "storefront"
             ? String(businessLocation ?? "").trim() || null
@@ -430,6 +431,7 @@ export function QRCodeManagementPage() {
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
+        contextLine: type === "table" ? `Table: ${item.name}` : type === "location" ? `Location: ${item.name}` : null,
         location:
           type === "storefront"
             ? String(businessLocation ?? "").trim() || null
@@ -562,20 +564,9 @@ export function QRCodeManagementPage() {
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() => downloadBrandedQR(item.id, item.name)}
-                    disabled={qrLocked}
-                    className={DASH_BTN_PRIMARY}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
                     onClick={() => void handleEmployeePrintPdf(item)}
                     disabled={qrLocked || !previewDataUrl}
-                    className={DASH_BTN_SECONDARY}
+                    className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
                     Download PDF layout
@@ -602,22 +593,6 @@ export function QRCodeManagementPage() {
                   <Button
                     type="button"
                     size="sm"
-                    onClick={() =>
-                      void handleVenueQrDownload(
-                        item,
-                        type,
-                        previewDataUrl
-                      )
-                    }
-                    disabled={qrLocked}
-                    className={DASH_BTN_PRIMARY}
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
                     variant="outline"
                     onClick={() => void handleVenueQrPrint(item, type as "storefront" | "table" | "location", previewDataUrl)}
                     disabled={qrLocked}
@@ -629,10 +604,9 @@ export function QRCodeManagementPage() {
                   <Button
                     type="button"
                     size="sm"
-                    variant="outline"
                     onClick={() => void handleVenuePrintPdf(item, type, previewDataUrl)}
                     disabled={qrLocked || !previewDataUrl}
-                    className={DASH_BTN_SECONDARY}
+                    className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
                     Download PDF layout
