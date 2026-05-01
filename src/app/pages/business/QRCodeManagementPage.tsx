@@ -736,6 +736,28 @@ export function QRCodeManagementPage() {
     return <CareTipPageLoader message="Loading…" />;
   }
 
+  if (qrLocked) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-20 text-foreground">
+        <div className="max-w-lg space-y-4 text-center">
+          <QrCode className="mx-auto h-14 w-14 opacity-40" />
+          <h1 className="text-2xl font-bold">Pending verification</h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Your account is under review. QR features will be available once your account is verified.
+          </p>
+          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
+            <Button asChild variant="outline">
+              <Link to="/dashboard">
+                <ChevronLeft className="mr-2 h-4 w-4" />
+                Back to dashboard
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const statusLabel =
     verificationStatus === "verified"
       ? "Verified"
