@@ -511,6 +511,7 @@ export function QRCodeManagementPage() {
                     type="button"
                     size="sm"
                     onClick={() => downloadBrandedQR(item.id, item.name)}
+                    disabled={qrLocked}
                     className={DASH_BTN_PRIMARY}
                   >
                     <Download className="mr-2 h-4 w-4" />
@@ -521,7 +522,7 @@ export function QRCodeManagementPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => void handleEmployeePrintPdf(item)}
-                    disabled={!previewDataUrl}
+                    disabled={qrLocked || !previewDataUrl}
                     className={DASH_BTN_SECONDARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
@@ -532,7 +533,7 @@ export function QRCodeManagementPage() {
                     size="sm"
                     variant={item.slug ? "outline" : "default"}
                     onClick={() => item.employeeRow && handleGenerateNew(item.employeeRow)}
-                    disabled={regeneratingId === item.id}
+                    disabled={qrLocked || regeneratingId === item.id}
                     className={item.slug ? DASH_BTN_SECONDARY : DASH_BTN_PRIMARY}
                   >
                     {regeneratingId === item.id ? (
@@ -556,6 +557,7 @@ export function QRCodeManagementPage() {
                         previewDataUrl
                       )
                     }
+                    disabled={qrLocked}
                     className={DASH_BTN_PRIMARY}
                   >
                     <Download className="mr-2 h-4 w-4" />
@@ -576,6 +578,7 @@ export function QRCodeManagementPage() {
                             : `Location: ${item.name}`
                       )
                     }
+                    disabled={qrLocked}
                     className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
@@ -586,7 +589,7 @@ export function QRCodeManagementPage() {
                     size="sm"
                     variant="outline"
                     onClick={() => void handleVenuePrintPdf(item, type, previewDataUrl)}
-                    disabled={!previewDataUrl}
+                    disabled={qrLocked || !previewDataUrl}
                     className={DASH_BTN_SECONDARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
@@ -608,6 +611,8 @@ export function QRCodeManagementPage() {
     verificationStatus === "verified" ||
     user.status === "APPROVED";
 
+  const qrLocked = !canUseQr;
+
   /** Only block the shell while we still expect `fetchBusinessProfile` to set KYC (managers with a business id). */
   const awaitingBusinessVerification =
     !user.impersonation &&
@@ -617,26 +622,6 @@ export function QRCodeManagementPage() {
 
   if (awaitingBusinessVerification) {
     return <CareTipPageLoader message="Loading…" />;
-  }
-
-  if (!canUseQr) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-20 text-foreground">
-        <div className="max-w-lg space-y-4 text-center">
-          <QrCode className="mx-auto h-14 w-14 opacity-40" />
-          <h1 className="text-2xl font-bold">Verification required</h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            QR code generation will be enabled after admin verification.
-          </p>
-          <Button asChild>
-            <Link to="/dashboard">
-              <ChevronLeft className="mr-2 h-4 w-4" />
-              Back to dashboard
-            </Link>
-          </Button>
-        </div>
-      </div>
-    );
   }
 
   const statusLabel =
@@ -663,7 +648,7 @@ export function QRCodeManagementPage() {
           badge={
             <>
               <QrCode className="h-3.5 w-3.5 text-foreground" />
-              Printable &amp; shareable
+              {qrLocked ? "Pending Verification" : "Printable & shareable"}
             </>
           }
           title="QR code management"
@@ -726,7 +711,7 @@ export function QRCodeManagementPage() {
             <Button
               type="button"
               onClick={handleGenerateAllPdf}
-              disabled={bulkPdfLoading || employees.length === 0}
+              disabled={qrLocked || bulkPdfLoading || employees.length === 0}
             >
               {bulkPdfLoading ? <LoadingSpinner size="sm" className="mr-2" /> : <FileDown className="mr-2 h-4 w-4" />}
               Generate all PDF
@@ -734,6 +719,17 @@ export function QRCodeManagementPage() {
           }
         />
       </div>
+
+      {qrLocked ? (
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-sm">
+            <p className="font-semibold text-foreground">Your account is under review.</p>
+            <p className="mt-1 text-muted-foreground">
+              QR features will be available once your account is verified.
+            </p>
+          </div>
+        </div>
+      ) : null}
 
       <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="space-y-6 py-4">
