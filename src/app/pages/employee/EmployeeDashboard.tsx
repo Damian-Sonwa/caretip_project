@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useMemo, useCallback } from "react";
+import type { ElementType } from "react";
 import { Link } from "react-router";
 import { toast } from "sonner";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -41,9 +42,10 @@ import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeMod
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
+import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashPanel, dashStatCard, DASH_ICON_WRAP } from "@/components/ui/dashboard-styles";
+import { dashPanel } from "@/components/ui/dashboard-styles";
 import { EmployeeGoalCard } from "../../components/employee/EmployeeGoalCard";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
@@ -51,6 +53,44 @@ const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(-
 const EMPLOYEE_HERO_HEADLINE = "Your Excellence, Rewarded.";
 const EMPLOYEE_HERO_SUB =
   "Every smile is an opportunity. Your next milestone is just one scan away. Let's make today your best shift yet.";
+
+function StatCard(props: {
+  title: string;
+  value: string;
+  change?: string;
+  icon: ElementType<{ className?: string }>;
+  beam?: boolean;
+  valueSize?: "default" | "lg";
+  pulse?: boolean;
+}) {
+  const Icon = props.icon;
+  const valueClass =
+    props.valueSize === "lg"
+      ? "text-4xl font-bold tabular-nums text-foreground sm:text-5xl"
+      : "text-2xl font-bold tabular-nums text-foreground sm:text-3xl";
+  return (
+    <Card className="relative h-full overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      {props.beam ? <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" /> : null}
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="rounded-lg border border-border bg-muted p-2">
+            <Icon className="h-5 w-5 text-foreground" />
+          </div>
+        </div>
+        <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {props.title}
+        </CardDescription>
+        <motion.div
+          animate={props.pulse ? { scale: [1, 1.06, 1] } : { scale: 1 }}
+          transition={{ duration: 1.2, ease: "easeInOut" }}
+        >
+          <CardTitle className={`${valueClass} ${props.pulse ? "text-primary" : ""}`}>{props.value}</CardTitle>
+        </motion.div>
+        {props.change ? <p className="text-sm leading-snug text-muted-foreground">{props.change}</p> : null}
+      </CardHeader>
+    </Card>
+  );
+}
 
 interface NewTipPayload {
   tip: TipItem;
@@ -413,26 +453,26 @@ export function EmployeeDashboard() {
       </div>
 
       <TracingBeam className="mx-auto max-w-7xl px-4">
-        <div className="mb-3 flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <LiveConnectionBadge status={connectionStatus} />
-        </div>
-        <div className="flex w-full max-w-md gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm">
-          {(["today", "week", "month"] as const).map((period) => (
-            <button
-              key={period}
-              type="button"
-              onClick={() => setTimeframe(period)}
-              className={`flex-1 rounded-md py-2 text-sm font-semibold transition-all ${
-                timeframe === period
-                  ? "bg-primary text-primary-foreground shadow-sm"
-                  : "text-muted-foreground hover:bg-muted"
-              }`}
-            >
-              {period === "today" && "Today"}
-              {period === "week" && "This Week"}
-              {period === "month" && "This Month"}
-            </button>
-          ))}
+          <div className="flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+            {(["today", "week", "month"] as const).map((period) => (
+              <button
+                key={period}
+                type="button"
+                onClick={() => setTimeframe(period)}
+                className={`min-h-11 flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-all sm:flex-initial sm:px-4 sm:text-sm ${
+                  timeframe === period
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {period === "today" && "Today"}
+                {period === "week" && "This Week"}
+                {period === "month" && "This Month"}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="space-y-6 pb-6 pt-6">
@@ -450,92 +490,36 @@ export function EmployeeDashboard() {
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.1 }}
-              className="relative col-span-2 lg:col-span-2"
-            >
-              <Card className={dashStatCard("relative h-full overflow-hidden")}>
-                <CardHeader>
-                  <div className="mb-2 flex items-start justify-between">
-                    <div className={DASH_ICON_WRAP}>
-                      <DollarSign className="h-6 w-6" />
-                    </div>
-                    <span className="text-xs text-muted-foreground">
-                      {timeframe === "today" && "Today"}
-                      {timeframe === "week" && "This Week"}
-                      {timeframe === "month" && "This Month"}
-                    </span>
-                  </div>
-                  <motion.div
-                    animate={pulseEarnings ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-                    transition={{ duration: 1.2, ease: "easeInOut" }}
-                  >
-                    <CardTitle
-                      className={`text-4xl font-bold tabular-nums ${
-                        pulseEarnings ? "text-primary" : "text-foreground"
-                      }`}
-                    >
-                      ${stats.amount.toFixed(2)}
-                    </CardTitle>
-                  </motion.div>
-                  <CardDescription>Total earnings (selected period)</CardDescription>
-                  {filteredTips.length > 0 && (
-                    <div className="mt-2 flex items-center gap-1 text-sm text-foreground">
-                      <TrendingUp className="h-4 w-4 text-primary" />
-                      <span>{filteredTips.length} tips this period</span>
-                    </div>
-                  )}
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <TrendingUp className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold tabular-nums">{stats.tips}</CardTitle>
-                  <CardDescription>Total tips</CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.3 }}>
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <Star className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold tabular-nums">
-                    {stats.rating != null ? stats.rating : "N/A"}
-                  </CardTitle>
-                  <CardDescription>
-                    {stats.rating != null ? "Avg rating" : "No ratings yet"}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-
-            <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.35 }}>
-              <Card className={dashStatCard("h-full")}>
-                <CardHeader>
-                  <div className="mb-2 w-fit rounded-lg border border-border bg-muted p-3">
-                    <Target className="h-6 w-6 text-foreground" />
-                  </div>
-                  <CardTitle className="text-2xl font-bold tabular-nums">
-                    {goalPct != null ? `${goalPct}%` : "N/A"}
-                  </CardTitle>
-                  <CardDescription>
-                    {goalPct != null ? "Monthly goal progress" : "No goal set"}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
-            </motion.div>
-          </div>
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                title={`Total earnings (${timeframe === "today" ? "today" : timeframe === "week" ? "week" : "month"})`}
+                value={`$${stats.amount.toFixed(2)}`}
+                change={
+                  filteredTips.length > 0
+                    ? `${filteredTips.length} tip${filteredTips.length === 1 ? "" : "s"} in this period`
+                    : "No activity yet for this period."
+                }
+                icon={DollarSign}
+                beam
+                valueSize="lg"
+                pulse={pulseEarnings}
+              />
+              <StatCard title="Total tips" value={String(stats.tips)} icon={TrendingUp} />
+              <StatCard
+                title={stats.rating != null ? "Avg rating" : "Ratings"}
+                value={stats.rating != null ? String(stats.rating) : "N/A"}
+                change={stats.rating != null ? undefined : "No ratings yet"}
+                icon={Star}
+              />
+              <StatCard
+                title="Monthly goal"
+                value={goalPct != null ? `${goalPct}%` : "N/A"}
+                change={goalPct != null ? "Progress toward your current target" : "Set a goal in settings to track progress."}
+                icon={Target}
+              />
+            </div>
+          </motion.div>
 
           <motion.div
             initial={{ y: 20, opacity: 0 }}
