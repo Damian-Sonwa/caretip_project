@@ -16,7 +16,8 @@ function getFrontendBaseUrl(): string {
 
 export function buildVerifyEmailUrl(plainToken: string): string {
   const token = String(plainToken ?? "").trim();
-  return `${getFrontendBaseUrl()}/verify?token=${encodeURIComponent(token)}`;
+  /** Must match SPA route that consumes `token` (see `CheckEmailPage` / `VerifyEmailPage`). */
+  return `${getFrontendBaseUrl()}/verify-email?token=${encodeURIComponent(token)}`;
 }
 
 export async function createEmailVerificationToken(userId: string): Promise<{

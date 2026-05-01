@@ -42,6 +42,9 @@ const ERROR_MAP: Record<string, string> = {
   "This account has been disabled.": "This account has been disabled. Contact support if you think this is a mistake.",
   "Email is already verified.": "Your email is already verified. You can sign in.",
   "We sent a new verification link to your email.": "We sent a new verification link. Check your inbox (and spam).",
+  "Verification link is invalid or has expired.": "This link has expired. Request a new one.",
+  "Verification token is required": "This link has expired. Request a new one.",
+  "Email verification required": "Please verify your email using the link we sent you.",
   "Restart the Caretip API after editing .env. JWT_SECRET is only loaded when the backend starts — stop it (Ctrl+C) and run npm run dev again.":
     "Sign-in isn’t working on the server right now. If you manage the app, restart the API after setting JWT_SECRET.",
   // Legacy keys
@@ -87,7 +90,7 @@ const ERROR_MAP: Record<string, string> = {
   "Slug is required": "Please enter a valid link or code.",
   "Employee ID is required": "We’re missing which team member this refers to. Please try again.",
 
-  // QR / verification (public + staff)
+  // QR / KYC (business managers — employees see audience-specific copy in {@link toUserFriendlyMessage})
   "QR code will be available after business verification.":
     "QR codes and public tip links unlock after your venue is verified by CareTip.",
   "QR code generation will be enabled after admin verification.":
@@ -167,6 +170,16 @@ const ERROR_MAP: Record<string, string> = {
   "Aborted": "The request was cancelled. Please try again.",
 };
 
+const EMPLOYEE_QR_BUSINESS_KYC_HINT =
+  "Your account is active. QR management is handled by your business.";
+
+export type FriendlyMessageAudience = "business" | "employee";
+
+export interface ToUserFriendlyMessageOptions {
+  /** When set to `employee`, business-KYC / manager QR lock messages are rewritten for staff context. */
+  audience?: FriendlyMessageAudience;
+}
+
 /** HTTP status → user message when the response body has no `message` field */
 const STATUS_MESSAGES: Record<number, string> = {
   400: "That request wasn’t valid. Check your details and try again.",
@@ -193,7 +206,7 @@ export function fallbackMessageForHttpStatus(status: number): string | undefined
 /**
  * Converts any error (API, fetch, thrown) into a user-friendly message.
  */
-export function toUserFriendlyMessage(error: unknown): string {
+export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMessageOptions): string {
   if (error == null) return GENERIC_UNKNOWN_ERROR;
 
   if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
@@ -204,6 +217,18 @@ export function toUserFriendlyMessage(error: unknown): string {
 
   const normalized = message.trim();
   if (!normalized) return GENERIC_UNKNOWN_ERROR;
+
+  if (options?.audience === "employee") {
+    const lower = normalized.toLowerCase();
+    if (
+      lower.includes("qr code will be available after business verification") ||
+      lower.includes("qr code generation will be enabled after admin verification") ||
+      lower.includes("unlock after your venue is verified") ||
+      lower.includes("after your venue is verified by caretip")
+    ) {
+      return EMPLOYEE_QR_BUSINESS_KYC_HINT;
+    }
+  }
 
   const mapped = ERROR_MAP[normalized];
   if (mapped) return mapped;

@@ -1,19 +1,96 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams, useLocation } from "react-router";
 import { Mail, Copy, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import { useAuth, getPostAuthRedirect } from "@/app/hooks/useAuth";
 import { resolveInboxOpenTarget } from "@/app/lib/inboxDeepLink";
-import { resendVerificationEmailAPI, resendVerificationEmailSessionAPI } from "@/app/lib/api";
+import {
+  resendVerificationEmailAPI,
+  resendVerificationEmailSessionAPI,
+  verifyEmailWithToken,
+} from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
 
 /**
+ * One-shot: call the verify-email API for this token, then redirect into the app or show success.
+ * Token is stripped from the URL on failure so a refresh does not re-hit a consumed token (HTTP 400).
+ */
+function VerifyEmailFromToken({ token }: { token: string }) {
+  const navigate = useNavigate();
+  const { refreshSession } = useAuth();
+  const [phase, setPhase] = useState<"verifying" | "success">("verifying");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await verifyEmailWithToken(token);
+        if (cancelled) return;
+        const hasSession =
+          typeof localStorage !== "undefined" && !!localStorage.getItem("caretip_token");
+        if (hasSession) {
+          const refreshed = await refreshSession();
+          if (cancelled) return;
+          if (refreshed) {
+            navigate(getPostAuthRedirect(refreshed), { replace: true });
+            return;
+          }
+        }
+        setPhase("success");
+      } catch (e) {
+        if (cancelled) return;
+        const msg = toUserFriendlyMessage(e);
+        navigate("/verify-email", { replace: true, state: { verifyError: msg } });
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [token, navigate, refreshSession]);
+
+  if (phase === "success") {
+    return (
+      <AuthRecoveryLayout showFooterLink={false}>
+        <div className="space-y-4 text-center">
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Email verified</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">Thanks. You can sign in to continue.</p>
+          <Link
+            to="/login"
+            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+          >
+            Continue to sign in
+          </Link>
+        </div>
+      </AuthRecoveryLayout>
+    );
+  }
+
+  return (
+    <AuthRecoveryLayout showFooterLink={false}>
+      <div className="space-y-3 text-center">
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Verifying your email…</h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">This will only take a moment.</p>
+      </div>
+    </AuthRecoveryLayout>
+  );
+}
+
+/**
  * Shown after password sign-up (and if an unverified session hits a protected route).
- * Users should not use the dashboard until they verify via the link in their inbox.
+ * With `?token=` from the email link, completes verification once then redirects.
  */
 export function CheckEmailPage() {
+  const [searchParams] = useSearchParams();
+  const location = useLocation();
+  const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
+  const verifyErrorBanner = (location.state as { verifyError?: string } | null)?.verifyError;
+
+  if (tokenFromUrl) {
+    return <VerifyEmailFromToken token={tokenFromUrl} />;
+  }
+
   const { user, logout, refreshSession } = useAuth();
   const navigate = useNavigate();
   const [resendBusy, setResendBusy] = useState(false);
@@ -81,6 +158,14 @@ export function CheckEmailPage() {
   return (
     <AuthRecoveryLayout showFooterLink={false}>
       <div className="space-y-4 text-center">
+        {verifyErrorBanner ? (
+          <div
+            role="alert"
+            className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-left text-sm text-red-900 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-100"
+          >
+            {verifyErrorBanner}
+          </div>
+        ) : null}
         <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
           Check your email to verify your account
         </h1>

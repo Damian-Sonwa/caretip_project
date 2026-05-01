@@ -361,13 +361,27 @@ export async function activateEmployeeWithToken(
   });
 }
 
+/** Deduplicate in-flight verification for the same token (React StrictMode / effect retries / double navigation). */
+const verifyEmailInFlight = new Map<string, Promise<{ ok: true; message: string }>>();
+
 export async function verifyEmailWithToken(token: string): Promise<{ ok: true; message: string }> {
-  const sp = new URLSearchParams({ token });
-  return apiRequest<{ ok: true; message: string }>(apiPath(`/api/auth/verify-email?${sp.toString()}`), {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  });
+  const key = String(token ?? "").trim();
+  if (!key) {
+    return Promise.reject(new Error("Verification link is invalid or has expired."));
+  }
+  let p = verifyEmailInFlight.get(key);
+  if (!p) {
+    const sp = new URLSearchParams({ token: key });
+    p = apiRequest<{ ok: true; message: string }>(apiPath(`/api/auth/verify-email?${sp.toString()}`), {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+    }).finally(() => {
+      verifyEmailInFlight.delete(key);
+    });
+    verifyEmailInFlight.set(key, p);
+  }
+  return p;
 }
 
 export async function oauthAPI(payload: {

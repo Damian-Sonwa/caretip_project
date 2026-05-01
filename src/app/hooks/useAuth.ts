@@ -51,7 +51,7 @@ export interface User {
   role: UserRole;
   /**
    * Mirrors backend `users.email_verified`. When false, app routes stay off dashboards until verified.
-   * Older saved sessions without this field are treated as verified in {@link parseUser}.
+   * Must match the server; missing fields are treated as unverified for staff/manager roles (see {@link parseUser}).
    */
   emailVerified?: boolean;
   /** Preferred alias for UI logic. Always set from `emailVerified`. */
@@ -110,8 +110,11 @@ function parseUser(data: AuthResponse["user"]): User {
   };
   const role = mapApiRoleToUserRole(data.role);
   const kyc = data.businessVerificationStatus;
+  /** Only verified when the API sends `true`. Missing/false keeps users on the verify-email gate until refresh matches the DB. */
   const emailVerified =
-    typeof ext.emailVerified === "boolean" ? ext.emailVerified : true;
+    typeof ext.emailVerified === "boolean"
+      ? ext.emailVerified
+      : role === "platform_admin" || role === "admin";
   const isVerified = emailVerified;
   const hasCompletedOnboarding =
     role === "business" ? (typeof ext.hasCompletedOnboarding === "boolean" ? ext.hasCompletedOnboarding : false) : true;

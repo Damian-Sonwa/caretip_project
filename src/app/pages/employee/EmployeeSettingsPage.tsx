@@ -102,7 +102,7 @@ export function EmployeeSettingsPage() {
       toast.success("Profile saved.", { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("EmployeeSettingsPage", e);
-      toast.error(toUserFriendlyMessage(e));
+      toast.error(toUserFriendlyMessage(e, { audience: "employee" }));
     } finally {
       setSaving(false);
     }
@@ -123,7 +123,7 @@ export function EmployeeSettingsPage() {
       toast.success("Photo updated.", { style: { background: TEAL, color: "#fff" } });
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
-      toast.error(toUserFriendlyMessage(err));
+      toast.error(toUserFriendlyMessage(err, { audience: "employee" }));
     } finally {
       setUploading(false);
     }
@@ -141,7 +141,7 @@ export function EmployeeSettingsPage() {
       toast.success("Password updated.", { style: { background: TEAL, color: "#fff" } });
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
-      toast.error(toUserFriendlyMessage(err));
+      toast.error(toUserFriendlyMessage(err, { audience: "employee" }));
     }
   };
 

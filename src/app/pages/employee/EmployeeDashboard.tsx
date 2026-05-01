@@ -169,7 +169,7 @@ export function EmployeeDashboard() {
         setGoalProgress(data.goal ?? null);
       } else {
         const err = tipsResult.reason;
-        setError(toUserFriendlyMessage(err));
+        setError(toUserFriendlyMessage(err, { audience: "employee" }));
         setTips([]);
         setMonthlyGoal(null);
         setCurrentMonthTotal(0);
@@ -338,7 +338,7 @@ export function EmployeeDashboard() {
         }
       } catch (e) {
         logClientError("EmployeeDashboard", e);
-        toast.error(toUserFriendlyMessage(e));
+        toast.error(toUserFriendlyMessage(e, { audience: "employee" }));
       } finally {
         setGeneratingSlug(false);
       }
