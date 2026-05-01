@@ -29,7 +29,7 @@ export function SimpleSetupSection() {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] bg-white px-6 py-24 dark:bg-neutral-950"
+      className="scroll-mt-[80px] bg-white px-4 py-24 sm:px-6 dark:bg-neutral-950"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
@@ -120,7 +120,7 @@ export function SimpleSetupSection() {
             className="relative order-1 mx-auto w-full max-w-2xl lg:order-2"
             whileHover={{ y: -4 }}
           >
-            <div className="relative w-full overflow-visible px-1 pb-2 sm:px-0">
+            <div className="relative w-full overflow-visible px-0 pb-2 sm:px-0">
               <LiveInMinutesLaptopDemo videoSrc={import.meta.env.VITE_LIVE_IN_MINUTES_DEMO_VIDEO} />
 
               <div className="pointer-events-none absolute -right-1 top-2 z-10 hidden sm:block lg:right-0">

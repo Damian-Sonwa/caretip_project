@@ -7,7 +7,7 @@ export function EmployeeLandingSection() {
   return (
     <section
       id="for-employees"
-      className="scroll-mt-[80px] bg-gray-50 px-6 py-20 md:py-28 dark:bg-neutral-900"
+      className="scroll-mt-[80px] bg-gray-50 px-4 py-20 sm:px-6 md:py-28 dark:bg-neutral-900"
     >
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
         <motion.div
@@ -15,11 +15,11 @@ export function EmployeeLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative order-2 flex w-full min-h-0 flex-col items-center justify-center lg:order-1"
+          className="relative order-1 flex w-full min-h-0 flex-col items-center justify-center lg:order-1"
           whileHover={{ y: -5 }}
         >
           <div className="flex w-full min-h-0 items-center justify-center">
-            <div className="mx-auto mt-10 w-full max-w-md overflow-hidden rounded-3xl border border-gray-200 bg-white md:mt-0 lg:max-w-2xl dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="mx-auto mt-6 w-full max-w-none overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm sm:mt-10 lg:max-w-2xl dark:border-neutral-800 dark:bg-neutral-900">
               <img
                 src={newEmployeeImg}
                 alt="CareTip employee dashboard showing daily earnings, ratings, and goals"
@@ -36,7 +36,7 @@ export function EmployeeLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="order-1 space-y-6 lg:order-2"
+          className="order-2 space-y-6 lg:order-2"
         >
           <div className="space-y-3">
             <span className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">

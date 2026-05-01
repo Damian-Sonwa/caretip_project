@@ -35,7 +35,7 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
   const active = slides[reduceMotion ? 0 : index];
 
   return (
-    <div className="relative mx-auto w-full max-w-2xl">
+    <div className="relative mx-auto w-full max-w-none sm:max-w-2xl">
       {/* Laptop shell */}
       <div className="relative rounded-[1.35rem] border border-gray-200 bg-gradient-to-b from-neutral-100 to-neutral-200 p-2 pt-3 shadow-[0_18px_50px_rgba(0,0,0,0.08)] dark:border-neutral-700 dark:from-neutral-800 dark:to-neutral-900 sm:p-2.5 sm:pt-3.5">
         {/* Camera notch */}
