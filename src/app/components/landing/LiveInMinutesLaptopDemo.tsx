@@ -201,49 +201,25 @@ function DemoQr() {
 
 function DemoDashboard() {
   return (
-    <div className="flex h-full min-h-0 flex-col rounded-lg bg-white p-2 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
-      <div className="flex shrink-0 items-start justify-between gap-2">
+    <div className="flex h-full flex-col rounded-lg bg-white p-3 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[11px] font-bold leading-tight text-neutral-900 dark:text-neutral-100 sm:text-xs">
-            Today
-          </p>
-          <p className="text-[8px] text-neutral-500 dark:text-neutral-400 sm:text-[9px]">Tips & activity</p>
+          <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">Today</p>
+          <p className="text-[9px] text-neutral-500 dark:text-neutral-400">Tips & activity</p>
         </div>
-        <BarChart3 className="h-3.5 w-3.5 shrink-0 text-primary sm:h-4 sm:w-4" />
+        <BarChart3 className="h-4 w-4 text-primary" />
       </div>
-      <div className="mt-1.5 grid shrink-0 grid-cols-2 gap-1.5 sm:mt-2 sm:gap-2">
-        <div className="rounded-md border border-neutral-100 bg-gradient-to-br from-primary/10 to-transparent p-1.5 dark:border-neutral-800 sm:p-2">
-          <p className="text-[7px] font-medium text-neutral-500 dark:text-neutral-400 sm:text-[8px]">Tips received</p>
-          <p className="text-base font-bold tabular-nums leading-tight text-neutral-900 dark:text-neutral-100 sm:text-lg">
-            €284
-          </p>
-          <p className="text-[7px] text-emerald-600 dark:text-emerald-400 sm:text-[8px]">+12% vs yesterday</p>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <div className="rounded-md border border-neutral-100 bg-gradient-to-br from-primary/10 to-transparent p-2 dark:border-neutral-800">
+          <p className="text-[8px] font-medium text-neutral-500 dark:text-neutral-400">Tips received</p>
+          <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">€284</p>
+          <p className="text-[8px] text-emerald-600 dark:text-emerald-400">+12% vs yesterday</p>
         </div>
-        <div className="rounded-md border border-neutral-100 bg-neutral-50 p-1.5 dark:border-neutral-800 dark:bg-neutral-800/40 sm:p-2">
-          <p className="text-[7px] font-medium text-neutral-500 dark:text-neutral-400 sm:text-[8px]">Scans</p>
-          <p className="text-base font-bold tabular-nums leading-tight text-neutral-900 dark:text-neutral-100 sm:text-lg">
-            48
-          </p>
+        <div className="rounded-md border border-neutral-100 bg-neutral-50 p-2 dark:border-neutral-800 dark:bg-neutral-800/40">
+          <p className="text-[8px] font-medium text-neutral-500 dark:text-neutral-400">Scans</p>
+          <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">48</p>
         </div>
       </div>
-      {/* Bar chart overflows the mini laptop below md; compact copy replaces it on small screens */}
-      <div className="mt-2 hidden min-h-0 flex-1 flex-col justify-end md:flex">
-        <p className="mb-1 text-[8px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-          Activity
-        </p>
-        <div className="flex h-12 min-h-0 items-end gap-1 rounded-md border border-neutral-100 bg-neutral-50/80 px-1.5 pb-1.5 sm:h-14 sm:gap-1.5 sm:px-2 sm:pb-2 dark:border-neutral-800 dark:bg-neutral-800/40">
-          {[22, 34, 18, 40, 24, 44, 28].map((px, i) => (
-            <div
-              key={i}
-              className="min-w-0 flex-1 rounded-sm bg-gradient-to-t from-primary to-primary/70"
-              style={{ height: `${px}px` }}
-            />
-          ))}
-        </div>
-      </div>
-      <p className="mt-2 shrink-0 text-[8px] leading-snug text-neutral-500 dark:text-neutral-400 md:hidden">
-        Activity up vs last shift — steady evening flow.
-      </p>
     </div>
   );
 }

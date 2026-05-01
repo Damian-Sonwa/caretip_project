@@ -121,7 +121,7 @@ export function FeatureShowcase({
       id={id}
       className={cn(
         cinematic
-          ? "relative w-full overflow-x-hidden bg-white text-gray-900 pt-20 sm:pt-24"
+          ? "relative w-full overflow-hidden bg-white text-gray-900 pt-20 sm:pt-24"
           : "w-full bg-transparent text-foreground pt-20 sm:pt-24",
         id && "scroll-mt-[80px]",
         className,
@@ -254,18 +254,11 @@ export function FeatureShowcase({
       ) : (
         <div
           className={cn(
-            "mx-auto grid w-full max-w-7xl grid-cols-1 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14",
-            cinematic
-              ? "relative z-[1] max-md:grid max-md:gap-y-10 max-md:px-0 max-md:pb-20 max-md:pt-10 md:gap-10 md:px-6 md:pb-32 md:pt-20 lg:gap-14"
-              : "gap-10 px-6 pt-16 pb-24 md:pt-20 md:pb-32 lg:gap-14",
+            "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14",
+            cinematic && "relative z-[1]",
           )}
         >
-        <div
-          className={cn(
-            "relative md:col-span-5",
-            cinematic && "order-2 max-md:px-4 max-md:pt-2 md:order-1 md:px-0 md:pt-6",
-          )}
-        >
+        <div className={cn("relative md:col-span-5", cinematic && "md:pt-6")}>
             <Badge
               variant="outline"
               className={cn(
@@ -341,12 +334,7 @@ export function FeatureShowcase({
             </div>
           </div>
 
-        <div
-          className={cn(
-            "relative flex min-h-0 items-center justify-center md:col-span-7",
-            cinematic && "order-1 max-md:w-full md:order-2 md:justify-end",
-          )}
-        >
+        <div className={cn("relative min-h-0 md:col-span-7 flex items-center justify-center", cinematic && "md:justify-end")}>
             {heroBorderBeam ? (
             <div className="relative inline-block">
               <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
@@ -389,21 +377,21 @@ export function FeatureShowcase({
                 </LandingImageFrame>
               ) : singleHeroImage ? (
                 cinematic ? (
-                  <div className="relative w-full max-w-[720px] max-md:left-1/2 max-md:max-w-none max-md:w-screen max-md:-translate-x-1/2 md:left-auto md:translate-x-0">
+                  <div className="relative w-full max-w-[720px]">
                     {/* Very subtle brand warmth behind device (stays behind frame + shadow). */}
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[44%] z-0 h-[min(280px,52vw)] w-[min(420px,88%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(235,153,44,0.08)] blur-3xl max-md:h-[min(200px,45vw)] max-md:w-[min(320px,92vw)]"
+                      className="pointer-events-none absolute left-1/2 top-[44%] z-0 h-[min(280px,52vw)] w-[min(420px,88%)] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[rgba(235,153,44,0.08)] blur-3xl"
                     />
-                    {/* "Phone" stage — shadow spec: 0 10px 30px rgba(0,0,0,0.06); mobile: full-bleed width + tall viewport presence */}
+                    {/* "Phone" stage — shadow spec: 0 10px 30px rgba(0,0,0,0.06) */}
                     <div
-                      className="relative z-[1] mx-auto w-full overflow-hidden rounded-3xl border border-black/[0.10] bg-white max-md:aspect-[9/17] max-md:max-h-[58dvh] max-md:w-full max-md:max-w-none max-md:rounded-2xl max-md:min-h-[40dvh] md:aspect-auto md:max-h-none md:min-h-0 md:w-[min(520px,92%)] md:rounded-[44px]"
+                      className="relative z-[1] mx-auto w-[min(520px,92%)] overflow-hidden rounded-[44px] border border-black/[0.10] bg-white"
                       style={{ boxShadow: "0 10px 30px rgba(0, 0, 0, 0.06)" }}
                     >
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
-                        className="block w-full object-cover object-[50%_12%] max-md:h-full md:h-auto md:object-[50%_50%]"
+                        className="block h-auto w-full object-cover"
                         loading="eager"
                         decoding="async"
                       />

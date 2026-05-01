@@ -1,5 +1,7 @@
 import { motion } from "motion/react";
 import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucide-react";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
+import { BorderBeam } from "@/components/ui/border-beam";
 
 const items = [
   { icon: QrCode, title: "QR tipping pages", text: "Branded pages guests open in one scan." },
@@ -34,7 +36,7 @@ export function LandingFeaturesSection() {
           </motion.p>
         </div>
 
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, idx) => {
             const Icon = item.icon;
             return (
@@ -44,13 +46,24 @@ export function LandingFeaturesSection() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.45, delay: idx * 0.05 }}
-                className="group rounded-2xl border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.04)] transition-shadow hover:shadow-[0_14px_40px_rgba(0,0,0,0.06)] dark:border-neutral-800 dark:bg-neutral-900"
+                className="h-full"
               >
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{item.title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{item.text}</p>
+                <Card className="relative h-full overflow-hidden border-2 border-border bg-card text-card-foreground shadow-sm transition-shadow hover:shadow-md">
+                  {idx === 0 ? (
+                    <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />
+                  ) : null}
+                  <CardHeader className="relative z-[1] pb-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="rounded-lg border border-border bg-muted p-2">
+                        <Icon className="h-5 w-5 text-foreground" />
+                      </div>
+                    </div>
+                    <CardTitle className="text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl">
+                      {item.title}
+                    </CardTitle>
+                    <p className="text-sm leading-relaxed text-muted-foreground">{item.text}</p>
+                  </CardHeader>
+                </Card>
               </motion.div>
             );
           })}
