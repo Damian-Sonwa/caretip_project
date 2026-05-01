@@ -9,6 +9,7 @@ import {
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
+  fetchAuthedObjectUrl,
   type PlatformBusinessRow,
   type PlatformVerificationAction,
 } from "../../lib/api";
@@ -226,24 +227,36 @@ export function BusinessDetailPage() {
 
                 <div className="flex flex-wrap gap-2">
                   {row.logoPath ? (
-                    <a
-                      href={row.logoPath}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const objUrl = await fetchAuthedObjectUrl(row.logoPath);
+                          window.open(objUrl, "_blank", "noopener,noreferrer");
+                        } catch (err) {
+                          toast.error(toUserFriendlyMessage(err));
+                        }
+                      }}
                       className="text-sm text-accent hover:underline"
                     >
                       Open logo
-                    </a>
+                    </button>
                   ) : null}
                   {row.verificationDocumentPath ? (
-                    <a
-                      href={row.verificationDocumentPath}
-                      target="_blank"
-                      rel="noreferrer"
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const objUrl = await fetchAuthedObjectUrl(row.verificationDocumentPath);
+                          window.open(objUrl, "_blank", "noopener,noreferrer");
+                        } catch (err) {
+                          toast.error(toUserFriendlyMessage(err));
+                        }
+                      }}
                       className="text-sm text-accent hover:underline"
                     >
                       Open KYC document
-                    </a>
+                    </button>
                   ) : null}
                 </div>
 

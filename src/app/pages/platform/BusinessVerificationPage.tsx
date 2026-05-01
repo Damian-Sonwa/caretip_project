@@ -9,6 +9,7 @@ import {
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
+  fetchAuthedObjectUrl,
   type PlatformBusinessRow,
   type PlatformVerificationAction,
 } from "../../lib/api";
@@ -266,26 +267,38 @@ export function BusinessVerificationPage() {
                           </td>
                           <td className="px-4 py-3 text-xs space-y-1">
                             {b.logoPath ? (
-                              <a
-                                href={b.logoPath}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-accent hover:underline block"
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    const objUrl = await fetchAuthedObjectUrl(b.logoPath);
+                                    window.open(objUrl, "_blank", "noopener,noreferrer");
+                                  } catch (err) {
+                                    toast.error(toUserFriendlyMessage(err));
+                                  }
+                                }}
+                                className="text-accent hover:underline block text-left"
                               >
                                 Logo
-                              </a>
+                              </button>
                             ) : (
                               <span className="text-muted-foreground">None</span>
                             )}
                             {b.verificationDocumentPath ? (
-                              <a
-                                href={b.verificationDocumentPath}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-accent hover:underline block"
+                              <button
+                                type="button"
+                                onClick={async () => {
+                                  try {
+                                    const objUrl = await fetchAuthedObjectUrl(b.verificationDocumentPath);
+                                    window.open(objUrl, "_blank", "noopener,noreferrer");
+                                  } catch (err) {
+                                    toast.error(toUserFriendlyMessage(err));
+                                  }
+                                }}
+                                className="text-accent hover:underline block text-left"
                               >
                                 KYC doc
-                              </a>
+                              </button>
                             ) : null}
                           </td>
                           <td className="px-4 py-3 text-right">

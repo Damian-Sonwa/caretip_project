@@ -196,6 +196,34 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   return handleRes<T>(res);
 }
 
+/** Fetch a protected file (PDF/image) with Bearer auth and return an object URL. */
+export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
+  const url = apiPath(inputUrl);
+  const token = getToken();
+  const headers = token ? ({ Authorization: `Bearer ${token}` } as Record<string, string>) : {};
+  let res = await fetch(url, { method: "GET", headers, credentials: "include" });
+
+  if (res.status === 401 && token) {
+    const { token: nextToken } = await refreshAccessToken();
+    if (nextToken) {
+      res = await fetch(url, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${nextToken}` },
+        credentials: "include",
+      });
+    }
+  }
+
+  if (!res.ok) {
+    // Reuse error formatting for consistent messages.
+    await handleRes(res);
+    throw new Error("Failed to fetch file");
+  }
+
+  const blob = await res.blob();
+  return URL.createObjectURL(blob);
+}
+
 // Auth
 export interface AuthResponse {
   token: string;
