@@ -15,7 +15,8 @@
     "lint:fix": "eslint . --fix --report-unused-disable-directives",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\" \"*.{ts,json}\" \"vite.config.ts\"",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:with-server": "node scripts/playwright-with-server.mjs"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
