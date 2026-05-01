@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Navigation } from './Navigation';
 import { Footer } from './Footer';
+import { AppLoader } from './AppLoader';
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type UserRole } from '../hooks/useAuth';
@@ -71,7 +72,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth } = useAuth();
+  const { login, register, loginWithOAuth, user, authHydrated } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -89,6 +90,11 @@ export function AuthPage() {
   useEffect(() => {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
+
+  useEffect(() => {
+    if (!authHydrated || !user) return;
+    navigate(getPostAuthRedirect(user), { replace: true });
+  }, [authHydrated, user, navigate]);
 
   useEffect(() => {
     // Update role from query params when the search string changes
@@ -308,6 +314,20 @@ export function AuthPage() {
       !isPasswordStrong(password) ||
       password !== confirmPassword ||
       (role === 'employee' && (!name || !inviteCode)));
+
+  if (!authHydrated) {
+    return (
+      <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
+        <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
+          <Navigation />
+          <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
+            <AppLoader message="Setting things up for you..." />
+          </div>
+          <Footer />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">

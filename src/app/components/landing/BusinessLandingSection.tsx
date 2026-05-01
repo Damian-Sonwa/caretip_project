@@ -7,15 +7,15 @@ export function BusinessLandingSection() {
   return (
     <section
       id="business-section"
-      className="scroll-mt-[80px] bg-white px-6 py-20 md:py-28 dark:bg-neutral-950"
+      className="scroll-mt-[80px] bg-white px-2 py-20 max-md:overflow-x-hidden md:px-6 md:py-28 dark:bg-neutral-950"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 max-md:gap-y-10 lg:grid-cols-2 lg:gap-16">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="space-y-6"
+          className="order-2 space-y-6 max-md:px-2 max-md:pt-2 md:order-1 md:px-0 md:pt-0"
         >
           <div className="space-y-4">
             <span className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
@@ -84,14 +84,14 @@ export function BusinessLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative flex w-full min-h-0 flex-col items-center justify-center"
+          className="relative order-1 flex w-full min-h-0 flex-col items-center justify-center max-md:-mx-2 max-md:w-[calc(100%+1rem)] md:order-2 md:mx-0 md:w-full"
           whileHover={{ y: -5 }}
         >
           <div className="flex w-full min-h-0 items-center justify-center">
             <img
               src={businessSectionImg}
               alt="CareTip business dashboard on a laptop showing team visibility and analytics"
-              className="mx-auto mt-10 h-auto w-full max-w-md object-contain md:mt-0 lg:max-w-2xl"
+              className="mx-auto h-auto w-full max-w-none object-contain max-md:mt-4 max-md:min-h-[min(42dvh,380px)] max-md:max-w-none md:mt-0 md:max-w-md lg:max-w-2xl"
               loading="lazy"
               decoding="async"
             />

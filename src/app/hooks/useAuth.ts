@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
 import {
   registerAPI,
@@ -155,17 +155,15 @@ export function getPostAuthRedirect(u: User): string {
 export function useAuth() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
-  const [isLoadingUser, setIsLoadingUser] = useState(() => {
-    try {
-      return typeof localStorage !== "undefined" && !!localStorage.getItem("caretip_token");
-    } catch {
-      return false;
-    }
-  });
+  /** False until the first session resolution pass finishes (no token path or refresh attempt). Route guards must wait on this, not on `user === null` alone. */
+  const [authHydrated, setAuthHydrated] = useState(false);
+  /** Bumped after successful credential-bearing mutations so an in-flight initial `refreshSession` cannot overwrite a newer session. */
+  const sessionEpochRef = useRef(0);
 
   useEffect(() => {
     const onStorageSync = () => {
       setUser(loadUserFromStorage());
+      setAuthHydrated(true);
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
@@ -174,18 +172,20 @@ export function useAuth() {
   useEffect(() => {
     let cancelled = false;
     const run = async () => {
+      const epochAtStart = sessionEpochRef.current;
       try {
         if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")) {
-          await refreshSessionAPI().then((data) => {
-            const u = persistAuthResponse(data);
-            if (!cancelled) setUser(u);
-          });
+          const data = await refreshSessionAPI();
+          if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+          const u = persistAuthResponse(data);
+          if (!cancelled) setUser(u);
         }
       } catch (err) {
         // If the backend is temporarily unavailable (503), don't spam logs or disrupt the session.
         const msg = err instanceof Error ? err.message : "";
         const lower = msg.toLowerCase();
         if (lower.includes("invalid or expired token") || lower.includes("authentication required")) {
+          if (cancelled || sessionEpochRef.current !== epochAtStart) return;
           try {
             localStorage.removeItem("caretip_user");
             localStorage.removeItem("caretip_token");
@@ -199,7 +199,7 @@ export function useAuth() {
           logClientError("useAuth.initialRefresh", err);
         }
       } finally {
-        if (!cancelled) setIsLoadingUser(false);
+        if (!cancelled) setAuthHydrated(true);
       }
     };
     void run();
@@ -209,13 +209,14 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
+    if (!authHydrated) return;
     if (user) {
       localStorage.setItem("caretip_user", JSON.stringify(user));
     } else {
       localStorage.removeItem("caretip_user");
       localStorage.removeItem("caretip_token");
     }
-  }, [user]);
+  }, [user, authHydrated]);
 
   const login = useCallback(async (
     email: string,
@@ -224,14 +225,18 @@ export function useAuth() {
   ): Promise<User> => {
     const data = await loginAPI(email, password, intendedRole);
     const u = persistAuthResponse(data);
+    sessionEpochRef.current += 1;
     setUser(u);
+    setAuthHydrated(true);
     return u;
   }, []);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<User> => {
     const data = await registerAPI(payload);
     const u = persistAuthResponse(data);
+    sessionEpochRef.current += 1;
     setUser(u);
+    setAuthHydrated(true);
     return u;
   }, []);
 
@@ -260,12 +265,15 @@ export function useAuth() {
       inviteCode: options.inviteCode,
     });
     const u = persistAuthResponse(data);
+    sessionEpochRef.current += 1;
     setUser(u);
+    setAuthHydrated(true);
     return u;
   }, []);
 
   const logout = useCallback(() => {
     void logoutAPI();
+    sessionEpochRef.current += 1;
     localStorage.removeItem("caretip_user");
     localStorage.removeItem("caretip_token");
     sessionStorage.removeItem("caretip_admin_token_backup");
@@ -293,6 +301,7 @@ export function useAuth() {
     localStorage.setItem("caretip_token", backupToken);
     const restored = JSON.parse(backupUser) as User;
     localStorage.setItem("caretip_user", JSON.stringify(restored));
+    sessionEpochRef.current += 1;
     setUser(restored);
     notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
@@ -309,6 +318,7 @@ export function useAuth() {
     try {
       const data = await patchMyOnboardingStatus(next);
       const u = persistAuthResponse(data);
+      sessionEpochRef.current += 1;
       setUser(u);
       return u;
     } catch (err) {
@@ -319,7 +329,9 @@ export function useAuth() {
 
   const replaceUser = useCallback((next: User) => {
     localStorage.setItem("caretip_user", JSON.stringify(next));
+    sessionEpochRef.current += 1;
     setUser(next);
+    setAuthHydrated(true);
     notifyAuthStorageSync();
   }, []);
 
@@ -338,9 +350,21 @@ export function useAuth() {
   /** Re-fetch the current session from the server (same as refreshSession). */
   const refetchUser = refreshSession;
 
+  const authState = useMemo(
+    () => ({
+      user,
+      isAuthenticated: !!user,
+      isLoading: !authHydrated,
+    }),
+    [user, authHydrated],
+  );
+
   return {
     user,
-    isLoadingUser,
+    /** @deprecated Prefer `authState.isLoading` or `!authHydrated`. */
+    isLoadingUser: !authHydrated,
+    authHydrated,
+    authState,
     isBusiness,
     isEmployee,
     isPlatformAdmin,

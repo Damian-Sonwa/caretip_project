@@ -17,7 +17,6 @@ import {
   ArrowRight,
   LayoutGrid,
 } from "lucide-react";
-import QRCode from "qrcode";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
@@ -36,6 +35,7 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import {
   renderBrandedQRToDataUrl,
+  renderBrandedQrUrlToDataUrl,
   downloadBrandedQR,
   downloadQrDataUrlPng,
   printQrDataUrl,
@@ -61,9 +61,6 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
-
-/** Dark modules for scannable QR */
-const QR_MODULE_DARK = "#000000";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -188,12 +185,7 @@ export function QRCodeManagementPage() {
       for (const loc of venueLocations) {
         const url = qrLocationUrl(loc.id);
         try {
-          next[`loc-${loc.id}`] = await QRCode.toDataURL(url, {
-            width: 256,
-            margin: 2,
-            color: { dark: QR_MODULE_DARK, light: "#ffffff" },
-            errorCorrectionLevel: "M",
-          });
+          next[`loc-${loc.id}`] = await renderBrandedQrUrlToDataUrl(url);
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[`loc-${loc.id}`] = "";
@@ -202,12 +194,7 @@ export function QRCodeManagementPage() {
       for (const t of venueTables) {
         const url = qrTableUrl(t.id);
         try {
-          next[`tbl-${t.id}`] = await QRCode.toDataURL(url, {
-            width: 256,
-            margin: 2,
-            color: { dark: QR_MODULE_DARK, light: "#ffffff" },
-            errorCorrectionLevel: "M",
-          });
+          next[`tbl-${t.id}`] = await renderBrandedQrUrlToDataUrl(url);
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[`tbl-${t.id}`] = "";
@@ -229,12 +216,7 @@ export function QRCodeManagementPage() {
         ? businessDirectoryUrl(businessSlug)
         : qrLandingUrl(user.businessId);
       try {
-        const sf = await QRCode.toDataURL(storeUrl, {
-          width: 256,
-          margin: 2,
-          color: { dark: QR_MODULE_DARK, light: "#ffffff" },
-          errorCorrectionLevel: "M",
-        });
+        const sf = await renderBrandedQrUrlToDataUrl(storeUrl);
         if (!cancelled) setStorefrontQr(sf);
       } catch (err) {
         logClientError("QRCodeManagementPage", err);
@@ -329,12 +311,7 @@ export function QRCodeManagementPage() {
     if (previewDataUrl) return previewDataUrl;
     if (!item.qrUrl) return null;
     try {
-      return await QRCode.toDataURL(item.qrUrl, {
-        width: 256,
-        margin: 2,
-        color: { dark: QR_MODULE_DARK, light: "#ffffff" },
-        errorCorrectionLevel: "M",
-      });
+      return await renderBrandedQrUrlToDataUrl(item.qrUrl);
     } catch (err) {
       logClientError("QRCodeManagementPage.buildVenueQr", err);
       return null;
@@ -554,7 +531,7 @@ export function QRCodeManagementPage() {
     >
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="flex-shrink-0">
-          <div className="flex h-36 w-36 items-center justify-center rounded-lg border border-black/[0.10] bg-white p-2">
+          <div className="flex h-44 w-44 shrink-0 items-center justify-center rounded-lg border border-black/[0.10] bg-white p-1.5">
             {previewDataUrl ? (
               <img src={previewDataUrl} alt="" className="h-full w-full object-contain" />
             ) : (
@@ -947,7 +924,7 @@ export function QRCodeManagementPage() {
                     Staff tags
                   </h2>
                   <p className="mb-3 text-xs text-muted-foreground">
-                    Individual QR codes for each team member. Uses your staff profile link (CareTip Limited branded).
+                    Individual QR codes for each team member — same branded style as storefront, tables, and locations.
                   </p>
                   {employees.length === 0 ? (
                     <div className="rounded-xl border-2 border-border bg-card py-12 text-center">

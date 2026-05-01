@@ -77,10 +77,10 @@ export function EmployeeQRCodeModal({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
-          <div className="min-h-[280px] flex items-center justify-center w-full bg-muted/30 rounded-xl border border-border p-4">
+          <div className="min-h-[400px] flex items-center justify-center w-full bg-muted/30 rounded-xl border border-border p-4">
             {imgLoading ? (
-              <div className="w-full max-w-[320px]">
-                <div className="h-[240px] w-full animate-pulse rounded-xl bg-muted" />
+              <div className="w-full max-w-[340px]">
+                <div className="h-[360px] w-full animate-pulse rounded-xl bg-muted" />
                 <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
                   Loading your QR…
                 </p>

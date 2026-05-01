@@ -6,17 +6,18 @@
  * - SKIP_PLAYWRIGHT_INSTALL=true → exit 0 with warning (no download).
  * - PLAYWRIGHT_DOWNLOAD_HOST, HTTP_PROXY, HTTPS_PROXY → passed through (also loaded from repo .env if unset).
  * - PLAYWRIGHT_BROWSERS_PATH → custom cache dir (clear uses this if set).
+ * - PLAYWRIGHT_INSTALL_STALL_MS → inactivity kill in ms; default 0 = disabled (recommended). After the download
+ *   reaches 100%, Playwright can go silent for many minutes while extracting; low values cause false stalls.
+ * - PLAYWRIGHT_INSTALL_RETRY_COOLDOWN_MS → wait after failure/kill before cache clear / next strategy (default 8000 on Windows, 4000 elsewhere).
  */
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { homedir, platform } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { setTimeout as sleep } from "node:timers/promises";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-
-const HARD_TIMEOUT_MS = Number(process.env.PLAYWRIGHT_INSTALL_TIMEOUT_MS ?? 600_000);
-const STALL_MS = Number(process.env.PLAYWRIGHT_INSTALL_STALL_MS ?? 180_000);
 
 function log(...args) {
   console.log("[playwright-install]", ...args);
@@ -47,6 +48,15 @@ function loadRootDotEnv() {
   }
 }
 
+loadRootDotEnv();
+
+const HARD_TIMEOUT_MS = Number(process.env.PLAYWRIGHT_INSTALL_TIMEOUT_MS ?? 900_000);
+/** <= 0 = disabled (recommended). Extraction after download often produces no stdout/stderr for a long time. */
+const STALL_MS = Number(process.env.PLAYWRIGHT_INSTALL_STALL_MS ?? 0);
+const RETRY_COOLDOWN_MS = Number(
+  process.env.PLAYWRIGHT_INSTALL_RETRY_COOLDOWN_MS ?? (platform() === "win32" ? 8_000 : 4_000),
+);
+
 function getPlaywrightBrowsersRoot() {
   if (process.env.PLAYWRIGHT_BROWSERS_PATH?.trim()) {
     return process.env.PLAYWRIGHT_BROWSERS_PATH.trim();
@@ -64,12 +74,57 @@ function getPlaywrightBrowsersRoot() {
   return join(xdg || join(homedir(), ".cache"), "ms-playwright");
 }
 
+function getDirLockPath() {
+  return join(getPlaywrightBrowsersRoot(), "__dirlock");
+}
+
+/** Playwright leaves `__dirlock` while installing; a killed child can leave it stale. Remove before cache clear or retry. */
+function removeDirLockQuiet() {
+  const lock = getDirLockPath();
+  if (!existsSync(lock)) return;
+  try {
+    rmSync(lock, { recursive: true, force: true });
+    log(`Removed stale dir lock: ${lock}`);
+  } catch (e) {
+    warn("Could not remove __dirlock (retry or close other Playwright installs):", e?.message ?? e);
+  }
+}
+
+function killInstallTree(child) {
+  if (!child?.pid) return;
+  try {
+    if (platform() === "win32") {
+      spawnSync("taskkill", ["/PID", String(child.pid), "/T", "/F"], {
+        stdio: "ignore",
+        windowsHide: true,
+      });
+    } else {
+      child.kill("SIGTERM");
+    }
+  } catch {
+    try {
+      child.kill("SIGKILL");
+    } catch {
+      /* ignore */
+    }
+  }
+}
+
+async function settleAfterKill() {
+  log(`Waiting ${RETRY_COOLDOWN_MS}ms for processes and locks to release…`);
+  await sleep(RETRY_COOLDOWN_MS);
+  removeDirLockQuiet();
+  await sleep(1_000);
+  removeDirLockQuiet();
+}
+
 function clearBrowserCache() {
   const dir = getPlaywrightBrowsersRoot();
   if (!existsSync(dir)) {
     log(`No cache dir to remove (${dir})`);
     return;
   }
+  removeDirLockQuiet();
   try {
     warn(`Removing Playwright browser cache: ${dir}`);
     rmSync(dir, { recursive: true, force: true });
@@ -110,36 +165,30 @@ function runShell(command, extraEnv) {
       process.stderr.write(chunk);
     });
 
-    const stallTimer = setInterval(() => {
-      if (Date.now() - lastActivity > STALL_MS) {
-        stalled = true;
-        warn(`No output for ${STALL_MS}ms — killing install (stall).`);
-        try {
-          child.kill("SIGTERM");
-        } catch {
-          /* ignore */
-        }
-      }
-    }, 10_000);
+    const stallTimer =
+      STALL_MS > 0
+        ? setInterval(() => {
+            if (Date.now() - lastActivity <= STALL_MS) return;
+            stalled = true;
+            warn(`No output for ${STALL_MS}ms — killing install (stall).`);
+            killInstallTree(child);
+          }, 10_000)
+        : null;
 
     const hardTimer = setTimeout(() => {
       timedOut = true;
       warn(`Hard timeout ${HARD_TIMEOUT_MS}ms — killing install.`);
-      try {
-        child.kill("SIGTERM");
-      } catch {
-        /* ignore */
-      }
+      killInstallTree(child);
     }, HARD_TIMEOUT_MS);
 
     child.on("exit", (code) => {
-      clearInterval(stallTimer);
+      if (stallTimer) clearInterval(stallTimer);
       clearTimeout(hardTimer);
       resolve({ code: code ?? 1, timedOut, stalled });
     });
 
     child.on("error", (err) => {
-      clearInterval(stallTimer);
+      if (stallTimer) clearInterval(stallTimer);
       clearTimeout(hardTimer);
       warn("Spawn error:", err?.message ?? err);
       resolve({ code: 1, timedOut, stalled });
@@ -149,6 +198,12 @@ function runShell(command, extraEnv) {
 
 async function main() {
   loadRootDotEnv();
+
+  if (STALL_MS > 0 && STALL_MS < 600_000) {
+    warn(
+      `PLAYWRIGHT_INSTALL_STALL_MS=${STALL_MS} is low; Playwright can be silent for many minutes after download completes. Prefer 0 (off) or >= 600000.`,
+    );
+  }
 
   if (process.env.SKIP_PLAYWRIGHT_INSTALL === "true") {
     warn("SKIP_PLAYWRIGHT_INSTALL=true — skipping browser download.");
@@ -194,9 +249,11 @@ async function main() {
     const s = strategies[i];
     if (i > 0) {
       log(`--- Strategy ${i + 1}/${strategies.length}: ${s.name} ---`);
+      await settleAfterKill();
       clearBrowserCache();
     } else {
       log(`--- Strategy 1/${strategies.length}: ${s.name} ---`);
+      removeDirLockQuiet();
     }
 
     const { code, timedOut, stalled } = await runShell(s.cmd, s.env);
@@ -205,6 +262,9 @@ async function main() {
       process.exit(0);
     }
     warn(`Failed (${s.name}) exit=${code} timedOut=${timedOut} stalled=${stalled}`);
+    if (i < strategies.length - 1 && (timedOut || stalled)) {
+      await settleAfterKill();
+    }
   }
 
   console.error(`

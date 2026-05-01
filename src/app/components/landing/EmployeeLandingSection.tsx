@@ -7,23 +7,23 @@ export function EmployeeLandingSection() {
   return (
     <section
       id="for-employees"
-      className="scroll-mt-[80px] bg-gray-50 px-4 py-20 sm:px-6 md:py-28 dark:bg-neutral-900"
+      className="scroll-mt-[80px] bg-gray-50 px-2 py-20 max-md:py-16 sm:px-6 md:py-28 dark:bg-neutral-900"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 max-md:gap-y-10 lg:grid-cols-2 lg:gap-16">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative order-1 flex w-full min-h-0 flex-col items-center justify-center lg:order-1"
+          className="relative order-1 flex w-full min-h-0 flex-col items-center justify-center max-md:-mx-2 max-md:w-[calc(100%+1rem)] lg:order-1 lg:mx-0 lg:w-full"
           whileHover={{ y: -5 }}
         >
           <div className="flex w-full min-h-0 items-center justify-center">
-            <div className="mx-auto mt-6 w-full max-w-none overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm sm:mt-10 lg:max-w-2xl dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:rounded-2xl sm:mt-10 sm:rounded-3xl lg:max-w-2xl dark:border-neutral-800 dark:bg-neutral-900">
               <img
                 src={newEmployeeImg}
                 alt="CareTip employee dashboard showing daily earnings, ratings, and goals"
-                className="mx-auto h-auto w-full object-contain"
+                className="mx-auto h-auto w-full object-contain max-md:min-h-[min(40dvh,360px)]"
                 loading="lazy"
                 decoding="async"
               />
@@ -36,7 +36,7 @@ export function EmployeeLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="order-2 space-y-6 lg:order-2"
+          className="order-2 max-md:px-2 space-y-6 max-md:pt-2 md:px-0 md:pt-0 lg:order-2"
         >
           <div className="space-y-3">
             <span className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">

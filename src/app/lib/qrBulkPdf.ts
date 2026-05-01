@@ -2,7 +2,8 @@ import { jsPDF } from "jspdf";
 import { renderBrandedQRToDataUrl } from "./qrBranded";
 
 const TEXT_SLATE_RGB: [number, number, number] = [40, 61, 59];
-const TEAL_RGB: [number, number, number] = [25, 114, 120];
+/** Same warm orange as {@link qrPrintPdf} / branded QR frame. */
+const BRAND_RGB: [number, number, number] = [233, 147, 47];
 
 /**
  * Printable PDF with one branded CareTip QR per page (staff list from Postgres).
@@ -35,7 +36,7 @@ export async function downloadStaffQrPdf(
 
     pdf.setFont("helvetica", "bold");
     pdf.setFontSize(10);
-    pdf.setTextColor(...TEAL_RGB);
+    pdf.setTextColor(...BRAND_RGB);
     pdf.text("CareTip Limited", pageW / 2, 32 + imgSize + 12, { align: "center" });
   }
 

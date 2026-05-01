@@ -12,10 +12,10 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
-  const { user, isLoadingUser } = useAuth();
+  const { user, authHydrated } = useAuth();
   const location = useLocation();
 
-  if (isLoadingUser) {
+  if (!authHydrated) {
     return <AppLoader message="Setting things up for you..." />;
   }
 

@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import jwt from "jsonwebtoken";
 import { Prisma } from "@prisma/client";
 import * as authService from "../services/auth.service.js";
 import * as oauthAuthService from "../services/oauthAuth.service.js";
@@ -373,18 +374,51 @@ export async function oauth(req: Request, res: Response) {
 export async function refresh(req: Request, res: Response) {
   try {
     const cookieHeader = req.headers.cookie;
-    const token = parseCookie(cookieHeader, refreshCookieName());
-    if (!token) {
-      return res.status(401).json({ message: "Authentication required" });
+    const rtCookie = parseCookie(cookieHeader, refreshCookieName());
+
+    if (rtCookie) {
+      const rotated = await rotateRefreshToken(rtCookie);
+      if (!rotated) {
+        clearRefreshCookie(res);
+        return res.status(401).json({ message: "Invalid or expired session" });
+      }
+      setRefreshCookie(res, rotated.newToken);
+      const result = await authService.authResultForUserId(rotated.userId);
+      return res.json(result);
     }
-    const rotated = await rotateRefreshToken(token);
-    if (!rotated) {
-      clearRefreshCookie(res);
-      return res.status(401).json({ message: "Invalid or expired session" });
+
+    /**
+     * No refresh cookie (e.g. `issueRefreshToken` failed at login, cross-site cookie blocked, or dev DB
+     * without RefreshToken rows). If the client still sends a valid access JWT, re-issue session from DB
+     * so hydration and `apiRequest` 401 recovery do not wipe local auth.
+     */
+    const authHeader = typeof req.headers.authorization === "string" ? req.headers.authorization : "";
+    const bearer =
+      authHeader.startsWith("Bearer ") && authHeader.length > 7 ? authHeader.slice(7).trim() : "";
+    if (bearer) {
+      try {
+        const secret = process.env.JWT_SECRET?.trim();
+        if (!secret) throw new Error("JWT_SECRET not configured");
+        const decoded = jwt.verify(bearer, secret) as { userId?: string; id?: string };
+        const userId =
+          (typeof decoded.userId === "string" && decoded.userId) ||
+          (typeof decoded.id === "string" && decoded.id) ||
+          null;
+        if (userId) {
+          const result = await authService.authResultForUserId(userId);
+          return res.json(result);
+        }
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : "";
+        if (msg === "Authentication required" || msg === "Invalid email or password") {
+          return res.status(401).json({ message: "Invalid or expired token" });
+        }
+        logServerError("auth.refresh.bearerFallback", e);
+        return res.status(401).json({ message: "Invalid or expired token" });
+      }
     }
-    setRefreshCookie(res, rotated.newToken);
-    const result = await authService.authResultForUserId(rotated.userId);
-    return res.json(result);
+
+    return res.status(401).json({ message: "Authentication required" });
   } catch (err) {
     logServerError("auth.refresh", err);
     return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });

@@ -98,9 +98,14 @@ async function refreshAccessToken(): Promise<{ token: string | null; shouldClear
   if (!refreshInFlight) {
     refreshInFlight = (async () => {
       try {
+        const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
+        const existing = getToken();
+        if (existing?.trim()) {
+          refreshHeaders.Authorization = `Bearer ${existing.trim()}`;
+        }
         const res = await fetch(apiPath("/api/auth/refresh"), {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: refreshHeaders,
           credentials: "include",
         });
         if (!res.ok) {

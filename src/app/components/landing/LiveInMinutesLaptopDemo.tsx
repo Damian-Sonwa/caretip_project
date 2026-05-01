@@ -36,8 +36,8 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
 
   return (
     <div className="relative mx-auto w-full max-w-none sm:max-w-2xl">
-      {/* Laptop shell */}
-      <div className="relative rounded-[1.35rem] border border-gray-200 bg-gradient-to-b from-neutral-100 to-neutral-200 p-2 pt-3 shadow-[0_18px_50px_rgba(0,0,0,0.08)] dark:border-neutral-700 dark:from-neutral-800 dark:to-neutral-900 sm:p-2.5 sm:pt-3.5">
+      {/* Laptop shell — larger presence on small screens */}
+      <div className="relative rounded-[1.35rem] border border-gray-200 bg-gradient-to-b from-neutral-100 to-neutral-200 p-2.5 pt-3.5 shadow-[0_22px_55px_rgba(0,0,0,0.1)] dark:border-neutral-700 dark:from-neutral-800 dark:to-neutral-900 max-md:rounded-2xl max-md:p-3 max-md:pt-4 sm:p-2.5 sm:pt-3.5 sm:shadow-[0_18px_50px_rgba(0,0,0,0.08)]">
         {/* Camera notch */}
         <div
           aria-hidden
@@ -46,7 +46,7 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
 
         {/* Screen bezel */}
         <div className="mt-2 overflow-hidden rounded-xl border border-neutral-300/80 bg-neutral-900 ring-1 ring-black/20 dark:border-neutral-600">
-          <div className="relative aspect-[16/10] w-full bg-neutral-950">
+          <div className="relative aspect-[16/10] w-full max-w-none bg-neutral-950">
             {videoSrc ? (
               <video
                 autoPlay

@@ -29,12 +29,12 @@ export function SimpleSetupSection() {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] bg-white px-4 py-24 sm:px-6 dark:bg-neutral-950"
+      className="scroll-mt-[80px] bg-white px-2 py-24 max-md:overflow-x-hidden sm:px-6 dark:bg-neutral-950"
     >
       <div className="max-w-7xl mx-auto">
         <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
           {/* LEFT: Journey step cards */}
-          <div className="order-2 space-y-8 lg:order-1">
+          <div className="order-2 max-md:px-1 space-y-8 max-md:pt-2 lg:order-1 lg:px-0 lg:pt-0 md:px-0 md:pt-0">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -117,7 +117,7 @@ export function SimpleSetupSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative order-1 mx-auto w-full max-w-2xl lg:order-2"
+            className="relative order-1 mx-auto w-full max-w-2xl max-md:max-w-none max-md:-mx-1 max-md:w-[calc(100%+0.5rem)] lg:order-2 lg:mx-auto lg:w-full"
             whileHover={{ y: -4 }}
           >
             <div className="relative w-full overflow-visible px-0 pb-2 sm:px-0">

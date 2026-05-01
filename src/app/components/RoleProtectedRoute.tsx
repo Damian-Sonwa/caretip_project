@@ -11,14 +11,14 @@ interface RoleProtectedRouteProps {
 }
 
 /**
- * Same guard as {@link ProtectedRoute} (single resolver). Uses the global auth loading flag
- * so session is not double-fetched here.
+ * Same guard as {@link ProtectedRoute} (single resolver). Waits on `authHydrated` so guards
+ * do not redirect before the initial session refresh (or no-token path) completes.
  */
 export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
-  const { user, isLoadingUser } = useAuth();
+  const { user, authHydrated } = useAuth();
   const location = useLocation();
 
-  if (isLoadingUser) {
+  if (!authHydrated) {
     return <AppLoader message="Setting things up for you..." />;
   }
 

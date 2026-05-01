@@ -1,16 +1,35 @@
 /**
- * Branded QR with CareTip wordmark framing.
- * Encodes public origin + `/qr/employee/[employeeId]` (origin from window or NEXT_PUBLIC_APP_URL).
+ * Canonical CareTip branded QR (single visual system).
+ *
+ * All scannable QRs — employee, business storefront, table, location — use the same layout:
+ * white field, orange frame + wordmark bands, high-contrast modules, optional small center logo,
+ * error correction H for logo tolerance.
+ *
+ * Use {@link renderBrandedQrUrlToDataUrl} for any encoded URL; use {@link renderBrandedQRToDataUrl}
+ * for staff `/qr/employee/:id` only (thin wrapper).
  */
 
 import QRCode from "qrcode";
 import caretipLogoUrl from "@/assets/brand/company_logo.png";
 import { qrEmployeeUrl } from "./appPublicUrl";
 
-const BRAND_TEXT = "CareTip Limited";
+export const CARETIP_QR_BRAND_HEX = "#e9932f";
 
-const BRAND_ORANGE = "#e9932f";
+const BRAND_TEXT = "CareTip Limited";
+const BRAND_ORANGE = CARETIP_QR_BRAND_HEX;
 const QR_MODULE_DARK = "#000000";
+
+/** Inner QR matrix width (px) — keep in sync across dashboard + PDF source images. */
+export const CARETIP_BRANDED_QR_MATRIX_PX = 256;
+
+const LAYOUT = {
+  qrSize: CARETIP_BRANDED_QR_MATRIX_PX,
+  padding: 24,
+  brandBand: 40,
+  /** Center mark width (px); keep modest for scan reliability with errorCorrectionLevel H. */
+  centerLogoMaxW: 56,
+  qrMargin: 2,
+} as const;
 
 /** Same URL encoded in the QR image (use for clipboard / display). */
 export function getEmployeeQrShareUrl(employeeId: string): string {
@@ -32,13 +51,17 @@ function loadCaretipLogoImage(): Promise<HTMLImageElement | null> {
   return logoImagePromise;
 }
 
-async function renderBrandedQRToCanvas(employeeId: string): Promise<HTMLCanvasElement | null> {
-  const url = qrEmployeeUrl(employeeId);
-  const qrSize = 256;
-  const padding = 24;
-  const brandHeight = 40;
+/**
+ * Renders the branded QR canvas for any absolute or same-origin URL string.
+ * Returns null if `document` / canvas is unavailable or URL is empty.
+ */
+export async function renderBrandedQrUrlToCanvas(url: string): Promise<HTMLCanvasElement | null> {
+  const encoded = String(url ?? "").trim();
+  if (!encoded || typeof document === "undefined") return null;
+
+  const { qrSize, padding, brandBand, centerLogoMaxW, qrMargin } = LAYOUT;
   const totalWidth = qrSize + padding * 2;
-  const totalHeight = qrSize + padding * 2 + brandHeight * 2;
+  const totalHeight = qrSize + padding * 2 + brandBand * 2;
 
   const canvas = document.createElement("canvas");
   canvas.width = totalWidth;
@@ -59,19 +82,19 @@ async function renderBrandedQRToCanvas(employeeId: string): Promise<HTMLCanvasEl
   ctx.fillText(BRAND_TEXT, totalWidth / 2, 28);
 
   const qrCanvas = document.createElement("canvas");
-  await QRCode.toCanvas(qrCanvas, url, {
+  await QRCode.toCanvas(qrCanvas, encoded, {
     width: qrSize,
-    margin: 2,
+    margin: qrMargin,
     color: { dark: QR_MODULE_DARK, light: "#ffffff" },
     errorCorrectionLevel: "H",
   });
 
-  const qrDrawY = brandHeight + padding;
+  const qrDrawY = brandBand + padding;
   ctx.drawImage(qrCanvas, padding, qrDrawY, qrSize, qrSize);
 
   const logoImg = await loadCaretipLogoImage();
   if (logoImg && logoImg.naturalWidth > 0) {
-    const markW = 72;
+    const markW = centerLogoMaxW;
     const ratio = logoImg.naturalHeight / logoImg.naturalWidth;
     const markH = ratio * markW;
     const cx = padding + qrSize / 2;
@@ -86,14 +109,19 @@ async function renderBrandedQRToCanvas(employeeId: string): Promise<HTMLCanvasEl
   return canvas;
 }
 
-export async function renderBrandedQRToDataUrl(employeeId: string): Promise<string> {
-  const canvas = await renderBrandedQRToCanvas(employeeId);
+export async function renderBrandedQrUrlToDataUrl(url: string): Promise<string> {
+  const canvas = await renderBrandedQrUrlToCanvas(url);
   if (!canvas) return "";
   return canvas.toDataURL("image/png");
 }
 
+/** Staff tipping page QR (`/qr/employee/:id`). */
+export async function renderBrandedQRToDataUrl(employeeId: string): Promise<string> {
+  return renderBrandedQrUrlToDataUrl(qrEmployeeUrl(employeeId));
+}
+
 export async function downloadBrandedQR(employeeId: string, employeeName: string): Promise<void> {
-  const canvas = await renderBrandedQRToCanvas(employeeId);
+  const canvas = await renderBrandedQrUrlToCanvas(qrEmployeeUrl(employeeId));
   if (!canvas) return;
   const filename = `caretip-${employeeId.slice(0, 8)}-${employeeName.replace(/\s+/g, "-").toLowerCase()}.png`;
   canvas.toBlob((blob) => {
@@ -114,7 +142,7 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/** Plain QR PNG from a data URL (table / location / storefront in dashboard). */
+/** Plain QR PNG from a data URL (legacy name — works for any PNG data URL from this module). */
 export function downloadQrDataUrlPng(dataUrl: string, filename: string): void {
   if (!dataUrl) return;
   const base = filename.trim().replace(/[^\w.-]+/g, "_") || "caretip-qr";
@@ -128,7 +156,7 @@ export function downloadQrDataUrlPng(dataUrl: string, filename: string): void {
   document.body.removeChild(a);
 }
 
-/** Open a new window and trigger print (table / location / storefront QR). Returns false if pop-up blocked. */
+/** Open a new window and trigger print. */
 export function printQrDataUrl(dataUrl: string, heading: string): boolean {
   if (!dataUrl) return false;
   const w = window.open("", "_blank");
