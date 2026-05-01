@@ -3,7 +3,6 @@ import { Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
-import { CareTipPageLoader } from "./CareTipPageLoader";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
 
 function mapDbVerificationToStatus(
@@ -64,10 +63,6 @@ export function ApprovedBusinessGate() {
 
   if (user.impersonation) {
     return <Outlet />;
-  }
-
-  if (user.role === "business" && !ready) {
-    return <CareTipPageLoader variant="wait" message="Loading…" />;
   }
 
   return <Outlet />;

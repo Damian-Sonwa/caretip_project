@@ -3,7 +3,6 @@ import { Navigate, Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
-import { CareTipPageLoader } from "./CareTipPageLoader";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined
@@ -39,10 +38,6 @@ export function PendingVerificationAllowedGate() {
       cancelled = true;
     };
   }, [user?.id, user?.role, user?.impersonation, updateUser]);
-
-  if (!ready) {
-    return <CareTipPageLoader variant="wait" message="Loading…" />;
-  }
 
   if (user?.impersonation) {
     return <Navigate to="/dashboard" replace />;
