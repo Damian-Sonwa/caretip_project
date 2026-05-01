@@ -171,6 +171,14 @@ export function AuthPage() {
     } catch (err) {
       logClientError('AuthPage', err);
       if (isApiRequestError(err) && err.code === EMAIL_NOT_VERIFIED_CODE) {
+        // Ensure we don't keep a stale session from a previous login when backend rejects unverified access.
+        try {
+          localStorage.removeItem("caretip_user");
+          localStorage.removeItem("caretip_token");
+          window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
+        } catch {
+          // ignore
+        }
         setError(err.message);
         setShowResendVerification(err.canResend === true);
         // No session is issued for unverified users; keep them here with resend.

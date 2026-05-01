@@ -176,6 +176,17 @@ export function useAuth() {
       } catch (err) {
         // If the backend is temporarily unavailable (503), don't spam logs or disrupt the session.
         const msg = err instanceof Error ? err.message : "";
+        const lower = msg.toLowerCase();
+        if (lower.includes("invalid or expired token") || lower.includes("authentication required")) {
+          try {
+            localStorage.removeItem("caretip_user");
+            localStorage.removeItem("caretip_token");
+            notifyAuthStorageSync();
+          } catch {
+            // ignore
+          }
+          if (!cancelled) setUser(null);
+        }
         if (!msg.toLowerCase().includes("service temporarily unavailable")) {
           logClientError("useAuth.initialRefresh", err);
         }
