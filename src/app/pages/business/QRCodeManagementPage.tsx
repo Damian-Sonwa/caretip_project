@@ -39,6 +39,7 @@ import {
   downloadQrDataUrlPng,
   printQrDataUrl,
 } from "../../lib/qrBranded";
+import { downloadBusinessQrPrintPdf, downloadEmployeeQrPrintPdf } from "../../lib/qrPrintPdf";
 import {
   businessDirectoryUrl,
   qrBusinessUrl,
@@ -368,6 +369,55 @@ export function QRCodeManagementPage() {
     }
   };
 
+  const handleVenuePrintPdf = async (
+    item: CardItem,
+    type: "storefront" | "table" | "location",
+    previewDataUrl?: string
+  ) => {
+    const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
+    if (!dataUrl) {
+      toast.error("QR image not ready. Wait a moment and try again.");
+      return;
+    }
+    try {
+      await downloadBusinessQrPrintPdf({
+        qrPngDataUrl: dataUrl,
+        businessName: item.name,
+        location: type === "storefront" ? undefined : type === "table" ? item.location : item.address,
+        instruction: "Scan to tip instantly",
+        fileBaseName:
+          type === "storefront"
+            ? `CareTip_QR_Team_${item.name}`
+            : type === "table"
+              ? `CareTip_QR_Table_${item.name}`
+              : `CareTip_QR_Location_${item.name}`,
+      });
+    } catch (err) {
+      logClientError("QRCodeManagementPage.printPdf", err);
+      toast.error("Could not build PDF.");
+    }
+  };
+
+  const handleEmployeePrintPdf = async (item: CardItem) => {
+    const dataUrl = qrImages[item.id];
+    if (!dataUrl) {
+      toast.error("QR image not ready. Wait a moment and try again.");
+      return;
+    }
+    try {
+      await downloadEmployeeQrPrintPdf({
+        qrPngDataUrl: dataUrl,
+        employeeName: item.name,
+        businessName: user?.businessName ?? "CareTip",
+        instruction: "Scan to tip",
+        fileBaseName: `CareTip_QR_${item.name}`,
+      });
+    } catch (err) {
+      logClientError("QRCodeManagementPage.employeePrintPdf", err);
+      toast.error("Could not build PDF.");
+    }
+  };
+
   const QRCard = ({
     item,
     type,
@@ -469,6 +519,17 @@ export function QRCodeManagementPage() {
                   <Button
                     type="button"
                     size="sm"
+                    variant="outline"
+                    onClick={() => void handleEmployeePrintPdf(item)}
+                    disabled={!previewDataUrl}
+                    className={DASH_BTN_SECONDARY}
+                  >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Print layout (PDF)
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
                     variant={item.slug ? "outline" : "default"}
                     onClick={() => item.employeeRow && handleGenerateNew(item.employeeRow)}
                     disabled={regeneratingId === item.id}
@@ -519,6 +580,17 @@ export function QRCodeManagementPage() {
                   >
                     <Printer className="mr-2 h-4 w-4" />
                     Print
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => void handleVenuePrintPdf(item, type, previewDataUrl)}
+                    disabled={!previewDataUrl}
+                    className={DASH_BTN_SECONDARY}
+                  >
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Print layout (PDF)
                   </Button>
                 </>
               )}
