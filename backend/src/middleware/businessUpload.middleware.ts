@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import multer from "multer";
+import { prisma } from "../prisma.js";
 
 function ensureBusinessDir(businessId: string): string {
   const dir = path.join(process.cwd(), "uploads", "businesses", businessId);
@@ -10,12 +11,22 @@ function ensureBusinessDir(businessId: string): string {
 
 const storage = multer.diskStorage({
   destination: (req, _file, cb) => {
-    const businessId = (req as unknown as { businessId?: string }).businessId;
-    if (!businessId || typeof businessId !== "string") {
-      cb(new Error("Missing business id"), "");
+    const userId = (req as any)?.user?.userId ?? (req as any)?.user?.id;
+    if (!userId || typeof userId !== "string") {
+      cb(new Error("Authentication required"), "");
       return;
     }
-    cb(null, ensureBusinessDir(businessId));
+    // Multer destination supports callback style; we can resolve businessId asynchronously.
+    void prisma.business
+      .findUnique({ where: { userId }, select: { id: true } })
+      .then((b) => {
+        if (!b?.id) {
+          cb(new Error("Business not found"), "");
+          return;
+        }
+        cb(null, ensureBusinessDir(b.id));
+      })
+      .catch(() => cb(new Error("Could not resolve business for upload"), ""));
   },
   filename: (_req, file, cb) => {
     const ext = path.extname(file.originalname) || ".bin";

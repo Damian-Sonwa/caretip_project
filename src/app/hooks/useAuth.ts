@@ -174,7 +174,11 @@ export function useAuth() {
           });
         }
       } catch (err) {
-        logClientError("useAuth.initialRefresh", err);
+        // If the backend is temporarily unavailable (503), don't spam logs or disrupt the session.
+        const msg = err instanceof Error ? err.message : "";
+        if (!msg.toLowerCase().includes("service temporarily unavailable")) {
+          logClientError("useAuth.initialRefresh", err);
+        }
       } finally {
         if (!cancelled) setIsLoadingUser(false);
       }
