@@ -68,7 +68,7 @@ export function Footer({
       {/* Main Footer */}
       <footer className="relative overflow-hidden border-t border-white/10">
         {/* Background with gradient (from the removed CTA section) */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-neutral-950 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-zinc-900 to-neutral-950" />
         {/* Decorative elements */}
         <div className="absolute top-0 right-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl" aria-hidden />
         <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl" aria-hidden />

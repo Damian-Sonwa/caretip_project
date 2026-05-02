@@ -322,20 +322,20 @@ export function AuthPage() {
 
   if (!authHydrated) {
     return (
-      <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
+      <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
         <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
           <Navigation />
           <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
             <AppLoader message="Setting things up for you..." />
           </div>
-          <Footer />
+          <Footer variant="minimal" surface="light" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
 
@@ -642,7 +642,7 @@ export function AuthPage() {
           </form>
         </SignInCard2>
 
-        <Footer />
+        <Footer variant="minimal" surface="light" />
       </div>
     </div>
   );

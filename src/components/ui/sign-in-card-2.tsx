@@ -49,7 +49,7 @@ export function SignInCard2({
   return (
     <main
       className={cn(
-        "relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-10 pt-20 sm:pt-24 dark:bg-neutral-950",
+        "relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-10 pt-20 sm:pt-24 dark:bg-neutral-900",
         authFont,
         className,
       )}
