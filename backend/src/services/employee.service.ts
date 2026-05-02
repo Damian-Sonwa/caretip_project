@@ -141,6 +141,10 @@ export interface EmployeeDetail {
   monthlyGoal: number | null;
   currentMonthTotal: number;
   businessId: string;
+  /** Public `Business.slug` for canonical `/{businessSlug}/{employeeSlug}` links. */
+  businessSlug: string | null;
+  /** Public `Employee.slug` when set. */
+  slug: string | null;
 }
 
 export async function getEmployeeById(employeeId: string): Promise<EmployeeDetail | null> {
@@ -151,11 +155,12 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       name: true,
       jobTitle: true,
       avatar: true,
+      slug: true,
       monthlyGoal: true,
       isActive: true,
       activationStatus: true,
       businessId: true,
-      business: { select: { verificationStatus: true } },
+      business: { select: { verificationStatus: true, slug: true } },
       user: { select: { emailVerified: true } },
       transactions: {
         where: {
@@ -207,6 +212,8 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
     currentMonthTotal,
     businessId: emp.businessId,
+    businessSlug: emp.business.slug ?? null,
+    slug: emp.slug ?? null,
   };
 }
 
@@ -249,21 +256,10 @@ export async function updateEmployeeForBusiness(
         : emp.tableAssignments.map((ta) => ta.table.id);
     resolvedAssignments = await resolveStaffAssignments(businessId, nextLocationId, nextTableIds);
   }
-  let slug = emp.slug;
-
   if (name !== undefined) {
     const newName = name.trim();
     if (!newName) {
       throw new Error("Name cannot be empty");
-    }
-    if (newName !== emp.name) {
-      const baseSlug = generateSlug(newName);
-      slug = await ensureUniqueSlug(baseSlug, async (s) => {
-        const existing = await prisma.employee.findFirst({
-          where: { slug: s, NOT: { id: employeeId } },
-        });
-        return !!existing;
-      });
     }
   }
 
@@ -310,7 +306,7 @@ export async function updateEmployeeForBusiness(
     await tx.employee.update({
     where: { id: employeeId },
     data: {
-      ...(nameTrimmed !== undefined ? { name: nameTrimmed, slug } : {}),
+      ...(nameTrimmed !== undefined ? { name: nameTrimmed } : {}),
       ...(jobTitle !== undefined && jobTitle.trim() ? { jobTitle: jobTitle.trim() } : {}),
       ...(monthlyGoal !== undefined
         ? { monthlyGoal: monthlyGoal === null ? null : monthlyGoal }
@@ -446,7 +442,7 @@ export async function regenerateEmployeeSlugForBusiness(businessId: string, empl
   if (!emp) {
     throw new Error("Employee not found");
   }
-  const baseSlug = generateSlug(`${emp.name}-${Date.now()}`);
+  const baseSlug = generateSlug(emp.name.trim() || "staff");
   const slug = await ensureUniqueSlug(baseSlug, async (s) => {
     const other = await prisma.employee.findFirst({
       where: { slug: s, NOT: { id: employeeId } },
@@ -582,6 +578,8 @@ export interface EmployeeSelfProfile {
   emailNotifications: boolean;
   pushNotifications: boolean;
   businessId: string;
+  /** Public `Business.slug` for `/{businessSlug}/{employeeSlug}` URLs. */
+  businessSlug: string | null;
   /** Public staff page / QR URL segment (Postgres `slug`) */
   slug: string | null;
 }
@@ -599,6 +597,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     pushNotifications: true,
     businessId: true,
     slug: true,
+    business: { select: { slug: true } },
     user: userEmail,
   } as const;
   try {
@@ -619,6 +618,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       emailNotifications: emp.emailNotifications,
       pushNotifications: emp.pushNotifications,
       businessId: emp.businessId,
+      businessSlug: emp.business.slug ?? null,
       slug: emp.slug ?? null,
     };
   } catch (e) {
@@ -632,6 +632,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
           avatar: true,
           businessId: true,
           slug: true,
+          business: { select: { slug: true } },
           user: userEmail,
         },
       });
@@ -648,6 +649,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         emailNotifications: true,
         pushNotifications: true,
         businessId: emp.businessId,
+        businessSlug: emp.business.slug ?? null,
         slug: emp.slug ?? null,
       };
     }

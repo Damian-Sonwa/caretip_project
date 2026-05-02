@@ -6,16 +6,17 @@
  * error correction H for logo tolerance.
  *
  * Use {@link renderBrandedQrUrlToDataUrl} for any encoded URL; use {@link renderBrandedQRToDataUrl}
- * for staff `/qr/employee/:id` only (thin wrapper).
+ * for canonical staff `/{businessSlug}/{employeeSlug}` (or {@link renderBrandedQRToDataUrlLegacy} for `/qr/employee/:id`).
  */
 
 import QRCode from "qrcode";
 import caretipLogoUrl from "@/assets/brand/company_logo.png";
-import { qrEmployeeUrl } from "./appPublicUrl";
+import { publicEmployeeTipUrl, qrEmployeeLegacyUrl } from "./appPublicUrl";
 
 export const CARETIP_QR_BRAND_HEX = "#e9932f";
 
-const BRAND_TEXT = "CareTip Limited";
+const BRAND_TOP_TEXT = "CareTip";
+const BRAND_FOOTER_TEXT = "Powered by CareTip Limited";
 const BRAND_ORANGE = CARETIP_QR_BRAND_HEX;
 const QR_MODULE_DARK = "#000000";
 
@@ -32,8 +33,13 @@ const LAYOUT = {
 } as const;
 
 /** Same URL encoded in the QR image (use for clipboard / display). */
-export function getEmployeeQrShareUrl(employeeId: string): string {
-  return qrEmployeeUrl(employeeId);
+export function getEmployeeQrShareUrl(businessSlug: string, employeeSlug: string): string {
+  return publicEmployeeTipUrl(businessSlug, employeeSlug);
+}
+
+/** Legacy `/qr/employee/:id` share URL when slug pair is unavailable. */
+export function getEmployeeQrLegacyShareUrl(employeeId: string): string {
+  return qrEmployeeLegacyUrl(employeeId);
 }
 
 let logoImagePromise: Promise<HTMLImageElement | null> | null = null;
@@ -79,7 +85,7 @@ export async function renderBrandedQrUrlToCanvas(url: string): Promise<HTMLCanva
   ctx.fillStyle = BRAND_ORANGE;
   ctx.font = "bold 14px system-ui, -apple-system, sans-serif";
   ctx.textAlign = "center";
-  ctx.fillText(BRAND_TEXT, totalWidth / 2, 28);
+  ctx.fillText(BRAND_TOP_TEXT, totalWidth / 2, 28);
 
   const qrCanvas = document.createElement("canvas");
   await QRCode.toCanvas(qrCanvas, encoded, {
@@ -103,8 +109,8 @@ export async function renderBrandedQrUrlToCanvas(url: string): Promise<HTMLCanva
   }
 
   ctx.fillStyle = BRAND_ORANGE;
-  ctx.font = "bold 14px system-ui, -apple-system, sans-serif";
-  ctx.fillText(BRAND_TEXT, totalWidth / 2, totalHeight - 12);
+  ctx.font = "bold 12px system-ui, -apple-system, sans-serif";
+  ctx.fillText(BRAND_FOOTER_TEXT, totalWidth / 2, totalHeight - 10);
 
   return canvas;
 }
@@ -115,13 +121,37 @@ export async function renderBrandedQrUrlToDataUrl(url: string): Promise<string> 
   return canvas.toDataURL("image/png");
 }
 
-/** Staff tipping page QR (`/qr/employee/:id`). */
-export async function renderBrandedQRToDataUrl(employeeId: string): Promise<string> {
-  return renderBrandedQrUrlToDataUrl(qrEmployeeUrl(employeeId));
+/** Staff tipping QR for canonical `/{businessSlug}/{employeeSlug}`. */
+export async function renderBrandedQRToDataUrl(businessSlug: string, employeeSlug: string): Promise<string> {
+  return renderBrandedQrUrlToDataUrl(publicEmployeeTipUrl(businessSlug, employeeSlug));
 }
 
-export async function downloadBrandedQR(employeeId: string, employeeName: string): Promise<void> {
-  const canvas = await renderBrandedQrUrlToCanvas(qrEmployeeUrl(employeeId));
+/** Legacy staff QR (`/qr/employee/:id`) when slugs are missing. */
+export async function renderBrandedQRToDataUrlLegacy(employeeId: string): Promise<string> {
+  return renderBrandedQrUrlToDataUrl(qrEmployeeLegacyUrl(employeeId));
+}
+
+export async function downloadBrandedQR(
+  businessSlug: string,
+  employeeSlug: string,
+  employeeName: string
+): Promise<void> {
+  const canvas = await renderBrandedQrUrlToCanvas(publicEmployeeTipUrl(businessSlug, employeeSlug));
+  if (!canvas) return;
+  const filename = `caretip-${employeeSlug}-${employeeName.replace(/\s+/g, "-").toLowerCase()}.png`;
+  canvas.toBlob((blob) => {
+    if (!blob) return;
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }, "image/png");
+}
+
+/** Download branded staff QR using legacy `/qr/employee/:id` when venue or staff slug is missing. */
+export async function downloadBrandedQRLegacy(employeeId: string, employeeName: string): Promise<void> {
+  const canvas = await renderBrandedQrUrlToCanvas(qrEmployeeLegacyUrl(employeeId));
   if (!canvas) return;
   const filename = `caretip-${employeeId.slice(0, 8)}-${employeeName.replace(/\s+/g, "-").toLowerCase()}.png`;
   canvas.toBlob((blob) => {

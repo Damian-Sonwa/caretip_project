@@ -17,7 +17,6 @@ import {
   ArrowRight,
   Store,
   Target,
-  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -334,10 +333,7 @@ export function BusinessDashboard() {
             <>
               <Store className="h-3.5 w-3.5 text-foreground" />
               {statsLoading && !stats?.name?.trim() ? (
-                <span className="inline-flex items-center gap-1.5">
-                  <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" aria-hidden />
-                  <span className="text-muted-foreground">Loading…</span>
-                </span>
+                <span className="text-muted-foreground animate-pulse">Loading venue…</span>
               ) : stats?.name?.trim() ? (
                 stats.name
               ) : (
@@ -474,12 +470,6 @@ export function BusinessDashboard() {
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
             <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {statsLoading ? (
-                <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-sm">
-                  <LoadingSpinner size="sm" />
-                </div>
-              ) : null}
-
               <StatCard
                 title={`Total tips (${timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"})`}
                 value={`$${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}

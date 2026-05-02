@@ -26,6 +26,7 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import {
   generateInviteCode,
   getBusinessStats,
+  fetchBusinessProfile,
   createEmployee,
   updateEmployee,
   updateEmployeeStatus,
@@ -35,7 +36,7 @@ import {
   type LocationDTO,
   type TableDTO,
 } from "../../lib/api";
-import { downloadBrandedQR } from "../../lib/qrBranded";
+import { downloadBrandedQR, downloadBrandedQRLegacy } from "../../lib/qrBranded";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -152,6 +153,7 @@ export function StaffManagementPage() {
   const [deleting, setDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [businessPublicSlug, setBusinessPublicSlug] = useState<string | null>(null);
 
   const canUseQr =
     Boolean(user?.impersonation) || user?.status === "APPROVED";
@@ -223,6 +225,22 @@ export function StaffManagementPage() {
   useEffect(() => {
     void fetchEmployees();
   }, [fetchEmployees]);
+
+  useEffect(() => {
+    if (!isBusiness || !user?.businessId) return;
+    let cancelled = false;
+    void fetchBusinessProfile()
+      .then((p) => {
+        if (!cancelled) setBusinessPublicSlug(p.slug?.trim() || null);
+      })
+      .catch((err) => {
+        logClientError("StaffManagementPage.businessSlug", err);
+        if (!cancelled) setBusinessPublicSlug(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isBusiness, user?.businessId]);
 
   useEffect(() => {
     if (!isBusiness) return;
@@ -457,7 +475,10 @@ export function StaffManagementPage() {
       return;
     }
     try {
-      await downloadBrandedQR(employee.id, employee.name);
+      const bs = businessPublicSlug?.trim();
+      const es = employee.slug?.trim();
+      if (bs && es) await downloadBrandedQR(bs, es, employee.name);
+      else await downloadBrandedQRLegacy(employee.id, employee.name);
       toastOk("QR code downloaded.");
     } catch (err) {
       logClientError("StaffManagementPage", err);

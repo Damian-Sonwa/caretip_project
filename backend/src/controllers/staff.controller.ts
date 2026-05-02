@@ -66,7 +66,12 @@ type StaffBySlugRow = {
   bio?: string | null;
   monthlyGoal?: unknown;
   businessId: string;
-  business: { id: string; name: string; verificationStatus?: "pending" | "verified" | "rejected" };
+  business: {
+    id: string;
+    name: string;
+    slug: string;
+    verificationStatus?: "pending" | "verified" | "rejected";
+  };
 };
 
 async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRow | null> {
@@ -79,7 +84,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     bio: true,
     monthlyGoal: true,
     businessId: true,
-    business: { select: { id: true, name: true, verificationStatus: true } },
+    business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
   } as const;
   try {
     return prisma.employee.findFirst({
@@ -106,12 +111,103 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
           slug: true,
           avatar: true,
           jobTitle: true,
+          bio: true,
+          monthlyGoal: true,
           businessId: true,
-          business: { select: { id: true, name: true, verificationStatus: true } },
+          business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
         },
       });
     }
     throw e;
+  }
+}
+
+async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
+  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const monthTips = await prisma.transaction.findMany({
+    where: {
+      employeeId: employee.id,
+      status: "success",
+      createdAt: { gte: startOfMonth },
+    },
+    select: { amount: true },
+  });
+  const currentMonthTotal = monthTips.reduce((s, t) => s + Number(t.amount), 0);
+
+  const monthlyGoal =
+    employee.monthlyGoal != null && employee.monthlyGoal !== undefined
+      ? Number(employee.monthlyGoal)
+      : null;
+
+  return {
+    id: employee.id,
+    name: employee.name,
+    slug: employee.slug,
+    avatar: employee.avatar,
+    jobTitle: employee.jobTitle,
+    bio: employee.bio ?? null,
+    monthlyGoal,
+    currentMonthTotal,
+    businessId: employee.businessId,
+    businessName: employee.business.name,
+    businessSlug: employee.business.slug,
+  };
+}
+
+/**
+ * GET /api/staff/directory/business/:businessSlug/employee/:employeeSlug
+ * Public: staff under a venue when URL segments match Postgres `Business.slug` + `Employee.slug`.
+ */
+export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Response) {
+  try {
+    const businessSlug = req.params.businessSlug?.trim().toLowerCase();
+    const employeeSlug = req.params.employeeSlug?.trim().toLowerCase();
+    if (!businessSlug || !employeeSlug) {
+      return res.status(400).json({ message: "Business and employee slugs are required" });
+    }
+    const business = await prisma.business.findFirst({
+      where: { slug: businessSlug },
+      select: { id: true, verificationStatus: true },
+    });
+    if (!business) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    if (business.verificationStatus !== "verified") {
+      return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
+    }
+
+    const full = {
+      id: true,
+      name: true,
+      slug: true,
+      avatar: true,
+      jobTitle: true,
+      bio: true,
+      monthlyGoal: true,
+      businessId: true,
+      business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+    } as const;
+
+    const employee = await prisma.employee.findFirst({
+      where: {
+        businessId: business.id,
+        slug: employeeSlug,
+        isActive: true,
+        activationStatus: "active",
+        user: { is: { emailVerified: true } },
+      },
+      select: full,
+    });
+    if (!employee) {
+      return res.status(404).json({ message: "Staff member not found" });
+    }
+
+    return res.json(await buildPublicStaffTipResponse(employee));
+  } catch (err) {
+    logServerError("staff.getStaffByBusinessAndEmployeeSlug", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.staff),
+    });
   }
 }
 
@@ -133,34 +229,7 @@ export async function getStaffBySlug(req: Request, res: Response) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
 
-    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-    const monthTips = await prisma.transaction.findMany({
-      where: {
-        employeeId: employee.id,
-        status: "success",
-        createdAt: { gte: startOfMonth },
-      },
-      select: { amount: true },
-    });
-    const currentMonthTotal = monthTips.reduce((s, t) => s + Number(t.amount), 0);
-
-    const monthlyGoal =
-      employee.monthlyGoal != null && employee.monthlyGoal !== undefined
-        ? Number(employee.monthlyGoal)
-        : null;
-
-    return res.json({
-      id: employee.id,
-      name: employee.name,
-      slug: employee.slug,
-      avatar: employee.avatar,
-      jobTitle: employee.jobTitle,
-      bio: employee.bio ?? null,
-      monthlyGoal,
-      currentMonthTotal,
-      businessId: employee.businessId,
-      businessName: employee.business.name,
-    });
+    return res.json(await buildPublicStaffTipResponse(employee));
   } catch (err) {
     logServerError("staff.getStaffBySlug", err);
     return res.status(500).json({

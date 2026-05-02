@@ -5,7 +5,7 @@
  * is still set on the host (must be http(s) only — pasted `.env` lines are sanitized).
  *
  * QR codes must encode **absolute** https URLs so phone cameras open the correct host (relative
- * `/qr/...` in a QR is not portable when scanned).
+ * paths in a QR are not portable when scanned).
  */
 
 /** Strips common copy-paste mistakes (e.g. `VITE_APP_URL=https://…` stored in the wrong field). */
@@ -91,9 +91,35 @@ function joinPath(path: string): string {
   return out;
 }
 
-/** /qr/employee/:employeeId — guest scan → tip flow */
-export function qrEmployeeUrl(employeeId: string): string {
+function slugPathSegment(raw: string): string {
+  return encodeURIComponent(raw.trim().toLowerCase());
+}
+
+/** Canonical business storefront / team directory: `/{businessSlug}` */
+export function publicBusinessTipUrl(businessSlug: string): string {
+  return joinPath(`/${slugPathSegment(businessSlug)}`);
+}
+
+/**
+ * Canonical employee tip entry: `/{businessSlug}/{employeeSlug}` (matches Postgres slugs).
+ */
+export function publicEmployeeTipUrl(businessSlug: string, employeeSlug: string): string {
+  return joinPath(`/${slugPathSegment(businessSlug)}/${slugPathSegment(employeeSlug)}`);
+}
+
+/** Legacy deep link by employee row id (still supported; redirects client-side to slug URL when possible). */
+export function qrEmployeeLegacyUrl(employeeId: string): string {
   return joinPath(`/qr/employee/${encodeURIComponent(employeeId)}`);
+}
+
+/** @deprecated Alias of {@link qrEmployeeLegacyUrl}; use {@link publicEmployeeTipUrl} for new QR codes. */
+export function qrEmployeeUrl(employeeId: string): string {
+  return qrEmployeeLegacyUrl(employeeId);
+}
+
+/** @deprecated Prefer {@link publicBusinessTipUrl}. */
+export function businessDirectoryUrl(businessSlug: string): string {
+  return publicBusinessTipUrl(businessSlug);
 }
 
 /** /qr/location/:locationId */
@@ -114,11 +140,6 @@ export function qrBusinessUrl(businessId: string): string {
 /** /qr-landing/:businessId — storefront / team picker when no slug */
 export function qrLandingUrl(businessId: string): string {
   return joinPath(`/qr-landing/${encodeURIComponent(businessId)}`);
-}
-
-/** /business/:businessSlug — team directory (Path B) */
-export function businessDirectoryUrl(businessSlug: string): string {
-  return joinPath(`/business/${encodeURIComponent(businessSlug)}`);
 }
 
 /** Legacy guest link by table slug (tipping context) */

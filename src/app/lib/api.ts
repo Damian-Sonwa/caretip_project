@@ -8,6 +8,7 @@ import { toUserFriendlyMessage, fallbackMessageForHttpStatus } from "./errorMess
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
+import { authDebug } from "./authDebugLog";
 
 let refreshInFlight: Promise<{ token: string | null; shouldClearAccessToken: boolean }> | null = null;
 
@@ -37,6 +38,64 @@ function clearAuthStorage(): void {
   } catch {
     // ignore
   }
+}
+
+/** Pathname for CareTip API URLs whether `url` is relative or absolute (e.g. `VITE_API_URL` + `/api/...`). */
+function requestUrlPathname(url: string): string {
+  try {
+    const base =
+      typeof window !== "undefined" && window.location?.origin ? window.location.origin : "http://localhost";
+    return new URL(url, base).pathname;
+  } catch {
+    if (url.startsWith("/")) {
+      const q = url.indexOf("?");
+      const path = q === -1 ? url : url.slice(0, q);
+      const h = path.indexOf("#");
+      return h === -1 ? path : path.slice(0, h);
+    }
+    return "";
+  }
+}
+
+function requestUsesCaretipProtectedApi(url: string): boolean {
+  const p = requestUrlPathname(url);
+  return p.startsWith("/api/") || p.startsWith("/uploads/");
+}
+
+/**
+ * Merge the latest access token from storage into `init` immediately before `fetch`.
+ * Overwrites any stale `Authorization` header from a captured `RequestInit`.
+ */
+function attachLatestBearer(init?: RequestInit): RequestInit {
+  try {
+    if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_auth_debug") === "1") {
+      const t = getToken();
+      console.log("Auth token:", t && t.trim() ? "present" : "absent");
+    }
+  } catch {
+    // ignore
+  }
+
+  const next: RequestInit = { ...(init ?? {}) };
+  const token = getToken()?.trim();
+  const headers = new Headers();
+  const h = next.headers;
+  if (h instanceof Headers) {
+    h.forEach((v, k) => {
+      if (k.toLowerCase() !== "authorization") headers.set(k, v);
+    });
+  } else if (Array.isArray(h)) {
+    for (const [k, v] of h) {
+      if (String(k).toLowerCase() !== "authorization") headers.set(k, v);
+    }
+  } else if (h && typeof h === "object") {
+    for (const [k, v] of Object.entries(h as Record<string, string>)) {
+      if (k.toLowerCase() !== "authorization" && v != null) headers.set(k, String(v));
+    }
+  }
+  if (token) headers.set("Authorization", `Bearer ${token}`);
+  next.headers = headers;
+  return next;
 }
 
 function getHeaders(): HeadersInit {
@@ -132,29 +191,15 @@ async function refreshAccessToken(): Promise<{ token: string | null; shouldClear
   return refreshInFlight;
 }
 
-function withUpdatedBearer(init: RequestInit | undefined, token: string): RequestInit {
-  const next: RequestInit = { ...(init ?? {}) };
-  const headers: Record<string, string> = {};
-  const h = next.headers as HeadersInit | undefined;
-  if (h) {
-    if (h instanceof Headers) {
-      h.forEach((v, k) => (headers[k] = v));
-    } else if (Array.isArray(h)) {
-      for (const [k, v] of h) headers[k] = v;
-    } else {
-      Object.assign(headers, h as Record<string, string>);
-    }
-  }
-  headers["Authorization"] = `Bearer ${token}`;
-  next.headers = headers;
-  return next;
-}
+type CaretipRequestInit = RequestInit & { __caretipRetried?: boolean; __caretipDelayedRetried?: boolean };
 
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
+  const initFlags = init as CaretipRequestInit | undefined;
+
   try {
-    res = await fetch(url, init);
+    res = await fetch(url, attachLatestBearer(init));
   } catch (err) {
     logClientError("api.apiRequest", err, { url });
     const baseMsg = toUserFriendlyMessage(err);
@@ -162,16 +207,26 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   if (res.status === 401) {
-    const token = getToken();
-    const tokenIsSet = typeof token === "string" && token.trim().length > 0;
-    const isProtectedPath = url.startsWith("/api/") || url.startsWith("/uploads/");
-    const canAttempt = tokenIsSet && isProtectedPath;
-    const alreadyRetried = (init as { __caretipRetried?: boolean } | undefined)?.__caretipRetried === true;
+    const isCaretipApi = requestUsesCaretipProtectedApi(url);
+    const tokenAtStart = getToken();
+    const tokenIsSet = typeof tokenAtStart === "string" && tokenAtStart.trim().length > 0;
+    const canAttempt = tokenIsSet && isCaretipApi;
+    const alreadyRetried = initFlags?.__caretipRetried === true;
+    let refreshDeemedInvalid = false;
+
+    authDebug("apiRequest 401", {
+      url,
+      pathname: requestUrlPathname(url),
+      isCaretipApi,
+      hasToken: tokenIsSet,
+    });
+
     if (canAttempt && !alreadyRetried) {
       const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
+      if (shouldClearAccessToken) refreshDeemedInvalid = true;
       if (nextToken) {
-        const retriedInit = { ...(withUpdatedBearer(init, nextToken) as any), __caretipRetried: true };
-        res = await fetch(url, retriedInit);
+        const retriedInit: CaretipRequestInit = { ...(init ?? {}), __caretipRetried: true };
+        res = await fetch(url, attachLatestBearer(retriedInit));
       } else if (shouldClearAccessToken) {
         clearAuthStorage();
       }
@@ -180,21 +235,21 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     // If we're still unauthorized, do a single short-delay retry before clearing auth.
     // This avoids \"logout on first login\" caused by timing/race conditions around initial auth state.
     if (canAttempt && res.status === 401) {
-      const alreadyDelayedRetry =
-        (init as { __caretipDelayedRetried?: boolean } | undefined)?.__caretipDelayedRetried === true;
+      const alreadyDelayedRetry = initFlags?.__caretipDelayedRetried === true;
       if (!alreadyDelayedRetry) {
         await new Promise((r) => setTimeout(r, 250));
-        const delayedInit = { ...(init as any), __caretipDelayedRetried: true };
-        res = await fetch(url, delayedInit);
+        const delayedInit: CaretipRequestInit = { ...(init ?? {}), __caretipDelayedRetried: true };
+        res = await fetch(url, attachLatestBearer(delayedInit));
       }
     }
 
-    // Only clear auth if:
-    // - request is to a protected path
-    // - token is set
-    // - and we still got 401 after retries
-    if (tokenIsSet && isProtectedPath && res.status === 401) {
-      clearAuthStorage();
+    // Clear session only when the refresh flow marked tokens invalid, or no token remains.
+    // Avoids logging users out on a stray 401 while a token is still present (e.g. permission mismatch).
+    if (res.status === 401 && isCaretipApi) {
+      const t = getToken()?.trim();
+      if (!t || refreshDeemedInvalid) {
+        clearAuthStorage();
+      }
     }
   }
 
@@ -204,18 +259,27 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 /** Fetch a protected file (PDF/image) with Bearer auth and return an object URL. */
 export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
   const url = apiPath(inputUrl);
-  const token = getToken();
-  const headers = token ? ({ Authorization: `Bearer ${token}` } as Record<string, string>) : {};
-  let res = await fetch(url, { method: "GET", headers, credentials: "include" });
+  const baseGet: RequestInit = { method: "GET", credentials: "include" };
+  let res = await fetch(url, attachLatestBearer(baseGet));
+  let refreshDeemedInvalid = false;
 
-  if (res.status === 401 && token) {
-    const { token: nextToken } = await refreshAccessToken();
-    if (nextToken) {
-      res = await fetch(url, {
-        method: "GET",
-        headers: { Authorization: `Bearer ${nextToken}` },
-        credentials: "include",
-      });
+  if (res.status === 401 && requestUsesCaretipProtectedApi(url)) {
+    const hadToken = Boolean(getToken()?.trim());
+    if (hadToken) {
+      const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
+      if (shouldClearAccessToken) refreshDeemedInvalid = true;
+      if (nextToken) {
+        res = await fetch(url, attachLatestBearer(baseGet));
+      } else if (shouldClearAccessToken) {
+        clearAuthStorage();
+      }
+    }
+  }
+
+  if (res.status === 401 && requestUsesCaretipProtectedApi(url)) {
+    const t = getToken()?.trim();
+    if (!t || refreshDeemedInvalid) {
+      clearAuthStorage();
     }
   }
 
@@ -553,7 +617,7 @@ export async function downloadBusinessTransactionsExport(): Promise<void> {
 export interface BusinessInfo {
   id: string;
   name: string;
-  /** Public directory path: /business/{slug} */
+  /** Public directory path: `/{slug}` */
   slug?: string | null;
   logo: string | null;
   location?: string;
@@ -666,6 +730,8 @@ export interface EmployeeDetail {
   monthlyGoal: number | null;
   currentMonthTotal: number;
   businessId: string;
+  businessSlug: string | null;
+  slug: string | null;
 }
 
 export async function getEmployeeById(employeeId: string): Promise<EmployeeDetail> {
@@ -685,10 +751,23 @@ export interface StaffBySlugResponse {
   currentMonthTotal: number;
   businessId: string;
   businessName: string;
+  businessSlug: string;
 }
 
 export async function getStaffBySlug(slug: string): Promise<StaffBySlugResponse> {
   return apiRequest(apiPath(`/api/staff/${encodeURIComponent(slug)}`), { headers: getHeaders() });
+}
+
+export async function getStaffByBusinessEmployeeSlug(
+  businessSlug: string,
+  employeeSlug: string
+): Promise<StaffBySlugResponse> {
+  return apiRequest(
+    apiPath(
+      `/api/staff/directory/business/${encodeURIComponent(businessSlug)}/employee/${encodeURIComponent(employeeSlug)}`
+    ),
+    { headers: getHeaders() }
+  );
 }
 
 export interface BusinessDirectoryEmployee {
@@ -872,6 +951,8 @@ export interface EmployeeSelfProfile {
   emailNotifications: boolean;
   pushNotifications: boolean;
   businessId: string;
+  /** Public `Business.slug` for `/{businessSlug}/{employeeSlug}` URLs */
+  businessSlug: string | null;
   /** Public /staff/[slug] segment */
   slug: string | null;
 }

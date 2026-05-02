@@ -1,14 +1,18 @@
 /**
  * QR ENTRY POINTS — implementation audit (read before changing routes)
  *
- * Employee (stable id)
- * - Routes: `/qr/employee/:employeeId` → EmployeeQrEntryPage; API `GET /api/employees/:id` (public)
- * - QR: branded PNG + management UI use `getAppPublicBaseUrl()` + `/qr/employee/:id` (see appPublicUrl.ts)
+ * Employee (canonical slug path)
+ * - Routes: `/{businessSlug}/{employeeSlug}` → StaffTipByPublicPathPage; API
+ *   `GET /api/staff/directory/business/:businessSlug/employee/:employeeSlug`
+ * - Legacy: `/staff/:slug` → StaffLandingPage; API `GET /api/staff/:slug` (global employee slug)
+ * - Legacy id: `/qr/employee/:employeeId` → EmployeeQrEntryPage; API `GET /api/employees/:id` (public)
+ * - QR: branded PNG uses `publicEmployeeTipUrl(businessSlug, employeeSlug)` from appPublicUrl.ts
  *
  * Business / team directory
- * - Routes: `/business/:businessSlug` → BusinessStaffDirectoryPage; API `GET /api/staff/directory/business/:slug`
- * - Alternate: `/qr-landing/:businessId` → QRLandingPage; `/qr/business/:id` → redirect to qr-landing
- * - QR: storefront encodes env-based `qrLandingUrl` / `businessDirectoryUrl`
+ * - Routes: `/{businessSlug}` → BusinessStaffDirectoryPage; legacy redirect from `/business/:slug`
+ * - API: `GET /api/staff/directory/business/:slug`
+ * - Alternate: `/qr-landing/:businessId` when venue has no slug yet
+ * - QR: storefront uses `businessDirectoryUrl` / `publicBusinessTipUrl` when `business.slug` is set
  *
  * Table
  * - Routes: `/table/:qrSlug` → QRLandingPage (slug); `/qr/table/:tableId` → TableQrLandingPage

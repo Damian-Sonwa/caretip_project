@@ -61,6 +61,7 @@ import { PaymentPage } from './pages/customer/PaymentPage';
 import { SuccessPage } from './pages/customer/SuccessPage';
 import { RatingPage } from './pages/customer/RatingPage';
 import { BusinessStaffDirectoryPage } from './pages/customer/BusinessStaffDirectoryPage';
+import { StaffTipByPublicPathPage } from './pages/customer/StaffTipByPublicPathPage';
 import { LocationQrLandingPage } from './pages/customer/LocationQrLandingPage';
 import { TableQrLandingPage } from './pages/customer/TableQrLandingPage';
 import { EmployeeQrEntryPage } from './pages/customer/EmployeeQrEntryPage';
@@ -90,6 +91,14 @@ function RedirectQrBusiness() {
   const { businessId } = useParams<{ businessId: string }>();
   if (!businessId?.trim()) return <Navigate to="/" replace />;
   return <Navigate to={`/qr-landing/${businessId}`} replace />;
+}
+
+/** Legacy team directory path → canonical `/{businessSlug}`. */
+function RedirectLegacyBusinessDirectory() {
+  const { businessSlug } = useParams<{ businessSlug: string }>();
+  const s = businessSlug?.trim();
+  if (!s) return <Navigate to="/" replace />;
+  return <Navigate to={`/${encodeURIComponent(s)}`} replace />;
 }
 
 // Error boundary: never show HTTP codes or raw error details
@@ -580,6 +589,17 @@ const routes: RouteObject[] = [
   // Public business team QR (Path B) — must stay below /business/dashboard* static routes
   {
     path: '/business/:businessSlug',
+    Component: RedirectLegacyBusinessDirectory,
+    errorElement: <ErrorBoundary />,
+  },
+  // Canonical public slug routes (must stay last so static paths win over params)
+  {
+    path: '/:businessSlug/:employeeSlug',
+    Component: StaffTipByPublicPathPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/:businessSlug',
     Component: BusinessStaffDirectoryPage,
     errorElement: <ErrorBoundary />,
   },

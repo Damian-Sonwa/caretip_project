@@ -23,7 +23,8 @@ import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 export function TableQrLandingPage() {
   const navigate = useNavigate();
   const { tableId } = useParams<{ tableId: string }>();
-  const { setBusinessId, setEmployee, setStaffProfileSlug, setTippingVenue, setAmount } = useTipFlow();
+  const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath, setTippingVenue, setAmount } =
+    useTipFlow();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<PublicTableContextResponse | null>(null);
@@ -83,11 +84,20 @@ export function TableQrLandingPage() {
     if (!data) return;
     setBusinessId(data.business.id);
     setEmployee(emp.id, emp.name, emp.avatar ?? undefined);
-    setStaffProfileSlug(emp.slug);
     const qs = new URLSearchParams({ employeeId: emp.id });
-    if (emp.slug) {
-      qs.set("returnSlug", emp.slug);
+    const bizSlug = data.business.slug?.trim();
+    const empSlug = emp.slug?.trim();
+    if (bizSlug && empSlug) {
+      setStaffTipReturnPath(bizSlug, empSlug);
+      qs.set("returnBusinessSlug", bizSlug);
+      qs.set("returnEmployeeSlug", empSlug);
       qs.set("direct", "1");
+    } else {
+      setStaffProfileSlug(emp.slug ?? null);
+      if (emp.slug) {
+        qs.set("returnSlug", emp.slug);
+        qs.set("direct", "1");
+      }
     }
     navigate(`/tip-amount?${qs.toString()}`);
   };
@@ -181,7 +191,10 @@ export function TableQrLandingPage() {
                         repeatCandidate.emp.name ?? "Team Member",
                         repeatCandidate.emp.avatar ?? undefined,
                       );
-                      setStaffProfileSlug(repeatCandidate.emp.slug);
+                      const bs = data.business.slug?.trim();
+                      const es = repeatCandidate.emp.slug?.trim();
+                      if (bs && es) setStaffTipReturnPath(bs, es);
+                      else setStaffProfileSlug(repeatCandidate.emp.slug);
                       setAmount(repeatCandidate.amount);
                       markCustomerFlowEntered();
                       navigate("/payment");

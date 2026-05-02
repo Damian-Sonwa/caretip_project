@@ -21,7 +21,7 @@ import {
   type PlatformBusinessRow,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
-import { CareTipPageLoader } from "./CareTipPageLoader";
+import { PageLoader } from "./PageLoader";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../hooks/useSocket";
 import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
@@ -90,7 +90,7 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
  * Renders inside SuperAdminLayout only (no business dashboard UI).
  */
 export function AdminDashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const { socket, connected, connectionStatus } = useSocket(user?.role === "platform_admin");
 
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
@@ -98,7 +98,8 @@ export function AdminDashboard() {
   const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
-  const [dashLoading, setDashLoading] = useState(true);
+  /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
+  const [initialDashLoading, setInitialDashLoading] = useState(true);
 
   const filteredBusinesses = useMemo(() => {
     const q = businessSearchQuery.trim().toLowerCase();
@@ -120,22 +121,15 @@ export function AdminDashboard() {
       })
       .catch((err: unknown) => {
         logClientError("AdminDashboard.fetchPlatformHealth", err);
-        const msg = err instanceof Error ? err.message : "";
-        if (msg.toLowerCase().includes("authentication required") || msg.toLowerCase().includes("unauthorized")) {
-          // Session/token missing: bounce to platform login.
-          void logout();
-          return;
-        }
         if (!cancelled) setHealth({ database: "offline", stripe: "offline" });
       });
     return () => {
       cancelled = true;
     };
-  }, [user, logout]);
+  }, [user]);
 
   const loadDashboardData = useCallback(async () => {
     if (!user || user.role !== "platform_admin") return;
-    setDashLoading(true);
     try {
       setServiceIssue(null);
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
@@ -146,12 +140,8 @@ export function AdminDashboard() {
     } catch (err) {
       logClientError("AdminDashboard", err);
       const msg = err instanceof Error ? err.message : "";
-      if (msg.toLowerCase().includes("authentication required") || msg.toLowerCase().includes("unauthorized")) {
-        void logout();
-        return;
-      }
       // Do not wipe the UI on transient outages; keep the last known values.
-      // Surface a clear message instead.
+      // Surface a clear message instead. Invalid sessions are cleared by the shared API client.
       if (
         msg.toLowerCase().includes("service temporarily unavailable") ||
         msg.toLowerCase().includes("http 503")
@@ -163,9 +153,9 @@ export function AdminDashboard() {
         setServiceIssue(msg || "We couldn't load platform data right now.");
       }
     } finally {
-      setDashLoading(false);
+      setInitialDashLoading(false);
     }
-  }, [user, logout]);
+  }, [user]);
 
   useEffect(() => {
     void loadDashboardData();
@@ -185,11 +175,19 @@ export function AdminDashboard() {
     };
   }, [socket, user?.role, loadDashboardData]);
 
-  if (user && user.role !== "platform_admin") {
+  if (!user) {
+    return null;
+  }
+  if (user.role !== "platform_admin") {
     return <Navigate to="/unauthorized" replace />;
   }
-  if (!user) {
-    return <Navigate to="/platform-admin/login" replace />;
+
+  if (initialDashLoading) {
+    return (
+      <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 pb-20 pt-8 lg:px-8">
+        <PageLoader message="Loading platform dashboard…" />
+      </main>
+    );
   }
 
   return (
@@ -207,11 +205,6 @@ export function AdminDashboard() {
           </div>
         ) : null}
         <div className="relative mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-          {dashLoading && (
-            <div className="absolute inset-0 z-10 flex items-center justify-center rounded-xl bg-background/70 backdrop-blur-sm">
-              <CareTipPageLoader variant="compact" message="Loading dashboard data…" />
-            </div>
-          )}
           <StatCard
             title="Successful tips (EUR)"
             value={stats ? `€${stats.totalVolumeEurFormatted}` : "N/A"}
@@ -272,7 +265,7 @@ export function AdminDashboard() {
               Open KYC &amp; verification
             </Link>
           </div>
-          {!dashLoading && businesses.length > 0 && (
+          {businesses.length > 0 && (
             <div className="border-b border-border px-4 py-3">
               <div className="relative max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -289,9 +282,7 @@ export function AdminDashboard() {
             </div>
           )}
           <div className="overflow-x-auto">
-            {dashLoading ? (
-              <CareTipPageLoader variant="compact" message="Loading businesses…" />
-            ) : businesses.length === 0 ? (
+            {businesses.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">No businesses yet.</p>
             ) : filteredBusinesses.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">

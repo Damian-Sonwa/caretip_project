@@ -2,9 +2,14 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "./useAuth";
 
-/** Redirects to /auth if user is not logged in. Call at the start of protected pages. */
+/**
+ * Ensures protected pages only redirect after auth hydration.
+ * While `isAuthLoading` is true, do not navigate away or show duplicate full-page auth spinners
+ * (route guards already render {@link AppLoader}).
+ */
 export function useRequireAuth() {
-  const { user, authHydrated, isBusiness, isEmployee, logout, updateUser, exitImpersonation } = useAuth();
+  const { user, authHydrated, isAuthLoading, isBusiness, isEmployee, logout, updateUser, exitImpersonation } =
+    useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,5 +19,14 @@ export function useRequireAuth() {
     }
   }, [user, navigate, authHydrated]);
 
-  return { user, isBusiness, isEmployee, logout, updateUser, exitImpersonation };
+  return {
+    user,
+    authHydrated,
+    isAuthLoading,
+    isBusiness,
+    isEmployee,
+    logout,
+    updateUser,
+    exitImpersonation,
+  };
 }

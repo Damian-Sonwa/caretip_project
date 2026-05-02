@@ -3,6 +3,7 @@ import { Navigate, Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { PageLoader } from "./PageLoader";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined
@@ -42,6 +43,11 @@ export function PendingVerificationAllowedGate() {
   if (user?.impersonation) {
     return <Navigate to="/dashboard" replace />;
   }
+
+  if (user?.role === "business" && !user.impersonation && !ready) {
+    return <PageLoader message="Syncing account status…" />;
+  }
+
   if (user?.status === "APPROVED") {
     return <Navigate to="/dashboard" replace />;
   }

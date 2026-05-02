@@ -10,17 +10,23 @@ import { Download, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
 import {
   renderBrandedQRToDataUrl,
+  renderBrandedQRToDataUrlLegacy,
   downloadBrandedQR,
+  downloadBrandedQRLegacy,
   getEmployeeQrShareUrl,
+  getEmployeeQrLegacyShareUrl,
 } from "../../lib/qrBranded";
 import { logClientError } from "../../lib/clientLog";
 
 type EmployeeQRCodeModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  /** Stable id — encoded in QR as /qr/employee/:id */
+  /** Stable id — used for legacy `/qr/employee/:id` when slugs are missing */
   employeeId: string;
   employeeName: string;
+  /** Venue public slug + staff slug for canonical `/{businessSlug}/{employeeSlug}` */
+  businessSlug?: string | null;
+  employeeSlug?: string | null;
 };
 
 export function EmployeeQRCodeModal({
@@ -28,16 +34,25 @@ export function EmployeeQRCodeModal({
   onOpenChange,
   employeeId,
   employeeName,
+  businessSlug,
+  employeeSlug,
 }: EmployeeQRCodeModalProps) {
   const [dataUrl, setDataUrl] = useState("");
   const [imgLoading, setImgLoading] = useState(false);
+
+  const bs = businessSlug?.trim();
+  const es = employeeSlug?.trim();
+  const useSlugPair = Boolean(bs && es);
 
   useEffect(() => {
     if (!open || !employeeId) return;
     let cancelled = false;
     setImgLoading(true);
     setDataUrl("");
-    renderBrandedQRToDataUrl(employeeId)
+    const render = useSlugPair
+      ? renderBrandedQRToDataUrl(bs!, es!)
+      : renderBrandedQRToDataUrlLegacy(employeeId);
+    render
       .then((url) => {
         if (!cancelled) setDataUrl(url);
       })
@@ -50,12 +65,13 @@ export function EmployeeQRCodeModal({
     return () => {
       cancelled = true;
     };
-  }, [open, employeeId]);
+  }, [open, employeeId, bs, es, useSlugPair]);
+
+  const shareUrl = useSlugPair ? getEmployeeQrShareUrl(bs!, es!) : getEmployeeQrLegacyShareUrl(employeeId);
 
   const copyLink = async () => {
-    const text = getEmployeeQrShareUrl(employeeId);
     try {
-      await navigator.clipboard.writeText(text);
+      await navigator.clipboard.writeText(shareUrl);
       toast.success("Link copied to clipboard");
     } catch (err) {
       logClientError("EmployeeQRCodeModal", err);
@@ -64,7 +80,8 @@ export function EmployeeQRCodeModal({
   };
 
   const download = () => {
-    void downloadBrandedQR(employeeId, employeeName);
+    if (useSlugPair) void downloadBrandedQR(bs!, es!, employeeName);
+    else void downloadBrandedQRLegacy(employeeId, employeeName);
   };
 
   return (
@@ -113,7 +130,7 @@ export function EmployeeQRCodeModal({
             </button>
           </div>
           <p className="text-xs text-muted-foreground text-center break-all px-2">
-            {getEmployeeQrShareUrl(employeeId)}
+            {shareUrl}
           </p>
         </div>
       </DialogContent>

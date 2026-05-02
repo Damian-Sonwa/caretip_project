@@ -19,13 +19,13 @@ import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 /**
- * Path B: /business/:businessSlug — Business QR (staff directory).
+ * Path B: `/{businessSlug}` (legacy redirect from `/business/:businessSlug`) — Business QR (staff directory).
  * Searchable grid of active employees; tap opens tip flow for that person.
  */
 export function BusinessStaffDirectoryPage() {
   const navigate = useNavigate();
   const { businessSlug } = useParams<{ businessSlug: string }>();
-  const { setBusinessId, setEmployee, setStaffProfileSlug } = useTipFlow();
+  const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath } = useTipFlow();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<BusinessDirectoryResponse | null>(null);
@@ -75,11 +75,20 @@ export function BusinessStaffDirectoryPage() {
     if (!data) return;
     setBusinessId(data.business.id);
     setEmployee(emp.id, emp.name, emp.avatar ?? undefined);
-    setStaffProfileSlug(emp.slug);
     const qs = new URLSearchParams({ employeeId: emp.id });
-    if (emp.slug) {
-      qs.set("returnSlug", emp.slug);
+    const bizSlug = data.business.slug?.trim();
+    const empSlug = emp.slug?.trim();
+    if (bizSlug && empSlug) {
+      setStaffTipReturnPath(bizSlug, empSlug);
+      qs.set("returnBusinessSlug", bizSlug);
+      qs.set("returnEmployeeSlug", empSlug);
       qs.set("direct", "1");
+    } else {
+      setStaffProfileSlug(emp.slug ?? null);
+      if (emp.slug) {
+        qs.set("returnSlug", emp.slug);
+        qs.set("direct", "1");
+      }
     }
     navigate(`/tip-amount?${qs.toString()}`);
   };

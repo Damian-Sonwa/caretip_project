@@ -363,6 +363,8 @@ export function useAuth() {
     user,
     /** @deprecated Prefer `authState.isLoading` or `!authHydrated`. */
     isLoadingUser: !authHydrated,
+    /** True while the first session resolution pass is in flight; route guards must wait and must not redirect. */
+    isAuthLoading: !authHydrated,
     authHydrated,
     authState,
     isBusiness,

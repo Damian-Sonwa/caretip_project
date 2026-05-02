@@ -32,11 +32,12 @@ import {
 } from "../../lib/api";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { PageLoader } from "../../components/PageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import {
   renderBrandedQRToDataUrl,
+  renderBrandedQRToDataUrlLegacy,
   renderBrandedQrUrlToDataUrl,
-  downloadBrandedQR,
   downloadQrDataUrlPng,
   printQrDataUrl,
 } from "../../lib/qrBranded";
@@ -48,8 +49,9 @@ import {
 } from "../../lib/qrPrintPdf";
 import {
   businessDirectoryUrl,
+  publicEmployeeTipUrl,
   qrBusinessUrl,
-  qrEmployeeUrl,
+  qrEmployeeLegacyUrl,
   qrLandingUrl,
   qrLocationUrl,
   qrTableUrl,
@@ -65,7 +67,7 @@ import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 export function QRCodeManagementPage() {
-  const { user, isBusiness, updateUser } = useRequireAuth();
+  const { user, authHydrated, isBusiness, updateUser } = useRequireAuth();
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
   >(null);
@@ -85,6 +87,7 @@ export function QRCodeManagementPage() {
   const [venueQrPreview, setVenueQrPreview] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    if (!authHydrated) return;
     if (!user?.businessId || user.role !== "business") return;
     let cancelled = false;
     void fetchBusinessProfile()
@@ -113,9 +116,10 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.businessId, user?.role, user?.status, updateUser]);
+  }, [authHydrated, user?.businessId, user?.role, user?.status, updateUser]);
 
   const handleRegenerateBusinessQr = async () => {
+    if (!authHydrated) return;
     if (qrLocked) return;
     if (!user?.businessId) return;
     setRegeneratingId("storefront");
@@ -132,6 +136,7 @@ export function QRCodeManagementPage() {
   };
 
   const loadEmployees = useCallback(async () => {
+    if (!authHydrated) return;
     if (!user?.businessId) {
       setEmployees([]);
       setLoading(false);
@@ -148,13 +153,14 @@ export function QRCodeManagementPage() {
     } finally {
       setLoading(false);
     }
-  }, [user?.businessId]);
+  }, [authHydrated, user?.businessId]);
 
   useEffect(() => {
     loadEmployees();
   }, [loadEmployees]);
 
   useEffect(() => {
+    if (!authHydrated) return;
     if (!user?.businessId || !isBusiness) return;
     let cancelled = false;
     void (async () => {
@@ -175,7 +181,7 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [user?.businessId, isBusiness]);
+  }, [authHydrated, user?.businessId, isBusiness]);
 
   useEffect(() => {
     let cancelled = false;
@@ -230,7 +236,9 @@ export function QRCodeManagementPage() {
           continue;
         }
         try {
-          next[e.id] = await renderBrandedQRToDataUrl(e.id);
+          next[e.id] = businessSlug
+            ? await renderBrandedQRToDataUrl(businessSlug, e.slug)
+            : await renderBrandedQRToDataUrlLegacy(e.id);
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[e.id] = "";
@@ -280,6 +288,7 @@ export function QRCodeManagementPage() {
   };
 
   const handleGenerateNew = async (employee: EmployeeItem) => {
+    if (!authHydrated) return;
     if (!isBusiness) return;
     setRegeneratingId(employee.id);
     try {
@@ -292,7 +301,9 @@ export function QRCodeManagementPage() {
         )
       );
       if (updated.slug) {
-        const dataUrl = await renderBrandedQRToDataUrl(updated.id);
+        const dataUrl = businessSlug
+          ? await renderBrandedQRToDataUrl(businessSlug, updated.slug)
+          : await renderBrandedQRToDataUrlLegacy(updated.id);
         setQrImages((prev) => ({ ...prev, [employee.id]: dataUrl }));
       }
       toast.success("QR link saved. New CareTip QR is ready.", TOAST_OK);
@@ -395,9 +406,19 @@ export function QRCodeManagementPage() {
   };
 
   const handleGenerateAllPdf = async () => {
-    const staff = employees.map((e) => ({ id: e.id, name: e.name }));
+    if (!authHydrated) return;
+    const bs = businessSlug?.trim();
+    const staff = bs
+      ? employees
+          .filter((e) => e.slug?.trim())
+          .map((e) => ({ id: e.id, name: e.name, businessSlug: bs, employeeSlug: e.slug!.trim() }))
+      : [];
     if (staff.length === 0) {
-      toast.error("Add staff first.");
+      toast.error(
+        bs
+          ? "Add staff with generated links first, or ensure your business has a public slug."
+          : "Add staff first."
+      );
       return;
     }
     setBulkPdfLoading(true);
@@ -708,7 +729,7 @@ export function QRCodeManagementPage() {
     verificationStatus === null;
 
   if (awaitingBusinessVerification) {
-    return <CareTipPageLoader message="Loading…" />;
+    return <PageLoader message="Checking verification status…" />;
   }
 
   if (qrLocked) {
@@ -902,14 +923,16 @@ export function QRCodeManagementPage() {
                     <p className="mb-3 text-xs text-muted-foreground">
                       Same page:{" "}
                       <code className="break-all font-mono text-[11px] text-foreground/90">
-                        {qrBusinessUrl(user.businessId)}
+                        {businessSlug ? businessDirectoryUrl(businessSlug) : qrBusinessUrl(user.businessId)}
                       </code>
                     </p>
                     <QRCard
                       item={{
                         id: "storefront",
                         name: String(businessDisplayName ?? "").trim() || user?.businessName || "Business",
-                        qrUrl: qrLandingUrl(user.businessId),
+                        qrUrl: businessSlug
+                          ? businessDirectoryUrl(businessSlug)
+                          : qrLandingUrl(user.businessId),
                         scans: 0,
                       }}
                       type="storefront"
@@ -946,7 +969,10 @@ export function QRCodeManagementPage() {
                             name: employee.name,
                             role: employee.role,
                             avatar: employee.avatar,
-                            qrUrl: qrEmployeeUrl(employee.id),
+                            qrUrl:
+                              businessSlug && employee.slug
+                                ? publicEmployeeTipUrl(businessSlug, employee.slug)
+                                : qrEmployeeLegacyUrl(employee.id),
                             scans: 0,
                             slug: employee.slug,
                             employeeRow: employee,

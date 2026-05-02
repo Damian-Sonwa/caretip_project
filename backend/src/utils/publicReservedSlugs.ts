@@ -1,0 +1,57 @@
+/**
+ * First URL segment values that must never be used as a public `Business.slug`
+ * (they collide with SPA routes at `/{slug}`).
+ */
+export const PUBLIC_APP_RESERVED_SLUGS = new Set([
+  "about",
+  "activate",
+  "admin",
+  "api",
+  "assets",
+  "auth",
+  "blog",
+  "business",
+  "careers",
+  "check-email",
+  "contact",
+  "cookies",
+  "create-rule",
+  "create-skill",
+  "dashboard",
+  "employee",
+  "faq",
+  "features",
+  "forgot-password",
+  "get-started",
+  "help",
+  "hero-animation-demo",
+  "hero-demo",
+  "how-it-works",
+  "join",
+  "login",
+  "mobile-app",
+  "onboarding",
+  "payment",
+  "platform-admin",
+  "pricing",
+  "privacy",
+  "qr",
+  "qr-landing",
+  "rating",
+  "reset-password",
+  "select-employee",
+  "signup",
+  "staff",
+  "success",
+  "table",
+  "terms",
+  "tip-amount",
+  "unauthorized",
+  "verification-pending",
+  "verify",
+  "verify-email",
+]);
+
+export function isReservedPublicSlug(slug: string): boolean {
+  return PUBLIC_APP_RESERVED_SLUGS.has(slug.trim().toLowerCase());
+}

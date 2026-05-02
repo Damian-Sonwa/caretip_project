@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { ChevronLeft, ShieldCheck } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { getEmployeeById, getStaffBySlug } from "../../lib/api";
+import { getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CareTipLogo } from "../../components/CareTipLogo";
@@ -17,6 +17,8 @@ export function TipAmountPage() {
   const [searchParams] = useSearchParams();
   const employeeId = searchParams.get("employeeId");
   const returnSlug = searchParams.get("returnSlug");
+  const returnBusinessSlug = searchParams.get("returnBusinessSlug");
+  const returnEmployeeSlug = searchParams.get("returnEmployeeSlug");
   const directFromStaffQr = searchParams.get("direct") === "1";
   const {
     businessId,
@@ -47,7 +49,12 @@ export function TipAmountPage() {
       // If a QR scan deep-linked directly to /tip-amount, validate via API before deciding.
       if (employeeId) {
         try {
-          if (returnSlug) {
+          if (returnBusinessSlug && returnEmployeeSlug) {
+            const s = await getStaffByBusinessEmployeeSlug(returnBusinessSlug, returnEmployeeSlug);
+            if (cancelled) return;
+            setBusinessId(s.businessId);
+            setEmployee(s.id, s.name, s.avatar ?? undefined);
+          } else if (returnSlug) {
             const s = await getStaffBySlug(returnSlug);
             if (cancelled) return;
             setBusinessId(s.businessId);
@@ -74,7 +81,16 @@ export function TipAmountPage() {
     return () => {
       cancelled = true;
     };
-  }, [businessId, employeeId, navigate, returnSlug, setBusinessId, setEmployee]);
+  }, [
+    businessId,
+    employeeId,
+    navigate,
+    returnSlug,
+    returnBusinessSlug,
+    returnEmployeeSlug,
+    setBusinessId,
+    setEmployee,
+  ]);
 
   useEffect(() => {
     if (employeeId) return;
@@ -94,6 +110,13 @@ export function TipAmountPage() {
     let cancelled = false;
     (async () => {
       try {
+        if (returnBusinessSlug && returnEmployeeSlug) {
+          const s = await getStaffByBusinessEmployeeSlug(returnBusinessSlug, returnEmployeeSlug);
+          if (cancelled) return;
+          setBusinessId(s.businessId);
+          setEmployee(s.id, s.name, s.avatar ?? undefined);
+          return;
+        }
         if (returnSlug) {
           const s = await getStaffBySlug(returnSlug);
           if (cancelled) return;
@@ -118,6 +141,8 @@ export function TipAmountPage() {
   }, [
     employeeId,
     returnSlug,
+    returnBusinessSlug,
+    returnEmployeeSlug,
     businessId,
     employeeName,
     setBusinessId,
@@ -153,6 +178,12 @@ export function TipAmountPage() {
   };
 
   const handleBack = () => {
+    if (returnBusinessSlug && returnEmployeeSlug) {
+      navigate(
+        `/${encodeURIComponent(returnBusinessSlug)}/${encodeURIComponent(returnEmployeeSlug)}?preview=1`
+      );
+      return;
+    }
     if (returnSlug) {
       navigate(`/staff/${returnSlug}?preview=1`);
       return;

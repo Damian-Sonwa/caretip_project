@@ -13,6 +13,9 @@ export interface TipFlowState {
   employeeAvatar: string | null;
   /** When customer started from `/staff/:slug` public profile — used for post-tip navigation */
   staffProfileSlug: string | null;
+  /** When customer started from `/{businessSlug}/{employeeSlug}` — used for back navigation */
+  staffTipReturnBusinessSlug: string | null;
+  staffTipReturnEmployeeSlug: string | null;
   /** Table QR flow: optional venue for reporting and UI */
   locationId: string | null;
   tableId: string | null;
@@ -36,6 +39,7 @@ interface TipFlowContextValue extends TipFlowState {
   setBusinessId: (id: string | null) => void;
   setEmployee: (id: string, name: string, avatar?: string) => void;
   setStaffProfileSlug: (slug: string | null) => void;
+  setStaffTipReturnPath: (businessSlug: string | null, employeeSlug: string | null) => void;
   setTippingVenue: (venue: TippingVenuePayload | null) => void;
   setAmount: (amount: number) => void;
   setBillAmount: (amount: number) => void;
@@ -48,6 +52,8 @@ const defaultState: TipFlowState = {
   employeeName: null,
   employeeAvatar: null,
   staffProfileSlug: null,
+  staffTipReturnBusinessSlug: null,
+  staffTipReturnEmployeeSlug: null,
   locationId: null,
   tableId: null,
   tippingLocationName: null,
@@ -79,7 +85,21 @@ export function TipFlowProvider({ children }: { children: ReactNode }) {
   );
 
   const setStaffProfileSlug = useCallback((slug: string | null) => {
-    setState((prev) => ({ ...prev, staffProfileSlug: slug }));
+    setState((prev) => ({
+      ...prev,
+      staffProfileSlug: slug,
+      staffTipReturnBusinessSlug: null,
+      staffTipReturnEmployeeSlug: null,
+    }));
+  }, []);
+
+  const setStaffTipReturnPath = useCallback((businessSlug: string | null, employeeSlug: string | null) => {
+    setState((prev) => ({
+      ...prev,
+      staffTipReturnBusinessSlug: businessSlug,
+      staffTipReturnEmployeeSlug: employeeSlug,
+      staffProfileSlug: employeeSlug,
+    }));
   }, []);
 
   const setTippingVenue = useCallback((venue: TippingVenuePayload | null) => {
@@ -121,6 +141,7 @@ export function TipFlowProvider({ children }: { children: ReactNode }) {
     setBusinessId,
     setEmployee,
     setStaffProfileSlug,
+    setStaffTipReturnPath,
     setTippingVenue,
     setAmount,
     setBillAmount,

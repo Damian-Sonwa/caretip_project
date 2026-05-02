@@ -1,6 +1,6 @@
-import { CareTipPageLoader } from "./CareTipPageLoader";
+import { PageLoader } from "./PageLoader";
 
 export function AppLoader({ message = "Setting things up for you..." }: { message?: string }) {
-  return <CareTipPageLoader variant="wait" message={message} />;
+  return <PageLoader message={message} />;
 }
 

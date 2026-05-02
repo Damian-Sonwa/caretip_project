@@ -38,6 +38,7 @@ export function QRLandingPage() {
     setAmount,
     setTippingVenue,
     setStaffProfileSlug,
+    setStaffTipReturnPath,
     tippingLocationName,
     tippingTableName,
   } = useTipFlow();
@@ -219,7 +220,7 @@ export function QRLandingPage() {
   const goToSelectEmployee = () => {
     const slug = businessData?.slug?.trim();
     if (slug) {
-      navigate(`/business/${encodeURIComponent(slug)}`);
+      navigate(`/${encodeURIComponent(slug)}`);
       return;
     }
     navigate("/");
@@ -229,11 +230,20 @@ export function QRLandingPage() {
     if (!businessData) return;
     setBusinessId(businessData.id);
     setEmployee(emp.id, emp.name, emp.avatar ?? undefined);
-    setStaffProfileSlug(emp.slug);
     const qs = new URLSearchParams({ employeeId: emp.id });
-    if (emp.slug) {
-      qs.set("returnSlug", emp.slug);
+    const bizSlug = businessData.slug?.trim();
+    const empSlug = emp.slug?.trim();
+    if (bizSlug && empSlug) {
+      setStaffTipReturnPath(bizSlug, empSlug);
+      qs.set("returnBusinessSlug", bizSlug);
+      qs.set("returnEmployeeSlug", empSlug);
       qs.set("direct", "1");
+    } else {
+      setStaffProfileSlug(emp.slug ?? null);
+      if (emp.slug) {
+        qs.set("returnSlug", emp.slug);
+        qs.set("direct", "1");
+      }
     }
     navigate(`/tip-amount?${qs.toString()}`);
   };

@@ -1,12 +1,14 @@
 import type { EmployeeActivationStatus } from "@prisma/client";
+import { randomBytes } from "node:crypto";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/socketEmitters.js";
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
+import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 
-/** Avoid collision with app routes under /business/... */
+/** Avoid collision with SPA routes at `/{slug}` and legacy `/business/{slug}` paths. */
 const RESERVED_BUSINESS_SLUGS = new Set([
-  "dashboard",
+  ...PUBLIC_APP_RESERVED_SLUGS,
   "qr-management",
   "qr-code-management",
 ]);
@@ -478,17 +480,10 @@ export async function updateManagerBusinessProfile(
   const nextWebsite =
     data.website !== undefined ? (data.website?.trim() || null) : undefined;
 
-  // If legal name changes, re-slug to match. This is safe pre-QR launch; later changes can be controlled.
-  let nextSlug: string | undefined;
-  if (nextName && nextName.length > 0 && nextName !== b.name) {
-    nextSlug = await generateUniqueBusinessSlugForName(nextName);
-  }
-
   await prisma.business.update({
     where: { id: b.id },
     data: {
       ...(nextName !== undefined ? { name: nextName } : {}),
-      ...(nextSlug !== undefined ? { slug: nextSlug } : {}),
       ...(nextType !== undefined ? { businessType: nextType } : {}),
       ...(nextAddress !== undefined ? { registeredAddress: nextAddress } : {}),
       ...(nextPhone !== undefined ? { contactPhone: nextPhone } : {}),
@@ -543,10 +538,10 @@ export async function regenerateManagerBusinessSlug(userId: string): Promise<{ s
   if (!b) {
     throw new Error("Business not found");
   }
-  // Keep it human-readable, but always create a new unique slug.
   const base = normalizeBusinessSlugBase(b.name);
-  const slug = await ensureUniqueSlug(`${base}-${Math.random().toString(36).slice(2, 6)}`, async (s) => {
-    const hit = await prisma.business.findFirst({ where: { slug: s } });
+  const seed = `${base}-${randomBytes(2).toString("hex")}`;
+  const slug = await ensureUniqueSlug(seed, async (s) => {
+    const hit = await prisma.business.findFirst({ where: { slug: s, NOT: { id: b.id } } });
     return !!hit;
   });
   await prisma.business.update({ where: { id: b.id }, data: { slug } });

@@ -114,7 +114,7 @@ function formatTimeAgo(iso: string): string {
 }
 
 export function EmployeeDashboard() {
-  const { user, logout, updateUser } = useRequireAuth();
+  const { user, authHydrated, logout, updateUser } = useRequireAuth();
 
   const handleLogout = () => {
     logout();
@@ -129,13 +129,15 @@ export function EmployeeDashboard() {
   const [pulseEarnings, setPulseEarnings] = useState(false);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
+  /** Public venue slug from `/api/employees/me` for canonical tip URLs */
+  const [employeeBusinessSlug, setEmployeeBusinessSlug] = useState<string | null | undefined>(undefined);
   /** Employee row id from `/api/employees/me` - must match QR `Employee.id`, not auth `User.id` */
   const [employeeRecordId, setEmployeeRecordId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
 
   const refreshTipsQuiet = useCallback(async () => {
-    if (!user || user.role !== "employee") return;
+    if (!authHydrated || !user || user.role !== "employee") return;
     try {
       const data = await getTipsByEmployee();
       setTips(data.tips ?? []);
@@ -145,7 +147,7 @@ export function EmployeeDashboard() {
     } catch (e) {
       logClientError("EmployeeDashboard.refreshTipsQuiet", e);
     }
-  }, [user?.id, user?.role]);
+  }, [authHydrated, user?.id, user?.role]);
 
   const socketReady = useDeferSocketConnect(user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
@@ -153,7 +155,7 @@ export function EmployeeDashboard() {
   useRealtimeFallback(connected, refreshTipsQuiet);
 
   useEffect(() => {
-    if (!user || user.role !== "employee") return;
+    if (!authHydrated || !user || user.role !== "employee") return;
     const load = async () => {
       setError(null);
       const [tipsResult, profileResult] = await Promise.allSettled([
@@ -179,10 +181,12 @@ export function EmployeeDashboard() {
       if (profileResult.status === "fulfilled") {
         const p = profileResult.value;
         setStaffSlug(p.slug ?? null);
+        setEmployeeBusinessSlug(p.businessSlug ?? null);
         setEmployeeRecordId(p.id);
         updateUser({ avatar: p.avatar ?? undefined, name: p.name });
       } else {
         setStaffSlug(null);
+        setEmployeeBusinessSlug(null);
         setEmployeeRecordId(null);
       }
     };
@@ -190,7 +194,7 @@ export function EmployeeDashboard() {
     // Use stable fields only: `user` object identity changes after `updateUser`, which would otherwise
     // retrigger this effect forever (loading blink).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above
-  }, [user?.id, user?.role, updateUser]);
+  }, [authHydrated, user?.id, user?.role, updateUser]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -323,6 +327,7 @@ export function EmployeeDashboard() {
   const qrEmployeeId = user.employeeId ?? employeeRecordId ?? null;
 
   const handleQrQuickAction = async () => {
+    if (!authHydrated) return;
     if (slugLoading || generatingSlug) return;
     if (!hasSlug) {
       setGeneratingSlug(true);
@@ -330,6 +335,7 @@ export function EmployeeDashboard() {
         const p = await ensureEmployeeSlug();
         const s = p.slug;
         setStaffSlug(s ?? null);
+        setEmployeeBusinessSlug(p.businessSlug ?? null);
         if (s) {
           setQrModalOpen(true);
           toast.success("Your tip link is ready");
@@ -686,6 +692,8 @@ export function EmployeeDashboard() {
           onOpenChange={setQrModalOpen}
           employeeId={qrEmployeeId}
           employeeName={user.name ?? "Staff"}
+          businessSlug={employeeBusinessSlug ?? undefined}
+          employeeSlug={typeof staffSlug === "string" ? staffSlug : undefined}
         />
       )}
     </div>

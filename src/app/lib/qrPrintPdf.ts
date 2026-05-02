@@ -32,16 +32,6 @@ function normalizeOptionalText(raw: string | null | undefined): string | null {
   return s ? s : null;
 }
 
-function drawHeartIcon(pdf: jsPDF, x: number, y: number, sizeMm: number, rgb: [number, number, number]) {
-  // Vector heart made from two circles + triangle (no emoji/font dependency).
-  const r = sizeMm * 0.22;
-  pdf.setDrawColor(...rgb);
-  pdf.setFillColor(...rgb);
-  pdf.circle(x + r, y + r, r, "F");
-  pdf.circle(x + r * 3, y + r, r, "F");
-  pdf.triangle(x + r * 0.3, y + r * 1.3, x + r * 3.7, y + r * 1.3, x + r * 2, y + r * 3.9, "F");
-}
-
 /**
  * Single canonical print layout for all QR PDFs.
  * Hierarchy (top → bottom): Header → optional Subtext → QR → Instruction → Footer → Branding.
@@ -155,14 +145,7 @@ function renderStandardQrPdfLayout(params: {
   pdf.setFont("helvetica", "normal");
   pdf.setTextColor(...BRAND_SOFT_RGB);
   pdf.setFontSize(footerFont);
-  // Center "Thank you" with a small heart icon to the right (consistent across PDF viewers).
-  const textW = pdf.getTextWidth(footerText);
-  const heartSize = params.size === "card" ? 6 : 7;
-  const gap = 2.2;
-  const groupW = textW + gap + heartSize;
-  const startX = (pageW - groupW) / 2;
-  pdf.text(footerText, startX, footerY, { align: "left" });
-  drawHeartIcon(pdf, startX + textW + gap, footerY - heartSize * 0.75, heartSize, BRAND_SOFT_RGB);
+  pdf.text(footerText, pageW / 2, footerY, { align: "center" });
 
   // Bottom branding (separated)
   const brandY = footerY + gapFooterToBrand;

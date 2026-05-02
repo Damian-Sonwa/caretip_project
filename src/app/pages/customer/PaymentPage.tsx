@@ -24,6 +24,8 @@ export function PaymentPage() {
     employeeName,
     employeeAvatar,
     staffProfileSlug,
+    staffTipReturnBusinessSlug,
+    staffTipReturnEmployeeSlug,
     businessId,
     locationId,
     tableId,
@@ -140,6 +142,16 @@ export function PaymentPage() {
   ];
 
   const handleBack = () => {
+    if (employeeId && staffTipReturnBusinessSlug && staffTipReturnEmployeeSlug) {
+      const qs = new URLSearchParams({
+        employeeId,
+        returnBusinessSlug: staffTipReturnBusinessSlug,
+        returnEmployeeSlug: staffTipReturnEmployeeSlug,
+        direct: "1",
+      });
+      navigate(`/tip-amount?${qs.toString()}`);
+      return;
+    }
     if (employeeId && staffProfileSlug) {
       navigate(
         `/tip-amount?employeeId=${encodeURIComponent(employeeId)}&returnSlug=${encodeURIComponent(staffProfileSlug)}&direct=1`,

@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
+import { PageLoader } from "./PageLoader";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined
@@ -63,6 +64,10 @@ export function ApprovedBusinessGate() {
 
   if (user.impersonation) {
     return <Outlet />;
+  }
+
+  if (user.role === "business" && !user.impersonation && !ready) {
+    return <PageLoader message="Syncing account status…" />;
   }
 
   return <Outlet />;
