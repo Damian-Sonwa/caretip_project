@@ -2,7 +2,6 @@ import { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
-import { Navigation } from "../../components/Navigation";
 import { Footer } from "../../components/Footer";
 import { CareTipLogo } from "../../components/CareTipLogo";
 import { useAuth } from "../../hooks/useAuth";
@@ -53,9 +52,7 @@ export function PlatformAdminLoginPage() {
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
-        <Navigation />
-
-        <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-10 pt-20 sm:pt-24 dark:bg-neutral-900">
+        <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-12 sm:py-16 dark:bg-neutral-900">
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
