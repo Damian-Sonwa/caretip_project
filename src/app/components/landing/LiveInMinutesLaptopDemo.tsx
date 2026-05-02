@@ -220,6 +220,20 @@ function DemoDashboard() {
           <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">48</p>
         </div>
       </div>
+      <div className="mt-2 hidden min-h-0 flex-1 flex-col justify-end md:flex">
+        <p className="mb-1 text-[8px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+          Activity
+        </p>
+        <div className="flex h-14 items-end gap-1.5 rounded-md border border-neutral-100 bg-neutral-50/80 px-2 pb-2 dark:border-neutral-800 dark:bg-neutral-800/40">
+          {[26, 40, 20, 48, 28, 52, 34].map((px, i) => (
+            <div
+              key={i}
+              className="min-w-0 flex-1 rounded-sm bg-gradient-to-t from-primary to-primary/70"
+              style={{ height: `${px}px` }}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

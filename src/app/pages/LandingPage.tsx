@@ -1,6 +1,6 @@
 import React from "react";
 import { Smartphone } from "lucide-react";
-import heroTapToTip from "../../../images/caretip-image.png";
+import heroCaretipImage from "../../../images/caretip-image.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -17,9 +17,10 @@ const SHOWCASE_TABS: TabMedia[] = [
     value: "contactless",
     label: "QR scan",
     Icon: Smartphone,
-    src: heroTapToTip,
+    src: heroCaretipImage,
     alt: "Phone showing CareTip QR tipping screen",
     imageFit: "contain",
+    imageObjectPosition: "center",
   },
 ];
 
