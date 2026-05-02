@@ -263,7 +263,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             "relative md:col-span-5",
-            cinematic && "order-2 max-md:pt-2 md:order-1 md:pt-6",
+            cinematic && "order-1 max-md:pt-2 md:pt-6",
           )}
         >
             <Badge
@@ -344,7 +344,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             "relative flex min-h-0 items-center justify-center md:col-span-7",
-            cinematic && "order-1 max-md:w-full md:order-2 md:justify-end md:overflow-visible",
+            cinematic && "order-2 max-md:w-full md:justify-end md:overflow-visible",
           )}
         >
             {heroBorderBeam ? (
