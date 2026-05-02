@@ -23,6 +23,7 @@ import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
+import { isPublicAuthenticationPath } from '../lib/authSession';
 
 const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as const;
 
@@ -93,8 +94,12 @@ export function AuthPage() {
 
   useEffect(() => {
     if (!authHydrated || !user) return;
-    navigate(getPostAuthRedirect(user), { replace: true });
-  }, [authHydrated, user, navigate]);
+    const dest = getPostAuthRedirect(user);
+    // Do not pull users away from explicit auth URLs into onboarding (e.g. "Sign in" from /join).
+    // Other post-auth destinations (dashboard, verify-email) still apply on mount.
+    if (isPublicAuthenticationPath(location.pathname) && dest === "/onboarding") return;
+    navigate(dest, { replace: true });
+  }, [authHydrated, user, navigate, location.pathname]);
 
   useEffect(() => {
     // Update role from query params when the search string changes

@@ -24,6 +24,17 @@ export type AuthSession = {
 
 const LOGGED_OUT_ROLE: SessionUserRole = "user";
 
+/**
+ * Auth-related URLs where an existing session must not trigger automatic redirects
+ * to onboarding or the app shell (user may intend to sign in as another account).
+ */
+export function isPublicAuthenticationPath(pathname: string): boolean {
+  const p = pathname;
+  if (p === "/login" || p === "/signup" || p === "/auth" || p === "/forgot-password") return true;
+  if (p.startsWith("/reset-password/")) return true;
+  return false;
+}
+
 export function deriveAuthSession(user: SessionUserLike | null): AuthSession {
   if (!user) {
     return {
@@ -76,7 +87,7 @@ export function resolveAuthenticatedAppGuard(
 
   if (r === "business") {
     if (!session.hasCompletedOnboarding) {
-      if (p === "/onboarding") {
+      if (p === "/onboarding" || isPublicAuthenticationPath(p)) {
         return { kind: "allow" };
       }
       return { kind: "redirect", to: "/onboarding", reason: "onboarding_incomplete" };
