@@ -23,6 +23,7 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
+import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport, getBusinessStats } from "../../lib/api";
 import type {
   BusinessDashboardStats,
@@ -320,14 +321,15 @@ export function BusinessDashboard() {
       )}
 
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        {pendingVerification && (
-          <div className="mb-5 rounded-xl border-2 border-primary/30 bg-muted/40 p-4 text-sm">
-            <p className="font-semibold text-foreground">Account pending verification</p>
-            <p className="mt-1 text-muted-foreground">
-              Your venue dashboard stats will appear once verification is approved.
-            </p>
-          </div>
-        )}
+        <FixPrompt
+          id="pendingVerification"
+          issueActive={pendingVerification === true}
+          tone="info"
+          title="Account pending verification"
+          description="Your venue dashboard stats will appear once verification is approved."
+          dismissPersistence="session"
+          className="mb-5"
+        />
         <DashboardHero
           badge={
             <>
@@ -432,19 +434,15 @@ export function BusinessDashboard() {
 
       <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="space-y-6 py-6">
-          {brokenQrLinks && (
-            <div className="flex flex-col gap-3 rounded-xl border-2 border-primary bg-muted/50 p-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold text-foreground">Some staff are missing QR links</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Open QR Management to generate fresh links and printable codes.
-                </p>
-              </div>
-              <Button asChild className="shrink-0">
-                <Link to="/business/qr-management">Fix QR links</Link>
-              </Button>
-            </div>
-          )}
+          <FixPrompt
+            id="missingQR"
+            issueActive={brokenQrLinks}
+            dismissPersistence="session"
+            title="Some staff are missing QR links"
+            description="Open QR Management to generate fresh links and printable codes."
+            actionLabel="Fix QR links"
+            actionTo="/business/qr-management"
+          />
 
           <div className="flex flex-wrap items-center gap-3">
             <LiveConnectionBadge status={connectionStatus} />

@@ -21,6 +21,7 @@ import {
   type PlatformBusinessRow,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { FixPrompt } from "./FixPrompt";
 import { PageLoader } from "./PageLoader";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../hooks/useSocket";
@@ -198,12 +199,16 @@ export function AdminDashboard() {
       <NetworkOverviewHero health={health} />
 
       <TracingBeam>
-        {serviceIssue ? (
-          <div className="mb-6 rounded-xl border border-border bg-muted p-4 text-sm text-foreground">
-            <p className="font-semibold">We’re having trouble loading platform data.</p>
-            <p className="mt-1 text-muted-foreground">{serviceIssue}</p>
-          </div>
-        ) : null}
+        <FixPrompt
+          id="platformDataLoad"
+          issueActive={Boolean(serviceIssue)}
+          dismissPersistence="session"
+          title="We’re having trouble loading platform data."
+          description={serviceIssue ?? undefined}
+          actionLabel="Retry"
+          onAction={() => void loadDashboardData()}
+          className="mb-6"
+        />
         <div className="relative mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <StatCard
             title="Successful tips (EUR)"

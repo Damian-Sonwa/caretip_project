@@ -37,6 +37,7 @@ import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { getTipsByEmployee, getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
+import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
@@ -482,19 +483,15 @@ export function EmployeeDashboard() {
         </div>
 
         <div className="space-y-6 pb-6 pt-6">
-          {!user.avatar && (
-            <div className="flex flex-col gap-3 rounded-xl border border-black/[0.06] bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-bold text-foreground">Action required</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Upload a photo so guests recognize you on your tip page.
-                </p>
-              </div>
-              <Button asChild className="shrink-0">
-                <Link to="/employee/settings">Upload photo</Link>
-              </Button>
-            </div>
-          )}
+          <FixPrompt
+            id="profilePhoto"
+            issueActive={!user.avatar}
+            dismissPersistence="local"
+            title="Add a profile photo"
+            description="Upload a photo so guests recognize you on your tip page."
+            actionLabel="Upload photo"
+            actionTo="/employee/settings"
+          />
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
             <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
