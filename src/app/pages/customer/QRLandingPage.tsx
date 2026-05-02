@@ -15,6 +15,7 @@ import {
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { CareTipLogo } from "../../components/CareTipLogo";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { resolveMediaUrl } from "../../lib/mediaUrl";
@@ -119,8 +120,6 @@ export function QRLandingPage() {
           setBusinessData({
             ...business,
             slug: business.slug ?? null,
-            location: business.location ?? "Downtown",
-            type: business.type ?? "Restaurant",
           });
           markCustomerFlowEntered();
         }
@@ -375,7 +374,11 @@ export function QRLandingPage() {
       <div className="min-h-screen bg-background pb-32">
         <div className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur-lg shadow-sm">
           <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3.5 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-            <CareTipLogo size="xs" />
+            {businessData ? (
+              <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="md" />
+            ) : (
+              <CareTipLogo size="xs" className="shrink-0" />
+            )}
             <div className="min-w-0 flex-1">
               <h1 className="truncate text-base font-semibold text-foreground">Tip {displayName}</h1>
               <p className="text-xs text-muted-foreground">{displayRole}</p>
@@ -560,11 +563,14 @@ export function QRLandingPage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       <div className="sticky top-0 z-10 border-b border-border/30 bg-background/95 backdrop-blur-lg shadow-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3.5 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-          <CareTipLogo size="sm" />
+          <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="md" />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold text-foreground">{businessData.name}</h1>
             <p className="text-xs text-muted-foreground">Select a team member to tip</p>
           </div>
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+            CareTip
+          </span>
         </div>
       </div>
 
@@ -656,16 +662,22 @@ export function QRLandingPage() {
               <CardContent className="space-y-5 p-7 md:p-8">
                 <div>
                   <h2 className="mb-3 text-3xl font-bold text-foreground">{businessData.name}</h2>
-                  <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground/90">
-                    <div className="flex items-center gap-2 font-medium">
-                      <MapPin className="h-5 w-5 shrink-0 text-primary" />
-                      <span>{businessData.location}</span>
+                  {(businessData.location || businessData.type) ? (
+                    <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground/90">
+                      {businessData.location ? (
+                        <div className="flex items-center gap-2 font-medium">
+                          <MapPin className="h-5 w-5 shrink-0 text-primary" />
+                          <span>{businessData.location}</span>
+                        </div>
+                      ) : null}
+                      {businessData.type ? (
+                        <div className="flex items-center gap-2 font-medium">
+                          <Building2 className="h-5 w-5 shrink-0 text-primary" />
+                          <span>{businessData.type}</span>
+                        </div>
+                      ) : null}
                     </div>
-                    <div className="flex items-center gap-2 font-medium">
-                      <Building2 className="h-5 w-5 shrink-0 text-primary" />
-                      <span>{businessData.type}</span>
-                    </div>
-                  </div>
+                  ) : null}
                 </div>
                 <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4">
                   <Users className="h-6 w-6 shrink-0 text-primary" />

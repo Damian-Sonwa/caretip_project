@@ -11,6 +11,7 @@ import { setPendingTipFromCheckout } from "../../lib/repeatTip";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CareTipLogo } from "../../components/CareTipLogo";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
@@ -35,6 +36,7 @@ export function PaymentPage() {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [guardReady, setGuardReady] = useState(false);
+  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(null);
 
   const tipAmountVal = tipAmountCtx ?? 15.3;
   /** Customer pays the tip only (no separate bill line). */
@@ -112,6 +114,29 @@ export function PaymentPage() {
       cancelled = true;
     };
   }, [employeeId, businessId, employeeName, setBusinessId, setEmployee]);
+
+  useEffect(() => {
+    if (!employeeId) {
+      setBusinessBrand(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const emp = await getEmployeeById(employeeId);
+        if (cancelled) return;
+        setBusinessBrand({
+          logo: emp.businessLogo ?? null,
+          name: String(emp.businessName ?? "").trim() || "Venue",
+        });
+      } catch {
+        if (!cancelled) setBusinessBrand(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [employeeId]);
 
   if (!guardReady && !import.meta.env.DEV) {
     return <CareTipPageLoader variant="wait" message="Preparing checkout…" />;
@@ -210,7 +235,16 @@ export function PaymentPage() {
             >
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
-            <CareTipLogo size="xs" className="shrink-0" />
+            {businessBrand ? (
+              <BusinessLogoMark
+                logoPathOrUrl={businessBrand.logo}
+                businessName={businessBrand.name}
+                size="md"
+                className="shrink-0"
+              />
+            ) : (
+              <CareTipLogo size="xs" className="shrink-0" />
+            )}
             <div className="min-w-0">
               <h1 className="text-lg font-semibold text-foreground">Payment</h1>
               <p className="text-xs text-muted-foreground">Choose payment method</p>

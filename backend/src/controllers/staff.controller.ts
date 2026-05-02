@@ -17,7 +17,15 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
     }
     const business = await prisma.business.findFirst({
       where: { slug: raw },
-      select: { id: true, name: true, slug: true, verificationStatus: true },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        verificationStatus: true,
+        logoPath: true,
+        businessType: true,
+        location: true,
+      },
     });
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
@@ -46,6 +54,9 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
         id: business.id,
         name: business.name,
         slug: business.slug,
+        logo: business.logoPath ?? null,
+        type: business.businessType ?? null,
+        location: business.location ?? null,
       },
       employees,
     });
@@ -71,6 +82,7 @@ type StaffBySlugRow = {
     name: string;
     slug: string;
     verificationStatus?: "pending" | "verified" | "rejected";
+    logoPath: string | null;
   };
 };
 
@@ -84,7 +96,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     bio: true,
     monthlyGoal: true,
     businessId: true,
-    business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+    business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
   } as const;
   try {
     return prisma.employee.findFirst({
@@ -114,7 +126,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
           bio: true,
           monthlyGoal: true,
           businessId: true,
-          business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+          business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
         },
       });
     }
@@ -151,6 +163,7 @@ async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
     businessId: employee.businessId,
     businessName: employee.business.name,
     businessSlug: employee.business.slug,
+    businessLogo: employee.business.logoPath ?? null,
   };
 }
 
@@ -185,7 +198,7 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
       bio: true,
       monthlyGoal: true,
       businessId: true,
-      business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+      business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
     } as const;
 
     const employee = await prisma.employee.findFirst({

@@ -6,6 +6,7 @@ import {
   UserCircle,
   HelpCircle,
   Wallet,
+  Building2,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+  { name: 'Business profile', href: '/dashboard/profile', icon: Building2 },
   { name: 'Tips & activity', href: '/dashboard/transactions', icon: Wallet },
   { name: 'Notifications', href: '/dashboard/notifications', icon: Bell },
   { name: 'Support', href: '/dashboard/support', icon: HelpCircle },

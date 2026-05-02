@@ -455,11 +455,17 @@ export async function getManagerBusinessProfile(userId: string) {
   return getBusinessById(b.id);
 }
 
+const MAX_LOCATION_LEN = 2000;
+
 export async function updateManagerBusinessProfile(
   userId: string,
   data: {
+    /** Preferred public / display name (same column as `legalBusinessName` legacy). */
+    name?: string;
     legalBusinessName?: string;
     businessType?: string | null;
+    /** Short venue location (separate from registered address). */
+    location?: string | null;
     registeredAddress?: string | null;
     contactPhone?: string | null;
     website?: string | null;
@@ -470,9 +476,25 @@ export async function updateManagerBusinessProfile(
     throw new Error("Business not found");
   }
 
+  const nameSource = data.name !== undefined ? data.name : data.legalBusinessName;
   const nextName =
-    typeof data.legalBusinessName === "string" ? data.legalBusinessName.trim() : undefined;
+    nameSource !== undefined ? String(nameSource).trim() : undefined;
+  if (nextName !== undefined && nextName.length === 0) {
+    throw new Error("Business name is required");
+  }
   const nextType = data.businessType !== undefined ? (data.businessType?.trim() || null) : undefined;
+  const nextLocation =
+    data.location !== undefined
+      ? data.location == null
+        ? null
+        : (() => {
+            const t = String(data.location).trim();
+            if (t.length > MAX_LOCATION_LEN) {
+              throw new Error(`Location must be at most ${MAX_LOCATION_LEN} characters`);
+            }
+            return t || null;
+          })()
+      : undefined;
   const nextAddress =
     data.registeredAddress !== undefined ? (data.registeredAddress?.trim() || null) : undefined;
   const nextPhone =
@@ -485,6 +507,7 @@ export async function updateManagerBusinessProfile(
     data: {
       ...(nextName !== undefined ? { name: nextName } : {}),
       ...(nextType !== undefined ? { businessType: nextType } : {}),
+      ...(nextLocation !== undefined ? { location: nextLocation } : {}),
       ...(nextAddress !== undefined ? { registeredAddress: nextAddress } : {}),
       ...(nextPhone !== undefined ? { contactPhone: nextPhone } : {}),
       ...(nextWebsite !== undefined ? { website: nextWebsite } : {}),
@@ -507,6 +530,7 @@ export async function getBusinessById(id: string) {
       location: true,
       registeredAddress: true,
       verificationStatus: true,
+      logoPath: true,
     },
   });
   if (!business) return null;
@@ -523,10 +547,10 @@ export async function getBusinessById(id: string) {
     id: business.id,
     name: business.name,
     slug: business.slug,
-    logo: null,
-    location: business.location ?? "Downtown",
+    logo: business.logoPath ?? null,
+    location: business.location ?? null,
     registeredAddress: business.registeredAddress ?? null,
-    type: business.businessType ?? "Restaurant",
+    type: business.businessType ?? null,
     employeeCount,
     verificationStatus: business.verificationStatus,
   };

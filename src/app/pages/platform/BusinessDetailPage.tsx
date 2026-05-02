@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router";
 import { motion } from "motion/react";
-import { ArrowLeft, Building2, CheckCircle, Shield, XCircle } from "lucide-react";
+import { ArrowLeft, CheckCircle, Shield, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchPlatformBusiness,
@@ -16,6 +16,7 @@ import {
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 
 export function BusinessDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -177,7 +178,7 @@ export function BusinessDetailPage() {
               >
                 <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                   <div className="flex items-start gap-3">
-                    <Building2 className="w-6 h-6 text-muted-foreground shrink-0 mt-0.5" />
+                    <BusinessLogoMark logoPathOrUrl={row.logoPath ?? null} businessName={row.name} size="lg" />
                     <div>
                       <h2 className="text-xl font-semibold text-foreground">{row.name}</h2>
                       <p className="text-sm text-muted-foreground font-mono">{row.slug}</p>

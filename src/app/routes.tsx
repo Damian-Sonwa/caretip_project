@@ -77,6 +77,7 @@ import { StaffManagementPage } from './pages/business/StaffManagementPage';
 import { QRCodeManagementPage } from './pages/business/QRCodeManagementPage';
 import { LocationsPage } from './pages/business/LocationsPage';
 import { TablesPage } from './pages/business/TablesPage';
+import { BusinessProfilePage } from './pages/business/BusinessProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { BusinessLayout } from './layouts/BusinessLayout';
@@ -281,6 +282,7 @@ const routes: RouteObject[] = [
         element: <BusinessLayout />,
         children: [
       { index: true, Component: BusinessDashboard },
+      { path: 'profile', Component: BusinessProfilePage },
       { path: 'staff-management', Component: StaffManagementPage },
       { path: 'qr-code-management', Component: QRCodeManagementPage },
       { path: 'locations', Component: LocationsPage },

@@ -620,9 +620,9 @@ export interface BusinessInfo {
   /** Public directory path: `/{slug}` */
   slug?: string | null;
   logo: string | null;
-  location?: string;
+  location?: string | null;
   registeredAddress?: string | null;
-  type?: string;
+  type?: string | null;
   employeeCount: number;
   verificationStatus?: "pending" | "verified" | "rejected";
 }
@@ -663,14 +663,33 @@ export async function patchMyOnboardingStatus(hasCompletedOnboarding: boolean): 
 }
 
 export async function patchBusinessProfile(body: {
+  name?: string;
   legalBusinessName?: string;
   businessType?: string | null;
+  location?: string | null;
   registeredAddress?: string | null;
   contactPhone?: string | null;
   website?: string | null;
 }): Promise<BusinessInfo> {
   return apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
     method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(body),
+    credentials: "include",
+  });
+}
+
+/** Same payload as PATCH — PUT for clients that expect REST “replace” semantics. */
+export async function putBusinessProfile(body: {
+  name?: string;
+  businessType?: string | null;
+  location?: string | null;
+  registeredAddress?: string | null;
+  contactPhone?: string | null;
+  website?: string | null;
+}): Promise<BusinessInfo> {
+  return apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
+    method: "PUT",
     headers: getHeaders(),
     body: JSON.stringify(body),
     credentials: "include",
@@ -731,6 +750,9 @@ export interface EmployeeDetail {
   currentMonthTotal: number;
   businessId: string;
   businessSlug: string | null;
+  /** API path or URL for venue logo on customer flows. */
+  businessLogo?: string | null;
+  businessName?: string;
   slug: string | null;
 }
 
@@ -752,6 +774,7 @@ export interface StaffBySlugResponse {
   businessId: string;
   businessName: string;
   businessSlug: string;
+  businessLogo?: string | null;
 }
 
 export async function getStaffBySlug(slug: string): Promise<StaffBySlugResponse> {
@@ -779,7 +802,14 @@ export interface BusinessDirectoryEmployee {
 }
 
 export interface BusinessDirectoryResponse {
-  business: { id: string; name: string; slug: string | null };
+  business: {
+    id: string;
+    name: string;
+    slug: string | null;
+    logo?: string | null;
+    type?: string | null;
+    location?: string | null;
+  };
   employees: BusinessDirectoryEmployee[];
 }
 
@@ -1061,6 +1091,7 @@ export interface TippingContextResponse {
   locationId: string;
   tableId: string;
   businessName: string;
+  businessLogo?: string | null;
 }
 
 /** Public: resolve table QR slug to venue + business (guest scan). */
@@ -1073,7 +1104,7 @@ export async function getTippingContextByQrSlug(qrSlug: string): Promise<Tipping
 
 /** Public: venue/location QR — team list for the business at this location. */
 export interface PublicLocationContextResponse {
-  business: { id: string; name: string; slug: string | null };
+  business: { id: string; name: string; slug: string | null; logo?: string | null };
   location: { id: string; name: string; description: string | null };
   employees: BusinessDirectoryEmployee[];
 }
@@ -1089,7 +1120,7 @@ export async function getPublicLocationContext(
 
 /** Public: table QR by table id — same team list + table/location labels for tip metadata. */
 export interface PublicTableContextResponse {
-  business: { id: string; name: string; slug: string | null };
+  business: { id: string; name: string; slug: string | null; logo?: string | null };
   location: { id: string; name: string };
   table: { id: string; name: string; qrSlug: string };
   employees: BusinessDirectoryEmployee[];

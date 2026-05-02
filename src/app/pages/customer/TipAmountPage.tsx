@@ -8,6 +8,7 @@ import { getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from 
 import { logClientError } from "../../lib/clientLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CareTipLogo } from "../../components/CareTipLogo";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
@@ -33,6 +34,7 @@ export function TipAmountPage() {
   const [customAmount, setCustomAmount] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [guardReady, setGuardReady] = useState(false);
+  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(null);
 
   // Guard: don't redirect until we can confirm the context is invalid.
   useEffect(() => {
@@ -54,16 +56,22 @@ export function TipAmountPage() {
             if (cancelled) return;
             setBusinessId(s.businessId);
             setEmployee(s.id, s.name, s.avatar ?? undefined);
+            setBusinessBrand({ logo: s.businessLogo ?? null, name: s.businessName });
           } else if (returnSlug) {
             const s = await getStaffBySlug(returnSlug);
             if (cancelled) return;
             setBusinessId(s.businessId);
             setEmployee(s.id, s.name, s.avatar ?? undefined);
+            setBusinessBrand({ logo: s.businessLogo ?? null, name: s.businessName });
           } else {
             const emp = await getEmployeeById(employeeId);
             if (cancelled) return;
             setBusinessId(emp.businessId);
             setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+            setBusinessBrand({
+              logo: emp.businessLogo ?? null,
+              name: String(emp.businessName ?? "").trim() || "Venue",
+            });
           }
           markCustomerFlowEntered();
           if (!cancelled) setGuardReady(true);
@@ -115,6 +123,7 @@ export function TipAmountPage() {
           if (cancelled) return;
           setBusinessId(s.businessId);
           setEmployee(s.id, s.name, s.avatar ?? undefined);
+          setBusinessBrand({ logo: s.businessLogo ?? null, name: s.businessName });
           return;
         }
         if (returnSlug) {
@@ -122,12 +131,17 @@ export function TipAmountPage() {
           if (cancelled) return;
           setBusinessId(s.businessId);
           setEmployee(s.id, s.name, s.avatar ?? undefined);
+          setBusinessBrand({ logo: s.businessLogo ?? null, name: s.businessName });
           return;
         }
         const emp = await getEmployeeById(employeeId);
         if (cancelled) return;
         setBusinessId(emp.businessId);
         setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+        setBusinessBrand({
+          logo: emp.businessLogo ?? null,
+          name: String(emp.businessName ?? "").trim() || "Venue",
+        });
       } catch (err) {
         logClientError("TipAmountPage", err);
         if (!cancelled) {
@@ -223,7 +237,16 @@ export function TipAmountPage() {
             >
               <ChevronLeft className="h-5 w-5 text-foreground" />
             </button>
-            <CareTipLogo size="xs" className="shrink-0" />
+            {businessBrand ? (
+              <BusinessLogoMark
+                logoPathOrUrl={businessBrand.logo}
+                businessName={businessBrand.name}
+                size="md"
+                className="shrink-0"
+              />
+            ) : (
+              <CareTipLogo size="xs" className="shrink-0" />
+            )}
             <div className="min-w-0">
               <h1 className="text-lg font-semibold text-foreground">Choose Tip Amount</h1>
               <p className="text-xs text-muted-foreground">For {employeeName ?? "Team Member"}</p>

@@ -57,6 +57,8 @@ import {
   qrTableUrl,
 } from "../../lib/appPublicUrl";
 import { downloadStaffQrPdf } from "../../lib/qrBulkPdf";
+import { resolveMediaUrl } from "../../lib/mediaUrl";
+import { fetchImageUrlAsSquarePngDataUrl } from "../../lib/imageDataUrl";
 import { logClientError } from "../../lib/clientLog";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -85,6 +87,8 @@ export function QRCodeManagementPage() {
   const [venueLocations, setVenueLocations] = useState<LocationDTO[]>([]);
   const [venueTables, setVenueTables] = useState<TableDTO[]>([]);
   const [venueQrPreview, setVenueQrPreview] = useState<Record<string, string>>({});
+  /** Stored API path for venue logo (PDF + print). */
+  const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authHydrated) return;
@@ -96,6 +100,7 @@ export function QRCodeManagementPage() {
         setBusinessSlug(p.slug?.trim() || null);
         setBusinessDisplayName(String(p.name ?? "").trim() || null);
         setBusinessLocation(String(p.registeredAddress ?? p.location ?? "").trim() || null);
+        setBusinessLogoPath(p.logo?.trim() ? p.logo : null);
         const v = p.verificationStatus ?? "pending";
         setVerificationStatus(v);
         updateUser({
@@ -109,6 +114,7 @@ export function QRCodeManagementPage() {
         setBusinessSlug(null);
         setBusinessDisplayName(user?.businessName ?? null);
         setBusinessLocation(null);
+        setBusinessLogoPath(null);
         if (user.status === "APPROVED") setVerificationStatus("verified");
         else if (user.status === "REJECTED") setVerificationStatus("rejected");
         else setVerificationStatus("pending");
@@ -315,6 +321,12 @@ export function QRCodeManagementPage() {
     }
   };
 
+  const loadLogoPngForPdf = async (): Promise<string | null> => {
+    const u = resolveMediaUrl(businessLogoPath ?? undefined);
+    if (!u) return null;
+    return fetchImageUrlAsSquarePngDataUrl(u);
+  };
+
   const buildVenueQrDataUrl = async (
     item: CardItem,
     previewDataUrl: string | undefined
@@ -372,11 +384,13 @@ export function QRCodeManagementPage() {
           : type === "table" || type === "location"
             ? String(item.name ?? "").trim() || null
             : null;
+      const logoPng = await loadLogoPngForPdf();
       const pdf = createBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
         subtext,
         instruction: "Scan to tip instantly",
+        businessLogoPngDataUrl: logoPng,
       });
       const blob = pdf.output("blob") as Blob;
       const url = URL.createObjectURL(blob);
@@ -424,7 +438,8 @@ export function QRCodeManagementPage() {
     setBulkPdfLoading(true);
     try {
       const dateStr = new Date().toISOString().slice(0, 10);
-      await downloadStaffQrPdf(staff, `CareTip_QR_All_${dateStr}`);
+      const logoPng = await loadLogoPngForPdf();
+      await downloadStaffQrPdf(staff, `CareTip_QR_All_${dateStr}`, { businessLogoPngDataUrl: logoPng });
       toast.success("PDF ready to print.", TOAST_OK);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
@@ -456,11 +471,13 @@ export function QRCodeManagementPage() {
           : type === "table" || type === "location"
             ? String(item.name ?? "").trim() || null
             : null;
+      const logoPng = await loadLogoPngForPdf();
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
         subtext,
         instruction: "Scan to tip instantly",
+        businessLogoPngDataUrl: logoPng,
         fileBaseName:
           type === "storefront"
             ? `CareTip_QR_${displayBusinessName}`
@@ -483,10 +500,12 @@ export function QRCodeManagementPage() {
     try {
       const displayBusinessName =
         String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+      const logoPng = await loadLogoPngForPdf();
       await downloadEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
         businessName: displayBusinessName,
+        businessLogoPngDataUrl: logoPng,
         fileBaseName: `CareTip_QR_${item.name}`,
       });
     } catch (err) {
@@ -504,10 +523,12 @@ export function QRCodeManagementPage() {
     try {
       const displayBusinessName =
         String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+      const logoPng = await loadLogoPngForPdf();
       const pdf = createEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
         businessName: displayBusinessName,
+        businessLogoPngDataUrl: logoPng,
       });
       const blob = pdf.output("blob") as Blob;
       const url = URL.createObjectURL(blob);

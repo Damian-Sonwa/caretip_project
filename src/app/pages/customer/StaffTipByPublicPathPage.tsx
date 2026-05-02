@@ -7,6 +7,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 
@@ -140,6 +141,14 @@ export function StaffTipByPublicPathPage() {
         }}
       />
       <div className="max-w-md mx-auto px-4 -mt-16 relative">
+        <div className="mb-4 flex justify-center">
+          <BusinessLogoMark
+            logoPathOrUrl={staff.businessLogo ?? null}
+            businessName={staff.businessName}
+            size="lg"
+            className="rounded-2xl shadow-md ring-2 ring-background"
+          />
+        </div>
         <div className="bg-card rounded-2xl border border-border shadow-lg p-6 text-center">
           <div className="mx-auto mb-4" style={{ boxShadow: `0 0 0 2px ${BRAND_ORANGE}` }}>
             <ProfileAvatar

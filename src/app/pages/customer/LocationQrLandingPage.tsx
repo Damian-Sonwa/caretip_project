@@ -12,7 +12,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { CareTipLogo } from "../../components/CareTipLogo";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
@@ -130,7 +130,7 @@ export function LocationQrLandingPage() {
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
-          <CareTipLogo size="xs" className="shrink-0" />
+          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="md" />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3.5 w-3.5 shrink-0" />

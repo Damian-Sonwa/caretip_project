@@ -143,6 +143,10 @@ export interface EmployeeDetail {
   businessId: string;
   /** Public `Business.slug` for canonical `/{businessSlug}/{employeeSlug}` links. */
   businessSlug: string | null;
+  /** Public `Business.logoPath` for venue branding on tip flows. */
+  businessLogo: string | null;
+  /** Venue display name for customer UI. */
+  businessName: string;
   /** Public `Employee.slug` when set. */
   slug: string | null;
 }
@@ -160,7 +164,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       isActive: true,
       activationStatus: true,
       businessId: true,
-      business: { select: { verificationStatus: true, slug: true } },
+      business: { select: { verificationStatus: true, slug: true, logoPath: true, name: true } },
       user: { select: { emailVerified: true } },
       transactions: {
         where: {
@@ -213,6 +217,8 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     currentMonthTotal,
     businessId: emp.businessId,
     businessSlug: emp.business.slug ?? null,
+    businessLogo: emp.business.logoPath ?? null,
+    businessName: emp.business.name ?? "",
     slug: emp.slug ?? null,
   };
 }

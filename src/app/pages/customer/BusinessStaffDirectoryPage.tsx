@@ -12,7 +12,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { CareTipLogo } from "../../components/CareTipLogo";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { usePublicSocket } from "../../hooks/usePublicSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
@@ -148,18 +148,16 @@ export function BusinessStaffDirectoryPage() {
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
-          <CareTipLogo size="xs" className="shrink-0" />
+          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="md" />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold text-foreground">{data.business.name}</h1>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span>{data.business.type}</span>
-              {data.business.location && (
-                <>
-                  <span>•</span>
-                  <span>{data.business.location}</span>
-                </>
-              )}
-            </div>
+            {(data.business.type || data.business.location) && (
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                {data.business.type ? <span>{data.business.type}</span> : null}
+                {data.business.type && data.business.location ? <span>•</span> : null}
+                {data.business.location ? <span>{data.business.location}</span> : null}
+              </div>
+            )}
           </div>
           <LiveConnectionBadge status={connectionStatus} className="shrink-0" />
         </div>

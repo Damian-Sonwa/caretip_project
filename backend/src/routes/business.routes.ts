@@ -19,6 +19,13 @@ router.patch(
   requireRole(Role.MANAGER),
   businessController.patchMyProfile
 );
+router.put(
+  "/profile",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.putMyProfile
+);
 router.post(
   "/profile/logo",
   authMiddleware,

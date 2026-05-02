@@ -9,13 +9,13 @@ export interface PublicTippingEmployee {
 }
 
 export interface PublicLocationContext {
-  business: { id: string; name: string; slug: string | null };
+  business: { id: string; name: string; slug: string | null; logo: string | null };
   location: { id: string; name: string; description: string | null };
   employees: PublicTippingEmployee[];
 }
 
 export interface PublicTableContext {
-  business: { id: string; name: string; slug: string | null };
+  business: { id: string; name: string; slug: string | null; logo: string | null };
   location: { id: string; name: string };
   table: { id: string; name: string; qrSlug: string };
   employees: PublicTippingEmployee[];
@@ -112,7 +112,7 @@ export async function getPublicLocationContext(
       name: true,
       description: true,
       businessId: true,
-      business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+      business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
     },
   });
   if (!loc) return null;
@@ -120,7 +120,12 @@ export async function getPublicLocationContext(
 
   const employees = await employeesForLocationQr(loc.businessId, loc.id);
   return {
-    business: { id: loc.business.id, name: loc.business.name, slug: loc.business.slug },
+    business: {
+      id: loc.business.id,
+      name: loc.business.name,
+      slug: loc.business.slug,
+      logo: loc.business.logoPath ?? null,
+    },
     location: { id: loc.id, name: loc.name, description: loc.description },
     employees,
   };
@@ -142,7 +147,7 @@ export async function getPublicTableContextById(
           id: true,
           name: true,
           businessId: true,
-          business: { select: { id: true, name: true, slug: true, verificationStatus: true } },
+          business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
         },
       },
     },
@@ -156,6 +161,7 @@ export async function getPublicTableContextById(
       id: table.location.business.id,
       name: table.location.business.name,
       slug: table.location.business.slug,
+      logo: table.location.business.logoPath ?? null,
     },
     location: { id: table.location.id, name: table.location.name },
     table: { id: table.id, name: table.name, qrSlug: table.qrSlug },

@@ -59,6 +59,25 @@ export async function validateInvite(req: Request, res: Response) {
   }
 }
 
+function parseProfileBody(body: Record<string, unknown>): Parameters<typeof businessService.updateManagerBusinessProfile>[1] {
+  const name =
+    typeof body.name === "string"
+      ? body.name
+      : typeof body.businessName === "string"
+        ? body.businessName
+        : undefined;
+  return {
+    name,
+    legalBusinessName: typeof body.legalBusinessName === "string" ? body.legalBusinessName : undefined,
+    businessType: body.businessType === undefined ? undefined : (body.businessType as string | null),
+    location: body.location === undefined ? undefined : (body.location as string | null),
+    registeredAddress:
+      body.registeredAddress === undefined ? undefined : (body.registeredAddress as string | null),
+    contactPhone: body.contactPhone === undefined ? undefined : (body.contactPhone as string | null),
+    website: body.website === undefined ? undefined : (body.website as string | null),
+  };
+}
+
 export async function patchMyProfile(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? req.user?.id;
@@ -66,14 +85,7 @@ export async function patchMyProfile(req: Request, res: Response) {
       return res.status(401).json({ message: "Authentication required" });
     }
     const body = req.body as Record<string, unknown>;
-    await businessService.updateManagerBusinessProfile(userId, {
-      legalBusinessName: typeof body.legalBusinessName === "string" ? body.legalBusinessName : undefined,
-      businessType: body.businessType === undefined ? undefined : (body.businessType as string | null),
-      registeredAddress:
-        body.registeredAddress === undefined ? undefined : (body.registeredAddress as string | null),
-      contactPhone: body.contactPhone === undefined ? undefined : (body.contactPhone as string | null),
-      website: body.website === undefined ? undefined : (body.website as string | null),
-    });
+    await businessService.updateManagerBusinessProfile(userId, parseProfileBody(body));
     const profile = await businessService.getManagerBusinessProfile(userId);
     return res.json(profile);
   } catch (err) {
@@ -82,6 +94,11 @@ export async function patchMyProfile(req: Request, res: Response) {
       message: clientSafeMessage(err, CLIENT_FALLBACK.business),
     });
   }
+}
+
+/** Same as PATCH — REST clients may use PUT for full profile replace-style updates. */
+export async function putMyProfile(req: Request, res: Response) {
+  return patchMyProfile(req, res);
 }
 
 export async function regenerateBusinessSlug(req: Request, res: Response) {

@@ -84,7 +84,7 @@ export async function getTippingContextByQrSlug(qrSlug: string) {
         select: {
           name: true,
           businessId: true,
-          business: { select: { id: true, name: true, verificationStatus: true } },
+          business: { select: { id: true, name: true, verificationStatus: true, logoPath: true } },
         },
       },
     },
@@ -102,5 +102,6 @@ export async function getTippingContextByQrSlug(qrSlug: string) {
     locationId: table.locationId,
     tableId: table.id,
     businessName: table.location.business.name,
+    businessLogo: table.location.business.logoPath ?? null,
   };
 }

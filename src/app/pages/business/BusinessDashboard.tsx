@@ -355,6 +355,16 @@ export function BusinessDashboard() {
           shortcuts={
             <>
               <Link
+                to="/dashboard/profile"
+                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="h-4 w-4" />
+                  Manage business profile
+                </span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
                 to="/dashboard/staff-management"
                 className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
               >
@@ -738,6 +748,12 @@ export function BusinessDashboard() {
                 <CardDescription>Common venue tasks</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
+                <Button variant="outline" className="w-full justify-start gap-3" asChild>
+                  <Link to="/dashboard/profile">
+                    <Building2 className="h-5 w-5 shrink-0" />
+                    Business profile
+                  </Link>
+                </Button>
                 <Button className="w-full justify-start gap-3" asChild>
                   <Link to="/business/qr-management">
                     <QrCode className="h-5 w-5 shrink-0" />

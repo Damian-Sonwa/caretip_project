@@ -21,6 +21,7 @@ import {
   type PlatformBusinessRow,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
 import { PageLoader } from "./PageLoader";
 import { useAuth } from "../hooks/useAuth";
@@ -314,6 +315,9 @@ export function AdminDashboard() {
                 <tbody>
                   {filteredBusinesses.map((b) => (
                     <tr key={b.id} className="border-b border-border hover:bg-muted/50">
+                      <td className="px-2 py-3 align-middle">
+                        <BusinessLogoMark logoPathOrUrl={b.logoPath ?? null} businessName={b.name} size="sm" />
+                      </td>
                       <td className="px-4 py-3">
                         <div className="font-medium text-foreground">{b.name}</div>
                         <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
