@@ -4,17 +4,9 @@
   "installCommand": "npm install",
   "outputDirectory": "dist",
   "framework": "vite",
-  "redirects": [
-    {
-      "source": "/:path*",
-      "has": [{ "type": "host", "value": "caretip-project.vercel.app" }],
-      "destination": "https://caretip.de/:path*",
-      "permanent": true
-    }
-  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/)(?!api/)(?!uploads/)(?!.*\\.(?:ico|png|jpe?g|gif|svg|webp|woff2?|ttf|js|mjs|css|json|webmanifest|map|txt)$).*)",
       "destination": "/index.html"
     }
   ],

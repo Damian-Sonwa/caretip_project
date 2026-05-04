@@ -8,9 +8,9 @@
  * Typography: Roboto (weights 400 / 500 / 600 / 700)
  *
  * HSL tokens use space-separated components for hsl(var(--token)).
+ *
+ * Load Roboto from index.html only; a bundled @import can minify to invalid CSS and break the whole sheet.
  */
-@import url("https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap");
-
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
