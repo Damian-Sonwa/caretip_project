@@ -60,7 +60,7 @@ export function LandingPage() {
             tabs={SHOWCASE_TABS}
             defaultTab="contactless"
             primaryCtaLabel="Get Started"
-            primaryCtaTo="/get-started"
+            primaryCtaTo="/auth?mode=signup&role=business&from=landing"
             secondaryCtaLabel="Join your team"
             secondaryCtaTo="/join"
             variant="cinematic"

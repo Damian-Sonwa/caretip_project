@@ -45,7 +45,9 @@ const FIELD = {
 export function AuthPage() {
   const location = useLocation();
   const [isLogin, setIsLogin] = useState(() => {
+    const sp = new URLSearchParams(location.search);
     if (location.pathname === '/signup') return false;
+    if (location.pathname === '/auth' && sp.get('mode') === 'signup') return false;
     return true;
   });
   
@@ -94,12 +96,14 @@ export function AuthPage() {
 
   useEffect(() => {
     if (!authHydrated || !user) return;
+    const sp = new URLSearchParams(location.search);
+    if (sp.get('from') === 'landing') return;
     const dest = getPostAuthRedirect(user);
     // Do not pull users away from explicit auth URLs into onboarding (e.g. "Sign in" from /join).
     // Other post-auth destinations (dashboard, verify-email) still apply on mount.
     if (isPublicAuthenticationPath(location.pathname) && dest === "/onboarding") return;
     navigate(dest, { replace: true });
-  }, [authHydrated, user, navigate, location.pathname]);
+  }, [authHydrated, user, navigate, location.pathname, location.search]);
 
   useEffect(() => {
     // Update role from query params when the search string changes

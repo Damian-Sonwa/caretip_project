@@ -203,7 +203,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/get-started',
-    element: <Navigate to="/signup?role=business" replace />,
+    element: <Navigate to="/auth?mode=signup&role=business&from=landing" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
