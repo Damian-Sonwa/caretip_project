@@ -46,6 +46,7 @@ import {
   Cell
 } from "recharts";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
+import { SaasDashboard3DHeroCore } from "@/components/saas-3d-hero/SaasDashboard3DHeroCore";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
@@ -55,8 +56,6 @@ import {
   devMockBusinessEmployeePerformance,
   devMockBusinessTipDistribution,
 } from "../../lib/devAnalyticsMocks";
-
-import businessDashboardHeroImg from "../../../../images/newly01 (2).png";
 
 const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
 
@@ -345,8 +344,15 @@ export function BusinessDashboard() {
           }
           title={BUSINESS_HERO_HEADLINE}
           description={BUSINESS_HERO_SUB}
-          imageSrc={businessDashboardHeroImg}
-          imageCaption="From QR scans to trophies: see how your team performs at every step."
+          image={
+            <SaasDashboard3DHeroCore
+              variant="embed"
+              embedMaxHeight="min(360px, min(44svh, 92vw))"
+              className="w-full max-w-full"
+            />
+          }
+          imageOverlay={false}
+          imageCaption="Live workspace preview: tips, teams, and clarity in motion."
           overview={
             <div className="space-y-3 text-sm text-foreground/80">
               <p>Monitor team performance, track tip activity, and manage your venue operations in real time.</p>

@@ -30,6 +30,7 @@ import { HowItWorksPage } from './pages/HowItWorksPage';
 import { FeaturesPage } from './pages/FeaturesPage';
 import HeroSectionDemoPage from './pages/HeroSectionDemoPage';
 import { HeroAnimationDemoPage } from './pages/HeroAnimationDemoPage';
+import SaasDashboard3DHeroPage from './pages/SaasDashboard3DHeroPage';
 import { JoinPage } from './pages/JoinPage';
 import { BusinessOnboardingPage } from './pages/BusinessOnboardingPage';
 import { AuthPage } from './components/AuthPage';
@@ -81,6 +82,7 @@ import { BusinessProfilePage } from './pages/business/BusinessProfilePage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { BusinessLayout } from './layouts/BusinessLayout';
+import { EmployeeLayout } from './layouts/EmployeeLayout';
 import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ApprovedBusinessGate } from './components/ApprovedBusinessGate';
 import { PendingVerificationAllowedGate } from './components/PendingVerificationAllowedGate';
@@ -439,6 +441,11 @@ const routes: RouteObject[] = [
     Component: HeroAnimationDemoPage,
     errorElement: <ErrorBoundary />,
   },
+  {
+    path: '/saas-3d-hero',
+    Component: SaasDashboard3DHeroPage,
+    errorElement: <ErrorBoundary />,
+  },
   // Customer Flow Pages
   {
     path: '/staff/:slug',
@@ -500,33 +507,21 @@ const routes: RouteObject[] = [
     Component: RatingPage,
     errorElement: <ErrorBoundary />,
   },
-  // Employee Dashboard Pages (staff only)
+  // Employee Dashboard Pages (staff only) — shared shell for walkthrough ribbon
   {
-    path: '/employee/dashboard',
+    path: '/employee',
     element: (
       <ProtectedRoute allowedRoles={['employee']}>
-        <EmployeeDashboard />
+        <EmployeeLayout />
       </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
-  },
-  {
-    path: '/employee/notifications',
-    element: (
-      <ProtectedRoute allowedRoles={['employee']}>
-        <EmployeeNotificationsPage />
-      </ProtectedRoute>
-    ),
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: '/employee/settings',
-    element: (
-      <ProtectedRoute allowedRoles={['employee']}>
-        <EmployeeSettingsPage />
-      </ProtectedRoute>
-    ),
-    errorElement: <ErrorBoundary />,
+    children: [
+      { index: true, element: <Navigate to="/employee/dashboard" replace /> },
+      { path: 'dashboard', Component: EmployeeDashboard },
+      { path: 'notifications', Component: EmployeeNotificationsPage },
+      { path: 'settings', Component: EmployeeSettingsPage },
+    ],
   },
   {
     path: '/employee-dashboard',

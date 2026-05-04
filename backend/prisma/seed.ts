@@ -2,6 +2,7 @@ import "dotenv/config";
 import bcrypt from "bcrypt";
 import "../src/loadEnv.js";
 import { prisma } from "../src/prisma.js";
+import { seedWalkthroughDemo } from "./seedWalkthroughDemo.js";
 
 async function main() {
   const defaultPassword = "password123";
@@ -112,6 +113,8 @@ async function main() {
   console.log("- Invite code:", business.inviteCode);
   console.log("- Employees:", employeeData.map((e) => `${e.name} (${e.email})`).join(", "));
   console.log("- All demo passwords: password123");
+
+  await seedWalkthroughDemo(prisma);
 }
 
 main()

@@ -122,6 +122,23 @@ npm run db:migrate
 # npm run db:push
 ```
 
+### Walkthrough demo (product tour)
+
+`npm run db:seed` (from `backend/`) provisions a **multi-role tour**: verified venue, staff with slugs (including a dedicated primary staff login), table QRs, tips for business and employee dashboards, platform admin, and a few audit log rows.
+
+| Role | Sign-in URL | Email | Password |
+|------|-------------|-------|----------|
+| **Business (manager)** | `/login` → Business | `demo@caretip.de` | `Demo1234!` |
+| **Employee (primary demo)** | `/login` → Staff | `employee@caretip.de` | `Demo1234!` |
+| **Platform admin** | `/platform-admin/login` | `admin@caretip.de` | `Demo1234!` |
+
+| Field | Value |
+|-------|-------|
+| **Venue** | Brasserie Lindenstraße (KYC **verified**, onboarding marked complete) |
+| **Extra staff (optional)** | `anna.staff.demo@caretip.de`, Sam, Jordan — same password |
+
+Amber ribbons on the **business**, **employee**, and **platform admin** shells mark walkthrough accounts. Demo business rows are isolated to that venue; the admin shell still reads the real database (see ribbon copy on `/platform-admin/*`).
+
 ### 4. Run locally
 
 **Terminal A — API (default port 3001):**
@@ -193,7 +210,8 @@ Add your domain in the **Resend dashboard → Domains**, complete the DNS record
 | Variable | Example | Purpose |
 |----------|---------|---------|
 | `VITE_API_URL` | *(omit in local dev)* | If **unset**, Vite **proxies** `/api` and `/socket.io` to `http://localhost:3001`. If set, the browser calls this base URL directly. |
-| `NEXT_PUBLIC_APP_URL` | *(optional)* | Override public origin for QR/share links only if it must differ from the browser’s current origin. Otherwise table QR links use the same host as the open app. |
+| **`BASE_URL`** | `https://caretip.de` | **Preferred** public SPA origin for **QR codes and share links** (read at `vite build` / dev start; not hardcoded). Baked as `import.meta.env.VITE_CARETIP_APP_ORIGIN`. |
+| `VITE_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL` / `VITE_APP_URL` | `https://caretip.de` | Fallbacks if `BASE_URL` is unset (same “URL only” rules). |
 | `VITE_GOOGLE_CLIENT_ID` | `*.apps.googleusercontent.com` | Google Sign-In, if enabled in your build |
 
 ---
@@ -307,7 +325,7 @@ cd backend && npm run db:migrate:deploy
 
 ### Split hosting (common)
 
-- **Frontend:** e.g. Vercel / Netlify → set **`VITE_API_URL`** to your **API** public URL. Table/employee QR links use the SPA origin automatically; set **`NEXT_PUBLIC_APP_URL`** only if you need a fixed public base different from where the page is opened.
+- **Frontend:** e.g. Vercel / Netlify → set **`VITE_API_URL`** to your **API** public URL. For production QR codes, set **`BASE_URL=https://caretip.de`** (or `NEXT_PUBLIC_APP_URL`) on the **frontend** build so links are not tied to a preview hostname. `vercel.json` redirects **`caretip-project.vercel.app`** → **`https://caretip.de`** when both point at this project.
 - **Backend:** e.g. Railway, Render, Fly, VPS → set **`FRONTEND_URL`** to the **same SPA origin** users open in the browser (emails and redirects depend on it).
 
 ### Resend

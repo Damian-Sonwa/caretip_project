@@ -381,7 +381,7 @@ export function EmployeeDashboard() {
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
       <EmployeeHeader user={user} onLogout={handleLogout} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-6">
+      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <DashboardHero
           badge={
             <>
@@ -391,8 +391,9 @@ export function EmployeeDashboard() {
           }
           title={EMPLOYEE_HERO_HEADLINE}
           description={EMPLOYEE_HERO_SUB}
-          image={<RealTimeTipPulseGraphic />}
-          imageCaption="Profile and guest tips stay in sync with your QR."
+          image={<RealTimeTipPulseGraphic className="w-full" />}
+          imageOverlay={false}
+          imageCaption="Profile and guest tips: stay in sync with your QR."
           overview={
             <div className="space-y-3 text-sm text-foreground/80">
               <p>Track your earnings, tips, and progress toward your monthly goal. Every scan counts!</p>

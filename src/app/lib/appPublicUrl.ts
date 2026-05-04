@@ -1,8 +1,12 @@
 /**
  * Public web app base URL for links and QR payloads (never the API host).
- * In the browser, defaults to `window.location.origin` so table/employee QR links match the site
- * the manager is using. Optional override: `NEXT_PUBLIC_APP_URL`, or legacy `VITE_APP_URL` if that
- * is still set on the host (must be http(s) only — pasted `.env` lines are sanitized).
+ *
+ * **Source of truth (production):** set `BASE_URL=https://caretip.de` in the environment used when
+ * running `vite build` (and optionally in dev `.env`). Vite injects the normalized origin as
+ * `import.meta.env.VITE_CARETIP_APP_ORIGIN` — see `vite.config.ts` (`loadEnv` + `define`).
+ *
+ * Fallback order in the client: injected origin → `VITE_BASE_URL` → `NEXT_PUBLIC_APP_URL` →
+ * `VITE_APP_URL` → `window.location.origin` (so local/dev QR still work without env).
  *
  * QR codes must encode **absolute** https URLs so phone cameras open the correct host (relative
  * paths in a QR are not portable when scanned).
@@ -62,10 +66,15 @@ function envRawToPublicOrigin(raw: string): string {
 }
 
 function readEnvBase(): string {
-  /** Prefer Next-style name; `VITE_APP_URL` is legacy (some dashboards still use it for the SPA origin). */
-  const candidates = [import.meta.env.NEXT_PUBLIC_APP_URL, import.meta.env.VITE_APP_URL];
+  const candidates = [
+    import.meta.env.VITE_CARETIP_APP_ORIGIN,
+    import.meta.env.VITE_BASE_URL,
+    import.meta.env.NEXT_PUBLIC_BASE_URL,
+    import.meta.env.NEXT_PUBLIC_APP_URL,
+    import.meta.env.VITE_APP_URL,
+  ];
   for (const raw of candidates) {
-    const origin = envRawToPublicOrigin(raw);
+    const origin = envRawToPublicOrigin(typeof raw === "string" ? raw : "");
     if (origin) return origin;
   }
   return "";

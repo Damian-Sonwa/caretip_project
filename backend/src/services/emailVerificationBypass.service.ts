@@ -14,9 +14,14 @@ function mergeEnvFirstNames(base: Set<string>): Set<string> {
   return out;
 }
 
+/** Stakeholder walkthrough accounts — eligible for login without inbox verification (non–super-admin). */
+const HARDCODED_DEMO_LOGIN_EMAILS = new Set(
+  ["demo@caretip.de", "employee@caretip.de"].map((e) => e.toLowerCase()),
+);
+
 function bypassEmails(): Set<string> {
+  const s = new Set<string>(HARDCODED_DEMO_LOGIN_EMAILS);
   const raw = process.env.EMAIL_VERIFICATION_BYPASS_EMAILS?.trim();
-  const s = new Set<string>();
   if (!raw) return s;
   for (const part of raw.split(/[,;]/)) {
     const t = part.trim().toLowerCase();

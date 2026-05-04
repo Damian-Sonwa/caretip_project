@@ -26,7 +26,7 @@
  * - `/qr/business/:businessId` → redirects to `/qr-landing/:businessId`
  *
  * Admin QR generation (dashboard → QR code management)
- * - All URLs: `src/app/lib/appPublicUrl.ts` (never raw localhost in production when env is set)
+ * - All URLs: `src/app/lib/appPublicUrl.ts` — production: set `BASE_URL` (see `vite.config.ts` + README)
  */
 
 export {};
