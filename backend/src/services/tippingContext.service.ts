@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 export interface PublicTippingEmployee {
   id: string;
@@ -124,10 +125,13 @@ export async function getPublicLocationContext(
       id: loc.business.id,
       name: loc.business.name,
       slug: loc.business.slug,
-      logo: loc.business.logoPath ?? null,
+      logo: absolutizePublicMediaPath(loc.business.logoPath ?? null),
     },
     location: { id: loc.id, name: loc.name, description: loc.description },
-    employees,
+    employees: employees.map((e) => ({
+      ...e,
+      avatar: absolutizePublicMediaPath(e.avatar),
+    })),
   };
 }
 
@@ -161,10 +165,13 @@ export async function getPublicTableContextById(
       id: table.location.business.id,
       name: table.location.business.name,
       slug: table.location.business.slug,
-      logo: table.location.business.logoPath ?? null,
+      logo: absolutizePublicMediaPath(table.location.business.logoPath ?? null),
     },
     location: { id: table.location.id, name: table.location.name },
     table: { id: table.id, name: table.name, qrSlug: table.qrSlug },
-    employees,
+    employees: employees.map((e) => ({
+      ...e,
+      avatar: absolutizePublicMediaPath(e.avatar),
+    })),
   };
 }

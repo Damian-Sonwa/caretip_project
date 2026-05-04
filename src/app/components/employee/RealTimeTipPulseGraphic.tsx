@@ -12,7 +12,7 @@ export type RealTimeTipPulseGraphicProps = {
   maxHeight?: string;
 };
 
-/** Spinning gold QR with floating accent particles for the employee dashboard hero (tight aspect-ratio layout). */
+/** Spinning gold QR with floating accent particles for the employee dashboard hero only. */
 export function RealTimeTipPulseGraphic({
   className,
   maxHeight = "min(340px, min(44svh, 92vw))",

@@ -1,4 +1,4 @@
-import { Suspense, useRef } from "react";
+import { Suspense, useLayoutEffect, useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { ContactShadows, Environment, Html, RoundedBox } from "@react-three/drei";
 import type { Group } from "three";
@@ -19,7 +19,18 @@ export function DashboardScene({ reducedMotion, reflectorResolution }: SceneProp
   const panel = useRef<Group>(null);
   const { pointer, viewport } = useThree();
 
+  useLayoutEffect(() => {
+    if (!reducedMotion) return;
+    const r = rig.current;
+    const p = panel.current;
+    if (!r || !p) return;
+    r.rotation.set(-0.12, 0.32, 0);
+    p.position.y = 0;
+  }, [reducedMotion]);
+
   useFrame(({ clock }) => {
+    if (reducedMotion) return;
+
     const r = rig.current;
     const p = panel.current;
     if (!r || !p) return;
@@ -27,13 +38,6 @@ export function DashboardScene({ reducedMotion, reflectorResolution }: SceneProp
     const t = clock.elapsedTime;
     const parallaxX = pointer.x * 0.14;
     const parallaxY = pointer.y * 0.08;
-
-    if (reducedMotion) {
-      r.rotation.y = 0.32 + parallaxX * 0.5;
-      r.rotation.x = -0.12 + parallaxY * 0.35;
-      p.position.y = 0;
-      return;
-    }
 
     const orbit = Math.sin(t * 0.11) * 0.06;
     const breathe = Math.sin(t * 0.65) * 0.038;
@@ -74,7 +78,7 @@ export function DashboardScene({ reducedMotion, reflectorResolution }: SceneProp
 
       <group ref={rig} position={[0, 0.05, 0]}>
         <group ref={panel} rotation={[-0.2, 0.22, 0.02]} position={[0, 0, 0]}>
-          <FloatingDepthCards />
+          <FloatingDepthCards animated={!reducedMotion} />
 
           <RoundedBox
             args={[2.85, 1.72, 0.14]}
@@ -118,11 +122,11 @@ export function DashboardScene({ reducedMotion, reflectorResolution }: SceneProp
             distanceFactor={5.2 * htmlScale}
             style={{ transformOrigin: "center center" }}
           >
-            <DashboardUiLayer />
+            <DashboardUiLayer animated={!reducedMotion} />
           </Html>
 
           <group position={[1.05, -0.35, 0.18]} rotation={[0, -0.35, 0.08]}>
-            <MiniChartBars />
+            <MiniChartBars animated={!reducedMotion} />
           </group>
         </group>
 

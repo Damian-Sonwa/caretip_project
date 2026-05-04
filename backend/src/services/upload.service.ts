@@ -2,46 +2,10 @@ import { mkdirSync, writeFileSync } from "fs";
 import { join } from "path";
 import { randomUUID } from "crypto";
 import { v2 as cloudinary } from "cloudinary";
+import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
 
 const UPLOAD_CONFIG_ERROR =
   "Photo upload is not configured on this server. The administrator should set CLOUDINARY_URL (recommended) or PUBLIC_API_BASE_URL to the API’s public HTTPS URL.";
-
-/**
- * Public base URL for serving `/uploads/*` when not using Cloudinary.
- * Many hosts set a single env (e.g. RENDER_EXTERNAL_URL) instead of PUBLIC_API_BASE_URL.
- */
-function resolvePublicApiBaseUrl(): string {
-  const trim = (s: string | undefined) => s?.trim().replace(/\/+$/, "") ?? "";
-
-  const explicit =
-    trim(process.env.PUBLIC_API_BASE_URL) ||
-    trim(process.env.API_PUBLIC_URL) ||
-    trim(process.env.BACKEND_PUBLIC_URL);
-  if (explicit) return explicit;
-
-  const render = trim(process.env.RENDER_EXTERNAL_URL);
-  if (render) return render;
-
-  const railway = trim(process.env.RAILWAY_PUBLIC_DOMAIN);
-  if (railway) {
-    const host = railway.replace(/^https?:\/\//i, "");
-    return `https://${host}`;
-  }
-
-  const fly = trim(process.env.FLY_APP_NAME);
-  if (fly) return `https://${fly}.fly.dev`;
-
-  const heroku = trim(process.env.HEROKU_APP_NAME);
-  if (heroku) return `https://${heroku}.herokuapp.com`;
-
-  const vercel = trim(process.env.VERCEL_URL);
-  if (vercel) {
-    const host = vercel.replace(/^https?:\/\//i, "");
-    return `https://${host}`;
-  }
-
-  return `http://localhost:${process.env.PORT ?? 3001}`;
-}
 
 function isLocalhostBase(url: string): boolean {
   try {

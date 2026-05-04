@@ -6,6 +6,7 @@ import {
 } from "../services/stripe.service.js";
 import { prisma } from "../prisma.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 /**
  * POST /api/payments/create-tip-session
@@ -96,13 +97,21 @@ export async function getTipSessionContext(req: Request, res: Response) {
         })
       : null;
 
+    const employeePayload = employee
+      ? {
+          id: employee.id,
+          name: employee.name,
+          avatar: absolutizePublicMediaPath(employee.avatar),
+        }
+      : null;
+
     // Webhook may not have persisted the Transaction yet; client can retry briefly.
     if (!tx) {
       return res.status(202).json({
         status: "pending",
         sessionId: ctx.sessionId,
         paymentIntentId: ctx.paymentIntentId,
-        employee: employee ? { id: employee.id, name: employee.name, avatar: employee.avatar } : null,
+        employee: employeePayload,
         businessId: ctx.businessId,
         locationId: ctx.locationId,
         tableId: ctx.tableId,
@@ -115,7 +124,7 @@ export async function getTipSessionContext(req: Request, res: Response) {
       sessionId: ctx.sessionId,
       paymentIntentId: ctx.paymentIntentId,
       transactionId: tx.id,
-      employee: employee ? { id: employee.id, name: employee.name, avatar: employee.avatar } : null,
+      employee: employeePayload,
       businessId: tx.businessId,
       locationId: tx.locationId,
       tableId: tx.tableId,

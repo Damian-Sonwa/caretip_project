@@ -8,6 +8,7 @@ import {
   buildEmployeeActivationUrl,
   sendEmployeeActivationEmail,
 } from "./employeeActivationEmail.service.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 const VERIFICATION_REQUIRED_MSG = "QR code will be available after business verification.";
 
@@ -120,7 +121,7 @@ export async function getEmployeesByBusinessId(businessId: string): Promise<Empl
         slug: emp.slug,
         name: emp.name,
         role: emp.jobTitle,
-        avatar: emp.avatar,
+        avatar: absolutizePublicMediaPath(emp.avatar),
         isActive: emp.isActive,
         email: emp.user?.email ?? "", // Handle nullable user/email
         rating: tipCount > 0 ? 4.8 : null,
@@ -212,12 +213,12 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     id: emp.id,
     name: emp.name,
     role: emp.jobTitle,
-    avatar: emp.avatar,
+    avatar: absolutizePublicMediaPath(emp.avatar),
     monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
     currentMonthTotal,
     businessId: emp.businessId,
     businessSlug: emp.business.slug ?? null,
-    businessLogo: emp.business.logoPath ?? null,
+    businessLogo: absolutizePublicMediaPath(emp.business.logoPath ?? null),
     businessName: emp.business.name ?? "",
     slug: emp.slug ?? null,
   };
@@ -361,7 +362,7 @@ export async function updateEmployeeForBusiness(
     name: updated.name,
     jobTitle: updated.jobTitle,
     slug: updated.slug,
-    avatar: updated.avatar,
+    avatar: absolutizePublicMediaPath(updated.avatar),
     monthlyGoal: updated.monthlyGoal != null ? Number(updated.monthlyGoal) : null,
     isActive: updated.isActive,
     email: updated.user?.email ?? "",
@@ -421,7 +422,7 @@ export async function updateEmployeeActiveStatusForBusiness(
     name: updated.name,
     jobTitle: updated.jobTitle,
     slug: updated.slug,
-    avatar: updated.avatar,
+    avatar: absolutizePublicMediaPath(updated.avatar),
     monthlyGoal: updated.monthlyGoal != null ? Number(updated.monthlyGoal) : null,
     isActive: updated.isActive,
     email: updated.user?.email ?? "",
@@ -470,7 +471,7 @@ export async function regenerateEmployeeSlugForBusiness(businessId: string, empl
     name: updated.name,
     jobTitle: updated.jobTitle,
     slug: updated.slug,
-    avatar: updated.avatar,
+    avatar: absolutizePublicMediaPath(updated.avatar),
     email: updated.user?.email ?? "",
   };
 }
@@ -563,7 +564,7 @@ export async function createEmployee(input: CreateEmployeeInput) {
       id: employee.id,
       name: employee.name,
       jobTitle: employee.jobTitle,
-      avatar: employee.avatar,
+      avatar: absolutizePublicMediaPath(employee.avatar),
       temporaryPassword: TEMP_PASSWORD,
       locationId: employee.locationId,
       assignedTableIds: employee.tableAssignments.map((ta) => ta.table.id),
@@ -619,7 +620,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       email: emp.user.email,
       jobTitle: emp.jobTitle,
       bio: emp.bio ?? null,
-      avatar: emp.avatar,
+      avatar: absolutizePublicMediaPath(emp.avatar),
       monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
       emailNotifications: emp.emailNotifications,
       pushNotifications: emp.pushNotifications,
@@ -650,7 +651,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         email: emp.user.email,
         jobTitle: emp.jobTitle,
         bio: null,
-        avatar: emp.avatar,
+        avatar: absolutizePublicMediaPath(emp.avatar),
         monthlyGoal: null,
         emailNotifications: true,
         pushNotifications: true,
@@ -744,7 +745,7 @@ export async function setEmployeeAvatarUrl(userId: string, avatarUrl: string) {
     where: { id: emp.id },
     data: { avatar: avatarUrl },
   });
-  return { avatar: avatarUrl };
+  return { avatar: absolutizePublicMediaPath(avatarUrl) };
 }
 
 export async function exportEmployeeData(userId: string) {
@@ -768,7 +769,7 @@ export async function exportEmployeeData(userId: string) {
       email: emp.user.email,
       jobTitle: emp.jobTitle,
       bio: emp.bio,
-      avatar: emp.avatar,
+      avatar: absolutizePublicMediaPath(emp.avatar),
       monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
       accountCreatedAt: emp.user.createdAt.toISOString(),
     },

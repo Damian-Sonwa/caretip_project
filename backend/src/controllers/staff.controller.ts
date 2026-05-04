@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 const VERIFICATION_REQUIRED_MSG = "QR code generation will be enabled after admin verification.";
 
@@ -54,11 +55,14 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
         id: business.id,
         name: business.name,
         slug: business.slug,
-        logo: business.logoPath ?? null,
+        logo: absolutizePublicMediaPath(business.logoPath ?? null),
         type: business.businessType ?? null,
         location: business.location ?? null,
       },
-      employees,
+      employees: employees.map((e) => ({
+        ...e,
+        avatar: absolutizePublicMediaPath(e.avatar),
+      })),
     });
   } catch (err) {
     logServerError("staff.listActiveEmployeesByBusinessSlug", err);
@@ -155,7 +159,7 @@ async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
     id: employee.id,
     name: employee.name,
     slug: employee.slug,
-    avatar: employee.avatar,
+    avatar: absolutizePublicMediaPath(employee.avatar),
     jobTitle: employee.jobTitle,
     bio: employee.bio ?? null,
     monthlyGoal,
@@ -163,7 +167,7 @@ async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
     businessId: employee.businessId,
     businessName: employee.business.name,
     businessSlug: employee.business.slug,
-    businessLogo: employee.business.logoPath ?? null,
+    businessLogo: absolutizePublicMediaPath(employee.business.logoPath ?? null),
   };
 }
 

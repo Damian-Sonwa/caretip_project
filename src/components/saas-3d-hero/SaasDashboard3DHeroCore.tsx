@@ -1,11 +1,8 @@
 import { Suspense, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Canvas } from "@react-three/fiber";
-import { motion } from "framer-motion";
 import { useMediaQuery } from "@react-hook/media-query";
 import { DashboardScene } from "./DashboardScene";
-
-const easeOut = [0.16, 1, 0.3, 1] as const;
 
 export type SaasDashboard3DHeroCoreVariant = "full" | "embed";
 
@@ -28,7 +25,8 @@ export function SaasDashboard3DHeroCore({
   className = "",
   embedMaxHeight = "min(340px, min(42svh, 92vw))",
 }: SaasDashboard3DHeroCoreProps) {
-  const prefersReducedMotion = useMediaQuery("(prefers-reduced-motion: reduce)") === true;
+  /** Dashboard/marketing hero: static scene only (no motion) — avoids WebGL + DOM animation conflicts in production. */
+  const reducedMotionScene = true;
   const narrow = useMediaQuery("(max-width: 767px)") === true;
 
   const dpr: [number, number] = useMemo(() => (narrow ? [1, 1] : [1, 1.5]), [narrow]);
@@ -54,12 +52,7 @@ export function SaasDashboard3DHeroCore({
           aria-hidden
         />
 
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.65, delay: 0.04, ease: easeOut }}
-          className="relative z-[2] w-full min-w-0 max-w-[min(600px,100%)] lg:max-w-none"
-        >
+        <div className="relative z-[2] w-full min-w-0 max-w-[min(600px,100%)] lg:max-w-none">
           <div className="relative w-full" style={{ aspectRatio: "5 / 3", maxHeight: embedMaxHeight }}>
             <div
               className="absolute inset-0 overflow-hidden rounded-lg ring-1 ring-white/[0.08]"
@@ -85,12 +78,12 @@ export function SaasDashboard3DHeroCore({
                 }}
               >
                 <Suspense fallback={null}>
-                  <DashboardScene reducedMotion={prefersReducedMotion} reflectorResolution={reflectorResolution} />
+                  <DashboardScene reducedMotion={reducedMotionScene} reflectorResolution={reflectorResolution} />
                 </Suspense>
               </Canvas>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -112,13 +105,7 @@ export function SaasDashboard3DHeroCore({
         aria-hidden
       />
 
-      <motion.div
-        initial={{ opacity: 0, y: 36 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.12, ease: easeOut }}
-        className="relative z-[2] mx-auto w-full max-w-5xl px-0"
-        style={{ height: fullCanvasHeight }}
-      >
+      <div className="relative z-[2] mx-auto w-full max-w-5xl px-0" style={{ height: fullCanvasHeight }}>
         <div
           className="absolute inset-0 overflow-hidden rounded-3xl ring-1 ring-white/[0.08]"
           style={{
@@ -142,11 +129,11 @@ export function SaasDashboard3DHeroCore({
             }}
           >
             <Suspense fallback={null}>
-              <DashboardScene reducedMotion={prefersReducedMotion} reflectorResolution={reflectorResolution} />
+              <DashboardScene reducedMotion={reducedMotionScene} reflectorResolution={reflectorResolution} />
             </Suspense>
           </Canvas>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

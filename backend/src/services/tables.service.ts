@@ -2,6 +2,7 @@ import { randomBytes } from "crypto";
 import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
 import * as locationsService from "./locations.service.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 function generateQrSlug(): string {
   return `t-${randomBytes(8).toString("hex")}`;
@@ -102,6 +103,6 @@ export async function getTippingContextByQrSlug(qrSlug: string) {
     locationId: table.locationId,
     tableId: table.id,
     businessName: table.location.business.name,
-    businessLogo: table.location.business.logoPath ?? null,
+    businessLogo: absolutizePublicMediaPath(table.location.business.logoPath ?? null),
   };
 }

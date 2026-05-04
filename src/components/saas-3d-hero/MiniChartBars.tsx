@@ -6,7 +6,11 @@ import { HERO_CHART_POINTS } from "./dummyData";
 
 const MAX = Math.max(...HERO_CHART_POINTS.map((p) => p.v));
 
-export function MiniChartBars() {
+type MiniChartBarsProps = {
+  animated?: boolean;
+};
+
+export function MiniChartBars({ animated = true }: MiniChartBarsProps) {
   const group = useRef<Group>(null);
   const heights = useMemo(
     () => HERO_CHART_POINTS.map((p) => 0.15 + (p.v / MAX) * 0.55),
@@ -14,6 +18,7 @@ export function MiniChartBars() {
   );
 
   useFrame(({ clock }) => {
+    if (!animated) return;
     const g = group.current;
     if (!g) return;
     const t = clock.elapsedTime;

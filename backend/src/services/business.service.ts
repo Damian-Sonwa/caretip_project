@@ -5,6 +5,7 @@ import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/socketEmitters.js";
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 /** Avoid collision with SPA routes at `/{slug}` and legacy `/business/{slug}` paths. */
 const RESERVED_BUSINESS_SLUGS = new Set([
@@ -399,7 +400,7 @@ export async function getBusinessStats(
       slug: emp.slug,
       name: emp.name,
       jobTitle: emp.jobTitle,
-      avatar: emp.avatar,
+      avatar: absolutizePublicMediaPath(emp.avatar),
       phone: emp.phone,
       isActive: emp.isActive,
       activationStatus: emp.activationStatus,
@@ -547,7 +548,7 @@ export async function getBusinessById(id: string) {
     id: business.id,
     name: business.name,
     slug: business.slug,
-    logo: business.logoPath ?? null,
+    logo: absolutizePublicMediaPath(business.logoPath ?? null),
     location: business.location ?? null,
     registeredAddress: business.registeredAddress ?? null,
     type: business.businessType ?? null,

@@ -13,6 +13,7 @@ import {
 import * as employeeActivationService from "./employeeActivation.service.js";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -148,7 +149,7 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
   if (user.role === "EMPLOYEE" && user.employee) {
     dto.employeeId = user.employee.id;
     dto.businessId = user.employee.businessId;
-    dto.avatar = user.employee.avatar ?? null;
+    dto.avatar = absolutizePublicMediaPath(user.employee.avatar ?? null);
   }
 
   return { token: signAuthJwt(tokenPayload), user: dto };

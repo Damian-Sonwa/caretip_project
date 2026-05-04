@@ -4,10 +4,15 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "rec
 import { Bell, Sparkles } from "lucide-react";
 import { HERO_CHART_POINTS, HERO_NOTIFICATIONS, HERO_STATS } from "./dummyData";
 
+type DashboardUiLayerProps = {
+  /** When false, no Framer Motion or Recharts path animations (stable inside WebGL `<Html>` in production). */
+  animated?: boolean;
+};
+
 /**
  * Glassmorphism dashboard UI rendered inside R3F `<Html transform>` (crisp vector + charts).
  */
-export function DashboardUiLayer() {
+export function DashboardUiLayer({ animated = true }: DashboardUiLayerProps) {
   const chartFillId = useId().replace(/:/g, "");
 
   return (
@@ -37,69 +42,62 @@ export function DashboardUiLayer() {
       </div>
 
       <div className="mb-3 grid grid-cols-3 gap-2">
-        {HERO_STATS.map((s, i) => (
-          <motion.div
-            key={s.label}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.08 * i, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-            className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 py-2 ring-1 ring-white/[0.04]"
-          >
-            <p className="text-[9px] font-medium uppercase tracking-wide text-slate-500">{s.label}</p>
-            <motion.p
-              className="text-base font-semibold tabular-nums text-white"
-              animate={{ opacity: [1, 0.88, 1] }}
-              transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+        {HERO_STATS.map((s, i) =>
+          animated ? (
+            <motion.div
+              key={s.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.08 * i, duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+              className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 py-2 ring-1 ring-white/[0.04]"
             >
-              {s.value}
-            </motion.p>
-            <p className={`text-[10px] font-medium ${s.up ? "text-emerald-400/90" : "text-rose-400/90"}`}>
-              {s.delta}
-            </p>
-          </motion.div>
-        ))}
+              <p className="text-[9px] font-medium uppercase tracking-wide text-slate-500">{s.label}</p>
+              <motion.p
+                className="text-base font-semibold tabular-nums text-white"
+                animate={{ opacity: [1, 0.88, 1] }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut", delay: i * 0.2 }}
+              >
+                {s.value}
+              </motion.p>
+              <p className={`text-[10px] font-medium ${s.up ? "text-emerald-400/90" : "text-rose-400/90"}`}>
+                {s.delta}
+              </p>
+            </motion.div>
+          ) : (
+            <div
+              key={s.label}
+              className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-2 py-2 ring-1 ring-white/[0.04]"
+            >
+              <p className="text-[9px] font-medium uppercase tracking-wide text-slate-500">{s.label}</p>
+              <p className="text-base font-semibold tabular-nums text-white">{s.value}</p>
+              <p className={`text-[10px] font-medium ${s.up ? "text-emerald-400/90" : "text-rose-400/90"}`}>
+                {s.delta}
+              </p>
+            </div>
+          ),
+        )}
       </div>
 
       <div className="flex gap-3">
-        <motion.div
-          className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-slate-950/40 p-2 ring-1 ring-white/[0.05]"
-          animate={{ boxShadow: ["0 0 0 0 rgba(139,92,246,0)", "0 0 24px 0 rgba(139,92,246,0.12)", "0 0 0 0 rgba(139,92,246,0)"] }}
-          transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-        >
-          <p className="mb-1 text-[9px] font-medium uppercase tracking-wide text-slate-500">Revenue</p>
-          <div className="h-[72px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={[...HERO_CHART_POINTS]} margin={{ top: 4, right: 0, left: -18, bottom: 0 }}>
-                <defs>
-                  <linearGradient id={chartFillId} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.55} />
-                    <stop offset="100%" stopColor="#6366f1" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="m" tick={{ fill: "#64748b", fontSize: 9 }} axisLine={false} tickLine={false} />
-                <YAxis hide domain={[0, "dataMax + 8"]} />
-                <Tooltip
-                  contentStyle={{
-                    background: "rgba(15,23,42,0.92)",
-                    border: "1px solid rgba(148,163,184,0.2)",
-                    borderRadius: 8,
-                    fontSize: 11,
-                  }}
-                  labelStyle={{ color: "#94a3b8" }}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="v"
-                  stroke="#c4b5fd"
-                  strokeWidth={2}
-                  fill={`url(#${chartFillId})`}
-                  isAnimationActive
-                  animationDuration={1200}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+        {animated ? (
+          <motion.div
+            className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-slate-950/40 p-2 ring-1 ring-white/[0.05]"
+            animate={{
+              boxShadow: [
+                "0 0 0 0 rgba(139,92,246,0)",
+                "0 0 24px 0 rgba(139,92,246,0.12)",
+                "0 0 0 0 rgba(139,92,246,0)",
+              ],
+            }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <ChartPanel chartFillId={chartFillId} animateChart />
+          </motion.div>
+        ) : (
+          <div className="min-w-0 flex-1 rounded-xl border border-white/[0.08] bg-slate-950/40 p-2 ring-1 ring-white/[0.05]">
+            <ChartPanel chartFillId={chartFillId} animateChart={false} />
           </div>
-        </motion.div>
+        )}
         <div className="w-[120px] shrink-0 space-y-1.5 rounded-xl border border-white/[0.08] bg-slate-950/35 p-2 ring-1 ring-white/[0.05]">
           <p className="text-[9px] font-medium uppercase tracking-wide text-slate-500">Alerts</p>
           {HERO_NOTIFICATIONS.map((n) => (
@@ -114,5 +112,45 @@ export function DashboardUiLayer() {
         </div>
       </div>
     </div>
+  );
+}
+
+function ChartPanel({ chartFillId, animateChart }: { chartFillId: string; animateChart: boolean }) {
+  return (
+    <>
+      <p className="mb-1 text-[9px] font-medium uppercase tracking-wide text-slate-500">Revenue</p>
+      <div className="h-[72px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={[...HERO_CHART_POINTS]} margin={{ top: 4, right: 0, left: -18, bottom: 0 }}>
+            <defs>
+              <linearGradient id={chartFillId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#a78bfa" stopOpacity={0.55} />
+                <stop offset="100%" stopColor="#6366f1" stopOpacity={0.05} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="m" tick={{ fill: "#64748b", fontSize: 9 }} axisLine={false} tickLine={false} />
+            <YAxis hide domain={[0, "dataMax + 8"]} />
+            <Tooltip
+              contentStyle={{
+                background: "rgba(15,23,42,0.92)",
+                border: "1px solid rgba(148,163,184,0.2)",
+                borderRadius: 8,
+                fontSize: 11,
+              }}
+              labelStyle={{ color: "#94a3b8" }}
+            />
+            <Area
+              type="monotone"
+              dataKey="v"
+              stroke="#c4b5fd"
+              strokeWidth={2}
+              fill={`url(#${chartFillId})`}
+              isAnimationActive={animateChart}
+              animationDuration={animateChart ? 1200 : 0}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+    </>
   );
 }

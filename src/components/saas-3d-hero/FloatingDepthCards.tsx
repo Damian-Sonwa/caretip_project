@@ -9,11 +9,13 @@ type CardProps = {
   color: string;
   emissive: string;
   phase: number;
+  animated: boolean;
 };
 
-function DepthCard({ position, size, color, emissive, phase }: CardProps) {
+function DepthCard({ position, size, color, emissive, phase, animated }: CardProps) {
   const ref = useRef<Group>(null);
   useFrame(({ clock }) => {
+    if (!animated) return;
     const g = ref.current;
     if (!g) return;
     const t = clock.elapsedTime;
@@ -41,8 +43,13 @@ function DepthCard({ position, size, color, emissive, phase }: CardProps) {
   );
 }
 
+type FloatingDepthCardsProps = {
+  /** When false, cards stay fixed (no per-frame motion). */
+  animated?: boolean;
+};
+
 /** Smaller glass slabs behind / beside the main panel for parallax depth. */
-export function FloatingDepthCards() {
+export function FloatingDepthCards({ animated = true }: FloatingDepthCardsProps) {
   return (
     <group>
       <DepthCard
@@ -51,6 +58,7 @@ export function FloatingDepthCards() {
         color="#1e1b4b"
         emissive="#4c1d95"
         phase={0}
+        animated={animated}
       />
       <DepthCard
         position={[1.28, -0.18, -0.18]}
@@ -58,6 +66,7 @@ export function FloatingDepthCards() {
         color="#0f172a"
         emissive="#312e81"
         phase={1.2}
+        animated={animated}
       />
       <DepthCard
         position={[0.85, 0.55, -0.35]}
@@ -65,6 +74,7 @@ export function FloatingDepthCards() {
         color="#172554"
         emissive="#5b21b6"
         phase={2.1}
+        animated={animated}
       />
     </group>
   );
