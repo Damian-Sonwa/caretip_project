@@ -360,11 +360,11 @@ export function FeatureShowcase({
                 />
                 <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
-                    <LandingImageFrame className="w-full max-w-[480px]">
+                    <LandingImageFrame className="w-full max-w-[520px]">
                       <CareTipHeroAnimation />
                     </LandingImageFrame>
                   ) : singleHeroImage ? (
-                    <LandingImageFrame className="w-full max-w-[480px]">
+                    <LandingImageFrame className="w-full max-w-[520px]">
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
@@ -384,7 +384,7 @@ export function FeatureShowcase({
           ) : (
             <>
               {useAnimatedHero ? (
-                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
+                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
                   <CareTipHeroAnimation />
                 </LandingImageFrame>
               ) : singleHeroImage ? (
@@ -395,7 +395,7 @@ export function FeatureShowcase({
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
                         className={cn(
-                          "relative mx-auto h-auto w-[min(520px,92%)] max-w-full select-none",
+                          "relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none",
                           singleHeroImage.imageFit === "cover" ? "object-cover" : "object-contain",
                         )}
                         style={
@@ -410,7 +410,7 @@ export function FeatureShowcase({
                     </div>
                   </div>
                 ) : (
-                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "480px" }}>
+                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
                     <img
                       src={singleHeroImage.src}
                       alt={singleHeroImage.alt}
@@ -421,7 +421,7 @@ export function FeatureShowcase({
                   </LandingImageFrame>
                 )
               ) : (
-                <div className="w-full" style={{ maxWidth: "480px" }}>
+                <div className="w-full" style={{ maxWidth: "520px" }}>
                   <FeatureCarousel images={carouselImages} />
                 </div>
               )}

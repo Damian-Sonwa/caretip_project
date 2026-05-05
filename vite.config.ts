@@ -96,18 +96,37 @@ export default defineConfig(({ mode }) => {
         cacheId: 'caretip-pwa-v9',
         /** Ensure old precaches are removed when SW updates. */
         cleanupOutdatedCaches: true,
-        globPatterns: [
-          '**/*.{js,css,html,ico,png,svg,woff2,webp,json,webmanifest}',
-        ],
+        /**
+         * Keep precache small so refreshes don't "re-download the world".
+         * Large marketing/dashboard images live in `dist/assets/*` and should be runtime-cached instead.
+         */
+        globPatterns: ['**/*.{js,css,html,ico,svg,woff2,json,webmanifest}'],
+        globIgnores: ['**/assets/*.{png,jpg,jpeg,webp,gif}'],
         navigateFallback: 'index.html',
         navigateFallbackDenylist: [
           /^\/api(\/|$)/,
           /^\/uploads(\/|$)/,
           /^\/socket\.io/,
         ],
-        /** Logo and large hashed assets may exceed Workbox default (2 MiB). */
-        maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+        /**
+         * Allow the main JS bundle in the precache (app shell),
+         * but keep large images out via `globIgnores` above.
+         */
+        maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
         runtimeCaching: [
+          {
+            // Cache built static images at runtime (fast repeat visits, no huge update downloads).
+            urlPattern: ({ url }) => url.pathname.startsWith('/assets/') && /\.(png|jpe?g|webp|gif)$/i.test(url.pathname),
+            handler: 'StaleWhileRevalidate',
+            options: {
+              cacheName: 'caretip-static-images',
+              expiration: {
+                maxEntries: 80,
+                maxAgeSeconds: 60 * 60 * 24 * 30,
+              },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
           {
             urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
             handler: 'CacheFirst',
