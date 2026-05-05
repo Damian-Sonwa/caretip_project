@@ -18,7 +18,7 @@ const SHOWCASE_TABS: TabMedia[] = [
     label: "QR scan",
     Icon: Smartphone,
     src: heroCaretipImage,
-    alt: "CareTip guest tipping screen: scan QR, choose amount, and send a tip",
+    alt: "Phone showing CareTip QR tipping screen",
     imageFit: "contain",
     imageObjectPosition: "center",
   },
