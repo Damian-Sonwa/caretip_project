@@ -19,7 +19,7 @@ export function BusinessHeroImagePreview({
   maxHeight,
 }: BusinessHeroImagePreviewProps) {
   return (
-    <div className={cn("relative isolate w-full max-w-full overflow-hidden rounded-3xl touch-manipulation", className)}>
+    <div className={cn("relative isolate w-full max-w-full touch-manipulation", className)}>
       <div
         className="relative mx-auto w-full min-w-0 max-w-none"
         style={{ aspectRatio: "4 / 3", ...(maxHeight ? { maxHeight } : {}) }}

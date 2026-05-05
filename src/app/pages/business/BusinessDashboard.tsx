@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import {
   DollarSign,
@@ -133,41 +133,87 @@ export function BusinessDashboard() {
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
   /** Stats fetch only — do not block rendering the dashboard shell. */
   const [statsLoading, setStatsLoading] = useState(true);
+  /** Lightweight loading indicator for timeframe toggles (no blocking spinner). */
+  const [timeframeLoading, setTimeframeLoading] = useState<null | "week" | "month" | "year">(null);
   const [error, setError] = useState<string | null>(null);
   const [pendingVerification, setPendingVerification] = useState(false);
+
+  const statsCacheRef = useRef(
+    new Map<"week" | "month" | "year", { stats: BusinessDashboardStats; pendingVerification: false } | { stats: null; pendingVerification: true }>()
+  );
+  const requestSeqRef = useRef(0);
+
+  const loadStatsFor = useCallback(
+    async (tf: "week" | "month" | "year", opts?: { background?: boolean }) => {
+      if (!user?.businessId) return;
+
+      const cached = statsCacheRef.current.get(tf);
+      if (cached) {
+        if (tf === timeframe) {
+          setPendingVerification(cached.pendingVerification);
+          setError(null);
+          setStats(cached.pendingVerification ? null : cached.stats);
+          setStatsLoading(false);
+          setTimeframeLoading(null);
+        }
+        return;
+      }
+
+      const seq = ++requestSeqRef.current;
+      if (!opts?.background && tf === timeframe) {
+        setTimeframeLoading(tf);
+      }
+      try {
+        const data = await getBusinessStats(tf);
+        statsCacheRef.current.set(tf, { stats: data, pendingVerification: false });
+        if (tf === timeframe && requestSeqRef.current === seq) {
+          setPendingVerification(false);
+          setError(null);
+          setStats(data);
+        }
+      } catch (err) {
+        const msg = toUserFriendlyMessage(err);
+        if (msg.toLowerCase().includes("pending verification")) {
+          statsCacheRef.current.set(tf, { stats: null, pendingVerification: true });
+          if (tf === timeframe && requestSeqRef.current === seq) {
+            setPendingVerification(true);
+            setError(null);
+            setStats(null);
+          }
+        } else if (!opts?.background) {
+          logClientError("BusinessDashboard.fetchStats", err);
+          if (tf === timeframe && requestSeqRef.current === seq) {
+            setError(msg);
+            setStats(null);
+          }
+        } else {
+          logClientError("BusinessDashboard.prefetchStats", err);
+        }
+      } finally {
+        if (!opts?.background && tf === timeframe) {
+          setStatsLoading(false);
+          setTimeframeLoading(null);
+        }
+      }
+    },
+    [timeframe, user?.businessId]
+  );
 
   const fetchStats = useCallback(async () => {
     if (!user?.businessId) {
       setStatsLoading(false);
       return;
     }
-    setStatsLoading(true);
-    setError(null);
-    setPendingVerification(false);
-    try {
-      const data = await getBusinessStats(timeframe);
-      setStats(data);
-    } catch (err) {
-      const msg = toUserFriendlyMessage(err);
-      if (msg.toLowerCase().includes("pending verification")) {
-        // Expected state: backend blocks manager stats until KYC verification completes.
-        setPendingVerification(true);
-        setError(null);
-        setStats(null);
-      } else {
-        logClientError("BusinessDashboard.fetchStats", err);
-        setError(msg);
-        setStats(null);
-      }
-    } finally {
-      setStatsLoading(false);
-    }
-  }, [user?.businessId, timeframe]);
+    // Only show loading if this timeframe is not cached.
+    if (!statsCacheRef.current.get(timeframe)) setStatsLoading(true);
+    await loadStatsFor(timeframe);
+  }, [user?.businessId, timeframe, loadStatsFor]);
 
   const refreshStatsQuiet = useCallback(async () => {
     if (!user?.businessId) return;
     try {
       const data = await getBusinessStats(timeframe);
+      statsCacheRef.current.set(timeframe, { stats: data, pendingVerification: false });
       setStats(data);
     } catch (err) {
       logClientError("BusinessDashboard.refreshStatsQuiet", err);
@@ -178,6 +224,17 @@ export function BusinessDashboard() {
   useEffect(() => {
     void fetchStats();
   }, [fetchStats]);
+
+  // Prefetch other timeframes after first load for instant toggles.
+  useEffect(() => {
+    if (!user?.businessId) return;
+    const others = (["week", "month", "year"] as const).filter((t) => t !== timeframe);
+    // Defer so it never blocks interaction.
+    const id = window.setTimeout(() => {
+      others.forEach((t) => void loadStatsFor(t, { background: true }));
+    }, 250);
+    return () => window.clearTimeout(id);
+  }, [loadStatsFor, timeframe, user?.businessId]);
 
   const socketReady = useDeferSocketConnect(user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
@@ -352,7 +409,7 @@ export function BusinessDashboard() {
             />
           }
           imageOverlay={false}
-          imageCaption="Live workspace preview: tips, teams, and clarity in motion."
+          imageCaption=""
           overview={
             <div className="space-y-3 text-sm text-foreground/80">
               <p>Monitor team performance, track tip activity, and manage your venue operations in real time.</p>
@@ -467,7 +524,16 @@ export function BusinessDashboard() {
               <button
                 key={period}
                 type="button"
-                onClick={() => setTimeframe(period)}
+                onClick={() => {
+                  // Prevent scroll jump: preserve scroll position across the state update.
+                  const y = window.scrollY;
+                  setTimeframe(period);
+                  queueMicrotask(() => {
+                    requestAnimationFrame(() => {
+                      window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior });
+                    });
+                  });
+                }}
                 className={`min-h-11 flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-all sm:flex-initial sm:px-4 sm:text-sm ${
                   timeframe === period
                     ? "bg-primary text-primary-foreground shadow-sm"
@@ -477,6 +543,9 @@ export function BusinessDashboard() {
                 {period === "week" && "This Week"}
                 {period === "month" && "This Month"}
                 {period === "year" && "This Year"}
+                {timeframeLoading === period ? (
+                  <span className="ml-2 inline-block h-2 w-2 animate-pulse rounded-full bg-current/70 align-middle" aria-hidden />
+                ) : null}
               </button>
             ))}
           </div>
