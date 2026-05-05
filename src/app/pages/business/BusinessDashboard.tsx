@@ -141,7 +141,12 @@ export function BusinessDashboard() {
   const statsCacheRef = useRef(
     new Map<"week" | "month" | "year", { stats: BusinessDashboardStats; pendingVerification: false } | { stats: null; pendingVerification: true }>()
   );
-  const requestSeqRef = useRef(0);
+  /**
+   * Only tracks *UI-affecting* requests for the currently selected timeframe.
+   * Background prefetches must never invalidate the foreground request, otherwise the first load
+   * can populate the cache but fail to update cards until the user toggles.
+   */
+  const uiRequestSeqRef = useRef(0);
 
   const loadStatsFor = useCallback(
     async (tf: "week" | "month" | "year", opts?: { background?: boolean }) => {
@@ -159,14 +164,15 @@ export function BusinessDashboard() {
         return;
       }
 
-      const seq = ++requestSeqRef.current;
-      if (!opts?.background && tf === timeframe) {
+      const affectsUi = !opts?.background && tf === timeframe;
+      const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
+      if (affectsUi) {
         setTimeframeLoading(tf);
       }
       try {
         const data = await getBusinessStats(tf);
         statsCacheRef.current.set(tf, { stats: data, pendingVerification: false });
-        if (tf === timeframe && requestSeqRef.current === seq) {
+        if (tf === timeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
           setPendingVerification(false);
           setError(null);
           setStats(data);
@@ -175,14 +181,14 @@ export function BusinessDashboard() {
         const msg = toUserFriendlyMessage(err);
         if (msg.toLowerCase().includes("pending verification")) {
           statsCacheRef.current.set(tf, { stats: null, pendingVerification: true });
-          if (tf === timeframe && requestSeqRef.current === seq) {
+          if (tf === timeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
             setPendingVerification(true);
             setError(null);
             setStats(null);
           }
         } else if (!opts?.background) {
           logClientError("BusinessDashboard.fetchStats", err);
-          if (tf === timeframe && requestSeqRef.current === seq) {
+          if (tf === timeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
             setError(msg);
             setStats(null);
           }
@@ -190,7 +196,7 @@ export function BusinessDashboard() {
           logClientError("BusinessDashboard.prefetchStats", err);
         }
       } finally {
-        if (!opts?.background && tf === timeframe) {
+        if (affectsUi) {
           setStatsLoading(false);
           setTimeframeLoading(null);
         }

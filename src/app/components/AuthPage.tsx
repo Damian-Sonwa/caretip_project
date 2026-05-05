@@ -75,7 +75,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, user, authHydrated } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, authHydrated } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -86,24 +86,16 @@ export function AuthPage() {
 
   useEffect(() => {
     const p = location.pathname;
-    if (p === '/signup') setIsLogin(false);
+    const sp = new URLSearchParams(location.search);
+    if (p === '/signup' || (p === '/auth' && sp.get('mode') === 'signup')) setIsLogin(false);
     else if (p === '/login' || p === '/auth') setIsLogin(true);
-  }, [location.pathname]);
+  }, [location.pathname, location.search]);
 
   useEffect(() => {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  useEffect(() => {
-    if (!authHydrated || !user) return;
-    const sp = new URLSearchParams(location.search);
-    if (sp.get('from') === 'landing') return;
-    const dest = getPostAuthRedirect(user);
-    // Do not pull users away from explicit auth URLs into onboarding (e.g. "Sign in" from /join).
-    // Other post-auth destinations (dashboard, verify-email) still apply on mount.
-    if (isPublicAuthenticationPath(location.pathname) && dest === "/onboarding") return;
-    navigate(dest, { replace: true });
-  }, [authHydrated, user, navigate, location.pathname, location.search]);
+  // NOTE: We intentionally do NOT auto-redirect away from auth routes.
 
   useEffect(() => {
     // Update role from query params when the search string changes
@@ -351,6 +343,30 @@ export function AuthPage() {
           formBusy={isSubmitting}
           className="flex-1"
         >
+          {user ? (
+            <div className="mb-4 rounded-xl border border-border bg-card/70 p-4 text-sm text-foreground">
+              <p className="font-semibold">You’re already signed in.</p>
+              <p className="mt-1 text-muted-foreground">
+                You can continue to your dashboard, or log out to sign in with a different account.
+              </p>
+              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                  onClick={() => navigate(getPostAuthRedirect(user), { replace: true })}
+                >
+                  Continue to dashboard
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+                  onClick={() => logout()}
+                >
+                  Log out
+                </button>
+              </div>
+            </div>
+          ) : null}
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting}
