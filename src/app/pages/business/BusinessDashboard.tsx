@@ -46,7 +46,8 @@ import {
   Cell
 } from "recharts";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
-import { SaasDashboard3DHeroCore } from "@/components/saas-3d-hero/SaasDashboard3DHeroCore";
+import { BusinessHeroImagePreview } from "../../components/business/BusinessHeroImagePreview";
+import haw1HeroImg from "../../../../images/haw1.png";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
@@ -345,10 +346,9 @@ export function BusinessDashboard() {
           title={BUSINESS_HERO_HEADLINE}
           description={BUSINESS_HERO_SUB}
           image={
-            <SaasDashboard3DHeroCore
-              variant="embed"
-              embedMaxHeight="min(360px, min(44svh, 92vw))"
-              className="w-full max-w-full"
+            <BusinessHeroImagePreview
+              src={haw1HeroImg}
+              className="w-full caretip-hero-fadein caretip-hero-float"
             />
           }
           imageOverlay={false}

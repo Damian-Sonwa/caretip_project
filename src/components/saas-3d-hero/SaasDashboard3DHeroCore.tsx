@@ -40,14 +40,15 @@ export function SaasDashboard3DHeroCore({
         className={cn("relative isolate w-full overflow-hidden rounded-xl", className)}
         style={{
           background:
-            "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99,102,241,0.35) 0%, transparent 55%), linear-gradient(180deg, #070b1a 0%, #0c1228 38%, #050814 100%)",
+            "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(235,153,44,0.24) 0%, transparent 58%), linear-gradient(180deg, #090909 0%, #050505 48%, #000000 100%)",
         }}
       >
+        <div className="caretip-hero-ambient pointer-events-none absolute inset-0 z-[0]" aria-hidden />
         <div
           className="pointer-events-none absolute inset-0 z-[1]"
           style={{
             background:
-              "radial-gradient(ellipse 65% 55% at 50% 42%, transparent 25%, rgba(5,8,20,0.5) 100%), radial-gradient(ellipse 90% 70% at 50% 100%, rgba(5,8,20,0.65) 0%, transparent 45%)",
+              "radial-gradient(ellipse 68% 55% at 50% 42%, transparent 25%, rgba(0,0,0,0.55) 100%), radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0,0,0,0.75) 0%, transparent 45%)",
           }}
           aria-hidden
         />
@@ -93,14 +94,15 @@ export function SaasDashboard3DHeroCore({
       className={cn("relative isolate overflow-hidden", className)}
       style={{
         background:
-          "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(99,102,241,0.35) 0%, transparent 55%), linear-gradient(180deg, #070b1a 0%, #0c1228 38%, #050814 100%)",
+          "radial-gradient(ellipse 120% 80% at 50% -20%, rgba(235,153,44,0.24) 0%, transparent 58%), linear-gradient(180deg, #090909 0%, #050505 48%, #000000 100%)",
       }}
     >
+      <div className="caretip-hero-ambient pointer-events-none absolute inset-0 z-[0]" aria-hidden />
       <div
         className="pointer-events-none absolute inset-0 z-[1]"
         style={{
           background:
-            "radial-gradient(ellipse 65% 55% at 50% 42%, transparent 25%, rgba(5,8,20,0.5) 100%), radial-gradient(ellipse 90% 70% at 50% 100%, rgba(5,8,20,0.65) 0%, transparent 45%)",
+            "radial-gradient(ellipse 68% 55% at 50% 42%, transparent 25%, rgba(0,0,0,0.55) 100%), radial-gradient(ellipse 90% 70% at 50% 100%, rgba(0,0,0,0.75) 0%, transparent 45%)",
         }}
         aria-hidden
       />

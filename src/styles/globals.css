@@ -43,6 +43,107 @@ textarea::placeholder {
   }
 }
 
+@keyframes caretip-hero-ambient-drift {
+  0% {
+    transform: translate3d(-1.5%, -2%, 0) scale(1);
+    opacity: 0.55;
+  }
+  50% {
+    transform: translate3d(1.5%, 2%, 0) scale(1.02);
+    opacity: 0.7;
+  }
+  100% {
+    transform: translate3d(-1.5%, -2%, 0) scale(1);
+    opacity: 0.55;
+  }
+}
+
+.caretip-hero-ambient {
+  background:
+    radial-gradient(600px circle at 18% 24%, rgba(235, 153, 44, 0.18), transparent 60%),
+    radial-gradient(700px circle at 78% 64%, rgba(235, 153, 44, 0.12), transparent 62%),
+    radial-gradient(900px circle at 50% 110%, rgba(255, 255, 255, 0.04), transparent 58%);
+  filter: blur(10px);
+  will-change: transform, opacity;
+  animation: caretip-hero-ambient-drift 18s ease-in-out infinite;
+}
+
+@keyframes caretip-hero-fadein {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 6px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.caretip-hero-fadein {
+  will-change: transform, opacity;
+  animation: caretip-hero-fadein 420ms ease-out both;
+}
+
+@keyframes caretip-hero-stroke-draw {
+  from {
+    stroke-dashoffset: 220;
+    opacity: 0.75;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.caretip-hero-stroke {
+  stroke-dasharray: 220;
+  stroke-dashoffset: 0;
+  animation: caretip-hero-stroke-draw 900ms ease-out both;
+}
+
+@keyframes caretip-hero-float {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -3px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.caretip-hero-float {
+  will-change: transform;
+  animation: caretip-hero-float 9s ease-in-out infinite;
+}
+
+.caretip-qr-glow {
+  background: radial-gradient(circle at 50% 50%, rgba(235, 153, 44, 0.18), transparent 60%);
+  filter: blur(10px);
+  opacity: 0.8;
+  will-change: opacity, transform;
+  animation: caretip-hero-ambient-drift 14s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-hero-ambient {
+    animation: none;
+  }
+  .caretip-hero-fadein {
+    animation: none;
+  }
+  .caretip-hero-stroke {
+    animation: none;
+  }
+  .caretip-hero-float {
+    animation: none;
+  }
+  .caretip-qr-glow {
+    animation: none;
+  }
+}
+
 :root {
   --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
   --font-size: 16px;

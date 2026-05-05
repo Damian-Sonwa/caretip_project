@@ -97,18 +97,28 @@ export function DashboardHero({
                 "dashboard-hero-media-column",
                 "relative flex min-h-0 min-w-0 flex-col p-0 lg:border-l lg:border-border",
                 hasPhoto && "min-h-[220px] lg:min-h-[min(100%,28rem)]",
-                hasCustomMedia && "lg:justify-start",
+                hasCustomMedia && "lg:justify-center",
               )}
             >
               {hasCustomMedia ? (
                 <>
-                  <div className="dashboard-hero-media relative w-full min-w-0 max-w-[min(600px,100%)] border-t border-border bg-muted p-2.5 sm:p-4 lg:mx-0 lg:max-w-none lg:border-t-0 lg:pt-6">
+                  <div
+                    className={cn(
+                      "dashboard-hero-media relative w-full min-w-0 border-t border-border",
+                      /**
+                       * When `imageOverlay={false}`, callers are typically providing their own visual that
+                       * should render flush (no extra padded frame/background behind it).
+                       */
+                      imageOverlay === false ? "bg-transparent p-0 sm:p-0 lg:pt-0" : "bg-muted p-2.5 sm:p-4 lg:pt-6",
+                      "lg:mx-0 lg:max-w-none lg:border-t-0",
+                    )}
+                  >
                     <div className="relative w-full min-w-0 touch-manipulation [&_canvas]:block [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full">
                       {image}
                     </div>
                   </div>
                   {imageCaption ? (
-                    <div className="shrink-0 border-t border-border/80 bg-muted/90 px-4 py-3 sm:px-5">
+                    <div className="shrink-0 border-t border-border/80 bg-muted/90 px-4 py-4 sm:px-5 sm:py-5">
                       <p className="max-w-prose text-sm font-medium leading-snug text-foreground">{imageCaption}</p>
                     </div>
                   ) : null}
