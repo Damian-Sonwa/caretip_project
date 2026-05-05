@@ -395,7 +395,7 @@ export function FeatureShowcase({
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
                         className={cn(
-                          "relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none",
+                          "relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none max-md:w-full",
                           singleHeroImage.imageFit === "cover" ? "object-cover" : "object-contain",
                         )}
                         style={

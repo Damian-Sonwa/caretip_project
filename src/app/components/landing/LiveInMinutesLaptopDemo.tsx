@@ -45,8 +45,8 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
         />
 
         {/* Screen bezel */}
-        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-300/80 bg-neutral-900 ring-1 ring-black/20 dark:border-neutral-600">
-          <div className="relative aspect-[16/10] w-full max-w-none bg-neutral-950">
+        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200 bg-white ring-0 dark:border-neutral-700 dark:bg-neutral-900">
+          <div className="relative aspect-[16/10] w-full max-w-none bg-white dark:bg-neutral-950">
             {videoSrc ? (
               <video
                 autoPlay
