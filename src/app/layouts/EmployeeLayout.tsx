@@ -21,9 +21,11 @@ export function EmployeeLayout() {
         {isAppReady ? <EmployeeSidebar /> : <SidebarSkeleton />}
         <EmployeeMobileSidebar isOpen={mobileMenuOpen && isAppReady} onClose={() => setMobileMenuOpen(false)} />
 
-        <div className="caretip-dashboard-shell min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
+        <div className="caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background lg:pl-64">
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-          <Outlet />
+          <main className="flex-1 pb-8">
+            <Outlet />
+          </main>
           <Footer variant="minimal" />
         </div>
       </div>

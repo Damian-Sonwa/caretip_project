@@ -161,9 +161,7 @@ export function StaffManagementPage() {
   const fetchEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
     const quiet = opts?.quiet === true;
     if (!authHydrated || !sessionValidated) {
-      if (!quiet) {
-        setLoading(false);
-      }
+      // Keep strict loading gate until auth is resolved to prevent UI flash/flicker.
       return;
     }
     if (!user?.businessId) {
@@ -177,6 +175,8 @@ export function StaffManagementPage() {
     if (!quiet) {
       setLoading(true);
       setError(null);
+      // Prevent any stale staff list from flashing while loading.
+      setEmployees([]);
     }
     try {
       const data = await getBusinessStats("all");
@@ -508,7 +508,9 @@ export function StaffManagementPage() {
     }
   };
 
-  if (!user) return null;
+  if (!authHydrated || !sessionValidated || !user) {
+    return <CareTipPageLoader message="Loading staff…" />;
+  }
 
   if (loading) {
     return <CareTipPageLoader message="Loading staff…" />;
