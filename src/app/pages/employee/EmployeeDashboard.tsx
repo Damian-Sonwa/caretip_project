@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
-  Euro,
   TrendingUp,
   Star,
   Eye,
@@ -15,9 +14,6 @@ import {
   Loader2,
   Sparkles,
   Settings,
-  Bell,
-  ArrowRight,
-  ExternalLink,
   Target,
 } from "lucide-react";
 import {
@@ -43,20 +39,15 @@ import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
 import { cn } from "@/lib/utils";
-import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashPanel } from "@/components/ui/dashboard-styles";
 import { EmployeeGoalCard } from "../../components/employee/EmployeeGoalCard";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
-const EMPLOYEE_HERO_HEADLINE = "Earnings and goal";
+const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
 const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
-
-/** Same `style.maxHeight` as `BusinessHeroImagePreview` (business dashboard hero image). */
-const BUSINESS_HERO_IMAGE_MAX_HEIGHT_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 function StatCard(props: {
   title: string;
@@ -136,7 +127,8 @@ export function EmployeeDashboard() {
   const [generatingSlug, setGeneratingSlug] = useState(false);
 
   const refreshTipsQuiet = useCallback(async () => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
+    const role = user?.role;
+    if (!authHydrated || !sessionValidated || role !== "employee") return;
     try {
       const data = await getTipsByEmployee();
       setTips(data.tips ?? []);
@@ -377,102 +369,96 @@ export function EmployeeDashboard() {
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
       <EmployeeHeader user={user} onLogout={handleLogout} />
 
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        <DashboardHero
-          stackHeroOnMobile
-          badge={
-            <>
-              <Sparkles className="h-3.5 w-3.5 text-foreground" />
-              Welcome back{user.name ? `, ${user.name.split(" ")[0]}` : ""}
-            </>
-          }
-          title={EMPLOYEE_HERO_HEADLINE}
-          description={EMPLOYEE_HERO_SUB}
-          image={
-            <div className="relative isolate w-full max-w-full touch-manipulation">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center gap-3">
-                <div
-                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-3xl bg-black shadow-sm ring-1 ring-black/25"
-                  style={BUSINESS_HERO_IMAGE_MAX_HEIGHT_STYLE}
-                >
-                  <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
-                </div>
-                <p className="text-center text-xs font-semibold tracking-wide text-[#EB992C] sm:text-[0.8125rem] dark:text-[#F4BD6A]">
-                  Real-time tip pulse
-                </p>
-              </div>
+      <div className="mx-auto max-w-7xl border-b border-border/50 px-6 pb-3 pt-3 sm:px-6 sm:pb-4 lg:px-8 lg:pt-4">
+        <section
+          className={cn(
+            "grid grid-cols-1 gap-y-2.5 sm:gap-y-3",
+            "lg:grid-cols-[minmax(0,1fr)_min(35%,clamp(234px,32vw,360px))] lg:gap-x-8 lg:gap-y-3 lg:items-start",
+          )}
+          aria-label="Dashboard overview"
+        >
+          <div className="flex min-w-0 flex-col gap-2 lg:col-start-1 lg:row-start-1">
+            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted/80 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-foreground backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs">
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden />
+              {user.name ? `Welcome back, ${user.name.split(" ")[0]}` : "Welcome back"}
             </div>
-          }
-          imageOverlay={false}
-          overview={
-            <p className="text-sm text-muted-foreground line-clamp-1">Goal progress follows the same period.</p>
-          }
-          shortcuts={
-            <>
-              <Link
-                to="/employee/settings"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Profile &amp; settings
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/employee/notifications"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Bell className="h-4 w-4" />
-                  Notifications
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              {hasSlug && staffSlug ? (
-                <a
-                  href={`/staff/${staffSlug}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-                >
-                  <span className="flex items-center gap-2">
-                    <ExternalLink className="h-4 w-4" />
-                    Public tip page
-                  </span>
-                  <ArrowRight className="h-4 w-4" />
-                </a>
+            <div className="space-y-1">
+              <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground lg:text-3xl xl:text-4xl">
+                {EMPLOYEE_HERO_HEADLINE}
+              </h1>
+              <p className="max-w-xl text-sm leading-snug text-muted-foreground">{EMPLOYEE_HERO_SUB}</p>
+            </div>
+          </div>
+
+          <div
+            className={cn(
+              "flex w-full flex-col items-center justify-center lg:col-start-2 lg:row-start-2 lg:w-full lg:justify-self-stretch lg:self-center",
+            )}
+          >
+            <div
+              className={cn(
+                "relative isolate aspect-square w-full max-h-[min(36vh,255px)] max-w-[min(238px,70vw)] touch-manipulation overflow-hidden rounded-2xl",
+                "shadow-[0_20px_40px_-14px_rgba(0,0,0,0.42),0_0_0_1px_rgba(255,255,255,0.06),0_12px_40px_-12px_rgba(235,153,44,0.18)]",
+                "ring-1 ring-white/5",
+                "lg:max-h-[min(38vh,272px)] lg:max-w-full",
+              )}
+            >
+              <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
+            </div>
+            <p className="mt-1.5 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground/90 sm:text-[11px]">
+              Live QR activity
+            </p>
+          </div>
+
+          <div className="lg:col-start-1 lg:row-start-2 lg:min-w-0 lg:pr-2">
+            <div className="rounded-xl border border-border/70 bg-muted/30 px-3.5 py-2.5 dark:bg-muted/15 sm:px-4 sm:py-3">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[11px]">
+                Total earnings (
+                {timeframe === "today" ? "today" : timeframe === "week" ? "this week" : "this month"})
+              </p>
+              <p className="mt-0.5 text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
+                {formatEur(stats.amount)}
+              </p>
+              {goalPct != null ? (
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {Math.round(Number(goalPct))}% toward monthly goal
+                </p>
               ) : null}
-            </>
-          }
-          actions={
-            <>
-              <Button type="button" onClick={() => void handleQrQuickAction()} disabled={slugLoading || generatingSlug} className="bg-primary hover:bg-primary/90">
-                {generatingSlug ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating…
-                  </>
-                ) : (
-                  <>
-                    <QrCode className="mr-2 h-4 w-4 shrink-0" />
-                    {hasSlug ? "My QR" : "Get QR"}
-                  </>
-                )}
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/employee/settings" className="gap-2">
-                  <Settings className="h-4 w-4 shrink-0" />
-                  Settings
-                </Link>
-              </Button>
-            </>
-          }
-        />
+            </div>
+          </div>
+
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:col-start-1 lg:row-start-3 lg:gap-2">
+            <Button
+              type="button"
+              size="sm"
+              onClick={() => void handleQrQuickAction()}
+              disabled={slugLoading || generatingSlug}
+              className="w-fit shrink-0 bg-primary px-3 hover:bg-primary/90 sm:px-4"
+            >
+              {generatingSlug ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating…
+                </>
+              ) : (
+                <>
+                  <QrCode className="mr-2 h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                  {hasSlug ? "My QR" : "Get QR"}
+                </>
+              )}
+            </Button>
+            <Button variant="outline" size="sm" className="w-fit shrink-0 px-3 sm:px-4" asChild>
+              <Link to="/employee/settings" className="gap-2">
+                <Settings className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                Settings
+              </Link>
+            </Button>
+          </div>
+        </section>
       </div>
 
-      <TracingBeam className="mx-auto max-w-7xl px-4">
-        <div className="flex flex-wrap items-center gap-3">
+      <TracingBeam className="mx-auto max-w-7xl px-6 pt-2 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <LiveConnectionBadge status={connectionStatus} />
           <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
             {(["today", "week", "month"] as const).map((period) => (
@@ -494,7 +480,7 @@ export function EmployeeDashboard() {
           </div>
         </div>
 
-        <div className="space-y-6 pb-6 pt-6">
+        <div className="space-y-6 pb-6 pt-2">
           <FixPrompt
             id="profilePhoto"
             issueActive={!user.avatar}
@@ -506,22 +492,15 @@ export function EmployeeDashboard() {
           />
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
-              <StatCard
-                featured
-                title={`Total earnings (${timeframe === "today" ? "today" : timeframe === "week" ? "week" : "month"})`}
-                value={formatEur(stats.amount)}
-                change={
-                  filteredTips.length > 0
-                    ? `${filteredTips.length} tip${filteredTips.length === 1 ? "" : "s"} in this period`
-                    : "No activity yet for this period."
-                }
-                icon={Euro}
-              />
+            <div className="relative mb-2 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 lg:gap-6">
               <StatCard
                 title="Total tips"
                 value={String(stats.tips)}
-                change={filteredTips.length > 0 ? "Tips in the selected period." : undefined}
+                change={
+                  filteredTips.length > 0
+                    ? `${filteredTips.length} in the selected period`
+                    : "No tips in this period yet."
+                }
                 icon={TrendingUp}
               />
               <StatCard
@@ -546,7 +525,7 @@ export function EmployeeDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className={dashPanel("shadow-sm")}>
+            <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
               <CardHeader>
                 <CardTitle className="text-lg">Earnings timeline</CardTitle>
                 <CardDescription>
@@ -559,7 +538,7 @@ export function EmployeeDashboard() {
                 {chartData.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                 ) : (
-                  <div className="h-[240px] w-full min-w-0 sm:h-[280px]">
+                  <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <AreaChart data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
                       <defs>
@@ -595,13 +574,13 @@ export function EmployeeDashboard() {
             </Card>
           </motion.div>
 
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="w-full grid gap-6 lg:grid-cols-2">
             <motion.div
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className={dashPanel("shadow-sm")}>
+              <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
                   <CardTitle className="text-lg">Recent tips</CardTitle>
                   <Link
@@ -642,7 +621,7 @@ export function EmployeeDashboard() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <Card className={dashPanel("shadow-sm")}>
+                <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
                   <CardHeader>
                     <CardTitle className="text-lg">Quick actions</CardTitle>
                     <CardDescription>QR and public page</CardDescription>

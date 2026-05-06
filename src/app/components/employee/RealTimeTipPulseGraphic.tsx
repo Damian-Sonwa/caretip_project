@@ -54,7 +54,7 @@ export type RealTimeTipPulseGraphicProps = {
   embedded?: boolean;
 };
 
-/** Spinning gold QR with floating accent particles for the employee dashboard hero only. */
+/** Spinning QR with floating orange particles for the employee dashboard hero only. */
 export function RealTimeTipPulseGraphic({
   className,
   maxHeight = "min(320px, min(46svh, 92vw))",

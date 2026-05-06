@@ -11,9 +11,7 @@ import {
   QrCode,
   MapPin,
   Star,
-  LogOut,
   Building2,
-  LineChart,
   ArrowRight,
   Store,
   Target,
@@ -48,21 +46,22 @@ import {
 } from "recharts";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
-import { BusinessHeroImagePreview } from "../../components/business/BusinessHeroImagePreview";
-import haw1HeroImg from "../../../../images/haw1.png";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashPanel } from "@/components/ui/dashboard-styles";
 import {
   devMockBusinessEmployeePerformance,
   devMockBusinessTipDistribution,
 } from "../../lib/devAnalyticsMocks";
+import aceHeroImage from "../../../../images/ACE.png";
 
 const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
 
-const BUSINESS_HERO_HEADLINE = "Team Performance Insights";
-const BUSINESS_HERO_SUB = "Clarity in motion, tips on demand";
+const BUSINESS_HERO_HEADLINE = "Team Performance Overview";
+const BUSINESS_HERO_SUB = "Monitor tips, staff activity, and earnings in real time";
+
+/** Same max height cap as employee hero media for consistent dashboard rhythm. */
+const BUSINESS_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -83,18 +82,29 @@ function StatCard(props: {
   icon: React.ElementType;
   /** On viewports below `lg`, span full width of the 2-column stats grid (primary metric). */
   featured?: boolean;
+  /** `brand` = orange staff/earnings; `muted` = slate for secondary metrics. */
+  iconTone?: "brand" | "muted";
 }) {
   const Icon = props.icon;
+  const tone = props.iconTone ?? "brand";
   return (
     <Card
       className={cn(
-        "flex min-h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
+        "flex min-h-32 flex-col rounded-2xl border border-[#E5E7EB] bg-white p-4 text-left shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
         props.featured && "max-lg:col-span-2",
       )}
     >
       <div className="mb-2 shrink-0">
-        <div className="inline-flex rounded-lg bg-orange-50 p-2">
-          <Icon className="h-5 w-5 text-primary" aria-hidden />
+        <div
+          className={cn(
+            "inline-flex rounded-lg p-2",
+            tone === "brand" ? "bg-orange-50" : "bg-slate-50",
+          )}
+        >
+          <Icon
+            className={cn("h-5 w-5", tone === "brand" ? "text-primary" : "text-slate-600")}
+            aria-hidden
+          />
         </div>
       </div>
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
@@ -117,7 +127,7 @@ function goalStatusLabel(s: EmployeeGoalProgressStatus): string {
 }
 
 function goalStatusClass(s: EmployeeGoalProgressStatus): string {
-  if (s === "achieved") return "text-emerald-600";
+  if (s === "achieved") return "text-[#34D399]";
   if (s === "on_track") return "text-primary";
   return "text-amber-700";
 }
@@ -371,7 +381,7 @@ export function BusinessDashboard() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background">
+    <div className="min-h-screen overflow-x-hidden bg-[#F8F9FA]">
       {user?.impersonation && (
         <div
           className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-primary/15 px-4 py-2.5 text-sm text-foreground"
@@ -388,7 +398,7 @@ export function BusinessDashboard() {
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
+      <div className="mx-auto max-w-7xl px-6 pt-6 sm:px-6 lg:px-8">
         <FixPrompt
           id="pendingVerification"
           issueActive={pendingVerification === true}
@@ -400,6 +410,8 @@ export function BusinessDashboard() {
         />
         <DashboardHero
           stackHeroOnMobile
+          hideTabs
+          actionsPlacement="belowText"
           badge={
             <>
               <Store className="h-3.5 w-3.5 text-foreground" />
@@ -415,106 +427,29 @@ export function BusinessDashboard() {
           title={BUSINESS_HERO_HEADLINE}
           description={BUSINESS_HERO_SUB}
           image={
-            <BusinessHeroImagePreview
-              src={haw1HeroImg}
-              className="w-full caretip-hero-fadein caretip-hero-float"
-            />
+            <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
+                <div
+                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
+                  style={BUSINESS_HERO_MEDIA_MAX_STYLE}
+                >
+                  <img
+                    src={aceHeroImage}
+                    alt=""
+                    className="h-full w-full object-cover"
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
+                  />
+                </div>
+              </div>
+            </div>
           }
           imageOverlay={false}
-          overview={
-            <p className="text-sm text-muted-foreground line-clamp-1">Charts and tables use the period filter above.</p>
-          }
-          shortcuts={
-            <>
-              <Link
-                to="/dashboard/profile"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Manage business profile
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard/staff-management"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Manage staff
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/business/qr-management"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <QrCode className="h-4 w-4" />
-                  QR management
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard/locations"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Building2 className="h-4 w-4" />
-                  Locations
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard/tables"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <LineChart className="h-4 w-4" />
-                  Tables
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </>
-          }
-          actions={
-            <>
-              <Button asChild className="bg-primary hover:bg-primary/90">
-                <Link to="/dashboard/staff-management" className="gap-2">
-                  <Users className="h-4 w-4 shrink-0" />
-                  Staff
-                </Link>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleExport}
-                disabled={exportLoading || !isBusiness}
-                aria-busy={exportLoading}
-              >
-                {exportLoading ? (
-                  <>
-                    <LoadingSpinner size="sm" className="mr-2" />
-                    Exporting…
-                  </>
-                ) : (
-                  <>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export
-                  </>
-                )}
-              </Button>
-              <Button variant="outline" type="button" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4 shrink-0" />
-                Logout
-              </Button>
-            </>
-          }
         />
       </div>
 
-      <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
+      <TracingBeam className="mx-auto max-w-7xl px-6 sm:px-6 lg:px-8">
         <div className="space-y-6 py-6">
           <FixPrompt
             id="missingQR"
@@ -528,7 +463,7 @@ export function BusinessDashboard() {
 
           <div className="flex flex-wrap items-center gap-3">
             <LiveConnectionBadge status={connectionStatus} />
-          <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+          <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-[#E5E7EB] bg-white p-1 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.06)] sm:w-fit">
             {(["week", "month", "year"] as const).map((period) => (
               <button
                 key={period}
@@ -545,8 +480,8 @@ export function BusinessDashboard() {
                 }}
                 className={`min-h-11 flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-all sm:flex-initial sm:px-4 sm:text-sm ${
                   timeframe === period
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
+                    ? "bg-primary text-primary-foreground shadow-[0_4px_18px_-4px_rgb(124_45_18_/0.22)]"
+                    : "text-muted-foreground hover:bg-slate-50"
                 }`}
               >
                 {period === "week" && "This Week"}
@@ -580,6 +515,7 @@ export function BusinessDashboard() {
                 value={String(stats?.tipCount ?? 0)}
                 change={hasTipActivityInPeriod ? "Includes successful tips in this timeframe." : undefined}
                 icon={Award}
+                iconTone="muted"
               />
               <StatCard
                 title="Avg tip per employee"
@@ -590,6 +526,7 @@ export function BusinessDashboard() {
                 }
                 change="Useful coaching metric"
                 icon={TrendingUp}
+                iconTone="muted"
               />
             </div>
           </motion.div>
@@ -599,11 +536,11 @@ export function BusinessDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.35 }}
           >
-            <Card className={dashPanel("shadow-sm")}>
+            <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
               <CardHeader>
                 <div className="flex items-start gap-3">
-                  <div className="rounded-lg border border-border bg-muted p-2">
-                    <Target className="h-5 w-5 text-foreground" />
+                  <div className="rounded-lg bg-slate-50 p-2">
+                    <Target className="h-5 w-5 text-slate-600" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <CardTitle className="text-lg">Employee tip goals</CardTitle>
@@ -653,238 +590,252 @@ export function BusinessDashboard() {
             </Card>
           </motion.div>
 
-        {/* Charts Section */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Tip Distribution Chart */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className={dashPanel("shadow-sm")}>
-              <CardHeader>
-                <CardTitle className="text-lg">Daily tip distribution</CardTitle>
-                <CardDescription>
-                  {timeframe === "week" && "Tips per day (Mon to Sun, current week)"}
-                  {timeframe === "month" && "Tips per day (current month)"}
-                  {timeframe === "year" && "Tips per month (current year)"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
-                ) : (
-                  <div className="h-[260px] w-full min-w-0 sm:h-[290px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <BarChart data={tipDistributionData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                      <XAxis dataKey="day" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
-                      <YAxis stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
-                      <Tooltip
-                        formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
-                        contentStyle={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #e5e5e5",
-                          borderRadius: "8px",
-                          color: "#000000",
-                        }}
-                      />
-                      <Bar dataKey="amount" fill="#EB992C" radius={[8, 8, 0, 0]} />
-                    </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Employee Performance */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card className={dashPanel("shadow-sm")}>
-              <CardHeader>
-                <CardTitle className="text-lg">Employee performance</CardTitle>
-                <CardDescription>Tip totals by team member</CardDescription>
-              </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {(stats?.employeeCount ?? 0) === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No employees yet</p>
-                ) : !hasTipActivityInPeriod ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
-                ) : employeePerformance.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
-                ) : (
-                  <div className="h-[260px] w-full min-w-0 sm:h-[290px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <BarChart data={employeePerformance} layout="vertical" margin={{ top: 10, right: 16, left: 4, bottom: 8 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                      <XAxis type="number" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
-                      <YAxis
-                        dataKey="name"
-                        type="category"
-                        stroke="#404040"
-                        style={{ fontSize: "12px" }}
-                        width={100}
-                        tickMargin={6}
-                      />
-                      <Tooltip
-                        formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
-                        contentStyle={{
-                          backgroundColor: "#ffffff",
-                          border: "1px solid #e5e5e5",
-                          borderRadius: "8px",
-                          color: "#000000",
-                        }}
-                      />
-                      <Bar dataKey="tips" radius={[0, 8, 8, 0]}>
-                        {employeePerformance.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Top Performers & Quick Actions */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Top Performers */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="lg:col-span-2"
-          >
-            <Card className={dashPanel("shadow-sm")}>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                <CardTitle className="text-lg">Top performers</CardTitle>
-                <Link
-                  to="/dashboard/staff-management"
-                  className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
-                >
-                  View all
-                  <ArrowUpRight className="h-4 w-4" />
-                </Link>
-              </CardHeader>
-              <CardContent>
-            <div className="space-y-3">
-              {topEmployees.length === 0 ? (
-                <p className="text-sm text-muted-foreground py-6 text-center">No employees yet</p>
-              ) : (
-                topEmployees.map((employee, index) => (
-                  <div
-                    key={employee.id}
-                    className="flex flex-col gap-3 rounded-lg border border-border bg-background p-4 sm:flex-row sm:items-center sm:gap-4"
-                  >
-                    <div className="flex min-w-0 flex-1 items-center gap-3">
-                      <div className="relative">
-                        <ProfileAvatar
-                          src={employee.avatar}
-                          displayName={employee.name}
-                          className="h-12 w-12"
-                        />
-                        {index === 0 && (
-                          <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                            <Award className="h-4 w-4" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="truncate font-semibold text-foreground">{employee.name}</h3>
-                        <p className="truncate text-sm text-muted-foreground">{employee.role}</p>
-                      </div>
-                    </div>
-                    <div className="shrink-0 text-left sm:text-right">
-                      <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
-                      <div className="flex items-center justify-end gap-1 text-sm">
-                        {employee.rating != null ? (
-                          <>
-                            <Star className="h-3 w-3 fill-primary text-primary" />
-                            <span className="text-muted-foreground">{employee.rating}</span>
-                          </>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">New member</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Quick Actions */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="space-y-4"
-          >
-            <Card className={dashPanel("shadow-sm")}>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick actions</CardTitle>
-                <CardDescription>Common venue tasks</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start gap-3" asChild>
-                  <Link to="/dashboard/profile">
-                    <Building2 className="h-5 w-5 shrink-0" />
-                    Business profile
-                  </Link>
-                </Button>
-                <Button className="w-full justify-start gap-3" asChild>
-                  <Link to="/business/qr-management">
-                    <QrCode className="h-5 w-5 shrink-0" />
-                    Generate QR codes
-                  </Link>
-                </Button>
-                <Button variant="outline" className="w-full justify-start gap-3" asChild>
-                  <Link to="/dashboard/locations">
-                    <MapPin className="h-5 w-5 shrink-0" />
-                    Manage locations
-                  </Link>
-                </Button>
-                <Button
-                  type="button"
-                  className="w-full justify-start gap-3"
-                  onClick={handleExport}
-                  disabled={exportLoading || !isBusiness}
-                  aria-busy={exportLoading}
-                >
-                  {exportLoading ? (
-                    <LoadingSpinner size="sm" />
+          {/* Charts Section */}
+          <div className="w-full grid gap-6 lg:grid-cols-2">
+            {/* Tip Distribution Chart */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.4 }}
+            >
+              <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+                <CardHeader>
+                  <CardTitle className="text-lg">Daily tip distribution</CardTitle>
+                  <CardDescription>
+                    {timeframe === "week" && "Tips per day (Mon to Sun, current week)"}
+                    {timeframe === "month" && "Tips per day (current month)"}
+                    {timeframe === "year" && "Tips per month (current year)"}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
+                  {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
+                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                   ) : (
-                    <Download className="h-5 w-5 shrink-0" />
+                    <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <BarChart data={tipDistributionData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                          <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
+                          <YAxis stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
+                          <Tooltip
+                            formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
+                            contentStyle={{
+                              backgroundColor: "#ffffff",
+                              border: "1px solid #E5E7EB",
+                              borderRadius: "8px",
+                              color: "#000000",
+                            }}
+                          />
+                          <Bar dataKey="amount" fill="#EB992C" radius={[8, 8, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   )}
-                  Export reports
-                </Button>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            </motion.div>
 
-            <Card className={dashPanel("shadow-sm")}>
-              <CardHeader>
-                <CardTitle className="text-base">Need help?</CardTitle>
-                <CardDescription>
-                  Learn how to maximize your team&apos;s earnings and keep guests tipping smoothly.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Button type="button" className="w-full" onClick={() => setGuidelinesOpen(true)}>
-                  View guidelines
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-        </div>
+            {/* Employee Performance */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.5 }}
+            >
+              <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+                <CardHeader>
+                  <CardTitle className="text-lg">Employee performance</CardTitle>
+                  <CardDescription>Tip totals by team member</CardDescription>
+                </CardHeader>
+                <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
+                  {(stats?.employeeCount ?? 0) === 0 ? (
+                    <p className="py-12 text-center text-sm text-muted-foreground">No employees yet</p>
+                  ) : !hasTipActivityInPeriod ? (
+                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                  ) : employeePerformance.length === 0 ? (
+                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                  ) : (
+                    <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                        <BarChart
+                          data={employeePerformance}
+                          layout="vertical"
+                          margin={{ top: 10, right: 16, left: 4, bottom: 8 }}
+                        >
+                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                          <XAxis type="number" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
+                          <YAxis
+                            dataKey="name"
+                            type="category"
+                            stroke="#64748b"
+                            style={{ fontSize: "12px" }}
+                            width={100}
+                            tickMargin={6}
+                          />
+                          <Tooltip
+                            formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
+                            contentStyle={{
+                              backgroundColor: "#ffffff",
+                              border: "1px solid #e5e5e5",
+                              borderRadius: "8px",
+                              color: "#000000",
+                            }}
+                          />
+                          <Bar dataKey="tips" radius={[0, 8, 8, 0]}>
+                            {employeePerformance.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Bar>
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
+
+          {/* Top Performers & Quick Actions */}
+          <div className="w-full grid gap-6 lg:grid-cols-3">
+            {/* Top Performers */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="lg:col-span-2"
+            >
+              <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+                  <CardTitle className="text-lg">Top performers</CardTitle>
+                  <Link
+                    to="/dashboard/staff-management"
+                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
+                  >
+                    View all
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {topEmployees.length === 0 ? (
+                      <p className="py-6 text-center text-sm text-muted-foreground">No employees yet</p>
+                    ) : (
+                      topEmployees.map((employee, index) => (
+                        <div
+                          key={employee.id}
+                          className="flex flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white p-4 sm:flex-row sm:items-center sm:gap-4"
+                        >
+                          <div className="flex min-w-0 flex-1 items-center gap-3">
+                            <div className="relative">
+                              <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
+                              {index === 0 && (
+                                <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                  <Award className="h-4 w-4" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h3 className="truncate font-semibold text-foreground">{employee.name}</h3>
+                              <p className="truncate text-sm text-muted-foreground">{employee.role}</p>
+                            </div>
+                          </div>
+                          <div className="shrink-0 text-left sm:text-right">
+                            <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
+                            <div className="flex items-center justify-end gap-1 text-sm">
+                              {employee.rating != null ? (
+                                <>
+                                  <Star className="h-3 w-3 fill-primary text-primary" />
+                                  <span className="text-muted-foreground">{employee.rating}</span>
+                                </>
+                              ) : (
+                                <span className="text-xs text-muted-foreground">New member</span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            {/* Quick Actions */}
+            <motion.div
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="space-y-4"
+            >
+              <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+                <CardHeader>
+                  <CardTitle className="text-lg">Quick actions</CardTitle>
+                  <CardDescription>Common venue tasks</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <Button variant="outline" className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]" asChild>
+                    <Link to="/dashboard/profile" className="gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                        <Building2 className="h-5 w-5 text-slate-600" />
+                      </span>
+                      Business profile
+                    </Link>
+                  </Button>
+                  <Button
+                    className="w-full justify-start gap-3 shadow-[0_4px_18px_-4px_rgb(124_45_18_/0.18)]"
+                    asChild
+                  >
+                    <Link to="/business/qr-management" className="gap-3">
+                      <QrCode className="h-5 w-5 shrink-0" />
+                      Generate QR codes
+                    </Link>
+                  </Button>
+                  <Button variant="outline" className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]" asChild>
+                    <Link to="/dashboard/locations" className="gap-3">
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                        <MapPin className="h-5 w-5 text-slate-600" />
+                      </span>
+                      Manage locations
+                    </Link>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]"
+                    onClick={handleExport}
+                    disabled={exportLoading || !isBusiness}
+                    aria-busy={exportLoading}
+                  >
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                      {exportLoading ? (
+                        <LoadingSpinner size="sm" />
+                      ) : (
+                        <Download className="h-5 w-5 text-slate-600" />
+                      )}
+                    </span>
+                    Export reports
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+                <CardHeader>
+                  <CardTitle className="text-base">Need help?</CardTitle>
+                  <CardDescription>
+                    Learn how to maximize your team&apos;s earnings and keep guests tipping smoothly.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    type="button"
+                    className="w-full shadow-[0_4px_16px_-4px_rgb(124_45_18_/0.12)]"
+                    onClick={() => setGuidelinesOpen(true)}
+                  >
+                    View guidelines
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </TracingBeam>
 

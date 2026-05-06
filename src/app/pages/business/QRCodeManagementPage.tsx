@@ -14,8 +14,6 @@ import {
   UserCheck,
   RefreshCw,
   FileDown,
-  ArrowRight,
-  LayoutGrid,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -796,6 +794,7 @@ export function QRCodeManagementPage() {
 
         <DashboardHero
           stackHeroOnMobile
+          hideTabs
           hideImage
           badge={
             <>
@@ -806,56 +805,6 @@ export function QRCodeManagementPage() {
           title="QR code management"
           description={
             businessSlug ? "Printable codes for staff and your venue page." : "Generate staff and venue QR codes."
-          }
-          overview={
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Staff</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Status</p>
-                <p className="text-lg font-bold text-foreground">{statusLabel}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Slug</p>
-                <p className="text-lg font-bold text-foreground">{businessSlug ? "Live" : "N/A"}</p>
-              </div>
-            </div>
-          }
-          shortcuts={
-            <>
-              <Link
-                to="/dashboard/staff-management"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Staff management
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard/locations"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4" />
-                  Locations
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4" />
-                  Dashboard
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </>
           }
           actions={
             <Button
@@ -872,6 +821,26 @@ export function QRCodeManagementPage() {
             </Button>
           }
         />
+
+        <Card className="mt-4 w-full rounded-2xl border border-gray-100 bg-white shadow-none">
+          <CardContent className="p-4 sm:p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">At a glance</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Staff</p>
+                <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Status</p>
+                <p className="text-lg font-bold text-foreground">{statusLabel}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Slug</p>
+                <p className="text-lg font-bold text-foreground">{businessSlug ? "Live" : "N/A"}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       {qrLocked ? (

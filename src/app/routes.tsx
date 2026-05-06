@@ -41,7 +41,6 @@ import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
 import { ProfileSettingsPage } from './components/ProfileSettingsPage';
 import { TransactionsPage } from './components/TransactionsPage';
-import { SupportPage } from './components/SupportPage';
 import { NotificationsPage } from './components/NotificationsPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PlatformAdminRoute } from './components/PlatformAdminRoute';
@@ -291,7 +290,7 @@ const routes: RouteObject[] = [
       { path: 'tables', Component: TablesPage },
       { path: 'transactions', Component: TransactionsPage },
       { path: 'profile-settings', Component: ProfileSettingsPage },
-      { path: 'support', Component: SupportPage },
+      { path: 'support', element: <Navigate to="/dashboard" replace /> },
       { path: 'notifications', Component: NotificationsPage },
       { path: 'subscriptions', element: <Navigate to="/dashboard/transactions" replace /> },
       { path: 'customers', element: <Navigate to="/dashboard" replace /> },

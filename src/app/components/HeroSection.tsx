@@ -155,7 +155,7 @@ export function HeroSection() {
               transition={{ duration: 0.5, delay: 1.2 }}
               className="absolute top-12 left-8 bg-white/95 backdrop-blur-sm px-4 py-3 rounded-full shadow-xl border border-white/20 flex items-center gap-2"
             >
-              <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
               <p className="text-xs font-semibold text-foreground">
                 3,200+ employees receiving tips
               </p>

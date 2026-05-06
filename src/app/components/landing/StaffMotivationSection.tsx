@@ -317,7 +317,7 @@ function ExplodedViewStage({
         >
           <div className="flex items-center justify-between">
             <p className="text-xs font-semibold text-gray-600">Top performer</p>
-            <span className="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-black text-primary">
+            <span className="inline-flex items-center rounded-full bg-emerald-500/10 px-2.5 py-1 text-[11px] font-black text-emerald-600 dark:text-emerald-400">
               Live
             </span>
           </div>

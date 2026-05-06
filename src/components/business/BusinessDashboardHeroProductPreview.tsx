@@ -58,7 +58,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                   <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
                     <div className="flex items-center justify-between">
                       <p className="text-xs font-semibold text-white/85">Table 12</p>
-                      <span className="rounded-full bg-primary/15 px-2 py-1 text-[10px] font-semibold text-primary ring-1 ring-primary/25">
+                      <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
                         Live
                       </span>
                     </div>
@@ -150,8 +150,8 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-semibold text-white">Team pulse</p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-white/65 ring-1 ring-white/10">
-                  <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
+                <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/25">
+                  <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
                   Live
                 </span>
               </div>

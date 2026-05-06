@@ -29,7 +29,10 @@ function InstantTipSplitIllustration() {
       </div>
       <div className="absolute right-2 top-2 max-w-[min(100%,11rem)] rounded-xl border border-gray-200 bg-white p-2.5 shadow-[0_10px_28px_rgba(0,0,0,0.06)] sm:right-3 sm:top-3 sm:max-w-[13rem] sm:p-3 dark:border-neutral-800 dark:bg-neutral-900">
         <div className="flex items-start gap-2">
-          <span className="mt-0.5 h-2 w-2 shrink-0 rounded-full bg-accent animate-pulse" aria-hidden />
+          <span
+            className="mt-0.5 h-2 w-2 shrink-0 animate-pulse rounded-full bg-emerald-500 shadow-[0_0_6px_rgba(52,211,153,0.45)]"
+            aria-hidden
+          />
           <p className="text-xs font-semibold leading-tight text-foreground sm:text-sm">New tip received</p>
         </div>
       </div>

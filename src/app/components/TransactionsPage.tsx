@@ -17,11 +17,6 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react';
-import { DashboardSidebar } from './DashboardSidebar';
-import { DashboardMobileSidebar } from './DashboardMobileSidebar';
-import { DashboardHeader } from './DashboardHeader';
-import { Footer } from './Footer';
-import AnimatedShaderBackground from './ui/animated-shader-background';
 import { formatEur } from '../lib/formatEur';
 
 // Transaction type
@@ -75,7 +70,6 @@ const getTypeConfig = (type: Transaction['type']) => {
 };
 
 export function TransactionsPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [selectedType, setSelectedType] = useState<string>('all');
@@ -114,26 +108,7 @@ export function TransactionsPage() {
   const failedCount = filteredTransactions.filter(t => t.status === 'failed').length;
 
   return (
-    <div className="min-h-screen relative">
-      <AnimatedShaderBackground />
-      
-      <div className="relative z-10">
-        {/* Sidebar - Desktop */}
-        <DashboardSidebar />
-
-        {/* Sidebar - Mobile */}
-        <DashboardMobileSidebar 
-          isOpen={mobileMenuOpen} 
-          onClose={() => setMobileMenuOpen(false)} 
-        />
-
-        {/* Main Content */}
-        <div className="lg:pl-64">
-          {/* Header */}
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-
-          {/* Page Content */}
-          <main className="px-4 lg:px-8 py-8 pb-20">
+    <main className="bg-background px-4 py-8 pb-20 lg:px-8">
             {/* Page Header */}
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
@@ -570,12 +545,6 @@ export function TransactionsPage() {
                 </div>
               </motion.div>
             )}
-          </main>
-
-          {/* Footer */}
-          <Footer />
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

@@ -27,7 +27,7 @@ export function HeroSectionNew() {
               transition={{ duration: 0.5, delay: 0.3 }}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20"
             >
-              <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+              <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]" />
               <span className="text-xs sm:text-sm text-white/90 font-medium">
                 Trusted by 5,000+ restaurants and cafes worldwide
               </span>

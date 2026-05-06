@@ -35,13 +35,13 @@ export function LiveConnectionBadge({
     >
       {ok ? (
         <span className="relative inline-flex h-3 w-3 flex-none items-center justify-center" aria-hidden>
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-40" />
-          <span className="inline-flex h-2.5 w-2.5 rounded-full bg-primary ring-2 ring-primary/20" />
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-40" />
+          <span className="inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-500/25 dark:ring-emerald-400/30" />
         </span>
       ) : (
         <span
           className={`h-1.5 w-1.5 rounded-full ${
-            warn ? "bg-primary animate-pulse" : "bg-muted-foreground"
+            warn ? "animate-pulse bg-amber-500" : "bg-muted-foreground"
           }`}
           aria-hidden
         />

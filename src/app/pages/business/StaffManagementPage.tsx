@@ -16,8 +16,6 @@ import {
   RefreshCw,
   Trash2,
   Users,
-  ArrowRight,
-  LayoutGrid,
   MapPin,
 } from "lucide-react";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -545,6 +543,7 @@ export function StaffManagementPage() {
 
         <DashboardHero
           stackHeroOnMobile
+          hideTabs
           hideImage
           badge={
             <>
@@ -554,46 +553,6 @@ export function StaffManagementPage() {
           }
           title="Staff management"
           description="Invites, roles, and active staff."
-          overview={
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Team</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Active</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">{activeCount}</p>
-              </div>
-              <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Tips (mo)</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(tipsMonthTotal)}</p>
-              </div>
-            </div>
-          }
-          shortcuts={
-            <>
-              <Link
-                to="/dashboard"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <LayoutGrid className="h-4 w-4" />
-                  Dashboard
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-              <Link
-                to="/dashboard/qr-code-management"
-                className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
-              >
-                <span className="flex items-center gap-2">
-                  <QrCode className="h-4 w-4" />
-                  QR management
-                </span>
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </>
-          }
           actions={
             <>
               <Button
@@ -626,6 +585,26 @@ export function StaffManagementPage() {
             </>
           }
         />
+
+        <Card className="mt-4 w-full rounded-2xl border border-gray-100 bg-white shadow-none">
+          <CardContent className="p-4 sm:p-5">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">At a glance</p>
+            <div className="grid grid-cols-3 gap-3 text-center">
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Team</p>
+                <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Active</p>
+                <p className="text-lg font-bold tabular-nums text-foreground">{activeCount}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium uppercase text-muted-foreground">Tips (mo)</p>
+                <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(tipsMonthTotal)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
       <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">

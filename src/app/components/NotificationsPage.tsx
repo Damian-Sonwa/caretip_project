@@ -11,11 +11,6 @@ import {
   Heart,
 } from 'lucide-react';
 import { Link } from 'react-router';
-import { DashboardSidebar } from './DashboardSidebar';
-import { DashboardMobileSidebar } from './DashboardMobileSidebar';
-import { DashboardHeader } from './DashboardHeader';
-import { Footer } from './Footer';
-import AnimatedShaderBackground from './ui/animated-shader-background';
 
 interface Notification {
   id: string;
@@ -140,20 +135,7 @@ export function NotificationsPage() {
   });
 
   return (
-    <div className="min-h-screen relative">
-      <AnimatedShaderBackground />
-
-      <div className="relative z-10">
-        <DashboardSidebar />
-        <DashboardMobileSidebar
-          isOpen={mobileMenuOpen}
-          onClose={() => setMobileMenuOpen(false)}
-        />
-
-        <div className="lg:pl-64">
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-
-          <main className="px-4 lg:px-8 py-8 pb-20">
+    <main className="bg-background px-4 py-8 pb-20 lg:px-8">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
               <div>
                 <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
@@ -244,11 +226,6 @@ export function NotificationsPage() {
                 );
               })}
             </div>
-          </main>
-
-          <Footer />
-        </div>
-      </div>
-    </div>
+    </main>
   );
 }

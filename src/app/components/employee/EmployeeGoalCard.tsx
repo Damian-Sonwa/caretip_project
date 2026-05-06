@@ -43,7 +43,7 @@ const STATUS_LABEL: Record<EmployeeGoalProgress["status"], string> = {
 };
 
 function statusClass(s: EmployeeGoalProgress["status"]): string {
-  if (s === "achieved") return "text-emerald-600";
+  if (s === "achieved") return "text-[#34D399]";
   if (s === "on_track") return "text-primary";
   return "text-amber-700";
 }
@@ -122,7 +122,7 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
 
   return (
     <>
-      <Card className="border-2 border-primary/30 bg-muted/30 shadow-sm">
+      <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
         <CardHeader>
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-primary p-2 text-primary-foreground">

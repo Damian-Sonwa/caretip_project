@@ -16,15 +16,27 @@ export type DashboardHeroProps = {
   /** Custom visual (e.g. WebGL); uses tight intrinsic layout instead of stretched cover. */
   image?: React.ReactNode;
   imageCaption?: string;
-  overview: React.ReactNode;
-  shortcuts: React.ReactNode;
-  actions: React.ReactNode;
+  overview?: React.ReactNode;
+  shortcuts?: React.ReactNode;
+  /** Primary hero CTAs; omit when navigation lives elsewhere (e.g. sidebar). */
+  actions?: React.ReactNode;
   /** Larger beam for main marketing hero */
   beamSize?: number;
   /** When true, omit the right-hand image column (single-column hero). */
   hideImage?: boolean;
   /** When false, skips the bottom gradient scrim over the media column (e.g. for WebGL / custom visuals). */
   imageOverlay?: boolean;
+  /**
+   * Dashboard-only: when true, omit the Overview/Shortcuts tabs entirely.
+   * Use to keep certain dashboards (e.g. employee hero) compact and purpose-driven.
+   */
+  hideTabs?: boolean;
+  /**
+   * Dashboard-only: where action buttons live on large screens when `stackHeroOnMobile`.
+   * - `belowTabs` (default): actions live in the second row under the tabs.
+   * - `belowText`: actions sit directly under the headline/tagline (more compact, summary-like).
+   */
+  actionsPlacement?: "belowTabs" | "belowText";
   /**
    * Dashboard routes only: on small screens, stack hero as heading → media → tabs/overview → actions.
    * Large screens keep the two-column layout. Does not affect landing or marketing pages unless they pass this flag.
@@ -43,12 +55,14 @@ export function DashboardHero({
   imageSrc,
   image,
   imageCaption,
-  overview,
-  shortcuts,
+  overview = null,
+  shortcuts = null,
   actions,
   beamSize = 260,
   hideImage = false,
   imageOverlay = true,
+  hideTabs = false,
+  actionsPlacement = "belowTabs",
   stackHeroOnMobile = false,
 }: DashboardHeroProps) {
   const hasCustomMedia = Boolean(image);
@@ -130,16 +144,19 @@ export function DashboardHero({
     </Tabs>
   );
 
-  const actionsRow = (
-    <div
-      className={cn(
-        "dashboard-hero-actions flex min-w-0 shrink-0 flex-row flex-wrap items-center gap-2 pt-1 sm:gap-3 sm:pt-2 lg:pt-0",
-        stackHeroOnMobile && "dashboard-hero-actions--premium-grid max-lg:pt-0",
-      )}
-    >
-      {actions}
-    </div>
-  );
+  const supportingCluster = hideTabs ? null : tabsCluster;
+
+  const actionsRow =
+    actions != null ? (
+      <div
+        className={cn(
+          "dashboard-hero-actions flex min-w-0 shrink-0 flex-row flex-wrap items-center gap-2 pt-1 sm:gap-3 sm:pt-2 lg:pt-0",
+          stackHeroOnMobile && "dashboard-hero-actions--premium-grid max-lg:pt-0",
+        )}
+      >
+        {actions}
+      </div>
+    ) : null;
 
   const mediaShellClass = (opts: { forStackedMobile: boolean }) =>
     cn(
@@ -283,11 +300,11 @@ export function DashboardHero({
               {/* Supporting text (tagline) + tabs */}
               <div className="flex min-w-0 flex-col gap-6">
                 {taglineBlock ? <div className="-mt-1 mb-1">{taglineBlock}</div> : null}
-                {tabsCluster}
+                {supportingCluster}
               </div>
 
               {/* Actions */}
-              <div className="mt-1">{actionsRow}</div>
+              {actionsRow ? <div className="mt-1">{actionsRow}</div> : null}
             </div>
 
             {/* Desktop/tablet layout unchanged */}
@@ -310,12 +327,15 @@ export function DashboardHero({
                   {titleRow}
                 </div>
                 {taglineBlock}
+                {actionsPlacement === "belowText" && actionsRow ? <div className="pt-1">{actionsRow}</div> : null}
               </div>
               {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
-              <div className="flex min-w-0 flex-col gap-6 lg:col-span-12 lg:row-start-2 lg:w-full">
-                {tabsCluster}
-                {actionsRow}
-              </div>
+              {hideTabs && actionsPlacement === "belowText" ? null : (
+                <div className="flex min-w-0 flex-col gap-6 lg:col-span-12 lg:row-start-2 lg:w-full">
+                  {supportingCluster}
+                  {actionsPlacement === "belowTabs" ? actionsRow : null}
+                </div>
+              )}
             </div>
           </>
         ) : (
@@ -333,28 +353,32 @@ export function DashboardHero({
                 </CardDescription>
               ) : null}
 
-              <Tabs defaultValue="overview" className={cn("w-full max-w-md", tagline ? "pt-2 sm:pt-3" : "pt-0 sm:pt-1")}>
-                <TabsList className="grid w-full grid-cols-2 bg-muted">
-                  <TabsTrigger value="overview">Overview</TabsTrigger>
-                  <TabsTrigger value="links">Shortcuts</TabsTrigger>
-                </TabsList>
-                <TabsContent
-                  value="overview"
-                  className="rounded-md border border-border bg-background p-4 text-sm text-foreground sm:p-5"
-                >
-                  {overview}
-                </TabsContent>
-                <TabsContent
-                  value="links"
-                  className="space-y-2 rounded-md border border-border bg-background p-4 text-sm sm:p-5"
-                >
-                  {shortcuts}
-                </TabsContent>
-              </Tabs>
+              {hideTabs ? null : (
+                <Tabs defaultValue="overview" className={cn("w-full max-w-md", tagline ? "pt-2 sm:pt-3" : "pt-0 sm:pt-1")}>
+                  <TabsList className="grid w-full grid-cols-2 bg-muted">
+                    <TabsTrigger value="overview">Overview</TabsTrigger>
+                    <TabsTrigger value="links">Shortcuts</TabsTrigger>
+                  </TabsList>
+                  <TabsContent
+                    value="overview"
+                    className="rounded-md border border-border bg-background p-4 text-sm text-foreground sm:p-5"
+                  >
+                    {overview}
+                  </TabsContent>
+                  <TabsContent
+                    value="links"
+                    className="space-y-2 rounded-md border border-border bg-background p-4 text-sm sm:p-5"
+                  >
+                    {shortcuts}
+                  </TabsContent>
+                </Tabs>
+              )}
 
-              <div className="dashboard-hero-actions flex min-w-0 flex-row flex-wrap items-center gap-2 pt-4 sm:gap-3 sm:pt-5">
-                {actions}
-              </div>
+              {actionsRow ? (
+                <div className="dashboard-hero-actions flex min-w-0 flex-row flex-wrap items-center gap-2 pt-4 sm:gap-3 sm:pt-5">
+                  {actions}
+                </div>
+              ) : null}
             </CardHeader>
 
             {renderMediaColumn({ stackedLayout: false })}

@@ -447,7 +447,7 @@ export function CinematicHero({
                     <div className="screen-glare pointer-events-none absolute inset-0 z-40" aria-hidden="true" />
 
                     <div className="absolute top-[5px] left-1/2 z-50 flex h-[28px] w-[100px] -translate-x-1/2 items-center justify-end rounded-full bg-black px-3 shadow-[inset_0_-1px_2px_rgba(255,255,255,0.1)]">
-                      <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-[hsl(var(--primary))] shadow-[0_0_8px_rgba(235,153,44,0.85)]" />
+                      <div className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.85)]" />
                     </div>
 
                     <div className="relative flex h-full w-full flex-col px-5 pt-12 pb-8">

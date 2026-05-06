@@ -44,15 +44,15 @@ export function HeroSectionSpline() {
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-white/70">
           <span className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.35)]" />
             No setup fees
           </span>
           <span className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.35)]" />
             Instant payouts
           </span>
           <span className="flex items-center gap-2">
-            <div className="h-2 w-2 rounded-full bg-accent animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.35)]" />
             24/7 support
           </span>
         </div>
