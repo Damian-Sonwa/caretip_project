@@ -264,7 +264,7 @@ export function FeatureShowcase({
             "relative",
             !cinematic && "md:col-span-5",
             cinematic &&
-              "order-1 flex flex-1 flex-col self-stretch max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
+              "order-1 flex flex-1 flex-col self-stretch max-md:pt-2 md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
           )}
         >
             <Badge
@@ -330,7 +330,7 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-8 flex w-full flex-wrap gap-3 max-md:justify-center max-md:text-center max-md:w-full">
+              <div className="mt-8 flex w-full flex-wrap gap-3 max-md:justify-start">
                 <Button
                   asChild
                   size="lg"
