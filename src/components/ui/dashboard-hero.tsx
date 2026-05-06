@@ -26,7 +26,7 @@ export type DashboardHeroProps = {
   /** When false, skips the bottom gradient scrim over the media column (e.g. for WebGL / custom visuals). */
   imageOverlay?: boolean;
   /**
-   * Dashboard routes only: on small screens, stack hero as heading → media → supporting copy/tabs → actions.
+   * Dashboard routes only: on small screens, stack hero as heading → media → tabs/overview → actions.
    * Large screens keep the two-column layout. Does not affect landing or marketing pages unless they pass this flag.
    */
   stackHeroOnMobile?: boolean;
@@ -145,7 +145,7 @@ export function DashboardHero({
     cn(
       "dashboard-hero-media relative w-full min-w-0",
       opts.forStackedMobile && stackHeroOnMobile
-        ? "max-lg:overflow-hidden max-lg:rounded-3xl max-lg:bg-[#FFFFFF] max-lg:p-0 max-lg:shadow-none"
+        ? "max-lg:overflow-visible max-lg:rounded-3xl max-lg:bg-[#FFFFFF] max-lg:p-0 max-lg:shadow-none"
         : imageOverlay === false
           ? "bg-transparent p-0 sm:p-0 lg:pt-0"
           : cn(
@@ -179,7 +179,7 @@ export function DashboardHero({
           hasPhoto && "min-h-[220px] lg:min-h-[min(100%,28rem)]",
           hasCustomMedia && "lg:justify-center",
           opts.stackedLayout &&
-            "max-lg:order-3 max-lg:w-full max-lg:max-w-none lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:justify-center",
+            "max-lg:w-full max-lg:max-w-none lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:justify-center",
         )}
       >
         {hasCustomMedia ? (
@@ -268,36 +268,56 @@ export function DashboardHero({
             className={stackHeroOnMobile ? "max-lg:hidden" : undefined}
           />
         {stackHeroOnMobile ? (
-          <div
-            className={cn(
-              "dashboard-hero-container flex min-w-0 flex-col max-lg:gap-6 max-lg:p-0",
-              hideImage
-                ? "lg:grid lg:grid-flow-row lg:grid-cols-1 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8"
-                : "lg:grid lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
-            )}
-          >
-            <div
-              className={cn(
-                "flex min-w-0 flex-col gap-4 text-left max-lg:order-1 lg:min-h-0 lg:flex-none lg:justify-center lg:gap-4 lg:text-left xl:gap-5",
-                hideImage ? "lg:col-span-12 lg:row-start-1" : "lg:col-span-5 lg:row-start-1",
-              )}
-            >
-              <div className="min-h-0 space-y-4 lg:space-y-5">
-                {badgeRow}
-                {titleRow}
+          <>
+            {/* Mobile DOM order (CRITICAL): heading → image → supporting → actions. Do not rely on CSS order. */}
+            <div className="dashboard-hero-container flex min-w-0 flex-col gap-6 p-0 lg:hidden">
+              <div className="flex min-w-0 flex-col gap-4 text-left">
+                <div className="min-h-0 space-y-4">
+                  {badgeRow}
+                  {titleRow}
+                </div>
               </div>
-              {taglineBlock}
+
+              {!hideImage ? <div className="mt-1">{renderMediaColumn({ stackedLayout: true })}</div> : null}
+
+              {/* Supporting text (tagline) + tabs */}
+              <div className="flex min-w-0 flex-col gap-6">
+                {taglineBlock ? <div className="-mt-1 mb-1">{taglineBlock}</div> : null}
+                {tabsCluster}
+              </div>
+
+              {/* Actions */}
+              <div className="mt-1">{actionsRow}</div>
             </div>
-            {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
+
+            {/* Desktop/tablet layout unchanged */}
             <div
               className={cn(
-                "flex min-w-0 flex-col gap-6 max-lg:order-2 lg:col-span-12 lg:row-start-2 lg:w-full",
+                "dashboard-hero-container hidden min-w-0 lg:grid",
+                hideImage
+                  ? "lg:grid-flow-row lg:grid-cols-1 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8"
+                  : "lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
               )}
             >
-              {tabsCluster}
-              {actionsRow}
+              <div
+                className={cn(
+                  "flex min-w-0 flex-col gap-4 text-left lg:min-h-0 lg:flex-none lg:justify-center lg:gap-4 lg:text-left xl:gap-5",
+                  hideImage ? "lg:col-span-12 lg:row-start-1" : "lg:col-span-5 lg:row-start-1",
+                )}
+              >
+                <div className="min-h-0 space-y-4 lg:space-y-5">
+                  {badgeRow}
+                  {titleRow}
+                </div>
+                {taglineBlock}
+              </div>
+              {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
+              <div className="flex min-w-0 flex-col gap-6 lg:col-span-12 lg:row-start-2 lg:w-full">
+                {tabsCluster}
+                {actionsRow}
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <div
             className={cn(

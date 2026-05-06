@@ -132,11 +132,13 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
               <CardTitle className="text-base">Tip goal</CardTitle>
               {goal && goal.goalAmount > 0 ? (
                 <>
-                  <CardDescription className="mt-1 text-foreground/90">
-                    <span className="font-semibold tabular-nums">
+                  <CardDescription className="mt-1 flex flex-wrap items-baseline gap-x-1.5 break-words text-foreground/90">
+                    <span className="min-w-0 font-semibold tabular-nums">
                       {formatEur(goal.currentAmount)} / {formatEur(goal.goalAmount)}
-                    </span>{" "}
-                    <span className="text-muted-foreground">({goal.percent}%)</span>
+                    </span>
+                    <span className="shrink-0 text-muted-foreground">
+                      ({Math.round(Number(goal.percent))}%)
+                    </span>
                   </CardDescription>
                   <p className="mt-0.5 text-xs text-muted-foreground">
                     {PERIOD_LABEL[goal.goalPeriod]} · since {goal.startDate}

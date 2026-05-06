@@ -88,7 +88,7 @@ function StatCard(props: {
   return (
     <Card
       className={cn(
-        "flex h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
+        "flex min-h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
         props.featured && "max-lg:col-span-2",
       )}
     >
@@ -98,7 +98,9 @@ function StatCard(props: {
         </div>
       </div>
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
-      <p className="min-h-0 shrink truncate text-2xl font-bold tabular-nums text-black">{props.value}</p>
+      <p className="shrink-0 hyphens-auto break-words text-balance text-xl font-bold tabular-nums leading-snug text-black sm:text-2xl">
+        {props.value}
+      </p>
       {props.change ? (
         <p className="mt-auto line-clamp-2 text-[10px] leading-snug text-gray-400">{props.change}</p>
       ) : (
@@ -668,15 +670,16 @@ export function BusinessDashboard() {
                   {timeframe === "year" && "Tips per month (current year)"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto">
+              <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={250} minWidth={0}>
-                    <BarChart data={tipDistributionData}>
+                  <div className="h-[260px] w-full min-w-0 sm:h-[290px]">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <BarChart data={tipDistributionData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                      <XAxis dataKey="day" stroke="#404040" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="#404040" style={{ fontSize: "12px" }} />
+                      <XAxis dataKey="day" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
+                      <YAxis stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
                       <Tooltip
                         formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
                         contentStyle={{
@@ -688,7 +691,8 @@ export function BusinessDashboard() {
                       />
                       <Bar dataKey="amount" fill="#EB992C" radius={[8, 8, 0, 0]} />
                     </BarChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -705,7 +709,7 @@ export function BusinessDashboard() {
                 <CardTitle className="text-lg">Employee performance</CardTitle>
                 <CardDescription>Tip totals by team member</CardDescription>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto">
+              <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 {(stats?.employeeCount ?? 0) === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No employees yet</p>
                 ) : !hasTipActivityInPeriod ? (
@@ -713,16 +717,18 @@ export function BusinessDashboard() {
                 ) : employeePerformance.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={250} minWidth={0}>
-                    <BarChart data={employeePerformance} layout="vertical">
+                  <div className="h-[260px] w-full min-w-0 sm:h-[290px]">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <BarChart data={employeePerformance} layout="vertical" margin={{ top: 10, right: 16, left: 4, bottom: 8 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                      <XAxis type="number" stroke="#404040" style={{ fontSize: "12px" }} />
+                      <XAxis type="number" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
                       <YAxis
                         dataKey="name"
                         type="category"
                         stroke="#404040"
                         style={{ fontSize: "12px" }}
-                        width={80}
+                        width={100}
+                        tickMargin={6}
                       />
                       <Tooltip
                         formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
@@ -739,7 +745,8 @@ export function BusinessDashboard() {
                         ))}
                       </Bar>
                     </BarChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 )}
               </CardContent>
             </Card>

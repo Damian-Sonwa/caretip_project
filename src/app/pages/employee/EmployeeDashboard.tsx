@@ -70,7 +70,7 @@ function StatCard(props: {
   return (
     <Card
       className={cn(
-        "flex h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
+        "flex min-h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
         props.featured && "max-lg:col-span-2",
       )}
     >
@@ -80,7 +80,9 @@ function StatCard(props: {
         </div>
       </div>
       <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
-      <p className="min-h-0 shrink truncate text-2xl font-bold tabular-nums text-black">{props.value}</p>
+      <p className="shrink-0 hyphens-auto break-words text-balance text-xl font-bold tabular-nums leading-snug text-black sm:text-2xl">
+        {props.value}
+      </p>
       {props.change ? (
         <p className="mt-auto line-clamp-2 text-[10px] leading-snug text-gray-400">{props.change}</p>
       ) : (
@@ -530,7 +532,7 @@ export function EmployeeDashboard() {
               />
               <StatCard
                 title="Monthly goal"
-                value={goalPct != null ? `${goalPct}%` : "N/A"}
+                value={goalPct != null ? `${Math.round(Number(goalPct))}%` : "N/A"}
                 change={
                   goalPct != null ? "Progress toward your current target." : "Set a goal in settings to track progress."
                 }
@@ -553,12 +555,13 @@ export function EmployeeDashboard() {
                   {timeframe === "month" && "Tips by 6-day segment (last 30 days)"}
                 </CardDescription>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto">
+              <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 {chartData.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                 ) : (
-                  <ResponsiveContainer width="100%" height={200} minWidth={0}>
-                    <AreaChart data={chartData}>
+                  <div className="h-[240px] w-full min-w-0 sm:h-[280px]">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
@@ -566,8 +569,8 @@ export function EmployeeDashboard() {
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />
-                      <XAxis dataKey="time" stroke="#404040" style={{ fontSize: "12px" }} />
-                      <YAxis stroke="#404040" style={{ fontSize: "12px" }} />
+                      <XAxis dataKey="time" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
+                      <YAxis stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
                       <Tooltip
                         formatter={(value: number) => [formatEur(Number(value)), "Earnings"]}
                         contentStyle={{
@@ -585,7 +588,8 @@ export function EmployeeDashboard() {
                         fill="url(#empColorAmount)"
                       />
                     </AreaChart>
-                  </ResponsiveContainer>
+                    </ResponsiveContainer>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -618,8 +622,8 @@ export function EmployeeDashboard() {
                           key={tip.id}
                           className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
                         >
-                          <div className="flex-1">
-                            <p className="font-semibold text-foreground">{formatEur(tip.amount)}</p>
+                          <div className="min-w-0 flex-1">
+                            <p className="break-words font-semibold tabular-nums text-foreground">{formatEur(tip.amount)}</p>
                             <p className="text-xs text-muted-foreground">
                               {tip.customer} • {tip.time}
                             </p>

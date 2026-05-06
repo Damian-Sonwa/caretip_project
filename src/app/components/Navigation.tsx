@@ -180,7 +180,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                       </button>
                     </Link>
                     <Link
-                      to="/auth?mode=signup&role=business&from=nav"
+                      to="/contact"
                       onClick={() => setMobileMenuOpen(false)}
                       className="inline-flex w-fit max-w-full shrink-0"
                     >
@@ -191,7 +191,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                           "bg-primary shadow-sm"
                         )}
                       >
-                        Get Started
+                        Request a Demo
                       </button>
                     </Link>
                   </div>
