@@ -531,6 +531,8 @@ export async function getBusinessById(id: string) {
       location: true,
       registeredAddress: true,
       verificationStatus: true,
+      contactPhone: true,
+      website: true,
       logoPath: true,
     },
   });
@@ -552,6 +554,8 @@ export async function getBusinessById(id: string) {
     location: business.location ?? null,
     registeredAddress: business.registeredAddress ?? null,
     type: business.businessType ?? null,
+    contactPhone: business.contactPhone ?? null,
+    website: business.website ?? null,
     employeeCount,
     verificationStatus: business.verificationStatus,
   };

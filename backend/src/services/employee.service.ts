@@ -702,6 +702,7 @@ export async function updateEmployeeSelf(
   input: {
     name?: string;
     bio?: string | null;
+    phone?: string | null;
     monthlyGoal?: number | null;
     emailNotifications?: boolean;
     pushNotifications?: boolean;
@@ -720,6 +721,7 @@ export async function updateEmployeeSelf(
     data: {
       ...(input.name !== undefined ? { name: input.name.trim() } : {}),
       ...(input.bio !== undefined ? { bio: input.bio?.trim() || null } : {}),
+      ...(input.phone !== undefined ? { phone: input.phone?.trim() || null } : {}),
       ...(input.monthlyGoal !== undefined
         ? { monthlyGoal: input.monthlyGoal === null ? null : input.monthlyGoal }
         : {}),

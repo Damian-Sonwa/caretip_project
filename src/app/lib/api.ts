@@ -720,6 +720,8 @@ export interface BusinessInfo {
   location?: string | null;
   registeredAddress?: string | null;
   type?: string | null;
+  contactPhone?: string | null;
+  website?: string | null;
   employeeCount: number;
   verificationStatus?: "pending" | "verified" | "rejected";
 }
@@ -1190,6 +1192,7 @@ export interface EmployeeSelfProfile {
   jobTitle: string;
   bio: string | null;
   avatar: string | null;
+  phone?: string | null;
   monthlyGoal: number | null;
   emailNotifications: boolean;
   pushNotifications: boolean;
@@ -1216,6 +1219,7 @@ export async function ensureEmployeeSlug(): Promise<EmployeeSelfProfile> {
 export async function patchEmployeeProfile(payload: {
   name?: string;
   bio?: string | null;
+  phone?: string | null;
   monthlyGoal?: number | null;
   emailNotifications?: boolean;
   pushNotifications?: boolean;
@@ -1252,6 +1256,66 @@ export async function changePasswordAPI(currentPassword: string, newPassword: st
     method: "POST",
     headers: getHeaders(),
     body: JSON.stringify({ currentPassword, newPassword }),
+    credentials: "include",
+  });
+}
+
+export type MyAccountSettings = {
+  tipReceivedNotifications: boolean;
+  summaryEmails: boolean;
+  systemAlerts: boolean;
+  notifyNewLogin: boolean;
+};
+
+export async function getMyAccountSettings(): Promise<MyAccountSettings> {
+  return apiRequest(apiPath("/api/me/settings"), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function patchMyAccountSettings(
+  payload: Partial<MyAccountSettings>,
+): Promise<MyAccountSettings> {
+  return apiRequest(apiPath("/api/me/settings"), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(payload),
+    credentials: "include",
+  });
+}
+
+export async function getTwoFactorStatus(): Promise<{ enabled: boolean }> {
+  return apiRequest(apiPath("/api/auth/2fa/status"), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function setupTwoFactor(): Promise<{ otpauthUrl: string; qrDataUrl: string }> {
+  return apiRequest(apiPath("/api/auth/2fa/setup"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function enableTwoFactor(code: string): Promise<{ enabled: boolean }> {
+  return apiRequest(apiPath("/api/auth/2fa/enable"), {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ code }),
+    credentials: "include",
+  });
+}
+
+export async function disableTwoFactor(code: string): Promise<{ enabled: boolean }> {
+  return apiRequest(apiPath("/api/auth/2fa/disable"), {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ code }),
     credentials: "include",
   });
 }

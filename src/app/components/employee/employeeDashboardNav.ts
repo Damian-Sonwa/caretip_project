@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Bell, LayoutDashboard, Settings, Target, Receipt } from "lucide-react";
+import { Bell, LayoutDashboard, Settings, Target } from "lucide-react";
 
 export type EmployeeDashboardNavItem = {
   name: string;
@@ -9,7 +9,6 @@ export type EmployeeDashboardNavItem = {
 
 export const employeeDashboardNavItems: readonly EmployeeDashboardNavItem[] = [
   { name: "Overview", href: "/employee/dashboard", icon: LayoutDashboard },
-  { name: "Tips & activity", href: "/employee/transactions", icon: Receipt },
   { name: "Notifications", href: "/employee/notifications", icon: Bell },
   { name: "Tip goals", href: "/employee/tip-goals", icon: Target },
   { name: "Settings", href: "/employee/settings", icon: Settings },

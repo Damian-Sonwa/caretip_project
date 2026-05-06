@@ -34,4 +34,10 @@ router.post("/reset-password", authResetPasswordLimiter, authController.resetPas
 router.post("/change-password", authMiddleware, authController.changePassword);
 router.patch("/me", authMiddleware, authController.patchMe);
 
+// 2FA (TOTP) management (does not change login flow by itself)
+router.get("/2fa/status", authMiddleware, authController.twoFactorStatus);
+router.post("/2fa/setup", authMiddleware, authController.twoFactorSetup);
+router.post("/2fa/enable", authMiddleware, authController.twoFactorEnable);
+router.post("/2fa/disable", authMiddleware, authController.twoFactorDisable);
+
 export default router;

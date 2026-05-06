@@ -6,6 +6,8 @@ import * as oauthAuthService from "../services/oauthAuth.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as passwordResetService from "../services/passwordReset.service.js";
 import { prisma } from "../prisma.js";
+import speakeasy from "speakeasy";
+import qrcode from "qrcode";
 import {
   clearRefreshCookie,
   issueRefreshToken,
@@ -22,6 +24,7 @@ import {
   CLIENT_FALLBACK,
   EmailNotVerifiedLoginError,
 } from "../utils/httpErrors.js";
+import { sendNewLoginAlertEmail } from "../services/loginAlertEmail.service.js";
 
 /** Thrown by auth.service.login — always safe to return to the client as 401. */
 const LOGIN_CLIENT_MESSAGES = new Set([
@@ -167,6 +170,20 @@ export async function login(req: Request, res: Response) {
       password,
       intendedRole,
     });
+
+    // Best-effort session alert email (opt-in via user_settings.notify_new_login).
+    try {
+      const settings = await prisma.userSettings.findUnique({ where: { userId: result.user.id } });
+      if (settings?.notifyNewLogin) {
+        const ip =
+          (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+          (req.socket.remoteAddress ?? null);
+        const ua = String(req.headers["user-agent"] ?? "");
+        void sendNewLoginAlertEmail({ to: result.user.email, ip, userAgent: ua });
+      }
+    } catch (e) {
+      logServerError("auth.login.sessionAlertEmail", e);
+    }
     try {
       const rt = await issueRefreshToken(result.user.id);
       setRefreshCookie(res, rt.token);
@@ -217,6 +234,122 @@ export async function login(req: Request, res: Response) {
     return res.status(503).json({
       message: CLIENT_FALLBACK.loginUnexpected,
     });
+  }
+}
+
+export async function twoFactorStatus(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    const u = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFactorEnabled: true },
+    });
+    return res.json({ enabled: Boolean(u?.twoFactorEnabled) });
+  } catch (err) {
+    logServerError("auth.twoFactorStatus", err);
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
+  }
+}
+
+export async function twoFactorSetup(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+
+    const user = await prisma.user.findUnique({ where: { id: userId }, select: { email: true } });
+    if (!user?.email) return res.status(404).json({ message: "User not found" });
+
+    const secret = speakeasy.generateSecret({
+      name: `CareTip (${user.email})`,
+      length: 20,
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorTempSecret: secret.base32 },
+    });
+
+    const otpauthUrl = secret.otpauth_url ?? "";
+    const qrDataUrl = otpauthUrl ? await qrcode.toDataURL(otpauthUrl) : "";
+
+    return res.json({ otpauthUrl, qrDataUrl });
+  } catch (err) {
+    logServerError("auth.twoFactorSetup", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
+  }
+}
+
+export async function twoFactorEnable(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    const code = String((req.body as { code?: unknown })?.code ?? "").trim();
+    if (!code) return res.status(400).json({ message: "Verification code is required" });
+
+    const u = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFactorTempSecret: true },
+    });
+    const temp = u?.twoFactorTempSecret ?? null;
+    if (!temp) return res.status(400).json({ message: "2FA setup has not been started" });
+
+    const ok = speakeasy.totp.verify({
+      secret: temp,
+      encoding: "base32",
+      token: code,
+      window: 1,
+    });
+    if (!ok) return res.status(400).json({ message: "Invalid verification code" });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        twoFactorEnabled: true,
+        twoFactorSecret: temp,
+        twoFactorTempSecret: null,
+      },
+    });
+
+    return res.json({ enabled: true });
+  } catch (err) {
+    logServerError("auth.twoFactorEnable", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
+  }
+}
+
+export async function twoFactorDisable(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    const code = String((req.body as { code?: unknown })?.code ?? "").trim();
+    if (!code) return res.status(400).json({ message: "Verification code is required" });
+
+    const u = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { twoFactorSecret: true, twoFactorEnabled: true },
+    });
+    if (!u?.twoFactorEnabled || !u.twoFactorSecret) {
+      return res.json({ enabled: false });
+    }
+
+    const ok = speakeasy.totp.verify({
+      secret: u.twoFactorSecret,
+      encoding: "base32",
+      token: code,
+      window: 1,
+    });
+    if (!ok) return res.status(400).json({ message: "Invalid verification code" });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorTempSecret: null },
+    });
+
+    return res.json({ enabled: false });
+  } catch (err) {
+    logServerError("auth.twoFactorDisable", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
   }
 }
 

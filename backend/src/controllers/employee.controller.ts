@@ -63,7 +63,7 @@ export async function patchMyProfile(req: Request, res: Response) {
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    const { name, bio, monthlyGoal, emailNotifications, pushNotifications } = req.body;
+    const { name, bio, monthlyGoal, emailNotifications, pushNotifications, phone } = req.body;
     if (monthlyGoal !== undefined && monthlyGoal !== null) {
       const n = Number(monthlyGoal);
       if (Number.isNaN(n) || n < 0) {
@@ -76,6 +76,7 @@ export async function patchMyProfile(req: Request, res: Response) {
       ...(monthlyGoal !== undefined
         ? { monthlyGoal: monthlyGoal === null ? null : Number(monthlyGoal) }
         : {}),
+      ...(phone !== undefined ? { phone: String(phone).trim() || null } : {}),
       ...(emailNotifications !== undefined ? { emailNotifications: Boolean(emailNotifications) } : {}),
       ...(pushNotifications !== undefined ? { pushNotifications: Boolean(pushNotifications) } : {}),
     });

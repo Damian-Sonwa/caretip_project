@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
 import { motion } from 'motion/react';
 import {
   User,
@@ -12,9 +12,6 @@ import {
   X,
   Eye,
   EyeOff,
-  Smartphone,
-  Monitor,
-  LogOut,
   Check,
   Heart,
   TrendingUp,
@@ -22,41 +19,40 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router';
 import { LetterAvatar } from './ui/letter-avatar';
+import { toast } from "sonner";
+import { useRequireAuth } from "../hooks/useRequireAuth";
+import {
+  changePasswordAPI,
+  fetchBusinessProfile,
+  patchBusinessProfile,
+  uploadMyBusinessLogo,
+  getMyAccountSettings,
+  patchMyAccountSettings,
+  getTwoFactorStatus,
+  setupTwoFactor,
+  enableTwoFactor,
+  disableTwoFactor,
+} from "../lib/api";
+import { logClientError } from "../lib/clientLog";
+import { toUserFriendlyMessage } from "../lib/errorMessages";
 
-// Mock data for active sessions
-const activeSessions = [
-  {
-    id: 1,
-    device: 'MacBook Pro',
-    location: 'San Francisco, CA',
-    lastActive: '2 minutes ago',
-    current: true,
-    icon: Monitor,
-  },
-  {
-    id: 2,
-    device: 'iPhone 14 Pro',
-    location: 'San Francisco, CA',
-    lastActive: '1 hour ago',
-    current: false,
-    icon: Smartphone,
-  },
-  {
-    id: 3,
-    device: 'Chrome on Windows',
-    location: 'New York, NY',
-    lastActive: '2 days ago',
-    current: false,
-    icon: Monitor,
-  },
-];
+const TEAL = "#EB992C";
 
 export function ProfileSettingsPage() {
+  const { user, updateUser } = useRequireAuth();
+
+  const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [savingPrefs, setSavingPrefs] = useState(false);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+
   // Profile info state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [initialProfile, setInitialProfile] = useState<{ name: string; email: string; phone: string } | null>(null);
   
   // Password state
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -69,32 +65,119 @@ export function ProfileSettingsPage() {
   
   // Security settings state
   const [twoFactorEnabled, setTwoFactorEnabled] = useState(false);
-  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [sessionAlerts, setSessionAlerts] = useState(true);
+  const [twoFactorQr, setTwoFactorQr] = useState<string>("");
+  const [twoFactorCode, setTwoFactorCode] = useState<string>("");
 
-  const handleSaveProfile = () => {
-    // In a real app, save to backend
-    setIsEditingProfile(false);
-  };
+  const [tipReceivedNotifications, setTipReceivedNotifications] = useState(true);
+  const [summaryEmails, setSummaryEmails] = useState(false);
+  const [systemAlerts, setSystemAlerts] = useState(true);
+  const [notifyNewLogin, setNotifyNewLogin] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user || user.role !== "business") return;
+      setLoading(true);
+      try {
+        const [biz, prefs, two] = await Promise.all([
+          fetchBusinessProfile(),
+          getMyAccountSettings(),
+          getTwoFactorStatus(),
+        ]);
+        if (cancelled) return;
+        setName(biz.name ?? "");
+        setEmail(user.email ?? "");
+        setPhone(biz.contactPhone ?? "");
+        if (biz.logo) {
+          updateUser({ avatar: biz.logo ?? undefined });
+        }
+        setInitialProfile({
+          name: biz.name ?? "",
+          email: user.email ?? "",
+          phone: biz.contactPhone ?? "",
+        });
+        setTipReceivedNotifications(prefs.tipReceivedNotifications);
+        setSummaryEmails(prefs.summaryEmails);
+        setSystemAlerts(prefs.systemAlerts);
+        setNotifyNewLogin(prefs.notifyNewLogin);
+        setTwoFactorEnabled(two.enabled);
+      } catch (e) {
+        logClientError("ProfileSettingsPage.load", e);
+        toast.error("Could not load settings.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid loops on updateUser patches
+  }, [user?.id, user?.role]);
 
   const handleCancelProfile = () => {
-    // Reset to original values
-    setName('');
-    setEmail('');
-    setPhone('');
+    if (initialProfile) {
+      setName(initialProfile.name);
+      setEmail(initialProfile.email);
+      setPhone(initialProfile.phone);
+    }
     setIsEditingProfile(false);
   };
 
-  const handleSavePassword = () => {
-    // In a real app, validate and save password
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match!');
-      return;
+  const handleSaveProfile = async () => {
+    if (!user || user.role !== "business") return;
+    setSavingProfile(true);
+    try {
+      const updated = await patchBusinessProfile({
+        name: name.trim(),
+        contactPhone: phone.trim() || null,
+      });
+      updateUser({ name: updated.name });
+      setIsEditingProfile(false);
+      toast.success("Profile saved.", { style: { background: TEAL, color: "#fff" } });
+    } catch (e) {
+      logClientError("ProfileSettingsPage.saveProfile", e);
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setSavingProfile(false);
     }
-    setCurrentPassword('');
-    setNewPassword('');
-    setConfirmPassword('');
-    setIsEditingPassword(false);
+  };
+
+  const handleLogo = async (file: File) => {
+    if (!user || user.role !== "business") return;
+    setUploadingLogo(true);
+    try {
+      const r = await uploadMyBusinessLogo(file);
+      if (r?.path) {
+        updateUser({ avatar: r.path });
+      }
+      toast.success("Logo updated.", { style: { background: TEAL, color: "#fff" } });
+    } catch (e) {
+      logClientError("ProfileSettingsPage.uploadLogo", e);
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setUploadingLogo(false);
+    }
+  };
+
+  const handleSavePassword = async () => {
+    setSavingPassword(true);
+    try {
+      if (newPassword !== confirmPassword) {
+        toast.error("Passwords do not match.");
+        return;
+      }
+      await changePasswordAPI(currentPassword, newPassword);
+      setCurrentPassword('');
+      setNewPassword('');
+      setConfirmPassword('');
+      setIsEditingPassword(false);
+      toast.success("Password updated.", { style: { background: TEAL, color: "#fff" } });
+    } catch (e) {
+      logClientError("ProfileSettingsPage.changePassword", e);
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setSavingPassword(false);
+    }
   };
 
   const handleCancelPassword = () => {
@@ -104,9 +187,26 @@ export function ProfileSettingsPage() {
     setIsEditingPassword(false);
   };
 
-  const handleRevokeSession = (sessionId: number) => {
-    void sessionId;
-    // In a real app, revoke the session
+  const savePrefs = async (patch: Partial<{
+    tipReceivedNotifications: boolean;
+    summaryEmails: boolean;
+    systemAlerts: boolean;
+    notifyNewLogin: boolean;
+  }>) => {
+    setSavingPrefs(true);
+    try {
+      const updated = await patchMyAccountSettings(patch);
+      setTipReceivedNotifications(updated.tipReceivedNotifications);
+      setSummaryEmails(updated.summaryEmails);
+      setSystemAlerts(updated.systemAlerts);
+      setNotifyNewLogin(updated.notifyNewLogin);
+      toast.success("Preferences saved.", { style: { background: TEAL, color: "#fff" } });
+    } catch (e) {
+      logClientError("ProfileSettingsPage.savePrefs", e);
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setSavingPrefs(false);
+    }
   };
 
   return (
@@ -220,12 +320,36 @@ export function ProfileSettingsPage() {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-8 pb-8 border-b border-border">
                   <div className="relative group">
                     <div className="h-24 w-24 shrink-0 overflow-hidden rounded-full">
-                      <LetterAvatar name={name} size="full" className="h-full w-full rounded-full text-3xl" />
+                      {user?.avatar ? (
+                        <img
+                          src={user.avatar}
+                          alt="Profile"
+                          className="h-full w-full rounded-full object-cover"
+                          draggable={false}
+                        />
+                      ) : (
+                        <LetterAvatar name={name} size="full" className="h-full w-full rounded-full text-3xl" />
+                      )}
                     </div>
                     {isEditingProfile && (
-                      <button className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <label className="absolute inset-0 cursor-pointer rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <Camera className="w-6 h-6 text-white" />
-                      </button>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          disabled={uploadingLogo}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            e.target.value = "";
+                            if (!file || !file.type.startsWith("image/")) {
+                              toast.error("Please choose an image file.");
+                              return;
+                            }
+                            void handleLogo(file);
+                          }}
+                        />
+                      </label>
                     )}
                   </div>
                   <div className="flex-1">
@@ -235,7 +359,7 @@ export function ProfileSettingsPage() {
                     <p className="text-sm text-muted-foreground mb-3">{email}</p>
                     {isEditingProfile && (
                       <p className="text-xs text-muted-foreground">
-                        Click on avatar to change profile picture
+                        Click on logo to change profile picture
                       </p>
                     )}
                   </div>
@@ -268,7 +392,7 @@ export function ProfileSettingsPage() {
                   {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Email Address
+                      Email Address (read-only)
                     </label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -276,13 +400,8 @@ export function ProfileSettingsPage() {
                         type="email"
                         value={email}
                         placeholder="you@example.com"
-                        onChange={(e) => setEmail(e.target.value)}
-                        disabled={!isEditingProfile}
-                        className={`w-full pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg transition-all ${
-                          isEditingProfile
-                            ? 'text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent'
-                            : 'cursor-not-allowed opacity-60'
-                        }`}
+                        disabled
+                        className="w-full cursor-not-allowed opacity-60 pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg transition-all"
                       />
                     </div>
                   </div>
@@ -290,7 +409,7 @@ export function ProfileSettingsPage() {
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Phone Number
+                      Contact phone
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -316,6 +435,7 @@ export function ProfileSettingsPage() {
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
+                      disabled={savingProfile}
                       onClick={handleSaveProfile}
                       className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
                     >
@@ -323,6 +443,7 @@ export function ProfileSettingsPage() {
                       Save Changes
                     </motion.button>
                     <button
+                      disabled={savingProfile}
                       onClick={handleCancelProfile}
                       className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                     >
@@ -476,6 +597,7 @@ export function ProfileSettingsPage() {
                       <motion.button
                         whileHover={{ scale: 1.02 }}
                         whileTap={{ scale: 0.98 }}
+                        disabled={savingPassword}
                         onClick={handleSavePassword}
                         className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
                       >
@@ -483,6 +605,7 @@ export function ProfileSettingsPage() {
                         Update Password
                       </motion.button>
                       <button
+                        disabled={savingPassword}
                         onClick={handleCancelPassword}
                         className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                       >
@@ -518,161 +641,298 @@ export function ProfileSettingsPage() {
 
                 <div className="space-y-6">
                   {/* Two-Factor Authentication */}
-                  <div className="flex items-start justify-between gap-4 pb-6 border-b border-border">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="p-2 bg-accent/10 rounded-lg">
-                        <Shield className="w-5 h-5 text-accent" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-foreground mb-1">
-                          Two-Factor Authentication
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Add an extra layer of security to your account
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setTwoFactorEnabled(!twoFactorEnabled)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        twoFactorEnabled ? 'bg-accent' : 'bg-border'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          twoFactorEnabled ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Email Notifications */}
-                  <div className="flex items-start justify-between gap-4 pb-6 border-b border-border">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="p-2 bg-accent/10 rounded-lg">
-                        <Mail className="w-5 h-5 text-accent" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-foreground mb-1">
-                          Email Notifications
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Receive security alerts via email
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setNotificationsEnabled(!notificationsEnabled)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        notificationsEnabled ? 'bg-accent' : 'bg-border'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          notificationsEnabled ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-
-                  {/* Session Alerts */}
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-3 flex-1">
-                      <div className="p-2 bg-accent/10 rounded-lg">
-                        <Monitor className="w-5 h-5 text-accent" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="text-sm font-semibold text-foreground mb-1">
-                          Session Alerts
-                        </h3>
-                        <p className="text-sm text-muted-foreground">
-                          Get notified of new login sessions
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => setSessionAlerts(!sessionAlerts)}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        sessionAlerts ? 'bg-accent' : 'bg-border'
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          sessionAlerts ? 'translate-x-6' : 'translate-x-1'
-                        }`}
-                      />
-                    </button>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Active Sessions Section */}
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-                className="bg-card border border-border rounded-xl p-6 sm:p-8"
-              >
-                <div className="mb-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-1">
-                    Active Sessions
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Manage your active login sessions across devices
-                  </p>
-                </div>
-
-                <div className="space-y-4">
-                  {activeSessions.map((session) => {
-                    const Icon = session.icon;
-                    return (
-                      <div
-                        key={session.id}
-                        className="flex items-start justify-between gap-4 p-4 rounded-lg border border-border hover:bg-muted/50 transition-colors"
-                      >
-                        <div className="flex items-start gap-3 flex-1">
-                          <div className="p-2 bg-muted rounded-lg">
-                            <Icon className="w-5 h-5 text-foreground" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <h3 className="text-sm font-semibold text-foreground">
-                                {session.device}
-                              </h3>
-                              {session.current && (
-                                <span className="rounded-full bg-success px-2 py-0.5 text-xs text-success-foreground">
-                                  Current
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground mb-1">
-                              {session.location}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              Last active: {session.lastActive}
-                            </p>
-                          </div>
+                  <div className="pb-6 border-b border-border">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <Shield className="w-5 h-5 text-accent" />
                         </div>
-                        {!session.current && (
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-foreground mb-1">
+                            Two-Factor Authentication
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Use an authenticator app (TOTP) for extra protection.
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {!twoFactorEnabled ? (
                           <button
-                            onClick={() => handleRevokeSession(session.id)}
-                            className="flex items-center gap-2 px-3 py-2 text-xs text-red-600 hover:bg-red-50 border border-red-200 rounded-lg transition-colors"
+                            type="button"
+                            disabled={loading}
+                            onClick={() => {
+                              void (async () => {
+                                try {
+                                  const r = await setupTwoFactor();
+                                  setTwoFactorQr(r.qrDataUrl || "");
+                                  toast.success("Scan the QR code and enter the 6-digit code.", {
+                                    style: { background: TEAL, color: "#fff" },
+                                  });
+                                } catch (e) {
+                                  logClientError("ProfileSettingsPage.2fa.setup", e);
+                                  toast.error(toUserFriendlyMessage(e));
+                                }
+                              })();
+                            }}
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                           >
-                            <LogOut className="w-3 h-3" />
-                            Revoke
+                            Set up
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => setTwoFactorQr("disable")}
+                            className="flex items-center justify-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
+                          >
+                            Disable…
                           </button>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
 
-                <div className="mt-6 pt-6 border-t border-border">
-                  <button className="text-sm text-red-600 hover:text-red-700 font-medium transition-colors">
-                    Sign out of all other sessions
-                  </button>
+                    {!twoFactorEnabled && twoFactorQr ? (
+                      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
+                        <div className="rounded-lg border border-border bg-muted/20 p-4">
+                          <p className="text-xs font-medium text-muted-foreground mb-3">
+                            Scan in your authenticator app
+                          </p>
+                          <img
+                            src={twoFactorQr}
+                            alt="2FA QR code"
+                            className="w-full max-w-[220px] rounded-md bg-white p-2"
+                          />
+                        </div>
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-sm font-medium text-foreground mb-2">
+                              Verification code
+                            </label>
+                            <input
+                              value={twoFactorCode}
+                              onChange={(e) => setTwoFactorCode(e.target.value)}
+                              placeholder="123456"
+                              inputMode="numeric"
+                              className="w-full px-4 py-3 bg-input-background border border-border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                            />
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void (async () => {
+                                try {
+                                  const r = await enableTwoFactor(twoFactorCode);
+                                  setTwoFactorEnabled(r.enabled);
+                                  setTwoFactorQr("");
+                                  setTwoFactorCode("");
+                                  toast.success("2FA enabled.", { style: { background: TEAL, color: "#fff" } });
+                                } catch (e) {
+                                  logClientError("ProfileSettingsPage.2fa.enable", e);
+                                  toast.error(toUserFriendlyMessage(e));
+                                }
+                              })();
+                            }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
+                          >
+                            Enable 2FA
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+
+                    {twoFactorEnabled && twoFactorQr === "disable" ? (
+                      <div className="mt-4 rounded-lg border border-border bg-muted/20 p-4">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Enter a code from your authenticator app to disable 2FA.
+                        </p>
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                          <input
+                            value={twoFactorCode}
+                            onChange={(e) => setTwoFactorCode(e.target.value)}
+                            placeholder="123456"
+                            inputMode="numeric"
+                            className="w-full px-4 py-3 bg-input-background border border-border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void (async () => {
+                                try {
+                                  const r = await disableTwoFactor(twoFactorCode);
+                                  setTwoFactorEnabled(r.enabled);
+                                  setTwoFactorQr("");
+                                  setTwoFactorCode("");
+                                  toast.success("2FA disabled.", { style: { background: TEAL, color: "#fff" } });
+                                } catch (e) {
+                                  logClientError("ProfileSettingsPage.2fa.disable", e);
+                                  toast.error(toUserFriendlyMessage(e));
+                                }
+                              })();
+                            }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
+                          >
+                            Disable
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setTwoFactorQr("");
+                              setTwoFactorCode("");
+                            }}
+                            className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {/* Notifications & alerts */}
+                  <div className="space-y-4">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <Mail className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-foreground mb-1">
+                            Tip received notifications
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Get notified when your venue receives a tip.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingPrefs}
+                        onClick={() => {
+                          const next = !tipReceivedNotifications;
+                          setTipReceivedNotifications(next);
+                          void savePrefs({ tipReceivedNotifications: next });
+                        }}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          tipReceivedNotifications ? 'bg-accent' : 'bg-border'
+                        } ${savingPrefs ? "opacity-60" : ""}`}
+                        aria-label="Toggle tip received notifications"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            tipReceivedNotifications ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <Mail className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-foreground mb-1">
+                            Summary emails
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Weekly/monthly performance summaries.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingPrefs}
+                        onClick={() => {
+                          const next = !summaryEmails;
+                          setSummaryEmails(next);
+                          void savePrefs({ summaryEmails: next });
+                        }}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          summaryEmails ? 'bg-accent' : 'bg-border'
+                        } ${savingPrefs ? "opacity-60" : ""}`}
+                        aria-label="Toggle summary emails"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            summaryEmails ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <Mail className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-foreground mb-1">
+                            System alerts
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Important account and system notifications.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingPrefs}
+                        onClick={() => {
+                          const next = !systemAlerts;
+                          setSystemAlerts(next);
+                          void savePrefs({ systemAlerts: next });
+                        }}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          systemAlerts ? 'bg-accent' : 'bg-border'
+                        } ${savingPrefs ? "opacity-60" : ""}`}
+                        aria-label="Toggle system alerts"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            systemAlerts ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 bg-accent/10 rounded-lg">
+                          <Mail className="w-5 h-5 text-accent" />
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-sm font-semibold text-foreground mb-1">
+                            New login alerts
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            Email me when a new device signs in.
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={savingPrefs}
+                        onClick={() => {
+                          const next = !notifyNewLogin;
+                          setNotifyNewLogin(next);
+                          void savePrefs({ notifyNewLogin: next });
+                        }}
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                          notifyNewLogin ? 'bg-accent' : 'bg-border'
+                        } ${savingPrefs ? "opacity-60" : ""}`}
+                        aria-label="Toggle new login alerts"
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            notifyNewLogin ? 'translate-x-6' : 'translate-x-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </motion.div>
+
             </div>
     </main>
   );

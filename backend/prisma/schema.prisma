@@ -98,8 +98,32 @@ model User {
   passwordResetTokens PasswordResetToken[]
   emailVerificationTokens EmailVerificationToken[]
   refreshTokens RefreshToken[]
+  settings UserSettings?
+
+  /** Account-level security features (optional; does not change auth flow unless enforced). */
+  twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
+  twoFactorSecret     String?  @map("two_factor_secret")
+  twoFactorTempSecret String?  @map("two_factor_temp_secret")
 
   @@unique([oauthProvider, oauthSubject], map: "User_oauth_provider_subject_key")
+}
+
+model UserSettings {
+  id String @id @default(cuid())
+  userId String @unique @map("user_id")
+
+  /** Email / in-app preferences */
+  tipReceivedNotifications Boolean @default(true) @map("tip_received_notifications")
+  summaryEmails            Boolean @default(false) @map("summary_emails")
+  systemAlerts             Boolean @default(true) @map("system_alerts")
+  notifyNewLogin           Boolean @default(true) @map("notify_new_login")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
 }
 
 /// Long-lived refresh tokens for session continuity (hashed at rest; rotated on every use).
