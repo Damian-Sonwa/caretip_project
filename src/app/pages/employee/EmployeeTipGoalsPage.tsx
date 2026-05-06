@@ -112,7 +112,7 @@ export function EmployeeTipGoalsPage() {
   if (loading) return <CareTipPageLoader />;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-6 py-6 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between gap-3">
         <Link to="/employee/dashboard" className="rounded-lg p-2 transition-colors hover:bg-muted" aria-label="Back">
           <ChevronLeft className="h-5 w-5" />
@@ -124,7 +124,7 @@ export function EmployeeTipGoalsPage() {
       </div>
 
       <Card className="w-full rounded-3xl border border-gray-100 bg-white p-0 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
-        <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-6 py-5">
+        <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
             <h2 className="text-base font-semibold text-foreground">Manage goals</h2>
             <p className="mt-1 text-sm text-muted-foreground">Create, edit, archive, or delete your tip goals.</p>
@@ -136,7 +136,7 @@ export function EmployeeTipGoalsPage() {
         </div>
 
         {loadError ? (
-          <div className="px-6 py-8">
+          <div className="px-4 py-8 sm:px-6">
             <div className="rounded-2xl border border-gray-100 bg-muted/20 p-5">
               <p className="text-sm font-semibold text-foreground">Couldn&apos;t load goals</p>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -152,7 +152,7 @@ export function EmployeeTipGoalsPage() {
         ) : null}
 
         {empty ? (
-          <div className="px-6 py-12">
+          <div className="px-4 py-12 sm:px-6">
             <div className="mx-auto flex max-w-md flex-col items-center text-center">
               <div className="relative">
                 <div className="h-28 w-28 rounded-3xl bg-muted/40 ring-1 ring-black/[0.04]" />
@@ -201,16 +201,16 @@ export function EmployeeTipGoalsPage() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="bg-muted/20 text-left">
-                  <th className="whitespace-nowrap px-6 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground">
+                  <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
                     Goal Name
                   </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground">
+                  <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
                     Target (€)
                   </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground">
+                  <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
                     Period
                   </th>
-                  <th className="whitespace-nowrap px-6 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground">
+                  <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
                     Actions
                   </th>
                 </tr>
@@ -218,7 +218,7 @@ export function EmployeeTipGoalsPage() {
               <tbody>
                 {sortedGoals.map((g) => (
                   <tr key={g.id} className="border-t border-gray-100">
-                    <td className="px-6 py-4 font-medium text-foreground">
+                    <td className="px-4 py-4 font-medium text-foreground sm:px-6">
                       <div className="flex items-center gap-2">
                         <span className="truncate">{g.name}</span>
                         {g.status === "archived" ? (
@@ -232,9 +232,9 @@ export function EmployeeTipGoalsPage() {
                         )}
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-foreground">{formatEur(Number(g.goalAmount) || 0)}</td>
-                    <td className="px-6 py-4 text-foreground">{PERIOD_LABEL[g.goalPeriod]}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-4 text-foreground sm:px-6">{formatEur(Number(g.goalAmount) || 0)}</td>
+                    <td className="px-4 py-4 text-foreground sm:px-6">{PERIOD_LABEL[g.goalPeriod]}</td>
+                    <td className="px-4 py-4 sm:px-6">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"

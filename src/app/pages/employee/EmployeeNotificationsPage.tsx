@@ -163,7 +163,7 @@ export function EmployeeNotificationsPage() {
           </div>
         ) : (
           <>
-            <div className="mb-4 flex items-center justify-between gap-3">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               {selectionMode ? (
                 <label className="flex items-center gap-3 text-sm text-muted-foreground">
                   <input
@@ -179,7 +179,7 @@ export function EmployeeNotificationsPage() {
                 <div className="text-sm text-muted-foreground">Manage your notifications</div>
               )}
 
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 {selectionMode ? (
                   <>
                     <Button type="button" variant="outline" onClick={() => confirmMarkRead(selectedIds)} disabled={!hasSelection}>
