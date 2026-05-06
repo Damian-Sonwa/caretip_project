@@ -263,14 +263,17 @@ export function FeatureShowcase({
         <div
           className={cn(
             "relative md:col-span-5",
-            cinematic && "order-1 max-md:pt-2 md:pt-6",
+            cinematic &&
+              "order-1 max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:pt-6",
           )}
         >
             <Badge
               variant="outline"
               className={cn(
-                "mb-6 border-primary/40",
-              cinematic ? "text-gray-900 border-black/[0.10] bg-white" : "text-foreground",
+                "mb-6",
+                cinematic
+                  ? "max-md:mx-auto text-gray-900 border-black/[0.10] bg-white"
+                  : "border-primary/40 text-foreground",
               )}
             >
               {eyebrow}
@@ -278,7 +281,7 @@ export function FeatureShowcase({
 
             <motion.h1
               className={cn(
-                "text-balance text-4xl font-bold leading-[0.95] sm:text-5xl md:text-6xl",
+                "text-balance text-4xl font-bold leading-[1.08] sm:text-5xl md:text-6xl",
               cinematic && "text-gray-900",
               )}
               initial={{ opacity: 0, y: 20 }}
@@ -289,7 +292,12 @@ export function FeatureShowcase({
             </motion.h1>
 
             {description ? (
-            <p className={cn("mt-6 max-w-xl", cinematic ? "text-gray-500" : "text-muted-foreground")}>
+            <p
+              className={cn(
+                "mt-5 max-w-xl leading-relaxed",
+                cinematic ? "mb-1 text-gray-500" : "text-muted-foreground",
+              )}
+            >
                 {description}
               </p>
             ) : null}
@@ -322,8 +330,16 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className={cn("rounded-full font-bold", cinematic && "rounded-2xl")}>
+              <div className="mt-8 flex flex-wrap gap-3 max-md:justify-center">
+                <Button
+                  asChild
+                  size="lg"
+                  className={cn(
+                    "rounded-full font-bold",
+                    cinematic &&
+                      "rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]",
+                  )}
+                >
                   <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
                 </Button>
                 <Button
@@ -331,8 +347,10 @@ export function FeatureShowcase({
                   size="lg"
                   variant="outline"
                   className={cn(
-                    "rounded-full border-2 border-primary bg-transparent font-semibold",
-                  cinematic && "rounded-2xl border-black/15 text-gray-900 hover:bg-black/5",
+                    "rounded-full border-2 bg-transparent font-semibold",
+                    cinematic
+                      ? "rounded-2xl border-neutral-300 text-gray-900 hover:bg-neutral-100 hover:text-gray-900 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800/70"
+                      : "border-primary",
                   )}
                 >
                   <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>

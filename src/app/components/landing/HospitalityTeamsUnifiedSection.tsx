@@ -60,14 +60,14 @@ export function HospitalityTeamsUnifiedSection() {
           {/* Mobile: images first */}
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard cardClassName="p-0">
-              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-full border border-primary/[0.12] bg-white px-4 py-2 text-sm font-semibold text-gray-900">
+              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900">
                 Where CareTip Works
               </div>
               <HospitalityBusinessesMarquee />
             </LandingBorderedCard>
           </div>
 
-          {/* Feature list (no cards) */}
+          {/* Feature list */}
           <div className="min-w-0 lg:order-1">
             <ul className="w-full min-w-0 space-y-4">
               {FEATURES.map((f, idx) => (
@@ -77,18 +77,20 @@ export function HospitalityTeamsUnifiedSection() {
                   whileInView={{ y: 0, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.45, delay: idx * 0.06 }}
-                  className="flex min-w-0 items-start gap-4"
+                  className="w-full rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-950/40"
                 >
-                  <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-primary/10 text-primary">
-                    <f.Icon className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="max-w-full break-words text-lg font-bold tracking-tight text-gray-900">
-                      {f.title}
-                    </p>
-                    <p className="mt-1 max-w-full break-words text-base leading-relaxed text-gray-500">
-                      {f.text}
-                    </p>
+                  <div className="flex w-full min-w-0 items-start gap-4">
+                    <div className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-primary/10 text-primary">
+                      <f.Icon className="h-5 w-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="max-w-full break-words text-lg font-bold tracking-tight text-gray-900 dark:text-neutral-100">
+                        {f.title}
+                      </p>
+                      <p className="mt-1 max-w-full break-words text-base leading-relaxed text-gray-500 dark:text-neutral-300">
+                        {f.text}
+                      </p>
+                    </div>
                   </div>
                 </motion.li>
               ))}
