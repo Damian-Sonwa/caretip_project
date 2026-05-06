@@ -138,7 +138,9 @@ export async function uploadMyLogo(req: Request, res: Response) {
     }
     const publicPath = `/uploads/businesses/${b.id}/${file.filename}`;
     let logoPathToStore = publicPath;
-    if (isCloudinaryConfiguredForUpload()) {
+
+    /** Multer disk storage sets `path`; if Cloudinary fails, keep the uploaded file path. */
+    if (isCloudinaryConfiguredForUpload() && typeof file.path === "string" && file.path.length > 0) {
       try {
         const buf = await readFile(file.path);
         const cloudUrl = await tryUploadBusinessLogoToCloudinary(buf);
@@ -149,8 +151,9 @@ export async function uploadMyLogo(req: Request, res: Response) {
           });
         }
       } catch (cloudErr) {
-        logServerError("business.uploadMyLogo.cloudinary", cloudErr);
-        throw cloudErr;
+        // Misconfigured CREDs, outages, signing errors, etc. — avoid blocking venue saves while Cloudinary is fixed.
+        logServerError("business.uploadMyLogo.cloudinary_fallback_disk", cloudErr);
+        logoPathToStore = publicPath;
       }
     }
 
