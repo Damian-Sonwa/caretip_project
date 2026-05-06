@@ -44,6 +44,7 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 import {
   dashStatCard,
   DASH_BTN_PRIMARY,
@@ -544,7 +545,6 @@ export function StaffManagementPage() {
         <DashboardHero
           stackHeroOnMobile
           hideTabs
-          hideImage
           badge={
             <>
               <Users className="h-3.5 w-3.5 text-foreground" />
@@ -553,26 +553,63 @@ export function StaffManagementPage() {
           }
           title="Staff management"
           description="Invites, roles, and active staff."
+          imageOverlay={false}
+          image={
+            <div className="relative mx-auto w-full max-w-full">
+              <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-none sm:p-5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Invite code</p>
+                    {inviteCode ? (
+                      <>
+                        <p className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.24em] text-foreground sm:text-3xl">
+                          {inviteCode}
+                        </p>
+                        {inviteExpiresAt ? (
+                          <p className="mt-2 text-xs text-muted-foreground">Expires {formatExpiresAt(inviteExpiresAt)}</p>
+                        ) : null}
+                      </>
+                    ) : (
+                      <p className="mt-2 text-sm text-muted-foreground">
+                        Generate an invite code to onboard staff.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 flex flex-wrap items-center gap-2">
+                  {inviteCode ? (
+                    <>
+                      <Button type="button" variant="outline" onClick={handleCopyCode}>
+                        <Copy className="h-4 w-4" />
+                        Copy
+                      </Button>
+                      <Button type="button" onClick={handleRegenerate} disabled={isGenerating}>
+                        <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+                        Regenerate
+                      </Button>
+                    </>
+                  ) : (
+                    <Button type="button" onClick={handleGenerateInvite} disabled={!isBusiness || isGenerating}>
+                      {isGenerating ? (
+                        <>
+                          <RefreshCw className="h-4 w-4 animate-spin" />
+                          Generating…
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="h-4 w-4" />
+                          Generate Invite Code
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          }
           actions={
             <>
-              <Button
-                type="button"
-                onClick={handleGenerateInvite}
-                disabled={!isBusiness || isGenerating}
-                variant="default"
-              >
-                {isGenerating ? (
-                  <>
-                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                    Generating…
-                  </>
-                ) : (
-                  <>
-                    <KeyRound className="mr-2 h-4 w-4 shrink-0" />
-                    Invite
-                  </>
-                )}
-              </Button>
               <Button
                 type="button"
                 onClick={() => isBusiness && setShowAddModal(true)}
@@ -627,42 +664,6 @@ export function StaffManagementPage() {
               </div>
             </CardContent>
           </Card>
-
-        {/* Invite Code Card */}
-        {inviteCode && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <Card className={dashStatCard("relative overflow-hidden")}>
-              <CardContent className="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-border bg-muted">
-                  <KeyRound className="h-6 w-6 text-foreground" />
-                </div>
-                <div>
-                  <p className="mb-0.5 text-sm font-medium text-muted-foreground">Staff invite code</p>
-                  <p className="select-all break-all font-mono text-xl font-bold tracking-wider text-foreground sm:text-2xl md:text-3xl sm:tracking-[0.3em]">
-                    {inviteCode}
-                  </p>
-                  {inviteExpiresAt && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Expires {formatExpiresAt(inviteExpiresAt)}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <Button type="button" variant="outline" onClick={handleCopyCode} className={DASH_BTN_SECONDARY}>
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy
-                </Button>
-                <Button type="button" onClick={handleRegenerate} disabled={isGenerating} className={DASH_BTN_PRIMARY}>
-                  <RefreshCw className={`mr-2 h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
-                  Regenerate
-                </Button>
-              </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
 
         {/* Desktop Table View */}
         <div className="hidden overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm lg:block">
