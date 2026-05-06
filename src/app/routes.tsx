@@ -70,6 +70,7 @@ import { EmployeeQrEntryPage } from './pages/customer/EmployeeQrEntryPage';
 import { EmployeeDashboard } from './pages/employee/EmployeeDashboard';
 import { EmployeeNotificationsPage } from './pages/employee/EmployeeNotificationsPage';
 import { EmployeeSettingsPage } from './pages/employee/EmployeeSettingsPage';
+import { EmployeeTipGoalsPage } from './pages/employee/EmployeeTipGoalsPage';
 
 // Business Dashboard Pages
 import { BusinessDashboard } from './pages/business/BusinessDashboard';
@@ -519,6 +520,7 @@ const routes: RouteObject[] = [
       { index: true, element: <Navigate to="/employee/dashboard" replace /> },
       { path: 'dashboard', Component: EmployeeDashboard },
       { path: 'notifications', Component: EmployeeNotificationsPage },
+      { path: 'tip-goals', Component: EmployeeTipGoalsPage },
       { path: 'settings', Component: EmployeeSettingsPage },
     ],
   },

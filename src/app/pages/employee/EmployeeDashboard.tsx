@@ -42,13 +42,11 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmployeeGoalCard } from "../../components/employee/EmployeeGoalCard";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
 const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
-const TIP_GOAL_ANCHOR_ID = "employee-tip-goal";
 
 function StatCard(props: {
   title: string;
@@ -341,12 +339,6 @@ export function EmployeeDashboard() {
     setQrModalOpen(true);
   };
 
-  const scrollToTipGoal = useCallback(() => {
-    const el = document.getElementById(TIP_GOAL_ANCHOR_ID);
-    if (!el) return;
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
-
   useEffect(() => {
     if (!sessionValidated || user?.role !== "employee") return;
     const params = new URLSearchParams(location.search);
@@ -429,9 +421,11 @@ export function EmployeeDashboard() {
                   </>
                 )}
               </Button>
-              <Button type="button" variant="outline" onClick={scrollToTipGoal}>
-                <Target className="mr-2 h-4 w-4 shrink-0" />
-                Set tip goal
+              <Button type="button" variant="outline" asChild>
+                <Link to="/employee/tip-goals" className="gap-2">
+                  <Target className="h-4 w-4 shrink-0" />
+                  Set tip goal
+                </Link>
               </Button>
             </>
           }
@@ -650,15 +644,6 @@ export function EmployeeDashboard() {
                 </Card>
               </motion.div>
 
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.7 }}
-              >
-                <div id={TIP_GOAL_ANCHOR_ID} className="scroll-mt-24">
-                  <EmployeeGoalCard goal={goalProgress} onUpdated={refreshTipsQuiet} />
-                </div>
-              </motion.div>
             </div>
           </div>
         </div>

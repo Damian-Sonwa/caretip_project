@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Pencil, Trash2, Target, Loader2 } from "lucide-react";
+import { CheckCircle2, Pencil, Plus, Trash2, Target, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   upsertEmployeeGoal,
@@ -57,6 +57,7 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [markingAchieved, setMarkingAchieved] = useState(false);
   const [amount, setAmount] = useState("");
   const [period, setPeriod] = useState<GoalPeriod>("monthly");
   const [startDate, setStartDate] = useState("");
@@ -71,6 +72,13 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
       setPeriod("monthly");
       setStartDate(new Date().toISOString().slice(0, 10));
     }
+    setOpen(true);
+  };
+
+  const openCreateNew = () => {
+    setAmount("");
+    setPeriod("monthly");
+    setStartDate(new Date().toISOString().slice(0, 10));
     setOpen(true);
   };
 
@@ -120,6 +128,32 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
     }
   };
 
+  const handleMarkAchieved = async () => {
+    if (!goal) return;
+    // Persisted behavior: we "lock in" achieved by setting the stored goalAmount
+    // to the currentAmount for the active period. Status is computed server-side.
+    const nextAmount = Number(goal.currentAmount);
+    if (!Number.isFinite(nextAmount) || nextAmount <= 0) {
+      toast.error("No progress yet to mark as achieved.");
+      return;
+    }
+    setMarkingAchieved(true);
+    try {
+      await upsertEmployeeGoal({
+        goalAmount: nextAmount,
+        goalPeriod: goal.goalPeriod,
+        startDate: goal.startDate,
+      });
+      toast.success("Marked as achieved");
+      onUpdated();
+    } catch (e) {
+      logClientError("EmployeeGoalCard.markAchieved", e);
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setMarkingAchieved(false);
+    }
+  };
+
   return (
     <>
       <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
@@ -159,16 +193,40 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
                 </CardDescription>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
-                <Button type="button" size="sm" variant="default" onClick={openEdit}>
-                  {goal ? (
-                    <>
+                {goal ? (
+                  <>
+                    <Button type="button" size="sm" variant="default" onClick={openEdit}>
                       <Pencil className="mr-1.5 h-3.5 w-3.5" />
-                      Edit goal
-                    </>
-                  ) : (
-                    "Create goal"
-                  )}
-                </Button>
+                      Edit
+                    </Button>
+                    <Button type="button" size="sm" variant="outline" onClick={openCreateNew}>
+                      <Plus className="mr-1.5 h-3.5 w-3.5" />
+                      New goal
+                    </Button>
+                    {goal.status !== "achieved" ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => void handleMarkAchieved()}
+                        disabled={markingAchieved}
+                      >
+                        {markingAchieved ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <>
+                            <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" />
+                            Mark achieved
+                          </>
+                        )}
+                      </Button>
+                    ) : null}
+                  </>
+                ) : (
+                  <Button type="button" size="sm" variant="default" onClick={openEdit}>
+                    Create goal
+                  </Button>
+                )}
                 {goal ? (
                   <Button
                     type="button"
