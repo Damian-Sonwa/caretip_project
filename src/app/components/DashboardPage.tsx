@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import {
   TrendingDown,
-  DollarSign,
+  Euro,
   CreditCard,
   Calendar,
   ArrowUpRight,
@@ -29,6 +29,11 @@ import { DashboardMobileSidebar } from './DashboardMobileSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
+import { formatEur } from '../lib/formatEur';
+
+function eurInt(n: number): string {
+  return formatEur(n, { minFrac: 0, maxFrac: 0 });
+}
 
 // Mock data — tipping-focused business dashboard
 const tipVolumeData = [
@@ -59,7 +64,7 @@ const teamTipLeaders = [
     icon: Heart,
     iconWrap: 'bg-primary/10',
     iconColor: 'text-primary',
-    periodTotal: '$1,240',
+    periodTotal: eurInt(1240),
     lastTip: '2h ago',
     shiftNote: 'Top week',
   },
@@ -70,7 +75,7 @@ const teamTipLeaders = [
     icon: Heart,
     iconWrap: 'bg-primary/10',
     iconColor: 'text-primary',
-    periodTotal: '$980',
+    periodTotal: eurInt(980),
     lastTip: '5h ago',
     shiftNote: 'Strong bar',
   },
@@ -81,7 +86,7 @@ const teamTipLeaders = [
     icon: Users,
     iconWrap: 'bg-primary/10',
     iconColor: 'text-primary',
-    periodTotal: '$2,410',
+    periodTotal: eurInt(2410),
     lastTip: '1h ago',
     shiftNote: 'Team pool',
   },
@@ -92,7 +97,7 @@ const teamTipLeaders = [
     icon: Heart,
     iconWrap: 'bg-primary/10',
     iconColor: 'text-primary',
-    periodTotal: '$865',
+    periodTotal: eurInt(865),
     lastTip: 'Yesterday',
     shiftNote: 'Steady',
   },
@@ -103,7 +108,7 @@ const teamTipLeaders = [
     icon: QrCode,
     iconWrap: 'bg-primary/10',
     iconColor: 'text-primary',
-    periodTotal: '$540',
+    periodTotal: eurInt(540),
     lastTip: '3d ago',
     shiftNote: 'QR on pass',
   },
@@ -114,7 +119,7 @@ const recentTipActivity = [
     id: 1,
     label: 'Guest → Maya Chen',
     action: 'Tip completed',
-    amount: '+$18.00',
+    amount: `+${formatEur(18)}`,
     status: 'success',
     time: '2h ago',
   },
@@ -122,7 +127,7 @@ const recentTipActivity = [
     id: 2,
     label: 'Guest → bar pool',
     action: 'Tip completed',
-    amount: '+$25.00',
+    amount: `+${formatEur(25)}`,
     status: 'success',
     time: '5h ago',
   },
@@ -130,7 +135,7 @@ const recentTipActivity = [
     id: 3,
     label: 'Guest → James Okoro',
     action: 'Tip pending',
-    amount: '$12.00',
+    amount: formatEur(12),
     status: 'warning',
     time: '6h ago',
   },
@@ -138,7 +143,7 @@ const recentTipActivity = [
     id: 4,
     label: 'Adjustment',
     action: 'Refund issued',
-    amount: '-$8.00',
+    amount: `−${formatEur(8)}`,
     status: 'success',
     time: '1d ago',
   },
@@ -146,7 +151,7 @@ const recentTipActivity = [
     id: 5,
     label: 'Guest → Sofia Reyes',
     action: 'Tip completed',
-    amount: '+$15.00',
+    amount: `+${formatEur(15)}`,
     status: 'success',
     time: '2d ago',
   },
@@ -233,10 +238,10 @@ export function DashboardPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <MetricCard
                 title="Tips received (30d)"
-                value="$18,420"
+                value={eurInt(18420)}
                 change="+12.4%"
                 isPositive={true}
-                icon={DollarSign}
+                icon={Euro}
                 delay={0.1}
                 subtitle="vs prior month"
               />
@@ -251,8 +256,8 @@ export function DashboardPage() {
               />
               <MetricCard
                 title="Avg tip size"
-                value="$30.10"
-                change="+$1.20"
+                value={formatEur(30.1)}
+                change={`+${formatEur(1.2)}`}
                 isPositive={true}
                 icon={TrendingDown}
                 delay={0.3}
@@ -327,7 +332,7 @@ export function DashboardPage() {
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorAvgTip)"
-                      name="Avg tip ($)"
+                      name="Avg tip (€)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>

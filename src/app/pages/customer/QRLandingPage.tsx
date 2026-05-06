@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Building2, MapPin, Users, DollarSign, Home, Search } from "lucide-react";
+import { Building2, MapPin, Users, Euro, Home, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import {
   getBusinessById,
@@ -23,6 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
+import { formatEur } from "../../lib/formatEur";
 
 const BRAND_ORANGE = "#EB992C";
 const presetAmounts = [5, 10, 15, 20];
@@ -431,7 +432,8 @@ export function QRLandingPage() {
                       />
                     </div>
                     <p className="mt-3 text-xs text-muted-foreground/80 font-medium">
-                      €{currentTotal.toFixed(0)} of €{Number(monthlyGoal).toFixed(0)} this month
+                      {formatEur(currentTotal, { minFrac: 0, maxFrac: 0 })} of{" "}
+                      {formatEur(Number(monthlyGoal), { minFrac: 0, maxFrac: 0 })} this month
                     </p>
                   </>
                 ) : (
@@ -486,7 +488,7 @@ export function QRLandingPage() {
                   onClick={handleCustomClick}
                   className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 transition-all hover:border-primary/40 hover:bg-muted/40"
                 >
-                  <DollarSign className="w-7 h-7 text-muted-foreground/50 mx-auto mb-2" />
+                  <Euro className="w-7 h-7 text-muted-foreground/50 mx-auto mb-2" />
                   <span className="text-sm text-muted-foreground/80 font-medium">Enter custom amount</span>
                 </motion.button>
               ) : (
@@ -516,7 +518,7 @@ export function QRLandingPage() {
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-muted-foreground/80">Total Tip</span>
                     <span className="text-4xl font-bold text-primary">
-                      €{selectedAmount.toFixed(2)}
+                      {formatEur(selectedAmount)}
                     </span>
                   </div>
                 </CardContent>
@@ -596,7 +598,7 @@ export function QRLandingPage() {
                       again?
                     </p>
                     <p className="mt-2 text-xs font-semibold text-primary">
-                      Last tip: €{repeatCard.amount.toFixed(2)}
+                      Last tip: {formatEur(repeatCard.amount)}
                     </p>
                   </div>
                   <ProfileAvatar

@@ -113,6 +113,11 @@ function mapVerificationToStatus(
   return undefined;
 }
 
+/** Normalize API auth user payloads for UI state (login, refresh, impersonation). */
+export function userFromAuthResponse(data: AuthResponse["user"]): User {
+  return parseUser(data);
+}
+
 function parseUser(data: AuthResponse["user"]): User {
   const ext = data as AuthResponse["user"] & {
     impersonation?: boolean;

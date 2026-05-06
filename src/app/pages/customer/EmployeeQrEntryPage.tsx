@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { formatEur } from "../../lib/formatEur";
 
 /**
  * /qr/employee/:employeeId — Deep link by employee id (parallel to `/staff/:slug`).
@@ -96,7 +97,7 @@ export function EmployeeQrEntryPage() {
                   <p className="mt-1 text-sm text-muted-foreground">
                     Tip <span className="font-semibold text-foreground">{emp.name ?? "Team Member"}</span> again?
                   </p>
-                  <p className="mt-2 text-xs font-semibold text-primary">Last tip: €{repeatAmount.toFixed(2)}</p>
+                  <p className="mt-2 text-xs font-semibold text-primary">Last tip: {formatEur(repeatAmount)}</p>
                 </div>
                 <ProfileAvatar
                   src={emp.avatar ?? undefined}

@@ -7,14 +7,15 @@ import {
   TrendingUp,
   Shield,
   Users,
-  DollarSign,
+  Euro,
 } from "lucide-react";
+import { formatEur } from "../lib/formatEur";
 
 export function HeroSection() {
   const features = [
     { icon: Zap, label: "Instant Tips" },
     { icon: Globe, label: "Anywhere" },
-    { icon: DollarSign, label: "Fast Withdrawals" },
+    { icon: Euro, label: "Fast Withdrawals" },
     { icon: Shield, label: "Secure" },
     { icon: Users, label: "Easy Sharing" },
     { icon: TrendingUp, label: "Track Earnings" },
@@ -136,15 +137,13 @@ export function HeroSection() {
             >
               <div className="flex items-center gap-4">
                 <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-accent to-primary flex items-center justify-center">
-                  <DollarSign className="w-6 h-6 text-white" />
+                  <Euro className="w-6 h-6 text-white" />
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground font-medium">
                     Tips This Month
                   </p>
-                  <p className="text-2xl font-bold text-foreground">
-                    $1,247
-                  </p>
+                  <p className="text-2xl font-bold text-foreground">{formatEur(1247, { minFrac: 0, maxFrac: 0 })}</p>
                 </div>
               </div>
             </motion.div>

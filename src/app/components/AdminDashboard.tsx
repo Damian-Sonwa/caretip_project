@@ -21,6 +21,7 @@ import {
   type PlatformBusinessRow,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { formatEur } from "../lib/formatEur";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
 import { PageLoader } from "./PageLoader";
@@ -339,7 +340,7 @@ export function AdminDashboard() {
                         )}
                       </td>
                       <td className="px-4 py-3 text-right tabular-nums">
-                        €{(b.totalTipsEur ?? 0).toFixed(2)}
+                        {formatEur(b.totalTipsEur ?? 0)}
                       </td>
                       <td className="px-4 py-3 text-right text-xs text-muted-foreground">
                         {b.staffCount ?? 0} / {b.locationCount ?? 0}

@@ -4,6 +4,7 @@ import { Search, CreditCard } from "lucide-react";
 import { fetchPlatformTransactions, type GlobalTransactionRow } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 
 export function GlobalTransactionsPage() {
   const [q, setQ] = useState("");
@@ -109,11 +110,11 @@ export function GlobalTransactionsPage() {
                             )}
                           </td>
                           <td className="px-4 py-3">{row.businessName}</td>
-                          <td className="px-4 py-3 text-right tabular-nums">{row.amountEur.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums">{formatEur(row.amountEur)}</td>
                           <td className="px-4 py-3 text-right tabular-nums text-muted-foreground">
-                            {row.caretipFeePercent}% ({row.caretipFeeEur.toFixed(2)})
+                            {row.caretipFeePercent}% ({formatEur(row.caretipFeeEur)})
                           </td>
-                          <td className="px-4 py-3 text-right tabular-nums font-medium">{row.netToStaffEur.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right tabular-nums font-medium">{formatEur(row.netToStaffEur)}</td>
                           <td className="px-4 py-3">
                             <span
                               className={`inline-flex px-2 py-0.5 rounded text-xs font-medium ${

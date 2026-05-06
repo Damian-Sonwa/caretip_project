@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import {
-  DollarSign,
+  Euro,
   Users,
   TrendingUp,
   Award,
@@ -25,6 +25,7 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport, getBusinessStats } from "../../lib/api";
+import { formatEur } from "../../lib/formatEur";
 import type {
   BusinessDashboardStats,
   EmployeeGoalProgressStatus,
@@ -278,7 +279,7 @@ export function BusinessDashboard() {
         minute: "2-digit",
       });
       toast.success(
-        `New tip: ${who} · $${Number(payload.tip.amount).toFixed(2)} · ${timeStr}`,
+        `New tip: ${who} · ${formatEur(Number(payload.tip.amount))} · ${timeStr}`,
         TOAST_OK,
       );
       void refreshStatsQuiet();
@@ -562,9 +563,9 @@ export function BusinessDashboard() {
               <StatCard
                 featured
                 title={`Total tips (${timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"})`}
-                value={`$${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
+                value={formatEur(stats?.totalTips ?? 0)}
                 change={hasTipActivityInPeriod ? "Live totals update as tips land." : "No tips yet for this period."}
-                icon={DollarSign}
+                icon={Euro}
               />
               <StatCard
                 title="Active employees"
@@ -580,7 +581,11 @@ export function BusinessDashboard() {
               />
               <StatCard
                 title="Avg tip per employee"
-                value={`$${stats?.employeeCount && stats?.totalTips ? (stats.totalTips / stats.employeeCount).toFixed(0) : "0"}`}
+                value={
+                  stats?.employeeCount && stats?.totalTips
+                    ? formatEur(stats.totalTips / stats.employeeCount, { minFrac: 0, maxFrac: 0 })
+                    : formatEur(0, { minFrac: 0, maxFrac: 0 })
+                }
                 change="Useful coaching metric"
                 icon={TrendingUp}
               />
@@ -631,12 +636,8 @@ export function BusinessDashboard() {
                           <td className="py-3 pr-3 text-muted-foreground">
                             {GOAL_PERIOD_LABEL[g.goalPeriod]}
                           </td>
-                          <td className="py-3 pr-3 tabular-nums">
-                            ${g.goalAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                          </td>
-                          <td className="py-3 pr-3 tabular-nums">
-                            ${g.currentAmount.toLocaleString("en-US", { minimumFractionDigits: 2 })}
-                          </td>
+                          <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
+                          <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
                           <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
                           <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
                             {goalStatusLabel(g.status)}
@@ -677,7 +678,7 @@ export function BusinessDashboard() {
                       <XAxis dataKey="day" stroke="#404040" style={{ fontSize: "12px" }} />
                       <YAxis stroke="#404040" style={{ fontSize: "12px" }} />
                       <Tooltip
-                        formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Tips"]}
+                        formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
                         contentStyle={{
                           backgroundColor: "#ffffff",
                           border: "1px solid #e5e5e5",
@@ -724,7 +725,7 @@ export function BusinessDashboard() {
                         width={80}
                       />
                       <Tooltip
-                        formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Tips"]}
+                        formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
                         contentStyle={{
                           backgroundColor: "#ffffff",
                           border: "1px solid #e5e5e5",
@@ -794,9 +795,7 @@ export function BusinessDashboard() {
                       </div>
                     </div>
                     <div className="shrink-0 text-left sm:text-right">
-                      <p className="text-lg font-bold tabular-nums text-foreground">
-                        ${employee.tips.toLocaleString()}
-                      </p>
+                      <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
                       <div className="flex items-center justify-end gap-1 text-sm">
                         {employee.rating != null ? (
                           <>

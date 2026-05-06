@@ -10,6 +10,7 @@ import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { formatEur } from "../../lib/formatEur";
 
 const BRAND_ORANGE = "#EB992C";
 const BLACK = "#000000";
@@ -178,7 +179,7 @@ export function StaffTipByPublicPathPage() {
               </div>
               <div className="flex justify-between text-xs text-muted-foreground mb-1">
                 <span>
-                  ${staff.currentMonthTotal.toFixed(2)} / ${goal.toFixed(2)}
+                  {formatEur(staff.currentMonthTotal)} / {formatEur(goal)}
                 </span>
                 {progress != null ? <span>{Math.round(progress)}%</span> : null}
               </div>
@@ -202,7 +203,7 @@ export function StaffTipByPublicPathPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
               >
                 <Heart className="w-5 h-5" />
-                Tip again (€{repeatAmount.toFixed(2)})
+                Tip again ({formatEur(repeatAmount)})
               </button>
               <button
                 type="button"

@@ -5,7 +5,7 @@ import { Users, UserCog, Search } from "lucide-react";
 import { toast } from "sonner";
 import { fetchPlatformBusinesses, impersonateManagerAPI, type PlatformBusinessRow } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth, userFromAuthResponse } from "../../hooks/useAuth";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 
@@ -57,16 +57,7 @@ export function PlatformUserManagementPage() {
 
       const data = await impersonateManagerAPI(b.id);
       localStorage.setItem("caretip_token", data.token);
-      replaceUser({
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        role: "business",
-        businessId: data.user.businessId,
-        status: "APPROVED",
-        impersonation: true,
-        impersonatedBy: user.id,
-      });
+      replaceUser(userFromAuthResponse(data.user));
       toast.message(`Viewing dashboard as ${b.name}`);
       navigate("/dashboard");
     } catch (e) {

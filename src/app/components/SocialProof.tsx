@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 export function SocialProof() {
   const stats = [
     { value: '3,200+', label: 'Active Users' },
-    { value: '$2.4M+', label: 'Tips Distributed' },
+    { value: '2,4 Mio. €+', label: 'Tips Distributed' },
     { value: '150+', label: 'Countries' },
     { value: '4.9/5', label: 'User Rating' },
   ];

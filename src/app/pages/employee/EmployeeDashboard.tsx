@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
-  DollarSign,
+  Euro,
   TrendingUp,
   Star,
   Eye,
@@ -35,6 +35,7 @@ import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { getTipsByEmployee, getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
+import { formatEur } from "../../lib/formatEur";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
@@ -507,13 +508,13 @@ export function EmployeeDashboard() {
               <StatCard
                 featured
                 title={`Total earnings (${timeframe === "today" ? "today" : timeframe === "week" ? "week" : "month"})`}
-                value={`$${stats.amount.toFixed(2)}`}
+                value={formatEur(stats.amount)}
                 change={
                   filteredTips.length > 0
                     ? `${filteredTips.length} tip${filteredTips.length === 1 ? "" : "s"} in this period`
                     : "No activity yet for this period."
                 }
-                icon={DollarSign}
+                icon={Euro}
               />
               <StatCard
                 title="Total tips"
@@ -568,7 +569,7 @@ export function EmployeeDashboard() {
                       <XAxis dataKey="time" stroke="#404040" style={{ fontSize: "12px" }} />
                       <YAxis stroke="#404040" style={{ fontSize: "12px" }} />
                       <Tooltip
-                        formatter={(value: number) => [`$${Number(value).toFixed(2)}`, "Earnings"]}
+                        formatter={(value: number) => [formatEur(Number(value)), "Earnings"]}
                         contentStyle={{
                           backgroundColor: "#ffffff",
                           border: "1px solid #e5e5e5",
@@ -618,7 +619,7 @@ export function EmployeeDashboard() {
                           className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
                         >
                           <div className="flex-1">
-                            <p className="font-semibold text-foreground">${tip.amount.toFixed(2)}</p>
+                            <p className="font-semibold text-foreground">{formatEur(tip.amount)}</p>
                             <p className="text-xs text-muted-foreground">
                               {tip.customer} • {tip.time}
                             </p>

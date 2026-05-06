@@ -51,7 +51,7 @@ const notificationsData: Notification[] = [
     type: 'success',
     title: 'Large tip received',
     message:
-      'A guest sent $50 to your front-of-house team. Funds are processing through Stripe as a one-time payment.',
+      'A guest sent 50 € to your front-of-house team. Funds are processing through Stripe as a one-time payment.',
     date: '2026-03-15',
     read: false,
     actionLabel: 'View activity',
@@ -65,7 +65,7 @@ const notificationsData: Notification[] = [
     type: 'success',
     title: 'Tip settled',
     message:
-      'A $12 tip completed successfully. There is no subscription or invoice, just a single PaymentIntent.',
+      'A 12 € tip completed successfully. There is no subscription or invoice, just a single PaymentIntent.',
     date: '2026-03-01',
     read: true,
     actionLabel: 'Tips & activity',

@@ -15,6 +15,7 @@ import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 
 export function PaymentPage() {
   const navigate = useNavigate();
@@ -303,13 +304,13 @@ export function PaymentPage() {
                         Tip for {employeeName ?? "Team Member"}
                       </span>
                       <span className="text-sm font-medium text-foreground">
-                        €{tipAmountVal.toFixed(2)}
+                        {formatEur(tipAmountVal)}
                       </span>
                     </div>
                     <div className="border-t border-border/60 pt-3 flex items-center justify-between gap-4">
                       <span className="text-base font-semibold text-foreground">Amount to pay</span>
                       <span className="text-3xl font-bold text-foreground tabular-nums">
-                        €{totalAmount.toFixed(2)}
+                        {formatEur(totalAmount)}
                       </span>
                     </div>
                   </div>
@@ -405,7 +406,7 @@ export function PaymentPage() {
                   ) : (
                     <>
                       <Smartphone className="w-5 h-5" />
-                      Pay €{totalAmount.toFixed(2)}
+                      Pay {formatEur(totalAmount)}
                     </>
                   )}
                 </button>

@@ -16,6 +16,7 @@ import {
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 import { useAuth } from "../../hooks/useAuth";
 import { useSocket } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -247,7 +248,7 @@ export function BusinessVerificationPage() {
                             <div className="text-muted-foreground">{b.contactPhone ?? ""}</div>
                           </td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
-                            <div className="font-medium">€{(b.totalTipsEur ?? 0).toFixed(2)}</div>
+                            <div className="font-medium">{formatEur(b.totalTipsEur ?? 0)}</div>
                             <div className="text-muted-foreground">
                               {b.successTipCount ?? 0} tips · {b.staffCount ?? 0} staff
                             </div>
@@ -270,8 +271,10 @@ export function BusinessVerificationPage() {
                               <button
                                 type="button"
                                 onClick={async () => {
+                                  const path = b.logoPath;
+                                  if (!path) return;
                                   try {
-                                    const objUrl = await fetchAuthedObjectUrl(b.logoPath);
+                                    const objUrl = await fetchAuthedObjectUrl(path);
                                     window.open(objUrl, "_blank", "noopener,noreferrer");
                                   } catch (err) {
                                     toast.error(toUserFriendlyMessage(err));
@@ -288,8 +291,10 @@ export function BusinessVerificationPage() {
                               <button
                                 type="button"
                                 onClick={async () => {
+                                  const path = b.verificationDocumentPath;
+                                  if (!path) return;
                                   try {
-                                    const objUrl = await fetchAuthedObjectUrl(b.verificationDocumentPath);
+                                    const objUrl = await fetchAuthedObjectUrl(path);
                                     window.open(objUrl, "_blank", "noopener,noreferrer");
                                   } catch (err) {
                                     toast.error(toUserFriendlyMessage(err));

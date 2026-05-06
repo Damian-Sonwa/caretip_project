@@ -7,7 +7,7 @@ import {
   Eye,
   RefreshCw,
   CreditCard,
-  DollarSign,
+  Euro,
   CheckCircle2,
   Clock,
   XCircle,
@@ -22,6 +22,7 @@ import { DashboardMobileSidebar } from './DashboardMobileSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
+import { formatEur } from '../lib/formatEur';
 
 // Transaction type
 interface Transaction {
@@ -153,11 +154,9 @@ export function TransactionsPage() {
               >
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-sm text-muted-foreground">Tip volume</span>
-                  <DollarSign className="w-5 h-5 text-accent" />
+                  <Euro className="w-5 h-5 text-accent" />
                 </div>
-                <p className="text-2xl font-semibold text-foreground">
-                  ${totalAmount.toLocaleString()}
-                </p>
+                <p className="text-2xl font-semibold text-foreground">{formatEur(totalAmount)}</p>
                 <p className="mt-1 text-xs text-primary">+12.5% from last month</p>
               </motion.div>
 
@@ -369,9 +368,7 @@ export function TransactionsPage() {
                             </span>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="text-sm font-semibold text-foreground">
-                              ${transaction.amount.toFixed(2)}
-                            </span>
+                            <span className="text-sm font-semibold text-foreground">{formatEur(transaction.amount)}</span>
                           </td>
                           <td className="px-6 py-4">
                             <span
@@ -483,9 +480,7 @@ export function TransactionsPage() {
                     <div className="flex items-center justify-between mb-4 pb-4 border-b border-border">
                       <div>
                         <p className="text-xs text-muted-foreground mb-1">Amount</p>
-                        <p className="text-lg font-semibold text-foreground">
-                          ${transaction.amount.toFixed(2)}
-                        </p>
+                        <p className="text-lg font-semibold text-foreground">{formatEur(transaction.amount)}</p>
                       </div>
                       <div className="text-right">
                         <p className="text-xs text-muted-foreground mb-1">Date</p>

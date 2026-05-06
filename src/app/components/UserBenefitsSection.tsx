@@ -42,7 +42,7 @@ export function UserBenefitsSection() {
 
   const stats = [
     { number: '3,200+', label: 'Active Users', sublabel: 'Receiving tips daily' },
-    { number: '$847', label: 'Avg Monthly', sublabel: 'Per user in tips' },
+    { number: '847 €', label: 'Avg Monthly', sublabel: 'Per user in tips' },
     { number: '98.4%', label: 'Satisfaction', sublabel: 'User happiness rate' },
   ];
 

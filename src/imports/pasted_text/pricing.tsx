@@ -166,11 +166,11 @@ All plans include access to our platform, lead generation tools, and dedicated s
                     }
                     format={{
                       style: "currency",
-                      currency: "USD",
+                      currency: "EUR",
                       minimumFractionDigits: 0,
                       maximumFractionDigits: 0,
                     }}
-                    formatter={(value) => `$${value}`}
+                    formatter={(value) => `€${value}`}
                     transformTiming={{
                       duration: 500,
                       easing: "ease-out",

@@ -10,6 +10,7 @@ import { logClientError } from "../../lib/clientLog";
 import { promotePendingTipToRepeatTip } from "../../lib/repeatTip";
 import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 
 export function SuccessPage() {
   const navigate = useNavigate();
@@ -140,7 +141,7 @@ export function SuccessPage() {
             </div>
             <div className="border-t border-border pt-3 flex items-center justify-between">
               <span className="font-semibold text-foreground">Tip Amount</span>
-              <span className="text-lg font-bold text-foreground">€{tipAmount.toFixed(2)}</span>
+              <span className="text-lg font-bold text-foreground">{formatEur(tipAmount)}</span>
             </div>
           </div>
         </motion.div>

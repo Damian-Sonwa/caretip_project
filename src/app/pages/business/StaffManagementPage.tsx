@@ -36,6 +36,7 @@ import {
   type LocationDTO,
   type TableDTO,
 } from "../../lib/api";
+import { formatEur } from "../../lib/formatEur";
 import { downloadBrandedQR, downloadBrandedQRLegacy } from "../../lib/qrBranded";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
@@ -565,9 +566,7 @@ export function StaffManagementPage() {
               </div>
               <div>
                 <p className="text-xs font-medium uppercase text-muted-foreground">Tips (mo)</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">
-                  ${tipsMonthTotal.toLocaleString()}
-                </p>
+                <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(tipsMonthTotal)}</p>
               </div>
             </div>
           }
@@ -780,7 +779,7 @@ export function StaffManagementPage() {
                   </td>
                   <td className="px-6 py-4 text-right">
                     <div>
-                      <p className="font-bold text-foreground">${employee.tips}</p>
+                      <p className="font-bold text-foreground">{formatEur(Number(employee.tips))}</p>
                       <p className="text-xs text-accent">{employee.growth}</p>
                     </div>
                   </td>
@@ -930,7 +929,7 @@ export function StaffManagementPage() {
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Tips (Month)</p>
-                  <p className="text-lg font-bold text-foreground">${employee.tips}</p>
+                  <p className="text-lg font-bold text-foreground">{formatEur(Number(employee.tips))}</p>
                   <p className="text-xs text-accent">{employee.growth}</p>
                 </div>
                 <div>

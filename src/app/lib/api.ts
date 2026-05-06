@@ -539,6 +539,8 @@ export async function oauthAPI(payload: {
   intendedRole: "business" | "employee";
   name?: string;
   businessName?: string;
+  businessType?: string;
+  location?: string;
   inviteCode?: string;
 }): Promise<AuthResponse> {
   return apiRequest<AuthResponse>(apiPath("/api/auth/oauth"), {
@@ -551,6 +553,8 @@ export async function oauthAPI(payload: {
       intendedRole: toBackendIntendedRole(payload.intendedRole),
       ...(payload.name ? { name: payload.name } : {}),
       ...(payload.businessName ? { businessName: payload.businessName } : {}),
+      ...(payload.businessType ? { businessType: payload.businessType } : {}),
+      ...(payload.location ? { location: payload.location } : {}),
       ...(payload.inviteCode ? { inviteCode: payload.inviteCode } : {}),
     }),
     credentials: "include",

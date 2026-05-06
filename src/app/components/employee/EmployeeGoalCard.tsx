@@ -7,6 +7,7 @@ import {
   type EmployeeGoalProgress,
   type GoalPeriod,
 } from "../../lib/api";
+import { formatEur } from "../../lib/formatEur";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { Button } from "@/components/ui/button";
@@ -133,7 +134,7 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
                 <>
                   <CardDescription className="mt-1 text-foreground/90">
                     <span className="font-semibold tabular-nums">
-                      ${goal.currentAmount.toFixed(2)} / ${goal.goalAmount.toFixed(2)}
+                      {formatEur(goal.currentAmount)} / {formatEur(goal.goalAmount)}
                     </span>{" "}
                     <span className="text-muted-foreground">({goal.percent}%)</span>
                   </CardDescription>
@@ -201,7 +202,7 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
           </DialogHeader>
           <div className="grid gap-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="goal-amount">Target amount ($)</Label>
+              <Label htmlFor="goal-amount">Target amount (€)</Label>
               <Input
                 id="goal-amount"
                 type="number"

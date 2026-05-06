@@ -75,72 +75,65 @@ export function DashboardHero({
     </CardTitle>
   );
 
-  const supportingBlock = (
-    <div className={cn("min-w-0 flex flex-col", tagline ? "gap-4" : "gap-0")}>
-      {tagline ? (
-        <CardDescription className="max-w-xl break-words text-left text-sm leading-snug text-muted-foreground line-clamp-1">
-          {tagline}
-        </CardDescription>
-      ) : null}
+  const taglineBlock =
+    tagline ? (
+      <CardDescription className="max-w-xl shrink-0 break-words pt-0 text-left text-sm leading-snug text-muted-foreground line-clamp-1">
+        {tagline}
+      </CardDescription>
+    ) : null;
 
-      <Tabs defaultValue="overview" className={cn("w-full pt-0", stackHeroOnMobile ? "max-w-none sm:pt-0" : "max-w-md sm:pt-1")}>
-        <TabsList
-          className={cn(
-            "grid h-11 w-full grid-cols-2 gap-1 p-1",
-            stackHeroOnMobile
-              ? "rounded-full bg-neutral-100"
-              : "rounded-md bg-muted",
-          )}
-        >
-          <TabsTrigger
-            value="overview"
-            className={cn(
-              stackHeroOnMobile &&
-                "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
-            )}
-          >
-            Overview
-          </TabsTrigger>
-          <TabsTrigger
-            value="links"
-            className={cn(
-              stackHeroOnMobile &&
-                "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
-            )}
-          >
-            Shortcuts
-          </TabsTrigger>
-        </TabsList>
-        <TabsContent
+  const tabsCluster = (
+    <Tabs defaultValue="overview" className={cn("w-full pt-0", stackHeroOnMobile ? "max-w-none sm:pt-0" : "max-w-md sm:pt-1")}>
+      <TabsList
+        className={cn(
+          "grid h-11 w-full grid-cols-2 gap-1 p-1",
+          stackHeroOnMobile ? "rounded-full bg-neutral-100" : "rounded-md bg-muted",
+        )}
+      >
+        <TabsTrigger
           value="overview"
           className={cn(
-            "text-sm text-foreground",
-            stackHeroOnMobile
-              ? "mt-3 border-0 bg-transparent p-0 shadow-none"
-              : "rounded-md border border-border bg-background p-4 sm:p-5",
+            stackHeroOnMobile &&
+              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
-          {overview}
-        </TabsContent>
-        <TabsContent
+          Overview
+        </TabsTrigger>
+        <TabsTrigger
           value="links"
           className={cn(
-            "text-sm",
-            stackHeroOnMobile
-              ? "mt-3 space-y-2 border-0 bg-transparent p-0 shadow-none"
-              : "space-y-2 rounded-md border border-border bg-background p-4 sm:p-5",
+            stackHeroOnMobile &&
+              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
-          {shortcuts}
-        </TabsContent>
-      </Tabs>
-    </div>
+          Shortcuts
+        </TabsTrigger>
+      </TabsList>
+      <TabsContent
+        value="overview"
+        className={cn(
+          "text-sm text-foreground",
+          stackHeroOnMobile ? "mt-3 border-0 bg-transparent p-0 shadow-none" : "rounded-md border border-border bg-background p-4 sm:p-5",
+        )}
+      >
+        {overview}
+      </TabsContent>
+      <TabsContent
+        value="links"
+        className={cn(
+          "text-sm",
+          stackHeroOnMobile ? "mt-3 space-y-2 border-0 bg-transparent p-0 shadow-none" : "space-y-2 rounded-md border border-border bg-background p-4 sm:p-5",
+        )}
+      >
+        {shortcuts}
+      </TabsContent>
+    </Tabs>
   );
 
   const actionsRow = (
     <div
       className={cn(
-        "dashboard-hero-actions flex min-w-0 flex-row flex-wrap items-center gap-2 pt-1 sm:gap-3 sm:pt-2 lg:pt-0",
+        "dashboard-hero-actions flex min-w-0 shrink-0 flex-row flex-wrap items-center gap-2 pt-1 sm:gap-3 sm:pt-2 lg:pt-0",
         stackHeroOnMobile && "dashboard-hero-actions--premium-grid max-lg:pt-0",
       )}
     >
@@ -186,7 +179,7 @@ export function DashboardHero({
           hasPhoto && "min-h-[220px] lg:min-h-[min(100%,28rem)]",
           hasCustomMedia && "lg:justify-center",
           opts.stackedLayout &&
-            "max-lg:w-full max-lg:max-w-none lg:col-span-7 lg:col-start-6 lg:self-center lg:justify-center",
+            "max-lg:order-3 max-lg:w-full max-lg:max-w-none lg:col-span-7 lg:col-start-6 lg:row-start-1 lg:justify-center",
         )}
       >
         {hasCustomMedia ? (
@@ -277,24 +270,33 @@ export function DashboardHero({
         {stackHeroOnMobile ? (
           <div
             className={cn(
-              "dashboard-hero-container flex min-w-0 flex-col max-lg:space-y-6 max-lg:p-0 lg:grid lg:items-center lg:gap-x-8 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
-              hideImage ? "lg:grid-cols-1" : "lg:grid-cols-12",
+              "dashboard-hero-container flex min-w-0 flex-col max-lg:gap-6 max-lg:p-0",
+              hideImage
+                ? "lg:grid lg:grid-flow-row lg:grid-cols-1 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8"
+                : "lg:grid lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
             )}
           >
             <div
               className={cn(
-                "flex min-w-0 flex-col gap-6 text-left lg:justify-center lg:gap-6 lg:pr-2",
-                hideImage ? "lg:col-span-12" : "lg:col-span-5",
+                "flex min-w-0 flex-col gap-4 text-left max-lg:order-1 lg:min-h-0 lg:flex-none lg:justify-center lg:gap-4 lg:text-left xl:gap-5",
+                hideImage ? "lg:col-span-12 lg:row-start-1" : "lg:col-span-5 lg:row-start-1",
               )}
             >
-              <div className="space-y-4 lg:space-y-5">
+              <div className="min-h-0 space-y-4 lg:space-y-5">
                 {badgeRow}
                 {titleRow}
               </div>
-              {supportingBlock}
+              {taglineBlock}
+            </div>
+            {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
+            <div
+              className={cn(
+                "flex min-w-0 flex-col gap-6 max-lg:order-2 lg:col-span-12 lg:row-start-2 lg:w-full",
+              )}
+            >
+              {tabsCluster}
               {actionsRow}
             </div>
-            {renderMediaColumn({ stackedLayout: true })}
           </div>
         ) : (
           <div

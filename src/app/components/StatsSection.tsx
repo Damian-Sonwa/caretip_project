@@ -14,7 +14,7 @@ export function StatsSection() {
 
   const stats = [
     { label: "Tips delivered", value: "12,483", change: "+12.5%" },
-    { label: "To staff this month", value: "$248K", change: "+23.1%" },
+    { label: "To staff this month", value: "€248 K", change: "+23.1%" },
     { label: "Guest satisfaction", value: "94.2%", change: "+2.4%" },
   ];
 

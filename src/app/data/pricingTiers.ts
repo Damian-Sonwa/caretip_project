@@ -4,7 +4,7 @@ import type { TippingTier } from "../components/PricingSection";
 export const PRICING_TIERS: TippingTier[] = [
   {
     name: "Starter",
-    feeLine: "2.9% + $0.30",
+    feeLine: "2,9 % + 0,30 €",
     feeNote: "per successful tip (Stripe)",
     icon: Store,
     description: "Best for small venues getting started with QR tipping.",
@@ -20,7 +20,7 @@ export const PRICING_TIERS: TippingTier[] = [
   },
   {
     name: "Business",
-    feeLine: "2.5% + $0.30",
+    feeLine: "2,5 % + 0,30 €",
     feeNote: "per successful tip (Stripe)",
     icon: Building2,
     description: "For growing teams that need more control and branding.",
@@ -29,7 +29,7 @@ export const PRICING_TIERS: TippingTier[] = [
       "Branded QR & exports",
       "Priority support",
       "Multi-location friendly",
-      "$29/mo platform fee (optional add-on)",
+      "29 €/Monat Plattformgebühr (optional)",
     ],
     buttonText: "Get started",
     isPopular: true,

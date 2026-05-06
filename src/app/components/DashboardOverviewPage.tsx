@@ -4,7 +4,7 @@ import { Link } from "react-router";
 import {
   TrendingUp,
   Users,
-  DollarSign,
+  Euro,
   Activity,
   ArrowUpRight,
   Heart,
@@ -24,6 +24,7 @@ import { DashboardMobileSidebar } from "./DashboardMobileSidebar";
 import { DashboardHeader } from "./DashboardHeader";
 import { Footer } from "./Footer";
 import AnimatedShaderBackground from "./ui/animated-shader-background";
+import { formatEur } from "../lib/formatEur";
 
 const tipsData = [
   { month: "Jan", tips: 12400 },
@@ -76,7 +77,7 @@ export function DashboardOverviewPage() {
                     to="/dashboard/transactions"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-white/90 text-primary rounded-lg font-semibold transition-all shadow-lg"
                   >
-                    <DollarSign className="w-4 h-4" />
+                    <Euro className="w-4 h-4" />
                     View tips & activity
                   </Link>
                   <Link
@@ -99,11 +100,11 @@ export function DashboardOverviewPage() {
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="p-3 bg-accent/10 rounded-xl">
-                    <DollarSign className="w-6 h-6 text-accent" />
+                    <Euro className="w-6 h-6 text-accent" />
                   </div>
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-2xl font-bold text-foreground mb-1">$24,800</p>
+                <p className="text-2xl font-bold text-foreground mb-1">{formatEur(24800, { minFrac: 0, maxFrac: 0 })}</p>
                 <p className="text-sm text-muted-foreground">Tips this month</p>
                 <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">Sample dashboard data</p>
               </motion.div>
@@ -154,7 +155,7 @@ export function DashboardOverviewPage() {
                   </div>
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-2xl font-bold text-foreground mb-1">$18.40</p>
+                <p className="text-2xl font-bold text-foreground mb-1">{formatEur(18.4)}</p>
                 <p className="text-sm text-muted-foreground">Average tip amount</p>
                 <p className="text-xs text-muted-foreground mt-2">Rolling 30 days (sample)</p>
               </motion.div>

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Link2, DollarSign, Wallet, QrCode } from "lucide-react";
+import { Link2, Euro, Wallet, QrCode } from "lucide-react";
 
 export function HowItWorksSection() {
   const steps = [
@@ -11,7 +11,7 @@ export function HowItWorksSection() {
       color: "from-accent to-primary"
     },
     {
-      icon: DollarSign,
+      icon: Euro,
       step: "2",
       title: "Customer sends tip",
       description: "Customers scan your QR code or click your link to send tips securely and instantly. No app download required for them.",

@@ -12,6 +12,7 @@ import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 
 export function TipAmountPage() {
   const navigate = useNavigate();
@@ -316,7 +317,7 @@ export function TipAmountPage() {
                       : "border-border bg-card hover:border-accent/50 hover:shadow-md"
                   }`}
                 >
-                  <div className="text-2xl font-bold text-foreground mb-1">€{amount}</div>
+                  <div className="text-2xl font-bold text-foreground mb-1">{formatEur(amount, { minFrac: 0, maxFrac: 0 })}</div>
                   <div className="text-sm text-muted-foreground">Tip amount</div>
                 </motion.button>
               ))}
@@ -390,9 +391,7 @@ export function TipAmountPage() {
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Tip amount</span>
-                  <span className="text-2xl font-bold text-foreground">
-                    €{selectedAmount.toFixed(2)}
-                  </span>
+                  <span className="text-2xl font-bold text-foreground">{formatEur(selectedAmount)}</span>
                 </div>
               </CardContent>
             </Card>

@@ -16,6 +16,7 @@ import {
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 
 export function BusinessDetailPage() {
@@ -192,7 +193,7 @@ export function BusinessDetailPage() {
                   <div>
                     <dt className="text-muted-foreground">Total tips (successful)</dt>
                     <dd className="font-medium">
-                      €{(row.totalTipsEur ?? 0).toFixed(2)}{" "}
+                      {formatEur(row.totalTipsEur ?? 0)}{" "}
                       <span className="text-muted-foreground font-normal">
                         ({row.successTipCount ?? 0} tips)
                       </span>
@@ -231,8 +232,10 @@ export function BusinessDetailPage() {
                     <button
                       type="button"
                       onClick={async () => {
+                        const path = row.logoPath;
+                        if (!path) return;
                         try {
-                          const objUrl = await fetchAuthedObjectUrl(row.logoPath);
+                          const objUrl = await fetchAuthedObjectUrl(path);
                           window.open(objUrl, "_blank", "noopener,noreferrer");
                         } catch (err) {
                           toast.error(toUserFriendlyMessage(err));
@@ -247,8 +250,10 @@ export function BusinessDetailPage() {
                     <button
                       type="button"
                       onClick={async () => {
+                        const path = row.verificationDocumentPath;
+                        if (!path) return;
                         try {
-                          const objUrl = await fetchAuthedObjectUrl(row.verificationDocumentPath);
+                          const objUrl = await fetchAuthedObjectUrl(path);
                           window.open(objUrl, "_blank", "noopener,noreferrer");
                         } catch (err) {
                           toast.error(toUserFriendlyMessage(err));

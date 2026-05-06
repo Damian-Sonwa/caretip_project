@@ -16,6 +16,7 @@ import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { formatEur } from "../../lib/formatEur";
 
 /**
  * /qr/location/:locationId — Venue QR: business team list in context of one location.
@@ -158,7 +159,7 @@ export function LocationQrLandingPage() {
                       again?
                     </p>
                     <p className="mt-2 text-xs font-semibold text-primary">
-                      Last tip: €{repeatCandidate.amount.toFixed(2)}
+                      Last tip: {formatEur(repeatCandidate.amount)}
                     </p>
                   </div>
                   <ProfileAvatar
