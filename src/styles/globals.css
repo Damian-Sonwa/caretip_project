@@ -316,4 +316,55 @@ textarea::placeholder {
     overflow: hidden;
     text-overflow: ellipsis;
   }
+
+  /* Premium mobile hero: 2-col action grid (overrides flex rules above). */
+  .caretip-dashboard-shell .dashboard-hero-actions.dashboard-hero-actions--premium-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .caretip-dashboard-shell .dashboard-hero-actions.dashboard-hero-actions--premium-grid > :is(a, button) {
+    display: inline-flex !important;
+    width: 100%;
+    max-width: none;
+    min-height: 56px;
+    height: 56px !important;
+    justify-content: center;
+    border-radius: 0.75rem;
+  }
+}
+
+/*
+ * Public marketing nav: mobile hamburger panel only (`Navigation` drawer, `lg:hidden`).
+ * Scoped with `.caretip-public-mobile-nav-drawer` — never matches dashboard shells.
+ * Matches typical “phone” breakpoint; wider tablets still use compact Tailwind on the panel.
+ */
+@media (max-width: 768px) {
+  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions :is(a, button) {
+    width: auto;
+    max-width: fit-content;
+    min-height: 40px;
+    box-sizing: border-box;
+  }
+
+  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions button {
+    padding: 8px 12px;
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-links a {
+    font-size: 14px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
 }

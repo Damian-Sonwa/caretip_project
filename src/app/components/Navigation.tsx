@@ -138,47 +138,60 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 exit={{ opacity: 0, y: -8 }}
                 transition={{ duration: 0.2 }}
                 className={cn(
-                  "absolute left-0 right-0 top-full z-[60] border-b shadow-[0_12px_40px_rgba(0,0,0,0.08)] lg:hidden",
+                  "caretip-public-mobile-nav-drawer absolute left-0 right-0 top-full z-[60] border-b shadow-[0_12px_40px_rgba(0,0,0,0.08)] lg:hidden",
                   "border-border/60 bg-background/98 backdrop-blur-md"
                 )}
               >
-                <div className="flex flex-col gap-1 px-4 py-4 sm:px-6">
-                  {navLinks.map((link) =>
-                    <Link
-                      key={link.name}
-                      to={link.to as string}
-                      className={cn(
-                        "rounded-lg px-3 py-3 text-base font-semibold transition-colors",
-                        "text-foreground active:bg-muted"
-                      )}
-                      onClick={() => setMobileMenuOpen(false)}
-                    >
-                      {link.name}
-                    </Link>
-                  )}
+                <div className="flex flex-col gap-2.5 px-4 py-4 sm:px-6">
+                  <div className="caretip-public-mobile-nav-links flex flex-col gap-2.5">
+                    {navLinks.map((link) => (
+                      <Link
+                        key={link.name}
+                        to={link.to as string}
+                        className={cn(
+                          "rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors",
+                          "text-foreground active:bg-muted"
+                        )}
+                        onClick={() => setMobileMenuOpen(false)}
+                      >
+                        {link.name}
+                      </Link>
+                    ))}
+                  </div>
                   <div
                     className={cn(
-                      "mt-3 flex flex-col gap-3 border-t pt-4",
+                      "caretip-public-mobile-nav-actions mt-1 flex flex-col gap-2.5 border-t pt-4",
                       "border-border/60"
                     )}
                   >
-                    <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex w-fit max-w-full shrink-0"
+                    >
                       <button
                         type="button"
                         className={cn(
-                          "w-full rounded-lg border-2 px-4 py-3 text-sm font-bold transition-all active:scale-[0.98]",
-                          "border-primary bg-card text-foreground"
+                          "inline-flex min-h-10 w-auto max-w-full items-center justify-center whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition-all active:scale-[0.98]",
+                          "border-border/80 bg-muted/40 text-foreground hover:bg-muted/70"
                         )}
                       >
-                        Log In
+                        Sign In
                       </button>
                     </Link>
-                    <Link to="/contact" onClick={() => setMobileMenuOpen(false)} className="w-full">
+                    <Link
+                      to="/auth?mode=signup&role=business&from=nav"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="inline-flex w-fit max-w-full shrink-0"
+                    >
                       <button
                         type="button"
-                        className="w-full rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-hover active:scale-[0.98]"
+                        className={cn(
+                          "inline-flex min-h-10 w-auto max-w-full items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-hover active:scale-[0.98]",
+                          "bg-primary shadow-sm"
+                        )}
                       >
-                        Request a Demo
+                        Get Started
                       </button>
                     </Link>
                   </div>
