@@ -405,7 +405,7 @@ export function FeatureShowcase({
                         }
                         loading="eager"
                         decoding="async"
-                        fetchPriority="high"
+                        fetchpriority="high"
                       />
                     </div>
                   </div>

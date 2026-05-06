@@ -8,6 +8,9 @@ import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 /** Use only when the failure type cannot be determined (null/empty/unknown). */
 export const GENERIC_UNKNOWN_ERROR = "Something went wrong. Please try again.";
 
+/** Shown when auth/session refresh fails with HTTP 503 (matches product copy; avoids infinite retry loops). */
+export const SERVICE_UNAVAILABLE_CLIENT_MESSAGE = "Service temporarily unavailable";
+
 const ERROR_MAP: Record<string, string> = {
   // Auth
   "Email already registered": "This email is already in use. Try signing in or use a different email.",
@@ -192,7 +195,7 @@ const STATUS_MESSAGES: Record<number, string> = {
   429: "Too many requests. Please wait a moment and try again.",
   500: "Our servers hit a problem. Please try again in a few minutes.",
   502: "Our servers are temporarily unavailable. Please try again in a few minutes.",
-  503: "This part of the service is temporarily unavailable. Please try again shortly.",
+  503: SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
   504: "The request took too long. Please try again.",
 };
 

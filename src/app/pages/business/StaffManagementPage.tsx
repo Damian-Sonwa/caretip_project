@@ -118,7 +118,7 @@ function rosterNoteClassName(note: string | null): string {
 }
 
 export function StaffManagementPage() {
-  const { user, isBusiness } = useRequireAuth();
+  const { user, isBusiness, authHydrated, sessionValidated } = useRequireAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
@@ -160,6 +160,12 @@ export function StaffManagementPage() {
 
   const fetchEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
     const quiet = opts?.quiet === true;
+    if (!authHydrated || !sessionValidated) {
+      if (!quiet) {
+        setLoading(false);
+      }
+      return;
+    }
     if (!user?.businessId) {
       if (!quiet) {
         setLoading(false);
@@ -205,9 +211,9 @@ export function StaffManagementPage() {
     } finally {
       if (!quiet) setLoading(false);
     }
-  }, [user?.businessId]);
+  }, [user?.businessId, authHydrated, sessionValidated]);
 
-  const { socket, connected } = useSocket(isBusiness);
+  const { socket, connected } = useSocket(isBusiness && authHydrated && sessionValidated);
 
   useRealtimeFallback(connected, () => void fetchEmployees({ quiet: true }));
 
@@ -227,7 +233,7 @@ export function StaffManagementPage() {
   }, [fetchEmployees]);
 
   useEffect(() => {
-    if (!isBusiness || !user?.businessId) return;
+    if (!authHydrated || !sessionValidated || !isBusiness || !user?.businessId) return;
     let cancelled = false;
     void fetchBusinessProfile()
       .then((p) => {
@@ -240,10 +246,10 @@ export function StaffManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [isBusiness, user?.businessId]);
+  }, [authHydrated, sessionValidated, isBusiness, user?.businessId]);
 
   useEffect(() => {
-    if (!isBusiness) return;
+    if (!authHydrated || !sessionValidated || !isBusiness) return;
     void (async () => {
       try {
         const [locs, tbs] = await Promise.all([fetchLocations(), fetchTables()]);
@@ -253,7 +259,7 @@ export function StaffManagementPage() {
         logClientError("StaffManagementPage.venues", err);
       }
     })();
-  }, [isBusiness]);
+  }, [authHydrated, sessionValidated, isBusiness]);
 
   const filteredEmployees = employees.filter(
     (emp) =>
@@ -537,6 +543,7 @@ export function StaffManagementPage() {
         </div>
 
         <DashboardHero
+          stackHeroOnMobile
           hideImage
           badge={
             <>
@@ -603,8 +610,8 @@ export function StaffManagementPage() {
                   </>
                 ) : (
                   <>
-                    <KeyRound className="mr-2 h-4 w-4" />
-                    Invite code
+                    <KeyRound className="mr-2 h-4 w-4 shrink-0" />
+                    Invite
                   </>
                 )}
               </Button>
@@ -614,8 +621,8 @@ export function StaffManagementPage() {
                 disabled={!isBusiness}
                 variant="outline"
               >
-                <Plus className="mr-2 h-4 w-4" />
-                Add employee
+                <Plus className="mr-2 h-4 w-4 shrink-0" />
+                Add
               </Button>
             </>
           }

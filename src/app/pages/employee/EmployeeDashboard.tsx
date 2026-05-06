@@ -115,7 +115,7 @@ function formatTimeAgo(iso: string): string {
 }
 
 export function EmployeeDashboard() {
-  const { user, authHydrated, logout, updateUser } = useRequireAuth();
+  const { user, authHydrated, sessionValidated, logout, updateUser } = useRequireAuth();
 
   const handleLogout = () => {
     logout();
@@ -138,7 +138,7 @@ export function EmployeeDashboard() {
   const [generatingSlug, setGeneratingSlug] = useState(false);
 
   const refreshTipsQuiet = useCallback(async () => {
-    if (!authHydrated || !user || user.role !== "employee") return;
+    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
     try {
       const data = await getTipsByEmployee();
       setTips(data.tips ?? []);
@@ -148,15 +148,15 @@ export function EmployeeDashboard() {
     } catch (e) {
       logClientError("EmployeeDashboard.refreshTipsQuiet", e);
     }
-  }, [authHydrated, user?.id, user?.role]);
+  }, [authHydrated, sessionValidated, user?.id, user?.role]);
 
-  const socketReady = useDeferSocketConnect(user?.role === "employee");
+  const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshTipsQuiet);
 
   useEffect(() => {
-    if (!authHydrated || !user || user.role !== "employee") return;
+    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
     const load = async () => {
       setError(null);
       const [tipsResult, profileResult] = await Promise.allSettled([
@@ -195,7 +195,7 @@ export function EmployeeDashboard() {
     // Use stable fields only: `user` object identity changes after `updateUser`, which would otherwise
     // retrigger this effect forever (loading blink).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above
-  }, [authHydrated, user?.id, user?.role, updateUser]);
+  }, [authHydrated, sessionValidated, user?.id, user?.role, updateUser]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -328,7 +328,7 @@ export function EmployeeDashboard() {
   const qrEmployeeId = user.employeeId ?? employeeRecordId ?? null;
 
   const handleQrQuickAction = async () => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (slugLoading || generatingSlug) return;
     if (!hasSlug) {
       setGeneratingSlug(true);
@@ -383,6 +383,7 @@ export function EmployeeDashboard() {
 
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <DashboardHero
+          stackHeroOnMobile
           badge={
             <>
               <Sparkles className="h-3.5 w-3.5 text-foreground" />
@@ -447,13 +448,16 @@ export function EmployeeDashboard() {
                   </>
                 ) : (
                   <>
-                    <QrCode className="mr-2 h-4 w-4" />
-                    {hasSlug ? "My QR code" : "Generate my QR"}
+                    <QrCode className="mr-2 h-4 w-4 shrink-0" />
+                    {hasSlug ? "My QR" : "Get QR"}
                   </>
                 )}
               </Button>
               <Button variant="outline" asChild>
-                <Link to="/employee/settings">Settings</Link>
+                <Link to="/employee/settings" className="gap-2">
+                  <Settings className="h-4 w-4 shrink-0" />
+                  Settings
+                </Link>
               </Button>
             </>
           }
@@ -463,7 +467,7 @@ export function EmployeeDashboard() {
       <TracingBeam className="mx-auto max-w-7xl px-4">
         <div className="flex flex-wrap items-center gap-3">
           <LiveConnectionBadge status={connectionStatus} />
-          <div className="flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+          <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
             {(["today", "week", "month"] as const).map((period) => (
               <button
                 key={period}

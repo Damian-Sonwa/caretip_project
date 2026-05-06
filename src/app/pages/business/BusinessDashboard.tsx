@@ -118,7 +118,7 @@ function goalStatusClass(s: EmployeeGoalProgressStatus): string {
 }
 
 export function BusinessDashboard() {
-  const { user, logout, isBusiness, exitImpersonation } = useRequireAuth();
+  const { user, logout, isBusiness, exitImpersonation, sessionValidated } = useRequireAuth();
 
   const handleLogout = () => {
     if (user?.impersonation) {
@@ -150,7 +150,7 @@ export function BusinessDashboard() {
 
   const loadStatsFor = useCallback(
     async (tf: "week" | "month" | "year", opts?: { background?: boolean }) => {
-      if (!user?.businessId) return;
+      if (!sessionValidated || !user?.businessId) return;
 
       const cached = statsCacheRef.current.get(tf);
       if (cached) {
@@ -202,21 +202,21 @@ export function BusinessDashboard() {
         }
       }
     },
-    [timeframe, user?.businessId]
+    [timeframe, user?.businessId, sessionValidated]
   );
 
   const fetchStats = useCallback(async () => {
-    if (!user?.businessId) {
+    if (!sessionValidated || !user?.businessId) {
       setStatsLoading(false);
       return;
     }
     // Only show loading if this timeframe is not cached.
     if (!statsCacheRef.current.get(timeframe)) setStatsLoading(true);
     await loadStatsFor(timeframe);
-  }, [user?.businessId, timeframe, loadStatsFor]);
+  }, [user?.businessId, sessionValidated, timeframe, loadStatsFor]);
 
   const refreshStatsQuiet = useCallback(async () => {
-    if (!user?.businessId) return;
+    if (!sessionValidated || !user?.businessId) return;
     try {
       const data = await getBusinessStats(timeframe);
       statsCacheRef.current.set(timeframe, { stats: data, pendingVerification: false });
@@ -225,7 +225,7 @@ export function BusinessDashboard() {
       logClientError("BusinessDashboard.refreshStatsQuiet", err);
       /* keep existing stats on background refresh failure */
     }
-  }, [user?.businessId, timeframe]);
+  }, [user?.businessId, timeframe, sessionValidated]);
 
   useEffect(() => {
     void fetchStats();
@@ -233,16 +233,16 @@ export function BusinessDashboard() {
 
   // Prefetch other timeframes after first load for instant toggles.
   useEffect(() => {
-    if (!user?.businessId) return;
+    if (!sessionValidated || !user?.businessId) return;
     const others = (["week", "month", "year"] as const).filter((t) => t !== timeframe);
     // Defer so it never blocks interaction.
     const id = window.setTimeout(() => {
       others.forEach((t) => void loadStatsFor(t, { background: true }));
     }, 250);
     return () => window.clearTimeout(id);
-  }, [loadStatsFor, timeframe, user?.businessId]);
+  }, [loadStatsFor, timeframe, user?.businessId, sessionValidated]);
 
-  const socketReady = useDeferSocketConnect(user?.role === "business");
+  const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshStatsQuiet);
@@ -394,6 +394,7 @@ export function BusinessDashboard() {
           className="mb-5"
         />
         <DashboardHero
+          stackHeroOnMobile
           badge={
             <>
               <Store className="h-3.5 w-3.5 text-foreground" />
@@ -478,9 +479,9 @@ export function BusinessDashboard() {
           actions={
             <>
               <Button asChild className="bg-primary hover:bg-primary/90">
-                <Link to="/dashboard/staff-management">
-                  Manage staff
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                <Link to="/dashboard/staff-management" className="gap-2">
+                  <Users className="h-4 w-4 shrink-0" />
+                  Staff
                 </Link>
               </Button>
               <Button
@@ -503,8 +504,8 @@ export function BusinessDashboard() {
                 )}
               </Button>
               <Button variant="outline" type="button" onClick={handleLogout}>
-                <LogOut className="mr-2 h-4 w-4" />
-                Log out
+                <LogOut className="mr-2 h-4 w-4 shrink-0" />
+                Logout
               </Button>
             </>
           }
@@ -525,7 +526,7 @@ export function BusinessDashboard() {
 
           <div className="flex flex-wrap items-center gap-3">
             <LiveConnectionBadge status={connectionStatus} />
-          <div className="flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+          <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
             {(["week", "month", "year"] as const).map((period) => (
               <button
                 key={period}

@@ -29,7 +29,7 @@ export function SuperAdminLayout() {
       <div className="relative z-10">
         <AdminSidebar />
         <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-        <div className="min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
+        <div className="caretip-dashboard-shell min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <Outlet />
           <Footer variant="minimal" />

@@ -11,7 +11,7 @@ export function BusinessLayout() {
   const showDemoRibbon = isWalkthroughDemoManager(user);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="caretip-dashboard-shell min-h-screen bg-background">
       {showDemoRibbon ? (
         <div
           className="border-b border-amber-500/30 bg-amber-500/10 px-3 py-2 text-center text-[11px] font-medium leading-snug text-amber-950 max-[380px]:px-2 sm:text-xs dark:text-amber-100"

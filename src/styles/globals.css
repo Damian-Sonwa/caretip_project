@@ -255,3 +255,65 @@ textarea::placeholder {
   --muted-2: 0 0% 15%;
   --muted-2-foreground: 0 0% 82%;
 }
+
+/*
+ * Dashboard-only button density (scoped to shells that wrap manager/staff/platform UIs).
+ * Marketing routes without `.caretip-dashboard-shell` are unaffected.
+ */
+@media (min-width: 769px) {
+  .caretip-dashboard-shell .dashboard-hero-actions > :is(a, button) {
+    height: auto !important;
+    min-height: 40px;
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+    line-height: 1.25;
+    width: auto;
+    max-width: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .caretip-dashboard-shell .dashboard-hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .caretip-dashboard-shell .dashboard-hero-actions > :is(a, button) {
+    display: inline-flex !important;
+    align-items: center;
+    height: auto !important;
+    min-height: 44px;
+    width: auto;
+    max-width: min(100%, 280px);
+    min-width: 0;
+    padding: 8px 14px !important;
+    font-size: 14px !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 0 1 auto;
+  }
+
+  .caretip-dashboard-shell .dashboard-inline-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .caretip-dashboard-shell .dashboard-inline-actions > button {
+    flex: 0 1 auto !important;
+    width: auto;
+    min-width: 0;
+    min-height: 44px;
+    height: auto !important;
+    padding: 8px 14px !important;
+    font-size: 0.8125rem !important;
+    line-height: 1.2;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

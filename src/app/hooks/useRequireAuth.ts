@@ -8,8 +8,17 @@ import { useAuth } from "./useAuth";
  * (route guards already render {@link AppLoader}).
  */
 export function useRequireAuth() {
-  const { user, authHydrated, isAuthLoading, isBusiness, isEmployee, logout, updateUser, exitImpersonation } =
-    useAuth();
+  const {
+    user,
+    authHydrated,
+    sessionValidated,
+    isAuthLoading,
+    isBusiness,
+    isEmployee,
+    logout,
+    updateUser,
+    exitImpersonation,
+  } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,6 +31,7 @@ export function useRequireAuth() {
   return {
     user,
     authHydrated,
+    sessionValidated,
     isAuthLoading,
     isBusiness,
     isEmployee,

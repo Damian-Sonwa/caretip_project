@@ -92,8 +92,10 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
  * Renders inside SuperAdminLayout only (no business dashboard UI).
  */
 export function AdminDashboard() {
-  const { user } = useAuth();
-  const { socket, connected, connectionStatus } = useSocket(user?.role === "platform_admin");
+  const { user, authHydrated, sessionValidated } = useAuth();
+  const { socket, connected, connectionStatus } = useSocket(
+    Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated),
+  );
 
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
@@ -115,7 +117,7 @@ export function AdminDashboard() {
   }, [businesses, businessSearchQuery]);
 
   useEffect(() => {
-    if (!user || user.role !== "platform_admin") return;
+    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     let cancelled = false;
     void fetchPlatformHealth()
       .then((h) => {
@@ -128,10 +130,10 @@ export function AdminDashboard() {
     return () => {
       cancelled = true;
     };
-  }, [user]);
+  }, [user, authHydrated, sessionValidated]);
 
   const loadDashboardData = useCallback(async () => {
-    if (!user || user.role !== "platform_admin") return;
+    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     try {
       setServiceIssue(null);
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
@@ -157,7 +159,7 @@ export function AdminDashboard() {
     } finally {
       setInitialDashLoading(false);
     }
-  }, [user]);
+  }, [user, authHydrated, sessionValidated]);
 
   useEffect(() => {
     void loadDashboardData();

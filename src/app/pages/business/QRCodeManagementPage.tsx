@@ -69,7 +69,7 @@ import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 export function QRCodeManagementPage() {
-  const { user, authHydrated, isBusiness, updateUser } = useRequireAuth();
+  const { user, authHydrated, sessionValidated, isBusiness, updateUser } = useRequireAuth();
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
   >(null);
@@ -91,7 +91,7 @@ export function QRCodeManagementPage() {
   const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (!user?.businessId || user.role !== "business") return;
     let cancelled = false;
     void fetchBusinessProfile()
@@ -122,10 +122,10 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, user?.businessId, user?.role, user?.status, updateUser]);
+  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.status, updateUser]);
 
   const handleRegenerateBusinessQr = async () => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (qrLocked) return;
     if (!user?.businessId) return;
     setRegeneratingId("storefront");
@@ -142,7 +142,7 @@ export function QRCodeManagementPage() {
   };
 
   const loadEmployees = useCallback(async () => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (!user?.businessId) {
       setEmployees([]);
       setLoading(false);
@@ -159,14 +159,14 @@ export function QRCodeManagementPage() {
     } finally {
       setLoading(false);
     }
-  }, [authHydrated, user?.businessId]);
+  }, [authHydrated, sessionValidated, user?.businessId]);
 
   useEffect(() => {
     loadEmployees();
   }, [loadEmployees]);
 
   useEffect(() => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (!user?.businessId || !isBusiness) return;
     let cancelled = false;
     void (async () => {
@@ -187,7 +187,7 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, user?.businessId, isBusiness]);
+  }, [authHydrated, sessionValidated, user?.businessId, isBusiness]);
 
   useEffect(() => {
     let cancelled = false;
@@ -294,7 +294,7 @@ export function QRCodeManagementPage() {
   };
 
   const handleGenerateNew = async (employee: EmployeeItem) => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (!isBusiness) return;
     setRegeneratingId(employee.id);
     try {
@@ -420,7 +420,7 @@ export function QRCodeManagementPage() {
   };
 
   const handleGenerateAllPdf = async () => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     const bs = businessSlug?.trim();
     const staff = bs
       ? employees
@@ -795,6 +795,7 @@ export function QRCodeManagementPage() {
         </div>
 
         <DashboardHero
+          stackHeroOnMobile
           hideImage
           badge={
             <>
@@ -864,8 +865,12 @@ export function QRCodeManagementPage() {
               onClick={handleGenerateAllPdf}
               disabled={qrLocked || bulkPdfLoading || employees.length === 0}
             >
-              {bulkPdfLoading ? <LoadingSpinner size="sm" className="mr-2" /> : <FileDown className="mr-2 h-4 w-4" />}
-              Generate all PDF
+              {bulkPdfLoading ? (
+                <LoadingSpinner size="sm" className="mr-2 shrink-0" />
+              ) : (
+                <FileDown className="mr-2 h-4 w-4 shrink-0" />
+              )}
+              All PDFs
             </Button>
           }
         />

@@ -30,7 +30,7 @@ export function BusinessHeroImagePreview({
           className="absolute inset-0 h-full w-full object-contain"
           loading="eager"
           decoding="async"
-          fetchPriority="high"
+          fetchpriority="high"
         />
       </div>
     </div>

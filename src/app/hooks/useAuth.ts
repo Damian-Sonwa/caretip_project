@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import {
   registerAPI,
   loginAPI,
@@ -12,6 +13,10 @@ import {
 import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
+import {
+  fallbackMessageForHttpStatus,
+  SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
+} from "../lib/errorMessages";
 
 export type { AuthSession } from "../lib/authSession";
 
@@ -157,6 +162,11 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
   /** False until the first session resolution pass finishes (no token path or refresh attempt). Route guards must wait on this, not on `user === null` alone. */
   const [authHydrated, setAuthHydrated] = useState(false);
+  /**
+   * True after bootstrap when there was no access token, or after `/api/auth/refresh` succeeded.
+   * False when a stored token was present but refresh ultimately failed — dashboards must not call protected APIs until true.
+   */
+  const [sessionValidated, setSessionValidated] = useState(false);
   /** Bumped after successful credential-bearing mutations so an in-flight initial `refreshSession` cannot overwrite a newer session. */
   const sessionEpochRef = useRef(0);
 
@@ -164,6 +174,7 @@ export function useAuth() {
     const onStorageSync = () => {
       setUser(loadUserFromStorage());
       setAuthHydrated(true);
+      setSessionValidated(true);
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
@@ -173,31 +184,49 @@ export function useAuth() {
     let cancelled = false;
     const run = async () => {
       const epochAtStart = sessionEpochRef.current;
+      const hadToken =
+        typeof localStorage !== "undefined" && Boolean(localStorage.getItem("caretip_token")?.trim());
+
       try {
-        if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")) {
-          const data = await refreshSessionAPI();
-          if (cancelled || sessionEpochRef.current !== epochAtStart) return;
-          const u = persistAuthResponse(data);
-          if (!cancelled) setUser(u);
-        }
-      } catch (err) {
-        // If the backend is temporarily unavailable (503), don't spam logs or disrupt the session.
-        const msg = err instanceof Error ? err.message : "";
-        const lower = msg.toLowerCase();
-        if (lower.includes("invalid or expired token") || lower.includes("authentication required")) {
-          if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+        if (!hadToken) {
           try {
-            localStorage.removeItem("caretip_user");
-            localStorage.removeItem("caretip_token");
-            notifyAuthStorageSync();
+            if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_user")) {
+              localStorage.removeItem("caretip_user");
+              if (!cancelled) setUser(null);
+            }
           } catch {
             // ignore
           }
-          if (!cancelled) setUser(null);
+          if (!cancelled) setSessionValidated(true);
+          return;
         }
-        if (!msg.toLowerCase().includes("service temporarily unavailable")) {
+
+        const data = await refreshSessionAPI();
+        if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+        const u = persistAuthResponse(data);
+        if (!cancelled) setUser(u);
+        if (!cancelled) setSessionValidated(true);
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "";
+        if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+
+        if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
+          toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
+        } else if (msg === fallbackMessageForHttpStatus(500)) {
+          toast.error(msg, { id: "caretip-auth-refresh-500" });
+        } else {
           logClientError("useAuth.initialRefresh", err);
         }
+
+        try {
+          localStorage.removeItem("caretip_user");
+          localStorage.removeItem("caretip_token");
+          notifyAuthStorageSync();
+        } catch {
+          // ignore
+        }
+        if (!cancelled) setUser(null);
+        if (!cancelled) setSessionValidated(false);
       } finally {
         if (!cancelled) setAuthHydrated(true);
       }
@@ -228,6 +257,7 @@ export function useAuth() {
     sessionEpochRef.current += 1;
     setUser(u);
     setAuthHydrated(true);
+    setSessionValidated(true);
     return u;
   }, []);
 
@@ -237,6 +267,7 @@ export function useAuth() {
     sessionEpochRef.current += 1;
     setUser(u);
     setAuthHydrated(true);
+    setSessionValidated(true);
     return u;
   }, []);
 
@@ -268,6 +299,7 @@ export function useAuth() {
     sessionEpochRef.current += 1;
     setUser(u);
     setAuthHydrated(true);
+    setSessionValidated(true);
     return u;
   }, []);
 
@@ -279,6 +311,7 @@ export function useAuth() {
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
     setUser(null);
+    setSessionValidated(true);
     notifyAuthStorageSync();
     authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
   }, []);
@@ -303,6 +336,7 @@ export function useAuth() {
     localStorage.setItem("caretip_user", JSON.stringify(restored));
     sessionEpochRef.current += 1;
     setUser(restored);
+    setSessionValidated(true);
     notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
@@ -332,6 +366,7 @@ export function useAuth() {
     sessionEpochRef.current += 1;
     setUser(next);
     setAuthHydrated(true);
+    setSessionValidated(true);
     notifyAuthStorageSync();
   }, []);
 
@@ -340,9 +375,23 @@ export function useAuth() {
       const data = await refreshSessionAPI();
       const u = persistAuthResponse(data);
       setUser(u);
+      setSessionValidated(true);
       return u;
     } catch (err) {
       logClientError("useAuth.refreshSession", err);
+      const msg = err instanceof Error ? err.message : "";
+      if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
+        toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
+      }
+      try {
+        localStorage.removeItem("caretip_user");
+        localStorage.removeItem("caretip_token");
+        notifyAuthStorageSync();
+      } catch {
+        // ignore
+      }
+      setUser(null);
+      setSessionValidated(false);
       return null;
     }
   }, []);
@@ -366,6 +415,8 @@ export function useAuth() {
     /** True while the first session resolution pass is in flight; route guards must wait and must not redirect. */
     isAuthLoading: !authHydrated,
     authHydrated,
+    /** True when bootstrap refresh succeeded or there was no token; false when stored session failed validation. */
+    sessionValidated,
     authState,
     isBusiness,
     isEmployee,

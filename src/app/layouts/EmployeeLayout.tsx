@@ -5,7 +5,7 @@ import { Outlet } from "react-router";
  */
 export function EmployeeLayout() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="caretip-dashboard-shell min-h-screen bg-background">
       <Outlet />
     </div>
   );

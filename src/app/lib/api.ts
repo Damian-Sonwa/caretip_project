@@ -4,13 +4,125 @@
  * All errors are translated to user-friendly messages before being thrown.
  */
 
-import { toUserFriendlyMessage, fallbackMessageForHttpStatus } from "./errorMessages";
+import {
+  toUserFriendlyMessage,
+  fallbackMessageForHttpStatus,
+  SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
+} from "./errorMessages";
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { authDebug } from "./authDebugLog";
 
-let refreshInFlight: Promise<{ token: string | null; shouldClearAccessToken: boolean }> | null = null;
+const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
+
+function isAuthRefreshRequestUrl(url: string): boolean {
+  return requestUrlPathname(url) === AUTH_REFRESH_PATHNAME;
+}
+
+type RefreshSessionResult =
+  | { ok: true; data: AuthResponse }
+  | { ok: false; status: number; shouldClearSession: boolean };
+
+/** Single-flight refresh: shared by `refreshSessionAPI` and 401 recovery (`refreshAccessToken`). */
+let refreshSingleton: Promise<RefreshSessionResult> | null = null;
+
+function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
+  if (!data || typeof data !== "object") return null;
+  const d = data as Record<string, unknown>;
+  if (typeof d.token !== "string" || !d.token.trim()) return null;
+  const u = d.user;
+  if (!u || typeof u !== "object") return null;
+  const ur = u as Record<string, unknown>;
+  if (typeof ur.id !== "string" || typeof ur.email !== "string" || typeof ur.role !== "string") return null;
+  return data as AuthResponse;
+}
+
+/**
+ * POST /api/auth/refresh with bounded retries (initial attempt + 2 retries).
+ * Backoff: 1s before 2nd attempt, 3s before 3rd. Stops after auth rejection (401/403) immediately.
+ * After final failure: caller should clear session (handled in {@link ensureRefreshedSession}).
+ */
+async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) {
+      const delayMs = attempt === 1 ? 1000 : 3000;
+      await new Promise((r) => setTimeout(r, delayMs));
+    }
+
+    let res: Response;
+    try {
+      const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      const existing = getToken();
+      if (existing?.trim()) {
+        refreshHeaders.Authorization = `Bearer ${existing.trim()}`;
+      }
+      res = await fetch(apiPath(AUTH_REFRESH_PATHNAME), {
+        method: "POST",
+        headers: refreshHeaders,
+        credentials: "include",
+      });
+    } catch (err) {
+      logClientError("api.runRefreshAuthWithRetries.fetch", err, { attempt });
+      if (attempt === 2) {
+        return { ok: false, shouldClearSession: true, status: 0 };
+      }
+      continue;
+    }
+
+    if (res.ok) {
+      const raw = await res.json().catch(() => null);
+      const parsed = parseAuthRefreshPayload(raw);
+      if (parsed) {
+        setToken(parsed.token);
+        return { ok: true, data: parsed };
+      }
+      return { ok: false, shouldClearSession: true, status: res.status };
+    }
+
+    if (res.status === 401 || res.status === 403) {
+      return { ok: false, shouldClearSession: true, status: res.status };
+    }
+
+    const transient =
+      res.status === 503 ||
+      res.status === 502 ||
+      res.status === 504 ||
+      res.status === 429 ||
+      res.status >= 500;
+
+    if (transient) {
+      if (attempt < 2) continue;
+      return { ok: false, shouldClearSession: true, status: res.status };
+    }
+
+    return { ok: false, shouldClearSession: true, status: res.status };
+  }
+
+  return { ok: false, shouldClearSession: true, status: 0 };
+}
+
+async function ensureRefreshedSession(): Promise<RefreshSessionResult> {
+  if (refreshSingleton) return refreshSingleton;
+  refreshSingleton = (async (): Promise<RefreshSessionResult> => {
+    try {
+      const out = await runRefreshAuthWithRetries();
+      if (!out.ok && out.shouldClearSession) {
+        clearAuthStorage();
+      }
+      return out;
+    } finally {
+      refreshSingleton = null;
+    }
+  })();
+  return refreshSingleton;
+}
+
+async function refreshAccessToken(): Promise<{ token: string | null; shouldClearAccessToken: boolean }> {
+  const r = await ensureRefreshedSession();
+  if (r.ok) return { token: r.data.token, shouldClearAccessToken: false };
+  return { token: null, shouldClearAccessToken: r.shouldClearSession };
+}
 
 /** Absolute path (starts with /) or full URL; honors Vite proxy when base is empty. */
 function apiPath(path: string): string {
@@ -153,44 +265,6 @@ function apiConfigHintForFailedFetch(url: string): string {
   return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com. Then trigger a new deploy.";
 }
 
-async function refreshAccessToken(): Promise<{ token: string | null; shouldClearAccessToken: boolean }> {
-  if (!refreshInFlight) {
-    refreshInFlight = (async () => {
-      try {
-        const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
-        const existing = getToken();
-        if (existing?.trim()) {
-          refreshHeaders.Authorization = `Bearer ${existing.trim()}`;
-        }
-        const res = await fetch(apiPath("/api/auth/refresh"), {
-          method: "POST",
-          headers: refreshHeaders,
-          credentials: "include",
-        });
-        if (!res.ok) {
-          // Only clear local access token when the refresh token is invalid/expired.
-          // For transient backend/network errors (5xx), keep the token to avoid cascading logouts.
-          const shouldClearAccessToken = res.status === 401 || res.status === 403;
-          return { token: null, shouldClearAccessToken };
-        }
-        const data = (await res.json().catch(() => null)) as unknown;
-        const token =
-          data && typeof data === "object" && typeof (data as any).token === "string"
-            ? String((data as any).token)
-            : null;
-        if (token) setToken(token);
-        return { token, shouldClearAccessToken: false };
-      } catch (err) {
-        logClientError("api.refreshAccessToken", err);
-        return { token: null, shouldClearAccessToken: false };
-      } finally {
-        refreshInFlight = null;
-      }
-    })();
-  }
-  return refreshInFlight;
-}
-
 type CaretipRequestInit = RequestInit & { __caretipRetried?: boolean; __caretipDelayedRetried?: boolean };
 
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
@@ -208,6 +282,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
   if (res.status === 401) {
     const isCaretipApi = requestUsesCaretipProtectedApi(url);
+    const isAuthRefresh = isAuthRefreshRequestUrl(url);
     const tokenAtStart = getToken();
     const tokenIsSet = typeof tokenAtStart === "string" && tokenAtStart.trim().length > 0;
     const canAttempt = tokenIsSet && isCaretipApi;
@@ -219,9 +294,13 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
       pathname: requestUrlPathname(url),
       isCaretipApi,
       hasToken: tokenIsSet,
+      isAuthRefresh,
     });
 
-    if (canAttempt && !alreadyRetried) {
+    if (isAuthRefresh && isCaretipApi) {
+      refreshDeemedInvalid = true;
+      clearAuthStorage();
+    } else if (canAttempt && !alreadyRetried) {
       const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
       if (shouldClearAccessToken) refreshDeemedInvalid = true;
       if (nextToken) {
@@ -234,7 +313,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
     // If we're still unauthorized, do a single short-delay retry before clearing auth.
     // This avoids \"logout on first login\" caused by timing/race conditions around initial auth state.
-    if (canAttempt && res.status === 401) {
+    if (!isAuthRefresh && canAttempt && res.status === 401) {
       const alreadyDelayedRetry = initFlags?.__caretipDelayedRetried === true;
       if (!alreadyDelayedRetry) {
         await new Promise((r) => setTimeout(r, 250));
@@ -479,11 +558,24 @@ export async function oauthAPI(payload: {
 }
 
 export async function refreshSessionAPI(): Promise<AuthResponse> {
-  return apiRequest<AuthResponse>(apiPath("/api/auth/refresh"), {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    credentials: "include",
-  });
+  const r = await ensureRefreshedSession();
+  if (r.ok) return r.data;
+  if (r.status === 503) {
+    throw new Error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE);
+  }
+  if (r.status === 500) {
+    const m = fallbackMessageForHttpStatus(500);
+    logClientError("api.refreshSessionAPI", new Error(`HTTP ${r.status}`), { status: r.status });
+    throw new Error(m ?? "Our servers hit a problem. Please try again in a few minutes.");
+  }
+  if (r.status === 401 || r.status === 403) {
+    throw new Error(fallbackMessageForHttpStatus(401) ?? "Your session has expired. Please sign in again.");
+  }
+  if (r.status === 0) {
+    throw new Error(fallbackMessageForHttpStatus(503) ?? SERVICE_UNAVAILABLE_CLIENT_MESSAGE);
+  }
+  const fallback = fallbackMessageForHttpStatus(r.status);
+  throw new Error(fallback ?? "Your session has expired. Please sign in again.");
 }
 
 // Business
