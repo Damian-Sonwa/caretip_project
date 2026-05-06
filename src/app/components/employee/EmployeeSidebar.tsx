@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, QrCode } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -55,13 +55,6 @@ export function EmployeeSidebar() {
       </nav>
 
       <div className="px-4 pb-4">
-        <Link
-          to="/employee/dashboard?qr=1"
-          className="mb-2 flex w-full items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5 text-foreground transition-colors hover:bg-muted/80"
-        >
-          <QrCode className="h-5 w-5 shrink-0 text-primary" />
-          <span className="text-sm font-semibold">My QR</span>
-        </Link>
         <button
           type="button"
           onClick={() => {

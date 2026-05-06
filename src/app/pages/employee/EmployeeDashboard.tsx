@@ -392,7 +392,10 @@ export function EmployeeDashboard() {
           image={
             <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
-                <div className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl bg-black shadow-sm ring-1 ring-black/25 lg:max-w-[420px]">
+                <div
+                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
+                  style={{ maxHeight: "min(55vh, 480px)" }}
+                >
                   <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
                 </div>
               </div>
@@ -400,11 +403,23 @@ export function EmployeeDashboard() {
           }
           imageOverlay={false}
           actions={
-            <Button variant="outline" asChild>
-              <Link to="/employee/settings" className="gap-2">
-                <Settings className="h-4 w-4 shrink-0" />
-                Settings
-              </Link>
+            <Button
+              type="button"
+              onClick={() => void handleQrQuickAction()}
+              disabled={slugLoading || generatingSlug}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {generatingSlug ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating…
+                </>
+              ) : (
+                <>
+                  <QrCode className="mr-2 h-4 w-4 shrink-0" />
+                  My QR
+                </>
+              )}
             </Button>
           }
         />
