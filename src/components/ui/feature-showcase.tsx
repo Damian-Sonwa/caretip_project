@@ -264,7 +264,7 @@ export function FeatureShowcase({
           className={cn(
             "relative md:col-span-5",
             cinematic &&
-              "order-1 max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:pt-6",
+              "order-1 max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:pt-6 md:-mt-6 lg:-mt-8",
           )}
         >
             <Badge
