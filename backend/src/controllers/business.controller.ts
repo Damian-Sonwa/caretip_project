@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readFile, unlink } from "node:fs/promises";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import {
@@ -6,6 +7,10 @@ import {
   clientSafeMessage,
   CLIENT_FALLBACK,
 } from "../utils/httpErrors.js";
+import {
+  isCloudinaryConfiguredForUpload,
+  tryUploadBusinessLogoToCloudinary,
+} from "../services/upload.service.js";
 
 export async function generateInvite(req: Request, res: Response) {
   try {
@@ -132,8 +137,28 @@ export async function uploadMyLogo(req: Request, res: Response) {
       return res.status(400).json({ message: "File is required (multipart field name: file)" });
     }
     const publicPath = `/uploads/businesses/${b.id}/${file.filename}`;
-    await prisma.business.update({ where: { id: b.id }, data: { logoPath: publicPath } });
-    return res.json({ success: true, path: publicPath });
+    let logoPathToStore = publicPath;
+    if (isCloudinaryConfiguredForUpload()) {
+      try {
+        const buf = await readFile(file.path);
+        const cloudUrl = await tryUploadBusinessLogoToCloudinary(buf);
+        if (cloudUrl) {
+          logoPathToStore = cloudUrl;
+          await unlink(file.path).catch(() => {
+            /* best-effort remove temp Multer file */
+          });
+        }
+      } catch (cloudErr) {
+        logServerError("business.uploadMyLogo.cloudinary", cloudErr);
+        throw cloudErr;
+      }
+    }
+
+    await prisma.business.update({
+      where: { id: b.id },
+      data: { logoPath: logoPathToStore },
+    });
+    return res.json({ success: true, path: logoPathToStore });
   } catch (err) {
     logServerError("business.uploadMyLogo", err);
     return res.status(400).json({

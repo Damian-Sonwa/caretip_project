@@ -28,6 +28,11 @@ function cloudinaryTripleConfigured(): boolean {
   return Boolean(cloudName && apiKey && apiSecret);
 }
 
+/** Used by controllers to decide whether to mirror disk uploads to Cloudinary (recommended on Render). */
+export function isCloudinaryConfiguredForUpload(): boolean {
+  return cloudinaryUrlConfigured() || cloudinaryTripleConfigured();
+}
+
 function configureCloudinaryForUpload(): void {
   if (cloudinaryUrlConfigured()) {
     // Reload from CLOUDINARY_URL (standard on Render, Railway, Heroku, etc.)
@@ -45,7 +50,7 @@ function configureCloudinaryForUpload(): void {
  * otherwise saves under /uploads/avatars (needs a persistent disk + correct PUBLIC_API_BASE_URL in production).
  */
 export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string): Promise<string> {
-  const useCloudinary = cloudinaryUrlConfigured() || cloudinaryTripleConfigured();
+  const useCloudinary = isCloudinaryConfiguredForUpload();
 
   if (useCloudinary) {
     configureCloudinaryForUpload();
@@ -89,4 +94,27 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
   return `${base}/uploads/avatars/${filename}`;
+}
+
+/**
+ * When Cloudinary env is set (recommended on Render), uploads a business logo and returns `https://...`.
+ * Otherwise returns `null` so callers can keep the on-disk Multer path.
+ */
+export async function tryUploadBusinessLogoToCloudinary(buffer: Buffer): Promise<string | null> {
+  if (!isCloudinaryConfiguredForUpload()) {
+    return null;
+  }
+  configureCloudinaryForUpload();
+  const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "caretip/business-logos", resource_type: "image" },
+      (err, res) => {
+        if (err) reject(err);
+        else if (res?.secure_url) resolve({ secure_url: res.secure_url });
+        else reject(new Error("Logo upload failed"));
+      },
+    );
+    stream.end(buffer);
+  });
+  return result.secure_url;
 }
