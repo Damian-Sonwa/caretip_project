@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { forwardRef, useImperativeHandle, useState } from "react";
 import { CheckCircle2, Pencil, Plus, Trash2, Target, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -48,12 +48,22 @@ function statusClass(s: EmployeeGoalProgress["status"]): string {
   return "text-amber-700";
 }
 
+export type EmployeeGoalCardHandle = {
+  createNewGoal: () => void;
+  editGoal: () => void;
+};
+
 type Props = {
   goal: EmployeeGoalProgress | null;
   onUpdated: () => void;
+  /** When false, hides the inline "New goal" action (use page-level button instead). */
+  showInlineNewGoalAction?: boolean;
 };
 
-export function EmployeeGoalCard({ goal, onUpdated }: Props) {
+export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(function EmployeeGoalCard(
+  { goal, onUpdated, showInlineNewGoalAction = true }: Props,
+  ref,
+) {
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -81,6 +91,16 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
     setStartDate(new Date().toISOString().slice(0, 10));
     setOpen(true);
   };
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      createNewGoal: openCreateNew,
+      editGoal: openEdit,
+    }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable enough for imperative handle
+    [goal],
+  );
 
   const handleSave = async () => {
     const n = parseFloat(amount);
@@ -199,10 +219,12 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
                       <Pencil className="mr-1.5 h-3.5 w-3.5" />
                       Edit
                     </Button>
-                    <Button type="button" size="sm" variant="outline" onClick={openCreateNew}>
-                      <Plus className="mr-1.5 h-3.5 w-3.5" />
-                      New goal
-                    </Button>
+                    {showInlineNewGoalAction ? (
+                      <Button type="button" size="sm" variant="outline" onClick={openCreateNew}>
+                        <Plus className="mr-1.5 h-3.5 w-3.5" />
+                        New goal
+                      </Button>
+                    ) : null}
                     {goal.status !== "achieved" ? (
                       <Button
                         type="button"
@@ -308,4 +330,4 @@ export function EmployeeGoalCard({ goal, onUpdated }: Props) {
       </Dialog>
     </>
   );
-}
+});
