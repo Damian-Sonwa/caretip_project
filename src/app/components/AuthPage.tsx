@@ -75,7 +75,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, logout, user, authHydrated } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -341,10 +341,29 @@ export function AuthPage() {
           role={role}
           onRoleChange={toggleRole}
           formBusy={isSubmitting}
-          sessionActive={Boolean(user)}
+          sessionActive={Boolean(user) && sessionValidated}
           className="flex-1"
         >
-          {user ? (
+          {user && !sessionValidated ? (
+            <div
+              role="status"
+              aria-live="polite"
+              className="mx-auto flex w-full max-w-[20rem] flex-col items-center rounded-2xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50 sm:p-7"
+            >
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                Checking your session...
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                We&apos;re confirming your login status before continuing.
+              </p>
+              <div className="mt-8 w-full">
+                <div className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold text-muted-foreground">
+                  Please wait
+                </div>
+              </div>
+            </div>
+          ) : null}
+          {user && sessionValidated ? (
             <div
               role="status"
               aria-live="polite"

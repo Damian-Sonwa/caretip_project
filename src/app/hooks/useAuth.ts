@@ -10,7 +10,7 @@ import {
   patchMyOnboardingStatus,
   type AuthResponse,
 } from "../lib/api";
-import { deriveAuthSession, type AuthSession } from "../lib/authSession";
+import { deriveAuthSession, isPublicAuthenticationPath, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
 import {
@@ -21,10 +21,53 @@ import {
 export type { AuthSession } from "../lib/authSession";
 
 const AUTH_STORAGE_SYNC_EVENT = "caretip-auth-storage-sync";
+const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
+const USER_STORAGE_KEY = "caretip_user";
+
+function readStoredAccessToken(): string | null {
+  try {
+    const t = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+    return t?.trim() ? t.trim() : null;
+  } catch {
+    return null;
+  }
+}
+
+function decodeJwtPayload(token: string): unknown | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length < 2) return null;
+    const b64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64.padEnd(Math.ceil(b64.length / 4) * 4, "=");
+    const json = atob(padded);
+    return JSON.parse(json) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function isJwtExpired(token: string): boolean {
+  const payload = decodeJwtPayload(token);
+  if (!payload || typeof payload !== "object") return false;
+  const exp = (payload as { exp?: unknown }).exp;
+  if (typeof exp !== "number") return false;
+  return Date.now() >= exp * 1000;
+}
+
+function clearStoredSession() {
+  try {
+    localStorage.removeItem(USER_STORAGE_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    sessionStorage.removeItem("caretip_admin_token_backup");
+    sessionStorage.removeItem("caretip_admin_user_backup");
+  } catch {
+    // ignore
+  }
+}
 
 function loadUserFromStorage(): User | null {
   try {
-    const saved = localStorage.getItem("caretip_user");
+    const saved = localStorage.getItem(USER_STORAGE_KEY);
     if (!saved) return null;
     return JSON.parse(saved) as User;
   } catch (err) {
@@ -40,9 +83,9 @@ function notifyAuthStorageSync() {
 
 /** Persist access token + normalized user to localStorage and sync all `useAuth()` instances. */
 function persistAuthResponse(data: AuthResponse): User {
-  localStorage.setItem("caretip_token", data.token);
+  localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
   const u = parseUser(data.user);
-  localStorage.setItem("caretip_user", JSON.stringify(u));
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u));
   notifyAuthStorageSync();
   authDebug("auth_session_updated", { ...deriveAuthSession(u), source: "persist" });
   return u;
@@ -179,6 +222,19 @@ export function useAuth() {
     const onStorageSync = () => {
       setUser(loadUserFromStorage());
       setAuthHydrated(true);
+      const token = readStoredAccessToken();
+      // Treat storage sync as "validated" only if the token exists and isn't expired.
+      // Otherwise, force the app into a logged-out, resolved state.
+      if (!token) {
+        setSessionValidated(true);
+        return;
+      }
+      if (isJwtExpired(token)) {
+        clearStoredSession();
+        setUser(null);
+        setSessionValidated(true);
+        return;
+      }
       setSessionValidated(true);
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
@@ -189,20 +245,32 @@ export function useAuth() {
     let cancelled = false;
     const run = async () => {
       const epochAtStart = sessionEpochRef.current;
-      const hadToken =
-        typeof localStorage !== "undefined" && Boolean(localStorage.getItem("caretip_token")?.trim());
+      const token = readStoredAccessToken();
+      const hadToken = Boolean(token);
 
       try {
         if (!hadToken) {
           try {
-            if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_user")) {
-              localStorage.removeItem("caretip_user");
+            if (typeof localStorage !== "undefined" && localStorage.getItem(USER_STORAGE_KEY)) {
+              localStorage.removeItem(USER_STORAGE_KEY);
               if (!cancelled) setUser(null);
             }
           } catch {
             // ignore
           }
           if (!cancelled) setSessionValidated(true);
+          return;
+        }
+
+        // Never trust persisted state alone: if the JWT is already expired, clear immediately.
+        if (token && isJwtExpired(token)) {
+          clearStoredSession();
+          notifyAuthStorageSync();
+          if (!cancelled) setUser(null);
+          if (!cancelled) setSessionValidated(true);
+          if (!cancelled && !isPublicAuthenticationPath(window.location.pathname)) {
+            navigate("/login", { replace: true });
+          }
           return;
         }
 
@@ -223,15 +291,14 @@ export function useAuth() {
           logClientError("useAuth.initialRefresh", err);
         }
 
-        try {
-          localStorage.removeItem("caretip_user");
-          localStorage.removeItem("caretip_token");
-          notifyAuthStorageSync();
-        } catch {
-          // ignore
-        }
+        // If refresh fails, the session is not valid. Clear everything and move to logged-out.
+        clearStoredSession();
+        notifyAuthStorageSync();
         if (!cancelled) setUser(null);
-        if (!cancelled) setSessionValidated(false);
+        if (!cancelled) setSessionValidated(true);
+        if (!cancelled && !isPublicAuthenticationPath(window.location.pathname)) {
+          navigate("/login", { replace: true });
+        }
       } finally {
         if (!cancelled) setAuthHydrated(true);
       }
@@ -240,15 +307,14 @@ export function useAuth() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     if (!authHydrated) return;
     if (user) {
-      localStorage.setItem("caretip_user", JSON.stringify(user));
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } else {
-      localStorage.removeItem("caretip_user");
-      localStorage.removeItem("caretip_token");
+      clearStoredSession();
     }
   }, [user, authHydrated]);
 
@@ -311,10 +377,7 @@ export function useAuth() {
   const logout = useCallback(() => {
     void logoutAPI();
     sessionEpochRef.current += 1;
-    localStorage.removeItem("caretip_user");
-    localStorage.removeItem("caretip_token");
-    sessionStorage.removeItem("caretip_admin_token_backup");
-    sessionStorage.removeItem("caretip_admin_user_backup");
+    clearStoredSession();
     setUser(null);
     setSessionValidated(true);
     notifyAuthStorageSync();
@@ -336,9 +399,9 @@ export function useAuth() {
     const backupToken = sessionStorage.getItem("caretip_admin_token_backup");
     const backupUser = sessionStorage.getItem("caretip_admin_user_backup");
     if (!backupToken || !backupUser) return;
-    localStorage.setItem("caretip_token", backupToken);
+    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, backupToken);
     const restored = JSON.parse(backupUser) as User;
-    localStorage.setItem("caretip_user", JSON.stringify(restored));
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
     sessionEpochRef.current += 1;
     setUser(restored);
     setSessionValidated(true);
