@@ -318,7 +318,7 @@ export function FeatureShowcase({
               </div>
             )}
 
-            <div className={cn("mt-10 max-w-xl", cinematic && "mt-auto")}>
+            <div className={cn("mt-8 max-w-xl sm:mt-10")}>
               {!cinematic ? (
                 <Accordion type="single" collapsible className="w-full">
                   {steps.map((step) => (
@@ -330,7 +330,7 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-8 flex w-full flex-wrap gap-3 max-md:justify-start">
+              <div className="mt-6 flex w-full flex-wrap gap-3 max-md:justify-start sm:mt-7">
                 <Button
                   asChild
                   size="lg"
