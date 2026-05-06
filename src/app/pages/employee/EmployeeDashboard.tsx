@@ -47,6 +47,8 @@ const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(-
 
 const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
 const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
+/** Same max height cap as business hero media for consistent dashboard rhythm. */
+const EMPLOYEE_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 function StatCard(props: {
   title: string;
@@ -393,7 +395,7 @@ export function EmployeeDashboard() {
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
                 <div
                   className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
-                  style={{ maxHeight: "min(55vh, 480px)" }}
+                  style={EMPLOYEE_HERO_MEDIA_MAX_STYLE}
                 >
                   <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
                 </div>
