@@ -58,7 +58,7 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
       transition={{ duration: 0.5, delay }}
       className="h-full"
     >
-      <Card className="relative h-full overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      <Card className="relative h-full overflow-visible border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
         {beam && <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />}
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between gap-3">
@@ -78,7 +78,7 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
           <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {title}
           </CardDescription>
-          <CardTitle className="text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
+          <CardTitle className="break-words text-balance text-2xl font-bold tabular-nums text-foreground sm:text-3xl leading-snug">
             {value}
           </CardTitle>
           {change && <p className="text-sm leading-snug text-muted-foreground">{change}</p>}
