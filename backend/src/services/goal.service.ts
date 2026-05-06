@@ -141,6 +141,8 @@ export async function getGoalProgressForEmployee(
   return {
     id: row.id,
     employeeId,
+    name: "Tip goal",
+    lifecycleStatus: "active",
     goalAmount,
     goalPeriod: row.goalPeriod,
     startDate: row.startDate.toISOString().slice(0, 10),

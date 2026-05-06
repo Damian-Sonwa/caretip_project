@@ -42,6 +42,7 @@ import { CheckEmailPage } from './pages/CheckEmailPage';
 import { ProfileSettingsPage } from './components/ProfileSettingsPage';
 import { TransactionsPage } from './components/TransactionsPage';
 import { NotificationsPage } from './components/NotificationsPage';
+import { TipsActivityPage } from './pages/shared/TipsActivityPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PlatformAdminRoute } from './components/PlatformAdminRoute';
 import { PlatformAdminLoginPage } from './pages/platform/PlatformAdminLoginPage';
@@ -289,7 +290,7 @@ const routes: RouteObject[] = [
       { path: 'qr-code-management', Component: QRCodeManagementPage },
       { path: 'locations', Component: LocationsPage },
       { path: 'tables', Component: TablesPage },
-      { path: 'transactions', Component: TransactionsPage },
+      { path: 'transactions', Component: TipsActivityPage },
       { path: 'profile-settings', Component: ProfileSettingsPage },
       { path: 'support', element: <Navigate to="/dashboard" replace /> },
       { path: 'notifications', Component: NotificationsPage },
@@ -519,6 +520,7 @@ const routes: RouteObject[] = [
     children: [
       { index: true, element: <Navigate to="/employee/dashboard" replace /> },
       { path: 'dashboard', Component: EmployeeDashboard },
+      { path: 'transactions', Component: TipsActivityPage },
       { path: 'notifications', Component: EmployeeNotificationsPage },
       { path: 'tip-goals', Component: EmployeeTipGoalsPage },
       { path: 'settings', Component: EmployeeSettingsPage },

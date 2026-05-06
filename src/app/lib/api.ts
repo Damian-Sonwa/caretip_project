@@ -1016,6 +1016,61 @@ export interface TipItem {
   createdAt: string;
 }
 
+export type TipStatus = "success" | "pending" | "failed";
+
+export type TipActivityRow = {
+  id: string;
+  amount: number;
+  status: TipStatus | string;
+  createdAt: string;
+  employeeId: string;
+  locationId: string | null;
+  tableId: string | null;
+  staffName: string | null;
+  locationName: string | null;
+  tableName: string | null;
+};
+
+export async function listBusinessTips(params: {
+  take?: number;
+  skip?: number;
+  status?: TipStatus;
+  from?: string;
+  to?: string;
+  employeeId?: string;
+  locationId?: string;
+  tableId?: string;
+}): Promise<{ total: number; items: TipActivityRow[] }> {
+  const sp = new URLSearchParams();
+  if (params.take != null) sp.set("take", String(params.take));
+  if (params.skip != null) sp.set("skip", String(params.skip));
+  if (params.status) sp.set("status", params.status);
+  if (params.from) sp.set("from", params.from);
+  if (params.to) sp.set("to", params.to);
+  if (params.employeeId) sp.set("employeeId", params.employeeId);
+  if (params.locationId) sp.set("locationId", params.locationId);
+  if (params.tableId) sp.set("tableId", params.tableId);
+  const qs = sp.toString();
+  return apiRequest(apiPath(`/api/tips/business${qs ? `?${qs}` : ""}`), { headers: getHeaders(), credentials: "include" });
+}
+
+export async function listEmployeeTips(params: {
+  take?: number;
+  skip?: number;
+  status?: TipStatus;
+  from?: string;
+  to?: string;
+}): Promise<{ total: number; items: TipActivityRow[] }> {
+  const sp = new URLSearchParams();
+  if (params.take != null) sp.set("take", String(params.take));
+  if (params.skip != null) sp.set("skip", String(params.skip));
+  if (params.status) sp.set("status", params.status);
+  if (params.from) sp.set("from", params.from);
+  if (params.to) sp.set("to", params.to);
+  const qs = sp.toString();
+  return apiRequest(apiPath(`/api/tips/employee/list${qs ? `?${qs}` : ""}`), { headers: getHeaders(), credentials: "include" });
+}
+
 export type GoalPeriod = "daily" | "weekly" | "monthly";
 
 export type EmployeeGoalProgressStatus = "achieved" | "on_track" | "below_target";
