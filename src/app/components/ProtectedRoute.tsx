@@ -12,12 +12,11 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
-  const { user, authHydrated } = useAuth();
+  const { user, authHydrated, sessionChecking } = useAuth();
   const location = useLocation();
 
-  if (!authHydrated) {
-    return <AppLoader message="Setting things up for you..." />;
-  }
+  // Hydration is synchronous; only show a loader in the rare case hydration hasn't happened yet.
+  if (!authHydrated) return <AppLoader message="Setting things up for you..." />;
 
   if (!user) {
     authDebug("route_guard", {
@@ -28,6 +27,10 @@ export function ProtectedRoute({
     });
     return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
+
+  // Optimistic auth: render app immediately while refresh validates in background.
+  // If refresh fails, `useAuth` will clear session and redirect to /login.
+  void sessionChecking;
 
   const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles);
 

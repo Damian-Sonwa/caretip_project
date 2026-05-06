@@ -75,7 +75,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated, sessionChecking } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -95,7 +95,12 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  // NOTE: We intentionally do NOT auto-redirect away from auth routes.
+  // If a session exists and has been validated, go straight to the dashboard.
+  useEffect(() => {
+    if (!user) return;
+    if (!sessionValidated) return;
+    navigate(getPostAuthRedirect(user), { replace: true });
+  }, [navigate, sessionValidated, user]);
 
   useEffect(() => {
     // Update role from query params when the search string changes
@@ -316,19 +321,8 @@ export function AuthPage() {
       password !== confirmPassword ||
       (role === 'employee' && (!name || !inviteCode)));
 
-  if (!authHydrated) {
-    return (
-      <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
-        <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
-          <Navigation />
-          <div className="flex flex-1 flex-col items-center justify-center px-4 py-12">
-            <AppLoader message="Setting things up for you..." />
-          </div>
-          <Footer variant="minimal" surface="light" />
-        </div>
-      </div>
-    );
-  }
+  // Keep auth pages instant; hydration is synchronous in normal browsers.
+  void authHydrated;
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
@@ -344,7 +338,7 @@ export function AuthPage() {
           sessionActive={Boolean(user) && sessionValidated}
           className="flex-1"
         >
-          {user && !sessionValidated ? (
+          {user && (sessionChecking || !sessionValidated) ? (
             <div
               role="status"
               aria-live="polite"
@@ -354,46 +348,12 @@ export function AuthPage() {
                 Checking your session...
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                We&apos;re confirming your login status before continuing.
+                We&apos;re confirming your login status.
               </p>
               <div className="mt-8 w-full">
                 <div className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold text-muted-foreground">
                   Please wait
                 </div>
-              </div>
-            </div>
-          ) : null}
-          {user && sessionValidated ? (
-            <div
-              role="status"
-              aria-live="polite"
-              className="mx-auto flex w-full max-w-[20rem] flex-col items-center rounded-2xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50 sm:p-7"
-            >
-              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                Active Session Detected
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                You are currently logged in as{' '}
-                <span className="font-medium text-foreground break-all" title={user.email}>
-                  {user.email?.trim() ? user.email : 'this account'}
-                </span>
-                . Please continue to your dashboard or switch accounts below.
-              </p>
-              <div className="mt-8 flex w-full flex-col items-stretch gap-8">
-                <button
-                  type="button"
-                  className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-[#EB992C] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]"
-                  onClick={() => navigate(getPostAuthRedirect(user), { replace: true })}
-                >
-                  Continue to dashboard
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl border-2 border-neutral-300 bg-transparent px-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800/80"
-                  onClick={() => logout()}
-                >
-                  Log out
-                </button>
               </div>
             </div>
           ) : null}

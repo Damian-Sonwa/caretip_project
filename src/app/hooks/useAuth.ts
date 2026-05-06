@@ -208,13 +208,18 @@ export function getPostAuthRedirect(u: User): string {
 export function useAuth() {
   const navigate = useNavigate();
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
-  /** False until the first session resolution pass finishes (no token path or refresh attempt). Route guards must wait on this, not on `user === null` alone. */
-  const [authHydrated, setAuthHydrated] = useState(false);
+  /**
+   * Hydration is synchronous (localStorage read) — keep UI instant.
+   * Background session validation uses `sessionChecking` / `sessionValidated`.
+   */
+  const [authHydrated, setAuthHydrated] = useState(true);
   /**
    * True after bootstrap when there was no access token, or after `/api/auth/refresh` succeeded.
    * False when a stored token was present but refresh ultimately failed — dashboards must not call protected APIs until true.
    */
   const [sessionValidated, setSessionValidated] = useState(false);
+  /** True while `/api/auth/refresh` is validating an existing stored token. */
+  const [sessionChecking, setSessionChecking] = useState(false);
   /** Bumped after successful credential-bearing mutations so an in-flight initial `refreshSession` cannot overwrite a newer session. */
   const sessionEpochRef = useRef(0);
 
@@ -249,6 +254,7 @@ export function useAuth() {
       const hadToken = Boolean(token);
 
       try {
+        if (!cancelled) setAuthHydrated(true);
         if (!hadToken) {
           try {
             if (typeof localStorage !== "undefined" && localStorage.getItem(USER_STORAGE_KEY)) {
@@ -261,6 +267,8 @@ export function useAuth() {
           if (!cancelled) setSessionValidated(true);
           return;
         }
+
+        if (!cancelled) setSessionChecking(true);
 
         // Never trust persisted state alone: if the JWT is already expired, clear immediately.
         if (token && isJwtExpired(token)) {
@@ -300,6 +308,7 @@ export function useAuth() {
           navigate("/login", { replace: true });
         }
       } finally {
+        if (!cancelled) setSessionChecking(false);
         if (!cancelled) setAuthHydrated(true);
       }
     };
@@ -483,6 +492,7 @@ export function useAuth() {
     /** True while the first session resolution pass is in flight; route guards must wait and must not redirect. */
     isAuthLoading: !authHydrated,
     authHydrated,
+    sessionChecking,
     /** True when bootstrap refresh succeeded or there was no token; false when stored session failed validation. */
     sessionValidated,
     authState,

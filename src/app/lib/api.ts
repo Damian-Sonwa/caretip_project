@@ -39,15 +39,16 @@ function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
 }
 
 /**
- * POST /api/auth/refresh with bounded retries (initial attempt + 2 retries).
- * Backoff: 1s before 2nd attempt, 3s before 3rd. Stops after auth rejection (401/403) immediately.
+ * POST /api/auth/refresh with bounded retries.
+ * UX goal: keep startup fast — at most one retry for transient failures.
+ * Stops after auth rejection (401/403) immediately.
  * After final failure: caller should clear session (handled in {@link ensureRefreshedSession}).
  */
 async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt > 0) {
-      const delayMs = attempt === 1 ? 1000 : 3000;
-      await new Promise((r) => setTimeout(r, delayMs));
+      // Short backoff to avoid long "stuck loading" sessions on flaky networks.
+      await new Promise((r) => setTimeout(r, 500));
     }
 
     let res: Response;
@@ -64,7 +65,7 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
       });
     } catch (err) {
       logClientError("api.runRefreshAuthWithRetries.fetch", err, { attempt });
-      if (attempt === 2) {
+      if (attempt === 1) {
         return { ok: false, shouldClearSession: true, status: 0 };
       }
       continue;
@@ -92,7 +93,7 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
       res.status >= 500;
 
     if (transient) {
-      if (attempt < 2) continue;
+      if (attempt < 1) continue;
       return { ok: false, shouldClearSession: true, status: res.status };
     }
 
