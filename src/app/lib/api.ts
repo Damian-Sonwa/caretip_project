@@ -1022,6 +1022,8 @@ export type EmployeeGoalProgressStatus = "achieved" | "on_track" | "below_target
 export interface EmployeeGoalProgress {
   id: string;
   employeeId: string;
+  name?: string;
+  lifecycleStatus?: "active" | "archived";
   goalAmount: number;
   goalPeriod: GoalPeriod;
   startDate: string;
@@ -1035,6 +1037,65 @@ export interface EmployeeTipsResponse {
   monthlyGoal: number | null;
   currentMonthTotal: number;
   goal: EmployeeGoalProgress | null;
+}
+
+export type EmployeeGoalStatus = "active" | "archived";
+
+export type EmployeeGoalRow = {
+  id: string;
+  name: string;
+  goalAmount: number;
+  goalPeriod: GoalPeriod;
+  status: EmployeeGoalStatus;
+  startDate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export async function listMyGoals(): Promise<{ goals: EmployeeGoalRow[] }> {
+  return apiRequest(apiPath("/api/goals"), { headers: getHeaders(), credentials: "include" });
+}
+
+export async function createMyGoal(payload: {
+  name: string;
+  goalAmount: number;
+  goalPeriod: GoalPeriod;
+  startDate: string;
+}): Promise<{ goal: EmployeeGoalRow }> {
+  return apiRequest(apiPath("/api/goals"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function updateMyGoal(
+  goalId: string,
+  payload: Partial<{ name: string; goalAmount: number; goalPeriod: GoalPeriod; startDate: string }>
+): Promise<{ goal: EmployeeGoalRow }> {
+  return apiRequest(apiPath(`/api/goals/${encodeURIComponent(goalId)}`), {
+    method: "PUT",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function archiveMyGoal(goalId: string): Promise<{ goal: EmployeeGoalRow }> {
+  return apiRequest(apiPath(`/api/goals/${encodeURIComponent(goalId)}/archive`), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function deleteMyGoalById(goalId: string): Promise<void> {
+  await apiRequest<void>(apiPath(`/api/goals/${encodeURIComponent(goalId)}`), {
+    method: "DELETE",
+    headers: getHeaders(),
+    credentials: "include",
+  });
 }
 
 export async function getEmployeeGoal(): Promise<{ goal: EmployeeGoalProgress | null }> {

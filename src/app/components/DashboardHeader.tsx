@@ -73,7 +73,24 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
+            type="button"
+            onClick={() => {
+              if (user?.role === "employee") {
+                navigate("/employee/notifications");
+                return;
+              }
+              if (user?.role === "business") {
+                navigate("/dashboard/notifications");
+                return;
+              }
+              if (user?.role === "platform_admin") {
+                navigate("/platform-admin/dashboard");
+                return;
+              }
+              navigate("/faq");
+            }}
             className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+            aria-label="Notifications"
           >
             <Bell className="w-5 h-5 text-foreground" />
             {/* Notification Badge */}

@@ -52,6 +52,11 @@ enum GoalPeriod {
   monthly
 }
 
+enum EmployeeGoalStatus {
+  active
+  archived
+}
+
 enum EmployeeActivationStatus {
   /** Fully onboarded staff (tippable / listed for customers as configured). */
   active
@@ -296,25 +301,29 @@ model Employee {
   location           Location?                 @relation(fields: [locationId], references: [id], onDelete: SetNull)
   transactions       Transaction[]
   tableAssignments   EmployeeTableAssignment[]
-  employeeGoal       EmployeeGoal?
+  employeeGoals      EmployeeGoal[]
   activationTokens   EmployeeActivationToken[]
 
   @@index([businessId, locationId])
   @@map("employees")
 }
 
-/// Employee-created tip goal (one row per employee). Business has read-only visibility via stats API.
+/// Employee-created tip goals (multiple rows per employee). Business has read-only visibility via stats API.
 model EmployeeGoal {
   id          String     @id @default(cuid())
-  employeeId  String     @unique @map("employee_id")
+  employeeId  String     @map("employee_id")
+  name        String     @default("Tip goal")
   goalAmount  Decimal    @map("goal_amount") @db.Decimal(10, 2)
   goalPeriod  GoalPeriod @map("goal_period")
+  status      EmployeeGoalStatus @default(active)
   startDate   DateTime   @map("start_date") @db.Date
   createdAt   DateTime   @default(now()) @map("created_at")
   updatedAt   DateTime   @updatedAt @map("updated_at")
 
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
+  @@index([employeeId])
+  @@index([employeeId, status])
   @@map("employee_goals")
 }
 

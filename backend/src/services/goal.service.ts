@@ -1,4 +1,4 @@
-import { GoalPeriod } from "@prisma/client";
+import { EmployeeGoalStatus, GoalPeriod } from "@prisma/client";
 import { prisma } from "../prisma.js";
 
 export type GoalProgressStatus = "achieved" | "on_track" | "below_target";
@@ -6,8 +6,10 @@ export type GoalProgressStatus = "achieved" | "on_track" | "below_target";
 export interface GoalWithProgress {
   id: string;
   employeeId: string;
+  name: string;
   goalAmount: number;
   goalPeriod: GoalPeriod;
+  lifecycleStatus: "active" | "archived";
   startDate: string;
   currentAmount: number;
   percent: number;
@@ -151,16 +153,23 @@ export async function getGoalProgressForEmployee(
 export async function getMyGoalWithProgress(userId: string): Promise<GoalWithProgress | null> {
   const emp = await prisma.employee.findUnique({
     where: { userId },
-    select: { id: true, employeeGoal: true },
+    select: {
+      id: true,
+      employeeGoals: {
+        where: { status: EmployeeGoalStatus.active },
+        orderBy: [{ updatedAt: "desc" }],
+        take: 1,
+      },
+    },
   });
-  if (!emp?.employeeGoal) return null;
-  const g = emp.employeeGoal;
+  const g = emp?.employeeGoals?.[0];
+  if (!emp?.id || !g) return null;
   return getGoalProgressForEmployee(emp.id, {
     id: g.id,
     goalAmount: g.goalAmount,
     goalPeriod: g.goalPeriod,
     startDate: g.startDate,
-  });
+  }).then((p) => ({ ...p, name: g.name, lifecycleStatus: g.status }));
 }
 
 export async function upsertMyGoal(
@@ -177,33 +186,49 @@ export async function upsertMyGoal(
   const sd = new Date(input.startDate + "T12:00:00.000Z");
   if (Number.isNaN(sd.getTime())) throw new Error("Invalid start date");
 
-  const row = await prisma.employeeGoal.upsert({
-    where: { employeeId: emp.id },
-    create: {
-      employeeId: emp.id,
-      goalAmount: input.goalAmount,
-      goalPeriod: input.goalPeriod,
-      startDate: sd,
-    },
-    update: {
-      goalAmount: input.goalAmount,
-      goalPeriod: input.goalPeriod,
-      startDate: sd,
-    },
+  // Back-compat for old `/api/employees/me/goal` endpoint: update the most recent active goal,
+  // otherwise create a new active goal.
+  const existing = await prisma.employeeGoal.findFirst({
+    where: { employeeId: emp.id, status: EmployeeGoalStatus.active },
+    orderBy: [{ updatedAt: "desc" }],
+    select: { id: true },
   });
 
-  return (await getGoalProgressForEmployee(emp.id, {
+  const row = existing
+    ? await prisma.employeeGoal.update({
+        where: { id: existing.id },
+        data: {
+          goalAmount: input.goalAmount,
+          goalPeriod: input.goalPeriod,
+          startDate: sd,
+          status: EmployeeGoalStatus.active,
+        },
+      })
+    : await prisma.employeeGoal.create({
+        data: {
+          employeeId: emp.id,
+          name: "Tip goal",
+          goalAmount: input.goalAmount,
+          goalPeriod: input.goalPeriod,
+          status: EmployeeGoalStatus.active,
+          startDate: sd,
+        },
+      });
+
+  const p = await getGoalProgressForEmployee(emp.id, {
     id: row.id,
     goalAmount: row.goalAmount,
     goalPeriod: row.goalPeriod,
     startDate: row.startDate,
-  })) as GoalWithProgress;
+  });
+  return { ...(p as GoalWithProgress), name: row.name, lifecycleStatus: row.status };
 }
 
 export async function deleteMyGoal(userId: string): Promise<void> {
   const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
   if (!emp) throw new Error("Employee not found");
-  await prisma.employeeGoal.deleteMany({ where: { employeeId: emp.id } });
+  // Back-compat: delete active goal only.
+  await prisma.employeeGoal.deleteMany({ where: { employeeId: emp.id, status: EmployeeGoalStatus.active } });
 }
 
 export async function listEmployeeGoalsForBusiness(businessId: string): Promise<
@@ -254,4 +279,126 @@ export async function listEmployeeGoalsForBusiness(businessId: string): Promise<
   }
 
   return out.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export type EmployeeGoalRow = {
+  id: string;
+  name: string;
+  goalAmount: number;
+  goalPeriod: GoalPeriod;
+  status: EmployeeGoalStatus;
+  startDate: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export async function listMyGoals(userId: string): Promise<EmployeeGoalRow[]> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) throw new Error("Employee not found");
+  const rows = await prisma.employeeGoal.findMany({
+    where: { employeeId: emp.id },
+    orderBy: [{ status: "asc" }, { updatedAt: "desc" }],
+  });
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    goalAmount: Number(r.goalAmount),
+    goalPeriod: r.goalPeriod,
+    status: r.status,
+    startDate: r.startDate.toISOString().slice(0, 10),
+    createdAt: r.createdAt.toISOString(),
+    updatedAt: r.updatedAt.toISOString(),
+  }));
+}
+
+export async function createMyGoal(
+  userId: string,
+  input: { name: string; goalAmount: number; goalPeriod: GoalPeriod; startDate: string }
+): Promise<EmployeeGoalRow> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) throw new Error("Employee not found");
+  const sd = new Date(input.startDate + "T12:00:00.000Z");
+  if (Number.isNaN(sd.getTime())) throw new Error("Invalid start date");
+  const row = await prisma.employeeGoal.create({
+    data: {
+      employeeId: emp.id,
+      name: input.name.trim() || "Tip goal",
+      goalAmount: input.goalAmount,
+      goalPeriod: input.goalPeriod,
+      status: EmployeeGoalStatus.active,
+      startDate: sd,
+    },
+  });
+  return {
+    id: row.id,
+    name: row.name,
+    goalAmount: Number(row.goalAmount),
+    goalPeriod: row.goalPeriod,
+    status: row.status,
+    startDate: row.startDate.toISOString().slice(0, 10),
+    createdAt: row.createdAt.toISOString(),
+    updatedAt: row.updatedAt.toISOString(),
+  };
+}
+
+export async function updateMyGoal(
+  userId: string,
+  goalId: string,
+  input: Partial<{ name: string; goalAmount: number; goalPeriod: GoalPeriod; startDate: string }>
+): Promise<EmployeeGoalRow> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) throw new Error("Employee not found");
+  const row = await prisma.employeeGoal.findFirst({ where: { id: goalId, employeeId: emp.id } });
+  if (!row) throw new Error("Goal not found");
+  const sd =
+    input.startDate !== undefined ? new Date(input.startDate + "T12:00:00.000Z") : undefined;
+  if (sd && Number.isNaN(sd.getTime())) throw new Error("Invalid start date");
+  const next = await prisma.employeeGoal.update({
+    where: { id: row.id },
+    data: {
+      ...(input.name !== undefined ? { name: input.name.trim() || "Tip goal" } : {}),
+      ...(input.goalAmount !== undefined ? { goalAmount: input.goalAmount } : {}),
+      ...(input.goalPeriod !== undefined ? { goalPeriod: input.goalPeriod } : {}),
+      ...(sd !== undefined ? { startDate: sd } : {}),
+    },
+  });
+  return {
+    id: next.id,
+    name: next.name,
+    goalAmount: Number(next.goalAmount),
+    goalPeriod: next.goalPeriod,
+    status: next.status,
+    startDate: next.startDate.toISOString().slice(0, 10),
+    createdAt: next.createdAt.toISOString(),
+    updatedAt: next.updatedAt.toISOString(),
+  };
+}
+
+export async function archiveMyGoal(userId: string, goalId: string): Promise<EmployeeGoalRow> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) throw new Error("Employee not found");
+  const row = await prisma.employeeGoal.findFirst({ where: { id: goalId, employeeId: emp.id } });
+  if (!row) throw new Error("Goal not found");
+  const next = await prisma.employeeGoal.update({
+    where: { id: row.id },
+    data: { status: EmployeeGoalStatus.archived },
+  });
+  return {
+    id: next.id,
+    name: next.name,
+    goalAmount: Number(next.goalAmount),
+    goalPeriod: next.goalPeriod,
+    status: next.status,
+    startDate: next.startDate.toISOString().slice(0, 10),
+    createdAt: next.createdAt.toISOString(),
+    updatedAt: next.updatedAt.toISOString(),
+  };
+}
+
+export async function deleteMyGoalById(userId: string, goalId: string): Promise<void> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) throw new Error("Employee not found");
+  const row = await prisma.employeeGoal.findFirst({ where: { id: goalId, employeeId: emp.id } });
+  if (!row) throw new Error("Goal not found");
+  await prisma.employeeGoal.delete({ where: { id: row.id } });
 }

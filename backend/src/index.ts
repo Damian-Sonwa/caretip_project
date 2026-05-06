@@ -14,6 +14,7 @@ import * as businessController from "./controllers/business.controller.js";
 import authRoutes from "./routes/auth.routes.js";
 import businessRoutes from "./routes/business.routes.js";
 import employeeRoutes from "./routes/employee.routes.js";
+import goalsRoutes from "./routes/goals.routes.js";
 import staffRoutes from "./routes/staff.routes.js";
 import tipsRoutes from "./routes/tips.routes.js";
 import transactionsRoutes from "./routes/transactions.routes.js";
@@ -80,6 +81,7 @@ app.get(
 );
 app.use("/api/business", businessRoutes);
 app.use("/api/employees", employeeRoutes);
+app.use("/api/goals", goalsRoutes);
 app.use("/api/staff", staffRoutes);
 app.use("/api/tips", tipsRoutes);
 app.use("/api/transactions", transactionsRoutes);
