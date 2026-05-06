@@ -18,7 +18,6 @@ import {
 } from "../../lib/passwordValidation";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { Input } from "../../components/ui/input";
@@ -178,8 +177,6 @@ export function EmployeeSettingsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <EmployeeHeader user={user} onLogout={logout} />
-
       <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
         <div className="flex items-center gap-3">
           <Link to="/employee/dashboard" className="p-2 rounded-lg hover:bg-muted transition-colors">

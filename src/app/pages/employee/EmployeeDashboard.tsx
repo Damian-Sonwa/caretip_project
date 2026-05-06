@@ -35,7 +35,6 @@ import { formatEur } from "../../lib/formatEur";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
-import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
 import { cn } from "@/lib/utils";
@@ -105,11 +104,7 @@ function formatTimeAgo(iso: string): string {
 }
 
 export function EmployeeDashboard() {
-  const { user, authHydrated, sessionValidated, logout, updateUser } = useRequireAuth();
-
-  const handleLogout = () => {
-    logout();
-  };
+  const { user, authHydrated, sessionValidated, updateUser } = useRequireAuth();
 
   const [timeframe, setTimeframe] = useState<"today" | "week" | "month">("today");
   const [tips, setTips] = useState<TipItem[]>([]);
@@ -367,8 +362,6 @@ export function EmployeeDashboard() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <EmployeeHeader user={user} onLogout={handleLogout} />
-
       <div className="mx-auto max-w-7xl border-b border-border/50 px-6 pb-3 pt-3 sm:px-6 sm:pb-4 lg:px-8 lg:pt-4">
         <section
           className={cn(

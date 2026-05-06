@@ -6,7 +6,6 @@ import { useSocket } from "../../hooks/useSocket";
 import { getTipsByEmployee, type TipItem } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
-import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 
 const TEAL = "#EB992C";
@@ -65,8 +64,6 @@ export function EmployeeNotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <EmployeeHeader user={user} onLogout={logout} />
-
       <div className="max-w-2xl mx-auto px-4 py-6">
         <div className="flex items-center gap-3 mb-6">
           <Link
