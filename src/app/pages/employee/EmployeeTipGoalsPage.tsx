@@ -40,6 +40,7 @@ export function EmployeeTipGoalsPage() {
   const { user } = useRequireAuth();
   const [loading, setLoading] = useState(true);
   const [goals, setGoals] = useState<EmployeeGoalRow[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<EmployeeGoalRow | null>(null);
   const [saving, setSaving] = useState(false);
@@ -54,9 +55,11 @@ export function EmployeeTipGoalsPage() {
     try {
       const data = await listMyGoals();
       setGoals(data.goals ?? []);
+      setLoadError(null);
     } catch (e) {
       logClientError("EmployeeTipGoalsPage.refresh", e);
       setGoals([]);
+      setLoadError(e instanceof Error ? e.message : "Failed to load goals.");
     }
   }, []);
 
@@ -75,9 +78,6 @@ export function EmployeeTipGoalsPage() {
       cancelled = true;
     };
   }, [refresh, user?.role, user?.id]);
-
-  if (!user || user.role !== "employee") return null;
-  if (loading) return <CareTipPageLoader />;
 
   const openCreate = () => {
     setEditing(null);
@@ -108,6 +108,9 @@ export function EmployeeTipGoalsPage() {
 
   const empty = sortedGoals.length === 0;
 
+  if (!user || user.role !== "employee") return null;
+  if (loading) return <CareTipPageLoader />;
+
   return (
     <div className="mx-auto w-full max-w-7xl px-6 py-6 sm:px-6 lg:px-8">
       <div className="mb-6 flex items-center justify-between gap-3">
@@ -131,6 +134,22 @@ export function EmployeeTipGoalsPage() {
             New Goal
           </Button>
         </div>
+
+        {loadError ? (
+          <div className="px-6 py-8">
+            <div className="rounded-2xl border border-gray-100 bg-muted/20 p-5">
+              <p className="text-sm font-semibold text-foreground">Couldn&apos;t load goals</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                {loadError}
+              </p>
+              <div className="mt-4 flex gap-2">
+                <Button type="button" variant="outline" onClick={() => void refresh()}>
+                  Retry
+                </Button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         {empty ? (
           <div className="px-6 py-12">
