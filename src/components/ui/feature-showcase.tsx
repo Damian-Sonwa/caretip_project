@@ -256,7 +256,7 @@ export function FeatureShowcase({
           className={cn(
             "mx-auto grid w-full max-w-7xl grid-cols-1 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14",
             cinematic
-              ? "relative z-[1] gap-10 px-6 pb-24 pt-16 max-md:gap-y-10 max-md:px-4 max-md:pb-20 max-md:pt-8 md:gap-12 md:px-6 md:pt-20 md:pb-32 lg:gap-14"
+              ? "relative z-[1] gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:items-center md:gap-12 md:px-6 md:pt-20 md:pb-32 lg:gap-14"
               : "gap-10 px-6 pt-16 pb-24 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -409,11 +409,16 @@ export function FeatureShowcase({
                 cinematic ? (
                   <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:ml-auto md:mr-0">
                     <div className="relative flex w-full justify-center md:justify-end">
+                      <div className="relative w-full max-w-[560px] max-md:mx-auto">
+                        <div
+                          aria-hidden
+                          className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"
+                        />
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
                         className={cn(
-                          "relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none max-md:w-full",
+                          "animate-float relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none max-md:w-full",
                           singleHeroImage.imageFit === "cover" ? "object-cover" : "object-contain",
                         )}
                         style={
@@ -425,6 +430,7 @@ export function FeatureShowcase({
                         decoding="async"
                         fetchPriority="high"
                       />
+                      </div>
                     </div>
                   </div>
                 ) : (

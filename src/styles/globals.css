@@ -118,6 +118,46 @@ textarea::placeholder {
   animation: caretip-hero-float 9s ease-in-out infinite;
 }
 
+@keyframes float {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-float {
+  will-change: transform;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float-shadow {
+  0% {
+    transform: translate3d(-50%, 0, 0) scale(0.94);
+    opacity: 0.45;
+    filter: blur(18px);
+  }
+  50% {
+    transform: translate3d(-50%, 0, 0) scale(1);
+    opacity: 0.6;
+    filter: blur(22px);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0) scale(0.94);
+    opacity: 0.45;
+    filter: blur(18px);
+  }
+}
+
+.animate-float-shadow {
+  will-change: transform, opacity, filter;
+  animation: float-shadow 4s ease-in-out infinite;
+}
+
 .caretip-qr-glow {
   background: radial-gradient(circle at 50% 50%, rgba(235, 153, 44, 0.18), transparent 60%);
   filter: blur(10px);
