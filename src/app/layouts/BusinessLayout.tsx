@@ -6,6 +6,7 @@ import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import { isWalkthroughDemoManager } from "../lib/walkthroughDemo";
+import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -13,8 +14,9 @@ import { isWalkthroughDemoManager } from "../lib/walkthroughDemo";
  */
 export function BusinessLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, authHydrated, sessionValidated } = useAuth();
   const showDemoRibbon = isWalkthroughDemoManager(user);
+  const isAppReady = authHydrated && sessionValidated && user?.role === "business";
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -28,8 +30,8 @@ export function BusinessLayout() {
         </div>
       ) : null}
       <div className="relative z-10">
-        <BusinessSidebar />
-        <BusinessMobileSidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        {isAppReady ? <BusinessSidebar /> : <SidebarSkeleton />}
+        <BusinessMobileSidebar isOpen={mobileMenuOpen && isAppReady} onClose={() => setMobileMenuOpen(false)} />
         <div className="caretip-dashboard-shell min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <Outlet />

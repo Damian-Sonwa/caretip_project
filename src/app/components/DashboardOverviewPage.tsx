@@ -25,6 +25,8 @@ import { DashboardHeader } from "./DashboardHeader";
 import { Footer } from "./Footer";
 import AnimatedShaderBackground from "./ui/animated-shader-background";
 import { formatEur } from "../lib/formatEur";
+import { useAuth } from "../hooks/useAuth";
+import { SidebarSkeleton } from "./ui/sidebar-skeleton";
 
 const tipsData = [
   { month: "Jan", tips: 12400 },
@@ -38,15 +40,17 @@ const tipsData = [
 
 export function DashboardOverviewPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, authHydrated, sessionValidated } = useAuth();
+  const isAppReady = authHydrated && sessionValidated && Boolean(user);
 
   return (
     <div className="min-h-screen relative">
       <AnimatedShaderBackground />
 
       <div className="relative z-10">
-        <DashboardSidebar />
+        {isAppReady ? <DashboardSidebar /> : <SidebarSkeleton />}
         <DashboardMobileSidebar
-          isOpen={mobileMenuOpen}
+          isOpen={mobileMenuOpen && isAppReady}
           onClose={() => setMobileMenuOpen(false)}
         />
 

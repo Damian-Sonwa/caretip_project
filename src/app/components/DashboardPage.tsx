@@ -30,6 +30,8 @@ import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
 import { formatEur } from '../lib/formatEur';
+import { useAuth } from '../hooks/useAuth';
+import { SidebarSkeleton } from './ui/sidebar-skeleton';
 
 function eurInt(n: number): string {
   return formatEur(n, { minFrac: 0, maxFrac: 0 });
@@ -202,6 +204,8 @@ function MetricCard({ title, value, change, isPositive, icon: Icon, delay, subti
 
 export function DashboardPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { user, authHydrated, sessionValidated } = useAuth();
+  const isAppReady = authHydrated && sessionValidated && Boolean(user);
 
   return (
     <div className="min-h-screen relative">
@@ -209,11 +213,11 @@ export function DashboardPage() {
       
       <div className="relative z-10">
         {/* Sidebar - Desktop */}
-        <DashboardSidebar />
+        {isAppReady ? <DashboardSidebar /> : <SidebarSkeleton />}
 
         {/* Sidebar - Mobile */}
         <DashboardMobileSidebar 
-          isOpen={mobileMenuOpen} 
+          isOpen={mobileMenuOpen && isAppReady} 
           onClose={() => setMobileMenuOpen(false)} 
         />
 
