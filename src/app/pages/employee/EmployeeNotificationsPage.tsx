@@ -27,6 +27,7 @@ export function EmployeeNotificationsPage() {
   const [tips, setTips] = useState<TipItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket(user?.role === "employee");
+  const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [readIds, setReadIds] = useState<Record<string, true>>({});
 
@@ -77,6 +78,18 @@ export function EmployeeNotificationsPage() {
 
   const toggleSelected = (id: string) => {
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+  };
+
+  const enterSelectionMode = (preselectId?: string) => {
+    setSelectionMode(true);
+    if (preselectId) {
+      setSelectedIds((prev) => (prev.includes(preselectId) ? prev : [preselectId, ...prev]));
+    }
+  };
+
+  const exitSelectionMode = () => {
+    setSelectionMode(false);
+    setSelectedIds([]);
   };
 
   const confirmDelete = (ids: string[]) => {
@@ -151,33 +164,46 @@ export function EmployeeNotificationsPage() {
         ) : (
           <>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <label className="flex items-center gap-3 text-sm text-muted-foreground">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
-                  aria-label="Select all notifications"
-                />
-                Select all
-              </label>
+              {selectionMode ? (
+                <label className="flex items-center gap-3 text-sm text-muted-foreground">
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    onChange={toggleSelectAll}
+                    className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
+                    aria-label="Select all notifications"
+                  />
+                  Select all
+                </label>
+              ) : (
+                <div className="text-sm text-muted-foreground">Manage your notifications</div>
+              )}
 
               <div className="flex items-center gap-2">
-                {hasSelection ? (
+                {selectionMode ? (
                   <>
-                    <Button type="button" variant="outline" onClick={() => confirmMarkRead(selectedIds)}>
+                    <Button type="button" variant="outline" onClick={() => confirmMarkRead(selectedIds)} disabled={!hasSelection}>
                       Mark as read
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="text-red-500 hover:text-red-600"
-                      onClick={() => confirmDelete(selectedIds)}
-                    >
-                      Delete selected
+                    {hasSelection ? (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="text-red-500 hover:text-red-600"
+                        onClick={() => confirmDelete(selectedIds)}
+                      >
+                        Delete selected
+                      </Button>
+                    ) : null}
+                    <Button type="button" variant="outline" onClick={exitSelectionMode}>
+                      Done
                     </Button>
                   </>
-                ) : null}
+                ) : (
+                  <Button type="button" variant="outline" onClick={() => enterSelectionMode()}>
+                    Select
+                  </Button>
+                )}
               </div>
             </div>
 
@@ -195,13 +221,15 @@ export function EmployeeNotificationsPage() {
                     style={selected ? { borderLeftWidth: 4, borderLeftColor: BRAND_ORANGE } : undefined}
                   >
                     <div className="flex items-center gap-3 px-4 py-4">
-                      <input
-                        type="checkbox"
-                        checked={selected}
-                        onChange={() => toggleSelected(t.id)}
-                        className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
-                        aria-label="Select notification"
-                      />
+                      {selectionMode ? (
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={() => toggleSelected(t.id)}
+                          className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
+                          aria-label="Select notification"
+                        />
+                      ) : null}
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3">
@@ -217,7 +245,13 @@ export function EmployeeNotificationsPage() {
 
                       <button
                         type="button"
-                        onClick={() => confirmDelete([t.id])}
+                        onClick={() => {
+                          if (!selectionMode) {
+                            enterSelectionMode(t.id);
+                            return;
+                          }
+                          confirmDelete([t.id]);
+                        }}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-red-500"
                         aria-label="Delete notification"
                       >
