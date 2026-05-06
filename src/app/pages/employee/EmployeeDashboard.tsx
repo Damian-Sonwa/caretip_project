@@ -48,6 +48,7 @@ const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(-
 
 const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
 const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
+const TIP_GOAL_ANCHOR_ID = "employee-tip-goal";
 
 function StatCard(props: {
   title: string;
@@ -340,6 +341,12 @@ export function EmployeeDashboard() {
     setQrModalOpen(true);
   };
 
+  const scrollToTipGoal = useCallback(() => {
+    const el = document.getElementById(TIP_GOAL_ANCHOR_ID);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, []);
+
   useEffect(() => {
     if (!sessionValidated || user?.role !== "employee") return;
     const params = new URLSearchParams(location.search);
@@ -403,24 +410,30 @@ export function EmployeeDashboard() {
           }
           imageOverlay={false}
           actions={
-            <Button
-              type="button"
-              onClick={() => void handleQrQuickAction()}
-              disabled={slugLoading || generatingSlug}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {generatingSlug ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating…
-                </>
-              ) : (
-                <>
-                  <QrCode className="mr-2 h-4 w-4 shrink-0" />
-                  My QR
-                </>
-              )}
-            </Button>
+            <>
+              <Button
+                type="button"
+                onClick={() => void handleQrQuickAction()}
+                disabled={slugLoading || generatingSlug}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {generatingSlug ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating…
+                  </>
+                ) : (
+                  <>
+                    <QrCode className="mr-2 h-4 w-4 shrink-0" />
+                    My QR
+                  </>
+                )}
+              </Button>
+              <Button type="button" variant="outline" onClick={scrollToTipGoal}>
+                <Target className="mr-2 h-4 w-4 shrink-0" />
+                Set tip goal
+              </Button>
+            </>
           }
         />
       </div>
@@ -642,7 +655,9 @@ export function EmployeeDashboard() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.7 }}
               >
-                <EmployeeGoalCard goal={goalProgress} onUpdated={refreshTipsQuiet} />
+                <div id={TIP_GOAL_ANCHOR_ID} className="scroll-mt-24">
+                  <EmployeeGoalCard goal={goalProgress} onUpdated={refreshTipsQuiet} />
+                </div>
               </motion.div>
             </div>
           </div>
