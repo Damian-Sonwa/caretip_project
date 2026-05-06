@@ -341,25 +341,36 @@ export function AuthPage() {
           role={role}
           onRoleChange={toggleRole}
           formBusy={isSubmitting}
+          sessionActive={Boolean(user)}
           className="flex-1"
         >
           {user ? (
-            <div className="mb-4 rounded-xl border border-border bg-card/70 p-4 text-sm text-foreground">
-              <p className="font-semibold">You’re already signed in.</p>
-              <p className="mt-1 text-muted-foreground">
-                You can continue to your dashboard, or log out to sign in with a different account.
+            <div
+              role="status"
+              aria-live="polite"
+              className="mx-auto flex w-full max-w-[20rem] flex-col items-center rounded-2xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50 sm:p-7"
+            >
+              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
+                Active Session Detected
+              </h2>
+              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                You are currently logged in as{' '}
+                <span className="font-medium text-foreground break-all" title={user.email}>
+                  {user.email?.trim() ? user.email : 'this account'}
+                </span>
+                . Please continue to your dashboard or switch accounts below.
               </p>
-              <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+              <div className="mt-8 flex w-full flex-col items-stretch gap-8">
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
+                  className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-[#EB992C] px-4 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]"
                   onClick={() => navigate(getPostAuthRedirect(user), { replace: true })}
                 >
                   Continue to dashboard
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center rounded-lg border border-border bg-background px-4 py-2 text-sm font-semibold text-foreground hover:bg-muted"
+                  className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl border-2 border-neutral-300 bg-transparent px-4 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-100 dark:border-neutral-600 dark:text-neutral-100 dark:hover:bg-neutral-800/80"
                   onClick={() => logout()}
                 >
                   Log out
@@ -367,6 +378,7 @@ export function AuthPage() {
               </div>
             </div>
           ) : null}
+          {!user ? (
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting}
@@ -660,6 +672,7 @@ export function AuthPage() {
               </button>
             </p>
           </form>
+          ) : null}
         </SignInCard2>
 
         <Footer variant="minimal" surface="light" />

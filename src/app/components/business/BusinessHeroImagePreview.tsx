@@ -8,26 +8,21 @@ export type BusinessHeroImagePreviewProps = {
 };
 
 /**
- * Business dashboard hero media wrapper that matches the employee hero layout:
- * - no extra background/padding beyond the image itself
- * - tight aspect-ratio sizing (5/3)
- * - optional max-height cap to avoid tall empty bands
+ * Business dashboard hero: full image visible (letterboxed), no hard crop from a fixed aspect box.
  */
 export function BusinessHeroImagePreview({
   className,
   src,
-  maxHeight,
+  maxHeight = "min(55vh, 480px)",
 }: BusinessHeroImagePreviewProps) {
   return (
     <div className={cn("relative isolate w-full max-w-full touch-manipulation", className)}>
-      <div
-        className="relative mx-auto w-full min-w-0 max-w-none"
-        style={{ aspectRatio: "4 / 3", ...(maxHeight ? { maxHeight } : {}) }}
-      >
+      <div className="relative mx-auto flex w-full min-w-0 max-w-none items-center justify-center">
         <img
           src={src}
           alt=""
-          className="absolute inset-0 h-full w-full object-contain"
+          className="block h-auto w-full max-w-full object-contain object-center"
+          style={{ maxHeight }}
           loading="eager"
           decoding="async"
           fetchpriority="high"

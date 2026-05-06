@@ -9,7 +9,8 @@ export type DashboardHeroProps = {
   className?: string;
   badge: React.ReactNode;
   title: string;
-  description: string;
+  /** Optional single-line tagline under the title; omitted when empty. */
+  description?: string;
   /** Static hero image (ignored when `image` is set). */
   imageSrc?: string;
   /** Custom visual (e.g. WebGL); uses tight intrinsic layout instead of stretched cover. */
@@ -41,7 +42,7 @@ export function DashboardHero({
   description,
   imageSrc,
   image,
-  imageCaption = "Yellow highlights, black type, and white surfaces. Same system-wide palette.",
+  imageCaption,
   overview,
   shortcuts,
   actions,
@@ -52,6 +53,8 @@ export function DashboardHero({
 }: DashboardHeroProps) {
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
+  const tagline = description?.trim() ?? "";
+  const caption = imageCaption?.trim() ?? "";
 
   const badgeRow = (
     <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground">
@@ -73,10 +76,12 @@ export function DashboardHero({
   );
 
   const supportingBlock = (
-    <div className="min-w-0 space-y-6">
-      <CardDescription className="max-w-xl break-words text-left text-base leading-relaxed text-foreground/80 sm:text-lg">
-        {description}
-      </CardDescription>
+    <div className={cn("min-w-0 flex flex-col", tagline ? "gap-4" : "gap-0")}>
+      {tagline ? (
+        <CardDescription className="max-w-xl break-words text-left text-sm leading-snug text-muted-foreground line-clamp-1">
+          {tagline}
+        </CardDescription>
+      ) : null}
 
       <Tabs defaultValue="overview" className={cn("w-full pt-0", stackHeroOnMobile ? "max-w-none sm:pt-0" : "max-w-md sm:pt-1")}>
         <TabsList
@@ -160,10 +165,10 @@ export function DashboardHero({
   const mediaInner = (opts: { stackedMobileFrame: boolean }) => (
     <div
       className={cn(
-        "relative w-full min-w-0 touch-manipulation [&_canvas]:block [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full",
+        "relative w-full min-w-0 touch-manipulation [&_canvas]:block [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_svg]:mx-auto [&_svg]:block",
         opts.stackedMobileFrame &&
           (stackHeroOnMobile
-            ? "max-lg:aspect-video max-lg:max-h-none max-lg:w-full"
+            ? "max-lg:w-full max-lg:min-h-0"
             : "max-lg:mx-auto max-lg:w-[min(92%,min(560px,95vw))]"),
       )}
     >
@@ -181,20 +186,15 @@ export function DashboardHero({
           hasPhoto && "min-h-[220px] lg:min-h-[min(100%,28rem)]",
           hasCustomMedia && "lg:justify-center",
           opts.stackedLayout &&
-            "max-lg:w-full max-lg:max-w-none lg:col-start-2 lg:row-start-1 lg:row-span-3 lg:self-stretch",
+            "max-lg:w-full max-lg:max-w-none lg:col-span-7 lg:col-start-6 lg:self-center lg:justify-center",
         )}
       >
         {hasCustomMedia ? (
           <>
-            <div
-              className={cn(
-                mediaShellClass({ forStackedMobile: opts.stackedLayout }),
-                opts.stackedLayout && stackHeroOnMobile && "max-lg:aspect-video",
-              )}
-            >
+            <div className={mediaShellClass({ forStackedMobile: opts.stackedLayout })}>
               {mediaInner({ stackedMobileFrame: opts.stackedLayout })}
             </div>
-            {imageCaption ? (
+            {caption ? (
               <div
                 className={cn(
                   "shrink-0 border-t border-border/80 bg-muted/90 px-4 py-4 sm:px-5 sm:py-5 lg:bg-muted/90",
@@ -203,7 +203,7 @@ export function DashboardHero({
                     : "max-lg:border-t-0 max-lg:bg-transparent max-lg:px-0 max-lg:py-3",
                 )}
               >
-                <p className="max-w-prose text-left text-sm font-medium leading-snug text-foreground">{imageCaption}</p>
+                <p className="max-w-prose text-left text-sm font-medium leading-snug text-foreground line-clamp-1">{caption}</p>
               </div>
             ) : null}
           </>
@@ -211,14 +211,14 @@ export function DashboardHero({
           <div
             className={cn(
               "relative flex min-h-[220px] flex-1 flex-col lg:min-h-[min(100%,28rem)]",
-              opts.stackedLayout && stackHeroOnMobile && "max-lg:min-h-0",
+              opts.stackedLayout && stackHeroOnMobile && "max-lg:min-h-0 max-lg:flex-none",
             )}
           >
             <div
               className={cn(
                 "relative min-h-0 flex-1 bg-muted lg:bg-muted",
                 opts.stackedLayout && !stackHeroOnMobile && "max-lg:bg-transparent",
-                opts.stackedLayout && stackHeroOnMobile && "max-lg:bg-[#FFFFFF]",
+                opts.stackedLayout && stackHeroOnMobile && "max-lg:h-auto max-lg:flex-none max-lg:bg-[#FFFFFF]",
               )}
             >
               <img
@@ -228,7 +228,7 @@ export function DashboardHero({
                   "h-full min-h-[220px] w-full object-cover lg:min-h-0",
                   opts.stackedLayout &&
                     stackHeroOnMobile &&
-                    "max-lg:aspect-video max-lg:min-h-0 max-lg:w-full max-lg:rounded-3xl max-lg:object-cover max-lg:shadow-none",
+                    "max-lg:h-auto max-lg:min-h-0 max-lg:w-full max-lg:max-h-[min(55vh,480px)] max-lg:rounded-3xl max-lg:object-contain max-lg:object-center max-lg:shadow-none",
                   opts.stackedLayout &&
                     !stackHeroOnMobile &&
                     "max-lg:mx-auto max-lg:min-h-0 max-lg:w-[min(92%,min(560px,95vw))] max-lg:object-contain",
@@ -240,14 +240,16 @@ export function DashboardHero({
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/25 to-transparent max-lg:hidden" />
               ) : null}
             </div>
-            <div
-              className={cn(
-                "relative shrink-0 px-4 py-3 sm:px-5 sm:py-4 max-lg:px-0",
-                opts.stackedLayout && stackHeroOnMobile && "max-lg:pt-2",
-              )}
-            >
-              <p className="max-w-sm text-left text-sm font-semibold text-foreground">{imageCaption}</p>
-            </div>
+            {caption ? (
+              <div
+                className={cn(
+                  "relative shrink-0 px-4 py-3 sm:px-5 sm:py-4 max-lg:px-0",
+                  opts.stackedLayout && stackHeroOnMobile && "max-lg:pt-2",
+                )}
+              >
+                <p className="max-w-sm text-left text-sm font-semibold text-foreground line-clamp-1">{caption}</p>
+              </div>
+            ) : null}
           </div>
         ) : null}
       </CardContent>
@@ -261,7 +263,7 @@ export function DashboardHero({
           className={cn(
             "relative overflow-hidden",
             stackHeroOnMobile
-              ? "max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:border-2 lg:border-border lg:bg-card lg:shadow-sm"
+              ? "max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:border-2 lg:border-border lg:bg-card lg:shadow-sm"
               : "border-2 border-border bg-card shadow-sm",
           )}
         >
@@ -275,21 +277,24 @@ export function DashboardHero({
         {stackHeroOnMobile ? (
           <div
             className={cn(
-              "dashboard-hero-container flex min-w-0 flex-col max-lg:space-y-6 max-lg:p-0",
-              "lg:grid lg:items-start lg:gap-x-8 lg:gap-y-6 lg:space-y-0 lg:px-0 lg:pb-0 lg:pt-0",
-              hideImage ? "lg:grid-cols-1" : "lg:grid-cols-2 lg:grid-rows-[auto_auto_auto]",
+              "dashboard-hero-container flex min-w-0 flex-col max-lg:space-y-6 max-lg:p-0 lg:grid lg:items-center lg:gap-x-8 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
+              hideImage ? "lg:grid-cols-1" : "lg:grid-cols-12",
             )}
           >
-            <div className="min-w-0 space-y-4 text-left lg:col-start-1 lg:row-start-1 lg:space-y-5 lg:self-start lg:px-8 lg:pr-2 lg:pt-8">
-              {badgeRow}
-              {titleRow}
+            <div
+              className={cn(
+                "flex min-w-0 flex-col gap-6 text-left lg:justify-center lg:gap-6 lg:pr-2",
+                hideImage ? "lg:col-span-12" : "lg:col-span-5",
+              )}
+            >
+              <div className="space-y-4 lg:space-y-5">
+                {badgeRow}
+                {titleRow}
+              </div>
+              {supportingBlock}
+              {actionsRow}
             </div>
-
             {renderMediaColumn({ stackedLayout: true })}
-
-            <div className="min-w-0 text-left lg:col-start-1 lg:row-start-2 lg:px-8 lg:pr-2">{supportingBlock}</div>
-
-            <div className="min-w-0 lg:col-start-1 lg:row-start-3 lg:px-8 lg:pb-8 lg:pr-2">{actionsRow}</div>
           </div>
         ) : (
           <div
@@ -300,11 +305,13 @@ export function DashboardHero({
             <CardHeader className="min-w-0 space-y-5 px-4 pb-6 pt-6 sm:space-y-6 sm:px-6 sm:pb-6 sm:pt-7 lg:pl-8 lg:pr-2 lg:pt-8">
               {badgeRow}
               {titleRow}
-              <CardDescription className="max-w-xl break-words text-base leading-relaxed text-foreground/80 sm:text-lg">
-                {description}
-              </CardDescription>
+              {tagline ? (
+                <CardDescription className="max-w-xl break-words text-sm leading-snug text-muted-foreground line-clamp-1">
+                  {tagline}
+                </CardDescription>
+              ) : null}
 
-              <Tabs defaultValue="overview" className="w-full max-w-md pt-2 sm:pt-3">
+              <Tabs defaultValue="overview" className={cn("w-full max-w-md", tagline ? "pt-2 sm:pt-3" : "pt-0 sm:pt-1")}>
                 <TabsList className="grid w-full grid-cols-2 bg-muted">
                   <TabsTrigger value="overview">Overview</TabsTrigger>
                   <TabsTrigger value="links">Shortcuts</TabsTrigger>

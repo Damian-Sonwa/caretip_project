@@ -45,14 +45,14 @@ import {
   ResponsiveContainer,
   Cell
 } from "recharts";
+import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { BusinessHeroImagePreview } from "../../components/business/BusinessHeroImagePreview";
 import haw1HeroImg from "../../../../images/haw1.png";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashPanel, dashStatCard, DASH_ICON_WRAP } from "@/components/ui/dashboard-styles";
+import { dashPanel } from "@/components/ui/dashboard-styles";
 import {
   devMockBusinessEmployeePerformance,
   devMockBusinessTipDistribution,
@@ -60,9 +60,8 @@ import {
 
 const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
 
-const BUSINESS_HERO_HEADLINE = "Your Team's Performance at a Glance";
-const BUSINESS_HERO_SUB =
-  "From scan to success: track daily milestones, growth trends, and 5-star service in real time.";
+const BUSINESS_HERO_HEADLINE = "Team Performance Insights";
+const BUSINESS_HERO_SUB = "Clarity in motion, tips on demand";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -81,26 +80,29 @@ function StatCard(props: {
   value: string;
   change?: string;
   icon: React.ElementType;
-  beam?: boolean;
+  /** On viewports below `lg`, span full width of the 2-column stats grid (primary metric). */
+  featured?: boolean;
 }) {
   const Icon = props.icon;
   return (
-    <Card className="relative h-full overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-      {props.beam ? <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" /> : null}
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="rounded-lg border border-border bg-muted p-2">
-            <Icon className="h-5 w-5 text-foreground" />
-          </div>
+    <Card
+      className={cn(
+        "flex h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
+        props.featured && "max-lg:col-span-2",
+      )}
+    >
+      <div className="mb-2 shrink-0">
+        <div className="inline-flex rounded-lg bg-orange-50 p-2">
+          <Icon className="h-5 w-5 text-primary" aria-hidden />
         </div>
-        <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {props.title}
-        </CardDescription>
-        <CardTitle className="text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
-          {props.value}
-        </CardTitle>
-        {props.change ? <p className="text-sm leading-snug text-muted-foreground">{props.change}</p> : null}
-      </CardHeader>
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
+      <p className="min-h-0 shrink truncate text-2xl font-bold tabular-nums text-black">{props.value}</p>
+      {props.change ? (
+        <p className="mt-auto line-clamp-2 text-[10px] leading-snug text-gray-400">{props.change}</p>
+      ) : (
+        <div className="mt-auto shrink-0" aria-hidden />
+      )}
     </Card>
   );
 }
@@ -416,11 +418,8 @@ export function BusinessDashboard() {
             />
           }
           imageOverlay={false}
-          imageCaption=""
           overview={
-            <div className="space-y-3 text-sm text-foreground/80">
-              <p>Monitor team performance, track tip activity, and manage your venue operations in real time.</p>
-            </div>
+            <p className="text-sm text-muted-foreground line-clamp-1">Charts and tables use the period filter above.</p>
           }
           shortcuts={
             <>
@@ -559,13 +558,13 @@ export function BusinessDashboard() {
           </div>
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               <StatCard
+                featured
                 title={`Total tips (${timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"})`}
                 value={`$${(stats?.totalTips ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2 })}`}
                 change={hasTipActivityInPeriod ? "Live totals update as tips land." : "No tips yet for this period."}
                 icon={DollarSign}
-                beam
               />
               <StatCard
                 title="Active employees"

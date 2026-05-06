@@ -805,9 +805,7 @@ export function QRCodeManagementPage() {
           }
           title="QR code management"
           description={
-            businessSlug
-              ? `Team directory: ${businessDirectoryUrl(businessSlug)}`
-              : "Generate staff and storefront codes. Black modules on white for clean scans. Actions use yellow with black text."
+            businessSlug ? "Printable codes for staff and your venue page." : "Generate staff and venue QR codes."
           }
           overview={
             <div className="grid grid-cols-3 gap-3 text-center">

@@ -41,9 +41,9 @@ import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeHeader } from "../../components/employee/EmployeeHeader";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
+import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { dashPanel } from "@/components/ui/dashboard-styles";
@@ -51,44 +51,40 @@ import { EmployeeGoalCard } from "../../components/employee/EmployeeGoalCard";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
-const EMPLOYEE_HERO_HEADLINE = "Your Excellence, Rewarded.";
-const EMPLOYEE_HERO_SUB =
-  "Every smile is an opportunity. Your next milestone is just one scan away. Let's make today your best shift yet.";
+const EMPLOYEE_HERO_HEADLINE = "Earnings and goal";
+const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
+
+/** Same `style.maxHeight` as `BusinessHeroImagePreview` (business dashboard hero image). */
+const BUSINESS_HERO_IMAGE_MAX_HEIGHT_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 function StatCard(props: {
   title: string;
   value: string;
   change?: string;
   icon: ElementType<{ className?: string }>;
-  beam?: boolean;
-  valueSize?: "default" | "lg";
-  pulse?: boolean;
+  /** On viewports below `lg`, span full width of the 2-column stats grid (primary metric). */
+  featured?: boolean;
 }) {
   const Icon = props.icon;
-  const valueClass =
-    props.valueSize === "lg"
-      ? "text-4xl font-bold tabular-nums text-foreground sm:text-5xl"
-      : "text-2xl font-bold tabular-nums text-foreground sm:text-3xl";
   return (
-    <Card className="relative h-full overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
-      {props.beam ? <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" /> : null}
-      <CardHeader className="pb-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="rounded-lg border border-border bg-muted p-2">
-            <Icon className="h-5 w-5 text-foreground" />
-          </div>
+    <Card
+      className={cn(
+        "flex h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
+        props.featured && "max-lg:col-span-2",
+      )}
+    >
+      <div className="mb-2 shrink-0">
+        <div className="inline-flex rounded-lg bg-orange-50 p-2">
+          <Icon className="h-5 w-5 text-primary" aria-hidden />
         </div>
-        <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          {props.title}
-        </CardDescription>
-        <motion.div
-          animate={props.pulse ? { scale: [1, 1.06, 1] } : { scale: 1 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
-        >
-          <CardTitle className={`${valueClass} ${props.pulse ? "text-primary" : ""}`}>{props.value}</CardTitle>
-        </motion.div>
-        {props.change ? <p className="text-sm leading-snug text-muted-foreground">{props.change}</p> : null}
-      </CardHeader>
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
+      <p className="min-h-0 shrink truncate text-2xl font-bold tabular-nums text-black">{props.value}</p>
+      {props.change ? (
+        <p className="mt-auto line-clamp-2 text-[10px] leading-snug text-gray-400">{props.change}</p>
+      ) : (
+        <div className="mt-auto shrink-0" aria-hidden />
+      )}
     </Card>
   );
 }
@@ -127,7 +123,6 @@ export function EmployeeDashboard() {
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0);
   const [goalProgress, setGoalProgress] = useState<EmployeeGoalProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [pulseEarnings, setPulseEarnings] = useState(false);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
   /** Public venue slug from `/api/employees/me` for canonical tip URLs */
@@ -213,8 +208,6 @@ export function EmployeeDashboard() {
 
       playChaChingSound();
       toast.success("You just received a tip!", TOAST_OK);
-      setPulseEarnings(true);
-      window.setTimeout(() => setPulseEarnings(false), 1500);
     };
 
     socket.on("new_tip", onNewTip);
@@ -392,13 +385,24 @@ export function EmployeeDashboard() {
           }
           title={EMPLOYEE_HERO_HEADLINE}
           description={EMPLOYEE_HERO_SUB}
-          image={<RealTimeTipPulseGraphic className="w-full" />}
-          imageOverlay={false}
-          imageCaption="Profile and guest tips: stay in sync with your QR."
-          overview={
-            <div className="space-y-3 text-sm text-foreground/80">
-              <p>Track your earnings, tips, and progress toward your monthly goal. Every scan counts!</p>
+          image={
+            <div className="relative isolate w-full max-w-full touch-manipulation">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center gap-3">
+                <div
+                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-3xl bg-black shadow-sm ring-1 ring-black/25"
+                  style={BUSINESS_HERO_IMAGE_MAX_HEIGHT_STYLE}
+                >
+                  <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
+                </div>
+                <p className="text-center text-xs font-semibold tracking-wide text-[#EB992C] sm:text-[0.8125rem] dark:text-[#F4BD6A]">
+                  Real-time tip pulse
+                </p>
+              </div>
             </div>
+          }
+          imageOverlay={false}
+          overview={
+            <p className="text-sm text-muted-foreground line-clamp-1">Goal progress follows the same period.</p>
           }
           shortcuts={
             <>
@@ -499,8 +503,9 @@ export function EmployeeDashboard() {
           />
 
           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <div className="relative mb-2 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               <StatCard
+                featured
                 title={`Total earnings (${timeframe === "today" ? "today" : timeframe === "week" ? "week" : "month"})`}
                 value={`$${stats.amount.toFixed(2)}`}
                 change={
@@ -509,11 +514,13 @@ export function EmployeeDashboard() {
                     : "No activity yet for this period."
                 }
                 icon={DollarSign}
-                beam
-                valueSize="lg"
-                pulse={pulseEarnings}
               />
-              <StatCard title="Total tips" value={String(stats.tips)} icon={TrendingUp} />
+              <StatCard
+                title="Total tips"
+                value={String(stats.tips)}
+                change={filteredTips.length > 0 ? "Tips in the selected period." : undefined}
+                icon={TrendingUp}
+              />
               <StatCard
                 title={stats.rating != null ? "Avg rating" : "Ratings"}
                 value={stats.rating != null ? String(stats.rating) : "N/A"}
@@ -523,7 +530,9 @@ export function EmployeeDashboard() {
               <StatCard
                 title="Monthly goal"
                 value={goalPct != null ? `${goalPct}%` : "N/A"}
-                change={goalPct != null ? "Progress toward your current target" : "Set a goal in settings to track progress."}
+                change={
+                  goalPct != null ? "Progress toward your current target." : "Set a goal in settings to track progress."
+                }
                 icon={Target}
               />
             </div>

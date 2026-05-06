@@ -552,7 +552,7 @@ export function StaffManagementPage() {
             </>
           }
           title="Staff management"
-          description="Invite codes, roles, and activation in one place, same white, black, and yellow system as the rest of your venue tools."
+          description="Invites, roles, and active staff."
           overview={
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
