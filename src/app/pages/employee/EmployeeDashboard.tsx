@@ -36,7 +36,7 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
+import coinsHero from "../../../../images/coins.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -397,7 +397,13 @@ export function EmployeeDashboard() {
                   className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
                   style={EMPLOYEE_HERO_MEDIA_MAX_STYLE}
                 >
-                  <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
+                  <img
+                    src={coinsHero}
+                    alt="Coins"
+                    className="h-full w-full object-contain"
+                    draggable={false}
+                    loading="eager"
+                  />
                 </div>
               </div>
             </div>
