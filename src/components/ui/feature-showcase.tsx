@@ -254,17 +254,17 @@ export function FeatureShowcase({
       ) : (
         <div
           className={cn(
-            "mx-auto grid w-full max-w-7xl grid-cols-1 md:grid-cols-12 md:pt-20 md:pb-32 lg:gap-14",
             cinematic
-              ? "relative z-[1] gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:items-center md:gap-12 md:px-6 md:pt-20 md:pb-32 lg:gap-14"
-              : "gap-10 px-6 pt-16 pb-24 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
+              ? "mx-auto relative z-[1] flex min-h-[500px] w-full max-w-7xl flex-col gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:flex-row md:items-center md:gap-12 md:px-6 md:pt-20 md:pb-32 lg:gap-14 lg:px-8"
+              : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
         <div
           className={cn(
-            "relative md:col-span-5",
+            "relative",
+            !cinematic && "md:col-span-5",
             cinematic &&
-              "order-1 max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:pt-6 md:-mt-6 lg:-mt-8",
+              "order-1 flex flex-1 flex-col self-stretch max-md:flex max-md:flex-col max-md:items-center max-md:justify-center max-md:pt-2 max-md:text-center md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
           )}
         >
             <Badge
@@ -318,7 +318,7 @@ export function FeatureShowcase({
               </div>
             )}
 
-            <div className="mt-10 max-w-xl">
+            <div className={cn("mt-10 max-w-xl", cinematic && "mt-auto")}>
               {!cinematic ? (
                 <Accordion type="single" collapsible className="w-full">
                   {steps.map((step) => (
@@ -330,7 +330,7 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-8 flex flex-wrap gap-3 max-md:justify-center">
+              <div className="mt-8 flex w-full flex-wrap gap-3 max-md:justify-center max-md:text-center max-md:w-full">
                 <Button
                   asChild
                   size="lg"
@@ -361,8 +361,9 @@ export function FeatureShowcase({
 
         <div
           className={cn(
-            "relative flex min-h-0 items-center justify-center md:col-span-7",
-            cinematic && "order-2 max-md:w-full md:justify-end md:overflow-visible",
+            "relative flex min-h-0 items-center justify-center",
+            !cinematic && "md:col-span-7",
+            cinematic && "order-2 max-md:w-full md:flex-1 md:self-stretch md:justify-center md:overflow-visible",
           )}
         >
             {heroBorderBeam ? (
@@ -409,7 +410,7 @@ export function FeatureShowcase({
                 cinematic ? (
                   <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:ml-auto md:mr-0">
                     <div className="relative flex w-full justify-center md:justify-end">
-                      <div className="relative w-full max-w-[560px] max-md:mx-auto">
+                      <div className="relative w-full max-w-[560px] max-md:mx-auto md:mt-2">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"
