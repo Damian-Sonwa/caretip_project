@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import type { ElementType } from "react";
-import { Link } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
@@ -38,6 +38,7 @@ import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { RealTimeTipPulseGraphic } from "../../components/employee/RealTimeTipPulseGraphic";
 import { cn } from "@/lib/utils";
+import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -105,6 +106,8 @@ function formatTimeAgo(iso: string): string {
 
 export function EmployeeDashboard() {
   const { user, authHydrated, sessionValidated, updateUser } = useRequireAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [timeframe, setTimeframe] = useState<"today" | "week" | "month">("today");
   const [tips, setTips] = useState<TipItem[]>([]);
@@ -337,6 +340,17 @@ export function EmployeeDashboard() {
     setQrModalOpen(true);
   };
 
+  useEffect(() => {
+    if (!sessionValidated || user?.role !== "employee") return;
+    const params = new URLSearchParams(location.search);
+    if (params.get("qr") !== "1") return;
+    void handleQrQuickAction();
+    params.delete("qr");
+    const next = params.toString();
+    navigate(next ? `${location.pathname}?${next}` : location.pathname, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid URL-trigger loop
+  }, [location.pathname, location.search, navigate, sessionValidated, user?.role]);
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -362,92 +376,38 @@ export function EmployeeDashboard() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <div className="mx-auto max-w-7xl border-b border-border/50 px-6 pb-3 pt-3 sm:px-6 sm:pb-4 lg:px-8 lg:pt-4">
-        <section
-          className={cn(
-            "grid grid-cols-1 gap-y-2.5 sm:gap-y-3",
-            "lg:grid-cols-[minmax(0,1fr)_min(35%,clamp(234px,32vw,360px))] lg:gap-x-8 lg:gap-y-3 lg:items-start",
-          )}
-          aria-label="Dashboard overview"
-        >
-          <div className="flex min-w-0 flex-col gap-2 lg:col-start-1 lg:row-start-1">
-            <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted/80 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-foreground backdrop-blur-sm sm:px-3 sm:py-1 sm:text-xs">
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-foreground" aria-hidden />
+      <div className="mx-auto max-w-7xl px-6 pt-6 sm:px-6 lg:px-8">
+        <DashboardHero
+          stackHeroOnMobile
+          hideTabs
+          actionsPlacement="belowText"
+          badge={
+            <>
+              <Sparkles className="h-3.5 w-3.5 text-foreground" />
               {user.name ? `Welcome back, ${user.name.split(" ")[0]}` : "Welcome back"}
+            </>
+          }
+          title={EMPLOYEE_HERO_HEADLINE}
+          description={EMPLOYEE_HERO_SUB}
+          image={
+            <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
+                <div className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl bg-black shadow-sm ring-1 ring-black/25 lg:max-w-[420px]">
+                  <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
+                </div>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground lg:text-3xl xl:text-4xl">
-                {EMPLOYEE_HERO_HEADLINE}
-              </h1>
-              <p className="max-w-xl text-sm leading-snug text-muted-foreground">{EMPLOYEE_HERO_SUB}</p>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              "flex w-full flex-col items-center justify-center lg:col-start-2 lg:row-start-2 lg:w-full lg:justify-self-stretch lg:self-center",
-            )}
-          >
-            <div
-              className={cn(
-                "relative isolate aspect-square w-full max-h-[min(36vh,255px)] max-w-[min(238px,70vw)] touch-manipulation overflow-hidden rounded-2xl",
-                "shadow-[0_20px_40px_-14px_rgba(0,0,0,0.42),0_0_0_1px_rgba(255,255,255,0.06),0_12px_40px_-12px_rgba(235,153,44,0.18)]",
-                "ring-1 ring-white/5",
-                "lg:max-h-[min(38vh,272px)] lg:max-w-full",
-              )}
-            >
-              <RealTimeTipPulseGraphic embedded className="h-full w-full min-h-0" />
-            </div>
-            <p className="mt-1.5 text-center text-[10px] font-medium uppercase tracking-wider text-muted-foreground/90 sm:text-[11px]">
-              Live QR activity
-            </p>
-          </div>
-
-          <div className="lg:col-start-1 lg:row-start-2 lg:min-w-0 lg:pr-2">
-            <div className="rounded-xl border border-border/70 bg-muted/30 px-3.5 py-2.5 dark:bg-muted/15 sm:px-4 sm:py-3">
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground sm:text-[11px]">
-                Total earnings (
-                {timeframe === "today" ? "today" : timeframe === "week" ? "this week" : "this month"})
-              </p>
-              <p className="mt-0.5 text-2xl font-bold tabular-nums tracking-tight text-foreground sm:text-3xl">
-                {formatEur(stats.amount)}
-              </p>
-              {goalPct != null ? (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {Math.round(Number(goalPct))}% toward monthly goal
-                </p>
-              ) : null}
-            </div>
-          </div>
-
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center lg:col-start-1 lg:row-start-3 lg:gap-2">
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => void handleQrQuickAction()}
-              disabled={slugLoading || generatingSlug}
-              className="w-fit shrink-0 bg-primary px-3 hover:bg-primary/90 sm:px-4"
-            >
-              {generatingSlug ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating…
-                </>
-              ) : (
-                <>
-                  <QrCode className="mr-2 h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
-                  {hasSlug ? "My QR" : "Get QR"}
-                </>
-              )}
-            </Button>
-            <Button variant="outline" size="sm" className="w-fit shrink-0 px-3 sm:px-4" asChild>
+          }
+          imageOverlay={false}
+          actions={
+            <Button variant="outline" asChild>
               <Link to="/employee/settings" className="gap-2">
-                <Settings className="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" />
+                <Settings className="h-4 w-4 shrink-0" />
                 Settings
               </Link>
             </Button>
-          </div>
-        </section>
+          }
+        />
       </div>
 
       <TracingBeam className="mx-auto max-w-7xl px-6 pt-2 sm:px-6 lg:px-8">
