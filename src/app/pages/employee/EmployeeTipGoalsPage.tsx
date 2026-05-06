@@ -112,7 +112,7 @@ export function EmployeeTipGoalsPage() {
   if (loading) return <CareTipPageLoader />;
 
   return (
-    <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+    <div className="caretip-container py-6">
       <div className="mb-6 flex items-center justify-between gap-3">
         <Link to="/employee/dashboard" className="rounded-lg p-2 transition-colors hover:bg-muted" aria-label="Back">
           <ChevronLeft className="h-5 w-5" />

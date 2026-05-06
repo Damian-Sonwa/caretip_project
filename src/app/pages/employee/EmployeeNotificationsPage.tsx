@@ -141,7 +141,7 @@ export function EmployeeNotificationsPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <div className="mx-auto max-w-3xl px-4 py-6">
+      <div className="caretip-container py-6">
         <div className="mb-6 flex items-center gap-3">
           <Link
             to="/employee/dashboard"

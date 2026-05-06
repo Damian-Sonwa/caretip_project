@@ -398,7 +398,7 @@ export function BusinessDashboard() {
         </div>
       )}
 
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      <div className="caretip-container pt-6">
         <FixPrompt
           id="pendingVerification"
           issueActive={pendingVerification === true}
@@ -449,7 +449,7 @@ export function BusinessDashboard() {
         />
       </div>
 
-      <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <TracingBeam className="caretip-container">
         <div className="space-y-6 py-6">
           <FixPrompt
             id="missingQR"

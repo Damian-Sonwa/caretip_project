@@ -37,7 +37,7 @@ export function HeroNestedCardSection({
 }: HeroNestedCardSectionProps) {
   return (
     <section id={id} className={cn("w-full bg-white pt-20 sm:pt-24", id && "scroll-mt-[80px]")}>
-      <div className="mx-auto w-full max-w-7xl px-6 pt-10 pb-16 sm:pt-14 sm:pb-20">
+      <div className="caretip-container pt-10 pb-16 sm:pt-14 sm:pb-20">
         {/* Outer frame */}
         <div className="rounded-[38px] bg-[#111111] p-3 shadow-[0_30px_120px_rgba(0,0,0,0.22)] sm:p-4">
           {/* Inner card */}

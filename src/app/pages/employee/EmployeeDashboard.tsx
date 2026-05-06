@@ -377,7 +377,7 @@ export function EmployeeDashboard() {
 
   return (
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+      <div className="caretip-container pt-6">
         <DashboardHero
           stackHeroOnMobile
           hideTabs
@@ -440,7 +440,7 @@ export function EmployeeDashboard() {
         />
       </div>
 
-      <TracingBeam className="mx-auto max-w-7xl px-4 pt-2 sm:px-6 lg:px-8">
+      <TracingBeam className="caretip-container pt-2">
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <LiveConnectionBadge status={connectionStatus} />
           <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
