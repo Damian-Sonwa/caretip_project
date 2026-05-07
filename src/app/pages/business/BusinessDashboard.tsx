@@ -15,6 +15,7 @@ import {
   ArrowRight,
   Store,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -154,6 +155,8 @@ export function BusinessDashboard() {
   const [timeframe, setTimeframe] = useState<"week" | "month" | "year">("month");
   const [exportLoading, setExportLoading] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
+  const [topPerformersExpanded, setTopPerformersExpanded] = useState(true);
+  const [employeeGoalsExpanded, setEmployeeGoalsExpanded] = useState(true);
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
   /** Stats fetch only — do not block rendering the dashboard shell. */
   const [statsLoading, setStatsLoading] = useState(true);
@@ -555,55 +558,71 @@ export function BusinessDashboard() {
           >
             <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
               <CardHeader>
-                <div className="flex items-start gap-3">
-                  <div className="rounded-lg bg-slate-50 p-2">
-                    <Target className="h-5 w-5 text-slate-600" />
+                <button
+                  type="button"
+                  onClick={() => setEmployeeGoalsExpanded((v) => !v)}
+                  className="flex w-full min-w-0 items-start justify-between gap-3 text-left"
+                  aria-expanded={employeeGoalsExpanded}
+                >
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className="rounded-lg bg-slate-50 p-2">
+                      <Target className="h-5 w-5 text-slate-600" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg">Employee tip goals</CardTitle>
+                      <CardDescription>
+                        Targets your team set for themselves. Progress uses tips in each person&apos;s current period
+                        (aligned with the performance chart timeframe for totals).
+                      </CardDescription>
+                    </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <CardTitle className="text-lg">Employee tip goals</CardTitle>
-                    <CardDescription>
-                      Targets your team set for themselves. Progress uses tips in each person&apos;s current period
-                      (aligned with the performance chart timeframe for totals).
-                    </CardDescription>
-                  </div>
-                </div>
+                  <ChevronDown
+                    className={cn(
+                      "mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform",
+                      employeeGoalsExpanded && "rotate-180",
+                    )}
+                    aria-hidden
+                  />
+                </button>
               </CardHeader>
-              <CardContent className="min-w-0 overflow-x-auto">
-                {!stats?.employeeGoals || stats.employeeGoals.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground">
-                    No staff have set a tip goal yet.
-                  </p>
-                ) : (
-                  <table className="w-full min-w-[640px] border-collapse text-sm">
-                    <thead>
-                      <tr className="border-b border-border text-left text-muted-foreground">
-                        <th className="pb-2 pr-3 font-medium">Team member</th>
-                        <th className="pb-2 pr-3 font-medium">Period</th>
-                        <th className="pb-2 pr-3 font-medium tabular-nums">Target</th>
-                        <th className="pb-2 pr-3 font-medium tabular-nums">Current</th>
-                        <th className="pb-2 pr-3 font-medium tabular-nums">Progress</th>
-                        <th className="pb-2 font-medium">Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {stats.employeeGoals.map((g) => (
-                        <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
-                          <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
-                          <td className="py-3 pr-3 text-muted-foreground">
-                            {GOAL_PERIOD_LABEL[g.goalPeriod]}
-                          </td>
-                          <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
-                          <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
-                          <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
-                          <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
-                            {goalStatusLabel(g.status)}
-                          </td>
+              {employeeGoalsExpanded ? (
+                <CardContent className="min-w-0 overflow-x-auto">
+                  {!stats?.employeeGoals || stats.employeeGoals.length === 0 ? (
+                    <p className="py-8 text-center text-sm text-muted-foreground">
+                      No staff have set a tip goal yet.
+                    </p>
+                  ) : (
+                    <table className="w-full min-w-[640px] border-collapse text-sm">
+                      <thead>
+                        <tr className="border-b border-border text-left text-muted-foreground">
+                          <th className="pb-2 pr-3 font-medium">Team member</th>
+                          <th className="pb-2 pr-3 font-medium">Period</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">Target</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">Current</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">Progress</th>
+                          <th className="pb-2 font-medium">Status</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </CardContent>
+                      </thead>
+                      <tbody>
+                        {stats.employeeGoals.map((g) => (
+                          <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
+                            <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
+                            <td className="py-3 pr-3 text-muted-foreground">
+                              {GOAL_PERIOD_LABEL[g.goalPeriod]}
+                            </td>
+                            <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
+                            <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
+                            <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
+                            <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
+                              {goalStatusLabel(g.status)}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </CardContent>
+              ) : null}
             </Card>
           </motion.div>
 
@@ -722,57 +741,73 @@ export function BusinessDashboard() {
             >
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-lg">Top performers</CardTitle>
+                  <button
+                    type="button"
+                    onClick={() => setTopPerformersExpanded((v) => !v)}
+                    className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+                    aria-expanded={topPerformersExpanded}
+                  >
+                    <CardTitle className="text-lg">Top performers</CardTitle>
+                    <ChevronDown
+                      className={cn(
+                        "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
+                        topPerformersExpanded && "rotate-180",
+                      )}
+                      aria-hidden
+                    />
+                  </button>
                   <Link
                     to="/dashboard/staff-management"
-                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
+                    className="ml-3 flex shrink-0 items-center gap-1 text-sm font-medium text-foreground hover:underline"
                   >
                     View all
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {topEmployees.length === 0 ? (
-                      <p className="py-6 text-center text-sm text-muted-foreground">No employees yet</p>
-                    ) : (
-                      topEmployees.map((employee, index) => (
-                        <div
-                          key={employee.id}
-                          className="flex flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white p-4 sm:flex-row sm:items-center sm:gap-4"
-                        >
-                          <div className="flex min-w-0 flex-1 items-center gap-3">
-                            <div className="relative">
-                              <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
-                              {index === 0 && (
-                                <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                  <Award className="h-4 w-4" />
-                                </div>
-                              )}
+                {topPerformersExpanded ? (
+                  <CardContent>
+                    <div className="space-y-3">
+                      {topEmployees.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">No employees yet</p>
+                      ) : (
+                        topEmployees.map((employee, index) => (
+                          <div
+                            key={employee.id}
+                            className="flex flex-col gap-3 rounded-lg border border-[#E5E7EB] bg-white p-4 sm:flex-row sm:items-center sm:gap-4"
+                          >
+                            <div className="flex min-w-0 flex-1 items-center gap-3">
+                              <div className="relative">
+                                <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
+                                {index === 0 && (
+                                  <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                                    <Award className="h-4 w-4" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="truncate font-semibold text-foreground">{employee.name}</h3>
+                                <p className="truncate text-sm text-muted-foreground">{employee.role}</p>
+                              </div>
                             </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="truncate font-semibold text-foreground">{employee.name}</h3>
-                              <p className="truncate text-sm text-muted-foreground">{employee.role}</p>
+                            <div className="shrink-0 text-left sm:text-right">
+                              <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
+                              <div className="flex items-center justify-end gap-1 text-sm">
+                                {employee.rating != null ? (
+                                  <>
+                                    <Star className="h-3 w-3 fill-primary text-primary" />
+                                    <span className="text-muted-foreground">{employee.rating}</span>
+                                  </>
+                                ) : (
+                                  <span className="text-xs text-muted-foreground">New member</span>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <div className="shrink-0 text-left sm:text-right">
-                            <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
-                            <div className="flex items-center justify-end gap-1 text-sm">
-                              {employee.rating != null ? (
-                                <>
-                                  <Star className="h-3 w-3 fill-primary text-primary" />
-                                  <span className="text-muted-foreground">{employee.rating}</span>
-                                </>
-                              ) : (
-                                <span className="text-xs text-muted-foreground">New member</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                ) : null}
               </Card>
             </motion.div>
 
