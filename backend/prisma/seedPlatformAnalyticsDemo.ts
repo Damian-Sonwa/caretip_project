@@ -180,8 +180,8 @@ async function main() {
   // Generate realistic activity: some days quiet, weekends busier.
   const transactions: Array<{
     amount: number;
-    status: "success" | "pending";
-    payoutStatus: "pending" | "not_applicable";
+    status: "success" | "pending" | "failed";
+    payoutStatus: "pending" | "failed" | "not_applicable";
     employeeId: string;
     businessId: string;
     createdAt: Date;
@@ -198,10 +198,12 @@ async function main() {
 
     for (let t = 0; t < dayTxCount; t += 1) {
       const emp = pick(createdEmployees);
-      const isSuccess = Math.random() < 0.86;
+      const roll = Math.random();
+      const status: "success" | "pending" | "failed" =
+        roll < 0.82 ? "success" : roll < 0.92 ? "pending" : "failed";
       const amount =
         Math.round(
-          (Math.random() * 28 + 4 + (isSuccess ? Math.random() * 2 : 0)) * 100,
+          (Math.random() * 28 + 4 + (status === "success" ? Math.random() * 2 : 0)) * 100,
         ) / 100;
 
       const createdAt = new Date(day);
@@ -209,8 +211,8 @@ async function main() {
 
       transactions.push({
         amount,
-        status: isSuccess ? "success" : "pending",
-        payoutStatus: isSuccess ? "pending" : "not_applicable",
+        status,
+        payoutStatus: status === "success" ? "pending" : status === "failed" ? "failed" : "not_applicable",
         employeeId: emp.id,
         businessId: emp.businessId,
         createdAt,
@@ -218,8 +220,14 @@ async function main() {
     }
   }
 
-  // CreateMany for speed; duplicates are fine (this is demo analytics, not idempotent).
-  // If you want to rerun, either clear tips first or accept more activity (charts still look realistic).
+  // Idempotent-ish per day: remove prior seed tips in the same date window, then insert fresh.
+  // This keeps charts stable on reruns without touching real production data (script is env-guarded).
+  await prisma.transaction.deleteMany({
+    where: {
+      createdAt: { gte: start, lte: new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1) },
+      stripePaymentIntentId: null,
+    },
+  });
   if (transactions.length > 0) {
     await prisma.transaction.createMany({ data: transactions });
   }

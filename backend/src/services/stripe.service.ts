@@ -363,6 +363,13 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
   await emitTipSocket(tip.id);
 }
 
+export async function handlePaymentFailed(paymentIntentId: string): Promise<void> {
+  await prisma.transaction.updateMany({
+    where: { stripePaymentIntentId: paymentIntentId, status: "pending" },
+    data: { status: "failed" },
+  });
+}
+
 /**
  * Persist tip from Stripe Checkout (idempotent on payment_intent id).
  * Alias for integrations that prefer an explicit name.

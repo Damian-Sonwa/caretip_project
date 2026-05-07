@@ -4,6 +4,7 @@ import {
   verifyWebhookSignature,
   handleSuccessfulTipPayment,
   handlePaymentSuccess,
+  handlePaymentFailed,
 } from "../services/stripe.service.js";
 import { logServerError } from "../utils/httpErrors.js";
 
@@ -37,6 +38,14 @@ router.post("/stripe", async (req: Request, res: Response) => {
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       await handlePaymentSuccess(paymentIntent.id);
+    }
+    if (event.type === "payment_intent.payment_failed") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      await handlePaymentFailed(paymentIntent.id);
+    }
+    if (event.type === "payment_intent.canceled") {
+      const paymentIntent = event.data.object as Stripe.PaymentIntent;
+      await handlePaymentFailed(paymentIntent.id);
     }
   } catch (err) {
     logServerError("stripe.webhook.handler", err);
