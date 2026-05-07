@@ -52,6 +52,77 @@ async function main() {
     },
   });
 
+  // Ensure walkthrough/demo accounts used in the UI exist and have visible dashboard data.
+  const demoManagerEmail = "demo@caretip.de";
+  const demoEmployeeEmail = "employee@caretip.de";
+
+  const demoManager = await prisma.user.upsert({
+    where: { email: demoManagerEmail },
+    update: { role: "MANAGER", isPlatformAdmin: false, isActive: true, emailVerified: true },
+    create: {
+      email: demoManagerEmail,
+      passwordHash,
+      role: "MANAGER",
+      isPlatformAdmin: false,
+      isActive: true,
+      emailVerified: true,
+      hasCompletedOnboarding: true,
+    },
+  });
+
+  const demoBusiness = await prisma.business.upsert({
+    where: { userId: demoManager.id },
+    update: { name: "CareTip Demo Venue", slug: "caretip-demo-venue", verificationStatus: "verified" },
+    create: {
+      name: "CareTip Demo Venue",
+      slug: "caretip-demo-venue",
+      userId: demoManager.id,
+      verificationStatus: "verified",
+      inviteCode: "DEMO-DE",
+      businessType: "Restaurant",
+      location: "Berlin, Germany",
+      contactEmail: demoManagerEmail,
+      legalContactName: "Demo Manager",
+    },
+  });
+
+  const demoEmpUser = await prisma.user.upsert({
+    where: { email: demoEmployeeEmail },
+    update: { role: "EMPLOYEE", isPlatformAdmin: false, isActive: true, emailVerified: true },
+    create: {
+      email: demoEmployeeEmail,
+      passwordHash,
+      role: "EMPLOYEE",
+      isPlatformAdmin: false,
+      isActive: true,
+      emailVerified: true,
+      hasCompletedOnboarding: true,
+    },
+  });
+
+  const demoEmployee = await prisma.employee.upsert({
+    where: { userId: demoEmpUser.id },
+    update: {
+      name: "Demo Employee",
+      jobTitle: "Server",
+      slug: "caretip-demo-employee",
+      businessId: demoBusiness.id,
+      isActive: true,
+      activationStatus: "active",
+      monthlyGoal: 350,
+    },
+    create: {
+      name: "Demo Employee",
+      jobTitle: "Server",
+      slug: "caretip-demo-employee",
+      businessId: demoBusiness.id,
+      userId: demoEmpUser.id,
+      isActive: true,
+      activationStatus: "active",
+      monthlyGoal: 350,
+    },
+  });
+
   const businessNames = [
     "Cafe Sonnenberg",
     "The Copper Spoon",
@@ -232,8 +303,77 @@ async function main() {
     await prisma.transaction.createMany({ data: transactions });
   }
 
+  // Ensure demo@caretip.de / employee@caretip.de dashboards always show tips + goal in the *current month*.
+  const now = new Date();
+  const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));
+  await prisma.employeeGoal.upsert({
+    where: { id: "seed-demo-employee-goal-monthly" },
+    update: {
+      employeeId: demoEmployee.id,
+      name: "Monthly tip goal",
+      goalAmount: 350,
+      goalPeriod: "monthly",
+      startDate: monthStart,
+      status: "active",
+    },
+    create: {
+      id: "seed-demo-employee-goal-monthly",
+      employeeId: demoEmployee.id,
+      name: "Monthly tip goal",
+      goalAmount: 350,
+      goalPeriod: "monthly",
+      startDate: monthStart,
+      status: "active",
+    },
+  });
+
+  const demoTips: Array<{
+    id: string;
+    amount: number;
+    status: "success" | "pending" | "failed";
+    payoutStatus: "pending" | "failed" | "not_applicable";
+    employeeId: string;
+    businessId: string;
+    createdAt: Date;
+    stripePaymentIntentId: string | null;
+  }> = [];
+  for (let i = 0; i < 18; i += 1) {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() - (i % 12));
+    d.setUTCHours(12 + (i % 6), 10 + (i % 40), 0, 0);
+    const roll = i % 10;
+    const status: "success" | "pending" | "failed" = roll < 8 ? "success" : roll === 8 ? "pending" : "failed";
+    demoTips.push({
+      id: `seed-demo-tip-${String(i + 1).padStart(3, "0")}`,
+      amount: Math.round((6 + Math.random() * 22) * 100) / 100,
+      status,
+      payoutStatus: status === "success" ? "pending" : status === "failed" ? "failed" : "not_applicable",
+      employeeId: demoEmployee.id,
+      businessId: demoBusiness.id,
+      createdAt: d,
+      stripePaymentIntentId: null,
+    });
+  }
+  for (const t of demoTips) {
+    await prisma.transaction.upsert({
+      where: { id: t.id },
+      update: {
+        amount: t.amount,
+        status: t.status,
+        payoutStatus: t.payoutStatus,
+        employeeId: t.employeeId,
+        businessId: t.businessId,
+        createdAt: t.createdAt,
+        stripePaymentIntentId: null,
+      },
+      create: t,
+    });
+  }
+
   console.log("Platform analytics demo seed completed.");
   console.log(`- Admin ensured: admin@caretip.de (password: ${defaultPassword})`);
+  console.log(`- Demo manager ensured: ${demoManagerEmail}`);
+  console.log(`- Demo employee ensured: ${demoEmployeeEmail}`);
   console.log(`- Businesses created/updated: ${createdBusinesses.length}`);
   console.log(`- Employees created/updated: ${createdEmployees.length}`);
   console.log(`- Tips inserted: ${transactions.length}`);
