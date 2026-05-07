@@ -314,9 +314,18 @@ function TipVolumeChart({
   return (
     <ChartContainer config={config} className="aspect-auto h-[260px]">
       {showTop ? (
-        <BarChart data={topBars} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
+        <BarChart data={topBars} margin={{ left: 6, right: 6, top: 12, bottom: 26 }}>
           <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" tickMargin={8} interval={0} tickFormatter={(v) => String(v).slice(0, 10)} />
+          <XAxis
+            dataKey="name"
+            tickMargin={10}
+            interval="preserveStartEnd"
+            tick={{ fontSize: 11 }}
+            angle={-28}
+            height={48}
+            textAnchor="end"
+            tickFormatter={(v) => String(v).slice(0, 12)}
+          />
           <YAxis tickFormatter={formatCompact} width={40} />
           <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
           <Bar dataKey="tipsEur" fill="var(--color-tipsEur)" radius={[10, 10, 0, 0]} />
