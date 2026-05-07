@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 
 export type PlatformAnalyticsResponse = {
@@ -48,6 +49,29 @@ function eachDayIso(start: Date, end: Date): string[] {
   return out;
 }
 
+async function resolveCreatedAtColumn(tableName: string): Promise<string | null> {
+  // Some deployed DBs historically used camelCase columns; newer ones use snake_case via @map("created_at").
+  // Detect without crashing so analytics stays accurate across environments.
+  const rows = await prisma.$queryRaw<Array<{ column_name: string }>>(Prisma.sql`
+    SELECT column_name
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = ${tableName}
+      AND column_name IN ('created_at', 'createdAt')
+    ORDER BY CASE column_name WHEN 'created_at' THEN 0 ELSE 1 END;
+  `);
+  const col = rows?.[0]?.column_name;
+  if (col === "created_at" || col === "createdAt") return col;
+  return null;
+}
+
+function colIdent(col: string) {
+  // Safe identifier injection from a tiny allowlist.
+  if (col === "created_at") return Prisma.raw("created_at");
+  if (col === "createdAt") return Prisma.raw("\"createdAt\"");
+  throw new Error(`Unsupported column identifier: ${col}`);
+}
+
 /** Analytics aggregates for Super Admin dashboard charts (Postgres/Supabase). */
 export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<PlatformAnalyticsResponse> {
   const rangeDays = clampDays(input?.days, 30);
@@ -57,6 +81,12 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
   const start = new Date(end);
   start.setDate(start.getDate() - (rangeDays - 1));
   start.setHours(0, 0, 0, 0);
+
+  const [userCreatedCol, bizCreatedCol, tipCreatedCol] = await Promise.all([
+    resolveCreatedAtColumn("User"),
+    resolveCreatedAtColumn("businesses"),
+    resolveCreatedAtColumn("tips"),
+  ]);
 
   const [managerCount, employeeCount, adminCount] = await Promise.all([
     prisma.user.count({ where: { role: "MANAGER" } }),
@@ -81,39 +111,50 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
   }
 
   // Safer production SQL (no generate_series): aggregate per-table and fill gaps in JS.
-  const [usersDaily, businessesDaily, tipsDaily, tipVolumeDaily] = await Promise.all([
-    prisma.$queryRaw<Array<{ d: string; c: number }>>`
-      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
-      FROM "User"
-      WHERE created_at >= ${start} AND created_at <= ${end}
-      GROUP BY 1
-      ORDER BY 1 ASC;
-    `,
-    prisma.$queryRaw<Array<{ d: string; c: number }>>`
-      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
-      FROM businesses
-      WHERE created_at >= ${start} AND created_at <= ${end}
-      GROUP BY 1
-      ORDER BY 1 ASC;
-    `,
-    prisma.$queryRaw<Array<{ d: string; c: number }>>`
-      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
-      FROM tips
-      WHERE created_at >= ${start} AND created_at <= ${end}
-      GROUP BY 1
-      ORDER BY 1 ASC;
-    `,
-    prisma.$queryRaw<Array<{ d: string; tips_eur: number; tip_count: number }>>`
-      SELECT
-        date_trunc('day', created_at)::date::text AS d,
-        COALESCE(SUM(amount), 0)::float AS tips_eur,
-        COUNT(*)::int AS tip_count
-      FROM tips
-      WHERE status = 'success' AND created_at >= ${start} AND created_at <= ${end}
-      GROUP BY 1
-      ORDER BY 1 ASC;
-    `,
-  ]);
+  const usersDaily = userCreatedCol
+    ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
+        SELECT date_trunc('day', ${colIdent(userCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        FROM "User"
+        WHERE ${colIdent(userCreatedCol)} >= ${start} AND ${colIdent(userCreatedCol)} <= ${end}
+        GROUP BY 1
+        ORDER BY 1 ASC;
+      `)
+    : [];
+
+  const businessesDaily = bizCreatedCol
+    ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
+        SELECT date_trunc('day', ${colIdent(bizCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        FROM businesses
+        WHERE ${colIdent(bizCreatedCol)} >= ${start} AND ${colIdent(bizCreatedCol)} <= ${end}
+        GROUP BY 1
+        ORDER BY 1 ASC;
+      `)
+    : [];
+
+  const tipsDaily = tipCreatedCol
+    ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
+        SELECT date_trunc('day', ${colIdent(tipCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        FROM tips
+        WHERE ${colIdent(tipCreatedCol)} >= ${start} AND ${colIdent(tipCreatedCol)} <= ${end}
+        GROUP BY 1
+        ORDER BY 1 ASC;
+      `)
+    : [];
+
+  const tipVolumeDaily = tipCreatedCol
+    ? await prisma.$queryRaw<Array<{ d: string; tips_eur: number; tip_count: number }>>(Prisma.sql`
+        SELECT
+          date_trunc('day', ${colIdent(tipCreatedCol)})::date::text AS d,
+          COALESCE(SUM(amount), 0)::float AS tips_eur,
+          COUNT(*)::int AS tip_count
+        FROM tips
+        WHERE status = 'success'
+          AND ${colIdent(tipCreatedCol)} >= ${start}
+          AND ${colIdent(tipCreatedCol)} <= ${end}
+        GROUP BY 1
+        ORDER BY 1 ASC;
+      `)
+    : [];
 
   const dayKeys = eachDayIso(start, end);
   const mapCount = (rows: Array<{ d: string; c: number }>) => {
