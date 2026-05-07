@@ -98,7 +98,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
     ) b ON b.d = days.d
     LEFT JOIN (
       SELECT date_trunc('day', created_at)::date AS d, COUNT(*) AS c
-      FROM transactions
+      FROM tips
       WHERE created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
     ) t ON t.d = days.d
@@ -118,7 +118,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
     FROM days
     LEFT JOIN (
       SELECT date_trunc('day', created_at)::date AS d, SUM(amount)::float AS sum_amount, COUNT(*) AS c
-      FROM transactions
+      FROM tips
       WHERE status = 'success' AND created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
     ) v ON v.d = days.d
