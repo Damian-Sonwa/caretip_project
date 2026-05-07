@@ -216,6 +216,11 @@ model Business {
   inviteCodeExpiresAt DateTime? @map("invite_code_expires_at")
   stripeAccountId     String?   @map("stripe_account_id")
   userId              String    @unique @map("user_id")
+  /**
+   * IANA timezone used for all dashboard analytics/ranges (e.g. "Europe/Berlin").
+   * Timestamps are stored in UTC; queries translate business-local boundaries to UTC.
+   */
+  timezone            String    @default("Europe/Berlin") @map("timezone")
 
   verificationStatus       BusinessVerificationStatus @default(pending) @map("verification_status")
   taxId                    String?                    @map("tax_id")

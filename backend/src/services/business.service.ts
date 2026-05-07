@@ -6,6 +6,11 @@ import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/sock
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import {
+  businessDayKey,
+  businessUtcRangeForTimeframe,
+  sanitizeIanaTimezone,
+} from "../utils/businessTime.js";
 
 /** Avoid collision with SPA routes at `/{slug}` and legacy `/business/{slug}` paths. */
 const RESERVED_BUSINESS_SLUGS = new Set([
@@ -191,45 +196,15 @@ export async function validateInviteCode(code: string): Promise<{ ok: boolean; b
 
 export type BusinessDashboardTimeframe = "week" | "month" | "year" | "all";
 
-function utcRangeForTimeframe(
-  tf: BusinessDashboardTimeframe,
-  now = new Date()
-): { start: Date; end: Date } | null {
-  if (tf === "all") return null;
-
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  const d = now.getUTCDate();
-
-  if (tf === "year") {
-    return {
-      start: new Date(Date.UTC(y, 0, 1, 0, 0, 0, 0)),
-      end: new Date(Date.UTC(y, 11, 31, 23, 59, 59, 999)),
-    };
-  }
-  if (tf === "month") {
-    return {
-      start: new Date(Date.UTC(y, m, 1, 0, 0, 0, 0)),
-      end: new Date(Date.UTC(y, m + 1, 0, 23, 59, 59, 999)),
-    };
-  }
-  const day = now.getUTCDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  const monday = new Date(Date.UTC(y, m, d + mondayOffset, 0, 0, 0, 0));
-  const sunday = new Date(monday);
-  sunday.setUTCDate(monday.getUTCDate() + 6);
-  sunday.setUTCHours(23, 59, 59, 999);
-  return { start: monday, end: sunday };
-}
-
 function buildDailyTipDistribution(
   tipRows: { amount: unknown; createdAt: Date }[],
   tf: BusinessDashboardTimeframe,
-  rangeStart: Date
+  rangeStartUtc: Date,
+  businessTimezone: string,
 ): { day: string; amount: number }[] {
   const byDay = new Map<string, number>();
   for (const t of tipRows) {
-    const key = t.createdAt.toISOString().slice(0, 10);
+    const key = businessDayKey(t.createdAt, businessTimezone);
     byDay.set(key, (byDay.get(key) ?? 0) + Number(t.amount));
   }
 
@@ -237,11 +212,11 @@ function buildDailyTipDistribution(
 
   if (tf === "week") {
     const out: { day: string; amount: number }[] = [];
-    const start = new Date(rangeStart);
+    const start = new Date(rangeStartUtc);
     for (let i = 0; i < 7; i++) {
       const cur = new Date(start);
       cur.setUTCDate(start.getUTCDate() + i);
-      const key = cur.toISOString().slice(0, 10);
+      const key = businessDayKey(cur, businessTimezone);
       out.push({ day: wdShort[i], amount: byDay.get(key) ?? 0 });
     }
     return out;
@@ -249,12 +224,12 @@ function buildDailyTipDistribution(
 
   if (tf === "month") {
     const out: { day: string; amount: number }[] = [];
-    const y = rangeStart.getUTCFullYear();
-    const mo = rangeStart.getUTCMonth();
+    const y = rangeStartUtc.getUTCFullYear();
+    const mo = rangeStartUtc.getUTCMonth();
     const daysInMonth = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
     for (let dom = 1; dom <= daysInMonth; dom++) {
       const cur = new Date(Date.UTC(y, mo, dom));
-      const key = cur.toISOString().slice(0, 10);
+      const key = businessDayKey(cur, businessTimezone);
       out.push({ day: String(dom), amount: byDay.get(key) ?? 0 });
     }
     return out;
@@ -279,6 +254,7 @@ export async function getBusinessStats(
       name: true,
       slug: true,
       verificationStatus: true,
+      timezone: true,
     },
   });
 
@@ -286,15 +262,16 @@ export async function getBusinessStats(
     throw new Error("Business not found");
   }
 
-  const range = utcRangeForTimeframe(timeframe);
-  const rangeStart = range?.start ?? new Date(0);
-  const rangeEnd = range?.end ?? new Date(8640000000000000);
+  const tz = sanitizeIanaTimezone(business.timezone);
+  const range = businessUtcRangeForTimeframe(timeframe === "all" ? "all" : timeframe, tz);
+  const rangeStart = range?.startUtc ?? new Date(0);
+  const rangeEnd = range?.endUtc ?? new Date(8640000000000000);
 
   const tipRows = await prisma.transaction.findMany({
     where: {
       businessId,
       status: "success",
-      ...(range ? { createdAt: { gte: range.start, lte: range.end } } : {}),
+      ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
     },
     select: { amount: true, employeeId: true, createdAt: true },
   });
@@ -305,7 +282,8 @@ export async function getBusinessStats(
   const dailyTipDistribution = buildDailyTipDistribution(
     tipRows,
     timeframe,
-    range?.start ?? rangeStart
+    rangeStart,
+    tz,
   );
 
   const tipsByEmp = new Map<string, { total: number; count: number }>();
