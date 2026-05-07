@@ -55,7 +55,16 @@ import {
 } from "../../lib/devAnalyticsMocks";
 import aceHeroImage from "../../../../images/ACE.png";
 
-const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
+// Match Platform Admin dashboard analytics palette (premium, consistent).
+const BUSINESS_CHART_COLORS = [
+  "#197278", // brand teal
+  "#22d3ee", // cyan
+  "#a78bfa", // purple
+  "#34d399", // emerald
+  "#f59e0b", // amber
+  "#fb7185", // red
+  "#94a3b8", // slate
+] as const;
 
 const BUSINESS_HERO_HEADLINE = "Team Performance Overview";
 const BUSINESS_HERO_SUB = "Track team growth in real time.";
@@ -342,7 +351,7 @@ export function BusinessDashboard() {
 
   const employeePerformance = useMemo(() => {
     if (devDemo) {
-      return devMockBusinessEmployeePerformance(CHART_COLORS);
+      return devMockBusinessEmployeePerformance([...BUSINESS_CHART_COLORS]);
     }
     const list = [...(stats?.employees ?? [])].sort((a, b) => b.tipsTotal - a.tipsTotal);
     return list.map((e, i) => ({
@@ -352,7 +361,7 @@ export function BusinessDashboard() {
           : e.name,
       tips: e.tipsTotal,
       rating: e.rating ?? 0,
-      color: CHART_COLORS[i % CHART_COLORS.length],
+      color: BUSINESS_CHART_COLORS[i % BUSINESS_CHART_COLORS.length],
     }));
   }, [devDemo, stats?.employees]);
 
@@ -632,7 +641,7 @@ export function BusinessDashboard() {
                               color: "#000000",
                             }}
                           />
-                          <Bar dataKey="amount" fill="#EB992C" radius={[8, 8, 0, 0]} />
+                          <Bar dataKey="amount" fill="#197278" radius={[8, 8, 0, 0]} />
                         </BarChart>
                       </ResponsiveContainer>
                     </div>
