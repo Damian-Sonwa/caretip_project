@@ -619,7 +619,7 @@ export function StaffManagementPage() {
                 variant="outline"
               >
                 <Plus className="mr-2 h-4 w-4 shrink-0" />
-                Add
+                Add Employee
               </Button>
             </>
           }

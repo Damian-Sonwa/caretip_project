@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as platformService from "../services/platform.service.js";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
+import * as platformAnalyticsService from "../services/platformAnalytics.service.js";
 import {
   logServerError,
   clientSafeMessage,
@@ -48,6 +49,19 @@ export async function getStats(_req: Request, res: Response) {
     logServerError("platform.getStats", err);
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't load platform statistics. Try again."),
+    });
+  }
+}
+
+export async function getAnalytics(req: Request, res: Response) {
+  try {
+    const days = req.query.days;
+    const data = await platformAnalyticsService.getPlatformAnalytics({ days });
+    return res.json(data);
+  } catch (err) {
+    logServerError("platform.getAnalytics", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load analytics right now. Try again."),
     });
   }
 }

@@ -28,6 +28,7 @@ function multerHandler(
 
 router.get("/health", platformController.getHealth);
 router.get("/stats", platformController.getStats);
+router.get("/analytics", platformController.getAnalytics);
 router.get("/transactions", platformController.listTransactions);
 router.get("/audit-logs", platformController.listAuditLogs);
 router.get("/businesses", platformController.listBusinesses);

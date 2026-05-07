@@ -16,9 +16,11 @@ import {
   fetchPlatformHealth,
   fetchPlatformStats,
   fetchPlatformBusinesses,
+  fetchPlatformAnalytics,
   type PlatformHealthResponse,
   type PlatformGlobalStats,
   type PlatformBusinessRow,
+  type PlatformAnalytics,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 import { formatEur } from "../lib/formatEur";
@@ -39,6 +41,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/app/components/ui/chart";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Legend,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface StatCardProps {
   title: string;
@@ -88,6 +111,210 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
   );
 }
 
+function AnalyticsCard({
+  title,
+  description,
+  children,
+}: {
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Card className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm">
+      <CardHeader className="border-b border-border bg-muted/40 pb-3">
+        <CardTitle className="text-base font-semibold text-foreground">{title}</CardTitle>
+        <CardDescription className="text-sm">{description}</CardDescription>
+      </CardHeader>
+      <CardContent className="p-4 sm:p-5">
+        <div className="h-[260px] w-full">{children}</div>
+      </CardContent>
+    </Card>
+  );
+}
+
+const ADMIN_CHART_COLORS = {
+  primary: "#197278", // brand teal
+  cyan: "#22d3ee",
+  purple: "#a78bfa",
+  emerald: "#34d399",
+  amber: "#f59e0b",
+  red: "#fb7185",
+  slate: "#94a3b8",
+} as const;
+
+function formatCompact(n: number): string {
+  try {
+    return new Intl.NumberFormat(undefined, { notation: "compact" }).format(n);
+  } catch {
+    return String(n);
+  }
+}
+
+function UserDistributionChart({
+  data,
+}: {
+  data: Array<{ role: "business" | "employee" | "platform_admin"; count: number }>;
+}) {
+  const config: ChartConfig = {
+    business: { label: "Businesses", color: ADMIN_CHART_COLORS.primary },
+    employee: { label: "Employees", color: ADMIN_CHART_COLORS.cyan },
+    platform_admin: { label: "Platform admins", color: ADMIN_CHART_COLORS.purple },
+  };
+
+  const rows = data.map((d) => ({
+    name: config[d.role]?.label ?? d.role,
+    role: d.role,
+    value: d.count,
+    fill: `var(--color-${d.role})`,
+  }));
+
+  return (
+    <ChartContainer config={config} className="aspect-auto h-[260px]">
+      <PieChart>
+        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+        <Pie
+          data={rows}
+          dataKey="value"
+          nameKey="name"
+          innerRadius={62}
+          outerRadius={92}
+          paddingAngle={3}
+        >
+          {rows.map((r) => (
+            <Cell key={r.role} fill={r.fill} />
+          ))}
+        </Pie>
+        <Legend verticalAlign="bottom" height={24} />
+      </PieChart>
+    </ChartContainer>
+  );
+}
+
+function TipStatusChart({
+  data,
+}: {
+  data: Array<{ status: "success" | "pending" | "failed"; count: number }>;
+}) {
+  const config: ChartConfig = {
+    success: { label: "Success", color: ADMIN_CHART_COLORS.emerald },
+    pending: { label: "Pending", color: ADMIN_CHART_COLORS.amber },
+    failed: { label: "Failed", color: ADMIN_CHART_COLORS.red },
+  };
+
+  const rows = data.map((d) => ({
+    name: config[d.status]?.label ?? d.status,
+    status: d.status,
+    value: d.count,
+    fill: `var(--color-${d.status})`,
+  }));
+
+  return (
+    <ChartContainer config={config} className="aspect-auto h-[260px]">
+      <PieChart>
+        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+        <Pie
+          data={rows}
+          dataKey="value"
+          nameKey="name"
+          innerRadius={62}
+          outerRadius={92}
+          paddingAngle={3}
+        >
+          {rows.map((r) => (
+            <Cell key={r.status} fill={r.fill} />
+          ))}
+        </Pie>
+        <Legend verticalAlign="bottom" height={24} />
+      </PieChart>
+    </ChartContainer>
+  );
+}
+
+function GrowthChart({
+  data,
+}: {
+  data: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }>;
+}) {
+  const config: ChartConfig = {
+    newUsers: { label: "New users", color: ADMIN_CHART_COLORS.primary },
+    newBusinesses: { label: "New venues", color: ADMIN_CHART_COLORS.purple },
+    newTips: { label: "New tips", color: ADMIN_CHART_COLORS.cyan },
+  };
+
+  return (
+    <ChartContainer config={config} className="aspect-auto h-[260px]">
+      <LineChart data={data} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
+        <CartesianGrid strokeDasharray="3 3" />
+        <XAxis dataKey="date" tickMargin={8} minTickGap={18} />
+        <YAxis tickFormatter={formatCompact} width={34} />
+        <ChartTooltip
+          content={
+            <ChartTooltipContent
+              indicator="dot"
+              labelFormatter={(v) => `Date: ${String(v ?? "")}`}
+            />
+          }
+        />
+        <Legend verticalAlign="bottom" height={24} />
+        <Line type="monotone" dataKey="newUsers" stroke="var(--color-newUsers)" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="newBusinesses" stroke="var(--color-newBusinesses)" strokeWidth={2} dot={false} />
+        <Line type="monotone" dataKey="newTips" stroke="var(--color-newTips)" strokeWidth={2} dot={false} />
+      </LineChart>
+    </ChartContainer>
+  );
+}
+
+function TipVolumeChart({
+  data,
+  top,
+}: {
+  data: Array<{ date: string; tipsEur: number; tipCount: number }>;
+  top: Array<{ businessId: string; businessName: string; tipsEur: number }>;
+}) {
+  const config: ChartConfig = {
+    tipsEur: { label: "Tips (EUR)", color: ADMIN_CHART_COLORS.emerald },
+    top: { label: "Top venues", color: ADMIN_CHART_COLORS.slate },
+  };
+
+  const topBars = (top ?? []).map((b) => ({
+    name: b.businessName,
+    tipsEur: b.tipsEur,
+  }));
+
+  // If there are no tips yet, still render a stable chart container.
+  const showTop = topBars.length > 0;
+
+  return (
+    <ChartContainer config={config} className="aspect-auto h-[260px]">
+      {showTop ? (
+        <BarChart data={topBars} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" tickMargin={8} interval={0} tickFormatter={(v) => String(v).slice(0, 10)} />
+          <YAxis tickFormatter={formatCompact} width={40} />
+          <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+          <Bar dataKey="tipsEur" fill="var(--color-tipsEur)" radius={[10, 10, 0, 0]} />
+        </BarChart>
+      ) : (
+        <AreaChart data={data} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="date" tickMargin={8} minTickGap={18} />
+          <YAxis tickFormatter={formatCompact} width={40} />
+          <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+          <Area
+            type="monotone"
+            dataKey="tipsEur"
+            stroke="var(--color-tipsEur)"
+            fill="var(--color-tipsEur)"
+            fillOpacity={0.15}
+            strokeWidth={2}
+          />
+        </AreaChart>
+      )}
+    </ChartContainer>
+  );
+}
+
 /**
  * Super Admin home: global platform stats + all businesses (live aggregates).
  * Renders inside SuperAdminLayout only (no business dashboard UI).
@@ -101,6 +328,7 @@ export function AdminDashboard() {
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
   const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
+  const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
@@ -137,8 +365,13 @@ export function AdminDashboard() {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     try {
       setServiceIssue(null);
-      const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
+      const [s, b, a] = await Promise.all([
+        fetchPlatformStats(),
+        fetchPlatformBusinesses(),
+        fetchPlatformAnalytics(30),
+      ]);
       setStats(s);
+      setAnalytics(a);
       setBusinesses(
         [...b.businesses].sort((a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0)),
       );
@@ -255,6 +488,46 @@ export function AdminDashboard() {
             delay={0.25}
           />
         </div>
+
+        {/* Analytics charts */}
+        {analytics ? (
+          <motion.section
+            initial={{ y: 16, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.18 }}
+            className="mb-10"
+          >
+            <div className="mb-4 flex items-end justify-between gap-3">
+              <div className="min-w-0">
+                <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
+                <p className="text-sm text-muted-foreground">
+                  Last {analytics.rangeDays} days · live aggregates
+                </p>
+              </div>
+              <span className="text-xs font-medium text-muted-foreground">
+                Tip status uses all-time totals
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+              <AnalyticsCard title="User distribution" description="Accounts by role">
+                <UserDistributionChart data={analytics.userDistribution} />
+              </AnalyticsCard>
+
+              <AnalyticsCard title="Tip status distribution" description="Success vs pending vs failed">
+                <TipStatusChart data={analytics.tipStatus} />
+              </AnalyticsCard>
+
+              <AnalyticsCard title="Platform growth" description="New users, venues, and tips per day">
+                <GrowthChart data={analytics.growth} />
+              </AnalyticsCard>
+
+              <AnalyticsCard title="Tip volume (EUR)" description="Successful tips per day">
+                <TipVolumeChart data={analytics.tipVolume} top={analytics.topBusinessesByTips} />
+              </AnalyticsCard>
+            </div>
+          </motion.section>
+        ) : null}
 
         <motion.div
           initial={{ y: 20, opacity: 0 }}

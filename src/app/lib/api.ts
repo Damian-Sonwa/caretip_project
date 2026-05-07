@@ -1580,6 +1580,24 @@ export async function fetchPlatformStats(): Promise<PlatformGlobalStats> {
   });
 }
 
+export type PlatformAnalytics = {
+  rangeDays: number;
+  userDistribution: Array<{ role: "business" | "employee" | "platform_admin"; count: number }>;
+  tipStatus: Array<{ status: "success" | "pending" | "failed"; count: number }>;
+  growth: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }>;
+  tipVolume: Array<{ date: string; tipsEur: number; tipCount: number }>;
+  topBusinessesByTips: Array<{ businessId: string; businessName: string; tipsEur: number }>;
+};
+
+export async function fetchPlatformAnalytics(days = 30): Promise<PlatformAnalytics> {
+  const sp = new URLSearchParams();
+  sp.set("days", String(days));
+  return apiRequest<PlatformAnalytics>(apiPath(`/api/platform/analytics?${sp.toString()}`), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
 export interface GlobalTransactionRow {
   id: string;
   amountEur: number;
