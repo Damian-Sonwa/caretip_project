@@ -365,16 +365,20 @@ export function AdminDashboard() {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     try {
       setServiceIssue(null);
-      const [s, b, a] = await Promise.all([
-        fetchPlatformStats(),
-        fetchPlatformBusinesses(),
-        fetchPlatformAnalytics(30),
-      ]);
+      // Keep core dashboard (stats + KYC table) resilient even if analytics fails.
+      const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
       setStats(s);
-      setAnalytics(a);
       setBusinesses(
         [...b.businesses].sort((a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0)),
       );
+
+      try {
+        const a = await fetchPlatformAnalytics(30);
+        setAnalytics(a);
+      } catch (e) {
+        logClientError("AdminDashboard.analytics", e);
+        setAnalytics(null);
+      }
     } catch (err) {
       logClientError("AdminDashboard", err);
       const msg = err instanceof Error ? err.message : "";
