@@ -47,8 +47,21 @@ export async function getStats(_req: Request, res: Response) {
     return res.json(stats);
   } catch (err) {
     logServerError("platform.getStats", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load platform statistics. Try again."),
+    // Never crash the platform admin dashboard on aggregation errors.
+    // Return safe defaults so the UI can still render (and surface a FixPrompt).
+    return res.json({
+      totalVolumeEur: 0,
+      totalVolumeEurFormatted: "0.00",
+      transactionCount: 0,
+      successTransactionCount: 0,
+      businessesCount: 0,
+      employeesCount: 0,
+      locationsCount: 0,
+      activeUsersCount: 0,
+      businessesWithSuccessfulTips: 0,
+      platformTotalTipsFromBusinessRollupEur: 0,
+      platformTotalsConsistent: false,
+      warning: clientSafeMessage(err, "We couldn't load platform statistics. Try again."),
     });
   }
 }
@@ -60,8 +73,24 @@ export async function getAnalytics(req: Request, res: Response) {
     return res.json(data);
   } catch (err) {
     logServerError("platform.getAnalytics", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load analytics right now. Try again."),
+    // Safe empty analytics payload: charts must not break the admin dashboard.
+    const rangeDays = 30;
+    return res.json({
+      rangeDays,
+      userDistribution: [
+        { role: "business", count: 0 },
+        { role: "employee", count: 0 },
+        { role: "platform_admin", count: 0 },
+      ],
+      tipStatus: [
+        { status: "success", count: 0 },
+        { status: "pending", count: 0 },
+        { status: "failed", count: 0 },
+      ],
+      growth: [],
+      tipVolume: [],
+      topBusinessesByTips: [],
+      warning: clientSafeMessage(err, "We couldn't load analytics right now. Try again."),
     });
   }
 }
@@ -73,8 +102,10 @@ export async function listBusinesses(_req: Request, res: Response) {
     return res.json({ businesses });
   } catch (err) {
     logServerError("platform.listBusinesses", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load the business list. Try again."),
+    // Safe empty list: keep dashboard usable even when DB/schema is out of sync.
+    return res.json({
+      businesses: [],
+      warning: clientSafeMessage(err, "We couldn't load the business list. Try again."),
     });
   }
 }
