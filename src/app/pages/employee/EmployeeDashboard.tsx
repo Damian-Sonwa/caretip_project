@@ -397,7 +397,7 @@ export function EmployeeDashboard() {
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
                     // Mobile: compact media card, tighter height
-                    "aspect-[16/10] max-h-[210px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
+                    "aspect-[16/10] min-h-[220px] max-h-[260px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
                     // Desktop: keep existing rhythm
                     "lg:aspect-square lg:max-h-none lg:max-w-[420px] lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
                   )}
@@ -406,7 +406,7 @@ export function EmployeeDashboard() {
                   <img
                     src={coinsHero}
                     alt="Coins"
-                    className="h-full w-full object-cover"
+                    className="h-full w-full p-4 object-contain object-center"
                     draggable={false}
                     loading="eager"
                   />
