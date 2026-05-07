@@ -35,6 +35,19 @@ function dateIso(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
+function eachDayIso(start: Date, end: Date): string[] {
+  const out: string[] = [];
+  const cur = new Date(start);
+  cur.setHours(0, 0, 0, 0);
+  const stop = new Date(end);
+  stop.setHours(0, 0, 0, 0);
+  while (cur.getTime() <= stop.getTime()) {
+    out.push(dateIso(cur));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
 /** Analytics aggregates for Super Admin dashboard charts (Postgres/Supabase). */
 export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<PlatformAnalyticsResponse> {
   const rangeDays = clampDays(input?.days, 30);
@@ -67,63 +80,57 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
     }
   }
 
-  const growthRows = await prisma.$queryRaw<
-    Array<{
-      d: string;
-      new_users: number;
-      new_businesses: number;
-      new_tips: number;
-    }>
-  >`
-    WITH days AS (
-      SELECT generate_series(${start}::timestamptz, ${end}::timestamptz, interval '1 day')::date AS d
-    )
-    SELECT
-      days.d::text AS d,
-      COALESCE(u.c, 0)::int AS new_users,
-      COALESCE(b.c, 0)::int AS new_businesses,
-      COALESCE(t.c, 0)::int AS new_tips
-    FROM days
-    LEFT JOIN (
-      SELECT date_trunc('day', created_at)::date AS d, COUNT(*) AS c
+  // Safer production SQL (no generate_series): aggregate per-table and fill gaps in JS.
+  const [usersDaily, businessesDaily, tipsDaily, tipVolumeDaily] = await Promise.all([
+    prisma.$queryRaw<Array<{ d: string; c: number }>>`
+      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
       FROM "User"
       WHERE created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
-    ) u ON u.d = days.d
-    LEFT JOIN (
-      SELECT date_trunc('day', created_at)::date AS d, COUNT(*) AS c
+      ORDER BY 1 ASC;
+    `,
+    prisma.$queryRaw<Array<{ d: string; c: number }>>`
+      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
       FROM businesses
       WHERE created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
-    ) b ON b.d = days.d
-    LEFT JOIN (
-      SELECT date_trunc('day', created_at)::date AS d, COUNT(*) AS c
+      ORDER BY 1 ASC;
+    `,
+    prisma.$queryRaw<Array<{ d: string; c: number }>>`
+      SELECT date_trunc('day', created_at)::date::text AS d, COUNT(*)::int AS c
       FROM tips
       WHERE created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
-    ) t ON t.d = days.d
-    ORDER BY days.d ASC;
-  `;
-
-  const tipVolumeRows = await prisma.$queryRaw<
-    Array<{ d: string; tips_eur: number; tip_count: number }>
-  >`
-    WITH days AS (
-      SELECT generate_series(${start}::timestamptz, ${end}::timestamptz, interval '1 day')::date AS d
-    )
-    SELECT
-      days.d::text AS d,
-      COALESCE(v.sum_amount, 0)::float AS tips_eur,
-      COALESCE(v.c, 0)::int AS tip_count
-    FROM days
-    LEFT JOIN (
-      SELECT date_trunc('day', created_at)::date AS d, SUM(amount)::float AS sum_amount, COUNT(*) AS c
+      ORDER BY 1 ASC;
+    `,
+    prisma.$queryRaw<Array<{ d: string; tips_eur: number; tip_count: number }>>`
+      SELECT
+        date_trunc('day', created_at)::date::text AS d,
+        COALESCE(SUM(amount), 0)::float AS tips_eur,
+        COUNT(*)::int AS tip_count
       FROM tips
       WHERE status = 'success' AND created_at >= ${start} AND created_at <= ${end}
       GROUP BY 1
-    ) v ON v.d = days.d
-    ORDER BY days.d ASC;
-  `;
+      ORDER BY 1 ASC;
+    `,
+  ]);
+
+  const dayKeys = eachDayIso(start, end);
+  const mapCount = (rows: Array<{ d: string; c: number }>) => {
+    const m = new Map<string, number>();
+    for (const r of rows) m.set(String(r.d).slice(0, 10), Number(r.c ?? 0));
+    return m;
+  };
+  const mapUsers = mapCount(usersDaily);
+  const mapBiz = mapCount(businessesDaily);
+  const mapTips = mapCount(tipsDaily);
+  const mapTipVol = new Map<string, { tipsEur: number; tipCount: number }>();
+  for (const r of tipVolumeDaily) {
+    mapTipVol.set(String(r.d).slice(0, 10), {
+      tipsEur: Number(r.tips_eur ?? 0),
+      tipCount: Number(r.tip_count ?? 0),
+    });
+  }
 
   const topBusinesses = await prisma.transaction.groupBy({
     by: ["businessId"],
@@ -152,16 +159,16 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
       { role: "platform_admin", count: adminCount },
     ],
     tipStatus,
-    growth: growthRows.map((r) => ({
-      date: r.d.slice(0, 10),
-      newUsers: Number(r.new_users ?? 0),
-      newBusinesses: Number(r.new_businesses ?? 0),
-      newTips: Number(r.new_tips ?? 0),
+    growth: dayKeys.map((d) => ({
+      date: d,
+      newUsers: mapUsers.get(d) ?? 0,
+      newBusinesses: mapBiz.get(d) ?? 0,
+      newTips: mapTips.get(d) ?? 0,
     })),
-    tipVolume: tipVolumeRows.map((r) => ({
-      date: r.d.slice(0, 10),
-      tipsEur: Number(r.tips_eur ?? 0),
-      tipCount: Number(r.tip_count ?? 0),
+    tipVolume: dayKeys.map((d) => ({
+      date: d,
+      tipsEur: mapTipVol.get(d)?.tipsEur ?? 0,
+      tipCount: mapTipVol.get(d)?.tipCount ?? 0,
     })),
     topBusinessesByTips,
   };
