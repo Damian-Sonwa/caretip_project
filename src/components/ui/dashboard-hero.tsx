@@ -42,6 +42,11 @@ export type DashboardHeroProps = {
    * Large screens keep the two-column layout. Does not affect landing or marketing pages unless they pass this flag.
    */
   stackHeroOnMobile?: boolean;
+  /**
+   * Mobile-only alignment for stacked heroes.
+   * Use `center` for premium, zero-slant, centered hero cards (e.g. Business Team Performance).
+   */
+  mobileAlign?: "left" | "center";
 };
 
 /**
@@ -64,6 +69,7 @@ export function DashboardHero({
   hideTabs = false,
   actionsPlacement = "belowTabs",
   stackHeroOnMobile = false,
+  mobileAlign = "left",
 }: DashboardHeroProps) {
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
@@ -71,7 +77,12 @@ export function DashboardHero({
   const caption = imageCaption?.trim() ?? "";
 
   const badgeRow = (
-    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground">
+    <div
+      className={cn(
+        "inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground",
+        stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
+      )}
+    >
       {badge}
     </div>
   );
@@ -81,7 +92,10 @@ export function DashboardHero({
       className={cn(
         "text-balance break-words text-foreground",
         stackHeroOnMobile
-          ? "text-left text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl"
+          ? cn(
+              "text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl",
+              mobileAlign === "center" ? "text-center" : "text-left",
+            )
           : "text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl",
       )}
     >
@@ -91,7 +105,12 @@ export function DashboardHero({
 
   const taglineBlock =
     tagline ? (
-      <CardDescription className="max-w-xl shrink-0 break-words pt-0 text-left text-sm leading-snug text-muted-foreground line-clamp-1">
+      <CardDescription
+        className={cn(
+          "max-w-xl shrink-0 break-words pt-0 text-sm leading-snug text-muted-foreground line-clamp-1",
+          stackHeroOnMobile && mobileAlign === "center" ? "mx-auto text-center" : "text-left",
+        )}
+      >
         {tagline}
       </CardDescription>
     ) : null;
@@ -288,11 +307,23 @@ export function DashboardHero({
           <>
             {/* Mobile DOM order (CRITICAL): heading → image → supporting → actions. Do not rely on CSS order. */}
             <div className="dashboard-hero-container flex min-w-0 flex-col gap-4 p-0 lg:hidden">
-              <div className="flex min-w-0 flex-col gap-2.5 text-left">
-                <div className="min-h-0 space-y-3">
-                  {badgeRow}
-                  {titleRow}
-                </div>
+              <div
+                className={cn(
+                  "flex min-w-0 flex-col gap-2.5",
+                  mobileAlign === "center" ? "text-center" : "text-left",
+                )}
+              >
+                {mobileAlign === "center" ? (
+                  <div className="relative min-h-0 pt-10">
+                    <div className="absolute left-1/2 top-0 -translate-x-1/2">{badgeRow}</div>
+                    {titleRow}
+                  </div>
+                ) : (
+                  <div className="min-h-0 space-y-3">
+                    {badgeRow}
+                    {titleRow}
+                  </div>
+                )}
                 {/* Supporting text (mobile): keep it tight + single-line. */}
                 {taglineBlock ? <div className="-mt-1">{taglineBlock}</div> : null}
               </div>

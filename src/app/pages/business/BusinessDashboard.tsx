@@ -421,6 +421,8 @@ export function BusinessDashboard() {
           stackHeroOnMobile
           hideTabs
           actionsPlacement="belowText"
+          mobileAlign="center"
+          className="mb-8 lg:mb-6"
           badge={
             <>
               <Store className="h-3.5 w-3.5 text-foreground" />
@@ -451,7 +453,7 @@ export function BusinessDashboard() {
                   <img
                     src={aceHeroImage}
                     alt=""
-                    className="h-full w-full p-4 object-contain object-center"
+                    className="h-full w-full p-5 max-w-[85%] mx-auto object-contain object-center"
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"
