@@ -15,6 +15,7 @@ import {
   Sparkles,
   Settings,
   Target,
+  ChevronDown,
 } from "lucide-react";
 import {
   AreaChart,
@@ -124,6 +125,7 @@ export function EmployeeDashboard() {
   const [employeeRecordId, setEmployeeRecordId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
+  const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
 
   const refreshTipsQuiet = useCallback(async () => {
     const role = user?.role;
@@ -571,7 +573,21 @@ export function EmployeeDashboard() {
             >
               <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <CardTitle className="text-lg">Recent tips</CardTitle>
+                  <button
+                    type="button"
+                    onClick={() => setRecentTipsExpanded((v) => !v)}
+                    className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+                    aria-expanded={recentTipsExpanded}
+                  >
+                    <CardTitle className="text-lg">Recent tips</CardTitle>
+                    <ChevronDown
+                      className={cn(
+                        "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
+                        recentTipsExpanded && "rotate-180",
+                      )}
+                      aria-hidden
+                    />
+                  </button>
                   <Link
                     to="/employee/notifications"
                     className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
@@ -580,27 +596,29 @@ export function EmployeeDashboard() {
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {recentTips.length === 0 ? (
-                      <p className="py-6 text-center text-sm text-muted-foreground">No tips yet</p>
-                    ) : (
-                      recentTips.map((tip) => (
-                        <div
-                          key={tip.id}
-                          className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
-                        >
-                          <div className="min-w-0 flex-1">
-                            <p className="break-words font-semibold tabular-nums text-foreground">{formatEur(tip.amount)}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {tip.customer} • {tip.time}
-                            </p>
+                {recentTipsExpanded ? (
+                  <CardContent>
+                    <div className="space-y-3">
+                      {recentTips.length === 0 ? (
+                        <p className="py-6 text-center text-sm text-muted-foreground">No tips yet</p>
+                      ) : (
+                        recentTips.map((tip) => (
+                          <div
+                            key={tip.id}
+                            className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="break-words font-semibold tabular-nums text-foreground">{formatEur(tip.amount)}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {tip.customer} • {tip.time}
+                              </p>
+                            </div>
                           </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
+                        ))
+                      )}
+                    </div>
+                  </CardContent>
+                ) : null}
               </Card>
             </motion.div>
 
