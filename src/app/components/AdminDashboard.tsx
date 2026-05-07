@@ -11,6 +11,7 @@ import {
   UserCheck,
   CheckCircle,
   XCircle,
+  ChevronDown,
 } from "lucide-react";
 import {
   fetchPlatformHealth,
@@ -34,6 +35,7 @@ import { LiveConnectionBadge } from "./LiveConnectionBadge";
 import { NetworkOverviewHero } from "./NetworkOverviewHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
+import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
@@ -321,8 +323,8 @@ function TipVolumeChart({
             tickMargin={10}
             interval="preserveStartEnd"
             tick={{ fontSize: 11 }}
-            angle={-28}
-            height={48}
+            angle={-35}
+            height={58}
             textAnchor="end"
             tickFormatter={(v) => String(v).slice(0, 12)}
           />
@@ -366,6 +368,7 @@ export function AdminDashboard() {
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
+  const [businessesExpanded, setBusinessesExpanded] = useState(true);
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
 
@@ -613,103 +616,131 @@ export function AdminDashboard() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm"
         >
-          <div className="flex flex-col gap-3 border-b border-border bg-muted px-4 py-4 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setBusinessesExpanded((v) => !v)}
+            className="flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-4 py-4 text-left"
+            aria-expanded={businessesExpanded}
+          >
+            <div className="flex min-w-0 items-center gap-2">
               <Building2 className="h-5 w-5 text-foreground" />
-              <h3 className="text-lg font-semibold text-foreground">All businesses</h3>
+              <h3 className="truncate text-lg font-semibold text-foreground">
+                All businesses
+                <span className="ml-2 text-xs font-medium text-muted-foreground">
+                  (Open KYC &amp; verification)
+                </span>
+              </h3>
             </div>
-            <Link
-              to="/platform-admin/businesses"
-              className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
-            >
-              Open KYC &amp; verification
-            </Link>
-          </div>
-          {businesses.length > 0 && (
-            <div className="border-b border-border px-4 py-3">
-              <div className="relative max-w-md">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="search"
-                  value={businessSearchQuery}
-                  onChange={(e) => setBusinessSearchQuery(e.target.value)}
-                  placeholder="Search by business name, slug, or owner email…"
-                  autoComplete="off"
-                  aria-label="Filter businesses"
-                  className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
-                />
+            <div className="flex items-center gap-3">
+              <Link
+                to="/platform-admin/businesses"
+                onClick={(e) => e.stopPropagation()}
+                className="hidden text-sm font-medium text-foreground underline-offset-4 hover:underline sm:inline"
+              >
+                Open
+              </Link>
+              <ChevronDown
+                className={cn(
+                  "h-5 w-5 text-muted-foreground transition-transform",
+                  businessesExpanded && "rotate-180",
+                )}
+              />
+            </div>
+          </button>
+
+          {businessesExpanded ? (
+            <>
+              {businesses.length > 0 && (
+                <div className="border-b border-border px-4 py-3">
+                  <div className="relative max-w-md">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                      type="search"
+                      value={businessSearchQuery}
+                      onChange={(e) => setBusinessSearchQuery(e.target.value)}
+                      placeholder="Search by business name, slug, or owner email…"
+                      autoComplete="off"
+                      aria-label="Filter businesses"
+                      className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
+                    />
+                  </div>
+                </div>
+              )}
+              <div className="overflow-x-auto">
+                {businesses.length === 0 ? (
+                  <p className="py-12 text-center text-sm text-muted-foreground">No businesses yet.</p>
+                ) : filteredBusinesses.length === 0 ? (
+                  <p className="py-12 text-center text-sm text-muted-foreground">
+                    No businesses match your search.
+                  </p>
+                ) : (
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border bg-muted text-left">
+                        <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
+                        <th className="px-4 py-3 font-medium text-muted-foreground">Owner</th>
+                        <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                          Tips (EUR)
+                        </th>
+                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                          Staff / Loc.
+                        </th>
+                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredBusinesses.map((b) => (
+                        <tr key={b.id} className="border-b border-border hover:bg-muted/50">
+                          <td className="px-2 py-3 align-middle">
+                            <BusinessLogoMark
+                              logoPathOrUrl={b.logoPath ?? null}
+                              businessName={b.name}
+                              size="sm"
+                            />
+                          </td>
+                          <td className="px-4 py-3">
+                            <div className="font-medium text-foreground">{b.name}</div>
+                            <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
+                          </td>
+                          <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
+                          <td className="px-4 py-3">
+                            {b.verificationStatus === "verified" ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+                                <CheckCircle className="h-3.5 w-3.5" /> Verified
+                              </span>
+                            ) : b.verificationStatus === "rejected" ? (
+                              <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
+                                <XCircle className="h-3.5 w-3.5" /> Rejected
+                              </span>
+                            ) : (
+                              <span className="text-xs font-medium text-amber-700">Pending</span>
+                            )}
+                          </td>
+                          <td className="px-4 py-3 text-right tabular-nums">
+                            {formatEur(b.totalTipsEur ?? 0)}
+                          </td>
+                          <td className="px-4 py-3 text-right text-xs text-muted-foreground">
+                            {b.staffCount ?? 0} / {b.locationCount ?? 0}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <Link
+                              to={`/platform-admin/businesses/${b.id}`}
+                              className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
+                            >
+                              View
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
-            </div>
-          )}
-          <div className="overflow-x-auto">
-            {businesses.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">No businesses yet.</p>
-            ) : filteredBusinesses.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">
-                No businesses match your search.
-              </p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-muted text-left">
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Owner</th>
-                    <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      Tips (EUR)
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      Staff / Loc.
-                    </th>
-                    <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBusinesses.map((b) => (
-                    <tr key={b.id} className="border-b border-border hover:bg-muted/50">
-                      <td className="px-2 py-3 align-middle">
-                        <BusinessLogoMark logoPathOrUrl={b.logoPath ?? null} businessName={b.name} size="sm" />
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-medium text-foreground">{b.name}</div>
-                        <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
-                      </td>
-                      <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
-                      <td className="px-4 py-3">
-                        {b.verificationStatus === "verified" ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                            <CheckCircle className="h-3.5 w-3.5" /> Verified
-                          </span>
-                        ) : b.verificationStatus === "rejected" ? (
-                          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
-                            <XCircle className="h-3.5 w-3.5" /> Rejected
-                          </span>
-                        ) : (
-                          <span className="text-xs font-medium text-amber-700">Pending</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right tabular-nums">
-                        {formatEur(b.totalTipsEur ?? 0)}
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs text-muted-foreground">
-                        {b.staffCount ?? 0} / {b.locationCount ?? 0}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link
-                          to={`/platform-admin/businesses/${b.id}`}
-                          className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
+            </>
+          ) : null}
         </motion.div>
       </TracingBeam>
     </main>
