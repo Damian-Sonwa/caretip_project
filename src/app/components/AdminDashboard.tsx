@@ -160,28 +160,41 @@ function UserDistributionChart({
     business: { label: "Businesses", color: ADMIN_CHART_COLORS.primary },
     employee: { label: "Employees", color: ADMIN_CHART_COLORS.cyan },
     platform_admin: { label: "Platform admins", color: ADMIN_CHART_COLORS.purple },
+    empty: { label: "No data yet", color: ADMIN_CHART_COLORS.slate },
   };
 
-  const rows = data.map((d) => ({
-    name: config[d.role]?.label ?? d.role,
+  const rows: Array<{ name: string; role: string; value: number; fill: string }> = data.map((d) => ({
+    name: String(config[d.role]?.label ?? d.role),
     role: d.role,
-    value: d.count,
+    value: Number.isFinite(d.count) ? d.count : 0,
     fill: `var(--color-${d.role})`,
   }));
+  const total = rows.reduce((s, r) => s + (Number.isFinite(r.value) ? r.value : 0), 0);
+  const chartRows =
+    total > 0
+      ? rows
+      : [
+          {
+            name: "No data yet",
+            role: "empty",
+            value: 1,
+            fill: "var(--color-empty)",
+          },
+        ];
 
   return (
     <ChartContainer config={config} className="aspect-auto h-[260px]">
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
         <Pie
-          data={rows}
+          data={chartRows}
           dataKey="value"
           nameKey="name"
           innerRadius={62}
           outerRadius={92}
           paddingAngle={3}
         >
-          {rows.map((r) => (
+          {chartRows.map((r) => (
             <Cell key={r.role} fill={r.fill} />
           ))}
         </Pie>
@@ -200,28 +213,41 @@ function TipStatusChart({
     success: { label: "Success", color: ADMIN_CHART_COLORS.emerald },
     pending: { label: "Pending", color: ADMIN_CHART_COLORS.amber },
     failed: { label: "Failed", color: ADMIN_CHART_COLORS.red },
+    empty: { label: "No data yet", color: ADMIN_CHART_COLORS.slate },
   };
 
-  const rows = data.map((d) => ({
-    name: config[d.status]?.label ?? d.status,
+  const rows: Array<{ name: string; status: string; value: number; fill: string }> = data.map((d) => ({
+    name: String(config[d.status]?.label ?? d.status),
     status: d.status,
-    value: d.count,
+    value: Number.isFinite(d.count) ? d.count : 0,
     fill: `var(--color-${d.status})`,
   }));
+  const total = rows.reduce((s, r) => s + (Number.isFinite(r.value) ? r.value : 0), 0);
+  const chartRows =
+    total > 0
+      ? rows
+      : [
+          {
+            name: "No data yet",
+            status: "empty",
+            value: 1,
+            fill: "var(--color-empty)",
+          },
+        ];
 
   return (
     <ChartContainer config={config} className="aspect-auto h-[260px]">
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
         <Pie
-          data={rows}
+          data={chartRows}
           dataKey="value"
           nameKey="name"
           innerRadius={62}
           outerRadius={92}
           paddingAngle={3}
         >
-          {rows.map((r) => (
+          {chartRows.map((r) => (
             <Cell key={r.status} fill={r.fill} />
           ))}
         </Pie>
