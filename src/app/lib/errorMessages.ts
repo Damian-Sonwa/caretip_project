@@ -221,8 +221,21 @@ export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMe
   const normalized = message.trim();
   if (!normalized) return GENERIC_UNKNOWN_ERROR;
 
+  // Never leak ORM/database internals to the UI.
+  // Examples: "Could not save (P2010). Try again or run migrations in the backend."
+  // Keep the real error in logs (handled elsewhere), but show safe product copy here.
+  const lower = normalized.toLowerCase();
+  if (
+    /\bP\d{4}\b/.test(normalized) ||
+    lower.includes("prisma") ||
+    lower.includes("run migrations") ||
+    lower.includes("prismaclient") ||
+    lower.includes("raw query failed")
+  ) {
+    return "We couldn't load that data right now. Please try again in a moment.";
+  }
+
   if (options?.audience === "employee") {
-    const lower = normalized.toLowerCase();
     if (
       lower.includes("qr code will be available after business verification") ||
       lower.includes("qr code generation will be enabled after admin verification") ||

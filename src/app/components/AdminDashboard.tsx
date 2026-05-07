@@ -25,6 +25,7 @@ import {
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 import { formatEur } from "../lib/formatEur";
+import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
 import { PageLoader } from "./PageLoader";
@@ -452,7 +453,7 @@ export function AdminDashboard() {
       }
     } catch (err) {
       logClientError("AdminDashboard", err);
-      const msg = err instanceof Error ? err.message : "";
+      const msg = toUserFriendlyMessage(err);
       setStats((prev) => prev ?? ({} as PlatformGlobalStats));
       setBusinesses((prev) => prev ?? []);
       setAnalytics((prev) => prev ?? emptyAnalytics);
