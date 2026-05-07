@@ -157,6 +157,7 @@ export function BusinessDashboard() {
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const [topPerformersExpanded, setTopPerformersExpanded] = useState(true);
   const [employeeGoalsExpanded, setEmployeeGoalsExpanded] = useState(true);
+  const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
   /** Stats fetch only — do not block rendering the dashboard shell. */
   const [statsLoading, setStatsLoading] = useState(true);
@@ -820,53 +821,79 @@ export function BusinessDashboard() {
             >
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
                 <CardHeader>
-                  <CardTitle className="text-lg">Quick actions</CardTitle>
-                  <CardDescription>Common venue tasks</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]" asChild>
-                    <Link to="/dashboard/profile" className="gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
-                        <Building2 className="h-5 w-5 text-slate-600" />
-                      </span>
-                      Business profile
-                    </Link>
-                  </Button>
-                  <Button
-                    className="w-full justify-start gap-3 shadow-[0_4px_18px_-4px_rgb(124_45_18_/0.18)]"
-                    asChild
-                  >
-                    <Link to="/business/qr-management" className="gap-3">
-                      <QrCode className="h-5 w-5 shrink-0" />
-                      Generate QR codes
-                    </Link>
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]" asChild>
-                    <Link to="/dashboard/locations" className="gap-3">
-                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
-                        <MapPin className="h-5 w-5 text-slate-600" />
-                      </span>
-                      Manage locations
-                    </Link>
-                  </Button>
-                  <Button
+                  <button
                     type="button"
-                    variant="outline"
-                    className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]"
-                    onClick={handleExport}
-                    disabled={exportLoading || !isBusiness}
-                    aria-busy={exportLoading}
+                    onClick={() => setQuickActionsExpanded((v) => !v)}
+                    className="flex w-full min-w-0 items-start justify-between gap-3 text-left"
+                    aria-expanded={quickActionsExpanded}
                   >
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
-                      {exportLoading ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        <Download className="h-5 w-5 text-slate-600" />
+                    <div className="min-w-0 flex-1">
+                      <CardTitle className="text-lg">Quick actions</CardTitle>
+                      <CardDescription>Common venue tasks</CardDescription>
+                    </div>
+                    <ChevronDown
+                      className={cn(
+                        "mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform",
+                        quickActionsExpanded && "rotate-180",
                       )}
-                    </span>
-                    Export reports
-                  </Button>
-                </CardContent>
+                      aria-hidden
+                    />
+                  </button>
+                </CardHeader>
+                {quickActionsExpanded ? (
+                  <CardContent className="space-y-3">
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]"
+                      asChild
+                    >
+                      <Link to="/dashboard/profile" className="gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                          <Building2 className="h-5 w-5 text-slate-600" />
+                        </span>
+                        Business profile
+                      </Link>
+                    </Button>
+                    <Button
+                      className="w-full justify-start gap-3 shadow-[0_4px_18px_-4px_rgb(124_45_18_/0.18)]"
+                      asChild
+                    >
+                      <Link to="/business/qr-management" className="gap-3">
+                        <QrCode className="h-5 w-5 shrink-0" />
+                        Generate QR codes
+                      </Link>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]"
+                      asChild
+                    >
+                      <Link to="/dashboard/locations" className="gap-3">
+                        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                          <MapPin className="h-5 w-5 text-slate-600" />
+                        </span>
+                        Manage locations
+                      </Link>
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full justify-start gap-3 shadow-[0_1px_8px_-4px_rgba(15,23,42,0.08)]"
+                      onClick={handleExport}
+                      disabled={exportLoading || !isBusiness}
+                      aria-busy={exportLoading}
+                    >
+                      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+                        {exportLoading ? (
+                          <LoadingSpinner size="sm" />
+                        ) : (
+                          <Download className="h-5 w-5 text-slate-600" />
+                        )}
+                      </span>
+                      Export reports
+                    </Button>
+                  </CardContent>
+                ) : null}
               </Card>
 
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
