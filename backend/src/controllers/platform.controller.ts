@@ -74,7 +74,21 @@ export async function getAnalytics(req: Request, res: Response) {
   } catch (err) {
     logServerError("platform.getAnalytics", err);
     // Safe empty analytics payload: charts must not break the admin dashboard.
-    const rangeDays = 30;
+    const rawDays = typeof req.query.days === "string" ? Number(req.query.days) : 30;
+    const rangeDays = Number.isFinite(rawDays) ? Math.min(Math.max(Math.floor(rawDays), 7), 120) : 30;
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - (rangeDays - 1));
+    const growth: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }> = [];
+    const tipVolume: Array<{ date: string; tipsEur: number; tipCount: number }> = [];
+    for (let i = 0; i < rangeDays; i += 1) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const iso = d.toISOString().slice(0, 10);
+      growth.push({ date: iso, newUsers: 0, newBusinesses: 0, newTips: 0 });
+      tipVolume.push({ date: iso, tipsEur: 0, tipCount: 0 });
+    }
     return res.json({
       rangeDays,
       userDistribution: [
@@ -87,8 +101,8 @@ export async function getAnalytics(req: Request, res: Response) {
         { status: "pending", count: 0 },
         { status: "failed", count: 0 },
       ],
-      growth: [],
-      tipVolume: [],
+      growth,
+      tipVolume,
       topBusinessesByTips: [],
       warning: clientSafeMessage(err, "We couldn't load analytics right now. Try again."),
     });

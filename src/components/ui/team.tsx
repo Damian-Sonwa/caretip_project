@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 import { Marquee } from "@/components/ui/marquee";
-import { cn } from "@/lib/utils";
 import { landingImageFrameClassName } from "@/components/ui/landing-image-frame";
 
 import hotelsImg from "../../../images/Hotels.png";
@@ -109,28 +108,13 @@ const businesses: HospitalityBusiness[] = [
   },
 ];
 
-type HospitalityBusinessesMarqueeProps = {
-  /** Edge-to-edge width (drops inner max-width) for landing sections above full-width content. */
-  fullBleed?: boolean;
-};
-
-export default function Component({ fullBleed = false }: HospitalityBusinessesMarqueeProps) {
+export default function Component() {
   return (
-    <section
-      className={cn(
-        "relative w-full overflow-hidden bg-white dark:bg-neutral-950",
-        fullBleed ? "py-8 md:py-10 lg:py-12" : "py-12 md:py-20",
-      )}
-    >
-      <div
-        className={cn(
-          "relative z-10 w-full",
-          fullBleed ? "mx-0 max-w-none" : "mx-auto max-w-7xl",
-        )}
-      >
+    <section className="relative w-full overflow-hidden bg-white py-12 md:py-20">
+      <div className="relative z-10 mx-auto max-w-7xl">
         <div className="relative w-full">
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white to-transparent dark:from-neutral-950 sm:w-24" />
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white to-transparent dark:from-neutral-950 sm:w-24" />
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white to-transparent" />
 
           <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={30} gapPx={24}>
             {businesses.map((b) => (
@@ -140,10 +124,7 @@ export default function Component({ fullBleed = false }: HospitalityBusinessesMa
                 tabIndex={0}
               >
                 <div
-                  className={cn(
-                    landingImageFrameClassName,
-                    "relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]",
-                  )}
+                  className={`${landingImageFrameClassName} relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]`}
                 >
                   <img
                     alt={b.name}

@@ -4,8 +4,8 @@ import { Player } from "@remotion/player";
 import { SpatialPush } from "@/app/components/ui/spatial-push";
 import { memo, useState, useEffect } from "react";
 import heroTapToTip from "../../../images/caretip-image.png";
-import heroTeamMotivation from "../../../images/newly01.png";
-import heroBusinessImpact from "../../../images/newly02.png";
+import heroTeamMotivation from "../../../images/cafe-employee.png";
+import heroBusinessImpact from "../../../images/new-hero.png";
 
 /**
  * Responsive portrait frame sizing (matches FeatureCarousel)

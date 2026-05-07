@@ -23,6 +23,7 @@
     "db:signin-smoke": "tsx scripts/signin-smoke.ts",
     "db:backfill-business-slugs": "tsx scripts/backfill-business-slugs.ts",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:platform-analytics-demo": "tsx prisma/seedPlatformAnalyticsDemo.ts",
     "db:backfill-slugs": "tsx prisma/backfill-slugs.ts",
     "admin:create": "tsx scripts/createAdmin.js",
     "admin:create:extra": "node scripts/runCreateAdminExtra.mjs",

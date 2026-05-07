@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
 import { Euro, TrendingUp, History, LayoutDashboard } from "lucide-react";
-import newEmployeeImg from "../../../../images/new_one.png";
+import newEmployeeImg from "../../../../images/cafe-employee.png";
 
 export function EmployeeLandingSection() {
   return (

@@ -334,6 +334,39 @@ export function AdminDashboard() {
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
 
+  const emptyAnalytics = useMemo<PlatformAnalytics>(() => {
+    const rangeDays = 30;
+    const end = new Date();
+    end.setHours(0, 0, 0, 0);
+    const start = new Date(end);
+    start.setDate(start.getDate() - (rangeDays - 1));
+    const growth: PlatformAnalytics["growth"] = [];
+    const tipVolume: PlatformAnalytics["tipVolume"] = [];
+    for (let i = 0; i < rangeDays; i += 1) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      const iso = d.toISOString().slice(0, 10);
+      growth.push({ date: iso, newUsers: 0, newBusinesses: 0, newTips: 0 });
+      tipVolume.push({ date: iso, tipsEur: 0, tipCount: 0 });
+    }
+    return {
+      rangeDays,
+      userDistribution: [
+        { role: "business", count: 0 },
+        { role: "employee", count: 0 },
+        { role: "platform_admin", count: 0 },
+      ],
+      tipStatus: [
+        { status: "success", count: 0 },
+        { status: "pending", count: 0 },
+        { status: "failed", count: 0 },
+      ],
+      growth,
+      tipVolume,
+      topBusinessesByTips: [],
+    };
+  }, []);
+
   const filteredBusinesses = useMemo(() => {
     const q = businessSearchQuery.trim().toLowerCase();
     if (!q) return businesses;
@@ -374,14 +407,17 @@ export function AdminDashboard() {
 
       try {
         const a = await fetchPlatformAnalytics(30);
-        setAnalytics(a);
+        setAnalytics(a ?? emptyAnalytics);
       } catch (e) {
         logClientError("AdminDashboard.analytics", e);
-        setAnalytics(null);
+        setAnalytics(emptyAnalytics);
       }
     } catch (err) {
       logClientError("AdminDashboard", err);
       const msg = err instanceof Error ? err.message : "";
+      setStats((prev) => prev ?? ({} as PlatformGlobalStats));
+      setBusinesses((prev) => prev ?? []);
+      setAnalytics((prev) => prev ?? emptyAnalytics);
       // Do not wipe the UI on transient outages; keep the last known values.
       // Surface a clear message instead. Invalid sessions are cleared by the shared API client.
       if (
@@ -397,7 +433,7 @@ export function AdminDashboard() {
     } finally {
       setInitialDashLoading(false);
     }
-  }, [user, authHydrated, sessionValidated]);
+  }, [user, authHydrated, sessionValidated, emptyAnalytics]);
 
   useEffect(() => {
     void loadDashboardData();
@@ -494,7 +530,7 @@ export function AdminDashboard() {
         </div>
 
         {/* Analytics charts */}
-        {analytics ? (
+        {(analytics ?? emptyAnalytics) ? (
           <motion.section
             initial={{ y: 16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -505,7 +541,7 @@ export function AdminDashboard() {
               <div className="min-w-0">
                 <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
                 <p className="text-sm text-muted-foreground">
-                  Last {analytics.rangeDays} days · live aggregates
+                  Last {(analytics ?? emptyAnalytics).rangeDays} days · live aggregates
                 </p>
               </div>
               <span className="text-xs font-medium text-muted-foreground">
@@ -515,19 +551,22 @@ export function AdminDashboard() {
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
               <AnalyticsCard title="User distribution" description="Accounts by role">
-                <UserDistributionChart data={analytics.userDistribution} />
+                <UserDistributionChart data={(analytics ?? emptyAnalytics).userDistribution} />
               </AnalyticsCard>
 
               <AnalyticsCard title="Tip status distribution" description="Success vs pending vs failed">
-                <TipStatusChart data={analytics.tipStatus} />
+                <TipStatusChart data={(analytics ?? emptyAnalytics).tipStatus} />
               </AnalyticsCard>
 
               <AnalyticsCard title="Platform growth" description="New users, venues, and tips per day">
-                <GrowthChart data={analytics.growth} />
+                <GrowthChart data={(analytics ?? emptyAnalytics).growth} />
               </AnalyticsCard>
 
               <AnalyticsCard title="Tip volume (EUR)" description="Successful tips per day">
-                <TipVolumeChart data={analytics.tipVolume} top={analytics.topBusinessesByTips} />
+                <TipVolumeChart
+                  data={(analytics ?? emptyAnalytics).tipVolume}
+                  top={(analytics ?? emptyAnalytics).topBusinessesByTips}
+                />
               </AnalyticsCard>
             </div>
           </motion.section>
