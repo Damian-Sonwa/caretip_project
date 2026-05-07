@@ -26,6 +26,7 @@ const STAFF = [
     jobTitle: "Head server",
     slug: "wd-brasserie-anna",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 650,
   },
   {
     email: "sam.staff.demo@caretip.de",
@@ -33,6 +34,7 @@ const STAFF = [
     jobTitle: "Bartender",
     slug: "wd-brasserie-sam",
     avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 500,
   },
   {
     email: "jordan.staff.demo@caretip.de",
@@ -40,6 +42,7 @@ const STAFF = [
     jobTitle: "Host",
     slug: "wd-brasserie-jordan",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 420,
   },
 ] as const;
 
@@ -205,6 +208,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         locationId: locMain.id,
         isActive: true,
         activationStatus: "active",
+        monthlyGoal: s.monthlyGoal,
       },
       create: {
         name: s.name,
@@ -216,6 +220,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         locationId: locMain.id,
         isActive: true,
         activationStatus: "active",
+        monthlyGoal: s.monthlyGoal,
       },
     });
     employeeRows.push({ id: emp.id, userId: eu.id });
@@ -254,6 +259,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
       locationId: locMain.id,
       isActive: true,
       activationStatus: "active",
+      monthlyGoal: 650,
     },
     create: {
       name: "Mina Schmidt",
@@ -266,6 +272,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
       locationId: locMain.id,
       isActive: true,
       activationStatus: "active",
+      monthlyGoal: 650,
     },
   });
 
