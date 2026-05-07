@@ -617,37 +617,37 @@ export function AdminDashboard() {
           transition={{ duration: 0.5, delay: 0.2 }}
           className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm"
         >
-          <button
-            type="button"
-            onClick={() => setBusinessesExpanded((v) => !v)}
-            className="flex w-full items-center justify-between gap-3 border-b border-border bg-muted px-4 py-4 text-left"
-            aria-expanded={businessesExpanded}
-          >
-            <div className="flex min-w-0 items-center gap-2">
-              <Building2 className="h-5 w-5 text-foreground" />
-              <h3 className="truncate text-lg font-semibold text-foreground">
-                All businesses
-                <span className="ml-2 text-xs font-medium text-muted-foreground">
-                  (Open KYC &amp; verification)
-                </span>
-              </h3>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link
-                to="/platform-admin/businesses"
-                onClick={(e) => e.stopPropagation()}
-                className="hidden text-sm font-medium text-foreground underline-offset-4 hover:underline sm:inline"
-              >
-                Open
-              </Link>
+          <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-4 py-4">
+            <button
+              type="button"
+              onClick={() => setBusinessesExpanded((v) => !v)}
+              className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
+              aria-expanded={businessesExpanded}
+            >
+              <div className="flex min-w-0 items-center gap-2">
+                <Building2 className="h-5 w-5 text-foreground" />
+                <h3 className="truncate text-lg font-semibold text-foreground">
+                  All businesses
+                  <span className="ml-2 text-xs font-medium text-muted-foreground">
+                    (Open KYC &amp; verification)
+                  </span>
+                </h3>
+              </div>
               <ChevronDown
                 className={cn(
-                  "h-5 w-5 text-muted-foreground transition-transform",
+                  "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
                   businessesExpanded && "rotate-180",
                 )}
               />
-            </div>
-          </button>
+            </button>
+
+            <Link
+              to="/platform-admin/businesses"
+              className="hidden shrink-0 text-sm font-medium text-foreground underline-offset-4 hover:underline sm:inline"
+            >
+              Open
+            </Link>
+          </div>
 
           {businessesExpanded ? (
             <>
