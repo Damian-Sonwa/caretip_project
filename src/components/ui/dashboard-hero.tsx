@@ -344,6 +344,7 @@ export function DashboardHero({
                 hideImage
                   ? "lg:grid-flow-row lg:grid-cols-1 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8"
                   : "lg:grid-cols-12 lg:items-center lg:gap-x-12 lg:gap-y-6 lg:px-8 lg:pb-8 lg:pt-8",
+                stackHeroOnMobile && mobileAlign === "center" && "lg:px-6",
               )}
             >
               <div
