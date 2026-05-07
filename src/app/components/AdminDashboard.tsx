@@ -38,6 +38,13 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/components/ui/select";
+import {
   Card,
   CardContent,
   CardDescription,
@@ -145,6 +152,22 @@ const ADMIN_CHART_COLORS = {
   red: "#fb7185",
   slate: "#94a3b8",
 } as const;
+
+const ADMIN_ANALYTICS_TZ_KEY = "caretip_platform_admin_timezone";
+const ADMIN_ANALYTICS_TZ_DEFAULT = "Europe/Berlin";
+const ADMIN_ANALYTICS_TZ_OPTIONS = [
+  "Europe/Berlin",
+  "Europe/London",
+  "Europe/Paris",
+  "America/New_York",
+  "America/Chicago",
+  "America/Los_Angeles",
+  "Africa/Lagos",
+  "Asia/Dubai",
+  "Asia/Singapore",
+  "Asia/Tokyo",
+  "Australia/Sydney",
+] as const;
 
 function formatCompact(n: number): string {
   try {
@@ -367,6 +390,7 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
   const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
+  const [analyticsTimezone, setAnalyticsTimezone] = useState<string>(ADMIN_ANALYTICS_TZ_DEFAULT);
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
   const [businessesExpanded, setBusinessesExpanded] = useState(true);
@@ -445,7 +469,7 @@ export function AdminDashboard() {
       );
 
       try {
-        const a = await fetchPlatformAnalytics(30);
+        const a = await fetchPlatformAnalytics(30, analyticsTimezone);
         setAnalytics(a ?? emptyAnalytics);
       } catch (e) {
         logClientError("AdminDashboard.analytics", e);
@@ -472,11 +496,22 @@ export function AdminDashboard() {
     } finally {
       setInitialDashLoading(false);
     }
-  }, [user, authHydrated, sessionValidated, emptyAnalytics]);
+  }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics]);
 
   useEffect(() => {
     void loadDashboardData();
   }, [loadDashboardData]);
+
+  useEffect(() => {
+    if (!authHydrated) return;
+    try {
+      const raw = localStorage.getItem(ADMIN_ANALYTICS_TZ_KEY);
+      const tz = raw?.trim();
+      if (tz) setAnalyticsTimezone(tz);
+    } catch {
+      // ignore
+    }
+  }, [authHydrated]);
 
   // If the API is down (503), don't keep hammering it on a timer.
   useRealtimeFallback(connected || Boolean(serviceIssue), loadDashboardData);
@@ -580,12 +615,42 @@ export function AdminDashboard() {
               <div className="min-w-0">
                 <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
                 <p className="text-sm text-muted-foreground">
-                  Last {(analytics ?? emptyAnalytics).rangeDays} days · live aggregates
+                  Last {(analytics ?? emptyAnalytics).rangeDays} days{" "}
+                  <span className="text-muted-foreground/80">
+                    ({(analytics ?? emptyAnalytics).timezone ?? analyticsTimezone})
+                  </span>{" "}
+                  · live aggregates
                 </p>
               </div>
-              <span className="text-xs font-medium text-muted-foreground">
-                Tip status uses all-time totals
-              </span>
+              <div className="flex flex-col items-end gap-2">
+                <div className="w-[210px]">
+                  <Select
+                    value={analyticsTimezone}
+                    onValueChange={(v) => {
+                      setAnalyticsTimezone(v);
+                      try {
+                        localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                      } catch {
+                        // ignore
+                      }
+                    }}
+                  >
+                    <SelectTrigger size="sm" aria-label="Analytics timezone">
+                      <SelectValue placeholder="Timezone" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
+                        <SelectItem key={tz} value={tz}>
+                          {tz}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <span className="text-xs font-medium text-muted-foreground">
+                  Tip status uses all-time totals
+                </span>
+              </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

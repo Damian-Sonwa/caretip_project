@@ -1,7 +1,10 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { DateTime } from "luxon";
+import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/businessTime.js";
 
 export type PlatformAnalyticsResponse = {
+  timezone: string;
   rangeDays: number;
   userDistribution: Array<{ role: "business" | "employee" | "platform_admin"; count: number }>;
   tipStatus: Array<{ status: "success" | "pending" | "failed"; count: number }>;
@@ -36,17 +39,16 @@ function dateIso(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-function eachDayIso(start: Date, end: Date): string[] {
-  const out: string[] = [];
-  const cur = new Date(start);
-  cur.setHours(0, 0, 0, 0);
-  const stop = new Date(end);
-  stop.setHours(0, 0, 0, 0);
-  while (cur.getTime() <= stop.getTime()) {
-    out.push(dateIso(cur));
-    cur.setDate(cur.getDate() + 1);
+function eachLocalDayIso(rangeDays: number, timezone: string): { startUtc: Date; endUtc: Date; dayKeys: string[] } {
+  const tz = sanitizeIanaTimezone(timezone);
+  // Define the window in business-local time, then convert to UTC for DB filtering.
+  const localEnd = DateTime.now().setZone(tz).endOf("day");
+  const localStart = localEnd.startOf("day").minus({ days: rangeDays - 1 });
+  const dayKeys: string[] = [];
+  for (let i = 0; i < rangeDays; i += 1) {
+    dayKeys.push(localStart.plus({ days: i }).toFormat("yyyy-MM-dd"));
   }
-  return out;
+  return { startUtc: localStart.toUTC().toJSDate(), endUtc: localEnd.toUTC().toJSDate(), dayKeys };
 }
 
 async function resolveCreatedAtColumn(tableName: string): Promise<string | null> {
@@ -73,14 +75,12 @@ function colIdent(col: string) {
 }
 
 /** Analytics aggregates for Super Admin dashboard charts (Postgres/Supabase). */
-export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<PlatformAnalyticsResponse> {
+export async function getPlatformAnalytics(input?: { days?: unknown; timezone?: unknown }): Promise<PlatformAnalyticsResponse> {
   const rangeDays = clampDays(input?.days, 30);
 
-  const end = new Date();
-  end.setHours(23, 59, 59, 999);
-  const start = new Date(end);
-  start.setDate(start.getDate() - (rangeDays - 1));
-  start.setHours(0, 0, 0, 0);
+  const timezone =
+    typeof input?.timezone === "string" ? sanitizeIanaTimezone(input.timezone) : DEFAULT_BUSINESS_TIMEZONE;
+  const { startUtc: start, endUtc: end, dayKeys } = eachLocalDayIso(rangeDays, timezone);
 
   const [userCreatedCol, bizCreatedCol, tipCreatedCol] = await Promise.all([
     resolveCreatedAtColumn("User"),
@@ -113,7 +113,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
   // Safer production SQL (no generate_series): aggregate per-table and fill gaps in JS.
   const usersDaily = userCreatedCol
     ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
-        SELECT date_trunc('day', ${colIdent(userCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        SELECT date_trunc('day', ${colIdent(userCreatedCol)} AT TIME ZONE ${timezone})::date::text AS d, COUNT(*)::int AS c
         FROM "User"
         WHERE ${colIdent(userCreatedCol)} >= ${start} AND ${colIdent(userCreatedCol)} <= ${end}
         GROUP BY 1
@@ -123,7 +123,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
 
   const businessesDaily = bizCreatedCol
     ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
-        SELECT date_trunc('day', ${colIdent(bizCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        SELECT date_trunc('day', ${colIdent(bizCreatedCol)} AT TIME ZONE ${timezone})::date::text AS d, COUNT(*)::int AS c
         FROM businesses
         WHERE ${colIdent(bizCreatedCol)} >= ${start} AND ${colIdent(bizCreatedCol)} <= ${end}
         GROUP BY 1
@@ -133,7 +133,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
 
   const tipsDaily = tipCreatedCol
     ? await prisma.$queryRaw<Array<{ d: string; c: number }>>(Prisma.sql`
-        SELECT date_trunc('day', ${colIdent(tipCreatedCol)})::date::text AS d, COUNT(*)::int AS c
+        SELECT date_trunc('day', ${colIdent(tipCreatedCol)} AT TIME ZONE ${timezone})::date::text AS d, COUNT(*)::int AS c
         FROM tips
         WHERE ${colIdent(tipCreatedCol)} >= ${start} AND ${colIdent(tipCreatedCol)} <= ${end}
         GROUP BY 1
@@ -144,7 +144,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
   const tipVolumeDaily = tipCreatedCol
     ? await prisma.$queryRaw<Array<{ d: string; tips_eur: number; tip_count: number }>>(Prisma.sql`
         SELECT
-          date_trunc('day', ${colIdent(tipCreatedCol)})::date::text AS d,
+          date_trunc('day', ${colIdent(tipCreatedCol)} AT TIME ZONE ${timezone})::date::text AS d,
           COALESCE(SUM(amount), 0)::float AS tips_eur,
           COUNT(*)::int AS tip_count
         FROM tips
@@ -156,7 +156,6 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
       `)
     : [];
 
-  const dayKeys = eachDayIso(start, end);
   const mapCount = (rows: Array<{ d: string; c: number }>) => {
     const m = new Map<string, number>();
     for (const r of rows) m.set(String(r.d).slice(0, 10), Number(r.c ?? 0));
@@ -193,6 +192,7 @@ export async function getPlatformAnalytics(input?: { days?: unknown }): Promise<
   }));
 
   return {
+    timezone,
     rangeDays,
     userDistribution: [
       { role: "business", count: managerCount },

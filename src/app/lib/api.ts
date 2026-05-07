@@ -1037,16 +1037,25 @@ export async function listBusinessTips(params: {
   take?: number;
   skip?: number;
   status?: TipStatus;
+  /** Optional preset range handled by backend in business timezone */
+  range?: "today" | "week" | "month" | "custom";
+  /** Custom local dates (YYYY-MM-DD). Backend converts using business timezone. */
+  fromDate?: string;
+  toDate?: string;
+  /** Legacy UTC instants (kept for backwards compatibility) */
   from?: string;
   to?: string;
   employeeId?: string;
   locationId?: string;
   tableId?: string;
-}): Promise<{ total: number; items: TipActivityRow[] }> {
+}): Promise<{ timezone?: string; total: number; items: TipActivityRow[] }> {
   const sp = new URLSearchParams();
   if (params.take != null) sp.set("take", String(params.take));
   if (params.skip != null) sp.set("skip", String(params.skip));
   if (params.status) sp.set("status", params.status);
+  if (params.range) sp.set("range", params.range);
+  if (params.fromDate) sp.set("fromDate", params.fromDate);
+  if (params.toDate) sp.set("toDate", params.toDate);
   if (params.from) sp.set("from", params.from);
   if (params.to) sp.set("to", params.to);
   if (params.employeeId) sp.set("employeeId", params.employeeId);
@@ -1060,13 +1069,22 @@ export async function listEmployeeTips(params: {
   take?: number;
   skip?: number;
   status?: TipStatus;
+  /** Optional preset range handled by backend in business timezone */
+  range?: "today" | "week" | "month" | "custom";
+  /** Custom local dates (YYYY-MM-DD). Backend converts using business timezone. */
+  fromDate?: string;
+  toDate?: string;
+  /** Legacy UTC instants (kept for backwards compatibility) */
   from?: string;
   to?: string;
-}): Promise<{ total: number; items: TipActivityRow[] }> {
+}): Promise<{ timezone?: string; total: number; items: TipActivityRow[] }> {
   const sp = new URLSearchParams();
   if (params.take != null) sp.set("take", String(params.take));
   if (params.skip != null) sp.set("skip", String(params.skip));
   if (params.status) sp.set("status", params.status);
+  if (params.range) sp.set("range", params.range);
+  if (params.fromDate) sp.set("fromDate", params.fromDate);
+  if (params.toDate) sp.set("toDate", params.toDate);
   if (params.from) sp.set("from", params.from);
   if (params.to) sp.set("to", params.to);
   const qs = sp.toString();
@@ -1181,8 +1199,11 @@ export async function deleteEmployeeGoal(): Promise<void> {
   });
 }
 
-export async function getTipsByEmployee(): Promise<EmployeeTipsResponse> {
-  return apiRequest(apiPath("/api/tips/employee"), { headers: getHeaders() });
+export async function getTipsByEmployee(
+  timeframe?: "today" | "week" | "month",
+): Promise<EmployeeTipsResponse> {
+  const qs = timeframe ? `?timeframe=${encodeURIComponent(timeframe)}` : "";
+  return apiRequest(apiPath(`/api/tips/employee${qs}`), { headers: getHeaders() });
 }
 
 export interface EmployeeSelfProfile {
@@ -1201,6 +1222,8 @@ export interface EmployeeSelfProfile {
   businessSlug: string | null;
   /** Public /staff/[slug] segment */
   slug: string | null;
+  /** Business IANA timezone for analytics reporting. */
+  businessTimezone?: string;
 }
 
 export async function getEmployeeProfile(): Promise<EmployeeSelfProfile> {
@@ -1581,6 +1604,7 @@ export async function fetchPlatformStats(): Promise<PlatformGlobalStats> {
 }
 
 export type PlatformAnalytics = {
+  timezone?: string;
   rangeDays: number;
   userDistribution: Array<{ role: "business" | "employee" | "platform_admin"; count: number }>;
   tipStatus: Array<{ status: "success" | "pending" | "failed"; count: number }>;
@@ -1589,9 +1613,13 @@ export type PlatformAnalytics = {
   topBusinessesByTips: Array<{ businessId: string; businessName: string; tipsEur: number }>;
 };
 
-export async function fetchPlatformAnalytics(days = 30): Promise<PlatformAnalytics> {
+export async function fetchPlatformAnalytics(days = 30, timezone?: string): Promise<PlatformAnalytics> {
   const sp = new URLSearchParams();
   sp.set("days", String(days));
+  if (timezone) sp.set("timezone", timezone);
+  // Optional: analytics timezone for day-bucketing on backend.
+  // When omitted, backend uses its safe default (Europe/Berlin).
+  // We keep this param optional for backward compatibility.
   return apiRequest<PlatformAnalytics>(apiPath(`/api/platform/analytics?${sp.toString()}`), {
     headers: getHeaders(),
     credentials: "include",

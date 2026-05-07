@@ -10,7 +10,7 @@ import { logClientError } from "@/app/lib/clientLog";
 import { formatEur } from "@/app/lib/formatEur";
 import { listBusinessTips, listEmployeeTips, type TipActivityRow, type TipStatus } from "@/app/lib/api";
 
-function formatDateTime(iso: string): string {
+function formatDateTime(iso: string, timezone?: string): string {
   try {
     return new Date(iso).toLocaleString(undefined, {
       month: "short",
@@ -18,6 +18,7 @@ function formatDateTime(iso: string): string {
       year: "numeric",
       hour: "2-digit",
       minute: "2-digit",
+      ...(timezone ? { timeZone: timezone } : {}),
     });
   } catch {
     return iso;
@@ -40,41 +41,6 @@ function downloadCsv(filename: string, csv: string) {
   URL.revokeObjectURL(url);
 }
 
-function computeRange(
-  preset: string,
-  customFrom: string,
-  customTo: string
-): { from?: string; to?: string } {
-  const now = new Date();
-  if (preset === "today") {
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(now);
-    end.setHours(23, 59, 59, 999);
-    return { from: start.toISOString(), to: end.toISOString() };
-  }
-  if (preset === "week") {
-    const start = new Date(now);
-    start.setDate(start.getDate() - 7);
-    start.setHours(0, 0, 0, 0);
-    return { from: start.toISOString(), to: now.toISOString() };
-  }
-  if (preset === "month") {
-    const start = new Date(now.getFullYear(), now.getMonth(), 1);
-    start.setHours(0, 0, 0, 0);
-    return { from: start.toISOString(), to: now.toISOString() };
-  }
-  if (preset === "custom") {
-    const f = customFrom ? new Date(customFrom + "T00:00:00.000Z") : null;
-    const t = customTo ? new Date(customTo + "T23:59:59.999Z") : null;
-    return {
-      from: f && !Number.isNaN(f.getTime()) ? f.toISOString() : undefined,
-      to: t && !Number.isNaN(t.getTime()) ? t.toISOString() : undefined,
-    };
-  }
-  return {};
-}
-
 export function TipsActivityPage() {
   const { user } = useRequireAuth();
   const [q, setQ] = useState("");
@@ -86,6 +52,7 @@ export function TipsActivityPage() {
 
   const [items, setItems] = useState<TipActivityRow[]>([]);
   const [total, setTotal] = useState(0);
+  const [dataTimezone, setDataTimezone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -93,8 +60,6 @@ export function TipsActivityPage() {
   const take = 50;
   const skip = (page - 1) * take;
   const totalPages = Math.max(1, Math.ceil(total / take));
-
-  const dateRange = useMemo(() => computeRange(range, customFrom, customTo), [customFrom, customTo, range]);
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -105,22 +70,24 @@ export function TipsActivityPage() {
         take,
         skip,
         status: status === "all" ? undefined : status,
-        from: dateRange.from,
-        to: dateRange.to,
+        range,
+        ...(range === "custom" ? { fromDate: customFrom || undefined, toDate: customTo || undefined } : {}),
       };
       const res =
         user.role === "business" ? await listBusinessTips(common) : await listEmployeeTips(common);
       setItems(res.items ?? []);
       setTotal(res.total ?? 0);
+      setDataTimezone((res as any).timezone ?? null);
     } catch (e) {
       logClientError("TipsActivityPage.load", e);
       setItems([]);
       setTotal(0);
+      setDataTimezone(null);
       setError(e instanceof Error ? e.message : "Failed to load tips.");
     } finally {
       setLoading(false);
     }
-  }, [dateRange.from, dateRange.to, skip, status, user?.id, user?.role]);
+  }, [customFrom, customTo, range, skip, status, user?.id, user?.role]);
 
   useEffect(() => {
     void load();
@@ -229,15 +196,20 @@ export function TipsActivityPage() {
                 try {
                   const header = ["Date", "Amount", "Staff", "Location/Table", "Status"];
                   const rows = filtered.map((t) => [
-                    formatDateTime(t.createdAt),
+                    formatDateTime(t.createdAt, dataTimezone ?? undefined),
                     formatEur(t.amount),
                     t.staffName ?? "",
                     t.tableName ? `Table: ${t.tableName}` : t.locationName ? `Location: ${t.locationName}` : "",
                     String(t.status),
                   ]);
-                  const csv = [header, ...rows].map((r) => r.map((c) => csvEscape(String(c))).join(",")).join("\n");
+                  const tzRow = dataTimezone ? [`Timezone: ${dataTimezone}`] : [];
+                  const csv = [tzRow, header, ...rows]
+                    .filter((r) => r.length > 0)
+                    .map((r) => r.map((c) => csvEscape(String(c))).join(","))
+                    .join("\n");
                   const dateStr = new Date().toISOString().slice(0, 10);
-                  downloadCsv(`tips_activity_${dateStr}.csv`, csv);
+                  const tzSlug = (dataTimezone ?? "local").replace(/\//g, "_");
+                  downloadCsv(`tips_activity_${dateStr}_${tzSlug}.csv`, csv);
                   toast.success("Export downloaded");
                 } finally {
                   setExporting(false);
@@ -294,7 +266,9 @@ export function TipsActivityPage() {
                     <td className="px-4 py-3">
                       {t.tableName ? `Table: ${t.tableName}` : t.locationName ? `Location: ${t.locationName}` : "—"}
                     </td>
-                    <td className="px-4 py-3 text-muted-foreground">{formatDateTime(t.createdAt)}</td>
+                    <td className="px-4 py-3 text-muted-foreground">
+                      {formatDateTime(t.createdAt, dataTimezone ?? undefined)}
+                    </td>
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold">
                         {String(t.status)}

@@ -117,6 +117,7 @@ export function EmployeeDashboard() {
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0);
   const [goalProgress, setGoalProgress] = useState<EmployeeGoalProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [businessTimezone, setBusinessTimezone] = useState<string | null>(null);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
   /** Public venue slug from `/api/employees/me` for canonical tip URLs */
@@ -131,15 +132,16 @@ export function EmployeeDashboard() {
     const role = user?.role;
     if (!authHydrated || !sessionValidated || role !== "employee") return;
     try {
-      const data = await getTipsByEmployee();
+      const data = await getTipsByEmployee(timeframe);
       setTips(data.tips ?? []);
       setMonthlyGoal(data.monthlyGoal ?? null);
       setCurrentMonthTotal(data.currentMonthTotal ?? 0);
       setGoalProgress(data.goal ?? null);
+      setBusinessTimezone((data as any).businessTimezone ?? null);
     } catch (e) {
       logClientError("EmployeeDashboard.refreshTipsQuiet", e);
     }
-  }, [authHydrated, sessionValidated, user?.id, user?.role]);
+  }, [authHydrated, sessionValidated, timeframe, user?.id, user?.role]);
 
   const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
@@ -151,7 +153,7 @@ export function EmployeeDashboard() {
     const load = async () => {
       setError(null);
       const [tipsResult, profileResult] = await Promise.allSettled([
-        getTipsByEmployee(),
+        getTipsByEmployee(timeframe),
         getEmployeeProfile(),
       ]);
 
@@ -161,6 +163,7 @@ export function EmployeeDashboard() {
         setMonthlyGoal(data.monthlyGoal ?? null);
         setCurrentMonthTotal(data.currentMonthTotal ?? 0);
         setGoalProgress(data.goal ?? null);
+        setBusinessTimezone((data as any).businessTimezone ?? null);
       } else {
         const err = tipsResult.reason;
         setError(toUserFriendlyMessage(err, { audience: "employee" }));
@@ -168,6 +171,7 @@ export function EmployeeDashboard() {
         setMonthlyGoal(null);
         setCurrentMonthTotal(0);
         setGoalProgress(null);
+        setBusinessTimezone(null);
       }
 
       if (profileResult.status === "fulfilled") {
@@ -186,7 +190,7 @@ export function EmployeeDashboard() {
     // Use stable fields only: `user` object identity changes after `updateUser`, which would otherwise
     // retrigger this effect forever (loading blink).
     // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above
-  }, [authHydrated, sessionValidated, user?.id, user?.role, updateUser]);
+  }, [authHydrated, sessionValidated, timeframe, user?.id, user?.role, updateUser]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -212,35 +216,49 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshTipsQuiet]);
 
-  const filteredTips = tips.filter((t) => {
-    const d = new Date(t.createdAt);
-    const now = new Date();
-    if (timeframe === "today")
-      return d.toDateString() === now.toDateString();
-    if (timeframe === "week") {
-      const weekAgo = new Date(now);
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      return d >= weekAgo;
-    }
-    const monthAgo = new Date(now);
-    monthAgo.setMonth(monthAgo.getMonth() - 1);
-    return d >= monthAgo;
-  });
-
-  const totalAmount = filteredTips.reduce((s, t) => s + t.amount, 0);
-  const avgTip = filteredTips.length > 0 ? totalAmount / filteredTips.length : 0;
+  const totalAmount = tips.reduce((s, t) => s + t.amount, 0);
+  const avgTip = tips.length > 0 ? totalAmount / tips.length : 0;
   // Dev-only: after initial hydration, show demo values when there are no real tips yet.
   const devDemo = import.meta.env.DEV && tips.length === 0 && staffSlug !== undefined && !error;
   const demoSummary = devDemo ? devMockEmployeeSummary(timeframe) : null;
   const stats = {
     amount: demoSummary ? demoSummary.amount : totalAmount,
-    tips: demoSummary ? demoSummary.tips : filteredTips.length,
+    tips: demoSummary ? demoSummary.tips : tips.length,
     avgTip: demoSummary ? demoSummary.avgTip : avgTip,
     rating: null,
   };
 
+  const tz = businessTimezone ?? undefined;
+  const fmtHour = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit",
+        hour12: false,
+        timeZone: tz,
+      }),
+    [tz],
+  );
+  const fmtWeekday = useMemo(
+    () =>
+      new Intl.DateTimeFormat(undefined, {
+        weekday: "short",
+        timeZone: tz,
+      }),
+    [tz],
+  );
+  const fmtDayKey = useMemo(
+    () =>
+      new Intl.DateTimeFormat("en-CA", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        timeZone: tz,
+      }),
+    [tz],
+  );
+
   const chartData = useMemo(() => {
-    if (filteredTips.length === 0) {
+    if (tips.length === 0) {
       return import.meta.env.DEV && tips.length === 0 && staffSlug !== undefined && !error
         ? devMockEmployeeEarningsTimeline(timeframe)
         : [];
@@ -248,9 +266,9 @@ export function EmployeeDashboard() {
 
     if (timeframe === "today") {
       const byHour = new Array(24).fill(0);
-      for (const t of filteredTips) {
-        const h = new Date(t.createdAt).getHours();
-        byHour[h] += t.amount;
+      for (const t of tips) {
+        const h = Number(fmtHour.format(new Date(t.createdAt)));
+        if (Number.isFinite(h) && h >= 0 && h < 24) byHour[h] += t.amount;
       }
       return byHour.map((amount, hour) => ({
         time: `${hour}:00`,
@@ -259,49 +277,36 @@ export function EmployeeDashboard() {
     }
 
     if (timeframe === "week") {
-      const start = new Date();
-      start.setDate(start.getDate() - 6);
-      start.setHours(0, 0, 0, 0);
       const dayTotals = new Map<string, number>();
-      for (let i = 0; i < 7; i++) {
-        const d = new Date(start);
-        d.setDate(start.getDate() + i);
-        dayTotals.set(d.toDateString(), 0);
+      for (const t of tips) {
+        const key = fmtDayKey.format(new Date(t.createdAt));
+        dayTotals.set(key, (dayTotals.get(key) ?? 0) + t.amount);
       }
-      for (const t of filteredTips) {
-        const key = new Date(t.createdAt).toDateString();
-        if (dayTotals.has(key)) {
-          dayTotals.set(key, (dayTotals.get(key) ?? 0) + t.amount);
-        }
-      }
-      return Array.from(dayTotals.entries()).map(([dateStr, amount]) => ({
-        time: new Date(dateStr).toLocaleDateString(undefined, { weekday: "short" }),
-        amount,
-      }));
+      return Array.from(dayTotals.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([dateStr, amount]) => ({
+          time: fmtWeekday.format(new Date(dateStr)),
+          amount,
+        }));
     }
 
-    const base = new Date();
-    base.setDate(base.getDate() - 29);
-    base.setHours(0, 0, 0, 0);
+    const dayTotals = new Map<string, number>();
+    for (const t of tips) {
+      const key = fmtDayKey.format(new Date(t.createdAt));
+      dayTotals.set(key, (dayTotals.get(key) ?? 0) + t.amount);
+    }
+    const entries = Array.from(dayTotals.entries()).sort(([a], [b]) => a.localeCompare(b));
+    // Compress into ~5 points for a clean month view.
+    const stride = Math.max(1, Math.ceil(entries.length / 5));
     const buckets: { time: string; amount: number }[] = [];
-    for (let w = 0; w < 5; w++) {
-      const ws = new Date(base);
-      ws.setDate(base.getDate() + w * 6);
-      const we = new Date(ws);
-      we.setDate(ws.getDate() + 5);
-      we.setHours(23, 59, 59, 999);
-      let sum = 0;
-      for (const t of filteredTips) {
-        const d = new Date(t.createdAt);
-        if (d >= ws && d <= we) sum += t.amount;
-      }
-      buckets.push({
-        time: `${ws.getMonth() + 1}/${ws.getDate()}`,
-        amount: sum,
-      });
+    for (let i = 0; i < entries.length; i += stride) {
+      const slice = entries.slice(i, i + stride);
+      const sum = slice.reduce((s, [, amount]) => s + amount, 0);
+      const label = slice[0]?.[0] ?? "";
+      buckets.push({ time: label.slice(5), amount: sum });
     }
     return buckets;
-  }, [error, filteredTips, staffSlug, timeframe, tips.length]);
+  }, [error, fmtDayKey, fmtHour, fmtWeekday, staffSlug, timeframe, tips.length]);
 
   const recentTips = tips.slice(0, 6).map((t) => ({
     id: t.id,
@@ -488,8 +493,8 @@ export function EmployeeDashboard() {
                 title="Total tips"
                 value={String(stats.tips)}
                 change={
-                  filteredTips.length > 0
-                    ? `${filteredTips.length} in the selected period`
+                  tips.length > 0
+                    ? `${tips.length} in the selected period`
                     : "No tips in this period yet."
                 }
                 icon={TrendingUp}

@@ -587,6 +587,8 @@ export interface EmployeeSelfProfile {
   businessId: string;
   /** Public `Business.slug` for `/{businessSlug}/{employeeSlug}` URLs. */
   businessSlug: string | null;
+  /** Business IANA timezone for analytics reporting. */
+  businessTimezone?: string;
   /** Public staff page / QR URL segment (Postgres `slug`) */
   slug: string | null;
 }
@@ -604,7 +606,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     pushNotifications: true,
     businessId: true,
     slug: true,
-    business: { select: { slug: true } },
+    business: { select: { slug: true, timezone: true } },
     user: userEmail,
   } as const;
   try {
@@ -626,6 +628,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       pushNotifications: emp.pushNotifications,
       businessId: emp.businessId,
       businessSlug: emp.business.slug ?? null,
+      businessTimezone: (emp.business as any).timezone ?? undefined,
       slug: emp.slug ?? null,
     };
   } catch (e) {
@@ -639,7 +642,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
           avatar: true,
           businessId: true,
           slug: true,
-          business: { select: { slug: true } },
+          business: { select: { slug: true, timezone: true } },
           user: userEmail,
         },
       });
@@ -657,6 +660,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         pushNotifications: true,
         businessId: emp.businessId,
         businessSlug: emp.business.slug ?? null,
+        businessTimezone: (emp.business as any).timezone ?? undefined,
         slug: emp.slug ?? null,
       };
     }

@@ -7,6 +7,8 @@ import {
   logServerError,
   clientSafeMessage,
 } from "../utils/httpErrors.js";
+import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/businessTime.js";
+import { DateTime } from "luxon";
 
 export async function getHealth(_req: Request, res: Response) {
   try {
@@ -69,27 +71,32 @@ export async function getStats(_req: Request, res: Response) {
 export async function getAnalytics(req: Request, res: Response) {
   try {
     const days = req.query.days;
-    const data = await platformAnalyticsService.getPlatformAnalytics({ days });
+    const timezone =
+      typeof req.query.timezone === "string"
+        ? sanitizeIanaTimezone(req.query.timezone)
+        : DEFAULT_BUSINESS_TIMEZONE;
+    const data = await platformAnalyticsService.getPlatformAnalytics({ days, timezone });
     return res.json(data);
   } catch (err) {
     logServerError("platform.getAnalytics", err);
     // Safe empty analytics payload: charts must not break the admin dashboard.
     const rawDays = typeof req.query.days === "string" ? Number(req.query.days) : 30;
     const rangeDays = Number.isFinite(rawDays) ? Math.min(Math.max(Math.floor(rawDays), 7), 120) : 30;
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    start.setDate(start.getDate() - (rangeDays - 1));
+    const timezone =
+      typeof req.query.timezone === "string"
+        ? sanitizeIanaTimezone(req.query.timezone)
+        : DEFAULT_BUSINESS_TIMEZONE;
+    const localEnd = DateTime.now().setZone(timezone).startOf("day");
+    const localStart = localEnd.minus({ days: rangeDays - 1 });
     const growth: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }> = [];
     const tipVolume: Array<{ date: string; tipsEur: number; tipCount: number }> = [];
     for (let i = 0; i < rangeDays; i += 1) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      const iso = d.toISOString().slice(0, 10);
+      const iso = localStart.plus({ days: i }).toFormat("yyyy-MM-dd");
       growth.push({ date: iso, newUsers: 0, newBusinesses: 0, newTips: 0 });
       tipVolume.push({ date: iso, tipsEur: 0, tipCount: 0 });
     }
     return res.json({
+      timezone,
       rangeDays,
       userDistribution: [
         { role: "business", count: 0 },

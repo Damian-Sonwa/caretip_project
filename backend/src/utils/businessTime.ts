@@ -66,3 +66,27 @@ export function businessDayKey(utcDate: Date, businessTimezone: string): string 
   return DateTime.fromJSDate(utcDate, { zone: "utc" }).setZone(tz).toFormat("yyyy-LL-dd");
 }
 
+/**
+ * Converts business-local YYYY-MM-DD inputs into UTC instants for DB filtering.
+ * The resulting range is inclusive of the entire local days.
+ */
+export function businessUtcRangeForLocalDates(
+  fromYmd: string | undefined,
+  toYmd: string | undefined,
+  businessTimezone: string,
+): { startUtc: Date; endUtc: Date } | null {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  const fromRaw = typeof fromYmd === "string" ? fromYmd.trim() : "";
+  const toRaw = typeof toYmd === "string" ? toYmd.trim() : "";
+  if (!fromRaw && !toRaw) return null;
+
+  const fromLocal = fromRaw ? DateTime.fromISO(fromRaw, { zone: tz }).startOf("day") : null;
+  const toLocal = toRaw ? DateTime.fromISO(toRaw, { zone: tz }).endOf("day") : null;
+  if (fromLocal && !fromLocal.isValid) return null;
+  if (toLocal && !toLocal.isValid) return null;
+
+  const startLocal = fromLocal ?? toLocal!.startOf("day");
+  const endLocal = toLocal ?? fromLocal!.endOf("day");
+  return { startUtc: startLocal.toUTC().toJSDate(), endUtc: endLocal.toUTC().toJSDate() };
+}
+
