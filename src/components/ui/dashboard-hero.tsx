@@ -268,7 +268,7 @@ export function DashboardHero({
 
   return (
     <div className={cn("mb-5 lg:mb-6", className)}>
-      <div className={cn(stackHeroOnMobile && "max-lg:bg-[#FFFFFF] max-lg:px-6 max-lg:py-10")}>
+      <div className={cn(stackHeroOnMobile && "max-lg:bg-[#FFFFFF] max-lg:px-6 max-lg:py-6")}>
         <Card
           className={cn(
             "relative overflow-hidden",
@@ -287,24 +287,23 @@ export function DashboardHero({
         {stackHeroOnMobile ? (
           <>
             {/* Mobile DOM order (CRITICAL): heading → image → supporting → actions. Do not rely on CSS order. */}
-            <div className="dashboard-hero-container flex min-w-0 flex-col gap-6 p-0 lg:hidden">
-              <div className="flex min-w-0 flex-col gap-4 text-left">
-                <div className="min-h-0 space-y-4">
+            <div className="dashboard-hero-container flex min-w-0 flex-col gap-4 p-0 lg:hidden">
+              <div className="flex min-w-0 flex-col gap-2.5 text-left">
+                <div className="min-h-0 space-y-3">
                   {badgeRow}
                   {titleRow}
                 </div>
+                {/* Supporting text (mobile): keep it tight + single-line. */}
+                {taglineBlock ? <div className="-mt-1">{taglineBlock}</div> : null}
               </div>
 
-              {!hideImage ? <div className="mt-1">{renderMediaColumn({ stackedLayout: true })}</div> : null}
+              {!hideImage ? <div className="mt-0.5">{renderMediaColumn({ stackedLayout: true })}</div> : null}
 
-              {/* Supporting text (tagline) + tabs */}
-              <div className="flex min-w-0 flex-col gap-6">
-                {taglineBlock ? <div className="-mt-1 mb-1">{taglineBlock}</div> : null}
-                {supportingCluster}
-              </div>
+              {/* Live status / tabs / controls */}
+              {supportingCluster ? <div className="flex min-w-0 flex-col gap-4">{supportingCluster}</div> : null}
 
               {/* Actions */}
-              {actionsRow ? <div className="mt-1">{actionsRow}</div> : null}
+              {actionsRow ? <div className="mt-0.5">{actionsRow}</div> : null}
             </div>
 
             {/* Desktop/tablet layout unchanged */}

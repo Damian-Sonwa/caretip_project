@@ -46,8 +46,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
-const EMPLOYEE_HERO_SUB = "Track tips by day, week, or month.";
-/** Same max height cap as business hero media for consistent dashboard rhythm. */
+const EMPLOYEE_HERO_SUB = "Your performance at a glance.";
+/** Desktop max height cap; mobile uses tighter fixed height for a compact hero. */
 const EMPLOYEE_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 function StatCard(props: {
@@ -394,13 +394,19 @@ export function EmployeeDashboard() {
             <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
                 <div
-                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
+                  className={cn(
+                    "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
+                    // Mobile: compact media card, tighter height
+                    "aspect-[16/10] max-h-[210px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
+                    // Desktop: keep existing rhythm
+                    "lg:aspect-square lg:max-h-none lg:max-w-[420px] lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                  )}
                   style={EMPLOYEE_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
                     src={coinsHero}
                     alt="Coins"
-                    className="h-full w-full object-contain"
+                    className="h-full w-full object-cover"
                     draggable={false}
                     loading="eager"
                   />
@@ -440,7 +446,7 @@ export function EmployeeDashboard() {
         />
       </div>
 
-      <TracingBeam className="caretip-container pt-2">
+      <TracingBeam className="caretip-container pt-3 sm:pt-2">
         <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <LiveConnectionBadge status={connectionStatus} />
           <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">

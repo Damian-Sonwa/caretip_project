@@ -58,9 +58,9 @@ import aceHeroImage from "../../../../images/ACE.png";
 const CHART_COLORS = ["#EB992C", "#000000", "#525252", "#a3a3a3", "#d4d4d4"];
 
 const BUSINESS_HERO_HEADLINE = "Team Performance Overview";
-const BUSINESS_HERO_SUB = "Monitor tips, staff activity, and earnings in real time";
+const BUSINESS_HERO_SUB = "Track team growth in real time.";
 
-/** Same max height cap as employee hero media for consistent dashboard rhythm. */
+/** Desktop max height cap; mobile uses tighter fixed height for a compact hero. */
 const BUSINESS_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
@@ -430,7 +430,13 @@ export function BusinessDashboard() {
             <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
                 <div
-                  className="relative mx-auto aspect-square w-full max-w-full shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-gray-100 shadow-sm ring-1 ring-black/[0.04] lg:max-w-[420px]"
+                  className={cn(
+                    "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
+                    // Mobile: compact, premium media card
+                    "aspect-[16/10] max-h-[210px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
+                    // Desktop: keep existing rhythm
+                    "lg:aspect-square lg:max-h-none lg:max-w-[420px] lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                  )}
                   style={BUSINESS_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
@@ -450,7 +456,7 @@ export function BusinessDashboard() {
       </div>
 
       <TracingBeam className="caretip-container">
-        <div className="space-y-6 py-6">
+        <div className="space-y-6 pb-6 pt-4 sm:pt-6">
           <FixPrompt
             id="missingQR"
             issueActive={brokenQrLinks}
