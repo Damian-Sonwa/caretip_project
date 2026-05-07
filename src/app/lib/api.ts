@@ -1113,6 +1113,11 @@ export interface EmployeeTipsResponse {
   monthlyGoal: number | null;
   currentMonthTotal: number;
   goal: EmployeeGoalProgress | null;
+  businessTimezone?: string;
+  /** Server aggregate for selected period — matches `tips` and `chartSeries` */
+  periodAmountEur?: number;
+  periodTipCount?: number;
+  chartSeries?: Array<{ label: string; amount: number }>;
 }
 
 export type EmployeeGoalStatus = "active" | "archived";
@@ -1201,9 +1206,10 @@ export async function deleteEmployeeGoal(): Promise<void> {
 
 export async function getTipsByEmployee(
   timeframe?: "today" | "week" | "month",
+  init?: Pick<RequestInit, "signal">,
 ): Promise<EmployeeTipsResponse> {
   const qs = timeframe ? `?timeframe=${encodeURIComponent(timeframe)}` : "";
-  return apiRequest(apiPath(`/api/tips/employee${qs}`), { headers: getHeaders() });
+  return apiRequest(apiPath(`/api/tips/employee${qs}`), { headers: getHeaders(), ...(init ?? {}) });
 }
 
 export interface EmployeeSelfProfile {

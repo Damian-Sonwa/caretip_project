@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type { ElementType } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -26,7 +26,6 @@ import {
   Tooltip,
   ResponsiveContainer
 } from "recharts";
-import { devMockEmployeeEarningsTimeline, devMockEmployeeSummary } from "../../lib/devAnalyticsMocks";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -118,6 +117,12 @@ export function EmployeeDashboard() {
   const [goalProgress, setGoalProgress] = useState<EmployeeGoalProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [businessTimezone, setBusinessTimezone] = useState<string | null>(null);
+  const [periodTipCount, setPeriodTipCount] = useState(0);
+  const [periodAmountEur, setPeriodAmountEur] = useState(0);
+  const [chartSeries, setChartSeries] = useState<Array<{ label: string; amount: number }>>([]);
+  const [periodLoading, setPeriodLoading] = useState(true);
+  /** Matches `tips` / aggregates to the period that was last applied (avoids showing wrong period while a fetch is in flight). */
+  const [dataTimeframe, setDataTimeframe] = useState<"today" | "week" | "month">("today");
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
   /** Public venue slug from `/api/employees/me` for canonical tip URLs */
@@ -128,20 +133,50 @@ export function EmployeeDashboard() {
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
 
-  const refreshTipsQuiet = useCallback(async () => {
-    const role = user?.role;
-    if (!authHydrated || !sessionValidated || role !== "employee") return;
-    try {
-      const data = await getTipsByEmployee(timeframe);
+  const timeframeRef = useRef(timeframe);
+  timeframeRef.current = timeframe;
+  const tipsFetchGen = useRef(0);
+
+  const applyTipsPayload = useCallback(
+    (data: Awaited<ReturnType<typeof getTipsByEmployee>>, requestedTf: typeof timeframe) => {
       setTips(data.tips ?? []);
       setMonthlyGoal(data.monthlyGoal ?? null);
       setCurrentMonthTotal(data.currentMonthTotal ?? 0);
       setGoalProgress(data.goal ?? null);
-      setBusinessTimezone((data as any).businessTimezone ?? null);
+      const tz = (data as { businessTimezone?: string }).businessTimezone;
+      setBusinessTimezone(tz ?? null);
+      const tipsArr = data.tips ?? [];
+      const nCount = data.periodTipCount;
+      const nAmount = data.periodAmountEur;
+      setPeriodTipCount(typeof nCount === "number" ? nCount : tipsArr.length);
+      setPeriodAmountEur(
+        typeof nAmount === "number" ? nAmount : tipsArr.reduce((s, t) => s + t.amount, 0),
+      );
+      setChartSeries(Array.isArray(data.chartSeries) ? data.chartSeries : []);
+      setDataTimeframe(requestedTf);
+    },
+    [],
+  );
+
+  const fetchTipsForTimeframe = useCallback(
+    async (tf: typeof timeframe, signal: AbortSignal, gen: number) => {
+      const data = await getTipsByEmployee(tf, { signal });
+      if (gen !== tipsFetchGen.current) return;
+      applyTipsPayload(data, tf);
+    },
+    [applyTipsPayload],
+  );
+
+  const refreshTipsQuiet = useCallback(async () => {
+    const role = user?.role;
+    if (!authHydrated || !sessionValidated || role !== "employee") return;
+    try {
+      const data = await getTipsByEmployee(timeframeRef.current);
+      applyTipsPayload(data, timeframeRef.current);
     } catch (e) {
       logClientError("EmployeeDashboard.refreshTipsQuiet", e);
     }
-  }, [authHydrated, sessionValidated, timeframe, user?.id, user?.role]);
+  }, [authHydrated, sessionValidated, applyTipsPayload, user?.role]);
 
   const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
@@ -150,47 +185,62 @@ export function EmployeeDashboard() {
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
-    const load = async () => {
-      setError(null);
-      const [tipsResult, profileResult] = await Promise.allSettled([
-        getTipsByEmployee(timeframe),
-        getEmployeeProfile(),
-      ]);
-
-      if (tipsResult.status === "fulfilled") {
-        const data = tipsResult.value;
-        setTips(data.tips ?? []);
-        setMonthlyGoal(data.monthlyGoal ?? null);
-        setCurrentMonthTotal(data.currentMonthTotal ?? 0);
-        setGoalProgress(data.goal ?? null);
-        setBusinessTimezone((data as any).businessTimezone ?? null);
-      } else {
-        const err = tipsResult.reason;
-        setError(toUserFriendlyMessage(err, { audience: "employee" }));
-        setTips([]);
-        setMonthlyGoal(null);
-        setCurrentMonthTotal(0);
-        setGoalProgress(null);
-        setBusinessTimezone(null);
-      }
-
-      if (profileResult.status === "fulfilled") {
-        const p = profileResult.value;
+    let cancelled = false;
+    const loadProfile = async () => {
+      try {
+        const p = await getEmployeeProfile();
+        if (cancelled) return;
         setStaffSlug(p.slug ?? null);
         setEmployeeBusinessSlug(p.businessSlug ?? null);
         setEmployeeRecordId(p.id);
         updateUser({ avatar: p.avatar ?? undefined, name: p.name });
-      } else {
+      } catch {
+        if (cancelled) return;
         setStaffSlug(null);
         setEmployeeBusinessSlug(null);
         setEmployeeRecordId(null);
       }
     };
-    void load();
-    // Use stable fields only: `user` object identity changes after `updateUser`, which would otherwise
-    // retrigger this effect forever (loading blink).
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- see comment above
-  }, [authHydrated, sessionValidated, timeframe, user?.id, user?.role, updateUser]);
+    void loadProfile();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-running on timeframe; profile is independent
+  }, [authHydrated, sessionValidated, user?.id, user?.role, updateUser]);
+
+  useEffect(() => {
+    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
+    const controller = new AbortController();
+    tipsFetchGen.current += 1;
+    const gen = tipsFetchGen.current;
+    setPeriodLoading(true);
+    setError(null);
+
+    void fetchTipsForTimeframe(timeframe, controller.signal, gen)
+      .then(() => {
+        if (gen !== tipsFetchGen.current) return;
+      })
+      .catch((e: unknown) => {
+        if ((e as { name?: string })?.name === "AbortError") return;
+        if (gen !== tipsFetchGen.current) return;
+        logClientError("EmployeeDashboard.fetchTips", e);
+        setError(toUserFriendlyMessage(e, { audience: "employee" }));
+        setTips([]);
+        setPeriodTipCount(0);
+        setPeriodAmountEur(0);
+        setChartSeries([]);
+        setMonthlyGoal(null);
+        setCurrentMonthTotal(0);
+        setGoalProgress(null);
+        setBusinessTimezone(null);
+      })
+      .finally(() => {
+        if (gen !== tipsFetchGen.current) return;
+        setPeriodLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [authHydrated, fetchTipsForTimeframe, sessionValidated, timeframe, user?.role, user?.id]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -198,10 +248,6 @@ export function EmployeeDashboard() {
     const onNewTip = (payload: NewTipPayload) => {
       if (user.employeeId && payload.employeeId !== user.employeeId) return;
 
-      setTips((prev) => {
-        const without = prev.filter((t) => t.id !== payload.tip.id);
-        return [payload.tip, ...without];
-      });
       setCurrentMonthTotal(payload.currentMonthTotal);
       setMonthlyGoal(payload.monthlyGoal);
       void refreshTipsQuiet();
@@ -216,97 +262,24 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshTipsQuiet]);
 
-  const totalAmount = tips.reduce((s, t) => s + t.amount, 0);
-  const avgTip = tips.length > 0 ? totalAmount / tips.length : 0;
-  // Dev-only: after initial hydration, show demo values when there are no real tips yet.
-  const devDemo = import.meta.env.DEV && tips.length === 0 && staffSlug !== undefined && !error;
-  const demoSummary = devDemo ? devMockEmployeeSummary(timeframe) : null;
+  const totalAmount = periodAmountEur;
+  const avgTipFromServer = periodTipCount > 0 ? totalAmount / periodTipCount : 0;
   const stats = {
-    amount: demoSummary ? demoSummary.amount : totalAmount,
-    tips: demoSummary ? demoSummary.tips : tips.length,
-    avgTip: demoSummary ? demoSummary.avgTip : avgTip,
+    tips: periodTipCount,
+    avgTip: avgTipFromServer,
+    amount: totalAmount,
     rating: null,
   };
 
-  const tz = businessTimezone ?? undefined;
-  const fmtHour = useMemo(
-    () =>
-      new Intl.DateTimeFormat(undefined, {
-        hour: "2-digit",
-        hour12: false,
-        timeZone: tz,
-      }),
-    [tz],
-  );
-  const fmtWeekday = useMemo(
-    () =>
-      new Intl.DateTimeFormat(undefined, {
-        weekday: "short",
-        timeZone: tz,
-      }),
-    [tz],
-  );
-  const fmtDayKey = useMemo(
-    () =>
-      new Intl.DateTimeFormat("en-CA", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        timeZone: tz,
-      }),
-    [tz],
-  );
-
   const chartData = useMemo(() => {
-    if (tips.length === 0) {
-      return import.meta.env.DEV && tips.length === 0 && staffSlug !== undefined && !error
-        ? devMockEmployeeEarningsTimeline(timeframe)
-        : [];
-    }
+    return chartSeries.map((p) => ({
+      time: p.label,
+      amount: p.amount,
+    }));
+  }, [chartSeries]);
 
-    if (timeframe === "today") {
-      const byHour = new Array(24).fill(0);
-      for (const t of tips) {
-        const h = Number(fmtHour.format(new Date(t.createdAt)));
-        if (Number.isFinite(h) && h >= 0 && h < 24) byHour[h] += t.amount;
-      }
-      return byHour.map((amount, hour) => ({
-        time: `${hour}:00`,
-        amount,
-      }));
-    }
-
-    if (timeframe === "week") {
-      const dayTotals = new Map<string, number>();
-      for (const t of tips) {
-        const key = fmtDayKey.format(new Date(t.createdAt));
-        dayTotals.set(key, (dayTotals.get(key) ?? 0) + t.amount);
-      }
-      return Array.from(dayTotals.entries())
-        .sort(([a], [b]) => a.localeCompare(b))
-        .map(([dateStr, amount]) => ({
-          time: fmtWeekday.format(new Date(dateStr)),
-          amount,
-        }));
-    }
-
-    const dayTotals = new Map<string, number>();
-    for (const t of tips) {
-      const key = fmtDayKey.format(new Date(t.createdAt));
-      dayTotals.set(key, (dayTotals.get(key) ?? 0) + t.amount);
-    }
-    const entries = Array.from(dayTotals.entries()).sort(([a], [b]) => a.localeCompare(b));
-    // Compress into ~5 points for a clean month view.
-    const stride = Math.max(1, Math.ceil(entries.length / 5));
-    const buckets: { time: string; amount: number }[] = [];
-    for (let i = 0; i < entries.length; i += stride) {
-      const slice = entries.slice(i, i + stride);
-      const sum = slice.reduce((s, [, amount]) => s + amount, 0);
-      const label = slice[0]?.[0] ?? "";
-      buckets.push({ time: label.slice(5), amount: sum });
-    }
-    return buckets;
-  }, [error, fmtDayKey, fmtHour, fmtWeekday, staffSlug, timeframe, tips.length]);
+  /** False while a fetch is in flight or responses have not caught up with the selected tab. */
+  const valuesMatchSelectedPeriod = dataTimeframe === timeframe && !periodLoading;
 
   const recentTips = tips.slice(0, 6).map((t) => ({
     id: t.id,
@@ -462,15 +435,20 @@ export function EmployeeDashboard() {
                 key={period}
                 type="button"
                 onClick={() => setTimeframe(period)}
-                className={`min-h-11 flex-1 rounded-md px-3 py-2 text-xs font-semibold transition-all sm:flex-initial sm:px-4 sm:text-sm ${
+                className={`min-h-11 flex flex-1 items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors sm:flex-initial sm:px-4 sm:text-sm ${
                   timeframe === period
                     ? "bg-primary text-primary-foreground shadow-sm"
                     : "text-muted-foreground hover:bg-muted"
                 }`}
               >
-                {period === "today" && "Today"}
-                {period === "week" && "This Week"}
-                {period === "month" && "This Month"}
+                <span className="shrink-0">
+                  {period === "today" && "Today"}
+                  {period === "week" && "This Week"}
+                  {period === "month" && "This Month"}
+                </span>
+                {period === timeframe && periodLoading ? (
+                  <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin opacity-90" aria-hidden />
+                ) : null}
               </button>
             ))}
           </div>
@@ -487,15 +465,34 @@ export function EmployeeDashboard() {
             actionTo="/employee/settings"
           />
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+          <motion.div
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className={cn("transition-opacity duration-200", !valuesMatchSelectedPeriod && "opacity-[0.92]")}
+          >
             <div className="relative mb-2 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 lg:gap-6">
+              {periodLoading ? (
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-center rounded-xl bg-transparent"
+                >
+                  <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-white/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                    Updating
+                  </div>
+                </div>
+              ) : null}
               <StatCard
                 title="Total tips"
-                value={String(stats.tips)}
+                value={valuesMatchSelectedPeriod ? String(stats.tips) : "—"}
                 change={
-                  tips.length > 0
-                    ? `${tips.length} in the selected period`
-                    : "No tips in this period yet."
+                  periodLoading && !valuesMatchSelectedPeriod
+                    ? "Updating this period…"
+                    : periodTipCount > 0 && valuesMatchSelectedPeriod
+                      ? `${formatEur(stats.amount)} earned · ${periodTipCount} in this period`
+                      : valuesMatchSelectedPeriod
+                        ? "No tips in this period yet."
+                        : "…"
                 }
                 icon={TrendingUp}
               />
@@ -525,18 +522,25 @@ export function EmployeeDashboard() {
               <CardHeader>
                 <CardTitle className="text-lg">Earnings timeline</CardTitle>
                 <CardDescription>
-                  {timeframe === "today" && "Tips by hour today"}
-                  {timeframe === "week" && "Tips by day (last 7 days)"}
-                  {timeframe === "month" && "Tips by 6-day segment (last 30 days)"}
+                  {timeframe === "today" &&
+                    `Tips by hour today${businessTimezone ? ` · ${businessTimezone}` : ""}`}
+                  {timeframe === "week" &&
+                    `Tips by weekday this week (Mon–Sun)${businessTimezone ? ` · ${businessTimezone}` : ""}`}
+                  {timeframe === "month" &&
+                    `Tips by calendar day this month${businessTimezone ? ` · ${businessTimezone}` : ""}`}
                 </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {chartData.length === 0 ? (
+                {periodLoading || !valuesMatchSelectedPeriod ? (
+                  <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Loading chart" />
+                  </div>
+                ) : chartData.length === 0 ? (
                   <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
                 ) : (
                   <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <AreaChart data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
+                    <AreaChart key={timeframe} data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />

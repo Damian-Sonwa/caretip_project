@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import { emitNewTip } from "../socket/emitTip.js";
 import { prisma } from "../prisma.js";
+import { businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -154,16 +155,23 @@ async function emitTipSocket(tipId: string): Promise<void> {
   });
   if (!tip?.employee) return;
 
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const monthTips = await prisma.transaction.findMany({
+  const business = await prisma.business.findUnique({
+    where: { id: tip.businessId },
+    select: { timezone: true },
+  });
+  const tz = sanitizeIanaTimezone(business?.timezone);
+  const monthRange = businessUtcRangeForTimeframe("month", tz);
+  const currentMonthTotalAgg = await prisma.transaction.aggregate({
     where: {
       employeeId: tip.employeeId,
       status: "success",
-      createdAt: { gte: startOfMonth },
+      ...(monthRange != null
+        ? { createdAt: { gte: monthRange.startUtc, lte: monthRange.endUtc } }
+        : { createdAt: { gte: new Date(0) } }),
     },
+    _sum: { amount: true },
   });
-  const currentMonthTotal = monthTips.reduce((s, t) => s + Number(t.amount), 0);
+  const currentMonthTotal = Number(currentMonthTotalAgg._sum.amount ?? 0);
   const monthlyGoal = tip.employee.monthlyGoal != null ? Number(tip.employee.monthlyGoal) : null;
 
   emitNewTip({

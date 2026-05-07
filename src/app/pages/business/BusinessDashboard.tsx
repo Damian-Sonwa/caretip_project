@@ -459,8 +459,9 @@ export function BusinessDashboard() {
                     alt=""
                     className="h-full w-full p-5 max-w-[85%] mx-auto object-contain object-center"
                     loading="eager"
-                    fetchPriority="high"
                     decoding="async"
+                    // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.
+                    {...({ fetchpriority: "high" } as unknown as React.ImgHTMLAttributes<HTMLImageElement>)}
                   />
                 </div>
               </div>

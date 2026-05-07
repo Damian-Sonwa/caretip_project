@@ -2,15 +2,11 @@ import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { createPaymentIntent, isStripeConfigured } from "../services/stripe.service.js";
-import * as tipsService from "../services/tips.service.js";
 import * as goalService from "../services/goal.service.js";
 import * as businessService from "../services/business.service.js";
+import { loadEmployeeTipsDashboardForTimeframe } from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
-import {
-  businessUtcRangeForTimeframe,
-  businessUtcRangeForLocalDates,
-  sanitizeIanaTimezone,
-} from "../utils/businessTime.js";
+import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 
 async function findEmployeeForTipsByUserId(
   userId: string,
@@ -53,32 +49,34 @@ export async function getByEmployee(req: Request, res: Response) {
     if (!employee) {
       return res.status(403).json({ message: "Insufficient permissions" });
     }
-    const tipsAll = await tipsService.getTipsByEmployeeId(employee.id);
     const timeframeRaw = typeof req.query.timeframe === "string" ? req.query.timeframe.trim() : "";
     const timeframe =
       timeframeRaw === "today" || timeframeRaw === "week" || timeframeRaw === "month"
         ? (timeframeRaw as "today" | "week" | "month")
         : null;
-    const tips =
-      timeframe === null
-        ? tipsAll
-        : (() => {
-            const r = businessUtcRangeForTimeframe(timeframe, employee.businessTimezone);
-            if (!r) return tipsAll;
-            const start = r.startUtc.getTime();
-            const end = r.endUtc.getTime();
-            return tipsAll.filter((t) => {
-              const ms = new Date(t.createdAt).getTime();
-              return ms >= start && ms < end;
-            });
-          })();
-    const monthRange = businessUtcRangeForTimeframe("month", employee.businessTimezone);
-    const startUtc = monthRange?.startUtc ?? new Date(0);
-    const currentMonthTotalAgg = await prisma.transaction.aggregate({
-      where: { employeeId: employee.id, status: "success", createdAt: { gte: startUtc } },
-      _sum: { amount: true },
+
+    const dash = await loadEmployeeTipsDashboardForTimeframe({
+      employeeId: employee.id,
+      businessTimezone: employee.businessTimezone,
+      timeframe,
     });
-    const currentMonthTotal = Number(currentMonthTotalAgg._sum.amount ?? 0);
+
+    const monthRange = businessUtcRangeForTimeframe("month", employee.businessTimezone);
+    let currentMonthTotal = 0;
+    if (monthRange) {
+      const currentMonthTotalAgg = await prisma.transaction.aggregate({
+        where: {
+          employeeId: employee.id,
+          status: "success",
+          createdAt: {
+            gte: monthRange.startUtc,
+            lte: monthRange.endUtc,
+          },
+        },
+        _sum: { amount: true },
+      });
+      currentMonthTotal = Number(currentMonthTotalAgg._sum.amount ?? 0);
+    }
     const monthlyGoal = employee.monthlyGoal;
     let goal = null as Awaited<ReturnType<typeof goalService.getMyGoalWithProgress>>;
     try {
@@ -87,10 +85,13 @@ export async function getByEmployee(req: Request, res: Response) {
       /* optional before migration */
     }
     return res.json({
-      tips,
+      tips: dash.tips,
       monthlyGoal,
       currentMonthTotal,
       businessTimezone: employee.businessTimezone,
+      periodAmountEur: dash.periodAmountEur,
+      periodTipCount: dash.periodTipCount,
+      chartSeries: dash.chartSeries,
       goal,
     });
   } catch (err) {

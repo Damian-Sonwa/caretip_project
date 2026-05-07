@@ -25,7 +25,8 @@ export function BusinessHeroImagePreview({
           style={{ maxHeight }}
           loading="eager"
           decoding="async"
-          fetchPriority="high"
+          // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.
+          {...({ fetchpriority: "high" } as unknown as React.ImgHTMLAttributes<HTMLImageElement>)}
         />
       </div>
     </div>
