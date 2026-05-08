@@ -70,9 +70,6 @@ const BUSINESS_CHART_COLORS = [
 const BUSINESS_HERO_HEADLINE = "Team Performance Overview";
 const BUSINESS_HERO_SUB = "Track team growth in real time.";
 
-/** Desktop max height cap; mobile uses tighter fixed height for a compact hero. */
-const BUSINESS_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
-
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 const EXPORT_ERROR_TOAST = {
@@ -443,21 +440,19 @@ export function BusinessDashboard() {
           description={BUSINESS_HERO_SUB}
           image={
             <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    // Mobile: compact, premium media card
-                    "aspect-[16/10] min-h-[220px] max-h-[260px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
-                    // Desktop: keep existing rhythm
-                    "lg:aspect-square lg:max-h-none lg:max-w-[420px] lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                    // Taller frame than employee hero so bar-chart artwork isn’t vertically cramped.
+                    "max-lg:h-[312px] max-lg:max-h-[312px] max-lg:min-h-0 rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
+                    "lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
                   )}
-                  style={BUSINESS_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
                     src={barChartHeroImage}
                     alt=""
-                    className="h-full w-full p-5 max-w-[85%] mx-auto object-contain object-center"
+                    className="h-full w-full px-2 py-3 lg:px-4 lg:py-4 object-contain object-center"
                     loading="eager"
                     decoding="async"
                     // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.

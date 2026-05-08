@@ -94,9 +94,9 @@ export function DashboardHero({
         stackHeroOnMobile
           ? mobileAlign === "center"
             ? cn(
-                // Business Dashboard (stacked + centered): premium rhythm + cleaner line breaks.
+                // Stacked + centered (Business / Employee): premium rhythm + room for longer headlines.
                 "text-[28px] font-bold leading-[1.06] tracking-tight sm:text-3xl lg:text-4xl xl:text-5xl",
-                "mx-auto max-w-[20ch] text-center",
+                "mx-auto max-w-[28ch] text-center text-pretty sm:max-w-[32ch]",
               )
             : cn("text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl", "text-left")
           : "text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl",

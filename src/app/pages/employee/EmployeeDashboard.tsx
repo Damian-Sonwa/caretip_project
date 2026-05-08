@@ -47,8 +47,6 @@ const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(-
 
 const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
 const EMPLOYEE_HERO_SUB = "Your performance at a glance.";
-/** Desktop max height cap; mobile uses tighter fixed height for a compact hero. */
-const EMPLOYEE_HERO_MEDIA_MAX_STYLE = { maxHeight: "min(55vh, 480px)" } as const;
 
 function StatCard(props: {
   title: string;
@@ -362,6 +360,7 @@ export function EmployeeDashboard() {
           stackHeroOnMobile
           hideTabs
           actionsPlacement="belowText"
+          mobileAlign="center"
           badge={
             <>
               <Sparkles className="h-3.5 w-3.5 text-foreground" />
@@ -372,21 +371,21 @@ export function EmployeeDashboard() {
           description={EMPLOYEE_HERO_SUB}
           image={
             <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center lg:w-full lg:max-w-[420px]">
+              {/* Mobile: bleed past hero gutter so the frame reads wider without taller height */}
+              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    // Mobile: compact media card, tighter height
-                    "aspect-[16/10] min-h-[220px] max-h-[260px] rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
-                    // Desktop: keep existing rhythm
-                    "lg:aspect-square lg:max-h-none lg:max-w-[420px] lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                    // Mobile: fixed height (no extra vertical growth); width uses full bleed wrapper above
+                    "max-lg:h-[236px] max-lg:max-h-[236px] max-lg:min-h-0 rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
+                    // Desktop: wider frame, fixed height cap (growth is horizontal-first vs old square crop)
+                    "lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
                   )}
-                  style={EMPLOYEE_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
                     src={staffHeroImage}
                     alt=""
-                    className="h-full w-full p-4 object-contain object-center"
+                    className="h-full w-full px-2 py-3 lg:px-4 lg:py-4 object-contain object-center"
                     draggable={false}
                     loading="eager"
                   />
