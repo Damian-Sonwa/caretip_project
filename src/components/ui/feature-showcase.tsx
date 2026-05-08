@@ -2,6 +2,7 @@ import * as React from "react";
 import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
+import { CheckCircle, ShieldCheck, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -67,9 +68,17 @@ export type FeatureShowcaseProps = {
   heroBorderBeam?: boolean;
 };
 
+function iconForFeatureHighlight(label: string) {
+  const s = label.trim().toLowerCase();
+  if (s.includes("live") || s.includes("minute")) return Zap;
+  if (s.includes("pos")) return Sparkles;
+  if (s.includes("secure") || s.includes("checkout")) return ShieldCheck;
+  return CheckCircle;
+}
+
 export function FeatureShowcase({
   id,
-  eyebrow = "Discover",
+  eyebrow,
   title,
   description,
   stats = ["1 reference", "30s setup", "Share‑ready"],
@@ -128,7 +137,7 @@ export function FeatureShowcase({
       )}
     >
       {splitPattern ? (
-        <div className="mx-auto w-full max-w-7xl px-6 pt-14 pb-24 md:pt-16 md:pb-32">
+        <div className="mx-auto w-full max-w-7xl px-6 pt-14 pb-16 md:pt-16 md:pb-20">
           <div className="relative overflow-hidden rounded-3xl border border-black/[0.06] bg-white shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
             <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-stretch">
               {/* Left: textured canvas */}
@@ -158,9 +167,11 @@ export function FeatureShowcase({
                   }}
                 />
                 <div className="relative z-[1] max-w-xl">
-                  <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
-                    {eyebrow}
-                  </Badge>
+                  {eyebrow?.trim() ? (
+                    <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
+                      {eyebrow}
+                    </Badge>
+                  ) : null}
 
                   <motion.h1
                     className="text-balance text-4xl font-bold leading-[0.95] text-gray-900 sm:text-5xl md:text-6xl"
@@ -172,39 +183,54 @@ export function FeatureShowcase({
                   </motion.h1>
 
                   {description ? (
-                    <p className="mt-6 max-w-xl text-gray-500">
+                    <p className="mt-5 max-w-xl text-gray-500">
                       {description}
                     </p>
                   ) : null}
 
                   {stats.length > 0 && (
-                    <div className="mt-6 flex flex-wrap gap-2">
-                      {stats.map((s, i) => (
-                        <Badge key={i} variant="secondary" className="bg-muted text-foreground">
-                          {s}
-                        </Badge>
-                      ))}
-                    </div>
+                    <ul className="mt-6 flex flex-col gap-2.5 text-[13px] font-medium text-gray-600/90 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
+                      {stats.map((s, i) => {
+                        const Icon = iconForFeatureHighlight(s);
+                        return (
+                          <li key={i} className="inline-flex items-center gap-2">
+                            <Icon
+                              className="h-4 w-4 shrink-0 text-primary/90"
+                              aria-hidden
+                            />
+                            <span className="leading-relaxed">{s}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
                   )}
 
-                  <div className="mt-10 flex flex-wrap gap-3">
-                    <Button asChild size="lg" className="rounded-2xl font-bold">
-                      <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
+                  <div className="mt-8 flex w-full flex-wrap items-stretch justify-center gap-3 sm:justify-start">
+                    <Button
+                      asChild
+                      size="lg"
+                      className="h-12 rounded-2xl px-6 font-bold leading-none"
+                    >
+                      <Link to={primaryCtaTo} className="whitespace-nowrap">
+                        {primaryCtaLabel}
+                      </Link>
                     </Button>
                     <Button
                       asChild
                       size="lg"
                       variant="outline"
-                      className="rounded-2xl border-2 border-primary bg-transparent font-semibold"
+                      className="h-12 rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold leading-none"
                     >
-                      <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>
+                      <Link to={secondaryCtaTo} className="whitespace-nowrap">
+                        {secondaryCtaLabel}
+                      </Link>
                     </Button>
                   </div>
                 </div>
               </div>
 
               {/* Right: brand panel + circular pattern */}
-              <div className="relative flex items-end justify-center overflow-hidden bg-primary/15 p-8 sm:p-10 lg:p-12">
+              <div className="relative flex items-center justify-center overflow-hidden bg-primary/15 p-8 sm:p-10 lg:p-12">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-0"
@@ -218,17 +244,17 @@ export function FeatureShowcase({
                 <div aria-hidden className="pointer-events-none absolute right-24 -bottom-36 h-[520px] w-[520px] rounded-full border border-black/10 bg-white/10" />
 
                 <motion.div
-                  className="relative z-[1] w-full max-w-[520px]"
+                  className="relative z-[1] mx-auto w-full max-w-[520px]"
                   initial={{ opacity: 0, y: 18 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
                 >
                   {useAnimatedHero ? (
-                    <LandingImageFrame className="w-full bg-white">
+                    <LandingImageFrame className="mx-auto w-full bg-white">
                       <CareTipHeroAnimation />
                     </LandingImageFrame>
                   ) : singleHeroImage ? (
-                    <LandingImageFrame className="w-full bg-white">
+                    <LandingImageFrame className="mx-auto w-full bg-white">
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
@@ -255,7 +281,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex min-h-[500px] w-full max-w-7xl flex-col gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:flex-row md:items-center md:gap-12 md:px-6 md:pt-20 md:pb-32 lg:gap-14 lg:px-8"
+              ? "mx-auto relative z-[1] flex min-h-[500px] w-full max-w-7xl flex-col gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-20 md:pb-32 lg:gap-10 lg:px-8"
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -267,17 +293,19 @@ export function FeatureShowcase({
               "order-1 flex flex-1 flex-col self-stretch max-md:pt-2 md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
           )}
         >
-            <Badge
-              variant="outline"
-              className={cn(
-                "mb-6",
-                cinematic
-                  ? "max-md:mx-auto text-gray-900 border-black/[0.10] bg-white"
-                  : "border-primary/40 text-foreground",
-              )}
-            >
-              {eyebrow}
-            </Badge>
+            {eyebrow?.trim() ? (
+              <Badge
+                variant="outline"
+                className={cn(
+                  "mb-6",
+                  cinematic
+                    ? "max-md:mx-auto text-gray-900 border-black/[0.10] bg-white"
+                    : "border-primary/40 text-foreground",
+                )}
+              >
+                {eyebrow}
+              </Badge>
+            ) : null}
 
             <motion.h1
               className={cn(
@@ -303,19 +331,30 @@ export function FeatureShowcase({
             ) : null}
 
             {stats.length > 0 && (
-              <div className="mt-6 flex flex-wrap gap-2">
-                {stats.map((s, i) => (
-                  <Badge
-                    key={i}
-                    variant="secondary"
-                    className={cn(
-                    cinematic ? "bg-white text-gray-900 border border-black/[0.08]" : "bg-muted text-foreground",
-                    )}
-                  >
-                    {s}
-                  </Badge>
-                ))}
-              </div>
+              <ul
+                className={cn(
+                  "mt-6 flex flex-col gap-2.5 text-[13px] font-medium",
+                  cinematic
+                    ? "text-gray-600/90 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2"
+                    : "text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2",
+                )}
+              >
+                {stats.map((s, i) => {
+                  const Icon = iconForFeatureHighlight(s);
+                  return (
+                    <li key={i} className="inline-flex items-center gap-2">
+                      <Icon
+                        className={cn(
+                          "h-4 w-4 shrink-0",
+                          cinematic ? "text-primary/90" : "text-primary",
+                        )}
+                        aria-hidden
+                      />
+                      <span className="leading-relaxed">{s}</span>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
 
             <div className={cn("mt-8 max-w-xl sm:mt-10")}>
@@ -330,30 +369,34 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-6 flex w-full flex-wrap gap-3 max-md:justify-start sm:mt-7">
+              <div className="mt-6 flex w-full flex-wrap items-stretch justify-center gap-3 sm:mt-7 sm:justify-start">
                 <Button
                   asChild
                   size="lg"
                   className={cn(
-                    "rounded-full font-bold",
+                    "h-12 rounded-full px-6 font-bold leading-none",
                     cinematic &&
                       "rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]",
                   )}
                 >
-                  <Link to={primaryCtaTo}>{primaryCtaLabel}</Link>
+                  <Link to={primaryCtaTo} className="whitespace-nowrap">
+                    {primaryCtaLabel}
+                  </Link>
                 </Button>
                 <Button
                   asChild
                   size="lg"
                   variant="outline"
                   className={cn(
-                    "rounded-full border-2 bg-transparent font-semibold",
+                    "h-12 rounded-full border-2 bg-transparent px-6 font-semibold leading-none",
                     cinematic
                       ? "rounded-2xl border-neutral-300 text-gray-900 hover:bg-neutral-100 hover:text-gray-900 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800/70"
                       : "border-primary",
                   )}
                 >
-                  <Link to={secondaryCtaTo}>{secondaryCtaLabel}</Link>
+                  <Link to={secondaryCtaTo} className="whitespace-nowrap">
+                    {secondaryCtaLabel}
+                  </Link>
                 </Button>
               </div>
             </div>
@@ -408,9 +451,9 @@ export function FeatureShowcase({
                 </LandingImageFrame>
               ) : singleHeroImage ? (
                 cinematic ? (
-                  <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:ml-auto md:mr-0">
-                    <div className="relative flex w-full justify-center md:justify-end">
-                      <div className="relative w-full max-w-[560px] max-md:mx-auto md:mt-2">
+                  <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
+                    <div className="relative flex w-full justify-center md:justify-center">
+                      <div className="relative w-full max-w-[560px] max-md:mx-auto md:-translate-y-6 lg:-translate-y-8">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"

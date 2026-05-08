@@ -116,7 +116,8 @@ export default function Component() {
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white to-transparent" />
 
-          <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={30} gapPx={24}>
+          {/* Slow, ambient motion (avoid noticeable constant movement). */}
+          <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={65} gapPx={24}>
             {businesses.map((b) => (
               <div
                 className="group flex w-80 shrink-0 flex-col sm:w-[26rem]"
@@ -128,7 +129,7 @@ export default function Component() {
                 >
                   <img
                     alt={b.name}
-                    className="h-full w-full cursor-pointer object-cover transition-transform duration-300 group-hover:scale-[1.01] group-active:scale-[0.99]"
+                    className="h-full w-full cursor-pointer object-cover transition-transform duration-700 ease-out group-hover:scale-[1.005] group-active:scale-[0.995]"
                     src={b.image}
                     loading="lazy"
                     decoding="async"

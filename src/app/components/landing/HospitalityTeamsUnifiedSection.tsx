@@ -36,15 +36,15 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="built-for-hospitality"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 py-24 dark:bg-neutral-900"
+      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 pb-24 pt-14 sm:pt-16 lg:pt-20 dark:bg-neutral-900"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
         <div className="mb-10 w-full max-w-full space-y-4 text-center sm:mb-14">
           <motion.div
-            initial={{ y: 16, opacity: 0 }}
+            initial={{ y: 10, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           >
             <h2 className="mb-3 max-w-full break-words text-balance font-bold leading-[1.05] text-gray-900 text-[clamp(1.75rem,6vw,3.75rem)]">
               Built for hospitality teams
@@ -60,9 +60,18 @@ export function HospitalityTeamsUnifiedSection() {
           {/* Mobile: images first */}
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard cardClassName="p-0">
-              <div className="pointer-events-none absolute left-4 top-4 z-10 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-900">
-                Where CareTip Works
-              </div>
+              <motion.div
+                initial={{ y: 6, opacity: 0 }}
+                whileInView={{ y: 0, opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+                className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 text-sm font-semibold text-gray-900"
+              >
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <QrCode className="h-3.5 w-3.5" aria-hidden />
+                </span>
+                <span>Where CareTip Works</span>
+              </motion.div>
               <HospitalityBusinessesMarquee />
             </LandingBorderedCard>
           </div>
@@ -73,10 +82,10 @@ export function HospitalityTeamsUnifiedSection() {
               {FEATURES.map((f, idx) => (
                 <motion.li
                   key={f.title}
-                  initial={{ y: 14, opacity: 0 }}
+                  initial={{ y: 10, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: idx * 0.06 }}
+                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
                   className="w-full rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-950/40"
                 >
                   <div className="flex w-full min-w-0 items-start gap-4">

@@ -36,7 +36,6 @@ export function LandingPage() {
           <FeatureShowcase
             id="about-section"
             className="font-sans"
-            eyebrow="CareTip"
             title="Tip in seconds. Reward great service instantly."
             description="CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan."
             stats={["Live in minutes", "No POS integration", "Secure checkout"]}
@@ -61,7 +60,7 @@ export function LandingPage() {
             defaultTab="contactless"
             primaryCtaLabel="Get Started"
             primaryCtaTo="/auth?mode=signup&role=business&from=landing"
-            secondaryCtaLabel="Join your team"
+            secondaryCtaLabel="Staff Access"
             secondaryCtaTo="/join"
             variant="cinematic"
             useAnimatedHero={false}
