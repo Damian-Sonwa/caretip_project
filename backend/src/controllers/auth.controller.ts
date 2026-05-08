@@ -172,18 +172,23 @@ export async function login(req: Request, res: Response) {
     });
 
     // Best-effort session alert email (opt-in via user_settings.notify_new_login).
-    try {
-      const settings = await prisma.userSettings.findUnique({ where: { userId: result.user.id } });
-      if (settings?.notifyNewLogin) {
+    void (async () => {
+      try {
+        const settings = await prisma.userSettings.findUnique({
+          where: { userId: result.user.id },
+          select: { notifyNewLogin: true },
+        });
+        if (!settings?.notifyNewLogin) return;
+
         const ip =
           (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
           (req.socket.remoteAddress ?? null);
         const ua = String(req.headers["user-agent"] ?? "");
-        void sendNewLoginAlertEmail({ to: result.user.email, ip, userAgent: ua });
+        await sendNewLoginAlertEmail({ to: result.user.email, ip, userAgent: ua });
+      } catch (e) {
+        logServerError("auth.login.sessionAlertEmail", e);
       }
-    } catch (e) {
-      logServerError("auth.login.sessionAlertEmail", e);
-    }
+    })();
     try {
       const rt = await issueRefreshToken(result.user.id);
       setRefreshCookie(res, rt.token);

@@ -209,7 +209,7 @@ export function FeatureShowcase({
                     <Button
                       asChild
                       size="lg"
-                      className="h-12 rounded-2xl px-6 font-bold leading-none"
+                      className="h-12 w-[min(64%,280px)] rounded-2xl px-6 font-bold leading-none sm:w-auto"
                     >
                       <Link to={primaryCtaTo} className="whitespace-nowrap">
                         {primaryCtaLabel}
@@ -219,7 +219,7 @@ export function FeatureShowcase({
                       asChild
                       size="lg"
                       variant="outline"
-                      className="h-12 rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold leading-none"
+                      className="h-12 w-[min(64%,280px)] rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold leading-none sm:w-auto"
                     >
                       <Link to={secondaryCtaTo} className="whitespace-nowrap">
                         {secondaryCtaLabel}
@@ -374,7 +374,7 @@ export function FeatureShowcase({
                   asChild
                   size="lg"
                   className={cn(
-                    "h-12 rounded-full px-6 font-bold leading-none",
+                    "h-12 w-[min(64%,280px)] rounded-full px-6 font-bold leading-none sm:w-auto",
                     cinematic &&
                       "rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]",
                   )}
@@ -388,7 +388,7 @@ export function FeatureShowcase({
                   size="lg"
                   variant="outline"
                   className={cn(
-                    "h-12 rounded-full border-2 bg-transparent px-6 font-semibold leading-none",
+                    "h-12 w-[min(64%,280px)] rounded-full border-2 bg-transparent px-6 font-semibold leading-none sm:w-auto",
                     cinematic
                       ? "rounded-2xl border-neutral-300 text-gray-900 hover:bg-neutral-100 hover:text-gray-900 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800/70"
                       : "border-primary",
@@ -453,7 +453,7 @@ export function FeatureShowcase({
                 cinematic ? (
                   <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
                     <div className="relative flex w-full justify-center md:justify-center">
-                      <div className="relative w-full max-w-[560px] max-md:mx-auto max-md:-translate-y-4 md:-translate-y-6 lg:-translate-y-8">
+                      <div className="relative w-full max-w-[620px] max-md:mx-auto max-md:-translate-y-4 md:-translate-y-6 lg:-translate-y-8">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"
@@ -462,7 +462,8 @@ export function FeatureShowcase({
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
                         className={cn(
-                          "animate-float relative mx-auto h-auto w-[min(560px,92%)] max-w-full select-none max-md:w-full",
+                          // Bigger on mobile, but slightly "zoomed out" (scale down a touch) to show more of the mockup.
+                          "animate-float relative mx-auto h-auto w-[min(620px,96%)] max-w-full select-none max-md:w-full max-md:scale-[0.94] max-md:origin-center",
                           singleHeroImage.imageFit === "cover" ? "object-cover" : "object-contain",
                         )}
                         style={
