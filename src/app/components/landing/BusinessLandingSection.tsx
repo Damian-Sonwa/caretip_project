@@ -9,7 +9,7 @@ export function BusinessLandingSection() {
       id="business-section"
       className="scroll-mt-[80px] bg-white px-2 py-16 max-md:overflow-x-hidden sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-950"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12 lg:items-center">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
@@ -33,7 +33,7 @@ export function BusinessLandingSection() {
 
           <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-500/10">
                 <BarChart3 className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -42,7 +42,7 @@ export function BusinessLandingSection() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-500/10">
                 <PieChart className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -51,7 +51,7 @@ export function BusinessLandingSection() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-500/10">
                 <FileDown className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -60,7 +60,7 @@ export function BusinessLandingSection() {
               </div>
             </div>
             <div className="flex items-start gap-3">
-              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+              <div className="mt-1 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-2xl bg-orange-500/10">
                 <Users className="h-4 w-4 text-primary" />
               </div>
               <div>
@@ -88,13 +88,15 @@ export function BusinessLandingSection() {
           whileHover={{ y: -5 }}
         >
           <div className="flex w-full min-h-0 items-center justify-center">
-            <img
-              src={businessSectionImg}
-              alt="CareTip business dashboard on a laptop showing team visibility and analytics"
-              className="mx-auto h-auto w-full max-w-none object-contain max-md:mt-4 max-md:min-h-[min(42dvh,380px)] max-md:max-w-none md:mt-0 md:max-w-md lg:max-w-2xl"
-              loading="lazy"
-              decoding="async"
-            />
+            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-[2.5rem] border border-gray-200/30 shadow-[0_20px_50px_rgba(0,0,0,0.08)] max-md:min-h-[min(42dvh,380px)] md:mt-0 md:max-w-md lg:max-w-2xl">
+              <img
+                src={businessSectionImg}
+                alt="CareTip business dashboard on a laptop showing team visibility and analytics"
+                className="h-full w-full object-cover"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
           </div>
         </motion.div>
       </div>

@@ -19,7 +19,7 @@ export function EmployeeLandingSection() {
           whileHover={{ y: -5 }}
         >
           <div className="flex w-full min-h-0 items-center justify-center">
-            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:rounded-2xl sm:mt-10 sm:rounded-3xl lg:max-w-xl dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:rounded-2xl sm:mt-10 sm:rounded-3xl lg:max-w-lg dark:border-neutral-800 dark:bg-neutral-900">
               <img
                 src={newEmployeeImg}
                 alt="CareTip employee dashboard showing daily earnings, ratings, and goals"
