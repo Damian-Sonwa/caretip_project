@@ -92,10 +92,13 @@ export function DashboardHero({
       className={cn(
         "text-balance break-words text-foreground",
         stackHeroOnMobile
-          ? cn(
-              "text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl",
-              mobileAlign === "center" ? "text-center" : "text-left",
-            )
+          ? mobileAlign === "center"
+            ? cn(
+                // Business Dashboard (stacked + centered): premium rhythm + cleaner line breaks.
+                "text-[28px] font-bold leading-[1.06] tracking-tight sm:text-3xl lg:text-4xl xl:text-5xl",
+                "mx-auto max-w-[20ch] text-center",
+              )
+            : cn("text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl", "text-left")
           : "text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl",
       )}
     >
@@ -181,7 +184,12 @@ export function DashboardHero({
     cn(
       "dashboard-hero-media relative w-full min-w-0",
       opts.forStackedMobile && stackHeroOnMobile
-        ? "max-lg:overflow-visible max-lg:rounded-3xl max-lg:bg-[#FFFFFF] max-lg:p-0 max-lg:shadow-none"
+        ? cn(
+            "max-lg:overflow-visible max-lg:rounded-3xl max-lg:bg-[#FFFFFF] max-lg:p-0 max-lg:shadow-none",
+            mobileAlign === "center" &&
+              // Business Dashboard (stacked + centered): keep media perfectly straight, centered, and symmetrical.
+              "max-lg:transform-none max-lg:flex max-lg:items-center max-lg:justify-center",
+          )
         : imageOverlay === false
           ? "bg-transparent p-0 sm:p-0 lg:pt-0"
           : cn(
@@ -195,6 +203,7 @@ export function DashboardHero({
     <div
       className={cn(
         "relative w-full min-w-0 touch-manipulation [&_canvas]:block [&_canvas]:h-full [&_canvas]:w-full [&_canvas]:max-w-full [&_img]:block [&_img]:h-auto [&_img]:w-full [&_img]:max-w-full [&_svg]:mx-auto [&_svg]:block",
+        stackHeroOnMobile && mobileAlign === "center" && "transform-none",
         opts.stackedMobileFrame &&
           (stackHeroOnMobile
             ? "max-lg:w-full max-lg:min-h-0"
@@ -309,13 +318,14 @@ export function DashboardHero({
             <div className="dashboard-hero-container flex min-w-0 flex-col gap-4 p-0 lg:hidden">
               <div
                 className={cn(
-                  "flex min-w-0 flex-col gap-2.5",
+                  "flex min-w-0 flex-col gap-3",
                   mobileAlign === "center" ? "text-center" : "text-left",
                 )}
               >
                 {mobileAlign === "center" ? (
-                  <div className="relative min-h-0 pt-10">
-                    <div className="absolute left-1/2 top-0 -translate-x-1/2">{badgeRow}</div>
+                  <div className="min-h-0 space-y-5">
+                    {/* Badge should sit ABOVE the headline with clear breathing room (no overlap). */}
+                    {badgeRow}
                     {titleRow}
                   </div>
                 ) : (

@@ -36,7 +36,7 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import coinsHero from "../../../../images/coins.png";
+import staffHeroImage from "../../../../images/for_staff.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -384,8 +384,8 @@ export function EmployeeDashboard() {
                   style={EMPLOYEE_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
-                    src={coinsHero}
-                    alt="Coins"
+                    src={staffHeroImage}
+                    alt=""
                     className="h-full w-full p-4 object-contain object-center"
                     draggable={false}
                     loading="eager"

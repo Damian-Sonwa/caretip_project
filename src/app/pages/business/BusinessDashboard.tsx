@@ -54,7 +54,7 @@ import {
   devMockBusinessEmployeePerformance,
   devMockBusinessTipDistribution,
 } from "../../lib/devAnalyticsMocks";
-import aceHeroImage from "../../../../images/ACE.png";
+import barChartHeroImage from "../../../../images/barchart.png";
 
 // Match Platform Admin dashboard analytics palette (premium, consistent).
 const BUSINESS_CHART_COLORS = [
@@ -455,7 +455,7 @@ export function BusinessDashboard() {
                   style={BUSINESS_HERO_MEDIA_MAX_STYLE}
                 >
                   <img
-                    src={aceHeroImage}
+                    src={barChartHeroImage}
                     alt=""
                     className="h-full w-full p-5 max-w-[85%] mx-auto object-contain object-center"
                     loading="eager"
