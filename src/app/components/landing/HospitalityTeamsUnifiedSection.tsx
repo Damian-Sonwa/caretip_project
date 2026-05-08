@@ -36,10 +36,10 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="built-for-hospitality"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 pb-24 pt-14 sm:pt-16 lg:pt-20 dark:bg-neutral-900"
+      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 pb-20 pt-14 sm:pb-24 sm:pt-16 lg:pt-20 dark:bg-neutral-900"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
-        <div className="mb-10 w-full max-w-full space-y-4 text-center sm:mb-14">
+        <div className="mb-8 w-full max-w-full space-y-3 text-center sm:mb-10 sm:space-y-4">
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -56,7 +56,7 @@ export function HospitalityTeamsUnifiedSection() {
           </motion.div>
         </div>
 
-        <div className="grid w-full min-w-0 gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-14">
+        <div className="grid w-full min-w-0 gap-8 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
           {/* Mobile: images first */}
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard cardClassName="p-0">

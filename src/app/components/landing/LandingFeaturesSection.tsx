@@ -14,9 +14,12 @@ const items = [
 
 export function LandingFeaturesSection() {
   return (
-    <section id="features" className="scroll-mt-[80px] bg-gray-50 px-6 py-24 dark:bg-neutral-900">
+    <section
+      id="features"
+      className="scroll-mt-[80px] bg-gray-50 px-6 py-16 sm:py-20 lg:py-24 dark:bg-neutral-900"
+    >
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-14 max-w-2xl text-center">
+        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -36,7 +39,7 @@ export function LandingFeaturesSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-6">
           {items.map((item, idx) => {
             const Icon = item.icon;
             return (
@@ -52,7 +55,7 @@ export function LandingFeaturesSection() {
                   {idx === 0 ? (
                     <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />
                   ) : null}
-                  <CardHeader className="relative z-[1] pb-4">
+                  <CardHeader className="relative z-[1] pb-3">
                     <div className="flex items-start justify-between gap-3">
                       <div className="rounded-lg border border-border bg-muted p-2">
                         <Icon className="h-5 w-5 text-foreground" />

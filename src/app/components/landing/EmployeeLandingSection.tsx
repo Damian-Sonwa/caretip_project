@@ -7,9 +7,9 @@ export function EmployeeLandingSection() {
   return (
     <section
       id="for-employees"
-      className="scroll-mt-[80px] bg-gray-50 px-2 py-20 max-md:py-16 sm:px-6 md:py-28 dark:bg-neutral-900"
+      className="scroll-mt-[80px] bg-gray-50 px-2 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-900"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 max-md:gap-y-10 lg:grid-cols-2 lg:gap-16">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}

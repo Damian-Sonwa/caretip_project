@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 
 export function LandingFinalCtaSection() {
   return (
-    <section className="relative overflow-hidden bg-white px-6 py-24 md:py-28 dark:bg-neutral-950">
+    <section className="relative overflow-hidden bg-white px-6 py-16 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-950">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(800px_circle_at_20%_20%,rgba(235,153,44,0.12),transparent_55%),radial-gradient(700px_circle_at_90%_60%,rgba(0,0,0,0.04),transparent_50%)]"
@@ -23,7 +23,7 @@ export function LandingFinalCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.06 }}
-          className="mt-5 text-pretty text-lg leading-relaxed text-neutral-600 dark:text-neutral-400"
+          className="mt-4 text-pretty text-lg leading-relaxed text-neutral-600 dark:text-neutral-400 sm:mt-5"
         >
           Set up in minutes and give your team the recognition they deserve.
         </motion.p>
@@ -32,7 +32,7 @@ export function LandingFinalCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.12 }}
-          className="mt-10"
+          className="mt-8 sm:mt-10"
         >
           <Link
             to="/auth?mode=signup&role=business&from=landing"

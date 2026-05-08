@@ -130,8 +130,8 @@ export function FeatureShowcase({
       id={id}
       className={cn(
         cinematic
-          ? "relative w-full overflow-x-hidden bg-gradient-to-b from-white via-neutral-50/40 to-white text-gray-900 pt-20 sm:pt-24"
-          : "w-full bg-transparent text-foreground pt-20 sm:pt-24",
+          ? "relative w-full overflow-x-hidden bg-gradient-to-b from-white via-neutral-50/40 to-white text-gray-900 pt-14 sm:pt-18"
+          : "w-full bg-transparent text-foreground pt-14 sm:pt-18",
         id && "scroll-mt-[80px]",
         className,
       )}
@@ -281,7 +281,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex min-h-[500px] w-full max-w-7xl flex-col gap-10 px-6 pb-24 pt-16 max-md:gap-y-12 max-md:px-4 max-md:pb-20 max-md:pt-8 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-20 md:pb-32 lg:gap-10 lg:px-8"
+              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-7 px-6 pb-10 pt-12 max-md:gap-y-6 max-md:px-4 max-md:pb-6 max-md:pt-8 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-16 md:pb-10 lg:gap-10 lg:px-8"
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -322,7 +322,7 @@ export function FeatureShowcase({
             {description ? (
             <p
               className={cn(
-                "mt-5 max-w-xl leading-relaxed",
+                "mt-4 max-w-xl leading-relaxed sm:mt-5",
                 cinematic ? "mb-1 text-gray-500" : "text-muted-foreground",
               )}
             >
@@ -333,7 +333,7 @@ export function FeatureShowcase({
             {stats.length > 0 && (
               <ul
                 className={cn(
-                  "mt-6 flex flex-col gap-2.5 text-[13px] font-medium",
+                  "mt-5 flex flex-col gap-2.5 text-[13px] font-medium sm:mt-6",
                   cinematic
                     ? "text-gray-600/90 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2"
                     : "text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2",
@@ -369,7 +369,7 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-6 flex w-full flex-wrap items-stretch justify-center gap-3 sm:mt-7 sm:justify-start">
+              <div className="mt-4 flex w-full flex-wrap items-stretch justify-center gap-3 sm:mt-7 sm:justify-start">
                 <Button
                   asChild
                   size="lg"
@@ -453,7 +453,7 @@ export function FeatureShowcase({
                 cinematic ? (
                   <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
                     <div className="relative flex w-full justify-center md:justify-center">
-                      <div className="relative w-full max-w-[560px] max-md:mx-auto md:-translate-y-6 lg:-translate-y-8">
+                      <div className="relative w-full max-w-[560px] max-md:mx-auto max-md:-translate-y-4 md:-translate-y-6 lg:-translate-y-8">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"

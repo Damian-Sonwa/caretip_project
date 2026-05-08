@@ -29,10 +29,10 @@ export function SimpleSetupSection() {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] bg-white px-2 py-24 max-md:overflow-x-hidden sm:px-6 dark:bg-neutral-950"
+      className="scroll-mt-[80px] bg-white px-2 py-16 max-md:overflow-x-hidden sm:px-6 sm:py-20 lg:py-24 dark:bg-neutral-950"
     >
       <div className="max-w-7xl mx-auto">
-        <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-16">
+        <div className="grid items-start gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
           {/* LEFT: Journey step cards */}
           <div className="order-2 max-md:px-1 space-y-8 max-md:pt-2 lg:order-1 lg:px-0 lg:pt-0 md:px-0 md:pt-0">
             <motion.div

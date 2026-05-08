@@ -35,10 +35,10 @@ export function LandingRealLifeSection() {
   return (
     <section
       id="real-life"
-      className="scroll-mt-[80px] bg-white px-6 py-24 dark:bg-neutral-950"
+      className="scroll-mt-[80px] bg-white px-6 py-16 sm:py-20 lg:py-24 dark:bg-neutral-950"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-12 max-w-2xl text-center sm:mb-14">
+        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -49,7 +49,7 @@ export function LandingRealLifeSection() {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 sm:gap-7 lg:gap-8">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:gap-7">
           {scenarios.map((item, idx) => (
             <motion.article
               key={item.headline}
@@ -68,7 +68,7 @@ export function LandingRealLifeSection() {
                   decoding="async"
                 />
               </div>
-              <div className="flex flex-1 flex-col gap-2 p-5 sm:p-6">
+              <div className="flex flex-1 flex-col gap-2 p-5 sm:p-5 lg:p-6">
                 <h3 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-xl">
                   {item.headline}
                 </h3>
