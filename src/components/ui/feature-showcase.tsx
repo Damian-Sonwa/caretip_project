@@ -281,7 +281,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-7 px-6 pb-10 pt-12 max-md:gap-y-6 max-md:px-4 max-md:pb-6 max-md:pt-8 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-16 md:pb-10 lg:gap-10 lg:px-8"
+              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-7 px-6 pb-10 pt-14 max-md:gap-y-6 max-md:px-4 max-md:pb-6 max-md:pt-12 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-16 md:pb-10 lg:gap-10 lg:px-8"
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
