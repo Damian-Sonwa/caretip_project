@@ -1,4 +1,5 @@
 import { GoogleLogin } from "@react-oauth/google";
+import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { AuthRole } from "@/components/ui/sign-in-card-2";
 
@@ -23,6 +24,7 @@ export function AuthOAuthButtons({
   inviteCode,
   onGoogleCredential,
 }: AuthOAuthButtonsProps) {
+  const { t } = useTranslation();
   const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const canOAuthSignUp =
@@ -33,11 +35,11 @@ export function AuthOAuthButtons({
   if (!googleClientId?.trim()) {
     return (
       <p className="text-center text-[11px] text-neutral-600 dark:text-neutral-400">
-        Add{" "}
+        {t("auth.oauth.envHintBefore")}{" "}
         <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
           VITE_GOOGLE_CLIENT_ID
         </code>{" "}
-        to enable Google.
+        {t("auth.oauth.envHintAfter")}
       </p>
     );
   }
@@ -48,11 +50,7 @@ export function AuthOAuthButtons({
         "flex w-full justify-center [&>div]:!w-full",
         !isLogin && !canOAuthSignUp && "pointer-events-none opacity-40",
       )}
-      title={
-        !isLogin && !canOAuthSignUp
-          ? "Enter your name and business or invite details first"
-          : undefined
-      }
+      title={!isLogin && !canOAuthSignUp ? t("auth.oauth.signupBlockedTitle") : undefined}
     >
       <GoogleLogin
         onSuccess={(cred) => {

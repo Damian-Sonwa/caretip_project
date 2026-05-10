@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { FileText, Search } from "lucide-react";
 import { toast } from "sonner";
 import { fetchPlatformAuditLogs, type PlatformAuditLogRow } from "../../lib/api";
@@ -17,6 +18,7 @@ function formatTime(iso: string): string {
 }
 
 export function AuditLogsPage() {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<PlatformAuditLogRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [total, setTotal] = useState(0);
@@ -61,10 +63,10 @@ export function AuditLogsPage() {
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
                 <FileText className="w-7 h-7 text-accent" />
-                Audit logs
+                {t("admin.auditLogsPage.title")}
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                Append-only trail of platform admin actions and sensitive API access ({total} entries).
+                {t("admin.auditLogsPage.subtitle", { count: total })}
               </p>
             </div>
 
@@ -75,9 +77,9 @@ export function AuditLogsPage() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Filter by action, user email, or details…"
+                  placeholder={t("admin.auditLogsPage.filterPlaceholder")}
                   autoComplete="off"
-                  aria-label="Filter audit logs"
+                  aria-label={t("admin.auditLogsPage.filterAria")}
                   className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm"
                 />
               </div>
@@ -92,29 +94,29 @@ export function AuditLogsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Time</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Action</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">User</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Details</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.auditLogsPage.colTime")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.auditLogsPage.colAction")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.auditLogsPage.colUser")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.auditLogsPage.colDetails")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-10">
-                          <CareTipPageLoader variant="compact" message="Loading…" />
+                          <CareTipPageLoader variant="compact" message={t("admin.auditLogsPage.loading")} />
                         </td>
                       </tr>
                     ) : rows.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">
-                          No audit entries yet.
+                          {t("admin.auditLogsPage.empty")}
                         </td>
                       </tr>
                     ) : filteredRows.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">
-                          No entries match your search.
+                          {t("admin.auditLogsPage.noSearchMatches")}
                         </td>
                       </tr>
                     ) : (
@@ -126,7 +128,7 @@ export function AuditLogsPage() {
                           <td className="px-4 py-3 font-mono text-xs">{r.action}</td>
                           <td className="px-4 py-3 text-xs break-all">{r.userEmail}</td>
                           <td className="px-4 py-3 text-xs text-muted-foreground max-w-md truncate" title={r.metadata ?? ""}>
-                            {r.metadata ?? "N/A"}
+                            {r.metadata ?? t("format.notAvailable")}
                           </td>
                         </tr>
                       ))

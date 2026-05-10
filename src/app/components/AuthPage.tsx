@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'motion/react';
+import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Navigation } from './Navigation';
 import { Footer } from './Footer';
@@ -43,6 +44,7 @@ const FIELD = {
 } as const;
 
 export function AuthPage() {
+  const { t } = useTranslation();
   const location = useLocation();
   const [isLogin, setIsLogin] = useState(() => {
     const sp = new URLSearchParams(location.search);
@@ -125,32 +127,30 @@ export function AuthPage() {
     setShowResendVerification(false);
 
     if (!email || !password) {
-      setError('Please enter both email and password.');
+      setError(t('auth.page.errorBothRequired'));
       return;
     }
 
     if (!validateEmail(email)) {
-      setError('Please enter a valid email address.');
+      setError(t('auth.page.errorInvalidEmail'));
       return;
     }
 
     if (!isLogin) {
       if (role === 'employee' && !name) {
-        setError('Please enter your full name.');
+        setError(t('auth.page.errorFullName'));
         return;
       }
       if (password !== confirmPassword) {
-        setError('Passwords do not match.');
+        setError(t('auth.page.errorPasswordsMismatch'));
         return;
       }
       if (!isPasswordStrong(password)) {
-        setError(
-          'Password must have 8+ chars, uppercase, lowercase, number, and special character (e.g. @#$%).'
-        );
+        setError(t('auth.page.errorPasswordWeak'));
         return;
       }
       if (role === 'employee' && !inviteCode) {
-        setError('Please enter your invite code.');
+        setError(t('auth.page.errorInviteRequired'));
         return;
       }
     }
@@ -175,7 +175,7 @@ export function AuthPage() {
           await validateInviteCode(inviteCode);
         }
         const created = await register(payload);
-        toast.success("Account created. Check your email to verify your address.", {
+        toast.success(t('auth.page.toastAccountCreated'), {
           style: ROLE_MISMATCH_TOAST_STYLE,
         });
         navigate(getPostAuthRedirect(created), { replace: true });
@@ -215,14 +215,14 @@ export function AuthPage() {
 
   const handleResendVerification = async () => {
     if (!email.trim() || !password) {
-      setError('Enter your password above, then tap resend. We use it to confirm it’s you.');
+      setError(t('auth.page.resendNeedPassword'));
       return;
     }
     setResendBusy(true);
     setError('');
     try {
       const r = await resendVerificationEmailAPI(email.trim(), password);
-      toast.success(r.message || "We sent a new verification link. Check your inbox.", {
+      toast.success(r.message || t('auth.page.toastResendDefault'), {
         style: ROLE_MISMATCH_TOAST_STYLE,
       });
     } catch (err) {
@@ -273,11 +273,11 @@ export function AuthPage() {
     if (!isLogin) {
       if (role === 'employee') {
         if (!name.trim()) {
-          setError('Please enter your full name.');
+          setError(t('auth.page.errorFullName'));
           return;
         }
         if (!inviteCode.trim()) {
-          setError('Please enter your invite code.');
+          setError(t('auth.page.errorInviteRequired'));
           return;
         }
       }
@@ -345,14 +345,14 @@ export function AuthPage() {
               className="mx-auto flex w-full max-w-[20rem] flex-col items-center rounded-2xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50 sm:p-7"
             >
               <h2 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                Checking your session...
+                {t('auth.page.sessionCheckingTitle')}
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                We&apos;re confirming your login status.
+                {t('auth.page.sessionCheckingBody')}
               </p>
               <div className="mt-8 w-full">
                 <div className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold text-muted-foreground">
-                  Please wait
+                  {t('auth.page.sessionPleaseWait')}
                 </div>
               </div>
             </div>
@@ -381,7 +381,7 @@ export function AuthPage() {
                 initial={{ opacity: 0, x: -12 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.25 }}
-                placeholder="Full name"
+                placeholder={t('auth.page.placeholderFullName')}
                 type="text"
                 id="auth-full-name"
                 name={FIELD.name}
@@ -403,7 +403,7 @@ export function AuthPage() {
               >
                 <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400" />
                 <input
-                  placeholder="Invite code"
+                  placeholder={t('auth.page.placeholderInviteCode')}
                   type="text"
                   name={FIELD.inviteCode}
                   autoComplete="off"
@@ -417,7 +417,7 @@ export function AuthPage() {
             )}
 
             <input
-              placeholder="Email"
+              placeholder={t('auth.page.placeholderEmail')}
               type="email"
               id="auth-email"
               name={FIELD.email}
@@ -430,7 +430,7 @@ export function AuthPage() {
 
             <div className="relative">
               <input
-                placeholder="Password"
+                placeholder={t('auth.page.placeholderPassword')}
                 type={showPassword ? 'text' : 'password'}
                 id="auth-password"
                 name={FIELD.password}
@@ -458,7 +458,7 @@ export function AuthPage() {
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -485,7 +485,7 @@ export function AuthPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
                 <div className="relative">
                   <input
-                    placeholder="Confirm password"
+                    placeholder={t('auth.page.placeholderConfirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
                     id="auth-confirm-password"
                     name={FIELD.confirmPassword}
@@ -498,7 +498,7 @@ export function AuthPage() {
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -509,11 +509,11 @@ export function AuthPage() {
                 </div>
                 <ul className="space-y-1 text-[11px] text-neutral-600 dark:text-neutral-400">
                   {[
-                    { key: 'minLength', label: 'At least 8 characters', met: getPasswordChecklist(password).minLength },
-                    { key: 'upper', label: 'One uppercase letter', met: getPasswordChecklist(password).hasUppercase },
-                    { key: 'lower', label: 'One lowercase letter', met: getPasswordChecklist(password).hasLowercase },
-                    { key: 'number', label: 'One number', met: getPasswordChecklist(password).hasNumber },
-                    { key: 'special', label: 'One special character (@#$%)', met: getPasswordChecklist(password).hasSpecial },
+                    { key: 'minLength', label: t('auth.page.passwordRuleMinLength'), met: getPasswordChecklist(password).minLength },
+                    { key: 'upper', label: t('auth.page.passwordRuleUpper'), met: getPasswordChecklist(password).hasUppercase },
+                    { key: 'lower', label: t('auth.page.passwordRuleLower'), met: getPasswordChecklist(password).hasLowercase },
+                    { key: 'number', label: t('auth.page.passwordRuleNumber'), met: getPasswordChecklist(password).hasNumber },
+                    { key: 'special', label: t('auth.page.passwordRuleSpecial'), met: getPasswordChecklist(password).hasSpecial },
                   ].map(({ key, label, met }) => (
                     <li key={key} className={`flex items-center gap-2 ${met ? 'text-primary' : ''}`}>
                       <span
@@ -534,7 +534,7 @@ export function AuthPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
                 <div className="relative">
                   <input
-                    placeholder="Confirm password"
+                    placeholder={t('auth.page.placeholderConfirmPassword')}
                     type={showConfirmPassword ? 'text' : 'password'}
                     id="auth-confirm-password"
                     name={FIELD.confirmPassword}
@@ -547,7 +547,7 @@ export function AuthPage() {
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                     className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                    aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
                   >
                     {showConfirmPassword ? (
                       <EyeOff className="h-4 w-4" />
@@ -576,10 +576,10 @@ export function AuthPage() {
                   {resendBusy ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                      Sending…
+                      {t('auth.page.resendSending')}
                     </>
                   ) : (
-                    'Resend verification email'
+                    t('auth.page.resendVerificationEmail')
                   )}
                 </button>
               </div>
@@ -591,7 +591,7 @@ export function AuthPage() {
                   to="/forgot-password"
                   className="text-xs font-medium text-neutral-600 transition-colors hover:text-primary dark:text-neutral-400"
                 >
-                  Forgot password?
+                  {t('auth.page.forgotPassword')}
                 </Link>
               </div>
             )}
@@ -607,25 +607,25 @@ export function AuthPage() {
               {isSubmitting ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                  {isLogin ? 'Signing in…' : 'Creating account…'}
+                  {isLogin ? t('auth.page.signingIn') : t('auth.page.creatingAccount')}
                 </>
               ) : isLogin ? (
-                'Sign in'
+                t('auth.page.signIn')
               ) : (
-                'Create account'
+                t('auth.page.createAccount')
               )}
             </motion.button>
 
             {isSubmitting && (
               <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
-                {isLogin ? 'Please wait…' : 'Creating your account…'}
+                {isLogin ? t('auth.page.pleaseWait') : t('auth.page.creatingAccountWait')}
               </p>
             )}
 
             <div className="relative my-1 flex items-center">
               <div className="flex-grow border-t border-neutral-200" />
               <span className="mx-3 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
-                or
+                {t('auth.page.dividerOr')}
               </span>
               <div className="flex-grow border-t border-neutral-200" />
             </div>
@@ -640,14 +640,14 @@ export function AuthPage() {
             />
 
             <p className="pt-1 text-center text-xs text-neutral-600 dark:text-neutral-400">
-              {isLogin ? "Don't have an account? " : 'Already have an account? '}
+              {isLogin ? t('auth.page.footerNoAccount') : t('auth.page.footerHasAccount')}
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={toggleAuthMode}
                 className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline disabled:opacity-50 dark:text-neutral-100"
               >
-                {isLogin ? 'Sign up' : 'Sign in'}
+                {isLogin ? t('auth.page.footerSignUp') : t('auth.page.footerSignIn')}
               </button>
             </p>
           </form>

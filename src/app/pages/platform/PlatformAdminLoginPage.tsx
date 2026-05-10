@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { Footer } from "../../components/Footer";
 import { CareTipLogo } from "../../components/CareTipLogo";
@@ -13,6 +14,7 @@ const FIELD_CLASS =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 export function PlatformAdminLoginPage() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -79,7 +81,7 @@ export function PlatformAdminLoginPage() {
                   transition={{ delay: 0.08 }}
                   className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl"
                 >
-                  Platform admin
+                  {t("admin.loginPage.title")}
                 </motion.h1>
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -89,7 +91,7 @@ export function PlatformAdminLoginPage() {
                 >
                   <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
                     <ShieldCheck className="h-3 w-3" strokeWidth={2} aria-hidden />
-                    Restricted
+                    {t("admin.loginPage.restricted")}
                   </span>
                   <motion.p
                     initial={{ opacity: 0 }}
@@ -97,7 +99,7 @@ export function PlatformAdminLoginPage() {
                     transition={{ delay: 0.12 }}
                     className="w-full text-xs font-medium text-neutral-600 dark:text-neutral-400"
                   >
-                    Sign in with your SuperAdmin credentials.
+                    {t("admin.loginPage.subtitle")}
                   </motion.p>
                 </motion.div>
               </div>
@@ -124,7 +126,7 @@ export function PlatformAdminLoginPage() {
 
                 <div className="relative">
                   <input
-                    placeholder="Password"
+                    placeholder={t("admin.loginPage.passwordPlaceholder")}
                     type={showPassword ? "text" : "password"}
                     id="platform-admin-password"
                     name="password"
@@ -137,7 +139,7 @@ export function PlatformAdminLoginPage() {
                     type="button"
                     onClick={() => setShowPassword((v) => !v)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t("admin.loginPage.hidePassword") : t("admin.loginPage.showPassword")}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -151,7 +153,7 @@ export function PlatformAdminLoginPage() {
 
                 {submitting ? (
                   <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
-                    Signing in…
+                    {t("admin.loginPage.signingIn")}
                   </p>
                 ) : null}
 
@@ -166,10 +168,10 @@ export function PlatformAdminLoginPage() {
                   {submitting ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                      Signing in…
+                      {t("admin.loginPage.signingIn")}
                     </>
                   ) : (
-                    "Sign in"
+                    t("admin.loginPage.signIn")
                   )}
                 </motion.button>
               </form>
@@ -179,7 +181,7 @@ export function PlatformAdminLoginPage() {
                   to="/login"
                   className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline dark:text-neutral-100"
                 >
-                  Business or staff sign in
+                  {t("admin.loginPage.businessStaffLink")}
                 </Link>
               </p>
             </div>

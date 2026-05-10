@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from 'motion/react';
 import {
   User,
@@ -39,6 +40,7 @@ import { toUserFriendlyMessage } from "../lib/errorMessages";
 const TEAL = "#EB992C";
 
 export function ProfileSettingsPage() {
+  const { t } = useTranslation();
   const { user, updateUser } = useRequireAuth();
 
   const [loading, setLoading] = useState(true);
@@ -103,7 +105,7 @@ export function ProfileSettingsPage() {
         setTwoFactorEnabled(two.enabled);
       } catch (e) {
         logClientError("ProfileSettingsPage.load", e);
-        toast.error("Could not load settings.");
+        toast.error(t("business.accountSettings.toastLoadFail"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -133,7 +135,7 @@ export function ProfileSettingsPage() {
       });
       updateUser({ name: updated.name });
       setIsEditingProfile(false);
-      toast.success("Profile saved.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("business.accountSettings.toastProfileSaved"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("ProfileSettingsPage.saveProfile", e);
       toast.error(toUserFriendlyMessage(e));
@@ -150,7 +152,7 @@ export function ProfileSettingsPage() {
       if (r?.path) {
         updateUser({ avatar: r.path });
       }
-      toast.success("Logo updated.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("business.accountSettings.toastLogoUpdated"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("ProfileSettingsPage.uploadLogo", e);
       toast.error(toUserFriendlyMessage(e));
@@ -163,7 +165,7 @@ export function ProfileSettingsPage() {
     setSavingPassword(true);
     try {
       if (newPassword !== confirmPassword) {
-        toast.error("Passwords do not match.");
+        toast.error(t("business.accountSettings.toastPasswordMismatch"));
         return;
       }
       await changePasswordAPI(currentPassword, newPassword);
@@ -171,7 +173,7 @@ export function ProfileSettingsPage() {
       setNewPassword('');
       setConfirmPassword('');
       setIsEditingPassword(false);
-      toast.success("Password updated.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("business.accountSettings.toastPasswordUpdated"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("ProfileSettingsPage.changePassword", e);
       toast.error(toUserFriendlyMessage(e));
@@ -200,7 +202,7 @@ export function ProfileSettingsPage() {
       setSummaryEmails(updated.summaryEmails);
       setSystemAlerts(updated.systemAlerts);
       setNotifyNewLogin(updated.notifyNewLogin);
-      toast.success("Preferences saved.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("business.accountSettings.toastPrefsSaved"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("ProfileSettingsPage.savePrefs", e);
       toast.error(toUserFriendlyMessage(e));
@@ -214,10 +216,10 @@ export function ProfileSettingsPage() {
             {/* Page Header */}
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-                Profile & Settings
+                {t("business.accountSettings.title")}
               </h1>
               <p className="text-muted-foreground">
-                Manage your account settings and preferences
+                {t("business.accountSettings.subtitle")}
               </p>
             </div>
 
@@ -234,13 +236,12 @@ export function ProfileSettingsPage() {
                     <div className="flex items-center gap-2 mb-3">
                       <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
                         <Check className="w-3 h-3" />
-                        Tipping enabled
+                        {t("business.accountSettings.heroPill")}
                       </span>
                     </div>
-                    <h2 className="text-2xl font-bold mb-3">Your CareTip account</h2>
+                    <h2 className="text-2xl font-bold mb-3">{t("business.accountSettings.heroTitle")}</h2>
                     <p className="text-white/80 mb-4 max-w-xl">
-                      Accept one-time tips via QR codes and staff links. Payments use Stripe Payment
-                      Intents. There is no recurring subscription to CareTip on Starter.
+                      {t("business.accountSettings.heroBodyLong")}
                     </p>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
                       <div className="flex items-center gap-3">
@@ -248,8 +249,8 @@ export function ProfileSettingsPage() {
                           <Heart className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-xs text-white/70">Model</p>
-                          <p className="font-semibold">Per-tip only</p>
+                          <p className="text-xs text-white/70">{t("business.accountSettings.statModel")}</p>
+                          <p className="font-semibold">{t("business.accountSettings.statModelValue")}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -257,8 +258,8 @@ export function ProfileSettingsPage() {
                           <Euro className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-xs text-white/70">Fees</p>
-                          <p className="font-semibold">See pricing</p>
+                          <p className="text-xs text-white/70">{t("business.accountSettings.statFees")}</p>
+                          <p className="font-semibold">{t("business.accountSettings.statFeesValue")}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -266,8 +267,8 @@ export function ProfileSettingsPage() {
                           <TrendingUp className="w-5 h-5" />
                         </div>
                         <div>
-                          <p className="text-xs text-white/70">Member since</p>
-                          <p className="font-semibold">Dec 2025</p>
+                          <p className="text-xs text-white/70">{t("business.accountSettings.statMember")}</p>
+                          <p className="font-semibold">{t("business.accountSettings.statMemberValue")}</p>
                         </div>
                       </div>
                     </div>
@@ -277,13 +278,13 @@ export function ProfileSettingsPage() {
                       to="/dashboard/transactions"
                       className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-white/90 text-primary rounded-lg font-semibold transition-all shadow-lg"
                     >
-                      View tips & activity
+                      {t("business.accountSettings.linkTipsActivity")}
                     </Link>
                     <Link
                       to="/pricing"
                       className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white/30 hover:bg-white/10 backdrop-blur-sm text-white rounded-lg font-medium transition-all"
                     >
-                      Fee details
+                      {t("business.accountSettings.linkFeeDetails")}
                     </Link>
                   </div>
                 </div>
@@ -299,10 +300,10 @@ export function ProfileSettingsPage() {
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="text-xl font-semibold text-foreground mb-1">
-                      Profile Information
+                      {t("business.accountSettings.profileTitle")}
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Update your personal details
+                      {t("business.accountSettings.profileDesc")}
                     </p>
                   </div>
                   {!isEditingProfile && (
@@ -311,7 +312,7 @@ export function ProfileSettingsPage() {
                       className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
-                      Edit
+                      {t("business.accountSettings.editShort")}
                     </button>
                   )}
                 </div>
@@ -323,7 +324,7 @@ export function ProfileSettingsPage() {
                       {user?.avatar ? (
                         <img
                           src={user.avatar}
-                          alt="Profile"
+                          alt={t("business.accountSettings.altProfilePhoto")}
                           className="h-full w-full rounded-full object-cover"
                           draggable={false}
                         />
@@ -343,7 +344,7 @@ export function ProfileSettingsPage() {
                             const file = e.target.files?.[0];
                             e.target.value = "";
                             if (!file || !file.type.startsWith("image/")) {
-                              toast.error("Please choose an image file.");
+                              toast.error(t("business.accountSettings.toastImageOnly"));
                               return;
                             }
                             void handleLogo(file);
@@ -359,7 +360,7 @@ export function ProfileSettingsPage() {
                     <p className="text-sm text-muted-foreground mb-3">{email}</p>
                     {isEditingProfile && (
                       <p className="text-xs text-muted-foreground">
-                        Click on logo to change profile picture
+                        {t("business.accountSettings.photoClickHint")}
                       </p>
                     )}
                   </div>
@@ -370,14 +371,14 @@ export function ProfileSettingsPage() {
                   {/* Full Name */}
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Full Name
+                      {t("business.accountSettings.labelFullName")}
                     </label>
                     <div className="relative">
                       <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <input
                         type="text"
                         value={name}
-                        placeholder="Schmidt Paul"
+                        placeholder={t("business.accountSettings.phName")}
                         onChange={(e) => setName(e.target.value)}
                         disabled={!isEditingProfile}
                         className={`w-full pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg transition-all ${
@@ -399,7 +400,7 @@ export function ProfileSettingsPage() {
                       <input
                         type="email"
                         value={email}
-                        placeholder="you@example.com"
+                        placeholder={t("business.accountSettings.phEmail")}
                         disabled
                         className="w-full cursor-not-allowed opacity-60 pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg transition-all"
                       />
@@ -409,14 +410,14 @@ export function ProfileSettingsPage() {
                   {/* Phone */}
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-2">
-                      Contact phone
+                      {t("business.accountSettings.labelContactPhone")}
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
                       <input
                         type="tel"
                         value={phone}
-                        placeholder="+1 (555) 123-4567"
+                        placeholder={t("business.accountSettings.phPhone")}
                         onChange={(e) => setPhone(e.target.value)}
                         disabled={!isEditingProfile}
                         className={`w-full pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg transition-all ${
@@ -440,7 +441,7 @@ export function ProfileSettingsPage() {
                       className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
                     >
                       <Save className="w-4 h-4" />
-                      Save Changes
+                      {t("business.accountSettings.saveProfile")}
                     </motion.button>
                     <button
                       disabled={savingProfile}
@@ -448,7 +449,7 @@ export function ProfileSettingsPage() {
                       className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                     >
                       <X className="w-4 h-4" />
-                      Cancel
+                      {t("business.accountSettings.cancel")}
                     </button>
                   </div>
                 )}
@@ -464,10 +465,10 @@ export function ProfileSettingsPage() {
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h2 className="text-xl font-semibold text-foreground mb-1">
-                      Password
+                      {t("business.accountSettings.passwordTitle")}
                     </h2>
                     <p className="text-sm text-muted-foreground">
-                      Change your account password
+                      {t("business.accountSettings.passwordDesc")}
                     </p>
                   </div>
                   {!isEditingPassword && (
@@ -476,7 +477,7 @@ export function ProfileSettingsPage() {
                       className="flex items-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
                     >
                       <Edit2 className="w-4 h-4" />
-                      Change
+                      {t("business.accountSettings.changeShort")}
                     </button>
                   )}
                 </div>
@@ -486,7 +487,7 @@ export function ProfileSettingsPage() {
                     {/* Current Password */}
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
-                        Current Password
+                        {t("business.accountSettings.labelCurrentPw")}
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -495,12 +496,13 @@ export function ProfileSettingsPage() {
                           value={currentPassword}
                           onChange={(e) => setCurrentPassword(e.target.value)}
                           className="w-full pl-11 pr-12 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          placeholder="Enter current password"
+                          placeholder={t("business.accountSettings.phCurrentPw")}
                         />
                         <button
                           type="button"
                           onClick={() => setShowCurrentPassword(!showCurrentPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={t("business.accountSettings.togglePwVisibility")}
                         >
                           {showCurrentPassword ? (
                             <EyeOff className="w-5 h-5" />
@@ -514,7 +516,7 @@ export function ProfileSettingsPage() {
                     {/* New Password */}
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
-                        New Password
+                        {t("business.accountSettings.labelNewPw")}
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -523,12 +525,13 @@ export function ProfileSettingsPage() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           className="w-full pl-11 pr-12 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          placeholder="Enter new password"
+                          placeholder={t("business.accountSettings.phNewPw")}
                         />
                         <button
                           type="button"
                           onClick={() => setShowNewPassword(!showNewPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={t("business.accountSettings.togglePwVisibility")}
                         >
                           {showNewPassword ? (
                             <EyeOff className="w-5 h-5" />
@@ -542,7 +545,7 @@ export function ProfileSettingsPage() {
                     {/* Confirm Password */}
                     <div>
                       <label className="block text-sm font-medium text-foreground mb-2">
-                        Confirm New Password
+                        {t("business.accountSettings.labelConfirmPw")}
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -551,12 +554,13 @@ export function ProfileSettingsPage() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           className="w-full pl-11 pr-12 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
-                          placeholder="Confirm new password"
+                          placeholder={t("business.accountSettings.phConfirmPw")}
                         />
                         <button
                           type="button"
                           onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                          aria-label={t("business.accountSettings.togglePwVisibility")}
                         >
                           {showConfirmPassword ? (
                             <EyeOff className="w-5 h-5" />
@@ -570,24 +574,24 @@ export function ProfileSettingsPage() {
                     {/* Password Requirements */}
                     <div className="bg-muted/50 border border-border rounded-lg p-4">
                       <p className="text-sm font-medium text-foreground mb-2">
-                        Password Requirements:
+                        {t("business.accountSettings.pwReqTitle")}
                       </p>
                       <ul className="space-y-1 text-xs text-muted-foreground">
                         <li className="flex items-center gap-2">
                           <Check className="w-3 h-3" />
-                          At least 8 characters long
+                          {t("business.accountSettings.pwReqLen")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3 h-3" />
-                          Contains uppercase and lowercase letters
+                          {t("business.accountSettings.pwReqCase")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3 h-3" />
-                          Contains at least one number
+                          {t("business.accountSettings.pwReqNum")}
                         </li>
                         <li className="flex items-center gap-2">
                           <Check className="w-3 h-3" />
-                          Contains at least one special character
+                          {t("business.accountSettings.pwReqSpec")}
                         </li>
                       </ul>
                     </div>
@@ -602,7 +606,7 @@ export function ProfileSettingsPage() {
                         className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
                       >
                         <Save className="w-4 h-4" />
-                        Update Password
+                        {t("business.accountSettings.updatePassword")}
                       </motion.button>
                       <button
                         disabled={savingPassword}
@@ -610,14 +614,14 @@ export function ProfileSettingsPage() {
                         className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                       >
                         <X className="w-4 h-4" />
-                        Cancel
+                        {t("business.accountSettings.cancel")}
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="py-4">
                     <p className="text-sm text-muted-foreground">
-                      •••••••••••• (Last changed 3 months ago)
+                      {t("business.accountSettings.passwordHint")}
                     </p>
                   </div>
                 )}
@@ -632,10 +636,10 @@ export function ProfileSettingsPage() {
               >
                 <div className="mb-6">
                   <h2 className="text-xl font-semibold text-foreground mb-1">
-                    Security Settings
+                    {t("business.accountSettings.securityTitle")}
                   </h2>
                   <p className="text-sm text-muted-foreground">
-                    Manage your account security preferences
+                    {t("business.accountSettings.securityDesc")}
                   </p>
                 </div>
 
@@ -649,10 +653,10 @@ export function ProfileSettingsPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-semibold text-foreground mb-1">
-                            Two-Factor Authentication
+                            {t("business.accountSettings.twoFactorTitle")}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Use an authenticator app (TOTP) for extra protection.
+                            {t("business.accountSettings.twoFactorDesc")}
                           </p>
                         </div>
                       </div>
@@ -666,7 +670,7 @@ export function ProfileSettingsPage() {
                                 try {
                                   const r = await setupTwoFactor();
                                   setTwoFactorQr(r.qrDataUrl || "");
-                                  toast.success("Scan the QR code and enter the 6-digit code.", {
+                                  toast.success(t("business.accountSettings.toast2faScan"), {
                                     style: { background: TEAL, color: "#fff" },
                                   });
                                 } catch (e) {
@@ -677,7 +681,7 @@ export function ProfileSettingsPage() {
                             }}
                             className="flex items-center justify-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
                           >
-                            Set up
+                            {t("business.accountSettings.setup2fa")}
                           </button>
                         ) : (
                           <button
@@ -685,7 +689,7 @@ export function ProfileSettingsPage() {
                             onClick={() => setTwoFactorQr("disable")}
                             className="flex items-center justify-center gap-2 px-4 py-2 text-sm border border-border rounded-lg hover:bg-muted transition-colors"
                           >
-                            Disable…
+                            {t("business.accountSettings.disable2fa")}
                           </button>
                         )}
                       </div>
@@ -695,23 +699,23 @@ export function ProfileSettingsPage() {
                       <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:items-start">
                         <div className="rounded-lg border border-border bg-muted/20 p-4">
                           <p className="text-xs font-medium text-muted-foreground mb-3">
-                            Scan in your authenticator app
+                            {t("business.accountSettings.scanAppTitle")}
                           </p>
                           <img
                             src={twoFactorQr}
-                            alt="2FA QR code"
+                            alt={t("business.accountSettings.twoFactorQrAlt")}
                             className="w-full max-w-[220px] rounded-md bg-white p-2"
                           />
                         </div>
                         <div className="space-y-3">
                           <div>
                             <label className="block text-sm font-medium text-foreground mb-2">
-                              Verification code
+                              {t("business.accountSettings.labelVerificationCode")}
                             </label>
                             <input
                               value={twoFactorCode}
                               onChange={(e) => setTwoFactorCode(e.target.value)}
-                              placeholder="123456"
+                              placeholder={t("business.accountSettings.phCode")}
                               inputMode="numeric"
                               className="w-full px-4 py-3 bg-input-background border border-border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                             />
@@ -725,7 +729,7 @@ export function ProfileSettingsPage() {
                                   setTwoFactorEnabled(r.enabled);
                                   setTwoFactorQr("");
                                   setTwoFactorCode("");
-                                  toast.success("2FA enabled.", { style: { background: TEAL, color: "#fff" } });
+                                  toast.success(t("business.accountSettings.toast2faEnabled"), { style: { background: TEAL, color: "#fff" } });
                                 } catch (e) {
                                   logClientError("ProfileSettingsPage.2fa.enable", e);
                                   toast.error(toUserFriendlyMessage(e));
@@ -734,7 +738,7 @@ export function ProfileSettingsPage() {
                             }}
                             className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
                           >
-                            Enable 2FA
+                            {t("business.accountSettings.enable2fa")}
                           </button>
                         </div>
                       </div>
@@ -743,13 +747,13 @@ export function ProfileSettingsPage() {
                     {twoFactorEnabled && twoFactorQr === "disable" ? (
                       <div className="mt-4 rounded-lg border border-border bg-muted/20 p-4">
                         <p className="text-sm text-muted-foreground mb-3">
-                          Enter a code from your authenticator app to disable 2FA.
+                          {t("business.accountSettings.disable2faPrompt")}
                         </p>
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
                           <input
                             value={twoFactorCode}
                             onChange={(e) => setTwoFactorCode(e.target.value)}
-                            placeholder="123456"
+                            placeholder={t("business.accountSettings.phCode")}
                             inputMode="numeric"
                             className="w-full px-4 py-3 bg-input-background border border-border rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
                           />
@@ -762,7 +766,7 @@ export function ProfileSettingsPage() {
                                   setTwoFactorEnabled(r.enabled);
                                   setTwoFactorQr("");
                                   setTwoFactorCode("");
-                                  toast.success("2FA disabled.", { style: { background: TEAL, color: "#fff" } });
+                                  toast.success(t("business.accountSettings.toast2faDisabled"), { style: { background: TEAL, color: "#fff" } });
                                 } catch (e) {
                                   logClientError("ProfileSettingsPage.2fa.disable", e);
                                   toast.error(toUserFriendlyMessage(e));
@@ -771,7 +775,7 @@ export function ProfileSettingsPage() {
                             }}
                             className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                           >
-                            Disable
+                            {t("business.accountSettings.disable")}
                           </button>
                           <button
                             type="button"
@@ -781,7 +785,7 @@ export function ProfileSettingsPage() {
                             }}
                             className="flex items-center justify-center gap-2 px-6 py-3 border border-border rounded-lg hover:bg-muted transition-colors"
                           >
-                            Cancel
+                            {t("business.accountSettings.cancel")}
                           </button>
                         </div>
                       </div>
@@ -797,10 +801,10 @@ export function ProfileSettingsPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-semibold text-foreground mb-1">
-                            Tip received notifications
+                            {t("business.accountSettings.tipNotifTitle")}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Get notified when your venue receives a tip.
+                            {t("business.accountSettings.tipNotifDesc")}
                           </p>
                         </div>
                       </div>
@@ -815,7 +819,7 @@ export function ProfileSettingsPage() {
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           tipReceivedNotifications ? 'bg-accent' : 'bg-border'
                         } ${savingPrefs ? "opacity-60" : ""}`}
-                        aria-label="Toggle tip received notifications"
+                        aria-label={t("business.accountSettings.ariaTipNotif")}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -832,10 +836,10 @@ export function ProfileSettingsPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-semibold text-foreground mb-1">
-                            Summary emails
+                            {t("business.accountSettings.summaryTitle")}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Weekly/monthly performance summaries.
+                            {t("business.accountSettings.summaryDesc")}
                           </p>
                         </div>
                       </div>
@@ -850,7 +854,7 @@ export function ProfileSettingsPage() {
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           summaryEmails ? 'bg-accent' : 'bg-border'
                         } ${savingPrefs ? "opacity-60" : ""}`}
-                        aria-label="Toggle summary emails"
+                        aria-label={t("business.accountSettings.ariaSummary")}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -867,10 +871,10 @@ export function ProfileSettingsPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-semibold text-foreground mb-1">
-                            System alerts
+                            {t("business.accountSettings.systemTitle")}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Important account and system notifications.
+                            {t("business.accountSettings.systemDesc")}
                           </p>
                         </div>
                       </div>
@@ -885,7 +889,7 @@ export function ProfileSettingsPage() {
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           systemAlerts ? 'bg-accent' : 'bg-border'
                         } ${savingPrefs ? "opacity-60" : ""}`}
-                        aria-label="Toggle system alerts"
+                        aria-label={t("business.accountSettings.ariaSystem")}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
@@ -902,10 +906,10 @@ export function ProfileSettingsPage() {
                         </div>
                         <div className="flex-1">
                           <h3 className="text-sm font-semibold text-foreground mb-1">
-                            New login alerts
+                            {t("business.accountSettings.loginTitle")}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            Email me when a new device signs in.
+                            {t("business.accountSettings.loginDesc")}
                           </p>
                         </div>
                       </div>
@@ -920,7 +924,7 @@ export function ProfileSettingsPage() {
                         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
                           notifyNewLogin ? 'bg-accent' : 'bg-border'
                         } ${savingPrefs ? "opacity-60" : ""}`}
-                        aria-label="Toggle new login alerts"
+                        aria-label={t("business.accountSettings.ariaLogin")}
                       >
                         <span
                           className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${

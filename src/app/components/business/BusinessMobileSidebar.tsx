@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LogOut, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
@@ -15,6 +16,7 @@ interface BusinessMobileSidebarProps {
 }
 
 export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
@@ -48,7 +50,9 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                 <div className="min-w-0">
                   <CareTipLogo size="sm" />
                 </div>
-                <span className="text-xs font-semibold text-sidebar-foreground">Business</span>
+                <span className="text-xs font-semibold text-sidebar-foreground">
+                  {t("dashboard.roleLabelBusiness")}
+                </span>
               </div>
               <button
                 type="button"
@@ -78,7 +82,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                         )}
                       >
                         <Icon className="h-5 w-5 shrink-0" />
-                        <span>{item.name}</span>
+                        <span>{t(item.labelKey)}</span>
                       </Link>
                     </li>
                   );
@@ -103,7 +107,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-5 w-5" />
-                <span className="text-sm font-medium">Sign out</span>
+                <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
               </button>
             </div>
 
@@ -117,7 +121,9 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                   {(user?.name?.trim().charAt(0) ?? "U").toUpperCase()}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">{user?.name || "Manager"}</p>
+                  <p className="truncate text-sm font-medium text-foreground">
+                    {user?.name || t("dashboard.managerFallback")}
+                  </p>
                   <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
                 </div>
               </Link>

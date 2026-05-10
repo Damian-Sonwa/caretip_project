@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { motion } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import {
@@ -9,6 +10,7 @@ import {
   FileText,
   Settings,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from './CareTipLogo';
@@ -21,14 +23,19 @@ interface NavItem {
 
 const DASHBOARD_HREF = '/platform-admin/dashboard';
 
-const navItems: NavItem[] = [
-  { name: 'Overview', href: DASHBOARD_HREF, icon: LayoutDashboard },
-  { name: 'Business Management', href: '/platform-admin/businesses', icon: Building2 },
-  { name: 'Global Transactions', href: '/platform-admin/transactions', icon: CreditCard },
-  { name: 'Audit Logs', href: '/platform-admin/logs', icon: FileText },
-  { name: 'System Settings', href: '/platform-admin/settings', icon: Settings },
-  { name: 'User Management', href: '/platform-admin/users', icon: Users },
-];
+function useAdminNavItems(t: (key: string) => string): NavItem[] {
+  return useMemo(
+    () => [
+      { name: t('admin.sidebar.navOverview'), href: DASHBOARD_HREF, icon: LayoutDashboard },
+      { name: t('admin.sidebar.navBusinesses'), href: '/platform-admin/businesses', icon: Building2 },
+      { name: t('admin.sidebar.navTransactions'), href: '/platform-admin/transactions', icon: CreditCard },
+      { name: t('admin.sidebar.navLogs'), href: '/platform-admin/logs', icon: FileText },
+      { name: t('admin.sidebar.navSettings'), href: '/platform-admin/settings', icon: Settings },
+      { name: t('admin.sidebar.navUsers'), href: '/platform-admin/users', icon: Users },
+    ],
+    [t],
+  );
+}
 
 function isNavActive(href: string, pathname: string): boolean {
   if (href === DASHBOARD_HREF) {
@@ -38,9 +45,12 @@ function isNavActive(href: string, pathname: string): boolean {
 }
 
 export function AdminSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const navItems = useAdminNavItems(t);
+  const displayName = user?.name || t("admin.fallbackAdminName");
 
   return (
     <motion.aside
@@ -60,8 +70,8 @@ export function AdminSidebar() {
           <CareTipLogo size="sm" />
         </div>
         <div>
-          <span className="text-sm font-semibold text-sidebar-foreground">Platform Admin</span>
-          <p className="text-xs text-muted-foreground">SuperAdmin</p>
+          <span className="text-sm font-semibold text-sidebar-foreground">{t('admin.sidebar.productLabel')}</span>
+          <p className="text-xs text-muted-foreground">{t('admin.sidebar.roleBadge')}</p>
         </div>
       </div>
 
@@ -73,7 +83,7 @@ export function AdminSidebar() {
             const Icon = item.icon;
 
             return (
-              <li key={item.name}>
+              <li key={item.href}>
                 <Link
                   to={item.href}
                   className={`
@@ -105,7 +115,7 @@ export function AdminSidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="w-5 h-5" />
-          <span className="text-sm font-medium">Sign out</span>
+          <span className="text-sm font-medium">{t('admin.sidebar.signOut')}</span>
         </button>
       </div>
 
@@ -113,10 +123,10 @@ export function AdminSidebar() {
       <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
-            {user?.name.charAt(0) || 'A'}
+            {displayName.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{user?.name || 'Admin'}</p>
+            <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
             <p className="truncate text-xs text-muted-foreground">{user?.email || 'admin@example.com'}</p>
           </div>
         </div>

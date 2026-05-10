@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import {
@@ -37,128 +38,6 @@ function eurInt(n: number): string {
   return formatEur(n, { minFrac: 0, maxFrac: 0 });
 }
 
-// Mock data — tipping-focused business dashboard
-const tipVolumeData = [
-  { month: 'Jan', tips: 118, avgTip: 14 },
-  { month: 'Feb', tips: 132, avgTip: 15 },
-  { month: 'Mar', tips: 126, avgTip: 16 },
-  { month: 'Apr', tips: 141, avgTip: 15 },
-  { month: 'May', tips: 156, avgTip: 17 },
-  { month: 'Jun', tips: 168, avgTip: 18 },
-  { month: 'Jul', tips: 174, avgTip: 17 },
-];
-
-const guestScanData = [
-  { month: 'Jan', scans: 142 },
-  { month: 'Feb', scans: 156 },
-  { month: 'Mar', scans: 138 },
-  { month: 'Apr', scans: 167 },
-  { month: 'May', scans: 178 },
-  { month: 'Jun', scans: 185 },
-  { month: 'Jul', scans: 192 },
-];
-
-const teamTipLeaders = [
-  {
-    id: 1,
-    name: 'Maya Chen',
-    role: 'Server',
-    icon: Heart,
-    iconWrap: 'bg-primary/10',
-    iconColor: 'text-primary',
-    periodTotal: eurInt(1240),
-    lastTip: '2h ago',
-    shiftNote: 'Top week',
-  },
-  {
-    id: 2,
-    name: 'James Okoro',
-    role: 'Bartender',
-    icon: Heart,
-    iconWrap: 'bg-primary/10',
-    iconColor: 'text-primary',
-    periodTotal: eurInt(980),
-    lastTip: '5h ago',
-    shiftNote: 'Strong bar',
-  },
-  {
-    id: 3,
-    name: 'Front desk pool',
-    role: 'Shared QR',
-    icon: Users,
-    iconWrap: 'bg-primary/10',
-    iconColor: 'text-primary',
-    periodTotal: eurInt(2410),
-    lastTip: '1h ago',
-    shiftNote: 'Team pool',
-  },
-  {
-    id: 4,
-    name: 'Sofia Reyes',
-    role: 'Server',
-    icon: Heart,
-    iconWrap: 'bg-primary/10',
-    iconColor: 'text-primary',
-    periodTotal: eurInt(865),
-    lastTip: 'Yesterday',
-    shiftNote: 'Steady',
-  },
-  {
-    id: 5,
-    name: 'Kitchen thank-you',
-    role: 'Back-of-house',
-    icon: QrCode,
-    iconWrap: 'bg-primary/10',
-    iconColor: 'text-primary',
-    periodTotal: eurInt(540),
-    lastTip: '3d ago',
-    shiftNote: 'QR on pass',
-  },
-];
-
-const recentTipActivity = [
-  {
-    id: 1,
-    label: 'Guest → Maya Chen',
-    action: 'Tip completed',
-    amount: `+${formatEur(18)}`,
-    status: 'success',
-    time: '2h ago',
-  },
-  {
-    id: 2,
-    label: 'Guest → bar pool',
-    action: 'Tip completed',
-    amount: `+${formatEur(25)}`,
-    status: 'success',
-    time: '5h ago',
-  },
-  {
-    id: 3,
-    label: 'Guest → James Okoro',
-    action: 'Tip pending',
-    amount: formatEur(12),
-    status: 'warning',
-    time: '6h ago',
-  },
-  {
-    id: 4,
-    label: 'Adjustment',
-    action: 'Refund issued',
-    amount: `−${formatEur(8)}`,
-    status: 'success',
-    time: '1d ago',
-  },
-  {
-    id: 5,
-    label: 'Guest → Sofia Reyes',
-    action: 'Tip completed',
-    amount: `+${formatEur(15)}`,
-    status: 'success',
-    time: '2d ago',
-  },
-];
-
 interface MetricCardProps {
   title: string;
   value: string;
@@ -196,16 +75,76 @@ function MetricCard({ title, value, change, isPositive, icon: Icon, delay, subti
         <span className={`text-sm font-medium ${isPositive ? 'text-primary' : 'text-neutral-600 dark:text-neutral-400'}`}>
           {change}
         </span>
-        <span className="text-sm text-muted-foreground">{subtitle || 'vs last month'}</span>
+        {subtitle ? <span className="text-sm text-muted-foreground">{subtitle}</span> : null}
       </div>
     </motion.div>
   );
 }
 
+const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul"] as const;
+const TIPS_SERIES = [118, 132, 126, 141, 156, 168, 174];
+const AVG_SERIES = [14, 15, 16, 15, 17, 18, 17];
+const SCAN_SERIES = [142, 156, 138, 167, 178, 185, 192];
+
 export function DashboardPage() {
+  const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, authHydrated, sessionValidated } = useAuth();
   const isAppReady = authHydrated && sessionValidated && Boolean(user);
+
+  const tipVolumeData = useMemo(
+    () =>
+      MONTH_KEYS.map((k, i) => ({
+        month: t(`charts.monthShort.${k}`),
+        tips: TIPS_SERIES[i],
+        avgTip: AVG_SERIES[i],
+      })),
+    [t, i18n.resolvedLanguage],
+  );
+
+  const guestScanData = useMemo(
+    () =>
+      MONTH_KEYS.map((k, i) => ({
+        month: t(`charts.monthShort.${k}`),
+        scans: SCAN_SERIES[i],
+      })),
+    [t, i18n.resolvedLanguage],
+  );
+
+  const teamTipLeaders = useMemo(() => {
+    const ids = [1, 2, 3, 4, 5] as const;
+    const icons = [Heart, Heart, Users, Heart, QrCode] as const;
+    const totals = [1240, 980, 2410, 865, 540];
+    return ids.map((id, i) => ({
+      id,
+      name: t(`sampleDashboard.leaders.${id}.name`),
+      role: t(`sampleDashboard.leaders.${id}.role`),
+      icon: icons[i],
+      iconWrap: "bg-primary/10",
+      iconColor: "text-primary",
+      periodTotal: eurInt(totals[i]),
+      lastTip: t(`sampleDashboard.leaders.${id}.lastTip`),
+      shiftNote: t(`sampleDashboard.leaders.${id}.shift`),
+    }));
+  }, [t, i18n.resolvedLanguage]);
+
+  const recentTipActivity = useMemo(() => {
+    const rows = [1, 2, 3, 4, 5] as const;
+    return rows.map((id) => {
+      const amounts = { 1: 18, 2: 25, 3: 12, 4: 8, 5: 15 } as const;
+      const amt = amounts[id];
+      const amount =
+        id === 4 ? `−${formatEur(amt)}` : id === 3 ? formatEur(amt) : `+${formatEur(amt)}`;
+      return {
+        id,
+        label: t(`sampleDashboard.activity.${id}.label`),
+        action: t(`sampleDashboard.activity.${id}.action`),
+        amount,
+        status: id === 3 ? ("warning" as const) : ("success" as const),
+        time: t(`sampleDashboard.activity.${id}.time`),
+      };
+    });
+  }, [t, i18n.resolvedLanguage]);
 
   return (
     <div className="min-h-screen relative">
@@ -231,50 +170,48 @@ export function DashboardPage() {
             {/* Page Header */}
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-                Welcome back! 👋
+                {t("sampleDashboard.welcomeTitle")}
               </h1>
-              <p className="text-muted-foreground">
-                Tips, scans, and payouts for your team, one-time payments only
-              </p>
+              <p className="text-muted-foreground">{t("sampleDashboard.welcomeSubtitle")}</p>
             </div>
 
             {/* Metrics Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <MetricCard
-                title="Tips received (30d)"
+                title={t("sampleDashboard.metrics.tipsReceived30d")}
                 value={eurInt(18420)}
                 change="+12.4%"
                 isPositive={true}
                 icon={Euro}
                 delay={0.1}
-                subtitle="vs prior month"
+                subtitle={t("sampleDashboard.metrics.vsPriorMonth")}
               />
               <MetricCard
-                title="Successful tips"
+                title={t("sampleDashboard.metrics.successfulTips")}
                 value="612"
                 change="+8.1%"
                 isPositive={true}
                 icon={CreditCard}
                 delay={0.2}
-                subtitle="completed PaymentIntents"
+                subtitle={t("sampleDashboard.metrics.completedIntents")}
               />
               <MetricCard
-                title="Avg tip size"
+                title={t("sampleDashboard.metrics.avgTipSize")}
                 value={formatEur(30.1)}
                 change={`+${formatEur(1.2)}`}
                 isPositive={true}
                 icon={TrendingDown}
                 delay={0.3}
-                subtitle="after fees"
+                subtitle={t("sampleDashboard.metrics.afterFees")}
               />
               <MetricCard
-                title="Pending settlement"
+                title={t("sampleDashboard.metrics.pendingSettlement")}
                 value="14"
-                change="Stripe"
+                change={t("sampleDashboard.metrics.stripe")}
                 isPositive={false}
                 icon={Calendar}
                 delay={0.4}
-                subtitle="in flight"
+                subtitle={t("sampleDashboard.metrics.inFlight")}
               />
             </div>
 
@@ -290,12 +227,12 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-1">
-                      Monthly Spending & Savings
+                      {t("sampleDashboard.chartMonthlyTitle")}
                     </h3>
-                    <p className="text-sm text-muted-foreground">Last 7 months</p>
+                    <p className="text-sm text-muted-foreground">{t("sampleDashboard.chartMonthlySubtitle")}</p>
                   </div>
                   <button className="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
-                    View Details
+                    {t("sampleDashboard.viewDetails")}
                   </button>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
@@ -327,7 +264,7 @@ export function DashboardPage() {
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorTips)"
-                      name="Tips"
+                      name={t("sampleDashboard.legendTips")}
                     />
                     <Area
                       type="monotone"
@@ -336,7 +273,7 @@ export function DashboardPage() {
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorAvgTip)"
-                      name="Avg tip (€)"
+                      name={t("sampleDashboard.legendAvgTip")}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -352,12 +289,12 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-semibold text-foreground mb-1">
-                      Guest QR scans
+                      {t("sampleDashboard.chartGuestScansTitle")}
                     </h3>
-                    <p className="text-sm text-muted-foreground">Opens of your tipping flow</p>
+                    <p className="text-sm text-muted-foreground">{t("sampleDashboard.chartGuestScansSubtitle")}</p>
                   </div>
                   <button className="px-3 py-1.5 text-xs border border-border rounded-lg hover:bg-muted transition-colors">
-                    Export
+                    {t("sampleDashboard.export")}
                   </button>
                 </div>
                 <ResponsiveContainer width="100%" height={300}>
@@ -372,7 +309,7 @@ export function DashboardPage() {
                         borderRadius: '8px',
                       }}
                     />
-                    <Bar dataKey="scans" fill="#EB992C" radius={[8, 8, 0, 0]} name="Scans" />
+                    <Bar dataKey="scans" fill="#EB992C" radius={[8, 8, 0, 0]} name={t("sampleDashboard.legendScans")} />
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -388,12 +325,12 @@ export function DashboardPage() {
                 className="bg-card border border-border rounded-xl p-6"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-foreground">Who guests tipped</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t("sampleDashboard.teamTitle")}</h3>
                   <Link
                     to="/dashboard/transactions"
                     className="text-sm text-accent hover:text-accent/80 transition-colors"
                   >
-                    Tips & activity
+                    {t("sampleDashboard.tipsActivityLink")}
                   </Link>
                 </div>
                 <div className="space-y-3">
@@ -412,7 +349,9 @@ export function DashboardPage() {
                             <p className="text-sm font-medium text-foreground truncate">
                               {row.name}
                             </p>
-                            <p className="text-xs text-muted-foreground">{row.role} · Last tip {row.lastTip}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {row.role} · {t("sampleDashboard.lastTipPrefix")} {row.lastTip}
+                            </p>
                           </div>
                         </div>
                         <div className="text-right ml-4">
@@ -437,12 +376,12 @@ export function DashboardPage() {
                 className="bg-card border border-border rounded-xl p-6"
               >
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-foreground">Recent Activity</h3>
+                  <h3 className="text-lg font-semibold text-foreground">{t("sampleDashboard.recentActivity")}</h3>
                   <Link
                     to="/dashboard/transactions"
                     className="text-sm text-accent hover:text-accent/80 transition-colors"
                   >
-                    View all
+                    {t("sampleDashboard.viewAll")}
                   </Link>
                 </div>
                 <div className="space-y-4">

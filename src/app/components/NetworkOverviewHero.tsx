@@ -1,4 +1,6 @@
 import type { ElementType, ReactNode } from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Cloud, Database } from "lucide-react";
 import type { PlatformHealthResponse } from "../lib/api";
@@ -191,17 +193,6 @@ function MapGraphic3D() {
   );
 }
 
-type ServiceKey = "database" | "stripe";
-
-function serviceLine(
-  health: PlatformHealthResponse | null,
-  key: ServiceKey
-): { text: string; state: "checking" | "online" | "offline" } {
-  if (!health) return { text: "Checking…", state: "checking" };
-  const ok = health[key] === "online";
-  return { text: ok ? "Online" : "Offline", state: ok ? "online" : "offline" };
-}
-
 function statusPulse(state: "checking" | "online" | "offline"): ReactNode {
   if (state === "checking") {
     return <span className="h-3 w-3 animate-pulse rounded-full bg-white/30" />;
@@ -227,8 +218,25 @@ function iconTint(state: "checking" | "online" | "offline"): string {
 }
 
 export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
-  const pg = serviceLine(health, "database");
-  const st = serviceLine(health, "stripe");
+  const { t } = useTranslation();
+
+  const pg = useMemo(() => {
+    if (!health) return { text: t("admin.networkHero.checking"), state: "checking" as const };
+    const ok = health.database === "online";
+    return {
+      text: ok ? t("admin.networkHero.online") : t("admin.networkHero.offline"),
+      state: ok ? ("online" as const) : ("offline" as const),
+    };
+  }, [health, t]);
+
+  const st = useMemo(() => {
+    if (!health) return { text: t("admin.networkHero.checking"), state: "checking" as const };
+    const ok = health.stripe === "online";
+    return {
+      text: ok ? t("admin.networkHero.online") : t("admin.networkHero.offline"),
+      state: ok ? ("online" as const) : ("offline" as const),
+    };
+  }, [health, t]);
 
   return (
     <section className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl ring-1 ring-white/5">
@@ -242,7 +250,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             transition={{ duration: 0.5 }}
             className="font-sans text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl"
           >
-            The CareTip Ecosystem
+            {t("admin.networkHero.title")}
           </motion.h1>
           <motion.p
             initial={{ opacity: 0, y: 8 }}
@@ -250,18 +258,18 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             transition={{ duration: 0.5, delay: 0.08 }}
             className="mt-3 max-w-lg font-sans text-base font-light leading-relaxed text-neutral-400 sm:text-lg"
           >
-            Real-time monitoring of global tipping activity and platform health.
+            {t("admin.networkHero.subtitle")}
           </motion.p>
         </div>
 
         <div className="flex w-full flex-col gap-3 lg:ml-auto lg:w-auto lg:max-w-md xl:max-w-lg">
           <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:text-left">
-            System health
+            {t("admin.networkHero.systemHealth")}
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
             <GlassStatCard
               icon={Database}
-              label="PostgreSQL"
+              label={t("admin.networkHero.labelPostgres")}
               value={pg.text}
               valueClassName={valueClass(pg.state)}
               iconClassName={iconTint(pg.state)}
@@ -270,7 +278,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             />
             <GlassStatCard
               icon={Cloud}
-              label="Stripe API"
+              label={t("admin.networkHero.labelStripe")}
               value={st.text}
               valueClassName={valueClass(st.state)}
               iconClassName={iconTint(st.state)}

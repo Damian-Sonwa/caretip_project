@@ -1,6 +1,9 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { de, enUS } from "date-fns/locale";
 import { toast } from "sonner";
 import {
   ChevronLeft,
@@ -94,30 +97,41 @@ function isFullyOnboardedDashboardStaff(emp: StaffRow): boolean {
  * Onboarding hints only when the database still indicates work left
  * (do not infer from `activation_status` alone — e.g. script-updated `email_verified` / password rows).
  */
-function staffRosterStatusNote(emp: StaffRow): string | null {
-  if (!emp.isActive) return "Deactivated";
+type StaffRosterNoteKey = "deactivated" | "awaiting_email" | "pending_password";
+
+function staffRosterNoteKey(emp: StaffRow): StaffRosterNoteKey | null {
+  if (!emp.isActive) return "deactivated";
   if (isFullyOnboardedDashboardStaff(emp)) return null;
   const emailOk = emp.emailVerified === true;
   const pwdOk = emp.passwordIsSet === true;
 
   if (emp.activationStatus === "pending_verification") {
-    if (!emailOk) return "Awaiting email verification";
+    if (!emailOk) return "awaiting_email";
     return null;
   }
   if (emp.activationStatus === "pending_activation") {
-    if (!pwdOk) return "Pending password setup";
+    if (!pwdOk) return "pending_password";
     return null;
   }
   return null;
 }
 
-function rosterNoteClassName(note: string | null): string {
-  if (!note) return "";
-  if (note === "Deactivated") return "text-xs font-medium text-muted-foreground mt-0.5";
+function rosterNoteClassName(noteKey: StaffRosterNoteKey | null): string {
+  if (!noteKey) return "";
+  if (noteKey === "deactivated") return "text-xs font-medium text-muted-foreground mt-0.5";
   return "text-xs font-medium text-amber-700 dark:text-amber-500 mt-0.5";
 }
 
+function rosterNoteText(noteKey: StaffRosterNoteKey | null, t: (k: string) => string): string | null {
+  if (!noteKey) return null;
+  if (noteKey === "deactivated") return t("business.staffPage.rosterDeactivated");
+  if (noteKey === "awaiting_email") return t("business.staffPage.rosterAwaitingEmail");
+  return t("business.staffPage.rosterPendingPassword");
+}
+
 export function StaffManagementPage() {
+  const { t, i18n } = useTranslation();
+  const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, isBusiness, authHydrated, sessionValidated } = useRequireAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
@@ -277,7 +291,7 @@ export function StaffManagementPage() {
 
   const handleGenerateInvite = async () => {
     if (!isBusiness) {
-      toastErr("Only business owners can generate invite codes.");
+      toastErr(t("business.staffPage.toastOwnerOnlyInvite"));
       return;
     }
     setIsGenerating(true);
@@ -285,7 +299,7 @@ export function StaffManagementPage() {
       const data = await generateInviteCode();
       setInviteCode(data.inviteCode);
       setInviteExpiresAt(data.expiresAt ?? null);
-      toastOk("Invite code generated successfully.");
+      toastOk(t("business.staffPage.toastInviteGenerated"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
       toastErr(toUserFriendlyMessage(err));
@@ -303,22 +317,22 @@ export function StaffManagementPage() {
     if (!inviteCode) return;
     try {
       await navigator.clipboard.writeText(inviteCode);
-      toastOk("Copied to clipboard!");
+      toastOk(t("business.staffPage.toastCopied"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
-      toastErr("Unable to copy. Please try again.");
+      toastErr(t("business.staffPage.toastCopyFailed"));
     }
   };
 
   const handleAddEmployeeSubmit = async () => {
     if (!isBusiness || !user?.businessId) {
-      toastErr("Only business owners can add employees.");
+      toastErr(t("business.staffPage.toastOwnerOnlyAdd"));
       return;
     }
     const name = addForm.name.trim();
     const email = addForm.email.trim();
     if (!name || !email) {
-      toastErr("Name and email are required.");
+      toastErr(t("business.staffPage.toastNameEmailRequired"));
       return;
     }
     setIsSubmitting(true);
@@ -378,7 +392,7 @@ export function StaffManagementPage() {
     const name = editForm.name.trim();
     const email = editForm.email.trim();
     if (!name || !email) {
-      toastErr("Name and email are required.");
+      toastErr(t("business.staffPage.toastNameEmailRequired"));
       return;
     }
     let monthlyGoal: number | null | undefined = undefined;
@@ -387,7 +401,7 @@ export function StaffManagementPage() {
     } else {
       const n = parseFloat(editForm.monthlyGoal);
       if (Number.isNaN(n) || n < 0) {
-        toastErr("Monthly goal must be a valid number.");
+        toastErr(t("business.staffPage.toastMonthlyGoalInvalid"));
         return;
       }
       monthlyGoal = n;
@@ -405,7 +419,7 @@ export function StaffManagementPage() {
       });
       setShowEditModal(false);
       await fetchEmployees();
-      toastOk("Staff updated successfully.");
+      toastOk(t("business.staffPage.toastStaffUpdated"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
       toastErr(toUserFriendlyMessage(err));
@@ -427,7 +441,7 @@ export function StaffManagementPage() {
       setShowDeleteModal(false);
       setDeleteTarget(null);
       await fetchEmployees();
-      toastOk("Staff member removed.");
+      toastOk(t("business.staffPage.toastStaffRemoved"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
       toastErr(toUserFriendlyMessage(err));
@@ -460,7 +474,7 @@ export function StaffManagementPage() {
 
       // Final reconcile: refetch from DB-backed stats
       await fetchEmployees({ quiet: true });
-      toastOk(next ? "Staff profile is now active." : "Staff profile deactivated. QR links are disabled.");
+      toastOk(next ? t("business.staffPage.toastActiveOn") : t("business.staffPage.toastActiveOff"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
       // Revert UI on failure
@@ -473,11 +487,11 @@ export function StaffManagementPage() {
 
   const handleQrDownload = async (employee: StaffRow) => {
     if (!employee.isActive) {
-      toastErr("Activate this profile before downloading a QR code.");
+      toastErr(t("business.staffPage.toastActivateForQr"));
       return;
     }
     if (!canUseQr) {
-      toastErr("QR code will be available after business verification.");
+      toastErr(t("business.staffPage.toastQrAfterVerification"));
       return;
     }
     try {
@@ -485,23 +499,17 @@ export function StaffManagementPage() {
       const es = employee.slug?.trim();
       if (bs && es) await downloadBrandedQR(bs, es, employee.name);
       else await downloadBrandedQRLegacy(employee.id, employee.name);
-      toastOk("QR code downloaded.");
+      toastOk(t("business.staffPage.toastQrDownloaded"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
-      toastErr("Failed to download QR.");
+      toastErr(t("business.staffPage.toastQrDownloadFailed"));
     }
   };
 
   const formatExpiresAt = (iso: string) => {
     try {
       const d = new Date(iso);
-      return d.toLocaleDateString(undefined, {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return format(d, "PPp", { locale: dateLocale });
     } catch (err) {
       logClientError("StaffManagementPage", err);
       return null;
@@ -509,11 +517,11 @@ export function StaffManagementPage() {
   };
 
   if (!authHydrated || !sessionValidated || !user) {
-    return <CareTipPageLoader message="Loading staff…" />;
+    return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
   }
 
   if (loading) {
-    return <CareTipPageLoader message="Loading staff…" />;
+    return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
   }
 
   if (error) {
@@ -522,7 +530,7 @@ export function StaffManagementPage() {
         <div className="text-center">
           <p className="mb-2 text-sm font-medium text-destructive">{error}</p>
           <button onClick={() => window.location.reload()} className="text-primary hover:underline text-sm">
-            Try again
+            {t("business.staffPage.tryAgain")}
           </button>
         </div>
       </div>
@@ -536,12 +544,12 @@ export function StaffManagementPage() {
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <div className="mb-4 flex items-center gap-2">
-          <Button variant="outline" size="icon" asChild aria-label="Back to dashboard">
+          <Button variant="outline" size="icon" asChild aria-label={t("business.staffPage.backAria")}>
             <Link to="/dashboard">
               <ChevronLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <span className="text-sm text-muted-foreground">Business dashboard</span>
+          <span className="text-sm text-muted-foreground">{t("business.staffPage.breadcrumbDashboard")}</span>
         </div>
 
         <DashboardHero
@@ -550,31 +558,35 @@ export function StaffManagementPage() {
           badge={
             <>
               <Users className="h-3.5 w-3.5 text-foreground" />
-              Team roster
+              {t("business.staffPage.badgeTeamRoster")}
             </>
           }
-          title="Staff management"
-          description="Invites, roles, and active staff."
+          title={t("business.staffPage.heroTitle")}
+          description={t("business.staffPage.heroDesc")}
           imageOverlay={false}
           image={
             <div className="relative mx-auto w-full max-w-full">
               <div className="rounded-2xl border border-gray-100 bg-white p-4 shadow-none sm:p-5">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Invite code</p>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t("business.staffPage.inviteCodeLabel")}
+                    </p>
                     {inviteCode ? (
                       <>
                         <p className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.24em] text-foreground sm:text-3xl">
                           {inviteCode}
                         </p>
                         {inviteExpiresAt ? (
-                          <p className="mt-2 text-xs text-muted-foreground">Expires {formatExpiresAt(inviteExpiresAt)}</p>
+                          <p className="mt-2 text-xs text-muted-foreground">
+                            {t("business.staffPage.inviteExpires", {
+                              date: formatExpiresAt(inviteExpiresAt) ?? "",
+                            })}
+                          </p>
                         ) : null}
                       </>
                     ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">
-                        Generate an invite code to onboard staff.
-                      </p>
+                      <p className="mt-2 text-sm text-muted-foreground">{t("business.staffPage.inviteHint")}</p>
                     )}
                   </div>
                 </div>
@@ -584,11 +596,11 @@ export function StaffManagementPage() {
                     <>
                       <Button type="button" variant="outline" onClick={handleCopyCode}>
                         <Copy className="h-4 w-4" />
-                        Copy
+                        {t("business.staffPage.copy")}
                       </Button>
                       <Button type="button" onClick={handleRegenerate} disabled={isGenerating}>
                         <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
-                        Regenerate
+                        {t("business.staffPage.regenerate")}
                       </Button>
                     </>
                   ) : (
@@ -596,12 +608,12 @@ export function StaffManagementPage() {
                       {isGenerating ? (
                         <>
                           <RefreshCw className="h-4 w-4 animate-spin" />
-                          Generating…
+                          {t("business.staffPage.generating")}
                         </>
                       ) : (
                         <>
                           <KeyRound className="h-4 w-4" />
-                          Generate Invite Code
+                          {t("business.staffPage.generateInvite")}
                         </>
                       )}
                     </Button>
@@ -651,14 +663,14 @@ export function StaffManagementPage() {
           <Card className="rounded-xl bg-white border border-black/[0.06] shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Search</CardTitle>
-              <CardDescription>Filter by name or role</CardDescription>
+              <CardDescription>{t("business.staffPage.filterDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
                 <input
                   type="search"
-                  placeholder="Search employees…"
+                  placeholder={t("business.staffPage.searchPlaceholder")}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-lg border border-black/[0.10] bg-background py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -693,16 +705,15 @@ export function StaffManagementPage() {
                   <td colSpan={8} className="px-6 py-12">
                     <div className={DASH_EMPTY_STATE}>
                       <Users className={DASH_EMPTY_ICON} />
-                      <p className="text-sm font-medium">No staff members yet.</p>
-                      <p className="mt-1 text-sm text-gray-400">
-                        Add employees to get started.
-                      </p>
+                      <p className="text-sm font-medium">{t("business.staffPage.emptyTitle")}</p>
+                      <p className="mt-1 text-sm text-gray-400">{t("business.staffPage.emptySubtitle")}</p>
                     </div>
                   </td>
                 </tr>
               ) : (
                 filteredEmployees.map((employee, index) => {
-                  const rosterNote = staffRosterStatusNote(employee);
+                  const rosterKey = staffRosterNoteKey(employee);
+                  const rosterNote = rosterNoteText(rosterKey, t);
                   return (
                 <motion.tr
                   key={employee.id}
@@ -725,9 +736,11 @@ export function StaffManagementPage() {
                       />
                       <div>
                         <p className="font-semibold text-foreground">{employee.name}</p>
-                        <p className="text-xs text-muted-foreground">Joined {employee.joinedDate}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {t("business.staffPage.joinedLabel", { date: employee.joinedDate })}
+                        </p>
                         {rosterNote ? (
-                          <p className={rosterNoteClassName(rosterNote)}>{rosterNote}</p>
+                          <p className={rosterNoteClassName(rosterKey)}>{rosterNote}</p>
                         ) : null}
                       </div>
                     </div>
@@ -738,13 +751,13 @@ export function StaffManagementPage() {
                   <td className="px-6 py-4 max-w-[200px]">
                     <p className="text-sm text-foreground truncate">
                       {employee.locationId
-                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "N/A"
-                        : "N/A"}
+                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? t("business.staffPage.na")
+                        : t("business.staffPage.na")}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {employee.assignedTableIds.length > 0
-                        ? `${employee.assignedTableIds.length} table(s)`
-                        : "No tables"}
+                        ? t("business.staffPage.tableCount", { count: employee.assignedTableIds.length })
+                        : t("business.staffPage.noTables")}
                     </p>
                   </td>
                   <td className="px-6 py-4">
@@ -755,7 +768,7 @@ export function StaffManagementPage() {
                       </div>
                       <div className="flex items-center gap-2 text-muted-foreground">
                         <Phone className="w-3 h-3" />
-                        <span>{employee.phone || "No phone"}</span>
+                        <span>{employee.phone || t("business.staffPage.noPhone")}</span>
                       </div>
                     </div>
                   </td>
@@ -773,7 +786,7 @@ export function StaffManagementPage() {
                           <span className="font-semibold text-foreground">{employee.rating}</span>
                         </>
                       ) : (
-                        <span className="text-muted-foreground text-sm">New Member</span>
+                        <span className="text-muted-foreground text-sm">{t("business.staffPage.newMember")}</span>
                       )}
                     </div>
                   </td>
@@ -809,10 +822,10 @@ export function StaffManagementPage() {
                         ].join(" ")}
                         title={
                           !employee.isActive
-                            ? "Activate this profile to enable QR downloads."
+                            ? t("business.staffPage.qrTitleInactive")
                             : canUseQr
-                              ? "Download branded QR (app URL /qr/employee/…)"
-                              : "QR code will be available after business verification."
+                              ? t("business.staffPage.qrTitleActive")
+                              : t("business.staffPage.qrTitleLocked")
                         }
                       >
                         <QrCode className="w-4 h-4 text-foreground" />
@@ -821,7 +834,7 @@ export function StaffManagementPage() {
                         type="button"
                         onClick={() => openEdit(employee)}
                         className="p-2 rounded-lg border border-transparent hover:bg-muted hover:border-border active:scale-95 transition-all"
-                        title="Edit"
+                        title={t("business.staffPage.editTooltip")}
                       >
                         <Edit className="w-4 h-4 text-foreground" />
                       </button>
@@ -829,7 +842,7 @@ export function StaffManagementPage() {
                         type="button"
                         onClick={() => openDelete(employee)}
                         className="p-2 rounded-lg border border-transparent hover:bg-red-500/10 hover:border-red-500/30 active:scale-95 transition-all"
-                        title="Remove staff member"
+                        title={t("business.staffPage.removeStaffTitle")}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </button>
@@ -846,10 +859,11 @@ export function StaffManagementPage() {
         {/* Mobile Card View */}
         <div className="lg:hidden space-y-4">
           {filteredEmployees.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">No staff members yet.</div>
+            <div className="text-center py-12 text-muted-foreground">{t("business.staffPage.mobileEmpty")}</div>
           ) : (
             filteredEmployees.map((employee, index) => {
-              const rosterNote = staffRosterStatusNote(employee);
+              const rosterKey = staffRosterNoteKey(employee);
+              const rosterNote = rosterNoteText(rosterKey, t);
               return (
             <motion.div
               key={employee.id}
@@ -874,16 +888,16 @@ export function StaffManagementPage() {
                     <h3 className="font-semibold text-foreground truncate">{employee.name}</h3>
                     <p className="text-sm text-muted-foreground">{employee.role}</p>
                     {rosterNote ? (
-                      <p className={rosterNoteClassName(rosterNote)}>{rosterNote}</p>
+                      <p className={rosterNoteClassName(rosterKey)}>{rosterNote}</p>
                     ) : null}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {employee.locationId
-                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? "N/A"
-                        : "No venue"}{" "}
+                        ? venueOptions.find((l) => l.id === employee.locationId)?.name ?? t("business.staffPage.na")
+                        : t("business.staffPage.noVenue")}{" "}
                       ·{" "}
                       {employee.assignedTableIds.length > 0
-                        ? `${employee.assignedTableIds.length} table(s)`
-                        : "no tables"}
+                        ? t("business.staffPage.tableCount", { count: employee.assignedTableIds.length })
+                        : t("business.staffPage.mobileNoTablesShort")}
                     </p>
                   </div>
                 </div>
@@ -910,12 +924,12 @@ export function StaffManagementPage() {
 
               <div className="grid grid-cols-2 gap-4 mb-4">
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Tips (Month)</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t("business.staffPage.labelTipsMonth")}</p>
                   <p className="text-lg font-bold text-foreground">{formatEur(Number(employee.tips))}</p>
                   <p className="text-xs text-accent">{employee.growth}</p>
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground mb-1">Rating</p>
+                  <p className="text-xs text-muted-foreground mb-1">{t("business.staffPage.labelRating")}</p>
                   <div className="flex items-center gap-1">
                     {employee.rating != null ? (
                       <>
@@ -923,7 +937,7 @@ export function StaffManagementPage() {
                         <span className="text-lg font-bold text-foreground">{employee.rating}</span>
                       </>
                     ) : (
-                      <span className="text-sm text-muted-foreground">New Member</span>
+                      <span className="text-sm text-muted-foreground">{t("business.staffPage.newMember")}</span>
                     )}
                   </div>
                 </div>
@@ -942,14 +956,14 @@ export function StaffManagementPage() {
                   ].join(" ")}
                   title={
                     !employee.isActive
-                      ? "Activate this profile to enable QR downloads."
+                      ? t("business.staffPage.qrTitleInactive")
                       : canUseQr
-                        ? "Download branded QR"
-                        : "QR code will be available after business verification."
+                        ? t("business.staffPage.qrTitleActive")
+                        : t("business.staffPage.qrTitleLocked")
                   }
                 >
                   <QrCode className="h-4 w-4" />
-                  QR
+                  {t("business.staffPage.qrButton")}
                 </button>
                 <button
                   type="button"
@@ -957,7 +971,7 @@ export function StaffManagementPage() {
                   className="px-4 py-2 border border-border rounded-lg hover:bg-muted active:scale-[0.98] transition-all text-sm font-medium flex items-center justify-center gap-2"
                 >
                   <Edit className="w-4 h-4" />
-                  Edit
+                  {t("business.staffPage.editButton")}
                 </button>
                 <button
                   type="button"
@@ -985,7 +999,7 @@ export function StaffManagementPage() {
             className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
           >
             <div className="shrink-0 border-b border-border px-5 pt-5 pb-3">
-              <h2 className="text-xl font-bold text-foreground">Add New Employee</h2>
+              <h2 className="text-xl font-bold text-foreground">{t("business.staffPage.addEmployeeTitle")}</h2>
             </div>
             <form
               onSubmit={(e) => {
@@ -998,57 +1012,55 @@ export function StaffManagementPage() {
                 <div className="space-y-3">
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="sm:col-span-1">
-                      <label className="mb-1 block text-sm text-muted-foreground">Full Name</label>
+                      <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelFullName")}</label>
                       <input
                         type="text"
-                        placeholder="Schmidt Paul"
+                        placeholder={t("business.staffPage.placeholderNameExample")}
                         value={addForm.name}
                         onChange={(e) => setAddForm((f) => ({ ...f, name: e.target.value }))}
                         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div className="sm:col-span-1">
-                      <label className="mb-1 block text-sm text-muted-foreground">Role</label>
+                      <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelRole")}</label>
                       <select
                         value={addForm.role}
                         onChange={(e) => setAddForm((f) => ({ ...f, role: e.target.value }))}
                         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       >
-                        <option>Server</option>
-                        <option>Bartender</option>
-                        <option>Chef</option>
-                        <option>Host</option>
-                        <option>Manager</option>
+                        <option value="Server">{t("business.staffPage.roleServer")}</option>
+                        <option value="Bartender">{t("business.staffPage.roleBartender")}</option>
+                        <option value="Chef">{t("business.staffPage.roleChef")}</option>
+                        <option value="Host">{t("business.staffPage.roleHost")}</option>
+                        <option value="Manager">{t("business.staffPage.roleManager")}</option>
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="min-w-0 sm:col-span-1">
-                      <label className="mb-1 block text-sm text-muted-foreground">Email (required)</label>
+                      <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelEmailRequired")}</label>
                       <input
                         type="email"
-                        placeholder="john.doe@example.com"
+                        placeholder={t("business.staffPage.phEmailExample")}
                         value={addForm.email}
                         onChange={(e) => setAddForm((f) => ({ ...f, email: e.target.value }))}
                         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                     <div className="min-w-0 sm:col-span-1">
-                      <label className="mb-1 block text-sm text-muted-foreground">Phone (optional)</label>
+                      <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelPhoneOptional")}</label>
                       <input
                         type="tel"
-                        placeholder="+1 (555) 000-0000"
+                        placeholder={t("business.staffPage.phPhoneExample")}
                         value={addForm.phone}
                         onChange={(e) => setAddForm((f) => ({ ...f, phone: e.target.value }))}
                         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       />
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground">
-                    We’ll use email for their account. Invite codes can be shared from this page after they’re added.
-                  </p>
+                  <p className="text-xs text-muted-foreground">{t("business.staffPage.emailHint")}</p>
                   <div>
-                    <label className="mb-1 block text-sm text-muted-foreground">Assigned location (optional)</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelAssignedLocation")}</label>
                     <select
                       value={addForm.locationId}
                       onChange={(e) => {
@@ -1064,48 +1076,44 @@ export function StaffManagementPage() {
                       }}
                       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="">Not set</option>
+                      <option value="">{t("business.staffPage.notSet")}</option>
                       {venueOptions.map((loc) => (
                         <option key={loc.id} value={loc.id}>
                           {loc.name}
                         </option>
                       ))}
                     </select>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      Shown on venue QR when set. Create venues under Locations.
-                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground">{t("business.staffPage.locationHintVenue")}</p>
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm text-muted-foreground">Assigned tables (optional)</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelAssignedTables")}</label>
                     <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background p-2">
                       {tablesForAddPicker.length === 0 ? (
-                        <p className="px-1 py-2 text-xs text-muted-foreground">
-                          No tables for this filter. Add tables under Locations.
-                        </p>
+                        <p className="px-1 py-2 text-xs text-muted-foreground">{t("business.staffPage.noTablesFilter")}</p>
                       ) : (
                         <div className="space-y-1">
-                          {tablesForAddPicker.map((t) => (
+                          {tablesForAddPicker.map((tbl) => (
                             <label
-                              key={t.id}
+                              key={tbl.id}
                               className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-muted/50"
                             >
                               <input
-                                id={`table-checkbox-${t.id}`}
-                                name={`table-${t.id}`}
+                                id={`table-checkbox-${tbl.id}`}
+                                name={`table-${tbl.id}`}
                                 type="checkbox"
                                 className="h-4 w-4 shrink-0 rounded border-border accent-primary"
-                                checked={addForm.tableIds.includes(t.id)}
+                                checked={addForm.tableIds.includes(tbl.id)}
                                 onChange={(e) => {
                                   setAddForm((f) => ({
                                     ...f,
                                     tableIds: e.target.checked
-                                      ? [...f.tableIds, t.id]
-                                      : f.tableIds.filter((id) => id !== t.id),
+                                      ? [...f.tableIds, tbl.id]
+                                      : f.tableIds.filter((id) => id !== tbl.id),
                                   }));
                                 }}
                               />
-                              <span className="min-w-0 truncate">{t.name}</span>
-                              <span className="shrink-0 text-xs text-muted-foreground">({t.location.name})</span>
+                              <span className="min-w-0 truncate">{tbl.name}</span>
+                              <span className="shrink-0 text-xs text-muted-foreground">({tbl.location.name})</span>
                             </label>
                           ))}
                         </div>
@@ -1122,10 +1130,10 @@ export function StaffManagementPage() {
                     className="flex-1"
                     onClick={() => setShowAddModal(false)}
                   >
-                    Cancel
+                    {t("business.staffPage.modalCancel")}
                   </Button>
                   <Button type="submit" disabled={isSubmitting} className="flex-1">
-                    {isSubmitting ? "Adding…" : "Add employee"}
+                    {isSubmitting ? t("business.staffPage.adding") : t("business.staffPage.addEmployee")}
                   </Button>
                 </div>
               </div>
@@ -1143,13 +1151,13 @@ export function StaffManagementPage() {
             className="flex h-[min(90vh,44rem)] min-h-0 w-full max-w-lg flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
           >
             <div className="shrink-0 border-b border-border px-5 pt-5 pb-3">
-              <h2 className="text-xl font-bold text-foreground">Edit staff member</h2>
+              <h2 className="text-xl font-bold text-foreground">{t("business.staffPage.editEmployeeTitle")}</h2>
             </div>
             <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 [scrollbar-gutter:stable]">
               <div className="space-y-3">
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div>
-                    <label className="mb-1 block text-sm text-muted-foreground">Full name</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelFullName")}</label>
                     <input
                       type="text"
                       value={editForm.name}
@@ -1158,23 +1166,23 @@ export function StaffManagementPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm text-muted-foreground">Role</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelRole")}</label>
                     <select
                       value={editForm.role}
                       onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value }))}
                       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option>Server</option>
-                      <option>Bartender</option>
-                      <option>Chef</option>
-                      <option>Host</option>
-                      <option>Manager</option>
+                      <option value="Server">{t("business.staffPage.roleServer")}</option>
+                      <option value="Bartender">{t("business.staffPage.roleBartender")}</option>
+                      <option value="Chef">{t("business.staffPage.roleChef")}</option>
+                      <option value="Host">{t("business.staffPage.roleHost")}</option>
+                      <option value="Manager">{t("business.staffPage.roleManager")}</option>
                     </select>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   <div className="min-w-0">
-                    <label className="mb-1 block text-sm text-muted-foreground">Email</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelEmail")}</label>
                     <input
                       type="email"
                       value={editForm.email}
@@ -1183,11 +1191,11 @@ export function StaffManagementPage() {
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-sm text-muted-foreground">Monthly goal ($)</label>
+                    <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.monthlyGoalUsd")}</label>
                     <input
                       type="text"
                       inputMode="decimal"
-                      placeholder="Leave empty for no goal"
+                      placeholder={t("business.staffPage.placeholderNoGoal")}
                       value={editForm.monthlyGoal}
                       onChange={(e) => setEditForm((f) => ({ ...f, monthlyGoal: e.target.value }))}
                       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
@@ -1195,7 +1203,7 @@ export function StaffManagementPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-muted-foreground">Assigned location (optional)</label>
+                  <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelAssignedLocation")}</label>
                   <select
                     value={editForm.locationId}
                     onChange={(e) => {
@@ -1211,7 +1219,7 @@ export function StaffManagementPage() {
                     }}
                     className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                   >
-                    <option value="">Not set</option>
+                    <option value="">{t("business.staffPage.notSet")}</option>
                     {venueOptions.map((loc) => (
                       <option key={loc.id} value={loc.id}>
                         {loc.name}
@@ -1220,34 +1228,32 @@ export function StaffManagementPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-sm text-muted-foreground">Assigned tables (optional)</label>
+                  <label className="mb-1 block text-sm text-muted-foreground">{t("business.staffPage.labelAssignedTables")}</label>
                   <div className="max-h-32 overflow-y-auto rounded-lg border border-border bg-background p-2">
                     {tablesForEditPicker.length === 0 ? (
-                      <p className="px-1 py-2 text-xs text-muted-foreground">
-                        No tables for this filter. Add tables under Locations.
-                      </p>
+                      <p className="px-1 py-2 text-xs text-muted-foreground">{t("business.staffPage.noTablesFilter")}</p>
                     ) : (
                       <div className="space-y-1">
-                        {tablesForEditPicker.map((t) => (
+                        {tablesForEditPicker.map((tbl) => (
                           <label
-                            key={t.id}
+                            key={tbl.id}
                             className="flex cursor-pointer items-center gap-2 rounded px-1 py-1 text-sm hover:bg-muted/50"
                           >
                             <input
                               type="checkbox"
                               className="h-4 w-4 shrink-0 rounded border-border accent-primary"
-                              checked={editForm.tableIds.includes(t.id)}
+                              checked={editForm.tableIds.includes(tbl.id)}
                               onChange={(e) => {
                                 setEditForm((f) => ({
                                   ...f,
                                   tableIds: e.target.checked
-                                    ? [...f.tableIds, t.id]
-                                    : f.tableIds.filter((id) => id !== t.id),
+                                    ? [...f.tableIds, tbl.id]
+                                    : f.tableIds.filter((id) => id !== tbl.id),
                                 }));
                               }}
                             />
-                            <span className="min-w-0 truncate">{t.name}</span>
-                            <span className="shrink-0 text-xs text-muted-foreground">({t.location.name})</span>
+                            <span className="min-w-0 truncate">{tbl.name}</span>
+                            <span className="shrink-0 text-xs text-muted-foreground">({tbl.location.name})</span>
                           </label>
                         ))}
                       </div>
@@ -1261,7 +1267,7 @@ export function StaffManagementPage() {
                     onChange={(e) => setEditForm((f) => ({ ...f, isActive: e.target.checked }))}
                     className="h-4 w-4 rounded border-border accent-primary"
                   />
-                  <span className="text-sm text-foreground">Active (QR and tipping enabled)</span>
+                  <span className="text-sm text-foreground">{t("business.staffPage.activeProfileLabel")}</span>
                 </label>
               </div>
             </div>
@@ -1273,10 +1279,10 @@ export function StaffManagementPage() {
                   onClick={() => setShowEditModal(false)}
                   className="flex-1"
                 >
-                  Cancel
+                  {t("business.staffPage.modalCancel")}
                 </Button>
                 <Button type="button" disabled={savingEdit} onClick={handleEditSave} className="flex-1">
-                  {savingEdit ? "Saving…" : "Save"}
+                  {savingEdit ? t("business.staffPage.saving") : t("business.staffPage.save")}
                 </Button>
               </div>
             </div>
@@ -1292,10 +1298,9 @@ export function StaffManagementPage() {
             animate={{ scale: 1, opacity: 1 }}
             className="bg-card rounded-xl border border-border p-6 max-w-md w-full"
           >
-            <h2 className="text-xl font-bold text-foreground mb-2">Remove staff member?</h2>
+            <h2 className="text-xl font-bold text-foreground mb-2">{t("business.staffPage.deleteConfirmTitle")}</h2>
             <p className="text-sm text-muted-foreground mb-6">
-              This will permanently delete {deleteTarget.name}&apos;s account and tip history associations
-              (right to erasure). This cannot be undone.
+              {t("business.staffPage.deleteConfirmBody", { name: deleteTarget.name })}
             </p>
             <div className="flex gap-3">
               <Button
@@ -1307,7 +1312,7 @@ export function StaffManagementPage() {
                   setDeleteTarget(null);
                 }}
               >
-                Cancel
+                {t("business.staffPage.modalCancel")}
               </Button>
               <Button
                 type="button"
@@ -1316,7 +1321,7 @@ export function StaffManagementPage() {
                 disabled={deleting}
                 onClick={handleDeleteConfirm}
               >
-                {deleting ? "Removing…" : "Delete"}
+                {deleting ? t("business.staffPage.removing") : t("business.staffPage.delete")}
               </Button>
             </div>
           </motion.div>

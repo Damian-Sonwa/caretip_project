@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -8,6 +9,7 @@ import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
 import { employeeDashboardNavItems, isEmployeeDashboardNavActive } from "./employeeDashboardNav";
 
 export function EmployeeSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -24,7 +26,9 @@ export function EmployeeSidebar() {
           <CareTipLogo size="sm" />
         </div>
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-sidebar-foreground">{user?.name || "Team member"}</p>
+          <p className="truncate text-sm font-semibold text-sidebar-foreground">
+            {user?.name || t("dashboard.teamMemberFallback")}
+          </p>
           <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
         </div>
       </div>
@@ -46,7 +50,7 @@ export function EmployeeSidebar() {
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  <span>{item.name}</span>
+                  <span>{t(item.labelKey)}</span>
                 </Link>
               </li>
             );
@@ -64,7 +68,7 @@ export function EmployeeSidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="h-5 w-5" />
-          <span className="text-sm font-medium">Sign out</span>
+          <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>
     </motion.aside>

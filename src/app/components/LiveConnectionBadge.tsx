@@ -1,15 +1,8 @@
+import { useTranslation } from "react-i18next";
 import type { SocketConnectionStatus } from "../hooks/useSocket";
 import type { PublicSocketStatus } from "../hooks/usePublicSocket";
 
 type Status = SocketConnectionStatus | PublicSocketStatus;
-
-const LABELS: Record<string, string> = {
-  idle: "Live updates",
-  connecting: "Connecting…",
-  connected: "Live",
-  disconnected: "Reconnecting…",
-  reconnecting: "Reconnecting…",
-};
 
 export function LiveConnectionBadge({
   status,
@@ -18,7 +11,11 @@ export function LiveConnectionBadge({
   status: Status;
   className?: string;
 }) {
-  const label = LABELS[status] ?? "Live updates";
+  const { t } = useTranslation();
+  const label =
+    status === "connected"
+      ? t("dashboard.live_status")
+      : t(`dashboard.socket.${status}`, { defaultValue: t("dashboard.socket.idle") });
   const ok = status === "connected";
   const warn = status === "disconnected" || status === "reconnecting" || status === "connecting";
 

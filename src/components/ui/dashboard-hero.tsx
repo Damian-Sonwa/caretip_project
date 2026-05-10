@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
 import { BorderBeam } from "@/components/ui/border-beam";
@@ -71,6 +72,7 @@ export function DashboardHero({
   stackHeroOnMobile = false,
   mobileAlign = "left",
 }: DashboardHeroProps) {
+  const { t } = useTranslation();
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
   const tagline = description?.trim() ?? "";
@@ -133,7 +135,7 @@ export function DashboardHero({
               "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
-          Overview
+          {t("dashboardHero.overview")}
         </TabsTrigger>
         <TabsTrigger
           value="links"
@@ -142,7 +144,7 @@ export function DashboardHero({
               "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
-          Shortcuts
+          {t("dashboardHero.shortcuts")}
         </TabsTrigger>
       </TabsList>
       <TabsContent
@@ -397,8 +399,8 @@ export function DashboardHero({
               {hideTabs ? null : (
                 <Tabs defaultValue="overview" className={cn("w-full max-w-md", tagline ? "pt-2 sm:pt-3" : "pt-0 sm:pt-1")}>
                   <TabsList className="grid w-full grid-cols-2 bg-muted">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="links">Shortcuts</TabsTrigger>
+                    <TabsTrigger value="overview">{t("dashboardHero.overview")}</TabsTrigger>
+                    <TabsTrigger value="links">{t("dashboardHero.shortcuts")}</TabsTrigger>
                   </TabsList>
                   <TabsContent
                     value="overview"

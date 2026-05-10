@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { CareTipLogo } from "@/app/components/CareTipLogo";
 
 type AuthRecoveryLayoutProps = {
@@ -25,7 +26,7 @@ export function AuthRecoveryLayout({ children, showFooterLink = true }: AuthReco
         {showFooterLink ? (
           <p className="mt-8 text-center text-xs text-neutral-600 dark:text-neutral-400">
             <Link to="/login" className="font-medium text-primary hover:underline">
-              Back to sign in
+              {t("auth.recovery.backToSignIn")}
             </Link>
           </p>
         ) : null}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion } from "motion/react";
 import {
@@ -182,11 +183,12 @@ function UserDistributionChart({
 }: {
   data: Array<{ role: "business" | "employee" | "platform_admin"; count: number }>;
 }) {
+  const { t } = useTranslation();
   const config: ChartConfig = {
-    business: { label: "Businesses", color: ADMIN_CHART_COLORS.primary },
-    employee: { label: "Employees", color: ADMIN_CHART_COLORS.cyan },
-    platform_admin: { label: "Platform admins", color: ADMIN_CHART_COLORS.purple },
-    empty: { label: "No data yet", color: ADMIN_CHART_COLORS.slate },
+    business: { label: t("admin.legendBusinesses"), color: ADMIN_CHART_COLORS.primary },
+    employee: { label: t("admin.legendEmployees"), color: ADMIN_CHART_COLORS.cyan },
+    platform_admin: { label: t("admin.legendPlatformAdmins"), color: ADMIN_CHART_COLORS.purple },
+    empty: { label: t("admin.legendNoData"), color: ADMIN_CHART_COLORS.slate },
   };
 
   const rows: Array<{ name: string; role: string; value: number; fill: string }> = data.map((d) => ({
@@ -201,7 +203,7 @@ function UserDistributionChart({
       ? rows
       : [
           {
-            name: "No data yet",
+            name: t("admin.legendNoData"),
             role: "empty",
             value: 1,
             fill: "var(--color-empty)",
@@ -235,11 +237,12 @@ function TipStatusChart({
 }: {
   data: Array<{ status: "success" | "pending" | "failed"; count: number }>;
 }) {
+  const { t } = useTranslation();
   const config: ChartConfig = {
-    success: { label: "Success", color: ADMIN_CHART_COLORS.emerald },
-    pending: { label: "Pending", color: ADMIN_CHART_COLORS.amber },
-    failed: { label: "Failed", color: ADMIN_CHART_COLORS.red },
-    empty: { label: "No data yet", color: ADMIN_CHART_COLORS.slate },
+    success: { label: t("admin.tipStatusSuccess"), color: ADMIN_CHART_COLORS.emerald },
+    pending: { label: t("admin.tipStatusPending"), color: ADMIN_CHART_COLORS.amber },
+    failed: { label: t("admin.tipStatusFailed"), color: ADMIN_CHART_COLORS.red },
+    empty: { label: t("admin.legendNoData"), color: ADMIN_CHART_COLORS.slate },
   };
 
   const rows: Array<{ name: string; status: string; value: number; fill: string }> = data.map((d) => ({
@@ -254,7 +257,7 @@ function TipStatusChart({
       ? rows
       : [
           {
-            name: "No data yet",
+            name: t("admin.legendNoData"),
             status: "empty",
             value: 1,
             fill: "var(--color-empty)",
@@ -288,10 +291,11 @@ function GrowthChart({
 }: {
   data: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }>;
 }) {
+  const { t } = useTranslation();
   const config: ChartConfig = {
-    newUsers: { label: "New users", color: ADMIN_CHART_COLORS.primary },
-    newBusinesses: { label: "New venues", color: ADMIN_CHART_COLORS.purple },
-    newTips: { label: "New tips", color: ADMIN_CHART_COLORS.cyan },
+    newUsers: { label: t("admin.legendNewUsers"), color: ADMIN_CHART_COLORS.primary },
+    newBusinesses: { label: t("admin.legendNewVenues"), color: ADMIN_CHART_COLORS.purple },
+    newTips: { label: t("admin.legendNewTips"), color: ADMIN_CHART_COLORS.cyan },
   };
 
   return (
@@ -304,7 +308,7 @@ function GrowthChart({
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(v) => `Date: ${String(v ?? "")}`}
+              labelFormatter={(v) => t("admin.growthDateLabel", { date: String(v ?? "") })}
             />
           }
         />
@@ -324,9 +328,10 @@ function TipVolumeChart({
   data: Array<{ date: string; tipsEur: number; tipCount: number }>;
   top: Array<{ businessId: string; businessName: string; tipsEur: number }>;
 }) {
+  const { t } = useTranslation();
   const config: ChartConfig = {
-    tipsEur: { label: "Tips (EUR)", color: ADMIN_CHART_COLORS.emerald },
-    top: { label: "Top venues", color: ADMIN_CHART_COLORS.slate },
+    tipsEur: { label: t("admin.legendTipsEur"), color: ADMIN_CHART_COLORS.emerald },
+    top: { label: t("admin.legendTopVenues"), color: ADMIN_CHART_COLORS.slate },
   };
 
   const topBars = (top ?? []).map((b) => ({
@@ -381,6 +386,7 @@ function TipVolumeChart({
  * Renders inside SuperAdminLayout only (no business dashboard UI).
  */
 export function AdminDashboard() {
+  const { t } = useTranslation();
   const { user, authHydrated, sessionValidated } = useAuth();
   const { socket, connected, connectionStatus } = useSocket(
     Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated),
@@ -487,16 +493,16 @@ export function AdminDashboard() {
         msg.toLowerCase().includes("service temporarily unavailable") ||
         msg.toLowerCase().includes("http 503")
       ) {
-        setServiceIssue("Service temporarily unavailable. Please try again in a moment.");
+        setServiceIssue(t("admin.serviceUnavailable"));
         // Best-effort: reflect degraded health badge.
         setHealth((h) => h ?? { database: "offline", stripe: "offline" });
       } else {
-        setServiceIssue(msg || "We couldn't load platform data right now.");
+        setServiceIssue(msg || t("admin.serviceGenericError"));
       }
     } finally {
       setInitialDashLoading(false);
     }
-  }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics]);
+  }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics, t]);
 
   useEffect(() => {
     void loadDashboardData();
@@ -537,7 +543,7 @@ export function AdminDashboard() {
   if (initialDashLoading) {
     return (
       <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 pb-20 pt-8 lg:px-8">
-        <PageLoader message="Loading platform dashboard…" />
+        <PageLoader message={t("admin.loadingDashboard")} />
       </main>
     );
   }
@@ -554,19 +560,26 @@ export function AdminDashboard() {
           id="platformDataLoad"
           issueActive={Boolean(serviceIssue)}
           dismissPersistence="session"
-          title="We’re having trouble loading platform data."
+          title={t("admin.loadErrorTitle")}
           description={serviceIssue ?? undefined}
-          actionLabel="Retry"
+          actionLabel={t("admin.retry")}
           onAction={() => void loadDashboardData()}
           className="mb-6"
         />
         <div className="relative mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           <StatCard
-            title="Successful tips (EUR)"
-            value={stats ? `€${stats.totalVolumeEurFormatted}` : "N/A"}
+            title={t("admin.statTips")}
+            value={stats ? `€${stats.totalVolumeEurFormatted}` : t("format.notAvailable")}
             change={
               stats
-                ? `Sum of all successful tips · ${stats.successTransactionCount} successful of ${stats.transactionCount} total${typeof stats.businessesWithSuccessfulTips === "number" ? ` · ${stats.businessesWithSuccessfulTips} businesses with tips` : ""}`
+                ? t("admin.statTipsChange", {
+                    success: stats.successTransactionCount,
+                    total: stats.transactionCount,
+                    biz:
+                      typeof stats.businessesWithSuccessfulTips === "number"
+                        ? t("admin.statTipsBizPart", { count: stats.businessesWithSuccessfulTips })
+                        : "",
+                  })
                 : undefined
             }
             icon={Heart}
@@ -574,30 +587,30 @@ export function AdminDashboard() {
             beam
           />
           <StatCard
-            title="Venues"
-            value={stats ? String(stats.businessesCount) : "N/A"}
-            change="Registered businesses on the platform"
+            title={t("admin.statVenues")}
+            value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
+            change={t("admin.statVenuesChange")}
             icon={Building2}
             delay={0.15}
           />
           <StatCard
-            title="Locations"
-            value={stats ? String(stats.locationsCount) : "N/A"}
-            change="Venue sites and rooms across all businesses"
+            title={t("admin.statLocations")}
+            value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
+            change={t("admin.statLocationsChange")}
             icon={MapPin}
             delay={0.18}
           />
           <StatCard
-            title="Staff"
-            value={stats ? String(stats.employeesCount) : "N/A"}
-            change="Employees with CareTip accounts"
+            title={t("admin.statStaff")}
+            value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
+            change={t("admin.statStaffChange")}
             icon={Users}
             delay={0.2}
           />
           <StatCard
-            title="Active users"
-            value={stats ? String(stats.activeUsersCount) : "N/A"}
-            change="Accounts with sign-in enabled"
+            title={t("admin.statActiveUsers")}
+            value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
+            change={t("admin.statActiveUsersChange")}
             icon={UserCheck}
             delay={0.25}
           />
@@ -613,13 +626,12 @@ export function AdminDashboard() {
           >
             <div className="mb-4 flex items-end justify-between gap-3">
               <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-foreground">Analytics</h3>
+                <h3 className="text-lg font-semibold text-foreground">{t("admin.analyticsTitle")}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Last {(analytics ?? emptyAnalytics).rangeDays} days{" "}
-                  <span className="text-muted-foreground/80">
-                    ({(analytics ?? emptyAnalytics).timezone ?? analyticsTimezone})
-                  </span>{" "}
-                  · live aggregates
+                  {t("admin.analyticsSubtitle", {
+                    days: (analytics ?? emptyAnalytics).rangeDays,
+                    tz: (analytics ?? emptyAnalytics).timezone ?? analyticsTimezone,
+                  })}
                 </p>
               </div>
               <div className="flex flex-col items-end gap-2">
@@ -635,8 +647,8 @@ export function AdminDashboard() {
                       }
                     }}
                   >
-                    <SelectTrigger size="sm" aria-label="Analytics timezone">
-                      <SelectValue placeholder="Timezone" />
+                    <SelectTrigger size="sm" aria-label={t("admin.timezoneAria")}>
+                      <SelectValue placeholder={t("admin.timezonePlaceholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
@@ -647,26 +659,24 @@ export function AdminDashboard() {
                     </SelectContent>
                   </Select>
                 </div>
-                <span className="text-xs font-medium text-muted-foreground">
-                  Tip status uses all-time totals
-                </span>
+                <span className="text-xs font-medium text-muted-foreground">{t("admin.tipStatusNote")}</span>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-              <AnalyticsCard title="User distribution" description="Accounts by role">
+              <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
                 <UserDistributionChart data={(analytics ?? emptyAnalytics).userDistribution} />
               </AnalyticsCard>
 
-              <AnalyticsCard title="Tip status distribution" description="Success vs pending vs failed">
+              <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
                 <TipStatusChart data={(analytics ?? emptyAnalytics).tipStatus} />
               </AnalyticsCard>
 
-              <AnalyticsCard title="Platform growth" description="New users, venues, and tips per day">
+              <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
                 <GrowthChart data={(analytics ?? emptyAnalytics).growth} />
               </AnalyticsCard>
 
-              <AnalyticsCard title="Tip volume (EUR)" description="Successful tips per day">
+              <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
                 <TipVolumeChart
                   data={(analytics ?? emptyAnalytics).tipVolume}
                   top={(analytics ?? emptyAnalytics).topBusinessesByTips}
@@ -692,9 +702,9 @@ export function AdminDashboard() {
               <div className="flex min-w-0 items-center gap-2">
                 <Building2 className="h-5 w-5 text-foreground" />
                 <h3 className="truncate text-lg font-semibold text-foreground">
-                  All businesses
+                  {t("admin.businessesTitle")}
                   <span className="ml-2 text-xs font-medium text-muted-foreground">
-                    (Open KYC &amp; verification)
+                    {t("admin.businessesSubtitle")}
                   </span>
                 </h3>
               </div>
@@ -710,7 +720,7 @@ export function AdminDashboard() {
               to="/platform-admin/businesses"
               className="hidden shrink-0 text-sm font-medium text-foreground underline-offset-4 hover:underline sm:inline"
             >
-              Open
+              {t("admin.businessesOpen")}
             </Link>
           </div>
 
@@ -724,9 +734,9 @@ export function AdminDashboard() {
                       type="search"
                       value={businessSearchQuery}
                       onChange={(e) => setBusinessSearchQuery(e.target.value)}
-                      placeholder="Search by business name, slug, or owner email…"
+                      placeholder={t("admin.searchBusinessesPlaceholder")}
                       autoComplete="off"
-                      aria-label="Filter businesses"
+                      aria-label={t("admin.searchBusinessesAria")}
                       className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
                     />
                   </div>
@@ -734,26 +744,24 @@ export function AdminDashboard() {
               )}
               <div className="overflow-x-auto">
                 {businesses.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No businesses yet.</p>
+                  <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
                 ) : filteredBusinesses.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">
-                    No businesses match your search.
-                  </p>
+                  <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noSearchMatches")}</p>
                 ) : (
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border bg-muted text-left">
-                        <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
-                        <th className="px-4 py-3 font-medium text-muted-foreground">Owner</th>
-                        <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colBusiness")}</th>
+                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colOwner")}</th>
+                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colStatus")}</th>
                         <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          Tips (EUR)
+                          {t("admin.colTipsEur")}
                         </th>
                         <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          Staff / Loc.
+                          {t("admin.colStaffLoc")}
                         </th>
                         <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          Actions
+                          {t("admin.colActions")}
                         </th>
                       </tr>
                     </thead>
@@ -775,14 +783,16 @@ export function AdminDashboard() {
                           <td className="px-4 py-3">
                             {b.verificationStatus === "verified" ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                                <CheckCircle className="h-3.5 w-3.5" /> Verified
+                                <CheckCircle className="h-3.5 w-3.5" /> {t("admin.verification.verified")}
                               </span>
                             ) : b.verificationStatus === "rejected" ? (
                               <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
-                                <XCircle className="h-3.5 w-3.5" /> Rejected
+                                <XCircle className="h-3.5 w-3.5" /> {t("admin.verification.rejected")}
                               </span>
                             ) : (
-                              <span className="text-xs font-medium text-amber-700">Pending</span>
+                              <span className="text-xs font-medium text-amber-700">
+                                {t("admin.verification.pending")}
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-right tabular-nums">
@@ -796,7 +806,7 @@ export function AdminDashboard() {
                               to={`/platform-admin/businesses/${b.id}`}
                               className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
                             >
-                              View
+                              {t("admin.view")}
                             </Link>
                           </td>
                         </tr>

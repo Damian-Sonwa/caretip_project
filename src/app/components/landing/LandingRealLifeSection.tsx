@@ -1,37 +1,45 @@
+import { useMemo } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import tableQrImg from "../../../../images/table_QR.png";
 import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
 
-const scenarios = [
-  {
-    headline: "At the table",
-    text: "Customers scan a QR code placed on the table and tip instantly, with no waiting and no cash.",
-    img: tableQrImg,
-    alt: "QR code on a restaurant table for instant tipping",
-  },
-  {
-    headline: "At reception",
-    text: "Guests tip staff quickly at check-in or check-out with a simple scan.",
-    img: atReceptionImg,
-    alt: "Hotel reception with guest tipping at check-in or check-out",
-  },
-  {
-    headline: "After service",
-    text: "Clients show appreciation right after their service, fast and seamless.",
-    img: salonImg,
-    alt: "Salon after a service",
-  },
-  {
-    headline: "On the go",
-    text: "Customers tip from anywhere using a shared link or QR code.",
-    img: homeImg,
-    alt: "Home and mobile service tipping moment",
-  },
-] as const;
-
 export function LandingRealLifeSection() {
+  const { t } = useTranslation();
+
+  const scenarios = useMemo(
+    () =>
+      [
+        {
+          headline: t("landing.realLife.s1Headline"),
+          text: t("landing.realLife.s1Text"),
+          img: tableQrImg,
+          alt: t("landing.realLife.s1Alt"),
+        },
+        {
+          headline: t("landing.realLife.s2Headline"),
+          text: t("landing.realLife.s2Text"),
+          img: atReceptionImg,
+          alt: t("landing.realLife.s2Alt"),
+        },
+        {
+          headline: t("landing.realLife.s3Headline"),
+          text: t("landing.realLife.s3Text"),
+          img: salonImg,
+          alt: t("landing.realLife.s3Alt"),
+        },
+        {
+          headline: t("landing.realLife.s4Headline"),
+          text: t("landing.realLife.s4Text"),
+          img: homeImg,
+          alt: t("landing.realLife.s4Alt"),
+        },
+      ],
+    [t],
+  );
+
   return (
     <section
       id="real-life"
@@ -45,7 +53,7 @@ export function LandingRealLifeSection() {
             viewport={{ once: true }}
             className="text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
           >
-            How CareTip works in real life
+            {t("landing.realLife.title")}
           </motion.h2>
         </div>
 
@@ -59,22 +67,12 @@ export function LandingRealLifeSection() {
               transition={{ duration: 0.45, delay: idx * 0.06 }}
               className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none"
             >
-              <div className="relative aspect-[16/10] shrink-0 overflow-hidden bg-neutral-100 dark:bg-neutral-900">
-                <img
-                  src={item.img}
-                  alt={item.alt}
-                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.02] motion-reduce:transition-none"
-                  loading="lazy"
-                  decoding="async"
-                />
+              <div className="relative aspect-[16/10] w-full overflow-hidden">
+                <img src={item.img} alt={item.alt} className="h-full w-full object-cover" loading="lazy" />
               </div>
-              <div className="flex flex-1 flex-col gap-2 p-5 sm:p-5 lg:p-6">
-                <h3 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-xl">
-                  {item.headline}
-                </h3>
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400 sm:text-base">
-                  {item.text}
-                </p>
+              <div className="flex flex-col gap-2 p-5 text-left">
+                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{item.headline}</h3>
+                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{item.text}</p>
               </div>
             </motion.article>
           ))}

@@ -16,6 +16,7 @@ import {
   FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
   getEmployees,
@@ -67,6 +68,7 @@ import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 export function QRCodeManagementPage() {
+  const { t } = useTranslation();
   const { user, authHydrated, sessionValidated, isBusiness, updateUser } = useRequireAuth();
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
@@ -130,10 +132,10 @@ export function QRCodeManagementPage() {
     try {
       const r = await regenerateBusinessSlug();
       setBusinessSlug(r.slug);
-      toast.success("Business QR regenerated.", TOAST_OK);
+      toast.success(t("business.qrPage.toastBusinessRegenerated"), TOAST_OK);
     } catch (err) {
       logClientError("QRCodeManagementPage.regenerateBusinessQr", err);
-      toast.error("Could not regenerate business QR.");
+      toast.error(t("business.qrPage.toastBusinessRegenerateFail"));
     } finally {
       setRegeneratingId(null);
     }
@@ -153,11 +155,11 @@ export function QRCodeManagementPage() {
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
       setEmployees([]);
-      toast.error("Could not load staff list.");
+      toast.error(t("business.qrPage.toastStaffListFail"));
     } finally {
       setLoading(false);
     }
-  }, [authHydrated, sessionValidated, user?.businessId]);
+  }, [authHydrated, sessionValidated, user?.businessId, t]);
 
   useEffect(() => {
     loadEmployees();
@@ -310,10 +312,10 @@ export function QRCodeManagementPage() {
           : await renderBrandedQRToDataUrlLegacy(updated.id);
         setQrImages((prev) => ({ ...prev, [employee.id]: dataUrl }));
       }
-      toast.success("QR link saved. New CareTip QR is ready.", TOAST_OK);
+      toast.success(t("business.qrPage.toastQrReady"), TOAST_OK);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
-      toast.error("Could not generate QR. Try again.");
+      toast.error(t("business.qrPage.toastQrGenerateFail"));
     } finally {
       setRegeneratingId(null);
     }
@@ -346,7 +348,7 @@ export function QRCodeManagementPage() {
   ) => {
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
-      toast.error("QR image not ready. Wait a moment and try again.");
+      toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
     const safe = item.name.replace(/\s+/g, "-").toLowerCase();
@@ -357,7 +359,7 @@ export function QRCodeManagementPage() {
           ? `caretip-table-${safe}-${item.id.slice(0, 8)}`
           : `caretip-location-${safe}-${item.id.slice(0, 8)}`;
     downloadQrDataUrlPng(dataUrl, `${prefix}.png`);
-    toast.success("QR downloaded.", TOAST_OK);
+    toast.success(t("business.qrPage.toastQrDownloaded"), TOAST_OK);
   };
 
   const handleVenueQrPrint = async (
@@ -367,7 +369,7 @@ export function QRCodeManagementPage() {
   ) => {
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
-      toast.error("QR image not ready. Wait a moment and try again.");
+      toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
     try {
@@ -375,7 +377,7 @@ export function QRCodeManagementPage() {
         String(businessDisplayName ?? "").trim() ||
         (type === "storefront" ? String(item.name ?? "").trim() : "") ||
         String(user?.businessName ?? "").trim() ||
-        "Business";
+        t("business.qrPage.fallbackBusinessName");
       const subtext =
         type === "storefront"
           ? String(businessLocation ?? "").trim() || null
@@ -387,7 +389,7 @@ export function QRCodeManagementPage() {
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
         subtext,
-        instruction: "Scan to tip instantly",
+        instruction: t("business.qrPage.pdfInstruction"),
         businessLogoPngDataUrl: logoPng,
       });
       const blob = pdf.output("blob") as Blob;
@@ -395,7 +397,7 @@ export function QRCodeManagementPage() {
       const w = window.open(url);
       if (!w) {
         URL.revokeObjectURL(url);
-        toast.error("Allow pop-ups to print, or use Download PDF layout.");
+        toast.error(t("business.qrPage.toastPopupsPdf"));
         return;
       }
       const timer = window.setInterval(() => {
@@ -426,11 +428,7 @@ export function QRCodeManagementPage() {
           .map((e) => ({ id: e.id, name: e.name, businessSlug: bs, employeeSlug: e.slug!.trim() }))
       : [];
     if (staff.length === 0) {
-      toast.error(
-        bs
-          ? "Add staff with generated links first, or ensure your business has a public slug."
-          : "Add staff first."
-      );
+      toast.error(bs ? t("business.qrPage.toastBulkNeedLinks") : t("business.qrPage.toastBulkAddStaff"));
       return;
     }
     setBulkPdfLoading(true);
@@ -438,10 +436,10 @@ export function QRCodeManagementPage() {
       const dateStr = new Date().toISOString().slice(0, 10);
       const logoPng = await loadLogoPngForPdf();
       await downloadStaffQrPdf(staff, `CareTip_QR_All_${dateStr}`, { businessLogoPngDataUrl: logoPng });
-      toast.success("PDF ready to print.", TOAST_OK);
+      toast.success(t("business.qrPage.toastPdfReady"), TOAST_OK);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
-      toast.error("Could not build PDF.");
+      toast.error(t("business.qrPage.toastPdfFail"));
     } finally {
       setBulkPdfLoading(false);
     }
@@ -454,7 +452,7 @@ export function QRCodeManagementPage() {
   ) => {
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
-      toast.error("QR image not ready. Wait a moment and try again.");
+      toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
     try {
@@ -462,7 +460,7 @@ export function QRCodeManagementPage() {
         String(businessDisplayName ?? "").trim() ||
         (type === "storefront" ? String(item.name ?? "").trim() : "") ||
         String(user?.businessName ?? "").trim() ||
-        "Business";
+        t("business.qrPage.fallbackBusinessName");
       const subtext =
         type === "storefront"
           ? String(businessLocation ?? "").trim() || null
@@ -474,7 +472,7 @@ export function QRCodeManagementPage() {
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
         subtext,
-        instruction: "Scan to tip instantly",
+        instruction: t("business.qrPage.pdfInstruction"),
         businessLogoPngDataUrl: logoPng,
         fileBaseName:
           type === "storefront"
@@ -485,19 +483,19 @@ export function QRCodeManagementPage() {
       });
     } catch (err) {
       logClientError("QRCodeManagementPage.printPdf", err);
-      toast.error("Could not build PDF.");
+      toast.error(t("business.qrPage.toastPdfFail"));
     }
   };
 
   const handleEmployeePrintPdf = async (item: CardItem) => {
     const dataUrl = qrImages[item.id];
     if (!dataUrl) {
-      toast.error("QR image not ready. Wait a moment and try again.");
+      toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
     try {
       const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || t("business.qrPage.fallbackBusinessName");
       const logoPng = await loadLogoPngForPdf();
       await downloadEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
@@ -508,19 +506,19 @@ export function QRCodeManagementPage() {
       });
     } catch (err) {
       logClientError("QRCodeManagementPage.employeePrintPdf", err);
-      toast.error("Could not build PDF.");
+      toast.error(t("business.qrPage.toastPdfFail"));
     }
   };
 
   const handleEmployeePrint = async (item: CardItem, previewDataUrl?: string) => {
     const dataUrl = previewDataUrl || qrImages[item.id];
     if (!dataUrl) {
-      toast.error("QR image not ready. Wait a moment and try again.");
+      toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
     try {
       const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || "Business";
+        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || t("business.qrPage.fallbackBusinessName");
       const logoPng = await loadLogoPngForPdf();
       const pdf = createEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
@@ -533,7 +531,7 @@ export function QRCodeManagementPage() {
       const w = window.open(url);
       if (!w) {
         URL.revokeObjectURL(url);
-        toast.error("Allow pop-ups to print, or use Download PDF layout.");
+        toast.error(t("business.qrPage.toastPopupsPdf"));
         return;
       }
       const timer = window.setInterval(() => {
@@ -585,7 +583,7 @@ export function QRCodeManagementPage() {
             {type === "storefront" && (
               <div className="mb-2">
                 <h3 className="font-semibold text-foreground">{item.name}</h3>
-                <p className="text-sm text-muted-foreground">Team QR • Entrance / front counter</p>
+                <p className="text-sm text-muted-foreground">{t("business.qrPage.teamQrSubtitle")}</p>
               </div>
             )}
             {type === "employee" && (
@@ -618,14 +616,14 @@ export function QRCodeManagementPage() {
           </div>
 
           <div className="rounded-lg border border-black/[0.08] bg-muted/30 p-3">
-            <p className="mb-1 text-xs text-muted-foreground">QR code URL</p>
+            <p className="mb-1 text-xs text-muted-foreground">{t("business.qrPage.labelQrUrl")}</p>
             <div className="flex items-center gap-2">
               <code className="flex-1 truncate font-mono text-xs text-foreground">{item.qrUrl}</code>
               <button
                 type="button"
                 onClick={() => handleCopy(item.id, item.qrUrl)}
                 className="flex-shrink-0 rounded-lg p-2 transition-colors hover:bg-background"
-                aria-label="Copy URL"
+                aria-label={t("business.qrPage.copyUrlAria")}
               >
                 {copiedId === item.id ? (
                   <Check className="h-4 w-4 text-primary" />
@@ -638,7 +636,7 @@ export function QRCodeManagementPage() {
 
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="text-sm text-muted-foreground">
-              <span>Total scans: </span>
+              <span>{t("business.qrPage.totalScans")} </span>
               <span className="font-semibold text-foreground">{item.scans}</span>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -653,7 +651,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
-                    Print
+                    {t("business.qrPage.print")}
                   </Button>
                   <Button
                     type="button"
@@ -663,7 +661,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Download PDF layout
+                    {t("business.qrPage.downloadPdfLayout")}
                   </Button>
                   <Button
                     type="button"
@@ -698,7 +696,7 @@ export function QRCodeManagementPage() {
                       ) : (
                         <RefreshCw className="mr-2 h-4 w-4" />
                       )}
-                      Regenerate business QR
+                      {t("business.qrPage.regenerateBusinessQr")}
                     </Button>
                   ) : null}
                   <Button
@@ -710,7 +708,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
-                    Print
+                    {t("business.qrPage.print")}
                   </Button>
                   <Button
                     type="button"
@@ -720,7 +718,7 @@ export function QRCodeManagementPage() {
                     className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
-                    Download PDF layout
+                    {t("business.qrPage.downloadPdfLayout")}
                   </Button>
                 </>
               )}
@@ -748,7 +746,7 @@ export function QRCodeManagementPage() {
     verificationStatus === null;
 
   if (awaitingBusinessVerification) {
-    return <PageLoader message="Checking verification status…" />;
+    return <PageLoader message={t("business.qrPage.checkingVerification")} />;
   }
 
   if (qrLocked) {
@@ -756,15 +754,13 @@ export function QRCodeManagementPage() {
       <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-20 text-foreground">
         <div className="max-w-lg space-y-4 text-center">
           <QrCode className="mx-auto h-14 w-14 opacity-40" />
-          <h1 className="text-2xl font-bold">Pending verification</h1>
-          <p className="text-sm leading-relaxed text-muted-foreground">
-            Your account is under review. QR features will be available once your account is verified.
-          </p>
+          <h1 className="text-2xl font-bold">{t("business.qrPage.pendingTitle")}</h1>
+          <p className="text-sm leading-relaxed text-muted-foreground">{t("business.qrPage.pendingBody")}</p>
           <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
             <Button asChild variant="outline">
               <Link to="/dashboard">
                 <ChevronLeft className="mr-2 h-4 w-4" />
-                Back to dashboard
+                {t("business.qrPage.backDashboard")}
               </Link>
             </Button>
           </div>
@@ -775,21 +771,21 @@ export function QRCodeManagementPage() {
 
   const statusLabel =
     verificationStatus === "verified"
-      ? "Verified"
+      ? t("admin.verification.verified")
       : verificationStatus === "rejected"
-        ? "Rejected"
-        : "Pending";
+        ? t("admin.verification.rejected")
+        : t("admin.verification.pending");
 
   return (
     <div className="min-h-screen bg-background pb-20 text-foreground">
       <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
         <div className="mb-4 flex items-center gap-2">
-          <Button variant="outline" size="icon" asChild aria-label="Back to dashboard">
+          <Button variant="outline" size="icon" asChild aria-label={t("business.qrPage.backDashboard")}>
             <Link to="/dashboard">
               <ChevronLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <span className="text-sm text-muted-foreground">Business dashboard</span>
+          <span className="text-sm text-muted-foreground">{t("business.qrPage.dashboardBreadcrumb")}</span>
         </div>
 
         <DashboardHero
@@ -799,13 +795,11 @@ export function QRCodeManagementPage() {
           badge={
             <>
               <QrCode className="h-3.5 w-3.5 text-foreground" />
-              {qrLocked ? "Pending Verification" : "Printable & shareable"}
+              {qrLocked ? t("business.qrPage.badgePending") : t("business.qrPage.badgePrintable")}
             </>
           }
-          title="QR code management"
-          description={
-            businessSlug ? "Printable codes for staff and your venue page." : "Generate staff and venue QR codes."
-          }
+          title={t("business.qrPage.heroTitle")}
+          description={businessSlug ? t("business.qrPage.heroDescWithSlug") : t("business.qrPage.heroDescNoSlug")}
           actions={
             <Button
               type="button"
@@ -817,26 +811,30 @@ export function QRCodeManagementPage() {
               ) : (
                 <FileDown className="mr-2 h-4 w-4 shrink-0" />
               )}
-              All PDFs
+              {t("business.qrPage.allPdfs")}
             </Button>
           }
         />
 
         <Card className="mt-4 w-full rounded-2xl border border-gray-100 bg-white shadow-none">
           <CardContent className="p-4 sm:p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">At a glance</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("business.qrPage.atAGlance")}
+            </p>
             <div className="grid grid-cols-3 gap-3 text-center">
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Staff</p>
+                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statStaff")}</p>
                 <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Status</p>
+                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statStatus")}</p>
                 <p className="text-lg font-bold text-foreground">{statusLabel}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">Slug</p>
-                <p className="text-lg font-bold text-foreground">{businessSlug ? "Live" : "N/A"}</p>
+                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statSlug")}</p>
+                <p className="text-lg font-bold text-foreground">
+                  {businessSlug ? t("business.qrPage.slugLive") : t("business.qrPage.slugNa")}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -846,7 +844,7 @@ export function QRCodeManagementPage() {
       {qrLocked ? (
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-sm">
-            <p className="font-semibold text-foreground">Your account is under review.</p>
+            <p className="font-semibold text-foreground">{t("business.qrPage.reviewBody")}</p>
             <p className="mt-1 text-muted-foreground">
               QR features will be available once your account is verified.
             </p>
@@ -858,8 +856,8 @@ export function QRCodeManagementPage() {
         <div className="space-y-6 py-4">
           <Card className="border-2 border-border shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Sections</CardTitle>
-              <CardDescription>Employees, tables, and locations</CardDescription>
+              <CardTitle className="text-base">{t("business.qrPage.sectionsTitle")}</CardTitle>
+              <CardDescription>{t("business.qrPage.sectionsDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/50 p-1">
@@ -871,7 +869,7 @@ export function QRCodeManagementPage() {
                   }`}
                 >
                   <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">Employees</span>
+                  <span className="hidden sm:inline">{t("business.qrPage.tabEmployees")}</span>
                 </button>
                 <button
                   type="button"
@@ -881,7 +879,7 @@ export function QRCodeManagementPage() {
                   }`}
                 >
                   <QrCode className="h-4 w-4" />
-                  <span className="hidden sm:inline">Tables</span>
+                  <span className="hidden sm:inline">{t("business.qrPage.tabTables")}</span>
                 </button>
                 <button
                   type="button"
@@ -891,7 +889,7 @@ export function QRCodeManagementPage() {
                   }`}
                 >
                   <MapPin className="h-4 w-4" />
-                  <span className="hidden sm:inline">Locations</span>
+                  <span className="hidden sm:inline">{t("business.qrPage.tabLocations")}</span>
                 </button>
               </div>
             </CardContent>
@@ -908,7 +906,12 @@ export function QRCodeManagementPage() {
                   <div>
                     <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                       <Store className="h-4 w-4 text-primary" />
-                      {String(businessDisplayName ?? "").trim() || user?.businessName || "Business"} QR
+                      {t("business.qrPage.storefrontQrHeading", {
+                        name:
+                          String(businessDisplayName ?? "").trim() ||
+                          user?.businessName ||
+                          t("business.qrPage.fallbackBusinessName"),
+                      })}
                     </h2>
                     <p className="mb-3 text-xs text-muted-foreground">
                       Place at the entrance. Customers scan to choose who to tip.
@@ -922,7 +925,10 @@ export function QRCodeManagementPage() {
                     <QRCard
                       item={{
                         id: "storefront",
-                        name: String(businessDisplayName ?? "").trim() || user?.businessName || "Business",
+                        name:
+                          String(businessDisplayName ?? "").trim() ||
+                          user?.businessName ||
+                          t("business.qrPage.fallbackBusinessName"),
                         qrUrl: businessSlug
                           ? businessDirectoryUrl(businessSlug)
                           : qrLandingUrl(user.businessId),
@@ -944,7 +950,7 @@ export function QRCodeManagementPage() {
                   </p>
                   {employees.length === 0 ? (
                     <div className="rounded-xl border-2 border-border bg-card py-12 text-center">
-                      <p className="mb-2 text-muted-foreground">No employees yet.</p>
+                      <p className="mb-2 text-muted-foreground">{t("business.qrPage.noEmployees")}</p>
                       <Link
                         to="/dashboard/staff-management"
                         className="text-sm font-semibold text-foreground underline underline-offset-2"
@@ -986,7 +992,7 @@ export function QRCodeManagementPage() {
           <div className="space-y-4">
             {tables.length === 0 ? (
               <div className="py-16 text-center text-muted-foreground">
-                <p className="mb-6">No tables configured.</p>
+                <p className="mb-6">{t("business.qrPage.noTables")}</p>
                 <Link
                   to="/dashboard/tables"
                   className="text-sm font-semibold text-foreground underline underline-offset-2"
@@ -1011,7 +1017,7 @@ export function QRCodeManagementPage() {
           <div className="space-y-4">
             {locations.length === 0 ? (
               <div className="py-16 text-center text-muted-foreground">
-                <p className="mb-6">No locations configured.</p>
+                <p className="mb-6">{t("business.qrPage.noLocations")}</p>
                 <Link
                   to="/dashboard/locations"
                   className="text-sm font-semibold text-foreground underline underline-offset-2"

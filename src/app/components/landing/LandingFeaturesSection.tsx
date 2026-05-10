@@ -1,18 +1,26 @@
+import { useMemo } from "react";
 import { motion } from "motion/react";
 import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { BorderBeam } from "@/components/ui/border-beam";
 
-const items = [
-  { icon: QrCode, title: "QR tipping pages", text: "Branded pages guests open in one scan." },
-  { icon: LayoutDashboard, title: "Employee dashboards", text: "Earnings and momentum in one place." },
-  { icon: BarChart3, title: "Business analytics", text: "See what is working across shifts and venues." },
-  { icon: History, title: "Tip history", text: "A clear record for staff and finance." },
-  { icon: Wallet, title: "Payout system", text: "Route and release tips with confidence." },
-  { icon: Star, title: "Feedback & ratings", text: "Capture praise while the moment is fresh." },
-] as const;
-
 export function LandingFeaturesSection() {
+  const { t } = useTranslation();
+
+  const items = useMemo(
+    () =>
+      [
+        { icon: QrCode, title: t("landing.features.i1Title"), text: t("landing.features.i1Text") },
+        { icon: LayoutDashboard, title: t("landing.features.i2Title"), text: t("landing.features.i2Text") },
+        { icon: BarChart3, title: t("landing.features.i3Title"), text: t("landing.features.i3Text") },
+        { icon: History, title: t("landing.features.i4Title"), text: t("landing.features.i4Text") },
+        { icon: Wallet, title: t("landing.features.i5Title"), text: t("landing.features.i5Text") },
+        { icon: Star, title: t("landing.features.i6Title"), text: t("landing.features.i6Text") },
+      ],
+    [t],
+  );
+
   return (
     <section
       id="features"
@@ -26,7 +34,7 @@ export function LandingFeaturesSection() {
             viewport={{ once: true }}
             className="text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
           >
-            Everything you need to grow
+            {t("landing.features.title")}
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -35,7 +43,7 @@ export function LandingFeaturesSection() {
             transition={{ delay: 0.05 }}
             className="mt-4 text-pretty text-lg text-neutral-600 dark:text-neutral-400"
           >
-            One platform for tipping, visibility, and payouts, without the overhead.
+            {t("landing.features.subtitle")}
           </motion.p>
         </div>
 

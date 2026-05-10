@@ -1,4 +1,5 @@
 import "./app/lib/pwaInstallDeferred";
+import "./i18n/i18n";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";

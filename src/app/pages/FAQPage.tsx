@@ -1,5 +1,6 @@
 import { Link, useSearchParams } from 'react-router';
 import { ArrowLeft, Plus, Minus, Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
 import AnimatedShaderBackground from '../components/ui/animated-shader-background';
@@ -99,6 +100,7 @@ const FAQ_ITEMS = [
 ];
 
 export function FAQPage() {
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const qFromUrl = searchParams.get('q') ?? '';
   const [searchQuery, setSearchQuery] = useState(qFromUrl);
@@ -162,9 +164,9 @@ export function FAQPage() {
                   type="search"
                   value={searchQuery}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search questions and answers…"
+                  placeholder={t('faq.searchPlaceholder')}
                   autoComplete="off"
-                  aria-label="Search FAQs"
+                  aria-label={t('faq.searchAria')}
                   className="w-full pl-12 pr-4 py-3 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
                 />
               </div>
@@ -173,13 +175,13 @@ export function FAQPage() {
                 <div className="space-y-4">
                   {filteredFaqs.length === 0 ? (
                     <p className="text-center text-muted-foreground py-8">
-                      No FAQs match your search.{' '}
+                      {t('faq.noMatch')}{' '}
                       <button
                         type="button"
                         className="font-medium text-accent underline underline-offset-2"
                         onClick={() => setQuery('')}
                       >
-                        Clear search
+                        {t('faq.clearSearch')}
                       </button>
                     </p>
                   ) : (

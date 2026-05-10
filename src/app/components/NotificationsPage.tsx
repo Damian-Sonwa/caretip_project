@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import { motion } from 'motion/react';
+import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import {
-  Bell,
   Gift,
   TrendingUp,
   Star,
@@ -9,119 +9,72 @@ import {
   Check,
   ArrowRight,
   Heart,
-} from 'lucide-react';
-import { Link } from 'react-router';
+} from "lucide-react";
+import { Link } from "react-router";
 
 interface Notification {
   id: string;
-  type: 'renewal' | 'trial' | 'promo' | 'alert' | 'success';
+  type: "renewal" | "trial" | "promo" | "alert" | "success";
   title: string;
   message: string;
   date: string;
   read: boolean;
   actionLabel?: string;
   actionUrl?: string;
-  icon: typeof Bell;
+  icon: typeof Gift;
   color: string;
   bgColor: string;
 }
 
-const notificationsData: Notification[] = [
-  {
-    id: '1',
-    type: 'promo',
-    title: 'Boost tips with branded QR cards',
-    message:
-      'Print-ready QR packs help guests tip in seconds. Order from your dashboard or export PDFs for each team member.',
-    date: '2026-03-17',
-    read: false,
-    actionLabel: 'QR management',
-    actionUrl: '/business/qr-management',
-    icon: Gift,
-    color: 'text-primary',
-    bgColor: 'bg-gray-50',
-  },
-  {
-    id: '2',
-    type: 'success',
-    title: 'Large tip received',
-    message:
-      'A guest sent 50 € to your front-of-house team. Funds are processing through Stripe as a one-time payment.',
-    date: '2026-03-15',
-    read: false,
-    actionLabel: 'View activity',
-    actionUrl: '/dashboard/transactions',
-    icon: Heart,
-    color: 'text-primary',
-    bgColor: 'bg-gray-50',
-  },
-  {
-    id: '3',
-    type: 'success',
-    title: 'Tip settled',
-    message:
-      'A 12 € tip completed successfully. There is no subscription or invoice, just a single PaymentIntent.',
-    date: '2026-03-01',
-    read: true,
-    actionLabel: 'Tips & activity',
-    actionUrl: '/dashboard/transactions',
-    icon: Check,
-    color: 'text-primary',
-    bgColor: 'bg-gray-50',
-  },
-  {
-    id: '4',
-    type: 'promo',
-    title: 'Share staff tipping links',
-    message:
-      'Each team member gets a personal link so regulars can tip them by name after great service.',
-    date: '2026-02-28',
-    read: true,
-    actionLabel: 'Staff management',
-    actionUrl: '/dashboard/staff-management',
-    icon: Star,
-    color: 'text-primary',
-    bgColor: 'bg-gray-50',
-  },
-  {
-    id: '5',
-    type: 'alert',
-    title: 'New: instant tip notifications',
-    message:
-      'Turn on push or email alerts when new tips land so your team can thank guests in the moment.',
-    date: '2026-02-20',
-    read: true,
-    actionLabel: 'Notification settings',
-    actionUrl: '/dashboard/profile-settings',
-    icon: Sparkles,
-    color: 'text-accent',
-    bgColor: 'bg-accent/10',
-  },
-  {
-    id: '6',
-    type: 'success',
-    title: 'Weekly tip summary',
-    message:
-      'You had 48 successful tips this week. Open Tips & activity for a full breakdown by employee.',
-    date: '2025-12-15',
-    read: true,
-    icon: TrendingUp,
-    color: 'text-primary',
-    bgColor: 'bg-gray-50',
-  },
-];
+const NOTIFICATION_IDS = ["1", "2", "3", "4", "5", "6"] as const;
 
 export function NotificationsPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState(notificationsData);
-  const [filter, setFilter] = useState<'all' | 'unread' | 'promo'>('all');
+  const { t, i18n } = useTranslation();
+  const notificationsData = useMemo<Notification[]>(
+    () =>
+      NOTIFICATION_IDS.map((id, index) => {
+        const icons = [Gift, Heart, Check, Star, Sparkles, TrendingUp] as const;
+        const types = ["promo", "success", "success", "promo", "alert", "success"] as const;
+        const reads = [false, false, true, true, true, true] as const;
+        const dates = ["2026-03-17", "2026-03-15", "2026-03-01", "2026-02-28", "2026-02-20", "2025-12-15"];
+        const actionUrls = [
+          "/business/qr-management",
+          "/dashboard/transactions",
+          "/dashboard/transactions",
+          "/dashboard/staff-management",
+          "/dashboard/profile-settings",
+          undefined,
+        ] as const;
+        const withAction = index < 5;
+        return {
+          id,
+          type: types[index],
+          title: t(`business.notifications.items.${id}.title`),
+          message: t(`business.notifications.items.${id}.message`),
+          date: dates[index],
+          read: reads[index],
+          actionLabel: withAction ? t(`business.notifications.items.${id}.action`) : undefined,
+          actionUrl: actionUrls[index],
+          icon: icons[index],
+          color: "text-primary",
+          bgColor: index === 4 ? "bg-accent/10" : "bg-gray-50",
+        };
+      }),
+    [t, i18n.resolvedLanguage],
+  );
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const [notifications, setNotifications] = useState<Notification[]>(notificationsData);
+
+  useEffect(() => {
+    setNotifications(notificationsData);
+  }, [notificationsData]);
+
+  const [filter, setFilter] = useState<"all" | "unread" | "promo">("all");
+
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleMarkAsRead = (id: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   };
 
   const handleMarkAllRead = () => {
@@ -129,103 +82,96 @@ export function NotificationsPage() {
   };
 
   const filtered = notifications.filter((n) => {
-    if (filter === 'unread') return !n.read;
-    if (filter === 'promo') return n.type === 'promo';
+    if (filter === "unread") return !n.read;
+    if (filter === "promo") return n.type === "promo";
     return true;
   });
 
+  const filterLabel = (f: typeof filter) => {
+    if (f === "all") return t("business.notifications.filterAll");
+    if (f === "unread") return t("business.notifications.filterUnread");
+    return t("business.notifications.filterPromo");
+  };
+
   return (
     <main className="bg-background px-4 py-8 pb-20 lg:px-8">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2">
-                  Notifications
-                </h1>
-                <p className="text-muted-foreground">
-                  Updates about tips, QR tools, and your CareTip account
-                </p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="mb-2 text-2xl font-semibold text-foreground sm:text-3xl">{t("business.notifications.title")}</h1>
+          <p className="text-muted-foreground">{t("business.notifications.subtitle")}</p>
+        </div>
+        {unreadCount > 0 && (
+          <button
+            type="button"
+            onClick={handleMarkAllRead}
+            className="text-sm font-medium text-accent hover:text-accent/80"
+          >
+            {t("business.notifications.markAllRead")}
+          </button>
+        )}
+      </div>
+
+      <div className="mb-6 flex flex-wrap gap-2">
+        {(["all", "unread", "promo"] as const).map((f) => (
+          <button
+            key={f}
+            type="button"
+            onClick={() => setFilter(f)}
+            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize ${
+              filter === f ? "bg-accent text-accent-foreground" : "border border-border hover:bg-muted"
+            }`}
+          >
+            {filterLabel(f)}
+            {f === "unread" && unreadCount > 0 ? ` (${unreadCount})` : ""}
+          </button>
+        ))}
+      </div>
+
+      <div className="max-w-3xl space-y-4">
+        {filtered.map((n) => {
+          const Icon = n.icon;
+          return (
+            <motion.div
+              key={n.id}
+              layout
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={`flex gap-4 rounded-xl border p-4 sm:p-5 ${
+                n.read ? "border-border bg-card" : "border-accent/20 bg-accent/5"
+              }`}
+            >
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${n.bgColor}`}>
+                <Icon className={`h-5 w-5 ${n.color}`} />
               </div>
-              {unreadCount > 0 && (
-                <button
-                  type="button"
-                  onClick={handleMarkAllRead}
-                  className="text-sm font-medium text-accent hover:text-accent/80"
-                >
-                  Mark all read
-                </button>
-              )}
-            </div>
-
-            <div className="flex gap-2 mb-6 flex-wrap">
-              {(['all', 'unread', 'promo'] as const).map((f) => (
-                <button
-                  key={f}
-                  type="button"
-                  onClick={() => setFilter(f)}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium capitalize ${
-                    filter === f
-                      ? 'bg-accent text-accent-foreground'
-                      : 'border border-border hover:bg-muted'
-                  }`}
-                >
-                  {f}
-                  {f === 'unread' && unreadCount > 0 ? ` (${unreadCount})` : ''}
-                </button>
-              ))}
-            </div>
-
-            <div className="space-y-4 max-w-3xl">
-              {filtered.map((n) => {
-                const Icon = n.icon;
-                return (
-                  <motion.div
-                    key={n.id}
-                    layout
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`rounded-xl border p-4 sm:p-5 flex gap-4 ${
-                      n.read ? 'bg-card border-border' : 'bg-accent/5 border-accent/20'
-                    }`}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${n.bgColor}`}
+              <div className="min-w-0 flex-1">
+                <div className="mb-1 flex items-start justify-between gap-2">
+                  <h2 className="font-semibold text-foreground">{n.title}</h2>
+                  {!n.read && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />}
+                </div>
+                <p className="mb-3 text-sm text-muted-foreground">{n.message}</p>
+                <p className="mb-3 text-xs text-muted-foreground">{n.date}</p>
+                <div className="flex flex-wrap gap-2">
+                  {!n.read && (
+                    <button
+                      type="button"
+                      onClick={() => handleMarkAsRead(n.id)}
+                      className="text-xs font-medium text-accent"
                     >
-                      <Icon className={`w-5 h-5 ${n.color}`} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <h2 className="font-semibold text-foreground">{n.title}</h2>
-                        {!n.read && (
-                          <span className="w-2 h-2 rounded-full bg-accent shrink-0 mt-2" />
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">{n.message}</p>
-                      <p className="text-xs text-muted-foreground mb-3">{n.date}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {!n.read && (
-                          <button
-                            type="button"
-                            onClick={() => handleMarkAsRead(n.id)}
-                            className="text-xs font-medium text-accent"
-                          >
-                            Mark read
-                          </button>
-                        )}
-                        {n.actionUrl && n.actionLabel && (
-                          <Link
-                            to={n.actionUrl}
-                            className="inline-flex items-center gap-1 text-xs font-medium text-accent"
-                          >
-                            {n.actionLabel}
-                            <ArrowRight className="w-3 h-3" />
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+                      {t("business.notifications.markRead")}
+                    </button>
+                  )}
+                  {n.actionUrl && n.actionLabel && (
+                    <Link to={n.actionUrl} className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+                      {n.actionLabel}
+                      <ArrowRight className="h-3 w-3" />
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
     </main>
   );
 }

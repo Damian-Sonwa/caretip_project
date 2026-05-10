@@ -1,4 +1,6 @@
 import * as React from "react";
+import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Building2,
   Coffee,
@@ -18,97 +20,109 @@ import barLoungeImg from "../../../images/bar and lounge.png";
 import salonSpaImg from "../../../images/salon and spa.png";
 import beachClubImg from "../../../images/Beach_club.png";
 
-type HospitalityBusiness = {
+type MarqueeSpec = {
+  id:
+    | "restaurants"
+    | "cafes"
+    | "barsLounges"
+    | "nightclubs"
+    | "hotels"
+    | "resorts"
+    | "beachClubs"
+    | "salonsSpas"
+    | "barbershops"
+    | "foodTrucks"
+    | "eventCenters"
+    | "hospitalityGroups";
   image: string;
-  name: string;
-  role: string;
   Icon: React.ComponentType<{ className?: string }>;
 };
 
-const businesses: HospitalityBusiness[] = [
+const MARQUEE_SPECS: MarqueeSpec[] = [
   {
+    id: "restaurants",
     image:
       "https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?auto=format&fit=crop&w=1200&q=80",
-    name: "Restaurants",
-    role: "Table QR tipping • shift pools • staff goals",
     Icon: UtensilsCrossed,
   },
   {
+    id: "cafes",
     image:
       "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=1200&q=80",
-    name: "Cafés",
-    role: "Counter QR • fast tips • repeat guests",
     Icon: Coffee,
   },
   {
+    id: "barsLounges",
     image: barLoungeImg,
-    name: "Bars & Lounges",
-    role: "High-volume nights • team recognition • live stats",
     Icon: Martini,
   },
   {
+    id: "nightclubs",
     image:
       "https://images.stockcake.com/public/1/6/d/16ddd8d6-02f0-4219-ac7d-82ffb23be7ad/dj-at-club-stockcake.jpg",
-    name: "Nightclubs",
-    role: "Late-night tipping • fast checkout • live activity",
     Icon: PartyPopper,
   },
   {
+    id: "hotels",
     image: hotelsImg,
-    name: "Hotels",
-    role: "Front desk & concierge • room service • track performance",
     Icon: Hotel,
   },
   {
+    id: "resorts",
     image:
       "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=1200&q=80",
-    name: "Resorts",
-    role: "Multiple venues • staff mapping • simple reporting",
     Icon: Hotel,
   },
   {
+    id: "beachClubs",
     image: beachClubImg,
-    name: "Beach clubs",
-    role: "Outdoor QR tipping • fast service • happy guests",
     Icon: Martini,
   },
   {
+    id: "salonsSpas",
     image: salonSpaImg,
-    name: "Salons & Spas",
-    role: "Personal QR • service-based tipping • staff profiles",
     Icon: Scissors,
   },
   {
+    id: "barbershops",
     image:
       "https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?auto=format&fit=crop&w=1200&q=80",
-    name: "Barbershops",
-    role: "Personal QR • repeat clients • staff profiles",
     Icon: Scissors,
   },
   {
+    id: "foodTrucks",
     image:
       "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0?auto=format&fit=crop&w=1200&q=80",
-    name: "Food trucks",
-    role: "Counter QR • quick tips • no extra hardware",
     Icon: Truck,
   },
   {
+    id: "eventCenters",
     image:
       "https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1200&q=80",
-    name: "Event centers",
-    role: "Pop-up QR codes • staff routing • clear earnings",
     Icon: PartyPopper,
   },
   {
+    id: "hospitalityGroups",
     image:
       "https://images.unsplash.com/photo-1528605248644-14dd04022da1?auto=format&fit=crop&w=1200&q=80",
-    name: "Hospitality groups",
-    role: "Locations & tables • staff mapping • consistent reporting",
     Icon: Building2,
   },
 ];
 
-export default function Component() {
+export default function HospitalityBusinessesMarquee() {
+  const { t, i18n } = useTranslation();
+
+  /** `t` is often referentially stable across language changes; depend on `resolvedLanguage` so labels refresh. */
+  const businesses = useMemo(
+    () =>
+      MARQUEE_SPECS.map((spec) => ({
+        ...spec,
+        name: t(`landing.hospitalityMarquee.${spec.id}.name`),
+        role: t(`landing.hospitalityMarquee.${spec.id}.role`),
+      })),
+    [t, i18n.resolvedLanguage],
+  );
+
   return (
     <section className="relative w-full overflow-hidden bg-white py-12 md:py-20">
       <div className="relative z-10 mx-auto max-w-7xl">
@@ -116,17 +130,10 @@ export default function Component() {
           <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />
           <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white to-transparent" />
 
-          {/* Slow, ambient motion (avoid noticeable constant movement). */}
           <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={65} gapPx={24}>
             {businesses.map((b) => (
-              <div
-                className="group flex w-80 shrink-0 flex-col sm:w-[26rem]"
-                key={b.name}
-                tabIndex={0}
-              >
-                <div
-                  className={`${landingImageFrameClassName} relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]`}
-                >
+              <div className="group flex w-80 shrink-0 flex-col sm:w-[26rem]" key={b.id} tabIndex={0}>
+                <div className={`${landingImageFrameClassName} relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]`}>
                   <img
                     alt={b.name}
                     className="h-full w-full cursor-pointer object-cover transition-transform duration-700 ease-out group-hover:scale-[1.005] group-active:scale-[0.995]"
@@ -142,9 +149,7 @@ export default function Component() {
                       </span>
                       <div className="min-w-0">
                         <h3 className="truncate font-semibold text-foreground">{b.name}</h3>
-                        <p className="mt-0.5 text-sm leading-snug text-muted-foreground">
-                          {b.role}
-                        </p>
+                        <p className="mt-0.5 text-sm leading-snug text-muted-foreground">{b.role}</p>
                       </div>
                     </div>
                   </div>
@@ -157,4 +162,3 @@ export default function Component() {
     </section>
   );
 }
-

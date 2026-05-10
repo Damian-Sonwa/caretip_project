@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, Copy, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -29,6 +30,7 @@ import { Button } from "../../components/ui/button";
 const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
 
 export function TablesPage() {
+  const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
   const [tables, setTables] = useState<TableDTO[]>([]);
   const [locations, setLocations] = useState<LocationDTO[]>([]);
@@ -72,23 +74,23 @@ export function TablesPage() {
 
   const copyLink = (tableId: string) => {
     void navigator.clipboard.writeText(tableUrl(tableId));
-    toast.success("Link copied.", TOAST_OK);
+    toast.success(t("business.tablesPage.toastCopied"), TOAST_OK);
   };
 
   const handleSave = async () => {
     const trimmed = tableName.trim();
     if (!trimmed) {
-      toast.error("Please enter a table name or number.");
+      toast.error(t("business.tablesPage.toastNameRequired"));
       return;
     }
     if (!locationId) {
-      toast.error("Create a location first, then add a table.");
+      toast.error(t("business.tablesPage.toastNeedLocation"));
       return;
     }
     setSaving(true);
     try {
       await createTableAPI({ name: trimmed, locationId });
-      toast.success("Table created.", TOAST_OK);
+      toast.success(t("business.tablesPage.toastCreated"), TOAST_OK);
       setModalOpen(false);
       setTableName("");
       await loadAll();
@@ -108,13 +110,13 @@ export function TablesPage() {
             <Link
               to="/dashboard"
               className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground shrink-0"
-              aria-label="Back to dashboard"
+              aria-label={t("business.tablesPage.backAria")}
             >
               <ChevronLeft className="w-5 h-5" />
             </Link>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">Tables</h1>
-              <p className="text-sm text-muted-foreground">Guest tipping QR codes per table</p>
+              <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("business.tablesPage.title")}</h1>
+              <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
             </div>
           </div>
           <Button
@@ -123,57 +125,57 @@ export function TablesPage() {
             disabled={!isBusiness}
             className="w-full shrink-0 sm:w-auto"
           >
-            + Create Table
+            {t("business.tablesPage.create")}
           </Button>
         </div>
       </div>
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (
-          <CareTipPageLoader variant="section" message="Loading tables…" />
+          <CareTipPageLoader variant="section" message={t("business.tablesPage.loading")} />
         ) : locations.length === 0 ? (
           <div className="text-center py-16 rounded-xl border border-dashed border-border text-muted-foreground">
             <LayoutGrid className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p className="mb-4">Add a location first, then create tables under it.</p>
+            <p className="mb-4">{t("business.tablesPage.emptyNeedLocation")}</p>
             <Link
               to="/dashboard/locations"
               className="text-sm font-medium text-primary underline underline-offset-2"
             >
-              Go to Locations
+              {t("business.tablesPage.goToLocations")}
             </Link>
           </div>
         ) : tables.length === 0 ? (
           <div className="text-center py-16 rounded-xl border border-dashed border-border text-muted-foreground">
             <LayoutGrid className="w-10 h-10 mx-auto mb-3 opacity-50" />
-            <p>No tables yet. Create one to get a guest QR link.</p>
+            <p>{t("business.tablesPage.emptyNoTables")}</p>
           </div>
         ) : (
           <div className="-mx-4 overflow-x-auto rounded-xl border border-border px-4 sm:mx-0 sm:px-0">
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-left">
-                  <th className="px-4 py-3 font-medium text-foreground">Table</th>
-                  <th className="px-4 py-3 font-medium text-foreground">Location</th>
-                  <th className="px-4 py-3 font-medium text-foreground">Guest link</th>
+                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thTable")}</th>
+                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thLocation")}</th>
+                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thGuestLink")}</th>
                   <th className="px-4 py-3 w-24" />
                 </tr>
               </thead>
               <tbody>
-                {tables.map((t) => (
-                  <tr key={t.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 font-medium text-foreground">{t.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{t.location.name}</td>
+                {tables.map((row) => (
+                  <tr key={row.id} className="border-b border-border last:border-0">
+                    <td className="px-4 py-3 font-medium text-foreground">{row.name}</td>
+                    <td className="px-4 py-3 text-muted-foreground">{row.location.name}</td>
                     <td className="px-4 py-3">
-                      <code className="text-xs break-all text-muted-foreground">{tableUrl(t.id)}</code>
+                      <code className="text-xs break-all text-muted-foreground">{tableUrl(row.id)}</code>
                     </td>
                     <td className="px-4 py-3">
                       <button
                         type="button"
-                        onClick={() => copyLink(t.id)}
+                        onClick={() => copyLink(row.id)}
                         className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md border border-border hover:bg-muted"
                       >
                         <Copy className="w-3.5 h-3.5" />
-                        Copy
+                        {t("business.tablesPage.copy")}
                       </button>
                     </td>
                   </tr>
@@ -187,14 +189,12 @@ export function TablesPage() {
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Create table</DialogTitle>
-            <DialogDescription>
-              Assign a table to a location. Guests will scan the QR to open the tipping flow for this table.
-            </DialogDescription>
+            <DialogTitle>{t("business.tablesPage.dialogTitle")}</DialogTitle>
+            <DialogDescription>{t("business.tablesPage.dialogDesc")}</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="table-loc">Location</Label>
+              <Label htmlFor="table-loc">{t("business.tablesPage.labelLocation")}</Label>
               <select
                 id="table-loc"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
@@ -209,11 +209,11 @@ export function TablesPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="table-name">Table name / number</Label>
+              <Label htmlFor="table-name">{t("business.tablesPage.labelTableName")}</Label>
               <input
                 id="table-name"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm"
-                placeholder="e.g. 12 or Patio 3"
+                placeholder={t("business.tablesPage.placeholderTable")}
                 value={tableName}
                 onChange={(e) => setTableName(e.target.value)}
                 autoComplete="off"
@@ -224,14 +224,15 @@ export function TablesPage() {
           </div>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => setModalOpen(false)} disabled={saving}>
-              Cancel
+              {t("business.tablesPage.cancel")}
             </Button>
             <Button
               type="button"
               onClick={() => void handleSave()}
               disabled={saving || locations.length === 0}
+              style={{ backgroundColor: "#e9932f" }}
             >
-              {saving ? <LoadingSpinner size="sm" /> : "Save"}
+              {saving ? <LoadingSpinner size="sm" /> : t("business.tablesPage.save")}
             </Button>
           </DialogFooter>
         </DialogContent>

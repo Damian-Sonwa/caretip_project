@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Users, UserCog, Search } from "lucide-react";
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 
 export function PlatformUserManagementPage() {
+  const { t } = useTranslation();
   const [rows, setRows] = useState<PlatformBusinessRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -58,7 +60,7 @@ export function PlatformUserManagementPage() {
       const data = await impersonateManagerAPI(b.id);
       localStorage.setItem("caretip_token", data.token);
       replaceUser(userFromAuthResponse(data.user));
-      toast.message(`Viewing dashboard as ${b.name}`);
+      toast.message(t("admin.userManagementPage.impersonateToast", { name: b.name }));
       navigate("/dashboard");
     } catch (e) {
       logClientError("PlatformUserManagementPage.impersonate", e);
@@ -75,11 +77,10 @@ export function PlatformUserManagementPage() {
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
                 <Users className="w-7 h-7 text-accent" />
-                User management
+                {t("admin.userManagementPage.title")}
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                Open a business dashboard as the venue manager to troubleshoot issues. Your admin session is saved. Use
-                &quot;Exit impersonation&quot; from the business dashboard banner to return.
+                {t("admin.userManagementPage.subtitle")}
               </p>
             </div>
 
@@ -89,9 +90,9 @@ export function PlatformUserManagementPage() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by business name, slug, or manager email…"
+                placeholder={t("admin.userManagementPage.searchPlaceholder")}
                 autoComplete="off"
-                aria-label="Search businesses"
+                aria-label={t("admin.userManagementPage.searchAria")}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm"
               />
             </div>
@@ -105,23 +106,25 @@ export function PlatformUserManagementPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Manager email</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Verification</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">Actions</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colBusiness")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colManagerEmail")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colVerification")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.userManagementPage.colActions")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-10">
-                          <CareTipPageLoader variant="compact" message="Loading…" />
+                          <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
                         </td>
                       </tr>
                     ) : filteredRows.length === 0 ? (
                       <tr>
                         <td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">
-                          No businesses match your search.
+                          {rows.length === 0
+                            ? t("admin.userManagementPage.emptyList")
+                            : t("admin.userManagementPage.noSearchMatches")}
                         </td>
                       </tr>
                     ) : (
@@ -138,7 +141,7 @@ export function PlatformUserManagementPage() {
                               className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
                             >
                               <UserCog className="w-3.5 h-3.5" />
-                              {busyId === b.id ? "Opening..." : "Impersonate manager"}
+                              {busyId === b.id ? t("admin.userManagementPage.opening") : t("admin.userManagementPage.impersonateCta")}
                             </button>
                           </td>
                         </tr>

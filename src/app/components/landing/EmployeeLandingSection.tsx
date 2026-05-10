@@ -1,29 +1,31 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { Euro, TrendingUp, History, LayoutDashboard } from "lucide-react";
+import { LayoutDashboard } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import newEmployeeImg from "../../../../images/cafe-employee.png";
 
 export function EmployeeLandingSection() {
+  const { t } = useTranslation();
   return (
     <section
       id="for-employees"
       className="scroll-mt-[80px] bg-gray-50 px-2 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-900"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center justify-items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative order-1 flex w-full min-h-0 flex-col items-center justify-center max-md:-mx-2 max-md:w-[calc(100%+1rem)] lg:order-1 lg:mx-0 lg:w-full"
-          whileHover={{ y: -5 }}
+          className="relative order-1 flex w-full max-w-lg flex-col items-center justify-center max-md:justify-self-center sm:max-w-xl lg:order-1 lg:max-w-none lg:w-full lg:justify-self-stretch"
         >
-          <div className="flex w-full min-h-0 items-center justify-center">
-            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm max-md:rounded-2xl sm:mt-10 sm:rounded-3xl lg:max-w-lg dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="flex w-full min-h-0 items-center justify-center max-md:px-1">
+            <div className="mx-auto mt-4 flex w-full items-center justify-center overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl max-md:min-h-[min(34dvh,320px)] sm:mt-10 lg:min-h-0 dark:border-neutral-800 dark:bg-neutral-900">
               <img
                 src={newEmployeeImg}
-                alt="CareTip employee dashboard showing daily earnings, ratings, and goals"
-                className="mx-auto h-auto w-full object-contain max-md:min-h-[min(34dvh,320px)]"
+                alt={t("landing.employeeSection.imageAlt")}
+                className="mx-auto block h-auto max-h-[min(52vh,420px)] w-full max-w-full object-contain object-center sm:max-h-none"
                 loading="lazy"
                 decoding="async"
               />
@@ -36,58 +38,43 @@ export function EmployeeLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="order-2 max-md:px-2 space-y-6 max-md:pt-2 md:px-0 md:pt-0 lg:order-2"
+          className="order-2 flex w-full max-w-lg flex-col items-center space-y-6 text-center max-md:justify-self-center max-md:px-2 max-md:pt-2 sm:max-w-xl md:px-0 md:pt-0 lg:order-2 lg:max-w-none lg:items-start lg:justify-self-stretch lg:text-left"
         >
-          <div className="space-y-3">
+          <div className="flex w-full max-w-xl flex-col items-center space-y-3 lg:items-start">
             <span className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-              For employees
+              {t("landing.employeeSection.pill")}
             </span>
             <h2 className="text-4xl font-bold text-neutral-900 sm:text-5xl dark:text-neutral-100">
-              Track your success.
+              {t("landing.employeeSection.titleLine1")}
               <br />
-              <span className="text-primary">Every day.</span>
+              <span className="text-primary">{t("landing.employeeSection.titleLine2")}</span>
             </h2>
             <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
-              See your earnings, ratings, and performance at a glance. Stay motivated and in control of your growth.
+              {t("landing.employeeSection.subtitle")}
             </p>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <Euro className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="mb-1 font-semibold text-neutral-900 dark:text-neutral-100">Real-time earnings</h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Watch tips land as your shift unfolds.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <TrendingUp className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="mb-1 font-semibold text-neutral-900 dark:text-neutral-100">Performance insights</h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">Spot patterns that help you earn more.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-primary/10">
-                <History className="h-4 w-4 text-primary" />
-              </div>
-              <div>
-                <h3 className="mb-1 font-semibold text-neutral-900 dark:text-neutral-100">Tip history & ratings</h3>
-                <p className="text-sm text-neutral-600 dark:text-neutral-400">A clear trail of gratitude and feedback.</p>
-              </div>
-            </div>
+          <div className="w-full max-w-xl space-y-4 text-left">
+            <LandingBenefitBlock
+              title={t("landing.employeeSection.b1Title")}
+              description={t("landing.employeeSection.b1Text")}
+            />
+            <LandingBenefitBlock
+              title={t("landing.employeeSection.b2Title")}
+              description={t("landing.employeeSection.b2Text")}
+            />
+            <LandingBenefitBlock
+              title={t("landing.employeeSection.b3Title")}
+              description={t("landing.employeeSection.b3Text")}
+            />
           </div>
 
           <Link
             to="/join"
             className="inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
           >
-            <LayoutDashboard className="h-5 w-5" />
-            View employee dashboard
+            <LayoutDashboard className="h-5 w-5" aria-hidden />
+            {t("landing.employeeSection.cta")}
           </Link>
         </motion.div>
       </div>

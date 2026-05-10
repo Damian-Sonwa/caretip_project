@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Bell, ChevronLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket } from "../../hooks/useSocket";
 import { getTipsByEmployee, type TipItem } from "../../lib/api";
@@ -23,7 +24,8 @@ interface NewTipPayload {
 }
 
 export function EmployeeNotificationsPage() {
-  const { user, logout } = useRequireAuth();
+  const { t, i18n } = useTranslation();
+  const { user } = useRequireAuth();
   const [tips, setTips] = useState<TipItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket(user?.role === "employee");
@@ -56,7 +58,7 @@ export function EmployeeNotificationsPage() {
     const onNew = (payload: NewTipPayload) => {
       if (user.employeeId && payload.employeeId !== user.employeeId) return;
       setTips((prev) => {
-        const rest = prev.filter((t) => t.id !== payload.tip.id);
+        const rest = prev.filter((tipRow) => tipRow.id !== payload.tip.id);
         return [payload.tip, ...rest];
       });
     };
@@ -68,7 +70,7 @@ export function EmployeeNotificationsPage() {
 
   if (!user || user.role !== "employee") return null;
 
-  const allIds = useMemo(() => tips.map((t) => t.id), [tips]);
+  const allIds = useMemo(() => tips.map((tipRow) => tipRow.id), [tips]);
   const allSelected = selectedIds.length > 0 && selectedIds.length === allIds.length;
   const hasSelection = selectedIds.length > 0;
 
@@ -95,22 +97,26 @@ export function EmployeeNotificationsPage() {
   const confirmDelete = (ids: string[]) => {
     const count = ids.length;
     if (count === 0) return;
-    toast(`Delete ${count === 1 ? "this notification" : `${count} notifications`}?`, {
+    const prompt =
+      count === 1
+        ? t("employee.notifications.toastDeletePromptOne")
+        : t("employee.notifications.toastDeletePromptMany", { count });
+    toast(prompt, {
       action: {
-        label: "Delete",
+        label: t("employee.notifications.actionDelete"),
         onClick: () => {
-          setTips((prev) => prev.filter((t) => !ids.includes(t.id)));
+          setTips((prev) => prev.filter((tipRow) => !ids.includes(tipRow.id)));
           setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
           setReadIds((prev) => {
             const next: Record<string, true> = { ...prev };
             for (const id of ids) delete next[id];
             return next;
           });
-          toast.success("Deleted");
+          toast.success(t("employee.notifications.toastDeleted"));
         },
       },
       cancel: {
-        label: "Cancel",
+        label: t("employee.notifications.actionCancel"),
         onClick: () => {},
       },
     });
@@ -119,9 +125,13 @@ export function EmployeeNotificationsPage() {
   const confirmMarkRead = (ids: string[]) => {
     const count = ids.length;
     if (count === 0) return;
-    toast(`Mark ${count === 1 ? "this notification" : `${count} notifications`} as read?`, {
+    const prompt =
+      count === 1
+        ? t("employee.notifications.toastMarkReadPromptOne")
+        : t("employee.notifications.toastMarkReadPromptMany", { count });
+    toast(prompt, {
       action: {
-        label: "Mark read",
+        label: t("employee.notifications.actionMarkRead"),
         onClick: () => {
           setReadIds((prev) => {
             const next: Record<string, true> = { ...prev };
@@ -129,11 +139,11 @@ export function EmployeeNotificationsPage() {
             return next;
           });
           setSelectedIds([]);
-          toast.success("Marked as read");
+          toast.success(t("employee.notifications.toastMarkedRead"));
         },
       },
       cancel: {
-        label: "Cancel",
+        label: t("employee.notifications.actionCancel"),
         onClick: () => {},
       },
     });
@@ -146,20 +156,20 @@ export function EmployeeNotificationsPage() {
           <Link
             to="/employee/dashboard"
             className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label="Back"
+            aria-label={t("employee.notifications.backAria")}
           >
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h2 className="text-xl font-semibold text-foreground">Notifications</h2>
+          <h2 className="text-xl font-semibold text-foreground">{t("employee.notifications.title")}</h2>
         </div>
 
         {loading ? (
-          <CareTipPageLoader variant="section" message="Loading notifications…" />
+          <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
         ) : tips.length === 0 ? (
           <div className="py-14 text-center">
             <Bell className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 text-lg font-semibold text-foreground">You&apos;re all caught up!</p>
-            <p className="mt-2 text-sm text-muted-foreground">New tip activity will show up here.</p>
+            <p className="mt-4 text-lg font-semibold text-foreground">{t("employee.notifications.emptyTitle")}</p>
+            <p className="mt-2 text-sm text-muted-foreground">{t("employee.notifications.emptySubtitle")}</p>
           </div>
         ) : (
           <>
@@ -171,19 +181,24 @@ export function EmployeeNotificationsPage() {
                     checked={allSelected}
                     onChange={toggleSelectAll}
                     className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
-                    aria-label="Select all notifications"
+                    aria-label={t("employee.notifications.selectAllAria")}
                   />
-                  Select all
+                  {t("employee.notifications.selectAll")}
                 </label>
               ) : (
-                <div className="text-sm text-muted-foreground">Manage your notifications</div>
+                <div className="text-sm text-muted-foreground">{t("employee.notifications.manageHint")}</div>
               )}
 
               <div className="flex flex-wrap items-center gap-2">
                 {selectionMode ? (
                   <>
-                    <Button type="button" variant="outline" onClick={() => confirmMarkRead(selectedIds)} disabled={!hasSelection}>
-                      Mark as read
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => confirmMarkRead(selectedIds)}
+                      disabled={!hasSelection}
+                    >
+                      {t("employee.notifications.markRead")}
                     </Button>
                     {hasSelection ? (
                       <Button
@@ -192,28 +207,28 @@ export function EmployeeNotificationsPage() {
                         className="text-red-500 hover:text-red-600"
                         onClick={() => confirmDelete(selectedIds)}
                       >
-                        Delete selected
+                        {t("employee.notifications.deleteSelected")}
                       </Button>
                     ) : null}
                     <Button type="button" variant="outline" onClick={exitSelectionMode}>
-                      Done
+                      {t("employee.notifications.done")}
                     </Button>
                   </>
                 ) : (
                   <Button type="button" variant="outline" onClick={() => enterSelectionMode()}>
-                    Select
+                    {t("employee.notifications.select")}
                   </Button>
                 )}
               </div>
             </div>
 
             <ul className="space-y-3">
-              {tips.map((t) => {
-                const selected = selectedIds.includes(t.id);
-                const isRead = Boolean(readIds[t.id]);
+              {tips.map((tipRow) => {
+                const selected = selectedIds.includes(tipRow.id);
+                const isRead = Boolean(readIds[tipRow.id]);
                 return (
                   <li
-                    key={t.id}
+                    key={tipRow.id}
                     className={cn(
                       "rounded-2xl bg-white border border-gray-50 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
                       selected && "bg-orange-50/30 ring-1 ring-[#EB992C]/20",
@@ -225,21 +240,28 @@ export function EmployeeNotificationsPage() {
                         <input
                           type="checkbox"
                           checked={selected}
-                          onChange={() => toggleSelected(t.id)}
+                          onChange={() => toggleSelected(tipRow.id)}
                           className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
-                          aria-label="Select notification"
+                          aria-label={t("employee.notifications.selectRowAria")}
                         />
                       ) : null}
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-3">
-                          <p className={cn("truncate text-lg font-semibold", isRead ? "text-muted-foreground" : "text-foreground")}>
-                            New tip received
+                          <p
+                            className={cn(
+                              "truncate text-lg font-semibold",
+                              isRead ? "text-muted-foreground" : "text-foreground",
+                            )}
+                          >
+                            {t("employee.notifications.newTipTitle")}
                           </p>
-                          <p className="shrink-0 text-xs text-muted-foreground">{formatTipDateTime(t.createdAt)}</p>
+                          <p className="shrink-0 text-xs text-muted-foreground">
+                            {formatTipDateTime(tipRow.createdAt, i18n.language)}
+                          </p>
                         </div>
                         <p className={cn("mt-1 text-sm", isRead ? "text-muted-foreground" : "text-muted-foreground")}>
-                          You received {formatTipNaira(t.amount)} from a customer.
+                          {t("employee.notifications.tipBody", { amount: formatTipNaira(tipRow.amount) })}
                         </p>
                       </div>
 
@@ -247,13 +269,13 @@ export function EmployeeNotificationsPage() {
                         type="button"
                         onClick={() => {
                           if (!selectionMode) {
-                            enterSelectionMode(t.id);
+                            enterSelectionMode(tipRow.id);
                             return;
                           }
-                          confirmDelete([t.id]);
+                          confirmDelete([tipRow.id]);
                         }}
                         className="inline-flex h-9 w-9 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-red-500"
-                        aria-label="Delete notification"
+                        aria-label={t("employee.notifications.deleteRowAria")}
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>

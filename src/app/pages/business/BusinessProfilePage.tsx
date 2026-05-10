@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useId, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Building2, Check, Loader2, MapPin, Save, Tag, Upload, X } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -39,6 +40,7 @@ function verificationClass(s: BusinessInfo["verificationStatus"]): string {
  * Full venue profile management: read, edit (PUT), logo upload (POST), read-only slug & verification.
  */
 export function BusinessProfilePage() {
+  const { t } = useTranslation();
   const { user } = useRequireAuth();
   const fileInputId = useId();
 
@@ -120,11 +122,11 @@ export function BusinessProfilePage() {
     e.target.value = "";
     if (!file) return;
     if (!file.type.startsWith("image/")) {
-      toast.error("Choose an image file (PNG, JPEG, or WebP).");
+      toast.error(t("business.profilePage.toastImageType"));
       return;
     }
     if (file.size > LOGO_MAX_BYTES) {
-      toast.error("Logo must be 5 MB or smaller.");
+      toast.error(t("business.profilePage.toastLogoSize"));
       return;
     }
     setPendingLogo(file);
@@ -134,8 +136,8 @@ export function BusinessProfilePage() {
 
   const validateForm = (): string | null => {
     const n = name.trim();
-    if (!n) return "Business name is required.";
-    if (location.length > LOCATION_MAX) return `Location must be at most ${LOCATION_MAX} characters.`;
+    if (!n) return t("business.profilePage.valNameRequired");
+    if (location.length > LOCATION_MAX) return t("business.profilePage.valLocationMax", { max: LOCATION_MAX });
     return null;
   };
 
@@ -163,7 +165,7 @@ export function BusinessProfilePage() {
       if (hadPendingLogo) setLogoBust((b) => b + 1);
       setPendingLogo(null);
       window.dispatchEvent(new Event("caretip-business-profile-changed"));
-      toast.success("Profile saved.", TOAST_OK);
+      toast.success(t("business.profilePage.toastSaved"), TOAST_OK);
     } catch (e) {
       logClientError("BusinessProfilePage.save", e);
       toast.error(toUserFriendlyMessage(e));
@@ -180,7 +182,7 @@ export function BusinessProfilePage() {
     return (
       <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-3 px-4 py-24 sm:px-6">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden />
-        <p className="text-sm text-muted-foreground">Loading profile…</p>
+        <p className="text-sm text-muted-foreground">{t("business.profilePage.loading")}</p>
       </div>
     );
   }
@@ -190,12 +192,12 @@ export function BusinessProfilePage() {
       <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
         <Card className="border-destructive/40">
           <CardHeader>
-            <CardTitle className="text-lg">Could not load profile</CardTitle>
-            <CardDescription>{loadError ?? "Something went wrong."}</CardDescription>
+            <CardTitle className="text-lg">{t("business.profilePage.loadErrorTitle")}</CardTitle>
+            <CardDescription>{loadError ?? t("business.profilePage.loadErrorDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <Button type="button" variant="outline" onClick={() => void loadProfile()}>
-              Try again
+              {t("business.profilePage.tryAgain")}
             </Button>
           </CardContent>
         </Card>
@@ -212,18 +214,16 @@ export function BusinessProfilePage() {
       <header>
         <div className="mb-2 flex items-center gap-2 text-muted-foreground">
           <Building2 className="h-5 w-5 shrink-0" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-wide">Venue</span>
+          <span className="text-xs font-semibold uppercase tracking-wide">{t("business.profilePage.venuePill")}</span>
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">Business profile</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-          Update how your venue appears to guests. Slug and verification status are managed by CareTip.
-        </p>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("business.profilePage.pageTitle")}</h1>
+        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("business.profilePage.pageDesc")}</p>
       </header>
 
       <Card className="overflow-hidden border-border shadow-sm">
         <CardHeader className="border-b border-border/60 bg-muted/30">
-          <CardTitle className="text-base">Logo</CardTitle>
-          <CardDescription>Shown on QR pages, print layouts, and your dashboard header.</CardDescription>
+          <CardTitle className="text-base">{t("business.profilePage.logoTitle")}</CardTitle>
+          <CardDescription>{t("business.profilePage.logoDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6 pt-6 sm:flex-row sm:items-start">
           <div className="flex flex-col items-center gap-3 sm:items-start">
@@ -237,7 +237,7 @@ export function BusinessProfilePage() {
               ) : (
                 <BusinessLogoMark
                   logoPathOrUrl={null}
-                  businessName={name.trim() || profile?.name || "Venue"}
+                  businessName={name.trim() || profile?.name || t("business.profilePage.venueFallback")}
                   size="xl"
                   className="h-28 w-28"
                 />
@@ -248,19 +248,23 @@ export function BusinessProfilePage() {
               <Button type="button" variant="outline" size="sm" asChild>
                 <label htmlFor={fileInputId} className="cursor-pointer">
                   <Upload className="mr-2 h-4 w-4" />
-                  {pendingLogo ? "Change selection" : profile?.logo ? "Change logo" : "Upload logo"}
+                  {pendingLogo
+                    ? t("business.profilePage.changeSelection")
+                    : profile?.logo
+                      ? t("business.profilePage.changeLogo")
+                      : t("business.profilePage.uploadLogo")}
                 </label>
               </Button>
               {pendingLogo ? (
                 <Button type="button" variant="ghost" size="sm" onClick={clearPendingLogo}>
                   <X className="mr-1 h-4 w-4" />
-                  Clear preview
+                  {t("business.profilePage.clearPreview")}
                 </Button>
               ) : null}
             </div>
             {pendingLogo ? (
               <p className="max-w-xs text-center text-xs text-muted-foreground sm:text-left">
-                New logo uploads when you click <span className="font-medium text-foreground">Save changes</span>.
+                {t("business.profilePage.pendingUploadHint", { save: t("business.profilePage.saveWord") })}
               </p>
             ) : null}
           </div>
@@ -269,46 +273,48 @@ export function BusinessProfilePage() {
 
       <Card className="border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Venue details</CardTitle>
-          <CardDescription>These fields are stored on your business record.</CardDescription>
+          <CardTitle className="text-base">{t("business.profilePage.venueDetailsTitle")}</CardTitle>
+          <CardDescription>{t("business.profilePage.venueDetailsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="biz-name">Business name</Label>
+            <Label htmlFor="biz-name">{t("business.profilePage.labelBusinessName")}</Label>
             <Input
               id="biz-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               autoComplete="organization"
               maxLength={200}
-              placeholder="Your venue name"
+              placeholder={t("business.profilePage.phVenueName")}
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="biz-location" className="flex items-center gap-1.5">
               <MapPin className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-              Location
+              {t("business.profilePage.labelLocation")}
             </Label>
             <Input
               id="biz-location"
               value={location}
               onChange={(e) => setLocation(e.target.value)}
               maxLength={LOCATION_MAX}
-              placeholder="City, area, or address guests recognize"
+              placeholder={t("business.profilePage.phLocation")}
             />
-            <p className="text-xs text-muted-foreground">{location.length} / {LOCATION_MAX} characters</p>
+            <p className="text-xs text-muted-foreground">
+              {t("business.profilePage.charCount", { n: location.length, max: LOCATION_MAX })}
+            </p>
           </div>
           <div className="space-y-2">
             <Label htmlFor="biz-type" className="flex items-center gap-1.5">
               <Tag className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
-              Business type
+              {t("business.profilePage.labelBusinessType")}
             </Label>
             <Input
               id="biz-type"
               value={businessType}
               onChange={(e) => setBusinessType(e.target.value)}
               maxLength={120}
-              placeholder="e.g. Restaurant, Salon, Hotel"
+              placeholder={t("business.profilePage.phBusinessType")}
             />
           </div>
           <div className="flex flex-wrap gap-3 pt-2">
@@ -316,19 +322,19 @@ export function BusinessProfilePage() {
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving…
+                  {t("business.profilePage.saving")}
                 </>
               ) : (
                 <>
                   <Save className="mr-2 h-4 w-4" />
-                  Save changes
+                  {t("business.profilePage.saveChanges")}
                 </>
               )}
             </Button>
             {!isDirty ? (
               <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
                 <Check className="h-3.5 w-3.5" aria-hidden />
-                Up to date
+                {t("business.profilePage.upToDate")}
               </span>
             ) : null}
           </div>
@@ -337,16 +343,16 @@ export function BusinessProfilePage() {
 
       <Card className="border-border shadow-sm">
         <CardHeader>
-          <CardTitle className="text-base">Public link & verification</CardTitle>
-          <CardDescription>Read-only. Contact support if you need a slug change after launch.</CardDescription>
+          <CardTitle className="text-base">{t("business.profilePage.publicTitle")}</CardTitle>
+          <CardDescription>{t("business.profilePage.publicDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Team QR path</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("business.profilePage.teamQrPath")}</p>
             <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{slug || "—"}</p>
             {teamUrl ? (
               <p className="mt-1 text-xs text-muted-foreground">
-                Guest directory:{" "}
+                {t("business.profilePage.guestDirectory")}{" "}
                 <a href={teamUrl} className="text-primary underline-offset-2 hover:underline" target="_blank" rel="noreferrer">
                   {teamUrl}
                 </a>
@@ -354,14 +360,18 @@ export function BusinessProfilePage() {
             ) : null}
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Verification</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("business.profilePage.verification")}</p>
             <span
               className={cn(
                 "mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
                 verificationClass(profile?.verificationStatus),
               )}
             >
-              {verificationLabel(profile?.verificationStatus)}
+              {profile?.verificationStatus === "verified"
+                ? t("business.profilePage.statusVerified")
+                : profile?.verificationStatus === "rejected"
+                  ? t("business.profilePage.statusRejected")
+                  : t("business.profilePage.statusPending")}
             </span>
           </div>
         </CardContent>

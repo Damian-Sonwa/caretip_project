@@ -1,8 +1,7 @@
 import * as React from "react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowRight, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { motion } from "motion/react";
-import { CheckCircle, ShieldCheck, Sparkles, Zap } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -17,6 +16,7 @@ import { FeatureCarousel } from "@/components/ui/feature-carousel";
 import { CareTipHeroAnimation } from "@/components/ui/caretip-hero-animation";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
+import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 
 export type TabMedia = {
   value: string;
@@ -67,14 +67,6 @@ export type FeatureShowcaseProps = {
    */
   heroBorderBeam?: boolean;
 };
-
-function iconForFeatureHighlight(label: string) {
-  const s = label.trim().toLowerCase();
-  if (s.includes("live") || s.includes("minute")) return Zap;
-  if (s.includes("pos")) return Sparkles;
-  if (s.includes("secure") || s.includes("checkout")) return ShieldCheck;
-  return CheckCircle;
-}
 
 export function FeatureShowcase({
   id,
@@ -189,20 +181,7 @@ export function FeatureShowcase({
                   ) : null}
 
                   {stats.length > 0 && (
-                    <ul className="mt-6 flex flex-col gap-2.5 text-[13px] font-medium text-gray-600/90 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2">
-                      {stats.map((s, i) => {
-                        const Icon = iconForFeatureHighlight(s);
-                        return (
-                          <li key={i} className="inline-flex items-center gap-2">
-                            <Icon
-                              className="h-4 w-4 shrink-0 text-primary/90"
-                              aria-hidden
-                            />
-                            <span className="leading-relaxed">{s}</span>
-                          </li>
-                        );
-                      })}
-                    </ul>
+                    <LandingBenefitChecklist items={stats} tone="split" className="mt-6 sm:mt-7" />
                   )}
 
                   <div className="mt-8 flex w-full flex-wrap items-stretch justify-center gap-3 sm:justify-start">
@@ -281,7 +260,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-7 px-6 pb-10 pt-14 max-md:gap-y-6 max-md:px-4 max-md:pb-6 max-md:pt-12 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-16 md:pb-10 lg:gap-10 lg:px-8"
+              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-7 px-6 pb-10 pt-14 max-md:gap-y-4 max-md:px-4 max-md:pb-6 max-md:pt-12 md:flex-row md:items-center md:gap-8 md:px-6 md:pt-16 md:pb-10 lg:gap-10 lg:px-8"
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -290,7 +269,7 @@ export function FeatureShowcase({
             "relative",
             !cinematic && "md:col-span-5",
             cinematic &&
-              "order-1 flex flex-1 flex-col self-stretch max-md:pt-2 md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
+              "order-1 flex flex-1 flex-col self-stretch max-md:pt-1 md:flex-1 md:self-stretch md:flex md:flex-col md:pt-6",
           )}
         >
             {eyebrow?.trim() ? (
@@ -331,33 +310,14 @@ export function FeatureShowcase({
             ) : null}
 
             {stats.length > 0 && (
-              <ul
-                className={cn(
-                  "mt-5 flex flex-col gap-2.5 text-[13px] font-medium sm:mt-6",
-                  cinematic
-                    ? "text-gray-600/90 sm:flex-row sm:flex-wrap sm:gap-x-8 sm:gap-y-2"
-                    : "text-muted-foreground sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2",
-                )}
-              >
-                {stats.map((s, i) => {
-                  const Icon = iconForFeatureHighlight(s);
-                  return (
-                    <li key={i} className="inline-flex items-center gap-2">
-                      <Icon
-                        className={cn(
-                          "h-4 w-4 shrink-0",
-                          cinematic ? "text-primary/90" : "text-primary",
-                        )}
-                        aria-hidden
-                      />
-                      <span className="leading-relaxed">{s}</span>
-                    </li>
-                  );
-                })}
-              </ul>
+              <LandingBenefitChecklist
+                items={stats}
+                tone={cinematic ? "cinematic" : "default"}
+                className={cn(cinematic && "max-md:mt-4 max-md:gap-2.5 sm:mt-6")}
+              />
             )}
 
-            <div className={cn("mt-8 max-w-xl sm:mt-10")}>
+            <div className={cn("max-w-xl", cinematic ? "mt-5 w-full sm:mt-8" : "mt-8 sm:mt-10")}>
               {!cinematic ? (
                 <Accordion type="single" collapsible className="w-full">
                   {steps.map((step) => (
@@ -369,33 +329,70 @@ export function FeatureShowcase({
                 </Accordion>
               ) : null}
 
-              <div className="mt-4 flex w-full flex-wrap items-stretch justify-center gap-3 sm:mt-7 sm:justify-start">
+              <div
+                className={cn(
+                  "flex w-full flex-wrap items-stretch justify-center gap-3 sm:justify-start",
+                  cinematic
+                    ? "mx-auto mt-3 max-w-[min(100%,320px)] flex-col gap-2 sm:mx-0 sm:mt-6 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3"
+                    : "mt-4 gap-3 sm:mt-7",
+                )}
+              >
                 <Button
                   asChild
-                  size="lg"
+                  size={cinematic ? "default" : "lg"}
+                  variant="default"
                   className={cn(
-                    "h-12 w-[min(64%,280px)] rounded-2xl px-6 font-bold leading-none sm:w-auto",
-                    cinematic &&
+                    "rounded-2xl font-bold leading-none sm:w-auto",
+                    cinematic
+                      ? [
+                          "h-11 w-full min-w-0 border-0 px-5 text-[15px] font-semibold tracking-tight shadow-[0_6px_20px_rgba(235,153,44,0.18)] sm:h-11 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
+                          "bg-[#EB992C] text-white hover:bg-[#d88926] hover:shadow-[0_8px_26px_rgba(235,153,44,0.22)]",
+                          "focus-visible:ring-2 focus-visible:ring-[#EB992C]/40 focus-visible:ring-offset-2",
+                        ]
+                      : "h-12 w-[min(64%,280px)] px-6",
+                    !cinematic && "w-[min(64%,280px)]",
+                    !cinematic &&
                       "bg-[#EB992C] text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]",
                   )}
                 >
-                  <Link to={primaryCtaTo} className="whitespace-nowrap">
+                  <Link
+                    to={primaryCtaTo}
+                    className={cn(
+                      "whitespace-nowrap",
+                      cinematic && "inline-flex w-full items-center justify-center py-0.5 sm:w-auto",
+                    )}
+                  >
                     {primaryCtaLabel}
                   </Link>
                 </Button>
                 <Button
                   asChild
-                  size="lg"
-                  variant="outline"
+                  size={cinematic ? "sm" : "lg"}
+                  variant={cinematic ? "ghost" : "outline"}
                   className={cn(
-                    "h-12 w-[min(64%,280px)] rounded-2xl border-2 bg-transparent px-6 font-semibold leading-none sm:w-auto",
+                    "rounded-2xl leading-none sm:w-auto",
                     cinematic
-                      ? "border-neutral-300 text-gray-900 hover:bg-neutral-100 hover:text-gray-900 dark:border-neutral-700 dark:text-neutral-100 dark:hover:bg-neutral-800/70"
-                      : "border-primary",
+                      ? [
+                          "h-10 w-full min-w-0 border border-neutral-200/90 bg-transparent px-4 text-[13px] font-medium text-neutral-600 shadow-none",
+                          "hover:bg-neutral-50/90 hover:text-neutral-900 dark:border-neutral-600/80 dark:text-neutral-300 dark:hover:bg-neutral-800/40 dark:hover:text-neutral-100",
+                          "sm:h-9 sm:min-w-[10.5rem] sm:rounded-xl sm:border-neutral-200 sm:px-4",
+                        ]
+                      : "h-12 w-[min(64%,280px)] border-2 bg-transparent px-6 font-semibold",
+                    !cinematic && "w-[min(64%,280px)] border-primary",
+                    !cinematic &&
+                      "border-2 text-foreground hover:bg-muted",
                   )}
                 >
-                  <Link to={secondaryCtaTo} className="whitespace-nowrap">
-                    {secondaryCtaLabel}
+                  <Link
+                    to={secondaryCtaTo}
+                    className={cn(
+                      "whitespace-nowrap",
+                      cinematic &&
+                        "inline-flex w-full items-center justify-center gap-1.5 text-neutral-600 dark:text-neutral-300",
+                    )}
+                  >
+                    <span>{secondaryCtaLabel}</span>
+                    {cinematic ? <ArrowRight className="h-3.5 w-3.5 opacity-60" aria-hidden /> : null}
                   </Link>
                 </Button>
               </div>
@@ -453,7 +450,7 @@ export function FeatureShowcase({
                 cinematic ? (
                   <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
                     <div className="relative flex w-full justify-center md:justify-center">
-                      <div className="relative w-full max-w-[590px] max-md:mx-auto max-md:-translate-y-4 md:-translate-y-6 lg:-translate-y-8">
+                      <div className="relative w-full max-w-[590px] max-md:mx-auto max-md:-translate-y-2 md:-translate-y-6 lg:-translate-y-8">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"

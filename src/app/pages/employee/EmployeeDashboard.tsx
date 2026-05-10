@@ -3,6 +3,9 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type { ElementType } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
+import i18n from "@/i18n/i18n";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
@@ -44,9 +47,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
-
-const EMPLOYEE_HERO_HEADLINE = "Your earnings at a glance";
-const EMPLOYEE_HERO_SUB = "Your performance at a glance.";
 
 function StatCard(props: {
   title: string;
@@ -98,12 +98,17 @@ function formatTimeAgo(iso: string): string {
   const diffMins = Math.floor(diffMs / 60000);
   const diffHours = Math.floor(diffMs / 3600000);
   const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 60) return `${diffMins} min ago`;
-  if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? "s" : ""} ago`;
-  return `${diffDays} day${diffDays > 1 ? "s" : ""} ago`;
+  if (diffMins < 60) return i18n.t("employee.relative.minutesAgo", { count: diffMins });
+  if (diffHours < 24) {
+    return diffHours === 1
+      ? i18n.t("employee.relative.hourAgo")
+      : i18n.t("employee.relative.hoursAgo", { count: diffHours });
+  }
+  return diffDays === 1 ? i18n.t("employee.relative.dayAgo") : i18n.t("employee.relative.daysAgo", { count: diffDays });
 }
 
 export function EmployeeDashboard() {
+  const { t, i18n } = useTranslation();
   const { user, authHydrated, sessionValidated, updateUser } = useRequireAuth();
   const location = useLocation();
   const navigate = useNavigate();
@@ -251,14 +256,14 @@ export function EmployeeDashboard() {
       void refreshTipsQuiet();
 
       playChaChingSound();
-      toast.success("You just received a tip!", TOAST_OK);
+      toast.success(t("employee.dashboard.toastNewTip"), TOAST_OK);
     };
 
     socket.on("new_tip", onNewTip);
     return () => {
       socket.off("new_tip", onNewTip);
     };
-  }, [socket, user?.role, user?.employeeId, refreshTipsQuiet]);
+  }, [socket, user?.role, user?.employeeId, refreshTipsQuiet, t]);
 
   const totalAmount = periodAmountEur;
   const avgTipFromServer = periodTipCount > 0 ? totalAmount / periodTipCount : 0;
@@ -271,19 +276,19 @@ export function EmployeeDashboard() {
 
   const chartData = useMemo(() => {
     return chartSeries.map((p) => ({
-      time: p.label,
+      time: timeframe === "week" ? translateChartWeekdayLabel(p.label, t) : p.label,
       amount: p.amount,
     }));
-  }, [chartSeries]);
+  }, [chartSeries, timeframe, t, i18n.resolvedLanguage]);
 
   /** False while a fetch is in flight or responses have not caught up with the selected tab. */
   const valuesMatchSelectedPeriod = dataTimeframe === timeframe && !periodLoading;
 
-  const recentTips = tips.slice(0, 6).map((t) => ({
-    id: t.id,
-    amount: t.amount,
-    customer: "Anonymous",
-    time: formatTimeAgo(t.createdAt)
+  const recentTips = tips.slice(0, 6).map((tipRow) => ({
+    id: tipRow.id,
+    amount: tipRow.amount,
+    customer: t("employee.dashboard.anonymous"),
+    time: formatTimeAgo(tipRow.createdAt),
   }));
 
   if (!user) return null;
@@ -304,9 +309,9 @@ export function EmployeeDashboard() {
         setEmployeeBusinessSlug(p.businessSlug ?? null);
         if (s) {
           setQrModalOpen(true);
-          toast.success("Your tip link is ready");
+          toast.success(t("employee.dashboard.toastLinkReady"));
         } else {
-          toast.error("Could not create your link. Try again.");
+          toast.error(t("employee.dashboard.toastLinkFail"));
         }
       } catch (e) {
         logClientError("EmployeeDashboard", e);
@@ -339,7 +344,7 @@ export function EmployeeDashboard() {
             onClick={() => window.location.reload()}
             className="text-primary hover:underline text-sm"
           >
-            Try again
+            {t("dashboard.tryAgain")}
           </button>
         </div>
       </div>
@@ -364,22 +369,21 @@ export function EmployeeDashboard() {
           badge={
             <>
               <Sparkles className="h-3.5 w-3.5 text-foreground" />
-              {user.name ? `Welcome back, ${user.name.split(" ")[0]}` : "Welcome back"}
+              {user.name
+                ? t("employee.welcome_mina", { name: user.name.split(" ")[0] })
+                : t("employee.hero.welcomeBack")}
             </>
           }
-          title={EMPLOYEE_HERO_HEADLINE}
-          description={EMPLOYEE_HERO_SUB}
+          title={t("employee.hero.headline")}
+          description={t("employee.hero.sub")}
           image={
-            <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
-              {/* Mobile: bleed past hero gutter so the frame reads wider without taller height */}
+            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center touch-manipulation">
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    // Mobile: fixed height (no extra vertical growth); width uses full bleed wrapper above
-                    "max-lg:h-[236px] max-lg:max-h-[236px] max-lg:min-h-0 rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
-                    // Desktop: wider frame, fixed height cap (growth is horizontal-first vs old square crop)
-                    "lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                    "max-lg:h-[236px] max-lg:max-h-[236px] max-lg:min-h-0 rounded-[2.5rem] border border-black/[0.06] shadow-xl",
+                    "lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:rounded-[2.5rem] lg:border-gray-100 lg:shadow-xl",
                   )}
                 >
                   <img
@@ -405,19 +409,19 @@ export function EmployeeDashboard() {
                 {generatingSlug ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating…
+                    {t("employee.hero.generating")}
                   </>
                 ) : (
                   <>
                     <QrCode className="mr-2 h-4 w-4 shrink-0" />
-                    My QR
+                    {t("dashboard.qr_button")}
                   </>
                 )}
               </Button>
               <Button type="button" variant="outline" asChild>
                 <Link to="/employee/tip-goals" className="gap-2">
                   <Target className="h-4 w-4 shrink-0" />
-                  Set tip goal
+                  {t("employee.set_goal")}
                 </Link>
               </Button>
             </>
@@ -441,9 +445,9 @@ export function EmployeeDashboard() {
                 }`}
               >
                 <span className="shrink-0">
-                  {period === "today" && "Today"}
-                  {period === "week" && "This Week"}
-                  {period === "month" && "This Month"}
+                  {period === "today" && t("employee.earnings_today")}
+                  {period === "week" && t("employee.earnings_week")}
+                  {period === "month" && t("employee.earnings_month")}
                 </span>
                 {period === timeframe && periodLoading ? (
                   <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin opacity-90" aria-hidden />
@@ -458,9 +462,9 @@ export function EmployeeDashboard() {
             id="profilePhoto"
             issueActive={!user.avatar}
             dismissPersistence="local"
-            title="Add a profile photo"
-            description="Upload a photo so guests recognize you on your tip page."
-            actionLabel="Upload photo"
+            title={t("employee.dashboard.fixPhotoTitle")}
+            description={t("employee.dashboard.fixPhotoDesc")}
+            actionLabel={t("employee.dashboard.fixPhotoAction")}
             actionTo="/employee/settings"
           />
 
@@ -477,35 +481,40 @@ export function EmployeeDashboard() {
                 >
                   <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-white/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                    Updating
+                    {t("employee.dashboard.overlayUpdating")}
                   </div>
                 </div>
               ) : null}
               <StatCard
-                title="Total tips"
+                title={t("employee.dashboard.statTotalTips")}
                 value={valuesMatchSelectedPeriod ? String(stats.tips) : "—"}
                 change={
                   periodLoading && !valuesMatchSelectedPeriod
-                    ? "Updating this period…"
+                    ? t("employee.dashboard.statChangeUpdating")
                     : periodTipCount > 0 && valuesMatchSelectedPeriod
-                      ? `${formatEur(stats.amount)} earned · ${periodTipCount} in this period`
+                      ? t("employee.dashboard.statChangeEarned", {
+                          amount: formatEur(stats.amount),
+                          count: periodTipCount,
+                        })
                       : valuesMatchSelectedPeriod
-                        ? "No tips in this period yet."
-                        : "…"
+                        ? t("employee.dashboard.statChangeNoTips")
+                        : t("employee.dashboard.statChangeEllipsis")
                 }
                 icon={TrendingUp}
               />
               <StatCard
-                title={stats.rating != null ? "Avg rating" : "Ratings"}
-                value={stats.rating != null ? String(stats.rating) : "N/A"}
-                change={stats.rating != null ? undefined : "No ratings yet"}
+                title={stats.rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")}
+                value={stats.rating != null ? String(stats.rating) : t("format.notAvailable")}
+                change={stats.rating != null ? undefined : t("employee.dashboard.statNoRatings")}
                 icon={Star}
               />
               <StatCard
-                title="Monthly goal"
-                value={goalPct != null ? `${Math.round(Number(goalPct))}%` : "N/A"}
+                title={t("employee.dashboard.statMonthlyGoal")}
+                value={goalPct != null ? `${Math.round(Number(goalPct))}%` : t("format.notAvailable")}
                 change={
-                  goalPct != null ? "Progress toward your current target." : "Set a goal in settings to track progress."
+                  goalPct != null
+                    ? t("employee.dashboard.statGoalProgress")
+                    : t("employee.dashboard.statGoalSetHint")
                 }
                 icon={Target}
               />
@@ -519,23 +528,34 @@ export function EmployeeDashboard() {
           >
             <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
               <CardHeader>
-                <CardTitle className="text-lg">Earnings timeline</CardTitle>
+                <CardTitle className="text-lg">{t("employee.dashboard.earningsTitle")}</CardTitle>
                 <CardDescription>
                   {timeframe === "today" &&
-                    `Tips by hour today${businessTimezone ? ` · ${businessTimezone}` : ""}`}
+                    t("employee.dashboard.earningsDescToday", {
+                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
+                    })}
                   {timeframe === "week" &&
-                    `Tips by weekday this week (Mon–Sun)${businessTimezone ? ` · ${businessTimezone}` : ""}`}
+                    t("employee.dashboard.earningsDescWeek", {
+                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
+                    })}
                   {timeframe === "month" &&
-                    `Tips by calendar day this month${businessTimezone ? ` · ${businessTimezone}` : ""}`}
+                    t("employee.dashboard.earningsDescMonth", {
+                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
+                    })}
                 </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 {periodLoading || !valuesMatchSelectedPeriod ? (
                   <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-label="Loading chart" />
+                    <Loader2
+                      className="h-8 w-8 animate-spin text-muted-foreground"
+                      aria-label={t("employee.dashboard.loadingChart")}
+                    />
                   </div>
                 ) : chartData.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                  <p className="py-12 text-center text-sm text-muted-foreground">
+                    {t("employee.dashboard.noTipActivityChart")}
+                  </p>
                 ) : (
                   <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -550,7 +570,7 @@ export function EmployeeDashboard() {
                       <XAxis dataKey="time" stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} />
                       <YAxis stroke="#404040" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
                       <Tooltip
-                        formatter={(value: number) => [formatEur(Number(value)), "Earnings"]}
+                        formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.earnings")]}
                         contentStyle={{
                           backgroundColor: "#ffffff",
                           border: "1px solid #e5e5e5",
@@ -587,7 +607,7 @@ export function EmployeeDashboard() {
                     className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
                     aria-expanded={recentTipsExpanded}
                   >
-                    <CardTitle className="text-lg">Recent tips</CardTitle>
+                    <CardTitle className="text-lg">{t("employee.dashboard.recentTips")}</CardTitle>
                     <ChevronDown
                       className={cn(
                         "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
@@ -600,7 +620,7 @@ export function EmployeeDashboard() {
                     to="/employee/notifications"
                     className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
                   >
-                    View all
+                    {t("dashboard.viewAll")}
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </CardHeader>
@@ -608,7 +628,9 @@ export function EmployeeDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {recentTips.length === 0 ? (
-                        <p className="py-6 text-center text-sm text-muted-foreground">No tips yet</p>
+                        <p className="py-6 text-center text-sm text-muted-foreground">
+                          {t("employee.dashboard.noTipsYet")}
+                        </p>
                       ) : (
                         recentTips.map((tip) => (
                           <div
@@ -638,8 +660,8 @@ export function EmployeeDashboard() {
               >
                 <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
                   <CardHeader>
-                    <CardTitle className="text-lg">Quick actions</CardTitle>
-                    <CardDescription>QR and public page</CardDescription>
+                    <CardTitle className="text-lg">{t("employee.dashboard.quickActions")}</CardTitle>
+                    <CardDescription>{t("employee.dashboard.quickActionsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-3">
@@ -656,26 +678,28 @@ export function EmployeeDashboard() {
                         )}
                         <span className="text-center text-xs font-semibold leading-tight">
                           {slugLoading
-                            ? "Loading…"
+                            ? t("employee.dashboard.qrTileLoading")
                             : generatingSlug
-                              ? "Generating…"
+                              ? t("employee.dashboard.qrTileGenerating")
                               : hasSlug
-                                ? "My QR"
-                                : "Generate QR"}
+                                ? t("employee.dashboard.qrTileMyQr")
+                                : t("employee.dashboard.qrTileGenerate")}
                         </span>
                       </Button>
                       {hasSlug && !slugLoading ? (
                         <Button variant="outline" className="h-auto min-h-[100px] flex-col gap-2 py-4" asChild>
                           <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-6 w-6" aria-hidden />
-                            <span className="text-center text-xs font-semibold leading-tight">View profile</span>
+                            <span className="text-center text-xs font-semibold leading-tight">
+                              {t("employee.dashboard.viewProfile")}
+                            </span>
                           </a>
                         </Button>
                       ) : (
                         <Button variant="outline" className="h-auto min-h-[100px] flex-col gap-2 py-4" disabled>
                           <Eye className="h-6 w-6" aria-hidden />
                           <span className="text-center text-xs font-semibold leading-tight">
-                            {slugLoading ? "Loading…" : "View profile"}
+                            {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}
                           </span>
                         </Button>
                       )}
@@ -694,7 +718,7 @@ export function EmployeeDashboard() {
           open={qrModalOpen}
           onOpenChange={setQrModalOpen}
           employeeId={qrEmployeeId}
-          employeeName={user.name ?? "Staff"}
+          employeeName={user.name ?? t("employee.dashboard.modalStaffFallback")}
           businessSlug={employeeBusinessSlug ?? undefined}
           employeeSlug={typeof staffSlug === "string" ? staffSlug : undefined}
         />

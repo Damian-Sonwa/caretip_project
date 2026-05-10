@@ -1,8 +1,10 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function LandingFinalCtaSection() {
+  const { t } = useTranslation();
   return (
     <section className="relative overflow-hidden bg-white px-6 py-16 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-950">
       <div
@@ -16,7 +18,7 @@ export function LandingFinalCtaSection() {
           viewport={{ once: true }}
           className="text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
         >
-          Start rewarding your team today
+          {t("landing.finalCta.title")}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0, y: 14 }}
@@ -25,7 +27,7 @@ export function LandingFinalCtaSection() {
           transition={{ delay: 0.06 }}
           className="mt-4 text-pretty text-lg leading-relaxed text-neutral-600 dark:text-neutral-400 sm:mt-5"
         >
-          Set up in minutes and give your team the recognition they deserve.
+          {t("landing.finalCta.subtitle")}
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 14 }}
@@ -38,7 +40,7 @@ export function LandingFinalCtaSection() {
             to="/auth?mode=signup&role=business&from=landing"
             className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
           >
-            Get started
+            {t("landing.finalCta.cta")}
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Link>
         </motion.div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 import { motion, useMotionValue, useTransform } from "motion/react";
 import { cn } from "@/lib/utils";
 import { CareTipLogo } from "@/app/components/CareTipLogo";
@@ -33,6 +34,7 @@ export function SignInCard2({
   formBusy = false,
   sessionActive = false,
 }: SignInCard2Props) {
+  const { t } = useTranslation();
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const rotateX = useTransform(mouseY, [-300, 300], [6, -6]);
@@ -91,7 +93,11 @@ export function SignInCard2({
                 transition={{ delay: 0.08 }}
                 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl"
               >
-                {sessionActive ? "CareTip" : isLogin ? "Welcome back" : "Get started"}
+                {sessionActive
+                  ? t("auth.signInCard.titleCareTip")
+                  : isLogin
+                    ? t("auth.signInCard.titleWelcomeBack")
+                    : t("auth.signInCard.titleGetStarted")}
               </motion.h1>
               <motion.p
                 initial={{ opacity: 0 }}
@@ -100,10 +106,10 @@ export function SignInCard2({
                 className="text-xs font-medium text-neutral-600 dark:text-neutral-400"
               >
                 {sessionActive
-                  ? "Manage your session"
+                  ? t("auth.signInCard.subtitleSession")
                   : isLogin
-                    ? "Sign in to CareTip"
-                    : "Create your CareTip account"}
+                    ? t("auth.signInCard.subtitleSignIn")
+                    : t("auth.signInCard.subtitleCreate")}
               </motion.p>
             </div>
 
@@ -112,7 +118,7 @@ export function SignInCard2({
                 <div
                   className="mb-5 flex rounded-full border border-gray-200 bg-gray-50 p-1 dark:border-neutral-800 dark:bg-neutral-900"
                   role="tablist"
-                  aria-label="Account mode"
+                  aria-label={t("auth.signInCard.tablistAria")}
                 >
                   <button
                     type="button"
@@ -130,7 +136,7 @@ export function SignInCard2({
                       formBusy && "cursor-not-allowed opacity-60",
                     )}
                   >
-                    Sign in
+                    {t("auth.signInCard.tabSignIn")}
                   </button>
                   <button
                     type="button"
@@ -148,7 +154,7 @@ export function SignInCard2({
                       formBusy && "cursor-not-allowed opacity-60",
                     )}
                   >
-                    Sign up
+                    {t("auth.signInCard.tabSignUp")}
                   </button>
                 </div>
 
@@ -157,7 +163,7 @@ export function SignInCard2({
                     htmlFor="auth-role-select"
                     className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400"
                   >
-                    Account type
+                    {t("auth.signInCard.accountTypeLabel")}
                   </label>
                   <div className="relative">
                     <select
@@ -172,8 +178,8 @@ export function SignInCard2({
                         "[&>option]:bg-white [&>option]:text-neutral-900 dark:[&>option]:bg-neutral-900 dark:[&>option]:text-neutral-100",
                       )}
                     >
-                      <option value="business">Business</option>
-                      <option value="employee">Staff</option>
+                      <option value="business">{t("auth.signInCard.roleBusiness")}</option>
+                      <option value="employee">{t("auth.signInCard.roleStaff")}</option>
                     </select>
                     <ChevronDown
                       className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400"

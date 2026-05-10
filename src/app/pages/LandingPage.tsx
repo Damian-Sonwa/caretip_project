@@ -1,6 +1,8 @@
-import React from "react";
+import { useMemo } from "react";
 import { Smartphone } from "lucide-react";
-import heroCaretipImage from "../../../images/aftermath.png";
+import { useTranslation } from "react-i18next";
+import heroVisualEn from "../../../images/aftermath.png";
+import heroVisualDe from "../../../images/new-hero.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -12,20 +14,39 @@ import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSec
 import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
 
-const SHOWCASE_TABS: TabMedia[] = [
-  {
-    value: "contactless",
-    label: "QR scan",
-    Icon: Smartphone,
-    src: heroCaretipImage,
-    alt: "Phone showing CareTip QR tipping screen",
-    imageFit: "contain",
-    imageObjectPosition: "center",
-  },
-];
-
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
+  const { t, i18n } = useTranslation();
+
+  const showcaseTabs: TabMedia[] = useMemo(() => {
+    const src = i18n.language?.toLowerCase().startsWith("de") ? heroVisualDe : heroVisualEn;
+    return [
+      {
+        value: "contactless",
+        label: t("landing.showcase.tabQrLabel"),
+        Icon: Smartphone,
+        src,
+        alt: t("landing.showcase.tabQrAlt"),
+        imageFit: "contain",
+        imageObjectPosition: "center",
+      },
+    ];
+  }, [t, i18n.language]);
+
+  const showcaseSteps = useMemo(
+    () => [
+      { id: "s1", title: t("landing.showcase.step1Title"), text: t("landing.showcase.step1Text") },
+      { id: "s2", title: t("landing.showcase.step2Title"), text: t("landing.showcase.step2Text") },
+      { id: "s3", title: t("landing.showcase.step3Title"), text: t("landing.showcase.step3Text") },
+    ],
+    [t],
+  );
+
+  const showcaseStats = useMemo(
+    () => [t("landing.showcase.statLive"), t("landing.showcase.statPos"), t("landing.showcase.statSecure")],
+    [t],
+  );
+
   return (
     <div className="relative min-h-screen bg-white">
       <div className="relative z-10">
@@ -36,31 +57,15 @@ export function LandingPage() {
           <FeatureShowcase
             id="about-section"
             className="font-sans"
-            title="Tip in seconds. Reward great service instantly."
-            description="CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan."
-            stats={["Live in minutes", "No POS integration", "Secure checkout"]}
-            steps={[
-              {
-                id: "s1",
-                title: "Guests scan your QR",
-                text: "Table tents, badges, or a shareable link, with no guest app required.",
-              },
-              {
-                id: "s2",
-                title: "Tips route your way",
-                text: "Pool by shift or reward individuals. You stay in control.",
-              },
-              {
-                id: "s3",
-                title: "Everyone sees clarity",
-                text: "Staff see earnings; you see performance, without the busywork.",
-              },
-            ]}
-            tabs={SHOWCASE_TABS}
+            title={t("landing.showcase.title")}
+            description={t("landing.showcase.description")}
+            stats={showcaseStats}
+            steps={showcaseSteps}
+            tabs={showcaseTabs}
             defaultTab="contactless"
-            primaryCtaLabel="Get Started"
+            primaryCtaLabel={t("landing.showcase.primaryCta")}
             primaryCtaTo="/auth?mode=signup&role=business&from=landing"
-            secondaryCtaLabel="Staff Access"
+            secondaryCtaLabel={t("landing.showcase.secondaryCta")}
             secondaryCtaTo="/join"
             variant="cinematic"
             useAnimatedHero={false}

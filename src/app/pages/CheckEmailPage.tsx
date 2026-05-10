@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router";
 import { Mail, Copy, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -60,13 +61,15 @@ function VerifyEmailFromToken({ token }: { token: string }) {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Email verified</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">Thanks. You can sign in to continue.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
+            {t("auth.checkEmail.emailVerifiedTitle")}
+          </h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.checkEmail.emailVerifiedBody")}</p>
           <Link
             to="/login"
             className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Continue to sign in
+            {t("auth.checkEmail.continueToSignIn")}
           </Link>
         </div>
       </AuthRecoveryLayout>
@@ -76,8 +79,10 @@ function VerifyEmailFromToken({ token }: { token: string }) {
   return (
     <AuthRecoveryLayout showFooterLink={false}>
       <div className="space-y-3 text-center">
-        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Verifying your email…</h1>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">This will only take a moment.</p>
+        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
+          {t("auth.checkEmail.verifyingTitle")}
+        </h1>
+        <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.checkEmail.verifyingBody")}</p>
       </div>
     </AuthRecoveryLayout>
   );
@@ -88,6 +93,7 @@ function VerifyEmailFromToken({ token }: { token: string }) {
  * With `?token=` from the email link, completes verification once then redirects.
  */
 export function CheckEmailPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
@@ -120,11 +126,11 @@ export function CheckEmailPage() {
     if (!user?.email) return;
     try {
       await navigator.clipboard.writeText(user.email);
-      toast.success("Email address copied. Open your inbox in a browser or app and look for CareTip.");
+      toast.success(t("auth.checkEmail.toastCopySuccess"));
     } catch {
-      toast.error("Could not copy automatically. Your address is shown above.");
+      toast.error(t("auth.checkEmail.toastCopyError"));
     }
-  }, [user?.email]);
+  }, [user?.email, t]);
 
   const handleResendVerification = useCallback(async () => {
     setResendBusy(true);
@@ -132,14 +138,14 @@ export function CheckEmailPage() {
       const r = hasSessionUser
         ? await resendVerificationEmailSessionAPI()
         : await resendVerificationEmailAPI(email.trim(), password);
-      toast.success(r.message || "We sent a new verification link. Check your inbox.");
+      toast.success(r.message || t("auth.page.toastResendDefault"));
     } catch (err) {
       logClientError("CheckEmailPage.resendVerification", err);
       toast.error(toUserFriendlyMessage(err));
     } finally {
       setResendBusy(false);
     }
-  }, [email, hasSessionUser, password]);
+  }, [email, hasSessionUser, password, t]);
 
   const handleContinueAfterVerify = useCallback(async () => {
     const refreshed = await refreshSession();
@@ -149,11 +155,11 @@ export function CheckEmailPage() {
       return;
     }
     if (refreshed.isVerified === false) {
-      toast.error("Not verified yet. Open the link in your email first.");
+      toast.error(t("auth.checkEmail.toastNotVerified"));
       return;
     }
     navigate(getPostAuthRedirect(refreshed), { replace: true });
-  }, [logout, navigate, refreshSession]);
+  }, [logout, navigate, refreshSession, t]);
 
   useEffect(() => {
     if (user?.email) setEmail(user.email);
@@ -173,21 +179,19 @@ export function CheckEmailPage() {
           </div>
         ) : null}
         <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
-          Check your email to verify your account
+          {t("auth.checkEmail.title")}
         </h1>
         {hasSessionUser ? (
           <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-            We sent a verification link to{" "}
-            <span className="font-semibold text-neutral-900 dark:text-neutral-100">{user!.email}</span>. Open it on this device
-            (or copy the link into the browser where you use CareTip).
+            {t("auth.checkEmail.introSession", { email: user!.email })}
           </p>
         ) : (
           <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-            Enter your email and password to resend the verification link.
+            {t("auth.checkEmail.introResend")}
           </p>
         )}
         <p className="text-xs text-neutral-600 dark:text-neutral-400">
-          The dashboard stays unavailable until your email is verified.
+          {t("auth.checkEmail.dashboardLocked")}
         </p>
 
         <div className="flex flex-col gap-2 pt-2">
@@ -198,18 +202,18 @@ export function CheckEmailPage() {
               className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
             >
               <Mail className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
-              Open my email
+              {t("auth.checkEmail.openMyEmail")}
               {isWebmail ? (
-                <span className="sr-only">Opens {inboxTarget!.providerLabel}</span>
+                <span className="sr-only">{t("auth.checkEmail.srOnlyOpensWebmail", { provider: inboxTarget!.providerLabel })}</span>
               ) : (
-                <span className="sr-only">Opens your default email app</span>
+                <span className="sr-only">{t("auth.checkEmail.srOnlyOpensDefault")}</span>
               )}
             </button>
           ) : null}
 
           {hasSessionUser && isWebmail && (
             <p className="text-[11px] leading-snug text-neutral-600 dark:text-neutral-400">
-              Opens {inboxTarget!.providerLabel} in a new tab.
+              {t("auth.checkEmail.opensWebmailHint", { provider: inboxTarget!.providerLabel })}
             </p>
           )}
 
@@ -220,22 +224,26 @@ export function CheckEmailPage() {
               className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
             >
               <Copy className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
-              Go to inbox manually
+              {t("auth.checkEmail.goToInboxManually")}
             </button>
           ) : (
             <div className="space-y-2 text-left">
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">Email</span>
+                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">
+                  {t("auth.checkEmail.emailLabel")}
+                </span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-neutral-900 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-                  placeholder="you@venue.com"
+                  placeholder={t("auth.checkEmail.placeholderEmail")}
                   autoComplete="email"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">Password</span>
+                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">
+                  {t("auth.checkEmail.passwordLabel")}
+                </span>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden />
                   <input
@@ -243,14 +251,14 @@ export function CheckEmailPage() {
                     onChange={(e) => setPassword(e.target.value)}
                     type={showPassword ? "text" : "password"}
                     className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-10 text-sm font-medium text-neutral-900 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-                    placeholder="Your password"
+                    placeholder={t("auth.checkEmail.placeholderPassword")}
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((s) => !s)}
                     className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-neutral-500 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? t("auth.page.hidePassword") : t("auth.page.showPassword")}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -268,18 +276,18 @@ export function CheckEmailPage() {
             {resendBusy ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                Sending…
+                {t("auth.checkEmail.resendSending")}
               </>
             ) : (
-              "Resend verification email"
+              t("auth.checkEmail.resendButton")
             )}
           </button>
 
           {!hasSessionUser ? (
             <p className="pt-1 text-[11px] text-neutral-600 dark:text-neutral-400">
-              Forgot your password?{" "}
+              {t("auth.checkEmail.forgotPasswordLead")}{" "}
               <Link to="/forgot-password" className="font-semibold text-primary underline-offset-2 hover:underline">
-                Reset it
+                {t("auth.checkEmail.resetIt")}
               </Link>
               .
             </p>
@@ -294,7 +302,7 @@ export function CheckEmailPage() {
             }}
             className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Continue
+            {t("auth.checkEmail.continue")}
           </button>
           <button
             type="button"
@@ -304,7 +312,7 @@ export function CheckEmailPage() {
             }}
             className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
           >
-            Use a different email
+            {t("auth.checkEmail.useDifferentEmail")}
           </button>
         </div>
       </div>

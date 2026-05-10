@@ -1,12 +1,21 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 import { Search, CreditCard } from "lucide-react";
 import { fetchPlatformTransactions, type GlobalTransactionRow } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 
+function payoutStatusLabel(status: string, t: TFunction) {
+  const key = `admin.globalTransactionsPage.payoutStatus.${status}`;
+  const label = t(key);
+  return label === key ? status.replace(/_/g, " ") : label;
+}
+
 export function GlobalTransactionsPage() {
+  const { t } = useTranslation();
   const [q, setQ] = useState("");
   const [debouncedQ, setDebouncedQ] = useState("");
   const [items, setItems] = useState<GlobalTransactionRow[]>([]);
@@ -46,11 +55,12 @@ export function GlobalTransactionsPage() {
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
                 <CreditCard className="w-7 h-7 text-accent" />
-                Global Transactions
+                {t("admin.globalTransactionsPage.title")}
               </h1>
               <p className="text-muted-foreground">
-                All tips platform-wide. Amounts in EUR, CareTip fee {items[0]?.caretipFeePercent ?? 5}%, net to staff,
-                payout status.
+                {t("admin.globalTransactionsPage.subtitle", {
+                  feePercent: items[0]?.caretipFeePercent ?? 5,
+                })}
               </p>
             </div>
 
@@ -58,14 +68,14 @@ export function GlobalTransactionsPage() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
                 type="search"
-                placeholder="Transaction ID, Stripe ID, business name, or staff name…"
+                placeholder={t("admin.globalTransactionsPage.searchPlaceholder")}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 autoComplete="off"
-                aria-label="Search transactions"
+                aria-label={t("admin.globalTransactionsPage.searchAria")}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm"
               />
-              <p className="mt-1.5 text-xs text-muted-foreground">Results update as you type.</p>
+              <p className="mt-1.5 text-xs text-muted-foreground">{t("admin.globalTransactionsPage.hintLiveSearch")}</p>
             </div>
 
             <motion.div
@@ -77,25 +87,25 @@ export function GlobalTransactionsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Transaction</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">Amount (EUR)</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">CareTip fee</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">Net to staff</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Payout</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.globalTransactionsPage.colTransaction")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.globalTransactionsPage.colBusiness")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.globalTransactionsPage.colAmountEur")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.globalTransactionsPage.colCaretipFee")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.globalTransactionsPage.colNetToStaff")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.globalTransactionsPage.colPayout")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-10">
-                          <CareTipPageLoader variant="compact" message="Loading…" />
+                          <CareTipPageLoader variant="compact" message={t("admin.globalTransactionsPage.loading")} />
                         </td>
                       </tr>
                     ) : items.length === 0 ? (
                       <tr>
                         <td colSpan={6} className="px-4 py-12 text-center text-muted-foreground">
-                          No transactions found.
+                          {t("admin.globalTransactionsPage.empty")}
                         </td>
                       </tr>
                     ) : (
@@ -127,7 +137,7 @@ export function GlobalTransactionsPage() {
                                       : "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100"
                               }`}
                             >
-                              {row.payoutStatus.replace(/_/g, " ")}
+                              {payoutStatusLabel(row.payoutStatus, t)}
                             </span>
                           </td>
                         </tr>
@@ -138,7 +148,7 @@ export function GlobalTransactionsPage() {
               </div>
               {!loading && (
                 <div className="px-4 py-2 text-xs text-muted-foreground border-t border-border">
-                  Showing {items.length} of {total} total
+                  {t("admin.globalTransactionsPage.footerShowing", { shown: items.length, total })}
                 </div>
               )}
             </motion.div>

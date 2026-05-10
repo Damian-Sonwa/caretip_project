@@ -14,21 +14,21 @@ import {
 export const BUSINESS_DASHBOARD_HOME_HREF = "/dashboard" as const;
 
 export type BusinessDashboardNavItem = {
-  name: string;
+  labelKey: string;
   href: string;
   icon: LucideIcon;
 };
 
 export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
-  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Team", href: "/dashboard/staff-management", icon: Users },
-  { name: "QR codes", href: "/dashboard/qr-code-management", icon: QrCode },
-  { name: "Locations", href: "/dashboard/locations", icon: MapPin },
-  { name: "Tables", href: "/dashboard/tables", icon: LayoutGrid },
-  { name: "Tips & activity", href: "/dashboard/transactions", icon: Wallet },
-  { name: "Venue profile", href: "/dashboard/profile", icon: Building2 },
-  { name: "Notifications", href: "/dashboard/notifications", icon: Bell },
-  { name: "Account settings", href: "/dashboard/profile-settings", icon: UserCircle },
+  { labelKey: "dashboardNav.business.overview", href: "/dashboard", icon: LayoutDashboard },
+  { labelKey: "dashboardNav.business.team", href: "/dashboard/staff-management", icon: Users },
+  { labelKey: "dashboardNav.business.qrCodes", href: "/dashboard/qr-code-management", icon: QrCode },
+  { labelKey: "dashboardNav.business.locations", href: "/dashboard/locations", icon: MapPin },
+  { labelKey: "dashboardNav.business.tables", href: "/dashboard/tables", icon: LayoutGrid },
+  { labelKey: "dashboardNav.business.tipsActivity", href: "/dashboard/transactions", icon: Wallet },
+  { labelKey: "dashboardNav.business.venueProfile", href: "/dashboard/profile", icon: Building2 },
+  { labelKey: "dashboardNav.business.notifications", href: "/dashboard/notifications", icon: Bell },
+  { labelKey: "dashboardNav.business.accountSettings", href: "/dashboard/profile-settings", icon: UserCircle },
 ] as const;
 
 export function isBusinessDashboardNavActive(href: string, pathname: string): boolean {

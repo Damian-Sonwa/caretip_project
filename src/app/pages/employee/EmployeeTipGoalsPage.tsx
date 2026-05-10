@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { Check, ChevronLeft, Pencil, Plus, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
@@ -22,12 +23,6 @@ import { Label } from "../../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../components/ui/select";
 import { cn } from "@/lib/utils";
 
-const PERIOD_LABEL: Record<GoalPeriod, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-};
-
 function formatEur(value: number): string {
   try {
     return new Intl.NumberFormat(undefined, { style: "currency", currency: "EUR" }).format(value);
@@ -37,6 +32,7 @@ function formatEur(value: number): string {
 }
 
 export function EmployeeTipGoalsPage() {
+  const { t } = useTranslation();
   const { user } = useRequireAuth();
   const [loading, setLoading] = useState(true);
   const [goals, setGoals] = useState<EmployeeGoalRow[]>([]);
@@ -59,9 +55,9 @@ export function EmployeeTipGoalsPage() {
     } catch (e) {
       logClientError("EmployeeTipGoalsPage.refresh", e);
       setGoals([]);
-      setLoadError(e instanceof Error ? e.message : "Failed to load goals.");
+      setLoadError(e instanceof Error ? e.message : t("employee.tipGoals.loadFailed"));
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (!user || user.role !== "employee") return;
@@ -108,43 +104,47 @@ export function EmployeeTipGoalsPage() {
 
   const empty = sortedGoals.length === 0;
 
+  const periodLabel = (p: GoalPeriod) => t(`business.period.${p}`);
+
   if (!user || user.role !== "employee") return null;
   if (loading) return <CareTipPageLoader />;
 
   return (
     <div className="caretip-container py-6">
       <div className="mb-6 flex items-center justify-between gap-3">
-        <Link to="/employee/dashboard" className="rounded-lg p-2 transition-colors hover:bg-muted" aria-label="Back">
+        <Link
+          to="/employee/dashboard"
+          className="rounded-lg p-2 transition-colors hover:bg-muted"
+          aria-label={t("employee.tipGoals.backAria")}
+        >
           <ChevronLeft className="h-5 w-5" />
         </Link>
         <div className="min-w-0 flex-1">
-          <h1 className="truncate text-xl font-semibold text-foreground">Tip goals</h1>
-          <p className="text-sm text-muted-foreground">Set a target and track your progress.</p>
+          <h1 className="truncate text-xl font-semibold text-foreground">{t("employee.tipGoals.title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("employee.tipGoals.subtitle")}</p>
         </div>
       </div>
 
       <Card className="w-full rounded-3xl border border-gray-100 bg-white p-0 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
         <div className="flex flex-col gap-3 border-b border-gray-100 px-4 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="min-w-0">
-            <h2 className="text-base font-semibold text-foreground">Manage goals</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Create, edit, archive, or delete your tip goals.</p>
+            <h2 className="text-base font-semibold text-foreground">{t("employee.tipGoals.manageTitle")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{t("employee.tipGoals.manageSubtitle")}</p>
           </div>
           <Button type="button" onClick={openCreate} className="rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926]">
             <Plus className="mr-2 h-4 w-4" />
-            New Goal
+            {t("employee.tipGoals.newGoal")}
           </Button>
         </div>
 
         {loadError ? (
           <div className="px-4 py-8 sm:px-6">
             <div className="rounded-2xl border border-gray-100 bg-muted/20 p-5">
-              <p className="text-sm font-semibold text-foreground">Couldn&apos;t load goals</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                {loadError}
-              </p>
+              <p className="text-sm font-semibold text-foreground">{t("employee.tipGoals.couldNotLoad")}</p>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{loadError}</p>
               <div className="mt-4 flex gap-2">
                 <Button type="button" variant="outline" onClick={() => void refresh()}>
-                  Retry
+                  {t("employee.tipGoals.retry")}
                 </Button>
               </div>
             </div>
@@ -176,22 +176,15 @@ export function EmployeeTipGoalsPage() {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                   />
-                  <path
-                    d="M26 46h12"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                  />
+                  <path d="M26 46h12" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" />
                 </svg>
               </div>
-              <h3 className="mt-6 text-base font-semibold text-foreground">No goals set yet</h3>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                Add your first goal to start tracking your tipping progress.
-              </p>
+              <h3 className="mt-6 text-base font-semibold text-foreground">{t("employee.tipGoals.emptyTitle")}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{t("employee.tipGoals.emptySubtitle")}</p>
               <div className="mt-6">
                 <Button type="button" onClick={openCreate} className="rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926]">
                   <Plus className="mr-2 h-4 w-4" />
-                  New Goal
+                  {t("employee.tipGoals.newGoal")}
                 </Button>
               </div>
             </div>
@@ -202,16 +195,16 @@ export function EmployeeTipGoalsPage() {
               <thead>
                 <tr className="bg-muted/20 text-left">
                   <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
-                    Goal Name
+                    {t("employee.tipGoals.colName")}
                   </th>
                   <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
-                    Target (€)
+                    {t("employee.tipGoals.colTarget")}
                   </th>
                   <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
-                    Period
+                    {t("employee.tipGoals.colPeriod")}
                   </th>
                   <th className="whitespace-nowrap px-4 py-3 text-[12px] font-semibold tracking-wide text-muted-foreground sm:px-6">
-                    Actions
+                    {t("employee.tipGoals.colActions")}
                   </th>
                 </tr>
               </thead>
@@ -223,24 +216,24 @@ export function EmployeeTipGoalsPage() {
                         <span className="truncate">{g.name}</span>
                         {g.status === "archived" ? (
                           <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
-                            Archived
+                            {t("employee.tipGoals.statusArchived")}
                           </span>
                         ) : (
                           <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
-                            Active
+                            {t("employee.tipGoals.statusActive")}
                           </span>
                         )}
                       </div>
                     </td>
                     <td className="px-4 py-4 text-foreground sm:px-6">{formatEur(Number(g.goalAmount) || 0)}</td>
-                    <td className="px-4 py-4 text-foreground sm:px-6">{PERIOD_LABEL[g.goalPeriod]}</td>
+                    <td className="px-4 py-4 text-foreground sm:px-6">{periodLabel(g.goalPeriod)}</td>
                     <td className="px-4 py-4 sm:px-6">
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => openEdit(g)}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-muted"
-                          aria-label="Edit goal"
+                          aria-label={t("employee.tipGoals.editAria")}
                           disabled={busyGoalId === g.id}
                         >
                           <Pencil className="h-4 w-4" />
@@ -249,7 +242,7 @@ export function EmployeeTipGoalsPage() {
                           type="button"
                           onClick={() => {
                             if (g.status === "archived") return;
-                            if (!window.confirm("Archive this goal? You can keep it for records.")) return;
+                            if (!window.confirm(t("employee.tipGoals.confirmArchive"))) return;
                             setBusyGoalId(g.id);
                             void (async () => {
                               try {
@@ -266,7 +259,7 @@ export function EmployeeTipGoalsPage() {
                             "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 transition-colors hover:bg-muted",
                             g.status === "archived" && "opacity-40 cursor-not-allowed",
                           )}
-                          aria-label="Archive goal"
+                          aria-label={t("employee.tipGoals.archiveAria")}
                           disabled={busyGoalId === g.id || g.status === "archived"}
                         >
                           <Check className="h-4 w-4" />
@@ -274,7 +267,7 @@ export function EmployeeTipGoalsPage() {
                         <button
                           type="button"
                           onClick={() => {
-                            if (!window.confirm("Delete this goal? This can't be undone.")) return;
+                            if (!window.confirm(t("employee.tipGoals.confirmDelete"))) return;
                             setBusyGoalId(g.id);
                             void (async () => {
                               try {
@@ -288,7 +281,7 @@ export function EmployeeTipGoalsPage() {
                             })();
                           }}
                           className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white text-red-500 transition-colors hover:bg-red-50"
-                          aria-label="Delete goal"
+                          aria-label={t("employee.tipGoals.deleteAria")}
                           disabled={busyGoalId === g.id}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -306,22 +299,22 @@ export function EmployeeTipGoalsPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>{editing ? "Edit goal" : "Create new goal"}</DialogTitle>
-            <DialogDescription>Set a target amount and a period for tracking.</DialogDescription>
+            <DialogTitle>{editing ? t("employee.tipGoals.dialogEdit") : t("employee.tipGoals.dialogCreate")}</DialogTitle>
+            <DialogDescription>{t("employee.tipGoals.dialogDesc")}</DialogDescription>
           </DialogHeader>
 
           <div className="grid gap-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="goal-name">Goal name</Label>
+              <Label htmlFor="goal-name">{t("employee.tipGoals.labelName")}</Label>
               <Input
                 id="goal-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="My weekly target"
+                placeholder={t("employee.tipGoals.placeholderName")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="goal-amount">Target (€)</Label>
+              <Label htmlFor="goal-amount">{t("employee.tipGoals.labelAmount")}</Label>
               <Input
                 id="goal-amount"
                 type="number"
@@ -329,31 +322,31 @@ export function EmployeeTipGoalsPage() {
                 step="0.01"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="300"
+                placeholder={t("employee.tipGoals.placeholderAmount")}
               />
             </div>
             <div className="space-y-2">
-              <Label>Period</Label>
+              <Label>{t("employee.tipGoals.labelPeriod")}</Label>
               <Select value={period} onValueChange={(v) => setPeriod(v as GoalPeriod)}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="daily">Daily</SelectItem>
-                  <SelectItem value="weekly">Weekly</SelectItem>
-                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="daily">{t("business.period.daily")}</SelectItem>
+                  <SelectItem value="weekly">{t("business.period.weekly")}</SelectItem>
+                  <SelectItem value="monthly">{t("business.period.monthly")}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="goal-start">Start date</Label>
+              <Label htmlFor="goal-start">{t("employee.tipGoals.labelStart")}</Label>
               <Input id="goal-start" type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
             </div>
           </div>
 
           <DialogFooter className="gap-2 sm:gap-0">
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
-              Cancel
+              {t("employee.tipGoals.cancel")}
             </Button>
             <Button
               type="button"
@@ -367,9 +360,19 @@ export function EmployeeTipGoalsPage() {
                 void (async () => {
                   try {
                     if (editing) {
-                      await updateMyGoal(editing.id, { name: name.trim(), goalAmount: n, goalPeriod: period, startDate: startDate.trim() });
+                      await updateMyGoal(editing.id, {
+                        name: name.trim(),
+                        goalAmount: n,
+                        goalPeriod: period,
+                        startDate: startDate.trim(),
+                      });
                     } else {
-                      await createMyGoal({ name: name.trim(), goalAmount: n, goalPeriod: period, startDate: startDate.trim() });
+                      await createMyGoal({
+                        name: name.trim(),
+                        goalAmount: n,
+                        goalPeriod: period,
+                        startDate: startDate.trim(),
+                      });
                     }
                     setOpen(false);
                     await refresh();
@@ -382,7 +385,7 @@ export function EmployeeTipGoalsPage() {
               }}
               className="rounded-2xl bg-[#EB992C] text-white hover:bg-[#d88926]"
             >
-              Save
+              {t("employee.tipGoals.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -390,4 +393,3 @@ export function EmployeeTipGoalsPage() {
     </div>
   );
 }
-

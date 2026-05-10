@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { ChevronLeft, Upload, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
   getEmployeeProfile,
@@ -39,6 +40,7 @@ import { Button } from "../../components/ui/button";
 const TEAL = "#EB992C";
 
 export function EmployeeSettingsPage() {
+  const { t } = useTranslation();
   const { user, logout, updateUser } = useRequireAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
@@ -70,7 +72,7 @@ export function EmployeeSettingsPage() {
         updateUser({ avatar: p.avatar ?? undefined, name: p.name });
       } catch (err) {
         logClientError("EmployeeSettingsPage", err);
-        toast.error("Could not load settings.");
+        toast.error(t("employee.settings.toastLoadError"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -79,14 +81,14 @@ export function EmployeeSettingsPage() {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- full `user` would loop after updateUser
-  }, [user?.role, user?.id, updateUser]);
+  }, [user?.role, user?.id, updateUser, t]);
 
   const handleSaveProfile = async () => {
     setSaving(true);
     try {
       const mg = monthlyGoal.trim() === "" ? null : Number(monthlyGoal);
       if (monthlyGoal.trim() !== "" && (Number.isNaN(mg) || mg! < 0)) {
-        toast.error("Monthly goal must be a valid number.");
+        toast.error(t("employee.settings.toastMonthlyGoalInvalid"));
         setSaving(false);
         return;
       }
@@ -98,7 +100,7 @@ export function EmployeeSettingsPage() {
         pushNotifications: pushNotif,
       });
       updateUser({ name: updated.name, avatar: updated.avatar ?? undefined });
-      toast.success("Profile saved.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("employee.settings.toastProfileSaved"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {
       logClientError("EmployeeSettingsPage", e);
       toast.error(toUserFriendlyMessage(e, { audience: "employee" }));
@@ -111,7 +113,7 @@ export function EmployeeSettingsPage() {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (!file || !file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+      toast.error(t("employee.settings.toastImageOnly"));
       return;
     }
     setUploading(true);
@@ -119,7 +121,7 @@ export function EmployeeSettingsPage() {
       const { avatar } = await uploadEmployeeAvatar(file);
       const base = avatar.split("?")[0];
       updateUser({ avatar: `${base}?v=${Date.now()}` });
-      toast.success("Photo updated.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("employee.settings.toastPhotoUpdated"), { style: { background: TEAL, color: "#fff" } });
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
       toast.error(toUserFriendlyMessage(err, { audience: "employee" }));
@@ -130,7 +132,7 @@ export function EmployeeSettingsPage() {
 
   const handleChangePassword = async () => {
     if (!isPasswordStrong(newPw)) {
-      toast.error("New password does not meet all requirements.");
+      toast.error(t("employee.settings.toastPasswordWeak"));
       return;
     }
     try {
@@ -147,10 +149,10 @@ export function EmployeeSettingsPage() {
   const handleDownload = async () => {
     try {
       await downloadMyDataExport();
-      toast.success("Download started.");
+      toast.success(t("employee.settings.toastDownloadStarted"));
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
-      toast.error("Download failed.");
+      toast.error(t("employee.settings.toastDownloadFailed"));
     }
   };
 
@@ -159,10 +161,10 @@ export function EmployeeSettingsPage() {
       await deleteMyEmployeeAccount();
       logout();
       navigate("/", { replace: true });
-      toast.success("Your account has been deleted.");
+      toast.success(t("employee.settings.toastAccountDeleted"));
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
-      toast.error("Could not delete account.");
+      toast.error(t("employee.settings.toastDeleteFailed"));
     }
   };
 
@@ -182,12 +184,12 @@ export function EmployeeSettingsPage() {
           <Link to="/employee/dashboard" className="p-2 rounded-lg hover:bg-muted transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
-          <h2 className="text-xl font-semibold text-foreground">Settings</h2>
+          <h2 className="text-xl font-semibold text-foreground">{t("employee.settings.title")}</h2>
         </div>
 
         <section className="space-y-4 rounded-xl border border-border bg-card p-6">
           <h3 className="font-semibold text-foreground" style={{ color: "#283D3B" }}>
-            Profile photo
+            {t("employee.settings.photoSection")}
           </h3>
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
             <ProfileAvatar
@@ -199,22 +201,22 @@ export function EmployeeSettingsPage() {
           </div>
           <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: TEAL }}>
             <Upload className="w-4 h-4" />
-            {uploading ? "Uploading…" : "Upload image"}
+            {uploading ? t("employee.settings.uploading") : t("employee.settings.uploadImage")}
             <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatar} disabled={uploading} />
           </label>
-          <p className="text-xs text-muted-foreground">JPEG, PNG, GIF, or WebP. Max 5 MB.</p>
+          <p className="text-xs text-muted-foreground">{t("employee.settings.photoHint")}</p>
         </section>
 
         <section className="space-y-4 rounded-xl border border-border bg-card p-6">
           <h3 className="font-semibold" style={{ color: "#283D3B" }}>
-            Profile
+            {t("employee.settings.profileSection")}
           </h3>
           <div>
-            <Label htmlFor="emp-name">Name</Label>
+            <Label htmlFor="emp-name">{t("employee.settings.labelName")}</Label>
             <Input id="emp-name" value={name} onChange={(e) => setName(e.target.value)} className="mt-1" />
           </div>
           <div>
-            <Label htmlFor="emp-bio">Bio</Label>
+            <Label htmlFor="emp-bio">{t("employee.settings.labelBio")}</Label>
             <textarea
               id="emp-bio"
               value={bio}
@@ -224,7 +226,7 @@ export function EmployeeSettingsPage() {
             />
           </div>
           <div>
-            <Label htmlFor="emp-goal">Monthly goal</Label>
+            <Label htmlFor="emp-goal">{t("employee.settings.labelMonthlyGoal")}</Label>
             <Input
               id="emp-goal"
               type="number"
@@ -233,11 +235,11 @@ export function EmployeeSettingsPage() {
               value={monthlyGoal}
               onChange={(e) => setMonthlyGoal(e.target.value)}
               className="mt-1"
-              placeholder="0.00"
+              placeholder={t("employee.settings.placeholderGoal")}
             />
           </div>
           <Button type="button" onClick={handleSaveProfile} disabled={saving} className="text-white" style={{ backgroundColor: TEAL }}>
-            {saving ? "Saving…" : "Save profile"}
+            {saving ? t("employee.settings.saving") : t("employee.settings.saveProfile")}
           </Button>
         </section>
 
@@ -246,7 +248,7 @@ export function EmployeeSettingsPage() {
             Account security
           </h3>
           <div>
-            <Label htmlFor="cur-pw">Current password</Label>
+            <Label htmlFor="cur-pw">{t("employee.settings.currentPassword")}</Label>
             <div className="relative mt-1">
               <Input
                 id="cur-pw"
@@ -255,13 +257,18 @@ export function EmployeeSettingsPage() {
                 onChange={(e) => setCurrentPw(e.target.value)}
                 className="pr-10"
               />
-              <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-1" onClick={() => setShowCur(!showCur)} aria-label="Toggle visibility">
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
+                onClick={() => setShowCur(!showCur)}
+                aria-label={t("employee.settings.toggleVisibility")}
+              >
                 {showCur ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
           <div>
-            <Label htmlFor="new-pw">New password</Label>
+            <Label htmlFor="new-pw">{t("employee.settings.newPassword")}</Label>
             <div className="relative mt-1">
               <Input
                 id="new-pw"
@@ -270,7 +277,12 @@ export function EmployeeSettingsPage() {
                 onChange={(e) => setNewPw(e.target.value)}
                 className="pr-10"
               />
-              <button type="button" className="absolute right-2 top-1/2 -translate-y-1/2 p-1" onClick={() => setShowNew(!showNew)} aria-label="Toggle visibility">
+              <button
+                type="button"
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1"
+                onClick={() => setShowNew(!showNew)}
+                aria-label={t("employee.settings.toggleVisibility")}
+              >
                 {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
@@ -285,11 +297,11 @@ export function EmployeeSettingsPage() {
             </div>
             <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
               {[
-                { key: "minLength", label: "At least 8 characters", met: checklist.minLength },
-                { key: "upper", label: "One uppercase letter", met: checklist.hasUppercase },
-                { key: "lower", label: "One lowercase letter", met: checklist.hasLowercase },
-                { key: "num", label: "One number", met: checklist.hasNumber },
-                { key: "spec", label: "One special character", met: checklist.hasSpecial },
+                { key: "minLength", label: t("employee.settings.pwMinLength"), met: checklist.minLength },
+                { key: "upper", label: t("employee.settings.pwUpper"), met: checklist.hasUppercase },
+                { key: "lower", label: t("employee.settings.pwLower"), met: checklist.hasLowercase },
+                { key: "num", label: t("employee.settings.pwNumber"), met: checklist.hasNumber },
+                { key: "spec", label: t("employee.settings.pwSpecial"), met: checklist.hasSpecial },
               ].map(({ key, label, met }) => (
                 <li key={key} className={`flex items-center gap-2 ${met ? "text-primary" : ""}`}>
                   <span className={`flex h-4 w-4 items-center justify-center rounded-full ${met ? "bg-primary text-white" : "bg-muted"}`}>
@@ -308,49 +320,47 @@ export function EmployeeSettingsPage() {
             className="border-2"
             style={{ borderColor: TEAL, color: TEAL }}
           >
-            Change password
+            {t("employee.settings.changePassword")}
           </Button>
         </section>
 
         <section className="space-y-4 rounded-xl border border-border bg-card p-6">
           <h3 className="font-semibold" style={{ color: "#283D3B" }}>
-            Preferences
+            {t("employee.settings.prefsSection")}
           </h3>
           <div className="flex items-center justify-between">
-            <Label htmlFor="email-n">Email notifications</Label>
+            <Label htmlFor="email-n">{t("employee.settings.emailNotif")}</Label>
             <Switch id="email-n" checked={emailNotif} onCheckedChange={setEmailNotif} />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="push-n">Push notifications</Label>
+            <Label htmlFor="push-n">{t("employee.settings.pushNotif")}</Label>
             <Switch id="push-n" checked={pushNotif} onCheckedChange={setPushNotif} />
           </div>
-          <p className="text-xs text-muted-foreground">Use Save profile to apply preference changes.</p>
+          <p className="text-xs text-muted-foreground">{t("employee.settings.prefsHint")}</p>
         </section>
 
         <section className="space-y-4 rounded-xl border border-border bg-card p-6">
           <h3 className="font-semibold" style={{ color: "#283D3B" }}>
-            Your data
+            {t("employee.settings.dataSection")}
           </h3>
           <Button type="button" variant="outline" onClick={handleDownload} className="w-full sm:w-auto">
-            Download My Data
+            {t("employee.settings.downloadMyData")}
           </Button>
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button type="button" variant="destructive" className="w-full sm:w-auto">
-                Delete account
+                {t("employee.settings.deleteAccount")}
               </Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Delete your account?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This permanently removes your Caretip staff account and associated data. This cannot be undone.
-                </AlertDialogDescription>
+                <AlertDialogTitle>{t("employee.settings.deleteConfirmTitle")}</AlertDialogTitle>
+                <AlertDialogDescription>{t("employee.settings.deleteConfirmDesc")}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t("employee.settings.dialogCancel")}</AlertDialogCancel>
                 <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive text-destructive-foreground">
-                  Delete permanently
+                  {t("employee.settings.deletePermanently")}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

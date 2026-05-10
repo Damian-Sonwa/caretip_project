@@ -18,6 +18,10 @@ import {
   ChevronDown,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
+import { format } from "date-fns";
+import { de, enUS } from "date-fns/locale";
+import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -67,20 +71,11 @@ const BUSINESS_CHART_COLORS = [
   "#94a3b8", // slate
 ] as const;
 
-const BUSINESS_HERO_HEADLINE = "Team Performance Overview";
-const BUSINESS_HERO_SUB = "Track team growth in real time.";
-
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 const EXPORT_ERROR_TOAST = {
   style: { background: "#000000", color: "#ffffff" },
 } as const;
-
-const GOAL_PERIOD_LABEL: Record<GoalPeriod, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
-};
 
 function StatCard(props: {
   title: string;
@@ -127,12 +122,6 @@ function StatCard(props: {
   );
 }
 
-function goalStatusLabel(s: EmployeeGoalProgressStatus): string {
-  if (s === "achieved") return "Achieved";
-  if (s === "on_track") return "On track";
-  return "Below target";
-}
-
 function goalStatusClass(s: EmployeeGoalProgressStatus): string {
   if (s === "achieved") return "text-[#34D399]";
   if (s === "on_track") return "text-primary";
@@ -140,6 +129,17 @@ function goalStatusClass(s: EmployeeGoalProgressStatus): string {
 }
 
 export function BusinessDashboard() {
+  const { t, i18n } = useTranslation();
+  const timeLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
+  const goalPeriodLabels = useMemo(
+    () =>
+      ({
+        daily: t("business.period.daily"),
+        weekly: t("business.period.weekly"),
+        monthly: t("business.period.monthly"),
+      }) satisfies Record<GoalPeriod, string>,
+    [t],
+  );
   const { user, logout, isBusiness, exitImpersonation, sessionValidated } = useRequireAuth();
 
   const handleLogout = () => {
@@ -295,13 +295,14 @@ export function BusinessDashboard() {
       monthlyGoal: number | null;
     }) => {
       if (payload.businessId !== user.businessId) return;
-      const who = payload.employeeName?.trim() || "Team member";
-      const timeStr = new Date(payload.tip.createdAt).toLocaleTimeString(undefined, {
-        hour: "numeric",
-        minute: "2-digit",
-      });
+      const who = payload.employeeName?.trim() || t("business.dashboard.toastTeamMember");
+      const timeStr = format(new Date(payload.tip.createdAt), "p", { locale: timeLocale });
       toast.success(
-        `New tip: ${who} · ${formatEur(Number(payload.tip.amount))} · ${timeStr}`,
+        t("business.dashboard.toastNewTip", {
+          who,
+          amount: formatEur(Number(payload.tip.amount)),
+          time: timeStr,
+        }),
         TOAST_OK,
       );
       void refreshStatsQuiet();
@@ -311,7 +312,7 @@ export function BusinessDashboard() {
     return () => {
       socket.off("new_tip", onNewTip);
     };
-  }, [socket, user?.role, user?.businessId, refreshStatsQuiet]);
+  }, [socket, user?.role, user?.businessId, refreshStatsQuiet, t, timeLocale]);
 
   const handleExport = async () => {
     if (!isBusiness) return;
@@ -320,7 +321,7 @@ export function BusinessDashboard() {
       await downloadBusinessTransactionsExport();
     } catch (err) {
       logClientError("BusinessDashboard", err);
-      toast.error("Export failed. Please try again.", EXPORT_ERROR_TOAST);
+      toast.error(t("business.dashboard.exportFailed"), EXPORT_ERROR_TOAST);
     } finally {
       setExportLoading(false);
     }
@@ -349,6 +350,18 @@ export function BusinessDashboard() {
   const tipDistributionData = devDemo
     ? devMockBusinessTipDistribution(timeframe)
     : (stats?.dailyTipDistribution ?? []);
+
+  const tipDistributionChartData = useMemo(() => {
+    return tipDistributionData.map((row) => ({
+      ...row,
+      dayLabel:
+        timeframe === "week"
+          ? translateChartWeekdayLabel(row.day, t)
+          : timeframe === "year"
+            ? translateChartMonthLabel(row.day, t)
+            : row.day,
+    }));
+  }, [tipDistributionData, timeframe, t, i18n.resolvedLanguage]);
 
   const employeePerformance = useMemo(() => {
     if (devDemo) {
@@ -383,7 +396,7 @@ export function BusinessDashboard() {
             onClick={() => window.location.reload()}
             className="text-primary hover:underline text-sm"
           >
-            Try again
+            {t("dashboard.tryAgain")}
           </button>
         </div>
       </div>
@@ -397,13 +410,13 @@ export function BusinessDashboard() {
           className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-primary/15 px-4 py-2.5 text-sm text-foreground"
           role="status"
         >
-          <span>Support mode: you are viewing this venue as the manager.</span>
+          <span>{t("business.dashboard.impersonationBanner")}</span>
           <button
             type="button"
             onClick={exitImpersonation}
             className="font-semibold text-foreground underline underline-offset-2"
           >
-            Exit to Platform Admin
+            {t("business.dashboard.exitImpersonation")}
           </button>
         </div>
       )}
@@ -413,8 +426,8 @@ export function BusinessDashboard() {
           id="pendingVerification"
           issueActive={pendingVerification === true}
           tone="info"
-          title="Account pending verification"
-          description="Your venue dashboard stats will appear once verification is approved."
+          title={t("business.dashboard.fixVerificationTitle")}
+          description={t("business.dashboard.fixVerificationDesc")}
           dismissPersistence="session"
           className="mb-5"
         />
@@ -428,25 +441,24 @@ export function BusinessDashboard() {
             <>
               <Store className="h-3.5 w-3.5 text-foreground" />
               {statsLoading && !stats?.name?.trim() ? (
-                <span className="text-muted-foreground animate-pulse">Loading venue…</span>
+                <span className="text-muted-foreground animate-pulse">{t("business.hero.loadingVenue")}</span>
               ) : stats?.name?.trim() ? (
                 stats.name
               ) : (
-                "Venue dashboard"
+                t("business.hero.venueDashboard")
               )}
             </>
           }
-          title={BUSINESS_HERO_HEADLINE}
-          description={BUSINESS_HERO_SUB}
+          title={t("business.hero.headline")}
+          description={t("business.hero.sub")}
           image={
-            <div className="relative isolate flex h-full w-full max-w-full min-h-0 items-center justify-center touch-manipulation">
+            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center touch-manipulation">
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    // Taller frame than employee hero so bar-chart artwork isn’t vertically cramped.
-                    "max-lg:h-[312px] max-lg:max-h-[312px] max-lg:min-h-0 rounded-[20px] border border-black/[0.06] shadow-[0_10px_30px_-18px_rgba(15,23,42,0.35)]",
-                    "lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:rounded-2xl lg:border-gray-100 lg:shadow-sm",
+                    "max-lg:h-[312px] max-lg:max-h-[312px] max-lg:min-h-0 rounded-[2.5rem] border border-black/[0.06] shadow-xl",
+                    "lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:rounded-[2.5rem] lg:border-gray-100 lg:shadow-xl",
                   )}
                 >
                   <img
@@ -472,9 +484,9 @@ export function BusinessDashboard() {
             id="missingQR"
             issueActive={brokenQrLinks}
             dismissPersistence="session"
-            title="Some staff are missing QR links"
-            description="Open QR Management to generate fresh links and printable codes."
-            actionLabel="Fix QR links"
+            title={t("business.fixQr.title")}
+            description={t("business.fixQr.description")}
+            actionLabel={t("business.fixQr.action")}
             actionTo="/business/qr-management"
           />
 
@@ -501,9 +513,9 @@ export function BusinessDashboard() {
                     : "text-muted-foreground hover:bg-slate-50"
                 }`}
               >
-                {period === "week" && "This Week"}
-                {period === "month" && "This Month"}
-                {period === "year" && "This Year"}
+                {period === "week" && t("dashboard.filter_week")}
+                {period === "month" && t("dashboard.filter_month")}
+                {period === "year" && t("dashboard.filter_year")}
                 {timeframeLoading === period ? (
                   <span className="ml-2 inline-block h-2 w-2 animate-pulse rounded-full bg-current/70 align-middle" aria-hidden />
                 ) : null}
@@ -516,32 +528,46 @@ export function BusinessDashboard() {
             <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               <StatCard
                 featured
-                title={`Total tips (${timeframe === "week" ? "week" : timeframe === "month" ? "month" : "year"})`}
+                title={
+                  timeframe === "week"
+                    ? t("business.dashboard.statsTotalTipsWeek")
+                    : timeframe === "month"
+                      ? t("business.dashboard.statsTotalTipsMonth")
+                      : t("business.dashboard.statsTotalTipsYear")
+                }
                 value={formatEur(stats?.totalTips ?? 0)}
-                change={hasTipActivityInPeriod ? "Live totals update as tips land." : "No tips yet for this period."}
+                change={
+                  hasTipActivityInPeriod
+                    ? t("business.dashboard.statsLiveTotals")
+                    : t("business.dashboard.statsNoTipsPeriod")
+                }
                 icon={Euro}
               />
               <StatCard
-                title="Active employees"
+                title={t("business.dashboard.activeEmployees")}
                 value={String(stats?.employeeCount ?? 0)}
-                change={topEmployees.length > 0 ? `${topEmployees.length} showing in top list` : undefined}
+                change={
+                  topEmployees.length > 0
+                    ? t("business.dashboard.activeEmployeesTopHint", { count: topEmployees.length })
+                    : undefined
+                }
                 icon={Users}
               />
               <StatCard
-                title="Tips count"
+                title={t("business.dashboard.tipsCount")}
                 value={String(stats?.tipCount ?? 0)}
-                change={hasTipActivityInPeriod ? "Includes successful tips in this timeframe." : undefined}
+                change={hasTipActivityInPeriod ? t("business.dashboard.tipsCountHint") : undefined}
                 icon={Award}
                 iconTone="muted"
               />
               <StatCard
-                title="Avg tip per employee"
+                title={t("business.dashboard.avgTipPerEmployee")}
                 value={
                   stats?.employeeCount && stats?.totalTips
                     ? formatEur(stats.totalTips / stats.employeeCount, { minFrac: 0, maxFrac: 0 })
                     : formatEur(0, { minFrac: 0, maxFrac: 0 })
                 }
-                change="Useful coaching metric"
+                change={t("business.dashboard.avgTipCoaching")}
                 icon={TrendingUp}
                 iconTone="muted"
               />
@@ -566,11 +592,8 @@ export function BusinessDashboard() {
                       <Target className="h-5 w-5 text-slate-600" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg">Employee tip goals</CardTitle>
-                      <CardDescription>
-                        Targets your team set for themselves. Progress uses tips in each person&apos;s current period
-                        (aligned with the performance chart timeframe for totals).
-                      </CardDescription>
+                      <CardTitle className="text-lg">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
+                      <CardDescription>{t("business.dashboard.employeeGoalsDesc")}</CardDescription>
                     </div>
                   </div>
                   <ChevronDown
@@ -586,18 +609,18 @@ export function BusinessDashboard() {
                 <CardContent className="min-w-0 overflow-x-auto">
                   {!stats?.employeeGoals || stats.employeeGoals.length === 0 ? (
                     <p className="py-8 text-center text-sm text-muted-foreground">
-                      No staff have set a tip goal yet.
+                      {t("business.dashboard.noStaffGoals")}
                     </p>
                   ) : (
                     <table className="w-full min-w-[640px] border-collapse text-sm">
                       <thead>
                         <tr className="border-b border-border text-left text-muted-foreground">
-                          <th className="pb-2 pr-3 font-medium">Team member</th>
-                          <th className="pb-2 pr-3 font-medium">Period</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">Target</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">Current</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">Progress</th>
-                          <th className="pb-2 font-medium">Status</th>
+                          <th className="pb-2 pr-3 font-medium">{t("business.dashboard.tableTeamMember")}</th>
+                          <th className="pb-2 pr-3 font-medium">{t("business.dashboard.tablePeriod")}</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableTarget")}</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableCurrent")}</th>
+                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableProgress")}</th>
+                          <th className="pb-2 font-medium">{t("business.dashboard.tableStatus")}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -605,13 +628,13 @@ export function BusinessDashboard() {
                           <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
                             <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
                             <td className="py-3 pr-3 text-muted-foreground">
-                              {GOAL_PERIOD_LABEL[g.goalPeriod]}
+                              {goalPeriodLabels[g.goalPeriod]}
                             </td>
                             <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
                             <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
                             <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
                             <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
-                              {goalStatusLabel(g.status)}
+                              {t(`business.goalStatus.${g.status}`)}
                             </td>
                           </tr>
                         ))}
@@ -633,25 +656,27 @@ export function BusinessDashboard() {
             >
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
                 <CardHeader>
-                  <CardTitle className="text-lg">Daily tip distribution</CardTitle>
+                  <CardTitle className="text-lg">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
                   <CardDescription>
-                    {timeframe === "week" && "Tips per day (Mon to Sun, current week)"}
-                    {timeframe === "month" && "Tips per day (current month)"}
-                    {timeframe === "year" && "Tips per month (current year)"}
+                    {timeframe === "week" && t("business.dashboard.dailyTipDistDescWeek")}
+                    {timeframe === "month" && t("business.dashboard.dailyTipDistDescMonth")}
+                    {timeframe === "year" && t("business.dashboard.dailyTipDistDescYear")}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                   {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">
+                      {t("business.dashboard.noTipActivity")}
+                    </p>
                   ) : (
                     <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                        <BarChart data={tipDistributionData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
+                        <BarChart data={tipDistributionChartData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                          <XAxis dataKey="day" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
+                          <XAxis dataKey="dayLabel" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
                           <YAxis stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
                           <Tooltip
-                            formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
+                            formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
                             contentStyle={{
                               backgroundColor: "#ffffff",
                               border: "1px solid #E5E7EB",
@@ -676,16 +701,22 @@ export function BusinessDashboard() {
             >
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
                 <CardHeader>
-                  <CardTitle className="text-lg">Employee performance</CardTitle>
-                  <CardDescription>Tip totals by team member</CardDescription>
+                  <CardTitle className="text-lg">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
+                  <CardDescription>{t("business.dashboard.employeePerformanceDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                   {(stats?.employeeCount ?? 0) === 0 ? (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No employees yet</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">
+                      {t("business.dashboard.noEmployees")}
+                    </p>
                   ) : !hasTipActivityInPeriod ? (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">
+                      {t("business.dashboard.noTipActivity")}
+                    </p>
                   ) : employeePerformance.length === 0 ? (
-                    <p className="py-12 text-center text-sm text-muted-foreground">No tip activity yet</p>
+                    <p className="py-12 text-center text-sm text-muted-foreground">
+                      {t("business.dashboard.noTipActivity")}
+                    </p>
                   ) : (
                     <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                       <ResponsiveContainer width="100%" height="100%" minWidth={0}>
@@ -705,7 +736,7 @@ export function BusinessDashboard() {
                             tickMargin={6}
                           />
                           <Tooltip
-                            formatter={(value: number) => [formatEur(Number(value)), "Tips"]}
+                            formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
                             contentStyle={{
                               backgroundColor: "#ffffff",
                               border: "1px solid #e5e5e5",
@@ -744,7 +775,7 @@ export function BusinessDashboard() {
                     className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
                     aria-expanded={topPerformersExpanded}
                   >
-                    <CardTitle className="text-lg">Top performers</CardTitle>
+                    <CardTitle className="text-lg">{t("business.dashboard.topPerformers")}</CardTitle>
                     <ChevronDown
                       className={cn(
                         "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
@@ -757,7 +788,7 @@ export function BusinessDashboard() {
                     to="/dashboard/staff-management"
                     className="ml-3 flex shrink-0 items-center gap-1 text-sm font-medium text-foreground hover:underline"
                   >
-                    View all
+                    {t("dashboard.viewAll")}
                     <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </CardHeader>
@@ -765,7 +796,9 @@ export function BusinessDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {topEmployees.length === 0 ? (
-                        <p className="py-6 text-center text-sm text-muted-foreground">No employees yet</p>
+                        <p className="py-6 text-center text-sm text-muted-foreground">
+                          {t("business.dashboard.noEmployees")}
+                        </p>
                       ) : (
                         topEmployees.map((employee, index) => (
                           <div
@@ -795,7 +828,9 @@ export function BusinessDashboard() {
                                     <span className="text-muted-foreground">{employee.rating}</span>
                                   </>
                                 ) : (
-                                  <span className="text-xs text-muted-foreground">New member</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {t("business.dashboard.newMember")}
+                                  </span>
                                 )}
                               </div>
                             </div>
@@ -824,8 +859,8 @@ export function BusinessDashboard() {
                     aria-expanded={quickActionsExpanded}
                   >
                     <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg">Quick actions</CardTitle>
-                      <CardDescription>Common venue tasks</CardDescription>
+                      <CardTitle className="text-lg">{t("business.dashboard.quickActions")}</CardTitle>
+                      <CardDescription>{t("business.dashboard.quickActionsDesc")}</CardDescription>
                     </div>
                     <ChevronDown
                       className={cn(
@@ -847,7 +882,7 @@ export function BusinessDashboard() {
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
                           <Building2 className="h-5 w-5 text-slate-600" />
                         </span>
-                        Business profile
+                        {t("business.dashboard.actionBusinessProfile")}
                       </Link>
                     </Button>
                     <Button
@@ -856,7 +891,7 @@ export function BusinessDashboard() {
                     >
                       <Link to="/business/qr-management" className="gap-3">
                         <QrCode className="h-5 w-5 shrink-0" />
-                        Generate QR codes
+                        {t("business.dashboard.actionGenerateQr")}
                       </Link>
                     </Button>
                     <Button
@@ -868,7 +903,7 @@ export function BusinessDashboard() {
                         <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
                           <MapPin className="h-5 w-5 text-slate-600" />
                         </span>
-                        Manage locations
+                        {t("business.dashboard.actionManageLocations")}
                       </Link>
                     </Button>
                     <Button
@@ -886,7 +921,7 @@ export function BusinessDashboard() {
                           <Download className="h-5 w-5 text-slate-600" />
                         )}
                       </span>
-                      Export reports
+                      {t("business.dashboard.actionExportReports")}
                     </Button>
                   </CardContent>
                 ) : null}
@@ -894,10 +929,8 @@ export function BusinessDashboard() {
 
               <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
                 <CardHeader>
-                  <CardTitle className="text-base">Need help?</CardTitle>
-                  <CardDescription>
-                    Learn how to maximize your team&apos;s earnings and keep guests tipping smoothly.
-                  </CardDescription>
+                  <CardTitle className="text-base">{t("business.dashboard.needHelpTitle")}</CardTitle>
+                  <CardDescription>{t("business.dashboard.needHelpDesc")}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <Button
@@ -905,7 +938,7 @@ export function BusinessDashboard() {
                     className="w-full shadow-[0_4px_16px_-4px_rgb(124_45_18_/0.12)]"
                     onClick={() => setGuidelinesOpen(true)}
                   >
-                    View guidelines
+                    {t("business.dashboard.viewGuidelines")}
                   </Button>
                 </CardContent>
               </Card>

@@ -1,7 +1,9 @@
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Settings } from "lucide-react";
 
 export function PlatformSettingsPage() {
+  const { t } = useTranslation();
   return (
     <main className="px-4 lg:px-8 py-8 pb-20">
             <div className="mb-8">
@@ -19,8 +21,7 @@ export function PlatformSettingsPage() {
               className="bg-card border border-border rounded-xl p-6 max-w-xl"
             >
               <p className="text-sm text-muted-foreground">
-                No mutable settings are exposed in this build. Use environment variables and your deployment pipeline for
-                infrastructure changes.
+                {t("admin.platformSettingsPage.cardBody")}
               </p>
             </motion.div>
     </main>

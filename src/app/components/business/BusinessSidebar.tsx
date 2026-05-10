@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LogOut } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { fetchBusinessProfile, type BusinessInfo } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
@@ -14,6 +15,7 @@ import {
 } from "./businessDashboardNav";
 
 export function BusinessSidebar() {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
@@ -42,7 +44,7 @@ export function BusinessSidebar() {
   }, [user?.businessId, user?.role]);
 
   const venueName =
-    String(profile?.name ?? user?.businessName ?? "").trim() || "Venue dashboard";
+    String(profile?.name ?? user?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
   return (
     <motion.aside
@@ -70,7 +72,7 @@ export function BusinessSidebar() {
           />
           <div className="min-w-0 flex-1">
             <p className="truncate text-sm font-semibold text-sidebar-foreground">{venueName}</p>
-            <p className="text-xs text-muted-foreground">Business dashboard</p>
+            <p className="text-xs text-muted-foreground">{t("dashboard.businessDashboardSubtitle")}</p>
           </div>
         </div>
       </div>
@@ -93,7 +95,7 @@ export function BusinessSidebar() {
                   )}
                 >
                   <Icon className="h-5 w-5 shrink-0" />
-                  <span>{item.name}</span>
+                  <span>{t(item.labelKey)}</span>
                 </Link>
               </li>
             );
@@ -116,7 +118,7 @@ export function BusinessSidebar() {
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
           <LogOut className="h-5 w-5" />
-          <span className="text-sm font-medium">Sign out</span>
+          <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>
 
@@ -129,7 +131,9 @@ export function BusinessSidebar() {
             {(user?.name?.trim().charAt(0) ?? "U").toUpperCase()}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{user?.name || "Manager"}</p>
+            <p className="truncate text-sm font-medium text-foreground">
+              {user?.name || t("dashboard.managerFallback")}
+            </p>
             <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
           </div>
         </Link>

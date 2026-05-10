@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
@@ -21,7 +22,7 @@ export function ForgotPasswordPage() {
     setError("");
     const trimmed = email.trim();
     if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
-      setError("Please enter a valid email address.");
+      setError(t("auth.forgot.errorInvalidEmail"));
       return;
     }
     setSubmitting(true);
@@ -40,16 +41,15 @@ export function ForgotPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Check your inbox</h1>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.forgot.sentTitle")}</h1>
           <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-            If an account exists for <span className="font-medium text-neutral-900 dark:text-neutral-100">{email.trim()}</span>, we sent a
-            link to reset your password. The link expires in one hour.
+            {t("auth.forgot.sentBody", { email: email.trim() })}
           </p>
           <Link
             to="/login"
             className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Back to login
+            {t("auth.forgot.backToLogin")}
           </Link>
         </div>
       </AuthRecoveryLayout>
@@ -60,15 +60,15 @@ export function ForgotPasswordPage() {
     <AuthRecoveryLayout>
       <div className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Reset your password</h1>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.forgot.title")}</h1>
           <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-            Enter your email and we&apos;ll send you a link to get back into your account.
+            {t("auth.forgot.subtitle")}
           </p>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4" noValidate>
           <div>
             <label htmlFor="forgot-email" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              Email address
+              {t("auth.forgot.emailLabel")}
             </label>
             <input
               id="forgot-email"
@@ -97,10 +97,10 @@ export function ForgotPasswordPage() {
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                Sending…
+                {t("auth.forgot.sending")}
               </>
             ) : (
-              "Send reset link"
+              t("auth.forgot.sendResetLink")
             )}
           </motion.button>
         </form>

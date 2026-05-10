@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { motion } from "motion/react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -31,8 +32,8 @@ export function ResetPasswordPage() {
   const mismatchHint = useMemo(() => {
     if (confirm.length === 0) return null;
     if (newPassword === confirm) return null;
-    return "Passwords do not match.";
-  }, [newPassword, confirm]);
+    return t("auth.reset.mismatch");
+  }, [newPassword, confirm, t]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,9 +54,9 @@ export function ResetPasswordPage() {
   if (!rawToken) {
     return (
       <AuthRecoveryLayout>
-        <p className="text-center text-sm text-red-600">This reset link is invalid.</p>
+        <p className="text-center text-sm text-red-600">{t("auth.reset.invalidToken")}</p>
         <Link to="/forgot-password" className="mt-4 block text-center text-sm font-medium text-primary hover:underline">
-          Request a new link
+          {t("auth.reset.requestNewLink")}
         </Link>
       </AuthRecoveryLayout>
     );
@@ -65,14 +66,14 @@ export function ResetPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Password updated</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">You can sign in with your new password.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.reset.doneTitle")}</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.reset.doneSubtitle")}</p>
           <button
             type="button"
             onClick={() => navigate("/login", { replace: true })}
             className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
           >
-            Back to login
+            {t("auth.reset.backToLogin")}
           </button>
         </div>
       </AuthRecoveryLayout>
@@ -83,13 +84,13 @@ export function ResetPasswordPage() {
     <AuthRecoveryLayout>
       <div className="space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Set a new password</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">Choose a strong password you haven&apos;t used elsewhere.</p>
+          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.reset.title")}</h1>
+          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.reset.subtitle")}</p>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
           <div>
             <label htmlFor="reset-new" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              New password
+              {t("auth.reset.labelNew")}
             </label>
             <div className="relative">
               <input
@@ -104,7 +105,7 @@ export function ResetPasswordPage() {
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                 onClick={() => setShowNew(!showNew)}
-                aria-label={showNew ? "Hide password" : "Show password"}
+                aria-label={showNew ? t("auth.reset.hidePassword") : t("auth.reset.showPassword")}
               >
                 {showNew ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -112,7 +113,7 @@ export function ResetPasswordPage() {
           </div>
           <div>
             <label htmlFor="reset-confirm" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
-              Confirm new password
+              {t("auth.reset.labelConfirm")}
             </label>
             <div className="relative">
               <input
@@ -127,7 +128,7 @@ export function ResetPasswordPage() {
                 type="button"
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
                 onClick={() => setShowConfirm(!showConfirm)}
-                aria-label={showConfirm ? "Hide password" : "Show password"}
+                aria-label={showConfirm ? t("auth.reset.hidePassword") : t("auth.reset.showPassword")}
               >
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -152,15 +153,15 @@ export function ResetPasswordPage() {
             {submitting ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                Saving…
+                {t("auth.reset.saving")}
               </>
             ) : (
-              "Update password"
+              t("auth.reset.updatePassword")
             )}
           </motion.button>
           {!strong && newPassword.length > 0 ? (
             <p className="text-center text-xs text-neutral-600 dark:text-neutral-400">
-              Use 8+ characters with upper, lower, number, and special (e.g. @#$%).
+              {t("auth.reset.hintWeak")}
             </p>
           ) : null}
         </form>

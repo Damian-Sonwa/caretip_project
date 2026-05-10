@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Link } from "react-router";
 import {
@@ -28,20 +29,23 @@ import { formatEur } from "../lib/formatEur";
 import { useAuth } from "../hooks/useAuth";
 import { SidebarSkeleton } from "./ui/sidebar-skeleton";
 
-const tipsData = [
-  { month: "Jan", tips: 12400 },
-  { month: "Feb", tips: 15200 },
-  { month: "Mar", tips: 14100 },
-  { month: "Apr", tips: 18900 },
-  { month: "May", tips: 20100 },
-  { month: "Jun", tips: 22400 },
-  { month: "Jul", tips: 24800 },
-];
+const MONTH_KEYS = ["jan", "feb", "mar", "apr", "may", "jun", "jul"] as const;
+const TIPS_OVERVIEW_SERIES = [12400, 15200, 14100, 18900, 20100, 22400, 24800];
 
 export function DashboardOverviewPage() {
+  const { t, i18n } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, authHydrated, sessionValidated } = useAuth();
   const isAppReady = authHydrated && sessionValidated && Boolean(user);
+
+  const tipsData = useMemo(
+    () =>
+      MONTH_KEYS.map((k, i) => ({
+        month: t(`charts.monthShort.${k}`),
+        tips: TIPS_OVERVIEW_SERIES[i],
+      })),
+    [t, i18n.resolvedLanguage],
+  );
 
   return (
     <div className="min-h-screen relative">
@@ -66,14 +70,11 @@ export function DashboardOverviewPage() {
             >
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
                 <div>
-                  <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
-                  <p className="text-white/80 mb-4 max-w-xl">
-                    CareTip helps guests send tips directly to your team. Share your QR links and
-                    keep every payout transparent.
-                  </p>
+                  <h1 className="text-3xl font-bold mb-2">{t("sampleDashboard.overviewHeroTitle")}</h1>
+                  <p className="text-white/80 mb-4 max-w-xl">{t("sampleDashboard.overviewHeroBody")}</p>
                   <span className="inline-flex items-center gap-1 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold">
                     <Heart className="w-3 h-3" />
-                    One-time tips only, no recurring billing
+                    {t("sampleDashboard.overviewHeroPill")}
                   </span>
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
@@ -82,14 +83,14 @@ export function DashboardOverviewPage() {
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-white/90 text-primary rounded-lg font-semibold transition-all shadow-lg"
                   >
                     <Euro className="w-4 h-4" />
-                    View tips & activity
+                    {t("sampleDashboard.overviewCtaTips")}
                   </Link>
                   <Link
                     to="/business/qr-management"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 border-2 border-white/40 hover:bg-white/10 text-white rounded-lg font-semibold transition-all"
                   >
                     <QrCode className="w-4 h-4" />
-                    Manage QR codes
+                    {t("sampleDashboard.overviewCtaQr")}
                   </Link>
                 </div>
               </div>
@@ -108,9 +109,13 @@ export function DashboardOverviewPage() {
                   </div>
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
-                <p className="text-2xl font-bold text-foreground mb-1">{formatEur(24800, { minFrac: 0, maxFrac: 0 })}</p>
-                <p className="text-sm text-muted-foreground">Tips this month</p>
-                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">Sample dashboard data</p>
+                <p className="text-2xl font-bold text-foreground mb-1">
+                  {formatEur(24800, { minFrac: 0, maxFrac: 0 })}
+                </p>
+                <p className="text-sm text-muted-foreground">{t("sampleDashboard.statTipsMonth")}</p>
+                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">
+                  {t("sampleDashboard.statSampleNote")}
+                </p>
               </motion.div>
 
               <motion.div
@@ -126,8 +131,8 @@ export function DashboardOverviewPage() {
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">18</p>
-                <p className="text-sm text-muted-foreground">Team members on CareTip</p>
-                <p className="text-xs text-muted-foreground mt-2">Invite staff from your business dashboard</p>
+                <p className="text-sm text-muted-foreground">{t("sampleDashboard.statTeamMembers")}</p>
+                <p className="text-xs text-muted-foreground mt-2">{t("sampleDashboard.statTeamHint")}</p>
               </motion.div>
 
               <motion.div
@@ -143,8 +148,10 @@ export function DashboardOverviewPage() {
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">412</p>
-                <p className="text-sm text-muted-foreground">Successful tip payments</p>
-                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">All one-time charges</p>
+                <p className="text-sm text-muted-foreground">{t("sampleDashboard.statSuccessfulTips")}</p>
+                <p className="text-xs text-neutral-600 mt-2 font-medium dark:text-neutral-400">
+                  {t("sampleDashboard.statOneTime")}
+                </p>
               </motion.div>
 
               <motion.div
@@ -160,8 +167,8 @@ export function DashboardOverviewPage() {
                   <ArrowUpRight className="w-5 h-5 text-primary" />
                 </div>
                 <p className="text-2xl font-bold text-foreground mb-1">{formatEur(18.4)}</p>
-                <p className="text-sm text-muted-foreground">Average tip amount</p>
-                <p className="text-xs text-muted-foreground mt-2">Rolling 30 days (sample)</p>
+                <p className="text-sm text-muted-foreground">{t("sampleDashboard.statAvgTip")}</p>
+                <p className="text-xs text-muted-foreground mt-2">{t("sampleDashboard.statRolling")}</p>
               </motion.div>
             </div>
 
@@ -173,8 +180,8 @@ export function DashboardOverviewPage() {
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h3 className="text-xl font-semibold text-foreground mb-1">Tip volume</h3>
-                  <p className="text-sm text-muted-foreground">Total tips collected (sample trend)</p>
+                  <h3 className="text-xl font-semibold text-foreground mb-1">{t("sampleDashboard.tipVolumeTitle")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("sampleDashboard.tipVolumeSubtitle")}</p>
                 </div>
               </div>
               <ResponsiveContainer width="100%" height={300}>
@@ -201,6 +208,7 @@ export function DashboardOverviewPage() {
                     stroke="#EB992C"
                     strokeWidth={3}
                     fill="url(#tipsGradient)"
+                    name={t("sampleDashboard.legendTips")}
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -213,16 +221,13 @@ export function DashboardOverviewPage() {
               className="bg-gradient-to-br from-accent/10 to-primary/10 border border-accent/20 rounded-2xl p-8 text-center"
             >
               <Heart className="w-10 h-10 text-accent mx-auto mb-4" />
-              <h3 className="text-2xl font-semibold text-foreground mb-3">Make tipping effortless</h3>
-              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Guests scan a QR code, choose an amount, and pay once. Funds route through Stripe as a
-                single payment intent, no subscriptions or invoices.
-              </p>
+              <h3 className="text-2xl font-semibold text-foreground mb-3">{t("sampleDashboard.ctaTitle")}</h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">{t("sampleDashboard.ctaBody")}</p>
               <Link
                 to="/how-it-works"
                 className="inline-flex items-center gap-2 px-8 py-4 bg-accent hover:bg-accent/90 text-white rounded-lg font-semibold shadow-lg shadow-accent/20 transition-all"
               >
-                How CareTip works
+                {t("sampleDashboard.ctaHowItWorks")}
               </Link>
             </motion.div>
           </main>

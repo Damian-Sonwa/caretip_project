@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Building2, CheckCircle, Search, Shield, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router";
@@ -22,6 +23,7 @@ import { useSocket } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 
 export function BusinessVerificationPage() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const [rows, setRows] = useState<PlatformBusinessRow[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -101,11 +103,11 @@ export function BusinessVerificationPage() {
     try {
       await updatePlatformBusinessVerificationStatus(businessId, status);
       if (status === "verified") {
-        toast.success("Business approved. They can generate QR codes.");
+        toast.success(t("admin.businessVerificationPage.toastApproved"));
       } else if (status === "rejected") {
-        toast.success("Business verification rejected.");
+        toast.success(t("admin.businessVerificationPage.toastRejected"));
       } else {
-        toast.success("Status updated.");
+        toast.success(t("admin.businessVerificationPage.toastStatusUpdated"));
       }
       await load();
     } catch (e) {
@@ -136,7 +138,7 @@ export function BusinessVerificationPage() {
         registeredAddress: form.registeredAddress || null,
       });
       setRows((prev) => prev.map((r) => (r.id === business.id ? { ...r, ...business } : r)));
-      toast.success("Business details saved.");
+      toast.success(t("admin.businessVerificationPage.toastDetailsSaved"));
       setEditing(null);
     } catch (e) {
       logClientError("BusinessVerificationPage.saveKyc", e);
@@ -149,7 +151,7 @@ export function BusinessVerificationPage() {
     if (!f || !editing) return;
     try {
       await uploadPlatformBusinessLogo(editing.id, f);
-      toast.success("Logo uploaded successfully.");
+      toast.success(t("admin.businessVerificationPage.toastLogoUploaded"));
       await load();
       e.target.value = "";
     } catch (err) {
@@ -163,7 +165,7 @@ export function BusinessVerificationPage() {
     if (!f || !editing) return;
     try {
       await uploadPlatformBusinessVerification(editing.id, f);
-      toast.success("Verification document uploaded successfully.");
+      toast.success(t("admin.businessVerificationPage.toastDocUploaded"));
       await load();
       e.target.value = "";
     } catch (err) {
@@ -177,12 +179,10 @@ export function BusinessVerificationPage() {
             <div className="mb-8">
               <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
                 <Shield className="w-7 h-7 text-accent" />
-                Business verification (KYC)
+                {t("admin.businessVerificationPage.title")}
               </h1>
               <p className="text-muted-foreground max-w-2xl">
-                New businesses are <strong>Pending</strong> until you verify them. Verified businesses can generate QR
-                codes. Store contact details for compliance. Tip totals and staff counts load live from the database;
-                the list also refreshes when you return to this tab.
+                {t("admin.businessVerificationPage.subtitle")}
               </p>
             </div>
 
@@ -192,9 +192,9 @@ export function BusinessVerificationPage() {
                 type="search"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by business, owner, contact…"
+                placeholder={t("admin.businessVerificationPage.searchPlaceholder")}
                 autoComplete="off"
-                aria-label="Search businesses"
+                aria-label={t("admin.businessVerificationPage.searchAria")}
                 className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm"
               />
             </div>
@@ -208,26 +208,28 @@ export function BusinessVerificationPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Business</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Owner</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Contact</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Live tips (€)</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">Files</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">Actions</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colBusiness")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colOwner")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colContact")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colLiveTips")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colStatus")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.businessVerificationPage.colFiles")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.businessVerificationPage.colActions")}</th>
                     </tr>
                   </thead>
                   <tbody>
                     {loading ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-10">
-                          <CareTipPageLoader variant="compact" message="Loading…" />
+                          <CareTipPageLoader variant="compact" message={t("admin.businessVerificationPage.loading")} />
                         </td>
                       </tr>
                     ) : filteredRows.length === 0 ? (
                       <tr>
                         <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
-                          No businesses match your search.
+                          {rows.length === 0
+                            ? t("admin.businessVerificationPage.emptyList")
+                            : t("admin.businessVerificationPage.noSearchMatches")}
                         </td>
                       </tr>
                     ) : (
@@ -244,26 +246,31 @@ export function BusinessVerificationPage() {
                           </td>
                           <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
                           <td className="px-4 py-3 text-xs max-w-[160px]">
-                            <div>{b.contactEmail ?? "N/A"}</div>
+                            <div>{b.contactEmail ?? t("format.notAvailable")}</div>
                             <div className="text-muted-foreground">{b.contactPhone ?? ""}</div>
                           </td>
                           <td className="px-4 py-3 text-xs whitespace-nowrap">
                             <div className="font-medium">{formatEur(b.totalTipsEur ?? 0)}</div>
                             <div className="text-muted-foreground">
-                              {b.successTipCount ?? 0} tips · {b.staffCount ?? 0} staff
+                              {t("admin.businessVerificationPage.tipsStaffSummary", {
+                                tips: b.successTipCount ?? 0,
+                                staff: b.staffCount ?? 0,
+                              })}
                             </div>
                           </td>
                           <td className="px-4 py-3">
                             {b.verificationStatus === "verified" ? (
                               <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                                <CheckCircle className="w-3.5 h-3.5" /> Verified
+                                <CheckCircle className="w-3.5 h-3.5" /> {t("admin.businessVerificationPage.statusVerified")}
                               </span>
                             ) : b.verificationStatus === "rejected" ? (
                               <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 text-xs font-medium">
-                                <XCircle className="w-3.5 h-3.5" /> Rejected
+                                <XCircle className="w-3.5 h-3.5" /> {t("admin.businessVerificationPage.statusRejected")}
                               </span>
                             ) : (
-                              <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">Pending</span>
+                              <span className="text-amber-600 dark:text-amber-400 text-xs font-medium">
+                                {t("admin.businessVerificationPage.statusPending")}
+                              </span>
                             )}
                           </td>
                           <td className="px-4 py-3 text-xs space-y-1">
@@ -282,10 +289,10 @@ export function BusinessVerificationPage() {
                                 }}
                                 className="text-accent hover:underline block text-left"
                               >
-                                Logo
+                                {t("admin.businessVerificationPage.fileLogo")}
                               </button>
                             ) : (
-                              <span className="text-muted-foreground">None</span>
+                              <span className="text-muted-foreground">{t("admin.businessVerificationPage.filesNone")}</span>
                             )}
                             {b.verificationDocumentPath ? (
                               <button
@@ -302,7 +309,7 @@ export function BusinessVerificationPage() {
                                 }}
                                 className="text-accent hover:underline block text-left"
                               >
-                                KYC doc
+                                {t("admin.businessVerificationPage.fileKycDoc")}
                               </button>
                             ) : null}
                           </td>
@@ -312,14 +319,14 @@ export function BusinessVerificationPage() {
                                 to={`/platform-admin/businesses/${b.id}`}
                                 className="text-xs text-accent hover:underline"
                               >
-                                View details
+                                {t("admin.businessVerificationPage.linkViewDetails")}
                               </Link>
                               <button
                                 type="button"
                                 onClick={() => openEdit(b)}
                                 className="text-xs text-accent hover:underline"
                               >
-                                Edit details
+                                {t("admin.businessVerificationPage.linkEditDetails")}
                               </button>
                               {b.verificationStatus !== "verified" && (
                                 <button
@@ -327,7 +334,7 @@ export function BusinessVerificationPage() {
                                   onClick={() => void handleStatusUpdate(b.id, "verified")}
                                   className="text-xs font-medium px-2 py-1 rounded bg-primary text-primary-foreground hover:bg-primary-hover"
                                 >
-                                  Approve
+                                  {t("admin.businessVerificationPage.btnApprove")}
                                 </button>
                               )}
                               {b.verificationStatus === "pending" && (
@@ -336,7 +343,7 @@ export function BusinessVerificationPage() {
                                   onClick={() => void handleStatusUpdate(b.id, "rejected")}
                                   className="text-xs font-medium px-2 py-1 rounded border border-destructive text-destructive hover:bg-destructive/10"
                                 >
-                                  Reject
+                                  {t("admin.businessVerificationPage.btnReject")}
                                 </button>
                               )}
                             </div>
@@ -356,11 +363,13 @@ export function BusinessVerificationPage() {
                   animate={{ scale: 1, opacity: 1 }}
                   className="bg-card border border-border rounded-xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto"
                 >
-                  <h2 className="text-lg font-semibold mb-1">Compliance: {editing.name}</h2>
-                  <p className="text-sm text-muted-foreground mb-4">Contact information</p>
+                  <h2 className="text-lg font-semibold mb-1">
+                    {t("admin.businessVerificationPage.modalTitle", { name: editing.name })}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mb-4">{t("admin.businessVerificationPage.sectionContactInfo")}</p>
                   <div className="space-y-3">
                     <label className="block text-sm">
-                      <span className="text-muted-foreground">Legal contact name</span>
+                      <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelLegalName")}</span>
                       <input
                         className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                         value={form.legalContactName}
@@ -377,7 +386,7 @@ export function BusinessVerificationPage() {
                       />
                     </label>
                     <label className="block text-sm">
-                      <span className="text-muted-foreground">Contact phone</span>
+                      <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelContactPhone")}</span>
                       <input
                         className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                         value={form.contactPhone}
@@ -394,13 +403,12 @@ export function BusinessVerificationPage() {
                     </label>
                   </div>
                   <div className="mt-6 pt-4 border-t border-border space-y-3">
-                    <p className="text-sm font-medium text-foreground">Uploads</p>
+                    <p className="text-sm font-medium text-foreground">{t("admin.businessVerificationPage.sectionUploads")}</p>
                     <p className="text-xs text-muted-foreground">
-                      Files are stored under{" "}
-                      <code className="text-[10px]">/uploads/platform/businesses/...</code>
+                      <code className="text-[10px]">{t("admin.businessVerificationPage.uploadsHint")}</code>
                     </p>
                     <label className="block text-sm">
-                      <span className="text-muted-foreground">Company logo (image)</span>
+                      <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelLogoUpload")}</span>
                       <input
                         type="file"
                         accept="image/*"
@@ -424,14 +432,14 @@ export function BusinessVerificationPage() {
                       onClick={() => setEditing(null)}
                       className="px-4 py-2 rounded-lg border border-border text-sm"
                     >
-                      Cancel
+                      {t("admin.businessVerificationPage.cancel")}
                     </button>
                     <button
                       type="button"
                       onClick={() => void saveKyc()}
                       className="px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary-hover"
                     >
-                      Save
+                      {t("admin.businessVerificationPage.save")}
                     </button>
                   </div>
                 </motion.div>

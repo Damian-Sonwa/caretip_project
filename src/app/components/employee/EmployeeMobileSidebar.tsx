@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { LogOut, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ type EmployeeMobileSidebarProps = {
 };
 
 export function EmployeeMobileSidebar({ isOpen, onClose }: EmployeeMobileSidebarProps) {
+  const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
@@ -70,7 +72,7 @@ export function EmployeeMobileSidebar({ isOpen, onClose }: EmployeeMobileSidebar
                         )}
                       >
                         <Icon className="h-5 w-5 shrink-0" />
-                        <span>{item.name}</span>
+                        <span>{t(item.labelKey)}</span>
                       </Link>
                     </li>
                   );
@@ -89,13 +91,15 @@ export function EmployeeMobileSidebar({ isOpen, onClose }: EmployeeMobileSidebar
                 className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
               >
                 <LogOut className="h-5 w-5" />
-                <span className="text-sm font-medium">Sign out</span>
+                <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
               </button>
             </div>
 
             <div className="border-t border-sidebar-border p-4">
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">{user?.name || "Team member"}</p>
+                <p className="truncate text-sm font-medium text-foreground">
+                  {user?.name || t("dashboard.teamMemberFallback")}
+                </p>
                 <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
               </div>
             </div>
