@@ -401,13 +401,13 @@ export function FeatureShowcase({
 
         <div
           className={cn(
-            "relative flex min-h-0 items-center justify-center",
-            !cinematic && "md:col-span-7",
+            "relative flex min-h-0 w-full items-center justify-center max-md:flex-col max-md:items-center",
+            !cinematic && "max-md:justify-self-center md:col-span-7",
             cinematic && "order-2 max-md:w-full md:flex-1 md:self-stretch md:justify-center md:overflow-visible",
           )}
         >
             {heroBorderBeam ? (
-            <div className="relative inline-block">
+            <div className="relative mx-auto inline-block max-md:w-full max-md:max-w-[520px]">
               <div className="relative overflow-hidden rounded-2xl border border-border/90 bg-card shadow-[0_10px_30px_rgba(0,0,0,0.06)]">
                 <BorderBeam
                   size={260}
@@ -419,11 +419,11 @@ export function FeatureShowcase({
                 />
                 <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
-                    <LandingImageFrame className="w-full max-w-[520px]">
+                    <LandingImageFrame className="mx-auto w-full max-w-[520px]">
                       <CareTipHeroAnimation />
                     </LandingImageFrame>
                   ) : singleHeroImage ? (
-                    <LandingImageFrame className="w-full max-w-[520px]">
+                    <LandingImageFrame className="mx-auto w-full max-w-[520px]">
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
@@ -433,7 +433,7 @@ export function FeatureShowcase({
                       />
                     </LandingImageFrame>
                   ) : (
-                    <div className="w-[320px] sm:w-[400px] md:w-[480px]">
+                    <div className="mx-auto w-[min(100%,320px)] sm:w-[min(100%,400px)] md:w-[min(100%,480px)]">
                       <FeatureCarousel images={carouselImages} />
                     </div>
                   )}
@@ -443,7 +443,7 @@ export function FeatureShowcase({
           ) : (
             <>
               {useAnimatedHero ? (
-                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
+                <LandingImageFrame className="mx-auto w-full bg-white" style={{ maxWidth: "520px" }}>
                   <CareTipHeroAnimation />
                 </LandingImageFrame>
               ) : singleHeroImage ? (
@@ -484,7 +484,7 @@ export function FeatureShowcase({
                     </div>
                   </div>
                 ) : (
-                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
+                  <LandingImageFrame className="mx-auto w-full bg-white" style={{ maxWidth: "520px" }}>
                     <img
                       src={singleHeroImage.src}
                       alt={singleHeroImage.alt}
@@ -495,7 +495,7 @@ export function FeatureShowcase({
                   </LandingImageFrame>
                 )
               ) : (
-                <div className="w-full" style={{ maxWidth: "520px" }}>
+                <div className="mx-auto w-full" style={{ maxWidth: "520px" }}>
                   <FeatureCarousel images={carouselImages} />
                 </div>
               )}

@@ -136,7 +136,7 @@ export default function HospitalityBusinessesMarquee() {
                 <div className={`${landingImageFrameClassName} relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]`}>
                   <img
                     alt={b.name}
-                    className="h-full w-full cursor-pointer object-cover transition-transform duration-700 ease-out group-hover:scale-[1.005] group-active:scale-[0.995]"
+                    className="h-full w-full cursor-pointer object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.005] group-active:scale-[0.995]"
                     src={b.image}
                     loading="lazy"
                     decoding="async"

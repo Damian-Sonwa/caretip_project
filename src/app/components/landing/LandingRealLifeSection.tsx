@@ -57,7 +57,7 @@ export function LandingRealLifeSection() {
           </motion.h2>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:gap-7">
+        <div className="grid grid-cols-1 justify-items-center gap-5 sm:grid-cols-2 sm:justify-items-stretch sm:gap-6 lg:gap-7">
           {scenarios.map((item, idx) => (
             <motion.article
               key={item.headline}
@@ -65,10 +65,15 @@ export function LandingRealLifeSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: idx * 0.06 }}
-              className="group flex flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none"
+              className="group flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:max-w-none dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden">
-                <img src={item.img} alt={item.alt} className="h-full w-full object-cover" loading="lazy" />
+                <img
+                  src={item.img}
+                  alt={item.alt}
+                  className="h-full w-full object-cover object-center"
+                  loading="lazy"
+                />
               </div>
               <div className="flex flex-col gap-2 p-5 text-left">
                 <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{item.headline}</h3>

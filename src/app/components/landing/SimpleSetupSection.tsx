@@ -37,7 +37,7 @@ export function SimpleSetupSection() {
       className="scroll-mt-[80px] bg-white px-2 py-16 max-md:overflow-x-hidden sm:px-6 sm:py-20 lg:py-24 dark:bg-neutral-950"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="grid items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:gap-12">
+        <div className="grid items-center justify-items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
           <div className="order-2 flex w-full max-w-full flex-col items-center text-center max-md:px-1 max-md:pt-2 lg:order-1 lg:items-start lg:px-0 lg:pt-0 lg:text-left md:px-0 md:pt-0">
             <motion.div
               initial={{ opacity: 0, y: 14 }}
@@ -95,7 +95,7 @@ export function SimpleSetupSection() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="relative order-1 flex w-full max-w-[95%] flex-col items-center justify-center lg:order-2 lg:mx-auto lg:w-full lg:max-w-none"
+            className="relative order-1 mx-auto flex w-full max-w-[min(100%,40rem)] flex-col items-center justify-center lg:order-2 lg:mx-auto lg:w-full lg:max-w-none"
           >
             <div className="relative w-full overflow-visible rounded-[2.5rem] shadow-xl ring-1 ring-black/[0.06]">
               <div className="relative w-full px-0 pb-2 sm:px-0">
