@@ -1180,7 +1180,7 @@
       "you": "You",
       "uploading": "Uploading…",
       "uploadImage": "Upload image",
-      "photoHint": "JPEG, PNG, GIF, or WebP. Max 5 MB.",
+      "photoHint": "JPEG, PNG, GIF, WebP, HEIC, or AVIF. Max 5 MB.",
       "profileSection": "Profile",
       "labelName": "Name",
       "labelBio": "Bio",

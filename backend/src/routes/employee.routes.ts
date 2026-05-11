@@ -4,6 +4,7 @@ import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import * as employeeController from "../controllers/employee.controller.js";
 import * as goalController from "../controllers/goal.controller.js";
+import { isAllowedImageMimetype } from "../services/upload.service.js";
 
 const router = Router();
 
@@ -11,10 +12,10 @@ const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
-    if (!/^image\/(jpeg|png|gif|webp)$/.test(file.mimetype)) {
-      cb(new Error("Only JPEG, PNG, GIF, or WebP images are allowed"));
-    } else {
+    if (isAllowedImageMimetype(file.mimetype)) {
       cb(null, true);
+    } else {
+      cb(new Error("Unsupported image type. Use JPEG, PNG, GIF, WebP, HEIC, or AVIF."));
     }
   },
 });

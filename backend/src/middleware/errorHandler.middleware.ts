@@ -11,10 +11,36 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     return;
   }
 
-  const status =
+  if (err instanceof multer.MulterError) {
+    const multerStatus = err.code === "LIMIT_FILE_SIZE" ? 413 : 400;
+    const context = {
+      method: req.method,
+      path: req.originalUrl ?? req.url,
+      status: multerStatus,
+    };
+    console.error("❌ BACKEND ERROR (multer):", context, err.code, err.message);
+    if (err.stack) console.error(err.stack);
+    const msg =
+      err.code === "LIMIT_FILE_SIZE"
+        ? "Image is too large (max 5 MB)."
+        : err.code === "LIMIT_UNEXPECTED_FILE"
+          ? "Unexpected upload field. Use the correct file field name."
+          : err.message || "Upload failed.";
+    res.status(multerStatus).json({ message: clientSafeMessage(new Error(msg), CLIENT_FALLBACK.generic) });
+    return;
+  }
+
+  let status =
     typeof err === "object" && err !== null && "status" in err && typeof (err as { status: unknown }).status === "number"
       ? (err as { status: number }).status
       : 500;
+
+  if (status === 500 && err instanceof Error) {
+    const m = err.message;
+    if (m.startsWith("Unsupported image type") || m.startsWith("Logo must be an image")) {
+      status = 400;
+    }
+  }
 
   // Log detailed errors on server only (do not expose stack traces / DB internals to clients).
   const context = {
@@ -22,13 +48,8 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
     path: req.originalUrl ?? req.url,
     status,
   };
-  if (err instanceof multer.MulterError) {
-    console.error("❌ BACKEND ERROR (multer):", context, err.code, err.message);
-    if (err.stack) console.error(err.stack);
-  } else {
-    console.error("❌ BACKEND ERROR:", context, err);
-    if (err instanceof Error && err.stack) console.error(err.stack);
-  }
+  console.error("❌ BACKEND ERROR:", context, err);
+  if (err instanceof Error && err.stack) console.error(err.stack);
 
   // Keep response shape stable: frontend reads `message` (see src/app/lib/api.ts handleRes).
   // For expected client errors (4xx), return allow-listed / Prisma-classified messages.

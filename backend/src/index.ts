@@ -29,6 +29,7 @@ import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { getImageUploadStorageDiagnostics } from "./services/upload.service.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -96,7 +97,12 @@ app.use("/api/platform", platformRoutes);
 /** Alias for SuperAdmin clients (same handlers as `/api/platform`). */
 app.use("/api/admin", platformRoutes);
 
-app.get("/health", (_, res) => res.json({ status: "ok" }));
+app.get("/health", (_, res) => {
+  res.json({
+    status: "ok",
+    uploads: getImageUploadStorageDiagnostics(),
+  });
+});
 
 app.use(errorHandler);
 

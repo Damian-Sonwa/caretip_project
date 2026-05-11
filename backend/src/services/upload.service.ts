@@ -3,9 +3,17 @@ import { join } from "path";
 import { randomUUID } from "crypto";
 import { v2 as cloudinary } from "cloudinary";
 import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
+import {
+  validateImageBufferForUpload,
+  isAllowedImageMimetype,
+} from "../lib/imageUploadValidation.js";
 
 const UPLOAD_CONFIG_ERROR =
   "Photo upload is not configured on this server. The administrator should set CLOUDINARY_URL (recommended) or PUBLIC_API_BASE_URL to the API’s public HTTPS URL.";
+
+const CLOUDINARY_UPLOAD_TIMEOUT_MS = 90_000;
+
+let loggedStorageBackend = false;
 
 function isLocalhostBase(url: string): boolean {
   try {
@@ -33,9 +41,33 @@ export function isCloudinaryConfiguredForUpload(): boolean {
   return cloudinaryUrlConfigured() || cloudinaryTripleConfigured();
 }
 
+/** Safe diagnostics for `/health` (no secrets). */
+export function getImageUploadStorageDiagnostics(): {
+  employeeAvatarStorage: "cloudinary" | "disk";
+  cloudinaryConfigured: boolean;
+  cloudinaryUrlPresent: boolean;
+  cloudinaryTriplePresent: boolean;
+} {
+  const cloudinaryConfigured = isCloudinaryConfiguredForUpload();
+  return {
+    employeeAvatarStorage: cloudinaryConfigured ? "cloudinary" : "disk",
+    cloudinaryConfigured,
+    cloudinaryUrlPresent: cloudinaryUrlConfigured(),
+    cloudinaryTriplePresent: cloudinaryTripleConfigured(),
+  };
+}
+
+function logStorageBackendOnce(): void {
+  if (loggedStorageBackend) return;
+  loggedStorageBackend = true;
+  const d = getImageUploadStorageDiagnostics();
+  console.info(
+    `[upload] Employee avatars: storage=${d.employeeAvatarStorage} (CLOUDINARY_URL=${d.cloudinaryUrlPresent}, triple=${d.cloudinaryTriplePresent})`,
+  );
+}
+
 function configureCloudinaryForUpload(): void {
   if (cloudinaryUrlConfigured()) {
-    // Reload from CLOUDINARY_URL (standard on Render, Railway, Heroku, etc.)
     cloudinary.config(true);
     return;
   }
@@ -45,44 +77,105 @@ function configureCloudinaryForUpload(): void {
   cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const t = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`));
+    }, ms);
+    promise.then(
+      (v) => {
+        clearTimeout(t);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(t);
+        reject(e);
+      },
+    );
+  });
+}
+
+async function uploadBufferToCloudinary(
+  buffer: Buffer,
+  folder: "caretip/avatars" | "caretip/business-logos",
+): Promise<string> {
+  configureCloudinaryForUpload();
+  const uploadPromise = new Promise<string>((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: "image",
+        /** Let Cloudinary infer format; avoids edge cases with HEIC etc. */
+        use_filename: false,
+        unique_filename: true,
+      },
+      (err, res) => {
+        if (err) {
+          const http = (err as { http_code?: number }).http_code;
+          const msg = err.message || String(err);
+          reject(
+            new Error(
+              http === 401 || /401|unauthorized/i.test(msg)
+                ? "Cloudinary rejected credentials (check CLOUDINARY_URL or API keys)."
+                : `${msg}`,
+            ),
+          );
+        } else if (res?.secure_url) {
+          resolve(res.secure_url);
+        } else {
+          reject(new Error("Cloudinary returned no image URL."));
+        }
+      },
+    );
+    stream.end(buffer);
+  });
+  return withTimeout(uploadPromise, CLOUDINARY_UPLOAD_TIMEOUT_MS, "Cloudinary upload");
+}
+
 /**
  * Uploads an image buffer to Cloudinary when configured (`CLOUDINARY_URL` or cloud name/key/secret);
  * otherwise saves under /uploads/avatars (needs a persistent disk + correct PUBLIC_API_BASE_URL in production).
  */
 export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string): Promise<string> {
+  logStorageBackendOnce();
+  validateImageBufferForUpload(buffer, mimetype);
+
   const useCloudinary = isCloudinaryConfiguredForUpload();
 
   if (useCloudinary) {
-    configureCloudinaryForUpload();
-    const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-        { folder: "caretip/avatars", resource_type: "image" },
-        (err, res) => {
-          if (err) reject(err);
-          else if (res?.secure_url) resolve({ secure_url: res.secure_url });
-          else reject(new Error("Upload failed"));
-        }
-      );
-      stream.end(buffer);
-    });
-    return result.secure_url;
+    try {
+      return await uploadBufferToCloudinary(buffer, "caretip/avatars");
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[upload] Cloudinary employee avatar failed:", msg);
+      if (/timed out/i.test(msg)) {
+        throw new Error("Photo upload timed out. Please try again with a smaller image.");
+      }
+      if (/rejected credentials|401|unauthorized/i.test(msg)) {
+        throw new Error("Photo storage is not available. Please try again later.");
+      }
+      throw new Error("We couldn't upload your photo. Please try a JPEG or PNG under 5 MB.");
+    }
   }
 
   const base = resolvePublicApiBaseUrl();
   if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
     console.error(
-      "[upload] Refusing disk upload: PUBLIC_API_BASE_URL (or host auto-detect) resolves to localhost in production. Set CLOUDINARY_URL or PUBLIC_API_BASE_URL."
+      "[upload] Refusing disk upload: PUBLIC_API_BASE_URL (or host auto-detect) resolves to localhost in production. Set CLOUDINARY_URL or PUBLIC_API_BASE_URL.",
     );
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
 
-  const ext = mimetype.includes("png")
+  const mt = mimetype.toLowerCase();
+  const ext = mt.includes("png")
     ? "png"
-    : mimetype.includes("webp")
+    : mt.includes("webp")
       ? "webp"
-      : mimetype.includes("gif")
+      : mt.includes("gif")
         ? "gif"
-        : "jpg";
+        : mt.includes("heic") || mt.includes("heif")
+          ? "heic"
+          : "jpg";
   const filename = `${randomUUID()}.${ext}`;
   const dir = join(process.cwd(), "uploads", "avatars");
   const fp = join(dir, filename);
@@ -104,17 +197,14 @@ export async function tryUploadBusinessLogoToCloudinary(buffer: Buffer): Promise
   if (!isCloudinaryConfiguredForUpload()) {
     return null;
   }
-  configureCloudinaryForUpload();
-  const result = await new Promise<{ secure_url: string }>((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "caretip/business-logos", resource_type: "image" },
-      (err, res) => {
-        if (err) reject(err);
-        else if (res?.secure_url) resolve({ secure_url: res.secure_url });
-        else reject(new Error("Logo upload failed"));
-      },
-    );
-    stream.end(buffer);
-  });
-  return result.secure_url;
+  try {
+    return await uploadBufferToCloudinary(buffer, "caretip/business-logos");
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[upload] Cloudinary business logo failed (keeping disk path):", msg);
+    return null;
+  }
 }
+
+/** Re-export for multer fileFilter (single source of truth). */
+export { isAllowedImageMimetype };

@@ -12,6 +12,7 @@ import {
   downloadMyDataExport,
   deleteMyEmployeeAccount,
 } from "../../lib/api";
+import { validateImageFileForUpload } from "../../lib/imageClientUpload";
 import {
   getPasswordChecklist,
   isPasswordStrong,
@@ -112,8 +113,10 @@ export function EmployeeSettingsPage() {
   const handleAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file || !file.type.startsWith("image/")) {
-      toast.error(t("employee.settings.toastImageOnly"));
+    if (!file) return;
+    const check = validateImageFileForUpload(file);
+    if (!check.ok) {
+      toast.error(toUserFriendlyMessage(new Error(check.message), { audience: "employee" }));
       return;
     }
     setUploading(true);
@@ -202,7 +205,13 @@ export function EmployeeSettingsPage() {
           <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: TEAL }}>
             <Upload className="w-4 h-4" />
             {uploading ? t("employee.settings.uploading") : t("employee.settings.uploadImage")}
-            <input type="file" accept="image/jpeg,image/png,image/gif,image/webp" className="hidden" onChange={handleAvatar} disabled={uploading} />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp,image/heic,image/heif,image/avif,.heic,.heif"
+              className="hidden"
+              onChange={handleAvatar}
+              disabled={uploading}
+            />
           </label>
           <p className="text-xs text-muted-foreground">{t("employee.settings.photoHint")}</p>
         </section>

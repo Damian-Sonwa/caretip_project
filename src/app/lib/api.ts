@@ -12,6 +12,7 @@ import {
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
+import { validateImageFileForUpload } from "./imageClientUpload";
 import { authDebug } from "./authDebugLog";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
@@ -796,6 +797,10 @@ export async function putBusinessProfile(body: {
 }
 
 export async function uploadMyBusinessLogo(file: File): Promise<{ success: boolean; path: string }> {
+  const check = validateImageFileForUpload(file);
+  if (!check.ok) {
+    throw new Error(toUserFriendlyMessage(new Error(check.message)));
+  }
   const form = new FormData();
   form.append("file", file);
   return apiRequest(apiPath("/api/business/profile/logo"), {
@@ -1262,22 +1267,18 @@ export async function patchEmployeeProfile(payload: {
 }
 
 export async function uploadEmployeeAvatar(file: File): Promise<{ avatar: string }> {
-  const token = getToken();
+  const check = validateImageFileForUpload(file);
+  if (!check.ok) {
+    throw new Error(toUserFriendlyMessage(new Error(check.message)));
+  }
   const fd = new FormData();
   fd.append("avatar", file);
-  const res = await fetch(apiPath("/api/employees/me/avatar"), {
+  return apiRequest<{ avatar: string }>(apiPath("/api/employees/me/avatar"), {
     method: "POST",
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    headers: getAuthHeadersOnly(),
     body: fd,
     credentials: "include",
   });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    logClientError("api.uploadEmployeeAvatar", new Error(`HTTP ${res.status}`), { body: data });
-    const raw = (data as { message?: string }).message ?? res.statusText ?? "Upload failed";
-    throw new Error(toUserFriendlyMessage(new Error(raw)));
-  }
-  return data as { avatar: string };
 }
 
 export async function changePasswordAPI(currentPassword: string, newPassword: string): Promise<void> {
@@ -1765,6 +1766,10 @@ export async function uploadPlatformBusinessLogo(
   businessId: string,
   file: File
 ): Promise<{ success: boolean; path: string }> {
+  const check = validateImageFileForUpload(file);
+  if (!check.ok) {
+    throw new Error(toUserFriendlyMessage(new Error(check.message)));
+  }
   const form = new FormData();
   form.append("file", file);
   return apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/logo`), {
