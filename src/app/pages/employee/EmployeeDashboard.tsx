@@ -291,13 +291,11 @@ export function EmployeeDashboard() {
     time: formatTimeAgo(tipRow.createdAt),
   }));
 
-  if (!user) return null;
-
   const slugLoading = staffSlug === undefined;
   const hasSlug = Boolean(staffSlug);
-  const qrEmployeeId = user.employeeId ?? employeeRecordId ?? null;
+  const qrEmployeeId = user?.employeeId ?? employeeRecordId ?? null;
 
-  const handleQrQuickAction = async () => {
+  const handleQrQuickAction = useCallback(async () => {
     if (!authHydrated || !sessionValidated) return;
     if (slugLoading || generatingSlug) return;
     if (!hasSlug) {
@@ -322,7 +320,14 @@ export function EmployeeDashboard() {
       return;
     }
     setQrModalOpen(true);
-  };
+  }, [
+    authHydrated,
+    sessionValidated,
+    slugLoading,
+    generatingSlug,
+    hasSlug,
+    t,
+  ]);
 
   useEffect(() => {
     if (!sessionValidated || user?.role !== "employee") return;
@@ -333,7 +338,9 @@ export function EmployeeDashboard() {
     const next = params.toString();
     navigate(next ? `${location.pathname}?${next}` : location.pathname, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid URL-trigger loop
-  }, [location.pathname, location.search, navigate, sessionValidated, user?.role]);
+  }, [location.pathname, location.search, navigate, sessionValidated, user?.role, handleQrQuickAction]);
+
+  if (!user) return null;
 
   if (error) {
     return (
