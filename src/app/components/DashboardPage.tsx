@@ -395,7 +395,7 @@ export function DashboardPage() {
                           className={`w-2 h-2 rounded-full mt-2 ${
                             activity.status === 'success'
                               ? 'bg-primary'
-                              : activity.status === 'failed'
+                              : activity.status === 'warning'
                               ? 'bg-neutral-400 dark:bg-neutral-600'
                               : 'bg-neutral-300 dark:bg-neutral-700'
                           }`}
@@ -412,7 +412,7 @@ export function DashboardPage() {
                         className={`text-sm font-medium ${
                           activity.status === 'success'
                             ? 'text-primary'
-                            : activity.status === 'failed'
+                            : activity.status === 'warning'
                             ? 'text-neutral-600 dark:text-neutral-400'
                             : 'text-neutral-600 dark:text-neutral-400'
                         }`}

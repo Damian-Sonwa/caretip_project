@@ -1,44 +1,27 @@
+import { useMemo } from "react";
 import { motion } from "motion/react";
-import { QrCode, ShieldCheck, Zap, BarChart3, Users, Building2 } from "lucide-react";
+import { QrCode, ShieldCheck, Zap, BarChart3, Users, Building2, type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { AuthLikePageBackground } from "../components/AuthLikePageBackground";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 
-const FEATURES = [
-  {
-    Icon: QrCode,
-    title: "QR Code Tipping",
-    description: "Guests scan and tip in seconds, with no app installs and no friction.",
-  },
-  {
-    Icon: Users,
-    title: "Employee Performance Tracking",
-    description: "Track tips, ratings, and goals in one place so staff stay motivated.",
-  },
-  {
-    Icon: BarChart3,
-    title: "Business Dashboard Insights",
-    description: "See team performance, trends, and activity across shifts and venues.",
-  },
-  {
-    Icon: ShieldCheck,
-    title: "Secure Payments (Stripe)",
-    description: "Trusted checkout and modern security so payments stay reliable and safe.",
-  },
-  {
-    Icon: Zap,
-    title: "Real-time Updates",
-    description: "Live activity and notifications so you can coach and respond fast.",
-  },
-  {
-    Icon: Building2,
-    title: "Multi-location Support",
-    description: "Manage multiple venues, locations, and tables without losing clarity.",
-  },
-] as const;
+const FEATURE_ICONS: LucideIcon[] = [QrCode, Users, BarChart3, ShieldCheck, Zap, Building2];
+const FEATURE_NUMS = ["1", "2", "3", "4", "5", "6"] as const;
 
 export function FeaturesPage() {
+  const { t } = useTranslation();
+  const features = useMemo(
+    () =>
+      FEATURE_NUMS.map((n, idx) => ({
+        Icon: FEATURE_ICONS[idx],
+        title: t(`staticPages.features.f${n}Title`),
+        description: t(`staticPages.features.f${n}Desc`),
+      })),
+    [t],
+  );
+
   return (
     <div className="relative min-h-[100dvh] bg-white">
       <AuthLikePageBackground />
@@ -54,16 +37,12 @@ export function FeaturesPage() {
               transition={{ duration: 0.55 }}
               className="mb-10 space-y-4 text-center"
             >
-              <h1 className="text-4xl font-bold text-neutral-900 sm:text-5xl md:text-6xl">
-                Everything CareTip Can Do
-              </h1>
-              <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">
-                A clear view of the platform, built for hospitality teams and designed for fast tipping.
-              </p>
+              <h1 className="text-4xl font-bold text-neutral-900 sm:text-5xl md:text-6xl">{t("staticPages.features.title")}</h1>
+              <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">{t("staticPages.features.subtitle")}</p>
             </motion.div>
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {FEATURES.map((f, idx) => (
+              {features.map((f, idx) => (
                 <motion.div
                   key={f.title}
                   initial={{ y: 14, opacity: 0 }}
@@ -93,4 +72,3 @@ export function FeaturesPage() {
     </div>
   );
 }
-

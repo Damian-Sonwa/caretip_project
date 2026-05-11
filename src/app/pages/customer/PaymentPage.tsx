@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, CreditCard, Smartphone, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
@@ -18,6 +19,7 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 
 export function PaymentPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
@@ -65,7 +67,7 @@ export function PaymentPage() {
           const emp = await getEmployeeById(employeeId);
           if (cancelled) return;
           setBusinessId(emp.businessId);
-          setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+          setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
         }
         markCustomerFlowEntered();
         if (!cancelled) setGuardReady(true);
@@ -78,7 +80,7 @@ export function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [businessId, employeeId, employeeName, navigate, setBusinessId, setEmployee]);
+  }, [businessId, employeeId, employeeName, navigate, setBusinessId, setEmployee, t]);
 
   // DEV-only: allow direct navigation without QR flow by seeding mock context.
   useEffect(() => {
@@ -90,11 +92,11 @@ export function PaymentPage() {
 
   useEffect(() => {
     if (searchParams.get("canceled") === "1") {
-      toast.message("Payment canceled", {
-        description: "You can choose a method and try again when you're ready.",
+      toast.message(t("tipFlow.payment.canceledTitle"), {
+        description: t("tipFlow.payment.canceledDesc"),
       });
     }
-  }, [searchParams]);
+  }, [searchParams, t]);
 
   // Hydrate name/avatar if context was partially cleared (same session)
   useEffect(() => {
@@ -106,7 +108,7 @@ export function PaymentPage() {
         const emp = await getEmployeeById(employeeId);
         if (cancelled) return;
         setBusinessId(emp.businessId);
-        setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+        setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
       } catch (err) {
         logClientError("PaymentPage.hydrate", err);
       }
@@ -114,7 +116,7 @@ export function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [employeeId, businessId, employeeName, setBusinessId, setEmployee]);
+  }, [employeeId, businessId, employeeName, setBusinessId, setEmployee, t]);
 
   useEffect(() => {
     if (!employeeId) {
@@ -128,7 +130,7 @@ export function PaymentPage() {
         if (cancelled) return;
         setBusinessBrand({
           logo: emp.businessLogo ?? null,
-          name: String(emp.businessName ?? "").trim() || "Venue",
+          name: String(emp.businessName ?? "").trim() || t("tipFlow.common.venue"),
         });
       } catch {
         if (!cancelled) setBusinessBrand(null);
@@ -137,35 +139,38 @@ export function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [employeeId]);
+  }, [employeeId, t]);
 
   if (!guardReady && !import.meta.env.DEV) {
-    return <CareTipPageLoader variant="wait" message="Preparing checkout…" />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
   }
 
-  const paymentMethods = [
-    {
-      id: "apple-pay",
-      name: "Apple Pay",
-      icon: "🍎",
-      description: "Pay with Apple Pay",
-      available: true,
-    },
-    {
-      id: "google-pay",
-      name: "Google Pay",
-      icon: "🅖",
-      description: "Pay with Google Pay",
-      available: true,
-    },
-    {
-      id: "card",
-      name: "Credit / Debit Card",
-      icon: <CreditCard className="w-6 h-6 text-accent" />,
-      description: "Visa, Mastercard, Amex",
-      available: true,
-    },
-  ];
+  const paymentMethods = useMemo(
+    () => [
+      {
+        id: "apple-pay",
+        name: t("tipFlow.payment.methods.applePay"),
+        icon: "🍎",
+        description: t("tipFlow.payment.methods.applePayDesc"),
+        available: true,
+      },
+      {
+        id: "google-pay",
+        name: t("tipFlow.payment.methods.googlePay"),
+        icon: "🅖",
+        description: t("tipFlow.payment.methods.googlePayDesc"),
+        available: true,
+      },
+      {
+        id: "card",
+        name: t("tipFlow.payment.methods.card"),
+        icon: <CreditCard className="w-6 h-6 text-accent" />,
+        description: t("tipFlow.payment.methods.cardDesc"),
+        available: true,
+      },
+    ],
+    [t],
+  );
 
   const handleBack = () => {
     if (employeeId && staffTipReturnBusinessSlug && staffTipReturnEmployeeSlug) {
@@ -201,7 +206,7 @@ export function PaymentPage() {
         tableId: tableId ?? null,
       });
       if (!url) {
-        toast.error("Could not start checkout. Please try again.");
+        toast.error(t("tipFlow.payment.checkoutStartError"));
         setProcessing(false);
         return;
       }
@@ -247,8 +252,8 @@ export function PaymentPage() {
               <CareTipLogo size="xs" className="shrink-0" />
             )}
             <div className="min-w-0">
-              <h1 className="text-lg font-semibold text-foreground">Payment</h1>
-              <p className="text-xs text-muted-foreground">Choose payment method</p>
+              <h1 className="text-lg font-semibold text-foreground">{t("tipFlow.payment.title")}</h1>
+              <p className="text-xs text-muted-foreground">{t("tipFlow.payment.subtitle")}</p>
             </div>
           </div>
         </div>
@@ -278,13 +283,13 @@ export function PaymentPage() {
                 <CardContent className="flex items-center gap-4 p-4">
                   <ProfileAvatar
                     src={employeeAvatar}
-                    displayName={employeeName ?? "Team Member"}
+                    displayName={employeeName ?? t("tipFlow.common.teamMember")}
                     className="h-16 w-16 shrink-0 ring-4 ring-primary shadow-sm"
                   />
                   <div>
-                    <p className="text-sm text-muted-foreground">Paying tip to</p>
+                    <p className="text-sm text-muted-foreground">{t("tipFlow.payment.payingTipTo")}</p>
                     <p className="font-semibold text-lg text-foreground">
-                      {employeeName ?? "Team Member"}
+                      {employeeName ?? t("tipFlow.common.teamMember")}
                     </p>
                   </div>
                 </CardContent>
@@ -301,14 +306,18 @@ export function PaymentPage() {
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
-                        Tip for {employeeName ?? "Team Member"}
+                        {t("tipFlow.payment.tipFor", {
+                          name: employeeName ?? t("tipFlow.common.teamMember"),
+                        })}
                       </span>
                       <span className="text-sm font-medium text-foreground">
                         {formatEur(tipAmountVal)}
                       </span>
                     </div>
                     <div className="border-t border-border/60 pt-3 flex items-center justify-between gap-4">
-                      <span className="text-base font-semibold text-foreground">Amount to pay</span>
+                      <span className="text-base font-semibold text-foreground">
+                        {t("tipFlow.payment.amountToPay")}
+                      </span>
                       <span className="text-3xl font-bold text-foreground tabular-nums">
                         {formatEur(totalAmount)}
                       </span>
@@ -320,8 +329,8 @@ export function PaymentPage() {
 
             <Card className="border-border shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Select payment method</CardTitle>
-                <CardDescription>Choose how you&apos;d like to pay</CardDescription>
+                <CardTitle className="text-base">{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
+                <CardDescription>{t("tipFlow.payment.selectMethodDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 {paymentMethods.map((method, index) => (
@@ -376,10 +385,8 @@ export function PaymentPage() {
               <CardContent className="flex items-start gap-3 py-4">
                 <Lock className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
                 <div className="text-xs text-muted-foreground">
-                  <p className="font-medium text-foreground mb-1">Secure payment</p>
-                  <p>
-                    Apple Pay, Google Pay, and cards are processed by Stripe. You will confirm on the next screen.
-                  </p>
+                  <p className="font-medium text-foreground mb-1">{t("tipFlow.payment.secureTitle")}</p>
+                  <p>{t("tipFlow.payment.secureBody")}</p>
                 </div>
               </CardContent>
             </Card>
@@ -401,12 +408,12 @@ export function PaymentPage() {
                   {processing ? (
                     <>
                       <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                      Redirecting to secure checkout…
+                      {t("tipFlow.payment.redirectingCheckout")}
                     </>
                   ) : (
                     <>
                       <Smartphone className="w-5 h-5" />
-                      Pay {formatEur(totalAmount)}
+                      {t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })}
                     </>
                   )}
                 </button>

@@ -20,6 +20,7 @@ import { logClientError } from "@/app/lib/clientLog";
  * Token is stripped from the URL on failure so a refresh does not re-hit a consumed token (HTTP 400).
  */
 function VerifyEmailFromToken({ token }: { token: string }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { refreshSession } = useAuth();
   const [phase, setPhase] = useState<"verifying" | "success">("verifying");

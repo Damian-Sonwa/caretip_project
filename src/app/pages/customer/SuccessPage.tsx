@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Check, Star, Home, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
@@ -13,6 +14,7 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 
 export function SuccessPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { amount, employeeName, reset } = useTipFlow();
@@ -76,7 +78,7 @@ export function SuccessPage() {
   }, [navigate, sessionId]);
 
   if (!verified) {
-    return <CareTipPageLoader variant="wait" message="Validating payment…" />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.success.validatingPayment")} />;
   }
 
   return (
@@ -105,16 +107,18 @@ export function SuccessPage() {
           className="text-center mb-8"
         >
           <h1 className="text-3xl font-bold text-foreground mb-3">
-            Tip Sent Successfully!
+            {t("tipFlow.success.headline")}
           </h1>
           <p className="text-lg text-muted-foreground mb-2">
-            Thank you for your generosity
+            {t("tipFlow.success.thankYou")}
           </p>
           <p className="text-4xl font-bold text-accent">
             €{tipAmount.toFixed(2)}
           </p>
           <p className="text-sm text-muted-foreground mt-2">
-            Your tip has been sent to {employeeName ?? "the team member"}
+            {t("tipFlow.success.sentTo", {
+              name: employeeName ?? t("tipFlow.common.theTeamMember"),
+            })}
           </p>
         </motion.div>
 
@@ -125,22 +129,22 @@ export function SuccessPage() {
           transition={{ delay: 0.6 }}
           className="bg-card rounded-xl border border-border p-6 mb-6"
         >
-          <h3 className="text-sm font-medium text-muted-foreground mb-4">Receipt</h3>
+          <h3 className="text-sm font-medium text-muted-foreground mb-4">{t("tipFlow.success.receipt")}</h3>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Transaction ID</span>
-              <span className="text-sm font-mono text-foreground">#TIP-2024-1247</span>
+              <span className="text-sm text-muted-foreground">{t("tipFlow.success.transactionId")}</span>
+              <span className="text-sm font-mono text-foreground">{t("tipFlow.success.demoTransactionId")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Date & Time</span>
-              <span className="text-sm text-foreground">Mar 23, 2026 • 7:45 PM</span>
+              <span className="text-sm text-muted-foreground">{t("tipFlow.success.dateTime")}</span>
+              <span className="text-sm text-foreground">{t("tipFlow.success.demoDateTime")}</span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Payment Method</span>
-              <span className="text-sm text-foreground">Apple Pay •••• 4242</span>
+              <span className="text-sm text-muted-foreground">{t("tipFlow.success.paymentMethod")}</span>
+              <span className="text-sm text-foreground">{t("tipFlow.success.demoPaymentMethod")}</span>
             </div>
             <div className="border-t border-border pt-3 flex items-center justify-between">
-              <span className="font-semibold text-foreground">Tip Amount</span>
+              <span className="font-semibold text-foreground">{t("tipFlow.success.tipAmount")}</span>
               <span className="text-lg font-bold text-foreground">{formatEur(tipAmount)}</span>
             </div>
           </div>
@@ -155,7 +159,7 @@ export function SuccessPage() {
           className="w-full bg-accent/10 border-2 border-accent/30 text-accent rounded-xl p-4 font-semibold hover:bg-accent/20 transition-all flex items-center justify-center gap-2 mb-4"
         >
           <Star className="w-5 h-5" />
-          Leave optional feedback
+          {t("tipFlow.success.leaveFeedback")}
         </motion.button>
 
         {/* Action Buttons */}
@@ -171,7 +175,7 @@ export function SuccessPage() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 font-semibold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
           >
             <LogOut className="w-5 h-5" />
-            Leave page
+            {t("tipFlow.success.leavePage")}
           </button>
           <p className="text-center">
             <button
@@ -180,7 +184,7 @@ export function SuccessPage() {
               className="text-sm text-muted-foreground hover:text-foreground underline-offset-2 hover:underline inline-flex items-center gap-1"
             >
               <Home className="w-4 h-4" />
-              Back to home
+              {t("tipFlow.success.backHome")}
             </button>
           </p>
         </motion.div>
@@ -192,7 +196,7 @@ export function SuccessPage() {
           transition={{ delay: 1.2 }}
           className="text-center text-xs text-muted-foreground mt-8"
         >
-          A receipt has been sent to your email
+          {t("tipFlow.success.emailReceipt")}
         </motion.p>
       </div>
     </div>

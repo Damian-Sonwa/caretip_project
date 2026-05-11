@@ -1,5 +1,6 @@
 import { useNavigate, useParams, Link } from "react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Building2, Home, MapPin, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
@@ -22,6 +23,7 @@ import { formatEur } from "../../lib/formatEur";
  * /qr/location/:locationId — Venue QR: business team list in context of one location.
  */
 export function LocationQrLandingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { locationId } = useParams<{ locationId: string }>();
   const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath, setAmount } = useTipFlow();
@@ -34,7 +36,7 @@ export function LocationQrLandingPage() {
   useEffect(() => {
     const raw = locationId?.trim();
     if (!raw) {
-      setError("Invalid link.");
+      setError(t("tipFlow.errors.invalidLink"));
       setLoading(false);
       return;
     }
@@ -60,7 +62,7 @@ export function LocationQrLandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [locationId, setBusinessId]);
+  }, [locationId, setBusinessId, t]);
 
   const filtered = useMemo(() => {
     const list = data?.employees ?? [];
@@ -105,15 +107,15 @@ export function LocationQrLandingPage() {
   }, [data?.business?.id, data?.employees, repeatDismissed]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message="Loading venue…" />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.locationLanding.loading")} />;
   }
 
   if (error || !data) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? "Not found"}</p>
+        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
         <Link to="/" className="text-primary hover:underline text-sm">
-          Go home
+          {t("tipFlow.common.goHomeLink")}
         </Link>
       </div>
     );
@@ -127,7 +129,7 @@ export function LocationQrLandingPage() {
             type="button"
             onClick={() => navigate("/")}
             className="rounded-lg p-2 hover:bg-muted transition-colors"
-            aria-label="Home"
+            aria-label={t("tipFlow.common.homeAria")}
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
@@ -150,21 +152,19 @@ export function LocationQrLandingPage() {
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Welcome back</p>
+                    <p className="text-sm font-semibold text-foreground">{t("tipFlow.qrLanding.repeatWelcome")}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Tip{" "}
-                      <span className="font-semibold text-foreground">
-                        {repeatCandidate.emp.name ?? "Team Member"}
-                      </span>{" "}
-                      again?
+                      {t("tipFlow.qrLanding.repeatBody", {
+                        name: repeatCandidate.emp.name ?? t("tipFlow.common.teamMember"),
+                      })}
                     </p>
                     <p className="mt-2 text-xs font-semibold text-primary">
-                      Last tip: {formatEur(repeatCandidate.amount)}
+                      {t("tipFlow.qrLanding.repeatLastTip", { amount: formatEur(repeatCandidate.amount) })}
                     </p>
                   </div>
                   <ProfileAvatar
                     src={repeatCandidate.emp.avatar}
-                    displayName={repeatCandidate.emp.name ?? "Team Member"}
+                    displayName={repeatCandidate.emp.name ?? t("tipFlow.common.teamMember")}
                     className="h-12 w-12 shrink-0 ring-2 ring-primary/20"
                   />
                 </div>
@@ -175,7 +175,7 @@ export function LocationQrLandingPage() {
                       setBusinessId(data.business.id);
                       setEmployee(
                         repeatCandidate.emp.id,
-                        repeatCandidate.emp.name ?? "Team Member",
+                        repeatCandidate.emp.name ?? t("tipFlow.common.teamMember"),
                         repeatCandidate.emp.avatar ?? undefined,
                       );
                       const bs = data.business.slug?.trim();
@@ -188,14 +188,14 @@ export function LocationQrLandingPage() {
                     }}
                     className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
                   >
-                    Tip again
+                    {t("tipFlow.qrLanding.tipAgain")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setRepeatDismissed(true)}
                     className="w-full rounded-xl border border-border bg-background py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
                   >
-                    Choose different staff
+                    {t("tipFlow.qrLanding.chooseDifferentStaff")}
                   </button>
                 </div>
               </CardContent>
@@ -206,23 +206,23 @@ export function LocationQrLandingPage() {
         <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
           <Card className="border-border shadow-sm">
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">Venue team</CardTitle>
-              <CardDescription>Choose who you&apos;d like to thank at this location.</CardDescription>
+              <CardTitle className="text-base">{t("tipFlow.locationLanding.venueTeam")}</CardTitle>
+              <CardDescription>{t("tipFlow.locationLanding.venueTeamDesc")}</CardDescription>
             </CardHeader>
           </Card>
         </motion.div>
 
         <Card className="border-border shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Search</CardTitle>
-            <CardDescription>Filter by name or role</CardDescription>
+            <CardTitle className="text-base">{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
+            <CardDescription>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
-                placeholder="Search by name or role…"
+                placeholder={t("tipFlow.qrLanding.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
@@ -234,12 +234,12 @@ export function LocationQrLandingPage() {
 
         <Card className="border-border shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Team</CardTitle>
-            <CardDescription>Tap to continue to tip amount</CardDescription>
+            <CardTitle className="text-base">{t("tipFlow.locationLanding.teamTitle")}</CardTitle>
+            <CardDescription>{t("tipFlow.locationLanding.teamDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             {filtered.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No matches.</p>
+              <p className="py-8 text-center text-sm text-muted-foreground">{t("tipFlow.locationLanding.noMatches")}</p>
             ) : (
               <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {filtered.map((emp, index) => (

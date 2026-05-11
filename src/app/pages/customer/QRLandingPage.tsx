@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
 import { useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Building2, MapPin, Users, Euro, Home, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import {
@@ -29,6 +30,7 @@ const BRAND_ORANGE = "#EB992C";
 const presetAmounts = [5, 10, 15, 20];
 
 export function QRLandingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessId, qrSlug } = useParams<{ businessId?: string; qrSlug?: string }>();
   const [searchParams] = useSearchParams();
@@ -101,12 +103,12 @@ export function QRLandingPage() {
         if (employeeIdParam) {
           const emp = await getEmployeeById(employeeIdParam);
           if (qrSlug && emp.businessId !== targetBusinessId) {
-            setError("This team member does not belong to this venue.");
+            setError(t("tipFlow.errors.employeeWrongVenue"));
             return;
           }
           setBusinessId(emp.businessId);
           setSelectedEmployee(emp);
-          setEmployee(emp.id, emp.name ?? "Valued Team Member", emp.avatar ?? undefined);
+          setEmployee(emp.id, emp.name ?? t("tipFlow.common.valuedTeamMember"), emp.avatar ?? undefined);
           markCustomerFlowEntered();
           if (!targetBusinessId) {
             targetBusinessId = emp.businessId;
@@ -114,7 +116,7 @@ export function QRLandingPage() {
         } else if (targetBusinessId) {
           const business = await getBusinessById(targetBusinessId);
           if (!business) {
-            setError("Business not found.");
+            setError(t("tipFlow.errors.businessNotFound"));
             return;
           }
           setBusinessId(targetBusinessId);
@@ -140,6 +142,7 @@ export function QRLandingPage() {
     setBusinessId,
     setEmployee,
     setTippingVenue,
+    t,
   ]);
 
   useEffect(() => {
@@ -208,14 +211,16 @@ export function QRLandingPage() {
 
   useEffect(() => {
     if (employeeIdParam && selectedEmployee) {
-      document.title = `Tip ${selectedEmployee.name || "Valued Team Member"} - CareTip Limited`;
+      document.title = t("tipFlow.docTitle.tip", {
+        name: selectedEmployee.name || t("tipFlow.common.valuedTeamMember"),
+      });
     } else if (businessData) {
-      document.title = `${businessData.name} - CareTip Limited`;
+      document.title = t("tipFlow.docTitle.business", { name: businessData.name });
     }
     return () => {
-      document.title = "CareTip Limited";
+      document.title = t("tipFlow.docTitle.default");
     };
-  }, [selectedEmployee, businessData, employeeIdParam]);
+  }, [selectedEmployee, businessData, employeeIdParam, t]);
 
   const goToSelectEmployee = () => {
     const slug = businessData?.slug?.trim();
@@ -298,8 +303,8 @@ export function QRLandingPage() {
           <div className="w-full max-w-md space-y-4">
             <Card className="border-border shadow-sm">
               <CardHeader className="pb-2">
-                <CardTitle className="text-base">Development bypass</CardTitle>
-                <CardDescription>Direct routing is enabled in local development only.</CardDescription>
+                <CardTitle className="text-base">{t("tipFlow.devBypass.title")}</CardTitle>
+                <CardDescription>{t("tipFlow.devBypass.description")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-3">
                 <button
@@ -307,21 +312,21 @@ export function QRLandingPage() {
                   onClick={() => navigate(`/tip-amount?employeeId=${encodeURIComponent(DEV_MOCK.employeeId)}`)}
                   className="w-full rounded-xl bg-accent py-3.5 font-semibold text-white shadow-sm hover:bg-accent/90 transition-colors"
                 >
-                  Open tip amount
+                  {t("tipFlow.devBypass.openTipAmount")}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate("/payment")}
                   className="w-full rounded-xl border border-border bg-background py-3.5 font-semibold text-foreground hover:bg-muted transition-colors"
                 >
-                  Open payment
+                  {t("tipFlow.devBypass.openPayment")}
                 </button>
                 <button
                   type="button"
                   onClick={() => navigate(`/rating?session_id=${encodeURIComponent(DEV_MOCK.sessionId)}`)}
                   className="w-full text-sm font-semibold text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
                 >
-                  Open rating / feedback
+                  {t("tipFlow.devBypass.openRating")}
                 </button>
               </CardContent>
             </Card>
@@ -335,7 +340,7 @@ export function QRLandingPage() {
   }
 
   if (loading && !employeeIdParam) {
-    return <CareTipPageLoader variant="wait" message="Loading…" />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.common.loading")} />;
   }
 
   if (error) {
@@ -348,20 +353,20 @@ export function QRLandingPage() {
           style={{ backgroundColor: BRAND_ORANGE }}
         >
           <Home className="w-5 h-5" />
-          Go Home
+          {t("tipFlow.common.goHomeButton")}
         </button>
       </div>
     );
   }
 
-  const displayName = selectedEmployee?.name?.trim() || "Valued Team Member";
-  const displayRole = selectedEmployee?.role?.trim() || "Team Member";
+  const displayName = selectedEmployee?.name?.trim() || t("tipFlow.common.valuedTeamMember");
+  const displayRole = selectedEmployee?.role?.trim() || t("tipFlow.common.teamMember");
 
   if (employeeIdParam && loading) {
     const venueMsg =
       tippingLocationName && tippingTableName
-        ? `You are at ${tippingLocationName}, ${tippingTableName}. Loading…`
-        : "Loading…";
+        ? t("tipFlow.venueLoading", { location: tippingLocationName, table: tippingTableName })
+        : t("tipFlow.common.loading");
     return <CareTipPageLoader variant="wait" message={venueMsg} />;
   }
 
@@ -381,7 +386,9 @@ export function QRLandingPage() {
               <CareTipLogo size="xs" className="shrink-0" />
             )}
             <div className="min-w-0 flex-1">
-              <h1 className="truncate text-base font-semibold text-foreground">Tip {displayName}</h1>
+              <h1 className="truncate text-base font-semibold text-foreground">
+                {t("tipFlow.qrLanding.tipHeading", { name: displayName })}
+              </h1>
               <p className="text-xs text-muted-foreground">{displayRole}</p>
             </div>
           </div>
@@ -390,7 +397,7 @@ export function QRLandingPage() {
         <div className="mx-auto max-w-2xl space-y-7 px-4 py-10 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 lg:space-y-9 xl:space-y-10">
           {tippingLocationName && tippingTableName ? (
             <p className="text-sm text-center text-muted-foreground/80">
-              🏠 You are at {tippingLocationName}, {tippingTableName}.
+              🏠 {t("tipFlow.atVenue", { location: tippingLocationName, table: tippingTableName })}
             </p>
           ) : null}
 
@@ -403,7 +410,9 @@ export function QRLandingPage() {
                   className="h-24 w-24 shrink-0 ring-2 ring-primary/30 shadow-lg sm:h-28 sm:w-28"
                 />
                 <div className="min-w-0 flex-1">
-                  <p className="text-xs font-medium text-muted-foreground/80 mb-1">Tipping</p>
+                  <p className="text-xs font-medium text-muted-foreground/80 mb-1">
+                    {t("tipFlow.qrLanding.tippingLabel")}
+                  </p>
                   <p className="text-2xl font-bold text-foreground mb-2">{displayName}</p>
                   <p className="text-sm text-muted-foreground/90">{displayRole}</p>
                 </div>
@@ -421,7 +430,10 @@ export function QRLandingPage() {
                 {monthlyGoal != null && monthlyGoal > 0 ? (
                   <>
                     <p className="mb-4 text-sm font-semibold text-foreground/90">
-                      🎯 Help {displayName.split(" ")[0]} reach their monthly goal!
+                      🎯{" "}
+                      {t("tipFlow.qrLanding.goalHelp", {
+                        firstName: displayName.split(" ")[0] || displayName,
+                      })}
                     </p>
                     <div className="h-3 overflow-hidden rounded-full bg-muted/60">
                       <motion.div
@@ -432,13 +444,15 @@ export function QRLandingPage() {
                       />
                     </div>
                     <p className="mt-3 text-xs text-muted-foreground/80 font-medium">
-                      {formatEur(currentTotal, { minFrac: 0, maxFrac: 0 })} of{" "}
-                      {formatEur(Number(monthlyGoal), { minFrac: 0, maxFrac: 0 })} this month
+                      {t("tipFlow.qrLanding.goalProgress", {
+                        current: formatEur(currentTotal, { minFrac: 0, maxFrac: 0 }),
+                        goal: formatEur(Number(monthlyGoal), { minFrac: 0, maxFrac: 0 }),
+                      })}
                     </p>
                   </>
                 ) : (
                   <p className="text-sm text-muted-foreground/90">
-                    ✨ Your tip goes directly to {displayName.split(" ")[0]}!
+                    ✨ {t("tipFlow.qrLanding.tipDirectly", { firstName: displayName.split(" ")[0] || displayName })}
                   </p>
                 )}
               </CardContent>
@@ -447,8 +461,8 @@ export function QRLandingPage() {
 
           <Card className="border border-border/50 shadow-md">
             <CardHeader className="pb-3 px-6 pt-6">
-              <CardTitle className="text-lg font-bold">Select Tip Amount</CardTitle>
-              <CardDescription className="text-sm">Choose a preset tip or enter a custom amount</CardDescription>
+              <CardTitle className="text-lg font-bold">{t("tipFlow.qrLanding.selectAmountTitle")}</CardTitle>
+              <CardDescription className="text-sm">{t("tipFlow.qrLanding.selectAmountDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="px-6">
               <div className="grid grid-cols-2 gap-3">
@@ -467,7 +481,7 @@ export function QRLandingPage() {
                     }`}
                   >
                     <div className="text-3xl font-bold mb-1">€{amount}</div>
-                    <div className="text-xs text-muted-foreground/70">Tip amount</div>
+                    <div className="text-xs text-muted-foreground/70">{t("tipFlow.qrLanding.tipAmountTile")}</div>
                   </motion.button>
                 ))}
               </div>
@@ -476,8 +490,8 @@ export function QRLandingPage() {
 
           <Card className="border border-border/50 shadow-md">
             <CardHeader className="pb-3 px-6 pt-6">
-              <CardTitle className="text-lg font-bold">Custom Amount</CardTitle>
-              <CardDescription className="text-sm">Want to tip a different amount?</CardDescription>
+              <CardTitle className="text-lg font-bold">{t("tipFlow.qrLanding.customAmountTitle")}</CardTitle>
+              <CardDescription className="text-sm">{t("tipFlow.qrLanding.customAmountDesc")}</CardDescription>
             </CardHeader>
             <CardContent className="px-6">
               {!showCustomInput ? (
@@ -489,7 +503,9 @@ export function QRLandingPage() {
                   className="w-full rounded-2xl border-2 border-dashed border-border/50 bg-muted/20 transition-all hover:border-primary/40 hover:bg-muted/40"
                 >
                   <Euro className="w-7 h-7 text-muted-foreground/50 mx-auto mb-2" />
-                  <span className="text-sm text-muted-foreground/80 font-medium">Enter custom amount</span>
+                  <span className="text-sm text-muted-foreground/80 font-medium">
+                    {t("tipFlow.qrLanding.enterCustom")}
+                  </span>
                 </motion.button>
               ) : (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="relative">
@@ -498,7 +514,7 @@ export function QRLandingPage() {
                   </div>
                   <input
                     type="number"
-                    placeholder="0.00"
+                    placeholder={t("tipFlow.qrLanding.amountPlaceholder")}
                     value={customAmount}
                     onChange={(e) => handleCustomInput(e.target.value)}
                     className="w-full pl-11 pr-5 py-5 rounded-2xl border-2 border-border/50 bg-card text-3xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/25 focus:border-primary"
@@ -516,7 +532,9 @@ export function QRLandingPage() {
               <Card className="border border-border/50 bg-card shadow-lg">
                 <CardContent className="pt-7 px-6">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-muted-foreground/80">Total Tip</span>
+                    <span className="text-sm font-semibold text-muted-foreground/80">
+                      {t("tipFlow.qrLanding.totalTip")}
+                    </span>
                     <span className="text-4xl font-bold text-primary">
                       {formatEur(selectedAmount)}
                     </span>
@@ -539,7 +557,7 @@ export function QRLandingPage() {
                 onClick={handleContinueToPayment}
                 className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl"
               >
-                Continue to Payment
+                {t("tipFlow.qrLanding.continuePayment")}
               </button>
             </div>
           </motion.div>
@@ -551,9 +569,9 @@ export function QRLandingPage() {
   if (!businessData) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-sm font-medium text-destructive">Business not found.</p>
+        <p className="mb-2 text-sm font-medium text-destructive">{t("tipFlow.errors.businessNotFound")}</p>
         <button onClick={goHome} className="text-primary hover:underline text-sm">
-          Go Home
+          {t("tipFlow.common.goHomeButton")}
         </button>
       </div>
     );
@@ -568,10 +586,10 @@ export function QRLandingPage() {
           <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="md" />
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold text-foreground">{businessData.name}</h1>
-            <p className="text-xs text-muted-foreground">Select a team member to tip</p>
+            <p className="text-xs text-muted-foreground">{t("tipFlow.qrLanding.selectTeamMember")}</p>
           </div>
           <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-            CareTip
+            {t("tipFlow.common.careTipBrand")}
           </span>
         </div>
       </div>
@@ -579,7 +597,7 @@ export function QRLandingPage() {
       <div className="mx-auto max-w-2xl space-y-8 px-4 py-10 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 lg:space-y-10 xl:space-y-12">
         {tippingLocationName && tippingTableName ? (
           <p className="text-center text-sm text-muted-foreground/80 px-2">
-            🏠 You are at <span className="font-semibold text-foreground">{tippingLocationName}</span>, <span className="font-semibold text-foreground">{tippingTableName}</span>.
+            🏠 {t("tipFlow.atVenue", { location: tippingLocationName, table: tippingTableName })}
           </p>
         ) : null}
 
@@ -589,21 +607,19 @@ export function QRLandingPage() {
               <CardContent className="p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">Welcome back</p>
+                    <p className="text-sm font-semibold text-foreground">{t("tipFlow.qrLanding.repeatWelcome")}</p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Tip{" "}
-                      <span className="font-semibold text-foreground">
-                        {repeatCard.employee.name ?? "Team Member"}
-                      </span>{" "}
-                      again?
+                      {t("tipFlow.qrLanding.repeatBody", {
+                        name: repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
+                      })}
                     </p>
                     <p className="mt-2 text-xs font-semibold text-primary">
-                      Last tip: {formatEur(repeatCard.amount)}
+                      {t("tipFlow.qrLanding.repeatLastTip", { amount: formatEur(repeatCard.amount) })}
                     </p>
                   </div>
                   <ProfileAvatar
                     src={repeatCard.employee.avatar}
-                    displayName={repeatCard.employee.name ?? "Team Member"}
+                    displayName={repeatCard.employee.name ?? t("tipFlow.common.teamMember")}
                     className="h-12 w-12 shrink-0 ring-2 ring-primary/30"
                   />
                 </div>
@@ -614,7 +630,7 @@ export function QRLandingPage() {
                       setBusinessId(businessData.id);
                       setEmployee(
                         repeatCard.employee.id,
-                        repeatCard.employee.name ?? "Team Member",
+                        repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
                         repeatCard.employee.avatar ?? undefined,
                       );
                       setAmount(repeatCard.amount);
@@ -623,7 +639,7 @@ export function QRLandingPage() {
                     }}
                     className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
                   >
-                    Tip again
+                    {t("tipFlow.qrLanding.tipAgain")}
                   </button>
                   <button
                     type="button"
@@ -633,7 +649,7 @@ export function QRLandingPage() {
                     }}
                     className="w-full rounded-2xl border border-border/50 bg-card/60 py-3.5 text-sm font-semibold text-foreground transition-colors hover:bg-card"
                   >
-                    Choose different staff
+                    {t("tipFlow.qrLanding.chooseDifferentStaff")}
                   </button>
                 </div>
               </CardContent>
@@ -684,7 +700,7 @@ export function QRLandingPage() {
                 <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4">
                   <Users className="h-6 w-6 shrink-0 text-primary" />
                   <span className="text-sm font-medium text-foreground">
-                    {businessData.employeeCount} team members ready to serve you
+                    {t("tipFlow.qrLanding.staffReady", { count: businessData.employeeCount })}
                   </span>
                 </div>
               </CardContent>
@@ -714,17 +730,15 @@ export function QRLandingPage() {
           >
             <Card className="border border-border/40 shadow-md overflow-hidden">
               <CardHeader className="pb-4 px-6 pt-6">
-                <CardTitle className="text-lg font-bold">Who served you?</CardTitle>
-                <CardDescription className="text-sm">
-                  Select the team member you'd like to tip
-                </CardDescription>
+                <CardTitle className="text-lg font-bold">{t("tipFlow.qrLanding.whoServedYou")}</CardTitle>
+                <CardDescription className="text-sm">{t("tipFlow.qrLanding.whoServedYouDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5 px-6">
                 <div className="relative">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" />
                   <input
                     type="search"
-                    placeholder="Search by name or role…"
+                    placeholder={t("tipFlow.qrLanding.searchPlaceholder")}
                     value={poolQuery}
                     onChange={(e) => setPoolQuery(e.target.value)}
                     className="w-full rounded-2xl border border-border/50 bg-card py-3.5 pl-11 pr-4 text-foreground placeholder:text-muted-foreground/60 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 transition-colors"
@@ -732,7 +746,7 @@ export function QRLandingPage() {
                   />
                 </div>
                 {filteredPool.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-muted-foreground/60">No matches found.</p>
+                  <p className="py-8 text-center text-sm text-muted-foreground/60">{t("tipFlow.qrLanding.noMatches")}</p>
                 ) : (
                   <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
                     {filteredPool.map((emp, index) => (
@@ -771,7 +785,7 @@ export function QRLandingPage() {
         {businessData.slug?.trim() && !poolLoading && poolEmployees?.length === 0 ? (
           <Card className="border border-border/30 bg-muted/10 shadow-sm">
             <CardContent className="py-6 text-center text-sm text-muted-foreground/70 font-medium">
-              No public team list is available yet. You can still browse the directory to find team members.
+              {t("tipFlow.qrLanding.noPublicList")}
             </CardContent>
           </Card>
         ) : null}
@@ -783,23 +797,21 @@ export function QRLandingPage() {
         >
           <Card className="border border-border/40 shadow-md">
             <CardHeader className="pb-4 px-6 pt-6">
-              <CardTitle className="text-lg font-bold">💝 Leave a Tip</CardTitle>
-              <CardDescription className="text-sm">
-                Your appreciation goes directly to the team member. It's quick, secure, and easy.
-              </CardDescription>
+              <CardTitle className="text-lg font-bold">💝 {t("tipFlow.qrLanding.leaveTip")}</CardTitle>
+              <CardDescription className="text-sm">{t("tipFlow.qrLanding.leaveTipDesc")}</CardDescription>
             </CardHeader>
           </Card>
         </motion.div>
 
         {showInlinePool ? (
           <p className="text-center text-sm text-muted-foreground/70 px-2">
-            Want to browse more team members?{" "}
+            {t("tipFlow.qrLanding.browseMore")}{" "}
             <button
               type="button"
               onClick={goToSelectEmployee}
               className="font-semibold text-primary underline underline-offset-2 transition-colors hover:opacity-90"
             >
-              Open full directory
+              {t("tipFlow.qrLanding.openFullDirectory")}
             </button>
           </p>
         ) : (
@@ -813,7 +825,9 @@ export function QRLandingPage() {
               onClick={goToSelectEmployee}
               className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
             >
-              {businessData.slug?.trim() ? "Browse All Team Members" : "Select Team Member"}
+              {businessData.slug?.trim()
+                ? t("tipFlow.qrLanding.browseAllTeam")
+                : t("tipFlow.qrLanding.selectTeamMemberBtn")}
             </button>
           </motion.div>
         )}
@@ -833,7 +847,7 @@ export function QRLandingPage() {
                   d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
                 />
               </svg>
-              Secure payment powered by CareTip Limited
+              {t("tipFlow.qrLanding.secureFooter")}
             </CardContent>
           </Card>
         </motion.div>

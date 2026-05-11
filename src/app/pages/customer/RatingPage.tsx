@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { HeartHandshake, MessageSquare, Send, LogOut, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
@@ -11,7 +12,18 @@ import { logClientError } from "../../lib/clientLog";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 
+/** Canonical English values sent to the API; labels are translated in the UI. */
+const FEEDBACK_TAGS = [
+  { key: "excellentService", api: "Excellent service" },
+  { key: "veryFriendly", api: "Very friendly" },
+  { key: "fastProfessional", api: "Fast and professional" },
+  { key: "attentive", api: "Attentive" },
+  { key: "greatVibe", api: "Great vibe" },
+  { key: "aboveBeyond", api: "Above and beyond" },
+] as const;
+
 export function RatingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { businessId, employeeName, employeeAvatar, staffProfileSlug, reset } = useTipFlow();
@@ -36,11 +48,6 @@ export function RatingPage() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customerName, setCustomerName] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  const tags = useMemo(
-    () => ["Excellent service", "Very friendly", "Fast and professional", "Attentive", "Great vibe", "Above and beyond"],
-    []
-  );
 
   const handleTagToggle = (tag: string) => {
     if (selectedTags.includes(tag)) {
@@ -107,18 +114,18 @@ export function RatingPage() {
 
   const handleSubmit = async () => {
     if (isDevMockSession) {
-      toast.success("DEV: feedback captured locally");
+      toast.success(t("tipFlow.rating.devCaptured"));
       leaveFlow();
       return;
     }
     if (!sessionId) {
-      toast.error("Missing payment session. You can close this page safely.");
+      toast.error(t("tipFlow.rating.missingSession"));
       leaveFlow();
       return;
     }
     if (rating <= 0 && comment.trim().length === 0 && selectedTags.length === 0) {
-      toast.message("Feedback is optional", {
-        description: "Tap a rating or add a quick note, or press Leave page.",
+      toast.message(t("tipFlow.rating.optionalTitle"), {
+        description: t("tipFlow.rating.optionalDesc"),
       });
       return;
     }
@@ -132,7 +139,7 @@ export function RatingPage() {
         tags: selectedTags,
         customerName: customerName.trim() ? customerName.trim() : null,
       });
-      toast.success("Thanks for the feedback!");
+      toast.success(t("tipFlow.rating.thanksFeedback"));
       leaveFlow();
     } catch (err) {
       logClientError("RatingPage.submitTipFeedback", err);
@@ -150,10 +157,10 @@ export function RatingPage() {
             type="button"
             onClick={leaveFlow}
             className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
-            aria-label="Leave page"
+            aria-label={t("tipFlow.rating.leavePageAria")}
           >
             <LogOut className="w-3.5 h-3.5" />
-            Leave page
+            {t("tipFlow.rating.leavePage")}
           </button>
 
           <div className="flex items-center gap-3">
@@ -162,9 +169,9 @@ export function RatingPage() {
             </div>
             <div className="min-w-0">
               <h1 className="text-base font-semibold text-foreground">
-                Thank you for your tip <span aria-hidden>💛</span>
+                {t("tipFlow.rating.thankYouTip")} <span aria-hidden>💛</span>
               </h1>
-              <p className="text-xs text-muted-foreground">How was your experience today?</p>
+              <p className="text-xs text-muted-foreground">{t("tipFlow.rating.experienceToday")}</p>
             </div>
           </div>
         </div>
@@ -185,15 +192,15 @@ export function RatingPage() {
               className="h-12 w-12"
             />
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">You tipped</p>
+              <p className="text-xs text-muted-foreground">{t("tipFlow.rating.youTipped")}</p>
               <p className="truncate text-sm font-semibold text-foreground">
-                {tipContext?.employee?.name ?? employeeName ?? "a team member"}
+                {tipContext?.employee?.name ?? employeeName ?? t("tipFlow.common.aTeamMember")}
               </p>
             </div>
             {!sessionReady && sessionId ? (
               <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
                 <Sparkles className="h-3.5 w-3.5" />
-                Verifying…
+                {t("tipFlow.rating.verifying")}
               </span>
             ) : null}
           </div>
@@ -201,7 +208,7 @@ export function RatingPage() {
 
         {!sessionId ? (
           <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
-            This feedback page needs a payment session id. You can close this page safely.
+            {t("tipFlow.rating.needsSession")}
           </div>
         ) : null}
 
@@ -213,9 +220,9 @@ export function RatingPage() {
           className="bg-card rounded-xl border border-border p-6 shadow-sm lg:p-7"
         >
           <div>
-            <h2 className="text-sm font-semibold text-foreground">Tap to rate</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t("tipFlow.rating.tapToRate")}</h2>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              Optional feedback for the staff member.
+              {t("tipFlow.rating.optionalForStaff")}
             </p>
           </div>
 
@@ -226,7 +233,7 @@ export function RatingPage() {
                 onClick={() => setRating(star)}
                 className="p-1 transition-transform hover:scale-110"
                 type="button"
-                aria-label={`Rate ${star} out of 5`}
+                aria-label={t("tipFlow.rating.starAria", { n: star })}
               >
                 <Star
                   className={[
@@ -241,16 +248,16 @@ export function RatingPage() {
           </div>
           <p className="mt-4 text-center text-xs text-muted-foreground">
             {rating === 0
-              ? "Quick tap, takes 2 seconds."
+              ? t("tipFlow.rating.hint0")
               : rating === 5
-                ? "Amazing, thank you!"
+                ? t("tipFlow.rating.hint5")
                 : rating === 4
-                  ? "Great, thanks!"
+                  ? t("tipFlow.rating.hint4")
                   : rating === 3
-                    ? "Thanks, appreciated."
+                    ? t("tipFlow.rating.hint3")
                     : rating === 2
-                      ? "Thanks, we’ll improve."
-                      : "Thanks, we’ll do better."}
+                      ? t("tipFlow.rating.hint2")
+                      : t("tipFlow.rating.hint1")}
           </p>
         </motion.div>
 
@@ -260,21 +267,21 @@ export function RatingPage() {
           animate={{ opacity: 1, height: "auto" }}
           className="bg-card rounded-xl border border-border p-6 shadow-sm lg:p-7"
         >
-          <h2 className="text-sm font-semibold text-foreground mb-3">Quick compliments (optional)</h2>
+          <h2 className="text-sm font-semibold text-foreground mb-3">{t("tipFlow.rating.quickCompliments")}</h2>
           <div className="flex flex-wrap gap-2">
-            {tags.map((tag) => (
+            {FEEDBACK_TAGS.map(({ key, api }) => (
               <button
-                key={tag}
-                onClick={() => handleTagToggle(tag)}
+                key={api}
+                onClick={() => handleTagToggle(api)}
                 className={[
                   "rounded-full px-4 py-2 text-sm font-semibold transition-colors ring-1",
-                  selectedTags.includes(tag)
+                  selectedTags.includes(api)
                     ? "bg-accent text-white ring-accent/30"
                     : "bg-background text-foreground ring-border hover:bg-muted/60",
                 ].join(" ")}
                 type="button"
               >
-                {tag}
+                {t(`tipFlow.rating.tags.${key}`)}
               </button>
             ))}
           </div>
@@ -288,21 +295,21 @@ export function RatingPage() {
         >
           <div className="flex items-center gap-2 mb-3">
             <MessageSquare className="w-5 h-5 text-accent" />
-            <h2 className="text-sm font-semibold text-foreground">Optional note</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t("tipFlow.rating.optionalNote")}</h2>
           </div>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="Short note (optional)…"
+            placeholder={t("tipFlow.rating.notePlaceholder")}
             rows={4}
             className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none"
           />
           <div className="mt-3">
-            <label className="text-xs font-semibold text-muted-foreground">Your name (optional)</label>
+            <label className="text-xs font-semibold text-muted-foreground">{t("tipFlow.rating.yourName")}</label>
             <input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
-              placeholder="e.g. Alex"
+              placeholder={t("tipFlow.rating.namePlaceholder")}
               className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
             />
           </div>
@@ -310,7 +317,7 @@ export function RatingPage() {
 
         <div className="bg-muted/40 rounded-lg p-4">
           <p className="text-xs text-muted-foreground">
-            Your feedback is optional and helps the team improve.
+            {t("tipFlow.rating.footerHint")}
           </p>
         </div>
       </div>
@@ -329,14 +336,14 @@ export function RatingPage() {
             type="button"
           >
             <Send className="w-5 h-5" />
-            Submit feedback
+            {t("tipFlow.rating.submit")}
           </button>
           <button
             onClick={leaveFlow}
             className="w-full text-muted-foreground text-sm hover:text-foreground transition-colors"
             type="button"
           >
-            Leave page
+            {t("tipFlow.rating.leavePage")}
           </button>
         </div>
       </motion.div>

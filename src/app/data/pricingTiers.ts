@@ -1,8 +1,12 @@
 import { Store, Building2, Crown } from "lucide-react";
 import type { TippingTier } from "../components/PricingSection";
 
+export type PricingTierKey = "starter" | "business" | "enterprise";
+
+/** Labels come from i18n `staticPages.pricing.tiers.<tierKey>.*`; amounts stay here. */
 export const PRICING_TIERS: TippingTier[] = [
   {
+    tierKey: "starter",
     name: "Starter",
     feeLine: "2,9 % + 0,30 €",
     feeNote: "per successful tip (Stripe)",
@@ -19,6 +23,7 @@ export const PRICING_TIERS: TippingTier[] = [
     isPopular: false,
   },
   {
+    tierKey: "business",
     name: "Business",
     feeLine: "2,5 % + 0,30 €",
     feeNote: "per successful tip (Stripe)",
@@ -35,6 +40,7 @@ export const PRICING_TIERS: TippingTier[] = [
     isPopular: true,
   },
   {
+    tierKey: "enterprise",
     name: "Enterprise",
     feeLine: "Custom",
     feeNote: "volume-based tip processing",

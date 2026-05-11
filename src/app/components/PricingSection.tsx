@@ -2,9 +2,12 @@ import type { ComponentType } from "react";
 import { motion } from "motion/react";
 import { Check, Star } from "lucide-react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
+import type { PricingTierKey } from "../data/pricingTiers";
 
 export interface TippingTier {
+  tierKey?: PricingTierKey;
   name: string;
   feeLine: string;
   feeNote: string;
@@ -24,13 +27,13 @@ interface PricingSectionProps {
  * No recurring plans or invoice billing.
  */
 export function PricingSection({ tiers }: PricingSectionProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-semibold text-foreground">Transparent tip fees</h2>
+        <h2 className="text-3xl font-semibold text-foreground">{t("staticPages.pricing.sectionTitle")}</h2>
         <p className="text-muted-foreground max-w-2xl mx-auto">
-          CareTip is built for one-time guest tips. You pay a small processing fee per successful tip;
-          no monthly software subscription required on Starter.
+          {t("staticPages.pricing.sectionSubtitle")}
         </p>
       </div>
 
@@ -57,7 +60,7 @@ export function PricingSection({ tiers }: PricingSectionProps) {
               {tier.isPopular && (
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
                   <Star className="w-3 h-3 fill-current" />
-                  Popular
+                  {t("staticPages.pricing.popular")}
                 </div>
               )}
 

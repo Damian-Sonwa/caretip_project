@@ -12,6 +12,7 @@ type AuthRecoveryLayoutProps = {
  * Soft light (alabaster) canvas + white elevated card + centered CareTip logo.
  */
 export function AuthRecoveryLayout({ children, showFooterLink = true }: AuthRecoveryLayoutProps) {
+  const { t } = useTranslation();
   return (
     <div className="min-h-[100dvh] bg-white font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-12">

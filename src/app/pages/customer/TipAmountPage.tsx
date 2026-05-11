@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, ShieldCheck } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
@@ -15,6 +16,7 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 
 export function TipAmountPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const employeeId = searchParams.get("employeeId");
@@ -68,10 +70,10 @@ export function TipAmountPage() {
             const emp = await getEmployeeById(employeeId);
             if (cancelled) return;
             setBusinessId(emp.businessId);
-            setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+            setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
             setBusinessBrand({
               logo: emp.businessLogo ?? null,
-              name: String(emp.businessName ?? "").trim() || "Venue",
+              name: String(emp.businessName ?? "").trim() || t("tipFlow.common.venue"),
             });
           }
           markCustomerFlowEntered();
@@ -99,6 +101,7 @@ export function TipAmountPage() {
     returnEmployeeSlug,
     setBusinessId,
     setEmployee,
+    t,
   ]);
 
   useEffect(() => {
@@ -138,15 +141,15 @@ export function TipAmountPage() {
         const emp = await getEmployeeById(employeeId);
         if (cancelled) return;
         setBusinessId(emp.businessId);
-        setEmployee(emp.id, emp.name ?? "Team Member", emp.avatar ?? undefined);
+        setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
         setBusinessBrand({
           logo: emp.businessLogo ?? null,
-          name: String(emp.businessName ?? "").trim() || "Venue",
+          name: String(emp.businessName ?? "").trim() || t("tipFlow.common.venue"),
         });
       } catch (err) {
         logClientError("TipAmountPage", err);
         if (!cancelled) {
-          setEmployee(employeeId, "Team Member");
+          setEmployee(employeeId, t("tipFlow.common.teamMember"));
         }
       }
     })();
@@ -162,10 +165,11 @@ export function TipAmountPage() {
     employeeName,
     setBusinessId,
     setEmployee,
+    t,
   ]);
 
   if (!guardReady && !import.meta.env.DEV) {
-    return <CareTipPageLoader variant="wait" message="Validating scan…" />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.tipAmount.validatingScan")} />;
   }
 
   const presetAmounts = [5, 10, 15];
@@ -220,7 +224,7 @@ export function TipAmountPage() {
   if (!employeeId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-sm text-muted-foreground">Redirecting…</p>
+        <p className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.redirecting")}</p>
       </div>
     );
   }
@@ -278,17 +282,17 @@ export function TipAmountPage() {
             >
           <ProfileAvatar
             src={employeeAvatar}
-            displayName={employeeName ?? "Team Member"}
+            displayName={employeeName ?? t("tipFlow.common.teamMember")}
             className={`shrink-0 ring-4 ring-primary shadow-sm ${
               directFromStaffQr ? "h-24 w-24" : "h-16 w-16"
             }`}
           />
           <div>
             <p className="text-sm text-muted-foreground">
-              {directFromStaffQr ? "You’re tipping" : "Tipping"}
+              {directFromStaffQr ? t("tipFlow.tipAmount.youreTipping") : t("tipFlow.tipAmount.tipping")}
             </p>
             <p className={`font-semibold text-foreground ${directFromStaffQr ? "text-xl" : "text-lg"}`}>
-              {employeeName ?? "Team Member"}
+              {employeeName ?? t("tipFlow.common.teamMember")}
             </p>
           </div>
             </CardContent>
@@ -298,8 +302,8 @@ export function TipAmountPage() {
         {/* Preset tip amounts — same tile size/layout as former %-of-bill quick select */}
         <Card className="border-border shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Quick select</CardTitle>
-            <CardDescription>Choose a preset tip amount</CardDescription>
+            <CardTitle className="text-base">{t("tipFlow.tipAmount.quickSelect")}</CardTitle>
+            <CardDescription>{t("tipFlow.tipAmount.quickSelectDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
@@ -318,7 +322,7 @@ export function TipAmountPage() {
                   }`}
                 >
                   <div className="text-2xl font-bold text-foreground mb-1">{formatEur(amount, { minFrac: 0, maxFrac: 0 })}</div>
-                  <div className="text-sm text-muted-foreground">Tip amount</div>
+                  <div className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.tipAmountLabel")}</div>
                 </motion.button>
               ))}
               <motion.button
@@ -334,7 +338,7 @@ export function TipAmountPage() {
                     : "border-border bg-card hover:border-accent/50 hover:shadow-md"
                 }`}
               >
-                <div className="text-lg font-bold text-foreground">Choose Your Amount</div>
+                <div className="text-lg font-bold text-foreground">{t("tipFlow.tipAmount.chooseYourAmount")}</div>
               </motion.button>
             </div>
           </CardContent>
@@ -343,8 +347,8 @@ export function TipAmountPage() {
         {/* Custom Amount */}
         <Card className="border-border shadow-sm">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Custom Tip</CardTitle>
-            <CardDescription>Enter any amount you prefer</CardDescription>
+            <CardTitle className="text-base">{t("tipFlow.tipAmount.customTip")}</CardTitle>
+            <CardDescription>{t("tipFlow.tipAmount.customTipDesc")}</CardDescription>
           </CardHeader>
           <CardContent>
           {!showCustomInput ? (
@@ -355,7 +359,7 @@ export function TipAmountPage() {
               onClick={handleCustomClick}
               className="w-full p-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:border-accent/50 transition-all"
             >
-              <span className="text-sm text-muted-foreground">Enter custom amount</span>
+              <span className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.enterCustom")}</span>
             </motion.button>
           ) : (
             <motion.div
@@ -368,7 +372,7 @@ export function TipAmountPage() {
               </div>
               <input
                 type="number"
-                placeholder="0.00"
+                placeholder={t("tipFlow.tipAmount.amountPlaceholder")}
                 value={customAmount}
                 onChange={(e) => handleCustomInput(e.target.value)}
                 className="w-full pl-10 pr-4 py-4 rounded-xl border-2 border-accent bg-card text-2xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
@@ -390,7 +394,7 @@ export function TipAmountPage() {
             <Card className="border-accent/30 bg-gradient-to-br from-accent/10 to-primary/10 shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">Tip amount</span>
+                  <span className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.tipAmountLabel")}</span>
                   <span className="text-2xl font-bold text-foreground">{formatEur(selectedAmount)}</span>
                 </div>
               </CardContent>
@@ -411,7 +415,7 @@ export function TipAmountPage() {
               onClick={handleContinue}
               className="w-full bg-accent text-white rounded-xl py-4 font-semibold text-lg hover:bg-accent/90 transition-all shadow-lg"
             >
-              Continue to Payment
+              {t("tipFlow.tipAmount.continuePayment")}
             </button>
           </div>
         </motion.div>
