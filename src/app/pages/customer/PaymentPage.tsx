@@ -141,10 +141,6 @@ export function PaymentPage() {
     };
   }, [employeeId, t]);
 
-  if (!guardReady && !import.meta.env.DEV) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
-  }
-
   const paymentMethods = useMemo(
     () => [
       {
@@ -171,6 +167,10 @@ export function PaymentPage() {
     ],
     [t],
   );
+
+  if (!guardReady && !import.meta.env.DEV) {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
+  }
 
   const handleBack = () => {
     if (employeeId && staffTipReturnBusinessSlug && staffTipReturnEmployeeSlug) {
