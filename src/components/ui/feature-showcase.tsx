@@ -419,11 +419,11 @@ export function FeatureShowcase({
                 />
                 <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
-                    <LandingImageFrame className="w-full max-w-[min(100%,640px)]">
+                    <LandingImageFrame className="w-full max-w-[520px]">
                       <CareTipHeroAnimation />
                     </LandingImageFrame>
                   ) : singleHeroImage ? (
-                    <LandingImageFrame className="w-full max-w-[min(100%,640px)]">
+                    <LandingImageFrame className="w-full max-w-[520px]">
                       <img
                         src={singleHeroImage.src}
                         alt={singleHeroImage.alt}
@@ -443,14 +443,14 @@ export function FeatureShowcase({
           ) : (
             <>
               {useAnimatedHero ? (
-                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "min(100%, 640px)" }}>
+                <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
                   <CareTipHeroAnimation />
                 </LandingImageFrame>
               ) : singleHeroImage ? (
                 cinematic ? (
-                  <div className="relative mx-auto w-full max-w-[min(100vw-1rem,900px)] min-h-0 md:mx-auto md:max-w-[880px]">
+                  <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
                     <div className="relative flex w-full justify-center md:justify-center">
-                      <div className="relative w-full max-w-[min(100vw-1.25rem,760px)] max-md:mx-auto max-md:-translate-y-1 md:-translate-y-5 lg:-translate-y-7">
+                      <div className="relative w-full max-w-[590px] max-md:mx-auto max-md:-translate-y-2 md:-translate-y-6 lg:-translate-y-8">
                         <div
                           aria-hidden
                           className="animate-float-shadow absolute -bottom-6 left-1/2 h-10 w-[72%] -translate-x-1/2 rounded-full bg-black/15 shadow-2xl"
@@ -458,8 +458,9 @@ export function FeatureShowcase({
                         <div
                           className={cn(
                             // Premium card container: soft curves + subtle border + diffuse shadow.
-                            "animate-float relative mx-auto w-[min(700px,calc(100vw-1.5rem))] max-w-full overflow-hidden rounded-[40px] border border-gray-100/50 bg-transparent shadow-[0_20px_50px_rgba(0,0,0,0.10)]",
-                            "max-md:w-full max-md:origin-center md:w-[min(720px,calc(100vw-2rem))]",
+                            "animate-float relative mx-auto w-[min(590px,94%)] max-w-full overflow-hidden rounded-[40px] border border-gray-100/50 bg-transparent shadow-[0_20px_50px_rgba(0,0,0,0.10)]",
+                            // Bigger on mobile, but slightly "zoomed out" (scale down a touch) to show more of the mockup.
+                            "max-md:w-full max-md:scale-[0.94] max-md:origin-center",
                             // Ensure the image fully fills the curved container (no corner gaps).
                             "aspect-[2/3]",
                           )}
@@ -483,7 +484,7 @@ export function FeatureShowcase({
                     </div>
                   </div>
                 ) : (
-                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "min(100%, 640px)" }}>
+                  <LandingImageFrame className="w-full bg-white" style={{ maxWidth: "520px" }}>
                     <img
                       src={singleHeroImage.src}
                       alt={singleHeroImage.alt}
@@ -494,7 +495,7 @@ export function FeatureShowcase({
                   </LandingImageFrame>
                 )
               ) : (
-                <div className="w-full" style={{ maxWidth: "min(100%, 640px)" }}>
+                <div className="w-full" style={{ maxWidth: "520px" }}>
                   <FeatureCarousel images={carouselImages} />
                 </div>
               )}
