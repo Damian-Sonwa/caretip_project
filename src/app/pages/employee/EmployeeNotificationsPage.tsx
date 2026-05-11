@@ -68,9 +68,10 @@ export function EmployeeNotificationsPage() {
     };
   }, [socket, user?.role, user?.employeeId]);
 
+  const allIds = useMemo(() => tips.map((tipRow) => tipRow.id), [tips]);
+
   if (!user || user.role !== "employee") return null;
 
-  const allIds = useMemo(() => tips.map((tipRow) => tipRow.id), [tips]);
   const allSelected = selectedIds.length > 0 && selectedIds.length === allIds.length;
   const hasSelection = selectedIds.length > 0;
 

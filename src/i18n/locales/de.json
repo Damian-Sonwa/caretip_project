@@ -66,23 +66,23 @@
     },
     "features": {
       "title": "Das leistet CareTip",
-      "subtitle": "Ein klarer Überblick über die Plattform für Teams in der Gastronomie – für schnelles digitales Trinkgeld.",
+      "subtitle": "Ein klarer Überblick über die Plattform für Teams in der Gastronomie, für schnelles digitales Trinkgeld.",
       "f1Title": "Trinkgeld per QR-Code",
-      "f1Desc": "Gäste scannen und tippen in Sekunden – ohne App und ohne Hürden.",
+      "f1Desc": "Gäste scannen und tippen in Sekunden, ganz ohne App und ohne Hürden.",
       "f2Title": "Leistung der Mitarbeitenden",
-      "f2Desc": "Trinkgelder, Bewertungen und Ziele an einem Ort – damit das Team motiviert bleibt.",
+      "f2Desc": "Trinkgelder, Bewertungen und Ziele an einem Ort, damit das Team motiviert bleibt.",
       "f3Title": "Einblicke fürs Unternehmen",
       "f3Desc": "Teamleistung, Trends und Aktivität über Schichten und Standorte hinweg.",
       "f4Title": "Sichere Zahlungen (Stripe)",
       "f4Desc": "Vertrauenswürdiger Checkout und moderne Sicherheit für zuverlässige Zahlungen.",
       "f5Title": "Echtzeit-Updates",
-      "f5Desc": "Live-Aktivität und Benachrichtigungen – schnell reagieren und coachen.",
+      "f5Desc": "Live-Aktivität und Benachrichtigungen, damit Sie schnell reagieren und coachen können.",
       "f6Title": "Mehrere Standorte",
-      "f6Desc": "Mehrere Betriebe, Standorte und Tische – ohne den Überblick zu verlieren."
+      "f6Desc": "Mehrere Betriebe, Standorte und Tische, ohne den Überblick zu verlieren."
     },
     "pricing": {
       "pageTitle": "Einfache Gebühren beim Trinkgeld",
-      "pageSubtitle": "Gäste zahlen pro Trinkgeld. CareTip erstellt keine Stripe-Abos und keine wiederkehrenden Rechnungen – nur Zahlungsintents für jedes Trinkgeld.",
+      "pageSubtitle": "Gäste zahlen pro Trinkgeld. CareTip erstellt keine Stripe-Abos und keine wiederkehrenden Rechnungen, nur Zahlungsintents für jedes Trinkgeld.",
       "sectionTitle": "Transparente Gebühren",
       "sectionSubtitle": "CareTip ist auf einmalige Gäste-Trinkgelder ausgelegt. Sie zahlen eine kleine Bearbeitungsgebühr pro erfolgreichem Trinkgeld; bei Starter keine monatliche Software-Pauschale.",
       "popular": "Beliebt",
@@ -235,9 +235,9 @@
       "trust1Title": "Zahlungen mit Rückgrat",
       "trust1Body": "Kartendaten werden von zertifizierten Anbietern verarbeitet; Verbindungen nutzen moderne Verschlüsselung, damit Gästezahlungen und Unternehmensdaten durchgängig geschützt sind.",
       "trust2Title": "Für volle Betriebe gebaut",
-      "trust2Body": "Web und Mobile bleiben synchron – Manager und Team sehen Updates vor Ort und unterwegs.",
+      "trust2Body": "Web und Mobile bleiben synchron; Manager und Team sehen Updates vor Ort und unterwegs.",
       "ctaTitle": "Digitales Trinkgeld ausrollen?",
-      "ctaBody": "Gebührenstufen für Gastronomie – vom Einzelbetrieb bis zur Multi-Standort-Gruppe.",
+      "ctaBody": "Gebührenstufen für Gastronomie, vom Einzelbetrieb bis zur Multi-Standort-Gruppe.",
       "ctaPricing": "Preise ansehen"
     },
     "cookies": {
@@ -420,7 +420,7 @@
       "errorPasswordWeak": "Das Passwort braucht mind. 8 Zeichen, Groß- und Kleinbuchstaben, Zahl und Sonderzeichen (z. B. @#$%).",
       "errorInviteRequired": "Bitte geben Sie Ihren Einladungscode ein.",
       "toastAccountCreated": "Konto erstellt. Bitte prüfen Sie Ihre E-Mail zur Bestätigung.",
-      "resendNeedPassword": "Geben Sie oben Ihr Passwort ein und tippen Sie dann auf Erneut senden – so bestätigen wir, dass Sie es sind.",
+      "resendNeedPassword": "Geben Sie oben Ihr Passwort ein und tippen Sie dann auf Erneut senden, damit wir bestätigen können, dass Sie es sind.",
       "toastResendDefault": "Wir haben einen neuen Bestätigungslink gesendet. Bitte Posteingang prüfen.",
       "placeholderFullName": "Vollständiger Name",
       "placeholderInviteCode": "Einladungscode",
@@ -462,7 +462,7 @@
       "sentBody": "Falls ein Konto für {{email}} existiert, haben wir einen Link zum Zurücksetzen des Passworts gesendet. Der Link ist eine Stunde gültig.",
       "backToLogin": "Zurück zur Anmeldung",
       "title": "Passwort zurücksetzen",
-      "subtitle": "Geben Sie Ihre E-Mail ein – wir senden Ihnen einen Link, um wieder Zugang zu erhalten.",
+      "subtitle": "Geben Sie Ihre E-Mail ein. Wir senden Ihnen einen Link, um wieder Zugang zu erhalten.",
       "emailLabel": "E-Mail-Adresse",
       "emailPlaceholder": "sie@beispiel.de",
       "sendResetLink": "Link senden",
@@ -812,7 +812,7 @@
   },
   "sampleDashboard": {
     "welcomeTitle": "Willkommen zurück! 👋",
-    "welcomeSubtitle": "Trinkgelder, Scans und Auszahlungen für Ihr Team – nur einmalige Zahlungen",
+    "welcomeSubtitle": "Trinkgelder, Scans und Auszahlungen für Ihr Team: nur einmalige Zahlungen",
     "metrics": {
       "tipsReceived30d": "Trinkgelder (30 Tage)",
       "vsPriorMonth": "vs. Vormonat",
@@ -855,7 +855,7 @@
     "tipVolumeTitle": "Trinkgeldvolumen",
     "tipVolumeSubtitle": "Gesammelte Trinkgelder (Beispieltrend)",
     "ctaTitle": "Tippen mühelos machen",
-    "ctaBody": "Gäste scannen einen QR Code, wählen einen Betrag und zahlen einmalig. Gelder laufen über Stripe als eine Zahlungsintention – ohne Abos oder Rechnungen.",
+    "ctaBody": "Gäste scannen einen QR Code, wählen einen Betrag und zahlen einmalig. Gelder laufen über Stripe als eine Zahlungsintention, ohne Abos oder Rechnungen.",
     "ctaHowItWorks": "So funktioniert CareTip",
     "leaders": {
       "1": { "name": "Maya Chen", "role": "Service", "lastTip": "vor 2 Std.", "shift": "Starke Woche" },
@@ -875,16 +875,16 @@
   "landing": {
     "showcase": {
       "title": "In Sekunden tippen. Hervorragenden Service sofort belohnen.",
-      "description": "CareTip macht es Kunden leicht zu tippen und Teams, die Leistung zu verfolgen – alles mit einem einfachen QR Scan.",
+      "description": "CareTip macht es Kunden leicht zu tippen und Teams, die Leistung zu verfolgen, alles mit einem einfachen QR-Scan.",
       "statLive": "Sofort per QR tippen",
       "statPos": "Keine POS-Anbindung nötig",
       "statSecure": "Sichere, schnelle Auszahlungen",
       "step1Title": "Gäste scannen Ihren QR Code",
-      "step1Text": "Tischaufsteller, Badges oder ein teilbarer Link – ohne Gästeapp.",
+      "step1Text": "Tischaufsteller, Badges oder ein teilbarer Link, ganz ohne Gäste-App.",
       "step2Title": "Trinkgelder nach Ihren Regeln",
       "step2Text": "Pro Schicht verteilen oder Einzelpersonen belohnen. Sie behalten die Kontrolle.",
       "step3Title": "Alle sehen klar",
-      "step3Text": "Mitarbeitende sehen Einnahmen; Sie sehen Leistung – ohne Extraaufwand.",
+      "step3Text": "Mitarbeitende sehen Einnahmen; Sie sehen Leistung, ohne Extraaufwand.",
       "primaryCta": "Loslegen",
       "secondaryCta": "Mitarbeiterzugang",
       "tabQrLabel": "QR Scan",
@@ -902,7 +902,7 @@
       "step3Title": "QR Codes erzeugen",
       "step3Desc": "Herunterladen, drucken und dort platzieren, wo Gäste hinschauen.",
       "step4Title": "Trinkgelder empfangen",
-      "step4Desc": "Gäste scannen und tippen – Ihr Dashboard aktualisiert sich sofort.",
+      "step4Desc": "Gäste scannen und tippen, und Ihr Dashboard aktualisiert sich sofort.",
       "floatSetupLabel": "Setupstatus",
       "floatSetupValue": "Bereit für Trinkgelder",
       "floatTimeLabel": "Typische Dauer",
@@ -940,7 +940,7 @@
     },
     "hospitality": {
       "title": "Für Teams in der Gastronomie",
-      "subtitle": "Vom Restaurant bis zum Salon: CareTip hilft Ihrem Team mehr zu verdienen – mit voller Transparenz über die Leistung.",
+      "subtitle": "Vom Restaurant bis zum Salon: CareTip hilft Ihrem Team mehr zu verdienen, mit voller Transparenz über die Leistung.",
       "pill": "Wo CareTip wirkt",
       "f1Title": "Mehr Trinkgelder",
       "f1Text": "Schnelles, mobiles Tippen, das Gäste wirklich nutzen.",
@@ -1035,7 +1035,7 @@
     },
     "features": {
       "title": "Alles für Ihr Wachstum",
-      "subtitle": "Eine Plattform für Trinkgelder, Transparenz und Auszahlungen – ohne Overhead.",
+      "subtitle": "Eine Plattform für Trinkgelder, Transparenz und Auszahlungen, ohne Overhead.",
       "i1Title": "Tippseiten mit QR",
       "i1Text": "Markierte Seiten, die Gäste mit einem Scan öffnen.",
       "i2Title": "Mitarbeiterdashboards",
@@ -1052,13 +1052,13 @@
     "realLife": {
       "title": "So funktioniert CareTip im Alltag",
       "s1Headline": "Am Tisch",
-      "s1Text": "Gäste scannen den QR Code auf dem Tisch und tippen sofort – ohne Warten und ohne Bargeld.",
+      "s1Text": "Gäste scannen den QR Code auf dem Tisch und tippen sofort, ohne Warten und ohne Bargeld.",
       "s1Alt": "QR Code auf dem Restauranttisch für sofortiges Tippen",
       "s2Headline": "An der Rezeption",
       "s2Text": "Gäste tippen Personal schnell beim Check-in oder Check-out mit einem einfachen Scan.",
       "s2Alt": "Hotelrezeption mit Tippen beim Check-in oder Check-out",
       "s3Headline": "Nach der Dienstleistung",
-      "s3Text": "Kunden zeigen Wertschätzung direkt nach dem Service – schnell und nahtlos.",
+      "s3Text": "Kunden zeigen Wertschätzung direkt nach dem Service, schnell und nahtlos.",
       "s3Alt": "Salon nach einer Behandlung",
       "s4Headline": "Unterwegs",
       "s4Text": "Kunden tippen von überall per geteiltem Link oder QR Code.",
@@ -1066,7 +1066,7 @@
     },
     "finalCta": {
       "title": "Belohnen Sie Ihr Team noch heute",
-      "subtitle": "In Minuten eingerichtet – Ihr Team verdient die Anerkennung.",
+      "subtitle": "In Minuten eingerichtet. Ihr Team verdient die Anerkennung.",
       "cta": "Loslegen"
     }
   },
@@ -1254,7 +1254,7 @@
       "overlayUpdating": "Aktualisierung",
       "earningsTitle": "Einnahmen im Zeitverlauf",
       "earningsDescToday": "Trinkgelder nach Stunde heute{{tz}}",
-      "earningsDescWeek": "Trinkgelder nach Wochentag in dieser Woche (Mo–So){{tz}}",
+      "earningsDescWeek": "Trinkgelder nach Wochentag in dieser Woche (Mo bis So){{tz}}",
       "earningsDescMonth": "Trinkgelder nach Kalendertag in diesem Monat{{tz}}",
       "tzSuffix": " · {{tz}}",
       "loadingChart": "Diagramm wird geladen",
@@ -1628,7 +1628,7 @@
         },
         "3": {
           "title": "Trinkgeld abgeschlossen",
-          "message": "Ein Trinkgeld von 12 € wurde erfolgreich abgeschlossen – einmalige Zahlung, kein Abo.",
+          "message": "Ein Trinkgeld von 12 € wurde erfolgreich abgeschlossen: einmalige Zahlung, kein Abo.",
           "action": "Trinkgelder & Aktivität"
         },
         "4": {
@@ -1638,7 +1638,7 @@
         },
         "5": {
           "title": "Neu: Sofortige Trinkgeld-Benachrichtigungen",
-          "message": "Push- oder E-Mail-Hinweise bei neuen Trinkgeldern – damit das Team sich rechtzeitig bedanken kann.",
+          "message": "Push- oder E-Mail-Hinweise bei neuen Trinkgeldern, damit das Team sich rechtzeitig bedanken kann.",
           "action": "Benachrichtigungseinstellungen"
         },
         "6": {
