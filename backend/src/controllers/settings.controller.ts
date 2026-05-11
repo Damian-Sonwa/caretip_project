@@ -12,16 +12,23 @@ export async function getMySettings(req: Request, res: Response) {
     const userId = getUserId(req);
     if (!userId) return res.status(401).json({ message: "Authentication required" });
 
-    const row = await prisma.userSettings.findUnique({ where: { userId } });
+    const [row, user] = await Promise.all([
+      prisma.userSettings.findUnique({ where: { userId } }),
+      prisma.user.findUnique({
+        where: { id: userId },
+        select: { preferredLocale: true },
+      }),
+    ]);
     // Do not force-create the row on read; defaults are defined in schema.
-    return res.json(
-      row ?? {
+    return res.json({
+      ...(row ?? {
         tipReceivedNotifications: true,
         summaryEmails: false,
         systemAlerts: true,
         notifyNewLogin: true,
-      },
-    );
+      }),
+      preferredLocale: user?.preferredLocale ?? null,
+    });
   } catch (err) {
     logServerError("settings.getMySettings", err);
     return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.generic) });
@@ -49,10 +56,26 @@ export async function patchMySettings(req: Request, res: Response) {
       update: data,
     });
 
-    return res.json(updated);
+    if (body.preferredLocale !== undefined) {
+      const pl = body.preferredLocale;
+      if (pl === null) {
+        await prisma.user.update({ where: { id: userId }, data: { preferredLocale: null } });
+      } else if (typeof pl === "string") {
+        const t = pl.trim().toLowerCase();
+        if (t === "en" || t === "de") {
+          await prisma.user.update({ where: { id: userId }, data: { preferredLocale: t } });
+        }
+      }
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { preferredLocale: true },
+    });
+
+    return res.json({ ...updated, preferredLocale: user?.preferredLocale ?? null });
   } catch (err) {
     logServerError("settings.patchMySettings", err);
     return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.generic) });
   }
 }
-

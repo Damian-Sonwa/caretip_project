@@ -4,8 +4,10 @@ import { prisma } from "../prisma.js";
 import { normalizeLoginEmail } from "./auth.service.js";
 import { validatePassword } from "../utils/passwordValidation.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
+import { buildPasswordResetContent, resolveEmailLocale, type EmailLocale } from "../emails/i18nEmail.js";
 
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
+const RESET_EXPIRES_HOURS = RESET_TTL_MS / (60 * 60 * 1000);
 
 function hashToken(plain: string): string {
   return createHash("sha256").update(plain, "utf8").digest("hex");
@@ -17,17 +19,36 @@ function getFrontendBaseUrl(): string {
   return "http://localhost:5173";
 }
 
+function renderPasswordReset(locale: EmailLocale, resetUrl: string) {
+  try {
+    return buildPasswordResetContent({
+      locale,
+      resetUrl,
+      expiresInHours: RESET_EXPIRES_HOURS,
+    });
+  } catch {
+    return buildPasswordResetContent({
+      locale: "en",
+      resetUrl,
+      expiresInHours: RESET_EXPIRES_HOURS,
+    });
+  }
+}
+
 /**
  * Creates a reset token for password-based accounts. OAuth-only users get the same generic success (no enumeration).
  * In development, logs the reset URL when email delivery is not configured.
  */
-export async function requestPasswordReset(rawEmail: string): Promise<void> {
+export async function requestPasswordReset(
+  rawEmail: string,
+  opts?: { acceptLanguage?: string | null; explicitLocale?: string | null }
+): Promise<void> {
   const email = normalizeLoginEmail(rawEmail);
   if (!email) return;
 
   const user = await prisma.user.findUnique({
     where: { email },
-    select: { id: true, passwordHash: true },
+    select: { id: true, passwordHash: true, preferredLocale: true },
   });
 
   if (!user?.passwordHash) {
@@ -52,9 +73,12 @@ export async function requestPasswordReset(rawEmail: string): Promise<void> {
   const resetUrl = `${getFrontendBaseUrl()}/reset-password/${encodeURIComponent(plainToken)}`;
 
   const from = getResendFromAddress();
-  const subject = "Reset your CareTip password";
-  const html = `<p>Hi,</p><p><a href="${resetUrl}">Click here to reset your password</a>.</p><p>This link expires in one hour.</p>`;
-  const text = `Reset your CareTip password (expires in one hour):\n${resetUrl}`;
+  const locale = resolveEmailLocale({
+    explicitLocale: opts?.explicitLocale ?? null,
+    storedLocale: user.preferredLocale,
+    acceptLanguage: opts?.acceptLanguage ?? null,
+  });
+  const { subject, html, text } = renderPasswordReset(locale, resetUrl);
 
   const ok = await sendResendEmail("password-reset", {
     from,

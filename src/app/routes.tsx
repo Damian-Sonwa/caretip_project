@@ -194,6 +194,16 @@ const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
   },
   {
+    path: '/business/login',
+    Component: AuthPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/employee/login',
+    Component: AuthPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
     path: '/onboarding',
     element: (
       <ProtectedRoute allowedRoles={['business']}>

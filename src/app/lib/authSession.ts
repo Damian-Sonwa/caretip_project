@@ -31,8 +31,26 @@ const LOGGED_OUT_ROLE: SessionUserRole = "user";
 export function isPublicAuthenticationPath(pathname: string): boolean {
   const p = pathname;
   if (p === "/login" || p === "/signup" || p === "/auth" || p === "/forgot-password") return true;
+  if (p === "/business/login" || p === "/employee/login") return true;
   if (p.startsWith("/reset-password/")) return true;
   return false;
+}
+
+/**
+ * True when an existing session is for the same lane as the business/staff auth UI
+ * (so auto-redirect to that dashboard is appropriate).
+ */
+export function sessionMatchesBusinessStaffAuthTarget(
+  sessionRole: SessionUserRole,
+  authPageRole: "business" | "employee",
+): boolean {
+  if (authPageRole === "business") return sessionRole === "business";
+  if (authPageRole === "employee") return sessionRole === "employee";
+  return false;
+}
+
+export function isPlatformAdminSessionRole(sessionRole: SessionUserRole): boolean {
+  return sessionRole === "platform_admin" || sessionRole === "admin";
 }
 
 export function deriveAuthSession(user: SessionUserLike | null): AuthSession {

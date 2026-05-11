@@ -337,6 +337,7 @@ export function StaffManagementPage() {
     }
     setIsSubmitting(true);
     try {
+      const inviteLocale = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
       const created = await createEmployee({
         name,
         role: addForm.role,
@@ -345,6 +346,7 @@ export function StaffManagementPage() {
         locationId: addForm.locationId.trim() ? addForm.locationId : null,
         tableIds: addForm.tableIds,
         useActivationFlow: true,
+        locale: inviteLocale,
       });
       setShowAddModal(false);
       setAddForm({

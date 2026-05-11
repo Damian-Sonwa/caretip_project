@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   registerAPI,
@@ -120,6 +121,7 @@ export interface User {
   /** True when platform admin is viewing as a business manager (JWT impersonation). */
   impersonation?: boolean;
   impersonatedBy?: string;
+  preferredLocale?: string | null;
 }
 
 export interface RegisterPayload {
@@ -165,6 +167,7 @@ function parseUser(data: AuthResponse["user"]): User {
   const ext = data as AuthResponse["user"] & {
     impersonation?: boolean;
     impersonatedBy?: string;
+    preferredLocale?: string | null;
   };
   const role = mapApiRoleToUserRole(data.role);
   const kyc = data.businessVerificationStatus;
@@ -189,6 +192,7 @@ function parseUser(data: AuthResponse["user"]): User {
     avatar: data.avatar ?? undefined,
     impersonation: ext.impersonation,
     impersonatedBy: ext.impersonatedBy,
+    preferredLocale: typeof ext.preferredLocale === "string" ? ext.preferredLocale : null,
     ...(role === "business" && mapVerificationToStatus(kyc) ? { status: mapVerificationToStatus(kyc)! } : {}),
   };
   // Super admins must not carry business/employee scope in client state (API maps SUPER_ADMIN → platform_admin).
@@ -202,11 +206,18 @@ export function getPostAuthRedirect(u: User): string {
   if (!u.isVerified) return "/verify-email";
   if (u.role === "business" && !u.hasCompletedOnboarding) return "/onboarding";
   if (u.role === "employee") return "/employee/dashboard";
+  if (u.role === "platform_admin" || u.role === "admin") return "/platform-admin/dashboard";
   return "/dashboard";
+}
+
+function requestEmailLocale(i18nLang: string | undefined): "en" | "de" {
+  return i18nLang?.toLowerCase().startsWith("de") ? "de" : "en";
 }
 
 export function useAuth() {
   const navigate = useNavigate();
+  const { i18n } = useTranslation();
+  const requestLocale = requestEmailLocale(i18n.resolvedLanguage);
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
   /**
    * Hydration is synchronous (localStorage read) — keep UI instant.
@@ -332,24 +343,24 @@ export function useAuth() {
     password: string,
     intendedRole: "business" | "employee" | "platform_admin"
   ): Promise<User> => {
-    const data = await loginAPI(email, password, intendedRole);
+    const data = await loginAPI(email, password, intendedRole, requestLocale);
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
     setUser(u);
     setAuthHydrated(true);
     setSessionValidated(true);
     return u;
-  }, []);
+  }, [requestLocale]);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<User> => {
-    const data = await registerAPI(payload);
+    const data = await registerAPI({ ...payload, locale: requestLocale });
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
     setUser(u);
     setAuthHydrated(true);
     setSessionValidated(true);
     return u;
-  }, []);
+  }, [requestLocale]);
 
   const loginWithOAuth = useCallback(async (
     provider: "google",
@@ -374,6 +385,7 @@ export function useAuth() {
       businessType: options.businessType,
       location: options.location,
       inviteCode: options.inviteCode,
+      locale: requestLocale,
     });
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
@@ -381,7 +393,7 @@ export function useAuth() {
     setAuthHydrated(true);
     setSessionValidated(true);
     return u;
-  }, []);
+  }, [requestLocale]);
 
   const logout = useCallback(() => {
     void logoutAPI();

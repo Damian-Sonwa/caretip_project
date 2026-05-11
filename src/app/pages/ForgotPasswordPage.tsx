@@ -12,7 +12,7 @@ const FIELD =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 export function ForgotPasswordPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
@@ -28,7 +28,8 @@ export function ForgotPasswordPage() {
     }
     setSubmitting(true);
     try {
-      await requestPasswordReset(trimmed);
+      const loc = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
+      await requestPasswordReset(trimmed, loc);
       setSent(true);
     } catch (err) {
       logClientError("ForgotPasswordPage", err);

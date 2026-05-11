@@ -1,8 +1,17 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "../prisma.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
+import {
+  buildVerifyEmailContent,
+  buildWelcomeEmailContent,
+  resolveEmailLocale,
+  type EmailLocale,
+} from "../emails/i18nEmail.js";
 
 const VERIFY_TTL_MS = 60 * 60 * 1000; // 1 hour
+
+/** Hours — keep in sync with {@link VERIFY_TTL_MS} for email copy. */
+export const VERIFY_EMAIL_EXPIRES_HOURS = VERIFY_TTL_MS / (60 * 60 * 1000);
 
 function hashToken(plain: string): string {
   return createHash("sha256").update(plain, "utf8").digest("hex");
@@ -43,48 +52,61 @@ export async function createEmailVerificationToken(userId: string): Promise<{
   return { plainToken, expiresAt };
 }
 
+function renderVerifyEmail(locale: EmailLocale, verifyUrl: string) {
+  try {
+    return buildVerifyEmailContent({
+      locale,
+      verifyUrl,
+      expiresInHours: VERIFY_EMAIL_EXPIRES_HOURS,
+    });
+  } catch {
+    return buildVerifyEmailContent({
+      locale: "en",
+      verifyUrl,
+      expiresInHours: VERIFY_EMAIL_EXPIRES_HOURS,
+    });
+  }
+}
+
 export async function sendEmailVerificationEmail(input: {
   to: string;
   verifyUrl: string;
-  expiresInHours?: number;
+  locale: EmailLocale;
 }): Promise<void> {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
 
   const from = getResendFromAddress();
-  const expiresInHours = input.expiresInHours ?? 1;
+  const loc: EmailLocale = input.locale === "de" ? "de" : "en";
+  const { subject, html, text } = renderVerifyEmail(loc, input.verifyUrl);
 
-  const subject = "Verify your CareTip email";
-  const html = `
-    <div style="font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; line-height: 1.5; color: #0f172a;">
-      <p>Welcome to CareTip,</p>
-      <p>Please verify your email address to finish setting up your account.</p>
-      <p style="margin: 24px 0;">
-        <a href="${input.verifyUrl}" style="display: inline-block; background: #197278; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 8px; font-weight: 600;">
-          Verify email
-        </a>
-      </p>
-      <p>This link expires in ${expiresInHours} hour${expiresInHours === 1 ? "" : "s"}.</p>
-      <p style="font-size: 12px; color: #475569;">If the button doesn’t work, copy and paste this link into your browser:<br/>${input.verifyUrl}</p>
-    </div>
-  `.trim();
-
-  const text = `Welcome to CareTip,
-
-Please verify your email address to finish setting up your account:
-${input.verifyUrl}
-
-This link expires in ${expiresInHours} hour${expiresInHours === 1 ? "" : "s"}.`;
-
-  const ok = await sendResendEmail(
-    "email-verify",
-    { from, to: [to], subject, html, text },
-  );
+  const ok = await sendResendEmail("email-verify", { from, to: [to], subject, html, text });
   if (!ok && process.env.NODE_ENV !== "production") {
     console.info(
       "[email-verify] (dev) Verify email link — configure RESEND_API_KEY to send email:",
       input.verifyUrl,
     );
+  }
+}
+
+function renderWelcome(locale: EmailLocale, dashboardUrl: string) {
+  try {
+    return buildWelcomeEmailContent({ locale, dashboardUrl });
+  } catch {
+    return buildWelcomeEmailContent({ locale: "en", dashboardUrl });
+  }
+}
+
+export async function sendWelcomeEmail(input: { to: string; locale: EmailLocale }): Promise<void> {
+  const to = input.to.trim().toLowerCase();
+  if (!to) return;
+  const from = getResendFromAddress();
+  const dashboardUrl = `${getFrontendBaseUrl()}/dashboard`;
+  const loc: EmailLocale = input.locale === "de" ? "de" : "en";
+  const { subject, html, text } = renderWelcome(loc, dashboardUrl);
+  const ok = await sendResendEmail("welcome", { from, to: [to], subject, html, text });
+  if (!ok && process.env.NODE_ENV !== "production") {
+    console.info("[welcome] (dev) Would send welcome to:", to);
   }
 }
 
@@ -96,7 +118,7 @@ export async function verifyEmailWithToken(plainToken: string): Promise<void> {
   const tokenHash = hashToken(token);
   const row = await prisma.emailVerificationToken.findUnique({
     where: { tokenHash },
-    include: { user: { select: { id: true } } },
+    include: { user: { select: { id: true, email: true, preferredLocale: true } } },
   });
   if (!row || row.expiresAt < new Date()) {
     throw new Error("Verification link is invalid or has expired.");
@@ -117,5 +139,16 @@ export async function verifyEmailWithToken(plainToken: string): Promise<void> {
     });
     await tx.emailVerificationToken.delete({ where: { id: row.id } });
   });
-}
 
+  const email = row.user.email?.trim().toLowerCase();
+  if (email) {
+    const welcomeLocale = resolveEmailLocale({
+      explicitLocale: null,
+      storedLocale: row.user.preferredLocale,
+      acceptLanguage: null,
+    });
+    void sendWelcomeEmail({ to: email, locale: welcomeLocale }).catch((e) => {
+      console.error("[email-verify] welcome email failed", { userId: row.userId }, e);
+    });
+  }
+}

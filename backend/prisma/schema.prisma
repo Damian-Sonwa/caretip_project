@@ -90,6 +90,10 @@ model User {
    * Controls post-auth routing to `/onboarding`.
    */
   hasCompletedOnboarding Boolean @default(false) @map("has_completed_onboarding")
+  /**
+   * UI + transactional email language: `en` or `de`. Null until user picks a language or registers with a locale hint.
+   */
+  preferredLocale String? @map("preferred_locale")
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
 

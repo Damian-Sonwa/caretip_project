@@ -447,7 +447,14 @@
       "footerNoAccount": "Noch kein Konto? ",
       "footerHasAccount": "Bereits ein Konto? ",
       "footerSignUp": "Registrieren",
-      "footerSignIn": "Anmelden"
+      "footerSignIn": "Anmelden",
+      "sessionRolePlatformAdmin": "Plattform-Administrator",
+      "sessionRoleBusiness": "Unternehmen",
+      "sessionRoleStaff": "Team",
+      "crossSessionRegionAria": "Aktive Sitzung",
+      "crossSessionBody": "Sie sind als {{role}} angemeldet. Weiter zum passenden Dashboard oder Konto wechseln, um sich hier mit anderen Zugangsdaten anzumelden.",
+      "crossSessionContinue": "Weiter zum Dashboard",
+      "crossSessionSwitch": "Konto wechseln"
     },
     "oauth": {
       "envHintBefore": "Fügen Sie",
@@ -1833,7 +1840,8 @@
       "signIn": "Anmelden",
       "signingIn": "Anmeldung…",
       "bothRequired": "Bitte E-Mail und Passwort eingeben.",
-      "businessStaffLink": "Anmeldung für Unternehmen oder Team"
+      "businessStaffLink": "Anmeldung für Unternehmen oder Team",
+      "redirecting": "Admin-Dashboard wird geöffnet…"
     },
     "auditLogsPage": {
       "title": "Audit-Protokolle",

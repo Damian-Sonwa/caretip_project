@@ -391,6 +391,8 @@ export interface AuthResponse {
     impersonatedBy?: string;
     /** Backend Prisma enum; managers only. */
     businessVerificationStatus?: "pending" | "verified" | "rejected";
+    /** `en` | `de` — UI + transactional email language. */
+    preferredLocale?: string | null;
   };
 }
 
@@ -400,6 +402,8 @@ export async function registerAPI(payload: {
   name?: string;
   role: "business" | "employee";
   inviteCode?: string;
+  /** Sent as `locale` for email + `users.preferred_locale` on sign-up. */
+  locale?: "en" | "de";
 }): Promise<AuthResponse> {
   return apiRequest<AuthResponse>(apiPath("/api/auth/register"), {
     method: "POST",
@@ -428,7 +432,8 @@ function toBackendIntendedRole(
 export async function loginAPI(
   email: string,
   password: string,
-  intendedRole: "business" | "employee" | "platform_admin"
+  intendedRole: "business" | "employee" | "platform_admin",
+  locale?: "en" | "de"
 ): Promise<AuthResponse> {
   return apiRequest<AuthResponse>(apiPath("/api/auth/signin"), {
     method: "POST",
@@ -437,6 +442,7 @@ export async function loginAPI(
       email,
       password,
       intendedRole: toBackendIntendedRole(intendedRole),
+      ...(locale ? { locale } : {}),
     }),
     credentials: "include",
   });
@@ -456,33 +462,39 @@ export async function logoutAPI(): Promise<void> {
 
 export async function resendVerificationEmailAPI(
   email: string,
-  password: string
+  password: string,
+  locale?: "en" | "de"
 ): Promise<{ ok: boolean; message: string }> {
   return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/resend-verification-email"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, ...(locale ? { locale } : {}) }),
     credentials: "include",
   });
 }
 
 /** While logged in with an unverified account (e.g. check-email page after signup). Uses Bearer token. */
-export async function resendVerificationEmailSessionAPI(): Promise<{ ok: boolean; message: string }> {
+export async function resendVerificationEmailSessionAPI(
+  locale?: "en" | "de"
+): Promise<{ ok: boolean; message: string }> {
   return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/resend-verification-email/session"), {
     method: "POST",
     headers: getHeaders(),
-    body: "{}",
+    body: JSON.stringify(locale ? { locale } : {}),
     credentials: "include",
   });
 }
 
 export { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, isApiRequestError } from "./apiError";
 
-export async function requestPasswordReset(email: string): Promise<{ ok: boolean; message: string }> {
+export async function requestPasswordReset(
+  email: string,
+  locale?: "en" | "de"
+): Promise<{ ok: boolean; message: string }> {
   return apiRequest<{ ok: boolean; message: string }>(apiPath("/api/auth/forgot-password"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, ...(locale ? { locale } : {}) }),
     credentials: "include",
   });
 }
@@ -544,6 +556,7 @@ export async function oauthAPI(payload: {
   businessType?: string;
   location?: string;
   inviteCode?: string;
+  locale?: "en" | "de";
 }): Promise<AuthResponse> {
   return apiRequest<AuthResponse>(apiPath("/api/auth/oauth"), {
     method: "POST",
@@ -558,6 +571,7 @@ export async function oauthAPI(payload: {
       ...(payload.businessType ? { businessType: payload.businessType } : {}),
       ...(payload.location ? { location: payload.location } : {}),
       ...(payload.inviteCode ? { inviteCode: payload.inviteCode } : {}),
+      ...(payload.locale ? { locale: payload.locale } : {}),
     }),
     credentials: "include",
   });
@@ -936,6 +950,8 @@ export async function createEmployee(payload: {
   tableIds?: string[];
   /** When true: employee is created pending activation and receives activation email. */
   useActivationFlow?: boolean;
+  /** Invite email language (`en` / `de`). */
+  locale?: "en" | "de";
 }): Promise<{
   id: string;
   name: string;
@@ -1295,6 +1311,7 @@ export type MyAccountSettings = {
   summaryEmails: boolean;
   systemAlerts: boolean;
   notifyNewLogin: boolean;
+  preferredLocale?: string | null;
 };
 
 export async function getMyAccountSettings(): Promise<MyAccountSettings> {
@@ -1306,7 +1323,7 @@ export async function getMyAccountSettings(): Promise<MyAccountSettings> {
 }
 
 export async function patchMyAccountSettings(
-  payload: Partial<MyAccountSettings>,
+  payload: Partial<MyAccountSettings> & { preferredLocale?: "en" | "de" | null },
 ): Promise<MyAccountSettings> {
   return apiRequest(apiPath("/api/me/settings"), {
     method: "PATCH",

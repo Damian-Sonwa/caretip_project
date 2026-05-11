@@ -14,6 +14,7 @@ import * as employeeActivationService from "./employeeActivation.service.js";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { resolveEmailLocale } from "../emails/i18nEmail.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -31,6 +32,8 @@ export interface AuthUserDto {
   impersonation?: boolean;
   impersonatedBy?: string;
   businessVerificationStatus?: "pending" | "verified" | "rejected";
+  /** UI + email language (`en` / `de`). */
+  preferredLocale?: string | null;
 }
 
 export interface AuthResult {
@@ -139,6 +142,7 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
     role: user.role,
     name: displayNameForUser(user),
     emailVerified: user.emailVerified === true,
+    preferredLocale: user.preferredLocale ?? null,
   };
 
   if (user.role === "MANAGER" && user.business) {
@@ -178,24 +182,43 @@ export async function authResultForUserId(userId: string): Promise<AuthResult> {
   return authResultForUserRecord(user);
 }
 
-async function sendVerificationEmailBestEffort(userId: string, email: string): Promise<void> {
+async function sendVerificationEmailBestEffort(
+  userId: string,
+  email: string,
+  opts?: { explicitLocale?: string | null; acceptLanguage?: string | null }
+): Promise<void> {
   try {
+    const u = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { preferredLocale: true },
+    });
+    const locale = resolveEmailLocale({
+      explicitLocale: opts?.explicitLocale ?? null,
+      storedLocale: u?.preferredLocale ?? null,
+      acceptLanguage: opts?.acceptLanguage ?? null,
+    });
     const { plainToken } = await createEmailVerificationToken(userId);
     await sendEmailVerificationEmail({
       to: email,
       verifyUrl: buildVerifyEmailUrl(plainToken),
+      locale,
     });
   } catch (e) {
     console.error("[auth] Failed to enqueue email verification", { userId, email }, e);
   }
 }
 
-export async function registerBusiness(input: {
-  email: string;
-  password: string;
-  /** Optional display name for the account (not persisted to Business profile). */
-  name?: string;
-}): Promise<AuthResult> {
+export async function registerBusiness(
+  input: {
+    email: string;
+    password: string;
+    /** Optional display name for the account (not persisted to Business profile). */
+    name?: string;
+    /** Client app language (`en` / `de`); stored on user for email + UI consistency. */
+    locale?: string | null;
+  },
+  opts?: { acceptLanguage?: string | null }
+): Promise<AuthResult> {
   const email = normalizeLoginEmail(input.email);
   const pwCheck = validatePassword(input.password);
   if (!pwCheck.valid) {
@@ -211,6 +234,11 @@ export async function registerBusiness(input: {
   const placeholderBusinessName = `${baseName} venue`;
   const slug = await generateUniqueBusinessSlugForName(placeholderBusinessName);
   const passwordHash = await bcrypt.hash(input.password, 10);
+  const preferredLocale = resolveEmailLocale({
+    explicitLocale: input.locale ?? null,
+    storedLocale: null,
+    acceptLanguage: opts?.acceptLanguage ?? null,
+  });
 
   const created = await prisma.user.create({
     data: {
@@ -219,6 +247,7 @@ export async function registerBusiness(input: {
       role: "MANAGER",
       isPlatformAdmin: false,
       emailVerified: false,
+      preferredLocale,
       business: {
         create: {
           name: placeholderBusinessName,
@@ -239,17 +268,24 @@ export async function registerBusiness(input: {
   });
 
   // Managers must verify email for password sign-ups — await so delivery runs before HTTP response (serverless-safe).
-  await sendVerificationEmailBestEffort(created.id, created.email);
+  await sendVerificationEmailBestEffort(created.id, created.email, {
+    explicitLocale: input.locale,
+    acceptLanguage: opts?.acceptLanguage,
+  });
 
   return authResultForUserRecord(created);
 }
 
-export async function registerEmployee(input: {
-  email: string;
-  password: string;
-  name: string;
-  inviteCode: string;
-}): Promise<AuthResult> {
+export async function registerEmployee(
+  input: {
+    email: string;
+    password: string;
+    name: string;
+    inviteCode: string;
+    locale?: string | null;
+  },
+  opts?: { acceptLanguage?: string | null }
+): Promise<AuthResult> {
   const email = normalizeLoginEmail(input.email);
   const pwCheck = validatePassword(input.password);
   if (!pwCheck.valid) {
@@ -274,6 +310,11 @@ export async function registerEmployee(input: {
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
+  const preferredLocale = resolveEmailLocale({
+    explicitLocale: input.locale ?? null,
+    storedLocale: null,
+    acceptLanguage: opts?.acceptLanguage ?? null,
+  });
 
   const slug =
     business.verificationStatus === "verified"
@@ -293,6 +334,7 @@ export async function registerEmployee(input: {
       role: "EMPLOYEE",
       isPlatformAdmin: false,
       emailVerified: false,
+      preferredLocale,
       employee: {
         create: {
           name: input.name.trim(),
@@ -309,7 +351,10 @@ export async function registerEmployee(input: {
     },
   });
 
-  await sendVerificationEmailBestEffort(created.id, created.email);
+  await sendVerificationEmailBestEffort(created.id, created.email, {
+    explicitLocale: input.locale,
+    acceptLanguage: opts?.acceptLanguage,
+  });
 
   return authResultForUserRecord(created);
 }
@@ -383,6 +428,8 @@ export async function login(input: LoginInput): Promise<AuthResult> {
 export async function resendVerificationEmail(input: {
   email: string;
   password: string;
+  explicitLocale?: string | null;
+  acceptLanguage?: string | null;
 }): Promise<void> {
   const email = normalizeLoginEmail(input.email);
   const user = await prisma.user.findUnique({
@@ -399,14 +446,20 @@ export async function resendVerificationEmail(input: {
   if (user.emailVerified === true) {
     throw new Error("Email is already verified.");
   }
-  await sendVerificationEmailBestEffort(user.id, email);
+  await sendVerificationEmailBestEffort(user.id, email, {
+    explicitLocale: input.explicitLocale,
+    acceptLanguage: input.acceptLanguage,
+  });
 }
 
 /**
  * Re-sends verification for the currently authenticated user (JWT), without requiring password again.
  * Used from the check-email screen right after sign-up while the session is still valid.
  */
-export async function resendVerificationEmailForSessionUser(userId: string): Promise<void> {
+export async function resendVerificationEmailForSessionUser(
+  userId: string,
+  opts?: { explicitLocale?: string | null; acceptLanguage?: string | null }
+): Promise<void> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { id: true, email: true, emailVerified: true, isActive: true },
@@ -418,7 +471,10 @@ export async function resendVerificationEmailForSessionUser(userId: string): Pro
     throw new Error("Email is already verified.");
   }
   const email = normalizeLoginEmail(user.email);
-  await sendVerificationEmailBestEffort(user.id, email);
+  await sendVerificationEmailBestEffort(user.id, email, {
+    explicitLocale: opts?.explicitLocale,
+    acceptLanguage: opts?.acceptLanguage,
+  });
 }
 
 function mapIntendedToRole(intended: LoginInput["intendedRole"]): Role {

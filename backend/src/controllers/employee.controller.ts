@@ -356,6 +356,11 @@ export async function createEmployee(req: Request, res: Response) {
     
     // Use new activation flow if explicitly requested
     if (useActivationFlow === true) {
+      const explicitLocale =
+        typeof req.body.locale === "string" && req.body.locale.trim()
+          ? String(req.body.locale).trim()
+          : undefined;
+      const acceptLanguage = req.get("accept-language") ?? undefined;
       const employee = await employeeService.createEmployeeWithActivation({
         name: name ?? "",
         jobTitle: jobTitle ?? "Staff",
@@ -369,6 +374,8 @@ export async function createEmployee(req: Request, res: Response) {
             : (req.body.tableIds as unknown[])
                 .map((x) => String(x).trim())
                 .filter((id: string) => id.length > 0),
+        explicitLocale,
+        acceptLanguage,
       });
       return res.status(201).json(employee);
     }

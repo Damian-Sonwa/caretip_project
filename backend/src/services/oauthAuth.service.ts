@@ -10,6 +10,7 @@ import {
 import * as businessService from "./business.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
+import { resolveEmailLocale } from "../emails/i18nEmail.js";
 
 /** Social OAuth supported by `/api/auth/oauth` (Google only; Apple removed temporarily). */
 export type OAuthProvider = "google";
@@ -23,6 +24,8 @@ export interface OAuthAuthBody {
   inviteCode?: string;
   businessType?: string;
   location?: string;
+  /** App language hint for new accounts (`en` / `de`). */
+  locale?: string;
 }
 
 async function verifyGoogleIdToken(idToken: string): Promise<{
@@ -62,9 +65,24 @@ function mapIntendedToRole(intended: LoginInput["intendedRole"]): Role {
 
 export async function authenticateWithOAuth(
   provider: OAuthProvider,
-  body: OAuthAuthBody
+  body: OAuthAuthBody,
+  opts?: { acceptLanguage?: string | null }
 ): Promise<AuthResult> {
-  const { idToken, intendedRole, isLogin, name: nameOverride, businessName, inviteCode, businessType, location } = body;
+  const {
+    idToken,
+    intendedRole,
+    isLogin,
+    name: nameOverride,
+    businessName,
+    inviteCode,
+    businessType,
+    location,
+  } = body;
+  const preferredLocale = resolveEmailLocale({
+    explicitLocale: body.locale ?? null,
+    storedLocale: null,
+    acceptLanguage: opts?.acceptLanguage ?? null,
+  });
   if (!idToken?.trim()) {
     throw new Error("Missing identity token.");
   }
@@ -171,6 +189,7 @@ export async function authenticateWithOAuth(
         role: "MANAGER",
         isPlatformAdmin: false,
         emailVerified: true,
+        preferredLocale,
         business: {
           create: {
             name: bizName,
@@ -209,6 +228,7 @@ export async function authenticateWithOAuth(
         role: "EMPLOYEE",
         isPlatformAdmin: false,
         emailVerified: true,
+        preferredLocale,
         employee: {
           create: {
             name: displayName,

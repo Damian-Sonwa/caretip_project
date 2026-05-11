@@ -101,12 +101,20 @@ export async function register(req: Request, res: Response) {
       });
     }
 
+    const acceptLanguage = req.get("accept-language") ?? undefined;
+    const locale =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
+
     if (role === "business") {
-      const result = await authService.registerBusiness({
-        email,
-        password,
-        name: typeof name === "string" ? name : undefined,
-      });
+      const result = await authService.registerBusiness(
+        {
+          email,
+          password,
+          name: typeof name === "string" ? name : undefined,
+          locale,
+        },
+        { acceptLanguage },
+      );
       try {
         const rt = await issueRefreshToken(result.user.id);
         setRefreshCookie(res, rt.token);
@@ -123,12 +131,16 @@ export async function register(req: Request, res: Response) {
       if (!inviteCode) {
         return res.status(400).json({ message: "Invite code is required" });
       }
-      const result = await authService.registerEmployee({
-        email,
-        password,
-        name,
-        inviteCode,
-      });
+      const result = await authService.registerEmployee(
+        {
+          email,
+          password,
+          name,
+          inviteCode,
+          locale,
+        },
+        { acceptLanguage },
+      );
       try {
         const rt = await issueRefreshToken(result.user.id);
         setRefreshCookie(res, rt.token);
@@ -171,6 +183,17 @@ export async function login(req: Request, res: Response) {
       intendedRole,
     });
 
+    const loginClientLocale =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
+    if (loginClientLocale === "en" || loginClientLocale === "de") {
+      void prisma.user
+        .update({
+          where: { id: result.user.id },
+          data: { preferredLocale: loginClientLocale },
+        })
+        .catch(() => {});
+    }
+
     // Best-effort session alert email (opt-in via user_settings.notify_new_login).
     void (async () => {
       try {
@@ -184,7 +207,16 @@ export async function login(req: Request, res: Response) {
           (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
           (req.socket.remoteAddress ?? null);
         const ua = String(req.headers["user-agent"] ?? "");
-        await sendNewLoginAlertEmail({ to: result.user.email, ip, userAgent: ua });
+        await sendNewLoginAlertEmail({
+          to: result.user.email,
+          ip,
+          userAgent: ua,
+          explicitLocale: loginClientLocale,
+          acceptLanguage:
+            typeof req.headers["accept-language"] === "string"
+              ? req.headers["accept-language"]
+              : undefined,
+        });
       } catch (e) {
         logServerError("auth.login.sessionAlertEmail", e);
       }
@@ -368,7 +400,10 @@ export async function resendVerificationEmail(req: Request, res: Response) {
     if (!email || typeof password !== "string") {
       return res.status(400).json({ message: "Email and password are required" });
     }
-    await authService.resendVerificationEmail({ email, password });
+    const acceptLanguage = req.get("accept-language") ?? undefined;
+    const locale =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
+    await authService.resendVerificationEmail({ email, password, explicitLocale: locale, acceptLanguage });
     return res.json({
       ok: true,
       message: "We sent a new verification link to your email.",
@@ -395,7 +430,14 @@ export async function resendVerificationEmailForSession(req: Request, res: Respo
     if (!uid || typeof uid !== "string") {
       return res.status(401).json({ message: "Authentication required" });
     }
-    await authService.resendVerificationEmailForSessionUser(uid);
+    const body = req.body as Record<string, unknown>;
+    const acceptLanguage = req.get("accept-language") ?? undefined;
+    const locale =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
+    await authService.resendVerificationEmailForSessionUser(uid, {
+      explicitLocale: locale,
+      acceptLanguage,
+    });
     return res.json({
       ok: true,
       message: "We sent a new verification link to your email.",
@@ -441,16 +483,23 @@ export async function oauth(req: Request, res: Response) {
       });
     }
 
-    const result = await oauthAuthService.authenticateWithOAuth(provider, {
-      idToken,
-      intendedRole,
-      isLogin,
-      name,
-      businessName,
-      inviteCode,
-      businessType,
-      location,
-    });
+    const locale =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
+    const result = await oauthAuthService.authenticateWithOAuth(
+      provider,
+      {
+        idToken,
+        intendedRole,
+        isLogin,
+        name,
+        businessName,
+        inviteCode,
+        businessType,
+        location,
+        locale,
+      },
+      { acceptLanguage: req.get("accept-language") ?? undefined },
+    );
     try {
       const rt = await issueRefreshToken(result.user.id);
       setRefreshCookie(res, rt.token);
@@ -582,8 +631,11 @@ export async function logout(req: Request, res: Response) {
 
 export async function forgotPassword(req: Request, res: Response) {
   try {
-    const email = typeof req.body?.email === "string" ? req.body.email : "";
+    const body = req.body as Record<string, unknown>;
+    const email = typeof body.email === "string" ? body.email : "";
     const normalized = authService.normalizeLoginEmail(email);
+    const localeHint =
+      typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
 
     // Per-email abuse protection (in addition to the IP-based limiter middleware).
     // Always log attempts before enforcing strict blocking.
@@ -600,7 +652,10 @@ export async function forgotPassword(req: Request, res: Response) {
       return res.status(429).json({ message: "Too many requests, try again later" });
     }
 
-    await passwordResetService.requestPasswordReset(email);
+    await passwordResetService.requestPasswordReset(email, {
+      acceptLanguage: req.get("accept-language") ?? undefined,
+      explicitLocale: localeHint,
+    });
     return res.status(200).json({
       ok: true,
       message:

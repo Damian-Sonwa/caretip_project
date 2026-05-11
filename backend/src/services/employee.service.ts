@@ -803,6 +803,9 @@ export interface CreateEmployeeWithActivationInput {
   businessId: string;
   locationId?: string | null;
   tableIds?: string[];
+  /** Client UI language for invite email (overrides inviter stored locale when set). */
+  explicitLocale?: string | null;
+  acceptLanguage?: string | null;
 }
 
 export interface CreateEmployeeWithActivationResult {
@@ -823,7 +826,17 @@ export interface CreateEmployeeWithActivationResult {
 export async function createEmployeeWithActivation(
   input: CreateEmployeeWithActivationInput
 ): Promise<CreateEmployeeWithActivationResult> {
-  const { name, jobTitle, email, phone, businessId, locationId: locIn, tableIds: tablesIn } = input;
+  const {
+    name,
+    jobTitle,
+    email,
+    phone,
+    businessId,
+    locationId: locIn,
+    tableIds: tablesIn,
+    explicitLocale,
+    acceptLanguage,
+  } = input;
   if (!name?.trim() || !email?.trim() || !jobTitle?.trim()) {
     throw new Error("Name, email, and role are required");
   }
@@ -840,11 +853,18 @@ export async function createEmployeeWithActivation(
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
-    select: { verificationStatus: true },
+    select: { verificationStatus: true, name: true, userId: true },
   });
   if (!business) {
     throw new Error("Business not found");
   }
+
+  const inviter = business.userId
+    ? await prisma.user.findUnique({
+        where: { id: business.userId },
+        select: { preferredLocale: true },
+      })
+    : null;
 
   const resolved = await resolveStaffAssignments(businessId, locIn ?? null, tablesIn ?? []);
 
@@ -899,6 +919,10 @@ export async function createEmployeeWithActivation(
     employeeName: employee.name,
     activationUrl: buildEmployeeActivationUrl(activationToken),
     expiresInHours: 24,
+    businessName: business.name?.trim() || "CareTip",
+    explicitLocale: explicitLocale ?? null,
+    inviterPreferredLocale: inviter?.preferredLocale ?? null,
+    acceptLanguage: acceptLanguage ?? null,
   });
 
   emitBusinessDataChanged(businessId, "staff_created");

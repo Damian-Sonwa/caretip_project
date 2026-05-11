@@ -447,7 +447,14 @@
       "footerNoAccount": "Don't have an account? ",
       "footerHasAccount": "Already have an account? ",
       "footerSignUp": "Sign up",
-      "footerSignIn": "Sign in"
+      "footerSignIn": "Sign in",
+      "sessionRolePlatformAdmin": "Platform admin",
+      "sessionRoleBusiness": "Business",
+      "sessionRoleStaff": "Staff",
+      "crossSessionRegionAria": "Active session",
+      "crossSessionBody": "You're signed in as {{role}}. Continue to that dashboard, or switch account to use different credentials here.",
+      "crossSessionContinue": "Continue to dashboard",
+      "crossSessionSwitch": "Switch account"
     },
     "oauth": {
       "envHintBefore": "Add",
@@ -1833,7 +1840,8 @@
       "signIn": "Sign in",
       "signingIn": "Signing in…",
       "bothRequired": "Please enter both email and password.",
-      "businessStaffLink": "Business or staff sign in"
+      "businessStaffLink": "Business or staff sign in",
+      "redirecting": "Opening your admin dashboard…"
     },
     "auditLogsPage": {
       "title": "Audit logs",

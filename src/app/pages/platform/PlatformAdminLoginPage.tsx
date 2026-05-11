@@ -1,14 +1,15 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { Footer } from "../../components/Footer";
 import { CareTipLogo } from "../../components/CareTipLogo";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth, getPostAuthRedirect } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
 import { logClientError } from "../../lib/clientLog";
+import { isPlatformAdminSessionRole } from "../../lib/authSession";
 
 const FIELD_CLASS =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
@@ -21,8 +22,31 @@ export function PlatformAdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const authInFlightRef = useRef(false);
-  const { login } = useAuth();
+  const { login, user, sessionValidated, sessionChecking, logout } = useAuth();
   const navigate = useNavigate();
+
+  const showSessionGate = Boolean(user && (sessionChecking || !sessionValidated));
+  const sameLaneValidated = Boolean(
+    user && sessionValidated && isPlatformAdminSessionRole(user.role),
+  );
+  const showCrossSessionHint = Boolean(
+    user && sessionValidated && !isPlatformAdminSessionRole(user.role),
+  );
+
+  useEffect(() => {
+    if (!user || !sessionValidated) return;
+    if (!isPlatformAdminSessionRole(user.role)) return;
+    navigate("/platform-admin/dashboard", { replace: true });
+  }, [user, sessionValidated, navigate]);
+
+  const sessionRoleLabel =
+    user?.role === "business"
+      ? t("auth.page.sessionRoleBusiness")
+      : user?.role === "employee"
+        ? t("auth.page.sessionRoleStaff")
+        : user?.role === "platform_admin" || user?.role === "admin"
+          ? t("auth.page.sessionRolePlatformAdmin")
+          : user?.role ?? "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +79,34 @@ export function PlatformAdminLoginPage() {
     <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-12 sm:py-16 dark:bg-neutral-900">
+          {showCrossSessionHint ? (
+            <div className="mb-6 w-full max-w-sm" role="region" aria-label={t("auth.page.crossSessionRegionAria")}>
+              <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+                <p className="font-medium leading-snug">{t("auth.page.crossSessionBody", { role: sessionRoleLabel })}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={!user}
+                    onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
+                    className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+                  >
+                    {t("auth.page.crossSessionContinue")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      logout();
+                      setError("");
+                    }}
+                    className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
+                  >
+                    {t("auth.page.crossSessionSwitch")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ) : null}
+
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -104,77 +156,94 @@ export function PlatformAdminLoginPage() {
                 </motion.div>
               </div>
 
-              <form
-                onSubmit={(e) => void handleSubmit(e)}
-                aria-busy={submitting}
-                className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
-                method="post"
-                action=""
-                noValidate
-              >
-                <input
-                  placeholder="Email"
-                  type="email"
-                  id="platform-admin-email"
-                  name="email"
-                  inputMode="email"
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className={FIELD_CLASS}
-                />
-
-                <div className="relative">
-                  <input
-                    placeholder={t("admin.loginPage.passwordPlaceholder")}
-                    type={showPassword ? "text" : "password"}
-                    id="platform-admin-password"
-                    name="password"
-                    autoComplete="current-password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className={`${FIELD_CLASS} pr-11`}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
-                    aria-label={showPassword ? t("admin.loginPage.hidePassword") : t("admin.loginPage.showPassword")}
-                  >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                  </button>
-                </div>
-
-                {error ? (
-                  <p className="text-sm font-medium text-red-600 dark:text-red-400" role="alert">
-                    {error}
-                  </p>
-                ) : null}
-
-                {submitting ? (
-                  <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
-                    {t("admin.loginPage.signingIn")}
-                  </p>
-                ) : null}
-
-                <motion.button
-                  whileHover={submitting ? undefined : { y: -3 }}
-                  whileTap={submitting ? undefined : { scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  type="submit"
-                  disabled={submitting}
-                  className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+              {showSessionGate ? (
+                <div
+                  role="status"
+                  aria-live="polite"
+                  className="flex flex-col items-center rounded-xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50"
                 >
+                  <Loader2 className="mb-3 h-8 w-8 animate-spin text-primary" aria-hidden />
+                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{t("auth.page.sessionCheckingTitle")}</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{t("auth.page.sessionCheckingBody")}</p>
+                </div>
+              ) : sameLaneValidated ? (
+                <div className="flex flex-col items-center py-8 text-center" role="status" aria-live="polite">
+                  <Loader2 className="mb-3 h-8 w-8 animate-spin text-primary" aria-hidden />
+                  <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("admin.loginPage.redirecting")}</p>
+                </div>
+              ) : (
+                <form
+                  onSubmit={(e) => void handleSubmit(e)}
+                  aria-busy={submitting}
+                  className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
+                  method="post"
+                  action=""
+                  noValidate
+                >
+                  <input
+                    placeholder="Email"
+                    type="email"
+                    id="platform-admin-email"
+                    name="email"
+                    inputMode="email"
+                    autoComplete="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className={FIELD_CLASS}
+                  />
+
+                  <div className="relative">
+                    <input
+                      placeholder={t("admin.loginPage.passwordPlaceholder")}
+                      type={showPassword ? "text" : "password"}
+                      id="platform-admin-password"
+                      name="password"
+                      autoComplete="current-password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className={`${FIELD_CLASS} pr-11`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                      aria-label={showPassword ? t("admin.loginPage.hidePassword") : t("admin.loginPage.showPassword")}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+
+                  {error ? (
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+
                   {submitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
+                    <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
                       {t("admin.loginPage.signingIn")}
-                    </>
-                  ) : (
-                    t("admin.loginPage.signIn")
-                  )}
-                </motion.button>
-              </form>
+                    </p>
+                  ) : null}
+
+                  <motion.button
+                    whileHover={submitting ? undefined : { y: -3 }}
+                    whileTap={submitting ? undefined : { scale: 0.98 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                    type="submit"
+                    disabled={submitting}
+                    className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
+                        {t("admin.loginPage.signingIn")}
+                      </>
+                    ) : (
+                      t("admin.loginPage.signIn")
+                    )}
+                  </motion.button>
+                </form>
+              )}
 
               <p className="mt-6 text-center text-xs text-neutral-600 dark:text-neutral-400">
                 <Link

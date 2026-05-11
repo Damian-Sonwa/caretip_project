@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Check, ChevronDown, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
+import { patchMyAccountSettings } from "@/app/lib/api";
 
 type LanguageSwitcherProps = {
   className?: string;
@@ -40,6 +41,13 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
   const setLang = (lng: "en" | "de") => {
     void i18n.changeLanguage(lng);
     setOpen(false);
+    try {
+      if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")?.trim()) {
+        void patchMyAccountSettings({ preferredLocale: lng });
+      }
+    } catch {
+      /* logged-out or network — ignore */
+    }
   };
 
   return (

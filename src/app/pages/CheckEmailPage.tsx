@@ -94,7 +94,7 @@ function VerifyEmailFromToken({ token }: { token: string }) {
  * With `?token=` from the email link, completes verification once then redirects.
  */
 export function CheckEmailPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
@@ -129,12 +129,14 @@ export function CheckEmailPage() {
     }
   }, [user?.email, t]);
 
+  const emailLocale = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
+
   const handleResendVerification = useCallback(async () => {
     setResendBusy(true);
     try {
       const r = hasSessionUser
-        ? await resendVerificationEmailSessionAPI()
-        : await resendVerificationEmailAPI(email.trim(), password);
+        ? await resendVerificationEmailSessionAPI(emailLocale)
+        : await resendVerificationEmailAPI(email.trim(), password, emailLocale);
       toast.success(r.message || t("auth.page.toastResendDefault"));
     } catch (err) {
       logClientError("CheckEmailPage.resendVerification", err);
@@ -142,7 +144,7 @@ export function CheckEmailPage() {
     } finally {
       setResendBusy(false);
     }
-  }, [email, hasSessionUser, password, t]);
+  }, [email, emailLocale, hasSessionUser, password, t]);
 
   const handleContinueAfterVerify = useCallback(async () => {
     const refreshed = await refreshSession();

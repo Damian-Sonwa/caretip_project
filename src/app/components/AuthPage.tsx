@@ -24,7 +24,10 @@ import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
-import { isPublicAuthenticationPath } from '../lib/authSession';
+import {
+  isPublicAuthenticationPath,
+  sessionMatchesBusinessStaffAuthTarget,
+} from '../lib/authSession';
 
 const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as const;
 
@@ -44,7 +47,7 @@ const FIELD = {
 } as const;
 
 export function AuthPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const location = useLocation();
   const [isLogin, setIsLogin] = useState(() => {
     const sp = new URLSearchParams(location.search);
@@ -90,32 +93,41 @@ export function AuthPage() {
     const p = location.pathname;
     const sp = new URLSearchParams(location.search);
     if (p === '/signup' || (p === '/auth' && sp.get('mode') === 'signup')) setIsLogin(false);
-    else if (p === '/login' || p === '/auth') setIsLogin(true);
+    else if (p === '/login' || p === '/auth' || p === '/employee/login' || p === '/business/login') {
+      setIsLogin(true);
+    }
   }, [location.pathname, location.search]);
 
   useEffect(() => {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  // If a session exists and has been validated, go straight to the dashboard.
+  /** Same-lane session (business/staff UI matches session role) → home dashboard. */
   useEffect(() => {
     if (!user) return;
     if (!sessionValidated) return;
+    if (!sessionMatchesBusinessStaffAuthTarget(user.role, role)) return;
     navigate(getPostAuthRedirect(user), { replace: true });
-  }, [navigate, sessionValidated, user]);
+  }, [navigate, sessionValidated, user, role]);
 
   useEffect(() => {
-    // Update role from query params when the search string changes
+    const p = location.pathname;
     const searchParams = new URLSearchParams(location.search);
-    const roleParam = searchParams.get('role');
-    if (roleParam === 'employee' || roleParam === 'business') {
-      setRole(roleParam as AuthRole);
+    if (p === '/employee/login') {
+      setRole('employee');
+    } else if (p === '/business/login') {
+      setRole('business');
+    } else {
+      const roleParam = searchParams.get('role');
+      if (roleParam === 'employee' || roleParam === 'business') {
+        setRole(roleParam as AuthRole);
+      }
     }
     const inviteParam = searchParams.get('inviteCode') || searchParams.get('code');
     if (inviteParam && inviteParam.trim().length > 0) {
       setInviteCode(inviteParam.trim());
     }
-  }, [location.search]);
+  }, [location.pathname, location.search]);
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -221,7 +233,8 @@ export function AuthPage() {
     setResendBusy(true);
     setError('');
     try {
-      const r = await resendVerificationEmailAPI(email.trim(), password);
+      const loc = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
+      const r = await resendVerificationEmailAPI(email.trim(), password, loc);
       toast.success(r.message || t('auth.page.toastResendDefault'), {
         style: ROLE_MISMATCH_TOAST_STYLE,
       });
@@ -236,7 +249,16 @@ export function AuthPage() {
   const toggleAuthMode = () => {
     const nextLogin = !isLogin;
     setIsLogin(nextLogin);
-    navigate(nextLogin ? '/login' : '/signup', { replace: true });
+    const p = location.pathname;
+    const base =
+      p === '/employee/login'
+        ? '/employee/login'
+        : p === '/business/login'
+          ? '/business/login'
+          : nextLogin
+            ? '/login'
+            : '/signup';
+    navigate(base, { replace: true });
     setError('');
     setShowResendVerification(false);
     setEmail('');
@@ -324,10 +346,60 @@ export function AuthPage() {
   // Keep auth pages instant; hydration is synchronous in normal browsers.
   void authHydrated;
 
+  const showSessionGate = Boolean(user && (sessionChecking || !sessionValidated));
+  const sameLaneValidated = Boolean(
+    user && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role),
+  );
+  const showSignInForm =
+    !user || (Boolean(user) && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
+  const showCrossSessionHint =
+    Boolean(user) && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role);
+
+  const sessionRoleLabel =
+    user?.role === 'platform_admin' || user?.role === 'admin'
+      ? t('auth.page.sessionRolePlatformAdmin')
+      : user?.role === 'employee'
+        ? t('auth.page.sessionRoleStaff')
+        : user?.role === 'business'
+          ? t('auth.page.sessionRoleBusiness')
+          : user?.role ?? '';
+
   return (
     <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
+
+        {showCrossSessionHint ? (
+          <div
+            className="mx-auto w-full max-w-lg px-4 pt-20 sm:pt-24"
+            role="region"
+            aria-label={t('auth.page.crossSessionRegionAria')}
+          >
+            <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+              <p className="font-medium leading-snug">{t('auth.page.crossSessionBody', { role: sessionRoleLabel })}</p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={!user}
+                  onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
+                  className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+                >
+                  {t('auth.page.crossSessionContinue')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    logout();
+                    setError('');
+                  }}
+                  className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
+                >
+                  {t('auth.page.crossSessionSwitch')}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
 
         <SignInCard2
           isLogin={isLogin}
@@ -335,10 +407,10 @@ export function AuthPage() {
           role={role}
           onRoleChange={toggleRole}
           formBusy={isSubmitting}
-          sessionActive={Boolean(user) && sessionValidated}
+          sessionActive={sameLaneValidated}
           className="flex-1"
         >
-          {user && (sessionChecking || !sessionValidated) ? (
+          {showSessionGate ? (
             <div
               role="status"
               aria-live="polite"
@@ -357,7 +429,7 @@ export function AuthPage() {
               </div>
             </div>
           ) : null}
-          {!user ? (
+          {showSignInForm ? (
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting}
