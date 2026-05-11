@@ -100,10 +100,6 @@ export function CheckEmailPage() {
   const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
   const verifyErrorBanner = (location.state as { verifyError?: string } | null)?.verifyError;
 
-  if (tokenFromUrl) {
-    return <VerifyEmailFromToken token={tokenFromUrl} />;
-  }
-
   const { user, logout, refreshSession } = useAuth();
   const navigate = useNavigate();
   const [resendBusy, setResendBusy] = useState(false);
@@ -167,6 +163,10 @@ export function CheckEmailPage() {
   }, [user?.email]);
 
   const isWebmail = inboxTarget?.kind === "web";
+
+  if (tokenFromUrl) {
+    return <VerifyEmailFromToken token={tokenFromUrl} />;
+  }
 
   return (
     <AuthRecoveryLayout showFooterLink={false}>
