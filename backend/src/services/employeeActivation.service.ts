@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { prisma } from "../prisma.js";
+import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 /**
  * Generates a secure activation token for employee onboarding.
@@ -51,14 +52,27 @@ export async function createEmployeeActivationToken(
  */
 export async function validateActivationToken(
   token: string
-): Promise<{ employeeId: string; email: string; name: string } | null> {
+): Promise<
+  | {
+      employeeId: string;
+      email: string;
+      name: string;
+      businessName: string;
+      businessLogo: string | null;
+    }
+  | null
+> {
   const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
 
   const record = await prisma.employeeActivationToken.findUnique({
     where: { tokenHash },
     include: {
       employee: {
-        select: { id: true, name: true },
+        select: {
+          id: true,
+          name: true,
+          business: { select: { name: true, logoPath: true } },
+        },
       },
     },
   });
@@ -76,6 +90,8 @@ export async function validateActivationToken(
     employeeId: record.employee.id,
     email: record.email,
     name: record.employee.name,
+    businessName: record.employee.business?.name ?? "Business",
+    businessLogo: absolutizePublicMediaPath(record.employee.business?.logoPath ?? null),
   };
 }
 

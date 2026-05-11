@@ -5,19 +5,30 @@ import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import { CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import { employeeDashboardNavItems, isEmployeeDashboardNavActive } from "./employeeDashboardNav";
 
 type EmployeeMobileSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
+  businessBranding?: {
+    businessLogo: string | null;
+    businessName: string;
+  } | null;
 };
 
-export function EmployeeMobileSidebar({ isOpen, onClose }: EmployeeMobileSidebarProps) {
+export function EmployeeMobileSidebar({
+  isOpen,
+  onClose,
+  businessBranding,
+}: EmployeeMobileSidebarProps) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const venueName = String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
   return (
     <AnimatePresence>
@@ -39,11 +50,15 @@ export function EmployeeMobileSidebar({ isOpen, onClose }: EmployeeMobileSidebar
             className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:hidden"
           >
             <div className={cn("flex items-center justify-between px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
-              <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
-                <div className="min-w-0">
-                  <CareTipLogo size="sm" />
-                </div>
-                <span className="text-xs font-semibold text-sidebar-foreground">Employee</span>
+              <div className="flex min-w-0 flex-1 items-center gap-2 pr-2">
+                <BusinessLogoMark
+                  logoPathOrUrl={businessBranding?.businessLogo ?? null}
+                  businessName={venueName}
+                  size="sm"
+                  rounded="rounded-lg"
+                  className="shrink-0"
+                />
+                <span className="min-w-0 truncate text-xs font-semibold text-sidebar-foreground">{venueName}</span>
               </div>
               <button
                 type="button"

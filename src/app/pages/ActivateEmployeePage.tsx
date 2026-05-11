@@ -1,17 +1,20 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
 import { motion } from "motion/react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
-import { activateEmployeeWithToken } from "@/app/lib/api";
+import { BusinessLogoMark } from "@/app/components/business/BusinessLogoMark";
+import { activateEmployeeWithToken, getActivateEmployeeBranding } from "@/app/lib/api";
 import { isPasswordStrong } from "@/app/lib/passwordValidation";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
+import { useTranslation } from "react-i18next";
 
 const FIELD =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 pr-11 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 export function ActivateEmployeePage() {
+  const { t } = useTranslation();
   const [sp] = useSearchParams();
   const navigate = useNavigate();
   const rawToken = sp.get("token")?.trim() ?? "";
@@ -23,6 +26,7 @@ export function ActivateEmployeePage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
+  const [branding, setBranding] = useState<{ businessName: string; businessLogo: string | null } | null>(null);
 
   const match = newPassword.length > 0 && newPassword === confirm;
   const strong = isPasswordStrong(newPassword);
@@ -49,6 +53,23 @@ export function ActivateEmployeePage() {
       setSubmitting(false);
     }
   };
+
+  useEffect(() => {
+    if (!rawToken) return;
+    let cancelled = false;
+    void getActivateEmployeeBranding(rawToken)
+      .then((p) => {
+        if (cancelled) return;
+        setBranding(p);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setBranding(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [rawToken]);
 
   if (!rawToken) {
     return (
@@ -85,6 +106,18 @@ export function ActivateEmployeePage() {
   return (
     <AuthRecoveryLayout>
       <div className="space-y-6">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <BusinessLogoMark
+            logoPathOrUrl={branding?.businessLogo ?? null}
+            businessName={branding?.businessName ?? t("dashboard.venueDashboardFallback")}
+            size="header"
+            rounded="rounded-2xl"
+            className="shadow-none"
+          />
+          <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+            {branding?.businessName ?? t("dashboard.venueDashboardFallback")}
+          </p>
+        </div>
         <div className="space-y-2 text-center">
           <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">Set your password</h1>
           <p className="text-sm text-neutral-600 dark:text-neutral-400">This link expires in 24 hours.</p>

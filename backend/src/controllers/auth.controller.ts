@@ -5,6 +5,7 @@ import * as authService from "../services/auth.service.js";
 import * as oauthAuthService from "../services/oauthAuth.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as passwordResetService from "../services/passwordReset.service.js";
+import * as employeeActivationService from "../services/employeeActivation.service.js";
 import { prisma } from "../prisma.js";
 import speakeasy from "speakeasy";
 import qrcode from "qrcode";
@@ -808,6 +809,29 @@ export async function activateEmployee(req: Request, res: Response) {
 
     return res.status(400).json({
       message: clientSafeMessage(err, "Activation failed. Please try again or contact support."),
+    });
+  }
+}
+
+/** Public preview for `/activate` so the invite/set-password screen can show venue branding. */
+export async function activateEmployeeBrandingPreview(req: Request, res: Response) {
+  try {
+    const token = typeof req.query?.token === "string" ? req.query.token.trim() : "";
+    if (!token) {
+      return res.status(400).json({ message: "Activation token is required" });
+    }
+    const preview = await employeeActivationService.validateActivationToken(token);
+    if (!preview) {
+      return res.status(400).json({ message: "Activation link is invalid or has expired." });
+    }
+    return res.json({
+      businessName: preview.businessName,
+      businessLogo: preview.businessLogo,
+    });
+  } catch (err) {
+    logServerError("auth.activateEmployeeBrandingPreview", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "Activation link is invalid or has expired."),
     });
   }
 }

@@ -346,14 +346,11 @@ export function AuthPage() {
   // Keep auth pages instant; hydration is synchronous in normal browsers.
   void authHydrated;
 
-  const showSessionGate = Boolean(user && (sessionChecking || !sessionValidated));
-  const sameLaneValidated = Boolean(
-    user && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role),
-  );
+  const showSessionGate = user != null && (sessionChecking || !sessionValidated);
+  const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);
   const showSignInForm =
-    !user || (Boolean(user) && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
-  const showCrossSessionHint =
-    Boolean(user) && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role);
+    !user || (user != null && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
+  const showCrossSessionHint = user != null && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role);
 
   const sessionRoleLabel =
     user?.role === 'platform_admin' || user?.role === 'admin'

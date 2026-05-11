@@ -5,14 +5,27 @@ import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import { CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import { employeeDashboardNavItems, isEmployeeDashboardNavActive } from "./employeeDashboardNav";
 
-export function EmployeeSidebar() {
+type EmployeeBusinessBranding = {
+  businessLogo: string | null;
+  businessName: string;
+};
+
+export function EmployeeSidebar({
+  businessBranding,
+}: {
+  businessBranding?: EmployeeBusinessBranding | null;
+}) {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+
+  const venueName =
+    String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
   return (
     <motion.aside
@@ -22,8 +35,17 @@ export function EmployeeSidebar() {
       className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-sidebar-border lg:bg-sidebar lg:text-sidebar-foreground"
     >
       <div className={cn("flex flex-col gap-3 px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
-        <div className="min-w-0">
-          <CareTipLogo size="sm" />
+        <div className="flex min-w-0 items-start gap-3">
+          <BusinessLogoMark
+            logoPathOrUrl={businessBranding?.businessLogo ?? null}
+            businessName={venueName}
+            size="md"
+            rounded="rounded-xl"
+            className="shrink-0"
+          />
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-semibold text-sidebar-foreground">{venueName}</p>
+          </div>
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-sidebar-foreground">

@@ -22,6 +22,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
@@ -48,6 +49,8 @@ export function EmployeeSettingsPage() {
   const [saving, setSaving] = useState(false);
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
+  const [businessName, setBusinessName] = useState<string>("");
+  const [businessLogo, setBusinessLogo] = useState<string | null>(null);
   const [monthlyGoal, setMonthlyGoal] = useState("");
   const [emailNotif, setEmailNotif] = useState(true);
   const [pushNotif, setPushNotif] = useState(true);
@@ -67,6 +70,8 @@ export function EmployeeSettingsPage() {
         if (cancelled) return;
         setName(p.name);
         setBio(p.bio ?? "");
+        setBusinessName(p.businessName ?? "");
+        setBusinessLogo(p.businessLogo ?? null);
         setMonthlyGoal(p.monthlyGoal != null ? String(p.monthlyGoal) : "");
         setEmailNotif(p.emailNotifications);
         setPushNotif(p.pushNotifications);
@@ -187,6 +192,13 @@ export function EmployeeSettingsPage() {
           <Link to="/employee/dashboard" className="p-2 rounded-lg hover:bg-muted transition-colors">
             <ChevronLeft className="w-5 h-5" />
           </Link>
+          <BusinessLogoMark
+            logoPathOrUrl={businessLogo}
+            businessName={businessName || t("dashboard.venueDashboardFallback")}
+            size="sm"
+            rounded="rounded-lg"
+            className="shadow-none"
+          />
           <h2 className="text-xl font-semibold text-foreground">{t("employee.settings.title")}</h2>
         </div>
 

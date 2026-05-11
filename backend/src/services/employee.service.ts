@@ -587,6 +587,10 @@ export interface EmployeeSelfProfile {
   businessId: string;
   /** Public `Business.slug` for `/{businessSlug}/{employeeSlug}` URLs. */
   businessSlug: string | null;
+  /** Public `Business.logoPath` for employee branding (logo URL resolved for the frontend). */
+  businessLogo: string | null;
+  /** Display name of the business (venue). */
+  businessName: string;
   /** Business IANA timezone for analytics reporting. */
   businessTimezone?: string;
   /** Public staff page / QR URL segment (Postgres `slug`) */
@@ -606,7 +610,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     pushNotifications: true,
     businessId: true,
     slug: true,
-    business: { select: { slug: true, timezone: true } },
+    business: { select: { slug: true, timezone: true, name: true, logoPath: true } },
     user: userEmail,
   } as const;
   try {
@@ -628,6 +632,8 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       pushNotifications: emp.pushNotifications,
       businessId: emp.businessId,
       businessSlug: emp.business.slug ?? null,
+      businessLogo: absolutizePublicMediaPath(emp.business.logoPath ?? null),
+      businessName: emp.business.name ?? "",
       businessTimezone: (emp.business as any).timezone ?? undefined,
       slug: emp.slug ?? null,
     };
@@ -642,7 +648,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
           avatar: true,
           businessId: true,
           slug: true,
-          business: { select: { slug: true, timezone: true } },
+          business: { select: { slug: true, timezone: true, name: true, logoPath: true } },
           user: userEmail,
         },
       });
@@ -660,6 +666,8 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         pushNotifications: true,
         businessId: emp.businessId,
         businessSlug: emp.business.slug ?? null,
+        businessLogo: absolutizePublicMediaPath(emp.business.logoPath ?? null),
+        businessName: emp.business.name ?? "",
         businessTimezone: (emp.business as any).timezone ?? undefined,
         slug: emp.slug ?? null,
       };

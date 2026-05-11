@@ -523,6 +523,17 @@ export async function activateEmployeeWithToken(
   });
 }
 
+export async function getActivateEmployeeBranding(
+  token: string
+): Promise<{ businessName: string; businessLogo: string | null }> {
+  const t = String(token ?? "").trim();
+  if (!t) throw new Error("Activation token is required");
+  return apiRequest<{ businessName: string; businessLogo: string | null }>(
+    apiPath(`/api/auth/activate-employee-branding?token=${encodeURIComponent(t)}`),
+    { method: "GET" }
+  );
+}
+
 /** Deduplicate in-flight verification for the same token (React StrictMode / effect retries / double navigation). */
 const verifyEmailInFlight = new Map<string, Promise<{ ok: true; message: string }>>();
 
@@ -1247,6 +1258,10 @@ export interface EmployeeSelfProfile {
   businessId: string;
   /** Public `Business.slug` for `/{businessSlug}/{employeeSlug}` URLs */
   businessSlug: string | null;
+  /** Public URL for venue branding. */
+  businessLogo: string | null;
+  /** Venue display name. */
+  businessName: string;
   /** Public /staff/[slug] segment */
   slug: string | null;
   /** Business IANA timezone for analytics reporting. */

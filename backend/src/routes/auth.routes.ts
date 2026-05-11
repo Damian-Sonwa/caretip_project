@@ -26,6 +26,10 @@ router.post(
 );
 router.post("/oauth", authLoginLimiter, authController.oauth);
 router.post("/activate-employee", authLoginLimiter, authController.activateEmployee);
+router.get(
+  "/activate-employee-branding",
+  authController.activateEmployeeBrandingPreview
+);
 router.post("/refresh", authController.refresh);
 router.post("/logout", authController.logout);
 router.get("/verify-email", authController.verifyEmail);
