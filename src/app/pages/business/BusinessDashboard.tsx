@@ -445,7 +445,7 @@ export function BusinessDashboard() {
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
                     // Mobile: flex-center so `object-contain` art sits optically centered (no horizontal bleed).
-                    "max-lg:flex max-lg:min-h-[272px] max-lg:max-h-[min(52vh,320px)] max-lg:items-center max-lg:justify-center",
+                    "max-lg:flex max-lg:min-h-[320px] max-lg:max-h-[min(58vh,420px)] max-lg:items-center max-lg:justify-center",
                     "rounded-[2.5rem] border border-black/[0.06] shadow-xl",
                     "lg:block lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:border-gray-100 lg:shadow-xl",
                   )}
@@ -455,7 +455,7 @@ export function BusinessDashboard() {
                     alt=""
                     className={cn(
                       "object-contain object-center",
-                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-3rem))] max-lg:px-3 max-lg:py-3",
+                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-2rem))] max-lg:px-2 max-lg:py-2",
                       "lg:h-full lg:w-full lg:px-4 lg:py-4",
                     )}
                     loading="eager"
