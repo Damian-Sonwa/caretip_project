@@ -183,6 +183,25 @@ const ERROR_MAP: Record<string, string> = {
   "NetworkError": "Unable to connect to the server. Check your connection and try again.",
   "Load failed": "Unable to connect to the server. Check your connection and try again.",
   "Aborted": "The request was cancelled. Please try again.",
+
+  // Storage / uploads (server sends these exact strings)
+  "We couldn't save your file. Please try again.": "We couldn't save your file. Please try again.",
+  "We couldn't confirm the upload. Please try again.": "We couldn't confirm the upload. Please try again.",
+  "We couldn't complete the upload. Please try again.": "We couldn't complete the upload. Please try again.",
+  "File upload isn't available right now. Please try again later.":
+    "File upload isn't available right now. Please try again later.",
+  "This feature is temporarily unavailable. Please try again in a few minutes.":
+    "This feature is temporarily unavailable. Please try again in a few minutes.",
+  "We couldn't verify payment setup. Please try again.":
+    "We couldn't verify payment setup. Please try again.",
+  "We couldn't upload your logo. Please try again.": "We couldn't upload your logo. Please try again.",
+  "We couldn't save your logo. Please try again.": "We couldn't save your logo. Please try again.",
+  "We couldn't save your verification file. Please try again.":
+    "We couldn't save your verification file. Please try again.",
+  "Logo upload timed out. Try again with a smaller image.":
+    "Logo upload timed out. Try again with a smaller image.",
+  "The service is temporarily unavailable. Please try again later.":
+    "The service is temporarily unavailable. Please try again later.",
 };
 
 const EMPLOYEE_QR_BUSINESS_KYC_HINT =
@@ -261,6 +280,22 @@ export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMe
 
     const mapped = ERROR_MAP[normalized];
     if (mapped) return mapped;
+
+    if (
+      /\bprismaclient\w*/i.test(normalized) ||
+      /\bjwt\b/i.test(lower) ||
+      lower.includes("jsonwebtoken") ||
+      lower.includes("unauthorizedexception") ||
+      lower.includes("stack trace") ||
+      lower.includes("supabase") ||
+      (lower.includes("stripe") && lower.includes("invalid")) ||
+      lower.includes("internal server error") ||
+      lower.includes("econnrefused") ||
+      lower.includes("enetunreach") ||
+      (lower.includes("at ") && /\.(ts|js|tsx|jsx):\d+/i.test(normalized))
+    ) {
+      return GENERIC_UNKNOWN_ERROR;
+    }
 
     if (Object.values(ERROR_MAP).includes(normalized)) {
       return normalized;

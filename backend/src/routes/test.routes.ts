@@ -21,11 +21,19 @@ router.get("/db", async (_req, res) => {
   } catch (err) {
     const code =
       err && typeof err === "object" && "code" in err ? String((err as { code?: string }).code) : undefined;
+    const isDev = process.env.NODE_ENV !== "production";
     return res.status(503).json({
       ok: false,
       database: "unreachable",
-      prismaCode: code,
-      message: err instanceof Error ? err.message : String(err),
+      message: "The service is temporarily unavailable. Please try again later.",
+      ...(isDev
+        ? {
+            debug: {
+              prismaCode: code,
+              detail: err instanceof Error ? err.message : String(err),
+            },
+          }
+        : {}),
     });
   }
 });

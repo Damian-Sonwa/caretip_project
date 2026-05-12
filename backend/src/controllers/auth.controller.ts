@@ -233,7 +233,8 @@ export async function login(req: Request, res: Response) {
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
       return res.status(403).json({
-        message: err.message,
+        message:
+          "Your email is not verified. Please check your inbox and verify your account before logging in.",
         code: err.code,
         canResend: err.canResend,
       });
@@ -255,7 +256,7 @@ export async function login(req: Request, res: Response) {
     if (message === "JWT_SECRET not configured") {
       logServerError("auth.login", err);
       return res.status(500).json({
-        message: "Server configuration error (JWT). Contact support or check backend environment.",
+        message: CLIENT_FALLBACK.loginUnexpected,
       });
     }
 
@@ -512,7 +513,8 @@ export async function oauth(req: Request, res: Response) {
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
       return res.status(403).json({
-        message: err.message,
+        message:
+          "Your email is not verified. Please check your inbox and verify your account before logging in.",
         code: err.code,
         canResend: err.canResend,
       });
@@ -520,7 +522,7 @@ export async function oauth(req: Request, res: Response) {
     const message = err instanceof Error ? err.message : "OAuth sign-in failed";
     if (message.includes("not configured") || message.includes("GOOGLE_CLIENT_ID")) {
       logServerError("auth.oauth", err);
-      return res.status(503).json({ message });
+      return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
     }
     if (
       message === "No account found for this email. Create an account first." ||

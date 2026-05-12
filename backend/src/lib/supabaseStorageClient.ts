@@ -37,9 +37,7 @@ export function supabaseStorageBucketName(): string {
 
 function getServiceClient(): SupabaseClient {
   if (!isSupabaseStorageConfigured()) {
-    throw new Error(
-      "Supabase Storage is not configured (set SUPABASE_SERVICE_ROLE_KEY and SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL).",
-    );
+    throw new Error("File upload isn't available right now. Please try again later.");
   }
   if (!_client) {
     _client = createClient(supabaseProjectUrl()!, supabaseServiceRoleKey()!, {
@@ -67,11 +65,11 @@ export async function uploadBufferToSupabasePublicUrl(
     cacheControl: "3600",
   });
   if (error) {
-    throw new Error(error.message || "Supabase storage upload failed.");
+    throw new Error("We couldn't save your file. Please try again.");
   }
   const { data } = supabase.storage.from(bucket).getPublicUrl(key);
   if (!data?.publicUrl) {
-    throw new Error("Supabase storage returned no public URL (check bucket visibility).");
+    throw new Error("We couldn't save your file. Please try again.");
   }
   return data.publicUrl;
 }
@@ -98,18 +96,16 @@ export function parseSupabasePublicStorageUrl(
  */
 export async function assertUploadedObjectReadableInBucket(publicUrl: string): Promise<void> {
   if (!isSupabaseStorageConfigured()) {
-    throw new Error("Supabase Storage is not configured; cannot verify upload.");
+    throw new Error("File upload isn't available right now. Please try again later.");
   }
   const parsed = parseSupabasePublicStorageUrl(publicUrl);
   if (!parsed) {
-    throw new Error("Storage returned a URL that is not a Supabase public object URL.");
+    throw new Error("We couldn't complete the upload. Please try again.");
   }
   const supabase = getServiceClient();
   const { error } = await supabase.storage.from(parsed.bucket).download(parsed.objectPath);
   if (error) {
-    throw new Error(
-      `Uploaded object is missing or not readable in bucket "${parsed.bucket}". Check bucket policies and public access. ${error.message}`,
-    );
+    throw new Error("We couldn't confirm the upload. Please try again.");
   }
 }
 

@@ -96,8 +96,9 @@ export async function getByEmployee(req: Request, res: Response) {
     });
   } catch (err) {
     logServerError("tips.getByEmployee", err);
-    const message = err instanceof Error ? err.message : "Failed to fetch tips";
-    return res.status(400).json({ message });
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.tips),
+    });
   }
 }
 

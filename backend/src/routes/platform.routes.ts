@@ -7,6 +7,7 @@ import {
   platformUploadVerification,
 } from "../middleware/platformUpload.middleware.js";
 import * as platformController from "../controllers/platform.controller.js";
+import { clientSafeMessage } from "../utils/httpErrors.js";
 
 const router = Router();
 
@@ -18,8 +19,9 @@ function multerHandler(
   return (req: Request, res: Response, next: NextFunction) => {
     mw(req, res, (err: unknown) => {
       if (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed";
-        return res.status(400).json({ message: msg });
+        return res.status(400).json({
+          message: clientSafeMessage(err, "We couldn't complete the upload. Please try again."),
+        });
       }
       next();
     });

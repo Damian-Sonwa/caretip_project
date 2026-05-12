@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import type { ElementType } from "react";
+import type { ElementType, ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -39,7 +39,7 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import staffHeroImage from "../../../../images/for_staff.png";
+import employeeHeroImage from "../../../../images/on_employee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -373,6 +373,7 @@ export function EmployeeDashboard() {
           hideTabs
           actionsPlacement="belowText"
           mobileAlign="center"
+          className="mb-8 lg:mb-6"
           badge={
             <>
               <Sparkles className="h-3.5 w-3.5 text-foreground" />
@@ -387,20 +388,18 @@ export function EmployeeDashboard() {
             <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
               <div
                 className={cn(
-                  "relative mx-auto block w-fit max-w-[min(100%,calc(100vw-2rem))] overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
+                  "relative mx-auto w-full max-w-[min(100%,calc(100vw-2rem))] min-h-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
                   "rounded-[2.5rem] border border-black/[0.06] shadow-xl lg:max-w-[520px]",
+                  "h-[min(58svh,420px)] lg:h-[460px]",
                 )}
               >
                 <img
-                  src={staffHeroImage}
+                  src={employeeHeroImage}
                   alt=""
-                  className={cn(
-                    "block h-auto w-auto max-w-full object-contain object-center",
-                    "max-lg:max-w-[min(100%,calc(100vw-3rem))]",
-                    "max-lg:max-h-[min(48vh,280px)] lg:max-h-[min(75vh,360px)]",
-                  )}
-                  draggable={false}
+                  className="block !h-full w-full object-cover object-center"
                   loading="eager"
+                  decoding="async"
+                  {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
                 />
               </div>
             </div>

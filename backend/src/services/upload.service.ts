@@ -14,8 +14,7 @@ import {
 } from "../lib/supabaseStorageClient.js";
 import { buildUniqueStorageObjectName } from "../utils/storageObjectName.js";
 
-const UPLOAD_CONFIG_ERROR =
-  "Photo upload is not configured on this server. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for Supabase Storage, or PUBLIC_API_BASE_URL with a persistent disk for local uploads.";
+const UPLOAD_CONFIG_ERROR = "File upload isn't available right now. Please try again later.";
 
 const REMOTE_UPLOAD_TIMEOUT_MS = 90_000;
 
@@ -190,9 +189,7 @@ export async function uploadManagerBusinessLogoImage(
       if (/timed out/i.test(msg)) {
         throw new Error("Logo upload timed out. Try again with a smaller image.");
       }
-      throw new Error(
-        "We couldn't store your logo in cloud storage. Check SUPABASE_SERVICE_ROLE_KEY, bucket name, and public read policies, then try again.",
-      );
+      throw new Error("We couldn't save your logo. Please try again.");
     }
   }
 
@@ -240,7 +237,7 @@ export async function uploadPlatformBusinessLogoImage(
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[upload] platform business logo (Supabase) failed:", msg);
-      throw new Error("We couldn't store the business logo. Check Supabase Storage configuration.");
+      throw new Error("We couldn't save your logo. Please try again.");
     }
   }
 
@@ -290,7 +287,7 @@ export async function uploadPlatformVerificationDocument(
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[upload] platform verification (Supabase) failed:", msg);
-      throw new Error("We couldn't store the verification document. Check Supabase Storage configuration.");
+      throw new Error("We couldn't save your verification file. Please try again.");
     }
   }
 

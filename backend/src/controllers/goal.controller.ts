@@ -5,6 +5,21 @@ import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/htt
 
 const PERIODS = new Set<string>(["daily", "weekly", "monthly"]);
 
+const GOAL_DOMAIN_MESSAGES = new Set([
+  "Employee not found",
+  "Goal amount must be a non-negative number",
+  "Invalid start date",
+  "Goal not found",
+]);
+
+/** Only messages thrown by goal.service — never forward arbitrary Error.message (may contain Prisma internals). */
+function goalDomainHttp(err: unknown): { status: number; message: string } | null {
+  const raw = err instanceof Error ? err.message : "";
+  if (!GOAL_DOMAIN_MESSAGES.has(raw)) return null;
+  if (raw === "Goal not found") return { status: 404, message: raw };
+  return { status: 400, message: raw };
+}
+
 function parseGoalId(req: Request): string | null {
   const raw = req.params?.goalId;
   const id = typeof raw === "string" ? raw.trim() : "";
@@ -49,10 +64,8 @@ export async function putMyGoal(req: Request, res: Response) {
     return res.json({ goal });
   } catch (err) {
     logServerError("goal.putMyGoal", err);
-    const msg = err instanceof Error ? err.message : "Failed to save goal";
-    if (msg.includes("Invalid") || msg.includes("not found")) {
-      return res.status(400).json({ message: msg });
-    }
+    const mapped = goalDomainHttp(err);
+    if (mapped) return res.status(mapped.status).json({ message: mapped.message });
     return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
   }
 }
@@ -110,8 +123,9 @@ export async function createMyGoal(req: Request, res: Response) {
     return res.status(201).json({ goal: row });
   } catch (err) {
     logServerError("goal.createMyGoal", err);
-    const msg = err instanceof Error ? err.message : "Failed to create goal";
-    return res.status(400).json({ message: msg });
+    const mapped = goalDomainHttp(err);
+    if (mapped) return res.status(mapped.status).json({ message: mapped.message });
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
   }
 }
 
@@ -145,9 +159,9 @@ export async function updateMyGoal(req: Request, res: Response) {
     return res.json({ goal: row });
   } catch (err) {
     logServerError("goal.updateMyGoal", err);
-    const msg = err instanceof Error ? err.message : "Failed to update goal";
-    const status = msg.includes("not found") ? 404 : 400;
-    return res.status(status).json({ message: msg });
+    const mapped = goalDomainHttp(err);
+    if (mapped) return res.status(mapped.status).json({ message: mapped.message });
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
   }
 }
 
@@ -161,9 +175,9 @@ export async function archiveMyGoal(req: Request, res: Response) {
     return res.json({ goal: row });
   } catch (err) {
     logServerError("goal.archiveMyGoal", err);
-    const msg = err instanceof Error ? err.message : "Failed to archive goal";
-    const status = msg.includes("not found") ? 404 : 400;
-    return res.status(status).json({ message: msg });
+    const mapped = goalDomainHttp(err);
+    if (mapped) return res.status(mapped.status).json({ message: mapped.message });
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
   }
 }
 
@@ -177,8 +191,8 @@ export async function deleteMyGoalById(req: Request, res: Response) {
     return res.status(204).send();
   } catch (err) {
     logServerError("goal.deleteMyGoalById", err);
-    const msg = err instanceof Error ? err.message : "Failed to delete goal";
-    const status = msg.includes("not found") ? 404 : 400;
-    return res.status(status).json({ message: msg });
+    const mapped = goalDomainHttp(err);
+    if (mapped) return res.status(mapped.status).json({ message: mapped.message });
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
   }
 }

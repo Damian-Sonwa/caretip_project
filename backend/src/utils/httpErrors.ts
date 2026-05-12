@@ -20,10 +20,17 @@ const ALLOWED_CLIENT_MESSAGES = new Set<string>([
   "Photo upload timed out. Please try again with a smaller image.",
   "Photo storage is not available. Please try again later.",
   "We couldn't upload your photo. Please try a JPEG or PNG under 5 MB.",
+  "We couldn't save your file. Please try again.",
+  "We couldn't confirm the upload. Please try again.",
+  "We couldn't complete the upload. Please try again.",
+  "File upload isn't available right now. Please try again later.",
+  "This feature is temporarily unavailable. Please try again in a few minutes.",
+  "Logo upload timed out. Try again with a smaller image.",
+  "We couldn't save your logo. Please try again.",
+  "We couldn't save your verification file. Please try again.",
   "Supabase storage returned no public URL (check bucket visibility).",
   "Unexpected upload field. Use the correct file field name.",
   "Logo must be an image (e.g. PNG, JPEG, WebP).",
-  "Photo upload is not configured on this server. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for Supabase Storage, or PUBLIC_API_BASE_URL with a persistent disk for local uploads.",
   "businessId is required",
   "Employee ID is required",
   "amount, employeeId, and businessId are required",
@@ -48,6 +55,9 @@ const ALLOWED_CLIENT_MESSAGES = new Set<string>([
   "Profile not found",
   "Staff member not found",
   "Employee not found",
+  "Goal not found",
+  "Goal amount must be a non-negative number",
+  "Invalid start date",
   "Only business owners can add employees",
   "Only business owners can update employees",
   "Only business owners can remove employees",
@@ -124,13 +134,39 @@ function prismaClientMessage(err: unknown): string | null {
     if (err.code === "P2014") {
       return "This action couldn't be completed due to related records.";
     }
-    if (err.code === "P2022") {
-      return "The database is missing required columns. From the backend folder, run: npm run db:migrate:deploy";
-    }
-    if (err.code === "P2021") {
-      return "A required table is missing (often the staff–table join `_EmployeeTableAssignments`). Run: npm run db:migrate:deploy in backend.";
+    if (err.code === "P2022" || err.code === "P2021") {
+      // Schema drift / incomplete deploy — never expose CLI or table names to guests.
+      return "This feature is temporarily unavailable. Please try again in a few minutes.";
     }
     return null;
+  }
+  return null;
+}
+
+/** Maps known internal/service errors to calm, user-safe copy (never env names, buckets, or stack text). */
+function scrubKnownInternalMessage(raw: string): string | null {
+  const msg = raw.trim();
+  if (!msg) return null;
+  if (msg.startsWith("Photo storage is not configured on this server.")) {
+    return "Photo upload isn't available on this server right now. Please try again later.";
+  }
+  if (msg.startsWith("Photo upload is not configured on this server.")) {
+    return "File upload isn't available right now. Please try again later.";
+  }
+  if (msg.startsWith("Supabase Storage is not configured")) {
+    return "File upload isn't available right now. Please try again later.";
+  }
+  if (msg.includes("Supabase storage returned no public URL")) {
+    return "We couldn't save your file. Please try again.";
+  }
+  if (msg.startsWith("Uploaded object is missing or not readable")) {
+    return "We couldn't confirm the upload. Please try again.";
+  }
+  if (msg.startsWith("Storage returned a URL that is not a Supabase public object URL.")) {
+    return "We couldn't complete the upload. Please try again.";
+  }
+  if (msg.startsWith("Supabase storage upload failed") || msg.toLowerCase().includes("bucket")) {
+    return "We couldn't save your file. Please try again.";
   }
   return null;
 }
@@ -144,22 +180,24 @@ export function clientSafeMessage(err: unknown, fallback: string): string {
   if (prismaMsg) return prismaMsg;
 
   if (err instanceof Prisma.PrismaClientValidationError) {
-    return "Invalid data. Check location and table assignments, or run backend migrations (npm run db:migrate:deploy).";
+    return fallback;
   }
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    return `Could not save (${err.code}). Try again or run migrations in the backend.`;
+    return fallback;
   }
   if (err instanceof Prisma.PrismaClientUnknownRequestError) {
-    return "Database error. Confirm migrations are applied (npm run db:migrate:deploy in backend).";
+    return fallback;
   }
   if (err instanceof Prisma.PrismaClientInitializationError) {
-    return "Database connection failed. Check DATABASE_URL and that PostgreSQL is reachable.";
+    return fallback;
   }
   if (err instanceof Prisma.PrismaClientRustPanicError) {
     return fallback;
   }
 
   const msg = err instanceof Error ? err.message : "";
+  const scrubbed = scrubKnownInternalMessage(msg);
+  if (scrubbed) return scrubbed;
   if (msg && ALLOWED_CLIENT_MESSAGES.has(msg)) {
     return msg;
   }

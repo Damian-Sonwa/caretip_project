@@ -28,7 +28,7 @@ export async function getHealth(_req: Request, res: Response) {
   } catch (err) {
     logServerError("platform.getHealth", err);
     return res.status(503).json({
-      message: clientSafeMessage(err, "We couldn't check database or payment status. Try again."),
+      message: clientSafeMessage(err, "We couldn't verify payment setup. Please try again."),
     });
   }
 }

@@ -206,6 +206,27 @@ export const FRIENDLY_MESSAGE_DE: Record<string, string> = {
     "Ihr Passwort muss mindestens 8 Zeichen lang sein.",
   "Your session has expired. Please sign in again.":
     "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+  "We couldn't save your file. Please try again.": "Die Datei konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+  "We couldn't confirm the upload. Please try again.":
+    "Der Upload konnte nicht bestätigt werden. Bitte versuchen Sie es erneut.",
+  "We couldn't complete the upload. Please try again.":
+    "Der Upload konnte nicht abgeschlossen werden. Bitte versuchen Sie es erneut.",
+  "File upload isn't available right now. Please try again later.":
+    "Datei-Upload ist gerade nicht verfügbar. Bitte versuchen Sie es später erneut.",
+  "This feature is temporarily unavailable. Please try again in a few minutes.":
+    "Diese Funktion ist vorübergehend nicht verfügbar. Bitte versuchen Sie es in einigen Minuten erneut.",
+  "We couldn't verify payment setup. Please try again.":
+    "Die Zahlungskonfiguration konnte nicht geprüft werden. Bitte versuchen Sie es erneut.",
+  "We couldn't upload your logo. Please try again.":
+    "Ihr Logo konnte nicht hochgeladen werden. Bitte versuchen Sie es erneut.",
+  "We couldn't save your logo. Please try again.":
+    "Ihr Logo konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+  "We couldn't save your verification file. Please try again.":
+    "Ihre Verifikationsdatei konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.",
+  "Logo upload timed out. Try again with a smaller image.":
+    "Das Hochladen des Logos dauerte zu lange. Bitte versuchen Sie es mit einer kleineren Datei erneut.",
+  "The service is temporarily unavailable. Please try again later.":
+    "Der Dienst ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
 };
 
 export function translateFriendlyMessageToDe(english: string): string {

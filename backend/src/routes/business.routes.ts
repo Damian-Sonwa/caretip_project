@@ -4,6 +4,7 @@ import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware
 import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
 import { businessUploadLogo } from "../middleware/businessUpload.middleware.js";
+import { clientSafeMessage } from "../utils/httpErrors.js";
 
 const router = Router();
 
@@ -34,8 +35,12 @@ router.post(
   (req, res, next) =>
     businessUploadLogo(req, res, (err: unknown) => {
       if (err) {
-        const msg = err instanceof Error ? err.message : "Upload failed";
-        return res.status(400).json({ message: msg });
+        return res.status(400).json({
+          message: clientSafeMessage(
+            err instanceof Error ? err : new Error(String(err)),
+            "We couldn't upload your logo. Please try again.",
+          ),
+        });
       }
       next();
     }),

@@ -279,7 +279,8 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   } catch (err) {
     logClientError("api.apiRequest", err, { url });
     const baseMsg = toUserFriendlyMessage(err);
-    throw new Error(baseMsg + apiConfigHintForFailedFetch(url));
+    const devHint = import.meta.env.DEV ? apiConfigHintForFailedFetch(url) : "";
+    throw new Error(baseMsg + devHint);
   }
 
   if (res.status === 401) {
