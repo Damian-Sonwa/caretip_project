@@ -385,27 +385,23 @@ export function EmployeeDashboard() {
           description={t("employee.hero.sub")}
           image={
             <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center justify-center lg:max-w-[520px]">
-                <div
+              <div
+                className={cn(
+                  "relative mx-auto block w-fit max-w-[min(100%,calc(100vw-2rem))] overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
+                  "rounded-[2.5rem] border border-black/[0.06] shadow-xl lg:max-w-[520px]",
+                )}
+              >
+                <img
+                  src={staffHeroImage}
+                  alt=""
                   className={cn(
-                    "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    "max-lg:flex max-lg:min-h-[280px] max-lg:max-h-[min(56vh,380px)] max-lg:items-center max-lg:justify-center",
-                    "rounded-[2.5rem] border border-black/[0.06] shadow-xl",
-                    "lg:block lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:border-gray-100 lg:shadow-xl",
+                    "block h-auto w-auto max-w-full object-contain object-center",
+                    "max-lg:max-w-[min(100%,calc(100vw-3rem))]",
+                    "max-lg:max-h-[min(48vh,280px)] lg:max-h-[min(75vh,360px)]",
                   )}
-                >
-                  <img
-                    src={staffHeroImage}
-                    alt=""
-                    className={cn(
-                      "object-contain object-center",
-                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-2rem))] max-lg:px-2 max-lg:py-2",
-                      "lg:h-full lg:w-full lg:px-4 lg:py-4",
-                    )}
-                    draggable={false}
-                    loading="eager"
-                  />
-                </div>
+                  draggable={false}
+                  loading="eager"
+                />
               </div>
             </div>
           }

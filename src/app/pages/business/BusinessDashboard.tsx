@@ -440,30 +440,22 @@ export function BusinessDashboard() {
           description={t("business.hero.sub")}
           image={
             <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center justify-center lg:max-w-[520px]">
-                <div
-                  className={cn(
-                    "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    // Mobile: flex-center so `object-contain` art sits optically centered (no horizontal bleed).
-                    "max-lg:flex max-lg:min-h-[320px] max-lg:max-h-[min(58vh,420px)] max-lg:items-center max-lg:justify-center",
-                    "rounded-[2.5rem] border border-black/[0.06] shadow-xl",
-                    "lg:block lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:border-gray-100 lg:shadow-xl",
-                  )}
-                >
-                  <img
-                    src={barChartHeroImage}
-                    alt=""
-                    className={cn(
-                      "object-contain object-center",
-                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-2rem))] max-lg:px-2 max-lg:py-2",
-                      "lg:h-full lg:w-full lg:px-4 lg:py-4",
-                    )}
-                    loading="eager"
-                    decoding="async"
-                    // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.
-                    {...({ fetchpriority: "high" } as unknown as React.ImgHTMLAttributes<HTMLImageElement>)}
-                  />
-                </div>
+              <div
+                className={cn(
+                  "relative mx-auto w-full max-w-[min(100%,calc(100vw-2rem))] min-h-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
+                  "rounded-[2.5rem] border border-black/[0.06] shadow-xl lg:max-w-[520px]",
+                  "h-[min(58vh,420px)] lg:h-[460px]",
+                )}
+              >
+                <img
+                  src={barChartHeroImage}
+                  alt=""
+                  className="block !h-full w-full object-cover object-center"
+                  loading="eager"
+                  decoding="async"
+                  // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.
+                  {...({ fetchpriority: "high" } as unknown as React.ImgHTMLAttributes<HTMLImageElement>)}
+                />
               </div>
             </div>
           }
