@@ -33,9 +33,13 @@ async function verifyGoogleIdToken(idToken: string): Promise<{
   sub: string;
   name: string;
 }> {
-  const clientId = process.env.GOOGLE_CLIENT_ID?.trim();
+  /** Same Web client ID as the SPA; prefer `GOOGLE_CLIENT_ID` on the server, fall back to `VITE_*` when root `.env` only defines the Vite name. */
+  const clientId =
+    process.env.GOOGLE_CLIENT_ID?.trim() || process.env.VITE_GOOGLE_CLIENT_ID?.trim();
   if (!clientId) {
-    throw new Error("Google sign-in is not configured on the server (GOOGLE_CLIENT_ID).");
+    throw new Error(
+      "Google sign-in is not configured on the server. Set GOOGLE_CLIENT_ID (or VITE_GOOGLE_CLIENT_ID) to your Google Web client ID.",
+    );
   }
   const client = new OAuth2Client(clientId);
   const ticket = await client.verifyIdToken({
