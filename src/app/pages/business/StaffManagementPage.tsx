@@ -798,7 +798,7 @@ export function StaffManagementPage() {
                       role="switch"
                       aria-checked={employee.isActive}
                       onClick={() => handleToggleActive(employee)}
-                      className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:scale-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                      className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         employee.isActive ? "bg-primary" : "bg-muted"
                       }`}
                     >
@@ -819,7 +819,7 @@ export function StaffManagementPage() {
                         className={[
                           "p-2 rounded-lg border border-transparent transition-all",
                           canUseQr && employee.isActive
-                            ? "hover:bg-muted hover:border-border active:scale-95"
+                            ? "hover:bg-muted hover:border-border active:opacity-90"
                             : "opacity-45 cursor-not-allowed",
                         ].join(" ")}
                         title={
@@ -835,7 +835,7 @@ export function StaffManagementPage() {
                       <button
                         type="button"
                         onClick={() => openEdit(employee)}
-                        className="p-2 rounded-lg border border-transparent hover:bg-muted hover:border-border active:scale-95 transition-all"
+                        className="p-2 rounded-lg border border-transparent hover:bg-muted hover:border-border active:opacity-90 transition-all"
                         title={t("business.staffPage.editTooltip")}
                       >
                         <Edit className="w-4 h-4 text-foreground" />
@@ -843,7 +843,7 @@ export function StaffManagementPage() {
                       <button
                         type="button"
                         onClick={() => openDelete(employee)}
-                        className="p-2 rounded-lg border border-transparent hover:bg-red-500/10 hover:border-red-500/30 active:scale-95 transition-all"
+                        className="p-2 rounded-lg border border-transparent hover:bg-red-500/10 hover:border-red-500/30 active:opacity-90 transition-all"
                         title={t("business.staffPage.removeStaffTitle")}
                       >
                         <Trash2 className="h-4 w-4 text-destructive" />
@@ -910,7 +910,7 @@ export function StaffManagementPage() {
                     role="switch"
                     aria-checked={employee.isActive}
                     onClick={() => handleToggleActive(employee)}
-                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:scale-95 ${
+                    className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:opacity-90 ${
                       employee.isActive ? "bg-primary" : "bg-muted"
                     }`}
                   >
@@ -953,7 +953,7 @@ export function StaffManagementPage() {
                   className={[
                     "flex items-center justify-center gap-2 rounded-lg border-2 border-border px-4 py-2 text-sm font-medium transition-all",
                     canUseQr && employee.isActive
-                      ? "bg-primary/10 text-foreground hover:bg-primary/20 active:scale-[0.98]"
+                      ? "bg-primary/10 text-foreground hover:bg-primary/20 active:opacity-90"
                       : "bg-muted/40 text-muted-foreground cursor-not-allowed opacity-60",
                   ].join(" ")}
                   title={
@@ -970,7 +970,7 @@ export function StaffManagementPage() {
                 <button
                   type="button"
                   onClick={() => openEdit(employee)}
-                  className="px-4 py-2 border border-border rounded-lg hover:bg-muted active:scale-[0.98] transition-all text-sm font-medium flex items-center justify-center gap-2"
+                  className="px-4 py-2 border border-border rounded-lg hover:bg-muted active:opacity-90 transition-all text-sm font-medium flex items-center justify-center gap-2"
                 >
                   <Edit className="w-4 h-4" />
                   {t("business.staffPage.editButton")}
@@ -978,7 +978,7 @@ export function StaffManagementPage() {
                 <button
                   type="button"
                   onClick={() => openDelete(employee)}
-                  className="col-span-2 flex items-center justify-center gap-2 rounded-lg border-2 border-destructive px-4 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10 active:scale-[0.98]"
+                  className="col-span-2 flex items-center justify-center gap-2 rounded-lg border-2 border-destructive px-4 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10 active:opacity-90"
                 >
                   <Trash2 className="h-4 w-4" />
                   Remove staff

@@ -19,7 +19,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
   const isInline = variant === "inline";
 
   const triggerBase =
-    "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold tracking-tight transition-all outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:scale-[0.98] sm:min-h-9 sm:px-3.5";
+    "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold tracking-tight transition-[colors,opacity,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:opacity-90 sm:min-h-9 sm:px-3.5";
 
   const triggerStyles = isInline
     ? "border-white/25 bg-white/10 text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] hover:border-white/35 hover:bg-white/[0.14] focus-visible:ring-white/40 focus-visible:ring-offset-neutral-950"

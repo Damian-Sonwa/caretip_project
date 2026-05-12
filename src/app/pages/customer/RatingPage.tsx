@@ -231,7 +231,7 @@ export function RatingPage() {
               <button
                 key={star}
                 onClick={() => setRating(star)}
-                className="p-1 transition-transform hover:scale-110"
+                className="p-1 transition-opacity hover:opacity-80"
                 type="button"
                 aria-label={t("tipFlow.rating.starAria", { n: star })}
               >

@@ -68,7 +68,7 @@ function VerifyEmailFromToken({ token }: { token: string }) {
           <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.checkEmail.emailVerifiedBody")}</p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
           >
             {t("auth.checkEmail.continueToSignIn")}
           </Link>
@@ -202,7 +202,7 @@ export function CheckEmailPage() {
             <button
               type="button"
               onClick={openInbox}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+              className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
             >
               <Mail className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               {t("auth.checkEmail.openMyEmail")}
@@ -303,7 +303,7 @@ export function CheckEmailPage() {
             onClick={() => {
               void handleContinueAfterVerify();
             }}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
           >
             {t("auth.checkEmail.continue")}
           </button>

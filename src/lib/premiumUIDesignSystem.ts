@@ -73,7 +73,7 @@ export const ICON_CONTAINER_DARK =
 
 /** CTA Button base - premium with hover effects */
 export const CTA_BUTTON_PREMIUM =
-  "inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-all duration-200 hover:bg-primary/90 hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:scale-95";
+  "inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-[box-shadow,colors,opacity] duration-200 hover:bg-primary/90 hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:opacity-90";
 
 /** Badge - premium styled with subtle gradient */
 export const BADGE_PREMIUM =
@@ -111,7 +111,7 @@ export const PREMIUM_HERO_SECTION = {
 
 export const _3D_STYLES = {
   /** Floating effect (hover) */
-  floating: "transition-transform duration-300 hover:translate-y-[-4px]",
+  floating: "transition-[box-shadow,colors] duration-300 hover:shadow-md",
   
   /** Perspective effect */
   perspective: "perspective-1000",

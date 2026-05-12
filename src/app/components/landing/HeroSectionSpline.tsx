@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { BackgroundCircles } from "../ui/background-circles";
@@ -25,22 +24,17 @@ export function HeroSectionSpline() {
       >
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Link to="/auth">
-            <motion.span
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="inline-flex items-center gap-2 rounded-xl bg-accent px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-accent/90"
-            >
+            <span className="inline-flex touch-manipulation items-center gap-2 rounded-xl bg-accent px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-[colors,opacity,box-shadow] hover:bg-accent/90 active:opacity-90">
               Get Started Free
               <ArrowRight className="h-5 w-5" />
-            </motion.span>
+            </span>
           </Link>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="rounded-xl border border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/20"
+          <button
+            type="button"
+            className="touch-manipulation rounded-xl border border-white/30 bg-white/10 px-8 py-4 font-semibold text-white backdrop-blur-sm transition-[colors,opacity,box-shadow] hover:bg-white/20 active:opacity-90"
           >
             Watch Demo
-          </motion.button>
+          </button>
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-6 text-sm text-white/70">
           <span className="flex items-center gap-2">

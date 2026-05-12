@@ -637,7 +637,7 @@ export function QRLandingPage() {
                       markCustomerFlowEntered();
                       navigate("/payment");
                     }}
-                    className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
+                    className="w-full rounded-2xl bg-primary py-3.5 text-base font-bold text-white shadow-lg transition-[colors,opacity,box-shadow] hover:bg-primary/90 hover:shadow-xl active:opacity-90"
                   >
                     {t("tipFlow.qrLanding.tipAgain")}
                   </button>
@@ -759,7 +759,7 @@ export function QRLandingPage() {
                         <button
                           type="button"
                           onClick={() => pickEmployeeFromPool(emp)}
-                          className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card/60 p-4 text-center transition-all hover:border-primary/40 hover:shadow-lg hover:bg-card active:scale-95"
+                          className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card/60 p-4 text-center transition-[colors,opacity,box-shadow,border-color] hover:border-primary/40 hover:bg-card hover:shadow-lg active:opacity-90"
                         >
                           <ProfileAvatar
                             src={emp.avatar}
@@ -823,7 +823,7 @@ export function QRLandingPage() {
             <button
               type="button"
               onClick={goToSelectEmployee}
-              className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-all hover:bg-primary/90 hover:shadow-xl active:scale-95"
+              className="w-full rounded-2xl bg-primary py-4 text-lg font-bold text-white shadow-lg transition-[colors,opacity,box-shadow] hover:bg-primary/90 hover:shadow-xl active:opacity-90"
             >
               {businessData.slug?.trim()
                 ? t("tipFlow.qrLanding.browseAllTeam")

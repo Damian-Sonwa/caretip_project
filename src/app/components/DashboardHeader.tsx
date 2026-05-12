@@ -64,9 +64,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+          <button
             type="button"
             onClick={() => {
               if (user?.role === "employee") {
@@ -83,12 +81,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               }
               navigate("/faq");
             }}
-            className="relative p-2 rounded-lg hover:bg-muted transition-colors"
+            className="relative touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
             aria-label={t("shell.header.notificationsAria")}
           >
             <Bell className="w-5 h-5 text-foreground" />
             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
-          </motion.button>
+          </button>
 
           <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
             <div className="text-right">

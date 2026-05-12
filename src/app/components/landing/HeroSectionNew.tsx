@@ -35,14 +35,13 @@ export function HeroSectionNew() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20 flex items-center justify-center gap-2 text-sm sm:text-base"
+              <button
+                type="button"
+                className="flex touch-manipulation items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-[colors,opacity,box-shadow] hover:bg-white/20 active:opacity-90 sm:px-8 sm:py-4 sm:text-base"
               >
-                <Play className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Play className="h-4 w-4 sm:h-5 sm:w-5" />
                 Watch Demo
-              </motion.button>
+              </button>
             </div>
 
             {/* Trust Badge */}
@@ -89,14 +88,13 @@ export function HeroSectionNew() {
                 Empower your team to receive tips digitally. Increase earnings, 
                 delight guests, and modernize your hospitality business.
               </p>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="group px-6 sm:px-8 py-3 sm:py-4 bg-accent text-white rounded-xl font-semibold hover:bg-accent/90 transition-all hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] flex items-center gap-2"
+              <button
+                type="button"
+                className="group flex touch-manipulation items-center gap-2 rounded-xl bg-accent px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-[colors,opacity,box-shadow] hover:bg-accent/90 hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:opacity-90 sm:px-8 sm:py-4"
               >
                 Get Started Free
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
+                <ArrowRight className="h-5 w-5 transition-opacity group-hover:opacity-80" />
+              </button>
             </motion.div>
           </motion.div>
         </div>

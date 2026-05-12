@@ -433,16 +433,15 @@ export function ProfileSettingsPage() {
                 {/* Action Buttons */}
                 {isEditingProfile && (
                   <div className="flex flex-col sm:flex-row gap-3 mt-6 pt-6 border-t border-border">
-                    <motion.button
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
+                    <button
+                      type="button"
                       disabled={savingProfile}
                       onClick={handleSaveProfile}
-                      className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
+                      className="flex touch-manipulation items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/20 transition-[colors,opacity,box-shadow] hover:bg-accent/90 active:opacity-90 disabled:opacity-50"
                     >
                       <Save className="w-4 h-4" />
                       {t("business.accountSettings.saveProfile")}
-                    </motion.button>
+                    </button>
                     <button
                       disabled={savingProfile}
                       onClick={handleCancelProfile}
@@ -598,16 +597,15 @@ export function ProfileSettingsPage() {
 
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
+                      <button
+                        type="button"
                         disabled={savingPassword}
                         onClick={handleSavePassword}
-                        className="flex items-center justify-center gap-2 px-6 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium shadow-lg shadow-accent/20 transition-all"
+                        className="flex touch-manipulation items-center justify-center gap-2 rounded-lg bg-accent px-6 py-3 font-medium text-white shadow-lg shadow-accent/20 transition-[colors,opacity,box-shadow] hover:bg-accent/90 active:opacity-90 disabled:opacity-50"
                       >
                         <Save className="w-4 h-4" />
                         {t("business.accountSettings.updatePassword")}
-                      </motion.button>
+                      </button>
                       <button
                         disabled={savingPassword}
                         onClick={handleCancelPassword}

@@ -82,22 +82,20 @@ export function HeroSection() {
 
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="group px-6 sm:px-8 py-3 sm:py-4 bg-white text-neutral-900 rounded-2xl font-semibold hover:bg-white/90 transition-all hover:shadow-2xl flex items-center justify-center gap-2 text-sm sm:text-base"
+              <button
+                type="button"
+                className="group flex touch-manipulation items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-semibold text-neutral-900 transition-[colors,opacity,box-shadow] hover:bg-white/90 hover:shadow-2xl active:opacity-90 sm:px-8 sm:py-4 sm:text-base"
               >
                 Get Started
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
-              </motion.button>
-              <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="px-6 sm:px-8 py-3 sm:py-4 bg-white/10 text-white rounded-2xl font-semibold hover:bg-white/20 transition-all backdrop-blur-sm border border-white/20 flex items-center justify-center gap-2 text-sm sm:text-base"
+                <ArrowRight className="w-4 h-4 transition-opacity group-hover:opacity-80 sm:h-5 sm:w-5" />
+              </button>
+              <button
+                type="button"
+                className="flex touch-manipulation items-center justify-center gap-2 rounded-2xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-[colors,opacity,box-shadow] hover:bg-white/20 active:opacity-90 sm:px-8 sm:py-4 sm:text-base"
               >
-                <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                <Download className="w-4 h-4 sm:h-5 sm:w-5" />
                 Create Your Tipping Page
-              </motion.button>
+              </button>
             </div>
 
             {/* Trust Badge */}

@@ -33,7 +33,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
   }, [location.pathname, location.hash]);
 
   const linkClass =
-    "text-sm font-semibold transition-colors hover:opacity-80 active:opacity-70 active:scale-[0.98] rounded-md px-1 py-1";
+    "text-sm font-semibold transition-colors hover:opacity-80 active:opacity-70 rounded-md px-1 py-1";
 
   const headerSurface = "border-b border-border/60 bg-background/95 backdrop-blur-md";
 
@@ -73,7 +73,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 <button
                   type="button"
                   className={cn(
-                    "rounded-lg border-2 px-4 py-2 text-sm font-bold transition-all active:scale-[0.98]",
+                    "rounded-lg border-2 px-4 py-2 text-sm font-bold transition-[colors,opacity,box-shadow] active:opacity-90",
                     "border-primary bg-card text-foreground hover:bg-muted",
                   )}
                 >
@@ -83,7 +83,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
               <Link to="/contact">
                 <button
                   type="button"
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md transition-all hover:bg-primary-hover active:scale-[0.98]"
+                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md transition-[colors,opacity,box-shadow] hover:bg-primary-hover active:opacity-90"
                 >
                   {t("nav.requestDemo")}
                 </button>
@@ -101,7 +101,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 setMobileMenuOpen((o) => !o);
               }}
               className={cn(
-                "relative z-[100] shrink-0 rounded-lg p-2.5 transition-colors active:scale-95",
+                "relative z-[100] shrink-0 touch-manipulation rounded-lg p-2.5 transition-colors active:opacity-90",
                 "hover:bg-muted/80 active:bg-muted",
               )}
               style={{ color: "hsl(var(--foreground))" }}
@@ -172,7 +172,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex min-h-10 w-auto max-w-full items-center justify-center whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition-all active:scale-[0.98]",
+                          "inline-flex min-h-10 w-auto max-w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow] active:opacity-90",
                           "border-border/80 bg-muted/40 text-foreground hover:bg-muted/70",
                         )}
                       >
@@ -187,7 +187,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex min-h-10 w-auto max-w-full items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold text-primary-foreground transition-all hover:bg-primary-hover active:scale-[0.98]",
+                          "inline-flex min-h-10 w-auto max-w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold text-primary-foreground transition-[colors,opacity,box-shadow] hover:bg-primary-hover active:opacity-90",
                           "bg-primary shadow-sm",
                         )}
                       >

@@ -650,13 +650,10 @@ export function AuthPage() {
               </div>
             )}
 
-            <motion.button
-              whileHover={isSubmitting ? undefined : { y: -3 }}
-              whileTap={isSubmitting ? undefined : { scale: 0.98 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            <button
               type="submit"
               disabled={isSubmitting || resumeSessionPending || (!isLogin && signUpDisabled)}
-              className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+              className="relative mt-1 flex h-11 w-full min-h-11 items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {isSubmitting ? (
                 <>
@@ -668,7 +665,7 @@ export function AuthPage() {
               ) : (
                 t('auth.page.createAccount')
               )}
-            </motion.button>
+            </button>
 
             {isSubmitting && (
               <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">

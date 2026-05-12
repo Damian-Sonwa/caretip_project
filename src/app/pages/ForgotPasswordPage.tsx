@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { motion } from "motion/react";
 import { Loader2 } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import { requestPasswordReset } from "@/app/lib/api";
@@ -49,7 +48,7 @@ export function ForgotPasswordPage() {
           </p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
           >
             {t("auth.forgot.backToLogin")}
           </Link>
@@ -88,13 +87,10 @@ export function ForgotPasswordPage() {
               {error}
             </p>
           ) : null}
-          <motion.button
+          <button
             type="submit"
             disabled={submitting}
-            whileHover={submitting ? undefined : { y: -3 }}
-            whileTap={submitting ? undefined : { scale: 0.98 }}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex h-12 w-full min-h-12 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? (
               <>
@@ -104,7 +100,7 @@ export function ForgotPasswordPage() {
             ) : (
               t("auth.forgot.sendResetLink")
             )}
-          </motion.button>
+          </button>
         </form>
       </div>
     </AuthRecoveryLayout>

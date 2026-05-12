@@ -249,14 +249,13 @@ export function TransactionsPage() {
                   </div>
 
                   {/* Export Button */}
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="flex items-center gap-2 px-4 py-3 bg-accent hover:bg-accent/90 text-white rounded-lg font-medium transition-all text-sm"
+                  <button
+                    type="button"
+                    className="flex touch-manipulation items-center gap-2 rounded-lg bg-accent px-4 py-3 text-sm font-medium text-white transition-[colors,opacity,box-shadow] hover:bg-accent/90 active:opacity-90"
                   >
                     <Download className="w-4 h-4" />
                     <span className="hidden sm:inline">Export</span>
-                  </motion.button>
+                  </button>
                 </div>
               </div>
             </motion.div>
@@ -364,31 +363,28 @@ export function TransactionsPage() {
                           </td>
                           <td className="px-6 py-4">
                             <div className="flex items-center justify-end gap-2">
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                              <button
+                                type="button"
+                                className="touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
                                 title="View Details"
                               >
                                 <Eye className="w-4 h-4 text-muted-foreground" />
-                              </motion.button>
+                              </button>
                               {transaction.status === 'completed' && (
-                                <motion.button
-                                  whileHover={{ scale: 1.05 }}
-                                  whileTap={{ scale: 0.95 }}
-                                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                                <button
+                                  type="button"
+                                  className="touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
                                   title="View in Stripe"
                                 >
                                   <RefreshCw className="w-4 h-4 text-muted-foreground" />
-                                </motion.button>
+                                </button>
                               )}
-                              <motion.button
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="p-2 hover:bg-muted rounded-lg transition-colors"
+                              <button
+                                type="button"
+                                className="touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
                               >
                                 <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                              </motion.button>
+                              </button>
                             </div>
                           </td>
                         </motion.tr>
@@ -471,23 +467,21 @@ export function TransactionsPage() {
 
                     {/* Actions */}
                     <div className="flex gap-2">
-                      <motion.button
-                        whileHover={{ scale: 1.02 }}
-                        whileTap={{ scale: 0.98 }}
-                        className="flex-1 flex items-center justify-center gap-2 px-4 py-2 border border-border rounded-lg hover:bg-muted transition-colors text-sm"
+                      <button
+                        type="button"
+                        className="flex flex-1 touch-manipulation items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-muted active:opacity-90"
                       >
                         <Eye className="w-4 h-4" />
                         View Details
-                      </motion.button>
+                      </button>
                       {transaction.status === 'completed' && (
-                        <motion.button
-                          whileHover={{ scale: 1.02 }}
-                          whileTap={{ scale: 0.98 }}
-                          className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-accent hover:bg-accent/90 text-white rounded-lg transition-colors text-sm"
+                        <button
+                          type="button"
+                          className="flex flex-1 touch-manipulation items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm text-white transition-colors hover:bg-accent/90 active:opacity-90"
                         >
                           <RefreshCw className="w-4 h-4" />
                           Repeat
-                        </motion.button>
+                        </button>
                       )}
                     </div>
                   </motion.div>
@@ -509,39 +503,36 @@ export function TransactionsPage() {
                   {filteredTransactions.length} transactions
                 </p>
                 <div className="flex items-center gap-2">
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="p-2 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="touch-manipulation rounded-lg border border-border p-2 transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ChevronLeft className="w-5 h-5" />
-                  </motion.button>
+                  </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                    <motion.button
+                    <button
                       key={page}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      type="button"
                       onClick={() => setCurrentPage(page)}
-                      className={`px-4 py-2 rounded-lg transition-colors ${
+                      className={`touch-manipulation rounded-lg px-4 py-2 transition-colors active:opacity-90 ${
                         currentPage === page
                           ? 'bg-accent text-white'
                           : 'border border-border hover:bg-muted'
                       }`}
                     >
                       {page}
-                    </motion.button>
+                    </button>
                   ))}
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="p-2 border border-border rounded-lg hover:bg-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="touch-manipulation rounded-lg border border-border p-2 transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
                     <ChevronRight className="w-5 h-5" />
-                  </motion.button>
+                  </button>
                 </div>
               </motion.div>
             )}

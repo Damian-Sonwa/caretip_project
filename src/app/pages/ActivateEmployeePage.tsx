@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { motion } from "motion/react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import { BusinessLogoMark } from "@/app/components/business/BusinessLogoMark";
@@ -94,7 +93,7 @@ export function ActivateEmployeePage() {
           <button
             type="button"
             onClick={() => navigate("/login", { replace: true })}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
           >
             Back to login
           </button>
@@ -175,13 +174,10 @@ export function ActivateEmployeePage() {
               {error}
             </p>
           ) : null}
-          <motion.button
+          <button
             type="submit"
             disabled={!canSubmit}
-            whileHover={canSubmit ? { y: -3 } : undefined}
-            whileTap={canSubmit ? { scale: 0.98 } : undefined}
-            transition={{ type: "spring", stiffness: 400, damping: 25 }}
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
+            className="flex h-12 w-full min-h-12 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {submitting ? (
               <>
@@ -191,7 +187,7 @@ export function ActivateEmployeePage() {
             ) : (
               "Set your password"
             )}
-          </motion.button>
+          </button>
           {!strong && newPassword.length > 0 ? (
             <p className="text-center text-xs text-neutral-600 dark:text-neutral-400">
               Use 8+ characters with upper, lower, number, and special (e.g. @#$%).
