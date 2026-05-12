@@ -40,6 +40,7 @@ import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
+import staffHeroImage from "../../../../images/for_staff.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -390,11 +391,22 @@ export function EmployeeDashboard() {
             </>
           }
           title={t("employee.hero.headline")}
-          description={`${t("employee.hero.sub")} • ${
-            businessName.trim() || t("dashboard.venueDashboardFallback")
-          }`}
+          description={t("employee.hero.sub")}
           image={
-            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center touch-manipulation">
+            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center gap-4 touch-manipulation">
+              {/* Business branding: separate from hero visual (non-destructive). */}
+              <div className="flex w-full max-w-full min-w-0 items-center justify-center gap-2.5 px-1 sm:gap-3">
+                <BusinessLogoMark
+                  logoPathOrUrl={businessLogo}
+                  businessName={businessName.trim() || t("dashboard.venueDashboardFallback")}
+                  size="sm"
+                  rounded="rounded-xl"
+                  className="shrink-0 max-lg:h-9 max-lg:w-9 max-lg:min-h-9 max-lg:min-w-9 lg:h-11 lg:w-11 lg:min-h-11 lg:min-w-11"
+                />
+                <p className="min-w-0 truncate text-center text-sm font-semibold text-foreground sm:text-base">
+                  {businessName.trim() || t("dashboard.venueDashboardFallback")}
+                </p>
+              </div>
               <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
                 <div
                   className={cn(
@@ -403,15 +415,13 @@ export function EmployeeDashboard() {
                     "lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:rounded-[2.5rem] lg:border-gray-100 lg:shadow-xl",
                   )}
                 >
-                  <div className="flex h-full w-full items-center justify-center p-8">
-                    <BusinessLogoMark
-                      logoPathOrUrl={businessLogo}
-                      businessName={businessName || t("dashboard.venueDashboardFallback")}
-                      size="header"
-                      rounded="rounded-3xl"
-                      className="shadow-none"
-                    />
-                  </div>
+                  <img
+                    src={staffHeroImage}
+                    alt=""
+                    className="h-full w-full px-2 py-3 object-contain object-center lg:px-4 lg:py-4"
+                    draggable={false}
+                    loading="eager"
+                  />
                 </div>
               </div>
             </div>
