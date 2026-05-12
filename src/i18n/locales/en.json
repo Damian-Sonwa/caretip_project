@@ -1348,7 +1348,22 @@
       "actionExportReports": "Export reports",
       "needHelpTitle": "Need help?",
       "needHelpDesc": "Learn how to maximize your team's earnings and keep guests tipping smoothly.",
-      "viewGuidelines": "View guidelines"
+      "viewGuidelines": "View guidelines",
+      "guidelinesDialogTitle": "CareTip usage guidelines",
+      "guidelinesDialogDesc": "Practical steps to get your team set up and grow tips. This is a quick reference—save or print for your staff room.",
+      "guidelinesSectionOnboardTitle": "Onboard your staff",
+      "guidelinesSectionOnboardLi1": "Invite team members from <highlight>Team</highlight> using your business invite code or add them directly with name and role.",
+      "guidelinesSectionOnboardLi2": "Ask each staff member to complete their profile and confirm they can sign in to the employee dashboard.",
+      "guidelinesSectionOnboardLi3": "Deactivate former staff promptly so tips and QR codes stay accurate.",
+      "guidelinesSectionPrintTitle": "Print QR tags",
+      "guidelinesSectionPrintLi1": "Open <highlight>QR codes</highlight> and download each staff member's branded QR.",
+      "guidelinesSectionPrintLi2": "Print on durable cards or tent cards; place them where guests naturally look (reception, tables, checkout).",
+      "guidelinesSectionPrintLi3": "Re-print when names or roles change so scans always match the right person.",
+      "guidelinesSectionTipsTitle": "Best practices for increasing tips",
+      "guidelinesSectionTipsLi1": "Train staff to mention CareTip at key moments: end of service, checkout, or when guests thank them.",
+      "guidelinesSectionTipsLi2": "Keep QR codes visible and unobstructed; a quick \"scan to tip\" sign boosts completion rates.",
+      "guidelinesSectionTipsLi3": "Review your dashboard regularly, recognize top performers, and share feedback with the team.",
+      "guidelinesFooter": "A full PDF guideline may be added later; for now this page is your in-app reference."
     },
     "locationsPage": {
       "backAria": "Back to dashboard",

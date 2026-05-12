@@ -1348,7 +1348,22 @@
       "actionExportReports": "Berichte exportieren",
       "needHelpTitle": "Brauchen Sie Hilfe?",
       "needHelpDesc": "So steigern Sie die Einnahmen Ihres Teams und halten das Tippen für Gäste einfach.",
-      "viewGuidelines": "Richtlinien ansehen"
+      "viewGuidelines": "Richtlinien ansehen",
+      "guidelinesDialogTitle": "CareTip Nutzungsrichtlinien",
+      "guidelinesDialogDesc": "Praktische Schritte, um Ihr Team einzurichten und Trinkgelder zu steigern. Kurzreferenz zum Speichern oder Ausdrucken für die Personalräume.",
+      "guidelinesSectionOnboardTitle": "Team einbinden",
+      "guidelinesSectionOnboardLi1": "Laden Sie Mitarbeitende über <highlight>Team</highlight> mit Ihrem Unternehmens-Einladungscode ein oder fügen Sie sie direkt mit Name und Rolle hinzu.",
+      "guidelinesSectionOnboardLi2": "Bitten Sie jede Person, das Profil zu vervollständigen und die Anmeldung im Mitarbeitenden-Dashboard zu testen.",
+      "guidelinesSectionOnboardLi3": "Deaktivieren Sie ausgeschiedene Mitarbeitende zeitnah, damit Trinkgelder und QR-Codes stimmen.",
+      "guidelinesSectionPrintTitle": "QR-Tags drucken",
+      "guidelinesSectionPrintLi1": "Öffnen Sie <highlight>QR Codes</highlight> und laden Sie den gebrandeten QR-Code jeder Person herunter.",
+      "guidelinesSectionPrintLi2": "Drucken Sie auf robuste Karten oder Tischaufsteller; platzieren Sie sie, wo Gäste sie natürlich sehen (Empfang, Tische, Kasse).",
+      "guidelinesSectionPrintLi3": "Drucken Sie neu, wenn sich Namen oder Rollen ändern, damit Scans immer der richtigen Person zugeordnet sind.",
+      "guidelinesSectionTipsTitle": "Best Practices für mehr Trinkgeld",
+      "guidelinesSectionTipsLi1": "Schulen Sie das Team, CareTip an passenden Momenten zu erwähnen: am Ende des Services, an der Kasse oder wenn Gäste sich bedanken.",
+      "guidelinesSectionTipsLi2": "Halten Sie QR-Codes sichtbar und frei; ein kurzer Hinweis „Zum Tippen scannen“ verbessert die Abschlussquote.",
+      "guidelinesSectionTipsLi3": "Schauen Sie regelmäßig ins Dashboard, würdigen Sie Top-Performer und geben Sie dem Team Feedback.",
+      "guidelinesFooter": "Eine vollständige PDF-Richtlinie kann später ergänzt werden; vorerst dient diese Ansicht als Referenz in der App."
     },
     "locationsPage": {
       "backAria": "Zurück zum Dashboard",
