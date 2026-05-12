@@ -444,7 +444,7 @@ export function BusinessDashboard() {
                 className={cn(
                   "relative mx-auto w-full max-w-[min(100%,calc(100vw-2rem))] min-h-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
                   "rounded-[2.5rem] border border-black/[0.06] shadow-xl lg:max-w-[520px]",
-                  "h-[min(58vh,420px)] lg:h-[460px]",
+                  "h-[min(58svh,420px)] lg:h-[460px]",
                 )}
               >
                 <img
