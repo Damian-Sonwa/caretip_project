@@ -24,6 +24,12 @@ console.log(
     : "optional for tips until payments enabled",
 );
 console.log(
+  "SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY:",
+  process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+    ? "set (avatars/logos → Supabase Storage)"
+    : "optional (omit for local disk uploads)",
+);
+console.log(
   "ADMIN_SEED_SECRET:",
   !hasAdminSeed ? "MISSING (required for npm run admin:create)" : adminSeedOk ? "set" : "too short (use at least 8 characters)",
 );

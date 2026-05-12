@@ -8,8 +8,8 @@ import {
   CLIENT_FALLBACK,
 } from "../utils/httpErrors.js";
 import {
-  isCloudinaryConfiguredForUpload,
-  tryUploadBusinessLogoToCloudinary,
+  isSupabaseStorageConfiguredForUpload,
+  tryUploadBusinessLogoToSupabase,
 } from "../services/upload.service.js";
 
 export async function generateInvite(req: Request, res: Response) {
@@ -139,20 +139,19 @@ export async function uploadMyLogo(req: Request, res: Response) {
     const publicPath = `/uploads/businesses/${b.id}/${file.filename}`;
     let logoPathToStore = publicPath;
 
-    /** Multer disk storage sets `path`; if Cloudinary fails, keep the uploaded file path. */
-    if (isCloudinaryConfiguredForUpload() && typeof file.path === "string" && file.path.length > 0) {
+    /** Multer disk storage sets `path`; mirror to Supabase when configured, else keep disk URL. */
+    if (isSupabaseStorageConfiguredForUpload() && typeof file.path === "string" && file.path.length > 0) {
       try {
         const buf = await readFile(file.path);
-        const cloudUrl = await tryUploadBusinessLogoToCloudinary(buf);
-        if (cloudUrl) {
-          logoPathToStore = cloudUrl;
+        const remoteUrl = await tryUploadBusinessLogoToSupabase(buf, file.mimetype, file.originalname);
+        if (remoteUrl) {
+          logoPathToStore = remoteUrl;
           await unlink(file.path).catch(() => {
             /* best-effort remove temp Multer file */
           });
         }
-      } catch (cloudErr) {
-        // Misconfigured CREDs, outages, signing errors, etc. — avoid blocking venue saves while Cloudinary is fixed.
-        logServerError("business.uploadMyLogo.cloudinary_fallback_disk", cloudErr);
+      } catch (remoteErr) {
+        logServerError("business.uploadMyLogo.supabase_fallback_disk", remoteErr);
         logoPathToStore = publicPath;
       }
     }

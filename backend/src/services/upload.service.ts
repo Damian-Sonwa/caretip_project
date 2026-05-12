@@ -1,17 +1,18 @@
 import { mkdirSync, writeFileSync } from "fs";
-import { join } from "path";
+import path from "node:path";
 import { randomUUID } from "crypto";
-import { v2 as cloudinary } from "cloudinary";
 import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
 import {
   validateImageBufferForUpload,
   isAllowedImageMimetype,
 } from "../lib/imageUploadValidation.js";
+import { isSupabaseStorageConfigured, uploadBufferToSupabasePublicUrl } from "../lib/supabaseStorageClient.js";
+import { buildUniqueStorageObjectName } from "../utils/storageObjectName.js";
 
 const UPLOAD_CONFIG_ERROR =
-  "Photo upload is not configured on this server. The administrator should set CLOUDINARY_URL (recommended) or PUBLIC_API_BASE_URL to the API’s public HTTPS URL.";
+  "Photo upload is not configured on this server. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for Supabase Storage, or PUBLIC_API_BASE_URL with a persistent disk for local uploads.";
 
-const CLOUDINARY_UPLOAD_TIMEOUT_MS = 90_000;
+const REMOTE_UPLOAD_TIMEOUT_MS = 90_000;
 
 let loggedStorageBackend = false;
 
@@ -24,36 +25,20 @@ function isLocalhostBase(url: string): boolean {
   }
 }
 
-function cloudinaryUrlConfigured(): boolean {
-  const u = process.env.CLOUDINARY_URL?.trim() ?? "";
-  return u.length > 0 && u.toLowerCase().startsWith("cloudinary://");
-}
-
-function cloudinaryTripleConfigured(): boolean {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
-  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
-  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
-  return Boolean(cloudName && apiKey && apiSecret);
-}
-
-/** Used by controllers to decide whether to mirror disk uploads to Cloudinary (recommended on Render). */
-export function isCloudinaryConfiguredForUpload(): boolean {
-  return cloudinaryUrlConfigured() || cloudinaryTripleConfigured();
+/** True when the API should upload images to Supabase Storage (recommended for production). */
+export function isSupabaseStorageConfiguredForUpload(): boolean {
+  return isSupabaseStorageConfigured();
 }
 
 /** Safe diagnostics for `/health` (no secrets). */
 export function getImageUploadStorageDiagnostics(): {
-  employeeAvatarStorage: "cloudinary" | "disk";
-  cloudinaryConfigured: boolean;
-  cloudinaryUrlPresent: boolean;
-  cloudinaryTriplePresent: boolean;
+  employeeAvatarStorage: "supabase" | "disk";
+  supabaseStorageConfigured: boolean;
 } {
-  const cloudinaryConfigured = isCloudinaryConfiguredForUpload();
+  const supabaseStorageConfigured = isSupabaseStorageConfiguredForUpload();
   return {
-    employeeAvatarStorage: cloudinaryConfigured ? "cloudinary" : "disk",
-    cloudinaryConfigured,
-    cloudinaryUrlPresent: cloudinaryUrlConfigured(),
-    cloudinaryTriplePresent: cloudinaryTripleConfigured(),
+    employeeAvatarStorage: supabaseStorageConfigured ? "supabase" : "disk",
+    supabaseStorageConfigured,
   };
 }
 
@@ -62,19 +47,8 @@ function logStorageBackendOnce(): void {
   loggedStorageBackend = true;
   const d = getImageUploadStorageDiagnostics();
   console.info(
-    `[upload] Employee avatars: storage=${d.employeeAvatarStorage} (CLOUDINARY_URL=${d.cloudinaryUrlPresent}, triple=${d.cloudinaryTriplePresent})`,
+    `[upload] Employee avatars: storage=${d.employeeAvatarStorage} (SUPABASE_URL+SERVICE_ROLE_KEY=${d.supabaseStorageConfigured})`,
   );
-}
-
-function configureCloudinaryForUpload(): void {
-  if (cloudinaryUrlConfigured()) {
-    cloudinary.config(true);
-    return;
-  }
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME!.trim();
-  const apiKey = process.env.CLOUDINARY_API_KEY!.trim();
-  const apiSecret = process.env.CLOUDINARY_API_SECRET!.trim();
-  cloudinary.config({ cloud_name: cloudName, api_key: apiKey, api_secret: apiSecret });
 }
 
 function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
@@ -95,64 +69,47 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-async function uploadBufferToCloudinary(
+function extFromImageMimetype(mimetype: string): string {
+  const mt = mimetype.toLowerCase();
+  if (mt.includes("png")) return ".png";
+  if (mt.includes("webp")) return ".webp";
+  if (mt.includes("gif")) return ".gif";
+  if (mt.includes("heic") || mt.includes("heif")) return ".heic";
+  if (mt.includes("avif")) return ".avif";
+  return ".jpg";
+}
+
+async function uploadBufferToSupabaseWithTimeout(
+  objectKey: string,
   buffer: Buffer,
-  folder: "caretip/avatars" | "caretip/business-logos",
+  contentType: string,
 ): Promise<string> {
-  configureCloudinaryForUpload();
-  const uploadPromise = new Promise<string>((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder,
-        resource_type: "image",
-        /** Let Cloudinary infer format; avoids edge cases with HEIC etc. */
-        use_filename: false,
-        unique_filename: true,
-      },
-      (err, res) => {
-        if (err) {
-          const http = (err as { http_code?: number }).http_code;
-          const msg = err.message || String(err);
-          reject(
-            new Error(
-              http === 401 || /401|unauthorized/i.test(msg)
-                ? "Cloudinary rejected credentials (check CLOUDINARY_URL or API keys)."
-                : `${msg}`,
-            ),
-          );
-        } else if (res?.secure_url) {
-          resolve(res.secure_url);
-        } else {
-          reject(new Error("Cloudinary returned no image URL."));
-        }
-      },
-    );
-    stream.end(buffer);
-  });
-  return withTimeout(uploadPromise, CLOUDINARY_UPLOAD_TIMEOUT_MS, "Cloudinary upload");
+  return withTimeout(
+    uploadBufferToSupabasePublicUrl(objectKey, buffer, contentType),
+    REMOTE_UPLOAD_TIMEOUT_MS,
+    "Supabase storage upload",
+  );
 }
 
 /**
- * Uploads an image buffer to Cloudinary when configured (`CLOUDINARY_URL` or cloud name/key/secret);
- * otherwise saves under /uploads/avatars (needs a persistent disk + correct PUBLIC_API_BASE_URL in production).
+ * Uploads an image buffer to Supabase Storage when configured; otherwise saves under /uploads/avatars
+ * (needs persistent disk + correct PUBLIC_API_BASE_URL in production).
  */
 export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string): Promise<string> {
   logStorageBackendOnce();
   validateImageBufferForUpload(buffer, mimetype);
 
-  const useCloudinary = isCloudinaryConfiguredForUpload();
-
-  if (useCloudinary) {
+  if (isSupabaseStorageConfiguredForUpload()) {
     try {
-      return await uploadBufferToCloudinary(buffer, "caretip/avatars");
+      const ext = extFromImageMimetype(mimetype);
+      const name = buildUniqueStorageObjectName(`avatar${ext}`, ext);
+      const objectKey = `avatars/${name}`;
+      return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error("[upload] Cloudinary employee avatar failed:", msg);
+      console.error("[upload] Supabase employee avatar failed:", msg);
       if (/timed out/i.test(msg)) {
         throw new Error("Photo upload timed out. Please try again with a smaller image.");
-      }
-      if (/rejected credentials|401|unauthorized/i.test(msg)) {
-        throw new Error("Photo storage is not available. Please try again later.");
       }
       throw new Error("We couldn't upload your photo. Please try a JPEG or PNG under 5 MB.");
     }
@@ -161,7 +118,7 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
   const base = resolvePublicApiBaseUrl();
   if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
     console.error(
-      "[upload] Refusing disk upload: PUBLIC_API_BASE_URL (or host auto-detect) resolves to localhost in production. Set CLOUDINARY_URL or PUBLIC_API_BASE_URL.",
+      "[upload] Refusing disk upload: PUBLIC_API_BASE_URL (or host auto-detect) resolves to localhost in production. Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY or PUBLIC_API_BASE_URL.",
     );
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
@@ -177,8 +134,8 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
           ? "heic"
           : "jpg";
   const filename = `${randomUUID()}.${ext}`;
-  const dir = join(process.cwd(), "uploads", "avatars");
-  const fp = join(dir, filename);
+  const dir = path.join(process.cwd(), "uploads", "avatars");
+  const fp = path.join(dir, filename);
   try {
     mkdirSync(dir, { recursive: true });
     writeFileSync(fp, buffer);
@@ -190,20 +147,87 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
 }
 
 /**
- * When Cloudinary env is set (recommended on Render), uploads a business logo and returns `https://...`.
- * Otherwise returns `null` so callers can keep the on-disk Multer path.
+ * When Supabase is configured, uploads a business logo buffer and returns a public `https://...` URL.
+ * On failure returns `null` so callers can keep the on-disk Multer path.
  */
-export async function tryUploadBusinessLogoToCloudinary(buffer: Buffer): Promise<string | null> {
-  if (!isCloudinaryConfiguredForUpload()) {
+export async function tryUploadBusinessLogoToSupabase(
+  buffer: Buffer,
+  mimetype: string,
+  originalFilename?: string,
+): Promise<string | null> {
+  if (!isSupabaseStorageConfiguredForUpload()) {
     return null;
   }
   try {
-    return await uploadBufferToCloudinary(buffer, "caretip/business-logos");
+    const ext = extFromImageMimetype(mimetype);
+    const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+    const objectKey = `business-logos/${name}`;
+    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    console.error("[upload] Cloudinary business logo failed (keeping disk path):", msg);
+    console.error("[upload] Supabase business logo failed (keeping disk path):", msg);
     return null;
   }
+}
+
+/** Platform admin: business logo file → public URL or null to keep disk path. */
+export async function tryUploadPlatformBusinessLogoToSupabase(
+  buffer: Buffer,
+  mimetype: string,
+  businessId: string,
+  originalFilename?: string,
+): Promise<string | null> {
+  if (!isSupabaseStorageConfiguredForUpload()) {
+    return null;
+  }
+  try {
+    const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+    const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+    const objectKey = `platform-logos/${businessId.replace(/[^a-zA-Z0-9-_]/g, "")}/${name}`;
+    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[upload] Supabase platform business logo failed:", msg);
+    return null;
+  }
+}
+
+/** Platform admin: verification document → public URL or null to keep disk path. */
+export async function tryUploadPlatformVerificationToSupabase(
+  buffer: Buffer,
+  mimetype: string,
+  businessId: string,
+  originalFilename?: string,
+): Promise<string | null> {
+  if (!isSupabaseStorageConfiguredForUpload()) {
+    return null;
+  }
+  try {
+    const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+    const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
+    const objectKey = `platform-verification/${businessId.replace(/[^a-zA-Z0-9-_]/g, "")}/${name}`;
+    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    console.error("[upload] Supabase platform verification upload failed:", msg);
+    return null;
+  }
+}
+
+function pathExtFromMimeOrName(mimetype: string, originalFilename?: string): string {
+  const fromName = originalFilename ? path.extname(originalFilename) : "";
+  if (fromName && /^\.[a-zA-Z0-9]{1,8}$/.test(fromName)) {
+    return fromName.toLowerCase();
+  }
+  const mt = mimetype.toLowerCase();
+  if (mt === "application/pdf") return ".pdf";
+  if (mt === "application/msword") return ".doc";
+  if (mt.includes("wordprocessingml")) return ".docx";
+  if (mt.includes("png")) return ".png";
+  if (mt.includes("webp")) return ".webp";
+  if (mt.includes("gif")) return ".gif";
+  if (mt.includes("jpeg") || mt.includes("jpg")) return ".jpg";
+  return ".bin";
 }
 
 /** Re-export for multer fileFilter (single source of truth). */

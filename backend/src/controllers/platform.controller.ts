@@ -1,8 +1,14 @@
 import type { Request, Response } from "express";
+import { readFile, unlink } from "node:fs/promises";
 import * as platformService from "../services/platform.service.js";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import * as platformAnalyticsService from "../services/platformAnalytics.service.js";
+import {
+  isSupabaseStorageConfiguredForUpload,
+  tryUploadPlatformBusinessLogoToSupabase,
+  tryUploadPlatformVerificationToSupabase,
+} from "../services/upload.service.js";
 import {
   logServerError,
   clientSafeMessage,
@@ -144,8 +150,22 @@ export async function uploadBusinessLogo(req: Request, res: Response) {
       return res.status(404).json({ message: "Business not found" });
     }
     const publicPath = `/uploads/platform/businesses/${id}/${file.filename}`;
-    await platformService.setBusinessLogoPath(id, publicPath);
-    return res.json({ success: true, path: publicPath });
+    let pathToStore = publicPath;
+    if (isSupabaseStorageConfiguredForUpload() && file.path) {
+      try {
+        const buf = await readFile(file.path);
+        const url = await tryUploadPlatformBusinessLogoToSupabase(buf, file.mimetype, id, file.originalname);
+        if (url) {
+          pathToStore = url;
+          await unlink(file.path).catch(() => {});
+        }
+      } catch (e) {
+        logServerError("platform.uploadBusinessLogo.supabase_fallback_disk", e);
+        pathToStore = publicPath;
+      }
+    }
+    await platformService.setBusinessLogoPath(id, pathToStore);
+    return res.json({ success: true, path: pathToStore });
   } catch (err) {
     logServerError("platform.uploadBusinessLogo", err);
     return res.status(500).json({
@@ -167,8 +187,22 @@ export async function uploadVerificationDocument(req: Request, res: Response) {
       return res.status(404).json({ message: "Business not found" });
     }
     const publicPath = `/uploads/platform/businesses/${id}/${file.filename}`;
-    await platformService.setBusinessVerificationDocumentPath(id, publicPath);
-    return res.json({ success: true, path: publicPath });
+    let pathToStore = publicPath;
+    if (isSupabaseStorageConfiguredForUpload() && file.path) {
+      try {
+        const buf = await readFile(file.path);
+        const url = await tryUploadPlatformVerificationToSupabase(buf, file.mimetype, id, file.originalname);
+        if (url) {
+          pathToStore = url;
+          await unlink(file.path).catch(() => {});
+        }
+      } catch (e) {
+        logServerError("platform.uploadVerificationDocument.supabase_fallback_disk", e);
+        pathToStore = publicPath;
+      }
+    }
+    await platformService.setBusinessVerificationDocumentPath(id, pathToStore);
+    return res.json({ success: true, path: pathToStore });
   } catch (err) {
     logServerError("platform.uploadVerificationDocument", err);
     return res.status(500).json({

@@ -60,7 +60,7 @@ Implementation is **frontend-only** (no schema changes, no changes to Stripe/aut
 
 - **PostgreSQL** is the system of record for businesses, employees, tips, and Stripe references.
 - **CSV exports** for reconciliation (`json2csv` on the API).
-- **Profile photos** via **Cloudinary** when configured; verification flows for businesses where the product requires them.
+- **Profile photos & logos** via **Supabase Storage** when `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` are set; otherwise local `./uploads` with `PUBLIC_API_BASE_URL`. Verification flows for businesses where the product requires them.
 
 ---
 
@@ -88,7 +88,7 @@ caretip_project/
 
 - **Node.js** 18+ (20 LTS recommended)
 - **PostgreSQL** (local or hosted, e.g. Supabase pooler URL)
-- Optional: **Stripe**, **Cloudinary**, **Resend** (see [Environment variables](#environment-variables))
+- Optional: **Stripe**, **Supabase Storage** (avatars/logos), **Resend** (see [Environment variables](#environment-variables))
 
 ### 1. Install
 
@@ -200,7 +200,7 @@ Add your domain in the **Resend dashboard → Domains**, complete the DNS record
 | Variable | Purpose |
 |----------|---------|
 | `STRIPE_SECRET_KEY` / `STRIPE_WEBHOOK_SECRET` | Card payments and webhooks |
-| `CLOUDINARY_*` or `CLOUDINARY_URL` | Avatar / uploads |
+| `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `SUPABASE_STORAGE_BUCKET` | Avatars & logos to Supabase Storage (public bucket `caretip` by default) |
 | `PORT` | API port (default **3001**) |
 | `ADMIN_SEED_SECRET` | Required for `npm run admin:create` (≥ 8 characters) |
 | `AUTH_LOGIN_MAX_PER_WINDOW` | Login rate limit tuning |
@@ -261,7 +261,7 @@ These are **separate product flows** but they share consistent user state:
 | **Backend** | Node.js, Express, Socket.io, JWT, Prisma |
 | **Database** | PostgreSQL + Prisma (`backend/prisma`) |
 | **Payments** | Stripe (Payment Intents, webhooks); businesses may store `stripeAccountId` for Connect-style flows |
-| **Media** | Cloudinary (optional) |
+| **Media** | Supabase Storage (optional; bucket should allow public read for logo/avatar URLs) |
 
 > The ORM is **Prisma** (not Sequelize). After schema or env changes, run **`npm run db:generate`** in `backend/`.
 

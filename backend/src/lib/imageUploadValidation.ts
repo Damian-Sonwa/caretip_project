@@ -1,4 +1,4 @@
-/** Shared rules for profile / logo image uploads (multer + Cloudinary path). */
+/** Shared rules for profile / logo image uploads (multer + Supabase Storage / disk path). */
 
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 
