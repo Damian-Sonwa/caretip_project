@@ -749,7 +749,7 @@
     "roleLabelBusiness": "Business",
     "teamMemberFallback": "Team member",
     "managerFallback": "Manager",
-    "venueDashboardFallback": "Venue dashboard",
+    "venueDashboardFallback": "Business",
     "businessDashboardSubtitle": "Business dashboard",
     "viewAll": "View all"
   },
@@ -1285,7 +1285,7 @@
       "headline": "Team Performance Overview",
       "sub": "Track team growth in real time.",
       "loadingVenue": "Loading venue…",
-      "venueDashboard": "Venue dashboard"
+      "venueDashboard": "Business"
     },
     "period": {
       "daily": "Daily",

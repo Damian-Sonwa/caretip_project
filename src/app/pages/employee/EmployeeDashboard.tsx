@@ -39,7 +39,6 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import staffHeroImage from "../../../../images/for_staff.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
@@ -121,8 +120,6 @@ export function EmployeeDashboard() {
   const [goalProgress, setGoalProgress] = useState<EmployeeGoalProgress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [businessTimezone, setBusinessTimezone] = useState<string | null>(null);
-  const [businessName, setBusinessName] = useState<string>("");
-  const [businessLogo, setBusinessLogo] = useState<string | null>(null);
   const [periodTipCount, setPeriodTipCount] = useState(0);
   const [periodAmountEur, setPeriodAmountEur] = useState(0);
   const [chartSeries, setChartSeries] = useState<Array<{ label: string; amount: number }>>([]);
@@ -199,16 +196,12 @@ export function EmployeeDashboard() {
         setStaffSlug(p.slug ?? null);
         setEmployeeBusinessSlug(p.businessSlug ?? null);
         setEmployeeRecordId(p.id);
-        setBusinessName(p.businessName ?? "");
-        setBusinessLogo(p.businessLogo ?? null);
         updateUser({ avatar: p.avatar ?? undefined, name: p.name });
       } catch {
         if (cancelled) return;
         setStaffSlug(null);
         setEmployeeBusinessSlug(null);
         setEmployeeRecordId(null);
-        setBusinessName("");
-        setBusinessLogo(null);
       }
     };
     void loadProfile();
@@ -312,8 +305,6 @@ export function EmployeeDashboard() {
         const s = p.slug;
         setStaffSlug(s ?? null);
         setEmployeeBusinessSlug(p.businessSlug ?? null);
-        setBusinessName(p.businessName ?? "");
-        setBusinessLogo(p.businessLogo ?? null);
         if (s) {
           setQrModalOpen(true);
           toast.success(t("employee.dashboard.toastLinkReady"));
@@ -393,20 +384,7 @@ export function EmployeeDashboard() {
           title={t("employee.hero.headline")}
           description={t("employee.hero.sub")}
           image={
-            <div className="relative isolate flex w-full flex-col items-center justify-center gap-4 touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
-              {/* Business branding: same horizontal rhythm as hero image on mobile */}
-              <div className="flex w-full max-w-full min-w-0 items-center justify-center gap-2.5 px-1 max-lg:max-w-[min(100%,calc(100vw-3rem))] max-lg:mx-auto sm:gap-3">
-                <BusinessLogoMark
-                  logoPathOrUrl={businessLogo}
-                  businessName={businessName.trim() || t("dashboard.venueDashboardFallback")}
-                  size="sm"
-                  rounded="rounded-xl"
-                  className="shrink-0 max-lg:h-9 max-lg:w-9 max-lg:min-h-9 max-lg:min-w-9 lg:h-11 lg:w-11 lg:min-h-11 lg:min-w-11"
-                />
-                <p className="min-w-0 truncate text-center text-sm font-semibold text-foreground sm:text-base">
-                  {businessName.trim() || t("dashboard.venueDashboardFallback")}
-                </p>
-              </div>
+            <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
               <div className="relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center justify-center lg:max-w-[520px]">
                 <div
                   className={cn(

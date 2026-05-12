@@ -8,7 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export type DashboardHeroProps = {
   className?: string;
-  badge: React.ReactNode;
+  /** Optional pill above the title; omit when redundant with sidebar branding. */
+  badge?: React.ReactNode;
   title: string;
   /** Optional single-line tagline under the title; omitted when empty. */
   description?: string;
@@ -78,16 +79,17 @@ export function DashboardHero({
   const tagline = description?.trim() ?? "";
   const caption = imageCaption?.trim() ?? "";
 
-  const badgeRow = (
-    <div
-      className={cn(
-        "inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground",
-        stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
-      )}
-    >
-      {badge}
-    </div>
-  );
+  const badgeRow =
+    badge != null ? (
+      <div
+        className={cn(
+          "inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground",
+          stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
+        )}
+      >
+        {badge}
+      </div>
+    ) : null;
 
   const titleRow = (
     <CardTitle

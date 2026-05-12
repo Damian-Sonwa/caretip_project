@@ -9,6 +9,8 @@ import { CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import { employeeDashboardNavItems, isEmployeeDashboardNavActive } from "./employeeDashboardNav";
 
+const EMPLOYEE_DASHBOARD_HOME = employeeDashboardNavItems[0]!.href;
+
 type EmployeeMobileSidebarProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -50,7 +52,11 @@ export function EmployeeMobileSidebar({
             className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:hidden"
           >
             <div className={cn("flex items-center justify-between px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
-              <div className="flex min-w-0 flex-1 items-center gap-2 pr-2">
+              <Link
+                to={EMPLOYEE_DASHBOARD_HOME}
+                onClick={onClose}
+                className="flex min-w-0 flex-1 items-center gap-2 rounded-lg pr-2 outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+              >
                 <BusinessLogoMark
                   logoPathOrUrl={businessBranding?.businessLogo ?? null}
                   businessName={venueName}
@@ -59,7 +65,7 @@ export function EmployeeMobileSidebar({
                   className="shrink-0"
                 />
                 <span className="min-w-0 truncate text-xs font-semibold text-sidebar-foreground">{venueName}</span>
-              </div>
+              </Link>
               <button
                 type="button"
                 onClick={onClose}

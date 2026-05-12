@@ -13,7 +13,6 @@ import {
   Star,
   Building2,
   ArrowRight,
-  Store,
   Target,
   ChevronDown,
 } from "lucide-react";
@@ -437,18 +436,6 @@ export function BusinessDashboard() {
           actionsPlacement="belowText"
           mobileAlign="center"
           className="mb-8 lg:mb-6"
-          badge={
-            <>
-              <Store className="h-3.5 w-3.5 text-foreground" />
-              {statsLoading && !stats?.name?.trim() ? (
-                <span className="text-muted-foreground animate-pulse">{t("business.hero.loadingVenue")}</span>
-              ) : stats?.name?.trim() ? (
-                stats.name
-              ) : (
-                t("business.hero.venueDashboard")
-              )}
-            </>
-          }
           title={t("business.hero.headline")}
           description={t("business.hero.sub")}
           image={

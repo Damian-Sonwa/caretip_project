@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { LayoutDashboard } from "lucide-react";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -11,6 +12,7 @@ import { cn } from "@/lib/utils";
  * Sticky venue header for all business manager routes: logo + business name (dashboard shell).
  */
 export function BusinessShellBar({ className }: { className?: string }) {
+  const { t } = useTranslation();
   const { user } = useRequireAuth();
   const [profile, setProfile] = useState<BusinessInfo | null>(null);
 
@@ -37,7 +39,7 @@ export function BusinessShellBar({ className }: { className?: string }) {
   }, [user?.businessId, user?.role]);
 
   const name =
-    String(profile?.name ?? user?.businessName ?? "").trim() || "Venue dashboard";
+    String(profile?.name ?? user?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
   return (
     <header

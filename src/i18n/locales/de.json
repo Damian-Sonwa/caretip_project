@@ -749,7 +749,7 @@
     "roleLabelBusiness": "Unternehmen",
     "teamMemberFallback": "Teammitglied",
     "managerFallback": "Leitung",
-    "venueDashboardFallback": "Lokaldashboard",
+    "venueDashboardFallback": "Unternehmen",
     "businessDashboardSubtitle": "Unternehmensdashboard",
     "viewAll": "Alle anzeigen"
   },
@@ -1285,7 +1285,7 @@
       "headline": "Teamleistung im Überblick",
       "sub": "Teamwachstum in Echtzeit verfolgen.",
       "loadingVenue": "Lokal wird geladen…",
-      "venueDashboard": "Lokaldashboard"
+      "venueDashboard": "Unternehmen"
     },
     "period": {
       "daily": "Täglich",
