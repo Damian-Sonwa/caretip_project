@@ -452,19 +452,25 @@ export function BusinessDashboard() {
           title={t("business.hero.headline")}
           description={t("business.hero.sub")}
           image={
-            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center touch-manipulation">
-              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
+            <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center justify-center lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    "max-lg:h-[312px] max-lg:max-h-[312px] max-lg:min-h-0 rounded-[2.5rem] border border-black/[0.06] shadow-xl",
-                    "lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:rounded-[2.5rem] lg:border-gray-100 lg:shadow-xl",
+                    // Mobile: flex-center so `object-contain` art sits optically centered (no horizontal bleed).
+                    "max-lg:flex max-lg:min-h-[272px] max-lg:max-h-[min(52vh,320px)] max-lg:items-center max-lg:justify-center",
+                    "rounded-[2.5rem] border border-black/[0.06] shadow-xl",
+                    "lg:block lg:h-[460px] lg:max-h-[460px] lg:min-h-0 lg:border-gray-100 lg:shadow-xl",
                   )}
                 >
                   <img
                     src={barChartHeroImage}
                     alt=""
-                    className="h-full w-full px-2 py-3 lg:px-4 lg:py-4 object-contain object-center"
+                    className={cn(
+                      "object-contain object-center",
+                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-3rem))] max-lg:px-3 max-lg:py-3",
+                      "lg:h-full lg:w-full lg:px-4 lg:py-4",
+                    )}
                     loading="eager"
                     decoding="async"
                     // React 18 warns on `fetchPriority`; keep the DOM attribute via lowercase.

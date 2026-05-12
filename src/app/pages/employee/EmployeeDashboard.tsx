@@ -393,9 +393,9 @@ export function EmployeeDashboard() {
           title={t("employee.hero.headline")}
           description={t("employee.hero.sub")}
           image={
-            <div className="relative isolate flex w-full max-w-[95%] flex-col items-center justify-center gap-4 touch-manipulation">
-              {/* Business branding: separate from hero visual (non-destructive). */}
-              <div className="flex w-full max-w-full min-w-0 items-center justify-center gap-2.5 px-1 sm:gap-3">
+            <div className="relative isolate flex w-full flex-col items-center justify-center gap-4 touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
+              {/* Business branding: same horizontal rhythm as hero image on mobile */}
+              <div className="flex w-full max-w-full min-w-0 items-center justify-center gap-2.5 px-1 max-lg:max-w-[min(100%,calc(100vw-3rem))] max-lg:mx-auto sm:gap-3">
                 <BusinessLogoMark
                   logoPathOrUrl={businessLogo}
                   businessName={businessName.trim() || t("dashboard.venueDashboardFallback")}
@@ -407,18 +407,23 @@ export function EmployeeDashboard() {
                   {businessName.trim() || t("dashboard.venueDashboardFallback")}
                 </p>
               </div>
-              <div className="relative mx-auto flex w-full min-w-0 max-w-none flex-col items-center justify-center max-lg:w-[calc(100%+3rem)] max-lg:max-w-none max-lg:-mx-6 lg:w-full lg:max-w-[520px]">
+              <div className="relative mx-auto flex w-full min-w-0 max-w-full flex-col items-center justify-center lg:max-w-[520px]">
                 <div
                   className={cn(
                     "relative mx-auto w-full max-w-full shrink-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                    "max-lg:h-[236px] max-lg:max-h-[236px] max-lg:min-h-0 rounded-[2.5rem] border border-black/[0.06] shadow-xl",
-                    "lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:rounded-[2.5rem] lg:border-gray-100 lg:shadow-xl",
+                    "max-lg:flex max-lg:min-h-[220px] max-lg:max-h-[min(48vh,280px)] max-lg:items-center max-lg:justify-center",
+                    "rounded-[2.5rem] border border-black/[0.06] shadow-xl",
+                    "lg:block lg:h-[360px] lg:max-h-[360px] lg:min-h-0 lg:border-gray-100 lg:shadow-xl",
                   )}
                 >
                   <img
                     src={staffHeroImage}
                     alt=""
-                    className="h-full w-full px-2 py-3 object-contain object-center lg:px-4 lg:py-4"
+                    className={cn(
+                      "object-contain object-center",
+                      "max-lg:h-auto max-lg:w-auto max-lg:max-h-full max-lg:max-w-[min(100%,calc(100vw-3rem))] max-lg:px-3 max-lg:py-3",
+                      "lg:h-full lg:w-full lg:px-4 lg:py-4",
+                    )}
                     draggable={false}
                     loading="eager"
                   />
