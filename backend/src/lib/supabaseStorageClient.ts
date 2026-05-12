@@ -1,11 +1,33 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 let _client: SupabaseClient | null = null;
+let warnedMissingServiceRole = false;
+
+/** Same project URL as the dashboard; SPA often sets `NEXT_PUBLIC_SUPABASE_URL` only. */
+function supabaseProjectUrl(): string | undefined {
+  const direct = process.env.SUPABASE_URL?.trim();
+  if (direct) return direct;
+  return process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+}
+
+/** Service role only — never the anon key (anon cannot replace server-side Storage uploads in our flow). */
+function supabaseServiceRoleKey(): string | undefined {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+}
 
 export function isSupabaseStorageConfigured(): boolean {
-  const url = process.env.SUPABASE_URL?.trim();
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
-  return Boolean(url && key);
+  return Boolean(supabaseProjectUrl() && supabaseServiceRoleKey());
+}
+
+/** Log once when URL exists but service role is missing (common misconfig after adding only `NEXT_PUBLIC_*`). */
+export function warnIfSupabaseUrlButNoServiceRole(): void {
+  if (warnedMissingServiceRole) return;
+  if (!supabaseProjectUrl() || supabaseServiceRoleKey()) return;
+  warnedMissingServiceRole = true;
+  console.warn(
+    "[upload] Supabase Storage disabled: set SUPABASE_SERVICE_ROLE_KEY in backend/root .env (Dashboard → Settings → API → service_role). " +
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY cannot be used for server uploads; without the service role, logos stay on disk only.",
+  );
 }
 
 /** Default `caretip` — create this bucket in Supabase (public read recommended for logos/avatars). */
@@ -15,10 +37,12 @@ export function supabaseStorageBucketName(): string {
 
 function getServiceClient(): SupabaseClient {
   if (!isSupabaseStorageConfigured()) {
-    throw new Error("Supabase Storage is not configured (set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY).");
+    throw new Error(
+      "Supabase Storage is not configured (set SUPABASE_SERVICE_ROLE_KEY and SUPABASE_URL or NEXT_PUBLIC_SUPABASE_URL).",
+    );
   }
   if (!_client) {
-    _client = createClient(process.env.SUPABASE_URL!.trim(), process.env.SUPABASE_SERVICE_ROLE_KEY!.trim(), {
+    _client = createClient(supabaseProjectUrl()!, supabaseServiceRoleKey()!, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
   }

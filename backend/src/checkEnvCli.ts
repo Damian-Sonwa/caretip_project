@@ -25,7 +25,8 @@ console.log(
 );
 console.log(
   "SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY:",
-  process.env.SUPABASE_URL?.trim() && process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
+  (process.env.SUPABASE_URL?.trim() || process.env.NEXT_PUBLIC_SUPABASE_URL?.trim()) &&
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim()
     ? "set (avatars/logos → Supabase Storage)"
     : "optional (omit for local disk uploads)",
 );

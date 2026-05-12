@@ -6,7 +6,7 @@ import {
   validateImageBufferForUpload,
   isAllowedImageMimetype,
 } from "../lib/imageUploadValidation.js";
-import { isSupabaseStorageConfigured, uploadBufferToSupabasePublicUrl } from "../lib/supabaseStorageClient.js";
+import { isSupabaseStorageConfigured, uploadBufferToSupabasePublicUrl, warnIfSupabaseUrlButNoServiceRole } from "../lib/supabaseStorageClient.js";
 import { buildUniqueStorageObjectName } from "../utils/storageObjectName.js";
 
 const UPLOAD_CONFIG_ERROR =
@@ -45,6 +45,7 @@ export function getImageUploadStorageDiagnostics(): {
 function logStorageBackendOnce(): void {
   if (loggedStorageBackend) return;
   loggedStorageBackend = true;
+  warnIfSupabaseUrlButNoServiceRole();
   const d = getImageUploadStorageDiagnostics();
   console.info(
     `[upload] Employee avatars: storage=${d.employeeAvatarStorage} (SUPABASE_URL+SERVICE_ROLE_KEY=${d.supabaseStorageConfigured})`,
@@ -155,6 +156,7 @@ export async function tryUploadBusinessLogoToSupabase(
   mimetype: string,
   originalFilename?: string,
 ): Promise<string | null> {
+  warnIfSupabaseUrlButNoServiceRole();
   if (!isSupabaseStorageConfiguredForUpload()) {
     return null;
   }
@@ -177,6 +179,7 @@ export async function tryUploadPlatformBusinessLogoToSupabase(
   businessId: string,
   originalFilename?: string,
 ): Promise<string | null> {
+  warnIfSupabaseUrlButNoServiceRole();
   if (!isSupabaseStorageConfiguredForUpload()) {
     return null;
   }
@@ -199,6 +202,7 @@ export async function tryUploadPlatformVerificationToSupabase(
   businessId: string,
   originalFilename?: string,
 ): Promise<string | null> {
+  warnIfSupabaseUrlButNoServiceRole();
   if (!isSupabaseStorageConfiguredForUpload()) {
     return null;
   }
