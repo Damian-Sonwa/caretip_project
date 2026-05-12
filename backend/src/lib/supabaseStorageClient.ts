@@ -75,3 +75,53 @@ export async function uploadBufferToSupabasePublicUrl(
   }
   return data.publicUrl;
 }
+
+/**
+ * Parses a `getPublicUrl` style URL: `/storage/v1/object/public/{bucket}/{objectPath}`.
+ */
+export function parseSupabasePublicStorageUrl(
+  publicUrl: string,
+): { bucket: string; objectPath: string } | null {
+  try {
+    const u = new URL(publicUrl.trim());
+    const m = u.pathname.match(/\/storage\/v1\/object\/public\/([^/]+)\/(.+)$/);
+    if (!m?.[1] || !m[2]) return null;
+    return { bucket: m[1], objectPath: decodeURIComponent(m[2]) };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Confirms the object exists in Storage using the service role (same auth as upload).
+ * Call this after `uploadBufferToSupabasePublicUrl` and before persisting `logoPath` in the database.
+ */
+export async function assertUploadedObjectReadableInBucket(publicUrl: string): Promise<void> {
+  if (!isSupabaseStorageConfigured()) {
+    throw new Error("Supabase Storage is not configured; cannot verify upload.");
+  }
+  const parsed = parseSupabasePublicStorageUrl(publicUrl);
+  if (!parsed) {
+    throw new Error("Storage returned a URL that is not a Supabase public object URL.");
+  }
+  const supabase = getServiceClient();
+  const { error } = await supabase.storage.from(parsed.bucket).download(parsed.objectPath);
+  if (error) {
+    throw new Error(
+      `Uploaded object is missing or not readable in bucket "${parsed.bucket}". Check bucket policies and public access. ${error.message}`,
+    );
+  }
+}
+
+/** Best-effort delete after a failed DB commit (avoids orphaned objects). */
+export async function removeUploadedObjectByPublicUrlIfPossible(publicUrl: string): Promise<void> {
+  if (!isSupabaseStorageConfigured()) return;
+  const parsed = parseSupabasePublicStorageUrl(publicUrl);
+  if (!parsed) return;
+  try {
+    const supabase = getServiceClient();
+    await supabase.storage.from(parsed.bucket).remove([parsed.objectPath]);
+  } catch {
+    /* ignore */
+  }
+}

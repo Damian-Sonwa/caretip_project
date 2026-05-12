@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as employeeService from "../services/employee.service.js";
 import * as businessService from "../services/business.service.js";
 import { uploadEmployeeAvatarImage } from "../services/upload.service.js";
+import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import {
   logServerError,
   clientSafeMessage,
@@ -100,8 +101,13 @@ export async function uploadMyAvatar(req: Request, res: Response) {
       return res.status(400).json({ message: "Image file is required (field name: avatar)" });
     }
     const url = await uploadEmployeeAvatarImage(file.buffer, file.mimetype);
-    const result = await employeeService.setEmployeeAvatarUrl(userId, url);
-    return res.json(result);
+    try {
+      const result = await employeeService.setEmployeeAvatarUrl(userId, url);
+      return res.json(result);
+    } catch (dbErr) {
+      await removeUploadedObjectByPublicUrlIfPossible(url);
+      throw dbErr;
+    }
   } catch (err) {
     logServerError("employee.uploadMyAvatar", err);
     return res.status(400).json({

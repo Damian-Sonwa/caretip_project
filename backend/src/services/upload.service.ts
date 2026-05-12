@@ -1,4 +1,4 @@
-import { mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import path from "node:path";
 import { randomUUID } from "crypto";
 import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
@@ -6,7 +6,12 @@ import {
   validateImageBufferForUpload,
   isAllowedImageMimetype,
 } from "../lib/imageUploadValidation.js";
-import { isSupabaseStorageConfigured, uploadBufferToSupabasePublicUrl, warnIfSupabaseUrlButNoServiceRole } from "../lib/supabaseStorageClient.js";
+import {
+  isSupabaseStorageConfigured,
+  uploadBufferToSupabasePublicUrl,
+  warnIfSupabaseUrlButNoServiceRole,
+  assertUploadedObjectReadableInBucket,
+} from "../lib/supabaseStorageClient.js";
 import { buildUniqueStorageObjectName } from "../utils/storageObjectName.js";
 
 const UPLOAD_CONFIG_ERROR =
@@ -80,6 +85,12 @@ function extFromImageMimetype(mimetype: string): string {
   return ".jpg";
 }
 
+function assertDiskFileExists(absolutePath: string): void {
+  if (!existsSync(absolutePath)) {
+    throw new Error("Saved file is missing on disk.");
+  }
+}
+
 async function uploadBufferToSupabaseWithTimeout(
   objectKey: string,
   buffer: Buffer,
@@ -105,7 +116,9 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
       const ext = extFromImageMimetype(mimetype);
       const name = buildUniqueStorageObjectName(`avatar${ext}`, ext);
       const objectKey = `avatars/${name}`;
-      return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      await assertUploadedObjectReadableInBucket(publicUrl);
+      return publicUrl;
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[upload] Supabase employee avatar failed:", msg);
@@ -140,82 +153,162 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
   try {
     mkdirSync(dir, { recursive: true });
     writeFileSync(fp, buffer);
+    assertDiskFileExists(fp);
   } catch (e) {
     console.error("[upload] Disk write failed (ephemeral or read-only filesystem?)", e);
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
-  return `${base}/uploads/avatars/${filename}`;
+  const baseNorm = base.replace(/\/$/, "");
+  return `${baseNorm}/uploads/avatars/${filename}`;
 }
 
 /**
- * When Supabase is configured, uploads a business logo buffer and returns a public `https://...` URL.
- * On failure returns `null` so callers can keep the on-disk Multer path.
+ * Manager business logo: Supabase public URL (verified readable) or absolute API URL for disk mode.
+ * Throws on any failure — callers must not update the database unless this resolves.
  */
-export async function tryUploadBusinessLogoToSupabase(
-  buffer: Buffer,
-  mimetype: string,
-  originalFilename?: string,
-): Promise<string | null> {
-  warnIfSupabaseUrlButNoServiceRole();
-  if (!isSupabaseStorageConfiguredForUpload()) {
-    return null;
-  }
-  try {
-    const ext = extFromImageMimetype(mimetype);
-    const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
-    const objectKey = `business-logos/${name}`;
-    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[upload] Supabase business logo failed (keeping disk path):", msg);
-    return null;
-  }
-}
-
-/** Platform admin: business logo file → public URL or null to keep disk path. */
-export async function tryUploadPlatformBusinessLogoToSupabase(
+export async function uploadManagerBusinessLogoImage(
   buffer: Buffer,
   mimetype: string,
   businessId: string,
   originalFilename?: string,
-): Promise<string | null> {
-  warnIfSupabaseUrlButNoServiceRole();
-  if (!isSupabaseStorageConfiguredForUpload()) {
-    return null;
+): Promise<string> {
+  logStorageBackendOnce();
+  validateImageBufferForUpload(buffer, mimetype);
+  const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+
+  if (isSupabaseStorageConfiguredForUpload()) {
+    try {
+      const ext = extFromImageMimetype(mimetype);
+      const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+      const objectKey = `business-logos/${name}`;
+      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      await assertUploadedObjectReadableInBucket(publicUrl);
+      return publicUrl;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[upload] manager business logo (Supabase) failed:", msg);
+      if (/timed out/i.test(msg)) {
+        throw new Error("Logo upload timed out. Try again with a smaller image.");
+      }
+      throw new Error(
+        "We couldn't store your logo in cloud storage. Check SUPABASE_SERVICE_ROLE_KEY, bucket name, and public read policies, then try again.",
+      );
+    }
   }
+
+  const base = resolvePublicApiBaseUrl();
+  if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
+    throw new Error(UPLOAD_CONFIG_ERROR);
+  }
+  const ext = extFromImageMimetype(mimetype);
+  const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+  const relDir = path.join("uploads", "businesses", safeBizId);
+  const dir = path.join(process.cwd(), relDir);
+  const fp = path.join(dir, name);
   try {
-    const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-    const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
-    const objectKey = `platform-logos/${businessId.replace(/[^a-zA-Z0-9-_]/g, "")}/${name}`;
-    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(fp, buffer);
+    assertDiskFileExists(fp);
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[upload] Supabase platform business logo failed:", msg);
-    return null;
+    console.error("[upload] manager business logo disk write failed:", e);
+    throw new Error(UPLOAD_CONFIG_ERROR);
   }
+  const baseNorm = base.replace(/\/$/, "");
+  const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
+  return `${baseNorm}/${relUrl}`;
 }
 
-/** Platform admin: verification document → public URL or null to keep disk path. */
-export async function tryUploadPlatformVerificationToSupabase(
+/** Platform admin: business logo — same persistence rules as manager upload. */
+export async function uploadPlatformBusinessLogoImage(
   buffer: Buffer,
   mimetype: string,
   businessId: string,
   originalFilename?: string,
-): Promise<string | null> {
+): Promise<string> {
+  logStorageBackendOnce();
+  validateImageBufferForUpload(buffer, mimetype);
+  const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+
+  if (isSupabaseStorageConfiguredForUpload()) {
+    try {
+      const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+      const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+      const objectKey = `platform-logos/${safeBizId}/${name}`;
+      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      await assertUploadedObjectReadableInBucket(publicUrl);
+      return publicUrl;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[upload] platform business logo (Supabase) failed:", msg);
+      throw new Error("We couldn't store the business logo. Check Supabase Storage configuration.");
+    }
+  }
+
+  const base = resolvePublicApiBaseUrl();
+  if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
+    throw new Error(UPLOAD_CONFIG_ERROR);
+  }
+  const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+  const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
+  const relDir = path.join("uploads", "platform", "businesses", safeBizId);
+  const dir = path.join(process.cwd(), relDir);
+  const fp = path.join(dir, name);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(fp, buffer);
+  assertDiskFileExists(fp);
+  const baseNorm = base.replace(/\/$/, "");
+  const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
+  return `${baseNorm}/${relUrl}`;
+}
+
+const VERIFICATION_MAX_BYTES = 10 * 1024 * 1024;
+
+/** Platform admin: verification document (image or PDF/Word). */
+export async function uploadPlatformVerificationDocument(
+  buffer: Buffer,
+  mimetype: string,
+  businessId: string,
+  originalFilename?: string,
+): Promise<string> {
   warnIfSupabaseUrlButNoServiceRole();
-  if (!isSupabaseStorageConfiguredForUpload()) {
-    return null;
+  if (!buffer?.length) {
+    throw new Error("File is empty.");
   }
-  try {
-    const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-    const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
-    const objectKey = `platform-verification/${businessId.replace(/[^a-zA-Z0-9-_]/g, "")}/${name}`;
-    return await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    console.error("[upload] Supabase platform verification upload failed:", msg);
-    return null;
+  if (buffer.length > VERIFICATION_MAX_BYTES) {
+    throw new Error("File is too large (max 10 MB).");
   }
+  const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+
+  if (isSupabaseStorageConfiguredForUpload()) {
+    try {
+      const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+      const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
+      const objectKey = `platform-verification/${safeBizId}/${name}`;
+      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      await assertUploadedObjectReadableInBucket(publicUrl);
+      return publicUrl;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[upload] platform verification (Supabase) failed:", msg);
+      throw new Error("We couldn't store the verification document. Check Supabase Storage configuration.");
+    }
+  }
+
+  const base = resolvePublicApiBaseUrl();
+  if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
+    throw new Error(UPLOAD_CONFIG_ERROR);
+  }
+  const ext = pathExtFromMimeOrName(mimetype, originalFilename);
+  const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
+  const relDir = path.join("uploads", "platform", "businesses", safeBizId);
+  const dir = path.join(process.cwd(), relDir);
+  const fp = path.join(dir, name);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(fp, buffer);
+  assertDiskFileExists(fp);
+  const baseNorm = base.replace(/\/$/, "");
+  const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
+  return `${baseNorm}/${relUrl}`;
 }
 
 function pathExtFromMimeOrName(mimetype: string, originalFilename?: string): string {

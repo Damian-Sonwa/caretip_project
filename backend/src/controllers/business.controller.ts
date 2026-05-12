@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-import { readFile, unlink } from "node:fs/promises";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import {
@@ -7,10 +6,8 @@ import {
   clientSafeMessage,
   CLIENT_FALLBACK,
 } from "../utils/httpErrors.js";
-import {
-  isSupabaseStorageConfiguredForUpload,
-  tryUploadBusinessLogoToSupabase,
-} from "../services/upload.service.js";
+import { uploadManagerBusinessLogoImage } from "../services/upload.service.js";
+import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 
 export async function generateInvite(req: Request, res: Response) {
   try {
@@ -132,34 +129,27 @@ export async function uploadMyLogo(req: Request, res: Response) {
     if (!b) {
       return res.status(404).json({ message: "Business not found" });
     }
-    const file = (req as any).file as Express.Multer.File | undefined;
-    if (!file) {
+    const file = req.file;
+    if (!file?.buffer) {
       return res.status(400).json({ message: "File is required (multipart field name: file)" });
     }
-    const publicPath = `/uploads/businesses/${b.id}/${file.filename}`;
-    let logoPathToStore = publicPath;
 
-    /** Multer disk storage sets `path`; mirror to Supabase when configured, else keep disk URL. */
-    if (isSupabaseStorageConfiguredForUpload() && typeof file.path === "string" && file.path.length > 0) {
-      try {
-        const buf = await readFile(file.path);
-        const remoteUrl = await tryUploadBusinessLogoToSupabase(buf, file.mimetype, file.originalname);
-        if (remoteUrl) {
-          logoPathToStore = remoteUrl;
-          await unlink(file.path).catch(() => {
-            /* best-effort remove temp Multer file */
-          });
-        }
-      } catch (remoteErr) {
-        logServerError("business.uploadMyLogo.supabase_fallback_disk", remoteErr);
-        logoPathToStore = publicPath;
-      }
+    const logoPathToStore = await uploadManagerBusinessLogoImage(
+      file.buffer,
+      file.mimetype,
+      b.id,
+      file.originalname,
+    );
+
+    try {
+      await prisma.business.update({
+        where: { id: b.id },
+        data: { logoPath: logoPathToStore },
+      });
+    } catch (dbErr) {
+      await removeUploadedObjectByPublicUrlIfPossible(logoPathToStore);
+      throw dbErr;
     }
-
-    await prisma.business.update({
-      where: { id: b.id },
-      data: { logoPath: logoPathToStore },
-    });
     return res.json({ success: true, path: logoPathToStore });
   } catch (err) {
     logServerError("business.uploadMyLogo", err);

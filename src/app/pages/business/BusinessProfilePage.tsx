@@ -151,19 +151,19 @@ export function BusinessProfilePage() {
     setSaving(true);
     const hadPendingLogo = pendingLogo != null;
     try {
-      const updated = await putBusinessProfile({
+      if (pendingLogo) {
+        await uploadMyBusinessLogo(pendingLogo);
+        setPendingLogo(null);
+      }
+      await putBusinessProfile({
         name: name.trim(),
         businessType: businessType.trim() || null,
         location: location.trim() || null,
       });
-      if (pendingLogo) {
-        await uploadMyBusinessLogo(pendingLogo);
-      }
-      const fresh = hadPendingLogo ? await fetchBusinessProfile() : updated;
+      const fresh = await fetchBusinessProfile();
       setProfile(fresh);
       applyProfileToForm(fresh);
       if (hadPendingLogo) setLogoBust((b) => b + 1);
-      setPendingLogo(null);
       window.dispatchEvent(new Event("caretip-business-profile-changed"));
       toast.success(t("business.profilePage.toastSaved"), TOAST_OK);
     } catch (e) {
