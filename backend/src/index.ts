@@ -69,7 +69,18 @@ app.use("/api/webhooks", express.raw({ type: "application/json" }), stripeWebhoo
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
-app.use("/uploads", express.static(join(process.cwd(), "uploads")));
+app.use(
+  "/uploads",
+  express.static(join(process.cwd(), "uploads"), {
+    maxAge: process.env.NODE_ENV === "production" ? 86400000 : 0,
+    immutable: false,
+    setHeaders(res, filePath) {
+      if (/\.(png|jpe?g|gif|webp|avif|svg|ico)$/i.test(filePath)) {
+        res.setHeader("Cache-Control", "public, max-age=86400");
+      }
+    },
+  }),
+);
 
 app.use("/api/test", testRoutes);
 app.use("/api/auth", authRoutes);
@@ -117,5 +128,14 @@ void assertEnvForAuth().then(() => {
   }
   httpServer.listen(PORT, () => {
     console.log(`Caretip API running on http://localhost:${PORT}`);
+    if (
+      process.env.NODE_ENV === "production" &&
+      process.env.RENDER &&
+      !getImageUploadStorageDiagnostics().supabaseStorageConfigured
+    ) {
+      console.warn(
+        "[upload] Render: Supabase Storage is not configured. Files in ./uploads are lost on redeploy and are not shared across multiple instances. Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (see backend/.env.example) so logos and avatars use durable object storage.",
+      );
+    }
   });
 });

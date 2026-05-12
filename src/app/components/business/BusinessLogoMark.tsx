@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { resolveMediaUrl } from "../../lib/mediaUrl";
@@ -35,8 +36,13 @@ export function BusinessLogoMark({
 }) {
   const src = resolveMediaUrl(logoPathOrUrl ?? undefined);
   const label = businessName.trim() || "Business";
+  const [imgFailed, setImgFailed] = useState(false);
 
-  if (src) {
+  useEffect(() => {
+    setImgFailed(false);
+  }, [src]);
+
+  if (src && !imgFailed) {
     return (
       <div
         className={cn(
@@ -46,7 +52,14 @@ export function BusinessLogoMark({
           className,
         )}
       >
-        <img src={src} alt="" className="h-full w-full object-contain p-0.5" loading="lazy" />
+        <img
+          src={src}
+          alt=""
+          className="h-full w-full object-contain p-0.5"
+          loading="lazy"
+          decoding="async"
+          onError={() => setImgFailed(true)}
+        />
       </div>
     );
   }

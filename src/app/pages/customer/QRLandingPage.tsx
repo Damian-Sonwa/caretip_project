@@ -67,6 +67,12 @@ export function QRLandingPage() {
     timestamp: number;
   } | null>(null);
   const [repeatDismissed, setRepeatDismissed] = useState(false);
+  /** Directory flow: single hero `<img>` loads the logo; sticky uses a local icon to avoid duplicate requests (and Firefox NS_BINDING_ABORTED). */
+  const [heroLogoFailed, setHeroLogoFailed] = useState(false);
+
+  useEffect(() => {
+    setHeroLogoFailed(false);
+  }, [businessData?.id, businessData?.logo]);
 
   useEffect(() => {
     if (!businessId && !employeeIdParam && !qrSlug) {
@@ -583,7 +589,12 @@ export function QRLandingPage() {
     <div className="min-h-screen bg-white dark:bg-neutral-950">
       <div className="sticky top-0 z-10 border-b border-border/30 bg-background/95 backdrop-blur-lg shadow-sm">
         <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3.5 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-          <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="md" />
+          <div
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40"
+            aria-hidden
+          >
+            <Building2 className="h-5 w-5 text-primary" />
+          </div>
           <div className="min-w-0 flex-1">
             <h1 className="truncate text-base font-semibold text-foreground">{businessData.name}</h1>
             <p className="text-xs text-muted-foreground">{t("tipFlow.qrLanding.selectTeamMember")}</p>
@@ -661,11 +672,14 @@ export function QRLandingPage() {
           <div className="relative">
             <Card className="overflow-hidden border border-border/40 shadow-xl hover:shadow-2xl transition-shadow duration-300">
               <div className="relative h-56 bg-gray-50 dark:bg-neutral-900">
-                {businessLogoSrc ? (
+                {businessLogoSrc && !heroLogoFailed ? (
                   <img
                     src={businessLogoSrc}
-                    alt={businessData.name}
+                    alt=""
                     className="h-full w-full object-cover"
+                    loading="eager"
+                    decoding="async"
+                    onError={() => setHeroLogoFailed(true)}
                   />
                 ) : (
                   <div

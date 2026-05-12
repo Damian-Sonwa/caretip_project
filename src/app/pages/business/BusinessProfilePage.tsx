@@ -54,8 +54,13 @@ export function BusinessProfilePage() {
   const [pendingLogo, setPendingLogo] = useState<File | null>(null);
   const [logoObjectUrl, setLogoObjectUrl] = useState<string | null>(null);
   const [logoBust, setLogoBust] = useState(0);
+  const [savedLogoLoadFailed, setSavedLogoLoadFailed] = useState(false);
 
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setSavedLogoLoadFailed(false);
+  }, [profile?.logo, pendingLogo]);
 
   const applyProfileToForm = useCallback((p: BusinessInfo) => {
     setName(p.name);
@@ -99,11 +104,12 @@ export function BusinessProfilePage() {
   }, [pendingLogo]);
 
   const serverLogoSrc = useMemo(() => {
+    if (savedLogoLoadFailed) return null;
     const base = resolveMediaUrl(profile?.logo ?? undefined);
     if (!base) return null;
     const sep = base.includes("?") ? "&" : "?";
     return `${base}${sep}v=${logoBust}`;
-  }, [profile?.logo, logoBust]);
+  }, [profile?.logo, logoBust, savedLogoLoadFailed]);
 
   const headerImageSrc = logoObjectUrl ?? serverLogoSrc;
 
@@ -233,6 +239,9 @@ export function BusinessProfilePage() {
                   src={headerImageSrc}
                   alt=""
                   className="h-28 w-28 rounded-xl border border-border bg-white object-contain p-1 shadow-sm"
+                  onError={() => {
+                    if (!pendingLogo) setSavedLogoLoadFailed(true);
+                  }}
                 />
               ) : (
                 <BusinessLogoMark
