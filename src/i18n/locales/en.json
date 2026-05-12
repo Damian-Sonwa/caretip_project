@@ -20,6 +20,14 @@
   "format": {
     "notAvailable": "N/A"
   },
+  "common": {
+    "settingUp": "Setting things up for you…",
+    "onlyAMoment": "This will only take a moment.",
+    "syncingAccountStatus": "Syncing account status…",
+    "loadingTeamMembers": "Loading team members…",
+    "loadingTeam": "Loading team…",
+    "openingTip": "Opening tip…"
+  },
   "join": {
     "eyebrow": "Join your team",
     "title": "Enter your invite code",
@@ -549,6 +557,11 @@
       "employeeWrongVenue": "This team member does not belong to this venue.",
       "businessNotFound": "Business not found.",
       "invalidLink": "Invalid link."
+    },
+    "staffLanding": {
+      "loadingProfile": "Loading profile…",
+      "openingTipScreen": "Opening tip screen…",
+      "goHome": "Go home"
     },
     "docTitle": {
       "tip": "Tip {{name}} - CareTip Limited",
@@ -1171,6 +1184,24 @@
       "cancel": "Cancel",
       "save": "Save"
     },
+    "goalCard": {
+      "toastInvalidAmount": "Enter a valid goal amount.",
+      "toastInvalidStartDate": "Please use a valid start date.",
+      "toastGoalSaved": "Goal saved",
+      "toastGoalRemoved": "Goal removed",
+      "toastNoProgress": "No progress yet to mark as achieved.",
+      "toastMarkedAchieved": "Marked as achieved",
+      "confirmRemove": "Remove your tip goal?"
+    },
+    "qrModal": {
+      "toastLinkCopied": "Link copied to clipboard",
+      "toastCopyFailed": "Could not copy link",
+      "title": "Your tip QR code",
+      "description": "Guests scan this to open your public tipping page.",
+      "loadingQr": "Loading your QR…",
+      "downloadImage": "Download image",
+      "copyLinkButton": "Copy link"
+    },
     "settings": {
       "toastLoadError": "Could not load settings.",
       "toastMonthlyGoalInvalid": "Monthly goal must be a valid number.",
@@ -1287,6 +1318,24 @@
       "loadingVenue": "Loading venue…",
       "venueDashboard": "Business"
     },
+    "heroPreview": {
+      "scanToTip": "Scan to tip",
+      "careTipQr": "CareTip QR",
+      "tableLabel": "Table 12",
+      "liveBadge": "Live",
+      "today": "Today",
+      "tipsReceived": "tips received",
+      "scans": "Scans",
+      "last24h": "last 24h",
+      "shareQr": "Share QR",
+      "paymentConfirmation": "Payment confirmation",
+      "tipSentSuccess": "Tip sent successfully",
+      "tipSentSub": "Guest scanned and tipped in under 10 seconds.",
+      "amount": "Amount",
+      "teamMember": "Team member",
+      "teamPulse": "Team pulse",
+      "previewFoot": "Preview: QR scans → instant tip → staff earnings visibility. Clean, fast, and guest-friendly."
+    },
     "period": {
       "daily": "Daily",
       "weekly": "Weekly",
@@ -1296,6 +1345,10 @@
       "title": "Some staff are missing QR links",
       "description": "Open QR Management to generate fresh links and printable codes.",
       "action": "Fix QR links"
+    },
+    "onboarding": {
+      "toastSessionExpired": "Your session expired. Please sign in again.",
+      "toastSavedLoadingDashboard": "Saved. Loading your dashboard…"
     },
     "goalStatus": {
       "achieved": "Achieved",
@@ -1601,6 +1654,7 @@
       "statStatus": "Status",
       "statSlug": "Slug",
       "reviewBody": "Your account is under review.",
+      "qrLockedSub": "QR features will be available once your account is verified.",
       "sectionsTitle": "Sections",
       "sectionsDesc": "Employees, tables, and locations",
       "tabEmployees": "Employees",

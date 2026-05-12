@@ -20,6 +20,14 @@
   "format": {
     "notAvailable": "k. A."
   },
+  "common": {
+    "settingUp": "Wird für Sie eingerichtet…",
+    "onlyAMoment": "Das dauert nur einen Moment.",
+    "syncingAccountStatus": "Kontostatus wird synchronisiert…",
+    "loadingTeamMembers": "Team wird geladen…",
+    "loadingTeam": "Team wird geladen…",
+    "openingTip": "Trinkgeld wird geöffnet…"
+  },
   "join": {
     "eyebrow": "Tritt deinem Team bei",
     "title": "Gib deinen Einladungscode ein",
@@ -550,6 +558,11 @@
       "businessNotFound": "Unternehmen nicht gefunden.",
       "invalidLink": "Ungültiger Link."
     },
+    "staffLanding": {
+      "loadingProfile": "Profil wird geladen…",
+      "openingTipScreen": "Trinkgeld-Ansicht wird geöffnet…",
+      "goHome": "Zur Startseite"
+    },
     "docTitle": {
       "tip": "Trinkgeld für {{name}} - CareTip Limited",
       "business": "{{name}} - CareTip Limited",
@@ -730,7 +743,7 @@
     "clearSearch": "Suche zurücksetzen"
   },
   "dashboard": {
-    "live_status": "Live",
+    "live_status": "Aktiv",
     "filter_today": "Heute",
     "filter_week": "Diese Woche",
     "filter_month": "Diesen Monat",
@@ -741,7 +754,7 @@
     "socket": {
       "idle": "Live-Updates",
       "connecting": "Verbindung wird hergestellt…",
-      "connected": "Live",
+      "connected": "Aktiv",
       "disconnected": "Verbindung wird wiederhergestellt…",
       "reconnecting": "Verbindung wird wiederhergestellt…"
     },
@@ -1171,6 +1184,24 @@
       "cancel": "Abbrechen",
       "save": "Speichern"
     },
+    "goalCard": {
+      "toastInvalidAmount": "Bitte geben Sie einen gültigen Zielbetrag ein.",
+      "toastInvalidStartDate": "Bitte verwenden Sie ein gültiges Startdatum.",
+      "toastGoalSaved": "Ziel gespeichert",
+      "toastGoalRemoved": "Ziel entfernt",
+      "toastNoProgress": "Noch kein Fortschritt, um als erreicht zu markieren.",
+      "toastMarkedAchieved": "Als erreicht markiert",
+      "confirmRemove": "Ihr Trinkgeldziel entfernen?"
+    },
+    "qrModal": {
+      "toastLinkCopied": "Link in die Zwischenablage kopiert",
+      "toastCopyFailed": "Link konnte nicht kopiert werden",
+      "title": "Ihr Trinkgeld-QR-Code",
+      "description": "Gäste scannen diesen Code, um Ihre öffentliche Trinkgeld-Seite zu öffnen.",
+      "loadingQr": "QR wird geladen…",
+      "downloadImage": "Bild herunterladen",
+      "copyLinkButton": "Link kopieren"
+    },
     "settings": {
       "toastLoadError": "Einstellungen konnten nicht geladen werden.",
       "toastMonthlyGoalInvalid": "Monatsziel muss eine gültige Zahl sein.",
@@ -1287,6 +1318,24 @@
       "loadingVenue": "Lokal wird geladen…",
       "venueDashboard": "Unternehmen"
     },
+    "heroPreview": {
+      "scanToTip": "Scannen zum Tippen",
+      "careTipQr": "CareTip-QR",
+      "tableLabel": "Tisch 12",
+      "liveBadge": "Aktiv",
+      "today": "Heute",
+      "tipsReceived": "Trinkgelder erhalten",
+      "scans": "Scans",
+      "last24h": "letzte 24 Std.",
+      "shareQr": "QR teilen",
+      "paymentConfirmation": "Zahlungsbestätigung",
+      "tipSentSuccess": "Trinkgeld erfolgreich gesendet",
+      "tipSentSub": "Gast hat gescannt und in unter 10 Sekunden getippt.",
+      "amount": "Betrag",
+      "teamMember": "Teammitglied",
+      "teamPulse": "Team-Puls",
+      "previewFoot": "Vorschau: QR-Scan → sofortiges Trinkgeld → Sichtbarkeit der Einnahmen. Schnell und gästefreundlich."
+    },
     "period": {
       "daily": "Täglich",
       "weekly": "Wöchentlich",
@@ -1296,6 +1345,10 @@
       "title": "Einigen Mitarbeitenden fehlen QR Links",
       "description": "Öffnen Sie die QR Verwaltung, um neue Links und druckbare Codes zu erzeugen.",
       "action": "QR Links beheben"
+    },
+    "onboarding": {
+      "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
+      "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…"
     },
     "goalStatus": {
       "achieved": "Erreicht",
@@ -1601,6 +1654,7 @@
       "statStatus": "Status",
       "statSlug": "Slug",
       "reviewBody": "Ihr Konto wird geprüft.",
+      "qrLockedSub": "QR-Funktionen stehen zur Verfügung, sobald Ihr Konto verifiziert ist.",
       "sectionsTitle": "Bereiche",
       "sectionsDesc": "Team, Tische und Standorte",
       "tabEmployees": "Team",

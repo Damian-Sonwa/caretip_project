@@ -1,6 +1,7 @@
 import { useNavigate, useParams, Link } from "react-router";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getEmployeeById } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -17,6 +18,7 @@ import { formatEur } from "../../lib/formatEur";
  * Resolves the staff member and continues to the tip amount step.
  */
 export function EmployeeQrEntryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { employeeId } = useParams<{ employeeId: string }>();
   const { setBusinessId, setEmployee, setStaffProfileSlug, setAmount } = useTipFlow();
@@ -31,7 +33,7 @@ export function EmployeeQrEntryPage() {
   useEffect(() => {
     const raw = employeeId?.trim();
     if (!raw) {
-      setError("Invalid link.");
+      setError(t("tipFlow.errors.invalidLink"));
       setLoading(false);
       return;
     }
@@ -71,18 +73,18 @@ export function EmployeeQrEntryPage() {
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
         <p className="mb-2 text-center text-sm font-medium text-destructive">{error}</p>
         <Link to="/" className="text-primary hover:underline text-sm">
-          Go home
+          {t("tipFlow.common.goHomeLink")}
         </Link>
       </div>
     );
   }
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message="Opening tip…" />;
+    return <CareTipPageLoader variant="wait" message={t("common.openingTip")} />;
   }
 
   if (!emp || repeatAmount == null) {
-    return <CareTipPageLoader variant="wait" message="Opening tip…" />;
+    return <CareTipPageLoader variant="wait" message={t("common.openingTip")} />;
   }
 
   return (

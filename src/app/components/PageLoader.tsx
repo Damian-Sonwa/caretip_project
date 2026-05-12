@@ -1,5 +1,6 @@
 import type { CareTipPageLoaderProps } from "./CareTipPageLoader";
 import { CareTipPageLoader } from "./CareTipPageLoader";
+import { useTranslation } from "react-i18next";
 
 export type PageLoaderProps = Pick<CareTipPageLoaderProps, "message" | "className" | "variant">;
 
@@ -7,10 +8,7 @@ export type PageLoaderProps = Pick<CareTipPageLoaderProps, "message" | "classNam
  * Canonical loading UI for route gates and primary page waits.
  * Prefer this (or {@link AppLoader}) over ad-hoc spinners so auth and data hydration stay consistent.
  */
-export function PageLoader({
-  message = "Setting things up for you...",
-  className,
-  variant = "wait",
-}: PageLoaderProps) {
-  return <CareTipPageLoader variant={variant} message={message} className={className} />;
+export function PageLoader({ message, className, variant = "wait" }: PageLoaderProps) {
+  const { t } = useTranslation();
+  return <CareTipPageLoader variant={variant} message={message ?? t("common.settingUp")} className={className} />;
 }

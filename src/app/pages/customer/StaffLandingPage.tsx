@@ -1,5 +1,6 @@
 import { useNavigate, useParams, Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Heart, Building2, Sparkles } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getStaffBySlug, type StaffBySlugResponse } from "../../lib/api";
@@ -20,6 +21,7 @@ const BLACK = "#000000";
  * ?preview=1 — full profile + "Leave a tip" (e.g. back navigation from tip flow).
  */
 export function StaffLandingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const previewProfile = searchParams.get("preview") === "1";
@@ -106,7 +108,7 @@ export function StaffLandingPage() {
     return (
       <CareTipPageLoader
         variant="wait"
-        message={previewProfile ? "Loading profile…" : "Opening tip screen…"}
+        message={previewProfile ? t("tipFlow.staffLanding.loadingProfile") : t("tipFlow.staffLanding.openingTipScreen")}
       />
     );
   }
@@ -114,9 +116,9 @@ export function StaffLandingPage() {
   if (error || !staff) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? "Not found"}</p>
+        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
         <Link to="/" className="text-primary hover:underline text-sm">
-          Go home
+          {t("tipFlow.staffLanding.goHome")}
         </Link>
       </div>
     );

@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { CheckCircle2, QrCode, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   className?: string;
@@ -14,6 +15,7 @@ type Props = {
  * No heavy assets; only CSS-based ambient/fade/float/glow.
  */
 export function BusinessDashboardHeroProductPreview({ className }: Props) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -46,8 +48,8 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                       <QrCode className="h-4 w-4 text-primary" aria-hidden />
                     </div>
                     <div className="leading-tight">
-                      <p className="text-[11px] font-semibold text-white">Scan to tip</p>
-                      <p className="text-[10px] text-white/60">CareTip QR</p>
+                      <p className="text-[11px] font-semibold text-white">{t("business.heroPreview.scanToTip")}</p>
+                      <p className="text-[10px] text-white/60">{t("business.heroPreview.careTipQr")}</p>
                     </div>
                   </div>
                   <div className="h-7 w-16 rounded-full bg-white/5 ring-1 ring-white/10" aria-hidden />
@@ -57,9 +59,9 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                 <div className="px-4 pb-4">
                   <div className="rounded-2xl bg-white/5 ring-1 ring-white/10 p-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-white/85">Table 12</p>
+                      <p className="text-xs font-semibold text-white/85">{t("business.heroPreview.tableLabel")}</p>
                       <span className="rounded-full bg-emerald-500/15 px-2 py-1 text-[10px] font-semibold text-emerald-600 ring-1 ring-emerald-500/25 dark:text-emerald-400">
-                        Live
+                        {t("business.heroPreview.liveBadge")}
                       </span>
                     </div>
                     <div className="mt-3 grid grid-cols-12 gap-3 items-center">
@@ -95,14 +97,14 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
 
                       <div className="col-span-6 space-y-2">
                         <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
-                          <p className="text-[10px] font-semibold text-white/70">Today</p>
+                          <p className="text-[10px] font-semibold text-white/70">{t("business.heroPreview.today")}</p>
                           <p className="mt-0.5 text-base font-bold text-white">+₦5,000</p>
-                          <p className="text-[10px] text-white/55">tips received</p>
+                          <p className="text-[10px] text-white/55">{t("business.heroPreview.tipsReceived")}</p>
                         </div>
                         <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
-                          <p className="text-[10px] font-semibold text-white/70">Scans</p>
+                          <p className="text-[10px] font-semibold text-white/70">{t("business.heroPreview.scans")}</p>
                           <p className="mt-0.5 text-base font-bold text-white">38</p>
-                          <p className="text-[10px] text-white/55">last 24h</p>
+                          <p className="text-[10px] text-white/55">{t("business.heroPreview.last24h")}</p>
                         </div>
                       </div>
                     </div>
@@ -111,7 +113,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                       type="button"
                       className="mt-4 w-full rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-[0_10px_26px_rgba(235,153,44,0.22)] transition-colors hover:bg-primary/90"
                     >
-                      Share QR
+                      {t("business.heroPreview.shareQr")}
                     </button>
                   </div>
                 </div>
@@ -126,9 +128,9 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-[0_26px_70px_rgba(0,0,0,0.50)] backdrop-blur-xl">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-[11px] font-semibold text-white/65">Payment confirmation</p>
-                  <p className="mt-1 text-base font-bold text-white">Tip sent successfully</p>
-                  <p className="mt-1 text-xs text-white/55">Guest scanned and tipped in under 10 seconds.</p>
+                  <p className="text-[11px] font-semibold text-white/65">{t("business.heroPreview.paymentConfirmation")}</p>
+                  <p className="mt-1 text-base font-bold text-white">{t("business.heroPreview.tipSentSuccess")}</p>
+                  <p className="mt-1 text-xs text-white/55">{t("business.heroPreview.tipSentSub")}</p>
                 </div>
                 <div className="shrink-0 rounded-2xl bg-primary/15 p-2.5 ring-1 ring-primary/25">
                   <CheckCircle2 className="h-6 w-6 text-primary" aria-hidden />
@@ -137,11 +139,11 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
 
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-black/30 ring-1 ring-white/10 p-3">
-                  <p className="text-[10px] font-semibold text-white/65">Amount</p>
+                  <p className="text-[10px] font-semibold text-white/65">{t("business.heroPreview.amount")}</p>
                   <p className="mt-1 text-lg font-bold text-white">₦2,000</p>
                 </div>
                 <div className="rounded-xl bg-black/30 ring-1 ring-white/10 p-3">
-                  <p className="text-[10px] font-semibold text-white/65">Team member</p>
+                  <p className="text-[10px] font-semibold text-white/65">{t("business.heroPreview.teamMember")}</p>
                   <p className="mt-1 text-sm font-semibold text-white">Anna · Floor</p>
                 </div>
               </div>
@@ -149,10 +151,10 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
 
             <div className="rounded-2xl border border-white/10 bg-white/5 p-4 backdrop-blur-xl">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-semibold text-white">Team pulse</p>
+                <p className="text-sm font-semibold text-white">{t("business.heroPreview.teamPulse")}</p>
                 <span className="inline-flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 text-[10px] font-semibold text-emerald-400 ring-1 ring-emerald-500/25">
                   <Sparkles className="h-3.5 w-3.5 text-emerald-400" aria-hidden />
-                  Live
+                  {t("business.heroPreview.liveBadge")}
                 </span>
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
@@ -175,9 +177,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
               </div>
             </div>
 
-            <p className="text-[11px] leading-snug text-white/55">
-              Preview: QR scans → instant tip → staff earnings visibility. Clean, fast, and guest-friendly.
-            </p>
+            <p className="text-[11px] leading-snug text-white/55">{t("business.heroPreview.previewFoot")}</p>
           </div>
         </div>
       </div>

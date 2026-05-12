@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Dialog,
   DialogContent,
@@ -37,6 +38,7 @@ export function EmployeeQRCodeModal({
   businessSlug,
   employeeSlug,
 }: EmployeeQRCodeModalProps) {
+  const { t } = useTranslation();
   const [dataUrl, setDataUrl] = useState("");
   const [imgLoading, setImgLoading] = useState(false);
 
@@ -72,10 +74,10 @@ export function EmployeeQRCodeModal({
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
-      toast.success("Link copied to clipboard");
+      toast.success(t("employee.qrModal.toastLinkCopied"));
     } catch (err) {
       logClientError("EmployeeQRCodeModal", err);
-      toast.error("Could not copy link");
+      toast.error(t("employee.qrModal.toastCopyFailed"));
     }
   };
 
@@ -88,9 +90,9 @@ export function EmployeeQRCodeModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Your tip QR code</DialogTitle>
+          <DialogTitle>{t("employee.qrModal.title")}</DialogTitle>
           <DialogDescription>
-            Guests scan this to open your public tipping page.
+            {t("employee.qrModal.description")}
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
@@ -99,7 +101,7 @@ export function EmployeeQRCodeModal({
               <div className="w-full max-w-[340px]">
                 <div className="h-[360px] w-full animate-pulse rounded-xl bg-muted" />
                 <p className="mt-3 text-center text-xs font-medium text-muted-foreground">
-                  Loading your QR…
+                  {t("employee.qrModal.loadingQr")}
                 </p>
               </div>
             ) : dataUrl ? (
@@ -118,7 +120,7 @@ export function EmployeeQRCodeModal({
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:pointer-events-none disabled:opacity-50"
             >
               <Download className="w-4 h-4 shrink-0" />
-              Download image
+              {t("employee.qrModal.downloadImage")}
             </button>
             <button
               type="button"
@@ -126,7 +128,7 @@ export function EmployeeQRCodeModal({
               className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-50"
             >
               <LinkIcon className="w-4 h-4 shrink-0" />
-              Copy link
+              {t("employee.qrModal.copyLinkButton")}
             </button>
           </div>
           <p className="text-xs text-muted-foreground text-center break-all px-2">

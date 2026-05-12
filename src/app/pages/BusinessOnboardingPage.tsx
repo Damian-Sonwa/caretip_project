@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { ArrowLeft, ArrowRight, Building2, Globe2, ImagePlus, Loader2, MapPin, Phone } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
@@ -10,6 +11,7 @@ import { patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 
 export function BusinessOnboardingPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { setHasCompletedOnboarding, refetchUser, logout } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
@@ -54,7 +56,7 @@ export function BusinessOnboardingPage() {
 
   const handleAuthFailure = () => {
     logout();
-    toast.error("Your session expired. Please sign in again.");
+    toast.error(t("business.onboarding.toastSessionExpired"));
     navigate("/login", { replace: true });
   };
 
@@ -198,7 +200,7 @@ export function BusinessOnboardingPage() {
                     if (!refreshed) {
                       // If refresh failed (e.g., backend temporarily down), still try navigation,
                       // but avoid trapping the user in a loop by showing a clear message.
-                      toast.success("Saved. Loading your dashboard…");
+                      toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
                     }
                     navigate("/dashboard", { replace: true });
                   } catch (err) {

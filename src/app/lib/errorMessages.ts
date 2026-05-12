@@ -3,7 +3,19 @@
  * Technical details stay on the server; the UI only shows safe copy.
  */
 
+import i18n from "../../i18n/i18n";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
+import { translateFriendlyMessageToDe } from "./friendlyMessageDe";
+
+function localizeFriendlyMessageCopy(english: string): string {
+  try {
+    const lng = String(i18n.resolvedLanguage ?? i18n.language ?? "").toLowerCase();
+    if (!lng.startsWith("de")) return english;
+  } catch {
+    return english;
+  }
+  return translateFriendlyMessageToDe(english);
+}
 
 /** Use only when the failure type cannot be determined (null/empty/unknown). */
 export const GENERIC_UNKNOWN_ERROR = "Something went wrong. Please try again.";
@@ -210,97 +222,101 @@ export function fallbackMessageForHttpStatus(status: number): string | undefined
  * Converts any error (API, fetch, thrown) into a user-friendly message.
  */
 export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMessageOptions): string {
-  if (error == null) return GENERIC_UNKNOWN_ERROR;
+  if (error == null) return localizeFriendlyMessageCopy(GENERIC_UNKNOWN_ERROR);
 
   if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
     return error.message;
   }
 
-  const message = error instanceof Error ? error.message : String(error);
+  const resolved = ((): string => {
+    const message = error instanceof Error ? error.message : String(error);
 
-  const normalized = message.trim();
-  if (!normalized) return GENERIC_UNKNOWN_ERROR;
+    const normalized = message.trim();
+    if (!normalized) return GENERIC_UNKNOWN_ERROR;
 
-  // Never leak ORM/database internals to the UI.
-  // Examples: "Could not save (P2010). Try again or run migrations in the backend."
-  // Keep the real error in logs (handled elsewhere), but show safe product copy here.
-  const lower = normalized.toLowerCase();
-  if (
-    /\bP\d{4}\b/.test(normalized) ||
-    lower.includes("prisma") ||
-    lower.includes("run migrations") ||
-    lower.includes("prismaclient") ||
-    lower.includes("raw query failed")
-  ) {
-    return "We couldn't load that data right now. Please try again in a moment.";
-  }
-
-  if (options?.audience === "employee") {
+    // Never leak ORM/database internals to the UI.
+    // Examples: "Could not save (P2010). Try again or run migrations in the backend."
+    // Keep the real error in logs (handled elsewhere), but show safe product copy here.
+    const lower = normalized.toLowerCase();
     if (
-      lower.includes("qr code will be available after business verification") ||
-      lower.includes("qr code generation will be enabled after admin verification") ||
-      lower.includes("unlock after your venue is verified") ||
-      lower.includes("after your venue is verified by caretip")
+      /\bP\d{4}\b/.test(normalized) ||
+      lower.includes("prisma") ||
+      lower.includes("run migrations") ||
+      lower.includes("prismaclient") ||
+      lower.includes("raw query failed")
     ) {
-      return EMPLOYEE_QR_BUSINESS_KYC_HINT;
+      return "We couldn't load that data right now. Please try again in a moment.";
     }
-  }
 
-  const mapped = ERROR_MAP[normalized];
-  if (mapped) return mapped;
+    if (options?.audience === "employee") {
+      if (
+        lower.includes("qr code will be available after business verification") ||
+        lower.includes("qr code generation will be enabled after admin verification") ||
+        lower.includes("unlock after your venue is verified") ||
+        lower.includes("after your venue is verified by caretip")
+      ) {
+        return EMPLOYEE_QR_BUSINESS_KYC_HINT;
+      }
+    }
 
-  if (Object.values(ERROR_MAP).includes(normalized)) {
-    return normalized;
-  }
+    const mapped = ERROR_MAP[normalized];
+    if (mapped) return mapped;
 
-  /** Preserves messages already produced by {@link fallbackMessageForHttpStatus} (api.ts handleRes). */
-  if (STATUS_MESSAGE_VALUES.has(normalized)) {
-    return normalized;
-  }
+    if (Object.values(ERROR_MAP).includes(normalized)) {
+      return normalized;
+    }
 
-  const requestFailedMatch = normalized.match(/^Request failed \((\d{3})\)$/);
-  if (requestFailedMatch) {
-    const code = parseInt(requestFailedMatch[1], 10);
-    const byCode = STATUS_MESSAGES[code];
-    if (byCode) return byCode;
-  }
+    /** Preserves messages already produced by {@link fallbackMessageForHttpStatus} (api.ts handleRes). */
+    if (STATUS_MESSAGE_VALUES.has(normalized)) {
+      return normalized;
+    }
 
-  if (/^(502|503|504)\s|Bad Gateway|Gateway Timeout|Service Unavailable/i.test(normalized)) {
-    if (/502|Bad Gateway/i.test(normalized)) return STATUS_MESSAGES[502]!;
-    if (/504|Gateway Timeout/i.test(normalized)) return STATUS_MESSAGES[504]!;
-    if (/503|Service Unavailable/i.test(normalized)) return STATUS_MESSAGES[503]!;
-  }
+    const requestFailedMatch = normalized.match(/^Request failed \((\d{3})\)$/);
+    if (requestFailedMatch) {
+      const code = parseInt(requestFailedMatch[1], 10);
+      const byCode = STATUS_MESSAGES[code];
+      if (byCode) return byCode;
+    }
 
-  const statusMatch = normalized.match(/^(\d{3})/);
-  if (statusMatch) {
-    const status = parseInt(statusMatch[1], 10);
-    const statusMsg = STATUS_MESSAGES[status];
-    if (statusMsg) return statusMsg;
-  }
+    if (/^(502|503|504)\s|Bad Gateway|Gateway Timeout|Service Unavailable/i.test(normalized)) {
+      if (/502|Bad Gateway/i.test(normalized)) return STATUS_MESSAGES[502]!;
+      if (/504|Gateway Timeout/i.test(normalized)) return STATUS_MESSAGES[504]!;
+      if (/503|Service Unavailable/i.test(normalized)) return STATUS_MESSAGES[503]!;
+    }
 
-  if (
-    normalized.includes("Failed to fetch") ||
-    normalized === "Load failed" ||
-    normalized === "NetworkError" ||
-    normalized.includes("NetworkError when attempting to fetch") ||
-    /failed to load|networkerror|load failed|econnrefused|err_connection_refused|err_network_changed/i.test(
-      normalized,
-    )
-  ) {
-    return ERROR_MAP["Failed to fetch"]!;
-  }
+    const statusMatch = normalized.match(/^(\d{3})/);
+    if (statusMatch) {
+      const status = parseInt(statusMatch[1], 10);
+      const statusMsg = STATUS_MESSAGES[status];
+      if (statusMsg) return statusMsg;
+    }
 
-  if (/network request failed|fetch failed|the network connection was lost|timeout/i.test(normalized)) {
-    return ERROR_MAP["Failed to fetch"]!;
-  }
+    if (
+      normalized.includes("Failed to fetch") ||
+      normalized === "Load failed" ||
+      normalized === "NetworkError" ||
+      normalized.includes("NetworkError when attempting to fetch") ||
+      /failed to load|networkerror|load failed|econnrefused|err_connection_refused|err_network_changed/i.test(
+        normalized,
+      )
+    ) {
+      return ERROR_MAP["Failed to fetch"]!;
+    }
 
-  if (
-    /database|prisma|sql|postgres|can't reach database|invocation:|error occurred during query|connectorerror/i.test(
-      normalized,
-    )
-  ) {
-    return "We couldn't load data right now. Please try again in a few minutes.";
-  }
+    if (/network request failed|fetch failed|the network connection was lost|timeout/i.test(normalized)) {
+      return ERROR_MAP["Failed to fetch"]!;
+    }
 
-  return GENERIC_UNKNOWN_ERROR;
+    if (
+      /database|prisma|sql|postgres|can't reach database|invocation:|error occurred during query|connectorerror/i.test(
+        normalized,
+      )
+    ) {
+      return "We couldn't load data right now. Please try again in a few minutes.";
+    }
+
+    return GENERIC_UNKNOWN_ERROR;
+  })();
+
+  return localizeFriendlyMessageCopy(resolved);
 }

@@ -1,5 +1,6 @@
-import { forwardRef, useImperativeHandle, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useState } from "react";
 import { CheckCircle2, Pencil, Plus, Trash2, Target, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
   upsertEmployeeGoal,
@@ -30,16 +31,16 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 
-const PERIOD_LABEL: Record<GoalPeriod, string> = {
-  daily: "Daily",
-  weekly: "Weekly",
-  monthly: "Monthly",
+const PERIOD_LABEL_KEYS: Record<GoalPeriod, string> = {
+  daily: "business.period.daily",
+  weekly: "business.period.weekly",
+  monthly: "business.period.monthly",
 };
 
-const STATUS_LABEL: Record<EmployeeGoalProgress["status"], string> = {
-  achieved: "Achieved",
-  on_track: "On track",
-  below_target: "Below target",
+const STATUS_LABEL_KEYS: Record<EmployeeGoalProgress["status"], string> = {
+  achieved: "business.goalStatus.achieved",
+  on_track: "business.goalStatus.on_track",
+  below_target: "business.goalStatus.below_target",
 };
 
 function statusClass(s: EmployeeGoalProgress["status"]): string {
@@ -64,6 +65,26 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
   { goal, onUpdated, showInlineNewGoalAction = true }: Props,
   ref,
 ) {
+  const { t } = useTranslation();
+  const periodLabel = useMemo(
+    () =>
+      ({
+        daily: t(PERIOD_LABEL_KEYS.daily),
+        weekly: t(PERIOD_LABEL_KEYS.weekly),
+        monthly: t(PERIOD_LABEL_KEYS.monthly),
+      }) satisfies Record<GoalPeriod, string>,
+    [t],
+  );
+  const statusLabel = useMemo(
+    () =>
+      ({
+        achieved: t(STATUS_LABEL_KEYS.achieved),
+        on_track: t(STATUS_LABEL_KEYS.on_track),
+        below_target: t(STATUS_LABEL_KEYS.below_target),
+      }) satisfies Record<EmployeeGoalProgress["status"], string>,
+    [t],
+  );
+
   const [open, setOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -105,11 +126,11 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
   const handleSave = async () => {
     const n = parseFloat(amount);
     if (Number.isNaN(n) || n < 0) {
-      toast.error("Enter a valid goal amount.");
+      toast.error(t("employee.goalCard.toastInvalidAmount"));
       return;
     }
     if (!/^\d{4}-\d{2}-\d{2}$/.test(startDate.trim())) {
-      toast.error("Please use a valid start date.");
+      toast.error(t("employee.goalCard.toastInvalidStartDate"));
       return;
     }
     setSaving(true);
@@ -119,7 +140,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
         goalPeriod: period,
         startDate: startDate.trim(),
       });
-      toast.success("Goal saved");
+      toast.success(t("employee.goalCard.toastGoalSaved"));
       setOpen(false);
       onUpdated();
     } catch (e) {
@@ -132,12 +153,12 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
 
   const handleDelete = async () => {
     if (!goal) return;
-    const ok = window.confirm("Remove your tip goal?");
+    const ok = window.confirm(t("employee.goalCard.confirmRemove"));
     if (!ok) return;
     setDeleting(true);
     try {
       await deleteEmployeeGoal();
-      toast.success("Goal removed");
+      toast.success(t("employee.goalCard.toastGoalRemoved"));
       setOpen(false);
       onUpdated();
     } catch (e) {
@@ -154,7 +175,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
     // to the currentAmount for the active period. Status is computed server-side.
     const nextAmount = Number(goal.currentAmount);
     if (!Number.isFinite(nextAmount) || nextAmount <= 0) {
-      toast.error("No progress yet to mark as achieved.");
+      toast.error(t("employee.goalCard.toastNoProgress"));
       return;
     }
     setMarkingAchieved(true);
@@ -164,7 +185,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
         goalPeriod: goal.goalPeriod,
         startDate: goal.startDate,
       });
-      toast.success("Marked as achieved");
+      toast.success(t("employee.goalCard.toastMarkedAchieved"));
       onUpdated();
     } catch (e) {
       logClientError("EmployeeGoalCard.markAchieved", e);
@@ -195,7 +216,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
                     </span>
                   </CardDescription>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {PERIOD_LABEL[goal.goalPeriod]} · since {goal.startDate}
+                    {periodLabel[goal.goalPeriod]} · since {goal.startDate}
                   </p>
                   <div className="mt-2 h-3 w-full overflow-hidden rounded-full bg-background">
                     <div
@@ -204,7 +225,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
                     />
                   </div>
                   <p className={`mt-2 text-xs font-medium ${statusClass(goal.status)}`}>
-                    {STATUS_LABEL[goal.status]}
+                    {statusLabel[goal.status]}
                   </p>
                 </>
               ) : (
@@ -278,7 +299,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
           <DialogHeader>
             <DialogTitle>{goal ? "Edit tip goal" : "Create tip goal"}</DialogTitle>
             <DialogDescription>
-              Progress uses successful tips in the current {PERIOD_LABEL[period].toLowerCase()} period
+              Progress uses successful tips in the current {periodLabel[period].toLowerCase()} period
               (from your start date).
             </DialogDescription>
           </DialogHeader>

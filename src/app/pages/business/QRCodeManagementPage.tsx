@@ -415,7 +415,7 @@ export function QRCodeManagementPage() {
       }, 300);
     } catch (err) {
       logClientError("QRCodeManagementPage.print", err);
-      toast.error("Could not open print preview.");
+      toast.error(t("business.qrPage.toastPrintFail"));
     }
   };
 
@@ -549,7 +549,7 @@ export function QRCodeManagementPage() {
       }, 300);
     } catch (err) {
       logClientError("QRCodeManagementPage.employeePrint", err);
-      toast.error("Could not open print preview.");
+      toast.error(t("business.qrPage.toastPrintFail"));
     }
   };
 
@@ -845,9 +845,7 @@ export function QRCodeManagementPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-sm">
             <p className="font-semibold text-foreground">{t("business.qrPage.reviewBody")}</p>
-            <p className="mt-1 text-muted-foreground">
-              QR features will be available once your account is verified.
-            </p>
+            <p className="mt-1 text-muted-foreground">{t("business.qrPage.qrLockedSub")}</p>
           </div>
         </div>
       ) : null}
@@ -899,7 +897,7 @@ export function QRCodeManagementPage() {
         {activeTab === "employees" && (
           <>
             {loading ? (
-              <CareTipPageLoader variant="section" message="Loading team members…" />
+              <CareTipPageLoader variant="section" message={t("common.loadingTeamMembers")} />
             ) : (
               <div className="space-y-8">
                 {user?.businessId && (

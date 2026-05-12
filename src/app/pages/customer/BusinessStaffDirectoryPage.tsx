@@ -1,6 +1,7 @@
 import { useNavigate, useParams, Link } from "react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Building2, Home, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import {
@@ -23,6 +24,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
  * Searchable grid of active employees; tap opens tip flow for that person.
  */
 export function BusinessStaffDirectoryPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessSlug } = useParams<{ businessSlug: string }>();
   const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath } = useTipFlow();
@@ -34,7 +36,7 @@ export function BusinessStaffDirectoryPage() {
   useEffect(() => {
     const raw = businessSlug?.trim().toLowerCase();
     if (!raw) {
-      setError("Invalid link.");
+      setError(t("tipFlow.errors.invalidLink"));
       setLoading(false);
       return;
     }
@@ -122,15 +124,15 @@ export function BusinessStaffDirectoryPage() {
   }, [socket, data, reloadDirectory]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message="Loading team…" />;
+    return <CareTipPageLoader variant="wait" message={t("common.loadingTeam")} />;
   }
 
   if (error || !data) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? "Not found"}</p>
+        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
         <Link to="/" className="text-sm text-primary hover:underline">
-          Go home
+          {t("tipFlow.common.goHomeLink")}
         </Link>
       </div>
     );

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
@@ -16,6 +17,7 @@ function mapDbVerificationToStatus(
 
 /** Only pending / rejected managers should stay on `/verification-pending`; approved users go to the dashboard. */
 export function PendingVerificationAllowedGate() {
+  const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const [ready, setReady] = useState(false);
 
@@ -45,7 +47,7 @@ export function PendingVerificationAllowedGate() {
   }
 
   if (user?.role === "business" && !user.impersonation && !ready) {
-    return <PageLoader message="Syncing account status…" />;
+    return <PageLoader message={t("common.syncingAccountStatus")} />;
   }
 
   if (user?.status === "APPROVED") {

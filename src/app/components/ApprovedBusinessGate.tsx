@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
@@ -20,6 +21,7 @@ function mapDbVerificationToStatus(
  * Dashboard stays accessible for all managers; QR / public flows gate on `user.status` elsewhere.
  */
 export function ApprovedBusinessGate() {
+  const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const [ready, setReady] = useState(false);
 
@@ -67,7 +69,7 @@ export function ApprovedBusinessGate() {
   }
 
   if (user.role === "business" && !user.impersonation && !ready) {
-    return <PageLoader message="Syncing account status…" />;
+    return <PageLoader message={t("common.syncingAccountStatus")} />;
   }
 
   return <Outlet />;

@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft, Star, Award } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getEmployees } from "../../lib/api";
@@ -14,6 +15,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 
 export function SelectEmployeePage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessId, setEmployee, setBusinessId, setTippingVenue } = useTipFlow();
   const [selectedEmployee, setSelectedEmployee] = useState<string | null>(null);
@@ -97,7 +99,7 @@ export function SelectEmployeePage() {
   }
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message="Loading team members…" />;
+    return <CareTipPageLoader variant="wait" message={t("common.loadingTeamMembers")} />;
   }
 
   if (error) {
@@ -106,7 +108,7 @@ export function SelectEmployeePage() {
         <div className="text-center">
           <p className="mb-2 text-sm font-medium text-destructive">{error}</p>
           <button type="button" onClick={() => window.location.reload()} className="text-sm text-primary hover:underline">
-            Try again
+            {t("dashboard.tryAgain")}
           </button>
         </div>
       </div>

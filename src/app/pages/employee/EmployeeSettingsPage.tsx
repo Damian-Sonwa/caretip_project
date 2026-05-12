@@ -147,7 +147,7 @@ export function EmployeeSettingsPage() {
       await changePasswordAPI(currentPw, newPw);
       setCurrentPw("");
       setNewPw("");
-      toast.success("Password updated.", { style: { background: TEAL, color: "#fff" } });
+      toast.success(t("employee.settings.toastPasswordUpdated"), { style: { background: TEAL, color: "#fff" } });
     } catch (err) {
       logClientError("EmployeeSettingsPage", err);
       toast.error(toUserFriendlyMessage(err, { audience: "employee" }));

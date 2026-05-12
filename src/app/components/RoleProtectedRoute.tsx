@@ -19,7 +19,7 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
   const location = useLocation();
 
   if (!authHydrated) {
-    return <AppLoader message="Setting things up for you..." />;
+    return <AppLoader />;
   }
 
   if (!user) {

@@ -16,7 +16,7 @@ export function ProtectedRoute({
   const location = useLocation();
 
   // Hydration is synchronous; only show a loader in the rare case hydration hasn't happened yet.
-  if (!authHydrated) return <AppLoader message="Setting things up for you..." />;
+  if (!authHydrated) return <AppLoader />;
 
   if (!user) {
     authDebug("route_guard", {
