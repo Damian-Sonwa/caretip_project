@@ -80,7 +80,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated, sessionChecking } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -137,6 +137,8 @@ export function AuthPage() {
     e.preventDefault();
     setError('');
     setShowResendVerification(false);
+
+    if (user != null && !sessionValidated) return;
 
     if (!email || !password) {
       setError(t('auth.page.errorBothRequired'));
@@ -346,10 +348,12 @@ export function AuthPage() {
   // Keep auth pages instant; hydration is synchronous in normal browsers.
   void authHydrated;
 
-  const showSessionGate = user != null && (sessionChecking || !sessionValidated);
+  const resumeSessionPending = user != null && !sessionValidated;
   const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);
   const showSignInForm =
-    !user || (user != null && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
+    !user ||
+    !sessionMatchesBusinessStaffAuthTarget(user.role, role) ||
+    !sessionValidated;
   const showCrossSessionHint = user != null && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role);
 
   const sessionRoleLabel =
@@ -407,29 +411,10 @@ export function AuthPage() {
           sessionActive={sameLaneValidated}
           className="flex-1"
         >
-          {showSessionGate ? (
-            <div
-              role="status"
-              aria-live="polite"
-              className="mx-auto flex w-full max-w-[20rem] flex-col items-center rounded-2xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50 sm:p-7"
-            >
-              <h2 className="text-lg font-semibold tracking-tight text-neutral-900 dark:text-neutral-100">
-                {t('auth.page.sessionCheckingTitle')}
-              </h2>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                {t('auth.page.sessionCheckingBody')}
-              </p>
-              <div className="mt-8 w-full">
-                <div className="inline-flex h-11 w-full min-h-[44px] items-center justify-center rounded-xl bg-muted px-4 text-sm font-semibold text-muted-foreground">
-                  {t('auth.page.sessionPleaseWait')}
-                </div>
-              </div>
-            </div>
-          ) : null}
           {showSignInForm ? (
           <form
             onSubmit={handleSubmit}
-            aria-busy={isSubmitting}
+            aria-busy={isSubmitting || resumeSessionPending}
             className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
             method="post"
             action=""
@@ -670,7 +655,7 @@ export function AuthPage() {
               whileTap={isSubmitting ? undefined : { scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 400, damping: 25 }}
               type="submit"
-              disabled={isSubmitting || (!isLogin && signUpDisabled)}
+              disabled={isSubmitting || resumeSessionPending || (!isLogin && signUpDisabled)}
               className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
             >
               {isSubmitting ? (

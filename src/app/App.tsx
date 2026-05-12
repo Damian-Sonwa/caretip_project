@@ -6,8 +6,9 @@ import { TipFlowProvider } from './context/TipFlowContext';
 import { AppLoadingSplashProvider } from './context/AppLoadingSplashContext';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { googleOAuthWebClientId } from "./lib/googleOAuthWebClientId";
 
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID?.trim() ?? '';
+const googleClientId = googleOAuthWebClientId();
 
 export default function App() {
   const AppTree = () => {

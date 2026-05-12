@@ -2,6 +2,7 @@ import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { AuthRole } from "@/components/ui/sign-in-card-2";
+import { googleOAuthWebClientId } from "@/app/lib/googleOAuthWebClientId";
 
 type AuthOAuthButtonsProps = {
   isLogin: boolean;
@@ -25,7 +26,7 @@ export function AuthOAuthButtons({
   onGoogleCredential,
 }: AuthOAuthButtonsProps) {
   const { t } = useTranslation();
-  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  const googleClientId = googleOAuthWebClientId();
 
   const canOAuthSignUp =
     isLogin ||
@@ -38,6 +39,10 @@ export function AuthOAuthButtons({
         {t("auth.oauth.envHintBefore")}{" "}
         <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
           VITE_GOOGLE_CLIENT_ID
+        </code>{" "}
+        {t("auth.oauth.envHintOr")}{" "}
+        <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
+          NEXT_PUBLIC_GOOGLE_CLIENT_ID
         </code>{" "}
         {t("auth.oauth.envHintAfter")}
       </p>

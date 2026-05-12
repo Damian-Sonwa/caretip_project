@@ -458,7 +458,8 @@
     },
     "oauth": {
       "envHintBefore": "Add",
-      "envHintAfter": "to enable Google.",
+      "envHintOr": "or",
+      "envHintAfter": "in your Vercel (or other) project environment, then redeploy — Vite bakes these in at build time. Plain GOOGLE_CLIENT_ID is for the API only, not the browser.",
       "signupBlockedTitle": "Enter your name and business or invite details first"
     },
     "recovery": {

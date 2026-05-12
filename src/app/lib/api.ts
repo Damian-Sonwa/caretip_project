@@ -287,7 +287,8 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     const isAuthRefresh = isAuthRefreshRequestUrl(url);
     const tokenAtStart = getToken();
     const tokenIsSet = typeof tokenAtStart === "string" && tokenAtStart.trim().length > 0;
-    const canAttempt = tokenIsSet && isCaretipApi;
+    /** HttpOnly refresh cookie can restore a session even when the access token is missing from storage. */
+    const canAttemptRefresh = isCaretipApi && !isAuthRefresh;
     const alreadyRetried = initFlags?.__caretipRetried === true;
     let refreshDeemedInvalid = false;
 
@@ -302,7 +303,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     if (isAuthRefresh && isCaretipApi) {
       refreshDeemedInvalid = true;
       clearAuthStorage();
-    } else if (canAttempt && !alreadyRetried) {
+    } else if (canAttemptRefresh && !alreadyRetried) {
       const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
       if (shouldClearAccessToken) refreshDeemedInvalid = true;
       if (nextToken) {
@@ -315,7 +316,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
     // If we're still unauthorized, do a single short-delay retry before clearing auth.
     // This avoids \"logout on first login\" caused by timing/race conditions around initial auth state.
-    if (!isAuthRefresh && canAttempt && res.status === 401) {
+    if (!isAuthRefresh && canAttemptRefresh && res.status === 401) {
       const alreadyDelayedRetry = initFlags?.__caretipDelayedRetried === true;
       if (!alreadyDelayedRetry) {
         await new Promise((r) => setTimeout(r, 250));
@@ -345,15 +346,12 @@ export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
   let refreshDeemedInvalid = false;
 
   if (res.status === 401 && requestUsesCaretipProtectedApi(url)) {
-    const hadToken = Boolean(getToken()?.trim());
-    if (hadToken) {
-      const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
-      if (shouldClearAccessToken) refreshDeemedInvalid = true;
-      if (nextToken) {
-        res = await fetch(url, attachLatestBearer(baseGet));
-      } else if (shouldClearAccessToken) {
-        clearAuthStorage();
-      }
+    const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
+    if (shouldClearAccessToken) refreshDeemedInvalid = true;
+    if (nextToken) {
+      res = await fetch(url, attachLatestBearer(baseGet));
+    } else if (shouldClearAccessToken) {
+      clearAuthStorage();
     }
   }
 

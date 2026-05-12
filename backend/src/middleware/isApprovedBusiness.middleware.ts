@@ -3,8 +3,8 @@ import { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
 
 /**
- * Managers may only use protected business APIs after KYC is approved (`verificationStatus === verified`).
- * Skips when the JWT is platform-admin impersonation or when the caller is not a venue manager.
+ * Authorization (business verification / KYC), not authentication.
+ * Mount after `authMiddleware` so `req.user` is trusted from the access JWT.
  */
 export async function isApprovedBusiness(req: Request, res: Response, next: NextFunction) {
   const uid = req.user?.userId ?? req.user?.id;

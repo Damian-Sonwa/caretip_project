@@ -3,27 +3,29 @@ import { prisma } from "../prisma.js";
 
 const COOKIE_NAME = "caretip_refresh";
 
-// Prisma client typings depend on `prisma generate`. In some Windows setups this can fail locally,
-// and if the client is out of date at runtime, `prisma.refreshToken` may be undefined.
-// Treat refresh tokens as an optional capability so sign-in doesn't hard-fail locally.
-function refreshTokenModel():
-  | {
-      create: (args: any) => Promise<any>;
-      findUnique: (args: any) => Promise<any>;
-      update: (args: any) => Promise<any>;
-      updateMany: (args: any) => Promise<any>;
-    }
-  | null {
-  const m = (prisma as any).refreshToken;
-  return m ? (m as any) : null;
-}
-
 function sha256Hex(input: string): string {
   return crypto.createHash("sha256").update(input).digest("hex");
 }
 
+/** Default 7 days; override with `REFRESH_TOKEN_EXPIRES_DAYS` (1–365). */
+export function refreshTokenTtlDays(): number {
+  const raw = process.env.REFRESH_TOKEN_EXPIRES_DAYS?.trim();
+  const n = raw ? Number(raw) : NaN;
+  if (Number.isFinite(n) && n > 0 && n <= 365) return Math.floor(n);
+  return 7;
+}
+
 function nowPlusDays(days: number): Date {
   return new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+}
+
+function defaultRefreshCookieMaxAgeMs(): number {
+  return refreshTokenTtlDays() * 24 * 60 * 60 * 1000;
+}
+
+/** Align `Set-Cookie` max-age with DB expiry (floor at 60s). */
+export function refreshCookieMaxAgeMs(expiresAt: Date): number {
+  return Math.max(60_000, expiresAt.getTime() - Date.now());
 }
 
 export function refreshCookieName(): string {
@@ -47,7 +49,7 @@ export function setRefreshCookie(
   opts?: { maxAgeMs?: number }
 ): void {
   const isProd = process.env.NODE_ENV === "production";
-  const maxAge = typeof opts?.maxAgeMs === "number" ? opts.maxAgeMs : 30 * 24 * 60 * 60 * 1000;
+  const maxAge = typeof opts?.maxAgeMs === "number" ? opts.maxAgeMs : defaultRefreshCookieMaxAgeMs();
   res.cookie(COOKIE_NAME, value, {
     httpOnly: true,
     secure: isProd,
@@ -72,16 +74,10 @@ export function clearRefreshCookie(
 }
 
 export async function issueRefreshToken(userId: string): Promise<{ token: string; expiresAt: Date }> {
-  const model = refreshTokenModel();
-  if (!model) {
-    // No refresh token persistence available (out-of-date client / migrations not applied).
-    // Caller should simply skip setting the cookie and continue with access-token auth.
-    throw new Error("RefreshToken model unavailable");
-  }
   const token = crypto.randomBytes(48).toString("base64url");
   const tokenHash = sha256Hex(token);
-  const expiresAt = nowPlusDays(30);
-  await model.create({
+  const expiresAt = nowPlusDays(refreshTokenTtlDays());
+  await prisma.refreshToken.create({
     data: {
       tokenHash,
       userId,
@@ -93,41 +89,81 @@ export async function issueRefreshToken(userId: string): Promise<{ token: string
   return { token, expiresAt };
 }
 
-export async function rotateRefreshToken(
-  token: string
-): Promise<{ userId: string; newToken: string; newExpiresAt: Date } | null> {
-  const model = refreshTokenModel();
-  if (!model) return null;
-  const tokenHash = sha256Hex(token);
-  const existing = await model.findUnique({
-    where: { tokenHash },
-    select: { id: true, userId: true, expiresAt: true, revokedAt: true },
-  });
-  if (!existing) return null;
-  if (existing.revokedAt) return null;
-  if (existing.expiresAt.getTime() <= Date.now()) return null;
-
-  const { token: newToken, expiresAt: newExpiresAt } = await issueRefreshToken(existing.userId);
-  const newHash = sha256Hex(newToken);
-  const newRow = await model.findUnique({
-    where: { tokenHash: newHash },
-    select: { id: true },
-  });
-  await model.update({
-    where: { id: existing.id },
-    data: { revokedAt: new Date(), replacedByTokenId: newRow?.id ?? null },
-  });
-
-  return { userId: existing.userId, newToken, newExpiresAt };
-}
-
-export async function revokeRefreshToken(token: string): Promise<void> {
-  const model = refreshTokenModel();
-  if (!model) return;
-  const tokenHash = sha256Hex(token);
-  await model.updateMany({
-    where: { tokenHash, revokedAt: null },
+/** Revoke all active refresh sessions for a user (e.g. reused / stolen refresh token). */
+export async function revokeAllRefreshTokensForUser(userId: string): Promise<void> {
+  await prisma.refreshToken.updateMany({
+    where: { userId, revokedAt: null },
     data: { revokedAt: new Date() },
   });
 }
 
+/**
+ * Rotates a refresh token inside a transaction (race-safe).
+ * Reuse of a revoked refresh token revokes all refresh sessions for that user.
+ */
+export async function rotateRefreshToken(
+  token: string
+): Promise<{ userId: string; newToken: string; newExpiresAt: Date } | null> {
+  const raw = String(token ?? "").trim();
+  if (!raw) return null;
+  const tokenHash = sha256Hex(raw);
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const existing = await tx.refreshToken.findUnique({
+        where: { tokenHash },
+        select: { id: true, userId: true, expiresAt: true, revokedAt: true },
+      });
+      if (!existing) return null;
+
+      if (existing.revokedAt) {
+        await tx.refreshToken.updateMany({
+          where: { userId: existing.userId, revokedAt: null },
+          data: { revokedAt: new Date() },
+        });
+        return null;
+      }
+      if (existing.expiresAt.getTime() <= Date.now()) return null;
+
+      const newPlain = crypto.randomBytes(48).toString("base64url");
+      const newHash = sha256Hex(newPlain);
+      const newExpiresAt = nowPlusDays(refreshTokenTtlDays());
+
+      const created = await tx.refreshToken.create({
+        data: {
+          tokenHash: newHash,
+          userId: existing.userId,
+          expiresAt: newExpiresAt,
+          revokedAt: null,
+          replacedByTokenId: null,
+        },
+        select: { id: true },
+      });
+
+      const updated = await tx.refreshToken.updateMany({
+        where: { id: existing.id, revokedAt: null },
+        data: { revokedAt: new Date(), replacedByTokenId: created.id },
+      });
+      if (updated.count !== 1) {
+        await tx.refreshToken.update({
+          where: { id: created.id },
+          data: { revokedAt: new Date() },
+        });
+        return null;
+      }
+
+      return { userId: existing.userId, newToken: newPlain, newExpiresAt };
+    });
+  } catch (e) {
+    console.warn("[refreshToken.rotate]", e);
+    return null;
+  }
+}
+
+export async function revokeRefreshToken(token: string): Promise<void> {
+  const tokenHash = sha256Hex(String(token ?? "").trim());
+  await prisma.refreshToken.updateMany({
+    where: { tokenHash, revokedAt: null },
+    data: { revokedAt: new Date() },
+  });
+}

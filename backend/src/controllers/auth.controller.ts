@@ -13,6 +13,7 @@ import {
   clearRefreshCookie,
   issueRefreshToken,
   parseCookie,
+  refreshCookieMaxAgeMs,
   refreshCookieName,
   rotateRefreshToken,
   revokeRefreshToken,
@@ -118,7 +119,7 @@ export async function register(req: Request, res: Response) {
       );
       try {
         const rt = await issueRefreshToken(result.user.id);
-        setRefreshCookie(res, rt.token);
+        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
       } catch (e) {
         logServerError("auth.register.issueRefreshToken", e);
       }
@@ -144,7 +145,7 @@ export async function register(req: Request, res: Response) {
       );
       try {
         const rt = await issueRefreshToken(result.user.id);
-        setRefreshCookie(res, rt.token);
+        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
       } catch (e) {
         logServerError("auth.register.issueRefreshToken", e);
       }
@@ -224,7 +225,7 @@ export async function login(req: Request, res: Response) {
     })();
     try {
       const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
     } catch (e) {
       logServerError("auth.login.issueRefreshToken", e);
     }
@@ -503,7 +504,7 @@ export async function oauth(req: Request, res: Response) {
     );
     try {
       const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
     } catch (e) {
       logServerError("auth.oauth.issueRefreshToken", e);
     }
@@ -570,7 +571,7 @@ export async function refresh(req: Request, res: Response) {
         clearRefreshCookie(res);
         return res.status(401).json({ message: "Invalid or expired session" });
       }
-      setRefreshCookie(res, rotated.newToken);
+      setRefreshCookie(res, rotated.newToken, { maxAgeMs: refreshCookieMaxAgeMs(rotated.newExpiresAt) });
       const result = await authService.authResultForUserId(rotated.userId);
       return res.json(result);
     }
@@ -750,7 +751,7 @@ export async function patchMe(req: Request, res: Response) {
     const result = await authService.authResultForUserId(userId);
     try {
       const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
     } catch (e) {
       logServerError("auth.patchMe.issueRefreshToken", e);
     }
@@ -777,7 +778,7 @@ export async function activateEmployee(req: Request, res: Response) {
     const result = await authService.activateEmployee(token, password);
     try {
       const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token);
+      setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
     } catch (e) {
       logServerError("auth.activateEmployee.issueRefreshToken", e);
     }

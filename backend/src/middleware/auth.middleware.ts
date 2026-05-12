@@ -22,6 +22,10 @@ declare global {
   }
 }
 
+/**
+ * Stateless authentication: validates the access JWT only (no server session store per request).
+ * Subscription / KYC gates belong in separate middleware (e.g. `isApprovedBusiness`).
+ */
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
@@ -36,8 +40,11 @@ export function authMiddleware(req: Request, res: Response, next: NextFunction) 
     const decoded = jwt.verify(token, secret) as JwtPayload;
     req.user = decoded;
     next();
-  } catch {
-    return res.status(401).json({ message: "Invalid or expired token" });
+  } catch (err) {
+    if (err instanceof jwt.TokenExpiredError) {
+      return res.status(401).json({ message: "Access token expired", code: "TOKEN_EXPIRED" });
+    }
+    return res.status(401).json({ message: "Invalid or expired token", code: "TOKEN_INVALID" });
   }
 }
 

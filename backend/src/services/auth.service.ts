@@ -79,8 +79,8 @@ function getJwtSecret(): string {
 }
 
 function jwtExpiresIn(): SignOptions["expiresIn"] {
-  // Short-lived access token by default; legacy 30d tokens remain valid until their own exp.
-  return (process.env.JWT_EXPIRES_IN?.trim() || "4h") as SignOptions["expiresIn"];
+  // Short-lived access token (15m default); override with `JWT_EXPIRES_IN` if needed.
+  return (process.env.JWT_EXPIRES_IN?.trim() || "15m") as SignOptions["expiresIn"];
 }
 
 function impersonationJwtExpiresIn(): SignOptions["expiresIn"] {

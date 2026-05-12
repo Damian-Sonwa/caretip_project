@@ -221,7 +221,7 @@ export function useAuth() {
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
   /**
    * Hydration is synchronous (localStorage read) — keep UI instant.
-   * Background session validation uses `sessionChecking` / `sessionValidated`.
+   * Background session validation uses `sessionValidated` only (no blocking "checking session" UI).
    */
   const [authHydrated, setAuthHydrated] = useState(true);
   /**
@@ -229,26 +229,35 @@ export function useAuth() {
    * False when a stored token was present but refresh ultimately failed — dashboards must not call protected APIs until true.
    */
   const [sessionValidated, setSessionValidated] = useState(false);
-  /** True while `/api/auth/refresh` is validating an existing stored token. */
-  const [sessionChecking, setSessionChecking] = useState(false);
   /** Bumped after successful credential-bearing mutations so an in-flight initial `refreshSession` cannot overwrite a newer session. */
   const sessionEpochRef = useRef(0);
+  /** Re-read access token so proactive refresh + effects track rotation after login/refresh. */
+  const accessTokenSnapshot = readStoredAccessToken();
 
   useEffect(() => {
     const onStorageSync = () => {
       setUser(loadUserFromStorage());
       setAuthHydrated(true);
       const token = readStoredAccessToken();
-      // Treat storage sync as "validated" only if the token exists and isn't expired.
-      // Otherwise, force the app into a logged-out, resolved state.
       if (!token) {
         setSessionValidated(true);
         return;
       }
       if (isJwtExpired(token)) {
-        clearStoredSession();
-        setUser(null);
-        setSessionValidated(true);
+        void (async () => {
+          try {
+            const data = await refreshSessionAPI();
+            sessionEpochRef.current += 1;
+            const u = persistAuthResponse(data);
+            setUser(u);
+            setSessionValidated(true);
+          } catch {
+            clearStoredSession();
+            notifyAuthStorageSync();
+            setUser(null);
+            setSessionValidated(true);
+          }
+        })();
         return;
       }
       setSessionValidated(true);
@@ -279,20 +288,7 @@ export function useAuth() {
           return;
         }
 
-        if (!cancelled) setSessionChecking(true);
-
-        // Never trust persisted state alone: if the JWT is already expired, clear immediately.
-        if (token && isJwtExpired(token)) {
-          clearStoredSession();
-          notifyAuthStorageSync();
-          if (!cancelled) setUser(null);
-          if (!cancelled) setSessionValidated(true);
-          if (!cancelled && !isPublicAuthenticationPath(window.location.pathname)) {
-            navigate("/login", { replace: true });
-          }
-          return;
-        }
-
+        // Expired access JWT is normal with short-lived tokens — refresh via HttpOnly cookie rotates silently.
         const data = await refreshSessionAPI();
         if (cancelled || sessionEpochRef.current !== epochAtStart) return;
         const u = persistAuthResponse(data);
@@ -319,7 +315,6 @@ export function useAuth() {
           navigate("/login", { replace: true });
         }
       } finally {
-        if (!cancelled) setSessionChecking(false);
         if (!cancelled) setAuthHydrated(true);
       }
     };
@@ -328,6 +323,35 @@ export function useAuth() {
       cancelled = true;
     };
   }, [navigate]);
+
+  /** Proactively refresh shortly before access token expiry so API calls rarely see 401. */
+  useEffect(() => {
+    if (!user || !accessTokenSnapshot) return;
+    const payload = decodeJwtPayload(accessTokenSnapshot);
+    if (!payload || typeof payload !== "object") return;
+    const exp = (payload as { exp?: unknown }).exp;
+    if (typeof exp !== "number") return;
+    const renewSkewMs = 90_000;
+    const delay = Math.max(4_000, exp * 1000 - Date.now() - renewSkewMs);
+    let cancelled = false;
+    const id = window.setTimeout(() => {
+      void (async () => {
+        if (cancelled) return;
+        try {
+          const data = await refreshSessionAPI();
+          sessionEpochRef.current += 1;
+          const u = persistAuthResponse(data);
+          if (!cancelled) setUser(u);
+        } catch {
+          // Leave handling to the next API 401 + silent refresh, or bootstrap on reload.
+        }
+      })();
+    }, delay);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(id);
+    };
+  }, [user?.id, accessTokenSnapshot]);
 
   useEffect(() => {
     if (!authHydrated) return;
@@ -480,7 +504,7 @@ export function useAuth() {
         // ignore
       }
       setUser(null);
-      setSessionValidated(false);
+      setSessionValidated(true);
       return null;
     }
   }, []);
@@ -504,7 +528,8 @@ export function useAuth() {
     /** True while the first session resolution pass is in flight; route guards must wait and must not redirect. */
     isAuthLoading: !authHydrated,
     authHydrated,
-    sessionChecking,
+    /** @deprecated Always false; silent refresh — do not gate UI on this. */
+    sessionChecking: false,
     /** True when bootstrap refresh succeeded or there was no token; false when stored session failed validation. */
     sessionValidated,
     authState,

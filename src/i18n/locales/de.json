@@ -458,7 +458,8 @@
     },
     "oauth": {
       "envHintBefore": "Fügen Sie",
-      "envHintAfter": "hinzu, um Google zu aktivieren.",
+      "envHintOr": "oder",
+      "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu — Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
       "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben"
     },
     "recovery": {

@@ -22,10 +22,9 @@ export function PlatformAdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const authInFlightRef = useRef(false);
-  const { login, user, sessionValidated, sessionChecking, logout } = useAuth();
+  const { login, user, sessionValidated, logout } = useAuth();
   const navigate = useNavigate();
 
-  const showSessionGate = Boolean(user && (sessionChecking || !sessionValidated));
   const sameLaneValidated = Boolean(
     user && sessionValidated && isPlatformAdminSessionRole(user.role),
   );
@@ -52,6 +51,7 @@ export function PlatformAdminLoginPage() {
     e.preventDefault();
     setError("");
     const trimmed = email.trim();
+    if (user && !sessionValidated) return;
     if (!trimmed || !password) {
       setError("Please enter both email and password.");
       return;
@@ -156,17 +156,7 @@ export function PlatformAdminLoginPage() {
                 </motion.div>
               </div>
 
-              {showSessionGate ? (
-                <div
-                  role="status"
-                  aria-live="polite"
-                  className="flex flex-col items-center rounded-xl border border-border bg-muted/40 p-6 text-center dark:bg-neutral-800/50"
-                >
-                  <Loader2 className="mb-3 h-8 w-8 animate-spin text-primary" aria-hidden />
-                  <p className="text-sm font-medium text-neutral-900 dark:text-neutral-100">{t("auth.page.sessionCheckingTitle")}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{t("auth.page.sessionCheckingBody")}</p>
-                </div>
-              ) : sameLaneValidated ? (
+              {sameLaneValidated ? (
                 <div className="flex flex-col items-center py-8 text-center" role="status" aria-live="polite">
                   <Loader2 className="mb-3 h-8 w-8 animate-spin text-primary" aria-hidden />
                   <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("admin.loginPage.redirecting")}</p>
@@ -174,7 +164,7 @@ export function PlatformAdminLoginPage() {
               ) : (
                 <form
                   onSubmit={(e) => void handleSubmit(e)}
-                  aria-busy={submitting}
+                  aria-busy={submitting || Boolean(user && !sessionValidated)}
                   className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
                   method="post"
                   action=""
@@ -230,7 +220,7 @@ export function PlatformAdminLoginPage() {
                     whileTap={submitting ? undefined : { scale: 0.98 }}
                     transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || Boolean(user && !sessionValidated)}
                     className="relative mt-1 flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,transform] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0"
                   >
                     {submitting ? (
