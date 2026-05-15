@@ -5,7 +5,10 @@ import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import App from "./app/App";
 import { GlobalErrorBoundary } from "./app/components/GlobalErrorBoundary";
+import { wakeRemoteApi } from "./app/lib/api";
 import "./styles/index.css";
+
+wakeRemoteApi();
 
 const updateSW = registerSW({
   immediate: true,

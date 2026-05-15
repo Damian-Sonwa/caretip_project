@@ -29,10 +29,15 @@ import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
+import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
 import { getImageUploadStorageDiagnostics } from "./services/upload.service.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
+
+if (process.env.NODE_ENV === "production") {
+  app.set("trust proxy", 1);
+}
 
 async function assertEnvForAuth(): Promise<void> {
   const jwt = process.env.JWT_SECRET?.trim();
@@ -67,7 +72,16 @@ app.use("/api/webhook", express.raw({ type: "application/json" }), stripeWebhook
 app.use("/api/webhooks", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(
+  express.json({
+    verify(req, _res, buf) {
+      if (buf.length > 0 && buf.length <= 4096) {
+        (req as import("express").Request & { _rawJsonBody?: string })._rawJsonBody = buf.toString("utf8");
+      }
+    },
+  }),
+);
+app.use(jsonParseErrorHandler);
 
 app.use(
   "/uploads",

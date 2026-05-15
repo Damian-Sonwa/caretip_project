@@ -29,8 +29,12 @@ export const FRIENDLY_MESSAGE_DE: Record<string, string> = {
   "Our servers are temporarily unavailable. Please try again in a few minutes.":
     "Unsere Server sind vorübergehend nicht erreichbar. Bitte versuchen Sie es in einigen Minuten erneut.",
 
+  "The request was not valid. Please try again or refresh the page.":
+    "Die Anfrage war ungültig. Bitte versuchen Sie es erneut oder laden Sie die Seite neu.",
   "Unable to connect to the server. Check your connection and try again.":
     "Keine Verbindung zum Server. Bitte prüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "Unable to connect to the server. The API may still be waking up — wait a few seconds and try again.":
+    "Keine Verbindung zum Server. Die API startet möglicherweise noch — warten Sie einige Sekunden und versuchen Sie es erneut.",
   "The request was cancelled. Please try again.": "Die Anfrage wurde abgebrochen. Bitte versuchen Sie es erneut.",
 
   "Add a star rating or a short note, or leave the page if you prefer not to.":

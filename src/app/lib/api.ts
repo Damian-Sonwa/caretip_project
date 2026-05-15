@@ -8,6 +8,7 @@ import {
   toUserFriendlyMessage,
   fallbackMessageForHttpStatus,
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
+  API_WAKEUP_NETWORK_MESSAGE,
 } from "./errorMessages";
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
@@ -84,16 +85,17 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
 
   for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt > 0) {
-      // Short backoff to avoid long "stuck loading" sessions on flaky networks.
-      await new Promise((r) => setTimeout(r, 500));
+      const backoffMs = resolveApiBaseUrl() ? 2000 : 500;
+      await new Promise((r) => setTimeout(r, backoffMs));
     }
 
     let res: Response;
     try {
       const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
-      res = await fetch(apiPath(AUTH_REFRESH_PATHNAME), {
+      res = await fetchWithNetworkRetry(apiPath(AUTH_REFRESH_PATHNAME), {
         method: "POST",
         headers: refreshHeaders,
+        body: EMPTY_JSON_BODY,
         credentials: "include",
       });
     } catch (err) {
@@ -251,11 +253,30 @@ function attachLatestBearer(init?: RequestInit): RequestInit {
   return next;
 }
 
+/** Valid empty JSON object for POST routes that have no fields (refresh, logout, etc.). */
+const EMPTY_JSON_BODY = "{}";
+
 function getHeaders(): HeadersInit {
   const headers: HeadersInit = { "Content-Type": "application/json" };
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
   return headers;
+}
+
+/** Always produces valid JSON; never double-encodes an already-serialized JSON string. */
+function toJsonRequestBody(data: unknown): string {
+  if (typeof data === "string") {
+    const trimmed = data.trim();
+    if (trimmed.length > 0) {
+      try {
+        JSON.parse(trimmed);
+        return trimmed;
+      } catch {
+        // not JSON text — stringify below
+      }
+    }
+  }
+  return JSON.stringify(data);
 }
 
 /** Bearer only — use with FormData (do not set Content-Type). */
@@ -309,7 +330,62 @@ function apiConfigHintForFailedFetch(url: string): string {
   return " For this deployed build, set VITE_API_URL in your host (e.g. Netlify: Site configuration → Environment variables) to your backend origin, e.g. https://your-api.onrender.com. Then trigger a new deploy.";
 }
 
-type CaretipRequestInit = RequestInit & { __caretipRetried?: boolean; __caretipDelayedRetried?: boolean };
+const NETWORK_RETRY_DELAY_MS = 2500;
+
+function isCrossOriginApi(): boolean {
+  return Boolean(resolveApiBaseUrl());
+}
+
+function isNetworkFetchFailure(err: unknown): boolean {
+  if (err instanceof TypeError) return true;
+  if (err instanceof Error) {
+    return /failed to fetch|networkerror|load failed|network request failed|the network connection was lost/i.test(
+      err.message,
+    );
+  }
+  return false;
+}
+
+type CaretipRequestInit = RequestInit & {
+  __caretipRetried?: boolean;
+  __caretipDelayedRetried?: boolean;
+  __caretipNetworkRetried?: boolean;
+};
+
+/** One delayed retry for cross-origin /api calls when the host is cold-starting (e.g. Render free tier). */
+async function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<Response> {
+  const flags = init as CaretipRequestInit | undefined;
+  try {
+    return await fetch(url, init);
+  } catch (err) {
+    if (flags?.__caretipNetworkRetried || !isCrossOriginApi() || !isNetworkFetchFailure(err)) {
+      throw err;
+    }
+    const pathname = requestUrlPathname(url);
+    if (!pathname.startsWith("/api/")) throw err;
+
+    await new Promise((r) => setTimeout(r, NETWORK_RETRY_DELAY_MS));
+    const retried: CaretipRequestInit = { ...(init ?? {}), __caretipNetworkRetried: true };
+    try {
+      return await fetch(url, retried);
+    } catch (retryErr) {
+      if (isNetworkFetchFailure(retryErr)) {
+        throw new Error(API_WAKEUP_NETWORK_MESSAGE);
+      }
+      throw retryErr;
+    }
+  }
+}
+
+let remoteApiWakeStarted = false;
+
+/** Fire-and-forget ping so a sleeping Render instance can wake before sign-in. */
+export function wakeRemoteApi(): void {
+  const base = resolveApiBaseUrl();
+  if (!base || remoteApiWakeStarted) return;
+  remoteApiWakeStarted = true;
+  void fetch(`${base}/health`, { method: "GET", mode: "cors", credentials: "omit" }).catch(() => {});
+}
 
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
@@ -317,7 +393,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   const initFlags = init as CaretipRequestInit | undefined;
 
   try {
-    res = await fetch(url, attachLatestBearer(init));
+    res = await fetchWithNetworkRetry(url, attachLatestBearer(init));
   } catch (err) {
     logClientError("api.apiRequest", err, { url });
     const baseMsg = toUserFriendlyMessage(err);
@@ -351,7 +427,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
       if (shouldClearAccessToken) refreshDeemedInvalid = true;
       if (nextToken) {
         const retriedInit: CaretipRequestInit = { ...(init ?? {}), __caretipRetried: true };
-        res = await fetch(url, attachLatestBearer(retriedInit));
+        res = await fetchWithNetworkRetry(url, attachLatestBearer(retriedInit));
       } else if (shouldClearAccessToken) {
         clearAuthStorage();
       }
@@ -364,7 +440,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
       if (!alreadyDelayedRetry) {
         await new Promise((r) => setTimeout(r, 250));
         const delayedInit: CaretipRequestInit = { ...(init ?? {}), __caretipDelayedRetried: true };
-        res = await fetch(url, attachLatestBearer(delayedInit));
+        res = await fetchWithNetworkRetry(url, attachLatestBearer(delayedInit));
       }
     }
 
@@ -449,7 +525,7 @@ export async function registerAPI(payload: {
   return apiRequest<AuthResponse>(apiPath("/api/auth/register"), {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify(payload),
+    body: toJsonRequestBody(payload),
     credentials: "include",
   });
 }
@@ -479,7 +555,7 @@ export async function loginAPI(
   return apiRequest<AuthResponse>(apiPath("/api/auth/signin"), {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
+    body: toJsonRequestBody({
       email,
       password,
       intendedRole: toBackendIntendedRole(intendedRole),
@@ -501,6 +577,7 @@ export async function logoutAPI(): Promise<void> {
     await fetch(apiPath("/api/auth/logout"), {
       method: "POST",
       headers,
+      body: EMPTY_JSON_BODY,
       credentials: "include",
     });
   } catch (err) {
@@ -622,7 +699,7 @@ export async function oauthAPI(payload: {
   return apiRequest<AuthResponse>(apiPath("/api/auth/oauth"), {
     method: "POST",
     headers: getHeaders(),
-    body: JSON.stringify({
+    body: toJsonRequestBody({
       provider: payload.provider,
       idToken: payload.idToken,
       isLogin: payload.isLogin,
@@ -665,6 +742,7 @@ export async function generateInviteCode(): Promise<{ inviteCode: string; expire
     return await apiRequest(apiPath("/api/business/generate-invite"), {
       method: "POST",
       headers: getHeaders(),
+      body: EMPTY_JSON_BODY,
       credentials: "include",
     });
   } catch (err) {
@@ -815,6 +893,7 @@ export async function regenerateBusinessSlug(): Promise<{ slug: string }> {
   return apiRequest<{ slug: string }>(apiPath("/api/business/profile/slug/regenerate"), {
     method: "POST",
     headers: getHeaders(),
+    body: EMPTY_JSON_BODY,
     credentials: "include",
   });
 }
@@ -916,6 +995,7 @@ export async function regenerateEmployeeSlug(employeeId: string): Promise<{
   return apiRequest(apiPath(`/api/employees/${encodeURIComponent(employeeId)}/regenerate-slug`), {
     method: "POST",
     headers: getHeaders(),
+    body: EMPTY_JSON_BODY,
     credentials: "include",
   });
 }
@@ -1249,6 +1329,7 @@ export async function archiveMyGoal(goalId: string): Promise<{ goal: EmployeeGoa
   return apiRequest(apiPath(`/api/goals/${encodeURIComponent(goalId)}/archive`), {
     method: "POST",
     headers: getHeaders(),
+    body: EMPTY_JSON_BODY,
     credentials: "include",
   });
 }
@@ -1327,6 +1408,7 @@ export async function ensureEmployeeSlug(): Promise<EmployeeSelfProfile> {
   return apiRequest(apiPath("/api/employees/me/ensure-slug"), {
     method: "POST",
     headers: getHeaders(),
+    body: EMPTY_JSON_BODY,
     credentials: "include",
   });
 }
@@ -1410,6 +1492,7 @@ export async function setupTwoFactor(): Promise<{ otpauthUrl: string; qrDataUrl:
   return apiRequest(apiPath("/api/auth/2fa/setup"), {
     method: "POST",
     headers: getHeaders(),
+    body: EMPTY_JSON_BODY,
     credentials: "include",
   });
 }

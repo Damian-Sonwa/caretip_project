@@ -27,6 +27,10 @@ export const GENERIC_UNKNOWN_ERROR = "Something went wrong. Please try again.";
 /** Shown when auth/session refresh fails with HTTP 503 (matches product copy; avoids infinite retry loops). */
 export const SERVICE_UNAVAILABLE_CLIENT_MESSAGE = "Service temporarily unavailable";
 
+/** Cross-origin API unreachable after retry (e.g. Render cold start on free tier). */
+export const API_WAKEUP_NETWORK_MESSAGE =
+  "Unable to connect to the server. The API may still be waking up — wait a few seconds and try again.";
+
 const ERROR_MAP: Record<string, string> = {
   // Auth
   "Email already registered": "This email is already in use. Try signing in or use a different email.",
@@ -183,9 +187,12 @@ const ERROR_MAP: Record<string, string> = {
   "Not allowed": "You’re not allowed to do that with your current account.",
 
   // Network / generic transport
+  "The request body was not valid JSON. Send a JSON object (for example {\"email\":\"...\",\"password\":\"...\"}) with Content-Type: application/json.":
+    "The request was not valid. Please try again or refresh the page.",
   "Failed to fetch": "Unable to connect to the server. Check your connection and try again.",
   "NetworkError": "Unable to connect to the server. Check your connection and try again.",
   "Load failed": "Unable to connect to the server. Check your connection and try again.",
+  [API_WAKEUP_NETWORK_MESSAGE]: API_WAKEUP_NETWORK_MESSAGE,
   "Aborted": "The request was cancelled. Please try again.",
 
   // Storage / uploads (server sends these exact strings)
