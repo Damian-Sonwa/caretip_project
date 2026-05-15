@@ -1,5 +1,4 @@
 import { OAuth2Client } from "google-auth-library";
-import type { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import {
   authResultForUserRecord,
@@ -11,6 +10,12 @@ import * as businessService from "./business.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { resolveEmailLocale } from "../emails/i18nEmail.js";
+
+/** Shown when Google sign-in (login) finds no CareTip user for that email. */
+export const GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE =
+  "This Google account is not registered with CareTip yet. Please create an account first." as const;
+
+export const GOOGLE_ACCOUNT_NOT_REGISTERED_CODE = "GOOGLE_ACCOUNT_NOT_REGISTERED" as const;
 
 /** Social OAuth supported by `/api/auth/oauth` (Google only; Apple removed temporarily). */
 export type OAuthProvider = "google";
@@ -61,12 +66,6 @@ async function verifyGoogleIdToken(idToken: string): Promise<{
   return { email: normalizeLoginEmail(p.email), sub: p.sub, name };
 }
 
-function mapIntendedToRole(intended: LoginInput["intendedRole"]): Role {
-  if (intended === "MANAGER") return "MANAGER";
-  if (intended === "EMPLOYEE") return "EMPLOYEE";
-  return "SUPER_ADMIN";
-}
-
 export async function authenticateWithOAuth(
   provider: OAuthProvider,
   body: OAuthAuthBody,
@@ -115,26 +114,16 @@ export async function authenticateWithOAuth(
     verified.name ||
     (verified.email ? verified.email.split("@")[0] : "User")
   ).slice(0, 120);
-  const targetRole = mapIntendedToRole(intendedRole);
 
   if (isLogin) {
     if (!user) {
-      throw new Error("No account found for this email. Create an account first.");
+      throw new Error(GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE);
     }
     if (user.isActive !== true) {
       throw new Error("This account has been disabled.");
     }
-    if (intendedRole === "MANAGER" && user.role === "EMPLOYEE") {
-      throw new Error("This account does not have Business permissions.");
-    }
-    if (intendedRole === "EMPLOYEE" && user.role === "MANAGER") {
-      throw new Error("This account does not have Staff permissions.");
-    }
     if (user.role === "SUPER_ADMIN") {
       throw new Error("Use the Platform Admin sign-in for this account.");
-    }
-    if (user.role !== targetRole) {
-      throw new Error("Invalid email or password");
     }
 
     if (user.oauthProvider !== oauthProvider || user.oauthSubject !== oauthSubject) {
@@ -152,7 +141,7 @@ export async function authenticateWithOAuth(
       },
     });
     if (!fullUser) {
-      throw new Error("No account found for this email. Create an account first.");
+      throw new Error(GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE);
     }
     let sessionUser = fullUser;
     if (sessionUser.emailVerified !== true) {

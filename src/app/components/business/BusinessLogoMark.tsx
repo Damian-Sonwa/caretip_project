@@ -58,6 +58,7 @@ export function BusinessLogoMark({
           className="h-full w-full object-contain p-0.5"
           loading="lazy"
           decoding="async"
+          referrerPolicy="no-referrer-when-downgrade"
           onError={() => setImgFailed(true)}
         />
       </div>

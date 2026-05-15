@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import {
   ChevronLeft,
   Search,
-  Plus,
   Star,
   Edit,
   QrCode,
@@ -593,49 +592,47 @@ export function StaffManagementPage() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center gap-2">
-                  {inviteCode ? (
-                    <>
-                      <Button type="button" variant="outline" onClick={handleCopyCode}>
-                        <Copy className="h-4 w-4" />
-                        {t("business.staffPage.copy")}
+                <div className="mt-4 flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-2">
+                    {inviteCode ? (
+                      <>
+                        <Button type="button" variant="outline" onClick={handleCopyCode}>
+                          <Copy className="h-4 w-4" />
+                          {t("business.staffPage.copy")}
+                        </Button>
+                        <Button type="button" onClick={handleRegenerate} disabled={isGenerating}>
+                          <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
+                          {t("business.staffPage.regenerate")}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button type="button" onClick={handleGenerateInvite} disabled={!isBusiness || isGenerating}>
+                        {isGenerating ? (
+                          <>
+                            <RefreshCw className="h-4 w-4 animate-spin" />
+                            {t("business.staffPage.generating")}
+                          </>
+                        ) : (
+                          <>
+                            <KeyRound className="h-4 w-4" />
+                            {t("business.staffPage.generateInvite")}
+                          </>
+                        )}
                       </Button>
-                      <Button type="button" onClick={handleRegenerate} disabled={isGenerating}>
-                        <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
-                        {t("business.staffPage.regenerate")}
-                      </Button>
-                    </>
-                  ) : (
-                    <Button type="button" onClick={handleGenerateInvite} disabled={!isBusiness || isGenerating}>
-                      {isGenerating ? (
-                        <>
-                          <RefreshCw className="h-4 w-4 animate-spin" />
-                          {t("business.staffPage.generating")}
-                        </>
-                      ) : (
-                        <>
-                          <KeyRound className="h-4 w-4" />
-                          {t("business.staffPage.generateInvite")}
-                        </>
-                      )}
-                    </Button>
-                  )}
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    onClick={() => isBusiness && setShowAddModal(true)}
+                    disabled={!isBusiness}
+                    variant="outline"
+                    className="w-full sm:w-auto"
+                  >
+                    {t("business.staffPage.addEmployee")}
+                  </Button>
                 </div>
               </div>
             </div>
-          }
-          actions={
-            <>
-              <Button
-                type="button"
-                onClick={() => isBusiness && setShowAddModal(true)}
-                disabled={!isBusiness}
-                variant="outline"
-              >
-                <Plus className="mr-2 h-4 w-4 shrink-0" />
-                Add Employee
-              </Button>
-            </>
           }
         />
 
@@ -660,8 +657,8 @@ export function StaffManagementPage() {
         </Card>
       </div>
 
-      <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="space-y-6 py-2">
+      <TracingBeam className="mx-auto min-w-0 max-w-7xl px-4 sm:px-6">
+        <div className="min-w-0 space-y-6 py-2">
           <Card className="rounded-xl bg-white border border-black/[0.06] shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Search</CardTitle>
@@ -681,9 +678,9 @@ export function StaffManagementPage() {
             </CardContent>
           </Card>
 
-        {/* Desktop Table View */}
-        <div className="hidden overflow-hidden rounded-xl border border-black/[0.06] bg-white shadow-sm lg:block">
-          <table className="w-full">
+        {/* Desktop Table View — horizontal scroll so Actions column stays reachable on narrow viewports */}
+        <div className="hidden max-w-full overflow-x-auto overflow-y-visible rounded-xl border border-black/[0.06] bg-white pb-1 shadow-sm lg:block">
+          <table className="w-full min-w-[72rem]">
             <thead className="bg-muted/50">
               <tr>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">Employee</th>
@@ -698,7 +695,9 @@ export function StaffManagementPage() {
                 <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">Tips (Month)</th>
                 <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">Rating</th>
                 <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">Active</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">Actions</th>
+                <th className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-foreground">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -810,7 +809,7 @@ export function StaffManagementPage() {
                       />
                     </button>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="whitespace-nowrap px-6 py-4">
                     <div className="flex items-center justify-end gap-1">
                       <button
                         type="button"

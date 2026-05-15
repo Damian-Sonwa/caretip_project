@@ -19,6 +19,7 @@ import {
   resendVerificationEmailAPI,
   isApiRequestError,
   EMAIL_NOT_VERIFIED_CODE,
+  GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
 } from '../lib/api';
 import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
@@ -321,6 +322,11 @@ export function AuthPage() {
       navigate(getPostAuthRedirect(loggedIn), { replace: true });
     } catch (err) {
       logClientError('AuthPage.oauth', err);
+      if (isApiRequestError(err) && err.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
+        setIsLogin(false);
+        setError(toUserFriendlyMessage(err));
+        return;
+      }
       const raw = err instanceof Error ? err.message : String(err);
       const msg = toUserFriendlyMessage(err);
       if (

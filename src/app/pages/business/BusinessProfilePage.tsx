@@ -10,7 +10,7 @@ import {
   type BusinessInfo,
 } from "../../lib/api";
 import { getAppPublicBaseUrl } from "../../lib/appPublicUrl";
-import { resolveMediaUrl } from "../../lib/mediaUrl";
+import { resolveMediaUrl, withMediaCacheBust } from "../../lib/mediaUrl";
 import { logClientError } from "../../lib/clientLog";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
@@ -107,8 +107,7 @@ export function BusinessProfilePage() {
     if (savedLogoLoadFailed) return null;
     const base = resolveMediaUrl(profile?.logo ?? undefined);
     if (!base) return null;
-    const sep = base.includes("?") ? "&" : "?";
-    return `${base}${sep}v=${logoBust}`;
+    return withMediaCacheBust(base, logoBust);
   }, [profile?.logo, logoBust, savedLogoLoadFailed]);
 
   const headerImageSrc = logoObjectUrl ?? serverLogoSrc;
@@ -236,9 +235,11 @@ export function BusinessProfilePage() {
             <div className="relative">
               {headerImageSrc ? (
                 <img
+                  key={pendingLogo ? "logo-preview" : `logo-saved-${profile?.logo ?? ""}-${logoBust}`}
                   src={headerImageSrc}
                   alt=""
                   className="h-28 w-28 rounded-xl border border-border bg-white object-contain p-1 shadow-sm"
+                  decoding="async"
                   onError={() => {
                     if (!pendingLogo) setSavedLogoLoadFailed(true);
                   }}

@@ -4,7 +4,11 @@
  */
 
 import i18n from "../../i18n/i18n";
-import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
+import {
+  isApiRequestError,
+  EMAIL_NOT_VERIFIED_CODE,
+  GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+} from "./apiError";
 import { translateFriendlyMessageToDe } from "./friendlyMessageDe";
 
 function localizeFriendlyMessageCopy(english: string): string {
@@ -242,6 +246,10 @@ export function fallbackMessageForHttpStatus(status: number): string | undefined
  */
 export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMessageOptions): string {
   if (error == null) return localizeFriendlyMessageCopy(GENERIC_UNKNOWN_ERROR);
+
+  if (isApiRequestError(error) && error.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
+    return localizeFriendlyMessageCopy(error.message);
+  }
 
   if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
     return error.message;

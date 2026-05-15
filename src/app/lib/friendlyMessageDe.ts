@@ -44,6 +44,8 @@ export const FRIENDLY_MESSAGE_DE: Record<string, string> = {
   "Goal amount must be zero or more.": "Der Zielbetrag muss null oder größer sein.",
   "Google didn’t share an email for this account. Try another Google account or contact support.":
     "Google hat für dieses Konto keine E-Mail übermittelt. Versuchen Sie ein anderes Google-Konto oder kontaktieren Sie den Support.",
+  "This Google account is not registered with CareTip yet. Please create an account first.":
+    "Dieses Google-Konto ist bei CareTip noch nicht registriert. Bitte legen Sie zuerst ein Konto an.",
   "Incorrect email or password. Please try again.":
     "E-Mail oder Passwort ist nicht korrekt. Bitte versuchen Sie es erneut.",
   "Name can't be empty.": "Der Name darf nicht leer sein.",

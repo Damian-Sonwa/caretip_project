@@ -112,11 +112,14 @@ export async function rotateRefreshToken(
     return await prisma.$transaction(async (tx) => {
       const existing = await tx.refreshToken.findUnique({
         where: { tokenHash },
-        select: { id: true, userId: true, expiresAt: true, revokedAt: true },
+        select: { id: true, userId: true, expiresAt: true, revokedAt: true, replacedByTokenId: true },
       });
       if (!existing) return null;
 
       if (existing.revokedAt) {
+        // If the token was explicitly revoked (e.g. via logout), do not revoke other devices' sessions.
+        // If the token was revoked due to rotation/reuse, `replacedByTokenId` is set and we treat it as reuse.
+        if (existing.replacedByTokenId == null) return null;
         await tx.refreshToken.updateMany({
           where: { userId: existing.userId, revokedAt: null },
           data: { revokedAt: new Date() },
@@ -166,4 +169,16 @@ export async function revokeRefreshToken(token: string): Promise<void> {
     where: { tokenHash, revokedAt: null },
     data: { revokedAt: new Date() },
   });
+}
+
+/** Resolve user id for logout when only the raw refresh cookie value is available. */
+export async function userIdForRefreshToken(token: string): Promise<string | null> {
+  const raw = String(token ?? "").trim();
+  if (!raw) return null;
+  const tokenHash = sha256Hex(raw);
+  const row = await prisma.refreshToken.findUnique({
+    where: { tokenHash },
+    select: { userId: true },
+  });
+  return row?.userId ?? null;
 }

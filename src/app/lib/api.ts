@@ -9,13 +9,44 @@ import {
   fallbackMessageForHttpStatus,
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
 } from "./errorMessages";
-import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "./apiError";
+import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { validateImageFileForUpload } from "./imageClientUpload";
 import { authDebug } from "./authDebugLog";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
+
+/** Set on explicit logout; blocks silent refresh until the next successful sign-in. */
+export const SESSION_REVOKED_STORAGE_KEY = "caretip_session_revoked";
+
+export function isClientSessionRevoked(): boolean {
+  try {
+    return localStorage.getItem(SESSION_REVOKED_STORAGE_KEY) != null;
+  } catch {
+    return false;
+  }
+}
+
+export function markClientSessionRevoked(): void {
+  try {
+    localStorage.setItem(SESSION_REVOKED_STORAGE_KEY, String(Date.now()));
+  } catch {
+    // ignore
+  }
+}
+
+export function clearClientSessionRevoked(): void {
+  try {
+    localStorage.removeItem(SESSION_REVOKED_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export function cancelPendingSessionRefresh(): void {
+  refreshSingleton = null;
+}
 
 function isAuthRefreshRequestUrl(url: string): boolean {
   return requestUrlPathname(url) === AUTH_REFRESH_PATHNAME;
@@ -46,6 +77,11 @@ function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
  * After final failure: caller should clear session (handled in {@link ensureRefreshedSession}).
  */
 async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
+  if (isClientSessionRevoked()) {
+    clearAuthStorage();
+    return { ok: false, shouldClearSession: true, status: 401 };
+  }
+
   for (let attempt = 0; attempt < 2; attempt++) {
     if (attempt > 0) {
       // Short backoff to avoid long "stuck loading" sessions on flaky networks.
@@ -55,10 +91,6 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
     let res: Response;
     try {
       const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
-      const existing = getToken();
-      if (existing?.trim()) {
-        refreshHeaders.Authorization = `Bearer ${existing.trim()}`;
-      }
       res = await fetch(apiPath(AUTH_REFRESH_PATHNAME), {
         method: "POST",
         headers: refreshHeaders,
@@ -143,15 +175,22 @@ function setToken(token: string | null): void {
   else localStorage.removeItem("caretip_token");
 }
 
-function clearAuthStorage(): void {
+/** Clears access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
+export function clearClientAuthStorage(): void {
+  cancelPendingSessionRefresh();
   try {
     localStorage.removeItem("caretip_token");
     localStorage.removeItem("caretip_user");
-    // Keep in sync with useAuth.ts
+    sessionStorage.removeItem("caretip_admin_token_backup");
+    sessionStorage.removeItem("caretip_admin_user_backup");
     window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
   } catch {
     // ignore
   }
+}
+
+function clearAuthStorage(): void {
+  clearClientAuthStorage();
 }
 
 /** Pathname for CareTip API URLs whether `url` is relative or absolute (e.g. `VITE_API_URL` + `/api/...`). */
@@ -253,6 +292,9 @@ async function handleRes<T>(res: Response): Promise<T> {
       `Request failed (${res.status})`;
     if (body.code === EMAIL_NOT_VERIFIED_CODE) {
       throw new ApiRequestError(base, res.status, body.code, body.canResend === true);
+    }
+    if (body.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
+      throw new ApiRequestError(base, res.status, body.code);
     }
     throw new Error(base);
   }
@@ -448,14 +490,23 @@ export async function loginAPI(
 }
 
 export async function logoutAPI(): Promise<void> {
+  markClientSessionRevoked();
+  cancelPendingSessionRefresh();
+  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const token = getToken();
+  if (token?.trim()) {
+    headers.Authorization = `Bearer ${token.trim()}`;
+  }
   try {
     await fetch(apiPath("/api/auth/logout"), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       credentials: "include",
     });
   } catch (err) {
     logClientError("api.logoutAPI", err);
+  } finally {
+    clearClientAuthStorage();
   }
 }
 
@@ -484,7 +535,7 @@ export async function resendVerificationEmailSessionAPI(
   });
 }
 
-export { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, isApiRequestError } from "./apiError";
+export { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE, isApiRequestError } from "./apiError";
 
 export async function requestPasswordReset(
   email: string,

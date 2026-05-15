@@ -47,6 +47,7 @@ const ALLOWED_CLIENT_MESSAGES = new Set<string>([
   "Email already registered",
   "Invalid or expired invite code",
   "Invalid email or password",
+  "This Google account is not registered with CareTip yet. Please create an account first.",
   "This account does not have Business permissions.",
   "This account does not have Staff permissions.",
   "Current password is incorrect",

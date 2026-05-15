@@ -9,6 +9,9 @@ import {
   logoutAPI,
   refreshSessionAPI,
   patchMyOnboardingStatus,
+  clearClientSessionRevoked,
+  clearClientAuthStorage,
+  isClientSessionRevoked,
   type AuthResponse,
 } from "../lib/api";
 import { deriveAuthSession, isPublicAuthenticationPath, type AuthSession } from "../lib/authSession";
@@ -56,14 +59,7 @@ function isJwtExpired(token: string): boolean {
 }
 
 function clearStoredSession() {
-  try {
-    localStorage.removeItem(USER_STORAGE_KEY);
-    localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-    sessionStorage.removeItem("caretip_admin_token_backup");
-    sessionStorage.removeItem("caretip_admin_user_backup");
-  } catch {
-    // ignore
-  }
+  clearClientAuthStorage();
 }
 
 function loadUserFromStorage(): User | null {
@@ -84,6 +80,7 @@ function notifyAuthStorageSync() {
 
 /** Persist access token + normalized user to localStorage and sync all `useAuth()` instances. */
 function persistAuthResponse(data: AuthResponse): User {
+  clearClientSessionRevoked();
   localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
   const u = parseUser(data.user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u));
@@ -243,6 +240,12 @@ export function useAuth() {
         setSessionValidated(true);
         return;
       }
+      if (isClientSessionRevoked()) {
+        clearStoredSession();
+        setUser(null);
+        setSessionValidated(true);
+        return;
+      }
       if (isJwtExpired(token)) {
         void (async () => {
           try {
@@ -275,6 +278,12 @@ export function useAuth() {
 
       try {
         if (!cancelled) setAuthHydrated(true);
+        if (isClientSessionRevoked()) {
+          clearStoredSession();
+          if (!cancelled) setUser(null);
+          if (!cancelled) setSessionValidated(true);
+          return;
+        }
         if (!hadToken) {
           try {
             if (typeof localStorage !== "undefined" && localStorage.getItem(USER_STORAGE_KEY)) {
@@ -419,12 +428,12 @@ export function useAuth() {
     return u;
   }, [requestLocale]);
 
-  const logout = useCallback(() => {
-    void logoutAPI();
+  const logout = useCallback(async () => {
     sessionEpochRef.current += 1;
     clearStoredSession();
     setUser(null);
     setSessionValidated(true);
+    await logoutAPI();
     notifyAuthStorageSync();
     authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
   }, []);

@@ -17,6 +17,7 @@ import {
   refreshCookieName,
   rotateRefreshToken,
   revokeRefreshToken,
+  revokeAllRefreshTokensForUser,
   setRefreshCookie,
 } from "../services/refreshToken.service.js";
 import { checkAndIncrementEmailLimit } from "../utils/emailRateLimit.js";
@@ -524,20 +525,19 @@ export async function oauth(req: Request, res: Response) {
       logServerError("auth.oauth", err);
       return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
     }
+    if (message === oauthAuthService.GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE) {
+      return res.status(400).json({
+        message: oauthAuthService.GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE,
+        code: oauthAuthService.GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+      });
+    }
     if (
-      message === "No account found for this email. Create an account first." ||
       message === "Email already registered. Sign in instead." ||
       message.includes("Invite code") ||
       message.includes("invite code") ||
       message.includes("Invalid or expired")
     ) {
       return res.status(400).json({ message });
-    }
-    if (
-      message === "This account does not have Business permissions." ||
-      message === "This account does not have Staff permissions."
-    ) {
-      return res.status(403).json({ message });
     }
     if (
       message === "This account has been disabled." ||
@@ -578,37 +578,6 @@ export async function refresh(req: Request, res: Response) {
       return res.json(result);
     }
 
-    /**
-     * No refresh cookie (e.g. `issueRefreshToken` failed at login, cross-site cookie blocked, or dev DB
-     * without RefreshToken rows). If the client still sends a valid access JWT, re-issue session from DB
-     * so hydration and `apiRequest` 401 recovery do not wipe local auth.
-     */
-    const authHeader = typeof req.headers.authorization === "string" ? req.headers.authorization : "";
-    const bearer =
-      authHeader.startsWith("Bearer ") && authHeader.length > 7 ? authHeader.slice(7).trim() : "";
-    if (bearer) {
-      try {
-        const secret = process.env.JWT_SECRET?.trim();
-        if (!secret) throw new Error("JWT_SECRET not configured");
-        const decoded = jwt.verify(bearer, secret) as { userId?: string; id?: string };
-        const userId =
-          (typeof decoded.userId === "string" && decoded.userId) ||
-          (typeof decoded.id === "string" && decoded.id) ||
-          null;
-        if (userId) {
-          const result = await authService.authResultForUserId(userId);
-          return res.json(result);
-        }
-      } catch (e) {
-        const msg = e instanceof Error ? e.message : "";
-        if (msg === "Authentication required" || msg === "Invalid email or password") {
-          return res.status(401).json({ message: "Invalid or expired token" });
-        }
-        logServerError("auth.refresh.bearerFallback", e);
-        return res.status(401).json({ message: "Invalid or expired token" });
-      }
-    }
-
     return res.status(401).json({ message: "Authentication required" });
   } catch (err) {
     logServerError("auth.refresh", err);
@@ -616,14 +585,15 @@ export async function refresh(req: Request, res: Response) {
   }
 }
 
-/** Logs out by revoking the current refresh token and clearing the cookie. */
+/** Logs out by revoking the current refresh session and clearing the cookie. */
 export async function logout(req: Request, res: Response) {
   try {
     const cookieHeader = req.headers.cookie;
-    const token = parseCookie(cookieHeader, refreshCookieName());
-    if (token) {
-      await revokeRefreshToken(token);
+    const refreshCookie = parseCookie(cookieHeader, refreshCookieName());
+    if (refreshCookie) {
+      await revokeRefreshToken(refreshCookie);
     }
+
     clearRefreshCookie(res);
     return res.json({ ok: true });
   } catch (err) {

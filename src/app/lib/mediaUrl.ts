@@ -33,3 +33,13 @@ export function resolveMediaUrl(url: string | null | undefined): string | undefi
   }
   return s;
 }
+
+/**
+ * Optional cache-bust query for the same stored path (e.g. after re-upload).
+ * Skips `?v=` when `bust` is 0 so all components share one URL and avoid duplicate/aborted fetches.
+ */
+export function withMediaCacheBust(url: string | undefined, bust: number): string | undefined {
+  if (!url || bust <= 0) return url;
+  const sep = url.includes("?") ? "&" : "?";
+  return `${url}${sep}v=${bust}`;
+}
