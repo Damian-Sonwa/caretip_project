@@ -386,7 +386,6 @@ export function AuthPage() {
     );
   }
 
-  void authHydrated;
   const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);
   const showSignInForm =
     !user ||
