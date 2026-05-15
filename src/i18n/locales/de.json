@@ -468,7 +468,8 @@
       "envHintBefore": "Fügen Sie",
       "envHintOr": "oder",
       "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu — Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
-      "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben"
+      "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben",
+      "googleOriginError": "Google-Anmeldung ist für diese Website ({{origin}}) nicht freigeschaltet. In der Google Cloud Console → APIs & Dienste → Anmeldedaten → Ihr Web-Client diese URL unter „Autorisierte JavaScript-Quellen“ eintragen, speichern und einige Minuten warten."
     },
     "recovery": {
       "backToSignIn": "Zurück zur Anmeldung"

@@ -18,6 +18,19 @@ let authHydrated = false;
 let sessionValidated = false;
 let bootstrapPromise: Promise<SessionBootstrapResult> | null = null;
 
+export type BootstrapResultHandler = (result: SessionBootstrapResult) => void;
+
+let bootstrapResultHandler: BootstrapResultHandler | null = null;
+
+/** Single handler — first registration wins; avoids N parallel bootstrap consumers. */
+export function registerBootstrapResultHandler(handler: BootstrapResultHandler): () => void {
+  if (bootstrapResultHandler) return () => {};
+  bootstrapResultHandler = handler;
+  return () => {
+    if (bootstrapResultHandler === handler) bootstrapResultHandler = null;
+  };
+}
+
 function notify() {
   listeners.forEach((l) => l());
 }
@@ -55,12 +68,15 @@ export function runSessionBootstrapOnce(run: BootstrapRunner): Promise<SessionBo
     bootstrapPromise = (async () => {
       try {
         return await run();
-      } finally {
-        authHydrated = true;
-        sessionValidated = true;
-        notify();
+      } catch {
+        return { kind: "unauthenticated" };
       }
-    })();
+    })().then((result) => {
+      authHydrated = true;
+      notify();
+      bootstrapResultHandler?.(result);
+      return result;
+    });
   }
   return bootstrapPromise;
 }

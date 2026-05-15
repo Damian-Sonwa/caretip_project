@@ -1,5 +1,6 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import type { AuthRole } from "@/components/ui/sign-in-card-2";
 import { googleOAuthWebClientId } from "@/app/lib/googleOAuthWebClientId";
@@ -25,8 +26,9 @@ export function AuthOAuthButtons({
   inviteCode,
   onGoogleCredential,
 }: AuthOAuthButtonsProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const googleClientId = googleOAuthWebClientId();
+  const gsiLocale = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
 
   const canOAuthSignUp =
     isLogin ||
@@ -62,12 +64,14 @@ export function AuthOAuthButtons({
           if (cred.credential) onGoogleCredential(cred.credential);
         }}
         onError={() => {
-          /* cancelled — optional toast elsewhere */
+          const origin = typeof window !== "undefined" ? window.location.origin : "";
+          toast.error(t("auth.oauth.googleOriginError", { origin }), { id: "caretip-google-gsi-error" });
         }}
         useOneTap={false}
         theme="outline"
         size="large"
         width={320}
+        locale={gsiLocale}
         text={isLogin ? "continue_with" : "signup_with"}
         shape="rectangular"
       />

@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
-import { resolveAuthenticatedAppGuard } from "../lib/authSession";
+import { getLoginPathForAllowedRoles, resolveAuthenticatedAppGuard } from "../lib/authSession";
+import { hasClientStoredSession } from "../lib/authUserStore";
+import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
 import { AppLoader } from "./AppLoader";
 
@@ -23,14 +25,18 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
   }
 
   if (!user) {
+    const loginPath = getLoginPathForAllowedRoles(allowedRoles);
+    if (!isClientSessionRevoked() && hasClientStoredSession()) {
+      return <AppLoader />;
+    }
     authDebug("route_guard", {
       decision: "redirect",
-      to: "/login",
+      to: loginPath,
       reason: "not_authenticated",
       path: location.pathname,
       scope: "RoleProtectedRoute",
     });
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+    return <Navigate to={loginPath} replace state={{ from: location.pathname }} />;
   }
 
   const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles);

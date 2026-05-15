@@ -81,7 +81,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated, isAuthLoading } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -103,13 +103,12 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  /** Same-lane session (business/staff UI matches session role) → home dashboard. */
+  /** Validated session on any auth page → app home (avoids re-sign-in with wrong business/staff lane). */
   useEffect(() => {
-    if (!user) return;
-    if (!sessionValidated) return;
-    if (!sessionMatchesBusinessStaffAuthTarget(user.role, role)) return;
+    if (!user || !sessionValidated) return;
+    if (!isPublicAuthenticationPath(location.pathname)) return;
     navigate(getPostAuthRedirect(user), { replace: true });
-  }, [navigate, sessionValidated, user, role]);
+  }, [navigate, sessionValidated, user, location.pathname]);
 
   useEffect(() => {
     const p = location.pathname;
@@ -140,6 +139,10 @@ export function AuthPage() {
     setShowResendVerification(false);
 
     if (user != null && !sessionValidated) return;
+    if (user != null && sessionValidated) {
+      navigate(getPostAuthRedirect(user), { replace: true });
+      return;
+    }
 
     if (!email || !password) {
       setError(t('auth.page.errorBothRequired'));
@@ -295,6 +298,10 @@ export function AuthPage() {
   };
 
   const runGoogleOAuth = async (idToken: string) => {
+    if (user != null && sessionValidated) {
+      navigate(getPostAuthRedirect(user), { replace: true });
+      return;
+    }
     if (!isLogin) {
       if (role === 'employee') {
         if (!name.trim()) {
@@ -351,10 +358,35 @@ export function AuthPage() {
       password !== confirmPassword ||
       (role === 'employee' && (!name || !inviteCode)));
 
-  // Keep auth pages instant; hydration is synchronous in normal browsers.
-  void authHydrated;
-
   const resumeSessionPending = user != null && !sessionValidated;
+  const redirectingAfterAuth =
+    Boolean(user) && sessionValidated && isPublicAuthenticationPath(location.pathname);
+
+  if (isAuthLoading && !user && !isSubmitting) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900"
+      >
+        <AppLoader />
+      </motion.div>
+    );
+  }
+
+  if (redirectingAfterAuth || isSubmitting) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900"
+      >
+        <AppLoader />
+      </motion.div>
+    );
+  }
+
+  void authHydrated;
   const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);
   const showSignInForm =
     !user ||
@@ -422,8 +454,6 @@ export function AuthPage() {
             onSubmit={handleSubmit}
             aria-busy={isSubmitting || resumeSessionPending}
             className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
-            method="post"
-            action=""
             noValidate
           >
             <input

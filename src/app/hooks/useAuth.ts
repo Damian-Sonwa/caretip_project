@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef, useReducer } from "react";
+import { useState, useEffect, useCallback, useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -16,10 +16,18 @@ import {
 import {
   getAuthSessionFlags,
   markSessionBootstrapSettled,
+  registerBootstrapResultHandler,
   resetSessionBootstrap,
   runSessionBootstrapOnce,
   subscribeAuthSessionFlags,
 } from "../lib/authSessionBootstrap";
+import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
+import {
+  commitAuthUser,
+  getAuthUser,
+  setAuthUser,
+  subscribeAuthUser,
+} from "../lib/authUserStore";
 import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
@@ -78,6 +86,32 @@ function loadUserFromStorage(): User | null {
     logClientError("useAuth.localStorage", err);
     return null;
   }
+}
+
+function applyBootstrapResult(
+  result: import("../lib/authSessionBootstrap").SessionBootstrapResult,
+  epochAtStart: number,
+): void {
+  if (getSessionEpoch() !== epochAtStart) {
+    markSessionBootstrapSettled();
+    return;
+  }
+
+  if (result.kind === "authenticated") {
+    commitAuthUser(persistAuthResponse(result.data));
+    markSessionBootstrapSettled();
+    return;
+  }
+
+  if (result.kind === "unauthenticated") {
+    commitAuthUser(null);
+    markSessionBootstrapSettled();
+    return;
+  }
+
+  const stored = loadUserFromStorage();
+  commitAuthUser(stored);
+  markSessionBootstrapSettled();
 }
 
 function notifyAuthStorageSync() {
@@ -231,14 +265,13 @@ function isTransientRefreshErrorMessage(msg: string): boolean {
 export function useAuth() {
   const { i18n } = useTranslation();
   const requestLocale = requestEmailLocale(i18n.resolvedLanguage);
-  const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
+  const [user, setUserSnapshot] = useState<User | null>(() => getAuthUser());
   const [, syncAuthFlags] = useReducer((n: number) => n + 1, 0);
   const { authHydrated, sessionValidated } = getAuthSessionFlags();
-  /** Bumped after successful credential-bearing mutations so an in-flight bootstrap cannot overwrite a newer session. */
-  const sessionEpochRef = useRef(0);
   /** Re-read access token so proactive refresh + effects track rotation after login/refresh. */
   const accessTokenSnapshot = readStoredAccessToken();
 
+  useEffect(() => subscribeAuthUser(() => setUserSnapshot(getAuthUser())), []);
   useEffect(() => subscribeAuthSessionFlags(() => syncAuthFlags()), []);
 
   useEffect(() => {
@@ -246,18 +279,21 @@ export function useAuth() {
       // Storage was already cleared by whoever dispatched the sync event — do not call
       // clearStoredSession() here or every listener re-dispatches and causes stack overflow.
       if (isClientSessionRevoked()) {
-        setUser(null);
+        setAuthUser(null);
         return;
       }
-      setUser(loadUserFromStorage());
+      setAuthUser(loadUserFromStorage());
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
-    const epochAtStart = sessionEpochRef.current;
+    const epochAtStart = getSessionEpoch();
+
+    const unregisterHandler = registerBootstrapResultHandler((result) => {
+      applyBootstrapResult(result, epochAtStart);
+    });
 
     void runSessionBootstrapOnce(async () => {
       if (isClientSessionRevoked()) {
@@ -290,28 +326,9 @@ export function useAuth() {
         clearStoredSession();
         return { kind: "unauthenticated" };
       }
-    }).then((result) => {
-      if (cancelled || sessionEpochRef.current !== epochAtStart) return;
-
-      if (result.kind === "authenticated") {
-        const u = persistAuthResponse(result.data);
-        setUser(u);
-        return;
-      }
-
-      if (result.kind === "unauthenticated") {
-        setUser(null);
-        return;
-      }
-
-      // Transient: keep optimistic user/token from storage; protected APIs may retry later.
-      const stored = loadUserFromStorage();
-      if (stored) setUser(stored);
     });
 
-    return () => {
-      cancelled = true;
-    };
+    return unregisterHandler;
   }, []);
 
   /** Proactively refresh shortly before access token expiry so API calls rarely see 401. */
@@ -329,9 +346,9 @@ export function useAuth() {
         if (cancelled) return;
         try {
           const data = await refreshSessionAPI();
-          sessionEpochRef.current += 1;
+          bumpSessionEpoch();
           const u = persistAuthResponse(data);
-          if (!cancelled) setUser(u);
+          if (!cancelled) setAuthUser(u);
         } catch {
           // Leave handling to the next API 401 + silent refresh, or bootstrap on reload.
         }
@@ -365,8 +382,8 @@ export function useAuth() {
   ): Promise<User> => {
     const data = await loginAPI(email, password, intendedRole, requestLocale);
     const u = persistAuthResponse(data);
-    sessionEpochRef.current += 1;
-    setUser(u);
+    bumpSessionEpoch();
+    commitAuthUser(u);
     markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
@@ -374,8 +391,8 @@ export function useAuth() {
   const register = useCallback(async (payload: RegisterPayload): Promise<User> => {
     const data = await registerAPI({ ...payload, locale: requestLocale });
     const u = persistAuthResponse(data);
-    sessionEpochRef.current += 1;
-    setUser(u);
+    bumpSessionEpoch();
+    commitAuthUser(u);
     markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
@@ -406,16 +423,16 @@ export function useAuth() {
       locale: requestLocale,
     });
     const u = persistAuthResponse(data);
-    sessionEpochRef.current += 1;
-    setUser(u);
+    bumpSessionEpoch();
+    commitAuthUser(u);
     markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
 
   const logout = useCallback(async () => {
-    sessionEpochRef.current += 1;
+    bumpSessionEpoch();
     resetSessionBootstrap();
-    setUser(null);
+    commitAuthUser(null);
     await logoutAPI();
     clearStoredSession();
     markSessionBootstrapSettled();
@@ -425,7 +442,7 @@ export function useAuth() {
 
   const switchRole = (newRole: UserRole) => {
     if (user) {
-      setUser({ ...user, role: newRole });
+      setAuthUser({ ...user, role: newRole });
     }
   };
 
@@ -441,8 +458,8 @@ export function useAuth() {
     localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, backupToken);
     const restored = JSON.parse(backupUser) as User;
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
-    sessionEpochRef.current += 1;
-    setUser(restored);
+    bumpSessionEpoch();
+    commitAuthUser(restored);
     markSessionBootstrapSettled();
     notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
@@ -452,15 +469,16 @@ export function useAuth() {
   }, []);
 
   const updateUser = useCallback((patch: Partial<User>) => {
-    setUser((u) => (u ? { ...u, ...patch } : null));
+    const current = getAuthUser();
+    setAuthUser(current ? { ...current, ...patch } : null);
   }, []);
 
   const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User> => {
     try {
       const data = await patchMyOnboardingStatus(next);
       const u = persistAuthResponse(data);
-      sessionEpochRef.current += 1;
-      setUser(u);
+      bumpSessionEpoch();
+      commitAuthUser(u);
       return u;
     } catch (err) {
       logClientError("useAuth.setHasCompletedOnboarding", err);
@@ -470,8 +488,8 @@ export function useAuth() {
 
   const replaceUser = useCallback((next: User) => {
     localStorage.setItem("caretip_user", JSON.stringify(next));
-    sessionEpochRef.current += 1;
-    setUser(next);
+    bumpSessionEpoch();
+    commitAuthUser(next);
     markSessionBootstrapSettled();
     notifyAuthStorageSync();
   }, []);
@@ -480,8 +498,8 @@ export function useAuth() {
     try {
       const data = await refreshSessionAPI();
       const u = persistAuthResponse(data);
-      sessionEpochRef.current += 1;
-      setUser(u);
+      bumpSessionEpoch();
+      commitAuthUser(u);
       markSessionBootstrapSettled();
       return u;
     } catch (err) {
@@ -494,7 +512,7 @@ export function useAuth() {
         return loadUserFromStorage();
       }
       clearStoredSession();
-      setUser(null);
+      commitAuthUser(null);
       markSessionBootstrapSettled();
       return null;
     }

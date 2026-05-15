@@ -468,7 +468,8 @@
       "envHintBefore": "Add",
       "envHintOr": "or",
       "envHintAfter": "in your Vercel (or other) project environment, then redeploy — Vite bakes these in at build time. Plain GOOGLE_CLIENT_ID is for the API only, not the browser.",
-      "signupBlockedTitle": "Enter your name and business or invite details first"
+      "signupBlockedTitle": "Enter your name and business or invite details first",
+      "googleOriginError": "Google sign-in is not configured for this site ({{origin}}). In Google Cloud Console → APIs & Services → Credentials → your Web client, add this URL under Authorized JavaScript origins, then save and wait a few minutes."
     },
     "recovery": {
       "backToSignIn": "Back to sign in"

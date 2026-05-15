@@ -49,6 +49,38 @@ export function sessionMatchesBusinessStaffAuthTarget(
   return false;
 }
 
+/** Sign-in URL for an existing session role (used when guards redirect unauthenticated users). */
+export function getLoginPathForSessionRole(role: SessionUserRole): string {
+  if (role === "employee") return "/employee/login";
+  if (role === "business") return "/business/login";
+  if (role === "platform_admin" || role === "admin") return "/platform-admin/login";
+  return "/login";
+}
+
+/** Sign-in URL for a protected route's allowed roles. */
+export function getLoginPathForAllowedRoles(
+  allowedRoles: Array<"business" | "employee">,
+): string {
+  if (allowedRoles.length === 1) {
+    return getLoginPathForSessionRole(allowedRoles[0]);
+  }
+  return "/login";
+}
+
+/** Best-effort login URL from the app path the user was trying to open. */
+export function getLoginPathFromAppPath(pathname: string): string {
+  if (pathname.startsWith("/employee")) return "/employee/login";
+  if (pathname.startsWith("/platform-admin")) return "/platform-admin/login";
+  if (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/onboarding") ||
+    pathname.startsWith("/business")
+  ) {
+    return "/business/login";
+  }
+  return "/login";
+}
+
 export function isPlatformAdminSessionRole(sessionRole: SessionUserRole): boolean {
   return sessionRole === "platform_admin" || sessionRole === "admin";
 }
@@ -130,5 +162,9 @@ export function resolveAuthenticatedAppGuard(
     return { kind: "redirect", to: "/employee/dashboard", reason: "wrong_shell_need_employee_home" };
   }
 
-  return { kind: "redirect", to: "/login", reason: "unknown_role" };
+  return {
+    kind: "redirect",
+    to: getLoginPathForSessionRole(r),
+    reason: "unknown_role",
+  };
 }
