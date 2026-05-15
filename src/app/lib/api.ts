@@ -101,7 +101,7 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
     } catch (err) {
       logClientError("api.runRefreshAuthWithRetries.fetch", err, { attempt });
       if (attempt === 1) {
-        return { ok: false, shouldClearSession: true, status: 0 };
+        return { ok: false, shouldClearSession: false, status: 0 };
       }
       continue;
     }
@@ -129,7 +129,7 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
 
     if (transient) {
       if (attempt < 1) continue;
-      return { ok: false, shouldClearSession: true, status: res.status };
+      return { ok: false, shouldClearSession: false, status: res.status };
     }
 
     return { ok: false, shouldClearSession: true, status: res.status };

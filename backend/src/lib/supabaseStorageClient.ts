@@ -1,18 +1,84 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
+const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+
 let _client: SupabaseClient | null = null;
 let warnedMissingServiceRole = false;
+let bucketReadyPromise: Promise<void> | null = null;
+
+function describeStorageError(error: unknown): string {
+  if (!error || typeof error !== "object") return String(error);
+  const e = error as Record<string, unknown>;
+  const parts: string[] = [];
+  if (typeof e.message === "string" && e.message.trim()) parts.push(e.message.trim());
+  if (e.statusCode != null && String(e.statusCode).trim()) parts.push(`status=${String(e.statusCode)}`);
+  if (typeof e.error === "string" && e.error.trim()) parts.push(e.error.trim());
+  if (typeof e.name === "string" && e.name.trim()) parts.push(`name=${e.name.trim()}`);
+  return parts.length > 0 ? parts.join(" | ") : JSON.stringify(error);
+}
+
+function clientMessageForStorageUploadError(detail: string): string {
+  const d = detail.toLowerCase();
+  if (/bucket not found|nosuchbucket|does not exist/.test(d)) {
+    return "File upload isn't available right now. Please try again later.";
+  }
+  if (/invalid jwt|invalid api key|unauthorized|jwt expired|invalid signature/.test(d)) {
+    return "File upload isn't available right now. Please try again later.";
+  }
+  if (/payload too large|entity too large|file size limit|exceeded/.test(d)) {
+    return "Image is too large (max 5 MB).";
+  }
+  if (/already exists|duplicate/.test(d)) {
+    return "We couldn't save your file. Please try again.";
+  }
+  return "We couldn't save your file. Please try again.";
+}
+
+function normalizeImageContentType(contentType: string): string {
+  const mt = contentType.trim().toLowerCase();
+  if (!mt) return "application/octet-stream";
+  if (mt === "image/jpg") return "image/jpeg";
+  if (mt.includes("heic") || mt.includes("heif")) return "image/heic";
+  return contentType.trim();
+}
+
+/**
+ * Project URL only — e.g. `https://abcdefgh.supabase.co`.
+ * Do NOT append `/rest/v1/` (the SDK adds API paths). Strips common copy-paste mistakes.
+ */
+function normalizeSupabaseProjectUrl(raw: string | undefined): string | undefined {
+  if (!raw?.trim()) return undefined;
+  let s = raw.trim().replace(/\/+$/, "");
+  const m = s.match(/https?:\/\/[a-z0-9-]+\.supabase\.co/i);
+  if (m?.[0]) {
+    s = m[0].replace(/\/+$/, "");
+  } else {
+    s = s.replace(/\/rest\/v1\/?$/i, "").replace(/\/+$/, "");
+  }
+  try {
+    const u = new URL(s);
+    if (!/\.supabase\.co$/i.test(u.hostname)) return undefined;
+    return `${u.protocol}//${u.host}`;
+  } catch {
+    return undefined;
+  }
+}
 
 /** Same project URL as the dashboard; SPA often sets `NEXT_PUBLIC_SUPABASE_URL` only. */
 function supabaseProjectUrl(): string | undefined {
-  const direct = process.env.SUPABASE_URL?.trim();
-  if (direct) return direct;
-  return process.env.NEXT_PUBLIC_SUPABASE_URL?.trim();
+  return (
+    normalizeSupabaseProjectUrl(process.env.SUPABASE_URL) ??
+    normalizeSupabaseProjectUrl(process.env.NEXT_PUBLIC_SUPABASE_URL)
+  );
 }
 
 /** Service role only — never the anon key (anon cannot replace server-side Storage uploads in our flow). */
 function supabaseServiceRoleKey(): string | undefined {
-  return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim();
+  return (
+    process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() ||
+    process.env.SUPABASE_SERVICE_ROLE?.trim() ||
+    undefined
+  );
 }
 
 export function isSupabaseStorageConfigured(): boolean {
@@ -33,6 +99,55 @@ export function warnIfSupabaseUrlButNoServiceRole(): void {
 /** Default `caretip` — create this bucket in Supabase (public read recommended for logos/avatars). */
 export function supabaseStorageBucketName(): string {
   return process.env.SUPABASE_STORAGE_BUCKET?.trim() || "caretip";
+}
+
+/**
+ * Ensures the configured bucket exists (public read). Safe to call before every upload — runs once per process.
+ * Requires `SUPABASE_SERVICE_ROLE_KEY` (anon key cannot create buckets or bypass storage RLS).
+ */
+export async function ensureSupabaseStorageBucketReady(): Promise<void> {
+  if (!isSupabaseStorageConfigured()) return;
+  if (bucketReadyPromise) return bucketReadyPromise;
+
+  bucketReadyPromise = (async () => {
+    const supabase = getServiceClient();
+    const bucket = supabaseStorageBucketName();
+
+    const { data: buckets, error: listErr } = await supabase.storage.listBuckets();
+    if (listErr) {
+      const detail = describeStorageError(listErr);
+      console.error("[upload] Supabase listBuckets failed:", detail);
+      throw new Error("File upload isn't available right now. Please try again later.");
+    }
+
+    if (buckets?.some((b) => b.name === bucket)) {
+      return;
+    }
+
+    console.info(`[upload] Supabase bucket "${bucket}" not found — creating (public read).`);
+    const { error: createErr } = await supabase.storage.createBucket(bucket, {
+      public: true,
+      fileSizeLimit: AVATAR_MAX_BYTES,
+    });
+
+    if (createErr) {
+      const detail = describeStorageError(createErr);
+      if (/already exists|duplicate/i.test(detail)) {
+        return;
+      }
+      console.error(`[upload] Supabase createBucket("${bucket}") failed:`, detail);
+      console.error(
+        `[upload] Create a **public** bucket named "${bucket}" in Supabase Dashboard → Storage, ` +
+          `or set SUPABASE_STORAGE_BUCKET to match an existing bucket. ` +
+          `Uploads require SUPABASE_SERVICE_ROLE_KEY (not the anon key).`,
+      );
+      throw new Error("File upload isn't available right now. Please try again later.");
+    }
+
+    console.info(`[upload] Supabase bucket "${bucket}" created.`);
+  })();
+
+  return bucketReadyPromise;
 }
 
 function getServiceClient(): SupabaseClient {
@@ -105,6 +220,11 @@ export async function assertUploadedObjectReadableInBucket(publicUrl: string): P
   const supabase = getServiceClient();
   const { error } = await supabase.storage.from(parsed.bucket).download(parsed.objectPath);
   if (error) {
+    const detail = describeStorageError(error);
+    console.error(
+      `[upload] Supabase post-upload verify failed bucket="${parsed.bucket}" path="${parsed.objectPath}":`,
+      detail,
+    );
     throw new Error("We couldn't confirm the upload. Please try again.");
   }
 }

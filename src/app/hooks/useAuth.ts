@@ -1,5 +1,4 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useState, useEffect, useCallback, useMemo, useRef, useReducer } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import {
@@ -14,12 +13,20 @@ import {
   isClientSessionRevoked,
   type AuthResponse,
 } from "../lib/api";
-import { deriveAuthSession, isPublicAuthenticationPath, type AuthSession } from "../lib/authSession";
+import {
+  getAuthSessionFlags,
+  markSessionBootstrapSettled,
+  resetSessionBootstrap,
+  runSessionBootstrapOnce,
+  subscribeAuthSessionFlags,
+} from "../lib/authSessionBootstrap";
+import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
 import {
   fallbackMessageForHttpStatus,
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
+  API_WAKEUP_NETWORK_MESSAGE,
 } from "../lib/errorMessages";
 
 export type { AuthSession } from "../lib/authSession";
@@ -211,59 +218,37 @@ function requestEmailLocale(i18nLang: string | undefined): "en" | "de" {
   return i18nLang?.toLowerCase().startsWith("de") ? "de" : "en";
 }
 
+function isTransientRefreshErrorMessage(msg: string): boolean {
+  return (
+    msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE ||
+    msg === API_WAKEUP_NETWORK_MESSAGE ||
+    msg === fallbackMessageForHttpStatus(500) ||
+    msg === fallbackMessageForHttpStatus(503) ||
+    msg === fallbackMessageForHttpStatus(504)
+  );
+}
+
 export function useAuth() {
-  const navigate = useNavigate();
   const { i18n } = useTranslation();
   const requestLocale = requestEmailLocale(i18n.resolvedLanguage);
   const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
-  /**
-   * Hydration is synchronous (localStorage read) — keep UI instant.
-   * Background session validation uses `sessionValidated` only (no blocking "checking session" UI).
-   */
-  const [authHydrated, setAuthHydrated] = useState(true);
-  /**
-   * True after bootstrap when there was no access token, or after `/api/auth/refresh` succeeded.
-   * False when a stored token was present but refresh ultimately failed — dashboards must not call protected APIs until true.
-   */
-  const [sessionValidated, setSessionValidated] = useState(false);
-  /** Bumped after successful credential-bearing mutations so an in-flight initial `refreshSession` cannot overwrite a newer session. */
+  const [, syncAuthFlags] = useReducer((n: number) => n + 1, 0);
+  const { authHydrated, sessionValidated } = getAuthSessionFlags();
+  /** Bumped after successful credential-bearing mutations so an in-flight bootstrap cannot overwrite a newer session. */
   const sessionEpochRef = useRef(0);
   /** Re-read access token so proactive refresh + effects track rotation after login/refresh. */
   const accessTokenSnapshot = readStoredAccessToken();
 
+  useEffect(() => subscribeAuthSessionFlags(() => syncAuthFlags()), []);
+
   useEffect(() => {
     const onStorageSync = () => {
-      setUser(loadUserFromStorage());
-      setAuthHydrated(true);
-      const token = readStoredAccessToken();
-      if (!token) {
-        setSessionValidated(true);
-        return;
-      }
       if (isClientSessionRevoked()) {
         clearStoredSession();
         setUser(null);
-        setSessionValidated(true);
         return;
       }
-      if (isJwtExpired(token)) {
-        void (async () => {
-          try {
-            const data = await refreshSessionAPI();
-            sessionEpochRef.current += 1;
-            const u = persistAuthResponse(data);
-            setUser(u);
-            setSessionValidated(true);
-          } catch {
-            clearStoredSession();
-            notifyAuthStorageSync();
-            setUser(null);
-            setSessionValidated(true);
-          }
-        })();
-        return;
-      }
-      setSessionValidated(true);
+      setUser(loadUserFromStorage());
     };
     window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
@@ -271,67 +256,62 @@ export function useAuth() {
 
   useEffect(() => {
     let cancelled = false;
-    const run = async () => {
-      const epochAtStart = sessionEpochRef.current;
-      const token = readStoredAccessToken();
-      const hadToken = Boolean(token);
+    const epochAtStart = sessionEpochRef.current;
+
+    void runSessionBootstrapOnce(async () => {
+      if (isClientSessionRevoked()) {
+        clearStoredSession();
+        return { kind: "unauthenticated" };
+      }
 
       try {
-        if (!cancelled) setAuthHydrated(true);
-        if (isClientSessionRevoked()) {
-          clearStoredSession();
-          if (!cancelled) setUser(null);
-          if (!cancelled) setSessionValidated(true);
-          return;
-        }
-        if (!hadToken) {
-          try {
-            if (typeof localStorage !== "undefined" && localStorage.getItem(USER_STORAGE_KEY)) {
-              localStorage.removeItem(USER_STORAGE_KEY);
-              if (!cancelled) setUser(null);
-            }
-          } catch {
-            // ignore
-          }
-          if (!cancelled) setSessionValidated(true);
-          return;
-        }
-
-        // Expired access JWT is normal with short-lived tokens — refresh via HttpOnly cookie rotates silently.
         const data = await refreshSessionAPI();
-        if (cancelled || sessionEpochRef.current !== epochAtStart) return;
-        const u = persistAuthResponse(data);
-        if (!cancelled) setUser(u);
-        if (!cancelled) setSessionValidated(true);
+        return { kind: "authenticated", data };
       } catch (err) {
         const msg = err instanceof Error ? err.message : "";
-        if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+        const hadLocalSession =
+          Boolean(readStoredAccessToken()) || Boolean(loadUserFromStorage());
 
-        if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
-          toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
-        } else if (msg === fallbackMessageForHttpStatus(500)) {
-          toast.error(msg, { id: "caretip-auth-refresh-500" });
-        } else {
-          logClientError("useAuth.initialRefresh", err);
+        if (isTransientRefreshErrorMessage(msg) && hadLocalSession) {
+          if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
+            toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
+          } else if (msg === fallbackMessageForHttpStatus(500)) {
+            toast.error(msg, { id: "caretip-auth-refresh-500" });
+          }
+          logClientError("useAuth.sessionBootstrap.transient", err);
+          return { kind: "transient_error" };
         }
 
-        // If refresh fails, the session is not valid. Clear everything and move to logged-out.
+        if (!isTransientRefreshErrorMessage(msg)) {
+          logClientError("useAuth.sessionBootstrap", err);
+        }
+
         clearStoredSession();
-        notifyAuthStorageSync();
-        if (!cancelled) setUser(null);
-        if (!cancelled) setSessionValidated(true);
-        if (!cancelled && !isPublicAuthenticationPath(window.location.pathname)) {
-          navigate("/login", { replace: true });
-        }
-      } finally {
-        if (!cancelled) setAuthHydrated(true);
+        return { kind: "unauthenticated" };
       }
-    };
-    void run();
+    }).then((result) => {
+      if (cancelled || sessionEpochRef.current !== epochAtStart) return;
+
+      if (result.kind === "authenticated") {
+        const u = persistAuthResponse(result.data);
+        setUser(u);
+        return;
+      }
+
+      if (result.kind === "unauthenticated") {
+        setUser(null);
+        return;
+      }
+
+      // Transient: keep optimistic user/token from storage; protected APIs may retry later.
+      const stored = loadUserFromStorage();
+      if (stored) setUser(stored);
+    });
+
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, []);
 
   /** Proactively refresh shortly before access token expiry so API calls rarely see 401. */
   useEffect(() => {
@@ -363,13 +343,13 @@ export function useAuth() {
   }, [user?.id, accessTokenSnapshot]);
 
   useEffect(() => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (user) {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
     } else {
       clearStoredSession();
     }
-  }, [user, authHydrated]);
+  }, [user, authHydrated, sessionValidated]);
 
   const login = useCallback(async (
     email: string,
@@ -380,8 +360,7 @@ export function useAuth() {
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
     setUser(u);
-    setAuthHydrated(true);
-    setSessionValidated(true);
+    markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
 
@@ -390,8 +369,7 @@ export function useAuth() {
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
     setUser(u);
-    setAuthHydrated(true);
-    setSessionValidated(true);
+    markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
 
@@ -423,17 +401,17 @@ export function useAuth() {
     const u = persistAuthResponse(data);
     sessionEpochRef.current += 1;
     setUser(u);
-    setAuthHydrated(true);
-    setSessionValidated(true);
+    markSessionBootstrapSettled();
     return u;
   }, [requestLocale]);
 
   const logout = useCallback(async () => {
     sessionEpochRef.current += 1;
-    clearStoredSession();
+    resetSessionBootstrap();
     setUser(null);
-    setSessionValidated(true);
     await logoutAPI();
+    clearStoredSession();
+    markSessionBootstrapSettled();
     notifyAuthStorageSync();
     authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
   }, []);
@@ -458,13 +436,13 @@ export function useAuth() {
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
     sessionEpochRef.current += 1;
     setUser(restored);
-    setSessionValidated(true);
+    markSessionBootstrapSettled();
     notifyAuthStorageSync();
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
     authDebug("auth_session_updated", { ...deriveAuthSession(restored), source: "exit_impersonation" });
-    navigate("/platform-admin/dashboard");
-  }, [navigate]);
+    window.location.assign("/platform-admin/dashboard");
+  }, []);
 
   const updateUser = useCallback((patch: Partial<User>) => {
     setUser((u) => (u ? { ...u, ...patch } : null));
@@ -487,8 +465,7 @@ export function useAuth() {
     localStorage.setItem("caretip_user", JSON.stringify(next));
     sessionEpochRef.current += 1;
     setUser(next);
-    setAuthHydrated(true);
-    setSessionValidated(true);
+    markSessionBootstrapSettled();
     notifyAuthStorageSync();
   }, []);
 
@@ -496,8 +473,9 @@ export function useAuth() {
     try {
       const data = await refreshSessionAPI();
       const u = persistAuthResponse(data);
+      sessionEpochRef.current += 1;
       setUser(u);
-      setSessionValidated(true);
+      markSessionBootstrapSettled();
       return u;
     } catch (err) {
       logClientError("useAuth.refreshSession", err);
@@ -505,15 +483,12 @@ export function useAuth() {
       if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
         toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
       }
-      try {
-        localStorage.removeItem("caretip_user");
-        localStorage.removeItem("caretip_token");
-        notifyAuthStorageSync();
-      } catch {
-        // ignore
+      if (isTransientRefreshErrorMessage(msg)) {
+        return loadUserFromStorage();
       }
+      clearStoredSession();
       setUser(null);
-      setSessionValidated(true);
+      markSessionBootstrapSettled();
       return null;
     }
   }, []);
@@ -521,25 +496,27 @@ export function useAuth() {
   /** Re-fetch the current session from the server (same as refreshSession). */
   const refetchUser = refreshSession;
 
+  const authReady = authHydrated && sessionValidated;
+
   const authState = useMemo(
     () => ({
       user,
       isAuthenticated: !!user,
-      isLoading: !authHydrated,
+      isLoading: !authReady,
     }),
-    [user, authHydrated],
+    [user, authReady],
   );
 
   return {
     user,
-    /** @deprecated Prefer `authState.isLoading` or `!authHydrated`. */
-    isLoadingUser: !authHydrated,
-    /** True while the first session resolution pass is in flight; route guards must wait and must not redirect. */
-    isAuthLoading: !authHydrated,
+    /** @deprecated Prefer `authState.isLoading` or `!authReady`. */
+    isLoadingUser: !authReady,
+    /** True while session restoration is in flight; route guards must wait and must not redirect. */
+    isAuthLoading: !authReady,
     authHydrated,
     /** @deprecated Always false; silent refresh — do not gate UI on this. */
     sessionChecking: false,
-    /** True when bootstrap refresh succeeded or there was no token; false when stored session failed validation. */
+    /** True after bootstrap refresh completes (success, invalid, or transient). */
     sessionValidated,
     authState,
     isBusiness,

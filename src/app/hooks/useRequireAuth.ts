@@ -22,11 +22,11 @@ export function useRequireAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authHydrated) return;
+    if (!authHydrated || !sessionValidated) return;
     if (user === null) {
       navigate("/login", { replace: true });
     }
-  }, [user, navigate, authHydrated]);
+  }, [user, navigate, authHydrated, sessionValidated]);
 
   return {
     user,

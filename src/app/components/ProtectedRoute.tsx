@@ -12,11 +12,10 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
-  const { user, authHydrated } = useAuth();
+  const { user, authHydrated, sessionValidated } = useAuth();
   const location = useLocation();
 
-  // Hydration is synchronous; only show a loader in the rare case hydration hasn't happened yet.
-  if (!authHydrated) return <AppLoader />;
+  if (!authHydrated || !sessionValidated) return <AppLoader />;
 
   if (!user) {
     authDebug("route_guard", {

@@ -31,6 +31,7 @@ import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
 import { getImageUploadStorageDiagnostics } from "./services/upload.service.js";
+import { ensureSupabaseStorageBucketReady, isSupabaseStorageConfigured } from "./lib/supabaseStorageClient.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -150,6 +151,11 @@ void assertEnvForAuth().then(() => {
       console.warn(
         "[upload] Render: Supabase Storage is not configured. Files in ./uploads are lost on redeploy and are not shared across multiple instances. Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY (see backend/.env.example) so logos and avatars use durable object storage.",
       );
+    }
+    if (isSupabaseStorageConfigured()) {
+      void ensureSupabaseStorageBucketReady().catch((e) => {
+        console.error("[upload] Supabase bucket startup check failed:", e instanceof Error ? e.message : e);
+      });
     }
   });
 });

@@ -8,6 +8,8 @@ import {
 } from "../lib/imageUploadValidation.js";
 import {
   isSupabaseStorageConfigured,
+  supabaseStorageBucketName,
+  ensureSupabaseStorageBucketReady,
   uploadBufferToSupabasePublicUrl,
   warnIfSupabaseUrlButNoServiceRole,
   assertUploadedObjectReadableInBucket,
@@ -38,11 +40,13 @@ export function isSupabaseStorageConfiguredForUpload(): boolean {
 export function getImageUploadStorageDiagnostics(): {
   employeeAvatarStorage: "supabase" | "disk";
   supabaseStorageConfigured: boolean;
+  supabaseStorageBucket?: string;
 } {
   const supabaseStorageConfigured = isSupabaseStorageConfiguredForUpload();
   return {
     employeeAvatarStorage: supabaseStorageConfigured ? "supabase" : "disk",
     supabaseStorageConfigured,
+    ...(supabaseStorageConfigured ? { supabaseStorageBucket: supabaseStorageBucketName() } : {}),
   };
 }
 
@@ -189,7 +193,13 @@ export async function uploadManagerBusinessLogoImage(
       if (/timed out/i.test(msg)) {
         throw new Error("Logo upload timed out. Try again with a smaller image.");
       }
-      throw new Error("We couldn't save your logo. Please try again.");
+      if (/isn't available right now/i.test(msg)) {
+        throw new Error(msg);
+      }
+      if (/too large/i.test(msg)) {
+        throw new Error(msg);
+      }
+      throw new Error(msg.includes("logo") ? msg : "We couldn't save your logo. Please try again.");
     }
   }
 

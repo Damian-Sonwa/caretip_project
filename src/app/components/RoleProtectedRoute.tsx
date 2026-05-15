@@ -15,10 +15,10 @@ interface RoleProtectedRouteProps {
  * do not redirect before the initial session refresh (or no-token path) completes.
  */
 export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
-  const { user, authHydrated } = useAuth();
+  const { user, authHydrated, sessionValidated } = useAuth();
   const location = useLocation();
 
-  if (!authHydrated) {
+  if (!authHydrated || !sessionValidated) {
     return <AppLoader />;
   }
 
