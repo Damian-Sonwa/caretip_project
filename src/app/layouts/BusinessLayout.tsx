@@ -14,9 +14,9 @@ import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
  */
 export function BusinessLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, authHydrated, sessionValidated } = useAuth();
+  const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoManager(user);
-  const isAppReady = authHydrated && sessionValidated && user?.role === "business";
+  const isAppReady = authStatus === "authenticated" && user?.role === "business";
 
   return (
     <div className="relative min-h-screen bg-background">

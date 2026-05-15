@@ -24,6 +24,17 @@ export type AuthSession = {
 
 const LOGGED_OUT_ROLE: SessionUserRole = "user";
 
+/** Auth lifecycle for route guards and shells — wait on `initializing` before redirecting. */
+export type AuthStatus = "initializing" | "authenticated" | "unauthenticated";
+
+export function resolveAuthStatus(
+  user: SessionUserLike | null,
+  flags: { authHydrated: boolean; sessionValidated: boolean },
+): AuthStatus {
+  if (!flags.authHydrated || !flags.sessionValidated) return "initializing";
+  return user ? "authenticated" : "unauthenticated";
+}
+
 /**
  * Auth-related URLs where an existing session must not trigger automatic redirects
  * to onboarding or the app shell (user may intend to sign in as another account).

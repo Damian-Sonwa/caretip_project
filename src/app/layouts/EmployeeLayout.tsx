@@ -19,8 +19,8 @@ type EmployeeBusinessBranding = {
  */
 export function EmployeeLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, authHydrated, sessionValidated } = useAuth();
-  const isAppReady = authHydrated && sessionValidated && user?.role === "employee";
+  const { user, authStatus } = useAuth();
+  const isAppReady = authStatus === "authenticated" && user?.role === "employee";
   const [branding, setBranding] = useState<EmployeeBusinessBranding | null>(null);
 
   useEffect(() => {

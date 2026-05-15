@@ -14,10 +14,10 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
-  const { user, authHydrated, sessionValidated } = useAuth();
+  const { user, authStatus } = useAuth();
   const location = useLocation();
 
-  if (!authHydrated || !sessionValidated) return <AppLoader />;
+  if (authStatus === "initializing") return <AppLoader />;
 
   if (!user) {
     const loginPath = getLoginPathForAllowedRoles(allowedRoles);

@@ -13,14 +13,13 @@ import {
   isClientSessionRevoked,
   type AuthResponse,
 } from "../lib/api";
+import { ensureAuthSessionBootstrap, resetAuthSessionClient } from "../lib/authBootstrap";
 import {
   getAuthSessionFlags,
   markSessionBootstrapSettled,
-  registerBootstrapResultHandler,
-  resetSessionBootstrap,
-  runSessionBootstrapOnce,
   subscribeAuthSessionFlags,
 } from "../lib/authSessionBootstrap";
+import { resolveAuthStatus, type AuthStatus } from "../lib/authSession";
 import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
 import {
   commitAuthUser,
@@ -38,7 +37,7 @@ import {
   API_WAKEUP_NETWORK_MESSAGE,
 } from "../lib/errorMessages";
 
-export type { AuthSession } from "../lib/authSession";
+export type { AuthSession, AuthStatus } from "../lib/authSession";
 
 const AUTH_STORAGE_SYNC_EVENT = "caretip-auth-storage-sync";
 const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
@@ -290,46 +289,41 @@ export function useAuth() {
   }, []);
 
   useEffect(() => {
-    const epochAtStart = getSessionEpoch();
+    ensureAuthSessionBootstrap(
+      async () => {
+        if (isClientSessionRevoked()) {
+          clearStoredSession();
+          return { kind: "unauthenticated" };
+        }
 
-    const unregisterHandler = registerBootstrapResultHandler((result) => {
-      applyBootstrapResult(result, epochAtStart);
-    });
+        try {
+          const data = await refreshSessionAPI();
+          return { kind: "authenticated", data };
+        } catch (err) {
+          const msg = err instanceof Error ? err.message : "";
+          const hadLocalSession =
+            Boolean(readStoredAccessToken()) || Boolean(loadUserFromStorage());
 
-    void runSessionBootstrapOnce(async () => {
-      if (isClientSessionRevoked()) {
-        clearStoredSession();
-        return { kind: "unauthenticated" };
-      }
-
-      try {
-        const data = await refreshSessionAPI();
-        return { kind: "authenticated", data };
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "";
-        const hadLocalSession =
-          Boolean(readStoredAccessToken()) || Boolean(loadUserFromStorage());
-
-        if (isTransientRefreshErrorMessage(msg) && hadLocalSession) {
-          if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
-            toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
-          } else if (msg === fallbackMessageForHttpStatus(500)) {
-            toast.error(msg, { id: "caretip-auth-refresh-500" });
+          if (isTransientRefreshErrorMessage(msg) && hadLocalSession) {
+            if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
+              toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
+            } else if (msg === fallbackMessageForHttpStatus(500)) {
+              toast.error(msg, { id: "caretip-auth-refresh-500" });
+            }
+            logClientError("useAuth.sessionBootstrap.transient", err);
+            return { kind: "transient_error" };
           }
-          logClientError("useAuth.sessionBootstrap.transient", err);
-          return { kind: "transient_error" };
+
+          if (!isTransientRefreshErrorMessage(msg)) {
+            logClientError("useAuth.sessionBootstrap", err);
+          }
+
+          clearStoredSession();
+          return { kind: "unauthenticated" };
         }
-
-        if (!isTransientRefreshErrorMessage(msg)) {
-          logClientError("useAuth.sessionBootstrap", err);
-        }
-
-        clearStoredSession();
-        return { kind: "unauthenticated" };
-      }
-    });
-
-    return unregisterHandler;
+      },
+      applyBootstrapResult,
+    );
   }, []);
 
   /** Proactively refresh shortly before access token expiry so API calls rarely see 401. */
@@ -349,7 +343,7 @@ export function useAuth() {
           const data = await refreshSessionAPI();
           bumpSessionEpoch();
           const u = persistAuthResponse(data);
-          if (!cancelled) setAuthUser(u);
+          if (!cancelled) commitAuthUser(u);
         } catch {
           // Leave handling to the next API 401 + silent refresh, or bootstrap on reload.
         }
@@ -433,7 +427,7 @@ export function useAuth() {
   const logout = useCallback(async () => {
     bumpSessionEpoch();
     clearEmployeeNotifications();
-    resetSessionBootstrap();
+    resetAuthSessionClient();
     commitAuthUser(null);
     await logoutAPI();
     clearStoredSession();
@@ -539,21 +533,29 @@ export function useAuth() {
 
   const authReady = authHydrated && sessionValidated;
 
+  const authStatus: AuthStatus = useMemo(
+    () => resolveAuthStatus(user, { authHydrated, sessionValidated }),
+    [user, authHydrated, sessionValidated],
+  );
+
   const authState = useMemo(
     () => ({
       user,
-      isAuthenticated: !!user,
-      isLoading: !authReady,
+      isAuthenticated: authStatus === "authenticated",
+      isLoading: authStatus === "initializing",
+      status: authStatus,
     }),
-    [user, authReady],
+    [user, authStatus],
   );
 
   return {
     user,
     /** @deprecated Prefer `authState.isLoading` or `!authReady`. */
-    isLoadingUser: !authReady,
+    isLoadingUser: authStatus === "initializing",
     /** True while session restoration is in flight; route guards must wait and must not redirect. */
-    isAuthLoading: !authReady,
+    isAuthLoading: authStatus === "initializing",
+    /** Canonical lifecycle: initializing → authenticated | unauthenticated */
+    authStatus,
     authHydrated,
     /** @deprecated Always false; silent refresh — do not gate UI on this. */
     sessionChecking: false,

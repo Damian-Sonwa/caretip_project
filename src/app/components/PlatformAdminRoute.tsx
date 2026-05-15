@@ -9,10 +9,10 @@ interface PlatformAdminRouteProps {
 
 /** Requires an authenticated platform admin (SuperAdmin). */
 export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
-  const { user, authHydrated, sessionValidated } = useAuth();
+  const { user, authStatus } = useAuth();
   const location = useLocation();
 
-  if (!authHydrated || !sessionValidated) {
+  if (authStatus === "initializing") {
     return <AppLoader />;
   }
 

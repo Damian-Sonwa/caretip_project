@@ -22,13 +22,9 @@ export type BootstrapResultHandler = (result: SessionBootstrapResult) => void;
 
 let bootstrapResultHandler: BootstrapResultHandler | null = null;
 
-/** Single handler — first registration wins; avoids N parallel bootstrap consumers. */
-export function registerBootstrapResultHandler(handler: BootstrapResultHandler): () => void {
-  if (bootstrapResultHandler) return () => {};
+/** Registers the handler that applies bootstrap results to shared auth state. */
+export function registerBootstrapResultHandler(handler: BootstrapResultHandler): void {
   bootstrapResultHandler = handler;
-  return () => {
-    if (bootstrapResultHandler === handler) bootstrapResultHandler = null;
-  };
 }
 
 function notify() {
@@ -54,6 +50,7 @@ export function markSessionBootstrapSettled(): void {
 /** Logout or hard reset — next mount must bootstrap again. */
 export function resetSessionBootstrap(): void {
   bootstrapPromise = null;
+  bootstrapResultHandler = null;
   authHydrated = false;
   sessionValidated = false;
   notify();
@@ -72,9 +69,9 @@ export function runSessionBootstrapOnce(run: BootstrapRunner): Promise<SessionBo
         return { kind: "unauthenticated" };
       }
     })().then((result) => {
+      bootstrapResultHandler?.(result);
       authHydrated = true;
       notify();
-      bootstrapResultHandler?.(result);
       return result;
     });
   }

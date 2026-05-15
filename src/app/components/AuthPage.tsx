@@ -81,7 +81,7 @@ export function AuthPage() {
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
   const navigate = useNavigate();
-  const { login, register, loginWithOAuth, logout, user, authHydrated, sessionValidated, isAuthLoading } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, sessionValidated, authStatus, isAuthLoading } = useAuth();
   const authInFlightRef = useRef(false);
 
   const unlockField = (key: string) => {
@@ -362,7 +362,7 @@ export function AuthPage() {
   const redirectingAfterAuth =
     Boolean(user) && sessionValidated && isPublicAuthenticationPath(location.pathname);
 
-  if (isAuthLoading && !user && !isSubmitting) {
+  if (authStatus === "initializing" && !isSubmitting) {
     return (
       <motion.div
         initial={{ opacity: 0 }}

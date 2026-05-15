@@ -13,6 +13,7 @@ export function useRequireAuth() {
     user,
     authHydrated,
     sessionValidated,
+    authStatus,
     isAuthLoading,
     isBusiness,
     isEmployee,
@@ -24,16 +25,17 @@ export function useRequireAuth() {
   const location = useLocation();
 
   useEffect(() => {
-    if (!authHydrated || !sessionValidated) return;
-    if (user === null) {
+    if (authStatus === "initializing") return;
+    if (authStatus === "unauthenticated") {
       navigate(getLoginPathFromAppPath(location.pathname), { replace: true });
     }
-  }, [user, navigate, authHydrated, sessionValidated, location.pathname]);
+  }, [authStatus, navigate, location.pathname]);
 
   return {
     user,
     authHydrated,
     sessionValidated,
+    authStatus,
     isAuthLoading,
     isBusiness,
     isEmployee,

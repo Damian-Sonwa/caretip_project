@@ -17,10 +17,10 @@ interface RoleProtectedRouteProps {
  * do not redirect before the initial session refresh (or no-token path) completes.
  */
 export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRouteProps) {
-  const { user, authHydrated, sessionValidated } = useAuth();
+  const { user, authStatus } = useAuth();
   const location = useLocation();
 
-  if (!authHydrated || !sessionValidated) {
+  if (authStatus === "initializing") {
     return <AppLoader />;
   }
 
