@@ -5,6 +5,7 @@
 
 import { flushSync } from "react-dom";
 import type { User } from "../hooks/useAuth";
+import { normalizeStoredUser } from "./authUserNormalize";
 
 const USER_STORAGE_KEY = "caretip_user";
 
@@ -15,7 +16,7 @@ function readInitialUser(): User | null {
   try {
     const saved = localStorage.getItem(USER_STORAGE_KEY);
     if (!saved) return null;
-    return JSON.parse(saved) as User;
+    return normalizeStoredUser(JSON.parse(saved) as unknown);
   } catch {
     return null;
   }

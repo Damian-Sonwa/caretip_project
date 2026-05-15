@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { getLoginPathForAllowedRoles, resolveAuthenticatedAppGuard } from "../lib/authSession";
+import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
 import { hasClientStoredSession } from "../lib/authUserStore";
 import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
@@ -39,7 +40,20 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
     return <Navigate to={loginPath} replace state={{ from: location.pathname }} />;
   }
 
-  const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles);
+  const { onboardingStatusFromServer } = getAuthSessionFlags();
+  const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles, {
+    onboardingStatusFromServer,
+  });
+
+  if (decision.kind === "wait") {
+    authDebug("route_guard", {
+      decision: "loading",
+      reason: decision.reason,
+      path: location.pathname,
+      scope: "RoleProtectedRoute",
+    });
+    return <AppLoader />;
+  }
 
   if (decision.kind === "redirect") {
     authDebug("route_guard", {

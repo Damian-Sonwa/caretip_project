@@ -16,9 +16,11 @@ import {
 import { ensureAuthSessionBootstrap, resetAuthSessionClient } from "../lib/authBootstrap";
 import {
   getAuthSessionFlags,
+  markOnboardingStatusFromServer,
   markSessionBootstrapSettled,
   subscribeAuthSessionFlags,
 } from "../lib/authSessionBootstrap";
+import { normalizeStoredUser } from "../lib/authUserNormalize";
 import { resolveAuthStatus, type AuthStatus } from "../lib/authSession";
 import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
 import {
@@ -81,7 +83,7 @@ function loadUserFromStorage(): User | null {
   try {
     const saved = localStorage.getItem(USER_STORAGE_KEY);
     if (!saved) return null;
-    return JSON.parse(saved) as User;
+    return normalizeStoredUser(JSON.parse(saved) as unknown);
   } catch (err) {
     logClientError("useAuth.localStorage", err);
     return null;
@@ -99,6 +101,7 @@ function applyBootstrapResult(
 
   if (result.kind === "authenticated") {
     commitAuthUser(persistAuthResponse(result.data));
+    markOnboardingStatusFromServer();
     markSessionBootstrapSettled();
     return;
   }
@@ -125,6 +128,7 @@ function persistAuthResponse(data: AuthResponse): User {
   localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
   const u = parseUser(data.user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u));
+  markOnboardingStatusFromServer();
   notifyAuthStorageSync();
   authDebug("auth_session_updated", { ...deriveAuthSession(u), source: "persist" });
   return u;
@@ -201,7 +205,7 @@ export function userFromAuthResponse(data: AuthResponse["user"]): User {
   return parseUser(data);
 }
 
-function parseUser(data: AuthResponse["user"]): User {
+export function parseUser(data: AuthResponse["user"]): User {
   const ext = data as AuthResponse["user"] & {
     impersonation?: boolean;
     impersonatedBy?: string;

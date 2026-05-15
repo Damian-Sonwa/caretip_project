@@ -25,6 +25,7 @@ import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
+import { commitAuthUser } from '../lib/authUserStore';
 import {
   isPublicAuthenticationPath,
   sessionMatchesBusinessStaffAuthTarget,
@@ -105,10 +106,10 @@ export function AuthPage() {
 
   /** Validated session on any auth page → app home (avoids re-sign-in with wrong business/staff lane). */
   useEffect(() => {
-    if (!user || !sessionValidated) return;
+    if (!user || !sessionValidated || isSubmitting) return;
     if (!isPublicAuthenticationPath(location.pathname)) return;
     navigate(getPostAuthRedirect(user), { replace: true });
-  }, [navigate, sessionValidated, user, location.pathname]);
+  }, [navigate, sessionValidated, user, location.pathname, isSubmitting]);
 
   useEffect(() => {
     const p = location.pathname;
@@ -319,6 +320,7 @@ export function AuthPage() {
     setIsSubmitting(true);
     setError('');
     setShowResendVerification(false);
+    commitAuthUser(null);
     try {
       const loggedIn = await loginWithOAuth('google', idToken, {
         isLogin,

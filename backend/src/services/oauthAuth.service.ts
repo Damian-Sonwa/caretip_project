@@ -3,6 +3,7 @@ import { prisma } from "../prisma.js";
 import {
   authResultForUserRecord,
   normalizeLoginEmail,
+  syncOnboardingFlagFromBusinessProfile,
   type AuthResult,
   type LoginInput,
 } from "./auth.service.js";
@@ -10,6 +11,16 @@ import * as businessService from "./business.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { resolveEmailLocale } from "../emails/i18nEmail.js";
+
+const businessIncludeForOAuth = {
+  select: {
+    id: true,
+    name: true,
+    verificationStatus: true,
+    businessType: true,
+    registeredAddress: true,
+  },
+} as const;
 
 /** Shown when Google sign-in (login) finds no CareTip user for that email. */
 export const GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE =
@@ -136,7 +147,7 @@ export async function authenticateWithOAuth(
     const fullUser = await prisma.user.findUnique({
       where: { id: user.id },
       include: {
-        business: { select: { id: true, name: true, verificationStatus: true } },
+        business: businessIncludeForOAuth,
         employee: { select: { id: true, name: true, avatar: true, businessId: true } },
       },
     });
@@ -149,7 +160,7 @@ export async function authenticateWithOAuth(
       const again = await prisma.user.findUnique({
         where: { id: user.id },
         include: {
-          business: { select: { id: true, name: true, verificationStatus: true } },
+          business: businessIncludeForOAuth,
           employee: { select: { id: true, name: true, avatar: true, businessId: true } },
         },
       });
@@ -158,7 +169,8 @@ export async function authenticateWithOAuth(
     if (sessionUser.emailVerified !== true) {
       throw new EmailNotVerifiedLoginError();
     }
-    return authResultForUserRecord(sessionUser);
+    const prepared = await syncOnboardingFlagFromBusinessProfile(sessionUser);
+    return authResultForUserRecord(prepared);
   }
 
   /** Sign up */

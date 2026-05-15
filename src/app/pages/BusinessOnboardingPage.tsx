@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
@@ -6,15 +6,18 @@ import { ArrowLeft, ArrowRight, Building2, Globe2, ImagePlus, Loader2, MapPin, P
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
+import { AppLoader } from "../components/AppLoader";
 import { toast } from "sonner";
 import { patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
+import { logClientError } from "../lib/clientLog";
 
 export function BusinessOnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { setHasCompletedOnboarding, refetchUser, logout } = useAuth();
+  const { user, authStatus, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [syncingOnboarding, setSyncingOnboarding] = useState(true);
 
   const [legalBusinessName, setLegalBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
@@ -23,6 +26,28 @@ export function BusinessOnboardingPage() {
   const [website, setWebsite] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [busy, setBusy] = useState(false);
+
+  /** Sync onboarding completion from the API — never rely on stale localStorage alone. */
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const fresh = await refetchUser();
+        if (cancelled) return;
+        if (fresh?.hasCompletedOnboarding) {
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+      } catch (err) {
+        logClientError("BusinessOnboardingPage.syncOnboarding", err);
+      } finally {
+        if (!cancelled) setSyncingOnboarding(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate, refetchUser]);
 
   const canContinue = useMemo(() => {
     if (step === 1) return legalBusinessName.trim().length > 1 && businessType.trim().length > 0;
@@ -60,8 +85,17 @@ export function BusinessOnboardingPage() {
     navigate("/login", { replace: true });
   };
 
+  if (authStatus === "initializing" || syncingOnboarding || user?.hasCompletedOnboarding) {
+    return <AppLoader />;
+  }
+
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950">
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55 }}
+      className="relative flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950"
+    >
       <Navigation />
       <main className="flex flex-1 items-center justify-center px-4 py-14">
         <div className="w-full max-w-2xl">
@@ -234,7 +268,7 @@ export function BusinessOnboardingPage() {
         </div>
       </main>
       <Footer variant="minimal" surface="dark" />
-    </div>
+    </motion.div>
   );
 }
 

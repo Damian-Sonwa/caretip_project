@@ -112,10 +112,60 @@ export function signImpersonationToken(
   );
 }
 
+type BusinessForAuthResult = {
+  id: string;
+  name: string;
+  verificationStatus: BusinessVerificationStatus;
+  businessType?: string | null;
+  registeredAddress?: string | null;
+};
+
 type UserForAuthResult = User & {
-  business?: { id: string; name: string; verificationStatus: BusinessVerificationStatus } | null;
+  business?: BusinessForAuthResult | null;
   employee?: { id: string; name: string; avatar: string | null; businessId: string } | null;
 };
+
+const businessIncludeForAuth = {
+  select: {
+    id: true,
+    name: true,
+    verificationStatus: true,
+    businessType: true,
+    registeredAddress: true,
+  },
+} as const;
+
+/** True when the manager finished the business onboarding wizard (DB flag). */
+export function managerHasCompletedOnboarding(user: Pick<User, "role" | "hasCompletedOnboarding">): boolean {
+  if (user.role !== "MANAGER") return true;
+  return user.hasCompletedOnboarding === true;
+}
+
+/**
+ * If the business profile already has wizard data but the user flag was never set
+ * (legacy rows / partial failures), persist completion once and return an updated row.
+ */
+export async function syncOnboardingFlagFromBusinessProfile(
+  user: UserForAuthResult,
+): Promise<UserForAuthResult> {
+  if (user.role !== "MANAGER" || managerHasCompletedOnboarding(user)) {
+    return user;
+  }
+  const biz = user.business;
+  if (!biz) return user;
+
+  const profileComplete =
+    biz.name.trim().length > 1 &&
+    Boolean(biz.businessType?.trim()) &&
+    Boolean(biz.registeredAddress?.trim());
+  if (!profileComplete) return user;
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { hasCompletedOnboarding: true },
+  });
+  return { ...user, hasCompletedOnboarding: true };
+}
 
 function displayNameForUser(user: UserForAuthResult): string {
   if (user.role === "MANAGER" && user.business?.name) {
@@ -145,10 +195,12 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
     preferredLocale: user.preferredLocale ?? null,
   };
 
-  if (user.role === "MANAGER" && user.business) {
-    dto.businessId = user.business.id;
-    dto.businessVerificationStatus = user.business.verificationStatus;
-    dto.hasCompletedOnboarding = (user as any).hasCompletedOnboarding === true;
+  if (user.role === "MANAGER") {
+    dto.hasCompletedOnboarding = managerHasCompletedOnboarding(user);
+    if (user.business) {
+      dto.businessId = user.business.id;
+      dto.businessVerificationStatus = user.business.verificationStatus;
+    }
   }
   if (user.role === "EMPLOYEE" && user.employee) {
     dto.employeeId = user.employee.id;
@@ -163,14 +215,14 @@ async function loadUserForAuthResult(userId: string): Promise<UserForAuthResult>
   const row = await prisma.user.findUnique({
     where: { id: userId },
     include: {
-      business: { select: { id: true, name: true, verificationStatus: true } },
+      business: businessIncludeForAuth,
       employee: { select: { id: true, name: true, avatar: true, businessId: true } },
     },
   });
   if (!row) {
     throw new Error("Invalid email or password");
   }
-  return row;
+  return syncOnboardingFlagFromBusinessProfile(row);
 }
 
 /** Used by refresh-token flow to re-issue an access token and user payload. */
@@ -364,7 +416,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
   let user = await prisma.user.findUnique({
     where: { email },
     include: {
-      business: { select: { id: true, name: true, verificationStatus: true } },
+      business: businessIncludeForAuth,
       employee: { select: { id: true, name: true, avatar: true, businessId: true } },
     },
   });
@@ -409,7 +461,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     user = await prisma.user.findUnique({
       where: { id: user.id },
       include: {
-        business: { select: { id: true, name: true, verificationStatus: true } },
+        business: businessIncludeForAuth,
         employee: { select: { id: true, name: true, avatar: true, businessId: true } },
       },
     });
@@ -418,7 +470,8 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     }
   }
 
-  return authResultForUserRecord(user);
+  const prepared = await syncOnboardingFlagFromBusinessProfile(user);
+  return authResultForUserRecord(prepared);
 }
 
 /**

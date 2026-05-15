@@ -121,7 +121,8 @@ export function deriveAuthSession(user: SessionUserLike | null): AuthSession {
 
 export type AuthGuardDecision =
   | { kind: "allow" }
-  | { kind: "redirect"; to: string; reason: string };
+  | { kind: "redirect"; to: string; reason: string }
+  | { kind: "wait"; reason: string };
 
 /**
  * Centralized app-shell guard for business/employee protected routes.
@@ -133,6 +134,7 @@ export function resolveAuthenticatedAppGuard(
   user: SessionUserLike,
   pathname: string,
   allowedRoles: Array<"business" | "employee">,
+  options?: { onboardingStatusFromServer?: boolean },
 ): AuthGuardDecision {
   const session = deriveAuthSession(user);
   const p = pathname;
@@ -147,13 +149,21 @@ export function resolveAuthenticatedAppGuard(
   }
 
   if (r === "business") {
+    const onboardingFromServer = options?.onboardingStatusFromServer === true;
     if (!session.hasCompletedOnboarding) {
       if (p === "/onboarding" || isPublicAuthenticationPath(p)) {
         return { kind: "allow" };
       }
+      // Never trap users in onboarding from stale localStorage — wait for API refresh.
+      if (!onboardingFromServer) {
+        return { kind: "wait", reason: "onboarding_status_unconfirmed" };
+      }
       return { kind: "redirect", to: "/onboarding", reason: "onboarding_incomplete" };
     }
     if (p === "/onboarding") {
+      if (!onboardingFromServer) {
+        return { kind: "wait", reason: "onboarding_status_unconfirmed" };
+      }
       return { kind: "redirect", to: "/dashboard", reason: "onboarding_already_complete" };
     }
   }

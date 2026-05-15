@@ -16,6 +16,8 @@ const listeners = new Set<() => void>();
 
 let authHydrated = false;
 let sessionValidated = false;
+/** True after login/refresh/bootstrap returned onboarding status from the API (not stale cache). */
+let onboardingStatusFromServer = false;
 let bootstrapPromise: Promise<SessionBootstrapResult> | null = null;
 
 export type BootstrapResultHandler = (result: SessionBootstrapResult) => void;
@@ -31,8 +33,18 @@ function notify() {
   listeners.forEach((l) => l());
 }
 
-export function getAuthSessionFlags(): { authHydrated: boolean; sessionValidated: boolean } {
-  return { authHydrated, sessionValidated };
+export function getAuthSessionFlags(): {
+  authHydrated: boolean;
+  sessionValidated: boolean;
+  onboardingStatusFromServer: boolean;
+} {
+  return { authHydrated, sessionValidated, onboardingStatusFromServer };
+}
+
+/** Onboarding guards may redirect only after the server confirmed completion status. */
+export function markOnboardingStatusFromServer(): void {
+  onboardingStatusFromServer = true;
+  notify();
 }
 
 export function subscribeAuthSessionFlags(listener: () => void): () => void {
@@ -53,6 +65,7 @@ export function resetSessionBootstrap(): void {
   bootstrapResultHandler = null;
   authHydrated = false;
   sessionValidated = false;
+  onboardingStatusFromServer = false;
   notify();
 }
 
