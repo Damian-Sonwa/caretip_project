@@ -1,4 +1,5 @@
 import { resolveApiBaseUrl } from "./apiOrigin";
+import { isBrokenLegacyApiDiskMediaUrl } from "./mediaPathKind";
 
 /**
  * Turns API-relative media paths (`/uploads/...`) into absolute URLs for `<img src>`.
@@ -10,6 +11,10 @@ import { resolveApiBaseUrl } from "./apiOrigin";
 export function resolveMediaUrl(url: string | null | undefined): string | undefined {
   if (url == null || String(url).trim() === "") return undefined;
   const s = String(url).trim();
+
+  if (isBrokenLegacyApiDiskMediaUrl(s)) {
+    return undefined;
+  }
 
   if (/^https?:\/\//i.test(s)) {
     try {

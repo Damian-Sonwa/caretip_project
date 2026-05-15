@@ -235,11 +235,12 @@ export function BusinessProfilePage() {
             <div className="relative">
               {headerImageSrc ? (
                 <img
-                  key={pendingLogo ? "logo-preview" : `logo-saved-${profile?.logo ?? ""}-${logoBust}`}
+                  key={pendingLogo ? "logo-preview" : `logo-saved-${profile?.logo ?? "none"}`}
                   src={headerImageSrc}
                   alt=""
                   className="h-28 w-28 rounded-xl border border-border bg-white object-contain p-1 shadow-sm"
                   decoding="async"
+                  referrerPolicy="no-referrer"
                   onError={() => {
                     if (!pendingLogo) setSavedLogoLoadFailed(true);
                   }}
