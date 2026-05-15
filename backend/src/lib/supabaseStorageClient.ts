@@ -171,19 +171,26 @@ export async function uploadBufferToSupabasePublicUrl(
   buffer: Buffer,
   contentType: string,
 ): Promise<string> {
+  await ensureSupabaseStorageBucketReady();
+
   const bucket = supabaseStorageBucketName();
   const key = objectKey.replace(/^\/+/, "").replace(/\/+/g, "/");
   const supabase = getServiceClient();
+  const normalizedType = normalizeImageContentType(contentType);
+
   const { error } = await supabase.storage.from(bucket).upload(key, buffer, {
-    contentType,
-    upsert: false,
+    contentType: normalizedType,
+    upsert: true,
     cacheControl: "3600",
   });
   if (error) {
-    throw new Error("We couldn't save your file. Please try again.");
+    const detail = describeStorageError(error);
+    console.error(`[upload] Supabase storage.upload bucket="${bucket}" key="${key}":`, detail);
+    throw new Error(clientMessageForStorageUploadError(detail));
   }
   const { data } = supabase.storage.from(bucket).getPublicUrl(key);
   if (!data?.publicUrl) {
+    console.error(`[upload] Supabase getPublicUrl returned empty for bucket="${bucket}" key="${key}"`);
     throw new Error("We couldn't save your file. Please try again.");
   }
   return data.publicUrl;
