@@ -65,8 +65,8 @@ function isJwtExpired(token: string): boolean {
   return Date.now() >= exp * 1000;
 }
 
-function clearStoredSession() {
-  clearClientAuthStorage();
+function clearStoredSession(options?: { notifySync?: boolean }) {
+  clearClientAuthStorage(options);
 }
 
 function loadUserFromStorage(): User | null {
@@ -243,8 +243,9 @@ export function useAuth() {
 
   useEffect(() => {
     const onStorageSync = () => {
+      // Storage was already cleared by whoever dispatched the sync event — do not call
+      // clearStoredSession() here or every listener re-dispatches and causes stack overflow.
       if (isClientSessionRevoked()) {
-        clearStoredSession();
         setUser(null);
         return;
       }
@@ -346,8 +347,14 @@ export function useAuth() {
     if (!authHydrated || !sessionValidated) return;
     if (user) {
       localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-    } else {
-      clearStoredSession();
+      return;
+    }
+    try {
+      if (localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) || localStorage.getItem(USER_STORAGE_KEY)) {
+        clearStoredSession({ notifySync: false });
+      }
+    } catch {
+      // ignore
     }
   }, [user, authHydrated, sessionValidated]);
 

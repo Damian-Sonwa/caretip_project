@@ -178,14 +178,16 @@ function setToken(token: string | null): void {
 }
 
 /** Clears access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
-export function clearClientAuthStorage(): void {
+export function clearClientAuthStorage(options?: { notifySync?: boolean }): void {
   cancelPendingSessionRefresh();
   try {
     localStorage.removeItem("caretip_token");
     localStorage.removeItem("caretip_user");
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
-    window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
+    if (options?.notifySync !== false) {
+      window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
+    }
   } catch {
     // ignore
   }
