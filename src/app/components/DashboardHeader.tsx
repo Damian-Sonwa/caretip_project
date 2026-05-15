@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { CareTipLogo } from "./CareTipLogo";
 import { ProfileAvatar } from "./ui/profile-avatar";
+import { useEmployeeUnreadCount } from "../hooks/useEmployeeUnreadNotifications";
+import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -14,6 +16,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const employeeUnreadCount = useEmployeeUnreadCount();
+  const showNotificationBadge = user?.role === "employee" && employeeUnreadCount > 0;
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
 
@@ -76,10 +80,24 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               navigate("/faq");
             }}
             className="relative touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
-            aria-label={t("shell.header.notificationsAria")}
+            aria-label={
+              showNotificationBadge
+                ? t("shell.header.notificationsUnreadAria", { count: employeeUnreadCount })
+                : t("shell.header.notificationsAria")
+            }
           >
             <Bell className="w-5 h-5 text-foreground" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent rounded-full" />
+            {showNotificationBadge ? (
+              <span
+                className={cn(
+                  "absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground shadow-sm",
+                  "animate-in fade-in zoom-in-75 duration-200",
+                )}
+                aria-hidden
+              >
+                {employeeUnreadCount > 9 ? "9+" : employeeUnreadCount}
+              </span>
+            ) : null}
           </button>
 
           <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">

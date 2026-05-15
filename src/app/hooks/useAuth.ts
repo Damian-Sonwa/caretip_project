@@ -28,6 +28,7 @@ import {
   setAuthUser,
   subscribeAuthUser,
 } from "../lib/authUserStore";
+import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
 import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
@@ -431,6 +432,7 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     bumpSessionEpoch();
+    clearEmployeeNotifications();
     resetSessionBootstrap();
     commitAuthUser(null);
     await logoutAPI();

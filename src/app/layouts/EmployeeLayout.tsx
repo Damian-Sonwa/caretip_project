@@ -6,7 +6,8 @@ import { useAuth } from "../hooks/useAuth";
 import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 import { EmployeeSidebar } from "../components/employee/EmployeeSidebar";
 import { EmployeeMobileSidebar } from "../components/employee/EmployeeMobileSidebar";
-import { getEmployeeProfile } from "../lib/api";
+import { getEmployeeProfile, getTipsByEmployee } from "../lib/api";
+import { syncEmployeeNotificationTips } from "../lib/employeeNotificationStore";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -42,6 +43,22 @@ export function EmployeeLayout() {
       cancelled = true;
     };
   }, [isAppReady]);
+
+  useEffect(() => {
+    if (!user?.employeeId || user.role !== "employee") return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await getTipsByEmployee();
+        if (!cancelled) syncEmployeeNotificationTips(user.employeeId!, data.tips ?? []);
+      } catch {
+        // Header badge stays hidden until tips load elsewhere
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.employeeId, user?.role]);
 
   return (
     <div className="relative min-h-screen bg-background">

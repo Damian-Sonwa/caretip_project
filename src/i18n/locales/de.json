@@ -820,6 +820,7 @@
       "searchPlaceholder": "FAQ durchsuchen…",
       "searchAria": "FAQ durchsuchen",
       "notificationsAria": "Benachrichtigungen",
+      "notificationsUnreadAria": "{{count}} ungelesene Benachrichtigungen",
       "adminFallback": "Admin",
       "platformAdminEmail": "Plattformadministration"
     },

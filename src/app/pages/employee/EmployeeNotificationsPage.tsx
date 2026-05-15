@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useReducer, useState } from "react";
 import { Link } from "react-router";
 import { Bell, ChevronLeft, Trash2 } from "lucide-react";
 import { toast } from "sonner";
@@ -11,6 +11,15 @@ import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  getEmployeeReadIdsRecord,
+  markAllEmployeeTipsRead,
+  markEmployeeTipsRead,
+  removeEmployeeTipsFromStore,
+  subscribeEmployeeNotifications,
+  syncEmployeeNotificationTips,
+  recordNewEmployeeTip,
+} from "../../lib/employeeNotificationStore";
 
 const BRAND_ORANGE = "#EB992C";
 
@@ -31,7 +40,10 @@ export function EmployeeNotificationsPage() {
   const { socket } = useSocket(user?.role === "employee");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [readIds, setReadIds] = useState<Record<string, true>>({});
+  const [, syncReadState] = useReducer((n: number) => n + 1, 0);
+  const readIds = getEmployeeReadIdsRecord();
+
+  useEffect(() => subscribeEmployeeNotifications(() => syncReadState()), []);
 
   useEffect(() => {
     if (!user || user.role !== "employee") return;
@@ -54,9 +66,15 @@ export function EmployeeNotificationsPage() {
   }, [user]);
 
   useEffect(() => {
+    if (loading || !user?.employeeId || tips.length === 0) return;
+    markAllEmployeeTipsRead();
+  }, [loading, user?.employeeId, tips.length]);
+
+  useEffect(() => {
     if (!socket || user?.role !== "employee") return;
     const onNew = (payload: NewTipPayload) => {
       if (user.employeeId && payload.employeeId !== user.employeeId) return;
+      if (user.employeeId) recordNewEmployeeTip(user.employeeId, payload.tip);
       setTips((prev) => {
         const rest = prev.filter((tipRow) => tipRow.id !== payload.tip.id);
         return [payload.tip, ...rest];
@@ -108,11 +126,7 @@ export function EmployeeNotificationsPage() {
         onClick: () => {
           setTips((prev) => prev.filter((tipRow) => !ids.includes(tipRow.id)));
           setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
-          setReadIds((prev) => {
-            const next: Record<string, true> = { ...prev };
-            for (const id of ids) delete next[id];
-            return next;
-          });
+          removeEmployeeTipsFromStore(ids);
           toast.success(t("employee.notifications.toastDeleted"));
         },
       },
@@ -134,11 +148,7 @@ export function EmployeeNotificationsPage() {
       action: {
         label: t("employee.notifications.actionMarkRead"),
         onClick: () => {
-          setReadIds((prev) => {
-            const next: Record<string, true> = { ...prev };
-            for (const id of ids) next[id] = true;
-            return next;
-          });
+          markEmployeeTipsRead(ids);
           setSelectedIds([]);
           toast.success(t("employee.notifications.toastMarkedRead"));
         },

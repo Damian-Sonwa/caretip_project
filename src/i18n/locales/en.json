@@ -820,6 +820,7 @@
       "searchPlaceholder": "Search FAQs…",
       "searchAria": "Search FAQs",
       "notificationsAria": "Notifications",
+      "notificationsUnreadAria": "{{count}} unread notifications",
       "adminFallback": "Admin",
       "platformAdminEmail": "Platform admin"
     },

@@ -39,6 +39,7 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
+import { recordNewEmployeeTip } from "../../lib/employeeNotificationStore";
 import employeeHeroImage from "../../../../images/ICT_employee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
@@ -250,6 +251,8 @@ export function EmployeeDashboard() {
 
     const onNewTip = (payload: NewTipPayload) => {
       if (user.employeeId && payload.employeeId !== user.employeeId) return;
+
+      recordNewEmployeeTip(user.employeeId, payload.tip);
 
       setCurrentMonthTotal(payload.currentMonthTotal);
       setMonthlyGoal(payload.monthlyGoal);
