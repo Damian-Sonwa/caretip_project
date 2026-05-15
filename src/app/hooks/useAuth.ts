@@ -470,7 +470,21 @@ export function useAuth() {
 
   const updateUser = useCallback((patch: Partial<User>) => {
     const current = getAuthUser();
-    setAuthUser(current ? { ...current, ...patch } : null);
+    if (!current) {
+      setAuthUser(null);
+      return;
+    }
+    const next = { ...current, ...patch };
+    try {
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(next));
+    } catch (err) {
+      logClientError("useAuth.updateUser", err);
+    }
+    if ("avatar" in patch || "name" in patch) {
+      commitAuthUser(next);
+    } else {
+      setAuthUser(next);
+    }
   }, []);
 
   const setHasCompletedOnboarding = useCallback(async (next: boolean): Promise<User> => {

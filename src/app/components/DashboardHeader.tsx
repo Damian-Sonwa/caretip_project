@@ -4,6 +4,7 @@ import { Bell, Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { CareTipLogo } from "./CareTipLogo";
+import { ProfileAvatar } from "./ui/profile-avatar";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -15,13 +16,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { user } = useAuth();
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
-  const initials =
-    displayName
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((p) => p[0]?.toUpperCase())
-      .join("") || "A";
 
   return (
     <motion.header
@@ -95,9 +89,13 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 {displayEmail || t("shell.header.platformAdminEmail")}
               </p>
             </div>
-            <div className="w-9 h-9 rounded-full bg-accent flex items-center justify-center text-accent-foreground text-xs font-medium cursor-pointer hover:ring-2 hover:ring-accent/50 transition-all">
-              {initials}
-            </div>
+            <ProfileAvatar
+              key={user?.avatar ?? user?.id ?? "header-avatar"}
+              src={user?.avatar}
+              displayName={displayName}
+              className="h-9 w-9 ring-2 ring-accent/30 hover:ring-accent/50 transition-all"
+              lightbox={false}
+            />
           </div>
         </div>
       </div>
