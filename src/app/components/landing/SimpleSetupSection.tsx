@@ -51,12 +51,12 @@ export function SimpleSetupSection() {
               transition={{ duration: 0.55 }}
               className={landingUi.copyStack}
             >
-              <div className="flex flex-wrap items-center gap-2">
+              <div className={landingUi.pillRow}>
                 <span className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-900 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1 sm:text-xs">
                   <Sparkles className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
                   {t("landing.simpleSetup.pill")}
                 </span>
-                <span className="text-[13px] font-medium text-neutral-600 dark:text-neutral-400 sm:text-sm">
+                <span className="text-center text-[13px] font-medium text-neutral-600 max-lg:w-full dark:text-neutral-400 sm:text-left sm:text-sm">
                   {t("landing.simpleSetup.pillSub")}
                 </span>
               </div>

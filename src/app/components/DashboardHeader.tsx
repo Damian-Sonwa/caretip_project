@@ -18,6 +18,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { user } = useAuth();
   const employeeUnreadCount = useEmployeeUnreadCount();
   const showNotificationBadge = user?.role === "employee" && employeeUnreadCount > 0;
+  const isPlatformAdmin = user?.role === "platform_admin";
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
 
@@ -28,8 +29,18 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       transition={{ duration: 0.5 }}
       className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[6px]"
     >
-      <div className="flex min-w-0 items-center justify-between gap-2 px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3.5">
-        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+      <div
+        className={cn(
+          "flex min-w-0 items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3.5 lg:px-8",
+          isPlatformAdmin ? "gap-2 max-lg:gap-2.5" : "gap-2",
+        )}
+      >
+        <div
+          className={cn(
+            "flex min-w-0 flex-1 items-center",
+            isPlatformAdmin ? "gap-1.5 max-lg:gap-2 sm:gap-3" : "gap-2 sm:gap-3",
+          )}
+        >
           <button
             type="button"
             onClick={onMenuClick}
@@ -44,7 +55,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           </div>
 
           <form
-            className="relative max-w-md w-full"
+            className={cn(
+              "relative min-w-0",
+              isPlatformAdmin
+                ? "w-full max-lg:max-w-[min(11.5rem,calc(100vw-9.5rem))] lg:max-w-md lg:flex-1"
+                : "w-full max-w-md flex-1",
+            )}
             role="search"
             onSubmit={(e) => {
               e.preventDefault();
@@ -61,12 +77,20 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               placeholder={t("shell.header.searchPlaceholder")}
               autoComplete="off"
               aria-label={t("shell.header.searchAria")}
-              className="w-full pl-10 pr-4 py-2 bg-input-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
+              className={cn(
+                "w-full rounded-lg border border-border bg-input-background py-2 pl-10 pr-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent",
+                isPlatformAdmin && "max-lg:py-2 max-lg:pl-9 max-lg:pr-2 max-lg:text-xs placeholder:max-lg:text-xs",
+              )}
             />
           </form>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+        <div
+          className={cn(
+            "flex shrink-0 items-center",
+            isPlatformAdmin ? "gap-1 max-lg:gap-1.5 sm:gap-3" : "gap-2 sm:gap-3",
+          )}
+        >
           <button
             type="button"
             onClick={() => {

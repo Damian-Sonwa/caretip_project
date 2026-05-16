@@ -39,6 +39,7 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platform/platformDashboardUi";
+import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
 import {
   Select,
   SelectContent,
@@ -83,19 +84,20 @@ interface StatCardProps {
   delay: number;
   trend?: "up" | "down";
   beam?: boolean;
+  wideOnTablet?: boolean;
 }
 
-function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: StatCardProps) {
+function StatCard({ title, value, change, icon: Icon, delay, trend, beam, wideOnTablet }: StatCardProps) {
   return (
     <motion.div
       initial={{ y: 20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5, delay }}
-      className="h-full"
+      className={cn("h-full", wideOnTablet && "sm:col-span-2 lg:col-span-1")}
     >
-      <Card className="relative h-full overflow-visible border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+      <Card className={platformUi.statCard}>
         {beam && <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />}
-        <CardHeader className="pb-2">
+        <CardHeader className={platformUi.statCardHeader}>
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-lg border border-border bg-muted p-2">
               <Icon className="h-5 w-5 text-foreground" />
@@ -110,13 +112,9 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
               </div>
             )}
           </div>
-          <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            {title}
-          </CardDescription>
-          <CardTitle className="break-words text-balance text-xl font-bold tabular-nums text-foreground sm:text-2xl lg:text-3xl leading-snug">
-            {value}
-          </CardTitle>
-          {change && <p className="text-sm leading-snug text-muted-foreground">{change}</p>}
+          <CardDescription className={platformUi.statCardLabel}>{title}</CardDescription>
+          <CardTitle className={platformUi.statCardValue}>{value}</CardTitle>
+          {change ? <p className={platformUi.statCardChange}>{change}</p> : null}
         </CardHeader>
       </Card>
     </motion.div>
@@ -135,15 +133,15 @@ function AnalyticsCard({
   descriptionClassName?: string;
 }) {
   return (
-    <Card className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm">
-      <CardHeader className="border-b border-border bg-muted/40 pb-3">
-        <CardTitle className="text-base font-semibold text-foreground">{title}</CardTitle>
-        <CardDescription className={cn("text-sm max-lg:line-clamp-2 lg:line-clamp-none", descriptionClassName)}>
+    <Card className={platformUi.analyticsCard}>
+      <CardHeader className={platformUi.analyticsCardHeader}>
+        <CardTitle className={platformUi.analyticsCardTitle}>{title}</CardTitle>
+        <CardDescription className={cn(platformUi.analyticsCardDesc, descriptionClassName)}>
           {description}
         </CardDescription>
       </CardHeader>
-      <CardContent className="p-4 sm:p-5">
-        <div className="h-[220px] w-full sm:h-[260px]">{children}</div>
+      <CardContent className={platformUi.analyticsCardBody}>
+        <div className={platformUi.analyticsChartWrap}>{children}</div>
       </CardContent>
     </Card>
   );
@@ -593,6 +591,7 @@ export function AdminDashboard() {
             icon={Heart}
             delay={0.1}
             beam
+            wideOnTablet
           />
           <StatCard
             title={t("admin.statVenues")}
@@ -630,19 +629,19 @@ export function AdminDashboard() {
             initial={{ y: 16, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.18 }}
-            className="mb-10"
+            className={platformUi.analyticsSection}
           >
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-              <div className="min-w-0">
-                <h3 className="text-lg font-semibold text-foreground">{t("admin.analyticsTitle")}</h3>
-                <p className="text-pretty text-sm leading-snug text-muted-foreground max-lg:line-clamp-2 lg:line-clamp-none">
+            <div className={platformUi.analyticsHeader}>
+              <div className={platformUi.analyticsHeaderCopy}>
+                <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
+                <p className="text-pretty text-sm leading-relaxed text-muted-foreground max-lg:line-clamp-3 lg:line-clamp-none">
                   {t("admin.analyticsSubtitle", {
                     days: (analytics ?? emptyAnalytics).rangeDays,
                     tz: (analytics ?? emptyAnalytics).timezone ?? analyticsTimezone,
                   })}
                 </p>
               </div>
-              <div className="flex w-full flex-col gap-2 sm:w-auto sm:max-w-[min(100%,16rem)] sm:items-end">
+              <div className={platformUi.analyticsControls}>
                 <Select
                   value={analyticsTimezone}
                   onValueChange={(v) => {
@@ -698,9 +697,9 @@ export function AdminDashboard() {
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm"
+          className={platformUi.businessesPanel}
         >
-          <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-4 py-4">
+          <div className={platformUi.businessesPanelHeader}>
             <button
               type="button"
               onClick={() => setBusinessesExpanded((v) => !v)}
@@ -709,9 +708,9 @@ export function AdminDashboard() {
             >
               <div className="flex min-w-0 items-center gap-2">
                 <Building2 className="h-5 w-5 text-foreground" />
-                <h3 className="truncate text-lg font-semibold text-foreground">
-                  {t("admin.businessesTitle")}
-                  <span className="ml-2 text-xs font-medium text-muted-foreground">
+                <h3 className="min-w-0 text-base font-semibold leading-snug text-foreground sm:text-lg">
+                  <span className="block sm:inline">{t("admin.businessesTitle")}</span>
+                  <span className="mt-0.5 block text-xs font-medium text-muted-foreground sm:ml-2 sm:mt-0 sm:inline">
                     {t("admin.businessesSubtitle")}
                   </span>
                 </h3>
@@ -726,7 +725,7 @@ export function AdminDashboard() {
 
             <Link
               to="/platform-admin/businesses"
-              className="hidden shrink-0 text-sm font-medium text-foreground underline-offset-4 hover:underline sm:inline"
+              className="shrink-0 text-xs font-medium text-foreground underline-offset-4 hover:underline sm:text-sm"
             >
               {t("admin.businessesOpen")}
             </Link>
@@ -735,8 +734,8 @@ export function AdminDashboard() {
           {businessesExpanded ? (
             <>
               {businesses.length > 0 && (
-                <div className="border-b border-border px-4 py-3">
-                  <div className="relative max-w-md">
+                <div className={platformUi.businessesSearchWrap}>
+                  <div className="relative w-full max-w-md">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                       type="search"
@@ -750,12 +749,18 @@ export function AdminDashboard() {
                   </div>
                 </div>
               )}
-              <div className="overflow-x-auto">
-                {businesses.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
-                ) : filteredBusinesses.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noSearchMatches")}</p>
-                ) : (
+              {businesses.length === 0 ? (
+                <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
+              ) : filteredBusinesses.length === 0 ? (
+                <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noSearchMatches")}</p>
+              ) : (
+                <>
+                  <div className={platformUi.businessesMobileList}>
+                    {filteredBusinesses.map((b) => (
+                      <PlatformBusinessMobileCard key={b.id} business={b} />
+                    ))}
+                  </div>
+                  <div className={platformUi.businessesTableWrap}>
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="border-b border-border bg-muted text-left">
@@ -821,8 +826,9 @@ export function AdminDashboard() {
                       ))}
                     </tbody>
                   </table>
-                )}
-              </div>
+                  </div>
+                </>
+              )}
             </>
           ) : null}
         </motion.div>

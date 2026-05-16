@@ -43,7 +43,7 @@ export function LandingFeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.05 }}
-            className={cn(landingUi.sectionSubtitle, "mt-3")}
+            className={landingUi.sectionSubtitle}
           >
             {t("landing.features.subtitle")}
           </motion.p>

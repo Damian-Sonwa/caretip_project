@@ -188,7 +188,7 @@ function MapGraphic3D() {
         ))}
       </svg>
 
-      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/40" />
     </div>
   );
 }
@@ -239,16 +239,20 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
   }, [health, t]);
 
   return (
-    <section className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06]">
+    <section className="platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12">
       <MapGraphic3D />
 
-      <div className="relative z-10 flex min-h-[min(420px,72svh)] flex-col gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">
-        <div className="max-w-xl lg:max-w-[28rem]">
+      <div className="relative z-10 flex min-h-[min(380px,68svh)] flex-col gap-8 px-5 py-8 max-lg:gap-7 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">
+        <div className="relative max-w-xl lg:max-w-[28rem]">
+          <div
+            aria-hidden
+            className="pointer-events-none absolute -inset-x-6 -inset-y-4 rounded-3xl bg-gradient-to-br from-black/70 via-black/45 to-transparent"
+          />
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="font-sans text-[1.75rem] font-bold leading-[1.16] tracking-tight text-white sm:text-4xl md:text-[2.6rem]"
+            className="relative font-sans text-[1.75rem] font-bold leading-[1.16] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-4xl md:text-[2.6rem]"
           >
             {t("admin.networkHero.title")}
           </motion.h1>
@@ -256,7 +260,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
-            className="mt-3 font-sans text-[15px] font-light leading-relaxed text-neutral-400 sm:text-base lg:text-lg"
+            className="relative mt-3 font-sans text-[15px] font-normal leading-relaxed text-neutral-200/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] sm:text-base lg:text-lg"
           >
             <span className="lg:hidden">{t("admin.networkHero.subtitleMobile")}</span>
             <span className="hidden lg:inline">{t("admin.networkHero.subtitle")}</span>

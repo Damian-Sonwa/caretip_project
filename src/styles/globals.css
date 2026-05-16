@@ -1025,6 +1025,24 @@ textarea::placeholder {
   box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.45);
 }
 
+/* Platform admin overview — mobile-native rhythm */
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell.platform-dashboard .platform-admin-stat-value {
+    font-size: clamp(1.25rem, 5.2vw, 1.5rem);
+    letter-spacing: -0.02em;
+  }
+
+  .caretip-dashboard-shell.platform-dashboard .platform-admin-hero .grid.grid-cols-2 {
+    gap: 0.625rem;
+  }
+}
+
+@media (max-width: 639px) {
+  .caretip-dashboard-shell.platform-dashboard .platform-admin-stat-grid {
+    gap: 0.875rem;
+  }
+}
+
 @media (max-width: 768px) {
   .caretip-dashboard-shell .recharts-cartesian-axis-tick-value {
     font-size: 10px;

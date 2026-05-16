@@ -18,12 +18,12 @@ export function LandingFinalCtaSection() {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_130%_75%_at_50%_0%,rgba(235,153,44,0.09),transparent_58%),radial-gradient(ellipse_120%_60%_at_20%_80%,rgba(0,0,0,0.028),transparent_55%),radial-gradient(ellipse_120%_60%_at_85%_70%,rgba(0,0,0,0.022),transparent_55%)]"
       />
-      <div className="relative mx-auto max-w-3xl text-left max-lg:max-w-none sm:text-center">
+      <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center max-lg:max-w-none max-lg:px-1 sm:max-w-2xl lg:max-w-3xl">
         <motion.h2
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className={cn(landingUi.headline, "max-w-none sm:mx-auto")}
+          className={cn(landingUi.sectionTitle, "max-w-[min(100%,22ch)] lg:max-w-3xl")}
         >
           {t("landing.finalCta.title")}
         </motion.h2>
@@ -32,7 +32,10 @@ export function LandingFinalCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.06 }}
-          className={cn(landingUi.subtitle, "mt-4 max-w-none text-neutral-700 dark:text-neutral-300 sm:mx-auto sm:mt-5")}
+          className={cn(
+            landingUi.sectionSubtitle,
+            "mt-4 text-neutral-700 dark:text-neutral-300 sm:mt-5",
+          )}
         >
           {t("landing.finalCta.subtitle")}
         </motion.p>
@@ -41,11 +44,14 @@ export function LandingFinalCtaSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.12 }}
-          className="mt-5 max-lg:mt-5 sm:mt-8"
+          className="mt-6 flex w-full max-w-md justify-center max-lg:mt-6 sm:mt-8"
         >
           <Link
             to="/auth?mode=signup&role=business&from=landing"
-            className={cn(landingUi.cta, "shadow-[0_12px_38px_-10px_rgba(235,153,44,0.42)] hover:shadow-[0_14px_44px_-8px_rgba(235,153,44,0.48)] active:scale-[0.99] sm:mx-auto")}
+            className={cn(
+              landingUi.cta,
+              "shadow-[0_12px_38px_-10px_rgba(235,153,44,0.42)] hover:shadow-[0_14px_44px_-8px_rgba(235,153,44,0.48)] active:scale-[0.99]",
+            )}
           >
             {t("landing.finalCta.cta")}
             <ArrowRight className="h-5 w-5" aria-hidden />

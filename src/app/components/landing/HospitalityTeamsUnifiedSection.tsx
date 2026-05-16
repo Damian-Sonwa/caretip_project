@@ -40,10 +40,10 @@ export function HospitalityTeamsUnifiedSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className={cn(landingUi.headline, "w-full max-w-none text-gray-900 sm:max-w-2xl lg:mx-auto lg:max-w-3xl lg:text-center")}>
+            <h2 className={cn(landingUi.sectionTitle, "text-gray-900 dark:text-neutral-100")}>
               {t("landing.hospitality.title")}
             </h2>
-            <p className={cn(landingUi.sectionSubtitle, "mt-3 text-gray-600 dark:text-neutral-300")}>
+            <p className={cn(landingUi.sectionSubtitle, "text-gray-600 dark:text-neutral-300")}>
               {t("landing.hospitality.subtitle")}
             </p>
           </motion.div>
