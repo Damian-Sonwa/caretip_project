@@ -1,5 +1,6 @@
 import { useNavigate, useParams, Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
+import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Heart, Building2, Sparkles } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
