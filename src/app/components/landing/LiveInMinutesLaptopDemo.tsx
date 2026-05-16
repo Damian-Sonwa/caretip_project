@@ -2,18 +2,28 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BarChart3, Mail, QrCode, UserPlus, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { cn } from "@/lib/utils";
 
-const SLIDE_MS = 1800;
-const FADE_MS = 0.45;
+const SLIDE_MS = 2200;
+const FADE_MS = 0.4;
+
+export const LIVE_DEMO_SLIDE_IDS = ["signup", "team", "qr", "dashboard"] as const;
+export type LiveDemoSlideId = (typeof LIVE_DEMO_SLIDE_IDS)[number];
 
 type LiveInMinutesLaptopDemoProps = {
   videoSrc?: string;
+  activeIndex?: number;
+  onActiveIndexChange?: (index: number) => void;
 };
 
-export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoProps) {
+export function LiveInMinutesLaptopDemo({
+  videoSrc,
+  activeIndex: controlledIndex,
+  onActiveIndexChange,
+}: LiveInMinutesLaptopDemoProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const [index, setIndex] = React.useState(0);
+  const [internalIndex, setInternalIndex] = React.useState(0);
 
   const slides = React.useMemo(
     () =>
@@ -26,26 +36,42 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
     [t],
   );
 
+  const isControlled = controlledIndex !== undefined;
+  const index = isControlled ? Math.min(Math.max(0, controlledIndex), slides.length - 1) : internalIndex;
+
+  const setIndex = React.useCallback(
+    (next: number) => {
+      const clamped = ((next % slides.length) + slides.length) % slides.length;
+      if (!isControlled) setInternalIndex(clamped);
+      onActiveIndexChange?.(clamped);
+    },
+    [isControlled, onActiveIndexChange, slides.length],
+  );
+
   React.useEffect(() => {
     if (reduceMotion || videoSrc) return;
     const timer = window.setInterval(() => {
-      setIndex((i) => (i + 1) % slides.length);
+      setIndex(index + 1);
     }, SLIDE_MS);
     return () => window.clearInterval(timer);
-  }, [reduceMotion, videoSrc, slides.length]);
+  }, [reduceMotion, videoSrc, index, setIndex]);
 
   const active = slides[reduceMotion ? 0 : index];
 
   return (
     <div className="relative mx-auto w-full max-w-none sm:max-w-2xl">
-      <div className="relative w-full rounded-[2.5rem] border border-gray-200 bg-gradient-to-b from-neutral-100 to-neutral-200 p-2.5 pt-3.5 shadow-xl dark:border-neutral-700 dark:from-neutral-800 dark:to-neutral-900 max-md:p-3 max-md:pt-4">
+      <p className="mb-3 text-center text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500 dark:text-neutral-400 sm:mb-4">
+        <span className="text-primary">{active.label}</span>
+      </p>
+
+      <div className="relative w-full rounded-[2rem] border border-neutral-200/95 bg-gradient-to-b from-neutral-50 to-neutral-100/90 p-2.5 pt-3.5 shadow-[0_2px_4px_rgba(15,15,15,0.05),0_24px_56px_rgba(15,15,15,0.12)] dark:border-neutral-600 dark:from-neutral-800 dark:to-neutral-900 sm:rounded-[2.5rem] sm:p-3 sm:pt-4">
         <div
           aria-hidden
-          className="absolute left-1/2 top-1.5 h-1 w-8 -translate-x-1/2 rounded-full bg-neutral-300/90 dark:bg-neutral-600"
+          className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-neutral-300 dark:bg-neutral-600"
         />
 
-        <div className="mt-2 overflow-hidden rounded-xl border border-[rgba(235,153,44,0.45)] bg-[rgba(250,249,246,0.9)] ring-1 ring-[rgba(235,153,44,0.18)] dark:border-[rgba(235,153,44,0.35)] dark:bg-[rgba(235,153,44,0.10)] dark:ring-[rgba(235,153,44,0.14)]">
-          <div className="relative aspect-[16/10] w-full max-w-none bg-white dark:bg-neutral-950">
+        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200/90 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-neutral-900/[0.06] dark:border-neutral-600 dark:bg-neutral-950 dark:ring-white/10">
+          <div className="relative aspect-[16/10] w-full bg-white dark:bg-neutral-950">
             {videoSrc ? (
               <video
                 autoPlay
@@ -62,11 +88,11 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
                     key={active.id}
                     role="img"
                     aria-label={t("landing.liveDemo.demoAria", { label: active.label })}
-                    initial={{ opacity: 0, x: 14 }}
+                    initial={{ opacity: 0, x: 12 }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -14 }}
+                    exit={{ opacity: 0, x: -12 }}
                     transition={{ duration: FADE_MS, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 flex flex-col p-[5%] sm:p-[6%]"
+                    className="absolute inset-0 flex flex-col p-[4.5%] sm:p-[5.5%]"
                   >
                     {active.id === "signup" && <DemoSignup />}
                     {active.id === "team" && <DemoTeam />}
@@ -85,12 +111,20 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
         />
       </div>
 
-      {!videoSrc && !reduceMotion ? (
-        <div className="mt-2 flex justify-center gap-1.5" aria-hidden>
+      {!videoSrc ? (
+        <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label={t("landing.liveDemo.slideNavAria")}>
           {slides.map((s, i) => (
-            <span
+            <button
               key={s.id}
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${i === index ? "bg-primary" : "bg-neutral-300 dark:bg-neutral-600"}`}
+              type="button"
+              role="tab"
+              aria-selected={i === index}
+              aria-label={s.label}
+              onClick={() => setIndex(i)}
+              className={cn(
+                "h-2 rounded-full transition-all duration-300",
+                i === index ? "w-6 bg-primary" : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600",
+              )}
             />
           ))}
         </div>
@@ -99,36 +133,41 @@ export function LiveInMinutesLaptopDemo({ videoSrc }: LiveInMinutesLaptopDemoPro
   );
 }
 
+const demoShell =
+  "flex h-full flex-col rounded-lg border border-neutral-200/90 bg-white p-3 text-left shadow-[0_4px_20px_rgba(15,15,15,0.06)] sm:p-3.5 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]";
+
 function DemoSignup() {
   const { t } = useTranslation();
   return (
-    <div className="flex h-full flex-col rounded-lg bg-white p-3 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
-      <div className="mb-2 flex items-center gap-2 border-b border-neutral-100 pb-2 dark:border-neutral-800">
-        <div className="flex h-6 w-6 items-center justify-center rounded-lg bg-primary/15 text-primary">
-          <UserPlus className="h-3.5 w-3.5" />
+    <div className={demoShell}>
+      <div className="mb-2.5 flex items-center gap-2 border-b border-neutral-200 pb-2.5 dark:border-neutral-700">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/20">
+          <UserPlus className="h-4 w-4" strokeWidth={2.25} />
         </div>
         <div>
           <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
             {t("landing.liveDemo.signupBrand")}
           </p>
-          <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.signupTitle")}</p>
+          <p className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.signupTitle")}</p>
         </div>
       </div>
-      <div className="flex flex-1 flex-col gap-2">
+      <div className="flex flex-1 flex-col gap-2.5">
         <div>
-          <p className="mb-0.5 text-[9px] font-medium text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.workEmail")}</p>
-          <div className="flex items-center gap-1.5 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-800/80">
-            <Mail className="h-3 w-3 shrink-0 text-neutral-400" />
-            <span className="truncate text-[10px] text-neutral-600 dark:text-neutral-300">{t("landing.liveDemo.sampleEmail")}</span>
+          <p className="mb-1 text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.workEmail")}</p>
+          <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-2 dark:border-neutral-600 dark:bg-neutral-800">
+            <Mail className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
+            <span className="truncate text-[11px] font-medium text-neutral-800 dark:text-neutral-200">
+              {t("landing.liveDemo.sampleEmail")}
+            </span>
           </div>
         </div>
         <div>
-          <p className="mb-0.5 text-[9px] font-medium text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.password")}</p>
-          <div className="h-7 rounded-md border border-neutral-200 bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800/80" />
+          <p className="mb-1 text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.password")}</p>
+          <div className="h-8 rounded-lg border border-neutral-200 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800" />
         </div>
         <button
           type="button"
-          className="mt-auto w-full rounded-lg bg-primary py-2 text-[10px] font-bold text-white shadow-sm"
+          className="mt-auto w-full rounded-lg bg-primary py-2.5 text-[11px] font-bold text-white shadow-[0_4px_14px_rgba(235,153,44,0.35)]"
         >
           {t("landing.liveDemo.continue")}
         </button>
@@ -141,29 +180,31 @@ function DemoTeam() {
   const { t } = useTranslation();
   const names = ["Sofia, Server", "Marcus, Bar", "Aisha, Host"];
   return (
-    <div className="flex h-full flex-col rounded-lg bg-white p-3 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
-      <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.inviteTitle")}</p>
-      <p className="mt-0.5 text-[9px] text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.inviteSub")}</p>
+    <div className={demoShell}>
+      <p className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.inviteTitle")}</p>
+      <p className="mt-0.5 text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.inviteSub")}</p>
       <ul className="mt-3 flex flex-1 flex-col gap-2">
         {names.map((name, i) => (
           <li
             key={name}
-            className="flex items-center gap-2 rounded-md border border-neutral-100 bg-neutral-50/90 px-2 py-1.5 dark:border-neutral-800 dark:bg-neutral-800/50"
+            className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-2 dark:border-neutral-700 dark:bg-neutral-800/80"
           >
-            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary">
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-[10px] font-bold text-primary">
               {name[0]}
             </div>
-            <span className="flex-1 truncate text-[10px] font-medium text-neutral-800 dark:text-neutral-200">{name}</span>
+            <span className="flex-1 truncate text-[11px] font-semibold text-neutral-800 dark:text-neutral-200">{name}</span>
             {i === 0 ? (
-              <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[8px] font-semibold text-primary">{t("landing.liveDemo.pending")}</span>
+              <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[9px] font-semibold text-primary">
+                {t("landing.liveDemo.pending")}
+              </span>
             ) : (
-              <span className="text-[8px] text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.active")}</span>
+              <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.active")}</span>
             )}
           </li>
         ))}
       </ul>
-      <div className="mt-2 flex items-center justify-center gap-1 rounded-md border border-dashed border-primary/30 bg-primary/[0.06] py-2 text-[9px] font-semibold text-primary">
-        <Users className="h-3 w-3" aria-hidden />
+      <div className="mt-2 flex items-center justify-center gap-1.5 rounded-lg border border-dashed border-primary/35 bg-primary/[0.08] py-2.5 text-[10px] font-semibold text-primary">
+        <Users className="h-3.5 w-3.5" aria-hidden />
         {t("landing.liveDemo.addAnother")}
       </div>
     </div>
@@ -174,30 +215,30 @@ function DemoQr() {
   const { t } = useTranslation();
   const labels = [t("landing.liveDemo.qrLabel1"), t("landing.liveDemo.qrLabel2"), t("landing.liveDemo.qrLabel3")];
   return (
-    <div className="flex h-full flex-col rounded-lg bg-white p-3 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
+    <div className={demoShell}>
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.qrTitle")}</p>
-          <p className="text-[9px] text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.qrSub")}</p>
+          <p className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.qrTitle")}</p>
+          <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.qrSub")}</p>
         </div>
-        <QrCode className="h-5 w-5 text-primary" aria-hidden />
+        <QrCode className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />
       </div>
       <div className="mt-3 grid flex-1 grid-cols-3 gap-2">
         {labels.map((label) => (
           <div
             key={label}
-            className="flex flex-col items-center justify-center rounded-md border border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800/60"
+            className="flex flex-col items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800/80"
           >
-            <div className="grid h-10 w-10 grid-cols-4 gap-px rounded bg-neutral-900 p-1">
+            <div className="grid h-11 w-11 grid-cols-4 gap-px rounded bg-neutral-900 p-1">
               {Array.from({ length: 16 }).map((_, i) => (
-                <div key={i} className={`rounded-[1px] ${i % 3 === 0 ? "bg-white" : "bg-neutral-200"}`} />
+                <div key={i} className={cn("rounded-[1px]", i % 3 === 0 ? "bg-white" : "bg-neutral-300")} />
               ))}
             </div>
-            <span className="mt-1.5 text-[8px] font-medium text-neutral-600 dark:text-neutral-300">{label}</span>
+            <span className="mt-1.5 text-[9px] font-semibold text-neutral-700 dark:text-neutral-300">{label}</span>
           </div>
         ))}
       </div>
-      <p className="mt-2 text-center text-[9px] text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.qrFooter")}</p>
+      <p className="mt-2 text-center text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.qrFooter")}</p>
     </div>
   );
 }
@@ -205,34 +246,34 @@ function DemoQr() {
 function DemoDashboard() {
   const { t } = useTranslation();
   return (
-    <div className="flex h-full flex-col rounded-lg bg-white p-3 text-left shadow-inner ring-1 ring-black/[0.04] sm:p-4 dark:bg-neutral-900 dark:ring-white/10">
+    <div className={demoShell}>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.dashToday")}</p>
-          <p className="text-[9px] text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.dashTipsSub")}</p>
+          <p className="text-[13px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.dashToday")}</p>
+          <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.dashTipsSub")}</p>
         </div>
-        <BarChart3 className="h-4 w-4 text-primary" aria-hidden />
+        <BarChart3 className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />
       </div>
-      <div className="mt-2 grid grid-cols-2 gap-2">
-        <div className="rounded-md border border-neutral-100 bg-gradient-to-br from-primary/10 to-transparent p-2 dark:border-neutral-800">
-          <p className="text-[8px] font-medium text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.tipsReceived")}</p>
-          <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">€284</p>
-          <p className="text-[8px] text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.dashDelta")}</p>
+      <div className="mt-2.5 grid grid-cols-2 gap-2">
+        <div className="rounded-lg border border-primary/20 bg-gradient-to-br from-primary/12 to-transparent p-2.5 dark:border-primary/30">
+          <p className="text-[9px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.tipsReceived")}</p>
+          <p className="text-xl font-bold tabular-nums text-neutral-900 dark:text-neutral-100">€284</p>
+          <p className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.dashDelta")}</p>
         </div>
-        <div className="rounded-md border border-neutral-100 bg-neutral-50 p-2 dark:border-neutral-800 dark:bg-neutral-800/40">
-          <p className="text-[8px] font-medium text-neutral-500 dark:text-neutral-400">{t("landing.liveDemo.dashScans")}</p>
-          <p className="text-lg font-bold tabular-nums text-neutral-900 dark:text-neutral-100">48</p>
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 dark:border-neutral-700 dark:bg-neutral-800/80">
+          <p className="text-[9px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.dashScans")}</p>
+          <p className="text-xl font-bold tabular-nums text-neutral-900 dark:text-neutral-100">48</p>
         </div>
       </div>
-      <div className="mt-2 hidden min-h-0 flex-1 flex-col justify-end md:flex">
-        <p className="mb-1 text-[8px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+      <div className="mt-2.5 flex min-h-0 flex-1 flex-col justify-end">
+        <p className="mb-1.5 text-[9px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400">
           {t("landing.liveDemo.activity")}
         </p>
-        <div className="flex h-14 items-end gap-1.5 rounded-md border border-neutral-100 bg-neutral-50/80 px-2 pb-2 dark:border-neutral-800 dark:bg-neutral-800/40">
-          {[26, 40, 20, 48, 28, 52, 34].map((px, i) => (
+        <div className="flex h-16 items-end gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 pb-2.5 dark:border-neutral-700 dark:bg-neutral-800/80">
+          {[28, 44, 22, 52, 30, 56, 36].map((px, i) => (
             <div
               key={i}
-              className="min-w-0 flex-1 rounded-sm bg-gradient-to-t from-primary to-primary/70"
+              className="min-w-0 flex-1 rounded-sm bg-gradient-to-t from-primary to-primary/75"
               style={{ height: `${px}px` }}
             />
           ))}

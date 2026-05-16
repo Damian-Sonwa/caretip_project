@@ -14,6 +14,7 @@ import {
 
 import { Marquee } from "@/components/ui/marquee";
 import { landingImageFrameClassName } from "@/components/ui/landing-image-frame";
+import { cn } from "@/lib/utils";
 
 import hotelsImg from "../../../images/Hotels.png";
 import barLoungeImg from "../../../images/bar and lounge.png";
@@ -124,41 +125,46 @@ export default function HospitalityBusinessesMarquee() {
   );
 
   return (
-    <section className="relative w-full overflow-hidden bg-white py-12 md:py-20">
-      <div className="relative z-10 mx-auto max-w-7xl">
-        <div className="relative w-full">
-          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-24 bg-gradient-to-r from-white to-transparent" />
-          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-24 bg-gradient-to-l from-white to-transparent" />
+    <div className="relative w-full overflow-hidden bg-transparent py-7 sm:py-8">
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
 
-          <Marquee className="[--gap:1.5rem]" pauseOnHover durationSeconds={65} gapPx={24}>
+      <Marquee className="[--gap:1rem]" pauseOnHover durationSeconds={65} gapPx={16}>
             {businesses.map((b) => (
-              <div className="group flex w-80 shrink-0 flex-col sm:w-[26rem]" key={b.id} tabIndex={0}>
-                <div className={`${landingImageFrameClassName} relative h-[26rem] w-full bg-neutral-100 sm:h-[28rem]`}>
+              <div className="group flex w-[17.5rem] shrink-0 flex-col sm:w-[19rem]" key={b.id} tabIndex={0}>
+                <div
+                  className={cn(
+                    landingImageFrameClassName,
+                    "relative aspect-[4/5] w-full bg-neutral-100 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:bg-neutral-900 dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)]",
+                  )}
+                >
                   <img
                     alt={b.name}
-                    className="h-full w-full cursor-pointer object-cover object-center transition-opacity duration-300 ease-out group-hover:opacity-95 group-active:opacity-90"
+                    className="h-full w-full object-cover object-center transition-opacity duration-300 ease-out group-hover:opacity-[0.97]"
                     src={b.image}
                     loading="lazy"
                     decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-x-0 bottom-0 bg-white/85 p-3 backdrop-blur-sm">
+                  <div className="absolute inset-x-0 bottom-0 border-t border-neutral-200/60 bg-white/88 px-2.5 py-2 backdrop-blur-[6px] dark:border-neutral-800/80 dark:bg-neutral-950/88 sm:px-3 sm:py-2.5">
                     <div className="flex items-start gap-2">
-                      <span className="mt-0.5 inline-flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                        <b.Icon className="h-4 w-4" />
+                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-8 sm:w-8">
+                        <b.Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                       <div className="min-w-0">
-                        <h3 className="truncate font-semibold text-foreground">{b.name}</h3>
-                        <p className="mt-0.5 text-sm leading-snug text-muted-foreground">{b.role}</p>
+                        <h3 className="truncate text-sm font-semibold leading-snug text-neutral-900 dark:text-neutral-50">
+                          {b.name}
+                        </h3>
+                        <p className="mt-0.5 text-xs leading-snug text-neutral-600 dark:text-neutral-400 sm:text-[13px]">
+                          {b.role}
+                        </p>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             ))}
-          </Marquee>
-        </div>
-      </div>
-    </section>
+      </Marquee>
+    </div>
   );
 }

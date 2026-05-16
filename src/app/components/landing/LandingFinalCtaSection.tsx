@@ -23,7 +23,7 @@ export function LandingFinalCtaSection() {
           initial={{ opacity: 0, y: 14 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className={cn(landingUi.sectionTitle, "max-w-[min(100%,22ch)] lg:max-w-3xl")}
+          className={landingUi.sectionTitle}
         >
           {t("landing.finalCta.title")}
         </motion.h2>

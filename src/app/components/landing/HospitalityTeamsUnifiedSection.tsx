@@ -1,11 +1,9 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { QrCode } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
-import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import HospitalityBusinessesMarquee from "@/components/ui/team";
-import { LandingCheckBadge } from "@/components/landing/LandingCheckBadge";
+import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
@@ -28,74 +26,75 @@ export function HospitalityTeamsUnifiedSection() {
     <section
       id="built-for-hospitality"
       className={cn(
-        landingUi.section,
-        "max-w-full overflow-x-hidden max-md:pb-16 max-md:pt-10 bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] sm:pb-24 sm:pt-20 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
+        landingUi.hospitalitySection,
+        "bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
       )}
     >
-      <div className="mx-auto w-full max-w-7xl min-w-0">
-        <div className={landingUi.sectionIntro}>
+      <motion.div
+        className="mx-auto w-full max-w-7xl min-w-0"
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+      >
+        <header className={landingUi.hospitalityIntro}>
+          <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
+          <p className={cn(landingUi.hospitalitySubtitle, "mt-2 sm:mt-2.5")}>
+            {t("landing.hospitality.subtitle")}
+          </p>
+        </header>
+
+        <motion.div
+          className={landingUi.hospitalityGrid}
+          initial={{ opacity: 0, y: 6 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+        >
+          {/* Features — left on desktop */}
           <motion.div
-            initial={{ y: 10, opacity: 0 }}
-            whileInView={{ y: 0, opacity: 1 }}
+            className="order-2 min-w-0 lg:order-1"
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
           >
-            <h2 className={cn(landingUi.sectionTitle, "text-gray-900 dark:text-neutral-100")}>
-              {t("landing.hospitality.title")}
-            </h2>
-            <p className={cn(landingUi.sectionSubtitle, "text-gray-600 dark:text-neutral-300")}>
-              {t("landing.hospitality.subtitle")}
-            </p>
-          </motion.div>
-        </div>
-
-        <div className="grid w-full min-w-0 gap-8 max-md:gap-10 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
-          <div className="min-w-0 lg:order-2">
-            <LandingBorderedCard cardClassName="p-0">
-              <motion.div
-                initial={{ y: 6, opacity: 0 }}
-                whileInView={{ y: 0, opacity: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
-                className="pointer-events-none absolute left-4 top-4 z-10 inline-flex items-center gap-2 text-sm font-semibold text-gray-900"
-              >
-                <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <QrCode className="h-3.5 w-3.5" aria-hidden />
-                </span>
-                <span>{t("landing.hospitality.pill")}</span>
-              </motion.div>
-              <HospitalityBusinessesMarquee />
-            </LandingBorderedCard>
-          </div>
-
-          <div className="flex min-w-0 flex-col items-center lg:order-1 lg:items-stretch">
-            <ul className="flex w-full min-w-0 max-w-full flex-col items-stretch space-y-3 max-md:mt-1 max-lg:space-y-3 sm:space-y-3.5 lg:items-stretch">
+            <div className={landingUi.hospitalityFeaturePanel}>
               {features.map((f, idx) => (
-                <motion.li
+                <LandingBenefitBlock
                   key={`hospitality-feature-${idx}`}
-                  initial={{ y: 10, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
-                  className="w-full max-w-full rounded-3xl border border-black/[0.06] bg-white px-5 py-5 shadow-sm max-md:py-5 sm:px-6 sm:py-6 dark:border-white/10 dark:bg-neutral-950/40"
-                >
-                  <div className="flex min-h-0 w-full min-w-0 flex-col gap-3 max-md:gap-3.5 sm:grid sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:items-start sm:gap-x-4">
-                    <LandingCheckBadge className="shrink-0 sm:mt-0.5" />
-                    <div className="min-w-0 space-y-2.5 text-left sm:space-y-2">
-                      <p className="max-w-full break-words text-lg font-bold leading-snug tracking-tight text-gray-900 dark:text-neutral-100">
-                        {f.title}
-                      </p>
-                      <p className="max-w-full break-words text-[15px] font-medium leading-[1.55] text-gray-600 dark:text-neutral-300 sm:text-base sm:font-normal sm:leading-relaxed sm:text-gray-500">
-                        {f.text}
-                      </p>
-                    </div>
-                  </div>
-                </motion.li>
+                  variant="split"
+                  title={f.title}
+                  description={f.text}
+                  className="py-3.5 sm:py-4"
+                />
               ))}
-            </ul>
-          </div>
-        </div>
-      </div>
+            </div>
+          </motion.div>
+
+          {/* Motion media — right on desktop */}
+          <motion.div
+            className="order-1 min-w-0 lg:order-2"
+            initial={{ opacity: 0, y: 8 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
+          >
+            <div className={landingUi.hospitalityMediaStack}>
+              <p className={landingUi.hospitalityMediaLabel}>{t("landing.hospitality.pill")}</p>
+              <motion.div
+                className={landingUi.hospitalityMediaCard}
+                initial={{ opacity: 0, y: 6 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+              >
+                <HospitalityBusinessesMarquee />
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      </motion.div>
     </section>
   );
 }

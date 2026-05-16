@@ -17,6 +17,8 @@ import { CareTipHeroAnimation } from "@/components/ui/caretip-hero-animation";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
+import { landingUi } from "@/components/landing/landingUi";
+import { useTranslation } from "react-i18next";
 
 export type TabMedia = {
   value: string;
@@ -102,6 +104,9 @@ export function FeatureShowcase({
   useAnimatedHero = false,
   heroBorderBeam = false,
 }: FeatureShowcaseProps) {
+  const { i18n } = useTranslation();
+  const isDe = i18n.language?.toLowerCase().startsWith("de");
+
   const carouselImages = React.useMemo(
     () =>
       tabsProp.map((t) => ({
@@ -122,7 +127,7 @@ export function FeatureShowcase({
       id={id}
       className={cn(
         cinematic
-          ? "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pt-24 pb-6 sm:pt-24 sm:pb-10 md:pt-[5.25rem] md:pb-14 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100"
+          ? "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pt-24 pb-8 max-md:px-0 sm:pt-24 sm:pb-12 md:pt-[5.5rem] md:pb-16 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100"
           : "w-full bg-transparent text-foreground pt-14 sm:pt-16",
         id && "scroll-mt-[80px]",
         className,
@@ -272,7 +277,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex w-full min-w-0 max-w-7xl flex-col gap-3 px-4 pb-4 pt-3 max-md:gap-y-3 sm:gap-5 sm:px-6 sm:pb-8 sm:pt-3 md:flex-row md:items-center md:gap-10 md:px-8 md:pb-10 md:pt-3 lg:gap-12 lg:px-10"
+              ? landingUi.heroShell
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -280,8 +285,7 @@ export function FeatureShowcase({
           className={cn(
             "relative",
             !cinematic && "md:col-span-5",
-            cinematic &&
-              "order-1 flex min-w-0 w-full max-w-full flex-1 flex-col self-stretch max-md:items-stretch max-md:pt-0 md:flex-1 md:self-stretch md:flex md:flex-col md:justify-center md:pt-2 lg:pr-4",
+            cinematic && landingUi.heroCopy,
           )}
         >
             {eyebrow?.trim() ? (
@@ -290,7 +294,7 @@ export function FeatureShowcase({
                 className={cn(
                   "mb-6",
                   cinematic
-                    ? "max-md:mx-auto max-md:mb-3 mb-4 text-gray-900 border-black/[0.10] bg-white sm:mb-6"
+                    ? "mb-4 max-md:mx-auto max-md:mb-3 border-black/[0.10] bg-white text-gray-900 sm:mb-6"
                     : "border-primary/40 text-foreground",
                 )}
               >
@@ -302,7 +306,9 @@ export function FeatureShowcase({
               className={cn(
                 "text-balance font-bold",
                 cinematic
-                  ? "text-[1.65rem] leading-[1.18] tracking-[-0.02em] text-gray-950 max-md:w-full max-md:min-w-0 max-md:max-w-full max-md:break-words sm:text-4xl sm:leading-[1.08] md:text-6xl dark:text-neutral-50"
+                  ? isDe
+                    ? landingUi.heroHeadlineDe
+                    : landingUi.heroHeadlineEn
                   : "text-4xl leading-[1.08] sm:text-5xl md:text-6xl",
               )}
               initial={{ opacity: 0, y: 20 }}
@@ -315,33 +321,49 @@ export function FeatureShowcase({
             {description ? (
             <p
               className={cn(
-                "mt-5 max-w-xl sm:mt-6",
-                cinematic
-                  ? "max-md:mt-4 mb-0.5 text-pretty text-[15px] font-normal leading-[1.68] tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 sm:mt-6 sm:text-[17px] sm:leading-[1.65]"
-                  : "leading-relaxed text-muted-foreground",
+                cinematic ? landingUi.heroSubtitle : "mt-5 max-w-xl leading-relaxed text-muted-foreground sm:mt-6",
               )}
             >
                 {description}
               </p>
             ) : null}
 
-            {cinematic && stats.length > 0 ? (
-              <LandingBenefitChecklist
-                items={stats}
-                tone="cinematic"
-                className="mt-4 max-w-xl max-md:mt-5 sm:mt-5 sm:gap-3"
-              />
-            ) : null}
-
-            <div
-              className={cn(
-                "max-w-xl",
-                cinematic && "w-full",
-                cinematic && (stats.length > 0 ? "max-md:mt-5 mt-3 sm:mt-6" : "max-md:mt-6 mt-4 sm:mt-8"),
-                !cinematic && "mt-8 sm:mt-10",
-              )}
-            >
-              {!cinematic ? (
+            {cinematic ? (
+              <motion.div
+                className={landingUi.heroActionCluster}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, ease: "easeOut", delay: 0.12 }}
+              >
+                {stats.length > 0 ? (
+                  <LandingBenefitChecklist
+                    items={stats}
+                    tone="cinematic"
+                    className={landingUi.heroBenefits}
+                  />
+                ) : null}
+                <div className={landingUi.heroCtaRow}>
+                  <Button asChild variant="default" className={landingUi.heroCtaPrimary}>
+                    <Link
+                      to={primaryCtaTo}
+                      className="inline-flex h-full w-full items-center justify-center whitespace-nowrap"
+                    >
+                      {primaryCtaLabel}
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline" className={landingUi.heroCtaSecondary}>
+                    <Link
+                      to={secondaryCtaTo}
+                      className="inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap"
+                    >
+                      <span>{secondaryCtaLabel}</span>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-55" aria-hidden />
+                    </Link>
+                  </Button>
+                </div>
+              </motion.div>
+            ) : (
+              <div className="mt-8 max-w-xl sm:mt-10">
                 <Accordion type="single" collapsible className="w-full">
                   {steps.map((step) => (
                     <AccordionItem key={step.id} value={step.id}>
@@ -350,79 +372,30 @@ export function FeatureShowcase({
                     </AccordionItem>
                   ))}
                 </Accordion>
-              ) : null}
-
-                  <div
-                    className={cn(
-                      "flex w-full flex-wrap items-stretch justify-start gap-3",
-                      cinematic
-                        ? "max-w-full flex-col gap-2 max-md:mt-3 max-md:py-0 sm:mt-5 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3.5 sm:py-0"
-                        : "mt-4 gap-3 sm:mt-7",
-                    )}
+                <motion.div className="mt-4 flex w-full flex-wrap items-stretch justify-start gap-3 sm:mt-7">
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="default"
+                    className="h-12 w-[min(64%,280px)] rounded-2xl bg-[#EB992C] px-6 font-bold leading-none text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]"
                   >
-                <Button
-                  asChild
-                  size={cinematic ? "default" : "lg"}
-                  variant="default"
-                  className={cn(
-                    "rounded-2xl font-bold leading-none sm:w-auto",
-                    cinematic
-                      ? [
-                          "h-12 w-full min-w-0 border-0 px-6 text-base font-bold tracking-tight shadow-[0_12px_38px_-10px_rgba(235,153,44,0.42)] max-md:h-11 max-md:text-[15px] max-md:font-semibold max-md:ring-2 max-md:ring-[#EB992C]/20 sm:h-12 sm:min-w-[11.5rem] sm:rounded-xl sm:px-7",
-                          "bg-[#EB992C] text-white hover:bg-[#d88926] hover:shadow-[0_14px_44px_-8px_rgba(235,153,44,0.48)]",
-                          "focus-visible:ring-2 focus-visible:ring-[#EB992C]/40 focus-visible:ring-offset-2",
-                        ]
-                      : "h-12 w-[min(64%,280px)] px-6",
-                    !cinematic && "w-[min(64%,280px)]",
-                    !cinematic &&
-                      "bg-[#EB992C] text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]",
-                  )}
-                >
-                  <Link
-                    to={primaryCtaTo}
-                    className={cn(
-                      "whitespace-nowrap",
-                      cinematic &&
-                        "inline-flex h-full min-h-0 w-full items-center justify-center gap-2 px-0 py-0 sm:w-auto",
-                    )}
+                    <Link to={primaryCtaTo} className="whitespace-nowrap">
+                      {primaryCtaLabel}
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="h-12 w-[min(64%,280px)] rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold leading-none text-foreground hover:bg-muted"
                   >
-                    {primaryCtaLabel}
-                  </Link>
-                </Button>
-                <Button
-                  asChild
-                  size={cinematic ? "default" : "lg"}
-                  variant={cinematic ? "ghost" : "outline"}
-                  className={cn(
-                    "rounded-2xl leading-none sm:w-auto",
-                    cinematic
-                      ? [
-                          "h-12 w-full min-w-0 border border-neutral-300/85 bg-white/80 px-5 text-[13px] font-medium leading-none text-neutral-600 shadow-sm backdrop-blur-sm max-md:h-11 max-md:border-[1.5px] max-md:border-stone-300/90 max-md:bg-white/95 max-md:px-5 max-md:text-[14px] max-md:shadow-[0_2px_10px_-3px_rgba(15,23,42,0.07)]",
-                          "hover:border-neutral-400/90 hover:bg-stone-50/95 hover:text-neutral-900 hover:shadow-md",
-                          "dark:border-neutral-600/90 dark:bg-neutral-900/50 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/60 dark:hover:text-neutral-50",
-                          "max-md:dark:border-neutral-500/95 max-md:dark:bg-neutral-950/65 max-md:dark:shadow-[0_2px_12px_-4px_rgba(0,0,0,0.35)]",
-                          "sm:h-12 sm:min-w-[11.5rem] sm:rounded-xl sm:border sm:px-6 sm:text-sm sm:font-semibold sm:shadow-sm",
-                        ]
-                      : "h-12 w-[min(64%,280px)] border-2 bg-transparent px-6 font-semibold",
-                    !cinematic && "w-[min(64%,280px)] border-primary",
-                    !cinematic &&
-                      "border-2 text-foreground hover:bg-muted",
-                  )}
-                >
-                  <Link
-                    to={secondaryCtaTo}
-                    className={cn(
-                      "whitespace-nowrap",
-                      cinematic &&
-                        "inline-flex h-full min-h-0 w-full items-center justify-center gap-1.5 px-0 py-0 text-neutral-700 dark:text-neutral-200 sm:w-auto",
-                    )}
-                  >
-                    <span>{secondaryCtaLabel}</span>
-                    {cinematic ? <ArrowRight className="h-3.5 w-3.5 opacity-60" aria-hidden /> : null}
-                  </Link>
-                </Button>
+                    <Link to={secondaryCtaTo} className="whitespace-nowrap">
+                      {secondaryCtaLabel}
+                    </Link>
+                  </Button>
+                </motion.div>
               </div>
-            </div>
+            )}
 
             {!cinematic && stats.length > 0 ? (
               <LandingBenefitChecklist items={stats} tone="default" className="mt-5 sm:mt-7" />
@@ -433,7 +406,7 @@ export function FeatureShowcase({
           className={cn(
             "relative flex min-h-0 w-full items-center justify-center max-md:flex-col max-md:items-center",
             !cinematic && "max-md:justify-self-center md:col-span-7",
-            cinematic && "order-2 max-md:w-full max-md:pt-0 md:flex-1 md:self-stretch md:justify-center md:overflow-visible md:pt-1",
+            cinematic && landingUi.heroMediaCol,
           )}
         >
             {heroBorderBeam ? (
@@ -478,29 +451,26 @@ export function FeatureShowcase({
                 </LandingImageFrame>
               ) : singleHeroImage ? (
                 cinematic ? (
-                  <div className="relative mx-auto w-full max-w-[720px] min-h-0 md:mx-auto">
+                  <div className={cn("relative min-h-0", landingUi.heroMediaShell)}>
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[10%] z-0 h-[min(440px,58vw)] w-[min(540px,94%)] max-md:h-[min(200px,48vw)] max-md:w-[min(100%,340px)] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.18)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-95 dark:opacity-45"
+                      className="pointer-events-none absolute left-1/2 top-[10%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:h-[min(200px,48vw)] max-md:w-full -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
                     />
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[30%] z-0 h-[260px] w-[min(400px,88%)] max-md:h-[140px] max-md:w-[min(92vw,300px)] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.09)_0%,transparent_68%)] blur-2xl dark:opacity-60"
+                      className="pointer-events-none absolute left-1/2 top-[32%] z-0 h-[200px] w-[min(340px,92%)] max-md:h-[120px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.07)_0%,transparent_68%)] blur-2xl dark:opacity-50"
                     />
-                    <div className="relative z-[1] flex w-full justify-center md:justify-center">
-                      <div className="relative w-full max-w-[590px] max-md:mx-auto max-md:translate-y-0 md:-translate-y-3 lg:-translate-y-5">
+                    <div className="relative z-[1] flex w-full justify-center">
+                      <div className="relative w-full max-md:mx-auto md:-translate-y-2 lg:-translate-y-4">
                         <div
                           aria-hidden
-                          className="animate-float-shadow absolute -bottom-3 left-1/2 z-0 h-10 w-[86%] max-md:h-9 max-md:w-[88%] -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.22)_0%,rgba(120,113,105,0.06)_42%,transparent_72%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.32)_0%,rgba(0,0,0,0.08)_48%,transparent_74%)]"
+                          className="animate-float-shadow absolute -bottom-2 left-1/2 z-0 h-8 w-[84%] max-md:h-7 -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.18)_0%,rgba(120,113,105,0.05)_42%,transparent_72%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.07)_48%,transparent_74%)]"
                         />
                         <div
                           className={cn(
-                            "animate-float relative mx-auto w-[min(590px,94%)] max-w-full overflow-hidden rounded-[clamp(22px,4.5vw,40px)]",
-                            "border border-neutral-200/95 bg-white",
-                            "shadow-[0_22px_56px_-28px_rgba(15,23,42,0.09),0_10px_28px_-18px_rgba(15,23,42,0.05),0_4px_14px_-8px_rgba(15,23,42,0.04),inset_0_1px_0_rgba(255,255,255,0.94)]",
-                            "ring-1 ring-black/[0.04] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_20px_48px_-22px_rgba(0,0,0,0.28),0_8px_22px_-14px_rgba(0,0,0,0.16),inset_0_1px_0_rgba(255,255,255,0.04)] dark:ring-white/[0.06]",
-                            "max-md:mx-auto max-md:w-[min(90vw,300px)] max-md:max-w-[300px] max-md:scale-100 max-md:origin-center",
-                            "aspect-[2/3] max-md:h-auto max-md:max-h-none max-md:min-h-0 md:h-auto md:max-h-none md:w-[min(590px,94%)]",
+                            "animate-float relative mx-auto",
+                            landingUi.heroPhoneFrame,
+                            isDe && "max-md:w-[min(86vw,268px)]",
                           )}
                           style={
                             singleHeroImage.objectPosition
@@ -515,8 +485,8 @@ export function FeatureShowcase({
                               "h-full w-full select-none",
                               (singleHeroImage.imageFit ?? "contain") === "contain"
                                 ? [
-                                    "max-md:object-contain max-md:object-center max-md:p-1.5",
-                                    "md:object-cover md:[object-position:var(--hero-object-position,center)]",
+                                    "max-md:object-contain max-md:object-center max-md:p-2",
+                                    "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1",
                                   ]
                                 : [
                                     "object-cover object-center max-md:p-0",

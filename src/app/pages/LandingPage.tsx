@@ -10,7 +10,9 @@ import { HospitalityTeamsUnifiedSection } from "../components/landing/Hospitalit
 import { EmployeeLandingSection } from "../components/landing/EmployeeLandingSection";
 import { BusinessLandingSection } from "../components/landing/BusinessLandingSection";
 import { LandingFeaturesSection } from "../components/landing/LandingFeaturesSection";
+import { PaymentsSection } from "../components/landing/PaymentsSection";
 import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSection";
+import { LandingSocialProofSection } from "../components/landing/LandingSocialProofSection";
 import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
 
@@ -28,21 +30,11 @@ export function LandingPage() {
         Icon: Smartphone,
         src,
         alt: t("landing.showcase.tabQrAlt"),
-        /** DE art fits best letterboxed; EN hero should fill the phone frame. */
         imageFit: isDe ? "contain" : "cover",
         imageObjectPosition: "center",
       },
     ];
   }, [t, i18n.language]);
-
-  const showcaseSteps = useMemo(
-    () => [
-      { id: "s1", title: t("landing.showcase.step1Title"), text: t("landing.showcase.step1Text") },
-      { id: "s2", title: t("landing.showcase.step2Title"), text: t("landing.showcase.step2Text") },
-      { id: "s3", title: t("landing.showcase.step3Title"), text: t("landing.showcase.step3Text") },
-    ],
-    [t],
-  );
 
   const showcaseStats = useMemo(
     () => [t("landing.showcase.statLive"), t("landing.showcase.statPos"), t("landing.showcase.statSecure")],
@@ -66,7 +58,6 @@ export function LandingPage() {
             title={t("landing.showcase.title")}
             description={t("landing.showcase.description")}
             stats={showcaseStats}
-            steps={showcaseSteps}
             tabs={showcaseTabs}
             defaultTab="contactless"
             primaryCtaLabel={t("landing.showcase.primaryCta")}
@@ -82,7 +73,9 @@ export function LandingPage() {
           <EmployeeLandingSection />
           <BusinessLandingSection />
           <LandingFeaturesSection />
+          <PaymentsSection />
           <LandingRealLifeSection />
+          <LandingSocialProofSection />
           <LandingFinalCtaSection />
         </main>
         <Footer />

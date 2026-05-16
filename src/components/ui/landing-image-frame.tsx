@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
  * (14px radius, no visible border, very light depth — not a heavy “boxed” card.)
  */
 export const landingImageFrameClassName =
-  "overflow-hidden rounded-[14px] shadow-[0_10px_28px_rgba(0,0,0,0.06)]";
+  "overflow-hidden rounded-[14px] shadow-[0_4px_16px_rgba(0,0,0,0.05)]";
 
 export type LandingImageFrameProps = React.HTMLAttributes<HTMLDivElement>;
 
