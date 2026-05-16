@@ -25,10 +25,10 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="built-for-hospitality"
-      className="scroll-mt-[80px] w-full max-w-full overflow-x-hidden bg-gray-50 px-6 pb-20 pt-14 sm:pb-24 sm:pt-16 lg:pt-20 dark:bg-neutral-900"
+      className="scroll-mt-[80px] w-full min-w-0 max-w-full overflow-x-hidden bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] px-4 pb-12 pt-10 sm:px-6 sm:pb-24 sm:pt-20 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
-        <div className="mb-8 w-full max-w-full space-y-3 text-center sm:mb-10 sm:space-y-4">
+        <div className="mb-6 w-full max-w-full space-y-2.5 text-center sm:mb-10 sm:space-y-4">
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
@@ -38,13 +38,13 @@ export function HospitalityTeamsUnifiedSection() {
             <h2 className="mb-3 max-w-full break-words text-balance font-bold leading-[1.05] text-gray-900 text-[clamp(1.75rem,6vw,3.75rem)]">
               {t("landing.hospitality.title")}
             </h2>
-            <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-gray-500 text-[clamp(1rem,2.6vw,1.25rem)]">
+            <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-gray-600 text-[clamp(1rem,2.6vw,1.25rem)] dark:text-neutral-300">
               {t("landing.hospitality.subtitle")}
             </p>
           </motion.div>
         </div>
 
-        <div className="grid w-full min-w-0 gap-8 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
+        <div className="grid w-full min-w-0 gap-6 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard cardClassName="p-0">
               <motion.div
@@ -64,7 +64,7 @@ export function HospitalityTeamsUnifiedSection() {
           </div>
 
           <div className="flex min-w-0 flex-col items-center lg:order-1 lg:items-stretch">
-            <ul className="flex w-full min-w-0 max-w-full flex-col items-center space-y-4 lg:items-stretch">
+            <ul className="flex w-full min-w-0 max-w-full flex-col items-center space-y-3 sm:space-y-4 lg:items-stretch">
               {features.map((f, idx) => (
                 <motion.li
                   key={`hospitality-feature-${idx}`}

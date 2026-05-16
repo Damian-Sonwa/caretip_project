@@ -7,6 +7,8 @@ import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import { isWalkthroughDemoPlatformAdmin } from "../lib/walkthroughDemo";
+import { PLATFORM_DASHBOARD_ROOT } from "../components/platform/platformDashboardUi";
+import { cn } from "@/lib/utils";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
  * Child routes render page content (no shared "Dashboard" with business).
@@ -30,9 +32,16 @@ export function SuperAdminLayout() {
       <div className="relative z-10">
         <AdminSidebar />
         <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
-        <div className="caretip-dashboard-shell min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
+        <div
+          className={cn(
+            "caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
+            PLATFORM_DASHBOARD_ROOT,
+          )}
+        >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-          <Outlet />
+          <main className="min-h-0 flex-1">
+            <Outlet />
+          </main>
           <Footer variant="minimal" />
         </div>
       </div>

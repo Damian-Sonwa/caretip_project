@@ -34,10 +34,10 @@ export function SimpleSetupSection() {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] bg-white px-2 py-16 max-md:overflow-x-hidden sm:px-6 sm:py-20 lg:py-24 dark:bg-neutral-950"
+      className="scroll-mt-[80px] w-full min-w-0 bg-[linear-gradient(180deg,#ffffff_0%,#fafaf8_50%,#ffffff_100%)] px-3 py-10 max-md:overflow-x-hidden sm:px-6 sm:py-16 lg:py-20 dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_50%,#0a0a0a_100%)]"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="grid items-center justify-items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
+        <div className="grid items-center justify-items-center gap-6 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
           <div className="order-2 flex w-full max-w-full flex-col items-center text-center max-md:px-1 max-md:pt-2 lg:order-1 lg:items-start lg:px-0 lg:pt-0 lg:text-left md:px-0 md:pt-0">
             <motion.div
               initial={{ opacity: 0, y: 14 }}

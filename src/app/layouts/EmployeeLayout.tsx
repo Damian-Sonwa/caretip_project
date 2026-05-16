@@ -8,6 +8,9 @@ import { EmployeeSidebar } from "../components/employee/EmployeeSidebar";
 import { EmployeeMobileSidebar } from "../components/employee/EmployeeMobileSidebar";
 import { getEmployeeProfile, getTipsByEmployee } from "../lib/api";
 import { syncEmployeeNotificationTips } from "../lib/employeeNotificationStore";
+import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
+import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboardUi";
+import { cn } from "@/lib/utils";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -50,7 +53,13 @@ export function EmployeeLayout() {
     void (async () => {
       try {
         const data = await getTipsByEmployee();
-        if (!cancelled) syncEmployeeNotificationTips(user.employeeId!, data.tips ?? []);
+        if (!cancelled) {
+          const tips = resolveEmployeeTipsWithDevPreview(data.tips ?? [], {
+            totalEarningsEur: data.totalEarningsEur,
+            totalSupporters: data.totalSupporters,
+          });
+          syncEmployeeNotificationTips(user.employeeId!, tips);
+        }
       } catch {
         // Header badge stays hidden until tips load elsewhere
       }
@@ -74,9 +83,14 @@ export function EmployeeLayout() {
           businessBranding={branding}
         />
 
-        <div className="caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background lg:pl-64">
+        <div
+          className={cn(
+            "caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
+            EMPLOYEE_DASHBOARD_ROOT,
+          )}
+        >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-          <main className="flex-1 pb-8">
+          <main className="flex-1">
             <Outlet />
           </main>
           <Footer variant="minimal" />

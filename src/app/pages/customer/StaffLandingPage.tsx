@@ -11,6 +11,7 @@ import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 const BRAND_ORANGE = "#EB992C";
 const BLACK = "#000000";
@@ -35,7 +36,7 @@ export function StaffLandingPage() {
 
   useEffect(() => {
     if (!slugParam?.trim()) {
-      setError("Invalid link.");
+      setError(t("tipFlow.errors.invalidLink"));
       setLoading(false);
       return;
     }
@@ -115,9 +116,9 @@ export function StaffLandingPage() {
 
   if (error || !staff) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
-        <Link to="/" className="text-primary hover:underline text-sm">
+      <div className={cf.stateCenter}>
+        <p className={cf.stateError}>{error ?? t("tipFlow.common.notFound")}</p>
+        <Link to="/" className="mt-4 text-sm font-semibold text-primary underline-offset-2 hover:underline">
           {t("tipFlow.staffLanding.goHome")}
         </Link>
       </div>
@@ -131,50 +132,56 @@ export function StaffLandingPage() {
       : null;
 
   return (
-    <div className="min-h-screen bg-background pb-12">
+    <div className={cf.page}>
       <div
-        className="h-36 w-full"
+        className="h-36 w-full shrink-0 rounded-b-[32px] shadow-[0_18px_42px_-26px_rgba(15,23,42,0.45)]"
         style={{
           background: `linear-gradient(135deg, ${BRAND_ORANGE} 0%, ${BLACK} 100%)`,
         }}
+        aria-hidden
       />
-      <div className="max-w-md mx-auto px-4 -mt-16 relative">
-        <div className="bg-card rounded-2xl border border-border shadow-lg p-6 text-center">
-          <div className="mx-auto mb-4" style={{ boxShadow: `0 0 0 2px ${BRAND_ORANGE}` }}>
+      <div className="caretip-container mx-auto max-w-xl -mt-14 space-y-0 pb-16 sm:-mt-16 sm:pb-20">
+        <motion.div
+          initial={{ y: 14, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className={`${cf.cardShadcn} border border-border/60 bg-card px-6 py-8 text-center shadow-[0_14px_42px_-22px_rgba(15,23,42,0.2)]`}
+        >
+          <div
+            className="mx-auto mb-5 inline-flex rounded-full"
+            style={{ boxShadow: `0 0 0 3px ${BRAND_ORANGE}33` }}
+          >
             <ProfileAvatar
               src={staff.avatar}
               displayName={staff.name}
-              className="mx-auto h-28 w-28 ring-4 ring-background"
+              className="mx-auto size-[7.25rem] ring-[6px] ring-background"
             />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">{staff.name}</h1>
-          <p className="text-sm font-medium mt-1" style={{ color: BRAND_ORANGE }}>
+          <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground">{staff.name}</h1>
+          <p className="mt-1.5 text-sm font-semibold" style={{ color: BRAND_ORANGE }}>
             {staff.jobTitle}
           </p>
-          <div className="flex items-center justify-center gap-1.5 mt-3 text-muted-foreground text-sm">
-            <Building2 className="w-4 h-4 shrink-0" />
+          <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
+            <Building2 className="size-4 shrink-0" aria-hidden />
             <span>{staff.businessName}</span>
           </div>
 
-          {staff.bio ? (
-            <p className="text-sm text-muted-foreground mt-4 text-left leading-relaxed">{staff.bio}</p>
-          ) : null}
+          {staff.bio ? <p className="mt-5 text-left text-sm leading-relaxed text-muted-foreground">{staff.bio}</p> : null}
 
           {goal != null && goal > 0 ? (
-            <div className="mt-6 text-left">
-              <div className="flex items-center gap-2 mb-2">
-                <Sparkles className="w-4 h-4" style={{ color: BRAND_ORANGE }} />
-                <span className="text-sm font-semibold text-foreground">Monthly goal</span>
+            <div className="mt-7 rounded-2xl border border-border/60 bg-muted/20 px-4 py-4 text-left">
+              <div className="mb-2 flex items-center gap-2">
+                <Sparkles className="size-4 shrink-0" style={{ color: BRAND_ORANGE }} aria-hidden />
+                <span className="text-sm font-semibold text-foreground">{t("tipFlow.staffLanding.monthlyGoalTitle")}</span>
               </div>
-              <div className="flex justify-between text-xs text-muted-foreground mb-1">
+              <div className="mb-2 flex justify-between text-xs text-muted-foreground">
                 <span>
                   {formatEur(staff.currentMonthTotal)} / {formatEur(goal)}
                 </span>
-                {progress != null ? <span>{Math.round(progress)}%</span> : null}
+                {progress != null ? <span className="tabular-nums">{Math.round(progress)}%</span> : null}
               </div>
-              <div className="h-2 rounded-full bg-muted overflow-hidden">
+              <div className="h-2 overflow-hidden rounded-full bg-muted">
                 <div
-                  className="h-full rounded-full transition-all"
+                  className="h-full rounded-full transition-[width]"
                   style={{
                     width: `${progress ?? 0}%`,
                     backgroundColor: BRAND_ORANGE,
@@ -185,34 +192,26 @@ export function StaffLandingPage() {
           ) : null}
 
           {showRepeatPrompt && repeatAmount ? (
-            <div className="mt-6 space-y-3">
+            <div className="mt-7 space-y-3">
               <button
                 type="button"
                 onClick={handleRepeatTip}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
+                className={`${cf.btnPrimaryLg} py-4 text-[0.9375rem]`}
               >
-                <Heart className="w-5 h-5" />
-                Tip again ({formatEur(repeatAmount)})
+                <Heart className="size-5 shrink-0" aria-hidden />
+                {t("tipFlow.staffLanding.tipAgainWithAmount", { amount: formatEur(repeatAmount) })}
               </button>
-              <button
-                type="button"
-                onClick={handleLeaveTip}
-                className="w-full rounded-xl border border-border bg-background py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
-              >
-                Choose different amount
+              <button type="button" onClick={handleLeaveTip} className={`${cf.btnSecondaryLg} py-3.5 text-sm`}>
+                {t("tipFlow.staffLanding.chooseDifferentAmount")}
               </button>
             </div>
           ) : (
-            <button
-              type="button"
-              onClick={handleLeaveTip}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-base font-bold text-primary-foreground shadow-md transition-colors hover:bg-primary-hover"
-            >
-              <Heart className="w-5 h-5" />
-              Leave a tip
+            <button type="button" onClick={handleLeaveTip} className={`${cf.btnPrimaryLg} mt-7 py-4 text-[0.9375rem]`}>
+              <Heart className="size-5 shrink-0" aria-hidden />
+              {t("tipFlow.qrLanding.leaveTip")}
             </button>
           )}
-        </div>
+        </motion.div>
       </div>
     </div>
   );

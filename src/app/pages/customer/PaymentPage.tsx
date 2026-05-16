@@ -17,6 +17,7 @@ import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 export function PaymentPage() {
   const { t } = useTranslation();
@@ -229,58 +230,55 @@ export function PaymentPage() {
   const missingContext = !employeeId || !businessId;
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="mx-auto max-w-2xl px-4 py-4 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="rounded-lg p-2 hover:bg-muted transition-colors"
-              disabled={processing}
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            {businessBrand ? (
-              <BusinessLogoMark
-                logoPathOrUrl={businessBrand.logo}
-                businessName={businessBrand.name}
-                size="md"
-                className="shrink-0"
-              />
-            ) : (
-              <CareTipLogo size="xs" className="shrink-0" />
-            )}
-            <div className="min-w-0">
-              <h1 className="text-lg font-semibold text-foreground">{t("tipFlow.payment.title")}</h1>
-              <p className="text-xs text-muted-foreground">{t("tipFlow.payment.subtitle")}</p>
-            </div>
+    <div className={selectedMethod && !missingContext ? cf.pageWithBottomCta : cf.page}>
+      <div className={cf.stickyHeader}>
+        <div className={cf.headerInner}>
+          <button
+            type="button"
+            onClick={handleBack}
+            className={cf.backButton}
+            disabled={processing}
+          >
+            <ChevronLeft className="h-5 w-5 text-foreground" />
+          </button>
+          {businessBrand ? (
+            <BusinessLogoMark
+              logoPathOrUrl={businessBrand.logo}
+              businessName={businessBrand.name}
+              size="md"
+              className="shrink-0"
+            />
+          ) : (
+            <CareTipLogo size="xs" className="shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <h1 className={cf.headline}>{t("tipFlow.payment.title")}</h1>
+            <p className={cf.subline}>{t("tipFlow.payment.subtitle")}</p>
           </div>
         </div>
       </div>
 
       {missingContext ? (
-        <div className="max-w-2xl mx-auto px-4 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 py-8 text-center text-sm text-muted-foreground">
-          <p className="mb-4">Missing tip context. Go back and select an amount first.</p>
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            className="text-primary font-medium underline"
-          >
-            Go home
-          </button>
+        <div className={`${cf.main} text-center`}>
+          <div className={`${cf.cardMuted} mx-auto max-w-md px-5 py-8 sm:px-8`}>
+            <p className="text-sm leading-relaxed text-muted-foreground">{t("tipFlow.payment.missingContext")}</p>
+            <button
+              type="button"
+              onClick={() => navigate("/")}
+              className={`${cf.btnPrimaryLg} mt-6`}
+            >
+              {t("tipFlow.common.goHomeButton")}
+            </button>
+          </div>
         </div>
       ) : null}
 
       {!missingContext ? (
         <>
-          <div className="max-w-2xl mx-auto px-4 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 py-8 space-y-6 lg:space-y-8 xl:space-y-10">
-            <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-            >
-              <Card className="border-border shadow-sm">
-                <CardContent className="flex items-center gap-4 p-4">
+          <div className={cf.main}>
+            <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+              <Card className={cf.cardShadcn}>
+                <CardContent className="flex items-center gap-4 p-5 sm:p-6">
                   <ProfileAvatar
                     src={employeeAvatar}
                     displayName={employeeName ?? t("tipFlow.common.teamMember")}
@@ -297,12 +295,12 @@ export function PaymentPage() {
             </motion.div>
 
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 16, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.05 }}
             >
-              <Card className="border-accent/30 bg-gradient-to-br from-accent/10 to-primary/10 shadow-sm">
-                <CardContent className="pt-6 pb-6">
+              <Card className={cf.cardAccentWash}>
+                <CardContent className="px-5 py-6 sm:px-6">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-muted-foreground">
@@ -327,28 +325,24 @@ export function PaymentPage() {
               </Card>
             </motion.div>
 
-            <Card className="border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
-                <CardDescription>{t("tipFlow.payment.selectMethodDesc")}</CardDescription>
+            <Card className={cf.cardShadcn}>
+              <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+                <CardTitle className={cf.cardTitle}>{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
+                <CardDescription className={cf.cardDesc}>{t("tipFlow.payment.selectMethodDesc")}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-3 px-5 pb-5 sm:px-6">
                 {paymentMethods.map((method, index) => (
                   <motion.button
                     key={method.id}
                     type="button"
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
                     onClick={() => setSelectedMethod(method.id)}
                     disabled={!method.available || processing}
-                    className={`w-full p-4 rounded-xl border-2 transition-all flex items-center gap-4 min-h-[72px] ${
-                      selectedMethod === method.id
-                        ? "border-accent bg-accent/10 shadow-lg"
-                        : "border-border bg-card hover:border-accent/50 hover:shadow-md"
-                    } ${!method.available ? "opacity-50 cursor-not-allowed" : ""}`}
+                    className={`${cf.paymentMethodRow} ${selectedMethod === method.id ? cf.paymentMethodOn : cf.paymentMethodOff} ${!method.available ? "cursor-not-allowed opacity-45" : ""}`}
                   >
-                    <div className="w-12 h-12 rounded-lg bg-muted/50 flex items-center justify-center text-2xl shrink-0">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/55 text-2xl">
                       {typeof method.icon === "string" ? method.icon : method.icon}
                     </div>
                     <div className="flex-1 text-left min-w-0">
@@ -356,9 +350,9 @@ export function PaymentPage() {
                       <div className="text-sm text-muted-foreground">{method.description}</div>
                     </div>
                     {selectedMethod === method.id && (
-                      <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center shrink-0">
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
                     )}
@@ -372,18 +366,17 @@ export function PaymentPage() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
               >
-                <Card className="border-border shadow-sm">
-                  <CardContent className="py-4 text-sm text-muted-foreground">
-                    You will enter card details on Stripe&apos;s secure checkout page. We never store your card
-                    number.
+                <Card className={`${cf.cardShadcn} border-primary/15`}>
+                  <CardContent className="px-5 py-4 text-sm leading-relaxed text-muted-foreground sm:px-6">
+                    {t("tipFlow.payment.stripeCardNote")}
                   </CardContent>
                 </Card>
               </motion.div>
             ) : null}
 
-            <Card className="border-border shadow-sm bg-muted/30">
-              <CardContent className="flex items-start gap-3 py-4">
-                <Lock className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" />
+            <Card className={`${cf.cardMuted} border-border/55`}>
+              <CardContent className="flex items-start gap-3 px-5 py-4 sm:px-6">
+                <Lock className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
                 <div className="text-xs text-muted-foreground">
                   <p className="font-medium text-foreground mb-1">{t("tipFlow.payment.secureTitle")}</p>
                   <p>{t("tipFlow.payment.secureBody")}</p>
@@ -393,26 +386,17 @@ export function PaymentPage() {
           </div>
 
           {selectedMethod ? (
-            <motion.div
-              initial={{ y: 100 }}
-              animate={{ y: 0 }}
-              className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4"
-            >
-              <div className="max-w-2xl mx-auto lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-                <button
-                  type="button"
-                  onClick={handlePayment}
-                  disabled={processing}
-                  className="w-full bg-accent text-white rounded-xl py-4 font-semibold text-lg hover:bg-accent/90 transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                >
+            <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
+              <div className={cf.fixedBottomInner}>
+                <button type="button" onClick={handlePayment} disabled={processing} className={cf.btnAccentLg}>
                   {processing ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
                       {t("tipFlow.payment.redirectingCheckout")}
                     </>
                   ) : (
                     <>
-                      <Smartphone className="w-5 h-5" />
+                      <Smartphone className="size-5 shrink-0" />
                       {t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })}
                     </>
                   )}

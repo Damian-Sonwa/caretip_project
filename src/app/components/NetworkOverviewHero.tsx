@@ -40,7 +40,7 @@ function GlassStatCard({
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl border border-white/25 bg-white/[0.08] px-4 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.35)] backdrop-blur-xl backdrop-saturate-150 sm:px-5 sm:py-4"
+      className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl border border-white/20 bg-white/[0.07] px-4 py-3 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.35),0_4px_12px_-4px_rgba(0,0,0,0.15)] backdrop-blur-xl backdrop-saturate-150 sm:px-5 sm:py-4"
     >
       <div className="flex items-center gap-2 text-white/90">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10">
@@ -91,7 +91,7 @@ function MapGraphic3D() {
         className="absolute left-1/2 top-[42%] h-[130%] w-[125%] -translate-x-1/2 -translate-y-1/2"
         style={{
           perspective: "900px",
-          transform: "rotateX(54deg) rotateZ(-12deg) scale(1.05)",
+          transform: "rotateX(54deg) rotateZ(-8deg) scale(1.04)",
           transformStyle: "preserve-3d",
         }}
       >
@@ -239,16 +239,16 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
   }, [health, t]);
 
   return (
-    <section className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-2xl ring-1 ring-white/5">
+    <section className="relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06]">
       <MapGraphic3D />
 
-      <div className="relative z-10 flex min-h-[min(420px,70vh)] flex-col justify-between gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:gap-0 lg:px-10 lg:py-12">
+      <div className="relative z-10 flex min-h-[min(420px,72svh)] flex-col gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">
         <div className="max-w-xl lg:max-w-[28rem]">
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="font-sans text-3xl font-bold leading-[1.15] tracking-tight text-white sm:text-4xl md:text-5xl"
+            className="font-sans text-[1.65rem] font-bold leading-[1.18] tracking-tight text-white sm:text-4xl md:text-[2.6rem]"
           >
             {t("admin.networkHero.title")}
           </motion.h1>
@@ -256,17 +256,18 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
-            className="mt-3 max-w-lg font-sans text-base font-light leading-relaxed text-neutral-400 sm:text-lg"
+            className="mt-3 font-sans text-sm font-light leading-relaxed text-neutral-400 sm:text-base lg:text-lg"
           >
-            {t("admin.networkHero.subtitle")}
+            <span className="lg:hidden">{t("admin.networkHero.subtitleMobile")}</span>
+            <span className="hidden lg:inline">{t("admin.networkHero.subtitle")}</span>
           </motion.p>
         </div>
 
         <div className="flex w-full flex-col gap-3 lg:ml-auto lg:w-auto lg:max-w-md xl:max-w-lg">
-          <p className="text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55 sm:text-left">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55 sm:text-left">
             {t("admin.networkHero.systemHealth")}
           </p>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-stretch sm:gap-3">
             <GlassStatCard
               icon={Database}
               label={t("admin.networkHero.labelPostgres")}

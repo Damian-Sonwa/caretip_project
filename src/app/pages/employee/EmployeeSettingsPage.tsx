@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
-import { ChevronLeft, Upload, Check, Eye, EyeOff } from "lucide-react";
+import { useNavigate } from "react-router";
+import { Settings, Upload, Check, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -22,7 +22,6 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
@@ -38,6 +37,9 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Button } from "../../components/ui/button";
+import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
+import { employeeUi } from "../../components/employee/employeeDashboardUi";
+import { cn } from "@/lib/utils";
 
 const TEAL = "#EB992C";
 
@@ -50,7 +52,6 @@ export function EmployeeSettingsPage() {
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
   const [businessName, setBusinessName] = useState<string>("");
-  const [businessLogo, setBusinessLogo] = useState<string | null>(null);
   const [monthlyGoal, setMonthlyGoal] = useState("");
   const [emailNotif, setEmailNotif] = useState(true);
   const [pushNotif, setPushNotif] = useState(true);
@@ -71,7 +72,6 @@ export function EmployeeSettingsPage() {
         setName(p.name);
         setBio(p.bio ?? "");
         setBusinessName(p.businessName ?? "");
-        setBusinessLogo(p.businessLogo ?? null);
         setMonthlyGoal(p.monthlyGoal != null ? String(p.monthlyGoal) : "");
         setEmailNotif(p.emailNotifications);
         setPushNotif(p.pushNotifications);
@@ -186,24 +186,21 @@ export function EmployeeSettingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-24">
-      <div className="max-w-2xl mx-auto px-4 py-6 space-y-8">
-        <div className="flex items-center gap-3">
-          <Link to="/employee/dashboard" className="p-2 rounded-lg hover:bg-muted transition-colors">
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-          <BusinessLogoMark
-            logoPathOrUrl={businessLogo}
-            businessName={businessName || t("dashboard.venueDashboardFallback")}
-            size="sm"
-            rounded="rounded-lg"
-            className="shadow-none"
-          />
-          <h2 className="text-xl font-semibold text-foreground">{t("employee.settings.title")}</h2>
-        </div>
+    <div className={employeeUi.page}>
+      <div className={cn(employeeUi.pageInner, "mx-auto max-w-2xl space-y-6")}>
+        <EmployeePageHeader
+          title={t("employee.settings.title")}
+          description={businessName || t("dashboard.venueDashboardFallback")}
+          backAriaLabel={t("employee.notifications.backAria")}
+          leading={
+            <div className={employeeUi.iconTileMuted}>
+              <Settings className="h-5 w-5" aria-hidden />
+            </div>
+          }
+        />
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold text-foreground" style={{ color: "#283D3B" }}>
+        <section className={employeeUi.settingsSection}>
+          <h3 className={employeeUi.settingsHeading}>
             {t("employee.settings.photoSection")}
           </h3>
           <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
@@ -214,7 +211,7 @@ export function EmployeeSettingsPage() {
               className="h-24 w-24 border-2 border-border shadow-md sm:h-28 sm:w-28"
             />
           </div>
-          <label className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-white text-sm font-medium cursor-pointer disabled:opacity-50" style={{ backgroundColor: TEAL }}>
+          <label className={cn(employeeUi.btnPrimary, "inline-flex cursor-pointer items-center gap-2 text-sm font-medium disabled:opacity-50")}>
             <Upload className="w-4 h-4" />
             {uploading ? t("employee.settings.uploading") : t("employee.settings.uploadImage")}
             <input
@@ -228,8 +225,8 @@ export function EmployeeSettingsPage() {
           <p className="text-xs text-muted-foreground">{t("employee.settings.photoHint")}</p>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold" style={{ color: "#283D3B" }}>
+        <section className={employeeUi.settingsSection}>
+          <h3 className={employeeUi.settingsHeading}>
             {t("employee.settings.profileSection")}
           </h3>
           <div>
@@ -259,13 +256,13 @@ export function EmployeeSettingsPage() {
               placeholder={t("employee.settings.placeholderGoal")}
             />
           </div>
-          <Button type="button" onClick={handleSaveProfile} disabled={saving} className="text-white" style={{ backgroundColor: TEAL }}>
+          <Button type="button" onClick={handleSaveProfile} disabled={saving} className={employeeUi.btnPrimary}>
             {saving ? t("employee.settings.saving") : t("employee.settings.saveProfile")}
           </Button>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold" style={{ color: "#283D3B" }}>
+        <section className={employeeUi.settingsSection}>
+          <h3 className={employeeUi.settingsHeading}>
             Account security
           </h3>
           <div>
@@ -338,15 +335,14 @@ export function EmployeeSettingsPage() {
             onClick={handleChangePassword}
             disabled={!currentPw || !newPw}
             variant="outline"
-            className="border-2"
-            style={{ borderColor: TEAL, color: TEAL }}
+            className={employeeUi.btnSecondary}
           >
             {t("employee.settings.changePassword")}
           </Button>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold" style={{ color: "#283D3B" }}>
+        <section className={employeeUi.settingsSection}>
+          <h3 className={employeeUi.settingsHeading}>
             {t("employee.settings.prefsSection")}
           </h3>
           <div className="flex items-center justify-between">
@@ -360,11 +356,11 @@ export function EmployeeSettingsPage() {
           <p className="text-xs text-muted-foreground">{t("employee.settings.prefsHint")}</p>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-border bg-card p-6">
-          <h3 className="font-semibold" style={{ color: "#283D3B" }}>
+        <section className={employeeUi.settingsSection}>
+          <h3 className={employeeUi.settingsHeading}>
             {t("employee.settings.dataSection")}
           </h3>
-          <Button type="button" variant="outline" onClick={handleDownload} className="w-full sm:w-auto">
+          <Button type="button" variant="outline" onClick={handleDownload} className={cn(employeeUi.btnSecondary, "w-full sm:w-auto")}>
             {t("employee.settings.downloadMyData")}
           </Button>
           <AlertDialog>

@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useReducer, useState } from "react";
-import { Link } from "react-router";
-import { Bell, ChevronLeft, Trash2 } from "lucide-react";
+import { Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -11,6 +10,10 @@ import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
+import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
+import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
+import { employeeUi } from "../../components/employee/employeeDashboardUi";
+import { resolveEmployeeTipsWithDevPreview } from "../../lib/devAnalyticsMocks";
 import {
   getEmployeeReadIdsRecord,
   markAllEmployeeTipsRead,
@@ -20,8 +23,6 @@ import {
   syncEmployeeNotificationTips,
   recordNewEmployeeTip,
 } from "../../lib/employeeNotificationStore";
-
-const BRAND_ORANGE = "#EB992C";
 
 interface NewTipPayload {
   tip: TipItem;
@@ -36,6 +37,7 @@ export function EmployeeNotificationsPage() {
   const { t, i18n } = useTranslation();
   const { user } = useRequireAuth();
   const [tips, setTips] = useState<TipItem[]>([]);
+  const [displayTips, setDisplayTips] = useState<TipItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { socket } = useSocket(user?.role === "employee");
   const [selectionMode, setSelectionMode] = useState(false);
@@ -52,10 +54,24 @@ export function EmployeeNotificationsPage() {
       setLoading(true);
       try {
         const data = await getTipsByEmployee();
-        if (!cancelled) setTips(data.tips ?? []);
+        if (!cancelled) {
+          const apiTips = data.tips ?? [];
+          setTips(apiTips);
+          const resolved = resolveEmployeeTipsWithDevPreview(apiTips, {
+            totalEarningsEur: data.totalEarningsEur,
+            totalSupporters: data.totalSupporters,
+          });
+          setDisplayTips(resolved);
+          if (user.employeeId) {
+            syncEmployeeNotificationTips(user.employeeId, resolved);
+          }
+        }
       } catch (err) {
         logClientError("EmployeeNotificationsPage", err);
-        if (!cancelled) setTips([]);
+        if (!cancelled) {
+          setTips([]);
+          setDisplayTips([]);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -66,9 +82,9 @@ export function EmployeeNotificationsPage() {
   }, [user]);
 
   useEffect(() => {
-    if (loading || !user?.employeeId || tips.length === 0) return;
+    if (loading || !user?.employeeId || displayTips.length === 0) return;
     markAllEmployeeTipsRead();
-  }, [loading, user?.employeeId, tips.length]);
+  }, [loading, user?.employeeId, displayTips.length]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee") return;
@@ -79,6 +95,10 @@ export function EmployeeNotificationsPage() {
         const rest = prev.filter((tipRow) => tipRow.id !== payload.tip.id);
         return [payload.tip, ...rest];
       });
+      setDisplayTips((prev) => {
+        const rest = prev.filter((tipRow) => tipRow.id !== payload.tip.id);
+        return [payload.tip, ...rest];
+      });
     };
     socket.on("new_tip", onNew);
     return () => {
@@ -86,7 +106,7 @@ export function EmployeeNotificationsPage() {
     };
   }, [socket, user?.role, user?.employeeId]);
 
-  const allIds = useMemo(() => tips.map((tipRow) => tipRow.id), [tips]);
+  const allIds = useMemo(() => displayTips.map((tipRow) => tipRow.id), [displayTips]);
 
   if (!user || user.role !== "employee") return null;
 
@@ -125,6 +145,7 @@ export function EmployeeNotificationsPage() {
         label: t("employee.notifications.actionDelete"),
         onClick: () => {
           setTips((prev) => prev.filter((tipRow) => !ids.includes(tipRow.id)));
+          setDisplayTips((prev) => prev.filter((tipRow) => !ids.includes(tipRow.id)));
           setSelectedIds((prev) => prev.filter((id) => !ids.includes(id)));
           removeEmployeeTipsFromStore(ids);
           toast.success(t("employee.notifications.toastDeleted"));
@@ -161,26 +182,28 @@ export function EmployeeNotificationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-20">
-      <div className="caretip-container py-6">
-        <div className="mb-6 flex items-center gap-3">
-          <Link
-            to="/employee/dashboard"
-            className="p-2 rounded-lg hover:bg-muted transition-colors"
-            aria-label={t("employee.notifications.backAria")}
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </Link>
-          <h2 className="text-xl font-semibold text-foreground">{t("employee.notifications.title")}</h2>
-        </div>
+    <div className={employeeUi.page}>
+      <div className={employeeUi.pageInner}>
+        <EmployeePageHeader
+          title={t("employee.notifications.title")}
+          description={t("employee.notifications.manageHint")}
+          backAriaLabel={t("employee.notifications.backAria")}
+          leading={
+            <div className={employeeUi.iconTileMuted}>
+              <Bell className="h-5 w-5" aria-hidden />
+            </div>
+          }
+        />
 
         {loading ? (
           <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
-        ) : tips.length === 0 ? (
-          <div className="py-14 text-center">
-            <Bell className="mx-auto h-12 w-12 text-muted-foreground/50" />
-            <p className="mt-4 text-lg font-semibold text-foreground">{t("employee.notifications.emptyTitle")}</p>
-            <p className="mt-2 text-sm text-muted-foreground">{t("employee.notifications.emptySubtitle")}</p>
+        ) : displayTips.length === 0 ? (
+          <div className={employeeUi.cardStatic}>
+            <EmployeeEmptyState
+              icon={<Bell className="h-6 w-6" aria-hidden />}
+              title={t("employee.notifications.emptyTitle")}
+              description={t("employee.notifications.emptySubtitle")}
+            />
           </div>
         ) : (
           <>
@@ -191,21 +214,20 @@ export function EmployeeNotificationsPage() {
                     type="checkbox"
                     checked={allSelected}
                     onChange={toggleSelectAll}
-                    className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
+                    className="h-4 w-4 rounded border-neutral-300 accent-primary"
                     aria-label={t("employee.notifications.selectAllAria")}
                   />
                   {t("employee.notifications.selectAll")}
                 </label>
-              ) : (
-                <div className="text-sm text-muted-foreground">{t("employee.notifications.manageHint")}</div>
-              )}
+              ) : null}
 
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
                 {selectionMode ? (
                   <>
                     <Button
                       type="button"
                       variant="outline"
+                      className={employeeUi.btnSecondary}
                       onClick={() => confirmMarkRead(selectedIds)}
                       disabled={!hasSelection}
                     >
@@ -221,12 +243,12 @@ export function EmployeeNotificationsPage() {
                         {t("employee.notifications.deleteSelected")}
                       </Button>
                     ) : null}
-                    <Button type="button" variant="outline" onClick={exitSelectionMode}>
+                    <Button type="button" variant="outline" className={employeeUi.btnSecondary} onClick={exitSelectionMode}>
                       {t("employee.notifications.done")}
                     </Button>
                   </>
                 ) : (
-                  <Button type="button" variant="outline" onClick={() => enterSelectionMode()}>
+                  <Button type="button" variant="outline" className={employeeUi.btnSecondary} onClick={() => enterSelectionMode()}>
                     {t("employee.notifications.select")}
                   </Button>
                 )}
@@ -234,25 +256,25 @@ export function EmployeeNotificationsPage() {
             </div>
 
             <ul className="space-y-3">
-              {tips.map((tipRow) => {
+              {displayTips.map((tipRow) => {
                 const selected = selectedIds.includes(tipRow.id);
                 const isRead = Boolean(readIds[tipRow.id]);
                 return (
                   <li
                     key={tipRow.id}
                     className={cn(
-                      "rounded-2xl bg-white border border-gray-50 shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]",
-                      selected && "bg-orange-50/30 ring-1 ring-[#EB992C]/20",
+                      employeeUi.listItem,
+                      selected && employeeUi.listItemSelected,
+                      selected && "border-l-4 border-l-primary",
                     )}
-                    style={selected ? { borderLeftWidth: 4, borderLeftColor: BRAND_ORANGE } : undefined}
                   >
-                    <div className="flex items-center gap-3 px-4 py-4">
+                    <div className="flex items-center gap-3 px-4 py-4 sm:px-5">
                       {selectionMode ? (
                         <input
                           type="checkbox"
                           checked={selected}
                           onChange={() => toggleSelected(tipRow.id)}
-                          className="h-4 w-4 rounded border-gray-300 accent-[#EB992C]"
+                          className="h-4 w-4 rounded border-neutral-300 accent-primary"
                           aria-label={t("employee.notifications.selectRowAria")}
                         />
                       ) : null}
@@ -261,7 +283,7 @@ export function EmployeeNotificationsPage() {
                         <div className="flex items-center justify-between gap-3">
                           <p
                             className={cn(
-                              "truncate text-lg font-semibold",
+                              "truncate text-base font-semibold sm:text-lg",
                               isRead ? "text-muted-foreground" : "text-foreground",
                             )}
                           >
@@ -271,7 +293,7 @@ export function EmployeeNotificationsPage() {
                             {formatTipDateTime(tipRow.createdAt, i18n.language)}
                           </p>
                         </div>
-                        <p className={cn("mt-1 text-sm", isRead ? "text-muted-foreground" : "text-muted-foreground")}>
+                        <p className="mt-1 text-sm text-muted-foreground">
                           {t("employee.notifications.tipBody", { amount: formatTipNaira(tipRow.amount) })}
                         </p>
                       </div>

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import type { ElementType, ImgHTMLAttributes } from "react";
+import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -46,42 +46,22 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmployeeStatCard } from "../../components/employee/EmployeeStatCard";
+import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
+import { employeeUi } from "../../components/employee/employeeDashboardUi";
+import {
+  devMockEmployeeAccountSummary,
+  devMockEmployeeChartSeries,
+  devMockEmployeeGoalBundle,
+  devMockEmployeeRating,
+  devMockEmployeeRecentTips,
+  devMockEmployeeSummary,
+  shouldUseEmployeeDashboardDevDemo,
+} from "../../lib/devAnalyticsMocks";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
-function StatCard(props: {
-  title: string;
-  value: string;
-  change?: string;
-  icon: ElementType<{ className?: string }>;
-  /** On viewports below `lg`, span full width of the 2-column stats grid (primary metric). */
-  featured?: boolean;
-}) {
-  const Icon = props.icon;
-  return (
-    <Card
-      className={cn(
-        "flex min-h-32 flex-col rounded-2xl border border-gray-100 bg-white p-4 text-left shadow-none",
-        props.featured && "max-lg:col-span-2",
-      )}
-    >
-      <div className="mb-2 shrink-0">
-        <div className="inline-flex rounded-lg bg-orange-50 p-2">
-          <Icon className="h-5 w-5 text-primary" aria-hidden />
-        </div>
-      </div>
-      <p className="text-xs font-semibold uppercase tracking-wider text-gray-500">{props.title}</p>
-      <p className="shrink-0 hyphens-auto break-words text-balance text-xl font-bold tabular-nums leading-snug text-black sm:text-2xl">
-        {props.value}
-      </p>
-      {props.change ? (
-        <p className="mt-auto line-clamp-2 text-[10px] leading-snug text-gray-400">{props.change}</p>
-      ) : (
-        <div className="mt-auto shrink-0" aria-hidden />
-      )}
-    </Card>
-  );
-}
+type AnalyticsTimeframe = "today" | "week" | "month";
 
 interface NewTipPayload {
   tip: TipItem;
@@ -114,7 +94,8 @@ export function EmployeeDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [timeframe, setTimeframe] = useState<"today" | "week" | "month">("today");
+  /** Body analytics only — does not affect hero account summary. */
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<AnalyticsTimeframe>("today");
   const [tips, setTips] = useState<TipItem[]>([]);
   const [monthlyGoal, setMonthlyGoal] = useState<number | null>(null);
   const [currentMonthTotal, setCurrentMonthTotal] = useState(0);
@@ -124,9 +105,10 @@ export function EmployeeDashboard() {
   const [periodTipCount, setPeriodTipCount] = useState(0);
   const [periodAmountEur, setPeriodAmountEur] = useState(0);
   const [chartSeries, setChartSeries] = useState<Array<{ label: string; amount: number }>>([]);
-  const [periodLoading, setPeriodLoading] = useState(true);
-  /** Matches `tips` / aggregates to the period that was last applied (avoids showing wrong period while a fetch is in flight). */
-  const [dataTimeframe, setDataTimeframe] = useState<"today" | "week" | "month">("today");
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  /** Matches analytics payload to the selected body period tab. */
+  const [dataAnalyticsTimeframe, setDataAnalyticsTimeframe] = useState<AnalyticsTimeframe>("today");
+  const [accountSummaryLoading, setAccountSummaryLoading] = useState(true);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
   /** Public venue slug from `/api/employees/me` for canonical tip URLs */
@@ -136,13 +118,29 @@ export function EmployeeDashboard() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
+  const [accountSummary, setAccountSummary] = useState({
+    totalEarningsEur: 0,
+    availableBalanceEur: 0,
+    totalSupporters: 0,
+    loaded: false,
+  });
 
-  const timeframeRef = useRef(timeframe);
-  timeframeRef.current = timeframe;
-  const tipsFetchGen = useRef(0);
+  const analyticsTimeframeRef = useRef(analyticsTimeframe);
+  analyticsTimeframeRef.current = analyticsTimeframe;
+  const analyticsFetchGen = useRef(0);
+  const accountSummaryFetchGen = useRef(0);
 
-  const applyTipsPayload = useCallback(
-    (data: Awaited<ReturnType<typeof getTipsByEmployee>>, requestedTf: typeof timeframe) => {
+  const applyAccountSummary = useCallback((data: Awaited<ReturnType<typeof getTipsByEmployee>>) => {
+    setAccountSummary({
+      totalEarningsEur: typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : 0,
+      availableBalanceEur: typeof data.availableBalanceEur === "number" ? data.availableBalanceEur : 0,
+      totalSupporters: typeof data.totalSupporters === "number" ? data.totalSupporters : 0,
+      loaded: true,
+    });
+  }, []);
+
+  const applyAnalyticsPayload = useCallback(
+    (data: Awaited<ReturnType<typeof getTipsByEmployee>>, requestedTf: AnalyticsTimeframe) => {
       setTips(data.tips ?? []);
       setMonthlyGoal(data.monthlyGoal ?? null);
       setCurrentMonthTotal(data.currentMonthTotal ?? 0);
@@ -157,35 +155,48 @@ export function EmployeeDashboard() {
         typeof nAmount === "number" ? nAmount : tipsArr.reduce((s, t) => s + t.amount, 0),
       );
       setChartSeries(Array.isArray(data.chartSeries) ? data.chartSeries : []);
-      setDataTimeframe(requestedTf);
+      setDataAnalyticsTimeframe(requestedTf);
     },
     [],
   );
 
-  const fetchTipsForTimeframe = useCallback(
-    async (tf: typeof timeframe, signal: AbortSignal, gen: number) => {
-      const data = await getTipsByEmployee(tf, { signal });
-      if (gen !== tipsFetchGen.current) return;
-      applyTipsPayload(data, tf);
+  const fetchAccountSummary = useCallback(
+    async (signal: AbortSignal, gen: number) => {
+      const data = await getTipsByEmployee(undefined, { signal });
+      if (gen !== accountSummaryFetchGen.current) return;
+      applyAccountSummary(data);
     },
-    [applyTipsPayload],
+    [applyAccountSummary],
   );
 
-  const refreshTipsQuiet = useCallback(async () => {
+  const fetchAnalyticsForTimeframe = useCallback(
+    async (tf: AnalyticsTimeframe, signal: AbortSignal, gen: number) => {
+      const data = await getTipsByEmployee(tf, { signal });
+      if (gen !== analyticsFetchGen.current) return;
+      applyAnalyticsPayload(data, tf);
+    },
+    [applyAnalyticsPayload],
+  );
+
+  const refreshDashboardQuiet = useCallback(async () => {
     const role = user?.role;
     if (!authHydrated || !sessionValidated || role !== "employee") return;
     try {
-      const data = await getTipsByEmployee(timeframeRef.current);
-      applyTipsPayload(data, timeframeRef.current);
+      const [summaryData, analyticsData] = await Promise.all([
+        getTipsByEmployee(undefined),
+        getTipsByEmployee(analyticsTimeframeRef.current),
+      ]);
+      applyAccountSummary(summaryData);
+      applyAnalyticsPayload(analyticsData, analyticsTimeframeRef.current);
     } catch (e) {
-      logClientError("EmployeeDashboard.refreshTipsQuiet", e);
+      logClientError("EmployeeDashboard.refreshDashboardQuiet", e);
     }
-  }, [authHydrated, sessionValidated, applyTipsPayload, user?.role]);
+  }, [authHydrated, sessionValidated, applyAccountSummary, applyAnalyticsPayload, user?.role]);
 
   const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
-  useRealtimeFallback(connected, refreshTipsQuiet);
+  useRealtimeFallback(connected, refreshDashboardQuiet);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
@@ -209,25 +220,43 @@ export function EmployeeDashboard() {
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid re-running on timeframe; profile is independent
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- profile load is independent of analytics period
   }, [authHydrated, sessionValidated, user?.id, user?.role, updateUser]);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
     const controller = new AbortController();
-    tipsFetchGen.current += 1;
-    const gen = tipsFetchGen.current;
-    setPeriodLoading(true);
-    setError(null);
+    accountSummaryFetchGen.current += 1;
+    const gen = accountSummaryFetchGen.current;
+    setAccountSummaryLoading(true);
 
-    void fetchTipsForTimeframe(timeframe, controller.signal, gen)
-      .then(() => {
-        if (gen !== tipsFetchGen.current) return;
-      })
+    void fetchAccountSummary(controller.signal, gen)
       .catch((e: unknown) => {
         if ((e as { name?: string })?.name === "AbortError") return;
-        if (gen !== tipsFetchGen.current) return;
-        logClientError("EmployeeDashboard.fetchTips", e);
+        if (gen !== accountSummaryFetchGen.current) return;
+        logClientError("EmployeeDashboard.fetchAccountSummary", e);
+      })
+      .finally(() => {
+        if (gen !== accountSummaryFetchGen.current) return;
+        setAccountSummaryLoading(false);
+      });
+
+    return () => controller.abort();
+  }, [authHydrated, fetchAccountSummary, sessionValidated, user?.role, user?.id]);
+
+  useEffect(() => {
+    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
+    const controller = new AbortController();
+    analyticsFetchGen.current += 1;
+    const gen = analyticsFetchGen.current;
+    setAnalyticsLoading(true);
+    setError(null);
+
+    void fetchAnalyticsForTimeframe(analyticsTimeframe, controller.signal, gen)
+      .catch((e: unknown) => {
+        if ((e as { name?: string })?.name === "AbortError") return;
+        if (gen !== analyticsFetchGen.current) return;
+        logClientError("EmployeeDashboard.fetchAnalytics", e);
         setError(toUserFriendlyMessage(e, { audience: "employee" }));
         setTips([]);
         setPeriodTipCount(0);
@@ -239,12 +268,12 @@ export function EmployeeDashboard() {
         setBusinessTimezone(null);
       })
       .finally(() => {
-        if (gen !== tipsFetchGen.current) return;
-        setPeriodLoading(false);
+        if (gen !== analyticsFetchGen.current) return;
+        setAnalyticsLoading(false);
       });
 
     return () => controller.abort();
-  }, [authHydrated, fetchTipsForTimeframe, sessionValidated, timeframe, user?.role, user?.id]);
+  }, [authHydrated, fetchAnalyticsForTimeframe, sessionValidated, analyticsTimeframe, user?.role, user?.id]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -256,7 +285,7 @@ export function EmployeeDashboard() {
 
       setCurrentMonthTotal(payload.currentMonthTotal);
       setMonthlyGoal(payload.monthlyGoal);
-      void refreshTipsQuiet();
+      void refreshDashboardQuiet();
 
       playChaChingSound();
       toast.success(t("employee.dashboard.toastNewTip"), TOAST_OK);
@@ -266,28 +295,69 @@ export function EmployeeDashboard() {
     return () => {
       socket.off("new_tip", onNewTip);
     };
-  }, [socket, user?.role, user?.employeeId, refreshTipsQuiet, t]);
+  }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t]);
 
-  const totalAmount = periodAmountEur;
-  const avgTipFromServer = periodTipCount > 0 ? totalAmount / periodTipCount : 0;
+  const useDevDemo = shouldUseEmployeeDashboardDevDemo({
+    isDev: import.meta.env.DEV,
+    hasError: Boolean(error),
+    accountSummaryLoaded: accountSummary.loaded,
+    accountSummaryLoading,
+    analyticsLoading,
+    totalEarningsEur: accountSummary.totalEarningsEur,
+    totalSupporters: accountSummary.totalSupporters,
+  });
+
+  const devGoalBundle = useDevDemo ? devMockEmployeeGoalBundle() : null;
+  const devPeriodSummary = useDevDemo ? devMockEmployeeSummary(analyticsTimeframe) : null;
+
+  const displayAccountSummary = useDevDemo
+    ? { ...devMockEmployeeAccountSummary(), loaded: true }
+    : accountSummary;
+
+  const displayPeriodTipCount = devPeriodSummary?.tips ?? periodTipCount;
+  const displayPeriodAmountEur = devPeriodSummary?.amount ?? periodAmountEur;
+  const displayChartSeries = useDevDemo
+    ? devMockEmployeeChartSeries(analyticsTimeframe)
+    : chartSeries;
+  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : tips;
+  const displayMonthlyGoal = devGoalBundle?.monthlyGoal ?? monthlyGoal;
+  const displayCurrentMonthTotal = devGoalBundle?.currentMonthTotal ?? currentMonthTotal;
+  const displayGoalProgress = devGoalBundle?.goal ?? goalProgress;
+
+  const totalAmount = displayPeriodAmountEur;
+  const avgTipFromServer = displayPeriodTipCount > 0 ? totalAmount / displayPeriodTipCount : 0;
   const stats = {
-    tips: periodTipCount,
+    tips: displayPeriodTipCount,
     avgTip: avgTipFromServer,
     amount: totalAmount,
-    rating: null,
+    rating: useDevDemo ? devMockEmployeeRating() : null,
   };
 
   const chartData = useMemo(() => {
-    return chartSeries.map((p) => ({
-      time: timeframe === "week" ? translateChartWeekdayLabel(p.label, t) : p.label,
+    return displayChartSeries.map((p) => ({
+      time: analyticsTimeframe === "week" ? translateChartWeekdayLabel(p.label, t) : p.label,
       amount: p.amount,
     }));
-  }, [chartSeries, timeframe, t, i18n.resolvedLanguage]);
+  }, [displayChartSeries, analyticsTimeframe, t, i18n.resolvedLanguage]);
 
-  /** False while a fetch is in flight or responses have not caught up with the selected tab. */
-  const valuesMatchSelectedPeriod = dataTimeframe === timeframe && !periodLoading;
+  const analyticsPeriodLabel = (tf: AnalyticsTimeframe) => {
+    if (tf === "today") return t("employee.period.today");
+    if (tf === "week") return t("employee.period.week");
+    return t("employee.period.month");
+  };
 
-  const recentTips = tips.slice(0, 6).map((tipRow) => ({
+  /** False while analytics fetch is in flight or data lags behind the selected body period tab. */
+  const valuesMatchAnalyticsPeriod =
+    useDevDemo || (dataAnalyticsTimeframe === analyticsTimeframe && !analyticsLoading);
+
+  const displayGoalPct =
+    displayGoalProgress != null && displayGoalProgress.goalAmount > 0
+      ? displayGoalProgress.percent
+      : displayMonthlyGoal != null && displayMonthlyGoal > 0
+        ? Math.min(100, Math.round((displayCurrentMonthTotal / displayMonthlyGoal) * 100))
+        : null;
+
+  const recentTips = displayTips.slice(0, 6).map((tipRow) => ({
     id: tipRow.id,
     amount: tipRow.amount,
     customer: t("employee.dashboard.anonymous"),
@@ -361,113 +431,186 @@ export function EmployeeDashboard() {
     );
   }
 
-  const goalPct =
-    goalProgress != null && goalProgress.goalAmount > 0
-      ? goalProgress.percent
-      : monthlyGoal != null && monthlyGoal > 0
-        ? Math.min(100, Math.round((currentMonthTotal / monthlyGoal) * 100))
-        : null;
-
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <div className="caretip-container pt-6">
+    <div className={cn(employeeUi.page, "overflow-x-hidden")}>
+      <div className={employeeUi.pageInner}>
         <DashboardHero
           stackHeroOnMobile
           hideTabs
           actionsPlacement="belowText"
-          mobileAlign="center"
-          className="mb-8 lg:mb-6"
+          mobileAlign="left"
+          className="employee-dashboard-hero mb-8 lg:mb-6"
+          cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
+          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] font-medium tracking-normal text-primary/90 shadow-none"
+          titleClassName="!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
+          descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:mx-0 max-lg:text-left lg:max-w-sm"
+          textColumnClassName="lg:py-2 xl:pr-6"
           badge={
             <>
-              <Sparkles className="h-3.5 w-3.5 text-foreground" />
-              {user.name
-                ? t("employee.welcome_mina", { name: user.name.split(" ")[0] })
-                : t("employee.hero.welcomeBack")}
+              <Sparkles className="h-3 w-3 shrink-0 text-primary/75" aria-hidden />
+              <span>
+                {user.name
+                  ? t("employee.hero.welcomeBackNamed", { name: user.name.split(" ")[0] })
+                  : t("employee.hero.welcomeBack")}
+              </span>
             </>
           }
-          title={t("employee.hero.headline")}
+          title={
+            <>
+              <span className="block">{t("employee.hero.headlineLine1")}</span>
+              <span className="block text-foreground/85">{t("employee.hero.headlineLine2")}</span>
+            </>
+          }
           description={t("employee.hero.sub")}
           image={
-            <div className="relative isolate flex w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto max-lg:max-w-full lg:max-w-[95%]">
-              <div
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, ease: "easeOut" }}
+              className="employee-hero-visual relative flex w-full flex-col items-center justify-center touch-manipulation max-lg:-mx-4 max-lg:w-[calc(100%+2rem)] max-lg:max-w-none sm:max-lg:-mx-5 sm:max-lg:w-[calc(100%+2.5rem)] lg:ml-auto lg:w-full lg:max-w-full"
+            >
+              <motion.div
                 className={cn(
-                  "relative mx-auto w-full max-w-[min(100%,calc(100vw-2rem))] min-h-0 overflow-hidden bg-gray-100 ring-1 ring-black/[0.04]",
-                  "rounded-[2.5rem] border border-black/[0.06] shadow-xl lg:max-w-[520px]",
-                  "h-[min(58svh,420px)] lg:h-[460px]",
+                  "employee-hero-chart-frame dashboard-hero-media-frame relative mx-auto w-full min-h-0 overflow-hidden max-lg:max-w-none",
+                  "rounded-[1.75rem]",
+                  "lg:h-[420px] lg:max-w-[560px]",
                 )}
               >
                 <img
                   src={employeeHeroImage}
                   alt=""
-                  className="block !h-full w-full object-cover object-center"
+                  className="block h-full w-full object-cover object-center max-lg:absolute max-lg:inset-0 lg:h-full"
                   loading="eager"
                   decoding="async"
                   {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
                 />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           }
           imageOverlay={false}
           actions={
-            <>
-              <Button
-                type="button"
-                onClick={() => void handleQrQuickAction()}
-                disabled={slugLoading || generatingSlug}
-                className="bg-primary hover:bg-primary/90"
-              >
-                {generatingSlug ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    {t("employee.hero.generating")}
-                  </>
-                ) : (
-                  <>
-                    <QrCode className="mr-2 h-4 w-4 shrink-0" />
-                    {t("dashboard.qr_button")}
-                  </>
-                )}
-              </Button>
-              <Button type="button" variant="outline" asChild>
-                <Link to="/employee/tip-goals" className="gap-2">
-                  <Target className="h-4 w-4 shrink-0" />
-                  {t("employee.set_goal")}
-                </Link>
-              </Button>
-            </>
+            <motion.div
+              className="employee-hero-cta-block"
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
+            >
+              <p className="text-xs leading-relaxed text-muted-foreground max-lg:max-w-sm">
+                {t("employee.hero.helperText")}
+              </p>
+              <div className="employee-hero-cta-row">
+                <Button
+                  type="button"
+                  onClick={() => void handleQrQuickAction()}
+                  disabled={slugLoading || generatingSlug}
+                  className={cn(employeeUi.btnPrimary, "min-w-0 shrink-0")}
+                >
+                  {generatingSlug ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 shrink-0 animate-spin" />
+                      {t("employee.hero.generating")}
+                    </>
+                  ) : (
+                    <>
+                      <QrCode className="mr-2 h-4 w-4 shrink-0" />
+                      {t("employee.hero.myQr")}
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className={cn(employeeUi.btnSecondary, "min-w-0 shrink-0")}
+                  asChild
+                >
+                  <Link to="/employee/tip-goals" className="inline-flex items-center justify-center gap-2">
+                    <Target className="h-4 w-4 shrink-0" />
+                    {t("employee.hero.setTipGoal")}
+                  </Link>
+                </Button>
+              </div>
+              <p className="text-[11px] font-medium text-muted-foreground/90">
+                {t("employee.hero.accountOverviewLabel")}
+              </p>
+              <dl className="employee-hero-account-stats">
+                <div>
+                  <dt>{t("employee.hero.statTotalEarnings")}</dt>
+                  <dd>
+                    {displayAccountSummary.loaded && !accountSummaryLoading
+                      ? formatEur(displayAccountSummary.totalEarningsEur)
+                      : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("employee.hero.statAvailableBalance")}</dt>
+                  <dd>
+                    {displayAccountSummary.loaded && !accountSummaryLoading
+                      ? formatEur(displayAccountSummary.availableBalanceEur)
+                      : "—"}
+                  </dd>
+                </div>
+                <div>
+                  <dt>{t("employee.hero.statTotalSupporters")}</dt>
+                  <dd>
+                    {displayAccountSummary.loaded && !accountSummaryLoading
+                      ? String(displayAccountSummary.totalSupporters)
+                      : "—"}
+                  </dd>
+                </div>
+              </dl>
+            </motion.div>
           }
         />
       </div>
 
-      <TracingBeam className="caretip-container pt-3 sm:pt-2">
-        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-          <LiveConnectionBadge status={connectionStatus} />
-          <div className="dashboard-inline-actions flex w-full max-w-full flex-wrap gap-2 rounded-lg border border-black/[0.06] bg-white p-1 shadow-sm sm:w-fit">
+      <TracingBeam className={cn(employeeUi.pageInner, "!pt-3 sm:!pt-2")}>
+        <section className="mb-4 space-y-3" aria-labelledby="employee-analytics-period-heading">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="min-w-0 space-y-1">
+              <h2
+                id="employee-analytics-period-heading"
+                className="text-base font-semibold tracking-tight text-foreground"
+              >
+                {t("employee.dashboard.analyticsSectionTitle")}
+              </h2>
+              <p className="text-pretty text-sm leading-snug text-muted-foreground max-lg:line-clamp-2 lg:line-clamp-none">
+                {t("employee.dashboard.analyticsSectionDesc", {
+                  period: analyticsPeriodLabel(analyticsTimeframe),
+                })}
+              </p>
+            </div>
+            <LiveConnectionBadge status={connectionStatus} />
+          </div>
+          <div
+            className={employeeUi.periodToggle}
+            role="group"
+            aria-label={t("employee.dashboard.analyticsPeriodAria")}
+          >
             {(["today", "week", "month"] as const).map((period) => (
               <button
                 key={period}
                 type="button"
-                onClick={() => setTimeframe(period)}
-                className={`min-h-11 flex flex-1 items-center justify-center gap-1 rounded-md px-3 py-2 text-xs font-semibold transition-colors sm:flex-initial sm:px-4 sm:text-sm ${
-                  timeframe === period
-                    ? "bg-primary text-primary-foreground shadow-sm"
-                    : "text-muted-foreground hover:bg-muted"
-                }`}
+                onClick={() => setAnalyticsTimeframe(period)}
+                aria-pressed={analyticsTimeframe === period}
+                className={cn(
+                  employeeUi.periodBtn,
+                  analyticsTimeframe === period ? employeeUi.periodBtnActive : employeeUi.periodBtnIdle,
+                )}
               >
                 <span className="shrink-0">
                   {period === "today" && t("employee.earnings_today")}
                   {period === "week" && t("employee.earnings_week")}
                   {period === "month" && t("employee.earnings_month")}
                 </span>
-                {period === timeframe && periodLoading ? (
+                {period === analyticsTimeframe && analyticsLoading ? (
                   <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin opacity-90" aria-hidden />
                 ) : null}
               </button>
             ))}
           </div>
-        </div>
+        </section>
 
-        <div className="space-y-6 pb-6 pt-2">
+        <div className={cn(employeeUi.section, "pb-6 pt-2")}>
           <FixPrompt
             id="profilePhoto"
             issueActive={!user.avatar}
@@ -481,10 +624,10 @@ export function EmployeeDashboard() {
           <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            className={cn("transition-opacity duration-200", !valuesMatchSelectedPeriod && "opacity-[0.92]")}
+            className={cn("transition-opacity duration-200", !valuesMatchAnalyticsPeriod && "opacity-[0.92]")}
           >
-            <div className="relative mb-2 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 lg:gap-6">
-              {periodLoading ? (
+            <div className="relative mb-2 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+              {analyticsLoading && !useDevDemo ? (
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-center rounded-xl bg-transparent"
@@ -495,38 +638,41 @@ export function EmployeeDashboard() {
                   </div>
                 </div>
               ) : null}
-              <StatCard
-                title={t("employee.dashboard.statTotalTips")}
-                value={valuesMatchSelectedPeriod ? String(stats.tips) : "—"}
+              <EmployeeStatCard
+                label={t("employee.dashboard.statTotalTips")}
+                value={valuesMatchAnalyticsPeriod ? String(stats.tips) : "—"}
                 change={
-                  periodLoading && !valuesMatchSelectedPeriod
+                  analyticsLoading && !valuesMatchAnalyticsPeriod
                     ? t("employee.dashboard.statChangeUpdating")
-                    : periodTipCount > 0 && valuesMatchSelectedPeriod
+                    : displayPeriodTipCount > 0 && valuesMatchAnalyticsPeriod
                       ? t("employee.dashboard.statChangeEarned", {
                           amount: formatEur(stats.amount),
-                          count: periodTipCount,
+                          count: displayPeriodTipCount,
                         })
-                      : valuesMatchSelectedPeriod
+                      : valuesMatchAnalyticsPeriod
                         ? t("employee.dashboard.statChangeNoTips")
                         : t("employee.dashboard.statChangeEllipsis")
                 }
-                icon={TrendingUp}
+                icon={<TrendingUp className="h-5 w-5" aria-hidden />}
+                featured
               />
-              <StatCard
-                title={stats.rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")}
+              <EmployeeStatCard
+                label={
+                  stats.rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
+                }
                 value={stats.rating != null ? String(stats.rating) : t("format.notAvailable")}
                 change={stats.rating != null ? undefined : t("employee.dashboard.statNoRatings")}
-                icon={Star}
+                icon={<Star className="h-5 w-5" aria-hidden />}
               />
-              <StatCard
-                title={t("employee.dashboard.statMonthlyGoal")}
-                value={goalPct != null ? `${Math.round(Number(goalPct))}%` : t("format.notAvailable")}
+              <EmployeeStatCard
+                label={t("employee.dashboard.statMonthlyGoal")}
+                value={displayGoalPct != null ? `${Math.round(Number(displayGoalPct))}%` : t("format.notAvailable")}
                 change={
-                  goalPct != null
+                  displayGoalPct != null
                     ? t("employee.dashboard.statGoalProgress")
                     : t("employee.dashboard.statGoalSetHint")
                 }
-                icon={Target}
+                icon={<Target className="h-5 w-5" aria-hidden />}
               />
             </div>
           </motion.div>
@@ -536,40 +682,43 @@ export function EmployeeDashboard() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
-              <CardHeader>
-                <CardTitle className="text-lg">{t("employee.dashboard.earningsTitle")}</CardTitle>
-                <CardDescription>
-                  {timeframe === "today" &&
+            <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>
+              <CardHeader className={employeeUi.cardHeader}>
+                <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.earningsTitle")}</CardTitle>
+                <CardDescription className="max-lg:line-clamp-3 lg:line-clamp-none">
+                  {analyticsTimeframe === "today" &&
                     t("employee.dashboard.earningsDescToday", {
                       tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
                     })}
-                  {timeframe === "week" &&
+                  {analyticsTimeframe === "week" &&
                     t("employee.dashboard.earningsDescWeek", {
                       tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
                     })}
-                  {timeframe === "month" &&
+                  {analyticsTimeframe === "month" &&
                     t("employee.dashboard.earningsDescMonth", {
                       tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
                     })}
                 </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {periodLoading || !valuesMatchSelectedPeriod ? (
-                  <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
+                {(analyticsLoading && !useDevDemo) || !valuesMatchAnalyticsPeriod ? (
+                  <div className="flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]">
                     <Loader2
                       className="h-8 w-8 animate-spin text-muted-foreground"
                       aria-label={t("employee.dashboard.loadingChart")}
                     />
                   </div>
                 ) : chartData.length === 0 ? (
-                  <p className="py-12 text-center text-sm text-muted-foreground">
-                    {t("employee.dashboard.noTipActivityChart")}
-                  </p>
+                  <EmployeeEmptyState
+                    icon={<TrendingUp className="h-6 w-6" aria-hidden />}
+                    title={t("employee.dashboard.noTipActivityChart")}
+                    description={t("employee.dashboard.statChangeNoTips")}
+                    className="!py-10"
+                  />
                 ) : (
-                  <div className="flex h-[240px] w-full min-w-0 items-center justify-center sm:h-[280px]">
+                  <div className="flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <AreaChart key={timeframe} data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
+                    <AreaChart key={analyticsTimeframe} data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
@@ -609,15 +758,22 @@ export function EmployeeDashboard() {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
+              <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>
+                <CardHeader className={cn(employeeUi.cardHeader, "flex flex-row items-center justify-between space-y-0")}>
                   <button
                     type="button"
                     onClick={() => setRecentTipsExpanded((v) => !v)}
                     className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
                     aria-expanded={recentTipsExpanded}
                   >
-                    <CardTitle className="text-lg">{t("employee.dashboard.recentTips")}</CardTitle>
+                    <div>
+                      <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.recentTips")}</CardTitle>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {t("employee.dashboard.analyticsSectionDesc", {
+                          period: analyticsPeriodLabel(analyticsTimeframe),
+                        })}
+                      </p>
+                    </div>
                     <ChevronDown
                       className={cn(
                         "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
@@ -638,14 +794,16 @@ export function EmployeeDashboard() {
                   <CardContent>
                     <div className="space-y-3">
                       {recentTips.length === 0 ? (
-                        <p className="py-6 text-center text-sm text-muted-foreground">
-                          {t("employee.dashboard.noTipsYet")}
-                        </p>
+                        <EmployeeEmptyState
+                          icon={<TrendingUp className="h-6 w-6" aria-hidden />}
+                          title={t("employee.dashboard.noTipsYet")}
+                          className="!py-8"
+                        />
                       ) : (
                         recentTips.map((tip) => (
                           <div
                             key={tip.id}
-                            className="flex items-center justify-between rounded-lg border border-border bg-background p-3"
+                            className="flex items-center justify-between rounded-xl border border-neutral-200/70 bg-stone-50/50 p-3.5"
                           >
                             <div className="min-w-0 flex-1">
                               <p className="break-words font-semibold tabular-nums text-foreground">{formatEur(tip.amount)}</p>
@@ -668,16 +826,16 @@ export function EmployeeDashboard() {
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.6 }}
               >
-                <Card className="w-full rounded-2xl border border-gray-100 bg-white shadow-none">
-                  <CardHeader>
-                    <CardTitle className="text-lg">{t("employee.dashboard.quickActions")}</CardTitle>
-                    <CardDescription>{t("employee.dashboard.quickActionsDesc")}</CardDescription>
+                <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>
+                  <CardHeader className={employeeUi.cardHeader}>
+                    <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
+                    <CardDescription className={employeeUi.cardDesc}>{t("employee.dashboard.quickActionsDesc")}</CardDescription>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
                     <div className="grid grid-cols-2 gap-3">
                       <Button
                         type="button"
-                        className="h-auto min-h-[100px] flex-col gap-2 py-4"
+                        className={cn(employeeUi.btnPrimary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
                         onClick={() => void handleQrQuickAction()}
                         disabled={slugLoading || generatingSlug}
                       >
@@ -697,7 +855,11 @@ export function EmployeeDashboard() {
                         </span>
                       </Button>
                       {hasSlug && !slugLoading ? (
-                        <Button variant="outline" className="h-auto min-h-[100px] flex-col gap-2 py-4" asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                          asChild
+                        >
                           <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
                             <Eye className="h-6 w-6" aria-hidden />
                             <span className="text-center text-xs font-semibold leading-tight">
@@ -706,7 +868,11 @@ export function EmployeeDashboard() {
                           </a>
                         </Button>
                       ) : (
-                        <Button variant="outline" className="h-auto min-h-[100px] flex-col gap-2 py-4" disabled>
+                        <Button
+                          variant="outline"
+                          className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                          disabled
+                        >
                           <Eye className="h-6 w-6" aria-hidden />
                           <span className="text-center text-xs font-semibold leading-tight">
                             {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}

@@ -34,23 +34,27 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 z-50 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
             onClick={onClose}
           />
 
           <motion.aside
-            initial={{ x: -280 }}
+            initial={{ x: "-100%" }}
             animate={{ x: 0 }}
-            exit={{ x: -280 }}
+            exit={{ x: "-100%" }}
             transition={{ duration: 0.3, type: "tween" }}
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-card border-r border-border lg:hidden flex flex-col"
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,18rem)] max-w-[85vw] flex-col border-r border-neutral-200/80 bg-gradient-to-b from-white to-stone-50/95 text-sidebar-foreground shadow-xl lg:hidden"
           >
-            <div className={cn("flex items-center justify-between px-6 py-5", CARE_TIP_LOGO_SURFACE_CLASS)}>
+            <div className={cn("flex items-center justify-between px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
               <div className="flex min-w-0 items-center gap-2">
                 <CareTipLogo size="sm" />
               </div>
-              <button type="button" onClick={onClose} className="p-2 rounded-lg hover:bg-muted transition-colors">
-                <X className="w-5 h-5 text-foreground" />
+              <button
+                type="button"
+                onClick={onClose}
+                className="touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-stone-100"
+              >
+                <X className="h-5 w-5 text-sidebar-foreground" />
               </button>
             </div>
 
@@ -83,7 +87,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
               </ul>
             </nav>
 
-            <div className="border-t border-border p-4">
+            <div className="border-t border-neutral-200/70 p-4">
               <Link
                 to="/dashboard/profile-settings"
                 onClick={onClose}

@@ -77,7 +77,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'tween', duration: 0.3 }}
-            className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,18rem)] max-w-[85vw] flex-col border-r border-neutral-200/80 bg-gradient-to-b from-white to-stone-50/95 text-sidebar-foreground shadow-xl lg:hidden"
           >
             {/* Header */}
             <div
@@ -95,7 +95,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-2 transition-colors hover:bg-sidebar-accent"
+                className="touch-manipulation rounded-xl p-2.5 transition-colors hover:bg-stone-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
                 aria-label={t("admin.sidebar.closeMenuAria")}
               >
                 <X className="h-5 w-5 text-sidebar-foreground" />
@@ -103,8 +103,8 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
             </div>
 
             {/* Navigation */}
-            <nav className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
-              <ul className="space-y-1">
+            <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
+              <ul className="space-y-0.5">
                 {navItems.map((item) => {
                   const isActive = isNavActive(item.href, location.pathname);
                   const Icon = item.icon;
@@ -115,14 +115,14 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
                         to={item.href}
                         onClick={onClose}
                         className={cn(
-                          'flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all',
+                          "admin-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all",
                           isActive
-                            ? 'bg-primary font-semibold text-primary-foreground shadow-md'
-                            : 'text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground',
+                            ? "admin-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
+                            : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
                         )}
                       >
-                        <Icon className="w-5 h-5" />
-                        <span className="text-sm font-medium">{item.name}</span>
+                        <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                        <span className="truncate tracking-tight">{item.name}</span>
                       </Link>
                     </li>
                   );
@@ -147,7 +147,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
             </div>
 
             {/* Admin Profile */}
-            <div className="border-t border-sidebar-border p-4">
+            <div className="border-t border-border/70 p-3 sm:p-4">
               <div className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
                   {displayName.charAt(0)}

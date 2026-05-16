@@ -14,6 +14,14 @@
 html {
   scroll-behavior: smooth;
   overflow-x: hidden;
+  /* Fixed marketing nav: keep in-page anchors (#sections) from hiding under the bar */
+  scroll-padding-top: 4.75rem;
+}
+
+@media (min-width: 640px) {
+  html {
+    scroll-padding-top: 5rem;
+  }
 }
 
 body {
@@ -165,19 +173,19 @@ textarea::placeholder {
 
 @keyframes float-shadow {
   0% {
-    transform: translate3d(-50%, 0, 0) scale(0.94);
-    opacity: 0.45;
-    filter: blur(18px);
+    transform: translate3d(-50%, 0, 0) scale(0.97);
+    opacity: 0.32;
+    filter: blur(36px);
   }
   50% {
     transform: translate3d(-50%, 0, 0) scale(1);
-    opacity: 0.6;
-    filter: blur(22px);
+    opacity: 0.4;
+    filter: blur(44px);
   }
   100% {
-    transform: translate3d(-50%, 0, 0) scale(0.94);
-    opacity: 0.45;
-    filter: blur(18px);
+    transform: translate3d(-50%, 0, 0) scale(0.97);
+    opacity: 0.32;
+    filter: blur(36px);
   }
 }
 
@@ -344,8 +352,17 @@ textarea::placeholder {
   .caretip-dashboard-shell .dashboard-hero-actions {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
+    align-items: stretch;
     gap: 8px;
+    width: 100%;
+  }
+
+  /* Full-width CTA blocks (employee / business wrap buttons + metrics). */
+  .caretip-dashboard-shell .dashboard-hero-actions > .employee-hero-cta-block,
+  .caretip-dashboard-shell .dashboard-hero-actions > .business-hero-cta-block {
+    flex: 1 1 100%;
+    max-width: none;
+    width: 100%;
   }
 
   .caretip-dashboard-shell .dashboard-hero-actions > :is(a, button) {
@@ -401,6 +418,440 @@ textarea::placeholder {
     height: 56px !important;
     justify-content: center;
     border-radius: 0.75rem;
+  }
+}
+
+/* Employee dashboard hero — composition, CTAs, and surface (scoped; does not affect business hero). */
+@media (min-width: 1024px) {
+  .employee-dashboard-hero .dashboard-hero-container.hidden.lg\:grid,
+  .business-dashboard-hero .dashboard-hero-container.hidden.lg\:grid {
+    column-gap: 3rem;
+    row-gap: 1.5rem;
+  }
+}
+
+.employee-dashboard-hero .employee-hero-visual {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Symmetric gloss — matches business hero polish (no left→right weight bias). */
+.employee-dashboard-hero .employee-hero-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 42%, rgb(255 255 255 / 0.12) 0%, transparent 58%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.08) 0%,
+      transparent 42%,
+      rgb(250 249 247 / 0.14) 100%
+    );
+}
+
+@media (max-width: 768px) {
+  .employee-dashboard-hero .employee-hero-cta-block,
+  .business-dashboard-hero .business-hero-cta-block {
+    max-width: 100%;
+  }
+
+  .dashboard-hero-media-frame img {
+    object-fit: cover;
+  }
+}
+
+/* Hero chart frame — business + employee (shared mobile/tablet sizing & balanced depth). */
+@media (max-width: 1023px) {
+  .business-dashboard-hero .business-hero-chart-frame,
+  .employee-dashboard-hero .employee-hero-chart-frame {
+    position: relative;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 10;
+    max-height: min(44svh, 280px);
+    overflow: hidden;
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.035),
+      0 8px 22px -8px rgb(15 23 42 / 0.06),
+      0 18px 40px -20px rgb(15 23 42 / 0.052),
+      inset 0 1px 0 rgb(255 255 255 / 0.68);
+  }
+
+  .business-dashboard-hero .business-hero-chart-frame img,
+  .employee-dashboard-hero .employee-hero-chart-frame img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: 50% 48%;
+    padding: 0 !important;
+    transform: none !important;
+  }
+}
+
+.employee-dashboard-hero .employee-hero-cta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 22rem;
+}
+
+.employee-dashboard-hero .employee-hero-cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .employee-dashboard-hero .employee-hero-cta-row {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.employee-dashboard-hero .employee-hero-cta-row > :is(a, button) {
+  flex: 1 1 0;
+  min-height: 2.75rem;
+  height: 2.75rem !important;
+  justify-content: center;
+}
+
+.employee-dashboard-hero .employee-hero-account-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  padding-top: 1rem;
+  margin-top: 0.375rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+.employee-dashboard-hero .employee-hero-account-stats > div {
+  min-width: 0;
+}
+
+.employee-dashboard-hero .employee-hero-account-stats dt {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: hsl(var(--muted-foreground) / 0.92);
+  line-height: 1.35;
+}
+
+.employee-dashboard-hero .employee-hero-account-stats dd {
+  margin-top: 0.25rem;
+  font-size: clamp(1.125rem, 2.8vw, 1.375rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  line-height: 1.15;
+}
+
+@media (min-width: 1024px) {
+  .employee-dashboard-hero .employee-hero-account-stats dd {
+    font-size: 1.375rem;
+  }
+}
+
+/* Business dashboard shell — mirrors employee rhythm */
+.caretip-dashboard-shell.business-dashboard .business-card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dash-nav-link {
+  border-radius: 0.75rem;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dash-nav-link--active {
+  box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.45);
+}
+
+.caretip-dashboard-shell.business-dashboard .business-page-header {
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--background)) 42%,
+    hsl(30 6% 97%) 100%
+  );
+}
+
+.business-dashboard-hero .business-hero-visual {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Soft, symmetric atmosphere over the hero media (avoid left→right glare that biases weight). */
+.business-dashboard-hero .business-hero-visual::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 85% 70% at 50% 42%, rgb(255 255 255 / 0.12) 0%, transparent 58%),
+    linear-gradient(
+      180deg,
+      rgb(255 255 255 / 0.08) 0%,
+      transparent 42%,
+      rgb(250 249 247 / 0.14) 100%
+    );
+}
+
+.business-dashboard-hero .business-hero-chart-frame,
+.employee-dashboard-hero .employee-hero-chart-frame {
+  border: 1px solid rgb(231 229 228 / 0.85); /* stone-200, calm edge */
+  background:
+    radial-gradient(ellipse 78% 58% at 50% 38%, hsl(43 42% 99%) 0%, transparent 62%),
+    linear-gradient(
+      180deg,
+      hsl(43 26% 98.5%) 0%,
+      hsl(37 14% 97%) 42%,
+      hsl(33 14% 95.5%) 100%
+    );
+}
+
+@media (min-width: 1024px) {
+  .business-dashboard-hero .business-hero-chart-frame,
+  .employee-dashboard-hero .employee-hero-chart-frame {
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.03),
+      0 10px 26px -8px rgb(15 23 42 / 0.055),
+      0 22px 48px -22px rgb(15 23 42 / 0.045),
+      inset 0 1px 0 rgb(255 255 255 / 0.72);
+  }
+}
+
+.business-dashboard-hero .business-hero-chart-frame img,
+.employee-dashboard-hero .employee-hero-chart-frame img {
+  transform-origin: 50% 48%;
+  object-position: 50% 48%;
+}
+
+@media (min-width: 1024px) {
+  .business-dashboard-hero .business-hero-chart-frame img,
+  .employee-dashboard-hero .employee-hero-chart-frame img {
+    transform: scale(1.02);
+  }
+}
+
+.business-dashboard-hero .business-hero-pulse-subline {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+.business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
+    font-size: clamp(0.9375rem, 3.6vw, 1.125rem);
+  }
+}
+
+.business-dashboard-hero .business-hero-cta-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.business-dashboard-hero .business-hero-cta-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .business-dashboard-hero .business-hero-cta-row {
+    flex-direction: row;
+    align-items: stretch;
+  }
+}
+
+.business-dashboard-hero .business-hero-cta-row > :is(a, button) {
+  flex: 1 1 0;
+  min-height: 2.75rem;
+  height: 2.75rem !important;
+  justify-content: center;
+}
+
+.business-dashboard-hero .business-hero-account-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+  padding-top: 1rem;
+  margin-top: 0.375rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+.business-dashboard-hero .business-hero-account-stats dt {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground) / 0.92);
+  line-height: 1.35;
+}
+
+.business-dashboard-hero .business-hero-account-stats dd {
+  margin-top: 0.25rem;
+  font-size: clamp(1.125rem, 2.8vw, 1.375rem);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+  line-height: 1.15;
+}
+
+@media (max-width: 768px) {
+  /* Manager + staff hero metrics: shared 2-up tiles and full-width third row. */
+  .employee-dashboard-hero .employee-hero-account-stats,
+  .business-dashboard-hero .business-hero-account-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+    padding-top: 0.875rem;
+    margin-top: 0.375rem;
+    align-items: stretch;
+  }
+
+  .employee-dashboard-hero .employee-hero-account-stats > div,
+  .business-dashboard-hero .business-hero-account-stats > div {
+    min-width: 0;
+    margin: 0;
+    padding: 0.5rem 0.625rem;
+    border-radius: 0.75rem;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border) / 0.55);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.125rem;
+    min-height: 4.125rem;
+  }
+
+  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3),
+  .business-dashboard-hero .business-hero-account-stats > div:nth-child(3) {
+    grid-column: 1 / -1;
+    text-align: start;
+    min-height: 0;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 0.375rem;
+  }
+
+  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3) dd,
+  .business-dashboard-hero .business-hero-account-stats > div:nth-child(3) dd {
+    margin-top: 0;
+    flex-shrink: 0;
+    width: 100%;
+  }
+
+  .employee-dashboard-hero .employee-hero-account-stats dt,
+  .business-dashboard-hero .business-hero-account-stats dt {
+    font-size: 0.625rem;
+    letter-spacing: 0.03em;
+  }
+
+  .employee-dashboard-hero .employee-hero-account-stats dd,
+  .business-dashboard-hero .business-hero-account-stats dd {
+    margin-top: 0;
+    font-size: clamp(1rem, 3.6vw, 1.1875rem);
+    line-height: 1.2;
+  }
+}
+
+/* Employee dashboard shell — shared cards, nav, and page rhythm */
+.caretip-dashboard-shell.employee-dashboard .employee-card {
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.caretip-dashboard-shell.employee-dashboard .employee-dash-nav-link {
+  border-radius: 0.75rem;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.caretip-dashboard-shell.employee-dashboard .employee-dash-nav-link--active {
+  box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.45);
+}
+
+.caretip-dashboard-shell.employee-dashboard .employee-page-header {
+  background-image: linear-gradient(
+    135deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--background)) 42%,
+    hsl(30 6% 97%) 100%
+  );
+}
+
+@media (max-width: 768px) {
+  .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions.dashboard-hero-actions--premium-grid,
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions.dashboard-hero-actions--premium-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+  }
+
+  /* Only direct button links use the premium grid sizing; nested CTA rows handle their own rhythm. */
+  .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions.dashboard-hero-actions--premium-grid > :is(a, button),
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions.dashboard-hero-actions--premium-grid > :is(a, button) {
+    width: 100%;
+    max-width: none;
+    min-height: 2.75rem;
+    height: 2.75rem !important;
+  }
+
+  .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions .employee-hero-cta-row,
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions .business-hero-cta-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions .employee-hero-cta-row > *,
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions .business-hero-cta-row > * {
+    min-height: 2.75rem;
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions .employee-hero-cta-row,
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions .business-hero-cta-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Platform admin shell — align with employee/business dashboard rhythm */
+.caretip-dashboard-shell.platform-dashboard .admin-dash-nav-link {
+  border-radius: 0.75rem;
+  transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.caretip-dashboard-shell.platform-dashboard .admin-dash-nav-link--active {
+  box-shadow: 0 4px 14px -6px hsl(var(--primary) / 0.45);
+}
+
+@media (max-width: 768px) {
+  .caretip-dashboard-shell .recharts-cartesian-axis-tick-value {
+    font-size: 10px;
   }
 }
 

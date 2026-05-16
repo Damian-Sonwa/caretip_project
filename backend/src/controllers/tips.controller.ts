@@ -4,7 +4,10 @@ import { prisma } from "../prisma.js";
 import { createPaymentIntent, isStripeConfigured } from "../services/stripe.service.js";
 import * as goalService from "../services/goal.service.js";
 import * as businessService from "../services/business.service.js";
-import { loadEmployeeTipsDashboardForTimeframe } from "../services/employeeTipsDashboard.service.js";
+import {
+  loadEmployeeAccountSummary,
+  loadEmployeeTipsDashboardForTimeframe,
+} from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 
@@ -55,11 +58,14 @@ export async function getByEmployee(req: Request, res: Response) {
         ? (timeframeRaw as "today" | "week" | "month")
         : null;
 
-    const dash = await loadEmployeeTipsDashboardForTimeframe({
-      employeeId: employee.id,
-      businessTimezone: employee.businessTimezone,
-      timeframe,
-    });
+    const [dash, accountSummary] = await Promise.all([
+      loadEmployeeTipsDashboardForTimeframe({
+        employeeId: employee.id,
+        businessTimezone: employee.businessTimezone,
+        timeframe,
+      }),
+      loadEmployeeAccountSummary(employee.id),
+    ]);
 
     const monthRange = businessUtcRangeForTimeframe("month", employee.businessTimezone);
     let currentMonthTotal = 0;
@@ -93,6 +99,9 @@ export async function getByEmployee(req: Request, res: Response) {
       periodTipCount: dash.periodTipCount,
       chartSeries: dash.chartSeries,
       goal,
+      totalEarningsEur: accountSummary.totalEarningsEur,
+      availableBalanceEur: accountSummary.availableBalanceEur,
+      totalSupporters: accountSummary.totalSupporters,
     });
   } catch (err) {
     logServerError("tips.getByEmployee", err);

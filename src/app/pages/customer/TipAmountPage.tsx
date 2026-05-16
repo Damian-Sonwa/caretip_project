@@ -14,6 +14,7 @@ import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 export function TipAmountPage() {
   const { t } = useTranslation();
@@ -230,52 +231,45 @@ export function TipAmountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Header */}
-      <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-xl border-b border-border">
-        <div className="mx-auto max-w-2xl px-4 py-4 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={handleBack}
-              className="rounded-lg p-2 hover:bg-muted transition-colors"
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            {businessBrand ? (
-              <BusinessLogoMark
-                logoPathOrUrl={businessBrand.logo}
-                businessName={businessBrand.name}
-                size="md"
-                className="shrink-0"
-              />
-            ) : (
-              <CareTipLogo size="xs" className="shrink-0" />
-            )}
-            <div className="min-w-0">
-              <h1 className="text-lg font-semibold text-foreground">Choose Tip Amount</h1>
-              <p className="text-xs text-muted-foreground">For {employeeName ?? "Team Member"}</p>
-              {directFromStaffQr ? (
-                <p className="text-xs mt-1 flex items-center gap-1 text-primary font-medium">
-                  <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                  Confirm this is who you meant to tip
-                </p>
-              ) : null}
-            </div>
+    <div className={selectedAmount ? cf.pageWithBottomCta : cf.page}>
+      <div className={cf.stickyHeader}>
+        <div className={cf.headerInner}>
+          <button type="button" onClick={handleBack} className={cf.backButton}>
+            <ChevronLeft className="h-5 w-5 text-foreground" />
+          </button>
+          {businessBrand ? (
+            <BusinessLogoMark
+              logoPathOrUrl={businessBrand.logo}
+              businessName={businessBrand.name}
+              size="md"
+              className="shrink-0"
+            />
+          ) : (
+            <CareTipLogo size="xs" className="shrink-0" />
+          )}
+          <div className="min-w-0 flex-1">
+            <h1 className={cf.headline}>{t("tipFlow.tipAmount.chooseTitle")}</h1>
+            <p className={cf.subline}>
+              {t("tipFlow.tipAmount.forEmployee", { name: employeeName ?? t("tipFlow.common.teamMember") })}
+            </p>
+            {directFromStaffQr ? (
+              <p className="mt-1 flex items-center gap-1 text-xs font-medium text-primary">
+                <ShieldCheck className="size-3.5 shrink-0" />
+                {t("tipFlow.tipAmount.confirmStaffQr")}
+              </p>
+            ) : null}
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 py-8 space-y-6 lg:space-y-8 xl:space-y-10">
+      <div className={cf.main}>
         {/* Selected Employee Card */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
         >
           <Card
-            className={`border-border shadow-sm ${
-              directFromStaffQr ? "border-2 border-primary/40" : ""
-            }`}
+            className={`${cf.cardShadcn} border-border shadow-sm ${directFromStaffQr ? "ring-2 ring-primary/25 ring-offset-2 ring-offset-background" : ""}`}
           >
             <CardContent
               className={`flex items-center gap-4 ${directFromStaffQr ? "p-5 pt-6" : "p-4"}`}
@@ -332,10 +326,8 @@ export function TipAmountPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 + presetAmounts.length * 0.05 }}
                 onClick={handleCustomClick}
-                className={`p-4 rounded-xl border-2 text-left transition-all min-h-[100px] flex flex-col justify-center ${
-                  showCustomInput
-                    ? "border-accent bg-accent/10 shadow-lg"
-                    : "border-border bg-card hover:border-accent/50 hover:shadow-md"
+                className={`${cf.selectableTile} flex flex-col justify-center ${
+                  showCustomInput ? cf.selectableOn : cf.selectableIdle
                 }`}
               >
                 <div className="text-lg font-bold text-foreground">{t("tipFlow.tipAmount.chooseYourAmount")}</div>
@@ -345,43 +337,40 @@ export function TipAmountPage() {
         </Card>
 
         {/* Custom Amount */}
-        <Card className="border-border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("tipFlow.tipAmount.customTip")}</CardTitle>
-            <CardDescription>{t("tipFlow.tipAmount.customTipDesc")}</CardDescription>
+        <Card className={`${cf.cardShadcn} border-border`}>
+          <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+            <CardTitle className={cf.cardTitle}>{t("tipFlow.tipAmount.customTip")}</CardTitle>
+            <CardDescription className={cf.cardDesc}>{t("tipFlow.tipAmount.customTipDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
-          {!showCustomInput ? (
-            <motion.button
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              onClick={handleCustomClick}
-              className="w-full p-4 rounded-xl border-2 border-dashed border-border bg-muted/30 hover:border-accent/50 transition-all"
-            >
-              <span className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.enterCustom")}</span>
-            </motion.button>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="relative"
-            >
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground">
-                €
-              </div>
-              <input
-                type="number"
-                placeholder={t("tipFlow.tipAmount.amountPlaceholder")}
-                value={customAmount}
-                onChange={(e) => handleCustomInput(e.target.value)}
-                className="w-full pl-10 pr-4 py-4 rounded-xl border-2 border-accent bg-card text-2xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
-                autoFocus
-                step="0.01"
-                min="0"
-              />
-            </motion.div>
-          )}
+          <CardContent className="px-5 pb-5 sm:px-6">
+            {!showCustomInput ? (
+              <motion.button
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+                onClick={handleCustomClick}
+                type="button"
+                className={cf.dashedCustomTrigger}
+              >
+                <span className="text-sm font-medium text-muted-foreground">{t("tipFlow.tipAmount.enterCustom")}</span>
+              </motion.button>
+            ) : (
+              <motion.div initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} className="relative">
+                <div className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-2xl font-bold text-muted-foreground">
+                  €
+                </div>
+                <input
+                  type="number"
+                  placeholder={t("tipFlow.tipAmount.amountPlaceholder")}
+                  value={customAmount}
+                  onChange={(e) => handleCustomInput(e.target.value)}
+                  className={`${cf.inputAmount} pl-11 text-2xl sm:text-3xl`}
+                  autoFocus
+                  step="0.01"
+                  min="0"
+                />
+              </motion.div>
+            )}
           </CardContent>
         </Card>
 
@@ -391,8 +380,8 @@ export function TipAmountPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            <Card className="border-accent/30 bg-gradient-to-br from-accent/10 to-primary/10 shadow-sm">
-              <CardContent className="pt-6">
+            <Card className={cf.cardAccentWash}>
+              <CardContent className="px-5 pb-5 pt-6 sm:px-6">
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">{t("tipFlow.tipAmount.tipAmountLabel")}</span>
                   <span className="text-2xl font-bold text-foreground">{formatEur(selectedAmount)}</span>
@@ -403,18 +392,10 @@ export function TipAmountPage() {
         )}
       </div>
 
-      {/* Fixed Bottom CTA */}
       {selectedAmount && (
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4"
-        >
-          <div className="max-w-2xl mx-auto lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
-            <button
-              onClick={handleContinue}
-              className="w-full bg-accent text-white rounded-xl py-4 font-semibold text-lg hover:bg-accent/90 transition-all shadow-lg"
-            >
+        <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
+          <div className={cf.fixedBottomInner}>
+            <button type="button" onClick={handleContinue} className={cf.btnPrimaryLg}>
               {t("tipFlow.tipAmount.continuePayment")}
             </button>
           </div>

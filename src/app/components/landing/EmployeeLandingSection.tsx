@@ -10,9 +10,9 @@ export function EmployeeLandingSection() {
   return (
     <section
       id="for-employees"
-      className="scroll-mt-[80px] bg-gray-50 px-2 py-16 sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-900"
+      className="scroll-mt-[80px] w-full min-w-0 bg-gray-50 px-3 py-12 sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-900"
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center justify-items-center gap-8 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center justify-items-center gap-6 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
@@ -21,7 +21,7 @@ export function EmployeeLandingSection() {
           className="relative order-1 flex w-full max-w-lg flex-col items-center justify-center max-md:justify-self-center sm:max-w-xl lg:order-1 lg:max-w-none lg:w-full lg:justify-self-stretch"
         >
           <div className="flex w-full min-h-0 items-center justify-center max-md:px-1">
-            <div className="mx-auto mt-4 flex w-full items-center justify-center overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl max-md:min-h-[min(34dvh,320px)] sm:mt-10 lg:min-h-0 dark:border-neutral-800 dark:bg-neutral-900">
+            <div className="mx-auto mt-4 flex w-full items-center justify-center overflow-hidden rounded-[2.5rem] border border-gray-200 bg-white shadow-xl max-md:min-h-[min(28dvh,260px)] sm:mt-10 lg:min-h-0 dark:border-neutral-800 dark:bg-neutral-900">
               <img
                 src={newEmployeeImg}
                 alt={t("landing.employeeSection.imageAlt")}

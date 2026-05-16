@@ -7,6 +7,8 @@ import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import { isWalkthroughDemoManager } from "../lib/walkthroughDemo";
 import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
+import { BUSINESS_DASHBOARD_ROOT } from "../components/business/businessDashboardUi";
+import { cn } from "@/lib/utils";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -32,9 +34,16 @@ export function BusinessLayout() {
       <div className="relative z-10">
         {isAppReady ? <BusinessSidebar /> : <SidebarSkeleton />}
         <BusinessMobileSidebar isOpen={mobileMenuOpen && isAppReady} onClose={() => setMobileMenuOpen(false)} />
-        <div className="caretip-dashboard-shell min-h-screen min-w-0 overflow-x-hidden bg-background lg:pl-64">
+        <div
+          className={cn(
+            "caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
+            BUSINESS_DASHBOARD_ROOT,
+          )}
+        >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
-          <Outlet />
+          <main className="flex-1">
+            <Outlet />
+          </main>
           <Footer variant="minimal" />
         </div>
       </div>

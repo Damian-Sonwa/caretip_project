@@ -18,6 +18,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 /**
  * /qr/location/:locationId — Venue QR: business team list in context of one location.
@@ -112,9 +113,9 @@ export function LocationQrLandingPage() {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
-        <Link to="/" className="text-primary hover:underline text-sm">
+      <div className={cf.stateCenter}>
+        <p className={cf.stateError}>{error ?? t("tipFlow.common.notFound")}</p>
+        <Link to="/" className={`mt-4 text-sm font-semibold text-primary underline-offset-2 hover:underline`}>
           {t("tipFlow.common.goHomeLink")}
         </Link>
       </div>
@@ -122,13 +123,13 @@ export function LocationQrLandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16">
-      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
+    <div className={`${cf.page} pb-8 sm:pb-10`}>
+      <div className={cf.stickyHeader}>
+        <div className={cf.headerInner}>
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="rounded-lg p-2 hover:bg-muted transition-colors"
+            className={cf.backButton}
             aria-label={t("tipFlow.common.homeAria")}
           >
             <Home className="h-5 w-5 text-foreground" />
@@ -139,17 +140,17 @@ export function LocationQrLandingPage() {
               <MapPin className="h-3.5 w-3.5 shrink-0" />
               {data.location.name}
             </p>
-            <h1 className="truncate text-lg font-semibold text-foreground">{data.business.name}</h1>
+            <h1 className={cf.headline}>{data.business.name}</h1>
           </div>
-          <Building2 className="h-8 w-8 shrink-0 text-muted-foreground opacity-80" />
+          <Building2 className="h-8 w-8 shrink-0 text-muted-foreground/75" aria-hidden />
         </div>
       </div>
 
-      <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
+      <div className={`${cf.main} lg:space-y-7`}>
         {repeatCandidate ? (
           <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <Card className="border border-border shadow-sm">
-              <CardContent className="p-5">
+            <Card className={cf.cardShadcn}>
+              <CardContent className="p-5 sm:p-6">
                 <div className="flex items-start justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm font-semibold text-foreground">{t("tipFlow.qrLanding.repeatWelcome")}</p>
@@ -186,14 +187,14 @@ export function LocationQrLandingPage() {
                       markCustomerFlowEntered();
                       navigate("/payment");
                     }}
-                    className="w-full rounded-xl bg-primary py-3.5 text-sm font-bold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover"
+                    className={`${cf.btnPrimaryLg} py-3.5 text-sm sm:flex-1`}
                   >
                     {t("tipFlow.qrLanding.tipAgain")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setRepeatDismissed(true)}
-                    className="w-full rounded-xl border border-border bg-background py-3.5 text-sm font-semibold text-foreground hover:bg-muted transition-colors"
+                    className={`${cf.btnSecondaryLg} py-3.5 text-sm sm:flex-1`}
                   >
                     {t("tipFlow.qrLanding.chooseDifferentStaff")}
                   </button>
@@ -204,40 +205,40 @@ export function LocationQrLandingPage() {
         ) : null}
 
         <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t("tipFlow.locationLanding.venueTeam")}</CardTitle>
-              <CardDescription>{t("tipFlow.locationLanding.venueTeamDesc")}</CardDescription>
+          <Card className={cf.cardShadcn}>
+            <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+              <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.venueTeam")}</CardTitle>
+              <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.venueTeamDesc")}</CardDescription>
             </CardHeader>
           </Card>
         </motion.div>
 
-        <Card className="border-border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
-            <CardDescription>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
+        <Card className={cf.cardShadcn}>
+          <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+            <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
+            <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 sm:px-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
                 placeholder={t("tipFlow.qrLanding.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className={`${cf.inputField} pl-11`}
                 autoComplete="off"
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm">
-          <CardHeader className="pb-2">
-            <CardTitle className="text-base">{t("tipFlow.locationLanding.teamTitle")}</CardTitle>
-            <CardDescription>{t("tipFlow.locationLanding.teamDesc")}</CardDescription>
+        <Card className={cf.cardShadcn}>
+          <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+            <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.teamTitle")}</CardTitle>
+            <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.teamDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 sm:px-6">
             {filtered.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">{t("tipFlow.locationLanding.noMatches")}</p>
             ) : (
@@ -252,7 +253,7 @@ export function LocationQrLandingPage() {
                     <button
                       type="button"
                       onClick={() => pickEmployee(emp)}
-                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-border bg-card p-3 text-left transition-all hover:border-primary/50 hover:shadow-md"
+                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-border/70 bg-card p-3 text-left shadow-[0_6px_22px_-14px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-[0_10px_30px_-16px_rgba(15,23,42,0.11)] active:opacity-95"
                     >
                       <ProfileAvatar
                         src={emp.avatar}

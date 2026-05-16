@@ -267,14 +267,36 @@ export async function getBusinessStats(
   const rangeStart = range?.startUtc ?? new Date(0);
   const rangeEnd = range?.endUtc ?? new Date(8640000000000000);
 
-  const tipRows = await prisma.transaction.findMany({
-    where: {
-      businessId,
-      status: "success",
-      ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
-    },
-    select: { amount: true, employeeId: true, createdAt: true },
-  });
+  const todayRange = businessUtcRangeForTimeframe("today", tz);
+  if (!todayRange) {
+    throw new Error("[getBusinessStats] today timezone range could not be computed");
+  }
+  const sixtyAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+  const [tipRows, tipsLast60mAgg, tipsTodayAgg] = await Promise.all([
+    prisma.transaction.findMany({
+      where: {
+        businessId,
+        status: "success",
+        ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
+      },
+      select: { amount: true, employeeId: true, createdAt: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { businessId, status: "success", createdAt: { gte: sixtyAgo } },
+      _sum: { amount: true },
+      _count: { _all: true },
+    }),
+    prisma.transaction.aggregate({
+      where: {
+        businessId,
+        status: "success",
+        createdAt: { gte: todayRange.startUtc, lte: todayRange.endUtc },
+      },
+      _sum: { amount: true },
+      _count: { _all: true },
+    }),
+  ]);
 
   const totalTips = tipRows.reduce((sum, t) => sum + Number(t.amount), 0);
   const tipCount = tipRows.length;
@@ -401,6 +423,31 @@ export async function getBusinessStats(
     /* optional: table missing before migration */
   }
 
+  const tippingReadyEmployees = employeeStats.filter(
+    (e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true,
+  ).length;
+  const employeesMissingQr = employeeStats.filter((e) => String(e.slug ?? "").trim().length === 0).length;
+  const goalsTracked = employeeGoals.length;
+  const goalsOnTrackOrBetter = employeeGoals.filter(
+    (g) => g.status === "on_track" || g.status === "achieved",
+  ).length;
+
+  const operationalPulse = {
+    tipsLast60m: {
+      amount: Number(tipsLast60mAgg._sum.amount ?? 0),
+      count: tipsLast60mAgg._count._all,
+    },
+    tipsToday: {
+      amount: Number(tipsTodayAgg._sum.amount ?? 0),
+      count: tipsTodayAgg._count._all,
+    },
+    tippingReadyEmployees,
+    rosterTotal: employeeStats.length,
+    employeesMissingQr,
+    goalsTracked,
+    goalsOnTrackOrBetter,
+  };
+
   return {
     id: business.id,
     name: business.name,
@@ -413,6 +460,7 @@ export async function getBusinessStats(
     dailyTipDistribution,
     employees: employeeStats,
     employeeGoals,
+    operationalPulse,
   };
 }
 

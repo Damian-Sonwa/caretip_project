@@ -805,6 +805,16 @@ export interface BusinessDashboardStats {
     percent: number;
     status: EmployeeGoalProgressStatus;
   }>;
+  /** Timeframe-agnostic live snapshot (hero). Body cards use `timeframe` totals. */
+  operationalPulse?: {
+    tipsLast60m: { amount: number; count: number };
+    tipsToday: { amount: number; count: number };
+    tippingReadyEmployees: number;
+    rosterTotal: number;
+    employeesMissingQr: number;
+    goalsTracked: number;
+    goalsOnTrackOrBetter: number;
+  };
 }
 
 /**
@@ -1282,6 +1292,10 @@ export interface EmployeeTipsResponse {
   periodAmountEur?: number;
   periodTipCount?: number;
   chartSeries?: Array<{ label: string; amount: number }>;
+  /** Lifetime successful tips — hero account summary */
+  totalEarningsEur?: number;
+  availableBalanceEur?: number;
+  totalSupporters?: number;
 }
 
 export type EmployeeGoalStatus = "active" | "archived";

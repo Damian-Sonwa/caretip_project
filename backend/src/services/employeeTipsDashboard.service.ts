@@ -162,3 +162,30 @@ export async function loadEmployeeTipsDashboardForTimeframe(opts: {
     chartSeries,
   };
 }
+
+/** Lifetime account summary for employee dashboard hero (not period-scoped). */
+export async function loadEmployeeAccountSummary(employeeId: string): Promise<{
+  totalEarningsEur: number;
+  availableBalanceEur: number;
+  totalSupporters: number;
+}> {
+  const base = { employeeId, status: "success" as const };
+  const [totalAgg, paidAgg, supporterCount] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: base,
+      _sum: { amount: true },
+    }),
+    prisma.transaction.aggregate({
+      where: { ...base, payoutStatus: "paid" },
+      _sum: { amount: true },
+    }),
+    prisma.transaction.count({ where: base }),
+  ]);
+
+  return {
+    totalEarningsEur: Number(totalAgg._sum.amount ?? 0),
+    availableBalanceEur: Number(paidAgg._sum.amount ?? 0),
+    /** Each successful tip counts as one supporter interaction (guests are anonymous). */
+    totalSupporters: supporterCount,
+  };
+}

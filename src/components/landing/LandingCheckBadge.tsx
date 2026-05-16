@@ -42,17 +42,27 @@ type LandingBenefitChecklistProps = {
 
 /** Hero-style benefit list: gold check + single-line value props. */
 export function LandingBenefitChecklist({ items, tone, className }: LandingBenefitChecklistProps) {
-  const textClass = tone === "default" ? "text-foreground" : "text-neutral-900";
+  const textClass =
+    tone === "default"
+      ? "text-foreground"
+      : "text-neutral-900 dark:text-neutral-50";
 
   return (
     <ul
-      className={cn("mt-5 flex w-full max-w-xl flex-col gap-3 sm:mt-7 sm:gap-3.5", className)}
+      className={cn(
+        "mt-5 flex w-full max-w-xl flex-col gap-3 sm:mt-7 sm:gap-3.5",
+        tone === "cinematic" && "max-md:mt-3 max-md:gap-2",
+        className,
+      )}
       role="list"
     >
       {items.map((label, i) => (
         <li
           key={i}
-          className="grid min-h-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-3 text-[15px] font-semibold leading-snug tracking-[-0.015em] sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4 sm:text-base sm:leading-snug"
+          className={cn(
+            "grid min-h-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-3 text-[15px] font-semibold leading-snug tracking-[-0.015em] sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4 sm:text-base sm:leading-snug",
+            tone === "cinematic" && "max-md:gap-x-2.5 max-md:text-[13.5px] max-md:leading-snug",
+          )}
           role="listitem"
         >
           <LandingCheckBadge matchLineHeight />

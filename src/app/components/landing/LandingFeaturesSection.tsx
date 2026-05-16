@@ -24,15 +24,15 @@ export function LandingFeaturesSection() {
   return (
     <section
       id="features"
-      className="scroll-mt-[80px] bg-gray-50 px-6 py-16 sm:py-20 lg:py-24 dark:bg-neutral-900"
+      className="scroll-mt-[80px] w-full min-w-0 bg-gray-50 px-4 py-12 sm:px-6 sm:py-20 lg:py-24 dark:bg-neutral-900"
     >
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-10 max-w-2xl text-center sm:mb-12">
+        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
+            className="text-balance text-[clamp(1.5rem,5.2vw,2.25rem)] font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
           >
             {t("landing.features.title")}
           </motion.h2>
@@ -47,7 +47,7 @@ export function LandingFeaturesSection() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-6">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 lg:gap-6">
           {items.map((item, idx) => {
             const Icon = item.icon;
             return (

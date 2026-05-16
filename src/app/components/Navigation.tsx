@@ -33,9 +33,13 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
   }, [location.pathname, location.hash]);
 
   const linkClass =
-    "text-sm font-semibold transition-colors hover:opacity-80 active:opacity-70 rounded-md px-1 py-1";
+    "text-sm font-semibold text-neutral-800 transition-colors hover:text-primary active:opacity-85 rounded-lg px-2 py-1.5 hover:bg-neutral-900/[0.04] dark:text-neutral-100 dark:hover:bg-white/[0.06]";
 
-  const headerSurface = "border-b border-border/60 bg-background/95 backdrop-blur-md";
+  const headerSurface = cn(
+    "border-b border-stone-200/88 dark:border-neutral-700/75",
+    "bg-white/72 backdrop-blur-xl dark:bg-neutral-950/75",
+    "shadow-[0_6px_32px_-18px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_-16px_rgba(0,0,0,0.45)]",
+  );
 
   return (
     <header
@@ -45,7 +49,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
       )}
     >
       <nav
-        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-3 sm:px-6 sm:py-4"
+        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-4"
         aria-label={t("nav.mainNav")}
       >
         <div className="relative z-50 flex min-h-0 min-w-0 max-w-full items-center justify-between gap-2 sm:gap-4">
@@ -63,7 +67,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
 
           <div className="hidden items-center gap-8 lg:flex xl:gap-10">
             {navLinks.map((link) => (
-              <Link key={link.to} to={link.to} className={cn(linkClass, "text-foreground")}>
+              <Link key={link.to} to={link.to} className={linkClass}>
                 {link.label}
               </Link>
             ))}
@@ -73,8 +77,8 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 <button
                   type="button"
                   className={cn(
-                    "rounded-lg border-2 px-4 py-2 text-sm font-bold transition-[colors,opacity,box-shadow] active:opacity-90",
-                    "border-primary bg-card text-foreground hover:bg-muted",
+                    "rounded-xl border px-4 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow,transform] active:opacity-95",
+                    "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(235,153,44,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
                   )}
                 >
                   {t("nav.logIn")}
@@ -83,7 +87,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
               <Link to="/contact">
                 <button
                   type="button"
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-bold text-primary-foreground shadow-md transition-[colors,opacity,box-shadow] hover:bg-primary-hover active:opacity-90"
+                  className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover hover:shadow-[0_10px_28px_-8px_rgba(235,153,44,0.5)] active:opacity-95"
                 >
                   {t("nav.requestDemo")}
                 </button>
@@ -123,8 +127,11 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className={cn("fixed inset-0 z-40 lg:hidden", "bg-black/40")}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                className={cn(
+                  "fixed inset-0 z-40 lg:hidden",
+                  "bg-neutral-950/[0.28] backdrop-blur-[3px] dark:bg-black/50",
+                )}
                 onClick={() => setMobileMenuOpen(false)}
               />
               <motion.div
@@ -133,24 +140,24 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 role="dialog"
                 aria-modal="true"
                 aria-label={t("nav.mainNav")}
-                initial={{ opacity: 0, y: -8 }}
+                initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.2 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
                 className={cn(
-                  "caretip-public-mobile-nav-drawer absolute left-0 right-0 top-full z-[60] border-b shadow-[0_12px_40px_rgba(0,0,0,0.08)] lg:hidden",
-                  "border-border/60 bg-background/98 backdrop-blur-md",
+                  "caretip-public-mobile-nav-drawer absolute left-0 right-0 top-full z-[60] border-b lg:hidden",
+                  "border-border/50 bg-background/[0.97] shadow-[0_16px_48px_-12px_rgba(15,23,42,0.14)] backdrop-blur-xl dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)]",
                 )}
               >
-                <div className="flex flex-col gap-2.5 px-4 py-4 sm:px-6">
-                  <div className="caretip-public-mobile-nav-links flex flex-col gap-2.5">
+                <div className="flex flex-col gap-1 px-4 py-3 sm:px-5 sm:py-3.5">
+                  <div className="caretip-public-mobile-nav-links flex flex-col gap-0.5">
                     {navLinks.map((link) => (
                       <Link
                         key={link.to}
                         to={link.to}
                         className={cn(
-                          "rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap transition-colors",
-                          "text-foreground active:bg-muted",
+                          "flex min-h-11 w-full items-center rounded-xl px-3 text-[15px] font-semibold tracking-tight transition-colors active:bg-muted/90",
+                          "text-foreground hover:bg-muted/60",
                         )}
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -160,38 +167,38 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                   </div>
                   <div
                     className={cn(
-                      "caretip-public-mobile-nav-actions mt-1 flex flex-col gap-2.5 border-t pt-4",
-                      "border-border/60",
+                      "caretip-public-mobile-nav-actions mt-2 flex flex-col gap-2 border-t pt-3",
+                      "border-border/55",
                     )}
                   >
                     <Link
-                      to="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="inline-flex w-fit max-w-full shrink-0"
-                    >
-                      <button
-                        type="button"
-                        className={cn(
-                          "inline-flex min-h-10 w-auto max-w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-lg border px-3 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow] active:opacity-90",
-                          "border-border/80 bg-muted/40 text-foreground hover:bg-muted/70",
-                        )}
-                      >
-                        {t("nav.signIn")}
-                      </button>
-                    </Link>
-                    <Link
                       to="/contact"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="inline-flex w-fit max-w-full shrink-0"
+                      className="w-full"
                     >
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex min-h-10 w-auto max-w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-lg px-3 py-2 text-sm font-bold text-primary-foreground transition-[colors,opacity,box-shadow] hover:bg-primary-hover active:opacity-90",
-                          "bg-primary shadow-sm",
+                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl px-4 text-[15px] font-bold text-primary-foreground shadow-[0_8px_22px_-8px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover active:scale-[0.99] active:opacity-95",
+                          "bg-primary",
                         )}
                       >
                         {t("nav.requestDemo")}
+                      </button>
+                    </Link>
+                    <Link
+                      to="/login"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="w-full"
+                    >
+                      <button
+                        type="button"
+                        className={cn(
+                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl border border-border/75 bg-muted/25 px-4 text-[15px] font-semibold text-foreground transition-[colors,opacity,box-shadow] active:opacity-90",
+                          "hover:bg-muted/55",
+                        )}
+                      >
+                        {t("nav.signIn")}
                       </button>
                     </Link>
                   </div>

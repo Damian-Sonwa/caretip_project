@@ -562,7 +562,10 @@
     "staffLanding": {
       "loadingProfile": "Loading profile…",
       "openingTipScreen": "Opening tip screen…",
-      "goHome": "Go home"
+      "goHome": "Go home",
+      "monthlyGoalTitle": "Monthly goal",
+      "tipAgainWithAmount": "Tip again ({{amount}})",
+      "chooseDifferentAmount": "Choose a different amount"
     },
     "docTitle": {
       "tip": "Tip {{name}} - CareTip Limited",
@@ -821,6 +824,7 @@
       "searchAria": "Search FAQs",
       "notificationsAria": "Notifications",
       "notificationsUnreadAria": "{{count}} unread notifications",
+      "menuButtonAria": "Open menu",
       "adminFallback": "Admin",
       "platformAdminEmail": "Platform admin"
     },
@@ -1254,13 +1258,19 @@
       "dialogCancel": "Cancel"
     },
     "hero": {
-      "headline": "Your earnings at a glance",
-      "sub": "Serve. Earn. Smile",
+      "headlineLine1": "Your earnings",
+      "headlineLine2": "at a glance",
+      "sub": "Track tips from every shift and share your personal QR in seconds.",
+      "helperText": "Snapshot above — tap a period below for detailed earnings and charts.",
       "welcomeBack": "Welcome back",
       "welcomeBackNamed": "Welcome back, {{name}}",
-      "myQr": "My QR",
+      "myQr": "My QR code",
       "generating": "Generating…",
-      "setTipGoal": "Set tip goal"
+      "setTipGoal": "Set tip goal",
+      "statTotalEarnings": "Total earnings",
+      "statAvailableBalance": "Available balance",
+      "statTotalSupporters": "Total supporters",
+      "accountOverviewLabel": "Account overview · all time"
     },
     "period": {
       "today": "Today",
@@ -1275,6 +1285,9 @@
       "daysAgo": "{{count}} days ago"
     },
     "dashboard": {
+      "analyticsSectionTitle": "Period analytics",
+      "analyticsSectionDesc": "Charts, stats, and recent tips for {{period}}.",
+      "analyticsPeriodAria": "Select period for analytics below",
       "toastNewTip": "You just received a tip!",
       "toastLinkReady": "Your tip link is ready",
       "toastLinkFail": "Could not create your link. Try again.",
@@ -1316,7 +1329,34 @@
   "business": {
     "hero": {
       "headline": "Team Performance Overview",
-      "sub": "Track team growth in real time.",
+      "headlineLine1": "Your venue",
+      "headlineLine2": "at a glance",
+      "sub": "Track team growth, QR engagement, and tip trends in one place.",
+      "helperText": "Live operational snapshot above — switch the period below for totals, charts, and trends.",
+      "welcomeBack": "Welcome back",
+      "welcomeBackNamed": "Welcome back, {{name}}",
+      "manageQr": "Manage QR codes",
+      "manageTeam": "Manage team",
+      "venueOverviewLabel": "Venue overview · this month",
+      "statTotalTips": "Tips this month",
+      "statTipCount": "Tips received",
+      "statActiveStaff": "Active staff",
+      "pulse": {
+        "sectionLabel": "Live operational pulse",
+        "lastHour": "Last 60 minutes",
+        "today": "Today · venue time",
+        "readiness": "Goals & readiness",
+        "tipsNone": "No tips yet",
+        "tipsCount_one": "{{count}} tip",
+        "tipsCount_other": "{{count}} tips",
+        "volume": "{{amount}} volume",
+        "goalsProgress": "{{onTrack}} / {{tracked}} on track",
+        "noGoalsTracked": "No team goals yet",
+        "readySubtitle": "{{ready}} / {{total}} tipping-ready",
+        "qrIssues_one": "{{count}} staff missing a QR link",
+        "qrIssues_other": "{{count}} staff missing QR links",
+        "qrComplete": "All staff have QR links"
+      },
       "loadingVenue": "Loading venue…",
       "venueDashboard": "Business"
     },
@@ -1358,6 +1398,9 @@
       "below_target": "Below target"
     },
     "dashboard": {
+      "analyticsSectionTitle": "Period analytics",
+      "analyticsSectionDesc": "Metrics and charts for {{period}}.",
+      "analyticsPeriodAria": "Select analytics period",
       "impersonationBanner": "Support mode: you are viewing this venue as the manager.",
       "exitImpersonation": "Exit to Platform Admin",
       "fixVerificationTitle": "Account pending verification",
@@ -1375,7 +1418,16 @@
       "avgTipCoaching": "Useful coaching metric",
       "employeeGoalsTitle": "Employee tip goals",
       "employeeGoalsDesc": "Targets your team set for themselves. Progress uses tips in each person's current period (aligned with the performance chart timeframe for totals).",
+      "employeeGoalsDescShort": "Track team goal progress in real time.",
+      "employeeGoalsMore": "How it works",
+      "employeeGoalsLess": "Hide details",
+      "employeeGoalsMoreAria": "Show how tip goal progress is calculated",
       "noStaffGoals": "No staff have set a tip goal yet.",
+      "noStaffGoalsHint": "Once team members add goals, progress appears here for coaching.",
+      "chartEmptyTitle": "No tips in this period yet",
+      "chartEmptyDesc": "When tips come in, this chart fills in automatically. Seeded demo venues show sample activity.",
+      "noEmployeesChartHint": "Invite your team to start tracking performance and tips together.",
+      "topPerformersEmptyHint": "Add active staff to see who is leading on tips this period.",
       "tableTeamMember": "Team member",
       "tablePeriod": "Period",
       "tableTarget": "Target",
@@ -1879,6 +1931,7 @@
     "networkHero": {
       "title": "The CareTip Ecosystem",
       "subtitle": "Real-time monitoring of global tipping activity and platform health.",
+      "subtitleMobile": "Live platform health and tipping activity at a glance.",
       "systemHealth": "System health",
       "labelPostgres": "PostgreSQL",
       "labelStripe": "Stripe API",

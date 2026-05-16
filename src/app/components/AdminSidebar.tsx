@@ -57,7 +57,7 @@ export function AdminSidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-sidebar-border lg:bg-sidebar lg:text-sidebar-foreground"
+      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
     >
       {/* Logo */}
       <div
@@ -76,8 +76,8 @@ export function AdminSidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
-        <ul className="space-y-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isNavActive(item.href, location.pathname);
             const Icon = item.icon;
@@ -86,17 +86,15 @@ export function AdminSidebar() {
               <li key={item.href}>
                 <Link
                   to={item.href}
-                  className={`
-                    flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all
-                    ${
-                      isActive
-                        ? 'bg-primary text-primary-foreground shadow-sm font-semibold'
-                        : 'text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground'
-                    }
-                  `}
+                  className={cn(
+                    "admin-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all",
+                    isActive
+                      ? "admin-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
+                      : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+                  )}
                 >
-                  <Icon className="w-5 h-5" />
-                  <span className="text-sm font-medium">{item.name}</span>
+                  <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                  <span className="truncate tracking-tight">{item.name}</span>
                 </Link>
               </li>
             );
@@ -120,7 +118,7 @@ export function AdminSidebar() {
       </div>
 
       {/* Admin Profile */}
-      <div className="border-t border-sidebar-border p-4">
+      <div className="border-t border-border/70 p-3 sm:p-4">
         <div className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
             {displayName.charAt(0)}

@@ -26,11 +26,16 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
       initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="sticky top-0 z-30 border-b border-border/80 bg-white"
+      className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[6px]"
     >
-      <div className="flex min-w-0 items-center justify-between gap-2 px-3 sm:px-4 lg:px-8 py-3 sm:py-4">
-        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-4">
-          <button type="button" onClick={onMenuClick} className="lg:hidden p-2 rounded-lg hover:bg-muted transition-colors">
+      <div className="flex min-w-0 items-center justify-between gap-2 px-3 sm:px-4 lg:px-8 py-2.5 sm:py-3.5">
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:gap-3">
+          <button
+            type="button"
+            onClick={onMenuClick}
+            className="touch-manipulation lg:hidden rounded-xl p-2.5 hover:bg-muted active:bg-muted/80 transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+            aria-label={t("shell.header.menuButtonAria")}
+          >
             <Menu className="w-5 h-5 text-foreground" />
           </button>
 
@@ -79,7 +84,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               }
               navigate("/faq");
             }}
-            className="relative touch-manipulation rounded-lg p-2 transition-colors hover:bg-muted active:opacity-90"
+            className="relative inline-flex touch-manipulation items-center justify-center rounded-xl min-h-[44px] min-w-[44px] p-2 transition-colors hover:bg-muted active:opacity-90"
             aria-label={
               showNotificationBadge
                 ? t("shell.header.notificationsUnreadAria", { count: employeeUnreadCount })

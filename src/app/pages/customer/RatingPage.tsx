@@ -11,6 +11,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 /** Canonical English values sent to the API; labels are translated in the UI. */
 const FEEDBACK_TAGS = [
@@ -149,46 +150,42 @@ export function RatingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background pb-32">
-      {/* Dashboard-style top bar */}
-      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="max-w-md mx-auto px-4 py-4 relative lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl lg:px-8 xl:px-10 2xl:px-12">
+    <div className={cf.pageWithBottomCta}>
+      <div className={cf.stickyHeader}>
+        <div className={`${cf.headerInner} relative`}>
           <button
             type="button"
             onClick={leaveFlow}
-            className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground"
+            className="absolute right-0 top-1/2 flex min-h-[2.5rem] min-w-[2.5rem] -translate-y-1/2 items-center justify-end gap-1.5 pr-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:right-3"
             aria-label={t("tipFlow.rating.leavePageAria")}
           >
-            <LogOut className="w-3.5 h-3.5" />
-            {t("tipFlow.rating.leavePage")}
+            <LogOut className="size-3.5 shrink-0" aria-hidden />
+            <span className="hidden min-[380px]:inline">{t("tipFlow.rating.leavePage")}</span>
           </button>
 
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent/10 text-accent ring-1 ring-accent/20">
-              <HeartHandshake className="h-5 w-5" />
+          <div className="flex min-w-0 flex-1 items-center gap-3 pr-20 sm:pr-28">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/18">
+              <HeartHandshake className="size-5" aria-hidden />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base font-semibold text-foreground">
-                {t("tipFlow.rating.thankYouTip")} <span aria-hidden>💛</span>
-              </h1>
-              <p className="text-xs text-muted-foreground">{t("tipFlow.rating.experienceToday")}</p>
+              <h1 className={cf.headline}>{t("tipFlow.rating.thankYouTip")}</h1>
+              <p className={cf.subline}>{t("tipFlow.rating.experienceToday")}</p>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-md mx-auto px-4 py-6 space-y-6 lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl lg:px-8 xl:px-10 2xl:px-12 lg:space-y-8">
-        {/* Context card (dashboard style) */}
+      <div className={cf.main}>
         <motion.div
           initial={{ y: 12, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.35 }}
-          className="rounded-xl border border-border bg-card p-5 shadow-sm lg:p-6"
+          className={`${cf.card} px-5 py-5 sm:px-6 sm:py-6`}
         >
           <div className="flex items-center gap-3">
             <ProfileAvatar
               src={tipContext?.employee?.avatar ?? employeeAvatar}
-              displayName={tipContext?.employee?.name ?? employeeName ?? "Team Member"}
+              displayName={tipContext?.employee?.name ?? employeeName ?? t("tipFlow.common.teamMember")}
               className="h-12 w-12"
             />
             <div className="min-w-0">
@@ -207,40 +204,37 @@ export function RatingPage() {
         </motion.div>
 
         {!sessionId ? (
-          <div className="rounded-xl border border-border bg-card p-5 text-sm text-muted-foreground">
+          <div className={`${cf.cardMuted} px-5 py-5 text-sm leading-relaxed text-muted-foreground sm:px-6`}>
             {t("tipFlow.rating.needsSession")}
           </div>
         ) : null}
 
-        {/* Rating */}
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
+          initial={{ y: 14, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-card rounded-xl border border-border p-6 shadow-sm lg:p-7"
+          className={`${cf.card} px-5 py-6 sm:px-7 sm:py-7`}
         >
           <div>
-            <h2 className="text-sm font-semibold text-foreground">{t("tipFlow.rating.tapToRate")}</h2>
-            <p className="mt-0.5 text-xs text-muted-foreground">
-              {t("tipFlow.rating.optionalForStaff")}
-            </p>
+            <h2 className={`${cf.cardTitle} text-[0.9375rem]`}>{t("tipFlow.rating.tapToRate")}</h2>
+            <p className={`${cf.cardDesc} mt-1 text-xs`}>{t("tipFlow.rating.optionalForStaff")}</p>
           </div>
 
-          <div className="mt-5 flex items-center justify-center gap-2">
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-1 sm:gap-2">
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
                 onClick={() => setRating(star)}
-                className="p-1 transition-opacity hover:opacity-80"
+                className={cf.starButton}
                 type="button"
                 aria-label={t("tipFlow.rating.starAria", { n: star })}
               >
                 <Star
                   className={[
-                    "h-10 w-10 transition-colors",
+                    "size-10 transition-colors sm:size-11",
                     star <= rating
-                      ? "text-accent fill-accent"
-                      : "text-muted-foreground",
+                      ? "fill-primary text-primary"
+                      : "text-muted-foreground/65",
                   ].join(" ")}
                 />
               </button>
@@ -265,19 +259,19 @@ export function RatingPage() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="bg-card rounded-xl border border-border p-6 shadow-sm lg:p-7"
+          className={`${cf.card} px-5 py-6 sm:px-7 sm:py-7`}
         >
-          <h2 className="text-sm font-semibold text-foreground mb-3">{t("tipFlow.rating.quickCompliments")}</h2>
+          <h2 className={`${cf.cardTitle} mb-4 text-[0.9375rem]`}>{t("tipFlow.rating.quickCompliments")}</h2>
           <div className="flex flex-wrap gap-2">
             {FEEDBACK_TAGS.map(({ key, api }) => (
               <button
                 key={api}
                 onClick={() => handleTagToggle(api)}
                 className={[
-                  "rounded-full px-4 py-2 text-sm font-semibold transition-colors ring-1",
+                  "rounded-full px-4 py-2.5 text-sm font-semibold transition-colors ring-1 ring-inset sm:min-h-[2.75rem]",
                   selectedTags.includes(api)
-                    ? "bg-accent text-white ring-accent/30"
-                    : "bg-background text-foreground ring-border hover:bg-muted/60",
+                    ? "bg-primary text-primary-foreground ring-primary/25 shadow-sm"
+                    : "bg-background text-foreground ring-border/70 hover:bg-muted/50",
                 ].join(" ")}
                 type="button"
               >
@@ -291,57 +285,52 @@ export function RatingPage() {
         <motion.div
           initial={{ opacity: 0, height: 0 }}
           animate={{ opacity: 1, height: "auto" }}
-          className="bg-card rounded-xl border border-border p-6 shadow-sm lg:p-7"
+          className={`${cf.card} px-5 py-6 sm:px-7 sm:py-7`}
         >
-          <div className="flex items-center gap-2 mb-3">
-            <MessageSquare className="w-5 h-5 text-accent" />
-            <h2 className="text-sm font-semibold text-foreground">{t("tipFlow.rating.optionalNote")}</h2>
+          <div className="mb-4 flex items-center gap-2">
+            <MessageSquare className="size-5 shrink-0 text-primary" aria-hidden />
+            <h2 className={`${cf.cardTitle} text-[0.9375rem]`}>{t("tipFlow.rating.optionalNote")}</h2>
           </div>
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder={t("tipFlow.rating.notePlaceholder")}
-            rows={4}
-            className="w-full px-4 py-3 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40 resize-none"
+            rows={3}
+            className={`${cf.inputField} resize-none leading-relaxed`}
           />
-          <div className="mt-3">
-            <label className="text-xs font-semibold text-muted-foreground">{t("tipFlow.rating.yourName")}</label>
+          <div className="mt-4">
+            <label className="mb-1.5 block text-xs font-semibold text-muted-foreground">
+              {t("tipFlow.rating.yourName")}
+            </label>
             <input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder={t("tipFlow.rating.namePlaceholder")}
-              className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-accent/40"
+              className={`${cf.inputField} py-2.5 text-sm`}
             />
           </div>
         </motion.div>
 
-        <div className="bg-muted/40 rounded-lg p-4">
-          <p className="text-xs text-muted-foreground">
-            {t("tipFlow.rating.footerHint")}
-          </p>
+        <div className={`${cf.cardMuted} px-5 py-4 sm:px-6`}>
+          <p className="text-xs leading-relaxed text-muted-foreground">{t("tipFlow.rating.footerHint")}</p>
         </div>
       </div>
 
-      {/* Fixed Bottom CTA */}
-      <motion.div
-        initial={{ y: 100 }}
-        animate={{ y: 0 }}
-        className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4"
-      >
-        <div className="max-w-md mx-auto space-y-2">
+      <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
+        <div className={`${cf.fixedBottomInner} space-y-2`}>
           <button
+            type="button"
             onClick={handleSubmit}
             disabled={submitting}
-            className="w-full bg-accent text-white rounded-xl py-4 font-semibold text-lg hover:bg-accent/90 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            type="button"
+            className={`${cf.btnPrimaryLg} disabled:pointer-events-none disabled:opacity-50`}
           >
-            <Send className="w-5 h-5" />
+            <Send className="size-5 shrink-0" aria-hidden />
             {t("tipFlow.rating.submit")}
           </button>
           <button
-            onClick={leaveFlow}
-            className="w-full text-muted-foreground text-sm hover:text-foreground transition-colors"
             type="button"
+            onClick={leaveFlow}
+            className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             {t("tipFlow.rating.leavePage")}
           </button>

@@ -10,7 +10,7 @@ export type DashboardHeroProps = {
   className?: string;
   /** Optional pill above the title; omit when redundant with sidebar branding. */
   badge?: React.ReactNode;
-  title: string;
+  title: React.ReactNode;
   /** Optional single-line tagline under the title; omitted when empty. */
   description?: string;
   /** Static hero image (ignored when `image` is set). */
@@ -49,6 +49,12 @@ export type DashboardHeroProps = {
    * Use `center` for premium, zero-slant, centered hero cards (e.g. Business Team Performance).
    */
   mobileAlign?: "left" | "center";
+  /** Optional class overrides (e.g. employee hero tone). */
+  badgeClassName?: string;
+  titleClassName?: string;
+  descriptionClassName?: string;
+  cardClassName?: string;
+  textColumnClassName?: string;
 };
 
 /**
@@ -72,6 +78,11 @@ export function DashboardHero({
   actionsPlacement = "belowTabs",
   stackHeroOnMobile = false,
   mobileAlign = "left",
+  badgeClassName,
+  titleClassName,
+  descriptionClassName,
+  cardClassName,
+  textColumnClassName,
 }: DashboardHeroProps) {
   const { t } = useTranslation();
   const hasCustomMedia = Boolean(image);
@@ -85,6 +96,7 @@ export function DashboardHero({
         className={cn(
           "inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground",
           stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
+          badgeClassName,
         )}
       >
         {badge}
@@ -98,12 +110,16 @@ export function DashboardHero({
         stackHeroOnMobile
           ? mobileAlign === "center"
             ? cn(
-                // Stacked + centered (Business / Employee): premium rhythm + room for longer headlines.
-                "text-[28px] font-bold leading-[1.06] tracking-tight sm:text-3xl lg:text-4xl xl:text-5xl",
-                "mx-auto max-w-[28ch] text-center text-pretty sm:max-w-[32ch]",
+                // Mobile: calmer scale; lg+ restores presence.
+                "text-[1.375rem] font-bold leading-[1.12] tracking-tight sm:text-[1.625rem] md:text-3xl lg:text-4xl xl:text-5xl",
+                "mx-auto max-w-[24ch] text-center text-pretty sm:max-w-[28ch] md:max-w-[32ch]",
               )
-            : cn("text-3xl font-bold tracking-tight lg:text-4xl xl:text-5xl", "text-left")
+            : cn(
+                "text-[1.375rem] font-bold leading-[1.12] tracking-tight sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl",
+                "max-w-[22ch] text-left sm:max-w-[28ch]",
+              )
           : "text-2xl font-bold tracking-tight sm:text-3xl md:text-4xl lg:text-5xl",
+        titleClassName,
       )}
     >
       {title}
@@ -114,8 +130,12 @@ export function DashboardHero({
     tagline ? (
       <CardDescription
         className={cn(
-          "max-w-xl shrink-0 break-words pt-0 text-sm leading-snug text-muted-foreground line-clamp-1",
-          stackHeroOnMobile && mobileAlign === "center" ? "mx-auto text-center" : "text-left",
+          "max-w-xl shrink-0 break-words pt-0 text-sm text-muted-foreground",
+          stackHeroOnMobile
+            ? "leading-snug line-clamp-2 max-lg:max-w-[36ch]"
+            : "leading-snug line-clamp-1",
+          stackHeroOnMobile && mobileAlign === "center" ? "mx-auto text-center lg:line-clamp-2" : "text-left",
+          descriptionClassName,
         )}
       >
         {tagline}
@@ -300,13 +320,19 @@ export function DashboardHero({
 
   return (
     <div className={cn("mb-5 lg:mb-6", className)}>
-      <div className={cn(stackHeroOnMobile && "max-lg:bg-[#FFFFFF] max-lg:px-6 max-lg:py-6")}>
+      <div
+        className={cn(
+          stackHeroOnMobile &&
+            "max-lg:bg-[#FFFFFF] max-lg:px-4 max-lg:py-4 sm:max-lg:px-5 sm:max-lg:py-5",
+        )}
+      >
         <Card
           className={cn(
             "relative overflow-hidden",
             stackHeroOnMobile
               ? "max-lg:overflow-visible max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:border-2 lg:border-border lg:bg-card lg:shadow-sm"
               : "border-2 border-border bg-card shadow-sm",
+            cardClassName,
           )}
         >
           <BorderBeam
@@ -318,37 +344,38 @@ export function DashboardHero({
           />
         {stackHeroOnMobile ? (
           <>
-            {/* Mobile DOM order (CRITICAL): heading → image → supporting → actions. Do not rely on CSS order. */}
-            <div className="dashboard-hero-container flex min-w-0 flex-col gap-4 p-0 lg:hidden">
+            {/*
+              Mobile flow (intentional): welcome → headline → supporting copy → CTAs + metrics (actions slot) →
+              optional tabs → hero visual last so it supports rather than dominates.
+            */}
+            <div className="dashboard-hero-container flex min-w-0 flex-col gap-3 p-0 sm:gap-4 lg:hidden">
               <div
                 className={cn(
-                  "flex min-w-0 flex-col gap-3",
+                  "flex min-w-0 flex-col gap-2.5 sm:gap-3",
                   mobileAlign === "center" ? "text-center" : "text-left",
                 )}
               >
                 {mobileAlign === "center" ? (
-                  <div className="min-h-0 space-y-5">
-                    {/* Badge should sit ABOVE the headline with clear breathing room (no overlap). */}
+                  <div className="min-h-0 space-y-3 sm:space-y-4">
                     {badgeRow}
                     {titleRow}
                   </div>
                 ) : (
-                  <div className="min-h-0 space-y-3">
+                  <div className="min-h-0 space-y-2.5 sm:space-y-3">
                     {badgeRow}
                     {titleRow}
                   </div>
                 )}
-                {/* Supporting text (mobile): keep it tight + single-line. */}
-                {taglineBlock ? <div className="-mt-1">{taglineBlock}</div> : null}
+                {taglineBlock ? <div className={cn(mobileAlign === "center" ? "" : "-mt-0.5")}>{taglineBlock}</div> : null}
               </div>
 
-              {!hideImage ? <div className="mt-0.5">{renderMediaColumn({ stackedLayout: true })}</div> : null}
+              {actionsRow ? <div className="min-w-0">{actionsRow}</div> : null}
 
-              {/* Live status / tabs / controls */}
-              {supportingCluster ? <div className="flex min-w-0 flex-col gap-4">{supportingCluster}</div> : null}
+              {supportingCluster ? <div className="flex min-w-0 flex-col gap-3">{supportingCluster}</div> : null}
 
-              {/* Actions */}
-              {actionsRow ? <div className="mt-0.5">{actionsRow}</div> : null}
+              {!hideImage ? (
+                <div className="min-w-0 pt-1">{renderMediaColumn({ stackedLayout: true })}</div>
+              ) : null}
             </div>
 
             {/* Desktop/tablet layout unchanged */}
@@ -365,6 +392,7 @@ export function DashboardHero({
                 className={cn(
                   "flex min-w-0 flex-col gap-4 text-left lg:min-h-0 lg:flex-none lg:justify-center lg:gap-4 lg:text-left xl:gap-5",
                   hideImage ? "lg:col-span-12 lg:row-start-1" : "lg:col-span-5 lg:row-start-1",
+                  textColumnClassName,
                 )}
               >
                 <div className="min-h-0 space-y-4 lg:space-y-5">
@@ -372,7 +400,7 @@ export function DashboardHero({
                   {titleRow}
                 </div>
                 {taglineBlock}
-                {actionsPlacement === "belowText" && actionsRow ? <div className="pt-1">{actionsRow}</div> : null}
+                {actionsPlacement === "belowText" && actionsRow ? <div className="pt-2 lg:pt-3">{actionsRow}</div> : null}
               </div>
               {!hideImage ? renderMediaColumn({ stackedLayout: true }) : null}
               {hideTabs && actionsPlacement === "belowText" ? null : (

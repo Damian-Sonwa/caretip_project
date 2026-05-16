@@ -34,7 +34,7 @@ export function EmployeeSidebar({
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-sidebar-border lg:bg-sidebar lg:text-sidebar-foreground"
+      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
     >
       <div className={cn("flex flex-col gap-3 px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
         <Link
@@ -60,8 +60,8 @@ export function EmployeeSidebar({
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
-        <ul className="space-y-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        <ul className="space-y-0.5">
           {employeeDashboardNavItems.map((item) => {
             const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);
             const Icon = item.icon;
@@ -70,14 +70,14 @@ export function EmployeeSidebar({
                 <Link
                   to={item.href}
                   className={cn(
-                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                    "employee-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium",
                     isActive
-                      ? "bg-primary font-semibold text-primary-foreground shadow-sm"
-                      : "text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                      ? "employee-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
+                      : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
                   )}
                 >
-                  <Icon className="h-5 w-5 shrink-0" />
-                  <span>{t(item.labelKey)}</span>
+                  <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                  <span className="tracking-tight">{t(item.labelKey)}</span>
                 </Link>
               </li>
             );
@@ -92,7 +92,7 @@ export function EmployeeSidebar({
             logout();
             navigate("/employee/login", { replace: true });
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className="employee-dash-nav-link flex w-full items-center gap-3 px-3 py-2.5 text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground"
         >
           <LogOut className="h-5 w-5" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>

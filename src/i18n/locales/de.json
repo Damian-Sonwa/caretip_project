@@ -562,7 +562,10 @@
     "staffLanding": {
       "loadingProfile": "Profil wird geladen…",
       "openingTipScreen": "Trinkgeld-Ansicht wird geöffnet…",
-      "goHome": "Zur Startseite"
+      "goHome": "Zur Startseite",
+      "monthlyGoalTitle": "Monatsziel",
+      "tipAgainWithAmount": "Erneut tippen ({{amount}})",
+      "chooseDifferentAmount": "Anderen Betrag wählen"
     },
     "docTitle": {
       "tip": "Trinkgeld für {{name}} - CareTip Limited",
@@ -821,6 +824,7 @@
       "searchAria": "FAQ durchsuchen",
       "notificationsAria": "Benachrichtigungen",
       "notificationsUnreadAria": "{{count}} ungelesene Benachrichtigungen",
+      "menuButtonAria": "Menü öffnen",
       "adminFallback": "Admin",
       "platformAdminEmail": "Plattformadministration"
     },
@@ -1254,13 +1258,19 @@
       "dialogCancel": "Abbrechen"
     },
     "hero": {
-      "headline": "Ihre Einnahmen auf einen Blick",
-      "sub": "Servieren. Verdienen. Lächeln.",
+      "headlineLine1": "Ihre Einnahmen",
+      "headlineLine2": "auf einen Blick",
+      "sub": "Trinkgelder pro Schicht verfolgen und Ihren persönlichen QR in Sekunden teilen.",
+      "helperText": "Überblick oben — unten den Zeitraum wählen für Details und Diagramme.",
       "welcomeBack": "Willkommen zurück",
       "welcomeBackNamed": "Willkommen zurück, {{name}}",
-      "myQr": "Mein QR Code",
+      "myQr": "Mein QR-Code",
       "generating": "Wird erstellt…",
-      "setTipGoal": "Trinkgeldziel setzen"
+      "setTipGoal": "Trinkgeldziel setzen",
+      "statTotalEarnings": "Gesamteinnahmen",
+      "statAvailableBalance": "Verfügbares Guthaben",
+      "statTotalSupporters": "Unterstützer gesamt",
+      "accountOverviewLabel": "Kontoübersicht · gesamt"
     },
     "period": {
       "today": "Heute",
@@ -1275,6 +1285,9 @@
       "daysAgo": "vor {{count}} Tagen"
     },
     "dashboard": {
+      "analyticsSectionTitle": "Zeitraum-Analysen",
+      "analyticsSectionDesc": "Diagramme, Kennzahlen und letzte Trinkgelder für {{period}}.",
+      "analyticsPeriodAria": "Zeitraum für die Analysen unten wählen",
       "toastNewTip": "Sie haben gerade ein Trinkgeld erhalten!",
       "toastLinkReady": "Ihr Tipp-Link ist bereit",
       "toastLinkFail": "Link konnte nicht erstellt werden. Bitte erneut versuchen.",
@@ -1316,7 +1329,34 @@
   "business": {
     "hero": {
       "headline": "Teamleistung im Überblick",
-      "sub": "Teamwachstum in Echtzeit verfolgen.",
+      "headlineLine1": "Ihr Betrieb",
+      "headlineLine2": "auf einen Blick",
+      "sub": "Teamwachstum, QR-Nutzung und Trinkgeld-Trends an einem Ort.",
+      "helperText": "Live-Betriebsmoment oben — unten den Zeitraum wählen für Summen, Diagramme und Trends.",
+      "welcomeBack": "Willkommen zurück",
+      "welcomeBackNamed": "Willkommen zurück, {{name}}",
+      "manageQr": "QR-Codes verwalten",
+      "manageTeam": "Team verwalten",
+      "venueOverviewLabel": "Betriebsübersicht · dieser Monat",
+      "statTotalTips": "Trinkgeld diesen Monat",
+      "statTipCount": "Trinkgelder erhalten",
+      "statActiveStaff": "Aktives Team",
+      "pulse": {
+        "sectionLabel": "Live-Betriebspuls",
+        "lastHour": "Letzte 60 Minuten",
+        "today": "Heute · Betriebszeit",
+        "readiness": "Ziele & Bereitschaft",
+        "tipsNone": "Noch keine Trinkgelder",
+        "tipsCount_one": "{{count}} Trinkgeld",
+        "tipsCount_other": "{{count}} Trinkgelder",
+        "volume": "{{amount}} Volumen",
+        "goalsProgress": "{{onTrack}} / {{tracked}} im Plan",
+        "noGoalsTracked": "Noch keine Teamziele",
+        "readySubtitle": "{{ready}} / {{total}} tip-bereit",
+        "qrIssues_one": "{{count}} Person ohne QR-Link",
+        "qrIssues_other": "{{count}} Personen ohne QR-Link",
+        "qrComplete": "Alle haben QR-Links"
+      },
       "loadingVenue": "Lokal wird geladen…",
       "venueDashboard": "Unternehmen"
     },
@@ -1358,6 +1398,9 @@
       "below_target": "Unter Ziel"
     },
     "dashboard": {
+      "analyticsSectionTitle": "Zeitraum-Analysen",
+      "analyticsSectionDesc": "Kennzahlen und Diagramme für {{period}}.",
+      "analyticsPeriodAria": "Analysezeitraum wählen",
       "impersonationBanner": "Supportmodus: Sie sehen dieses Lokal als Manager.",
       "exitImpersonation": "Zur Plattformadministration",
       "fixVerificationTitle": "Konto ausstehende Verifizierung",
@@ -1375,7 +1418,16 @@
       "avgTipCoaching": "Nützliche Kennzahl fürs Team",
       "employeeGoalsTitle": "Trinkgeldziele des Teams",
       "employeeGoalsDesc": "Ziele, die Ihr Team selbst setzt. Der Fortschritt basiert auf Trinkgeldern der jeweiligen Person im aktuellen Zeitraum (an die Gesamtzeiträume des Leistungsdiagramms angeglichen).",
+      "employeeGoalsDescShort": "Team-Fortschritt bei den Zielen in Echtzeit verfolgen.",
+      "employeeGoalsMore": "So funktioniert‘s",
+      "employeeGoalsLess": "Weniger anzeigen",
+      "employeeGoalsMoreAria": "Erklärung zur Berechnung des Zielfortschritts einblenden",
       "noStaffGoals": "Noch hat niemand ein Trinkgeldziel gesetzt.",
+      "noStaffGoalsHint": "Sobald das Team Ziele anlegt, erscheint der Fortschritt hier fürs Coaching.",
+      "chartEmptyTitle": "Noch keine Trinkgelder in diesem Zeitraum",
+      "chartEmptyDesc": "Sobald Trinkgelder eingehen, füllt sich das Diagramm automatisch. Demo-Lokale zeigen Beispieldaten.",
+      "noEmployeesChartHint": "Laden Sie Ihr Team ein, um Leistung und Trinkgelder gemeinsam zu verfolgen.",
+      "topPerformersEmptyHint": "Fügen Sie aktive Mitarbeitende hinzu, um die Trinkgeld-Spitzenreiter dieses Zeitraums zu sehen.",
       "tableTeamMember": "Teammitglied",
       "tablePeriod": "Zeitraum",
       "tableTarget": "Ziel",
@@ -1879,6 +1931,7 @@
     "networkHero": {
       "title": "Das CareTip-Ökosystem",
       "subtitle": "Echtzeitüberwachung globaler Trinkgeldaktivität und Plattform-Gesundheit.",
+      "subtitleMobile": "Live-Überblick: Plattformstatus und Aktivität.",
       "systemHealth": "Systemstatus",
       "labelPostgres": "PostgreSQL",
       "labelStripe": "Stripe-API",

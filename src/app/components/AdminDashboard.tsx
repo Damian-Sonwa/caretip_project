@@ -38,6 +38,7 @@ import { NetworkOverviewHero } from "./NetworkOverviewHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
+import { platformUi } from "./platform/platformDashboardUi";
 import {
   Select,
   SelectContent,
@@ -112,7 +113,7 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam }: Stat
           <CardDescription className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {title}
           </CardDescription>
-          <CardTitle className="break-words text-balance text-2xl font-bold tabular-nums text-foreground sm:text-3xl leading-snug">
+          <CardTitle className="break-words text-balance text-xl font-bold tabular-nums text-foreground sm:text-2xl lg:text-3xl leading-snug">
             {value}
           </CardTitle>
           {change && <p className="text-sm leading-snug text-muted-foreground">{change}</p>}
@@ -126,19 +127,23 @@ function AnalyticsCard({
   title,
   description,
   children,
+  descriptionClassName,
 }: {
   title: string;
   description: string;
   children: React.ReactNode;
+  descriptionClassName?: string;
 }) {
   return (
     <Card className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm">
       <CardHeader className="border-b border-border bg-muted/40 pb-3">
         <CardTitle className="text-base font-semibold text-foreground">{title}</CardTitle>
-        <CardDescription className="text-sm">{description}</CardDescription>
+        <CardDescription className={cn("text-sm max-lg:line-clamp-2 lg:line-clamp-none", descriptionClassName)}>
+          {description}
+        </CardDescription>
       </CardHeader>
       <CardContent className="p-4 sm:p-5">
-        <div className="h-[260px] w-full">{children}</div>
+        <div className="h-[220px] w-full sm:h-[260px]">{children}</div>
       </CardContent>
     </Card>
   );
@@ -211,7 +216,7 @@ function UserDistributionChart({
         ];
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-[260px]">
+    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
         <Pie
@@ -265,7 +270,7 @@ function TipStatusChart({
         ];
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-[260px]">
+    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
       <PieChart>
         <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
         <Pie
@@ -299,7 +304,7 @@ function GrowthChart({
   };
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-[260px]">
+    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
       <LineChart data={data} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="date" tickMargin={8} minTickGap={18} />
@@ -343,7 +348,7 @@ function TipVolumeChart({
   const showTop = topBars.length > 0;
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-[260px]">
+    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
       {showTop ? (
         <BarChart data={topBars} margin={{ left: 6, right: 6, top: 12, bottom: 26 }}>
           <CartesianGrid strokeDasharray="3 3" />
@@ -542,31 +547,34 @@ export function AdminDashboard() {
 
   if (initialDashLoading) {
     return (
-      <main className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-background px-4 pb-20 pt-8 lg:px-8">
-        <PageLoader message={t("admin.loadingDashboard")} />
+      <main className="bg-background">
+        <div className={cn(platformUi.page, "flex min-h-[min(70vh,calc(100vh-5rem))] flex-col items-center justify-center py-16")}>
+          <PageLoader message={t("admin.loadingDashboard")} />
+        </div>
       </main>
     );
   }
 
   return (
-    <main className="bg-background px-4 pb-20 pt-8 lg:px-8">
-      <div className="mb-4 flex justify-end">
-        <LiveConnectionBadge status={connectionStatus} />
-      </div>
-      <NetworkOverviewHero health={health} />
+    <main className="bg-background">
+      <div className={platformUi.page}>
+        <div className="mb-4 flex justify-end">
+          <LiveConnectionBadge status={connectionStatus} />
+        </div>
+        <NetworkOverviewHero health={health} />
 
-      <TracingBeam>
-        <FixPrompt
-          id="platformDataLoad"
-          issueActive={Boolean(serviceIssue)}
-          dismissPersistence="session"
-          title={t("admin.loadErrorTitle")}
-          description={serviceIssue ?? undefined}
-          actionLabel={t("admin.retry")}
-          onAction={() => void loadDashboardData()}
-          className="mb-6"
-        />
-        <div className="relative mb-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <TracingBeam>
+          <FixPrompt
+            id="platformDataLoad"
+            issueActive={Boolean(serviceIssue)}
+            dismissPersistence="session"
+            title={t("admin.loadErrorTitle")}
+            description={serviceIssue ?? undefined}
+            actionLabel={t("admin.retry")}
+            onAction={() => void loadDashboardData()}
+            className="mb-6"
+          />
+          <div className={cn(platformUi.statGrid)}>
           <StatCard
             title={t("admin.statTips")}
             value={stats ? `€${stats.totalVolumeEurFormatted}` : t("format.notAvailable")}
@@ -624,46 +632,46 @@ export function AdminDashboard() {
             transition={{ duration: 0.5, delay: 0.18 }}
             className="mb-10"
           >
-            <div className="mb-4 flex items-end justify-between gap-3">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div className="min-w-0">
                 <h3 className="text-lg font-semibold text-foreground">{t("admin.analyticsTitle")}</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-pretty text-sm leading-snug text-muted-foreground max-lg:line-clamp-2 lg:line-clamp-none">
                   {t("admin.analyticsSubtitle", {
                     days: (analytics ?? emptyAnalytics).rangeDays,
                     tz: (analytics ?? emptyAnalytics).timezone ?? analyticsTimezone,
                   })}
                 </p>
               </div>
-              <div className="flex flex-col items-end gap-2">
-                <div className="w-[210px]">
-                  <Select
-                    value={analyticsTimezone}
-                    onValueChange={(v) => {
-                      setAnalyticsTimezone(v);
-                      try {
-                        localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                      } catch {
-                        // ignore
-                      }
-                    }}
-                  >
-                    <SelectTrigger size="sm" aria-label={t("admin.timezoneAria")}>
-                      <SelectValue placeholder={t("admin.timezonePlaceholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
-                        <SelectItem key={tz} value={tz}>
-                          {tz}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <span className="text-xs font-medium text-muted-foreground">{t("admin.tipStatusNote")}</span>
+              <div className="flex w-full flex-col gap-2 sm:w-auto sm:max-w-[min(100%,16rem)] sm:items-end">
+                <Select
+                  value={analyticsTimezone}
+                  onValueChange={(v) => {
+                    setAnalyticsTimezone(v);
+                    try {
+                      localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                    } catch {
+                      // ignore
+                    }
+                  }}
+                >
+                  <SelectTrigger size="sm" className="w-full" aria-label={t("admin.timezoneAria")}>
+                    <SelectValue placeholder={t("admin.timezonePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
+                      <SelectItem key={tz} value={tz}>
+                        {tz}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <span className="text-xs font-medium leading-snug text-muted-foreground max-lg:line-clamp-2">
+                  {t("admin.tipStatusNote")}
+                </span>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className={cn(platformUi.analyticsChartsGrid)}>
               <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
                 <UserDistributionChart data={(analytics ?? emptyAnalytics).userDistribution} />
               </AnalyticsCard>
@@ -818,7 +826,8 @@ export function AdminDashboard() {
             </>
           ) : null}
         </motion.div>
-      </TracingBeam>
+        </TracingBeam>
+      </div>
     </main>
   );
 }

@@ -38,7 +38,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "tween", duration: 0.3 }}
-            className="fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:hidden"
+            className="fixed inset-y-0 left-0 z-50 flex w-[min(100%,18rem)] max-w-[85vw] flex-col border-r border-neutral-200/80 bg-gradient-to-b from-white to-stone-50/95 text-sidebar-foreground shadow-xl lg:hidden"
           >
             <div
               className={cn(
@@ -57,14 +57,14 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-2 transition-colors hover:bg-sidebar-accent"
+                className="touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-stone-100"
               >
                 <X className="h-5 w-5 text-sidebar-foreground" />
               </button>
             </div>
 
-            <nav className="min-h-0 flex-1 overflow-y-auto px-4 py-6">
-              <ul className="space-y-1">
+            <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
+              <ul className="space-y-0.5">
                 {businessDashboardNavItems.map((item) => {
                   const isActive = isBusinessDashboardNavActive(item.href, location.pathname);
                   const Icon = item.icon;
@@ -75,13 +75,13 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                         to={item.href}
                         onClick={onClose}
                         className={cn(
-                          "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all",
+                          "business-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all",
                           isActive
-                            ? "bg-primary font-semibold text-primary-foreground shadow-md"
-                            : "text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground",
+                            ? "business-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
+                            : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
                         )}
                       >
-                        <Icon className="h-5 w-5 shrink-0" />
+                        <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
                         <span>{t(item.labelKey)}</span>
                       </Link>
                     </li>

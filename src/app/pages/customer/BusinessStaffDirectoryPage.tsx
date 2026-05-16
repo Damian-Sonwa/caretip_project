@@ -18,6 +18,7 @@ import { usePublicSocket } from "../../hooks/usePublicSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 /**
  * Path B: `/{businessSlug}` (legacy redirect from `/business/:businessSlug`) — Business QR (staff directory).
@@ -129,9 +130,9 @@ export function BusinessStaffDirectoryPage() {
 
   if (error || !data) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
-        <p className="mb-2 text-center text-sm font-medium text-destructive">{error ?? t("tipFlow.common.notFound")}</p>
-        <Link to="/" className="text-sm text-primary hover:underline">
+      <div className={cf.stateCenter}>
+        <p className={cf.stateError}>{error ?? t("tipFlow.common.notFound")}</p>
+        <Link to="/" className="mt-4 text-sm font-semibold text-primary underline-offset-2 hover:underline">
           {t("tipFlow.common.goHomeLink")}
         </Link>
       </div>
@@ -139,71 +140,71 @@ export function BusinessStaffDirectoryPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-16">
-      <div className="sticky top-0 z-10 border-b border-border/40 bg-background/95 backdrop-blur-lg shadow-sm">
-        <div className="mx-auto flex max-w-2xl items-center gap-4 px-4 py-3.5 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12">
+    <div className={`${cf.page} pb-10 sm:pb-12`}>
+      <div className={cf.stickyHeader}>
+        <div className={cf.headerInner}>
           <button
             type="button"
             onClick={() => navigate("/")}
-            className="rounded-lg p-2 hover:bg-muted transition-colors"
-            aria-label="Home"
+            className={cf.backButton}
+            aria-label={t("tipFlow.common.homeAria")}
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
           <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="md" />
           <div className="min-w-0 flex-1">
-            <h1 className="truncate text-base font-semibold text-foreground">{data.business.name}</h1>
-            {(data.business.type || data.business.location) && (
-              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+            <h1 className={cf.headline}>{data.business.name}</h1>
+            {(data.business.type || data.business.location) ? (
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                 {data.business.type ? <span>{data.business.type}</span> : null}
-                {data.business.type && data.business.location ? <span>•</span> : null}
+                {data.business.type && data.business.location ? <span aria-hidden>•</span> : null}
                 {data.business.location ? <span>{data.business.location}</span> : null}
               </div>
-            )}
+            ) : null}
           </div>
           <LiveConnectionBadge status={connectionStatus} className="shrink-0" />
         </div>
       </div>
 
-      <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:max-w-6xl xl:max-w-7xl 2xl:max-w-[1280px] lg:px-8 xl:px-10 2xl:px-12 lg:space-y-8">
-        <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-2">
-          <h2 className="text-lg font-bold text-foreground">Choose who you'd like to thank</h2>
-          <p className="text-sm text-muted-foreground">
-            Every tip is recorded for transparency. You'll set the amount on the next screen.
+      <div className={`${cf.main} lg:space-y-8`}>
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-2">
+          <h2 className={`${cf.headline}`}>{t("tipFlow.qrLanding.whoServedYou")}</h2>
+          <p className={`${cf.subline} text-sm leading-relaxed sm:text-[0.9375rem]`}>
+            {t("tipFlow.qrLanding.whoServedYouDesc")}
           </p>
         </motion.div>
 
-        <Card className="border border-border/50 shadow-md">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Search Team</CardTitle>
-            <CardDescription>Filter by name or role</CardDescription>
+        <Card className={cf.cardShadcn}>
+          <CardHeader className={`${cf.cardHeaderPadding} pb-3`}>
+            <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
+            <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-5 pb-5 sm:px-6">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <input
                 type="search"
-                placeholder="Search by name or role…"
+                placeholder={t("tipFlow.qrLanding.searchPlaceholder")}
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                className="w-full rounded-lg border border-border bg-background py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
+                className={`${cf.inputField} pl-11`}
                 autoComplete="off"
               />
             </div>
           </CardContent>
         </Card>
 
-        <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <Card className="border border-border/50 shadow-md">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Team Members</CardTitle>
-              <CardDescription>Tap a team member to continue</CardDescription>
+        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+          <Card className={cf.cardShadcn}>
+            <CardHeader className={`${cf.cardHeaderPadding} pb-3`}>
+              <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.teamTitle")}</CardTitle>
+              <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.teamDesc")}</CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-5 pb-5 sm:px-6">
               {filtered.length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted-foreground">No matches found.</p>
+                <p className="py-12 text-center text-sm text-muted-foreground">{t("tipFlow.qrLanding.noMatches")}</p>
               ) : (
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
                   {filtered.map((emp, index) => (
                     <motion.li
                       key={emp.id}
@@ -214,18 +215,18 @@ export function BusinessStaffDirectoryPage() {
                       <button
                         type="button"
                         onClick={() => pickEmployee(emp)}
-                        className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/50 bg-card p-4 text-left transition-all hover:border-primary/50 hover:shadow-lg hover:bg-muted/30"
+                        className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 text-left shadow-[0_6px_22px_-14px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] hover:border-primary/35 hover:shadow-[0_10px_30px_-16px_rgba(15,23,42,0.11)] active:opacity-95"
                       >
                         <ProfileAvatar
                           src={emp.avatar}
                           displayName={emp.name}
-                          className="h-20 w-20 ring-2 ring-primary/20 sm:h-24 sm:w-24"
+                          className="h-20 w-20 ring-2 ring-primary/22 sm:h-24 sm:w-24"
                         />
                         <div className="min-w-0 text-center">
                           <span className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">
                             {emp.name}
                           </span>
-                          <span className="line-clamp-2 text-xs text-muted-foreground mt-1">{emp.jobTitle}</span>
+                          <span className="mt-1 line-clamp-2 text-xs text-muted-foreground">{emp.jobTitle}</span>
                         </div>
                       </button>
                     </motion.li>
@@ -236,9 +237,10 @@ export function BusinessStaffDirectoryPage() {
           </Card>
         </motion.div>
 
-        <Card className="border border-border/50 bg-muted/20 shadow-sm">
-          <CardContent className="flex items-center justify-center gap-2 py-4 text-center text-xs text-muted-foreground">
-            Secure checkout on the next steps · CareTip Limited
+        <Card className={`${cf.cardMuted} border-border/55`}>
+          <CardContent className="flex items-center justify-center gap-2 px-5 py-4 text-center text-xs font-medium leading-relaxed text-muted-foreground">
+            <Building2 className="size-4 shrink-0 text-primary/75" aria-hidden />
+            <span>{t("tipFlow.qrLanding.secureFooter")}</span>
           </CardContent>
         </Card>
       </div>
