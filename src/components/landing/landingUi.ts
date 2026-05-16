@@ -184,7 +184,7 @@ export const landingUi = {
     "w-full max-w-2xl text-left pt-1 max-lg:pt-1.5 md:max-w-none md:pt-2",
   ),
   heroActionCluster:
-    "relative z-10 flex w-full flex-col items-start gap-7 max-md:gap-7 max-md:pb-0 max-md:!mt-0 md:!mt-10 md:max-w-none md:gap-8",
+    "relative z-10 flex w-full flex-col items-start gap-7 max-md:gap-7 max-md:pb-0 max-md:!mt-8 md:!mt-12 md:max-w-none md:gap-8",
   heroBenefits:
     "!mt-0 w-full gap-3.5 max-md:gap-4 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
   heroCtaRow:
