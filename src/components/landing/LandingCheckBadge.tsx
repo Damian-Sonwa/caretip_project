@@ -97,12 +97,12 @@ export function LandingBenefitBlock({
   return (
     <div
       className={cn(
-        "flex min-h-0 flex-col gap-3 max-md:gap-3.5 sm:grid sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:items-start sm:gap-x-4 sm:gap-y-0",
+        "grid min-h-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-3 sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4",
         className,
       )}
     >
-      <LandingCheckBadge className="shrink-0 sm:mt-0.5" />
-      <div className="min-w-0 space-y-2 max-md:space-y-2.5">
+      <LandingCheckBadge className="mt-0.5 shrink-0 sm:mt-0.5" />
+      <div className="min-w-0 space-y-1.5 sm:space-y-2">
         <div className={cn("text-base font-semibold leading-snug text-neutral-900 dark:text-neutral-100", titleClassName)}>
           {title}
         </div>

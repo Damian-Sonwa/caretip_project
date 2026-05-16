@@ -3,6 +3,8 @@ import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
+import { landingUi } from "@/components/landing/landingUi";
+import { cn } from "@/lib/utils";
 import businessSectionImg from "../../../../images/business_section.jpeg";
 
 export function BusinessLandingSection() {
@@ -10,31 +12,27 @@ export function BusinessLandingSection() {
   return (
     <section
       id="business-section"
-      className="scroll-mt-[80px] w-full min-w-0 bg-white px-3 py-12 max-md:overflow-x-hidden sm:px-6 sm:py-20 md:py-24 lg:py-28 dark:bg-neutral-950"
+      className={cn(landingUi.section, landingUi.sectionWhite, "max-md:overflow-x-hidden")}
     >
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center justify-items-center gap-6 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
+      <div className={landingUi.splitGrid}>
         <motion.div
           initial={{ x: -30, opacity: 0 }}
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="order-2 flex w-full flex-col items-center space-y-6 text-center max-md:px-2 max-md:pt-2 md:order-1 md:px-0 md:pt-0 lg:items-start lg:text-left"
+          className={cn(landingUi.copyColumn, "md:order-1")}
         >
-          <div className="flex w-full max-w-xl flex-col items-center space-y-4 lg:items-start">
-            <span className="inline-block rounded-full bg-primary/10 px-4 py-2 text-sm font-semibold text-primary">
-              {t("landing.businessSection.pill")}
-            </span>
-            <h2 className="text-4xl font-bold text-neutral-900 sm:text-5xl dark:text-neutral-100">
+          <div className={landingUi.copyStack}>
+            <span className={landingUi.pill}>{t("landing.businessSection.pill")}</span>
+            <h2 className={landingUi.headline}>
               {t("landing.businessSection.titleLine1")}
               <br />
               <span className="text-primary">{t("landing.businessSection.titleLine2")}</span>
             </h2>
-            <p className="text-lg leading-relaxed text-neutral-600 dark:text-neutral-400">
-              {t("landing.businessSection.subtitle")}
-            </p>
+            <p className={landingUi.subtitle}>{t("landing.businessSection.subtitle")}</p>
           </div>
 
-          <div className="w-full max-w-xl space-y-4 text-left">
+          <div className={landingUi.benefitList}>
             <LandingBenefitBlock
               title={t("landing.businessSection.b1Title")}
               description={t("landing.businessSection.b1Text")}
@@ -55,10 +53,10 @@ export function BusinessLandingSection() {
 
           <Link
             to="/auth?mode=signup&role=business&from=landing"
-            className="inline-flex items-center gap-2 rounded-2xl bg-primary px-8 py-4 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
+            className={landingUi.cta}
           >
             {t("landing.businessSection.cta")}
-            <ArrowRight className="h-5 w-5" aria-hidden />
+            <ArrowRight className="h-5 w-5 shrink-0" aria-hidden />
           </Link>
         </motion.div>
 
@@ -67,18 +65,16 @@ export function BusinessLandingSection() {
           whileInView={{ x: 0, opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
-          className="relative order-1 flex w-full max-w-[min(100%,36rem)] flex-col items-center justify-center md:order-2 md:mx-auto md:max-w-none md:w-full"
+          className={cn(landingUi.visualColumn, "md:order-2")}
         >
-          <div className="flex w-full min-h-0 items-center justify-center">
-            <div className="mx-auto mt-4 w-full max-w-none overflow-hidden rounded-[2.5rem] border border-gray-200/30 shadow-xl max-md:min-h-[min(42dvh,380px)] md:mt-0 md:max-w-md lg:max-w-2xl">
-              <img
-                src={businessSectionImg}
-                alt={t("landing.businessSection.imageAlt")}
-                className="h-full w-full object-cover object-center"
-                loading="lazy"
-                decoding="async"
-              />
-            </div>
+          <div className={cn(landingUi.visualFrame, "max-lg:max-h-[min(40vh,320px)]")}>
+            <img
+              src={businessSectionImg}
+              alt={t("landing.businessSection.imageAlt")}
+              className="h-full min-h-[200px] w-full object-cover object-center sm:min-h-[240px]"
+              loading="lazy"
+              decoding="async"
+            />
           </div>
         </motion.div>
       </div>

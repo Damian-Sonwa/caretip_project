@@ -5,6 +5,8 @@ import tableQrImg from "../../../../images/table_QR.png";
 import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
+import { landingUi } from "@/components/landing/landingUi";
+import { cn } from "@/lib/utils";
 
 export function LandingRealLifeSection() {
   const { t } = useTranslation();
@@ -43,15 +45,15 @@ export function LandingRealLifeSection() {
   return (
     <section
       id="real-life"
-      className="scroll-mt-[80px] w-full min-w-0 bg-white px-4 py-12 sm:px-6 sm:py-20 lg:py-24 dark:bg-neutral-950"
+      className={cn(landingUi.section, landingUi.sectionWhite, "lg:py-24")}
     >
       <div className="mx-auto max-w-7xl">
-        <div className="mx-auto mb-8 max-w-2xl text-center sm:mb-12">
+        <div className={landingUi.sectionIntro}>
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-balance text-[clamp(1.5rem,5.2vw,2.25rem)] font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl md:text-5xl"
+            className={landingUi.sectionTitle}
           >
             {t("landing.realLife.title")}
           </motion.h2>

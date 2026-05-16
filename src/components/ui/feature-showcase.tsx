@@ -354,9 +354,9 @@ export function FeatureShowcase({
 
                   <div
                     className={cn(
-                      "flex w-full flex-wrap items-stretch justify-center gap-3 sm:justify-start",
+                      "flex w-full flex-wrap items-stretch justify-start gap-3",
                       cinematic
-                        ? "mx-auto max-w-[min(100%,320px)] flex-col gap-2 max-md:mt-3 max-md:py-2 sm:mx-0 sm:mt-5 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3.5 sm:py-0"
+                        ? "max-w-full flex-col gap-2 max-md:mt-3 max-md:py-0 sm:mt-5 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3.5 sm:py-0"
                         : "mt-4 gap-3 sm:mt-7",
                     )}
                   >

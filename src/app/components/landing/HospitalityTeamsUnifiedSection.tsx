@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { LandingCheckBadge } from "@/components/landing/LandingCheckBadge";
+import { landingUi } from "@/components/landing/landingUi";
+import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
   const { t } = useTranslation();
@@ -25,20 +27,23 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="built-for-hospitality"
-      className="scroll-mt-[80px] w-full min-w-0 max-w-full overflow-x-hidden bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-20 max-md:pb-24 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]"
+      className={cn(
+        landingUi.section,
+        "max-w-full overflow-x-hidden max-md:pb-16 max-md:pt-10 bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] sm:pb-24 sm:pt-20 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
+      )}
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
-        <div className="mb-6 w-full max-w-full space-y-2.5 text-center sm:mb-10 sm:space-y-4">
+        <div className={landingUi.sectionIntro}>
           <motion.div
             initial={{ y: 10, opacity: 0 }}
             whileInView={{ y: 0, opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
           >
-            <h2 className="mb-3 max-w-full break-words text-balance font-bold leading-[1.05] text-gray-900 text-[clamp(1.75rem,6vw,3.75rem)]">
+            <h2 className={cn(landingUi.headline, "w-full max-w-none text-gray-900 sm:max-w-2xl lg:mx-auto lg:max-w-3xl lg:text-center")}>
               {t("landing.hospitality.title")}
             </h2>
-            <p className="mx-auto max-w-3xl break-words text-pretty leading-relaxed text-gray-600 text-[clamp(1rem,2.6vw,1.25rem)] dark:text-neutral-300">
+            <p className={cn(landingUi.sectionSubtitle, "mt-3 text-gray-600 dark:text-neutral-300")}>
               {t("landing.hospitality.subtitle")}
             </p>
           </motion.div>
@@ -64,7 +69,7 @@ export function HospitalityTeamsUnifiedSection() {
           </div>
 
           <div className="flex min-w-0 flex-col items-center lg:order-1 lg:items-stretch">
-            <ul className="flex w-full min-w-0 max-w-full flex-col items-center space-y-3.5 max-md:mt-1 sm:space-y-4 lg:items-stretch">
+            <ul className="flex w-full min-w-0 max-w-full flex-col items-stretch space-y-3 max-md:mt-1 max-lg:space-y-3 sm:space-y-3.5 lg:items-stretch">
               {features.map((f, idx) => (
                 <motion.li
                   key={`hospitality-feature-${idx}`}
