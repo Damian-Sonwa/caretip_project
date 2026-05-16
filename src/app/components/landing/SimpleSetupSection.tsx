@@ -34,7 +34,7 @@ export function SimpleSetupSection() {
   return (
     <section
       id="how-it-works"
-      className="scroll-mt-[80px] w-full min-w-0 bg-[linear-gradient(180deg,#ffffff_0%,#fafaf8_50%,#ffffff_100%)] px-3 py-10 max-md:overflow-x-hidden sm:px-6 sm:py-16 lg:py-20 dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_50%,#0a0a0a_100%)]"
+      className="scroll-mt-[80px] w-full min-w-0 bg-[linear-gradient(180deg,#ffffff_0%,#fafaf8_50%,#ffffff_100%)] px-3 py-10 max-md:overflow-x-hidden max-md:pt-14 sm:px-6 sm:py-16 lg:py-20 dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_50%,#0a0a0a_100%)]"
     >
       <div className="mx-auto max-w-7xl">
         <div className="grid items-center justify-items-center gap-6 sm:gap-10 lg:grid-cols-2 lg:justify-items-stretch lg:gap-12">
@@ -65,7 +65,7 @@ export function SimpleSetupSection() {
             </motion.div>
 
             <div className="relative mt-2 w-full max-w-full">
-              <div className="space-y-3">
+              <div className="space-y-3.5 max-md:space-y-4">
                 {steps.map((step, idx) => (
                   <motion.div
                     key={step.title}
@@ -73,13 +73,15 @@ export function SimpleSetupSection() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: idx * 0.06 }}
-                    className="group relative rounded-2xl bg-white p-5 shadow-sm ring-1 ring-gray-200/70 transition-shadow hover:shadow-md dark:bg-neutral-950 dark:ring-neutral-800"
+                    className="group relative rounded-2xl bg-white px-5 py-5 shadow-sm ring-1 ring-gray-200/70 transition-shadow hover:shadow-md max-md:py-5 sm:px-6 sm:py-6 dark:bg-neutral-950 dark:ring-neutral-800"
                   >
-                    <div className="flex items-start gap-4">
-                      <LandingCheckBadge className="mt-0.5 shrink-0" />
-                      <div className="min-w-0 text-left">
-                        <p className="text-base font-semibold text-neutral-900 dark:text-neutral-100">{step.title}</p>
-                        <p className="mt-1 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+                    <div className="flex flex-col gap-3 max-md:gap-3.5 sm:flex-row sm:items-start sm:gap-4">
+                      <LandingCheckBadge className="shrink-0 sm:mt-0.5" />
+                      <div className="min-w-0 space-y-2 text-left">
+                        <p className="text-base font-semibold leading-snug text-neutral-900 dark:text-neutral-100">
+                          {step.title}
+                        </p>
+                        <p className="text-[15px] font-medium leading-[1.55] text-neutral-600 dark:text-neutral-400 sm:text-sm sm:font-normal sm:leading-relaxed">
                           {step.description}
                         </p>
                       </div>

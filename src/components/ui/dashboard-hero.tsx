@@ -352,7 +352,7 @@ export function DashboardHero({
         {stackHeroOnMobile ? (
           <>
             {/*
-              Mobile flow (intentional): welcome → headline → supporting copy → CTAs + metrics (actions slot) →
+              Mobile flow (intentional): welcome → headline → supporting copy → CTAs → metrics → context bridge (actions slot) →
               optional tabs → hero visual last so it supports rather than dominates.
             */}
             <div className="dashboard-hero-container flex min-w-0 flex-col gap-3 p-0 sm:gap-4 lg:hidden">

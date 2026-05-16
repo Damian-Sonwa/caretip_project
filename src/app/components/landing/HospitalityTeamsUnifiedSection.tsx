@@ -25,7 +25,7 @@ export function HospitalityTeamsUnifiedSection() {
   return (
     <section
       id="built-for-hospitality"
-      className="scroll-mt-[80px] w-full min-w-0 max-w-full overflow-x-hidden bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] px-4 pb-12 pt-10 sm:px-6 sm:pb-24 sm:pt-20 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]"
+      className="scroll-mt-[80px] w-full min-w-0 max-w-full overflow-x-hidden bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] px-4 pb-16 pt-10 sm:px-6 sm:pb-24 sm:pt-20 max-md:pb-24 lg:pt-24 dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]"
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
         <div className="mb-6 w-full max-w-full space-y-2.5 text-center sm:mb-10 sm:space-y-4">
@@ -44,7 +44,7 @@ export function HospitalityTeamsUnifiedSection() {
           </motion.div>
         </div>
 
-        <div className="grid w-full min-w-0 gap-6 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
+        <div className="grid w-full min-w-0 gap-8 max-md:gap-10 sm:gap-10 lg:grid-cols-[1fr_1.15fr] lg:items-stretch lg:gap-12">
           <div className="min-w-0 lg:order-2">
             <LandingBorderedCard cardClassName="p-0">
               <motion.div
@@ -64,7 +64,7 @@ export function HospitalityTeamsUnifiedSection() {
           </div>
 
           <div className="flex min-w-0 flex-col items-center lg:order-1 lg:items-stretch">
-            <ul className="flex w-full min-w-0 max-w-full flex-col items-center space-y-3 sm:space-y-4 lg:items-stretch">
+            <ul className="flex w-full min-w-0 max-w-full flex-col items-center space-y-3.5 max-md:mt-1 sm:space-y-4 lg:items-stretch">
               {features.map((f, idx) => (
                 <motion.li
                   key={`hospitality-feature-${idx}`}
@@ -72,15 +72,15 @@ export function HospitalityTeamsUnifiedSection() {
                   whileInView={{ y: 0, opacity: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: idx * 0.08 }}
-                  className="w-full max-w-full rounded-3xl border border-black/[0.06] bg-white p-5 shadow-sm dark:border-white/10 dark:bg-neutral-950/40"
+                  className="w-full max-w-full rounded-3xl border border-black/[0.06] bg-white px-5 py-5 shadow-sm max-md:py-5 sm:px-6 sm:py-6 dark:border-white/10 dark:bg-neutral-950/40"
                 >
-                  <div className="grid min-h-0 w-full min-w-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-4 sm:grid-cols-[2.5rem_minmax(0,1fr)]">
-                    <LandingCheckBadge className="mt-0.5" />
-                    <div className="min-w-0 text-left">
-                      <p className="max-w-full break-words text-lg font-bold tracking-tight text-gray-900 dark:text-neutral-100">
+                  <div className="flex min-h-0 w-full min-w-0 flex-col gap-3 max-md:gap-3.5 sm:grid sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:items-start sm:gap-x-4">
+                    <LandingCheckBadge className="shrink-0 sm:mt-0.5" />
+                    <div className="min-w-0 space-y-2.5 text-left sm:space-y-2">
+                      <p className="max-w-full break-words text-lg font-bold leading-snug tracking-tight text-gray-900 dark:text-neutral-100">
                         {f.title}
                       </p>
-                      <p className="mt-1 max-w-full break-words text-base leading-relaxed text-gray-500 dark:text-neutral-300">
+                      <p className="max-w-full break-words text-[15px] font-medium leading-[1.55] text-gray-600 dark:text-neutral-300 sm:text-base sm:font-normal sm:leading-relaxed sm:text-gray-500">
                         {f.text}
                       </p>
                     </div>

@@ -495,9 +495,6 @@ export function EmployeeDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
-              <p className="text-[13px] leading-relaxed text-muted-foreground max-lg:max-w-sm sm:text-sm">
-                {t("employee.hero.helperText")}
-              </p>
               <div className="employee-hero-cta-row">
                 <Button
                   type="button"
@@ -529,10 +526,7 @@ export function EmployeeDashboard() {
                   </Link>
                 </Button>
               </div>
-              <p className="text-[12px] font-medium text-muted-foreground/90 sm:text-xs">
-                {t("employee.hero.accountOverviewLabel")}
-              </p>
-              <dl className="employee-hero-account-stats">
+              <dl className="employee-hero-account-stats" aria-label={t("employee.hero.accountOverviewLabel")}>
                 <div>
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
                   <dd>
@@ -558,6 +552,9 @@ export function EmployeeDashboard() {
                   </dd>
                 </div>
               </dl>
+              <div className="dashboard-hero-context-bridge">
+                <p className="dashboard-hero-context-bridge__text">{t("employee.hero.helperText")}</p>
+              </div>
             </motion.div>
           }
         />

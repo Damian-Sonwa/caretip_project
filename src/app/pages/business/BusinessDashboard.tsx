@@ -489,9 +489,6 @@ export function BusinessDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
-              <p className="text-[13px] leading-relaxed text-muted-foreground max-lg:max-w-sm sm:text-sm">
-                {t("business.hero.helperText")}
-              </p>
               <div className="business-hero-cta-row">
                 <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 shrink-0")} asChild>
                   <Link to="/dashboard/qr-code-management" className="inline-flex items-center justify-center gap-2">
@@ -506,10 +503,7 @@ export function BusinessDashboard() {
                   </Link>
                 </Button>
               </div>
-              <p className="text-[12px] font-medium text-muted-foreground/90 sm:text-xs">
-                {t("business.hero.pulse.sectionLabel")}
-              </p>
-              <dl className="business-hero-account-stats">
+              <dl className="business-hero-account-stats" aria-label={t("business.hero.pulse.sectionLabel")}>
                 <div>
                   <dt>{t("business.hero.pulse.lastHour")}</dt>
                   <dd>
@@ -588,6 +582,9 @@ export function BusinessDashboard() {
                   </dd>
                 </div>
               </dl>
+              <div className="dashboard-hero-context-bridge">
+                <p className="dashboard-hero-context-bridge__text">{t("business.hero.helperText")}</p>
+              </div>
             </motion.div>
           }
         />

@@ -63,7 +63,7 @@ export function LandingFeaturesSection() {
                   {idx === 0 ? (
                     <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />
                   ) : null}
-                  <CardHeader className="relative z-[1] pb-3">
+                  <CardHeader className="relative z-[1] flex flex-col gap-3 pb-4 pt-1 sm:gap-3.5">
                     <div className="flex items-start justify-between gap-3">
                       <div className="rounded-lg border border-border bg-muted p-2">
                         <Icon className="h-5 w-5 text-foreground" />
@@ -72,7 +72,9 @@ export function LandingFeaturesSection() {
                     <CardTitle className="text-lg font-semibold leading-snug tracking-tight text-foreground sm:text-xl">
                       {item.title}
                     </CardTitle>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{item.text}</p>
+                    <p className="text-[15px] font-medium leading-[1.55] text-muted-foreground sm:text-sm sm:font-normal sm:leading-relaxed">
+                      {item.text}
+                    </p>
                   </CardHeader>
                 </Card>
               </motion.div>
