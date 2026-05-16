@@ -4,6 +4,7 @@ import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 export function SimpleSetupSection() {
@@ -51,11 +52,11 @@ export function SimpleSetupSection() {
             className={cn(landingUi.copyStack, "mb-5 max-lg:mb-6 sm:mb-8")}
           >
             <div className={cn(landingUi.pillRow, "max-md:flex-col max-md:gap-1.5 max-md:items-center")}>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white px-2.5 py-0.5 text-[12px] font-semibold text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1 sm:text-xs">
+              <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white px-2.5 py-0.5 text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1", landingType.pill)}>
                 <Sparkles className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
                 {t("landing.simpleSetup.pill")}
               </span>
-              <span className="text-center text-[14px] font-medium text-neutral-600 max-lg:w-full dark:text-neutral-400 sm:text-left sm:text-sm">
+              <span className={cn(landingUi.eyebrowSecondary, "max-lg:w-full")}>
                 {t("landing.simpleSetup.pillSub")}
               </span>
             </div>
@@ -63,7 +64,7 @@ export function SimpleSetupSection() {
             <h2 className={landingUi.headline}>
               {t("landing.simpleSetup.title")}
             </h2>
-            <p className={cn(landingUi.subtitle, "text-neutral-700 dark:text-neutral-300")}>
+            <p className={landingUi.subtitle}>
               {t("landing.simpleSetup.subtitle")}
             </p>
           </motion.div>
@@ -97,7 +98,7 @@ export function SimpleSetupSection() {
                     <div className="flex items-start gap-3 max-lg:gap-3 sm:gap-4">
                       <span
                         className={cn(
-                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[14px] font-bold transition-colors max-lg:h-8 max-lg:w-8 sm:h-10 sm:w-10 sm:text-sm",
+                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-card-title font-bold tabular-nums transition-colors max-lg:h-8 max-lg:w-8 sm:h-10 sm:w-10",
                           isActive
                             ? "bg-primary text-white shadow-[0_4px_14px_rgba(235,153,44,0.35)]"
                             : "bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300",
@@ -108,13 +109,13 @@ export function SimpleSetupSection() {
                       <div className="min-w-0 flex-1 space-y-1.5 pt-0.5 sm:space-y-2">
                         <p
                           className={cn(
-                            "text-[15px] font-semibold leading-snug tracking-tight max-lg:text-[15px] sm:text-[17px]",
+                            cn(landingType.cardTitle, "tracking-tight"),
                             isActive ? "text-neutral-900 dark:text-neutral-50" : "text-neutral-800 dark:text-neutral-100",
                           )}
                         >
                           {step.title}
                         </p>
-                        <p className="text-[14px] leading-[1.52] text-neutral-600 max-lg:leading-[1.5] dark:text-neutral-400 sm:text-[15px] sm:leading-[1.62]">
+                        <p className={landingType.featureBody}>
                           {step.description}
                         </p>
                       </div>
@@ -146,20 +147,20 @@ export function SimpleSetupSection() {
 
             <div className="pointer-events-none absolute -right-1 top-4 z-10 hidden sm:block lg:right-2">
               <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                <p className={cn(landingType.meta, "text-neutral-500 dark:text-neutral-400")}>
                   {t("landing.simpleSetup.floatSetupLabel")}
                 </p>
-                <p className="mt-0.5 text-sm font-bold text-neutral-900 dark:text-neutral-100">
+                <p className={cn(landingType.cardTitle, "mt-0.5 tabular-nums")}>
                   {t("landing.simpleSetup.floatSetupValue")}
                 </p>
               </div>
             </div>
             <div className="pointer-events-none absolute bottom-16 left-0 z-10 hidden sm:block lg:bottom-20">
               <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
+                <p className={cn(landingType.meta, "text-neutral-500 dark:text-neutral-400")}>
                   {t("landing.simpleSetup.floatTimeLabel")}
                 </p>
-                <p className="mt-0.5 text-sm font-bold text-primary">{t("landing.simpleSetup.floatTimeValue")}</p>
+                <p className={cn(landingType.cardTitle, "mt-0.5 text-primary tabular-nums")}>{t("landing.simpleSetup.floatTimeValue")}</p>
               </div>
             </div>
           </div>

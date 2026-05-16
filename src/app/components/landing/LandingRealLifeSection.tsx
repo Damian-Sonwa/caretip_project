@@ -6,6 +6,7 @@ import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 export function LandingRealLifeSection() {
@@ -45,7 +46,7 @@ export function LandingRealLifeSection() {
   return (
     <section
       id="real-life"
-      className={cn(landingUi.section, landingUi.sectionWhite, "lg:py-24")}
+      className={cn(landingUi.section, landingUi.sectionWhite)}
     >
       <div className="mx-auto max-w-7xl">
         <div className={landingUi.sectionIntro}>
@@ -77,9 +78,9 @@ export function LandingRealLifeSection() {
                   loading="lazy"
                 />
               </div>
-              <div className="flex flex-col gap-2 p-5 text-left">
-                <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-100">{item.headline}</h3>
-                <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">{item.text}</p>
+              <div className={cn(landingUi.cardCopyStack, "p-5 sm:p-6")}>
+                <h3 className={cn(landingType.cardTitle, "tracking-tight")}>{item.headline}</h3>
+                <p className={landingUi.cardFeatureBody}>{item.text}</p>
               </div>
             </motion.article>
           ))}

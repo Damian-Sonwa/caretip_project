@@ -14,38 +14,22 @@ export function LandingFinalCtaSection() {
         "relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fcfbf9_50%,#fffefb_100%)] md:py-24 lg:py-28 dark:bg-neutral-950",
       )}
     >
-      <div
+      <motion.div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_130%_75%_at_50%_0%,rgba(235,153,44,0.09),transparent_58%),radial-gradient(ellipse_120%_60%_at_20%_80%,rgba(0,0,0,0.028),transparent_55%),radial-gradient(ellipse_120%_60%_at_85%_70%,rgba(0,0,0,0.022),transparent_55%)]"
       />
-      <div className="relative mx-auto flex max-w-3xl flex-col items-center text-center max-lg:max-w-none max-lg:px-1 sm:max-w-2xl lg:max-w-3xl">
-        <motion.h2
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className={landingUi.sectionTitle}
-        >
-          {t("landing.finalCta.title")}
-        </motion.h2>
-        <motion.p
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.06 }}
-          className={cn(
-            landingUi.sectionSubtitle,
-            "mt-4 text-neutral-700 dark:text-neutral-300 sm:mt-5",
-          )}
-        >
-          {t("landing.finalCta.subtitle")}
-        </motion.p>
-        <motion.div
-          initial={{ opacity: 0, y: 14 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.12 }}
-          className="mt-6 flex w-full max-w-md justify-center max-lg:mt-6 sm:mt-8"
-        >
+      <motion.div
+        initial={{ opacity: 0, y: 14 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        className={cn(
+          landingUi.sectionIntro,
+          "relative mx-auto mb-0 max-w-3xl max-lg:max-w-none max-lg:px-1 sm:max-w-2xl lg:max-w-3xl",
+        )}
+      >
+        <h2 className={landingUi.sectionTitle}>{t("landing.finalCta.title")}</h2>
+        <p className={landingUi.sectionSubtitle}>{t("landing.finalCta.subtitle")}</p>
+        <div className="flex w-full max-w-md justify-center pt-2 sm:pt-3">
           <Link
             to="/auth?mode=signup&role=business&from=landing"
             className={cn(
@@ -56,8 +40,8 @@ export function LandingFinalCtaSection() {
             {t("landing.finalCta.cta")}
             <ArrowRight className="h-5 w-5" aria-hidden />
           </Link>
-        </motion.div>
-      </div>
+        </div>
+      </motion.div>
     </section>
   );
 }

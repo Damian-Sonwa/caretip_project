@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -18,10 +19,10 @@ const cardClassName = cn(
 
 const chipClassName = cn(
   "inline-flex min-h-8 items-center justify-center rounded-full border border-neutral-200/95 bg-white px-3 py-1.5 max-lg:min-h-8 max-lg:px-3 max-lg:py-1.5",
-  "text-xs font-semibold tracking-tight text-neutral-800",
+  cn(landingType.pill, "tracking-tight text-neutral-800 normal-case"),
   "shadow-[0_1px_2px_rgba(15,15,15,0.04)] ring-1 ring-neutral-900/[0.04]",
   "dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:ring-white/[0.06]",
-  "sm:min-h-10 sm:px-4 sm:text-[13px]",
+  "sm:min-h-10 sm:px-4",
 );
 
 export function LandingSocialProofSection() {
@@ -68,10 +69,7 @@ export function LandingSocialProofSection() {
             {t("landing.socialProof.title")}
           </h2>
           <p
-            className={cn(
-              landingUi.sectionSubtitle,
-              "text-neutral-700 dark:text-neutral-300",
-            )}
+            className={landingUi.sectionSubtitle}
           >
             {t("landing.socialProof.subtitle")}
           </p>
@@ -81,7 +79,10 @@ export function LandingSocialProofSection() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-5 flex flex-wrap items-center justify-center gap-2 max-lg:mb-6 sm:mb-8 sm:gap-2.5"
+          className={cn(
+            landingUi.sectionAfterIntro,
+            "flex flex-wrap items-center justify-center gap-2 sm:gap-2.5",
+          )}
           aria-label={t("landing.socialProof.chipsAria")}
         >
           {stats.map((stat) => (
@@ -111,7 +112,7 @@ export function LandingSocialProofSection() {
                 strokeWidth={2}
                 aria-hidden
               />
-              <blockquote className="flex-1 text-pretty text-[15px] font-normal leading-[1.55] text-neutral-800 max-lg:leading-[1.55] dark:text-neutral-200 sm:text-[17px] sm:leading-[1.7]">
+              <blockquote className={cn(landingType.bodyLead, "flex-1 text-pretty text-neutral-800 dark:text-neutral-200")}>
                 <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
                   “
                 </span>
@@ -121,10 +122,10 @@ export function LandingSocialProofSection() {
                 </span>
               </blockquote>
               <figcaption className="mt-auto border-t border-neutral-200/90 pt-4 max-lg:pt-4 dark:border-neutral-700/90 sm:pt-5">
-                <p className="text-[15px] font-semibold tracking-tight text-neutral-900 max-lg:text-[15px] dark:text-neutral-50 sm:text-[15px]">
+                <p className={cn(landingType.cardTitle, "tracking-tight")}>
                   {item.name}
                 </p>
-                <p className="mt-1 text-sm font-medium leading-snug text-neutral-600 dark:text-neutral-400">
+                <p className={cn(landingType.featureCopy, "mt-1 text-neutral-600 dark:text-neutral-400")}>
                   {item.role}
                 </p>
               </figcaption>

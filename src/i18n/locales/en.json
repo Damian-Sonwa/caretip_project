@@ -907,6 +907,7 @@
   },
   "landing": {
     "showcase": {
+      "tagline": "Earn. Serve. Smile.",
       "title": "Tip in seconds. Reward great service instantly.",
       "description": "CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan.",
       "statLive": "Instant QR tipping",

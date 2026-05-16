@@ -18,6 +18,7 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { useTranslation } from "react-i18next";
 
 export type TabMedia = {
@@ -289,27 +290,22 @@ export function FeatureShowcase({
           )}
         >
             {eyebrow?.trim() ? (
-              <Badge
-                variant="outline"
-                className={cn(
-                  "mb-6",
-                  cinematic
-                    ? "mb-4 max-md:mb-3 border-black/[0.10] bg-white text-gray-900 sm:mb-6"
-                    : "border-primary/40 text-foreground",
-                )}
-              >
-                {eyebrow}
-              </Badge>
+              cinematic ? (
+                <p className={landingUi.heroTagline}>{eyebrow}</p>
+              ) : (
+                <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
+                  {eyebrow}
+                </Badge>
+              )
             ) : null}
 
             <motion.h1
               className={cn(
-                "text-balance font-bold",
                 cinematic
                   ? isDe
                     ? landingUi.heroHeadlineDe
                     : landingUi.heroHeadlineEn
-                  : "text-4xl leading-[1.08] sm:text-5xl md:text-6xl",
+                  : landingType.heroHeadline,
               )}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -321,7 +317,7 @@ export function FeatureShowcase({
             {description ? (
             <p
               className={cn(
-                cinematic ? landingUi.heroSubtitle : "mt-5 max-w-xl leading-relaxed text-muted-foreground sm:mt-6",
+                cinematic ? landingUi.heroSubtitle : cn(landingType.bodyLeadMuted, "mt-5 max-w-xl sm:mt-6"),
               )}
             >
                 {description}
@@ -454,23 +450,22 @@ export function FeatureShowcase({
                   <div className={cn("relative min-h-0", landingUi.heroMediaShell)}>
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[10%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:h-[min(200px,48vw)] max-md:w-full -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
+                      className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[14%] max-md:h-[min(168px,44vw)] max-md:w-[92%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
                     />
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[32%] z-0 h-[200px] w-[min(340px,92%)] max-md:h-[120px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.07)_0%,transparent_68%)] blur-2xl dark:opacity-50"
+                      className="pointer-events-none absolute left-1/2 top-[34%] z-0 h-[200px] w-[min(340px,92%)] max-md:top-[36%] max-md:h-[100px] max-md:w-[88%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.07)_0%,transparent_68%)] blur-2xl dark:opacity-50"
                     />
-                    <div className="relative z-[1] flex w-full justify-center">
+                    <div className="relative z-[1] flex w-full justify-center max-md:py-0">
                       <div className="relative w-full max-md:mx-auto md:-translate-y-2 lg:-translate-y-4">
                         <div
                           aria-hidden
-                          className="animate-float-shadow absolute -bottom-2 left-1/2 z-0 h-8 w-[84%] max-md:h-7 -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.18)_0%,rgba(120,113,105,0.05)_42%,transparent_72%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.07)_48%,transparent_74%)]"
+                          className="animate-float-shadow absolute -bottom-1.5 left-1/2 z-0 h-7 w-[82%] max-md:-bottom-1 max-md:h-6 -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.18)_0%,rgba(120,113,105,0.05)_42%,transparent_72%)] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.28)_0%,rgba(0,0,0,0.07)_48%,transparent_74%)]"
                         />
                         <div
                           className={cn(
                             "animate-float relative mx-auto",
                             landingUi.heroPhoneFrame,
-                            isDe && "max-md:w-[min(86vw,268px)]",
                           )}
                           style={
                             singleHeroImage.objectPosition
@@ -485,7 +480,7 @@ export function FeatureShowcase({
                               "h-full w-full select-none",
                               (singleHeroImage.imageFit ?? "contain") === "contain"
                                 ? [
-                                    "max-md:object-contain max-md:object-center max-md:p-2",
+                                    "max-md:object-contain max-md:object-center max-md:p-0.5",
                                     "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1",
                                   ]
                                 : [

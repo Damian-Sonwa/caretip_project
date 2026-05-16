@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { CreditCard, Smartphone, Clock, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -62,14 +63,10 @@ export function PaymentsSection() {
           className={landingUi.sectionIntro}
         >
           <span className={landingUi.pill}>{t("landing.paymentsTrust.pill")}</span>
-          <h2
-            className={cn(landingUi.sectionTitle, "mt-2 max-md:mt-2 sm:mt-3.5")}
-          >
+          <h2 className={landingUi.sectionTitle}>
             {t("landing.paymentsTrust.title")}
           </h2>
-          <p
-            className={cn(landingUi.sectionSubtitle, "text-neutral-600 dark:text-neutral-400")}
-          >
+          <p className={landingUi.sectionSubtitle}>
             {t("landing.paymentsTrust.subtitle")}
           </p>
         </motion.div>
@@ -89,10 +86,10 @@ export function PaymentsSection() {
                 <div className={iconWrapClassName}>
                   <Icon className={iconClassName} aria-hidden />
                 </div>
-                <h3 className="text-[14px] font-semibold leading-snug tracking-tight text-neutral-900 max-md:text-[14px] dark:text-neutral-50 sm:text-base">
+                <h3 className={cn(landingType.cardTitle, "tracking-tight")}>
                   {item.title}
                 </h3>
-                <p className="mt-1.5 text-[13px] leading-[1.52] text-neutral-600 max-md:mt-1.5 dark:text-neutral-400 sm:mt-3 sm:text-sm sm:leading-[1.65]">
+                <p className={landingUi.cardFeatureBody}>
                   {item.text}
                 </p>
               </motion.li>

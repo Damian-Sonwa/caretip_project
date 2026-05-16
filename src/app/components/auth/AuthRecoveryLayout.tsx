@@ -14,7 +14,7 @@ type AuthRecoveryLayoutProps = {
 export function AuthRecoveryLayout({ children, showFooterLink = true }: AuthRecoveryLayoutProps) {
   const { t } = useTranslation();
   return (
-    <div className="min-h-[100dvh] bg-white font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-950">
+    <div className="min-h-[100dvh] bg-white font-sans dark:bg-neutral-950">
       <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-12">
         <div className="mb-8 flex justify-center">
           <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">

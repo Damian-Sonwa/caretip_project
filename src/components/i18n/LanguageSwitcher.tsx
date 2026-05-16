@@ -19,7 +19,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
   const isInline = variant === "inline";
 
   const triggerBase =
-    "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold tracking-tight transition-[colors,opacity,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:opacity-90 sm:min-h-9 sm:px-3.5";
+    "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-[15px] font-semibold tracking-tight transition-[colors,opacity,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:opacity-90 lg:min-h-9 lg:text-sm lg:px-3.5";
 
   const triggerStyles = isInline
     ? "border-white/25 bg-white/10 text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] hover:border-white/35 hover:bg-white/[0.14] focus-visible:ring-white/40 focus-visible:ring-offset-neutral-950"
@@ -30,7 +30,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
     : "border-neutral-200/80 bg-white p-1.5 text-neutral-900 shadow-xl";
 
   const rowBase =
-    "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-sm font-semibold transition-colors";
+    "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold transition-colors lg:text-sm";
 
   const rowIdle = isInline
     ? "text-neutral-200 hover:bg-white/10"

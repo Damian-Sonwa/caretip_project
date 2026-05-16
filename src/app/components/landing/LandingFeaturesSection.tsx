@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
+import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -29,8 +30,8 @@ const iconClassName =
 
 const tagClassName = cn(
   "mb-2 inline-flex w-fit items-center rounded-full border border-primary/15 bg-primary/[0.08] px-2 py-0.5 max-md:mb-2",
-  "text-[10px] font-semibold uppercase tracking-[0.12em] text-primary/90 sm:text-[11px]",
-  "dark:border-primary/25 dark:bg-primary/15 dark:text-[#f0a84d]",
+  landingType.pill,
+  "text-primary/90 dark:border-primary/25 dark:bg-primary/15 dark:text-[#f0a84d]",
 );
 
 export function LandingFeaturesSection() {
@@ -110,7 +111,7 @@ export function LandingFeaturesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.05 }}
-            className={cn(landingUi.sectionSubtitle, "text-neutral-700 dark:text-neutral-300")}
+            className={landingUi.sectionSubtitle}
           >
             {t("landing.features.subtitle")}
           </motion.p>
@@ -133,10 +134,10 @@ export function LandingFeaturesSection() {
                   <div className={iconWrapClassName}>
                     <Icon className={iconClassName} aria-hidden />
                   </div>
-                  <h3 className="text-[15px] font-semibold leading-snug tracking-tight text-neutral-900 max-md:text-[15px] dark:text-neutral-50 sm:text-lg">
+                  <h3 className={cn(landingType.cardTitle, "tracking-tight")}>
                     {item.title}
                   </h3>
-                  <p className="mt-1.5 flex-1 text-[14px] leading-[1.52] text-neutral-700 max-md:mt-1.5 dark:text-neutral-300 sm:mt-3.5 sm:text-base sm:leading-[1.62]">
+                  <p className={cn(landingUi.cardFeatureBody, "flex-1")}>
                     {item.text}
                   </p>
                 </article>

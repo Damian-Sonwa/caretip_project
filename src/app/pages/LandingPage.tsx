@@ -42,7 +42,7 @@ export function LandingPage() {
   );
 
   return (
-    <div className="relative min-h-screen w-full min-w-0 bg-[linear-gradient(180deg,#fafaf8_0%,#ffffff_38%,#f7f6f4_100%)]">
+    <div className="caretip-landing relative min-h-screen w-full min-w-0 font-sans bg-[linear-gradient(180deg,#fafaf8_0%,#ffffff_38%,#f7f6f4_100%)]">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-0 bottom-0 z-0 min-h-[100dvh] bg-[radial-gradient(ellipse_150%_70%_at_50%_-18%,rgba(235,153,44,0.07),transparent_60%),radial-gradient(ellipse_95%_55%_at_0%_30%,rgba(120,113,105,0.045),transparent_55%),radial-gradient(ellipse_95%_55%_at_100%_34%,rgba(235,153,44,0.04),transparent_55%)]"
@@ -54,7 +54,7 @@ export function LandingPage() {
         <main className="w-full min-w-0 overflow-x-hidden">
           <FeatureShowcase
             id="about-section"
-            className="font-sans"
+            className=""
             title={t("landing.showcase.title")}
             description={t("landing.showcase.description")}
             stats={showcaseStats}

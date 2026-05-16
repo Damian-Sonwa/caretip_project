@@ -60,7 +60,7 @@ export function LiveInMinutesLaptopDemo({
 
   return (
     <div className="relative mx-auto w-full max-w-none sm:max-w-2xl">
-      <p className="mb-2.5 min-h-[1.25rem] px-1 text-center text-[12px] font-semibold uppercase leading-snug tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mb-4 sm:text-xs sm:tracking-[0.14em]">
+      <p className="mb-2.5 min-h-[1.25rem] px-1 text-center text-[13px] font-semibold uppercase leading-snug tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mb-4 sm:text-xs sm:tracking-[0.14em]">
         <span className="text-primary">{active.label}</span>
       </p>
 
@@ -148,7 +148,7 @@ function DemoSignup() {
           <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
             {t("landing.liveDemo.signupBrand")}
           </p>
-          <p className="text-[14px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.signupTitle")}</p>
+          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.signupTitle")}</p>
         </div>
       </div>
       <div className="flex min-h-0 flex-1 flex-col justify-between gap-1.5 max-md:gap-1 sm:gap-2.5">
@@ -181,7 +181,7 @@ function DemoTeam() {
   const names = ["Sofia, Server", "Marcus, Bar", "Aisha, Host"];
   return (
     <div className={demoShell}>
-      <p className="shrink-0 text-[12px] font-bold leading-snug text-neutral-900 dark:text-neutral-100 sm:text-[13px]">{t("landing.liveDemo.inviteTitle")}</p>
+      <p className="shrink-0 text-[13px] font-bold leading-snug text-neutral-900 dark:text-neutral-100 sm:text-[13px]">{t("landing.liveDemo.inviteTitle")}</p>
       <p className="mt-0.5 shrink-0 text-[9px] font-medium leading-snug text-neutral-600 dark:text-neutral-400 sm:text-[10px]">{t("landing.liveDemo.inviteSub")}</p>
       <ul className="mt-1.5 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden max-md:gap-1 sm:mt-3 sm:gap-2">
         {names.map((name, i) => (
@@ -218,7 +218,7 @@ function DemoQr() {
     <div className={demoShell}>
       <div className="flex items-center justify-between gap-2">
         <div>
-          <p className="text-[14px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.qrTitle")}</p>
+          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.qrTitle")}</p>
           <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.qrSub")}</p>
         </div>
         <QrCode className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />
@@ -249,7 +249,7 @@ function DemoDashboard() {
     <div className={demoShell}>
       <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-[14px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.dashToday")}</p>
+          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.dashToday")}</p>
           <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.dashTipsSub")}</p>
         </div>
         <BarChart3 className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />

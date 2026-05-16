@@ -156,7 +156,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                         key={link.to}
                         to={link.to}
                         className={cn(
-                          "flex min-h-11 w-full items-center rounded-xl px-3 text-[15px] font-semibold tracking-tight transition-colors active:bg-muted/90",
+                          "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-colors active:bg-muted/90",
                           "text-foreground hover:bg-muted/60",
                         )}
                         onClick={() => setMobileMenuOpen(false)}
@@ -179,7 +179,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl px-4 text-[15px] font-bold text-primary-foreground shadow-[0_8px_22px_-8px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover active:scale-[0.99] active:opacity-95",
+                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl px-4 text-[1.0625rem] font-bold text-primary-foreground shadow-[0_8px_22px_-8px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover active:scale-[0.99] active:opacity-95",
                           "bg-primary",
                         )}
                       >
@@ -194,7 +194,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                       <button
                         type="button"
                         className={cn(
-                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl border border-border/75 bg-muted/25 px-4 text-[15px] font-semibold text-foreground transition-[colors,opacity,box-shadow] active:opacity-90",
+                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl border border-border/75 bg-muted/25 px-4 text-[1.0625rem] font-semibold text-foreground transition-[colors,opacity,box-shadow] active:opacity-90",
                           "hover:bg-muted/55",
                         )}
                       >

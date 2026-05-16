@@ -36,7 +36,7 @@ const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as
 export type { AuthRole };
 
 const FIELD_CLASS =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
+  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-sans dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
 
 const FIELD_ICON = `${FIELD_CLASS} pl-10`;
 
@@ -405,7 +405,7 @@ export function AuthPage() {
           : user?.role ?? '';
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-['Roboto',ui-sans-serif,system-ui,sans-serif] dark:bg-neutral-900">
+    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-sans dark:bg-neutral-900">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
 

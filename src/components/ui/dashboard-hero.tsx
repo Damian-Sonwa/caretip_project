@@ -94,7 +94,7 @@ export function DashboardHero({
     badge != null ? (
       <div
         className={cn(
-          "inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground max-lg:gap-1.5 max-lg:px-2 max-lg:py-0.5 max-lg:text-[10px] max-lg:tracking-[0.07em] sm:px-2.5 sm:text-[0.8125rem]",
+          "inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 font-sans text-meta font-semibold uppercase text-foreground max-lg:gap-1.5 max-lg:px-2 max-lg:py-0.5 sm:px-2.5",
           stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
           badgeClassName,
         )}
@@ -110,15 +110,14 @@ export function DashboardHero({
         stackHeroOnMobile
           ? mobileAlign === "center"
             ? cn(
-                // Mobile-first scale; lg+ restores full desktop presence.
-                "text-[1.5rem] font-bold leading-[1.14] tracking-tight sm:text-[1.75rem] md:text-3xl lg:text-4xl xl:text-5xl",
-                "mx-auto max-w-[24ch] text-center text-pretty sm:max-w-[28ch] md:max-w-[32ch]",
+                "font-sans text-app-title font-bold text-pretty",
+                "mx-auto max-w-[24ch] text-center sm:max-w-[28ch] md:max-w-[32ch]",
               )
             : cn(
-                "text-[1.5rem] font-bold leading-[1.14] tracking-tight sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl",
+                "font-sans text-app-title font-bold text-pretty",
                 "max-w-[22ch] text-left sm:max-w-[28ch]",
               )
-          : "text-[1.5625rem] font-bold leading-snug tracking-tight sm:text-3xl md:text-4xl lg:text-5xl",
+          : "font-sans text-app-title font-bold text-pretty lg:text-section-title",
         titleClassName,
       )}
     >
@@ -132,8 +131,8 @@ export function DashboardHero({
         className={cn(
           "max-w-xl shrink-0 break-words pt-0 text-muted-foreground",
           stackHeroOnMobile
-            ? "text-[15px] leading-snug line-clamp-2 max-lg:max-w-[36ch] lg:text-base lg:leading-relaxed"
-            : "text-sm leading-snug line-clamp-1",
+            ? "font-sans text-body-copy line-clamp-2 max-lg:max-w-[36ch]"
+            : "font-sans text-body-copy line-clamp-1",
           stackHeroOnMobile && mobileAlign === "center" ? "mx-auto text-center lg:line-clamp-2" : "text-left",
           descriptionClassName,
         )}
@@ -153,7 +152,7 @@ export function DashboardHero({
         <TabsTrigger
           value="overview"
           className={cn(
-            stackHeroOnMobile && "text-[13px] font-semibold sm:text-sm",
+            stackHeroOnMobile && "font-sans text-feature-copy font-semibold",
             stackHeroOnMobile &&
               "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
@@ -163,7 +162,7 @@ export function DashboardHero({
         <TabsTrigger
           value="links"
           className={cn(
-            stackHeroOnMobile && "text-[13px] font-semibold sm:text-sm",
+            stackHeroOnMobile && "font-sans text-feature-copy font-semibold",
             stackHeroOnMobile &&
               "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
@@ -176,8 +175,8 @@ export function DashboardHero({
         className={cn(
           "text-foreground",
           stackHeroOnMobile
-            ? "mt-3 border-0 bg-transparent p-0 text-[15px] leading-snug shadow-none sm:text-sm"
-            : "rounded-md border border-border bg-background p-4 text-sm sm:p-5",
+            ? "mt-3 border-0 bg-transparent p-0 font-sans text-body-copy shadow-none"
+            : "rounded-md border border-border bg-background p-4 font-sans text-body-copy sm:p-5",
         )}
       >
         {overview}
@@ -186,8 +185,8 @@ export function DashboardHero({
         value="links"
         className={cn(
           stackHeroOnMobile
-            ? "mt-3 space-y-2 border-0 bg-transparent p-0 text-[15px] leading-snug shadow-none sm:text-sm"
-            : "space-y-2 rounded-md border border-border bg-background p-4 text-sm sm:p-5",
+            ? "mt-3 space-y-2 border-0 bg-transparent p-0 font-sans text-body-copy shadow-none"
+            : "space-y-2 rounded-md border border-border bg-background p-4 font-sans text-body-copy sm:p-5",
         )}
       >
         {shortcuts}
@@ -270,7 +269,7 @@ export function DashboardHero({
                     : "max-lg:border-t-0 max-lg:bg-transparent max-lg:px-0 max-lg:py-3",
                 )}
               >
-                <p className="max-w-prose text-left text-[15px] font-medium leading-snug text-foreground line-clamp-1 sm:text-sm">
+                <p className="max-w-prose text-left font-sans text-body-copy font-medium text-foreground line-clamp-1">
                   {caption}
                 </p>
               </div>
@@ -316,7 +315,7 @@ export function DashboardHero({
                   opts.stackedLayout && stackHeroOnMobile && "max-lg:pt-2",
                 )}
               >
-                <p className="max-w-sm text-left text-[15px] font-semibold leading-snug text-foreground line-clamp-1 sm:text-sm">{caption}</p>
+                <p className="max-w-sm text-left font-sans text-feature-copy font-semibold text-foreground line-clamp-1">{caption}</p>
               </div>
             ) : null}
           </div>
@@ -428,7 +427,7 @@ export function DashboardHero({
               {badgeRow}
               {titleRow}
               {tagline ? (
-                <CardDescription className="max-w-xl break-words text-[15px] leading-snug text-muted-foreground line-clamp-1 sm:text-sm">
+                <CardDescription className="max-w-xl break-words font-sans text-body-copy text-muted-foreground line-clamp-1">
                   {tagline}
                 </CardDescription>
               ) : null}
@@ -436,22 +435,22 @@ export function DashboardHero({
               {hideTabs ? null : (
                 <Tabs defaultValue="overview" className={cn("w-full max-w-md", tagline ? "pt-2 sm:pt-3" : "pt-0 sm:pt-1")}>
                   <TabsList className="grid w-full grid-cols-2 bg-muted">
-                    <TabsTrigger value="overview" className="text-[13px] font-semibold sm:text-sm">
+                    <TabsTrigger value="overview" className="font-sans text-feature-copy font-semibold">
                       {t("dashboardHero.overview")}
                     </TabsTrigger>
-                    <TabsTrigger value="links" className="text-[13px] font-semibold sm:text-sm">
+                    <TabsTrigger value="links" className="font-sans text-feature-copy font-semibold">
                       {t("dashboardHero.shortcuts")}
                     </TabsTrigger>
                   </TabsList>
                   <TabsContent
                     value="overview"
-                    className="rounded-md border border-border bg-background p-4 text-[15px] leading-snug text-foreground sm:p-5 sm:text-sm"
+                    className="rounded-md border border-border bg-background p-4 font-sans text-body-copy text-foreground sm:p-5"
                   >
                     {overview}
                   </TabsContent>
                   <TabsContent
                     value="links"
-                    className="space-y-2 rounded-md border border-border bg-background p-4 text-[15px] leading-snug sm:p-5 sm:text-sm"
+                    className="space-y-2 rounded-md border border-border bg-background p-4 font-sans text-body-copy sm:p-5"
                   >
                     {shortcuts}
                   </TabsContent>

@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { TrendingUp } from "lucide-react";
+import { caretipType } from "@/lib/typography/caretipType";
 import { cn } from "@/lib/utils";
 
 /** CareTip landing gold badge — keep in sync across hero and benefit sections. */
@@ -66,14 +67,14 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
           key={i}
           className={cn(
             landingUptrendRowGrid,
-            "items-center text-[14px] font-semibold leading-snug tracking-[-0.015em] sm:text-[15px] md:text-base md:leading-snug",
-            tone === "cinematic" &&
-              "max-md:text-[14px] max-md:font-semibold max-md:leading-[1.42] max-md:tracking-[-0.012em] md:text-[17px] md:leading-[1.42]",
+            "items-center",
+            caretipType.featureCopySemibold,
+            textClass,
           )}
           role="listitem"
         >
           <LandingCheckBadge matchLineHeight />
-          <span className={cn("min-w-0 [text-wrap:balance]", textClass)}>{label}</span>
+          <span className="min-w-0 [text-wrap:balance]">{label}</span>
         </li>
       ))}
     </ul>
@@ -83,18 +84,12 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
 type LandingBenefitBlockProps = {
   title: ReactNode;
   description?: ReactNode;
-  /** Title line size for grid alignment (default matches employee/business sections). */
   titleClassName?: string;
   bodyClassName?: string;
   className?: string;
-  /** Premium split-layout showcase (alternating landing sections). */
   variant?: "default" | "split" | "showcase";
 };
 
-/**
- * Title + optional body with the same gold uptrend badge used in the hero.
- * Badge sits tight to copy (same rhythm as hero + hospitality feature list).
- */
 export function LandingBenefitBlock({
   title,
   description,
@@ -108,28 +103,22 @@ export function LandingBenefitBlock({
   return (
     <div className={cn(landingUptrendRowGrid, "items-start", className)}>
       <LandingCheckBadge className="mt-0.5 shrink-0 self-start" />
-      <div className={cn("min-w-0", isRich ? "space-y-1 max-md:space-y-1 sm:space-y-1.5 lg:space-y-2" : "space-y-1.5 sm:space-y-2")}>
+      <div
+        className={cn(
+          "min-w-0",
+          isRich ? "space-y-1 max-md:space-y-1 sm:space-y-1.5 lg:space-y-2" : "space-y-1.5 sm:space-y-2",
+        )}
+      >
         <div
           className={cn(
-            isRich
-              ? "text-[15px] font-semibold leading-snug tracking-tight text-neutral-900 max-md:text-[15px] dark:text-neutral-50 sm:text-[15px] lg:text-[17px]"
-              : "text-base font-semibold leading-snug text-neutral-900 dark:text-neutral-100",
+            isRich ? caretipType.featureCopySemibold : caretipType.cardTitle,
             titleClassName,
           )}
         >
           {title}
         </div>
         {description ? (
-          <div
-            className={cn(
-              isRich
-                ? "max-w-[38ch] text-[14px] font-normal leading-[1.52] text-neutral-700 max-md:max-w-none dark:text-neutral-300 sm:text-[14px] sm:leading-[1.52] lg:text-base lg:leading-[1.65]"
-                : "text-[15px] font-medium leading-[1.55] text-neutral-600 dark:text-neutral-400 sm:text-sm sm:font-normal sm:leading-relaxed",
-              bodyClassName,
-            )}
-          >
-            {description}
-          </div>
+          <div className={cn(caretipType.bodyCopyMuted, bodyClassName)}>{description}</div>
         ) : null}
       </div>
     </div>

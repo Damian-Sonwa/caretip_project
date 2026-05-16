@@ -1,3 +1,4 @@
+import "./lib/fonts/inter";
 import "./app/lib/pwaInstallDeferred";
 import "./i18n/i18n";
 import React from "react";

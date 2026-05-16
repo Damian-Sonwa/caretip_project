@@ -85,7 +85,7 @@ export function EmployeeLayout() {
 
         <div
           className={cn(
-            "caretip-dashboard-shell flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
+            "caretip-dashboard-shell font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
             EMPLOYEE_DASHBOARD_ROOT,
           )}
         >

@@ -39,7 +39,7 @@ export function HospitalityTeamsUnifiedSection() {
       >
         <header className={landingUi.hospitalityIntro}>
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
-          <p className={cn(landingUi.hospitalitySubtitle, "mt-2 sm:mt-2.5")}>
+          <p className={landingUi.hospitalitySubtitle}>
             {t("landing.hospitality.subtitle")}
           </p>
         </header>

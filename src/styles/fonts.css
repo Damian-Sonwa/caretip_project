@@ -1,0 +1,12 @@
+/**
+ * Inter only — loaded via @fontsource in src/lib/fonts/inter.ts
+ */
+:root {
+  --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter);
+  --font-display: var(--font-inter);
+}
+
+html.caretip-font-inter {
+  font-family: var(--font-inter);
+}

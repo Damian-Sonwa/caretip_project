@@ -5,11 +5,9 @@
  *   Orange (primary): #EB992C
  *   Background:       #FFFFFF
  *   Text:              #000000
- * Typography: Roboto (weights 400 / 500 / 600 / 700)
+ * Typography: Inter via --font-inter (@fontsource) — see fonts.css + caretip-typography.css
  *
  * HSL tokens use space-separated components for hsl(var(--token)).
- *
- * Load Roboto from index.html only; a bundled @import can minify to invalid CSS and break the whole sheet.
  */
 html {
   scroll-behavior: smooth;
@@ -221,7 +219,7 @@ textarea::placeholder {
 }
 
 :root {
-  --font-sans: "Roboto", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-size: 16px;
 
   /* #EB992C — primary fills, focus ring, highlights */
@@ -341,7 +339,7 @@ textarea::placeholder {
     height: auto !important;
     min-height: 40px;
     padding: 12px 20px !important;
-    font-size: 16px !important;
+    font-size: var(--caretip-button-size, 0.9375rem) !important;
     line-height: 1.25;
     width: auto;
     max-width: none;
@@ -374,7 +372,7 @@ textarea::placeholder {
     max-width: min(100%, 280px);
     min-width: 0;
     padding: 8px 14px !important;
-    font-size: 15px !important;
+    font-size: var(--caretip-button-size, 0.9375rem) !important;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
@@ -384,7 +382,7 @@ textarea::placeholder {
 
   .caretip-dashboard-shell .employee-hero-cta-row > :is(a, button),
   .caretip-dashboard-shell .business-hero-cta-row > :is(a, button) {
-    font-size: 15px !important;
+    font-size: var(--caretip-button-size, 0.9375rem) !important;
     line-height: 1.2;
   }
 

@@ -19,10 +19,10 @@ export interface SignInCard2Props {
   sessionActive?: boolean;
 }
 
-const authFont = "font-['Roboto',ui-sans-serif,system-ui,sans-serif]";
+const authFont = "font-sans";
 
 /**
- * Soft light auth shell: off-white canvas, white elevated card, Roboto typography.
+ * Soft light auth shell: off-white canvas, white elevated card, Inter/Manrope typography.
  */
 export function SignInCard2({
   isLogin,

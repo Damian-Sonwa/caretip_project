@@ -1,0 +1,4 @@
+/**
+ * @deprecated Import `caretip-typography.css` instead. Kept for import path stability.
+ */
+@import "./caretip-typography.css";
