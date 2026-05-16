@@ -647,7 +647,7 @@ export function EmployeeDashboard() {
                           count: displayPeriodTipCount,
                         })
                       : valuesMatchAnalyticsPeriod
-                        ? t("employee.dashboard.statChangeNoTips")
+                        ? t("format.metricZeroTips")
                         : t("employee.dashboard.statChangeEllipsis")
                 }
                 icon={<TrendingUp className="h-5 w-5" aria-hidden />}
@@ -658,7 +658,7 @@ export function EmployeeDashboard() {
                   stats.rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
                 }
                 value={stats.rating != null ? String(stats.rating) : t("format.notAvailable")}
-                change={stats.rating != null ? undefined : t("employee.dashboard.statNoRatings")}
+                change={stats.rating != null ? undefined : t("format.metricZeroRatings")}
                 icon={<Star className="h-5 w-5" aria-hidden />}
               />
               <EmployeeStatCard
@@ -708,8 +708,7 @@ export function EmployeeDashboard() {
                 ) : chartData.length === 0 ? (
                   <EmployeeEmptyState
                     icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                    title={t("employee.dashboard.noTipActivityChart")}
-                    description={t("employee.dashboard.statChangeNoTips")}
+                    title={t("format.metricNoActivity")}
                     className="!py-10"
                   />
                 ) : (
@@ -793,7 +792,7 @@ export function EmployeeDashboard() {
                       {recentTips.length === 0 ? (
                         <EmployeeEmptyState
                           icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                          title={t("employee.dashboard.noTipsYet")}
+                          title={t("format.metricNoActivity")}
                           className="!py-8"
                         />
                       ) : (

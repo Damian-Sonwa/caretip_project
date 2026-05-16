@@ -511,7 +511,7 @@ export function BusinessDashboard() {
                       <>
                         <span className="block tabular-nums">
                           {operationalPulse.tipsLast60m.count === 0
-                            ? t("business.hero.pulse.tipsNone")
+                            ? t("format.metricZeroTips")
                             : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsLast60m.count })}
                         </span>
                         {operationalPulse.tipsLast60m.count > 0 ? (
@@ -532,7 +532,7 @@ export function BusinessDashboard() {
                       <>
                         <span className="block tabular-nums">
                           {operationalPulse.tipsToday.count === 0
-                            ? t("business.hero.pulse.tipsNone")
+                            ? t("format.metricZeroTips")
                             : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsToday.count })}
                         </span>
                         {operationalPulse.tipsToday.count > 0 ? (
@@ -557,7 +557,7 @@ export function BusinessDashboard() {
                                 onTrack: operationalPulse.goalsOnTrackOrBetter,
                                 tracked: operationalPulse.goalsTracked,
                               })
-                            : t("business.hero.pulse.noGoalsTracked")}
+                            : t("format.metricZeroGoals")}
                         </span>
                         <span className="business-hero-pulse-subline text-muted-foreground/90">
                           {t("business.hero.pulse.readySubtitle", {
@@ -668,7 +668,7 @@ export function BusinessDashboard() {
                 change={
                   hasTipActivityInPeriod
                     ? t("business.dashboard.statsLiveTotals")
-                    : t("business.dashboard.statsNoTipsPeriod")
+                    : t("format.metricZeroTips")
                 }
                 icon={<Euro className="h-5 w-5" aria-hidden />}
               />
@@ -827,7 +827,7 @@ export function BusinessDashboard() {
                       <EmployeeEmptyState
                         className="py-10 sm:py-12"
                         icon={<BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("business.dashboard.chartEmptyTitle")}
+                        title={t("format.metricNoActivity")}
                         description={t("business.dashboard.chartEmptyDesc")}
                       />
                     </div>
@@ -882,7 +882,7 @@ export function BusinessDashboard() {
                       <EmployeeEmptyState
                         className="py-10 sm:py-12"
                         icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("business.dashboard.chartEmptyTitle")}
+                        title={t("format.metricNoActivity")}
                         description={t("business.dashboard.chartEmptyDesc")}
                       />
                     </div>
@@ -891,7 +891,7 @@ export function BusinessDashboard() {
                       <EmployeeEmptyState
                         className="py-10 sm:py-12"
                         icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("business.dashboard.chartEmptyTitle")}
+                        title={t("format.metricNoActivity")}
                         description={t("business.dashboard.chartEmptyDesc")}
                       />
                     </div>

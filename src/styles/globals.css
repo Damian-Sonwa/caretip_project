@@ -868,6 +868,11 @@ textarea::placeholder {
   line-height: 1.15;
 }
 
+.business-dashboard-hero .business-hero-account-stats dd > .block:first-child,
+.employee-dashboard-hero .employee-hero-account-stats dd > .block:first-child {
+  white-space: nowrap;
+}
+
 @media (max-width: 768px) {
   .business-dashboard-hero .business-hero-pulse-subline {
     font-size: 0.75rem;
