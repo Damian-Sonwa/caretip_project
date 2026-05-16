@@ -51,7 +51,7 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
     <ul
       className={cn(
         "mt-5 flex w-full max-w-xl flex-col gap-3 sm:mt-7 sm:gap-3.5",
-        tone === "cinematic" && "max-md:mt-3 max-md:gap-2",
+        tone === "cinematic" && "max-md:mt-4 max-md:gap-3.5",
         className,
       )}
       role="list"
@@ -61,7 +61,8 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
           key={i}
           className={cn(
             "grid min-h-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-3 text-[15px] font-semibold leading-snug tracking-[-0.015em] sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4 sm:text-base sm:leading-snug",
-            tone === "cinematic" && "max-md:gap-x-2.5 max-md:text-[13.5px] max-md:leading-snug",
+            tone === "cinematic" &&
+              "max-md:grid-cols-[2.5rem_minmax(0,1fr)] max-md:gap-x-3.5 max-md:text-[15px] max-md:font-semibold max-md:leading-[1.45] max-md:tracking-[-0.012em]",
           )}
           role="listitem"
         >

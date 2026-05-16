@@ -360,7 +360,7 @@ export function BusinessProfilePage() {
         <CardContent className="space-y-4 text-sm">
           <div>
             <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("business.profilePage.teamQrPath")}</p>
-            <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{slug || "—"}</p>
+            <p className="mt-1 break-all font-mono text-xs text-foreground sm:text-sm">{slug || t("format.notSet")}</p>
             {teamUrl ? (
               <p className="mt-1 text-xs text-muted-foreground">
                 {t("business.profilePage.guestDirectory")}{" "}

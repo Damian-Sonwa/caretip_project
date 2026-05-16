@@ -350,7 +350,7 @@ export function DashboardPage() {
                               {row.name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {row.role} · {t("sampleDashboard.lastTipPrefix")} {row.lastTip}
+                              {row.role}, {t("sampleDashboard.lastTipPrefix")} {row.lastTip}
                             </p>
                           </div>
                         </div>

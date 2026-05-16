@@ -18,7 +18,9 @@
     "shortcuts": "Shortcuts"
   },
   "format": {
-    "notAvailable": "N/A"
+    "notAvailable": "N/A",
+    "noDataYet": "No data yet",
+    "notSet": "Not set"
   },
   "common": {
     "settingUp": "Setting things up for you…",
@@ -467,7 +469,7 @@
     "oauth": {
       "envHintBefore": "Add",
       "envHintOr": "or",
-      "envHintAfter": "in your Vercel (or other) project environment, then redeploy — Vite bakes these in at build time. Plain GOOGLE_CLIENT_ID is for the API only, not the browser.",
+      "envHintAfter": "in your Vercel (or other) project environment, then redeploy. Vite bakes these in at build time. Plain GOOGLE_CLIENT_ID is for the API only, not the browser.",
       "signupBlockedTitle": "Enter your name and business or invite details first",
       "googleOriginError": "Google sign-in is not configured for this site ({{origin}}). In Google Cloud Console → APIs & Services → Credentials → your Web client, add this URL under Authorized JavaScript origins, then save and wait a few minutes."
     },
@@ -694,7 +696,7 @@
       "paymentMethod": "Payment Method",
       "tipAmount": "Tip Amount",
       "demoTransactionId": "#TIP-2024-1247",
-      "demoDateTime": "Mar 23, 2026 • 7:45 PM",
+      "demoDateTime": "Mar 23, 2026, 7:45 PM",
       "demoPaymentMethod": "Apple Pay •••• 4242",
       "leaveFeedback": "Leave optional feedback",
       "leavePage": "Leave page",
@@ -839,7 +841,7 @@
   },
   "sampleDashboard": {
     "welcomeTitle": "Welcome back! 👋",
-    "welcomeSubtitle": "Tips, scans, and payouts for your team — one-time payments only",
+    "welcomeSubtitle": "Tips, scans, and payouts for your team. One-time payments only.",
     "metrics": {
       "tipsReceived30d": "Tips received (30d)",
       "vsPriorMonth": "vs prior month",
@@ -882,7 +884,7 @@
     "tipVolumeTitle": "Tip volume",
     "tipVolumeSubtitle": "Total tips collected (sample trend)",
     "ctaTitle": "Make tipping effortless",
-    "ctaBody": "Guests scan a QR code, choose an amount, and pay once. Funds route through Stripe as a single payment intent — no subscriptions or invoices.",
+    "ctaBody": "Guests scan a QR code, choose an amount, and pay once. Funds route through Stripe as a single payment intent. No subscriptions or invoices.",
     "ctaHowItWorks": "How CareTip works",
     "leaders": {
       "1": { "name": "Maya Chen", "role": "Server", "lastTip": "2h ago", "shift": "Top week" },
@@ -957,7 +959,7 @@
       "qrLabel1": "Table 12",
       "qrLabel2": "Bar",
       "qrLabel3": "Lobby",
-      "qrFooter": "Download PNG · Print PDF",
+      "qrFooter": "Download PNG, print PDF",
       "dashToday": "Today",
       "dashTipsSub": "Tips & activity",
       "tipsReceived": "Tips received",
@@ -983,51 +985,51 @@
     "hospitalityMarquee": {
       "restaurants": {
         "name": "Restaurants",
-        "role": "Table QR tipping • shift pools • staff goals"
+        "role": "Table QR tipping, shift pools, staff goals"
       },
       "cafes": {
         "name": "Cafés",
-        "role": "Counter QR • fast tips • repeat guests"
+        "role": "Counter QR, fast tips, repeat guests"
       },
       "barsLounges": {
         "name": "Bars & Lounges",
-        "role": "High-volume nights • team recognition • live stats"
+        "role": "High-volume nights, team recognition, live stats"
       },
       "nightclubs": {
         "name": "Nightclubs",
-        "role": "Late-night tipping • fast checkout • live activity"
+        "role": "Late-night tipping, fast checkout, live activity"
       },
       "hotels": {
         "name": "Hotels",
-        "role": "Front desk & concierge • room service • track performance"
+        "role": "Front desk and concierge, room service, track performance"
       },
       "resorts": {
         "name": "Resorts",
-        "role": "Multiple venues • staff mapping • simple reporting"
+        "role": "Multiple venues, staff mapping, simple reporting"
       },
       "beachClubs": {
         "name": "Beach clubs",
-        "role": "Outdoor QR tipping • fast service • happy guests"
+        "role": "Outdoor QR tipping, fast service, happy guests"
       },
       "salonsSpas": {
         "name": "Salons & Spas",
-        "role": "Personal QR • service-based tipping • staff profiles"
+        "role": "Personal QR, service-based tipping, staff profiles"
       },
       "barbershops": {
         "name": "Barbershops",
-        "role": "Personal QR • repeat clients • staff profiles"
+        "role": "Personal QR, repeat clients, staff profiles"
       },
       "foodTrucks": {
         "name": "Food trucks",
-        "role": "Counter QR • quick tips • no extra hardware"
+        "role": "Counter QR, quick tips, no extra hardware"
       },
       "eventCenters": {
         "name": "Event centers",
-        "role": "Pop-up QR codes • staff routing • clear earnings"
+        "role": "Pop-up QR codes, staff routing, clear earnings"
       },
       "hospitalityGroups": {
         "name": "Hospitality groups",
-        "role": "Locations & tables • staff mapping • consistent reporting"
+        "role": "Locations and tables, staff mapping, consistent reporting"
       }
     },
     "employeeSection": {
@@ -1261,7 +1263,7 @@
       "headlineLine1": "Your earnings",
       "headlineLine2": "at a glance",
       "sub": "Track tips from every shift and share your personal QR in seconds.",
-      "helperText": "Snapshot above — tap a period below for detailed earnings and charts.",
+      "helperText": "Snapshot above. Tap a period below for detailed earnings and charts.",
       "welcomeBack": "Welcome back",
       "welcomeBackNamed": "Welcome back, {{name}}",
       "myQr": "My QR code",
@@ -1270,7 +1272,7 @@
       "statTotalEarnings": "Total earnings",
       "statAvailableBalance": "Available balance",
       "statTotalSupporters": "Total supporters",
-      "accountOverviewLabel": "Account overview · all time"
+      "accountOverviewLabel": "Account overview, all time"
     },
     "period": {
       "today": "Today",
@@ -1302,15 +1304,15 @@
       "statGoalProgress": "Progress toward your current target.",
       "statGoalSetHint": "Set a goal in settings to track progress.",
       "statChangeUpdating": "Updating this period…",
-      "statChangeEarned": "{{amount}} earned · {{count}} in this period",
+      "statChangeEarned": "{{amount}} earned, {{count}} in this period",
       "statChangeNoTips": "No tips in this period yet.",
       "statChangeEllipsis": "…",
       "overlayUpdating": "Updating",
       "earningsTitle": "Earnings timeline",
       "earningsDescToday": "Tips by hour today{{tz}}",
-      "earningsDescWeek": "Tips by weekday this week (Mon–Sun){{tz}}",
+      "earningsDescWeek": "Tips by weekday this week (Mon to Sun){{tz}}",
       "earningsDescMonth": "Tips by calendar day this month{{tz}}",
-      "tzSuffix": " · {{tz}}",
+      "tzSuffix": ", {{tz}}",
       "loadingChart": "Loading chart",
       "noTipActivityChart": "No tip activity yet",
       "recentTips": "Recent tips",
@@ -1332,19 +1334,19 @@
       "headlineLine1": "Your venue",
       "headlineLine2": "at a glance",
       "sub": "Track team growth, QR engagement, and tip trends in one place.",
-      "helperText": "Live operational snapshot above — switch the period below for totals, charts, and trends.",
+      "helperText": "Live operational snapshot above. Switch the period below for totals, charts, and trends.",
       "welcomeBack": "Welcome back",
       "welcomeBackNamed": "Welcome back, {{name}}",
       "manageQr": "Manage QR codes",
       "manageTeam": "Manage team",
-      "venueOverviewLabel": "Venue overview · this month",
+      "venueOverviewLabel": "Venue overview, this month",
       "statTotalTips": "Tips this month",
       "statTipCount": "Tips received",
       "statActiveStaff": "Active staff",
       "pulse": {
         "sectionLabel": "Live operational pulse",
         "lastHour": "Last 60 minutes",
-        "today": "Today · venue time",
+        "today": "Today, venue time",
         "readiness": "Goals & readiness",
         "tipsNone": "No tips yet",
         "tipsCount_one": "{{count}} tip",
@@ -1442,7 +1444,7 @@
       "employeePerformanceDesc": "Tip totals by team member",
       "noEmployees": "No employees yet",
       "noTipActivity": "No tip activity yet",
-      "toastNewTip": "New tip: {{who}} · {{amount}} · {{time}}",
+      "toastNewTip": "New tip: {{who}}, {{amount}}, {{time}}",
       "toastTeamMember": "Team member",
       "exportFailed": "Export failed. Please try again.",
       "topPerformers": "Top performers",
@@ -1457,7 +1459,7 @@
       "needHelpDesc": "Learn how to maximize your team's earnings and keep guests tipping smoothly.",
       "viewGuidelines": "View guidelines",
       "guidelinesDialogTitle": "CareTip usage guidelines",
-      "guidelinesDialogDesc": "Practical steps to get your team set up and grow tips. This is a quick reference—save or print for your staff room.",
+      "guidelinesDialogDesc": "Practical steps to get your team set up and grow tips. This is a quick reference you can save or print for your staff room.",
       "guidelinesSectionOnboardTitle": "Onboard your staff",
       "guidelinesSectionOnboardLi1": "Invite team members from <highlight>Team</highlight> using your business invite code or add them directly with name and role.",
       "guidelinesSectionOnboardLi2": "Ask each staff member to complete their profile and confirm they can sign in to the employee dashboard.",
@@ -1590,7 +1592,8 @@
       "loading": "Loading…",
       "empty": "No tips found.",
       "you": "You",
-      "dash": "—",
+      "unknownStaff": "Unknown",
+      "noLocationDetail": "No location",
       "pagination": "Showing {{from}} to {{to}} of {{total}}",
       "prev": "Prev",
       "next": "Next",
@@ -1698,7 +1701,7 @@
       "toastPrintFail": "Could not open print preview.",
       "toastPdfReady": "PDF ready to print.",
       "toastPdfFail": "Could not build PDF.",
-      "teamQrSubtitle": "Team QR • Entrance / front counter",
+      "teamQrSubtitle": "Team QR, entrance or front counter",
       "labelQrUrl": "QR code URL",
       "totalScans": "Total scans:",
       "pendingTitle": "Pending verification",
@@ -1736,7 +1739,9 @@
       "copyUrlAria": "Copy URL",
       "print": "Print",
       "downloadPdfLayout": "Download PDF layout",
-      "regenerateBusinessQr": "Regenerate business QR"
+      "regenerateBusinessQr": "Regenerate business QR",
+      "staffTagsTitle": "Staff tags",
+      "staffTagsDesc": "Individual QR codes for each team member, with the same branded style as your storefront, table, and location codes."
     },
     "notifications": {
       "title": "Notifications",
@@ -1871,8 +1876,8 @@
     "loadErrorTitle": "We’re having trouble loading platform data.",
     "retry": "Retry",
     "statTips": "Successful tips (EUR)",
-    "statTipsChange": "Sum of all successful tips · {{success}} successful of {{total}} total{{biz}}",
-    "statTipsBizPart": " · {{count}} businesses with tips",
+    "statTipsChange": "Sum of all successful tips: {{success}} successful of {{total}} total{{biz}}",
+    "statTipsBizPart": ", {{count}} businesses with tips",
     "statVenues": "Venues",
     "statVenuesChange": "Registered businesses on the platform",
     "statLocations": "Locations",
@@ -1882,7 +1887,7 @@
     "statActiveUsers": "Active users",
     "statActiveUsersChange": "Accounts with sign-in enabled",
     "analyticsTitle": "Analytics",
-    "analyticsSubtitle": "Last {{days}} days ({{tz}}) · live aggregates",
+    "analyticsSubtitle": "Last {{days}} days ({{tz}}), live aggregates",
     "timezoneAria": "Analytics timezone",
     "timezonePlaceholder": "Timezone",
     "tipStatusNote": "Tip status uses all-time totals",
@@ -2061,7 +2066,7 @@
       "labelVerificationDoc": "Verification document (PDF or image)",
       "cancel": "Cancel",
       "save": "Save",
-      "tipsStaffSummary": "{{tips}} tips · {{staff}} staff",
+      "tipsStaffSummary": "{{tips}} tips, {{staff}} staff",
       "toastApproved": "Business approved. They can generate QR codes.",
       "toastRejected": "Business verification rejected.",
       "toastStatusUpdated": "Status updated.",
@@ -2083,7 +2088,7 @@
       "dtWebsite": "Website",
       "dtRegisteredAddress": "Registered address",
       "dtStaffLocations": "Staff / locations",
-      "staffLocationsLine": "{{staff}} staff · {{locations}} locations",
+      "staffLocationsLine": "{{staff}} staff, {{locations}} locations",
       "openLogo": "Open logo",
       "openKycDocument": "Open KYC document",
       "editDetails": "Edit details",

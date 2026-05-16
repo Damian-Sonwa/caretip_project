@@ -19,7 +19,8 @@ export function LandingPage() {
   const { t, i18n } = useTranslation();
 
   const showcaseTabs: TabMedia[] = useMemo(() => {
-    const src = i18n.language?.toLowerCase().startsWith("de") ? heroVisualDe : heroVisualEn;
+    const isDe = i18n.language?.toLowerCase().startsWith("de");
+    const src = isDe ? heroVisualDe : heroVisualEn;
     return [
       {
         value: "contactless",
@@ -27,7 +28,8 @@ export function LandingPage() {
         Icon: Smartphone,
         src,
         alt: t("landing.showcase.tabQrAlt"),
-        imageFit: "contain",
+        /** DE art fits best letterboxed; EN hero should fill the phone frame. */
+        imageFit: isDe ? "contain" : "cover",
         imageObjectPosition: "center",
       },
     ];

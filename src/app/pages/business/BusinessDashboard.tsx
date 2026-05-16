@@ -435,7 +435,7 @@ export function BusinessDashboard() {
           mobileAlign="left"
           className="business-dashboard-hero mb-8 lg:mb-6"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
-          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] font-medium tracking-normal text-primary/90 shadow-none"
+          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
           titleClassName="!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
           descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:text-left lg:max-w-md"
           textColumnClassName="lg:py-2 xl:pr-6"
@@ -489,7 +489,7 @@ export function BusinessDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
-              <p className="text-xs leading-relaxed text-muted-foreground max-lg:max-w-sm">
+              <p className="text-[13px] leading-relaxed text-muted-foreground max-lg:max-w-sm sm:text-sm">
                 {t("business.hero.helperText")}
               </p>
               <div className="business-hero-cta-row">
@@ -506,7 +506,7 @@ export function BusinessDashboard() {
                   </Link>
                 </Button>
               </div>
-              <p className="text-[11px] font-medium text-muted-foreground/90">
+              <p className="text-[12px] font-medium text-muted-foreground/90 sm:text-xs">
                 {t("business.hero.pulse.sectionLabel")}
               </p>
               <dl className="business-hero-account-stats">
@@ -527,7 +527,7 @@ export function BusinessDashboard() {
                         ) : null}
                       </>
                     ) : (
-                      <span className="block">—</span>
+                      <span className="block">{t("format.noDataYet")}</span>
                     )}
                   </dd>
                 </div>
@@ -548,7 +548,7 @@ export function BusinessDashboard() {
                         ) : null}
                       </>
                     ) : (
-                      <span className="block">—</span>
+                      <span className="block">{t("format.noDataYet")}</span>
                     )}
                   </dd>
                 </div>
@@ -583,7 +583,7 @@ export function BusinessDashboard() {
                         </span>
                       </>
                     ) : (
-                      <span className="block">—</span>
+                      <span className="block">{t("format.noDataYet")}</span>
                     )}
                   </dd>
                 </div>

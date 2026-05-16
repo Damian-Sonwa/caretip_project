@@ -941,10 +941,10 @@ export function QRCodeManagementPage() {
                 <div>
                   <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
                     <UserCheck className="h-4 w-4 text-primary" />
-                    Staff tags
+                    {t("business.qrPage.staffTagsTitle")}
                   </h2>
                   <p className="mb-3 text-xs text-muted-foreground">
-                    Individual QR codes for each team member — same branded style as storefront, tables, and locations.
+                    {t("business.qrPage.staffTagsDesc")}
                   </p>
                   {employees.length === 0 ? (
                     <div className="rounded-xl border-2 border-border bg-card py-12 text-center">

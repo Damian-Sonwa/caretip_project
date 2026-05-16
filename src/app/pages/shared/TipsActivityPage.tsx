@@ -287,14 +287,14 @@ export function TipsActivityPage() {
                   <tr key={tip.id} className="border-b border-border/60 hover:bg-muted/30">
                     <td className="px-4 py-3 tabular-nums">{formatEur(tip.amount)}</td>
                     <td className="px-4 py-3">
-                      {tip.staffName ?? (user?.role === "employee" ? t("business.tipsActivity.you") : t("business.tipsActivity.dash"))}
+                      {tip.staffName ?? (user?.role === "employee" ? t("business.tipsActivity.you") : t("business.tipsActivity.unknownStaff"))}
                     </td>
                     <td className="px-4 py-3">
                       {tip.tableName
                         ? `${t("business.tipsActivity.csvTablePrefix")} ${tip.tableName}`
                         : tip.locationName
                           ? `${t("business.tipsActivity.csvLocationPrefix")} ${tip.locationName}`
-                          : t("business.tipsActivity.dash")}
+                          : t("business.tipsActivity.noLocationDetail")}
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
                       {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}

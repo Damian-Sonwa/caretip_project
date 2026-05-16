@@ -18,7 +18,9 @@
     "shortcuts": "Verknüpfungen"
   },
   "format": {
-    "notAvailable": "k. A."
+    "notAvailable": "k. A.",
+    "noDataYet": "Noch keine Daten",
+    "notSet": "Nicht festgelegt"
   },
   "common": {
     "settingUp": "Wird für Sie eingerichtet…",
@@ -467,7 +469,7 @@
     "oauth": {
       "envHintBefore": "Fügen Sie",
       "envHintOr": "oder",
-      "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu — Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
+      "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu. Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
       "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben",
       "googleOriginError": "Google-Anmeldung ist für diese Website ({{origin}}) nicht freigeschaltet. In der Google Cloud Console → APIs & Dienste → Anmeldedaten → Ihr Web-Client diese URL unter „Autorisierte JavaScript-Quellen“ eintragen, speichern und einige Minuten warten."
     },
@@ -957,7 +959,7 @@
       "qrLabel1": "Tisch 12",
       "qrLabel2": "Bar",
       "qrLabel3": "Lobby",
-      "qrFooter": "PNG laden · PDF drucken",
+      "qrFooter": "PNG laden, PDF drucken",
       "dashToday": "Heute",
       "dashTipsSub": "Trinkgelder & Aktivität",
       "tipsReceived": "Erhaltene Trinkgelder",
@@ -983,51 +985,51 @@
     "hospitalityMarquee": {
       "restaurants": {
         "name": "Restaurant & Gastro",
-        "role": "QR Tippen am Tisch • Schichtpools • Teamziele"
+        "role": "QR Tippen am Tisch, Schichtpools, Teamziele"
       },
       "cafes": {
         "name": "Cafés & Bistros",
-        "role": "Theken QR • schnelle Trinkgelder • Stammgäste"
+        "role": "Theken QR, schnelle Trinkgelder, Stammgäste"
       },
       "barsLounges": {
         "name": "Bars und Lounges",
-        "role": "Hohe Auslastung • Teamanerkennung • Statistiken in Echtzeit"
+        "role": "Hohe Auslastung, Teamanerkennung, Statistiken in Echtzeit"
       },
       "nightclubs": {
         "name": "Nachtclubs",
-        "role": "Spätes Tippen • schneller Checkout • Liveaktivität"
+        "role": "Spätes Tippen, schneller Checkout, Liveaktivität"
       },
       "hotels": {
         "name": "Hotels & Unterkünfte",
-        "role": "Rezeption & Concierge • Roomservice • Leistung im Blick"
+        "role": "Rezeption und Concierge, Roomservice, Leistung im Blick"
       },
       "resorts": {
         "name": "Resortanlagen",
-        "role": "Mehrere Bereiche • Teamzuordnung • übersichtliche Reports"
+        "role": "Mehrere Bereiche, Teamzuordnung, übersichtliche Reports"
       },
       "beachClubs": {
         "name": "Strandclubs",
-        "role": "QR draußen • schneller Service • zufriedene Gäste"
+        "role": "QR draußen, schneller Service, zufriedene Gäste"
       },
       "salonsSpas": {
         "name": "Salons und Spas",
-        "role": "Persönliches QR • servicebasiertes Tippen • Mitarbeiterprofile"
+        "role": "Persönliches QR, servicebasiertes Tippen, Mitarbeiterprofile"
       },
       "barbershops": {
         "name": "Friseursalons",
-        "role": "Persönliches QR • Stammkunden • Mitarbeiterprofile"
+        "role": "Persönliches QR, Stammkunden, Mitarbeiterprofile"
       },
       "foodTrucks": {
         "name": "Imbisswagen & Streetfood",
-        "role": "Theken QR • schnelle Trinkgelder • ohne Extrahardware"
+        "role": "Theken QR, schnelle Trinkgelder, ohne Extrahardware"
       },
       "eventCenters": {
         "name": "Event- und Tagungsorte",
-        "role": "Popup QR • Routing für Personal • klare Einnahmen"
+        "role": "Popup QR, Routing für Personal, klare Einnahmen"
       },
       "hospitalityGroups": {
         "name": "Gastronomiegruppen",
-        "role": "Standorte & Tische • Teamzuordnung • einheitliche Reports"
+        "role": "Standorte und Tische, Teamzuordnung, einheitliche Reports"
       }
     },
     "employeeSection": {
@@ -1261,7 +1263,7 @@
       "headlineLine1": "Ihre Einnahmen",
       "headlineLine2": "auf einen Blick",
       "sub": "Trinkgelder pro Schicht verfolgen und Ihren persönlichen QR in Sekunden teilen.",
-      "helperText": "Überblick oben — unten den Zeitraum wählen für Details und Diagramme.",
+      "helperText": "Überblick oben. Unten den Zeitraum wählen für Details und Diagramme.",
       "welcomeBack": "Willkommen zurück",
       "welcomeBackNamed": "Willkommen zurück, {{name}}",
       "myQr": "Mein QR-Code",
@@ -1270,7 +1272,7 @@
       "statTotalEarnings": "Gesamteinnahmen",
       "statAvailableBalance": "Verfügbares Guthaben",
       "statTotalSupporters": "Unterstützer gesamt",
-      "accountOverviewLabel": "Kontoübersicht · gesamt"
+      "accountOverviewLabel": "Kontoübersicht, gesamt"
     },
     "period": {
       "today": "Heute",
@@ -1302,7 +1304,7 @@
       "statGoalProgress": "Fortschritt zu Ihrem aktuellen Ziel.",
       "statGoalSetHint": "Legen Sie in den Einstellungen ein Ziel fest, um den Fortschritt zu verfolgen.",
       "statChangeUpdating": "Dieser Zeitraum wird aktualisiert…",
-      "statChangeEarned": "{{amount}} verdient · {{count}} in diesem Zeitraum",
+      "statChangeEarned": "{{amount}} verdient, {{count}} in diesem Zeitraum",
       "statChangeNoTips": "Noch keine Trinkgelder in diesem Zeitraum.",
       "statChangeEllipsis": "…",
       "overlayUpdating": "Aktualisierung",
@@ -1310,7 +1312,7 @@
       "earningsDescToday": "Trinkgelder nach Stunde heute{{tz}}",
       "earningsDescWeek": "Trinkgelder nach Wochentag in dieser Woche (Mo bis So){{tz}}",
       "earningsDescMonth": "Trinkgelder nach Kalendertag in diesem Monat{{tz}}",
-      "tzSuffix": " · {{tz}}",
+      "tzSuffix": ", {{tz}}",
       "loadingChart": "Diagramm wird geladen",
       "noTipActivityChart": "Noch keine Trinkgeldaktivität",
       "recentTips": "Letzte Trinkgelder",
@@ -1332,19 +1334,19 @@
       "headlineLine1": "Ihr Betrieb",
       "headlineLine2": "auf einen Blick",
       "sub": "Teamwachstum, QR-Nutzung und Trinkgeld-Trends an einem Ort.",
-      "helperText": "Live-Betriebsmoment oben — unten den Zeitraum wählen für Summen, Diagramme und Trends.",
+      "helperText": "Live-Betriebsmoment oben. Unten den Zeitraum wählen für Summen, Diagramme und Trends.",
       "welcomeBack": "Willkommen zurück",
       "welcomeBackNamed": "Willkommen zurück, {{name}}",
       "manageQr": "QR-Codes verwalten",
       "manageTeam": "Team verwalten",
-      "venueOverviewLabel": "Betriebsübersicht · dieser Monat",
+      "venueOverviewLabel": "Betriebsübersicht, dieser Monat",
       "statTotalTips": "Trinkgeld diesen Monat",
       "statTipCount": "Trinkgelder erhalten",
       "statActiveStaff": "Aktives Team",
       "pulse": {
         "sectionLabel": "Live-Betriebspuls",
         "lastHour": "Letzte 60 Minuten",
-        "today": "Heute · Betriebszeit",
+        "today": "Heute, Betriebszeit",
         "readiness": "Ziele & Bereitschaft",
         "tipsNone": "Noch keine Trinkgelder",
         "tipsCount_one": "{{count}} Trinkgeld",
@@ -1442,7 +1444,7 @@
       "employeePerformanceDesc": "Trinkgeldsummen pro Person",
       "noEmployees": "Noch keine Mitarbeitenden",
       "noTipActivity": "Noch keine Trinkgeldaktivität",
-      "toastNewTip": "Neues Trinkgeld: {{who}} · {{amount}} · {{time}}",
+      "toastNewTip": "Neues Trinkgeld: {{who}}, {{amount}}, {{time}}",
       "toastTeamMember": "Teammitglied",
       "exportFailed": "Export fehlgeschlagen. Bitte erneut versuchen.",
       "topPerformers": "Top-Performer",
@@ -1590,7 +1592,8 @@
       "loading": "Wird geladen…",
       "empty": "Keine Trinkgelder gefunden.",
       "you": "Sie",
-      "dash": "—",
+      "unknownStaff": "Unbekannt",
+      "noLocationDetail": "Kein Standort",
       "pagination": "{{from}} bis {{to}} von {{total}}",
       "prev": "Zurück",
       "next": "Weiter",
@@ -1698,7 +1701,7 @@
       "toastPrintFail": "Druckvorschau konnte nicht geöffnet werden.",
       "toastPdfReady": "PDF zum Drucken bereit.",
       "toastPdfFail": "PDF konnte nicht erstellt werden.",
-      "teamQrSubtitle": "Team-QR • Eingang / Theke",
+      "teamQrSubtitle": "Team-QR, Eingang oder Theke",
       "labelQrUrl": "QR-Code-URL",
       "totalScans": "Scans gesamt:",
       "pendingTitle": "Verifizierung ausstehend",
@@ -1736,7 +1739,9 @@
       "copyUrlAria": "URL kopieren",
       "print": "Drucken",
       "downloadPdfLayout": "PDF-Layout herunterladen",
-      "regenerateBusinessQr": "Unternehmens-QR neu erzeugen"
+      "regenerateBusinessQr": "Unternehmens-QR neu erzeugen",
+      "staffTagsTitle": "Team-QR-Codes",
+      "staffTagsDesc": "Individuelle QR-Codes pro Teammitglied, im gleichen Markenstil wie Schaufenster-, Tisch- und Standortcodes."
     },
     "notifications": {
       "title": "Benachrichtigungen",
@@ -1871,8 +1876,8 @@
     "loadErrorTitle": "Plattformdaten konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
     "statTips": "Erfolgreiche Trinkgelder (EUR)",
-    "statTipsChange": "Summe aller erfolgreichen Trinkgelder · {{success}} erfolgreich von {{total}} gesamt{{biz}}",
-    "statTipsBizPart": " · {{count}} Lokale mit Trinkgeldern",
+    "statTipsChange": "Summe aller erfolgreichen Trinkgelder: {{success}} erfolgreich von {{total}} gesamt{{biz}}",
+    "statTipsBizPart": ", {{count}} Lokale mit Trinkgeldern",
     "statVenues": "Lokale",
     "statVenuesChange": "Registrierte Unternehmen auf der Plattform",
     "statLocations": "Standorte",
@@ -1882,7 +1887,7 @@
     "statActiveUsers": "Aktive Nutzer",
     "statActiveUsersChange": "Konten mit aktivierter Anmeldung",
     "analyticsTitle": "Analysen",
-    "analyticsSubtitle": "Letzte {{days}} Tage ({{tz}}) · Kennzahlen in Echtzeit",
+    "analyticsSubtitle": "Letzte {{days}} Tage ({{tz}}), Kennzahlen in Echtzeit",
     "timezoneAria": "Zeitzone für Analysen",
     "timezonePlaceholder": "Zeitzone",
     "tipStatusNote": "Trinkgeldstatus nutzt Gesamtwerte",
@@ -2061,7 +2066,7 @@
       "labelVerificationDoc": "Verifizierungsdokument (PDF oder Bild)",
       "cancel": "Abbrechen",
       "save": "Speichern",
-      "tipsStaffSummary": "{{tips}} Trinkgelder · {{staff}} Team",
+      "tipsStaffSummary": "{{tips}} Trinkgelder, {{staff}} Team",
       "toastApproved": "Unternehmen freigegeben. QR-Codes können erstellt werden.",
       "toastRejected": "Unternehmensverifizierung abgelehnt.",
       "toastStatusUpdated": "Status aktualisiert.",
@@ -2083,7 +2088,7 @@
       "dtWebsite": "Website",
       "dtRegisteredAddress": "Registrierte Adresse",
       "dtStaffLocations": "Team / Standorte",
-      "staffLocationsLine": "{{staff}} Teammitglieder · {{locations}} Standorte",
+      "staffLocationsLine": "{{staff}} Teammitglieder, {{locations}} Standorte",
       "openLogo": "Logo öffnen",
       "openKycDocument": "KYC-Dokument öffnen",
       "editDetails": "Details bearbeiten",

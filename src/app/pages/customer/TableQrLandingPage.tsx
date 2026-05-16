@@ -151,7 +151,7 @@ export function TableQrLandingPage() {
             <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3.5 w-3.5 shrink-0" />
               <span className="truncate">
-                {data.location.name} · {data.business.name}
+                {data.location.name}, {data.business.name}
               </span>
             </p>
             <h1 className={`${cf.headline} mt-1`}>{t("tipFlow.tableLanding.whoServedYou")}</h1>

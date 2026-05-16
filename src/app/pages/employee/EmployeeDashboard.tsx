@@ -441,7 +441,7 @@ export function EmployeeDashboard() {
           mobileAlign="left"
           className="employee-dashboard-hero mb-8 lg:mb-6"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
-          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] font-medium tracking-normal text-primary/90 shadow-none"
+          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
           titleClassName="!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
           descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:mx-0 max-lg:text-left lg:max-w-sm"
           textColumnClassName="lg:py-2 xl:pr-6"
@@ -495,7 +495,7 @@ export function EmployeeDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
-              <p className="text-xs leading-relaxed text-muted-foreground max-lg:max-w-sm">
+              <p className="text-[13px] leading-relaxed text-muted-foreground max-lg:max-w-sm sm:text-sm">
                 {t("employee.hero.helperText")}
               </p>
               <div className="employee-hero-cta-row">
@@ -529,7 +529,7 @@ export function EmployeeDashboard() {
                   </Link>
                 </Button>
               </div>
-              <p className="text-[11px] font-medium text-muted-foreground/90">
+              <p className="text-[12px] font-medium text-muted-foreground/90 sm:text-xs">
                 {t("employee.hero.accountOverviewLabel")}
               </p>
               <dl className="employee-hero-account-stats">
@@ -538,7 +538,7 @@ export function EmployeeDashboard() {
                   <dd>
                     {displayAccountSummary.loaded && !accountSummaryLoading
                       ? formatEur(displayAccountSummary.totalEarningsEur)
-                      : "—"}
+                      : t("format.noDataYet")}
                   </dd>
                 </div>
                 <div>
@@ -546,7 +546,7 @@ export function EmployeeDashboard() {
                   <dd>
                     {displayAccountSummary.loaded && !accountSummaryLoading
                       ? formatEur(displayAccountSummary.availableBalanceEur)
-                      : "—"}
+                      : t("format.noDataYet")}
                   </dd>
                 </div>
                 <div>
@@ -554,7 +554,7 @@ export function EmployeeDashboard() {
                   <dd>
                     {displayAccountSummary.loaded && !accountSummaryLoading
                       ? String(displayAccountSummary.totalSupporters)
-                      : "—"}
+                      : t("format.noDataYet")}
                   </dd>
                 </div>
               </dl>
@@ -640,7 +640,7 @@ export function EmployeeDashboard() {
               ) : null}
               <EmployeeStatCard
                 label={t("employee.dashboard.statTotalTips")}
-                value={valuesMatchAnalyticsPeriod ? String(stats.tips) : "—"}
+                value={valuesMatchAnalyticsPeriod ? String(stats.tips) : t("format.noDataYet")}
                 change={
                   analyticsLoading && !valuesMatchAnalyticsPeriod
                     ? t("employee.dashboard.statChangeUpdating")

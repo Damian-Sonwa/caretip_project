@@ -122,7 +122,7 @@ export function FeatureShowcase({
       id={id}
       className={cn(
         cinematic
-          ? "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pt-11 pb-6 sm:pt-16 sm:pb-10 md:pt-[5.25rem] md:pb-14 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100"
+          ? "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pt-24 pb-6 sm:pt-24 sm:pb-10 md:pt-[5.25rem] md:pb-14 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100"
           : "w-full bg-transparent text-foreground pt-14 sm:pt-16",
         id && "scroll-mt-[80px]",
         className,
@@ -272,7 +272,7 @@ export function FeatureShowcase({
         <div
           className={cn(
             cinematic
-              ? "mx-auto relative z-[1] flex w-full max-w-7xl flex-col gap-3 px-4 pb-3 pt-1 max-md:gap-y-2 sm:gap-5 sm:px-6 sm:pb-8 sm:pt-3 md:flex-row md:items-center md:gap-10 md:px-8 md:pb-10 md:pt-3 lg:gap-12 lg:px-10"
+              ? "mx-auto relative z-[1] flex w-full min-w-0 max-w-7xl flex-col gap-3 px-4 pb-4 pt-3 max-md:gap-y-3 sm:gap-5 sm:px-6 sm:pb-8 sm:pt-3 md:flex-row md:items-center md:gap-10 md:px-8 md:pb-10 md:pt-3 lg:gap-12 lg:px-10"
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
@@ -281,7 +281,7 @@ export function FeatureShowcase({
             "relative",
             !cinematic && "md:col-span-5",
             cinematic &&
-              "order-1 flex flex-1 flex-col self-stretch max-md:items-stretch max-md:pt-0 md:flex-1 md:self-stretch md:flex md:flex-col md:justify-center md:pt-2 lg:pr-4",
+              "order-1 flex min-w-0 w-full max-w-full flex-1 flex-col self-stretch max-md:items-stretch max-md:pt-0 md:flex-1 md:self-stretch md:flex md:flex-col md:justify-center md:pt-2 lg:pr-4",
           )}
         >
             {eyebrow?.trim() ? (
@@ -302,7 +302,7 @@ export function FeatureShowcase({
               className={cn(
                 "text-balance font-bold",
                 cinematic
-                  ? "text-[1.65rem] leading-[1.18] tracking-[-0.02em] text-gray-950 sm:text-4xl sm:leading-[1.08] md:text-6xl dark:text-neutral-50"
+                  ? "text-[1.65rem] leading-[1.18] tracking-[-0.02em] text-gray-950 max-md:w-full max-md:min-w-0 max-md:max-w-full max-md:break-words sm:text-4xl sm:leading-[1.08] md:text-6xl dark:text-neutral-50"
                   : "text-4xl leading-[1.08] sm:text-5xl md:text-6xl",
               )}
               initial={{ opacity: 0, y: 20 }}
@@ -317,7 +317,7 @@ export function FeatureShowcase({
               className={cn(
                 "mt-5 max-w-xl sm:mt-6",
                 cinematic
-                  ? "max-md:mt-3 mb-0.5 text-pretty text-[14px] font-normal leading-[1.62] tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 sm:text-[17px] sm:leading-[1.65]"
+                  ? "max-md:mt-4 mb-0.5 text-pretty text-[15px] font-normal leading-[1.68] tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 sm:mt-6 sm:text-[17px] sm:leading-[1.65]"
                   : "leading-relaxed text-muted-foreground",
               )}
             >
@@ -329,7 +329,7 @@ export function FeatureShowcase({
               <LandingBenefitChecklist
                 items={stats}
                 tone="cinematic"
-                className="mt-4 max-w-xl max-md:mt-3 sm:mt-5 sm:gap-3"
+                className="mt-4 max-w-xl max-md:mt-5 sm:mt-5 sm:gap-3"
               />
             ) : null}
 
@@ -337,7 +337,7 @@ export function FeatureShowcase({
               className={cn(
                 "max-w-xl",
                 cinematic && "w-full",
-                cinematic && (stats.length > 0 ? "mt-3 sm:mt-6" : "mt-4 sm:mt-8"),
+                cinematic && (stats.length > 0 ? "max-md:mt-5 mt-3 sm:mt-6" : "max-md:mt-6 mt-4 sm:mt-8"),
                 !cinematic && "mt-8 sm:mt-10",
               )}
             >
@@ -356,7 +356,7 @@ export function FeatureShowcase({
                     className={cn(
                       "flex w-full flex-wrap items-stretch justify-center gap-3 sm:justify-start",
                       cinematic
-                        ? "mx-auto mt-2 max-w-[min(100%,320px)] flex-col gap-1.5 sm:mx-0 sm:mt-5 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3.5"
+                        ? "mx-auto max-w-[min(100%,320px)] flex-col gap-2 max-md:mt-3 max-md:py-2 sm:mx-0 sm:mt-5 sm:max-w-none sm:flex-row sm:flex-wrap sm:gap-3.5 sm:py-0"
                         : "mt-4 gap-3 sm:mt-7",
                     )}
                   >
@@ -513,8 +513,15 @@ export function FeatureShowcase({
                             alt={singleHeroImage.alt}
                             className={cn(
                               "h-full w-full select-none",
-                              "max-md:object-contain max-md:object-center max-md:p-1.5",
-                              "md:object-cover md:[object-position:var(--hero-object-position,center)]",
+                              (singleHeroImage.imageFit ?? "contain") === "contain"
+                                ? [
+                                    "max-md:object-contain max-md:object-center max-md:p-1.5",
+                                    "md:object-cover md:[object-position:var(--hero-object-position,center)]",
+                                  ]
+                                : [
+                                    "object-cover object-center max-md:p-0",
+                                    "[object-position:var(--hero-object-position,center)]",
+                                  ],
                             )}
                             loading="eager"
                             decoding="async"

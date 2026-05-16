@@ -49,13 +49,13 @@ function GlassStatCard({
             strokeWidth={2}
           />
         </div>
-        <span className="truncate text-[11px] font-medium uppercase tracking-[0.12em] text-white/70 sm:text-xs">
+        <span className="truncate text-[12px] font-medium uppercase tracking-[0.11em] text-white/72 sm:text-xs">
           {label}
         </span>
       </div>
       <div className="flex items-baseline justify-between gap-2 pl-[2px]">
         <p
-          className={`font-sans text-2xl font-bold tabular-nums tracking-tight text-white sm:text-3xl ${valueClassName ?? ""}`}
+          className={`font-sans text-[1.625rem] font-bold tabular-nums tracking-tight text-white sm:text-3xl ${valueClassName ?? ""}`}
         >
           {value}
         </p>
@@ -206,9 +206,9 @@ function statusPulse(state: "checking" | "online" | "offline"): ReactNode {
 }
 
 function valueClass(state: "checking" | "online" | "offline"): string {
-  if (state === "checking") return "!text-xl sm:!text-2xl text-white/90";
-  if (state === "online") return "!text-xl sm:!text-2xl text-emerald-300";
-  return "!text-xl sm:!text-2xl text-red-300";
+  if (state === "checking") return "!text-[1.125rem] sm:!text-2xl text-white/90";
+  if (state === "online") return "!text-[1.125rem] sm:!text-2xl text-emerald-300";
+  return "!text-[1.125rem] sm:!text-2xl text-red-300";
 }
 
 function iconTint(state: "checking" | "online" | "offline"): string {
@@ -248,7 +248,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="font-sans text-[1.65rem] font-bold leading-[1.18] tracking-tight text-white sm:text-4xl md:text-[2.6rem]"
+            className="font-sans text-[1.75rem] font-bold leading-[1.16] tracking-tight text-white sm:text-4xl md:text-[2.6rem]"
           >
             {t("admin.networkHero.title")}
           </motion.h1>
@@ -256,7 +256,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
-            className="mt-3 font-sans text-sm font-light leading-relaxed text-neutral-400 sm:text-base lg:text-lg"
+            className="mt-3 font-sans text-[15px] font-light leading-relaxed text-neutral-400 sm:text-base lg:text-lg"
           >
             <span className="lg:hidden">{t("admin.networkHero.subtitleMobile")}</span>
             <span className="hidden lg:inline">{t("admin.networkHero.subtitle")}</span>
@@ -264,7 +264,7 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
         </div>
 
         <div className="flex w-full flex-col gap-3 lg:ml-auto lg:w-auto lg:max-w-md xl:max-w-lg">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55 sm:text-left">
+          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-white/58 sm:text-left sm:text-xs">
             {t("admin.networkHero.systemHealth")}
           </p>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-stretch sm:gap-3">

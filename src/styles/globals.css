@@ -374,12 +374,18 @@ textarea::placeholder {
     max-width: min(100%, 280px);
     min-width: 0;
     padding: 8px 14px !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
     line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex: 0 1 auto;
+  }
+
+  .caretip-dashboard-shell .employee-hero-cta-row > :is(a, button),
+  .caretip-dashboard-shell .business-hero-cta-row > :is(a, button) {
+    font-size: 15px !important;
+    line-height: 1.2;
   }
 
   .caretip-dashboard-shell .dashboard-inline-actions {
@@ -657,12 +663,6 @@ textarea::placeholder {
   font-weight: 700;
 }
 
-@media (max-width: 768px) {
-  .business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
-    font-size: clamp(0.9375rem, 3.6vw, 1.125rem);
-  }
-}
-
 .business-dashboard-hero .business-hero-cta-block {
   display: flex;
   flex-direction: column;
@@ -719,6 +719,14 @@ textarea::placeholder {
 }
 
 @media (max-width: 768px) {
+  .business-dashboard-hero .business-hero-pulse-subline {
+    font-size: 0.75rem;
+  }
+
+  .business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
+    font-size: clamp(1rem, 3.8vw, 1.1875rem);
+  }
+
   /* Manager + staff hero metrics: shared 2-up tiles and full-width third row. */
   .employee-dashboard-hero .employee-hero-account-stats,
   .business-dashboard-hero .business-hero-account-stats {
@@ -765,14 +773,14 @@ textarea::placeholder {
 
   .employee-dashboard-hero .employee-hero-account-stats dt,
   .business-dashboard-hero .business-hero-account-stats dt {
-    font-size: 0.625rem;
+    font-size: 0.6875rem;
     letter-spacing: 0.03em;
   }
 
   .employee-dashboard-hero .employee-hero-account-stats dd,
   .business-dashboard-hero .business-hero-account-stats dd {
     margin-top: 0;
-    font-size: clamp(1rem, 3.6vw, 1.1875rem);
+    font-size: clamp(1.0625rem, 3.6vw, 1.25rem);
     line-height: 1.2;
   }
 }

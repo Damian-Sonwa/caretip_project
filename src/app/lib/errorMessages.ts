@@ -29,7 +29,7 @@ export const SERVICE_UNAVAILABLE_CLIENT_MESSAGE = "Service temporarily unavailab
 
 /** Cross-origin API unreachable after retry (e.g. Render cold start on free tier). */
 export const API_WAKEUP_NETWORK_MESSAGE =
-  "Unable to connect to the server. The API may still be waking up — wait a few seconds and try again.";
+  "Unable to connect to the server. The API may still be waking up. Wait a few seconds and try again.";
 
 const ERROR_MAP: Record<string, string> = {
   // Auth
@@ -68,7 +68,7 @@ const ERROR_MAP: Record<string, string> = {
   "Verification link is invalid or has expired.": "This link has expired. Request a new one.",
   "Verification token is required": "This link has expired. Request a new one.",
   "Email verification required": "Please verify your email using the link we sent you.",
-  "Restart the Caretip API after editing .env. JWT_SECRET is only loaded when the backend starts — stop it (Ctrl+C) and run npm run dev again.":
+  "Restart the Caretip API after editing .env. JWT_SECRET is only loaded when the backend starts. Stop it (Ctrl+C) and run npm run dev again.":
     "Sign-in isn’t working on the server right now. If you manage the app, restart the API after setting JWT_SECRET.",
   // Legacy keys
   "Server is currently unavailable. Please try again in a moment.":
