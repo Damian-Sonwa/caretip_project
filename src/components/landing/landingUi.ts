@@ -2,8 +2,9 @@
  * Landing page design system — typography scale, spacing rhythm, layout proportions.
  *
  * Responsive rules:
- * - Mobile (<md): centered section intros (headlines + subtitles)
+ * - Phone (<md): compact type (+1 step readability pass), spacing, CTAs; centered section intros
  * - Tablet/desktop split columns (md+ / lg+): copy left-aligned, visuals balanced
+ * - Hero: left-aligned on all breakpoints
  * - All sections: min-w-0 + overflow-x containment to prevent horizontal scroll
  */
 export const landingUi = {
@@ -26,24 +27,25 @@ export const landingUi = {
 
   pillRow:
     "flex w-full flex-wrap items-center justify-center gap-2 max-lg:justify-center lg:justify-start",
-  pill: "inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-semibold text-primary max-lg:mx-auto lg:mx-0 sm:px-3 sm:py-1 sm:text-xs",
+  pill: "inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-[12px] font-semibold text-primary max-lg:mx-auto lg:mx-0 sm:px-3 sm:py-1 sm:text-xs",
 
   /** Tier 2 — split / setup sections */
   copyStack:
     "flex w-full flex-col items-start space-y-3.5 max-lg:items-center max-lg:text-center max-lg:space-y-4 lg:items-start lg:text-left sm:space-y-4",
   headline:
-    "mx-auto max-w-[min(100%,24ch)] text-balance text-center text-[1.75rem] font-bold leading-[1.12] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 sm:text-3xl sm:leading-[1.1] md:text-4xl lg:mx-0 lg:max-w-[24ch] lg:text-left lg:text-5xl lg:leading-[1.08]",
+    "mx-auto max-w-[min(100%,20ch)] text-balance text-center text-[1.4375rem] font-bold leading-[1.14] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 max-md:max-w-[min(100%,20ch)] sm:text-[1.625rem] md:text-4xl md:leading-[1.1] lg:mx-0 lg:max-w-[24ch] lg:text-left lg:text-5xl lg:leading-[1.08]",
   subtitle:
-    "mx-auto max-w-[min(100%,36ch)] text-pretty text-center text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-neutral-600 max-lg:px-0.5 dark:text-neutral-400 sm:text-base sm:leading-relaxed md:text-lg lg:mx-0 lg:max-w-[38ch] lg:text-left",
+    "mx-auto max-w-[min(100%,32ch)] text-pretty text-center text-[14px] font-normal leading-[1.52] tracking-[-0.01em] text-neutral-600 max-lg:px-0.5 dark:text-neutral-400 sm:text-[15px] sm:leading-[1.55] md:text-lg md:leading-relaxed lg:mx-0 lg:max-w-[38ch] lg:text-left",
 
   benefitList: "w-full space-y-3 max-lg:mt-1 max-lg:space-y-2.5 sm:space-y-3.5",
-  cta: "inline-flex w-full max-w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-[15px] font-semibold text-white shadow-[0_10px_28px_rgba(235,153,44,0.32)] transition-colors hover:bg-primary/90 max-lg:h-12 sm:w-auto sm:min-w-[12rem] sm:rounded-2xl sm:px-8 sm:py-4 sm:text-base",
+  cta:
+    "inline-flex w-full max-w-full items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2 text-[14px] font-semibold text-white shadow-[0_6px_18px_rgba(235,153,44,0.26)] transition-colors hover:bg-primary/90 max-md:h-9 max-md:min-h-9 max-md:rounded-lg max-md:px-4 max-md:py-2 max-md:text-[14px] sm:h-11 sm:min-h-11 sm:w-auto sm:min-w-[12rem] sm:rounded-2xl sm:px-8 sm:py-3.5 sm:text-[15px] md:h-12 md:py-4 md:text-base lg:h-auto",
 
   /** Tier 2 — full-width section titles */
   sectionTitle:
-    "mx-auto max-w-[min(100%,24ch)] text-balance text-center text-[1.75rem] font-bold leading-[1.12] tracking-[-0.02em] text-neutral-900 max-lg:px-1 dark:text-neutral-100 sm:max-w-2xl sm:text-3xl sm:leading-[1.1] md:text-4xl lg:max-w-3xl lg:text-5xl lg:leading-[1.08]",
+    "mx-auto max-w-[min(100%,20ch)] text-balance text-center text-[1.4375rem] font-bold leading-[1.14] tracking-[-0.02em] text-neutral-900 max-lg:px-1 dark:text-neutral-100 max-md:max-w-[min(100%,22ch)] sm:max-w-2xl sm:text-[1.625rem] md:text-3xl md:leading-[1.1] lg:max-w-3xl lg:text-5xl lg:leading-[1.08]",
   sectionSubtitle:
-    "mx-auto max-w-[min(100%,38ch)] text-pretty text-center text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-neutral-600 max-lg:px-1 dark:text-neutral-400 sm:max-w-2xl sm:text-base sm:leading-relaxed md:text-lg lg:max-w-2xl",
+    "mx-auto max-w-[min(100%,32ch)] text-pretty text-center text-[14px] font-normal leading-[1.52] tracking-[-0.01em] text-neutral-600 max-lg:px-1 dark:text-neutral-400 sm:max-w-2xl sm:text-[15px] sm:leading-[1.55] md:text-lg md:leading-relaxed lg:max-w-2xl",
 
   /** Tier 3 — alternating image + copy showcases (employee, business) */
   showcaseSection:
@@ -55,22 +57,23 @@ export const landingUi = {
   showcaseGrid:
     "relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden sm:gap-10 lg:grid-cols-2 lg:gap-12",
   showcaseCopy:
-    "flex w-full min-w-0 max-w-xl flex-col items-start max-lg:mx-auto max-lg:items-center max-lg:text-center lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
+    "flex w-full min-w-0 max-w-xl flex-col items-start max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
   showcaseIntro:
-    "flex w-full flex-col items-start space-y-3.5 max-lg:items-center max-lg:text-center max-lg:space-y-4 lg:space-y-4 lg:items-start lg:text-left",
+    "flex w-full flex-col items-start space-y-3 max-lg:items-center max-lg:text-center max-lg:space-y-3.5 lg:space-y-4 lg:items-start lg:text-left",
   showcaseHeadline:
-    "mx-auto max-w-[min(100%,22ch)] text-balance text-center text-[1.75rem] font-bold leading-[1.12] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 sm:text-3xl sm:leading-[1.1] lg:mx-0 lg:max-w-[22ch] lg:text-left lg:text-5xl lg:leading-[1.08]",
-  showcaseHeadlineAccent: "mt-2 block text-primary sm:mt-2.5",
+    "mx-auto max-w-[min(100%,19ch)] text-balance text-center text-[1.4375rem] font-bold leading-[1.14] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 max-md:max-w-[min(100%,20ch)] sm:text-[1.625rem] md:text-3xl md:leading-[1.1] lg:mx-0 lg:max-w-[22ch] lg:text-left lg:text-5xl lg:leading-[1.08]",
+  showcaseHeadlineAccent: "mt-1 block text-primary max-md:mt-1 sm:mt-2 lg:mt-2.5",
   showcaseSubtitle:
-    "mx-auto max-w-[min(100%,36ch)] text-pretty text-center text-[15px] font-normal leading-[1.65] text-neutral-700 max-lg:px-0.5 dark:text-neutral-300 sm:text-base md:text-lg lg:mx-0 lg:max-w-[36ch] lg:text-left",
+    "mx-auto max-w-[min(100%,32ch)] text-pretty text-center text-[14px] font-normal leading-[1.52] text-neutral-700 max-lg:px-0.5 dark:text-neutral-300 sm:text-[15px] sm:leading-[1.55] md:text-lg lg:mx-0 lg:max-w-[36ch] lg:text-left",
   showcaseActionCluster:
-    "mt-6 flex w-full min-w-0 flex-col gap-3.5 sm:mt-7 sm:gap-4 max-lg:mx-auto max-lg:max-w-md lg:mx-0 lg:max-w-none",
+    "mt-5 flex w-full min-w-0 flex-col gap-3 max-lg:items-start sm:mt-6 sm:gap-3.5 lg:mx-0 lg:max-w-none",
   /** Embedded feature list — light surface, no card shadow (split showcases) */
   showcaseBenefitsPanel:
     "w-full divide-y divide-neutral-900/[0.07] rounded-xl bg-white/30 ring-1 ring-inset ring-neutral-900/[0.05] backdrop-blur-[1px] dark:divide-white/[0.07] dark:bg-white/[0.04] dark:ring-white/[0.06]",
-  showcaseBenefits: "mt-0 w-full",
+  showcaseBenefits: "mt-0 w-full max-lg:self-start",
+  showcaseBenefitRow: "px-3.5 py-2 sm:px-4 sm:py-3",
   showcaseCta:
-    "mt-0 w-full px-6 py-3.5 shadow-[0_10px_28px_rgba(235,153,44,0.32)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-primary/90 hover:shadow-[0_12px_34px_rgba(235,153,44,0.38)] active:scale-[0.99] max-lg:flex max-lg:h-12 max-lg:justify-center sm:px-7 sm:py-3.5 lg:inline-flex lg:h-auto lg:w-auto lg:self-start",
+    "mt-0 w-full self-start max-md:h-9 max-md:min-h-9 max-md:py-2 max-md:px-4 max-md:text-[14px] shadow-[0_6px_18px_rgba(235,153,44,0.26)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-primary/90 hover:shadow-[0_12px_34px_rgba(235,153,44,0.38)] active:scale-[0.99] max-lg:flex max-lg:h-11 max-lg:min-h-11 max-lg:py-2.5 max-lg:px-5 max-lg:text-[14px] sm:px-7 sm:py-3.5 lg:inline-flex lg:h-auto lg:w-auto",
   showcaseVisualCol:
     "flex w-full min-w-0 max-w-full flex-col items-center justify-center max-lg:max-w-lg lg:max-w-none lg:justify-self-center",
   showcaseVisualGlow:
@@ -90,9 +93,9 @@ export const landingUi = {
   hospitalityIntro:
     "mb-8 flex w-full flex-col items-center space-y-4 px-0.5 text-center sm:mb-9 lg:mb-10",
   hospitalityTitle:
-    "mx-auto max-w-[min(100%,24ch)] text-balance text-center text-[1.75rem] font-bold leading-[1.12] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 sm:text-3xl sm:leading-[1.1] md:text-4xl lg:max-w-[26ch] lg:text-5xl lg:leading-[1.08]",
+    "mx-auto max-w-[min(100%,20ch)] text-balance text-center text-[1.4375rem] font-bold leading-[1.14] tracking-[-0.02em] text-neutral-900 max-lg:px-0.5 dark:text-neutral-100 max-md:max-w-[min(100%,22ch)] sm:text-[1.625rem] md:text-3xl md:leading-[1.1] lg:max-w-[26ch] lg:text-5xl lg:leading-[1.08]",
   hospitalitySubtitle:
-    "mx-auto max-w-[min(100%,38ch)] text-pretty text-center text-[15px] font-normal leading-[1.65] text-neutral-600 max-lg:px-0.5 dark:text-neutral-400 sm:text-base md:text-lg lg:max-w-[36ch]",
+    "mx-auto max-w-[min(100%,32ch)] text-pretty text-center text-[14px] font-normal leading-[1.52] text-neutral-600 max-lg:px-0.5 dark:text-neutral-400 sm:text-[15px] sm:leading-[1.55] md:text-lg lg:max-w-[36ch]",
   hospitalityGrid:
     "grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden sm:gap-9 lg:grid-cols-2 lg:gap-12",
   hospitalityFeaturePanel:
@@ -100,7 +103,7 @@ export const landingUi = {
   hospitalityMediaStack:
     "flex w-full min-w-0 flex-col gap-3 pt-0.5 max-lg:items-center max-lg:text-center sm:gap-4 lg:items-start lg:text-left",
   hospitalityMediaLabel:
-    "text-[13px] font-semibold leading-snug tracking-[0.01em] text-neutral-600 dark:text-neutral-400 sm:text-sm",
+    "text-[14px] font-semibold leading-snug tracking-[0.01em] text-neutral-600 dark:text-neutral-400 sm:text-sm",
   hospitalityMediaCard:
     "w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_2px_4px_rgba(15,15,15,0.04),0_12px_32px_rgba(15,15,15,0.07)] dark:border-neutral-800/90 dark:bg-neutral-950/60 dark:shadow-[0_16px_36px_rgba(0,0,0,0.35)]",
 
@@ -108,22 +111,22 @@ export const landingUi = {
   heroShell:
     "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-8 overflow-x-hidden px-4 pb-6 pt-3 max-md:gap-y-5 sm:gap-9 sm:px-6 sm:pb-10 sm:pt-4 md:grid-cols-[minmax(0,min(100%,30rem))_1fr] md:items-center md:gap-8 md:px-8 md:pb-12 md:pt-4 lg:grid-cols-[minmax(0,34rem)_minmax(280px,1.05fr)] lg:gap-10 xl:gap-12",
   heroCopy:
-    "order-1 flex min-w-0 w-full max-w-[34rem] flex-col max-md:mx-auto max-md:items-center max-md:text-center md:max-w-[30rem] md:items-start md:text-left md:mx-0 lg:max-w-[34rem]",
+    "order-1 flex min-w-0 w-full max-w-[34rem] flex-col items-start text-left md:max-w-[30rem] md:mx-0 lg:max-w-[34rem]",
   heroHeadlineEn:
-    "mx-auto max-w-[min(100%,20ch)] text-balance text-center text-[1.75rem] font-bold leading-[1.1] tracking-[-0.02em] text-gray-950 dark:text-neutral-50 sm:text-[1.85rem] sm:leading-[1.08] md:mx-0 md:max-w-[21ch] md:text-left md:text-4xl md:leading-[1.06] lg:text-[3.15rem] xl:text-[3.25rem] lg:leading-[1.04]",
+    "max-w-[min(100%,21ch)] text-balance text-left text-[1.5rem] font-bold leading-[1.13] tracking-[-0.02em] text-gray-950 dark:text-neutral-50 sm:text-[1.625rem] sm:leading-[1.1] md:text-4xl md:leading-[1.06] lg:max-w-[21ch] lg:text-[3.15rem] xl:text-[3.25rem] lg:leading-[1.04]",
   heroHeadlineDe:
-    "mx-auto max-w-[min(100%,24ch)] text-balance text-center text-[1.6rem] font-bold leading-[1.1] tracking-[-0.02em] text-gray-950 dark:text-neutral-50 sm:text-[1.85rem] sm:leading-[1.08] md:mx-0 md:max-w-[26ch] md:text-left md:text-[2.35rem] md:leading-[1.08] lg:text-[2.75rem] xl:text-[2.875rem] lg:leading-[1.06]",
+    "max-w-[min(100%,28ch)] text-balance text-left text-[1.375rem] font-bold leading-[1.13] tracking-[-0.02em] text-gray-950 dark:text-neutral-50 sm:text-[1.5rem] sm:leading-[1.1] md:max-w-[26ch] md:text-[2.35rem] md:leading-[1.08] lg:text-[2.75rem] xl:text-[2.875rem] lg:leading-[1.06]",
   heroSubtitle:
-    "mx-auto mt-4 max-w-[min(100%,36ch)] text-pretty text-center text-[15px] font-normal leading-[1.65] tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 sm:mt-5 sm:text-[17px] sm:leading-[1.62] md:mx-0 md:mt-5 md:text-left md:text-lg md:leading-[1.6]",
+    "mt-2.5 max-w-[min(100%,36ch)] text-pretty text-left text-[14px] font-normal leading-[1.52] tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 sm:mt-5 sm:text-[15px] sm:leading-[1.55] md:text-lg md:leading-[1.6] lg:max-w-[38ch]",
   heroActionCluster:
-    "mt-5 flex w-full max-w-[min(100%,38ch)] flex-col gap-3.5 max-md:mx-auto max-md:items-center sm:mt-6 sm:gap-4 md:mx-0 md:items-start md:max-w-[38ch]",
-  heroBenefits: "!mt-0 w-full max-w-full gap-2.5 max-md:mx-auto sm:!mt-0 sm:gap-2.5",
+    "mt-4 flex w-full max-w-[min(100%,38ch)] flex-col gap-3 items-start sm:mt-6 sm:gap-4 md:max-w-[38ch]",
+  heroBenefits: "!mt-0 w-full max-w-full gap-2.5 sm:!mt-0 sm:gap-2.5",
   heroCtaRow:
-    "flex w-full max-w-full flex-col items-stretch gap-2 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-center min-[420px]:gap-3 md:justify-start",
+    "flex w-full max-w-full flex-col items-stretch gap-2 justify-start min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3",
   heroCtaPrimary:
-    "h-11 w-full shrink-0 rounded-xl border-0 bg-[#EB992C] px-7 text-[15px] font-bold tracking-tight text-white shadow-[0_12px_36px_-10px_rgba(235,153,44,0.48)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:px-8 sm:text-base",
+    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 text-[14px] font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-9 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8 sm:text-base",
   heroCtaSecondary:
-    "h-11 w-full shrink-0 rounded-xl border border-neutral-300/90 bg-white/90 px-6 text-[14px] font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:px-6",
+    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 text-[13px] font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-9 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6 sm:text-[14px]",
   heroMediaCol:
     "order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:pt-1 md:justify-center md:self-center",
   heroMediaShell:

@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
   "flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
-  "px-6 pb-6 pt-6 sm:px-7 sm:pb-7 sm:pt-7",
+  "px-4 pb-5 pt-4 max-lg:px-4 max-lg:pb-5 max-lg:pt-4 sm:px-7 sm:pb-7 sm:pt-7",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.06)]",
   "transition-[box-shadow,border-color] duration-300",
   "hover:border-neutral-300/90 hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_14px_36px_rgba(15,15,15,0.08)]",
@@ -17,7 +17,7 @@ const cardClassName = cn(
 );
 
 const chipClassName = cn(
-  "inline-flex min-h-9 items-center justify-center rounded-full border border-neutral-200/95 bg-white px-4 py-2",
+  "inline-flex min-h-8 items-center justify-center rounded-full border border-neutral-200/95 bg-white px-3 py-1.5 max-lg:min-h-8 max-lg:px-3 max-lg:py-1.5",
   "text-xs font-semibold tracking-tight text-neutral-800",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04)] ring-1 ring-neutral-900/[0.04]",
   "dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:ring-white/[0.06]",
@@ -81,7 +81,7 @@ export function LandingSocialProofSection() {
           initial={{ opacity: 0, y: 8 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="mb-7 flex flex-wrap items-center justify-center gap-2 sm:mb-8 sm:gap-2.5"
+          className="mb-5 flex flex-wrap items-center justify-center gap-2 max-lg:mb-6 sm:mb-8 sm:gap-2.5"
           aria-label={t("landing.socialProof.chipsAria")}
         >
           {stats.map((stat) => (
@@ -92,7 +92,7 @@ export function LandingSocialProofSection() {
         </motion.ul>
 
         <motion.div
-          className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6"
+          className="grid gap-3 max-lg:gap-3.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
@@ -107,11 +107,11 @@ export function LandingSocialProofSection() {
               className={cardClassName}
             >
               <Quote
-                className="mb-4 h-8 w-8 text-primary/55 dark:text-primary/65 sm:mb-5 sm:h-9 sm:w-9"
+                className="mb-3 h-7 w-7 text-primary/55 max-lg:mb-3 max-lg:h-7 max-lg:w-7 dark:text-primary/65 sm:mb-5 sm:h-9 sm:w-9"
                 strokeWidth={2}
                 aria-hidden
               />
-              <blockquote className="flex-1 text-pretty text-[16px] font-normal leading-[1.72] text-neutral-800 dark:text-neutral-200 sm:text-[17px] sm:leading-[1.7]">
+              <blockquote className="flex-1 text-pretty text-[15px] font-normal leading-[1.55] text-neutral-800 max-lg:leading-[1.55] dark:text-neutral-200 sm:text-[17px] sm:leading-[1.7]">
                 <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
                   “
                 </span>
@@ -120,8 +120,8 @@ export function LandingSocialProofSection() {
                   ”
                 </span>
               </blockquote>
-              <figcaption className="mt-auto border-t border-neutral-200/90 pt-5 dark:border-neutral-700/90 sm:pt-5">
-                <p className="text-[15px] font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
+              <figcaption className="mt-auto border-t border-neutral-200/90 pt-4 max-lg:pt-4 dark:border-neutral-700/90 sm:pt-5">
+                <p className="text-[15px] font-semibold tracking-tight text-neutral-900 max-lg:text-[15px] dark:text-neutral-50 sm:text-[15px]">
                   {item.name}
                 </p>
                 <p className="mt-1 text-sm font-medium leading-snug text-neutral-600 dark:text-neutral-400">

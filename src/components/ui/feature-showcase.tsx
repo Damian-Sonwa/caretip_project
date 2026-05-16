@@ -294,7 +294,7 @@ export function FeatureShowcase({
                 className={cn(
                   "mb-6",
                   cinematic
-                    ? "mb-4 max-md:mx-auto max-md:mb-3 border-black/[0.10] bg-white text-gray-900 sm:mb-6"
+                    ? "mb-4 max-md:mb-3 border-black/[0.10] bg-white text-gray-900 sm:mb-6"
                     : "border-primary/40 text-foreground",
                 )}
               >

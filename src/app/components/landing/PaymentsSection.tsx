@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
   "group relative flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
-  "px-6 pb-7 pt-6 sm:px-6 sm:pb-8 sm:pt-7",
+  "px-3.5 pb-4 pt-3.5 max-md:px-3.5 max-md:pb-4 max-md:pt-3.5 sm:px-6 sm:pb-8 sm:pt-7",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.06)]",
   "transition-[box-shadow,border-color,transform] duration-300 ease-out",
   "hover:border-neutral-300/90 hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_16px_40px_rgba(15,15,15,0.08)]",
@@ -17,12 +17,13 @@ const cardClassName = cn(
 );
 
 const iconWrapClassName = cn(
-  "mb-5 flex h-12 w-12 shrink-0 items-center justify-center rounded-xl sm:mb-5 sm:h-[52px] sm:w-[52px]",
+  "mb-2.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg max-md:mb-2.5 max-md:h-9 max-md:w-9 sm:mb-5 sm:h-[52px] sm:w-[52px] sm:rounded-xl",
   "bg-primary/[0.14] text-primary ring-1 ring-primary/25",
   "dark:bg-primary/20 dark:text-[#f0a84d] dark:ring-primary/35",
 );
 
-const iconClassName = "h-[22px] w-[22px] stroke-[2.25] text-primary dark:text-[#f0a84d]";
+const iconClassName =
+  "h-4 w-4 stroke-[2.25] text-primary max-md:h-4 max-md:w-4 dark:text-[#f0a84d] sm:h-[22px] sm:w-[22px]";
 
 export function PaymentsSection() {
   const { t } = useTranslation();
@@ -62,7 +63,7 @@ export function PaymentsSection() {
         >
           <span className={landingUi.pill}>{t("landing.paymentsTrust.pill")}</span>
           <h2
-            className={cn(landingUi.sectionTitle, "mt-3.5")}
+            className={cn(landingUi.sectionTitle, "mt-2 max-md:mt-2 sm:mt-3.5")}
           >
             {t("landing.paymentsTrust.title")}
           </h2>
@@ -73,7 +74,7 @@ export function PaymentsSection() {
           </p>
         </motion.div>
 
-        <ul className="grid gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">
+        <ul className="grid gap-2.5 max-md:gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">
           {bullets.map((item, idx) => {
             const Icon = item.icon;
             return (
@@ -88,10 +89,10 @@ export function PaymentsSection() {
                 <div className={iconWrapClassName}>
                   <Icon className={iconClassName} aria-hidden />
                 </div>
-                <h3 className="text-[15px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-base">
+                <h3 className="text-[14px] font-semibold leading-snug tracking-tight text-neutral-900 max-md:text-[14px] dark:text-neutral-50 sm:text-base">
                   {item.title}
                 </h3>
-                <p className="mt-3 text-sm leading-[1.65] text-neutral-600 dark:text-neutral-400">
+                <p className="mt-1.5 text-[13px] leading-[1.52] text-neutral-600 max-md:mt-1.5 dark:text-neutral-400 sm:mt-3 sm:text-sm sm:leading-[1.65]">
                   {item.text}
                 </p>
               </motion.li>

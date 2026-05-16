@@ -48,14 +48,14 @@ export function SimpleSetupSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
-            className={cn(landingUi.copyStack, "mb-7 sm:mb-8")}
+            className={cn(landingUi.copyStack, "mb-5 max-lg:mb-6 sm:mb-8")}
           >
-            <div className={landingUi.pillRow}>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white px-2.5 py-0.5 text-[11px] font-semibold text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1 sm:text-xs">
+            <div className={cn(landingUi.pillRow, "max-md:flex-col max-md:gap-1.5 max-md:items-center")}>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white px-2.5 py-0.5 text-[12px] font-semibold text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1 sm:text-xs">
                 <Sparkles className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
                 {t("landing.simpleSetup.pill")}
               </span>
-              <span className="text-center text-[13px] font-medium text-neutral-600 max-lg:w-full dark:text-neutral-400 sm:text-left sm:text-sm">
+              <span className="text-center text-[14px] font-medium text-neutral-600 max-lg:w-full dark:text-neutral-400 sm:text-left sm:text-sm">
                 {t("landing.simpleSetup.pillSub")}
               </span>
             </div>
@@ -73,7 +73,7 @@ export function SimpleSetupSection() {
               aria-hidden
               className="absolute bottom-4 left-[1.125rem] top-4 w-px bg-gradient-to-b from-primary/40 via-neutral-200 to-neutral-200 dark:via-neutral-700 dark:to-neutral-700 sm:left-5"
             />
-            <div className="space-y-3 sm:space-y-3.5">
+            <div className="space-y-2.5 max-lg:space-y-2.5 sm:space-y-3.5">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (
@@ -88,16 +88,16 @@ export function SimpleSetupSection() {
                     viewport={{ once: true }}
                     transition={{ duration: 0.4, delay: idx * 0.05 }}
                     className={cn(
-                      "group relative w-full rounded-2xl border px-4 py-4 text-left transition-all duration-300 sm:px-5 sm:py-5",
+                      "group relative w-full rounded-xl border px-3.5 py-3 text-left transition-all duration-300 max-lg:rounded-xl max-lg:py-3 sm:rounded-2xl sm:px-5 sm:py-5",
                       isActive
                         ? "border-primary/30 bg-white shadow-[0_2px_4px_rgba(15,15,15,0.04),0_14px_36px_rgba(235,153,44,0.12)] ring-2 ring-primary/15 dark:bg-neutral-900 dark:ring-primary/25"
                         : "border-neutral-200/90 bg-white/90 shadow-sm hover:border-neutral-300 hover:shadow-md dark:border-neutral-700 dark:bg-neutral-900/80 dark:hover:border-neutral-600",
                     )}
                   >
-                    <div className="flex items-start gap-3.5 sm:gap-4">
+                    <div className="flex items-start gap-3 max-lg:gap-3 sm:gap-4">
                       <span
                         className={cn(
-                          "relative z-[1] flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold transition-colors sm:h-10 sm:w-10",
+                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[14px] font-bold transition-colors max-lg:h-8 max-lg:w-8 sm:h-10 sm:w-10 sm:text-sm",
                           isActive
                             ? "bg-primary text-white shadow-[0_4px_14px_rgba(235,153,44,0.35)]"
                             : "bg-neutral-100 text-neutral-600 group-hover:bg-neutral-200 dark:bg-neutral-800 dark:text-neutral-300",
@@ -108,13 +108,13 @@ export function SimpleSetupSection() {
                       <div className="min-w-0 flex-1 space-y-1.5 pt-0.5 sm:space-y-2">
                         <p
                           className={cn(
-                            "text-[16px] font-semibold leading-snug tracking-tight sm:text-[17px]",
+                            "text-[15px] font-semibold leading-snug tracking-tight max-lg:text-[15px] sm:text-[17px]",
                             isActive ? "text-neutral-900 dark:text-neutral-50" : "text-neutral-800 dark:text-neutral-100",
                           )}
                         >
                           {step.title}
                         </p>
-                        <p className="text-[14px] leading-[1.62] text-neutral-600 dark:text-neutral-400 sm:text-[15px]">
+                        <p className="text-[14px] leading-[1.52] text-neutral-600 max-lg:leading-[1.5] dark:text-neutral-400 sm:text-[15px] sm:leading-[1.62]">
                           {step.description}
                         </p>
                       </div>

@@ -74,7 +74,7 @@ export function LandingSplitShowcaseSection({
           transition={{ duration: 0.65 }}
           className={cn(
             landingUi.showcaseCopy,
-            visualFirstOnMobile ? "order-2 max-lg:mt-2" : "order-1",
+            visualFirstOnMobile ? "order-2 max-lg:mt-1" : "order-1",
             copyLgOrder,
           )}
         >
@@ -104,7 +104,7 @@ export function LandingSplitShowcaseSection({
                   variant={benefitsVariant}
                   title={item.title}
                   description={item.description}
-                  className={benefitsVariant === "showcase" ? "py-3.5 sm:py-4" : undefined}
+                  className={benefitsVariant === "showcase" ? landingUi.showcaseBenefitRow : undefined}
                 />
               ))}
             </div>

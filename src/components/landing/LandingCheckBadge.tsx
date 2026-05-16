@@ -6,10 +6,15 @@ import { cn } from "@/lib/utils";
 export const CARETIP_LANDING_CHECK_GRADIENT =
   "linear-gradient(165deg, #fff8e8 0%, #f6d896 48%, #e8b24a 100%)";
 
-const badgeShell =
-  "flex w-9 shrink-0 items-center justify-center rounded-[13px] ring-1 ring-amber-900/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_6px_16px_rgba(180,130,40,0.14)] sm:w-10 sm:rounded-2xl";
+/** Shared icon+text row — hero, hospitality, showcases, and all uptrend lists. */
+export const landingUptrendRowGrid =
+  "grid min-h-0 grid-cols-[auto_minmax(0,1fr)] gap-x-1.5 sm:gap-x-2";
 
-const uptrendIcon = "h-[1em] w-[1em] max-h-[16px] max-w-[16px] text-neutral-900 sm:max-h-[17px] sm:max-w-[17px]";
+const badgeShell =
+  "flex w-7 shrink-0 items-center justify-center rounded-[10px] ring-1 ring-amber-900/[0.08] shadow-[inset_0_1px_0_rgba(255,255,255,0.45),0_2px_8px_rgba(180,130,40,0.08)] max-md:w-7 max-md:rounded-[10px] sm:w-9 sm:rounded-[13px] sm:shadow-[inset_0_1px_0_rgba(255,255,255,0.55),0_6px_16px_rgba(180,130,40,0.14)] lg:w-10 lg:rounded-2xl";
+
+const uptrendIcon =
+  "h-[1em] w-[1em] max-h-[12px] max-w-[12px] text-neutral-900 max-md:max-h-[12px] max-md:max-w-[12px] sm:max-h-[16px] sm:max-w-[16px] lg:max-h-[17px] lg:max-w-[17px]";
 
 export type LandingBenefitTone = "cinematic" | "split" | "default";
 
@@ -25,7 +30,7 @@ type LandingCheckBadgeProps = {
 export function LandingCheckBadge({ className, matchLineHeight }: LandingCheckBadgeProps) {
   return (
     <span
-      className={cn(badgeShell, matchLineHeight ? "h-[1lh]" : "h-9 sm:h-10", className)}
+      className={cn(badgeShell, matchLineHeight ? "h-[1lh]" : "h-7 sm:h-9 lg:h-10", className)}
       style={{ background: CARETIP_LANDING_CHECK_GRADIENT }}
       aria-hidden
     >
@@ -50,8 +55,8 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
   return (
     <ul
       className={cn(
-        "mt-5 flex w-full max-w-xl flex-col gap-3 sm:mt-7 sm:gap-3.5",
-        tone === "cinematic" && "max-md:mt-0 max-md:gap-3 max-md:max-w-full",
+        "mt-5 flex w-full max-w-xl flex-col gap-2.5 sm:mt-7 sm:gap-3.5",
+        tone === "cinematic" && "max-md:mt-0 max-md:gap-2 max-md:max-w-full",
         className,
       )}
       role="list"
@@ -60,9 +65,10 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
         <li
           key={i}
           className={cn(
-            "grid min-h-0 grid-cols-[2.25rem_minmax(0,1fr)] items-start gap-x-3 text-[15px] font-semibold leading-snug tracking-[-0.015em] sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4 sm:text-base sm:leading-snug",
+            landingUptrendRowGrid,
+            "items-center text-[14px] font-semibold leading-snug tracking-[-0.015em] sm:text-[15px] md:text-base md:leading-snug",
             tone === "cinematic" &&
-              "max-md:grid-cols-[2.5rem_minmax(0,1fr)] max-md:gap-x-3.5 max-md:text-[15px] max-md:font-semibold max-md:leading-[1.45] max-md:tracking-[-0.012em] sm:text-[17px] sm:leading-[1.42]",
+              "max-md:text-[14px] max-md:font-semibold max-md:leading-[1.42] max-md:tracking-[-0.012em] md:text-[17px] md:leading-[1.42]",
           )}
           role="listitem"
         >
@@ -87,7 +93,7 @@ type LandingBenefitBlockProps = {
 
 /**
  * Title + optional body with the same gold uptrend badge used in the hero.
- * For multi-line body copy, badge aligns to the first line (`items-start` + `mt-0.5`).
+ * Badge sits tight to copy (same rhythm as hero + hospitality feature list).
  */
 export function LandingBenefitBlock({
   title,
@@ -97,38 +103,16 @@ export function LandingBenefitBlock({
   className,
   variant = "default",
 }: LandingBenefitBlockProps) {
-  const isSplit = variant === "split" || variant === "showcase";
+  const isRich = variant === "split" || variant === "showcase";
 
   return (
-    <div
-      className={cn(
-        "grid min-h-0 items-start",
-        isSplit
-          ? cn(
-              "grid-cols-[3rem_minmax(0,1fr)] gap-x-4 sm:grid-cols-[3.25rem_minmax(0,1fr)]",
-              "py-3.5 sm:py-4",
-            )
-          : "grid-cols-[2.25rem_minmax(0,1fr)] gap-x-3 sm:grid-cols-[2.5rem_minmax(0,1fr)] sm:gap-x-4",
-        className,
-      )}
-    >
-      <div
-        className={cn(
-          "flex shrink-0 items-center justify-center",
-          isSplit
-            ? "h-11 w-11 rounded-xl bg-primary/[0.12] ring-1 ring-primary/20 sm:h-12 sm:w-12"
-            : "mt-0.5",
-        )}
-      >
-        <LandingCheckBadge
-          className={cn(isSplit && "h-9 w-9 rounded-[11px] sm:h-10 sm:w-10")}
-        />
-      </div>
-      <div className={cn("min-w-0", isSplit ? "space-y-2 sm:space-y-2.5" : "space-y-1.5 sm:space-y-2")}>
+    <div className={cn(landingUptrendRowGrid, "items-start", className)}>
+      <LandingCheckBadge className="mt-0.5 shrink-0 self-start" />
+      <div className={cn("min-w-0", isRich ? "space-y-1 max-md:space-y-1 sm:space-y-1.5 lg:space-y-2" : "space-y-1.5 sm:space-y-2")}>
         <div
           className={cn(
-            isSplit
-              ? "text-[17px] font-semibold leading-snug tracking-tight text-neutral-900 dark:text-neutral-50"
+            isRich
+              ? "text-[15px] font-semibold leading-snug tracking-tight text-neutral-900 max-md:text-[15px] dark:text-neutral-50 sm:text-[15px] lg:text-[17px]"
               : "text-base font-semibold leading-snug text-neutral-900 dark:text-neutral-100",
             titleClassName,
           )}
@@ -138,8 +122,8 @@ export function LandingBenefitBlock({
         {description ? (
           <div
             className={cn(
-              isSplit
-                ? "max-w-[38ch] text-[15px] font-normal leading-[1.65] text-neutral-700 dark:text-neutral-300 sm:text-base"
+              isRich
+                ? "max-w-[38ch] text-[14px] font-normal leading-[1.52] text-neutral-700 max-md:max-w-none dark:text-neutral-300 sm:text-[14px] sm:leading-[1.52] lg:text-base lg:leading-[1.65]"
                 : "text-[15px] font-medium leading-[1.55] text-neutral-600 dark:text-neutral-400 sm:text-sm sm:font-normal sm:leading-relaxed",
               bodyClassName,
             )}

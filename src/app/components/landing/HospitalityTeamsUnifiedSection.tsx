@@ -66,7 +66,7 @@ export function HospitalityTeamsUnifiedSection() {
                   variant="split"
                   title={f.title}
                   description={f.text}
-                  className="py-3.5 sm:py-4"
+                  className={landingUi.showcaseBenefitRow}
                 />
               ))}
             </div>
