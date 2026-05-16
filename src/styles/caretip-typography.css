@@ -45,126 +45,130 @@ html.caretip-font-inter {
   font-family: var(--font-inter);
 }
 
-@layer utilities {
-  .font-display {
-    font-family: var(--font-inter);
-  }
+/* Tailwind v4: @utility registers classes for @apply and HTML (not @layer utilities). */
+@utility font-display {
+  font-family: var(--font-inter);
+}
 
-  .text-hero-title {
-    font-size: var(--caretip-hero-size);
-    line-height: 0.98;
-    letter-spacing: -0.035em;
-  }
+@utility text-hero-title {
+  font-size: var(--caretip-hero-size);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
 
-  .text-hero-title-de {
-    font-size: var(--caretip-hero-size-de);
-    line-height: 0.98;
-    letter-spacing: -0.032em;
-  }
+@utility text-hero-title-de {
+  font-size: var(--caretip-hero-size-de);
+  line-height: 0.98;
+  letter-spacing: -0.032em;
+}
 
-  .text-section-title {
-    font-size: var(--caretip-section-size);
-    line-height: 1.08;
-    letter-spacing: -0.028em;
-  }
+@utility text-section-title {
+  font-size: var(--caretip-section-size);
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+}
 
-  .text-app-title {
-    font-size: var(--caretip-app-title-size);
-    line-height: 1.12;
-    letter-spacing: -0.024em;
-  }
+@utility text-app-title {
+  font-size: var(--caretip-app-title-size);
+  line-height: 1.12;
+  letter-spacing: -0.024em;
+}
 
-  .text-app-subtitle {
-    font-size: var(--caretip-app-subtitle-size);
-    line-height: 1.2;
-    letter-spacing: -0.02em;
-  }
+@utility text-app-subtitle {
+  font-size: var(--caretip-app-subtitle-size);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
 
-  .text-card-title {
-    font-size: var(--caretip-card-title-size);
-    line-height: 1.35;
-    letter-spacing: -0.016em;
-  }
+@utility text-card-title {
+  font-size: var(--caretip-card-title-size);
+  line-height: 1.35;
+  letter-spacing: -0.016em;
+}
 
-  .text-body-copy {
-    font-size: var(--caretip-body-size);
-    line-height: 1.68;
-    letter-spacing: -0.008em;
-  }
+@utility text-body-copy {
+  font-size: var(--caretip-body-size);
+  line-height: 1.68;
+  letter-spacing: -0.008em;
+}
 
-  .text-feature-copy {
-    font-size: var(--caretip-feature-size);
-    line-height: 1.5;
-    letter-spacing: -0.006em;
-  }
+@utility text-feature-copy {
+  font-size: var(--caretip-feature-size);
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+}
 
-  .text-button-text {
-    font-size: var(--caretip-button-size);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-  }
+@utility text-button-text {
+  font-size: var(--caretip-button-size);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
 
-  .text-tagline {
-    font-size: var(--caretip-tagline-size);
-    line-height: 1.35;
-    letter-spacing: 0.06em;
-  }
+@utility text-tagline {
+  font-size: var(--caretip-tagline-size);
+  line-height: 1.35;
+  letter-spacing: 0.06em;
+}
 
-  .text-meta {
-    font-size: var(--caretip-meta-size);
-    line-height: 1.35;
-    letter-spacing: 0.05em;
-  }
+@utility text-meta {
+  font-size: var(--caretip-meta-size);
+  line-height: 1.35;
+  letter-spacing: 0.05em;
+}
 
-  /* Legacy aliases — same scale */
-  .text-landing-hero {
-    font-size: var(--caretip-hero-size);
-    line-height: 0.98;
-    letter-spacing: -0.035em;
-  }
+/* Legacy aliases — same scale */
+@utility text-landing-hero {
+  font-size: var(--caretip-hero-size);
+  line-height: 0.98;
+  letter-spacing: -0.035em;
+}
 
-  .text-landing-hero-de {
-    font-size: var(--caretip-hero-size-de);
-    line-height: 0.98;
-    letter-spacing: -0.032em;
-  }
+@utility text-landing-hero-de {
+  font-size: var(--caretip-hero-size-de);
+  line-height: 0.98;
+  letter-spacing: -0.032em;
+}
 
-  .text-landing-section {
-    font-size: var(--caretip-section-size);
-    line-height: 1.08;
-    letter-spacing: -0.028em;
-  }
+@utility text-landing-section {
+  font-size: var(--caretip-section-size);
+  line-height: 1.08;
+  letter-spacing: -0.028em;
+}
 
-  .text-landing-card-title {
-    font-size: var(--caretip-card-title-size);
-    line-height: 1.35;
-    letter-spacing: -0.016em;
-  }
+@utility text-landing-card-title {
+  font-size: var(--caretip-card-title-size);
+  line-height: 1.35;
+  letter-spacing: -0.016em;
+}
 
-  .text-landing-body {
-    font-size: var(--caretip-body-size);
-    line-height: 1.68;
-    letter-spacing: -0.008em;
-  }
+@utility text-landing-body {
+  font-size: var(--caretip-body-size);
+  line-height: 1.68;
+  letter-spacing: -0.008em;
+}
 
-  .text-landing-feature {
-    font-size: var(--caretip-feature-size);
-    line-height: 1.5;
-    letter-spacing: -0.006em;
-  }
+@utility text-landing-feature {
+  font-size: var(--caretip-feature-size);
+  line-height: 1.5;
+  letter-spacing: -0.006em;
+}
 
-  .text-landing-cta {
-    font-size: var(--caretip-button-size);
-    line-height: 1.25;
-    letter-spacing: -0.01em;
-  }
+@utility text-landing-cta {
+  font-size: var(--caretip-button-size);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
 
-  .text-landing-pill,
-  .text-landing-meta {
-    font-size: var(--caretip-meta-size);
-    line-height: 1.35;
-    letter-spacing: 0.05em;
-  }
+@utility text-landing-pill {
+  font-size: var(--caretip-meta-size);
+  line-height: 1.35;
+  letter-spacing: 0.05em;
+}
+
+@utility text-landing-meta {
+  font-size: var(--caretip-meta-size);
+  line-height: 1.35;
+  letter-spacing: 0.05em;
 }
 
 @layer base {
