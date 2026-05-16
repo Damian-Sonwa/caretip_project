@@ -450,11 +450,11 @@ export function FeatureShowcase({
                   <div className={cn("relative min-h-0", landingUi.heroMediaShell)}>
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[14%] max-md:h-[min(168px,44vw)] max-md:w-[92%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
+                      className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[8%] max-md:h-[min(140px,38vw)] max-md:w-[88%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
                     />
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[34%] z-0 h-[200px] w-[min(340px,92%)] max-md:top-[36%] max-md:h-[100px] max-md:w-[88%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.07)_0%,transparent_68%)] blur-2xl dark:opacity-50"
+                      className="pointer-events-none absolute left-1/2 top-[34%] z-0 h-[200px] w-[min(340px,92%)] max-md:top-[30%] max-md:h-[72px] max-md:w-[84%] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(15,23,42,0.07)_0%,transparent_68%)] blur-2xl dark:opacity-50"
                     />
                     <div className="relative z-[1] flex w-full justify-center max-md:py-0">
                       <div className="relative w-full max-md:mx-auto md:-translate-y-2 lg:-translate-y-4">

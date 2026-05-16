@@ -12,10 +12,11 @@ import { landingType } from "@/components/landing/landingTypography";
 /** Hero headline — premium scale, lighter weight than extrabold (Stripe/Linear feel). */
 const heroHeadlineTone =
   "font-sans font-bold text-balance tracking-[-0.02em] text-neutral-950 dark:text-neutral-50";
+/** Below md only — desktop uses `heroHeadlineDesktop` unchanged. */
 const heroHeadlineMobile =
-  "max-lg:text-[clamp(2.5rem,9.25vw,3.5rem)] max-lg:leading-[0.95]";
+  "max-md:text-[2.8rem] max-md:font-extrabold max-md:leading-[0.95]";
 const heroHeadlineMobileDe =
-  "max-lg:text-[clamp(2.35rem,8.75vw,3.3rem)] max-lg:leading-[0.95]";
+  "max-md:text-[2.65rem] max-md:font-extrabold max-md:leading-[0.95]";
 const heroHeadlineDesktop =
   "md:text-5xl lg:text-6xl md:leading-[0.95] lg:leading-[0.95]";
 
@@ -170,33 +171,33 @@ export const landingUi = {
     "w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_2px_4px_rgba(15,15,15,0.04),0_12px_32px_rgba(15,15,15,0.07)] dark:border-neutral-800/90 dark:bg-neutral-950/60 dark:shadow-[0_16px_36px_rgba(0,0,0,0.35)]",
 
   heroShell:
-    "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-9 overflow-x-hidden px-4 pb-6 pt-3 max-md:gap-y-6 sm:gap-10 sm:px-6 sm:pb-10 sm:pt-4 md:grid-cols-12 md:items-center md:gap-x-8 md:gap-y-0 md:px-8 md:pb-12 md:pt-4 lg:gap-x-10 xl:gap-x-12",
+    "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-9 overflow-x-hidden px-4 pb-6 pt-3 max-md:gap-y-0 sm:gap-10 sm:px-6 sm:pb-10 sm:pt-4 md:grid-cols-12 md:items-center md:gap-x-8 md:gap-y-0 md:px-8 md:pb-12 md:pt-4 lg:gap-x-10 xl:gap-x-12",
   heroCopy:
-    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start space-y-7 text-left max-md:space-y-8 md:col-span-7 md:max-w-[620px] md:space-y-8 md:pr-2 lg:col-span-7 lg:pr-4 xl:col-span-7",
+    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 md:col-span-7 md:max-w-[620px] md:space-y-8 md:pr-2 lg:col-span-7 lg:pr-4 xl:col-span-7",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "w-full max-w-xl antialiased text-left md:max-w-none",
+    "w-full max-w-xl max-md:max-w-[320px] antialiased text-left md:max-w-none",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
-    "w-full max-w-xl antialiased text-left md:max-w-none",
+    "w-full max-w-xl max-md:max-w-[300px] antialiased text-left md:max-w-none",
   ),
   heroSubtitle: cnHeroSubtitle(
-    "w-full max-w-2xl text-left pt-1 max-lg:pt-1.5 md:max-w-none md:pt-2",
+    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[320px] max-lg:pt-0 md:max-w-none md:pt-2",
   ),
   heroActionCluster:
-    "relative z-10 flex w-full flex-col items-start gap-7 max-md:gap-7 max-md:pb-0 max-md:!mt-8 md:!mt-12 md:max-w-none md:gap-8",
+    "relative z-10 flex w-full flex-col items-start max-md:mt-8 max-md:gap-0 max-md:pb-0 md:!mt-12 md:max-w-none md:gap-8",
   heroBenefits:
-    "!mt-0 w-full gap-3.5 max-md:gap-4 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
+    "!mt-0 w-full max-md:gap-3 max-md:[&_li]:!text-base max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-8 max-md:[&_li>span:first-child]:!w-8 max-md:[&_li>span:first-child]:!rounded-lg max-md:[&_li_svg]:!max-h-3.5 max-md:[&_li_svg]:!max-w-3.5 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
   heroCtaRow:
-    "relative z-10 flex w-full max-w-full flex-col items-stretch gap-3 justify-start max-md:gap-3.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3",
+    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-8 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
-    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-9 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
+    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.625rem] max-md:rounded-2xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
   heroCtaSecondary:
-    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-9 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
+    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.625rem] max-md:rounded-2xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
   heroMediaCol:
-    "relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:pt-0 max-md:pb-0 md:col-span-5 md:justify-center md:self-center lg:col-span-5",
+    "relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:mt-11 max-md:pt-0 max-md:pb-0 md:col-span-5 md:mt-0 md:justify-center md:self-center lg:col-span-5",
   heroMediaShell:
-    "relative mx-auto w-full max-md:max-w-[min(100%,340px)] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[440px]",
+    "relative mx-auto w-full max-md:max-w-[min(100%,300px)] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[440px]",
   heroPhoneFrame:
-    "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,332px)] overflow-hidden rounded-[clamp(20px,4.2vw,28px)] border border-neutral-200/95 bg-white py-0 shadow-[0_18px_48px_-26px_rgba(15,23,42,0.14),0_8px_24px_-14px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[4/5] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[340px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
+    "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,318px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[4/5] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[340px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
 } as const;
