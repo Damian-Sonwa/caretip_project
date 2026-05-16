@@ -64,6 +64,8 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { cn } from "@/lib/utils";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -778,8 +780,8 @@ export function QRCodeManagementPage() {
 
   return (
     <div className="min-h-screen bg-background pb-20 text-foreground">
-      <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6">
-        <div className="mb-4 flex items-center gap-2">
+      <div className={businessUi.subPageTop}>
+        <div className={businessUi.subPageBreadcrumb}>
           <Button variant="outline" size="icon" asChild aria-label={t("business.qrPage.backDashboard")}>
             <Link to="/dashboard">
               <ChevronLeft className="h-5 w-5" />
@@ -792,6 +794,8 @@ export function QRCodeManagementPage() {
           stackHeroOnMobile
           hideTabs
           hideImage
+          className={businessUi.subPageHero}
+          badgeClassName={businessUi.heroBadge}
           badge={
             <>
               <QrCode className="h-3.5 w-3.5 text-foreground" />
@@ -801,8 +805,10 @@ export function QRCodeManagementPage() {
           title={t("business.qrPage.heroTitle")}
           description={businessSlug ? t("business.qrPage.heroDescWithSlug") : t("business.qrPage.heroDescNoSlug")}
           actions={
+            <div className="dashboard-hero-actions dashboard-hero-actions--uniform">
             <Button
               type="button"
+              className={cn(businessUi.btnPrimary, businessUi.heroActionBtn)}
               onClick={handleGenerateAllPdf}
               disabled={qrLocked || bulkPdfLoading || employees.length === 0}
             >
@@ -813,26 +819,25 @@ export function QRCodeManagementPage() {
               )}
               {t("business.qrPage.allPdfs")}
             </Button>
+            </div>
           }
         />
 
-        <Card className="mt-4 w-full rounded-2xl border border-gray-100 bg-white shadow-none">
-          <CardContent className="p-4 sm:p-5">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-              {t("business.qrPage.atAGlance")}
-            </p>
-            <div className="grid grid-cols-3 gap-3 text-center">
+        <Card className={businessUi.atAGlanceCard}>
+          <CardContent className={businessUi.atAGlanceContent}>
+            <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
+            <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statStaff")}</p>
-                <p className="text-lg font-bold tabular-nums text-foreground">{employees.length}</p>
+                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStaff")}</p>
+                <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statStatus")}</p>
-                <p className="text-lg font-bold text-foreground">{statusLabel}</p>
+                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStatus")}</p>
+                <p className={businessUi.atAGlanceStatValue}>{statusLabel}</p>
               </div>
               <div>
-                <p className="text-xs font-medium uppercase text-muted-foreground">{t("business.qrPage.statSlug")}</p>
-                <p className="text-lg font-bold text-foreground">
+                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statSlug")}</p>
+                <p className={businessUi.atAGlanceStatValue}>
                   {businessSlug ? t("business.qrPage.slugLive") : t("business.qrPage.slugNa")}
                 </p>
               </div>
@@ -850,8 +855,8 @@ export function QRCodeManagementPage() {
         </div>
       ) : null}
 
-      <TracingBeam className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="space-y-6 py-4">
+      <TracingBeam className={cn(businessUi.subPageMain, "pb-4")}>
+        <div className="space-y-6">
           <Card className="border-2 border-border shadow-sm">
             <CardHeader className="pb-2">
               <CardTitle className="text-base">{t("business.qrPage.sectionsTitle")}</CardTitle>

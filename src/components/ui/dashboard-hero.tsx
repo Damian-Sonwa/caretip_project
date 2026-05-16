@@ -94,7 +94,7 @@ export function DashboardHero({
     badge != null ? (
       <div
         className={cn(
-          "inline-flex w-fit items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wide text-foreground max-lg:text-[0.8125rem]",
+          "inline-flex w-fit max-w-full items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide text-foreground max-lg:gap-1.5 max-lg:px-2 max-lg:py-0.5 max-lg:text-[10px] max-lg:tracking-[0.07em] sm:px-2.5 sm:text-[0.8125rem]",
           stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
           badgeClassName,
         )}
@@ -326,11 +326,11 @@ export function DashboardHero({
   };
 
   return (
-    <div className={cn("mb-5 lg:mb-6", className)}>
+    <div className={cn("mb-4 max-lg:mb-3.5 lg:mb-6", className)}>
       <div
         className={cn(
           stackHeroOnMobile &&
-            "max-lg:bg-[#FFFFFF] max-lg:px-4 max-lg:py-4 sm:max-lg:px-5 sm:max-lg:py-5",
+            "max-lg:bg-[#FFFFFF] max-lg:px-4 max-lg:py-3 sm:max-lg:px-5 sm:max-lg:py-4",
         )}
       >
         <Card
@@ -355,10 +355,10 @@ export function DashboardHero({
               Mobile flow (intentional): welcome → headline → supporting copy → CTAs → metrics → context bridge (actions slot) →
               optional tabs → hero visual last so it supports rather than dominates.
             */}
-            <div className="dashboard-hero-container flex min-w-0 flex-col gap-3 p-0 sm:gap-4 lg:hidden">
+            <div className="dashboard-hero-container flex min-w-0 flex-col gap-2.5 p-0 max-lg:gap-2.5 sm:gap-4 lg:hidden">
               <div
                 className={cn(
-                  "flex min-w-0 flex-col gap-2.5 sm:gap-3",
+                  "flex min-w-0 flex-col gap-2 max-lg:gap-2 sm:gap-3",
                   mobileAlign === "center" ? "text-center" : "text-left",
                 )}
               >
@@ -368,7 +368,7 @@ export function DashboardHero({
                     {titleRow}
                   </div>
                 ) : (
-                  <div className="min-h-0 space-y-2.5 sm:space-y-3">
+                  <div className="min-h-0 space-y-2 max-lg:space-y-2 sm:space-y-3">
                     {badgeRow}
                     {titleRow}
                   </div>

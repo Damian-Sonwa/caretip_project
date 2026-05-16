@@ -1651,6 +1651,8 @@
       "loadingStaff": "Team wird geladen…",
       "tryAgain": "Erneut versuchen",
       "breadcrumbDashboard": "Unternehmens-Dashboard",
+      "glanceTeam": "Team",
+      "glanceActive": "Aktiv",
       "badgeTeamRoster": "Teamliste",
       "inviteCodeLabel": "Einladungscode",
       "inviteExpires": "Läuft ab {{date}}",

@@ -1651,6 +1651,8 @@
       "loadingStaff": "Loading staff…",
       "tryAgain": "Try again",
       "breadcrumbDashboard": "Business dashboard",
+      "glanceTeam": "Team",
+      "glanceActive": "Active",
       "badgeTeamRoster": "Team roster",
       "inviteCodeLabel": "Invite code",
       "inviteExpires": "Expires {{date}}",
