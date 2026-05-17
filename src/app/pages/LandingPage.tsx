@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import heroVisualEn from "../../../images/aftermath.png";
-import heroVisualDe from "../../../images/YCE.png";
+import heroVisualDe from "../../../images/glassy.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -32,6 +32,7 @@ export function LandingPage() {
         alt: t("landing.showcase.tabQrAlt"),
         imageFit: "cover",
         imageObjectPosition: "center",
+        heroFrameAspect: isDe ? "square" : "phone",
       },
     ];
   }, [t, i18n.language]);

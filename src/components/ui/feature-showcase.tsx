@@ -34,6 +34,8 @@ export type TabMedia = {
   imageFit?: "cover" | "contain";
   /** Passed to `object-position` on the hero image (e.g. `center 25%` to bias framing). */
   imageObjectPosition?: string;
+  /** Square frame for 1:1 hero art (e.g. glassy mockup); default is portrait phone ratio. */
+  heroFrameAspect?: "phone" | "square";
 };
 
 export type ShowcaseStep = {
@@ -115,6 +117,7 @@ export function FeatureShowcase({
         alt: t.alt ?? t.label,
         imageFit: t.imageFit,
         objectPosition: t.imageObjectPosition,
+        heroFrameAspect: t.heroFrameAspect,
       })),
     [tabsProp]
   );
@@ -465,7 +468,9 @@ export function FeatureShowcase({
                         <div
                           className={cn(
                             "animate-float relative mx-auto",
-                            landingUi.heroPhoneFrame,
+                            singleHeroImage.heroFrameAspect === "square"
+                              ? landingUi.heroPhoneFrameSquare
+                              : landingUi.heroPhoneFrame,
                           )}
                           style={
                             singleHeroImage.objectPosition
@@ -480,11 +485,11 @@ export function FeatureShowcase({
                               "h-full w-full select-none",
                               (singleHeroImage.imageFit ?? "contain") === "contain"
                                 ? [
-                                    "max-md:object-contain max-md:object-center max-md:p-0.5",
-                                    "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1",
+                                    "max-md:object-contain max-md:object-center max-md:p-1",
+                                    "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1.5",
                                   ]
                                 : [
-                                    "object-cover object-center max-md:p-0",
+                                    "object-cover object-center",
                                     "[object-position:var(--hero-object-position,center)]",
                                   ],
                             )}

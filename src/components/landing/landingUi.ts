@@ -9,16 +9,16 @@ import { landingType } from "@/components/landing/landingTypography";
  * - clamp()-based type scale in `caretip-typography.css`
  */
 
-/** Hero headline — premium scale, lighter weight than extrabold (Stripe/Linear feel). */
+/** Hero headline — editorial scale, restrained weight (Stripe/Linear feel). */
 const heroHeadlineTone =
-  "font-sans font-bold text-balance tracking-[-0.02em] text-neutral-950 dark:text-neutral-50";
-/** Below md only — desktop uses `heroHeadlineDesktop` unchanged. */
+  "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
+/** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.8rem] max-md:font-bold max-md:leading-[0.95]";
+  "max-md:text-[3rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2.65rem] max-md:font-bold max-md:leading-[0.95]";
+  "max-md:text-[2.875rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineDesktop =
-  "md:text-5xl lg:text-6xl md:leading-[0.95] lg:leading-[0.95]";
+  "md:text-5xl md:font-semibold md:leading-[0.94] md:tracking-[-0.03em] lg:text-6xl lg:leading-[0.95] lg:tracking-[-0.03em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -27,7 +27,7 @@ function cnHeroHeadlineDe(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobileDe} ${heroHeadlineDesktop} ${layout}`;
 }
 function cnHeroSubtitle(layout: string) {
-  return `font-sans font-normal text-pretty tracking-[-0.01em] text-neutral-600 dark:text-neutral-400 max-lg:text-lg max-lg:leading-[1.72] md:text-lg md:font-medium md:leading-[1.7] md:text-zinc-700 md:dark:text-zinc-300 lg:text-xl lg:leading-[1.68] ${layout}`;
+  return `font-sans font-normal text-pretty tracking-[-0.01em] text-neutral-600 dark:text-neutral-400 md:text-lg md:leading-[1.72] md:text-zinc-700 md:dark:text-zinc-300 lg:text-xl lg:leading-[1.7] ${layout}`;
 }
 /** Section H2 — bold, balanced tracking (below hero scale). */
 function cnSectionHeadline(layout: string) {
@@ -89,15 +89,17 @@ export const landingUi = {
     "flex w-full flex-wrap items-center justify-center gap-x-5 gap-y-2 max-lg:justify-center lg:justify-start",
   sectionAccent: "relative inline-flex w-fit items-center gap-2 max-lg:mx-auto lg:mx-0",
   sectionAccentText:
-    "text-[11px] font-medium uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/75",
+    "text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-600 dark:text-amber-500",
   sectionAccentTextMuted:
-    "text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500/85 dark:text-neutral-400/80",
+    "text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600 dark:text-neutral-400",
   sectionAccentIcon:
-    "h-3 w-3 shrink-0 text-amber-500/70 dark:text-amber-400/65",
+    "h-3 w-3 shrink-0 text-amber-500/90 dark:text-amber-400/85",
+  sectionAccentIconMuted:
+    "h-3 w-3 shrink-0 text-neutral-500/90 dark:text-neutral-500",
   sectionAccentGlow:
-    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.12),transparent_72%)] opacity-60 blur-md",
+    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.16),transparent_72%)] opacity-70 blur-md",
   sectionAccentLine:
-    "h-px w-6 shrink-0 bg-gradient-to-r from-amber-500/55 via-amber-400/20 to-transparent",
+    "h-px w-6 shrink-0 bg-gradient-to-r from-amber-600/70 via-amber-500/35 to-transparent",
 
   copyStack: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   eyebrowSecondary: cnSectionLead(
@@ -185,31 +187,34 @@ export const landingUi = {
   heroShell:
     "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-9 overflow-x-hidden px-4 pb-6 pt-3 max-md:gap-y-0 sm:gap-10 sm:px-6 sm:pb-10 sm:pt-4 md:grid-cols-12 md:items-center md:gap-x-8 md:gap-y-0 md:px-8 md:pb-12 md:pt-4 lg:gap-x-10 xl:gap-x-12",
   heroCopy:
-    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 md:col-span-7 md:max-w-[620px] md:space-y-8 md:pr-2 lg:col-span-7 lg:pr-4 xl:col-span-7",
+    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 md:col-span-7 md:max-w-[620px] md:space-y-7 md:pr-2 lg:col-span-7 lg:space-y-8 lg:pr-4 xl:col-span-7",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "w-full max-w-xl max-md:max-w-[min(320px,26ch)] antialiased text-left md:max-w-none",
-  ),
-  heroHeadlineDe: cnHeroHeadlineDe(
     "w-full max-w-xl max-md:max-w-[min(300px,24ch)] antialiased text-left md:max-w-none",
   ),
+  heroHeadlineDe: cnHeroHeadlineDe(
+    "w-full max-w-xl max-md:max-w-[min(288px,23ch)] antialiased text-left md:max-w-none",
+  ),
   heroSubtitle: cnHeroSubtitle(
-    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[320px] max-md:leading-[1.62] max-lg:pt-0 md:max-w-none md:pt-2",
+    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[min(300px,32ch)] max-md:text-[1.05rem] max-md:leading-[1.7] max-lg:pt-0 md:max-w-xl md:pt-1 md:mt-0",
   ),
   heroActionCluster:
-    "relative z-10 flex w-full flex-col items-start max-md:mt-8 max-md:gap-0 max-md:pb-0 md:!mt-12 md:max-w-none md:gap-8",
+    "relative z-10 flex w-full flex-col items-start max-md:mt-8 max-md:gap-0 max-md:pb-0 md:!mt-10 md:max-w-none md:gap-7",
   heroBenefits:
-    "!mt-0 w-full max-md:gap-2.5 max-md:[&_li]:!text-base max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-8 max-md:[&_li>span:first-child]:!w-8 max-md:[&_li>span:first-child]:!rounded-lg max-md:[&_li_svg]:!max-h-3.5 max-md:[&_li_svg]:!max-w-3.5 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
+    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-[0.9375rem] max-md:[&_li]:!font-normal max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-3.5 md:[&_li]:!font-normal md:[&_li]:text-[0.9375rem]",
   heroCtaRow:
-    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-6 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
+    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-8 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
-    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-10 max-md:rounded-2xl max-md:px-5 max-md:py-2.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
+    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-3.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
   heroCtaSecondary:
-    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-2xl max-md:px-5 max-md:py-2 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
+    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
   heroMediaCol:
     "relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:mt-11 max-md:pt-0 max-md:pb-0 md:col-span-5 md:mt-0 md:justify-center md:self-center lg:col-span-5",
   heroMediaShell:
-    "relative mx-auto w-full max-md:max-w-[min(100%,300px)] sm:max-w-[360px] md:max-w-[400px] lg:max-w-[440px]",
+    "relative mx-auto w-full max-md:max-w-[min(100%,340px)] sm:max-w-[400px] md:max-w-[440px] lg:max-w-[480px]",
   heroPhoneFrame:
-    "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,318px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[4/5] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[340px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
+    "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
+  /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */
+  heroPhoneFrameSquare:
+    "relative mx-auto aspect-square w-full max-w-[min(92vw,420px)] overflow-hidden rounded-[clamp(18px,3.8vw,28px)] border border-neutral-200/95 bg-[linear-gradient(180deg,#faf9f7_0%,#ffffff_42%,#f3f1ed_100%)] py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[420px] sm:rounded-[clamp(22px,4.5vw,40px)] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
 } as const;
