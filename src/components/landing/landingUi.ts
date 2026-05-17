@@ -14,11 +14,11 @@ const heroHeadlineTone =
   "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
-const heroHeadlineMobileDe =
   "max-md:text-[2.375rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+const heroHeadlineMobileDe =
+  "max-md:text-[2.25rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineDesktop =
-  "md:text-[3.25rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[3.75rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
+  "md:text-[3rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[3.5rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -209,12 +209,12 @@ export const landingUi = {
     "w-full max-w-xl max-md:max-w-[min(288px,23ch)] antialiased text-left md:max-w-none",
   ),
   heroSubtitle: cnHeroSubtitle(
-    `w-full max-w-2xl text-left ${heroStackGapMobile} max-md:max-w-[min(300px,32ch)] max-md:text-[0.9375rem] max-md:leading-[1.65] max-lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
+    `w-full max-w-2xl text-left ${heroStackGapMobile} max-md:max-w-[min(300px,32ch)] max-lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
   heroBenefits:
-    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
+    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-[0.875rem] max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-6 max-md:[&_li>span:first-child]:!w-6 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-[0.875rem]",
   heroCtaRow:
     "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
