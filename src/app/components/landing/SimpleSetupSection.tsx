@@ -63,7 +63,12 @@ export function SimpleSetupSection() {
             <h2 className={landingUi.headline}>
               {t("landing.simpleSetup.title")}
             </h2>
-            <p className={landingUi.subtitle}>
+            <p
+              className={cn(
+                landingUi.subtitle,
+                "max-md:max-w-[min(280px,30ch)] max-md:text-base max-md:font-normal max-md:leading-[1.65] max-md:text-neutral-500 dark:max-md:text-neutral-400",
+              )}
+            >
               {t("landing.simpleSetup.subtitle")}
             </p>
           </motion.div>
