@@ -14,11 +14,11 @@ const heroHeadlineTone =
   "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[3rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+  "max-md:text-[2.625rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2.875rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+  "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineDesktop =
-  "md:text-5xl md:font-semibold md:leading-[0.94] md:tracking-[-0.03em] lg:text-6xl lg:leading-[0.95] lg:tracking-[-0.03em]";
+  "md:text-[3.5rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[4rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -27,8 +27,15 @@ function cnHeroHeadlineDe(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobileDe} ${heroHeadlineDesktop} ${layout}`;
 }
 function cnHeroSubtitle(layout: string) {
-  return `font-sans font-normal text-pretty tracking-[-0.01em] text-neutral-600 dark:text-neutral-400 md:text-lg md:leading-[1.72] md:text-zinc-700 md:dark:text-zinc-300 lg:text-xl lg:leading-[1.7] ${layout}`;
+  return `font-sans font-normal text-pretty tracking-[-0.01em] text-neutral-600 dark:text-neutral-400 md:text-lg md:leading-[1.6] md:text-neutral-700 md:dark:text-zinc-300 ${layout}`;
 }
+
+/** Clears fixed nav + ~1.75rem gap (mobile includes safe-area). */
+const heroSectionPadTop =
+  "pt-[calc(5.25rem+env(safe-area-inset-top,0px)+1.75rem)] md:pt-[calc(6rem+1.75rem)] lg:pt-[calc(6.75rem+1.75rem)]";
+/** Mobile-first stack rhythm between headline, lead, actions, and mockup. */
+const heroStackGapMobile = "mt-7";
+const heroStackGapMediaMobile = "max-md:mt-10";
 /** Section H2 — bold, balanced tracking (below hero scale). */
 function cnSectionHeadline(layout: string) {
   return `${landingType.sectionHeadline} tracking-[-0.02em] ${layout}`;
@@ -184,10 +191,11 @@ export const landingUi = {
   hospitalityMediaCard:
     "w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_2px_4px_rgba(15,15,15,0.04),0_12px_32px_rgba(15,15,15,0.07)] dark:border-neutral-800/90 dark:bg-neutral-950/60 dark:shadow-[0_16px_36px_rgba(0,0,0,0.35)]",
 
+  heroSectionCinematic: heroSectionPadTop,
   heroShell:
-    "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-9 overflow-x-hidden px-4 pb-6 pt-3 max-md:gap-y-0 sm:gap-10 sm:px-6 sm:pb-10 sm:pt-4 md:grid-cols-12 md:items-center md:gap-x-8 md:gap-y-0 md:px-8 md:pb-12 md:pt-4 lg:gap-x-10 xl:gap-x-12",
+    "mx-auto relative z-[1] grid w-full min-w-0 max-w-7xl grid-cols-1 gap-9 overflow-x-hidden px-4 pb-8 pt-6 max-md:gap-y-0 sm:gap-10 sm:px-6 sm:pb-10 md:grid-cols-[minmax(0,1.06fr)_minmax(0,0.94fr)] md:items-center md:gap-x-6 md:gap-y-0 md:px-8 md:pb-12 md:pt-7 lg:gap-x-7 xl:gap-x-8",
   heroCopy:
-    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 md:col-span-7 md:max-w-[620px] md:space-y-7 md:pr-2 lg:col-span-7 lg:space-y-8 lg:pr-4 xl:col-span-7",
+    "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0 md:pr-1 lg:pr-2 xl:pr-3",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
     "w-full max-w-xl max-md:max-w-[min(300px,24ch)] antialiased text-left md:max-w-none",
@@ -196,25 +204,45 @@ export const landingUi = {
     "w-full max-w-xl max-md:max-w-[min(288px,23ch)] antialiased text-left md:max-w-none",
   ),
   heroSubtitle: cnHeroSubtitle(
-    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[min(300px,32ch)] max-md:text-[1.05rem] max-md:leading-[1.7] max-lg:pt-0 md:max-w-xl md:pt-1 md:mt-0",
+    `w-full max-w-2xl text-left ${heroStackGapMobile} max-md:max-w-[min(300px,32ch)] max-md:text-[0.9375rem] max-md:leading-[1.65] max-lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
   heroActionCluster:
-    "relative z-10 flex w-full flex-col items-start max-md:mt-8 max-md:gap-0 max-md:pb-0 md:!mt-10 md:max-w-none md:gap-7",
+    `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
   heroBenefits:
-    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-[0.9375rem] max-md:[&_li]:!font-normal max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-3.5 md:[&_li]:!font-normal md:[&_li]:text-[0.9375rem]",
+    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-[0.9375rem] max-md:[&_li]:!font-normal max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-normal md:[&_li]:!gap-x-1.5 md:[&_li]:text-[0.9375rem]",
   heroCtaRow:
-    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-8 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
+    "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
     "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-3.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
   heroCtaSecondary:
     "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
   heroMediaCol:
-    "relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:mt-11 max-md:pt-0 max-md:pb-0 md:col-span-5 md:mt-0 md:justify-center md:self-center lg:col-span-5",
+    `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,
+  heroMediaColShowcase:
+    `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 max-md:mt-8 max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-end md:self-center`,
+  /** Outer shell — shrink-wraps to showcase card / image size. */
   heroMediaShell:
-    "relative mx-auto w-full max-md:max-w-[min(100%,340px)] sm:max-w-[400px] md:max-w-[440px] lg:max-w-[480px]",
+    "relative mx-auto w-fit min-w-0 max-w-full md:ml-auto md:mr-0",
+  heroMediaShellLegacy:
+    "relative mx-auto w-full max-md:max-w-[min(100%,320px)] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[400px]",
+  /** Premium product showcase card (Stripe / Linear / fintech hero). */
+  heroShowcaseFrame:
+    "relative w-fit max-w-full",
+  heroShowcaseGlow:
+    "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 dark:opacity-50",
+  /** Card hugs image — no extra min-height or padding. */
+  heroShowcaseCard:
+    "relative z-[1] inline-block w-fit max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-b from-white via-white to-neutral-50 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:from-neutral-900 dark:via-neutral-900/95 dark:to-neutral-950 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px]",
+  heroShowcaseImg:
+    "block h-auto w-auto max-w-[min(100%,calc(100vw-2rem))] max-h-none select-none sm:max-w-[min(100%,28rem)] md:max-w-[min(100%,36rem)] lg:max-w-[min(100%,40rem)]",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */
   heroPhoneFrameSquare:
     "relative mx-auto aspect-square w-full max-w-[min(92vw,420px)] overflow-hidden rounded-[clamp(18px,3.8vw,28px)] border border-neutral-200/95 bg-[linear-gradient(180deg,#faf9f7_0%,#ffffff_42%,#f3f1ed_100%)] py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[420px] sm:rounded-[clamp(22px,4.5vw,40px)] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
+  /** Wide frame for cinematic hero art — cover fills card at default scale. */
+  heroPhoneFrameCinematic:
+    "relative mx-auto aspect-[16/10] w-full max-w-[min(92vw,400px)] overflow-hidden rounded-[clamp(18px,3.8vw,28px)] border border-neutral-200/90 bg-neutral-950 py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.06)] ring-1 ring-black/[0.06] dark:border-neutral-700/90 dark:bg-neutral-950 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.45)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:max-w-[380px] lg:max-w-[400px]",
+  heroPhoneFrameCinematicImg:
+    "block h-full w-full origin-center object-cover object-center [object-position:var(--hero-object-position,center)] max-md:scale-[0.97] md:scale-[0.91]",
 } as const;

@@ -17,6 +17,7 @@ import { CareTipHeroAnimation } from "@/components/ui/caretip-hero-animation";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
+import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
 import { landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import { useTranslation } from "react-i18next";
@@ -35,7 +36,7 @@ export type TabMedia = {
   /** Passed to `object-position` on the hero image (e.g. `center 25%` to bias framing). */
   imageObjectPosition?: string;
   /** Square frame for 1:1 hero art (e.g. glassy mockup); default is portrait phone ratio. */
-  heroFrameAspect?: "phone" | "square";
+  heroFrameAspect?: "phone" | "square" | "cinematic" | "showcase";
 };
 
 export type ShowcaseStep = {
@@ -131,7 +132,10 @@ export function FeatureShowcase({
       id={id}
       className={cn(
         cinematic
-          ? "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pt-24 pb-8 max-md:px-0 sm:pt-24 sm:pb-12 md:pt-[5.5rem] md:pb-16 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100"
+          ? cn(
+              "relative isolate w-full min-w-0 overflow-x-hidden bg-gradient-to-b from-[#fafaf8] via-white to-[#f4f3f0] text-gray-900 pb-8 max-md:px-0 sm:pb-12 md:pb-16 dark:from-neutral-950 dark:via-neutral-950 dark:to-neutral-950 dark:text-neutral-100",
+              landingUi.heroSectionCinematic,
+            )
           : "w-full bg-transparent text-foreground pt-14 sm:pt-16",
         id && "scroll-mt-[80px]",
         className,
@@ -405,7 +409,10 @@ export function FeatureShowcase({
           className={cn(
             "relative flex min-h-0 w-full items-center justify-center max-md:flex-col max-md:items-center",
             !cinematic && "max-md:justify-self-center md:col-span-7",
-            cinematic && landingUi.heroMediaCol,
+            cinematic &&
+              (singleHeroImage?.heroFrameAspect === "showcase"
+                ? landingUi.heroMediaColShowcase
+                : landingUi.heroMediaCol),
           )}
         >
             {heroBorderBeam ? (
@@ -449,8 +456,10 @@ export function FeatureShowcase({
                   <CareTipHeroAnimation />
                 </LandingImageFrame>
               ) : singleHeroImage ? (
-                cinematic ? (
-                  <div className={cn("relative min-h-0", landingUi.heroMediaShell)}>
+                cinematic && singleHeroImage.heroFrameAspect === "showcase" ? (
+                  <LandingHeroShowcase src={singleHeroImage.src} alt={singleHeroImage.alt} />
+                ) : cinematic ? (
+                  <div className={cn("relative min-h-0", landingUi.heroMediaShellLegacy)}>
                     <div
                       aria-hidden
                       className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[8%] max-md:h-[min(140px,38vw)] max-md:w-[88%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
@@ -470,7 +479,9 @@ export function FeatureShowcase({
                             "animate-float relative mx-auto",
                             singleHeroImage.heroFrameAspect === "square"
                               ? landingUi.heroPhoneFrameSquare
-                              : landingUi.heroPhoneFrame,
+                              : singleHeroImage.heroFrameAspect === "cinematic"
+                                ? landingUi.heroPhoneFrameCinematic
+                                : landingUi.heroPhoneFrame,
                           )}
                           style={
                             singleHeroImage.objectPosition
@@ -482,16 +493,20 @@ export function FeatureShowcase({
                             src={singleHeroImage.src}
                             alt={singleHeroImage.alt}
                             className={cn(
-                              "h-full w-full select-none",
-                              (singleHeroImage.imageFit ?? "contain") === "contain"
-                                ? [
-                                    "max-md:object-contain max-md:object-center max-md:p-1",
-                                    "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1.5",
-                                  ]
-                                : [
-                                    "object-cover object-center",
-                                    "[object-position:var(--hero-object-position,center)]",
-                                  ],
+                              "select-none",
+                              singleHeroImage.heroFrameAspect === "cinematic"
+                                ? landingUi.heroPhoneFrameCinematicImg
+                                : "h-full w-full",
+                              singleHeroImage.heroFrameAspect !== "cinematic" &&
+                                ((singleHeroImage.imageFit ?? "contain") === "contain"
+                                  ? [
+                                      "max-md:object-contain max-md:object-center max-md:p-1",
+                                      "md:object-contain md:[object-position:var(--hero-object-position,center)] md:p-1.5",
+                                    ]
+                                  : [
+                                      "object-cover object-center",
+                                      "[object-position:var(--hero-object-position,center)]",
+                                    ]),
                             )}
                             loading="eager"
                             decoding="async"

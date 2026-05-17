@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import heroVisualEn from "../../../images/aftermath.png";
-import heroVisualDe from "../../../images/glassy.png";
+import heroVisualDe from "../../../images/cca.png";
+import heroVisualEn from "../../../images/en-hero.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -22,17 +22,18 @@ export function LandingPage() {
 
   const showcaseTabs: TabMedia[] = useMemo(() => {
     const isDe = i18n.language?.toLowerCase().startsWith("de");
-    const src = isDe ? heroVisualDe : heroVisualEn;
+    const heroVisual = isDe ? heroVisualDe : heroVisualEn;
+
     return [
       {
         value: "contactless",
         label: t("landing.showcase.tabQrLabel"),
         Icon: Smartphone,
-        src,
+        src: heroVisual,
         alt: t("landing.showcase.tabQrAlt"),
-        imageFit: "cover",
+        imageFit: "contain",
         imageObjectPosition: "center",
-        heroFrameAspect: isDe ? "square" : "phone",
+        heroFrameAspect: "showcase",
       },
     ];
   }, [t, i18n.language]);
