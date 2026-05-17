@@ -68,7 +68,7 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
           className={cn(
             landingUptrendRowGrid,
             "items-center",
-            caretipType.featureCopySemibold,
+            caretipType.featureCopy,
             textClass,
           )}
           role="listitem"

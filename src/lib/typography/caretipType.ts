@@ -10,7 +10,7 @@ export const caretipType = {
   heroTitleDe:
     "font-sans text-hero-title-de font-extrabold text-balance text-neutral-950 dark:text-neutral-50",
   sectionTitle:
-    "font-sans text-section-title font-bold text-balance text-neutral-950 dark:text-neutral-50",
+    "font-sans text-section-title font-semibold text-balance text-neutral-950 dark:text-neutral-50",
   cardTitle:
     "font-sans text-card-title font-semibold text-neutral-900 dark:text-neutral-50",
   bodyCopy:

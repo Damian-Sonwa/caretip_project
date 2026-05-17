@@ -11,7 +11,7 @@
   /* Mobile-first scale */
   --caretip-hero-size: clamp(2.2rem, 8vw, 3.2rem);
   --caretip-hero-size-de: clamp(2.05rem, 7.5vw, 3rem);
-  --caretip-section-size: clamp(1.8rem, 6vw, 2.4rem);
+  --caretip-section-size: clamp(1.75rem, 5.5vw, 2.2rem);
   --caretip-app-title-size: clamp(1.375rem, 2.5vw + 0.75rem, 1.75rem);
   --caretip-app-subtitle-size: clamp(1.125rem, 1vw + 0.95rem, 1.3125rem);
   --caretip-card-title-size: clamp(1.0625rem, 0.2vw + 1rem, 1.125rem);
@@ -26,7 +26,7 @@
   :root {
     --caretip-hero-size: clamp(3.2rem, 6vw, 5.5rem);
     --caretip-hero-size-de: clamp(2.75rem, 5.25vw, 4.75rem);
-    --caretip-section-size: clamp(2.2rem, 4vw, 3.5rem);
+    --caretip-section-size: clamp(2rem, 3.6vw, 3.125rem);
     --caretip-app-title-size: clamp(1.5rem, 1.2vw + 0.85rem, 2rem);
     --caretip-app-subtitle-size: clamp(1.1875rem, 0.5vw + 1rem, 1.4375rem);
     --caretip-card-title-size: clamp(1.0625rem, 0.15vw + 1rem, 1.1875rem);

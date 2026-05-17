@@ -112,7 +112,7 @@ export function LandingSocialProofSection() {
                 strokeWidth={2}
                 aria-hidden
               />
-              <blockquote className={cn(landingType.bodyLead, "flex-1 text-pretty text-neutral-800 dark:text-neutral-200")}>
+              <blockquote className={cn(landingUi.cardBodyLead, "flex-1 text-neutral-800 dark:text-neutral-200")}>
                 <span className="text-neutral-400 dark:text-neutral-500" aria-hidden>
                   “
                 </span>

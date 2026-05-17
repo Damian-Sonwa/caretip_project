@@ -14,11 +14,11 @@ const heroHeadlineTone =
   "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.625rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
-const heroHeadlineMobileDe =
   "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+const heroHeadlineMobileDe =
+  "max-md:text-[2.375rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
 const heroHeadlineDesktop =
-  "md:text-[3.5rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[4rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
+  "md:text-[3.25rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[3.75rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -26,8 +26,11 @@ function cnHeroHeadline(layout: string) {
 function cnHeroHeadlineDe(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobileDe} ${heroHeadlineDesktop} ${layout}`;
 }
+/** Shared intro/lead copy — hero subtitle + section taglines. */
+const landingLeadCopy =
+  "font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] leading-[1.65] text-neutral-600 dark:text-neutral-400";
 function cnHeroSubtitle(layout: string) {
-  return `font-sans font-normal text-pretty tracking-[-0.01em] text-neutral-600 dark:text-neutral-400 md:text-lg md:leading-[1.6] md:text-neutral-700 md:dark:text-zinc-300 ${layout}`;
+  return `${landingLeadCopy} ${layout}`;
 }
 
 /** Clears fixed nav + ~1.75rem gap (mobile includes safe-area). */
@@ -42,7 +45,7 @@ function cnSectionHeadline(layout: string) {
 }
 /** Tagline / intro paragraph under section headlines — readable, not tiny. */
 function cnSectionLead(layout: string) {
-  return `font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] text-neutral-600 max-lg:text-lg max-lg:leading-[1.65] dark:text-neutral-400 ${layout}`;
+  return `${landingLeadCopy} ${layout}`;
 }
 
 /** Centered / split section intro — eyebrow → headline → lead rhythm. */
@@ -119,6 +122,8 @@ export const landingUi = {
     `${sectionLeadReadable} text-center max-lg:px-0.5 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   cardFeatureBody: `${landingType.featureBody} mt-2 leading-snug sm:mt-2.5 text-neutral-700 dark:text-neutral-300`,
+  /** In-card body / quote — same scale as hero subtitle & section leads. */
+  cardBodyLead: cnSectionLead("text-left"),
   cardCopyStack: "flex flex-col gap-2.5 text-left sm:gap-3",
 
   benefitList: "w-full space-y-3 max-lg:mt-1 max-lg:space-y-2.5 sm:space-y-3.5",
@@ -209,7 +214,7 @@ export const landingUi = {
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
   heroBenefits:
-    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-[0.9375rem] max-md:[&_li]:!font-normal max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-normal md:[&_li]:!gap-x-1.5 md:[&_li]:text-[0.9375rem]",
+    "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
     "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
