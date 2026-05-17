@@ -443,7 +443,7 @@ textarea::placeholder {
     border-radius: 0.75rem;
   }
 
-  /* Inline buttons inside hero media panels (invite code card, etc.) */
+  /* Inline buttons inside hero media panels (invite code card, etc.) — match max-lg (1023px) */
   .caretip-dashboard-shell .dashboard-hero-inline-actions {
     display: flex;
     flex-direction: column;
@@ -458,25 +458,31 @@ textarea::placeholder {
 
   .caretip-dashboard-shell .dashboard-hero-inline-actions > button,
   .caretip-dashboard-shell .dashboard-hero-inline-actions--row > button {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     min-height: 44px !important;
     height: 44px !important;
     padding: 0 1rem !important;
     font-size: 0.8125rem !important;
     line-height: 1.2 !important;
     border-radius: 0.75rem;
+    text-align: center;
   }
 
-  .caretip-dashboard-shell .dashboard-hero-inline-actions--row > button {
+  .caretip-dashboard-shell .dashboard-hero-inline-actions--row > button:not(.dashboard-hero-inline-actions__full) {
     flex: 1 1 calc(50% - 0.25rem);
     min-width: 0;
     max-width: calc(50% - 0.25rem);
   }
 
   .caretip-dashboard-shell .dashboard-hero-inline-actions > button.dashboard-hero-inline-actions__full,
+  .caretip-dashboard-shell .dashboard-hero-inline-actions--row > button.dashboard-hero-inline-actions__full,
   .caretip-dashboard-shell .dashboard-hero-inline-actions > button:only-child {
     width: 100%;
     max-width: 100%;
     flex: 1 1 100%;
+    justify-content: center !important;
   }
 
   .caretip-dashboard-shell .dashboard-hero-badge--compact {
@@ -806,11 +812,6 @@ textarea::placeholder {
   line-height: 1.35;
 }
 
-.business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
-  font-size: clamp(1rem, 2.5vw, 1.25rem);
-  font-weight: 700;
-}
-
 .business-dashboard-hero .business-hero-cta-block {
   display: flex;
   flex-direction: column;
@@ -835,17 +836,24 @@ textarea::placeholder {
 
 .business-dashboard-hero .business-hero-cta-row > :is(a, button) {
   flex: 1 1 0;
+  min-width: 0;
   min-height: 2.75rem;
-  height: 2.75rem !important;
+  height: auto !important;
+  padding-inline: 0.625rem;
+  padding-block: 0.5rem;
   justify-content: center;
+  text-align: center;
+  white-space: normal;
+  line-height: 1.25;
+  overflow: visible;
 }
 
 .business-dashboard-hero .business-hero-account-stats {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem 1rem;
-  padding-top: 1rem;
-  margin-top: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem 1.25rem;
+  padding-top: 1.125rem;
+  margin-top: 0.875rem;
   border-top: 1px solid hsl(var(--border) / 0.5);
 }
 
@@ -876,15 +884,11 @@ textarea::placeholder {
     font-size: 0.75rem;
   }
 
-  .business-dashboard-hero .business-hero-pulse-readiness > span:first-child {
-    font-size: clamp(1rem, 3.8vw, 1.1875rem);
-  }
-
-  /* Manager + staff hero metrics: shared 2-up tiles and full-width third row. */
+  /* Manager + staff hero metrics: shared 2-up tiles; employee keeps a full-width third row. */
   .employee-dashboard-hero .employee-hero-account-stats,
   .business-dashboard-hero .business-hero-account-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.5rem;
+    gap: 0.625rem;
     padding-top: 0.875rem;
     margin-top: 0.875rem;
     align-items: stretch;
@@ -916,11 +920,10 @@ textarea::placeholder {
     flex-direction: column;
     justify-content: center;
     gap: 0.125rem;
-    min-height: 4.125rem;
+    min-height: 3.75rem;
   }
 
-  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3),
-  .business-dashboard-hero .business-hero-account-stats > div:nth-child(3) {
+  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3) {
     grid-column: 1 / -1;
     text-align: start;
     min-height: 0;
@@ -930,8 +933,7 @@ textarea::placeholder {
     gap: 0.375rem;
   }
 
-  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3) dd,
-  .business-dashboard-hero .business-hero-account-stats > div:nth-child(3) dd {
+  .employee-dashboard-hero .employee-hero-account-stats > div:nth-child(3) dd {
     margin-top: 0;
     flex-shrink: 0;
     width: 100%;
@@ -1000,9 +1002,14 @@ textarea::placeholder {
 
   .caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-actions .employee-hero-cta-row > *,
   .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-actions .business-hero-cta-row > * {
+    min-width: 0;
     min-height: 2.75rem;
+    height: auto !important;
     width: 100% !important;
     max-width: none !important;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
   }
 }
 
@@ -1039,6 +1046,10 @@ textarea::placeholder {
   .caretip-dashboard-shell.platform-dashboard .platform-admin-stat-grid {
     gap: 0.875rem;
   }
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-page-title {
+  letter-spacing: -0.02em;
 }
 
 @media (max-width: 768px) {

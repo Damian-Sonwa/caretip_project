@@ -60,7 +60,7 @@ export function DashboardSidebar() {
 
       <div className="border-t border-border p-4">
         <Link
-          to="/dashboard/profile-settings"
+          to="/dashboard/settings"
           className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors cursor-pointer"
         >
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">

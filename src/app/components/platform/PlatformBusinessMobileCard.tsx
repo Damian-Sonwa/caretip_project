@@ -5,6 +5,7 @@ import type { PlatformBusinessRow } from "../../lib/api";
 import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import { cn } from "@/lib/utils";
+import { platformUi } from "./platformDashboardUi";
 
 type PlatformBusinessMobileCardProps = {
   business: PlatformBusinessRow;
@@ -32,11 +33,7 @@ export function PlatformBusinessMobileCard({ business: b, className }: PlatformB
   return (
     <Link
       to={`/platform-admin/businesses/${b.id}`}
-      className={cn(
-        "block rounded-2xl border border-border bg-card p-4 shadow-sm transition-colors",
-        "hover:bg-muted/30 active:bg-muted/50",
-        className,
-      )}
+      className={cn(platformUi.mobileCard, "hover:bg-muted/30 active:bg-muted/50", className)}
     >
       <div className="flex gap-3">
         <BusinessLogoMark logoPathOrUrl={b.logoPath ?? null} businessName={b.name} size="sm" />

@@ -27,35 +27,43 @@ export function BusinessLogoMark({
   size = "md",
   className,
   rounded = "rounded-lg",
+  fallbackTone = "brand",
 }: {
   logoPathOrUrl?: string | null;
   businessName: string;
   size?: BusinessLogoMarkSize;
   className?: string;
   rounded?: string;
+  /** Muted stone fallback — e.g. compact header avatars. */
+  fallbackTone?: "brand" | "muted";
 }) {
   const src = resolveMediaUrl(logoPathOrUrl ?? undefined);
   const label = businessName.trim() || "Business";
   const [imgFailed, setImgFailed] = useState(false);
+  const isCircle = rounded.includes("full");
 
   useEffect(() => {
     setImgFailed(false);
   }, [src]);
 
+  const shellClass = cn(
+    "shrink-0 overflow-hidden border shadow-sm",
+    isCircle ? "border-border/70 bg-muted/75" : "border-border bg-white",
+    sizeClass[size],
+    rounded,
+    className,
+  );
+
   if (src && !imgFailed) {
     return (
-      <div
-        className={cn(
-          "shrink-0 overflow-hidden border border-border bg-white shadow-sm",
-          sizeClass[size],
-          rounded,
-          className,
-        )}
-      >
+      <div className={cn(shellClass, "flex items-center justify-center")}>
         <img
           src={src}
           alt=""
-          className="h-full w-full object-contain p-0.5"
+          className={cn(
+            "block max-h-full max-w-full",
+            isCircle ? "h-full w-full object-contain p-1.5" : "h-full w-full object-contain p-0.5",
+          )}
           loading="lazy"
           decoding="async"
           referrerPolicy="no-referrer"
@@ -68,14 +76,17 @@ export function BusinessLogoMark({
   return (
     <div
       className={cn(
-        "flex shrink-0 items-center justify-center border border-border bg-primary/10 font-bold text-primary",
+        "flex shrink-0 items-center justify-center border font-semibold tracking-tight",
+        fallbackTone === "muted"
+          ? "border-border/70 bg-muted text-muted-foreground"
+          : "border-border bg-primary/10 font-bold text-primary",
         sizeClass[size],
         rounded,
         className,
       )}
       aria-hidden
     >
-      <span className="font-semibold tracking-tight">{initialsFromName(label)}</span>
+      <span>{initialsFromName(label)}</span>
     </div>
   );
 }

@@ -790,9 +790,8 @@
       "locations": "Locations",
       "tables": "Tables",
       "tipsActivity": "Tips & activity",
-      "venueProfile": "Venue profile",
       "notifications": "Notifications",
-      "accountSettings": "Account settings"
+      "settings": "Settings"
     }
   },
   "charts": {
@@ -840,7 +839,7 @@
       "tipsActivity": "Tips & activity",
       "notifications": "Notifications",
       "support": "Support",
-      "profileSettings": "Profile & settings"
+      "settings": "Settings"
     }
   },
   "sampleDashboard": {
@@ -1831,6 +1830,50 @@
           "title": "Weekly tip summary",
           "message": "You had 48 successful tips this week. Open Tips & activity for a full breakdown by employee."
         }
+      }
+    },
+    "settings": {
+      "eyebrow": "Workspace",
+      "title": "Settings",
+      "subtitle": "Manage your account, venue, security, and notifications in one place.",
+      "navAria": "Settings sections",
+      "loading": "Loading…",
+      "sections": {
+        "general": "General",
+        "generalDesc": "Account manager contact details",
+        "business": "Business profile",
+        "businessDesc": "Venue name, logo, location, and verification",
+        "team": "Team & roles",
+        "teamDesc": "Staff roster and permissions",
+        "notifications": "Notifications",
+        "notificationsDesc": "Email and alert preferences",
+        "security": "Security",
+        "securityDesc": "Password and two-factor authentication",
+        "billing": "Billing & subscription",
+        "billingDesc": "Fees, model, and activity links",
+        "branding": "Branding & QR",
+        "brandingDesc": "QR codes and branded materials"
+      },
+      "panels": {
+        "generalTitle": "General",
+        "generalDesc": "Your manager account details",
+        "generalHint": "Business name, logo, and venue details are under Business profile.",
+        "managerName": "Account manager name",
+        "businessIntro": "Update how guests and staff see your venue on CareTip.",
+        "notificationsTitle": "Notifications",
+        "notificationsDesc": "Choose what we email you about",
+        "billingTitle": "Billing & subscription",
+        "billingDesc": "How CareTip bills your venue",
+        "twoFactorOn": "Two-factor authentication is enabled.",
+        "twoFactorOff": "Two-factor authentication is not enabled.",
+        "teamTitle": "Team & roles",
+        "teamDesc": "Manage staff from your team dashboard",
+        "teamCardTitle": "Staff management",
+        "teamCardDesc": "Add employees, roles, invite codes, and table assignments",
+        "brandingTitle": "Branding & QR",
+        "brandingDesc": "Customize guest-facing QR experiences",
+        "brandingCardTitle": "QR code management",
+        "brandingCardDesc": "Download, print, and regenerate venue and staff QR codes"
       }
     },
     "accountSettings": {

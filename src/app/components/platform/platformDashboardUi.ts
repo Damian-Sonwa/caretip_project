@@ -5,7 +5,41 @@ export const PLATFORM_DASHBOARD_ROOT = "platform-dashboard";
  * Shared rhythm for platform admin pages (presentation only).
  */
 export const platformUi = {
+  pageMain: "bg-background",
   page: "caretip-container max-w-[min(100%,96rem)] pb-16 pt-5 sm:pb-20 sm:pt-7",
+
+  pageHeader: "mb-8 max-lg:mb-10",
+  pageTitleRow: "flex items-start gap-3",
+  pageTitleIcon: "mt-0.5 h-7 w-7 shrink-0 text-accent sm:h-8 sm:w-8",
+  pageTitle: "text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[1.75rem]",
+  pageSubtitle: "mt-2 max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base",
+
+  searchSection: "mb-6 max-lg:mb-8",
+  searchWrap: "relative w-full max-w-xl",
+  searchIcon: "pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground",
+  searchInput:
+    "w-full min-h-[44px] rounded-xl border-2 border-border bg-card py-2.5 pl-10 pr-4 text-sm shadow-sm transition-[box-shadow,border-color] focus:border-accent/40 focus:outline-none focus:ring-2 focus:ring-accent/25",
+  searchHint: "mt-2 text-xs leading-relaxed text-muted-foreground",
+
+  backLink:
+    "mb-6 inline-flex min-h-[44px] touch-manipulation items-center gap-2 text-sm font-medium text-accent transition-colors hover:underline",
+
+  contentCard: "rounded-xl border-2 border-border bg-card p-5 shadow-sm sm:p-6",
+
+  dataPanel: "overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm",
+  mobileList: "space-y-3 p-4 max-lg:p-4 lg:hidden",
+  tableWrap: "hidden overflow-x-auto lg:block",
+  table: "w-full text-sm",
+  tableHeadRow: "border-b border-border bg-muted/40 text-left",
+  tableTh:
+    "px-4 py-3 text-xs font-medium uppercase tracking-wide text-muted-foreground lg:normal-case lg:tracking-normal",
+  tableRow: "border-b border-border/60 transition-colors hover:bg-muted/30",
+  tableTd: "px-4 py-3",
+  panelFooter: "border-t border-border px-4 py-3 text-xs leading-relaxed text-muted-foreground",
+  emptyState: "px-4 py-12 text-center text-sm text-muted-foreground",
+
+  mobileCard:
+    "block rounded-2xl border-2 border-border bg-card p-4 shadow-sm transition-colors hover:bg-muted/25 active:bg-muted/40",
 
   /** Single column on phone; 2-up from sm; full grid from lg. */
   statGrid:

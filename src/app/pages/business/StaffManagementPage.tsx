@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type ComponentProps, type ReactNode } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -65,6 +65,29 @@ function toastOk(message: string) {
 
 function toastErr(message: string) {
   toast.error(message, TOAST_ERR);
+}
+
+/** Centers icon + label as one unit inside full-width hero panel CTAs (mobile-safe). */
+function HeroPanelButton({ className, children, ...props }: ComponentProps<typeof Button>) {
+  return (
+    <Button
+      className={cn(
+        "flex h-11 min-h-11 w-full max-w-full items-center justify-center gap-0 px-4 text-sm font-semibold leading-none whitespace-normal sm:px-5",
+        className,
+      )}
+      {...props}
+    >
+      <span className="inline-flex max-w-full items-center justify-center gap-2">{children}</span>
+    </Button>
+  );
+}
+
+function HeroPanelButtonIcon({ children }: { children: ReactNode }) {
+  return (
+    <span className="inline-flex size-4 shrink-0 items-center justify-center [&>svg]:block [&>svg]:size-4">
+      {children}
+    </span>
+  );
 }
 
 type StaffRow = {
@@ -595,59 +618,65 @@ export function StaffManagementPage() {
                   </div>
                 </div>
 
-                <div className="mt-3.5 flex flex-col gap-2 max-lg:mt-3">
-                  <div className="dashboard-hero-inline-actions dashboard-hero-inline-actions--row">
-                    {inviteCode ? (
-                      <>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          className={businessUi.btnSecondary}
-                          onClick={handleCopyCode}
-                        >
-                          <Copy className="h-4 w-4" />
-                          {t("business.staffPage.copy")}
-                        </Button>
-                        <Button
-                          type="button"
-                          className={businessUi.btnPrimary}
-                          onClick={handleRegenerate}
-                          disabled={isGenerating}
-                        >
-                          <RefreshCw className={cn("h-4 w-4", isGenerating && "animate-spin")} />
-                          {t("business.staffPage.regenerate")}
-                        </Button>
-                      </>
-                    ) : (
-                      <Button
+                <div className="mt-3.5 flex w-full flex-col gap-2 max-lg:mt-3">
+                  {inviteCode ? (
+                    <div className="grid w-full grid-cols-2 gap-2">
+                      <HeroPanelButton
                         type="button"
-                        className={cn(businessUi.btnPrimary, "dashboard-hero-inline-actions__full")}
-                        onClick={handleGenerateInvite}
-                        disabled={!isBusiness || isGenerating}
+                        variant="outline"
+                        className={cn(businessUi.btnSecondary, "min-w-0 px-3 sm:px-4")}
+                        onClick={handleCopyCode}
                       >
-                        {isGenerating ? (
-                          <>
-                            <RefreshCw className="h-4 w-4 animate-spin" />
-                            {t("business.staffPage.generating")}
-                          </>
-                        ) : (
-                          <>
-                            <KeyRound className="h-4 w-4" />
-                            {t("business.staffPage.generateInvite")}
-                          </>
-                        )}
-                      </Button>
-                    )}
-                  </div>
-                  <Button
+                        <HeroPanelButtonIcon>
+                          <Copy aria-hidden />
+                        </HeroPanelButtonIcon>
+                        <span className="min-w-0 leading-snug">{t("business.staffPage.copy")}</span>
+                      </HeroPanelButton>
+                      <HeroPanelButton
+                        type="button"
+                        className={cn(businessUi.btnPrimary, "min-w-0 px-3 sm:px-4")}
+                        onClick={handleRegenerate}
+                        disabled={isGenerating}
+                      >
+                        <HeroPanelButtonIcon>
+                          <RefreshCw className={cn(isGenerating && "animate-spin")} aria-hidden />
+                        </HeroPanelButtonIcon>
+                        <span className="min-w-0 leading-snug">{t("business.staffPage.regenerate")}</span>
+                      </HeroPanelButton>
+                    </div>
+                  ) : (
+                    <HeroPanelButton
+                      type="button"
+                      className={businessUi.btnPrimary}
+                      onClick={handleGenerateInvite}
+                      disabled={!isBusiness || isGenerating}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <HeroPanelButtonIcon>
+                            <RefreshCw className="animate-spin" aria-hidden />
+                          </HeroPanelButtonIcon>
+                          <span className="leading-snug">{t("business.staffPage.generating")}</span>
+                        </>
+                      ) : (
+                        <>
+                          <HeroPanelButtonIcon>
+                            <KeyRound aria-hidden />
+                          </HeroPanelButtonIcon>
+                          <span className="leading-snug">{t("business.staffPage.generateInvite")}</span>
+                        </>
+                      )}
+                    </HeroPanelButton>
+                  )}
+                  <HeroPanelButton
                     type="button"
+                    variant="outline"
+                    className={businessUi.btnSecondary}
                     onClick={() => isBusiness && setShowAddModal(true)}
                     disabled={!isBusiness}
-                    variant="outline"
-                    className={cn(businessUi.btnSecondary, "dashboard-hero-inline-actions__full")}
                   >
-                    {t("business.staffPage.addEmployee")}
-                  </Button>
+                    <span className="leading-snug">{t("business.staffPage.addEmployee")}</span>
+                  </HeroPanelButton>
                 </div>
               </div>
             </div>

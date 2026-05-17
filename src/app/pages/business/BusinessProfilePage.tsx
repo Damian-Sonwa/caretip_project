@@ -39,7 +39,7 @@ function verificationClass(s: BusinessInfo["verificationStatus"]): string {
 /**
  * Full venue profile management: read, edit (PUT), logo upload (POST), read-only slug & verification.
  */
-export function BusinessProfilePage() {
+export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }) {
   const { t } = useTranslation();
   const { user } = useRequireAuth();
   const fileInputId = useId();
@@ -214,16 +214,22 @@ export function BusinessProfilePage() {
   const publicBase = getAppPublicBaseUrl().replace(/\/+$/, "");
   const teamUrl = slug ? `${publicBase}/${slug}` : "";
 
-  return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
-      <header>
-        <div className="mb-2 flex items-center gap-2 text-muted-foreground">
-          <Building2 className="h-5 w-5 shrink-0" aria-hidden />
-          <span className="text-xs font-semibold uppercase tracking-wide">{t("business.profilePage.venuePill")}</span>
-        </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("business.profilePage.pageTitle")}</h1>
-        <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("business.profilePage.pageDesc")}</p>
-      </header>
+  const profileContent = (
+    <>
+      {!embedded ? (
+        <header>
+          <div className="mb-2 flex items-center gap-2 text-muted-foreground">
+            <Building2 className="h-5 w-5 shrink-0" aria-hidden />
+            <span className="text-xs font-semibold uppercase tracking-wide">{t("business.profilePage.venuePill")}</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">{t("business.profilePage.pageTitle")}</h1>
+          <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("business.profilePage.pageDesc")}</p>
+        </header>
+      ) : (
+        <p className="rounded-lg border border-border/80 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+          {t("business.settings.panels.businessIntro")}
+        </p>
+      )}
 
       <Card className="overflow-hidden border-border shadow-sm">
         <CardHeader className="border-b border-border/60 bg-muted/30">
@@ -387,6 +393,16 @@ export function BusinessProfilePage() {
           </div>
         </CardContent>
       </Card>
+    </>
+  );
+
+  if (embedded) {
+    return <div className="space-y-6">{profileContent}</div>;
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
+      {profileContent}
     </div>
   );
 }

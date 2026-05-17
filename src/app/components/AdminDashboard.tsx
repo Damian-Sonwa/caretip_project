@@ -545,7 +545,7 @@ export function AdminDashboard() {
 
   if (initialDashLoading) {
     return (
-      <main className="bg-background">
+      <main className={platformUi.pageMain}>
         <div className={cn(platformUi.page, "flex min-h-[min(70vh,calc(100vh-5rem))] flex-col items-center justify-center py-16")}>
           <PageLoader message={t("admin.loadingDashboard")} />
         </div>

@@ -39,7 +39,6 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ActivateEmployeePage } from './pages/ActivateEmployeePage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
-import { ProfileSettingsPage } from './components/ProfileSettingsPage';
 import { TransactionsPage } from './components/TransactionsPage';
 import { NotificationsPage } from './components/NotificationsPage';
 import { TipsActivityPage } from './pages/shared/TipsActivityPage';
@@ -80,6 +79,7 @@ import { QRCodeManagementPage } from './pages/business/QRCodeManagementPage';
 import { LocationsPage } from './pages/business/LocationsPage';
 import { TablesPage } from './pages/business/TablesPage';
 import { BusinessProfilePage } from './pages/business/BusinessProfilePage';
+import { BusinessSettingsPage } from './pages/business/BusinessSettingsPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { BusinessLayout } from './layouts/BusinessLayout';
@@ -295,13 +295,14 @@ const routes: RouteObject[] = [
         element: <BusinessLayout />,
         children: [
       { index: true, Component: BusinessDashboard },
-      { path: 'profile', Component: BusinessProfilePage },
+      { path: 'settings', Component: BusinessSettingsPage },
+      { path: 'profile', element: <Navigate to="/dashboard/settings?section=business" replace /> },
       { path: 'staff-management', Component: StaffManagementPage },
       { path: 'qr-code-management', Component: QRCodeManagementPage },
       { path: 'locations', Component: LocationsPage },
       { path: 'tables', Component: TablesPage },
       { path: 'transactions', Component: TipsActivityPage },
-      { path: 'profile-settings', Component: ProfileSettingsPage },
+      { path: 'profile-settings', element: <Navigate to="/dashboard/settings?section=general" replace /> },
       { path: 'support', element: <Navigate to="/dashboard" replace /> },
       { path: 'notifications', Component: NotificationsPage },
       { path: 'subscriptions', element: <Navigate to="/dashboard/transactions" replace /> },
@@ -312,7 +313,6 @@ const routes: RouteObject[] = [
       { path: 'billing', element: <Navigate to="/dashboard/transactions" replace /> },
       { path: 'subscription-plans', element: <Navigate to="/pricing" replace /> },
       { path: 'subscription-billing', element: <Navigate to="/dashboard/transactions" replace /> },
-      { path: 'settings', element: <Navigate to="/dashboard/profile-settings" replace /> },
         ],
       },
     ],

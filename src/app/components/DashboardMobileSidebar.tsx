@@ -89,7 +89,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
 
             <div className="border-t border-neutral-200/70 p-4">
               <Link
-                to="/dashboard/profile-settings"
+                to="/dashboard/settings"
                 onClick={onClose}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-muted transition-colors cursor-pointer"
               >

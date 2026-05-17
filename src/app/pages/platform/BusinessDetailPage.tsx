@@ -19,6 +19,9 @@ import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
+import { PlatformPage, PlatformPageHeader } from "../../components/platform/PlatformPageChrome";
+import { platformUi } from "../../components/platform/platformDashboardUi";
+import { cn } from "@/lib/utils";
 
 export function BusinessDetailPage() {
   const { t } = useTranslation();
@@ -151,36 +154,28 @@ export function BusinessDetailPage() {
   };
 
   return (
-    <>
-      <main className="px-4 lg:px-8 py-8 pb-20">
-        <div className="mb-6 text-sm">
-          <Link
-            to="/platform-admin/businesses"
-            className="inline-flex items-center gap-2 text-accent hover:underline"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            {t("admin.businessDetailPage.backLink")}
-          </Link>
-        </div>
+    <PlatformPage>
+      <Link to="/platform-admin/businesses" className={platformUi.backLink}>
+        <ArrowLeft className="h-4 w-4" aria-hidden />
+        {t("admin.businessDetailPage.backLink")}
+      </Link>
 
-        <div className="mb-8">
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
-            <Shield className="w-7 h-7 text-accent" />
-            {t("admin.businessDetailPage.title")}
-          </h1>
-          <p className="text-muted-foreground max-w-2xl">{t("admin.businessDetailPage.subtitle")}</p>
-        </div>
+      <PlatformPageHeader
+        icon={Shield}
+        title={t("admin.businessDetailPage.title")}
+        subtitle={t("admin.businessDetailPage.subtitle")}
+      />
 
-        {loading ? (
-          <CareTipPageLoader variant="section" message={t("admin.businessDetailPage.loading")} />
-        ) : !id || !row ? (
-          <p className="text-muted-foreground">{t("admin.businessDetailPage.notFound")}</p>
-        ) : (
-          <motion.div
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-card border border-border rounded-xl p-6 max-w-2xl space-y-6"
-          >
+      {loading ? (
+        <CareTipPageLoader variant="section" message={t("admin.businessDetailPage.loading")} />
+      ) : !id || !row ? (
+        <p className="text-muted-foreground">{t("admin.businessDetailPage.notFound")}</p>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(platformUi.contentCard, "max-w-2xl space-y-6")}
+        >
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="flex items-start gap-3">
                 <BusinessLogoMark logoPathOrUrl={row.logoPath ?? null} businessName={row.name} size="lg" />
@@ -302,9 +297,8 @@ export function BusinessDetailPage() {
             </div>
           </motion.div>
         )}
-      </main>
 
-      {editing && row && (
+      {editing && row ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.96, opacity: 0 }}
@@ -397,7 +391,7 @@ export function BusinessDetailPage() {
             </div>
           </motion.div>
         </div>
-      )}
-    </>
+      ) : null}
+    </PlatformPage>
   );
 }

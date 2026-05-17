@@ -1,14 +1,21 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
-import { Users, UserCog, Search } from "lucide-react";
+import { Users, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { fetchPlatformBusinesses, impersonateManagerAPI, type PlatformBusinessRow } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { useAuth, userFromAuthResponse } from "../../hooks/useAuth";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  PlatformPage,
+  PlatformPageHeader,
+  PlatformResponsiveData,
+  PlatformSearchField,
+} from "../../components/platform/PlatformPageChrome";
+import { PlatformUserMobileCard } from "../../components/platform/platformAdminMobileCards";
+import { platformUi } from "../../components/platform/platformDashboardUi";
 
 export function PlatformUserManagementPage() {
   const { t } = useTranslation();
@@ -44,7 +51,7 @@ export function PlatformUserManagementPage() {
       (b) =>
         b.name.toLowerCase().includes(q) ||
         b.slug.toLowerCase().includes(q) ||
-        b.ownerEmail.toLowerCase().includes(q)
+        b.ownerEmail.toLowerCase().includes(q),
     );
   }, [rows, searchQuery]);
 
@@ -72,85 +79,92 @@ export function PlatformUserManagementPage() {
     }
   };
 
+  const emptyMessage =
+    rows.length === 0
+      ? t("admin.userManagementPage.emptyList")
+      : t("admin.userManagementPage.noSearchMatches");
+
   return (
-    <main className="px-4 lg:px-8 py-8 pb-20">
-            <div className="mb-8">
-              <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mb-2 flex items-center gap-2">
-                <Users className="w-7 h-7 text-accent" />
-                {t("admin.userManagementPage.title")}
-              </h1>
-              <p className="text-muted-foreground max-w-2xl">
-                {t("admin.userManagementPage.subtitle")}
-              </p>
-            </div>
+    <PlatformPage>
+      <PlatformPageHeader
+        icon={Users}
+        title={t("admin.userManagementPage.title")}
+        subtitle={t("admin.userManagementPage.subtitle")}
+      />
 
-            <div className="relative mb-4 max-w-md">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <input
-                type="search"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t("admin.userManagementPage.searchPlaceholder")}
-                autoComplete="off"
-                aria-label={t("admin.userManagementPage.searchAria")}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-card text-sm"
+      <PlatformSearchField
+        value={searchQuery}
+        onChange={setSearchQuery}
+        placeholder={t("admin.userManagementPage.searchPlaceholder")}
+        ariaLabel={t("admin.userManagementPage.searchAria")}
+      />
+
+      <PlatformResponsiveData
+        mobile={
+          loading ? (
+            <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
+          ) : filteredRows.length === 0 ? (
+            <p className={platformUi.emptyState}>{emptyMessage}</p>
+          ) : (
+            filteredRows.map((b) => (
+              <PlatformUserMobileCard
+                key={b.id}
+                business={b}
+                busy={busyId !== null}
+                onImpersonate={() => void impersonate(b)}
               />
-            </div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-card border border-border rounded-xl overflow-hidden"
-            >
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-muted/40 text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colBusiness")}</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colManagerEmail")}</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.userManagementPage.colVerification")}</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground text-right">{t("admin.userManagementPage.colActions")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan={4} className="px-4 py-10">
-                          <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
-                        </td>
-                      </tr>
-                    ) : filteredRows.length === 0 ? (
-                      <tr>
-                        <td colSpan={4} className="px-4 py-12 text-center text-muted-foreground">
-                          {rows.length === 0
-                            ? t("admin.userManagementPage.emptyList")
-                            : t("admin.userManagementPage.noSearchMatches")}
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredRows.map((b) => (
-                        <tr key={b.id} className="border-b border-border/60 hover:bg-muted/30">
-                          <td className="px-4 py-3 font-medium">{b.name}</td>
-                          <td className="px-4 py-3 text-xs text-muted-foreground">{b.ownerEmail}</td>
-                          <td className="px-4 py-3 text-xs capitalize">{b.verificationStatus}</td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              type="button"
-                              disabled={busyId !== null}
-                              onClick={() => void impersonate(b)}
-                              className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
-                            >
-                              <UserCog className="w-3.5 h-3.5" />
-                              {busyId === b.id ? t("admin.userManagementPage.opening") : t("admin.userManagementPage.impersonateCta")}
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </motion.div>
-    </main>
+            ))
+          )
+        }
+        desktop={
+          <table className={platformUi.table}>
+            <thead>
+              <tr className={platformUi.tableHeadRow}>
+                <th className={platformUi.tableTh}>{t("admin.userManagementPage.colBusiness")}</th>
+                <th className={platformUi.tableTh}>{t("admin.userManagementPage.colManagerEmail")}</th>
+                <th className={platformUi.tableTh}>{t("admin.userManagementPage.colVerification")}</th>
+                <th className={`${platformUi.tableTh} text-right`}>{t("admin.userManagementPage.colActions")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={4} className={platformUi.tableTd}>
+                    <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
+                  </td>
+                </tr>
+              ) : filteredRows.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className={platformUi.emptyState}>
+                    {emptyMessage}
+                  </td>
+                </tr>
+              ) : (
+                filteredRows.map((b) => (
+                  <tr key={b.id} className={platformUi.tableRow}>
+                    <td className={`${platformUi.tableTd} font-medium`}>{b.name}</td>
+                    <td className={`${platformUi.tableTd} text-xs text-muted-foreground`}>{b.ownerEmail}</td>
+                    <td className={`${platformUi.tableTd} text-xs capitalize`}>{b.verificationStatus}</td>
+                    <td className={`${platformUi.tableTd} text-right`}>
+                      <button
+                        type="button"
+                        disabled={busyId !== null}
+                        onClick={() => void impersonate(b)}
+                        className="inline-flex min-h-[44px] touch-manipulation items-center gap-1.5 rounded-xl bg-accent px-3 py-2 text-xs font-medium text-accent-foreground hover:bg-accent/90 disabled:opacity-50"
+                      >
+                        <UserCog className="h-3.5 w-3.5" aria-hidden />
+                        {busyId === b.id
+                          ? t("admin.userManagementPage.opening")
+                          : t("admin.userManagementPage.impersonateCta")}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        }
+      />
+    </PlatformPage>
   );
 }

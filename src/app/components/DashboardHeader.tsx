@@ -1,10 +1,12 @@
 import { motion } from "motion/react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Bell, Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { CareTipLogo } from "./CareTipLogo";
+import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { ProfileAvatar } from "./ui/profile-avatar";
+import { useBusinessVenueBrand } from "../hooks/useBusinessVenueBrand";
 import { useEmployeeUnreadCount } from "../hooks/useEmployeeUnreadNotifications";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +21,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const employeeUnreadCount = useEmployeeUnreadCount();
   const showNotificationBadge = user?.role === "employee" && employeeUnreadCount > 0;
   const isPlatformAdmin = user?.role === "platform_admin";
+  const isBusinessManager = user?.role === "business";
+  const { venueName, logo: businessLogo } = useBusinessVenueBrand();
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
 
@@ -50,39 +54,43 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             <Menu className="w-5 h-5 text-foreground" />
           </button>
 
-          <div className="shrink-0 lg:hidden">
-            <CareTipLogo size="xs" />
-          </div>
+          {!isBusinessManager ? (
+            <div className="shrink-0 lg:hidden">
+              <CareTipLogo size="xs" />
+            </div>
+          ) : null}
 
-          <form
-            className={cn(
-              "relative min-w-0",
-              isPlatformAdmin
-                ? "w-full max-lg:max-w-[min(11.5rem,calc(100vw-9.5rem))] lg:max-w-md lg:flex-1"
-                : "w-full max-w-md flex-1",
-            )}
-            role="search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.currentTarget);
-              const raw = String(fd.get("q") ?? "").trim();
-              navigate(raw ? `/faq?q=${encodeURIComponent(raw)}` : "/faq");
-            }}
-          >
-            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
-              name="q"
-              type="search"
-              enterKeyHint="search"
-              placeholder={t("shell.header.searchPlaceholder")}
-              autoComplete="off"
-              aria-label={t("shell.header.searchAria")}
+          {!isBusinessManager ? (
+            <form
               className={cn(
-                "w-full rounded-lg border border-border bg-input-background py-2 pl-10 pr-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent",
-                isPlatformAdmin && "max-lg:py-2 max-lg:pl-9 max-lg:pr-2 max-lg:text-xs placeholder:max-lg:text-xs",
+                "relative min-w-0",
+                isPlatformAdmin
+                  ? "w-full max-lg:max-w-[min(11.5rem,calc(100vw-9.5rem))] lg:max-w-md lg:flex-1"
+                  : "w-full max-w-md flex-1",
               )}
-            />
-          </form>
+              role="search"
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.currentTarget);
+                const raw = String(fd.get("q") ?? "").trim();
+                navigate(raw ? `/faq?q=${encodeURIComponent(raw)}` : "/faq");
+              }}
+            >
+              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <input
+                name="q"
+                type="search"
+                enterKeyHint="search"
+                placeholder={t("shell.header.searchPlaceholder")}
+                autoComplete="off"
+                aria-label={t("shell.header.searchAria")}
+                className={cn(
+                  "w-full rounded-lg border border-border bg-input-background py-2 pl-10 pr-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent",
+                  isPlatformAdmin && "max-lg:py-2 max-lg:pl-9 max-lg:pr-2 max-lg:text-xs placeholder:max-lg:text-xs",
+                )}
+              />
+            </form>
+          ) : null}
         </div>
 
         <div
@@ -129,21 +137,39 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             ) : null}
           </button>
 
-          <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
-            <div className="text-right">
-              <p className="text-sm font-medium text-foreground">{displayName}</p>
-              <p className="text-xs text-muted-foreground truncate max-w-[180px]">
-                {displayEmail || t("shell.header.platformAdminEmail")}
-              </p>
+          {isBusinessManager ? (
+            <Link
+              to="/dashboard/settings?section=business"
+              className="inline-flex touch-manipulation items-center justify-center rounded-xl p-0.5 transition-colors hover:bg-muted active:opacity-90"
+              aria-label={t("shell.nav.settings")}
+            >
+              <BusinessLogoMark
+                key={`${businessLogo ?? "no-logo"}-${venueName}`}
+                logoPathOrUrl={businessLogo}
+                businessName={venueName}
+                size="header"
+                rounded="rounded-full"
+                fallbackTone="muted"
+                className="ring-1 ring-border/60"
+              />
+            </Link>
+          ) : (
+            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
+              <div className="text-right">
+                <p className="text-sm font-medium text-foreground">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+                  {displayEmail || t("shell.header.platformAdminEmail")}
+                </p>
+              </div>
+              <ProfileAvatar
+                key={user?.avatar ?? user?.id ?? "header-avatar"}
+                src={user?.avatar}
+                displayName={displayName}
+                className="h-9 w-9 ring-2 ring-accent/30 hover:ring-accent/50 transition-all"
+                lightbox={false}
+              />
             </div>
-            <ProfileAvatar
-              key={user?.avatar ?? user?.id ?? "header-avatar"}
-              src={user?.avatar}
-              displayName={displayName}
-              className="h-9 w-9 ring-2 ring-accent/30 hover:ring-accent/50 transition-all"
-              lightbox={false}
-            />
-          </div>
+          )}
         </div>
       </div>
     </motion.header>

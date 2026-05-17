@@ -790,9 +790,8 @@
       "locations": "Standorte",
       "tables": "Tische",
       "tipsActivity": "Trinkgelder & Aktivität",
-      "venueProfile": "Lokalprofil",
       "notifications": "Benachrichtigungen",
-      "accountSettings": "Kontoeinstellungen"
+      "settings": "Einstellungen"
     }
   },
   "charts": {
@@ -840,7 +839,7 @@
       "tipsActivity": "Trinkgelder & Aktivität",
       "notifications": "Benachrichtigungen",
       "support": "Support",
-      "profileSettings": "Profil & Einstellungen"
+      "settings": "Einstellungen"
     }
   },
   "sampleDashboard": {
@@ -1831,6 +1830,50 @@
           "title": "Wöchentliche Trinkgeld-Zusammenfassung",
           "message": "Diese Woche 48 erfolgreiche Trinkgelder. Details unter Trinkgelder & Aktivität."
         }
+      }
+    },
+    "settings": {
+      "eyebrow": "Arbeitsbereich",
+      "title": "Einstellungen",
+      "subtitle": "Konto, Betrieb, Sicherheit und Benachrichtigungen an einem Ort verwalten.",
+      "navAria": "Einstellungsbereiche",
+      "loading": "Wird geladen…",
+      "sections": {
+        "general": "Allgemein",
+        "generalDesc": "Kontaktdaten des Kontoverwalters",
+        "business": "Unternehmensprofil",
+        "businessDesc": "Name, Logo, Standort und Verifizierung",
+        "team": "Team & Rollen",
+        "teamDesc": "Mitarbeiterliste und Berechtigungen",
+        "notifications": "Benachrichtigungen",
+        "notificationsDesc": "E-Mail- und Alert-Einstellungen",
+        "security": "Sicherheit",
+        "securityDesc": "Passwort und Zwei-Faktor-Authentifizierung",
+        "billing": "Abrechnung & Abo",
+        "billingDesc": "Gebühren, Modell und Aktivitätslinks",
+        "branding": "Branding & QR",
+        "brandingDesc": "QR-Codes und Markenmaterial"
+      },
+      "panels": {
+        "generalTitle": "Allgemein",
+        "generalDesc": "Details Ihres Manager-Kontos",
+        "generalHint": "Betriebsname, Logo und Standort finden Sie unter Unternehmensprofil.",
+        "managerName": "Name des Kontoverwalters",
+        "businessIntro": "Aktualisieren Sie, wie Gäste und Team Ihren Betrieb auf CareTip sehen.",
+        "notificationsTitle": "Benachrichtigungen",
+        "notificationsDesc": "Wählen Sie, worüber wir Sie per E-Mail informieren",
+        "billingTitle": "Abrechnung & Abo",
+        "billingDesc": "So rechnet CareTip mit Ihrem Betrieb ab",
+        "twoFactorOn": "Zwei-Faktor-Authentifizierung ist aktiviert.",
+        "twoFactorOff": "Zwei-Faktor-Authentifizierung ist nicht aktiviert.",
+        "teamTitle": "Team & Rollen",
+        "teamDesc": "Team im Dashboard verwalten",
+        "teamCardTitle": "Mitarbeiterverwaltung",
+        "teamCardDesc": "Mitarbeiter, Rollen, Einladungscodes und Tischzuweisungen",
+        "brandingTitle": "Branding & QR",
+        "brandingDesc": "Gastseitige QR-Erlebnisse anpassen",
+        "brandingCardTitle": "QR-Code-Verwaltung",
+        "brandingCardDesc": "Lokal- und Team-QR herunterladen, drucken und neu erzeugen"
       }
     },
     "accountSettings": {

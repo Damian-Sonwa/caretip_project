@@ -42,7 +42,7 @@ export function NotificationsPage() {
           "/dashboard/transactions",
           "/dashboard/transactions",
           "/dashboard/staff-management",
-          "/dashboard/profile-settings",
+          "/dashboard/settings?section=notifications",
           undefined,
         ] as const;
         const withAction = index < 5;

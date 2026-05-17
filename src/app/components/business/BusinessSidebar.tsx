@@ -59,9 +59,6 @@ export function BusinessSidebar() {
           CARE_TIP_LOGO_SURFACE_CLASS,
         )}
       >
-        <div className="min-w-0">
-          <CareTipLogo size="sm" />
-        </div>
         <div className="flex min-w-0 items-start gap-3">
           <BusinessLogoMark
             logoPathOrUrl={profile?.logo}
@@ -124,7 +121,7 @@ export function BusinessSidebar() {
 
       <div className="border-t border-sidebar-border p-4">
         <Link
-          to="/dashboard/profile-settings"
+          to="/dashboard/settings"
           className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5 transition-colors hover:bg-muted/80"
         >
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">

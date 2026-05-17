@@ -490,15 +490,15 @@ export function BusinessDashboard() {
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
               <div className="business-hero-cta-row">
-                <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 shrink-0")} asChild>
-                  <Link to="/dashboard/qr-code-management" className="inline-flex items-center justify-center gap-2">
-                    <QrCode className="h-4 w-4 shrink-0" />
+                <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
+                  <Link to="/dashboard/qr-code-management" className={businessUi.heroCtaLink}>
+                    <QrCode className="h-4 w-4 shrink-0" aria-hidden />
                     {t("business.hero.manageQr")}
                   </Link>
                 </Button>
-                <Button type="button" variant="ghost" className={cn(businessUi.btnSecondary, "min-w-0 shrink-0")} asChild>
-                  <Link to="/dashboard/staff-management" className="inline-flex items-center justify-center gap-2">
-                    <Users className="h-4 w-4 shrink-0" />
+                <Button type="button" variant="ghost" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                  <Link to="/dashboard/staff-management" className={businessUi.heroCtaLink}>
+                    <Users className="h-4 w-4 shrink-0" aria-hidden />
                     {t("business.hero.manageTeam")}
                   </Link>
                 </Button>
@@ -540,41 +540,6 @@ export function BusinessDashboard() {
                             {t("business.hero.pulse.volume", { amount: formatEur(operationalPulse.tipsToday.amount) })}
                           </span>
                         ) : null}
-                      </>
-                    ) : (
-                      <span className="block">{t("format.noDataYet")}</span>
-                    )}
-                  </dd>
-                </div>
-                <div>
-                  <dt>{t("business.hero.pulse.readiness")}</dt>
-                  <dd className="business-hero-pulse-readiness !mt-0 space-y-1">
-                    {operationalPulse ? (
-                      <>
-                        <span className="block tabular-nums leading-tight">
-                          {operationalPulse.goalsTracked > 0
-                            ? t("business.hero.pulse.goalsProgress", {
-                                onTrack: operationalPulse.goalsOnTrackOrBetter,
-                                tracked: operationalPulse.goalsTracked,
-                              })
-                            : t("format.metricZeroGoals")}
-                        </span>
-                        <span className="business-hero-pulse-subline text-muted-foreground/90">
-                          {t("business.hero.pulse.readySubtitle", {
-                            ready: operationalPulse.tippingReadyEmployees,
-                            total: operationalPulse.rosterTotal,
-                          })}
-                        </span>
-                        <span
-                          className={cn(
-                            "business-hero-pulse-subline",
-                            operationalPulse.employeesMissingQr > 0 ? "font-medium text-amber-900/85" : "text-muted-foreground/90",
-                          )}
-                        >
-                          {operationalPulse.employeesMissingQr > 0
-                            ? t("business.hero.pulse.qrIssues", { count: operationalPulse.employeesMissingQr })
-                            : t("business.hero.pulse.qrComplete")}
-                        </span>
                       </>
                     ) : (
                       <span className="block">{t("format.noDataYet")}</span>
@@ -1064,7 +1029,7 @@ export function BusinessDashboard() {
                       className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
                       asChild
                     >
-                      <Link to="/dashboard/profile" className="gap-3">
+                      <Link to="/dashboard/settings?section=business" className="gap-3">
                         <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
                           <Building2 className="h-5 w-5" aria-hidden />
                         </span>

@@ -113,7 +113,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
 
             <div className="border-t border-sidebar-border p-4">
               <Link
-                to="/dashboard/profile-settings"
+                to="/dashboard/settings"
                 onClick={onClose}
                 className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5"
               >
