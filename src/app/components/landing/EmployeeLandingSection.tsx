@@ -28,6 +28,7 @@ export function EmployeeLandingSection() {
       visualPosition="left"
       tone="muted"
       eyebrow={t("landing.employeeSection.pill")}
+      eyebrowVariant="spark"
       titleLine1={t("landing.employeeSection.titleLine1")}
       titleLine2={t("landing.employeeSection.titleLine2")}
       subtitle={t("landing.employeeSection.subtitle")}

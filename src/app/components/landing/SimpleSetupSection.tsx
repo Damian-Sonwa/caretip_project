@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 import { landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
+import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { cn } from "@/lib/utils";
 
 export function SimpleSetupSection() {
@@ -49,16 +49,15 @@ export function SimpleSetupSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.55 }}
-            className={cn(landingUi.copyStack, "mb-5 max-lg:mb-6 sm:mb-8")}
+            className={cn(landingUi.copyStack, "mb-8 sm:mb-10")}
           >
-            <div className={cn(landingUi.pillRow, "max-md:flex-col max-md:gap-1.5 max-md:items-center")}>
-              <span className={cn("inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-white px-2.5 py-0.5 text-neutral-900 shadow-sm dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 sm:gap-2 sm:px-3 sm:py-1", landingType.pill)}>
-                <Sparkles className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" />
+            <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
+              <LandingSectionAccent variant="spark">
                 {t("landing.simpleSetup.pill")}
-              </span>
-              <span className={cn(landingUi.eyebrowSecondary, "max-lg:w-full")}>
+              </LandingSectionAccent>
+              <LandingSectionAccent variant="arrow" muted>
                 {t("landing.simpleSetup.pillSub")}
-              </span>
+              </LandingSectionAccent>
             </div>
 
             <h2 className={landingUi.headline}>

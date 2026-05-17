@@ -14,9 +14,9 @@ const heroHeadlineTone =
   "font-sans font-bold text-balance tracking-[-0.02em] text-neutral-950 dark:text-neutral-50";
 /** Below md only — desktop uses `heroHeadlineDesktop` unchanged. */
 const heroHeadlineMobile =
-  "max-md:text-[2.8rem] max-md:font-extrabold max-md:leading-[0.95]";
+  "max-md:text-[2.8rem] max-md:font-bold max-md:leading-[0.95]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2.65rem] max-md:font-extrabold max-md:leading-[0.95]";
+  "max-md:text-[2.65rem] max-md:font-bold max-md:leading-[0.95]";
 const heroHeadlineDesktop =
   "md:text-5xl lg:text-6xl md:leading-[0.95] lg:leading-[0.95]";
 
@@ -35,8 +35,16 @@ function cnSectionHeadline(layout: string) {
 }
 /** Tagline / intro paragraph under section headlines — readable, not tiny. */
 function cnSectionLead(layout: string) {
-  return `font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] text-neutral-600 max-lg:text-lg max-lg:leading-[1.68] dark:text-neutral-400 ${layout}`;
+  return `font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] text-neutral-600 max-lg:text-lg max-lg:leading-[1.65] dark:text-neutral-400 ${layout}`;
 }
+
+/** Centered / split section intro — eyebrow → headline → lead rhythm. */
+const sectionIntroStack = "flex w-full flex-col items-center space-y-0 px-0.5 text-center";
+const sectionIntroChildRhythm =
+  "[&>h2]:mt-3 [&>h2:first-child]:mt-0 [&>div~h2]:mt-4 [&>p]:mt-5 sm:[&>p]:mt-6 [&>motion.div]:mt-8 sm:[&>motion.div]:mt-10 [&>motion.div]:sm:mt-10 [&>motion.div~*]:mt-0 [&>div.flex]:mt-8 sm:[&>motion.div]:mt-8";
+/** Narrower centered body copy — headlines stay wider via section title tokens. */
+const sectionLeadReadable =
+  "mx-auto w-full max-w-lg max-lg:leading-[1.65] sm:max-w-xl";
 function cnBodyLead(layout: string) {
   return `${landingType.bodyLead} ${layout}`;
 }
@@ -66,9 +74,8 @@ export const landingUi = {
   sectionWhite: "bg-white dark:bg-neutral-950",
 
   /** Eyebrow → headline → tagline stack (centered sections). */
-  sectionIntro:
-    "mb-8 flex w-full max-w-full flex-col items-center space-y-4 px-0.5 text-center max-lg:mb-9 sm:mb-9 sm:space-y-5 lg:mb-10",
-  sectionAfterIntro: "mb-8 max-lg:mb-8 sm:mb-9",
+  sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-w-full sm:mb-10`,
+  sectionAfterIntro: "mb-8 sm:mb-10",
 
   splitGrid:
     "mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-7 sm:gap-9 lg:grid-cols-2 lg:items-center lg:gap-12",
@@ -77,22 +84,32 @@ export const landingUi = {
   visualColumn:
     "order-2 flex w-full min-w-0 max-w-full flex-col items-center justify-center max-lg:pt-1 lg:order-none",
 
-  pillRow:
-    "flex w-full flex-wrap items-center justify-center gap-2 max-lg:justify-center lg:justify-start",
-  pill: `inline-flex w-fit items-center rounded-full bg-primary/10 px-2.5 py-0.5 ${landingType.pill} text-primary max-lg:mx-auto lg:mx-0 sm:px-3 sm:py-1`,
+  /** Row of lightweight section accents (replaces pill chips). */
+  sectionAccentRow:
+    "flex w-full flex-wrap items-center justify-center gap-x-5 gap-y-2 max-lg:justify-center lg:justify-start",
+  sectionAccent: "relative inline-flex w-fit items-center gap-2 max-lg:mx-auto lg:mx-0",
+  sectionAccentText:
+    "text-[11px] font-medium uppercase tracking-[0.18em] text-amber-600/80 dark:text-amber-400/75",
+  sectionAccentTextMuted:
+    "text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-500/85 dark:text-neutral-400/80",
+  sectionAccentIcon:
+    "h-3 w-3 shrink-0 text-amber-500/70 dark:text-amber-400/65",
+  sectionAccentGlow:
+    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.12),transparent_72%)] opacity-60 blur-md",
+  sectionAccentLine:
+    "h-px w-6 shrink-0 bg-gradient-to-r from-amber-500/55 via-amber-400/20 to-transparent",
 
-  copyStack:
-    "flex w-full flex-col items-start space-y-4 max-lg:items-center max-lg:text-center sm:space-y-5 lg:items-start lg:text-left",
+  copyStack: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   eyebrowSecondary: cnSectionLead(
-    "text-neutral-600 dark:text-neutral-400 max-lg:text-center sm:text-left",
+    `${sectionLeadReadable} text-neutral-600 max-lg:text-center sm:text-left lg:mx-0 lg:max-w-md lg:text-left dark:text-neutral-400`,
   ),
   headline: cnSectionHeadline(
     "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0.5 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
   ),
   subtitle: cnSectionLead(
-    "mx-auto max-w-[min(100%,36ch)] text-center max-lg:px-0.5 lg:mx-0 lg:max-w-[38ch] lg:text-left",
+    `${sectionLeadReadable} text-center max-lg:px-0.5 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
-  cardFeatureBody: `${landingType.featureBody} mt-2 sm:mt-2.5 text-neutral-700 dark:text-neutral-300`,
+  cardFeatureBody: `${landingType.featureBody} mt-2 leading-snug sm:mt-2.5 text-neutral-700 dark:text-neutral-300`,
   cardCopyStack: "flex flex-col gap-2.5 text-left sm:gap-3",
 
   benefitList: "w-full space-y-3 max-lg:mt-1 max-lg:space-y-2.5 sm:space-y-3.5",
@@ -104,7 +121,7 @@ export const landingUi = {
     "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-1 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-3xl",
   ),
   sectionSubtitle: cnSectionLead(
-    "mx-auto max-w-[min(100%,36ch)] text-center max-lg:px-1 sm:max-w-[38ch] lg:max-w-2xl",
+    `${sectionLeadReadable} text-center max-lg:px-1`,
   ),
 
   showcaseSection:
@@ -117,17 +134,16 @@ export const landingUi = {
     "relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden sm:gap-10 lg:grid-cols-2 lg:gap-12",
   showcaseCopy:
     "flex w-full min-w-0 max-w-xl flex-col items-start max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
-  showcaseIntro:
-    "flex w-full flex-col items-start space-y-4 max-lg:items-center max-lg:text-center sm:space-y-5 lg:items-start lg:text-left",
+  showcaseIntro: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   showcaseHeadline: cnSectionHeadline(
     "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0.5 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
   ),
   showcaseHeadlineAccent: "mt-1 block text-primary max-md:mt-1 sm:mt-1.5 lg:mt-2",
   showcaseSubtitle: cnSectionLead(
-    "mx-auto max-w-[min(100%,36ch)] text-center max-lg:px-0.5 lg:mx-0 lg:max-w-[38ch] lg:text-left",
+    `${sectionLeadReadable} text-center max-lg:px-0.5 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   showcaseActionCluster:
-    "mt-6 flex w-full min-w-0 flex-col gap-4 max-lg:items-start sm:mt-7 sm:gap-4 lg:mx-0 lg:max-w-none",
+    "mt-8 flex w-full min-w-0 flex-col gap-4 max-lg:items-start sm:mt-10 sm:gap-4 lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
     "w-full divide-y divide-neutral-900/[0.07] rounded-xl bg-white/30 ring-1 ring-inset ring-neutral-900/[0.05] backdrop-blur-[1px] dark:divide-white/[0.07] dark:bg-white/[0.04] dark:ring-white/[0.06]",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",
@@ -150,13 +166,12 @@ export const landingUi = {
 
   hospitalitySection:
     "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-11 max-lg:pb-12 max-lg:pt-10 sm:px-6 sm:py-16 lg:py-20",
-  hospitalityIntro:
-    "mb-8 flex w-full flex-col items-center space-y-4 px-0.5 text-center max-lg:mb-9 sm:mb-9 sm:space-y-5 lg:mb-10",
+  hospitalityIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full sm:mb-10`,
   hospitalityTitle: cnSectionHeadline(
-    "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0.5 max-md:max-w-[min(100%,24ch)] lg:max-w-[28ch]",
+    "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0.5 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
   ),
   hospitalitySubtitle: cnSectionLead(
-    "mx-auto max-w-[min(100%,36ch)] text-center max-lg:px-0.5 lg:max-w-[40ch]",
+    `${sectionLeadReadable} text-center max-lg:px-0.5`,
   ),
   hospitalityGrid:
     "grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden sm:gap-9 lg:grid-cols-2 lg:gap-12",
@@ -164,9 +179,6 @@ export const landingUi = {
     "w-full divide-y divide-neutral-900/[0.07] rounded-xl bg-white/30 ring-1 ring-inset ring-neutral-900/[0.05] backdrop-blur-[1px] dark:divide-white/[0.07] dark:bg-white/[0.04] dark:ring-white/[0.06]",
   hospitalityMediaStack:
     "flex w-full min-w-0 flex-col gap-3 pt-0.5 max-lg:items-center max-lg:text-center sm:gap-4 lg:items-start lg:text-left",
-  hospitalityMediaLabel: cnCardTitle(
-    "text-neutral-600 dark:text-neutral-400",
-  ),
   hospitalityMediaCard:
     "w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_2px_4px_rgba(15,15,15,0.04),0_12px_32px_rgba(15,15,15,0.07)] dark:border-neutral-800/90 dark:bg-neutral-950/60 dark:shadow-[0_16px_36px_rgba(0,0,0,0.35)]",
 
@@ -176,24 +188,24 @@ export const landingUi = {
     "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 md:col-span-7 md:max-w-[620px] md:space-y-8 md:pr-2 lg:col-span-7 lg:pr-4 xl:col-span-7",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "w-full max-w-xl max-md:max-w-[320px] antialiased text-left md:max-w-none",
+    "w-full max-w-xl max-md:max-w-[min(320px,26ch)] antialiased text-left md:max-w-none",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
-    "w-full max-w-xl max-md:max-w-[300px] antialiased text-left md:max-w-none",
+    "w-full max-w-xl max-md:max-w-[min(300px,24ch)] antialiased text-left md:max-w-none",
   ),
   heroSubtitle: cnHeroSubtitle(
-    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[320px] max-lg:pt-0 md:max-w-none md:pt-2",
+    "w-full max-w-2xl text-left max-md:mt-6 max-md:max-w-[320px] max-md:leading-[1.62] max-lg:pt-0 md:max-w-none md:pt-2",
   ),
   heroActionCluster:
     "relative z-10 flex w-full flex-col items-start max-md:mt-8 max-md:gap-0 max-md:pb-0 md:!mt-12 md:max-w-none md:gap-8",
   heroBenefits:
-    "!mt-0 w-full max-md:gap-3 max-md:[&_li]:!text-base max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-8 max-md:[&_li>span:first-child]:!w-8 max-md:[&_li>span:first-child]:!rounded-lg max-md:[&_li_svg]:!max-h-3.5 max-md:[&_li_svg]:!max-w-3.5 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
+    "!mt-0 w-full max-md:gap-2.5 max-md:[&_li]:!text-base max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-8 max-md:[&_li>span:first-child]:!w-8 max-md:[&_li>span:first-child]:!rounded-lg max-md:[&_li_svg]:!max-h-3.5 max-md:[&_li_svg]:!max-w-3.5 [&_li]:max-lg:text-base [&_li]:max-lg:leading-snug md:max-w-none md:gap-4",
   heroCtaRow:
-    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-8 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
+    "relative z-10 mt-8 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:mt-6 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
-    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.625rem] max-md:rounded-2xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
+    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-10 max-md:rounded-2xl max-md:px-5 max-md:py-2.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
   heroCtaSecondary:
-    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.625rem] max-md:rounded-2xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
+    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-2xl max-md:px-5 max-md:py-2 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
   heroMediaCol:
     "relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-center justify-center px-0 max-md:mt-11 max-md:pt-0 max-md:pb-0 md:col-span-5 md:mt-0 md:justify-center md:self-center lg:col-span-5",
   heroMediaShell:

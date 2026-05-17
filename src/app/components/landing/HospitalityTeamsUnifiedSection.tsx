@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import { landingUi } from "@/components/landing/landingUi";
+import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
@@ -81,7 +82,9 @@ export function HospitalityTeamsUnifiedSection() {
             transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
           >
             <div className={landingUi.hospitalityMediaStack}>
-              <p className={landingUi.hospitalityMediaLabel}>{t("landing.hospitality.pill")}</p>
+              <LandingSectionAccent variant="line" className="max-lg:mx-auto">
+                {t("landing.hospitality.pill")}
+              </LandingSectionAccent>
               <motion.div
                 className={landingUi.hospitalityMediaCard}
                 initial={{ opacity: 0, y: 6 }}

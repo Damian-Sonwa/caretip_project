@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import heroVisualEn from "../../../images/aftermath.png";
-import heroVisualDe from "../../../images/new-hero.png";
+import heroVisualDe from "../../../images/YCE.png";
 import { Navigation } from "../components/Navigation";
 import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -30,7 +30,7 @@ export function LandingPage() {
         Icon: Smartphone,
         src,
         alt: t("landing.showcase.tabQrAlt"),
-        imageFit: isDe ? "contain" : "cover",
+        imageFit: "cover",
         imageObjectPosition: "center",
       },
     ];

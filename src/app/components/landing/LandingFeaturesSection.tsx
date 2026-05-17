@@ -4,6 +4,10 @@ import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucid
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
+import {
+  LandingSectionAccent,
+  type LandingAccentVariant,
+} from "@/components/landing/LandingSectionAccent";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -28,11 +32,14 @@ const iconWrapClassName = cn(
 const iconClassName =
   "h-4 w-4 stroke-[2.25] text-primary transition-transform duration-300 max-md:h-4 max-md:w-4 group-hover:scale-105 dark:text-[#f0a84d] sm:h-[22px] sm:w-[22px]";
 
-const tagClassName = cn(
-  "mb-2 inline-flex w-fit items-center rounded-full border border-primary/15 bg-primary/[0.08] px-2 py-0.5 max-md:mb-2",
-  landingType.pill,
-  "text-primary/90 dark:border-primary/25 dark:bg-primary/15 dark:text-[#f0a84d]",
-);
+const featureAccentVariants: LandingAccentVariant[] = [
+  "spark",
+  "trend",
+  "arrow",
+  "line",
+  "spark",
+  "trend",
+];
 
 export function LandingFeaturesSection() {
   const { t } = useTranslation();
@@ -130,7 +137,12 @@ export function LandingFeaturesSection() {
                 className="h-full"
               >
                 <article className={cardClassName}>
-                  <span className={tagClassName}>{item.tag}</span>
+                  <LandingSectionAccent
+                    variant={featureAccentVariants[idx % featureAccentVariants.length]}
+                    className="mb-2 max-md:mb-2"
+                  >
+                    {item.tag}
+                  </LandingSectionAccent>
                   <div className={iconWrapClassName}>
                     <Icon className={iconClassName} aria-hidden />
                   </div>

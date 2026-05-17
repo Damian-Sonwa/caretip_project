@@ -26,6 +26,7 @@ export function BusinessLandingSection() {
       visualPosition="right"
       tone="warm"
       eyebrow={t("landing.businessSection.pill")}
+      eyebrowVariant="arrow"
       titleLine1={t("landing.businessSection.titleLine1")}
       titleLine2={t("landing.businessSection.titleLine2")}
       subtitle={t("landing.businessSection.subtitle")}

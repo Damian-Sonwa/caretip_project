@@ -3,6 +3,7 @@ import { motion } from "motion/react";
 import { CreditCard, Smartphone, Clock, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
+import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
@@ -62,7 +63,9 @@ export function PaymentsSection() {
           viewport={{ once: true }}
           className={landingUi.sectionIntro}
         >
-          <span className={landingUi.pill}>{t("landing.paymentsTrust.pill")}</span>
+          <LandingSectionAccent variant="spark">
+            {t("landing.paymentsTrust.pill")}
+          </LandingSectionAccent>
           <h2 className={landingUi.sectionTitle}>
             {t("landing.paymentsTrust.title")}
           </h2>

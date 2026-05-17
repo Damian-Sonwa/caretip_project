@@ -3,6 +3,10 @@ import { motion } from "motion/react";
 import { Link } from "react-router";
 import { landingUi } from "@/components/landing/landingUi";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
+import {
+  LandingSectionAccent,
+  type LandingAccentVariant,
+} from "@/components/landing/LandingSectionAccent";
 import { cn } from "@/lib/utils";
 
 export type LandingShowcaseBenefit = {
@@ -16,6 +20,7 @@ export type LandingSplitShowcaseSectionProps = {
   visualPosition: "left" | "right";
   tone?: "warm" | "muted";
   eyebrow: string;
+  eyebrowVariant?: LandingAccentVariant;
   titleLine1: string;
   titleLine2?: string;
   subtitle: string;
@@ -31,6 +36,7 @@ export function LandingSplitShowcaseSection({
   visualPosition,
   tone = "warm",
   eyebrow,
+  eyebrowVariant = "trend",
   titleLine1,
   titleLine2,
   subtitle,
@@ -79,7 +85,7 @@ export function LandingSplitShowcaseSection({
           )}
         >
           <div className={landingUi.showcaseIntro}>
-            <span className={landingUi.pill}>{eyebrow}</span>
+            <LandingSectionAccent variant={eyebrowVariant}>{eyebrow}</LandingSectionAccent>
             <h2 className={landingUi.showcaseHeadline}>
               <span className="block text-neutral-900 dark:text-neutral-100">{titleLine1}</span>
               {titleLine2 ? (

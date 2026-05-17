@@ -24,12 +24,12 @@ export function LandingFinalCtaSection() {
         viewport={{ once: true }}
         className={cn(
           landingUi.sectionIntro,
-          "relative mx-auto mb-0 max-w-3xl max-lg:max-w-none max-lg:px-1 sm:max-w-2xl lg:max-w-3xl",
+          "relative mx-auto mb-0 w-full",
         )}
       >
         <h2 className={landingUi.sectionTitle}>{t("landing.finalCta.title")}</h2>
         <p className={landingUi.sectionSubtitle}>{t("landing.finalCta.subtitle")}</p>
-        <div className="flex w-full max-w-md justify-center pt-2 sm:pt-3">
+        <div className="flex w-full max-w-md justify-center">
           <Link
             to="/auth?mode=signup&role=business&from=landing"
             className={cn(

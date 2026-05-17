@@ -4,6 +4,10 @@ import { Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
+import {
+  LandingSectionAccent,
+  type LandingAccentVariant,
+} from "@/components/landing/LandingSectionAccent";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -17,13 +21,7 @@ const cardClassName = cn(
   "dark:hover:border-neutral-600",
 );
 
-const chipClassName = cn(
-  "inline-flex min-h-8 items-center justify-center rounded-full border border-neutral-200/95 bg-white px-3 py-1.5 max-lg:min-h-8 max-lg:px-3 max-lg:py-1.5",
-  cn(landingType.pill, "tracking-tight text-neutral-800 normal-case"),
-  "shadow-[0_1px_2px_rgba(15,15,15,0.04)] ring-1 ring-neutral-900/[0.04]",
-  "dark:border-neutral-600 dark:bg-neutral-900 dark:text-neutral-100 dark:ring-white/[0.06]",
-  "sm:min-h-10 sm:px-4",
-);
+const statAccentVariants: LandingAccentVariant[] = ["trend", "spark", "arrow"];
 
 export function LandingSocialProofSection() {
   const { t } = useTranslation();
@@ -81,13 +79,15 @@ export function LandingSocialProofSection() {
           viewport={{ once: true }}
           className={cn(
             landingUi.sectionAfterIntro,
-            "flex flex-wrap items-center justify-center gap-2 sm:gap-2.5",
+            "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 sm:gap-x-8",
           )}
           aria-label={t("landing.socialProof.chipsAria")}
         >
-          {stats.map((stat) => (
-            <li key={stat} className={chipClassName}>
-              {stat}
+          {stats.map((stat, idx) => (
+            <li key={stat}>
+              <LandingSectionAccent variant={statAccentVariants[idx % statAccentVariants.length]}>
+                {stat}
+              </LandingSectionAccent>
             </li>
           ))}
         </motion.ul>
