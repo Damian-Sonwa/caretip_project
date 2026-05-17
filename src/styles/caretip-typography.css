@@ -171,24 +171,6 @@ html.caretip-font-inter {
   letter-spacing: 0.05em;
 }
 
-/** Landing marketing page — slightly smaller scale than global tokens. */
-.caretip-landing {
-  --caretip-section-size: clamp(1.625rem, 5vw, 2rem);
-  --caretip-body-size: clamp(0.9375rem, 0.12vw + 0.9rem, 1rem);
-  --caretip-feature-size: clamp(0.875rem, 0.08vw + 0.84rem, 0.9375rem);
-  --caretip-card-title-size: clamp(1rem, 0.12vw + 0.94rem, 1.0625rem);
-  --caretip-button-size: 0.875rem;
-}
-
-@media (min-width: 1024px) {
-  .caretip-landing {
-    --caretip-section-size: clamp(1.875rem, 3.25vw, 2.875rem);
-    --caretip-body-size: clamp(1rem, 0.08vw + 0.94rem, 1.0625rem);
-    --caretip-feature-size: clamp(0.9375rem, 0.05vw + 0.9rem, 1rem);
-    --caretip-card-title-size: clamp(1.03125rem, 0.1vw + 0.96rem, 1.125rem);
-  }
-}
-
 @layer base {
   .caretip-dashboard-shell {
     font-family: var(--font-inter);
