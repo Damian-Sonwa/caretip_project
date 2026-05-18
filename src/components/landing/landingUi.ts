@@ -239,9 +239,9 @@ export const landingUi = {
     "relative w-full max-w-full max-lg:mx-auto max-lg:w-full lg:h-full lg:min-h-0",
   /** Mobile hero — taller framing, softer shadow (desktop unchanged via child tokens). */
   heroShowcaseMobileShell:
-    "max-lg:[&_.hero-showcase-card]:rounded-[24px] max-lg:[&_.hero-showcase-card]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",
+    "max-lg:[&_.hero-showcase-card]:rounded-[24px] max-lg:[&_.hero-showcase-card]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)] max-lg:[&_.hero-showcase-card]:min-h-[min(88vw,420px)] sm:max-lg:[&_.hero-showcase-card]:min-h-[min(80vw,440px)]",
   heroShowcaseCard:
-    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-neutral-950 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[10/11] max-lg:max-w-[min(100%,22rem)] sm:max-lg:max-w-[min(100%,26rem)] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,40rem)]",
+    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-neutral-950 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[10/11] max-lg:max-w-[min(100%,24rem)] sm:max-lg:max-w-[min(100%,28rem)] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,40rem)]",
   heroShowcaseGlow:
     "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 dark:opacity-50",
   heroShowcaseImg:

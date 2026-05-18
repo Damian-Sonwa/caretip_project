@@ -105,7 +105,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
       >
         {/* Copy — mobile: headline + CTAs first; metrics follow the product shot */}
         <motion.div
-          className="relative z-10 flex flex-col justify-center px-5 pb-4 pt-1 sm:px-8 sm:pb-5 max-lg:justify-center lg:w-[min(100%,54%)] lg:flex-none lg:self-center lg:justify-center lg:px-12 lg:pb-16 lg:pt-6 xl:px-16"
+          className="relative z-10 flex flex-col justify-center px-5 pb-1 pt-1 sm:px-8 sm:max-lg:pb-2 max-lg:justify-center lg:w-[min(100%,54%)] lg:flex-none lg:self-center lg:justify-center lg:px-12 lg:pb-16 lg:pt-6 xl:px-16"
           variants={reduceMotion ? undefined : { hidden: {}, visible: {} }}
           initial={reduceMotion ? false : "hidden"}
           animate={reduceMotion ? false : "visible"}
@@ -152,14 +152,14 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           </motion.h1>
 
           <motion.p
-            className={cn(landingUi.heroSubtitle, "max-w-lg max-lg:!mt-5 md:max-w-[32rem] lg:!mt-6")}
+            className={cn(landingUi.heroSubtitle, "max-w-lg max-lg:!mt-4 md:max-w-[32rem] lg:!mt-6")}
             variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
           >
             {t("landing.showcase.description")}
           </motion.p>
 
           <motion.div
-            className={cn(landingUi.heroCtaRow, "!mt-6 max-lg:pb-0 lg:!mt-8")}
+            className={cn(landingUi.heroCtaRow, "max-lg:!mt-5 max-lg:pb-0 !mt-6 lg:!mt-8")}
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
           >
             <Link to="/auth?mode=signup&role=business&from=landing" className={landingUi.heroCtaPrimary}>
@@ -177,7 +177,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         {/* Product showcase — primary focal point on mobile */}
         <motion.div
           className={cn(
-            "relative z-0 w-full max-lg:mt-8 max-lg:pb-2 sm:max-lg:mt-10 sm:max-lg:pb-3 lg:mt-0 lg:w-[46%]",
+            "relative z-0 w-full max-lg:mt-4 max-lg:pb-1 sm:max-lg:mt-5 sm:max-lg:pb-2 lg:mt-0 lg:w-[46%]",
             landingUi.heroShowcaseDesktopCol,
           )}
           variants={landingHeroTextReveal}
@@ -189,7 +189,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
 
           <motion.div
             className={cn(
-              "flex items-center justify-center max-lg:relative max-lg:px-5 max-lg:pt-10 max-lg:pb-2 sm:max-lg:px-7 sm:max-lg:pt-11 sm:max-lg:pb-3",
+              "flex items-center justify-center max-lg:relative max-lg:px-5 max-lg:pt-3 max-lg:pb-1 sm:max-lg:px-7 sm:max-lg:pt-4 sm:max-lg:pb-2",
               "lg:absolute lg:inset-0",
               landingUi.heroShowcaseDesktopStage,
             )}
@@ -201,7 +201,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               src={imageSrc}
               alt={imageAlt}
               className={cn(
-                "relative mx-auto flex w-full max-w-[min(100%,22rem)] justify-center sm:max-w-[min(100%,26rem)]",
+                "relative mx-auto flex w-full justify-center",
                 landingUi.heroShowcaseMobileShell,
                 landingUi.heroShowcaseDesktopShell,
               )}
@@ -253,7 +253,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         </motion.div>
 
         <motion.div
-          className="relative z-10 px-5 pb-10 pt-8 sm:px-8 sm:pb-12 sm:pt-9 lg:hidden"
+          className="relative z-10 px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-7 lg:hidden"
           variants={landingHeroTextReveal}
         >
           {metricsRow(
