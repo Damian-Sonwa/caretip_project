@@ -53,12 +53,12 @@ export function LandingHeroShowcase({ src, alt, className, compositionOverlay }:
         />
 
         <motion.div
-          className="relative z-[1]"
+          className="relative z-[1] h-full min-h-0 w-full max-lg:h-auto"
           animate={enableFloat ? landingHeroShowcaseFloat : undefined}
           transition={enableFloat ? landingHeroShowcaseFloatTransition : undefined}
         >
           <motion.div
-            className={landingUi.heroShowcaseCard}
+            className={cn(landingUi.heroShowcaseCard, "h-full w-full")}
             initial={reduceMotion ? false : { opacity: 0, scale: 0.994 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, ease: landingHeroEaseOut, delay: 0.08 }}

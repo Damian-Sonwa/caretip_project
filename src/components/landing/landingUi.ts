@@ -231,21 +231,28 @@ export const landingUi = {
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 max-md:mt-8 max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-end md:self-center`,
   /** Outer shell — shrink-wraps to showcase card / image size. */
   heroMediaShell:
-    "relative mx-auto w-fit min-w-0 max-w-full md:ml-auto md:mr-0",
+    "relative mx-auto w-fit min-w-0 max-w-full md:ml-auto md:mr-0 lg:h-full lg:w-full lg:max-w-none",
   heroMediaShellLegacy:
     "relative mx-auto w-full max-md:max-w-[min(100%,320px)] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[400px]",
   /** Premium product showcase card (Stripe / Linear / fintech hero). */
   heroShowcaseFrame:
-    "relative w-fit max-w-full",
+    "relative w-full max-w-full max-lg:mx-auto max-lg:w-full lg:h-full lg:min-h-0",
   /** Mobile hero — taller framing, softer shadow (desktop unchanged via child tokens). */
   heroShowcaseMobileShell:
     "max-lg:[&_.hero-showcase-card]:rounded-[24px] max-lg:[&_.hero-showcase-card]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",
   heroShowcaseCard:
-    "hero-showcase-card relative z-[1] inline-block w-fit max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-b from-white via-white to-neutral-50 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:from-neutral-900 dark:via-neutral-900/95 dark:to-neutral-950 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px]",
+    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-neutral-950 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[10/11] max-lg:max-w-[min(100%,22rem)] sm:max-lg:max-w-[min(100%,26rem)] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,40rem)]",
   heroShowcaseGlow:
     "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 dark:opacity-50",
   heroShowcaseImg:
-    "block h-auto w-auto max-w-[min(100%,calc(100vw-2.5rem))] max-h-none select-none max-lg:max-w-[min(100%,22rem)] sm:max-w-[min(100%,26rem)] md:max-w-[min(100%,36rem)] lg:max-w-[min(100%,40rem)]",
+    "block h-full w-full min-h-0 select-none object-cover object-[center_38%] max-lg:object-[center_36%]",
+  /** Desktop showcase — full-height anchor matching the copy column (headline → metrics). */
+  heroShowcaseDesktopCol:
+    "lg:flex lg:min-h-[760px] lg:flex-1 lg:self-stretch xl:min-h-[820px]",
+  heroShowcaseDesktopStage:
+    "lg:flex lg:h-full lg:w-full lg:items-center lg:justify-center lg:px-6 lg:py-5 xl:px-8 xl:py-6",
+  heroShowcaseDesktopShell:
+    "lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,40rem)] lg:flex-1 lg:flex-col lg:justify-center",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */
