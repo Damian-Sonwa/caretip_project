@@ -106,18 +106,18 @@ export function DashboardHero({
   const titleRow = (
     <CardTitle
       className={cn(
-        "text-balance break-words text-foreground",
+        "break-words text-foreground",
         stackHeroOnMobile
           ? mobileAlign === "center"
             ? cn(
-                "font-sans text-app-title font-bold text-pretty max-lg:leading-[1]",
+                "text-balance font-sans text-app-title font-bold text-pretty max-lg:leading-[1.05]",
                 "mx-auto max-w-[24ch] text-center sm:max-w-[28ch] md:max-w-[32ch]",
               )
             : cn(
-                "font-sans text-app-title font-bold text-pretty max-lg:leading-[1]",
+                "w-full font-sans text-app-title font-bold max-lg:transform-none max-lg:leading-[1.05] max-lg:text-left",
                 "max-w-[22ch] text-left sm:max-w-[28ch]",
               )
-          : "font-sans text-app-title font-bold text-pretty lg:text-section-title",
+          : "text-balance font-sans text-app-title font-bold text-pretty lg:text-section-title",
         titleClassName,
       )}
     >

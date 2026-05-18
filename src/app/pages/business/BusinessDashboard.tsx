@@ -436,7 +436,7 @@ export function BusinessDashboard() {
           className="business-dashboard-hero mb-8 lg:mb-6"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
           badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
-          titleClassName="max-lg:!leading-[1] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
+          titleClassName="max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
           descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:text-left lg:max-w-md"
           textColumnClassName="lg:py-2 xl:pr-6"
           badge={
@@ -450,10 +450,11 @@ export function BusinessDashboard() {
             </>
           }
           title={
-            <span className="flex flex-col gap-1 max-lg:gap-1.5">
-              <span>{t("business.hero.headlineLine1")}</span>
+            <>
+              {t("business.hero.headlineLine1")}
+              <br />
               <span className="text-foreground/85">{t("business.hero.headlineLine2")}</span>
-            </span>
+            </>
           }
           description={t("business.hero.sub")}
           image={

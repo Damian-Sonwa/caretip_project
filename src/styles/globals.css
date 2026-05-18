@@ -157,7 +157,7 @@ textarea::placeholder {
     transform: translate3d(0, 0, 0);
   }
   50% {
-    transform: translate3d(0, -10px, 0);
+    transform: translate3d(3px, -8px, 0);
   }
   100% {
     transform: translate3d(0, 0, 0);
@@ -166,7 +166,7 @@ textarea::placeholder {
 
 .animate-float {
   will-change: transform;
-  animation: float 4s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
 }
 
 @keyframes float-shadow {
@@ -189,7 +189,7 @@ textarea::placeholder {
 
 .animate-float-shadow {
   will-change: transform, opacity, filter;
-  animation: float-shadow 4s ease-in-out infinite;
+  animation: float-shadow 8s ease-in-out infinite;
 }
 
 .caretip-qr-glow {
@@ -214,6 +214,10 @@ textarea::placeholder {
     animation: none;
   }
   .caretip-qr-glow {
+    animation: none;
+  }
+  .animate-float,
+  .animate-float-shadow {
     animation: none;
   }
 }

@@ -1,7 +1,7 @@
-import * as React from "react";
+﻿import * as React from "react";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,12 @@ import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
 import { landingUi } from "@/components/landing/landingUi";
+import {
+  landingHeroCopyStagger,
+  landingHeroGlowDrift,
+  landingHeroGlowDriftTransition,
+  landingHeroTextReveal,
+} from "@/components/landing/landingHeroMotion";
 import { landingType } from "@/components/landing/landingTypography";
 import { useTranslation } from "react-i18next";
 
@@ -79,7 +85,7 @@ export function FeatureShowcase({
   eyebrow,
   title,
   description,
-  stats = ["1 reference", "30s setup", "Share‑ready"],
+  stats = ["1 reference", "30s setup", "Shareâ€‘ready"],
   steps = [
     {
       id: "step-1",
@@ -109,6 +115,7 @@ export function FeatureShowcase({
   heroBorderBeam = false,
 }: FeatureShowcaseProps) {
   const { i18n } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const isDe = i18n.language?.toLowerCase().startsWith("de");
 
   const carouselImages = React.useMemo(
@@ -143,13 +150,21 @@ export function FeatureShowcase({
     >
       {cinematic && !splitPattern ? (
         <>
-          <div
+          <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 min-h-[min(88vh,900px)] bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(235,153,44,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%),radial-gradient(ellipse_100%_58%_at_100%_54%,rgba(235,153,44,0.036),transparent_58%)] dark:opacity-40"
+            animate={reduceMotion ? undefined : landingHeroGlowDrift}
+            transition={reduceMotion ? undefined : { ...landingHeroGlowDriftTransition, duration: 16 }}
+            style={{ willChange: "transform, opacity" }}
           />
-          <div
+          <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 inset-y-0 opacity-[0.28] dark:opacity-[0.16] bg-[linear-gradient(180deg,transparent_0%,rgba(255,255,255,0.26)_38%,rgba(255,255,255,0.18)_50%,rgba(255,255,255,0.26)_62%,transparent_100%)]"
+            animate={reduceMotion ? undefined : { opacity: [0.22, 0.3, 0.24] }}
+            transition={
+              reduceMotion ? undefined : { duration: 10, repeat: Infinity, ease: "easeInOut" }
+            }
+            style={{ willChange: "opacity" }}
           />
         </>
       ) : null}
@@ -289,16 +304,21 @@ export function FeatureShowcase({
               : "mx-auto grid w-full max-w-7xl grid-cols-1 gap-10 px-6 pt-16 pb-24 md:grid-cols-12 md:gap-10 md:pt-20 md:pb-32 lg:gap-14",
           )}
         >
-        <div
+        <motion.div
           className={cn(
             "relative",
             !cinematic && "md:col-span-5",
             cinematic && landingUi.heroCopy,
           )}
+          variants={cinematic && !reduceMotion ? landingHeroCopyStagger : undefined}
+          initial={cinematic && !reduceMotion ? "hidden" : false}
+          animate={cinematic && !reduceMotion ? "visible" : undefined}
         >
             {eyebrow?.trim() ? (
               cinematic ? (
-                <p className={landingUi.heroTagline}>{eyebrow}</p>
+                <motion.p className={landingUi.heroTagline} variants={landingHeroTextReveal}>
+                  {eyebrow}
+                </motion.p>
               ) : (
                 <Badge variant="outline" className="mb-6 border-primary/40 text-foreground">
                   {eyebrow}
@@ -314,30 +334,26 @@ export function FeatureShowcase({
                     : landingUi.heroHeadlineEn
                   : landingType.heroHeadline,
               )}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              variants={cinematic && !reduceMotion ? landingHeroTextReveal : undefined}
+              initial={!cinematic && !reduceMotion ? { opacity: 0, y: 20 } : false}
+              animate={!cinematic && !reduceMotion ? { opacity: 1, y: 0 } : undefined}
+              transition={!cinematic ? { duration: 0.8, ease: "easeOut" } : undefined}
             >
               {title}
             </motion.h1>
 
             {description ? (
-            <p
-              className={cn(
-                cinematic ? landingUi.heroSubtitle : cn(landingType.bodyLeadMuted, "mt-5 max-w-xl sm:mt-6"),
-              )}
-            >
-                {description}
-              </p>
+              cinematic ? (
+                <motion.p className={landingUi.heroSubtitle} variants={landingHeroTextReveal}>
+                  {description}
+                </motion.p>
+              ) : (
+                <p className={cn(landingType.bodyLeadMuted, "mt-5 max-w-xl sm:mt-6")}>{description}</p>
+              )
             ) : null}
 
             {cinematic ? (
-              <motion.div
-                className={landingUi.heroActionCluster}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: "easeOut", delay: 0.12 }}
-              >
+              <motion.div className={landingUi.heroActionCluster} variants={landingHeroTextReveal}>
                 {stats.length > 0 ? (
                   <LandingBenefitChecklist
                     items={stats}
@@ -403,7 +419,7 @@ export function FeatureShowcase({
             {!cinematic && stats.length > 0 ? (
               <LandingBenefitChecklist items={stats} tone="default" className="mt-5 sm:mt-7" />
             ) : null}
-          </div>
+          </motion.div>
 
         <div
           className={cn(

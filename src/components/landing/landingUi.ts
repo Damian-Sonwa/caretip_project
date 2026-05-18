@@ -11,7 +11,7 @@ import { landingType } from "@/components/landing/landingTypography";
 
 /** Hero headline — editorial scale, restrained weight (Stripe/Linear feel). */
 const heroHeadlineTone =
-  "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
+  "font-sans font-semibold text-neutral-950 dark:text-neutral-50 max-md:text-left md:text-balance";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
   "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.98] max-md:tracking-[-0.04em]";
@@ -218,9 +218,9 @@ export const landingUi = {
   heroCtaRow:
     "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
   heroCtaPrimary:
-    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-200 hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-3.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8",
+    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:translate-y-0 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-3.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8 motion-reduce:transform-none motion-reduce:hover:transform-none",
   heroCtaSecondary:
-    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-200 hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6",
+    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:translate-y-0 active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6 motion-reduce:transform-none motion-reduce:hover:transform-none",
   heroMediaCol:
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,
   heroMediaColShowcase:
