@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @source '../**/*.{js,ts,jsx,tsx}';
+/* Ignore downloaded HTML templates at repo root (e.g. vaultedge) so dev CSS never pins missing assets */
+@source not '../../vaultedge-1.0.0';
+@source not '../../vaultedge-1.0.0/**';
 
 @import 'tw-animate-css';
 

@@ -2,10 +2,15 @@ import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { BarChart3, Mail, QrCode, UserPlus, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { useInViewActive, useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
-const SLIDE_MS = 2200;
-const FADE_MS = 0.4;
+const SLIDE_MS_MOBILE = 2800;
+const SLIDE_MS_DESKTOP = 2200;
+const FADE_MS_MOBILE = 0.32;
+const FADE_MS_DESKTOP = 0.4;
+const SLIDE_X_MOBILE = 8;
+const SLIDE_X_DESKTOP = 12;
 
 export const LIVE_DEMO_SLIDE_IDS = ["signup", "team", "qr", "dashboard"] as const;
 export type LiveDemoSlideId = (typeof LIVE_DEMO_SLIDE_IDS)[number];
@@ -23,6 +28,8 @@ export function LiveInMinutesLaptopDemo({
 }: LiveInMinutesLaptopDemoProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const isDesktop = useLargeScreen(768);
+  const { ref: inViewRef, active: inView } = useInViewActive<HTMLDivElement>();
   const [internalIndex, setInternalIndex] = React.useState(0);
 
   const slides = React.useMemo(
@@ -38,6 +45,12 @@ export function LiveInMinutesLaptopDemo({
 
   const isControlled = controlledIndex !== undefined;
   const index = isControlled ? Math.min(Math.max(0, controlledIndex), slides.length - 1) : internalIndex;
+  const indexRef = React.useRef(index);
+  indexRef.current = index;
+
+  const slideMs = isDesktop ? SLIDE_MS_DESKTOP : SLIDE_MS_MOBILE;
+  const fadeMs = isDesktop ? FADE_MS_DESKTOP : FADE_MS_MOBILE;
+  const slideX = isDesktop ? SLIDE_X_DESKTOP : SLIDE_X_MOBILE;
 
   const setIndex = React.useCallback(
     (next: number) => {
@@ -50,21 +63,24 @@ export function LiveInMinutesLaptopDemo({
 
   React.useEffect(() => {
     if (reduceMotion || videoSrc) return;
+    // Desktop: auto-advance whenever mounted; mobile: only while in view (perf).
+    if (!isDesktop && !inView) return;
+
     const timer = window.setInterval(() => {
-      setIndex(index + 1);
-    }, SLIDE_MS);
+      setIndex(indexRef.current + 1);
+    }, slideMs);
     return () => window.clearInterval(timer);
-  }, [reduceMotion, videoSrc, index, setIndex]);
+  }, [reduceMotion, videoSrc, inView, isDesktop, slideMs, setIndex]);
 
   const active = slides[reduceMotion ? 0 : index];
 
   return (
-    <div className="relative mx-auto w-full max-w-none sm:max-w-2xl">
+    <div ref={inViewRef} className="relative mx-auto w-full max-w-none sm:max-w-2xl">
       <p className="mb-2.5 min-h-[1.25rem] px-1 text-center text-[13px] font-semibold uppercase leading-snug tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mb-4 sm:text-xs sm:tracking-[0.14em]">
         <span className="text-primary">{active.label}</span>
       </p>
 
-      <div className="relative w-full rounded-[2rem] border border-neutral-200/95 bg-gradient-to-b from-neutral-50 to-neutral-100/90 p-2.5 pt-3.5 shadow-[0_2px_4px_rgba(15,15,15,0.05),0_24px_56px_rgba(15,15,15,0.12)] dark:border-neutral-600 dark:from-neutral-800 dark:to-neutral-900 sm:rounded-[2.5rem] sm:p-3 sm:pt-4">
+      <div className="relative w-full rounded-[2rem] border border-neutral-200/95 bg-gradient-to-b from-neutral-50 to-neutral-100/90 p-2.5 pt-3.5 shadow-[0_2px_4px_rgba(15,15,15,0.05),0_20px_48px_rgba(15,15,15,0.1)] dark:border-neutral-600 dark:from-neutral-800 dark:to-neutral-900 sm:rounded-[2.5rem] sm:p-3 sm:pt-4">
         <div
           aria-hidden
           className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-neutral-300 dark:bg-neutral-600"
@@ -88,10 +104,10 @@ export function LiveInMinutesLaptopDemo({
                     key={active.id}
                     role="img"
                     aria-label={t("landing.liveDemo.demoAria", { label: active.label })}
-                    initial={{ opacity: 0, x: 12 }}
+                    initial={{ opacity: 0, x: reduceMotion ? 0 : slideX }}
                     animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -12 }}
-                    transition={{ duration: FADE_MS, ease: [0.22, 1, 0.36, 1] }}
+                    exit={{ opacity: 0, x: reduceMotion ? 0 : -slideX }}
+                    transition={{ duration: fadeMs, ease: [0.22, 1, 0.36, 1] }}
                     className="absolute inset-0 flex min-h-0 flex-col overflow-hidden p-2 max-md:p-2.5 sm:p-[5.5%]"
                   >
                     {active.id === "signup" && <DemoSignup />}

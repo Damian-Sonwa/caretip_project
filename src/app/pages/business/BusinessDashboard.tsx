@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import type { ImgHTMLAttributes } from "react";
@@ -619,7 +620,7 @@ export function BusinessDashboard() {
             </div>
           </section>
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+          <motion.div {...dashboardBlockMotion}>
             <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
               <BusinessStatCard
                 featured
@@ -671,8 +672,7 @@ export function BusinessDashboard() {
           </motion.div>
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            {...dashboardBlockMotion}
             transition={{ delay: 0.35 }}
           >
             <Card className={cn(businessUi.cardStatic, "w-full")}>
@@ -774,8 +774,7 @@ export function BusinessDashboard() {
           <div className="w-full grid gap-6 lg:grid-cols-2">
             {/* Tip Distribution Chart */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              {...dashboardBlockMotion}
               transition={{ delay: 0.4 }}
             >
               <Card className={cn(businessUi.cardStatic, "w-full")}>
@@ -824,8 +823,7 @@ export function BusinessDashboard() {
 
             {/* Employee Performance */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              {...dashboardBlockMotion}
               transition={{ delay: 0.5 }}
             >
               <Card className={cn(businessUi.cardStatic, "w-full")}>
@@ -906,8 +904,7 @@ export function BusinessDashboard() {
           <div className="w-full grid gap-6 lg:grid-cols-3">
             {/* Top Performers */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              {...dashboardBlockMotion}
               transition={{ delay: 0.6 }}
               className="lg:col-span-2"
             >
@@ -997,8 +994,7 @@ export function BusinessDashboard() {
 
             {/* Quick Actions */}
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              {...dashboardBlockMotion}
               transition={{ delay: 0.7 }}
               className="space-y-4"
             >

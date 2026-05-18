@@ -217,7 +217,8 @@ textarea::placeholder {
     animation: none;
   }
   .animate-float,
-  .animate-float-shadow {
+  .animate-float-shadow,
+  .animate-marquee {
     animation: none;
   }
 }
@@ -229,6 +230,8 @@ textarea::placeholder {
   /* #EB992C — primary fills, focus ring, highlights */
   --primary: 33 82% 55%;
   --primary-hover: 33 82% 46%;
+  /* Headline emphasis — #E79B2F; brand orange, slightly softer than solid CTA fills */
+  --headline-accent: 33 76% 54%;
   /* White text on orange (buttons, tags on primary) */
   --primary-foreground: 0 0% 100%;
 
@@ -295,6 +298,7 @@ textarea::placeholder {
   --primary: 33 82% 55%;
   --primary-hover: 33 82% 48%;
   --primary-foreground: 0 0% 100%;
+  --headline-accent: 33 74% 62%;
 
   --secondary: 0 0% 15%;
   --secondary-foreground: 0 0% 98%;

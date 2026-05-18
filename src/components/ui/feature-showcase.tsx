@@ -1,4 +1,4 @@
-﻿import * as React from "react";
+import * as React from "react";
 import { ArrowRight, type LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
@@ -19,12 +19,7 @@ import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
 import { landingUi } from "@/components/landing/landingUi";
-import {
-  landingHeroCopyStagger,
-  landingHeroGlowDrift,
-  landingHeroGlowDriftTransition,
-  landingHeroTextReveal,
-} from "@/components/landing/landingHeroMotion";
+import { landingHeroCopyStagger, landingHeroTextReveal } from "@/components/landing/landingHeroMotion";
 import { landingType } from "@/components/landing/landingTypography";
 import { useTranslation } from "react-i18next";
 
@@ -153,9 +148,9 @@ export function FeatureShowcase({
           <motion.div
             aria-hidden
             className="pointer-events-none absolute inset-x-0 top-0 min-h-[min(88vh,900px)] bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(235,153,44,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%),radial-gradient(ellipse_100%_58%_at_100%_54%,rgba(235,153,44,0.036),transparent_58%)] dark:opacity-40"
-            animate={reduceMotion ? undefined : landingHeroGlowDrift}
-            transition={reduceMotion ? undefined : { ...landingHeroGlowDriftTransition, duration: 16 }}
-            style={{ willChange: "transform, opacity" }}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
           />
           <motion.div
             aria-hidden

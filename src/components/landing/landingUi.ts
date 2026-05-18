@@ -9,16 +9,16 @@ import { landingType } from "@/components/landing/landingTypography";
  * - clamp()-based type scale in `caretip-typography.css`
  */
 
-/** Hero headline — editorial scale, restrained weight (Stripe/Linear feel). */
+/** Hero headline — editorial scale, semibold, relaxed leading (Stripe / Linear / Vercel). */
 const heroHeadlineTone =
-  "font-sans font-semibold text-neutral-950 dark:text-neutral-50 max-md:text-left md:text-balance";
+  "font-sans font-semibold text-neutral-950 dark:text-neutral-50 max-md:text-left text-pretty";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.98] max-md:tracking-[-0.04em]";
+  "max-md:text-[2.125rem] max-md:leading-[1.14] max-md:tracking-[-0.028em]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2.375rem] max-md:font-semibold max-md:leading-[0.98] max-md:tracking-[-0.04em]";
+  "max-md:text-[2rem] max-md:leading-[1.14] max-md:tracking-[-0.026em]";
 const heroHeadlineDesktop =
-  "md:text-[3.25rem] md:font-semibold md:leading-[0.96] md:tracking-[-0.025em] lg:text-[3.75rem] lg:leading-[0.98] lg:tracking-[-0.025em]";
+  "md:text-[2.875rem] md:leading-[1.12] md:tracking-[-0.024em] lg:text-[3.25rem] lg:leading-[1.14] lg:tracking-[-0.022em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -35,9 +35,9 @@ function cnHeroSubtitle(layout: string) {
 
 /** Clears fixed nav + ~1.75rem gap (mobile includes safe-area). */
 const heroSectionPadTop =
-  "pt-[calc(5.25rem+env(safe-area-inset-top,0px)+1.75rem)] md:pt-[calc(6rem+1.75rem)] lg:pt-[calc(6.75rem+1.75rem)]";
+  "pt-[calc(5.25rem+env(safe-area-inset-top,0px)+1.75rem)] pb-2 max-lg:pb-4 md:pt-[calc(6rem+2rem)] lg:pt-[calc(6.75rem+2.25rem)] lg:pb-0";
 /** Mobile-first stack rhythm between headline, lead, actions, and mockup. */
-const heroStackGapMobile = "mt-7";
+const heroStackGapMobile = "mt-6 md:mt-7";
 const heroStackGapMediaMobile = "max-md:mt-10";
 /** Section H2 — bold, balanced tracking (below hero scale). */
 function cnSectionHeadline(layout: string) {
@@ -203,11 +203,15 @@ export const landingUi = {
     "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0 md:pr-1 lg:pr-2 xl:pr-3",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "w-full max-w-xl max-md:max-w-[min(300px,24ch)] antialiased text-left md:max-w-none",
+    "w-full max-w-[26ch] antialiased text-left sm:max-w-[28ch] md:max-w-[24ch] lg:max-w-[26ch]",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
-    "w-full max-w-xl max-md:max-w-[min(288px,23ch)] antialiased text-left md:max-w-none",
+    "w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[28ch]",
   ),
+  /** Brand orange emphasis — `globals.css` --headline-accent (#E79B2F); inherits headline weight. */
+  heroHeadlineEmphasis: "font-inherit text-headline-accent",
+  heroHeadlineLine:
+    "block text-neutral-950 dark:text-neutral-50 [&:not(:first-child)]:mt-2 md:[&:not(:first-child)]:mt-2.5",
   heroSubtitle: cnHeroSubtitle(
     `w-full max-w-2xl text-left ${heroStackGapMobile} max-md:max-w-[min(300px,32ch)] max-md:text-[0.9375rem] max-md:leading-[1.65] max-lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
@@ -216,11 +220,11 @@ export const landingUi = {
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:gap-3 md:mt-0",
+    "relative z-10 mt-6 flex w-full max-w-full flex-col items-stretch justify-start gap-3 max-md:gap-2.5 min-[420px]:flex-row min-[420px]:items-center min-[420px]:justify-start min-[420px]:gap-3 md:mt-0 [&_a]:no-underline",
   heroCtaPrimary:
-    "h-9 w-full shrink-0 rounded-lg border-0 bg-[#EB992C] px-5 font-sans text-button-text font-bold tracking-tight text-white shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:translate-y-0 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:h-auto max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-3.5 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8 motion-reduce:transform-none motion-reduce:hover:transform-none",
+    "inline-flex h-9 w-full shrink-0 items-center justify-center whitespace-nowrap rounded-lg border-0 bg-[#EB992C] px-5 text-center font-sans text-[0.9375rem] font-bold !leading-none tracking-tight text-white no-underline shadow-[0_8px_22px_-10px_rgba(235,153,44,0.38)] transition-[transform,box-shadow,background-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:bg-[#d88926] hover:shadow-[0_16px_44px_-8px_rgba(235,153,44,0.52)] active:translate-y-0 active:scale-[0.99] focus-visible:ring-2 focus-visible:ring-[#EB992C]/45 focus-visible:ring-offset-2 max-md:min-h-[2.5rem] max-md:rounded-xl max-md:px-5 max-md:py-0 min-[420px]:w-auto sm:h-12 sm:min-w-[12rem] sm:rounded-xl sm:px-8 motion-reduce:transform-none motion-reduce:hover:transform-none",
   heroCtaSecondary:
-    "h-9 w-full shrink-0 rounded-lg border border-neutral-300/90 bg-white/90 px-4 font-sans text-button-text font-semibold text-neutral-700 shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:translate-y-0 active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:h-auto max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-3 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6 motion-reduce:transform-none motion-reduce:hover:transform-none",
+    "inline-flex h-9 w-full shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg border border-neutral-300/90 bg-white/90 px-4 text-center font-sans text-[0.9375rem] font-semibold !leading-none text-neutral-700 no-underline shadow-sm backdrop-blur-sm transition-[transform,box-shadow,background-color,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:scale-[1.01] hover:border-neutral-400 hover:bg-white hover:text-neutral-900 hover:shadow-md active:translate-y-0 active:scale-[0.99] dark:border-neutral-600/90 dark:bg-neutral-900/55 dark:text-neutral-200 dark:hover:border-neutral-500 dark:hover:bg-neutral-800/70 max-md:min-h-[2.375rem] max-md:rounded-xl max-md:px-5 max-md:py-0 min-[420px]:w-auto sm:h-12 sm:min-w-[10.5rem] sm:rounded-xl sm:px-6 motion-reduce:transform-none motion-reduce:hover:transform-none",
   heroMediaCol:
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,
   heroMediaColShowcase:
@@ -233,13 +237,15 @@ export const landingUi = {
   /** Premium product showcase card (Stripe / Linear / fintech hero). */
   heroShowcaseFrame:
     "relative w-fit max-w-full",
+  /** Mobile hero — taller framing, softer shadow (desktop unchanged via child tokens). */
+  heroShowcaseMobileShell:
+    "max-lg:[&_.hero-showcase-card]:rounded-[24px] max-lg:[&_.hero-showcase-card]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",
+  heroShowcaseCard:
+    "hero-showcase-card relative z-[1] inline-block w-fit max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-b from-white via-white to-neutral-50 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:from-neutral-900 dark:via-neutral-900/95 dark:to-neutral-950 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px]",
   heroShowcaseGlow:
     "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 dark:opacity-50",
-  /** Card hugs image — no extra min-height or padding. */
-  heroShowcaseCard:
-    "relative z-[1] inline-block w-fit max-w-full overflow-hidden rounded-[28px] border border-white/60 bg-gradient-to-b from-white via-white to-neutral-50 p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:from-neutral-900 dark:via-neutral-900/95 dark:to-neutral-950 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px]",
   heroShowcaseImg:
-    "block h-auto w-auto max-w-[min(100%,calc(100vw-2rem))] max-h-none select-none sm:max-w-[min(100%,28rem)] md:max-w-[min(100%,36rem)] lg:max-w-[min(100%,40rem)]",
+    "block h-auto w-auto max-w-[min(100%,calc(100vw-2.5rem))] max-h-none select-none max-lg:max-w-[min(100%,22rem)] sm:max-w-[min(100%,26rem)] md:max-w-[min(100%,36rem)] lg:max-w-[min(100%,40rem)]",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */

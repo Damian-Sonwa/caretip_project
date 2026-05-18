@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { useInViewActive } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export type MarqueeProps = {
@@ -14,7 +15,7 @@ export type MarqueeProps = {
 
 /**
  * Lightweight marquee (Tailwind 4 + keyframes in `src/styles/tailwind.css`).
- * Duplicates children once for a seamless loop.
+ * Duplicates children once for a seamless loop. Pauses when off-screen.
  */
 export function Marquee({
   className,
@@ -23,6 +24,7 @@ export function Marquee({
   pauseOnHover = false,
   children,
 }: MarqueeProps) {
+  const { ref, active } = useInViewActive<HTMLDivElement>();
   const inner = (
     <div className="flex min-w-full shrink-0 items-stretch" style={{ gap: `${gapPx}px` }}>
       {children}
@@ -31,11 +33,12 @@ export function Marquee({
 
   return (
     <div
+      ref={ref}
       className={cn("group flex w-full overflow-hidden [--gap:24px] [--duration:28s]", className)}
       style={
         {
-          ["--gap" as any]: `${gapPx}px`,
-          ["--duration" as any]: `${durationSeconds}s`,
+          ["--gap" as string]: `${gapPx}px`,
+          ["--duration" as string]: `${durationSeconds}s`,
         } as React.CSSProperties
       }
     >
@@ -43,6 +46,7 @@ export function Marquee({
         className={cn(
           "flex min-w-full flex-none animate-marquee items-stretch",
           pauseOnHover && "group-hover:[animation-play-state:paused]",
+          !active && "[animation-play-state:paused]",
         )}
         style={{ gap: `${gapPx}px` }}
       >
@@ -52,4 +56,3 @@ export function Marquee({
     </div>
   );
 }
-

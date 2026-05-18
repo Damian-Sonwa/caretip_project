@@ -37,14 +37,14 @@ export function LandingEarningsPulse({ className }: LandingEarningsPulseProps) {
       initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.45, delay: 0.2 }}
+      transition={{ duration: 0.4, delay: 0.15 }}
       role="status"
       aria-label={t("landing.earningsPulse.aria")}
       className={cn(
         "w-fit max-w-[min(calc(100%-1.25rem),11rem)] shrink-0",
         "rounded-xl border border-white/85 bg-white/90 px-2.5 py-2",
         "shadow-[0_2px_8px_rgba(15,15,15,0.08),0_8px_20px_rgba(15,15,15,0.1)]",
-        "ring-1 ring-neutral-900/[0.05] backdrop-blur-[10px]",
+        "ring-1 ring-neutral-900/[0.05] max-md:bg-white/96 md:backdrop-blur-sm",
         "dark:border-neutral-600/75 dark:bg-neutral-900/88 dark:ring-white/[0.08]",
         "dark:shadow-[0_6px_24px_rgba(0,0,0,0.4)]",
         "sm:max-w-[15rem] sm:rounded-2xl sm:px-3.5 sm:py-3",

@@ -906,7 +906,7 @@
   },
   "landing": {
     "showcase": {
-      "tagline": "Earn. Serve. Smile.",
+      "tagline": "Verdienen. Servieren. Lächeln.",
       "title": "In Sekunden tippen. Hervorragenden Service sofort belohnen.",
       "description": "CareTip macht es Kunden leicht zu tippen und Teams, die Leistung zu verfolgen, alles mit einem einfachen QR-Scan.",
       "statLive": "Sofort per QR tippen",
@@ -921,7 +921,23 @@
       "primaryCta": "Loslegen",
       "secondaryCta": "Mitarbeiterzugang",
       "tabQrLabel": "QR Scan",
-      "tabQrAlt": "Telefon mit CareTip QR Code und Trinkgeldbildschirm"
+      "tabQrAlt": "Telefon mit CareTip QR Code und Trinkgeldbildschirm",
+      "heroTitlePrefix": "In Sekunden tippen.",
+      "heroTitleEmphasis": "",
+      "heroTitleSuffix": "",
+      "heroTitleLine2Prefix": "Hervorragenden ",
+      "heroTitleLine2Emphasis": "Service",
+      "heroTitleLine2Suffix": " sofort belohnen.",
+      "heroTitleLine2": "",
+      "heroTitleLine3": "",
+      "heroMetric1Value": "Sofort",
+      "heroMetric1Label": "QR-Tipping",
+      "heroMetric2Value": "30s",
+      "heroMetric2Label": "Setup-Zeit",
+      "heroMetric3Value": "Sicher",
+      "heroMetric3Label": "Schnelle Auszahlungen",
+      "floatCardValue": "+18 %",
+      "floatCardLabel": "Team-Trinkgelder heute"
     },
     "simpleSetup": {
       "pill": "In Minuten live",

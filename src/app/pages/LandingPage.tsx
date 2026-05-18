@@ -1,10 +1,8 @@
-import { useMemo } from "react";
-import { Smartphone } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import heroVisualDe from "../../../images/cca.png";
 import heroVisualEn from "../../../images/en-hero.png";
 import { Navigation } from "../components/Navigation";
-import { FeatureShowcase, type TabMedia } from "@/components/ui/feature-showcase";
+import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
 import { HospitalityTeamsUnifiedSection } from "../components/landing/HospitalityTeamsUnifiedSection";
 import { EmployeeLandingSection } from "../components/landing/EmployeeLandingSection";
@@ -19,29 +17,8 @@ import { Footer } from "../components/Footer";
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
-
-  const showcaseTabs: TabMedia[] = useMemo(() => {
-    const isDe = i18n.language?.toLowerCase().startsWith("de");
-    const heroVisual = isDe ? heroVisualDe : heroVisualEn;
-
-    return [
-      {
-        value: "contactless",
-        label: t("landing.showcase.tabQrLabel"),
-        Icon: Smartphone,
-        src: heroVisual,
-        alt: t("landing.showcase.tabQrAlt"),
-        imageFit: "contain",
-        imageObjectPosition: "center",
-        heroFrameAspect: "showcase",
-      },
-    ];
-  }, [t, i18n.language]);
-
-  const showcaseStats = useMemo(
-    () => [t("landing.showcase.statLive"), t("landing.showcase.statPos"), t("landing.showcase.statSecure")],
-    [t],
-  );
+  const isDe = i18n.language?.toLowerCase().startsWith("de");
+  const heroVisual = isDe ? heroVisualDe : heroVisualEn;
 
   return (
     <div className="caretip-landing relative min-h-screen w-full min-w-0 font-sans bg-[linear-gradient(180deg,#fafaf8_0%,#ffffff_38%,#f7f6f4_100%)]">
@@ -54,21 +31,11 @@ export function LandingPage() {
           <Navigation />
         </div>
         <main className="w-full min-w-0 overflow-x-hidden">
-          <FeatureShowcase
+          <CareTipLandingHero
             id="about-section"
-            className=""
-            title={t("landing.showcase.title")}
-            description={t("landing.showcase.description")}
-            stats={showcaseStats}
-            tabs={showcaseTabs}
-            defaultTab="contactless"
-            primaryCtaLabel={t("landing.showcase.primaryCta")}
-            primaryCtaTo="/auth?mode=signup&role=business&from=landing"
-            secondaryCtaLabel={t("landing.showcase.secondaryCta")}
-            secondaryCtaTo="/join"
-            variant="cinematic"
-            useAnimatedHero={false}
-            heroBorderBeam={false}
+            imageSrc={heroVisual}
+            imageAlt={t("landing.showcase.tabQrAlt")}
+            isDe={isDe}
           />
           <HospitalityTeamsUnifiedSection />
           <SimpleSetupSection />

@@ -145,7 +145,7 @@ export function SimpleSetupSection() {
             />
 
             <div className="pointer-events-none absolute -right-1 top-4 z-10 hidden sm:block lg:right-2">
-              <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
+              <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] max-md:bg-white max-md:backdrop-blur-none md:backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900/95">
                 <p className={cn(landingType.meta, "text-neutral-500 dark:text-neutral-400")}>
                   {t("landing.simpleSetup.floatSetupLabel")}
                 </p>
@@ -155,7 +155,7 @@ export function SimpleSetupSection() {
               </div>
             </div>
             <div className="pointer-events-none absolute bottom-16 left-0 z-10 hidden sm:block lg:bottom-20">
-              <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] backdrop-blur-md dark:border-neutral-700 dark:bg-neutral-900/95">
+              <div className="rounded-2xl border border-neutral-200/95 bg-white/95 px-3.5 py-2.5 shadow-[0_8px_24px_rgba(15,15,15,0.08)] ring-1 ring-neutral-900/[0.04] max-md:bg-white max-md:backdrop-blur-none md:backdrop-blur-sm dark:border-neutral-700 dark:bg-neutral-900/95">
                 <p className={cn(landingType.meta, "text-neutral-500 dark:text-neutral-400")}>
                   {t("landing.simpleSetup.floatTimeLabel")}
                 </p>

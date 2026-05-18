@@ -39,8 +39,8 @@ function GlassStatCard({
     <motion.div
       initial={{ opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.45, delay, ease: [0.22, 1, 0.36, 1] }}
-      className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl border border-white/20 bg-white/[0.07] px-4 py-3 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.35),0_4px_12px_-4px_rgba(0,0,0,0.15)] backdrop-blur-xl backdrop-saturate-150 sm:px-5 sm:py-4"
+      transition={{ duration: 0.35, delay: delay * 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl border border-white/20 bg-white/[0.09] px-4 py-3 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.35),0_4px_12px_-4px_rgba(0,0,0,0.15)] backdrop-blur-md sm:px-5 sm:py-4"
     >
       <div className="flex items-center gap-2 text-white/90">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10">
@@ -124,20 +124,12 @@ function MapGraphic3D() {
           preserveAspectRatio="none"
         >
           <defs>
-            <filter id="glow-line" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="0.4" result="b" />
-              <feMerge>
-                <feMergeNode in="b" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
           </defs>
           <path
             d="M 22 42 Q 50 28 78 38"
             fill="none"
             stroke="hsl(33 82% 55% / 0.35)"
             strokeWidth="0.15"
-            filter="url(#glow-line)"
           />
           <path
             d="M 35 68 Q 48 52 62 62"
@@ -155,34 +147,17 @@ function MapGraphic3D() {
       </div>
 
       <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        <defs>
-          <filter id="node-glow" x="-100%" y="-100%" width="300%" height="300%">
-            <feGaussianBlur stdDeviation="1.2" result="blur" />
-            <feMerge>
-              <feMergeNode in="blur" />
-              <feMergeNode in="SourceGraphic" />
-            </feMerge>
-          </filter>
-        </defs>
         {nodes.map((n, i) => (
           <g key={i}>
             <circle
               cx={n.x}
               cy={n.y}
-              r={n.r * 1.8}
-              fill="hsl(33 90% 55% / 0.15)"
-              filter="url(#node-glow)"
-              className="animate-pulse"
-              style={{ animationDelay: `${n.delay}s`, animationDuration: "2.8s" }}
+              r={n.r * 1.5}
+              fill="hsl(33 90% 55% / 0.12)"
+              className="max-md:opacity-80 md:animate-pulse"
+              style={{ animationDelay: `${n.delay}s`, animationDuration: "3.2s" }}
             />
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r={n.r * 0.45}
-              fill="hsl(33 95% 62%)"
-              className="animate-pulse"
-              style={{ animationDelay: `${n.delay}s`, animationDuration: "2.2s" }}
-            />
+            <circle cx={n.x} cy={n.y} r={n.r * 0.45} fill="hsl(33 95% 62%)" />
             <circle cx={n.x} cy={n.y} r={n.r * 0.2} fill="white" opacity="0.85" />
           </g>
         ))}

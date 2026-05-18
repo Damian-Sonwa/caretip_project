@@ -1,4 +1,5 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { Link, useNavigate } from "react-router";
 import { Bell, Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -25,13 +26,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { venueName, logo: businessLogo } = useBusinessVenueBrand();
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
+  const reduceMotion = useReducedMotion();
 
   return (
     <motion.header
-      initial={{ y: -20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[6px]"
+      {...(reduceMotion ? {} : dashboardBlockMotion)}
+      className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[4px]"
     >
       <div
         className={cn(

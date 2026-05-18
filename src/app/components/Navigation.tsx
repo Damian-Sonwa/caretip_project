@@ -37,7 +37,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
 
   const headerSurface = cn(
     "border-b border-stone-200/88 dark:border-neutral-700/75",
-    "bg-white/72 backdrop-blur-xl dark:bg-neutral-950/75",
+    "bg-white/88 backdrop-blur-md dark:bg-neutral-950/88 md:backdrop-blur-lg",
     "shadow-[0_6px_32px_-18px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_-16px_rgba(0,0,0,0.45)]",
   );
 

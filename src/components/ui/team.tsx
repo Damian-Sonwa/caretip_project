@@ -146,7 +146,7 @@ export default function HospitalityBusinessesMarquee() {
                     decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-x-0 bottom-0 border-t border-neutral-200/60 bg-white/88 px-2.5 py-2 backdrop-blur-[6px] dark:border-neutral-800/80 dark:bg-neutral-950/88 sm:px-3 sm:py-2.5">
+                  <div className="absolute inset-x-0 bottom-0 border-t border-neutral-200/60 bg-white/92 px-2.5 py-2 max-md:backdrop-blur-none md:backdrop-blur-[4px] dark:border-neutral-800/80 dark:bg-neutral-950/88 sm:px-3 sm:py-2.5">
                     <div className="flex items-start gap-2">
                       <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-8 sm:w-8">
                         <b.Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />

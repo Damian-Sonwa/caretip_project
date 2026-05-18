@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
+import { dashboardBlockMotion } from "@/lib/motionPerf";
 import {
   Users,
   TrendingUp,
@@ -88,15 +89,17 @@ interface StatCardProps {
 }
 
 function StatCard({ title, value, change, icon: Icon, delay, trend, beam, wideOnTablet }: StatCardProps) {
+  const reduceMotion = useReducedMotion();
   return (
     <motion.div
-      initial={{ y: 20, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.5, delay }}
+      {...dashboardBlockMotion}
+      transition={{ ...dashboardBlockMotion.transition, delay: reduceMotion ? 0 : delay * 0.5 }}
       className={cn("h-full", wideOnTablet && "sm:col-span-2 lg:col-span-1")}
     >
       <Card className={platformUi.statCard}>
-        {beam && <BorderBeam size={220} duration={18} colorFrom="#e9932f" colorTo="#000000" />}
+        {beam && !reduceMotion ? (
+          <BorderBeam size={220} duration={20} colorFrom="#e9932f" colorTo="#000000" />
+        ) : null}
         <CardHeader className={platformUi.statCardHeader}>
           <div className="flex items-start justify-between gap-3">
             <div className="rounded-lg border border-border bg-muted p-2">
@@ -694,9 +697,8 @@ export function AdminDashboard() {
         ) : null}
 
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
+          {...dashboardBlockMotion}
+          transition={{ ...dashboardBlockMotion.transition, delay: 0.12 }}
           className={platformUi.businessesPanel}
         >
           <div className={platformUi.businessesPanelHeader}>

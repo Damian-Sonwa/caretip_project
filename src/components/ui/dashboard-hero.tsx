@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
@@ -85,6 +86,7 @@ export function DashboardHero({
   textColumnClassName,
 }: DashboardHeroProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
   const tagline = description?.trim() ?? "";
@@ -341,13 +343,15 @@ export function DashboardHero({
             cardClassName,
           )}
         >
-          <BorderBeam
-            size={beamSize}
-            duration={14}
-            colorFrom="#e9932f"
-            colorTo="#000000"
-            className={stackHeroOnMobile ? "max-lg:hidden" : undefined}
-          />
+          {!reduceMotion ? (
+            <BorderBeam
+              size={beamSize}
+              duration={18}
+              colorFrom="#e9932f"
+              colorTo="#000000"
+              className={stackHeroOnMobile ? "max-lg:hidden" : undefined}
+            />
+          ) : null}
         {stackHeroOnMobile ? (
           <>
             {/*

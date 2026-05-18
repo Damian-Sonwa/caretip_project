@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
@@ -620,8 +621,7 @@ export function EmployeeDashboard() {
           />
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            {...dashboardBlockMotion}
             className={cn("transition-opacity duration-200", !valuesMatchAnalyticsPeriod && "opacity-[0.92]")}
           >
             <div className="relative mb-2 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
@@ -676,8 +676,7 @@ export function EmployeeDashboard() {
           </motion.div>
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
+            {...dashboardBlockMotion}
             transition={{ delay: 0.4 }}
           >
             <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>
@@ -751,8 +750,7 @@ export function EmployeeDashboard() {
 
           <div className="w-full grid gap-6 lg:grid-cols-2">
             <motion.div
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
+              {...dashboardBlockMotion}
               transition={{ delay: 0.5 }}
             >
               <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>
@@ -819,8 +817,7 @@ export function EmployeeDashboard() {
 
             <div className="space-y-4">
               <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
+                {...dashboardBlockMotion}
                 transition={{ delay: 0.6 }}
               >
                 <Card className={cn(employeeUi.cardStatic, "w-full shadow-none hover:shadow-none")}>

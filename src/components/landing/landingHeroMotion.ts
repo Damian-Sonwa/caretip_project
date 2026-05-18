@@ -2,81 +2,102 @@
 
 export const landingHeroEaseOut = [0.22, 1, 0.36, 1] as const;
 
+/** Single-block fade-up (metrics, showcase column, legacy). */
 export const landingHeroTextReveal = {
   hidden: {
     opacity: 0,
-    y: 12,
-    filter: "blur(5px)",
+    y: 8,
   },
   visible: {
     opacity: 1,
     y: 0,
-    filter: "blur(0px)",
     transition: {
-      duration: 0.65,
+      duration: 0.45,
       ease: landingHeroEaseOut,
     },
   },
-} as const;
+};
 
-export const landingHeroCopyStagger = {
+/** Headline lines — 0ms / 80ms / 160ms stagger via parent. */
+export const landingHeroHeadlineStagger = {
   hidden: {},
   visible: {
     transition: {
       staggerChildren: 0.08,
-      delayChildren: 0.04,
+      delayChildren: 0,
     },
   },
-} as const;
+};
 
-/** Primary showcase card — slow vertical float + tiny horizontal drift */
+export const landingHeroHeadlineLineReveal = {
+  hidden: {
+    opacity: 0,
+    y: 12,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.6,
+      ease: landingHeroEaseOut,
+    },
+  },
+};
+
+/** Supporting copy — enters after headline lines. */
+export const landingHeroSubtitleReveal = {
+  hidden: {
+    opacity: 0,
+    y: 9,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
+      ease: landingHeroEaseOut,
+      delay: 0.28,
+    },
+  },
+};
+
+/** CTA cluster — minimal scale + fade. */
+export const landingHeroCtaReveal = {
+  hidden: {
+    opacity: 0,
+    scale: 0.98,
+  },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      duration: 0.4,
+      ease: landingHeroEaseOut,
+      delay: 0.36,
+    },
+  },
+};
+
+/** Page columns (copy / visual / mobile metrics). */
+export const landingHeroCopyStagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.06,
+      delayChildren: 0.02,
+    },
+  },
+};
+
+/** Primary showcase card — slow vertical float (desktop only in component). */
 export const landingHeroShowcaseFloat = {
-  y: [0, -9, 0],
-  x: [0, 4, -3, 0],
-} as const;
+  y: [0, -6, 0],
+  x: [0, 2, -2, 0],
+};
 
 export const landingHeroShowcaseFloatTransition = {
-  duration: 8,
+  duration: 10,
   repeat: Infinity,
   ease: "easeInOut" as const,
   delay: 0.85,
-};
-
-/** Ambient orange glow — atmospheric pulse/drift */
-export const landingHeroGlowDrift = {
-  opacity: [0.42, 0.58, 0.45],
-  scale: [1, 1.035, 1],
-  x: [0, 10, -6, 0],
-  y: [0, -6, 5, 0],
-} as const;
-
-export const landingHeroGlowDriftTransition = {
-  duration: 11,
-  repeat: Infinity,
-  ease: "easeInOut" as const,
-};
-
-export const landingHeroGlowDriftAlt = {
-  opacity: [0.32, 0.48, 0.34],
-  x: [0, -8, 5, 0],
-  y: [0, 7, -5, 0],
-} as const;
-
-export const landingHeroGlowDriftAltTransition = {
-  duration: 9,
-  repeat: Infinity,
-  ease: "easeInOut" as const,
-  delay: 0.35,
-};
-
-export const landingHeroFloorShadowPulse = {
-  opacity: [0.22, 0.32, 0.24],
-  scaleX: [0.96, 1, 0.97],
-} as const;
-
-export const landingHeroFloorShadowTransition = {
-  duration: 7.5,
-  repeat: Infinity,
-  ease: "easeInOut" as const,
-  delay: 0.2,
 };
