@@ -110,11 +110,11 @@ export function DashboardHero({
         stackHeroOnMobile
           ? mobileAlign === "center"
             ? cn(
-                "font-sans text-app-title font-bold text-pretty",
+                "font-sans text-app-title font-bold text-pretty max-lg:leading-[1]",
                 "mx-auto max-w-[24ch] text-center sm:max-w-[28ch] md:max-w-[32ch]",
               )
             : cn(
-                "font-sans text-app-title font-bold text-pretty",
+                "font-sans text-app-title font-bold text-pretty max-lg:leading-[1]",
                 "max-w-[22ch] text-left sm:max-w-[28ch]",
               )
           : "font-sans text-app-title font-bold text-pretty lg:text-section-title",

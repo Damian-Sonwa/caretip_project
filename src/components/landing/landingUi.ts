@@ -14,11 +14,11 @@ const heroHeadlineTone =
   "font-sans font-semibold text-balance text-neutral-950 dark:text-neutral-50";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+  "max-md:text-[2.5rem] max-md:font-semibold max-md:leading-[0.98] max-md:tracking-[-0.04em]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2.375rem] max-md:font-semibold max-md:leading-[0.92] max-md:tracking-[-0.04em]";
+  "max-md:text-[2.375rem] max-md:font-semibold max-md:leading-[0.98] max-md:tracking-[-0.04em]";
 const heroHeadlineDesktop =
-  "md:text-[3.25rem] md:font-semibold md:leading-[0.94] md:tracking-[-0.025em] lg:text-[3.75rem] lg:leading-[0.95] lg:tracking-[-0.025em]";
+  "md:text-[3.25rem] md:font-semibold md:leading-[0.96] md:tracking-[-0.025em] lg:text-[3.75rem] lg:leading-[0.98] lg:tracking-[-0.025em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;

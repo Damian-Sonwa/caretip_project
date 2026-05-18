@@ -191,7 +191,7 @@ export function FeatureShowcase({
                   ) : null}
 
                   <motion.h1
-                    className="text-balance text-4xl font-bold leading-[0.95] text-gray-900 sm:text-5xl md:text-6xl"
+                    className="text-balance text-4xl font-bold leading-[0.98] text-gray-900 sm:text-5xl md:text-6xl"
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, ease: "easeOut" }}

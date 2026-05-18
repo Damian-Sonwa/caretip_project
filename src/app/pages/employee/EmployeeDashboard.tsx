@@ -442,7 +442,7 @@ export function EmployeeDashboard() {
           className="employee-dashboard-hero mb-8 lg:mb-6"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
           badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
-          titleClassName="!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
+          titleClassName="max-lg:!leading-[1] lg:!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
           descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:mx-0 max-lg:text-left lg:max-w-sm"
           textColumnClassName="lg:py-2 xl:pr-6"
           badge={
@@ -456,10 +456,10 @@ export function EmployeeDashboard() {
             </>
           }
           title={
-            <>
-              <span className="block">{t("employee.hero.headlineLine1")}</span>
-              <span className="block text-foreground/85">{t("employee.hero.headlineLine2")}</span>
-            </>
+            <span className="flex flex-col gap-1 max-lg:gap-1.5">
+              <span>{t("employee.hero.headlineLine1")}</span>
+              <span className="text-foreground/85">{t("employee.hero.headlineLine2")}</span>
+            </span>
           }
           description={t("employee.hero.sub")}
           image={
