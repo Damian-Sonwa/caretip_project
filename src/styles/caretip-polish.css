@@ -13,6 +13,20 @@
     text-wrap: pretty;
   }
 
+  /* Mobile hero H1 — natural wraps, avoid cramped pretty-text breaks */
+  @media (max-width: 1023px) {
+    .caretip-landing .caretip-hero-headline {
+      text-wrap: wrap;
+      overflow-wrap: normal;
+      word-break: normal;
+      hyphens: manual;
+    }
+
+    .caretip-landing .caretip-hero-headline > span {
+      display: block;
+    }
+  }
+
   /* App: consistent card radius and icon alignment in shells */
   .caretip-dashboard-shell [data-slot="card"] {
     border-radius: 1rem;

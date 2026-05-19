@@ -90,7 +90,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
 
       <motion.div
         className={cn(
-          "relative z-[1] mx-auto flex w-full max-w-[100rem] flex-col max-lg:gap-y-0",
+          "relative z-[1] mx-auto flex w-full max-w-[100rem] flex-col px-4 max-lg:gap-y-0 sm:px-6 lg:px-8",
           landingUi.heroSplitRowDesktop,
         )}
         variants={reduceMotion ? undefined : landingHeroCopyStagger}
@@ -108,10 +108,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           animate={reduceMotion ? false : "visible"}
         >
           <motion.h1
-            className={cn(
-              isDe ? landingUi.heroHeadlineDe : landingUi.heroHeadlineEn,
-              "mt-0 max-lg:max-w-[24ch] sm:mt-0 lg:mt-0",
-            )}
+            className={cn(isDe ? landingUi.heroHeadlineDe : landingUi.heroHeadlineEn, "mt-0 sm:mt-0 lg:mt-0")}
             variants={reduceMotion ? undefined : landingHeroHeadlineStagger}
           >
             <motion.span
@@ -151,7 +148,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           <motion.p
             className={cn(
               landingUi.heroSubtitle,
-              "max-w-lg max-lg:!mt-4 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]",
+              "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]",
             )}
             variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
           >

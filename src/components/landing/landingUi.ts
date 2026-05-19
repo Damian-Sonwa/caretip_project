@@ -11,14 +11,14 @@ import { landingType } from "@/components/landing/landingTypography";
 
 /** Hero headline — Plus Jakarta Sans, bold, tight metrics for optical balance at display sizes. */
 const heroHeadlineTone =
-  "font-hero-display font-bold text-neutral-950 dark:text-neutral-50 max-md:text-left text-pretty antialiased";
+  "font-hero-display font-bold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-md:text-[2.125rem] max-md:leading-[1.02] max-md:tracking-[-0.032em]";
+  "max-lg:text-[1.9375rem] max-lg:leading-[1.08] max-lg:tracking-[-0.028em]";
 const heroHeadlineMobileDe =
-  "max-md:text-[2rem] max-md:leading-[1.02] max-md:tracking-[-0.03em]";
+  "max-lg:text-[1.875rem] max-lg:leading-[1.1] max-lg:tracking-[-0.026em]";
 const heroHeadlineDesktop =
-  "md:text-[2.875rem] md:leading-[1.04] md:tracking-[-0.03em] lg:text-[3.25rem] lg:leading-[1.02] lg:tracking-[-0.034em]";
+  "lg:text-[2.875rem] lg:leading-[1.04] lg:tracking-[-0.03em] xl:text-[3.25rem] xl:leading-[1.02] xl:tracking-[-0.034em]";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
@@ -215,9 +215,9 @@ export const landingUi = {
   /** Brand orange emphasis — `globals.css` --headline-accent (#E79B2F); inherits headline weight. */
   heroHeadlineEmphasis: "font-inherit text-headline-accent",
   heroHeadlineLine:
-    "block text-neutral-950 dark:text-neutral-50 max-md:[&:not(:first-child)]:mt-1 [&:not(:first-child)]:mt-1.5 md:[&:not(:first-child)]:mt-2",
+    "block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-2.5 [&:not(:first-child)]:mt-1.5 md:[&:not(:first-child)]:mt-2",
   heroSubtitle: cnHeroSubtitle(
-    `w-full max-w-2xl text-left ${heroStackGapMobile} max-md:max-w-[min(300px,32ch)] max-md:text-[0.9375rem] max-md:leading-[1.65] max-lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
+    `w-full max-w-2xl text-left ${heroStackGapMobile} max-lg:max-w-[min(100%,21.5rem)] max-lg:text-[0.9375rem] max-lg:leading-[1.68] max-lg:pt-0 lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
