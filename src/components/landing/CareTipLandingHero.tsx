@@ -1,4 +1,4 @@
-import { ArrowRight, TrendingUp } from "lucide-react";
+﻿import { ArrowRight, TrendingUp } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
@@ -17,12 +17,11 @@ import {
 import { useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
-/** Tertiary accent on product art — smaller/softer on mobile so the phone stays primary. */
 const heroFloatCardClass =
-  "pointer-events-none absolute z-30 flex items-center rounded-xl border border-neutral-200/70 bg-white ring-1 ring-neutral-950/[0.04] drop-shadow-[0_4px_14px_rgba(15,23,42,0.08),0_16px_40px_-12px_rgba(15,23,42,0.14)] max-lg:bottom-[9%] max-lg:left-auto max-lg:right-[5%] max-lg:max-w-[min(calc(100%-1.5rem),138px)] max-lg:translate-x-0 max-lg:scale-[0.78] max-lg:origin-bottom-right max-lg:gap-1.5 max-lg:px-2 max-lg:py-1.5 sm:max-lg:bottom-[10%] sm:max-lg:right-[6%] sm:max-lg:scale-[0.82] sm:max-lg:max-w-[min(calc(100%-1.75rem),148px)] md:bottom-[11%] md:right-[6%] md:max-w-[min(100%,172px)] md:scale-[0.92] md:gap-2 md:px-2.5 md:py-2 lg:bottom-[11%] lg:right-[7%] lg:max-w-[min(100%,188px)] lg:scale-100 lg:gap-2.5 lg:px-3 lg:py-2.5 lg:rounded-2xl";
+  "caretip-hero-float-metric__card pointer-events-none absolute z-30 flex items-center rounded-xl border border-neutral-200/70 bg-white ring-1 ring-neutral-950/[0.04] drop-shadow-[0_4px_14px_rgba(15,23,42,0.08),0_16px_40px_-12px_rgba(15,23,42,0.14)] max-lg:bottom-[9%] max-lg:left-auto max-lg:right-[5%] max-lg:max-w-[min(calc(100%-1.5rem),138px)] max-lg:translate-x-0 max-lg:scale-[0.78] max-lg:origin-bottom-right max-lg:gap-1.5 max-lg:px-2 max-lg:py-1.5 sm:max-lg:bottom-[10%] sm:max-lg:right-[6%] sm:max-lg:scale-[0.82] sm:max-lg:max-w-[min(calc(100%-1.75rem),148px)] md:bottom-[11%] md:right-[6%] md:max-w-[min(100%,172px)] md:scale-[0.92] md:gap-2 md:px-2.5 md:py-2 lg:bottom-[11%] lg:right-[7%] lg:max-w-[min(100%,188px)] lg:scale-100 lg:gap-2.5 lg:px-3 lg:py-2.5 lg:rounded-2xl";
 
 const heroFloatCardGlowClass =
-  "pointer-events-none absolute z-20 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.16)_0%,transparent_70%)] blur-sm max-lg:bottom-[12%] max-lg:left-auto max-lg:right-[10%] max-lg:h-9 max-lg:w-16 max-lg:opacity-40 sm:max-lg:bottom-[13%] sm:max-lg:right-[11%] md:bottom-[14%] md:right-[11%] md:h-11 md:w-20 md:opacity-75 lg:bottom-[14%] lg:right-[11%] lg:h-11 lg:w-20 lg:opacity-60";
+  "caretip-hero-float-metric__glow pointer-events-none absolute z-20 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.16)_0%,transparent_70%)] blur-sm max-lg:bottom-[12%] max-lg:left-auto max-lg:right-[10%] max-lg:h-9 max-lg:w-16 max-lg:opacity-40 sm:max-lg:bottom-[13%] sm:max-lg:right-[11%] md:bottom-[14%] md:right-[11%] md:h-11 md:w-20 md:opacity-75 lg:bottom-[14%] lg:right-[11%] lg:h-11 lg:w-20 lg:opacity-60";
 
 export type CareTipLandingHeroProps = {
   id?: string;
@@ -33,7 +32,7 @@ export type CareTipLandingHeroProps = {
 };
 
 /**
- * VaultEdge-inspired split hero — adapted for CareTip (Inter, orange, cream panel, product art).
+ * VaultEdge-inspired split hero ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â adapted for CareTip (Inter, orange, cream panel, product art).
  * Layout reference: vaultedge `index.html` `.ve-hero` + `css/custom-override.css`
  */
 export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, className }: CareTipLandingHeroProps) {
@@ -80,6 +79,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         "relative isolate w-full min-w-0 overflow-x-hidden",
         "scroll-mt-[80px] bg-[linear-gradient(180deg,#fafaf8_0%,#ffffff_42%,#f7f6f4_100%)]",
         landingUi.heroSectionCinematic,
+        !isDe && "caretip-hero-visual--en",
         className,
       )}
     >
@@ -97,7 +97,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         initial={reduceMotion ? false : "hidden"}
         animate={reduceMotion ? false : "visible"}
       >
-        {/* Copy — mobile: headline + CTAs first; metrics follow the product shot */}
+        {/* Copy ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â mobile: headline + CTAs first; metrics follow the product shot */}
         <motion.div
           className={cn(
             "relative z-10 flex flex-col justify-center pb-1 pt-1 max-lg:px-0 sm:max-lg:pb-2 max-lg:justify-center",
@@ -171,7 +171,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           {metricsRow("mt-9 hidden lg:flex sm:mt-10")}
         </motion.div>
 
-        {/* Product showcase — primary focal point on mobile */}
+        {/* Product showcase ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â primary focal point on mobile */}
         <motion.div
           className={cn(
             "relative z-0 w-full max-lg:mt-4 max-lg:pb-1 sm:max-lg:mt-5 sm:max-lg:pb-2",
@@ -208,13 +208,8 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             />
           </motion.div>
 
-          <motion.div
-            className={landingUi.heroFloatLayer}
-            initial={reduceMotion ? false : { opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.45, delay: 0.35, ease: landingHeroEaseOut }}
-          >
-            <div aria-hidden className={heroFloatCardGlowClass} />
+          <div className={cn("caretip-hero-float-metric", landingUi.heroFloatLayer)} aria-hidden>
+            <motion.div aria-hidden className={heroFloatCardGlowClass} />
             <motion.div
               className={heroFloatCardClass}
               initial={reduceMotion ? false : { opacity: 0, y: 6 }}
@@ -239,7 +234,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
                 </div>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         </motion.div>
 
         <motion.div

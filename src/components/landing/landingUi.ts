@@ -244,12 +244,12 @@ export const landingUi = {
   heroShowcaseStack: "hero-showcase-stack relative z-[1] h-full min-h-0 w-full overflow-hidden max-lg:h-auto",
   /** Float stats — out of flow; anchored to showcase column in CareTipLandingHero. */
   heroFloatLayer: "pointer-events-none absolute inset-0 z-30 overflow-hidden",
-  /** Mobile hero — taller framing, softer shadow (desktop unchanged via child tokens). */
+  /** Mobile hero — same scale/aspect as Live in Minutes demo (desktop unchanged via child tokens). */
   heroShowcaseMobileShell:
-    "max-lg:[&_.hero-showcase-card-media]:rounded-[24px] max-lg:[&_.hero-showcase-card-media]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)] max-lg:[&_.hero-showcase-card]:min-h-[min(88vw,450px)] sm:max-lg:[&_.hero-showcase-card]:min-h-[min(80vw,472px)]",
+    "max-lg:[&_.hero-showcase-card-media]:rounded-[1.5rem] max-lg:[&_.hero-showcase-card-media]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",
   /** Outer frame — visible overflow so float card + shadows are not clipped. */
   heroShowcaseCard:
-    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-visible rounded-[28px] border border-white/60 bg-transparent p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[10/11] max-lg:max-w-[min(100%,24rem)] sm:max-lg:max-w-[min(100%,28rem)] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)] lg:overflow-hidden lg:shadow-[0_28px_72px_-24px_rgba(0,0,0,0.22)]",
+    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-visible rounded-[28px] border border-white/60 bg-transparent p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] max-lg:rounded-[1.5rem] sm:max-lg:max-w-[22rem] sm:max-lg:rounded-[1.5rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)] lg:overflow-hidden lg:shadow-[0_28px_72px_-24px_rgba(0,0,0,0.22)]",
   heroShowcaseCardMedia:
     "hero-showcase-card-media h-full w-full overflow-hidden rounded-[inherit] bg-neutral-950",
   heroShowcaseGlow:

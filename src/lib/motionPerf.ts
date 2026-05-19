@@ -76,3 +76,17 @@ export function useLargeScreen(minWidth = 1024) {
 
   return matches;
 }
+
+/** SSR-safe viewport gate — false below `minWidth` (no DOM for desktop-only UI on mobile). */
+export function useMinWidthMedia(minWidth = 1024) {
+  const query = `(min-width: ${minWidth}px)`;
+  return React.useSyncExternalStore(
+    (onStoreChange) => {
+      const mq = window.matchMedia(query);
+      mq.addEventListener("change", onStoreChange);
+      return () => mq.removeEventListener("change", onStoreChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false,
+  );
+}
