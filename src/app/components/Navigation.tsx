@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useState, useEffect, useMemo } from "react";
 import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 import { CareTipLogo } from "./CareTipLogo";
 import { useTheme } from "../context/ThemeContext";
@@ -174,32 +175,22 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                     <Link
                       to="/contact"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full"
+                      className={cn(
+                        landingUi.heroCtaPrimary,
+                        "w-full max-lg:min-w-0 max-lg:max-w-full",
+                      )}
                     >
-                      <button
-                        type="button"
-                        className={cn(
-                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl px-4 text-[1.0625rem] font-bold text-primary-foreground shadow-[0_8px_22px_-8px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover active:scale-[0.99] active:opacity-95",
-                          "bg-primary",
-                        )}
-                      >
-                        {t("nav.requestDemo")}
-                      </button>
+                      {t("nav.requestDemo")}
                     </Link>
                     <Link
                       to="/login"
                       onClick={() => setMobileMenuOpen(false)}
-                      className="w-full"
+                      className={cn(
+                        landingUi.heroCtaSecondary,
+                        "w-full max-lg:min-w-0 max-lg:max-w-full",
+                      )}
                     >
-                      <button
-                        type="button"
-                        className={cn(
-                          "inline-flex min-h-11 w-full touch-manipulation items-center justify-center whitespace-nowrap rounded-xl border border-border/75 bg-muted/25 px-4 text-[1.0625rem] font-semibold text-foreground transition-[colors,opacity,box-shadow] active:opacity-90",
-                          "hover:bg-muted/55",
-                        )}
-                      >
-                        {t("nav.signIn")}
-                      </button>
+                      {t("nav.signIn")}
                     </Link>
                   </div>
                 </div>

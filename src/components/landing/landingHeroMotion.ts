@@ -6,7 +6,7 @@ export const landingHeroEaseOut = [0.22, 1, 0.36, 1] as const;
 export const landingHeroTextReveal = {
   hidden: {
     opacity: 0,
-    y: 8,
+    y: 6,
   },
   visible: {
     opacity: 1,
@@ -32,7 +32,7 @@ export const landingHeroHeadlineStagger = {
 export const landingHeroHeadlineLineReveal = {
   hidden: {
     opacity: 0,
-    y: 12,
+    y: 8,
   },
   visible: {
     opacity: 1,
@@ -65,11 +65,9 @@ export const landingHeroSubtitleReveal = {
 export const landingHeroCtaReveal = {
   hidden: {
     opacity: 0,
-    scale: 0.98,
   },
   visible: {
     opacity: 1,
-    scale: 1,
     transition: {
       duration: 0.4,
       ease: landingHeroEaseOut,
@@ -89,15 +87,11 @@ export const landingHeroCopyStagger = {
   },
 };
 
-/** Primary showcase card — slow vertical float (desktop only in component). */
-export const landingHeroShowcaseFloat = {
-  y: [0, -6, 0],
-  x: [0, 2, -2, 0],
-};
-
-export const landingHeroShowcaseFloatTransition = {
-  duration: 10,
-  repeat: Infinity,
-  ease: "easeInOut" as const,
-  delay: 0.85,
-};
+/** Desktop showcase entrance — opacity only (no scale; scroll-friendly). */
+export const landingHeroShowcaseEnter = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.45, ease: landingHeroEaseOut, delay: 0.08 },
+  },
+} as const;

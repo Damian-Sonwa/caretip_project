@@ -58,12 +58,13 @@ export function LandingSplitShowcaseSection({
         tone === "muted" ? landingUi.showcaseSectionToneMuted : landingUi.showcaseSectionToneWarm,
       )}
     >
-      <div className={landingUi.showcaseGrid}>
+      <div className={cn(landingUi.showcaseGrid, landingUi.sectionShell)}>
         <motion.div
-          initial={{ opacity: 0, x: visualPosition === "left" ? -24 : 24 }}
+          data-polish-view
+          initial={{ opacity: 0, x: visualPosition === "left" ? -12 : 12 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.65 }}
+          transition={{ duration: 0.5 }}
           className={cn(
             landingUi.showcaseVisualCol,
             visualFirstOnMobile ? "order-1" : "order-2",
@@ -74,10 +75,11 @@ export function LandingSplitShowcaseSection({
         </motion.div>
 
         <motion.div
-          initial={{ opacity: 0, x: visualPosition === "left" ? 24 : -24 }}
+          data-polish-view
+          initial={{ opacity: 0, x: visualPosition === "left" ? 12 : -12 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.65 }}
+          transition={{ duration: 0.5 }}
           className={cn(
             landingUi.showcaseCopy,
             visualFirstOnMobile ? "order-2 max-lg:mt-1" : "order-1",
@@ -116,10 +118,18 @@ export function LandingSplitShowcaseSection({
             </div>
 
             {cta ? (
-              <Link to={cta.to} className={cn(landingUi.cta, landingUi.showcaseCta)}>
-                {cta.icon}
-                {cta.label}
-              </Link>
+              <div className="flex w-full max-lg:justify-center">
+                <Link
+                  to={cta.to}
+                  className={cn(
+                    cta.to === "/join" ? landingUi.heroCtaSecondary : landingUi.heroCtaPrimary,
+                    "gap-2 lg:self-start",
+                  )}
+                >
+                  {cta.icon}
+                  {cta.label}
+                </Link>
+              </div>
             ) : null}
           </div>
         </motion.div>

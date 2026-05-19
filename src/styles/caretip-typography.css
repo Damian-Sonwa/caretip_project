@@ -5,6 +5,7 @@
 
 :root {
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-hero-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter);
   --font-display: var(--font-inter);
 
@@ -50,16 +51,24 @@ html.caretip-font-inter {
   font-family: var(--font-inter);
 }
 
+/** Landing hero H1 only — geometric display face (Plus Jakarta Sans). */
+@utility font-hero-display {
+  font-family: var(--font-hero-display);
+  font-feature-settings: "kern" 1, "liga" 1;
+  font-variant-ligatures: common-ligatures;
+  text-rendering: optimizeLegibility;
+}
+
 @utility text-hero-title {
   font-size: var(--caretip-hero-size);
-  line-height: 0.98;
-  letter-spacing: -0.035em;
+  line-height: 1.02;
+  letter-spacing: -0.038em;
 }
 
 @utility text-hero-title-de {
   font-size: var(--caretip-hero-size-de);
-  line-height: 0.98;
-  letter-spacing: -0.032em;
+  line-height: 1.02;
+  letter-spacing: -0.034em;
 }
 
 @utility text-section-title {

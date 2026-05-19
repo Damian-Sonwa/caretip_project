@@ -1,0 +1,49 @@
+/**
+ * CareTip UI polish — optical balance, rhythm, and consistency.
+ * Refinements only; does not change layout structure.
+ */
+
+@layer base {
+  /* Landing: balanced headlines and readable leads */
+  .caretip-landing h2 {
+    text-wrap: balance;
+  }
+
+  .caretip-landing .caretip-section-intro p {
+    text-wrap: pretty;
+  }
+
+  /* App: consistent card radius and icon alignment in shells */
+  .caretip-dashboard-shell [data-slot="card"] {
+    border-radius: 1rem;
+  }
+
+  .caretip-dashboard-shell [data-slot="card-header"],
+  .caretip-dashboard-shell [data-slot="card-content"],
+  .caretip-dashboard-shell [data-slot="card-footer"] {
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .caretip-dashboard-shell [data-slot="card-header"],
+    .caretip-dashboard-shell [data-slot="card-content"],
+    .caretip-dashboard-shell [data-slot="card-footer"] {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  /* Public pages: calmer scroll-linked motion */
+  @media (prefers-reduced-motion: no-preference) {
+    .caretip-landing [data-polish-view] {
+      will-change: opacity, transform;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .caretip-landing [data-polish-view] {
+      transform: none !important;
+    }
+  }
+}

@@ -17,17 +17,12 @@ import {
 import { useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
-const floatCardMotion = {
-  y: [0, -3, 0],
-  x: [0, 1, -1, 0],
-};
-
 /** Tertiary accent on product art — smaller/softer on mobile so the phone stays primary. */
 const heroFloatCardClass =
-  "pointer-events-none absolute z-20 flex items-center rounded-xl border border-neutral-200/60 bg-white/[0.97] ring-1 ring-neutral-950/[0.03] max-lg:bottom-[6%] max-lg:left-auto max-lg:right-0 max-lg:max-w-[min(calc(100%-1rem),138px)] max-lg:translate-x-0 max-lg:scale-[0.78] max-lg:origin-bottom-right max-lg:gap-1.5 max-lg:px-2 max-lg:py-1.5 max-lg:shadow-[0_2px_6px_rgba(15,23,42,0.04),0_8px_22px_-8px_rgba(15,23,42,0.09)] sm:max-lg:bottom-[7%] sm:max-lg:right-[1%] sm:max-lg:scale-[0.82] sm:max-lg:max-w-[min(calc(100%-1.25rem),148px)] md:bottom-[12%] md:right-[0%] md:max-w-[min(100%,172px)] md:scale-[0.92] md:gap-2 md:px-2.5 md:py-2 md:shadow-[0_2px_5px_rgba(15,23,42,0.04),0_12px_32px_-10px_rgba(15,23,42,0.12),inset_0_1px_0_rgba(255,255,255,0.9)] lg:bottom-[14%] lg:right-[2%] lg:max-w-[min(100%,188px)] lg:scale-100 lg:gap-2.5 lg:px-3 lg:py-2.5 lg:rounded-2xl lg:z-30";
+  "pointer-events-none absolute z-30 flex items-center rounded-xl border border-neutral-200/70 bg-white ring-1 ring-neutral-950/[0.04] drop-shadow-[0_4px_14px_rgba(15,23,42,0.08),0_16px_40px_-12px_rgba(15,23,42,0.14)] max-lg:bottom-[9%] max-lg:left-auto max-lg:right-[5%] max-lg:max-w-[min(calc(100%-1.5rem),138px)] max-lg:translate-x-0 max-lg:scale-[0.78] max-lg:origin-bottom-right max-lg:gap-1.5 max-lg:px-2 max-lg:py-1.5 sm:max-lg:bottom-[10%] sm:max-lg:right-[6%] sm:max-lg:scale-[0.82] sm:max-lg:max-w-[min(calc(100%-1.75rem),148px)] md:bottom-[11%] md:right-[6%] md:max-w-[min(100%,172px)] md:scale-[0.92] md:gap-2 md:px-2.5 md:py-2 lg:bottom-[11%] lg:right-[7%] lg:max-w-[min(100%,188px)] lg:scale-100 lg:gap-2.5 lg:px-3 lg:py-2.5 lg:rounded-2xl";
 
 const heroFloatCardGlowClass =
-  "pointer-events-none absolute z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.18)_0%,transparent_70%)] blur-lg max-lg:blur-md max-lg:bottom-[14%] max-lg:left-auto max-lg:right-[6%] max-lg:h-9 max-lg:w-16 max-lg:translate-x-0 max-lg:opacity-45 sm:max-lg:bottom-[15%] sm:max-lg:right-[8%] md:bottom-[20%] md:right-[10%] md:h-12 md:w-20 md:opacity-90 lg:h-14 lg:w-24";
+  "pointer-events-none absolute z-20 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(235,153,44,0.16)_0%,transparent_70%)] blur-sm max-lg:bottom-[12%] max-lg:left-auto max-lg:right-[10%] max-lg:h-9 max-lg:w-16 max-lg:opacity-40 sm:max-lg:bottom-[13%] sm:max-lg:right-[11%] md:bottom-[14%] md:right-[11%] md:h-11 md:w-20 md:opacity-75 lg:bottom-[14%] lg:right-[11%] lg:h-11 lg:w-20 lg:opacity-60";
 
 export type CareTipLandingHeroProps = {
   id?: string;
@@ -45,7 +40,6 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
   const isLargeScreen = useLargeScreen();
-  const floatCardLoop = !reduceMotion && isLargeScreen;
 
   const metrics = [
     { value: t("landing.showcase.heroMetric1Value"), label: t("landing.showcase.heroMetric1Label") },
@@ -89,23 +83,26 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         className,
       )}
     >
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 min-h-[min(84vh,880px)] bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(235,153,44,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%)] dark:opacity-40"
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="pointer-events-none absolute inset-x-0 top-0 h-full min-h-0 bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(235,153,44,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%)] dark:opacity-40"
       />
 
       <motion.div
-        className="relative z-[1] mx-auto flex w-full max-w-[100rem] flex-col max-lg:gap-y-0 lg:flex-row lg:items-stretch lg:gap-2 xl:gap-4"
+        className={cn(
+          "relative z-[1] mx-auto flex w-full max-w-[100rem] flex-col max-lg:gap-y-0",
+          landingUi.heroSplitRowDesktop,
+        )}
         variants={reduceMotion ? undefined : landingHeroCopyStagger}
         initial={reduceMotion ? false : "hidden"}
         animate={reduceMotion ? false : "visible"}
       >
         {/* Copy — mobile: headline + CTAs first; metrics follow the product shot */}
         <motion.div
-          className="relative z-10 flex flex-col justify-center px-5 pb-1 pt-1 sm:px-8 sm:max-lg:pb-2 max-lg:justify-center lg:w-[min(100%,54%)] lg:flex-none lg:self-center lg:justify-center lg:px-12 lg:pb-16 lg:pt-6 xl:px-16"
+          className={cn(
+            "relative z-10 flex flex-col justify-center pb-1 pt-1 max-lg:px-0 sm:max-lg:pb-2 max-lg:justify-center",
+            isDe ? landingUi.heroCopyDesktopDe : landingUi.heroCopyDesktopEn,
+          )}
           variants={reduceMotion ? undefined : { hidden: {}, visible: {} }}
           initial={reduceMotion ? false : "hidden"}
           animate={reduceMotion ? false : "visible"}
@@ -152,14 +149,17 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           </motion.h1>
 
           <motion.p
-            className={cn(landingUi.heroSubtitle, "max-w-lg max-lg:!mt-4 md:max-w-[32rem] lg:!mt-6")}
+            className={cn(
+              landingUi.heroSubtitle,
+              "max-w-lg max-lg:!mt-4 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]",
+            )}
             variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
           >
             {t("landing.showcase.description")}
           </motion.p>
 
           <motion.div
-            className={cn(landingUi.heroCtaRow, "max-lg:!mt-5 max-lg:pb-0 !mt-6 lg:!mt-8")}
+            className={cn(landingUi.heroCtaRow, "max-lg:!mt-5 max-lg:w-full max-lg:pb-0 !mt-6 lg:!mt-8")}
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
           >
             <Link to="/auth?mode=signup&role=business&from=landing" className={landingUi.heroCtaPrimary}>
@@ -177,25 +177,28 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         {/* Product showcase — primary focal point on mobile */}
         <motion.div
           className={cn(
-            "relative z-0 w-full max-lg:mt-4 max-lg:pb-1 sm:max-lg:mt-5 sm:max-lg:pb-2 lg:mt-0 lg:w-[46%]",
-            landingUi.heroShowcaseDesktopCol,
+            "relative z-0 w-full max-lg:mt-4 max-lg:pb-1 sm:max-lg:mt-5 sm:max-lg:pb-2",
+            isDe ? landingUi.heroShowcaseColDesktopDe : landingUi.heroShowcaseColDesktopEn,
+            isDe ? landingUi.heroShowcaseDesktopColDe : landingUi.heroShowcaseDesktopColEn,
           )}
           variants={landingHeroTextReveal}
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 bg-[linear-gradient(105deg,#fafaf8_0%,#fafaf8_12%,rgba(250,249,247,0.85)_28%,rgba(250,249,247,0.35)_48%,transparent_62%)] lg:via-[#fafaf8]/20"
+            className={cn(
+              "pointer-events-none absolute inset-0",
+              "max-lg:bg-[linear-gradient(105deg,#fafaf8_0%,#fafaf8_14%,rgba(250,249,247,0.98)_24%,rgba(250,249,247,0.88)_36%,rgba(250,249,247,0.45)_50%,transparent_62%)]",
+              "lg:bg-[linear-gradient(90deg,#fafaf8_0%,rgba(250,249,247,0.72)_10%,rgba(250,249,247,0.28)_20%,transparent_30%,transparent_70%,rgba(250,249,247,0.28)_80%,rgba(250,249,247,0.72)_90%,#fafaf8_100%)]",
+            )}
           />
 
           <motion.div
-            className={cn(
-              "flex items-center justify-center max-lg:relative max-lg:px-5 max-lg:pt-3 max-lg:pb-1 sm:max-lg:px-7 sm:max-lg:pt-4 sm:max-lg:pb-2",
-              "lg:absolute lg:inset-0",
-              landingUi.heroShowcaseDesktopStage,
-            )}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.99 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: landingHeroEaseOut, delay: 0.1 }}
+            className={isDe ? landingUi.heroShowcaseDesktopStageDe : landingUi.heroShowcaseDesktopStageEn}
+            initial={
+              reduceMotion ? false : isLargeScreen ? { opacity: 0 } : { opacity: 0, scale: 0.99 }
+            }
+            animate={{ opacity: 1, ...(isLargeScreen ? {} : { scale: 1 }) }}
+            transition={{ duration: 0.45, ease: landingHeroEaseOut, delay: 0.1 }}
           >
             <LandingHeroShowcase
               src={imageSrc}
@@ -203,57 +206,47 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               className={cn(
                 "relative mx-auto flex w-full justify-center",
                 landingUi.heroShowcaseMobileShell,
-                landingUi.heroShowcaseDesktopShell,
+                isDe ? landingUi.heroShowcaseDesktopShellDe : landingUi.heroShowcaseDesktopShellEn,
               )}
-              compositionOverlay={
-                <>
-                  <motion.div
-                    aria-hidden
-                    className={heroFloatCardGlowClass}
-                    initial={reduceMotion ? false : { opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.8, delay: 0.5 }}
-                  />
-                  <motion.div
-                    className={heroFloatCardClass}
-                    initial={reduceMotion ? false : { opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4, ease: landingHeroEaseOut }}
-                  >
-                    <motion.div
-                      className="flex w-full items-center max-lg:gap-1.5 md:gap-2"
-                      animate={floatCardLoop ? floatCardMotion : undefined}
-                      transition={
-                        floatCardLoop
-                          ? { duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1.2 }
-                          : undefined
-                      }
-                    >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 ring-1 ring-primary/12 max-lg:h-5 max-lg:w-5 md:h-7 md:w-7 md:rounded-lg lg:h-8 lg:w-8 lg:rounded-xl">
-                        <TrendingUp
-                          className="h-3 w-3 text-primary md:h-3.5 md:w-3.5 lg:h-4 lg:w-4"
-                          strokeWidth={2.25}
-                          aria-hidden
-                        />
-                      </span>
-                      <div className="min-w-0">
-                        <strong className="block font-sans text-xs font-semibold tabular-nums tracking-tight text-neutral-900 md:text-sm lg:text-base">
-                          {t("landing.showcase.floatCardValue")}
-                        </strong>
-                        <span className="text-[9px] leading-snug text-neutral-600 md:text-[10px] lg:text-[11px]">
-                          {t("landing.showcase.floatCardLabel")}
-                        </span>
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                </>
-              }
             />
+          </motion.div>
+
+          <motion.div
+            className={landingUi.heroFloatLayer}
+            initial={reduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.45, delay: 0.35, ease: landingHeroEaseOut }}
+          >
+            <div aria-hidden className={heroFloatCardGlowClass} />
+            <motion.div
+              className={heroFloatCardClass}
+              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.4, ease: landingHeroEaseOut }}
+            >
+              <div className="flex w-full items-center max-lg:gap-1.5 md:gap-2">
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 ring-1 ring-primary/12 max-lg:h-5 max-lg:w-5 md:h-7 md:w-7 md:rounded-lg lg:h-8 lg:w-8 lg:rounded-xl">
+                  <TrendingUp
+                    className="h-3 w-3 text-primary md:h-3.5 md:w-3.5 lg:h-4 lg:w-4"
+                    strokeWidth={2.25}
+                    aria-hidden
+                  />
+                </span>
+                <div className="min-w-0">
+                  <strong className="block font-sans text-xs font-semibold tabular-nums tracking-tight text-neutral-900 md:text-sm lg:text-base">
+                    {t("landing.showcase.floatCardValue")}
+                  </strong>
+                  <span className="text-[9px] leading-snug text-neutral-600 md:text-[10px] lg:text-[11px]">
+                    {t("landing.showcase.floatCardLabel")}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         </motion.div>
 
         <motion.div
-          className="relative z-10 px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-7 lg:hidden"
+          className="relative z-10 pb-10 pt-6 max-lg:px-0 sm:pb-12 sm:pt-7 lg:hidden"
           variants={landingHeroTextReveal}
         >
           {metricsRow(
@@ -264,3 +257,4 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
     </section>
   );
 }
+

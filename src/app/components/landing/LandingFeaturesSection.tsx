@@ -15,7 +15,7 @@ const cardClassName = cn(
   "px-3.5 pb-4 pt-3.5 max-md:px-3.5 max-md:pb-4 max-md:pt-3.5 sm:px-6 sm:pb-7 sm:pt-6",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.05)]",
   "transition-[transform,box-shadow,border-color] duration-300 ease-out",
-  "md:hover:-translate-y-1 md:hover:border-primary/20",
+  "md:hover:border-primary/20",
   "md:hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_16px_40px_rgba(235,153,44,0.1)]",
   "dark:border-neutral-700/90 dark:bg-neutral-900",
   "dark:shadow-[0_1px_2px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.42)]",
@@ -30,7 +30,7 @@ const iconWrapClassName = cn(
 );
 
 const iconClassName =
-  "h-4 w-4 stroke-[2.25] text-primary transition-transform duration-300 max-md:h-4 max-md:w-4 group-hover:scale-105 dark:text-[#f0a84d] sm:h-[22px] sm:w-[22px]";
+  "h-4 w-4 stroke-[2.25] text-primary max-md:h-4 max-md:w-4 dark:text-[#f0a84d] sm:h-[22px] sm:w-[22px]";
 
 const featureAccentVariants: LandingAccentVariant[] = [
   "spark",

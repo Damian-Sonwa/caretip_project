@@ -33,10 +33,11 @@ export function HospitalityTeamsUnifiedSection() {
     >
       <motion.div
         className="mx-auto w-full max-w-7xl min-w-0"
-        initial={{ opacity: 0, y: 8 }}
+        data-polish-view
+        initial={{ opacity: 0, y: 6 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
-        transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
       >
         <header className={landingUi.hospitalityIntro}>
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
@@ -50,15 +51,15 @@ export function HospitalityTeamsUnifiedSection() {
           initial={{ opacity: 0, y: 6 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.05 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
         >
           {/* Features — left on desktop */}
           <motion.div
             className="order-2 min-w-0 lg:order-1"
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.08 }}
+            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
           >
             <div className={landingUi.hospitalityFeaturePanel}>
               {features.map((f, idx) => (

@@ -1,4 +1,5 @@
 import "./lib/fonts/inter";
+import "./lib/fonts/heroDisplay";
 import "./app/lib/pwaInstallDeferred";
 import "./i18n/i18n";
 import React from "react";

@@ -6,9 +6,9 @@ export const caretipType = {
   sans: "font-sans",
 
   heroTitle:
-    "font-sans text-hero-title font-extrabold text-balance text-neutral-950 dark:text-neutral-50",
+    "font-hero-display text-hero-title font-bold text-balance text-neutral-950 dark:text-neutral-50",
   heroTitleDe:
-    "font-sans text-hero-title-de font-extrabold text-balance text-neutral-950 dark:text-neutral-50",
+    "font-hero-display text-hero-title-de font-bold text-balance text-neutral-950 dark:text-neutral-50",
   sectionTitle:
     "font-sans text-section-title font-semibold text-balance text-neutral-950 dark:text-neutral-50",
   cardTitle:

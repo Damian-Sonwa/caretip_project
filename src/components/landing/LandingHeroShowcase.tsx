@@ -1,11 +1,7 @@
-import type { ImgHTMLAttributes, ReactNode } from "react";
+import type { ImgHTMLAttributes } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
-import {
-  landingHeroEaseOut,
-  landingHeroShowcaseFloat,
-  landingHeroShowcaseFloatTransition,
-} from "@/components/landing/landingHeroMotion";
+import { landingHeroEaseOut, landingHeroShowcaseEnter } from "@/components/landing/landingHeroMotion";
 import { landingUi } from "@/components/landing/landingUi";
 import { useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
@@ -14,29 +10,24 @@ type LandingHeroShowcaseProps = {
   src: string;
   alt: string;
   className?: string;
-  /** Anchored on the product frame (moves with showcase float). */
-  compositionOverlay?: ReactNode;
 };
 
-/** Premium hero showcase — entrance motion + optional desktop float; glows are static. */
-export function LandingHeroShowcase({ src, alt, className, compositionOverlay }: LandingHeroShowcaseProps) {
+/** Premium hero showcase — one entrance pass; static glows (no infinite float on desktop). */
+export function LandingHeroShowcase({ src, alt, className }: LandingHeroShowcaseProps) {
   const reduceMotion = useReducedMotion();
   const isLargeScreen = useLargeScreen();
-  const enableFloat = !reduceMotion && isLargeScreen;
+  const useLightEnter = reduceMotion || isLargeScreen;
 
   return (
     <motion.div
       className={cn(landingUi.heroMediaShell, className)}
-      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+      initial={reduceMotion || isLargeScreen ? false : { opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55, ease: landingHeroEaseOut }}
+      transition={{ duration: 0.45, ease: landingHeroEaseOut }}
     >
-      <motion.div
+      <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-3 left-1/2 z-0 h-8 w-[78%] -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.2)_0%,rgba(120,113,105,0.06)_45%,transparent_72%)] blur-lg dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.35)_0%,transparent_70%)] max-lg:blur-md"
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 0.28 }}
-        transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
+        className="pointer-events-none absolute -bottom-3 left-1/2 z-0 h-8 w-[78%] -translate-x-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(120,113,105,0.2)_0%,rgba(120,113,105,0.06)_45%,transparent_72%)] blur-lg opacity-[0.28] dark:bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.35)_0%,transparent_70%)] max-lg:blur-md lg:hidden"
       />
 
       <div className={landingUi.heroShowcaseFrame}>
@@ -44,35 +35,39 @@ export function LandingHeroShowcase({ src, alt, className, compositionOverlay }:
           aria-hidden
           className={cn(
             landingUi.heroShowcaseGlow,
-            "blur-2xl opacity-[0.52] max-lg:blur-xl max-lg:opacity-40",
+            "blur-2xl opacity-[0.52] max-lg:blur-xl max-lg:opacity-40 lg:blur-xl lg:opacity-45",
           )}
         />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -inset-3 z-0 rounded-[36px] bg-[radial-gradient(circle_at_58%_36%,rgba(235,153,44,0.14)_0%,rgba(235,153,44,0.03)_42%,transparent_68%)] blur-xl opacity-50 max-lg:blur-lg max-lg:opacity-40"
-        />
-
         <motion.div
-          className="relative z-[1] h-full min-h-0 w-full max-lg:h-auto"
-          animate={enableFloat ? landingHeroShowcaseFloat : undefined}
-          transition={enableFloat ? landingHeroShowcaseFloatTransition : undefined}
+          className={landingUi.heroShowcaseStack}
+          variants={useLightEnter ? landingHeroShowcaseEnter : undefined}
+          initial={
+            reduceMotion
+              ? false
+              : useLightEnter
+                ? "hidden"
+                : { opacity: 0, scale: 0.994 }
+          }
+          animate={reduceMotion ? false : useLightEnter ? "visible" : { opacity: 1, scale: 1 }}
+          transition={
+            useLightEnter || reduceMotion
+              ? undefined
+              : { duration: 0.5, ease: landingHeroEaseOut, delay: 0.08 }
+          }
         >
-          <motion.div
-            className={cn(landingUi.heroShowcaseCard, "h-full w-full")}
-            initial={reduceMotion ? false : { opacity: 0, scale: 0.994 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5, ease: landingHeroEaseOut, delay: 0.08 }}
-          >
-            <img
-              src={src}
-              alt={alt}
-              className={landingUi.heroShowcaseImg}
-              loading="eager"
-              decoding="async"
-              {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
-            />
-          </motion.div>
-          {compositionOverlay}
+          <div className={cn(landingUi.heroShowcaseCard, "h-full w-full")}>
+            <div className={landingUi.heroShowcaseCardMedia}>
+              <img
+                src={src}
+                alt={alt}
+                className={landingUi.heroShowcaseImg}
+                loading="eager"
+                decoding="async"
+                sizes="(max-width: 1023px) min(90vw, 448px), 672px"
+                {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
     </motion.div>

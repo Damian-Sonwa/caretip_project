@@ -37,7 +37,7 @@ export function EmployeeLandingSection() {
       cta={{
         label: t("landing.employeeSection.cta"),
         to: "/join",
-        icon: <LayoutDashboard className="h-5 w-5 shrink-0" aria-hidden />,
+        icon: <LayoutDashboard className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />,
       }}
       visual={
         <LandingShowcaseVisualFrame>

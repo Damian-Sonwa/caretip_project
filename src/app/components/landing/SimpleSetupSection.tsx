@@ -42,13 +42,14 @@ export function SimpleSetupSection() {
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_75%_40%,rgba(235,153,44,0.06),transparent_60%)]"
       />
 
-      <div className={cn(landingUi.splitGrid, "relative lg:items-start lg:gap-14")}>
+      <div className={cn(landingUi.splitGrid, landingUi.sectionShell, "relative lg:items-start")}>
         <div className={cn(landingUi.copyColumn, "lg:order-1 lg:max-w-xl")}>
           <motion.div
-            initial={{ opacity: 0, y: 14 }}
+            data-polish-view
+            initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.55 }}
+            transition={{ duration: 0.45 }}
             className={cn(landingUi.copyStack, "mb-8 sm:mb-10")}
           >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
