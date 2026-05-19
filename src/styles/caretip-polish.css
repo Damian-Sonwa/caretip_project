@@ -27,6 +27,18 @@
     }
   }
 
+  /* English hero — stacked lines on mobile; single editorial line on desktop */
+  @media (min-width: 1024px) {
+    .caretip-landing .caretip-hero-headline--en > span {
+      display: inline;
+      margin-top: 0 !important;
+    }
+
+    .caretip-landing .caretip-hero-headline--en > span + span::before {
+      content: " ";
+    }
+  }
+
   /* App: consistent card radius and icon alignment in shells */
   .caretip-dashboard-shell [data-slot="card"] {
     border-radius: 1rem;

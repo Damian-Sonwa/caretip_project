@@ -1,14 +1,13 @@
 import { LayoutDashboard } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { LandingEarningsPulse } from "@/app/components/landing/LandingEarningsPulse";
 import {
   LandingShowcaseVisualFrame,
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
-import newEmployeeImg from "../../../../images/cafe-employee.png";
+import employeeSectionImg from "../../../../images/FYP.jpeg";
 
 export function EmployeeLandingSection() {
   const { t } = useTranslation();
@@ -43,18 +42,11 @@ export function EmployeeLandingSection() {
         <LandingShowcaseVisualFrame>
           <div className={cn(landingUi.showcaseVisualFrame, "relative")}>
             <img
-              src={newEmployeeImg}
+              src={employeeSectionImg}
               alt={t("landing.employeeSection.imageAlt")}
-              className={cn(landingUi.showcaseVisualImg, "object-[50%_24%]")}
+              className={cn(landingUi.showcaseVisualImg, "object-[center_42%]")}
               loading="lazy"
               decoding="async"
-            />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-x-0 bottom-0 h-[38%] bg-gradient-to-t from-neutral-900/35 via-neutral-900/12 to-transparent"
-            />
-            <LandingEarningsPulse
-              className="absolute bottom-3 left-3 z-20 sm:bottom-6 sm:left-6"
             />
           </div>
         </LandingShowcaseVisualFrame>

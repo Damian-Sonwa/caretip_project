@@ -207,7 +207,7 @@ export const landingUi = {
     "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0 md:pr-1 lg:pr-2 xl:pr-3",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "w-full max-w-[26ch] antialiased text-left sm:max-w-[28ch] md:max-w-[24ch] lg:max-w-[30ch] xl:max-w-[32ch]",
+    "caretip-hero-headline caretip-hero-headline--en w-full antialiased text-left max-lg:max-w-[min(100%,19rem)] max-lg:pl-0.5 max-lg:pr-2 lg:max-w-[30ch] xl:max-w-[32ch]",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
     "w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
