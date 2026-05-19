@@ -956,7 +956,20 @@
       "floatSetupLabel": "Setup status",
       "floatSetupValue": "Ready to collect tips",
       "floatTimeLabel": "Typical time",
-      "floatTimeValue": "Under 5 minutes"
+      "floatTimeValue": "Under 5 minutes",
+      "visualCaption1": "Create your space — warm and simple",
+      "visualCaption2": "Bring your team together",
+      "visualCaption3": "QR codes ready where guests are",
+      "visualCaption4": "Tips flow in — instantly appreciated",
+      "visualWhisperLabel": "Today",
+      "phoneWelcome": "Welcome",
+      "phoneWelcomeSub": "Your venue, ready in minutes",
+      "phoneTeam": "Your team",
+      "phoneTeamSub": "Everyone set to shine",
+      "phoneQr": "Ready for guests",
+      "phoneQrSub": "Print and place at the table",
+      "phoneCelebrate": "Tip received",
+      "phoneCelebrateSub": "Gratitude, delivered instantly"
     },
     "liveDemo": {
       "slideNavAria": "Product preview steps",

@@ -1,19 +1,15 @@
 import * as React from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { BarChart3, Mail, QrCode, UserPlus, Users } from "lucide-react";
+import { Heart, QrCode, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useInViewActive, useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
-
-const SLIDE_MS_MOBILE = 2800;
-const SLIDE_MS_DESKTOP = 2200;
-const FADE_MS_MOBILE = 0.32;
-const FADE_MS_DESKTOP = 0.4;
-const SLIDE_X_MOBILE = 8;
-const SLIDE_X_DESKTOP = 12;
+import atmosphereImg from "../../../../images/beauty-r.png";
+import caretipLogo from "@/assets/brand/company_logo.png";
 
 export const LIVE_DEMO_SLIDE_IDS = ["signup", "team", "qr", "dashboard"] as const;
 export type LiveDemoSlideId = (typeof LIVE_DEMO_SLIDE_IDS)[number];
+
+const STEP_IDS = ["signup", "team", "qr", "celebrate"] as const;
 
 type LiveInMinutesLaptopDemoProps = {
   videoSrc?: string;
@@ -23,278 +19,202 @@ type LiveInMinutesLaptopDemoProps = {
 
 export function LiveInMinutesLaptopDemo({
   videoSrc,
-  activeIndex: controlledIndex,
-  onActiveIndexChange,
+  activeIndex = 0,
 }: LiveInMinutesLaptopDemoProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const isDesktop = useLargeScreen(768);
-  const { ref: inViewRef, active: inView } = useInViewActive<HTMLDivElement>();
-  const [internalIndex, setInternalIndex] = React.useState(0);
+  const index = Math.min(Math.max(0, activeIndex), STEP_IDS.length - 1);
+  const stepId = STEP_IDS[index];
 
-  const slides = React.useMemo(
-    () =>
-      [
-        { id: "signup" as const, label: t("landing.liveDemo.slideSignup") },
-        { id: "team" as const, label: t("landing.liveDemo.slideTeam") },
-        { id: "qr" as const, label: t("landing.liveDemo.slideQr") },
-        { id: "dashboard" as const, label: t("landing.liveDemo.slideDashboard") },
-      ],
+  const captions = React.useMemo(
+    () => [
+      t("landing.simpleSetup.visualCaption1"),
+      t("landing.simpleSetup.visualCaption2"),
+      t("landing.simpleSetup.visualCaption3"),
+      t("landing.simpleSetup.visualCaption4"),
+    ],
     [t],
   );
 
-  const isControlled = controlledIndex !== undefined;
-  const index = isControlled ? Math.min(Math.max(0, controlledIndex), slides.length - 1) : internalIndex;
-  const indexRef = React.useRef(index);
-  indexRef.current = index;
-
-  const slideMs = isDesktop ? SLIDE_MS_DESKTOP : SLIDE_MS_MOBILE;
-  const fadeMs = isDesktop ? FADE_MS_DESKTOP : FADE_MS_MOBILE;
-  const slideX = isDesktop ? SLIDE_X_DESKTOP : SLIDE_X_MOBILE;
-
-  const setIndex = React.useCallback(
-    (next: number) => {
-      const clamped = ((next % slides.length) + slides.length) % slides.length;
-      if (!isControlled) setInternalIndex(clamped);
-      onActiveIndexChange?.(clamped);
-    },
-    [isControlled, onActiveIndexChange, slides.length],
-  );
-
-  React.useEffect(() => {
-    if (reduceMotion || videoSrc) return;
-    // Desktop: auto-advance whenever mounted; mobile: only while in view (perf).
-    if (!isDesktop && !inView) return;
-
-    const timer = window.setInterval(() => {
-      setIndex(indexRef.current + 1);
-    }, slideMs);
-    return () => window.clearInterval(timer);
-  }, [reduceMotion, videoSrc, inView, isDesktop, slideMs, setIndex]);
-
-  const active = slides[reduceMotion ? 0 : index];
+  if (videoSrc) {
+    return (
+      <motion.div
+        className="relative mx-auto w-full max-w-[min(100%,20rem)] overflow-hidden rounded-[1.5rem] shadow-[0_20px_50px_-24px_rgba(15,23,42,0.28)] ring-1 ring-neutral-900/[0.06] sm:max-w-[22rem] dark:ring-white/[0.08]"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <video autoPlay muted loop playsInline className="aspect-[3/4] w-full object-cover" src={videoSrc} />
+      </motion.div>
+    );
+  }
 
   return (
-    <div ref={inViewRef} className="relative mx-auto w-full max-w-none sm:max-w-2xl">
-      <p className="mb-2.5 min-h-[1.25rem] px-1 text-center text-[13px] font-semibold uppercase leading-snug tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mb-4 sm:text-xs sm:tracking-[0.14em]">
-        <span className="text-primary">{active.label}</span>
-      </p>
-
-      <div className="relative w-full rounded-[2rem] border border-neutral-200/95 bg-gradient-to-b from-neutral-50 to-neutral-100/90 p-2.5 pt-3.5 shadow-[0_2px_4px_rgba(15,15,15,0.05),0_20px_48px_rgba(15,15,15,0.1)] dark:border-neutral-600 dark:from-neutral-800 dark:to-neutral-900 sm:rounded-[2.5rem] sm:p-3 sm:pt-4">
-        <div
+    <div className="relative mx-auto w-full max-w-[min(100%,20rem)] sm:max-w-[22rem]">
+      <motion.div
+        className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_28px_60px_-28px_rgba(30,24,16,0.35)] ring-1 ring-neutral-900/[0.05] dark:ring-white/[0.08]"
+        initial={{ opacity: 0, y: 8 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-8%" }}
+        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+      >
+        <img
+          src={atmosphereImg}
+          alt=""
           aria-hidden
-          className="absolute left-1/2 top-1.5 h-1 w-10 -translate-x-1/2 rounded-full bg-neutral-300 dark:bg-neutral-600"
+          className="absolute inset-0 h-full w-full scale-105 object-cover object-center"
+          loading="lazy"
+          decoding="async"
+        />
+        <motion.div
+          aria-hidden
+          className="absolute inset-0 bg-[linear-gradient(180deg,rgba(28,22,16,0.25)_0%,rgba(28,22,16,0.55)_55%,rgba(20,16,12,0.72)_100%)]"
+        />
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(235,153,44,0.22),transparent_55%)]"
         />
 
-        <div className="mt-2 overflow-hidden rounded-xl border border-neutral-200/90 bg-white shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-neutral-900/[0.06] dark:border-neutral-600 dark:bg-neutral-950 dark:ring-white/10">
-          <div className="relative w-full bg-white max-md:aspect-[4/3] max-md:min-h-[min(72vw,280px)] aspect-[16/10] dark:bg-neutral-950 sm:min-h-0 sm:aspect-[16/10]">
-            {videoSrc ? (
-              <video
-                autoPlay
-                muted
-                loop
-                playsInline
-                className="absolute inset-0 h-full w-full object-cover object-top"
-                src={videoSrc}
-              />
-            ) : (
-              <div className="absolute inset-0 overflow-hidden">
-                <AnimatePresence mode="wait" initial={false}>
-                  <motion.div
-                    key={active.id}
-                    role="img"
-                    aria-label={t("landing.liveDemo.demoAria", { label: active.label })}
-                    initial={{ opacity: 0, x: reduceMotion ? 0 : slideX }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: reduceMotion ? 0 : -slideX }}
-                    transition={{ duration: fadeMs, ease: [0.22, 1, 0.36, 1] }}
-                    className="absolute inset-0 flex min-h-0 flex-col overflow-hidden p-2 max-md:p-2.5 sm:p-[5.5%]"
-                  >
-                    {active.id === "signup" && <DemoSignup />}
-                    {active.id === "team" && <DemoTeam />}
-                    {active.id === "qr" && <DemoQr />}
-                    {active.id === "dashboard" && <DemoDashboard />}
-                  </motion.div>
-                </AnimatePresence>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div
-          aria-hidden
-          className="mx-auto mt-1.5 h-1.5 w-[88%] rounded-b-md bg-gradient-to-b from-neutral-300 to-neutral-400/90 dark:from-neutral-600 dark:to-neutral-700"
-        />
-      </div>
-
-      {!videoSrc ? (
-        <div className="mt-3 flex justify-center gap-2" role="tablist" aria-label={t("landing.liveDemo.slideNavAria")}>
-          {slides.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              role="tab"
-              aria-selected={i === index}
-              aria-label={s.label}
-              onClick={() => setIndex(i)}
-              className={cn(
-                "h-2 rounded-full transition-all duration-300",
-                i === index ? "w-6 bg-primary" : "w-2 bg-neutral-300 hover:bg-neutral-400 dark:bg-neutral-600",
-              )}
-            />
-          ))}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-const demoShell =
-  "flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-neutral-200/90 bg-white p-2 text-left shadow-[0_4px_20px_rgba(15,15,15,0.06)] max-md:p-2 sm:p-3.5 dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_8px_24px_rgba(0,0,0,0.35)]";
-
-function DemoSignup() {
-  const { t } = useTranslation();
-  return (
-    <div className={demoShell}>
-      <div className="mb-2.5 flex items-center gap-2 border-b border-neutral-200 pb-2.5 dark:border-neutral-700">
-        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary ring-1 ring-primary/20">
-          <UserPlus className="h-4 w-4" strokeWidth={2.25} />
-        </div>
-        <div>
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-500 dark:text-neutral-400">
-            {t("landing.liveDemo.signupBrand")}
-          </p>
-          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.signupTitle")}</p>
-        </div>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col justify-between gap-1.5 max-md:gap-1 sm:gap-2.5">
-        <div>
-          <p className="mb-1 text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.workEmail")}</p>
-          <div className="flex items-center gap-2 rounded-lg border border-neutral-200 bg-neutral-50 px-2.5 py-2 dark:border-neutral-600 dark:bg-neutral-800">
-            <Mail className="h-3.5 w-3.5 shrink-0 text-neutral-500" />
-            <span className="truncate text-[12px] font-medium text-neutral-800 dark:text-neutral-200">
-              {t("landing.liveDemo.sampleEmail")}
-            </span>
-          </div>
-        </div>
-        <div>
-          <p className="mb-1 text-[10px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.password")}</p>
-          <div className="h-6 rounded-md border border-neutral-200 bg-neutral-50 dark:border-neutral-600 dark:bg-neutral-800 sm:h-8 sm:rounded-lg" />
-        </div>
-        <button
-          type="button"
-          className="shrink-0 w-full rounded-md bg-primary py-2 text-[10px] font-bold text-white shadow-[0_4px_14px_rgba(235,153,44,0.35)] sm:rounded-lg sm:py-2.5 sm:text-[11px]"
+        <motion.div
+          className="absolute inset-x-0 top-[10%] bottom-[14%] flex items-center justify-center px-6"
+          animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
+          transition={
+            reduceMotion
+              ? undefined
+              : { duration: 7, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }
+          }
         >
-          {t("landing.liveDemo.continue")}
-        </button>
-      </div>
-    </div>
-  );
-}
+          <PhoneFrame>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={stepId}
+                role="img"
+                aria-label={t("landing.liveDemo.demoAria", { label: captions[index] })}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                className="flex h-full flex-col items-center justify-center px-4 py-8 text-center"
+              >
+                {stepId === "signup" && <PhoneWelcome />}
+                {stepId === "team" && <PhoneTeam />}
+                {stepId === "qr" && <PhoneQr />}
+                {stepId === "celebrate" && <PhoneCelebrate />}
+              </motion.div>
+            </AnimatePresence>
+          </PhoneFrame>
+        </motion.div>
 
-function DemoTeam() {
-  const { t } = useTranslation();
-  const names = ["Sofia, Server", "Marcus, Bar", "Aisha, Host"];
-  return (
-    <div className={demoShell}>
-      <p className="shrink-0 text-[13px] font-bold leading-snug text-neutral-900 dark:text-neutral-100 sm:text-[13px]">{t("landing.liveDemo.inviteTitle")}</p>
-      <p className="mt-0.5 shrink-0 text-[9px] font-medium leading-snug text-neutral-600 dark:text-neutral-400 sm:text-[10px]">{t("landing.liveDemo.inviteSub")}</p>
-      <ul className="mt-1.5 flex min-h-0 flex-1 flex-col gap-1 overflow-hidden max-md:gap-1 sm:mt-3 sm:gap-2">
-        {names.map((name, i) => (
-          <li
-            key={name}
-            className="flex items-center gap-1.5 rounded-md border border-neutral-200 bg-neutral-50 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-800/80 max-md:py-1 sm:gap-2 sm:rounded-lg sm:px-2.5 sm:py-2"
+        {stepId === "celebrate" ? (
+          <motion.div
+            aria-hidden
+            className="pointer-events-none absolute bottom-5 right-4 rounded-xl border border-white/25 bg-white/12 px-2.5 py-1.5 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5, delay: 0.15 }}
           >
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-[9px] font-bold text-primary sm:h-7 sm:w-7 sm:text-[10px]">
-              {name[0]}
-            </div>
-            <span className="flex-1 truncate text-[12px] font-semibold text-neutral-800 dark:text-neutral-200">{name}</span>
-            {i === 0 ? (
-              <span className="rounded-md bg-primary/15 px-2 py-0.5 text-[9px] font-semibold text-primary">
-                {t("landing.liveDemo.pending")}
-              </span>
-            ) : (
-              <span className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.active")}</span>
-            )}
-          </li>
-        ))}
-      </ul>
-      <div className="mt-1.5 flex shrink-0 items-center justify-center gap-1 rounded-md border border-dashed border-primary/35 bg-primary/[0.08] py-1.5 text-[9px] font-semibold text-primary sm:mt-2 sm:gap-1.5 sm:rounded-lg sm:py-2.5 sm:text-[10px]">
-        <Users className="h-3.5 w-3.5" aria-hidden />
-        {t("landing.liveDemo.addAnother")}
-      </div>
+            <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-white/70">
+              {t("landing.simpleSetup.visualWhisperLabel")}
+            </p>
+            <p className="text-xs font-semibold tabular-nums text-white">€284</p>
+          </motion.div>
+        ) : null}
+      </motion.div>
+
+      <p className="mt-4 text-center font-sans text-[13px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:text-sm">
+        {captions[index]}
+      </p>
     </div>
   );
 }
 
-function DemoQr() {
-  const { t } = useTranslation();
-  const labels = [t("landing.liveDemo.qrLabel1"), t("landing.liveDemo.qrLabel2"), t("landing.liveDemo.qrLabel3")];
+function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
-    <div className={demoShell}>
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.qrTitle")}</p>
-          <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.qrSub")}</p>
-        </div>
-        <QrCode className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />
-      </div>
-      <div className="mt-1.5 grid min-h-0 flex-1 grid-cols-3 gap-1 sm:mt-3 sm:gap-2">
-        {labels.map((label) => (
-          <div
-            key={label}
-            className="flex flex-col items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 p-2 dark:border-neutral-700 dark:bg-neutral-800/80"
+    <motion.div className="relative h-full w-full max-w-[11.25rem] sm:max-w-[12rem]">
+      <motion.div className="relative h-full rounded-[1.65rem] bg-neutral-900/90 p-[3px] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-white/10">
+        <span
+          aria-hidden
+          className="absolute left-1/2 top-1.5 z-10 h-[3px] w-10 -translate-x-1/2 rounded-full bg-neutral-700"
+        />
+        <motion.div className="h-full overflow-hidden rounded-[1.45rem] bg-[linear-gradient(180deg,#fffdf9_0%,#f8f4ee_100%)]">
+          {children}
+        </motion.div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+function PhoneWelcome() {
+  const { t } = useTranslation();
+  return (
+    <>
+      <img src={caretipLogo} alt="" className="mb-4 h-11 w-auto opacity-90 sm:h-12" aria-hidden />
+      <p className="font-sans text-[15px] font-bold leading-snug tracking-tight text-neutral-900">
+        {t("landing.simpleSetup.phoneWelcome")}
+      </p>
+      <p className="mt-2 max-w-[9.5rem] text-[11px] leading-relaxed text-neutral-600">
+        {t("landing.simpleSetup.phoneWelcomeSub")}
+      </p>
+      <span className="mt-5 inline-flex items-center gap-1 rounded-full bg-primary/12 px-3 py-1.5 text-[10px] font-semibold text-primary ring-1 ring-primary/15">
+        <Sparkles className="h-3 w-3" aria-hidden />
+        {t("landing.liveDemo.continue")}
+      </span>
+    </>
+  );
+}
+
+function PhoneTeam() {
+  const { t } = useTranslation();
+  const avatars = ["S", "M", "A"];
+  return (
+    <>
+      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-100/80 text-primary ring-1 ring-amber-200/60">
+        <Users className="h-5 w-5" strokeWidth={2} aria-hidden />
+      </span>
+      <p className="font-sans text-[15px] font-bold tracking-tight text-neutral-900">{t("landing.simpleSetup.phoneTeam")}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-neutral-600">{t("landing.simpleSetup.phoneTeamSub")}</p>
+      <motion.div className="mt-4 flex -space-x-2">
+        {avatars.map((initial) => (
+          <span
+            key={initial}
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-amber-100 to-orange-50 text-[11px] font-bold text-neutral-800 ring-2 ring-white"
           >
-            <div className="grid h-8 w-8 grid-cols-4 gap-px rounded bg-neutral-900 p-0.5 sm:h-11 sm:w-11 sm:p-1">
-              {Array.from({ length: 16 }).map((_, i) => (
-                <div key={i} className={cn("rounded-[1px]", i % 3 === 0 ? "bg-white" : "bg-neutral-300")} />
-              ))}
-            </div>
-            <span className="mt-1.5 text-[9px] font-semibold text-neutral-700 dark:text-neutral-300">{label}</span>
-          </div>
+            {initial}
+          </span>
         ))}
-      </div>
-      <p className="mt-2 text-center text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.qrFooter")}</p>
-    </div>
+      </motion.div>
+    </>
   );
 }
 
-function DemoDashboard() {
+function PhoneQr() {
   const { t } = useTranslation();
   return (
-    <div className={demoShell}>
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="text-[15px] font-bold text-neutral-900 dark:text-neutral-100">{t("landing.liveDemo.dashToday")}</p>
-          <p className="text-[10px] font-medium text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.dashTipsSub")}</p>
-        </div>
-        <BarChart3 className="h-5 w-5 text-primary" strokeWidth={2.25} aria-hidden />
-      </div>
-      <div className="mt-1.5 grid shrink-0 grid-cols-2 gap-1.5 sm:mt-2.5 sm:gap-2">
-        <div className="rounded-md border border-primary/20 bg-gradient-to-br from-primary/12 to-transparent p-2 dark:border-primary/30 sm:rounded-lg sm:p-2.5">
-          <p className="text-[8px] font-semibold text-neutral-600 dark:text-neutral-400 sm:text-[9px]">{t("landing.liveDemo.tipsReceived")}</p>
-          <p className="text-base font-bold tabular-nums leading-none text-neutral-900 dark:text-neutral-100 sm:text-xl">€284</p>
-          <p className="text-[9px] font-semibold text-emerald-600 dark:text-emerald-400">{t("landing.liveDemo.dashDelta")}</p>
-        </div>
-        <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 dark:border-neutral-700 dark:bg-neutral-800/80">
-          <p className="text-[9px] font-semibold text-neutral-600 dark:text-neutral-400">{t("landing.liveDemo.dashScans")}</p>
-          <p className="text-base font-bold tabular-nums leading-none text-neutral-900 dark:text-neutral-100 sm:text-xl">48</p>
-        </div>
-      </div>
-      <div className="mt-1.5 flex min-h-0 flex-1 flex-col justify-end sm:mt-2.5">
-        <p className="mb-1 text-[8px] font-semibold uppercase tracking-wide text-neutral-600 dark:text-neutral-400 sm:mb-1.5 sm:text-[9px]">
-          {t("landing.liveDemo.activity")}
-        </p>
-        <div className="flex h-10 origin-bottom items-end gap-1 overflow-hidden rounded-md border border-neutral-200 bg-neutral-50 px-2 pb-2 dark:border-neutral-700 dark:bg-neutral-800/80 max-md:scale-y-[0.72] sm:h-16 sm:scale-y-100 sm:gap-1.5 sm:rounded-lg sm:px-2.5 sm:pb-2.5">
-          {[28, 44, 22, 52, 30, 56, 36].map((px, i) => (
-            <div
-              key={i}
-              className="min-w-0 flex-1 rounded-sm bg-gradient-to-t from-primary to-primary/75"
-              style={{ height: `${px}px` }}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
+    <>
+      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-amber-100/80 text-primary ring-1 ring-amber-200/60">
+        <QrCode className="h-5 w-5" strokeWidth={2} aria-hidden />
+      </span>
+      <p className="font-sans text-[15px] font-bold tracking-tight text-neutral-900">{t("landing.simpleSetup.phoneQr")}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-neutral-600">{t("landing.simpleSetup.phoneQrSub")}</p>
+      <motion.div className="mt-4 grid grid-cols-4 gap-px rounded-lg bg-neutral-900 p-1.5 shadow-sm">
+        {Array.from({ length: 16 }).map((_, i) => (
+          <div key={i} className={cn("h-2 w-2 rounded-[1px]", i % 3 === 0 ? "bg-white" : "bg-neutral-400")} />
+        ))}
+      </motion.div>
+    </>
+  );
+}
+
+function PhoneCelebrate() {
+  const { t } = useTranslation();
+  return (
+    <>
+      <span className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/20">
+        <Heart className="h-5 w-5 fill-primary/20" strokeWidth={2} aria-hidden />
+      </span>
+      <p className="font-sans text-[15px] font-bold tracking-tight text-neutral-900">{t("landing.simpleSetup.phoneCelebrate")}</p>
+      <p className="mt-2 text-[11px] leading-relaxed text-neutral-600">{t("landing.simpleSetup.phoneCelebrateSub")}</p>
+      <p className="mt-4 font-sans text-2xl font-bold tabular-nums tracking-tight text-primary">€12</p>
+    </>
   );
 }

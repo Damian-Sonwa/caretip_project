@@ -6,6 +6,7 @@ import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import { landingUi } from "@/components/landing/landingUi";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
+import { landingFadeReveal } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
@@ -31,36 +32,14 @@ export function HospitalityTeamsUnifiedSection() {
         "bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
       )}
     >
-      <motion.div
-        className="mx-auto w-full max-w-7xl min-w-0"
-        data-polish-view
-        initial={{ opacity: 0, y: 6 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      >
+      <motion.div className="mx-auto w-full max-w-7xl min-w-0" {...landingFadeReveal}>
         <header className={landingUi.hospitalityIntro}>
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
-          <p className={landingUi.hospitalitySubtitle}>
-            {t("landing.hospitality.subtitle")}
-          </p>
+          <p className={landingUi.hospitalitySubtitle}>{t("landing.hospitality.subtitle")}</p>
         </header>
 
-        <motion.div
-          className={landingUi.hospitalityGrid}
-          initial={{ opacity: 0, y: 6 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.05 }}
-        >
-          {/* Features — left on desktop */}
-          <motion.div
-            className="order-2 min-w-0 lg:order-1"
-            initial={{ opacity: 0, y: 6 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1], delay: 0.08 }}
-          >
+        <motion.div className={landingUi.hospitalityGrid}>
+          <div className="order-2 min-w-0 lg:order-1">
             <div className={landingUi.hospitalityFeaturePanel}>
               {features.map((f, idx) => (
                 <LandingBenefitBlock
@@ -72,31 +51,18 @@ export function HospitalityTeamsUnifiedSection() {
                 />
               ))}
             </div>
-          </motion.div>
+          </div>
 
-          {/* Motion media — right on desktop */}
-          <motion.div
-            className="order-1 min-w-0 lg:order-2"
-            initial={{ opacity: 0, y: 8 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1], delay: 0.12 }}
-          >
+          <div className="order-1 min-w-0 lg:order-2">
             <div className={landingUi.hospitalityMediaStack}>
               <LandingSectionAccent variant="line" className="max-lg:mx-auto">
                 {t("landing.hospitality.pill")}
               </LandingSectionAccent>
-              <motion.div
-                className={landingUi.hospitalityMediaCard}
-                initial={{ opacity: 0, y: 6 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-              >
+              <div className={landingUi.hospitalityMediaCard}>
                 <HospitalityBusinessesMarquee />
-              </motion.div>
+              </div>
             </div>
-          </motion.div>
+          </div>
         </motion.div>
       </motion.div>
     </section>

@@ -16,6 +16,21 @@ export const landingSectionReveal = {
   },
 } as const;
 
+/** Opacity-only scroll reveal — avoids translate jitter on mobile. */
+export const landingFadeReveal = {
+  initial: { opacity: 0 },
+  whileInView: { opacity: 1 },
+  viewport: landingSectionViewport,
+  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+} as const;
+
+export function landingFadeRevealWithDelay(delay = 0) {
+  return {
+    ...landingFadeReveal,
+    transition: { ...landingFadeReveal.transition, delay },
+  };
+}
+
 /** Dashboard block entrance — opacity-first, minimal travel. */
 export const dashboardBlockMotion = {
   initial: { opacity: 0, y: 8 },
@@ -33,8 +48,11 @@ export function useInViewActive<T extends HTMLElement = HTMLDivElement>(options?
     if (!node) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => setActive(entry.isIntersecting),
-      { root: null, rootMargin: "80px 0px", threshold: 0.05, ...options },
+      ([entry]) => {
+        const ratio = entry?.intersectionRatio ?? 0;
+        setActive(entry.isIntersecting && ratio >= 0.08);
+      },
+      { root: null, rootMargin: "48px 0px", threshold: [0, 0.08, 0.2], ...options },
     );
     observer.observe(node);
     return () => observer.disconnect();

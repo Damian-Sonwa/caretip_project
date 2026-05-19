@@ -24,7 +24,10 @@ export function Marquee({
   pauseOnHover = false,
   children,
 }: MarqueeProps) {
-  const { ref, active } = useInViewActive<HTMLDivElement>();
+  const { ref, active } = useInViewActive<HTMLDivElement>({
+    rootMargin: "32px 0px",
+    threshold: [0, 0.15],
+  });
   const inner = (
     <div className="flex min-w-full shrink-0 items-stretch" style={{ gap: `${gapPx}px` }}>
       {children}

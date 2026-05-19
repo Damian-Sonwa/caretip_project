@@ -956,7 +956,20 @@
       "floatSetupLabel": "Setupstatus",
       "floatSetupValue": "Bereit für Trinkgelder",
       "floatTimeLabel": "Typische Dauer",
-      "floatTimeValue": "Unter 5 Minuten"
+      "floatTimeValue": "Unter 5 Minuten",
+      "visualCaption1": "Ihr Bereich — warm und unkompliziert",
+      "visualCaption2": "Ihr Team, zusammen am Start",
+      "visualCaption3": "QR-Codes dort, wo Gäste sind",
+      "visualCaption4": "Trinkgelder fließen — sofort spürbar",
+      "visualWhisperLabel": "Heute",
+      "phoneWelcome": "Willkommen",
+      "phoneWelcomeSub": "Ihr Betrieb, in Minuten bereit",
+      "phoneTeam": "Ihr Team",
+      "phoneTeamSub": "Alle bereit zu glänzen",
+      "phoneQr": "Bereit für Gäste",
+      "phoneQrSub": "Drucken und an den Tisch",
+      "phoneCelebrate": "Trinkgeld erhalten",
+      "phoneCelebrateSub": "Dankbarkeit, sofort da"
     },
     "liveDemo": {
       "slideNavAria": "Produktvorschau-Schritte",

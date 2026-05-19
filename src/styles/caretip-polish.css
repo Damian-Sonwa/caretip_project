@@ -60,16 +60,20 @@
     }
   }
 
-  /* Public pages: calmer scroll-linked motion */
-  @media (prefers-reduced-motion: no-preference) {
-    .caretip-landing [data-polish-view] {
-      will-change: opacity, transform;
+  /* Landing scroll — contain paint; no will-change (reduces sticky/jitter on mobile) */
+  @media (max-width: 1023px) {
+    .caretip-landing #how-it-works,
+    .caretip-landing #built-for-hospitality {
+      content-visibility: auto;
+      contain-intrinsic-size: auto 520px;
     }
-  }
 
-  @media (prefers-reduced-motion: reduce) {
-    .caretip-landing [data-polish-view] {
-      transform: none !important;
+    .caretip-landing [data-landing-accent] [data-accent-glow] {
+      display: none;
+    }
+
+    .caretip-landing .caretip-hospitality-marquee {
+      contain: layout paint;
     }
   }
 }

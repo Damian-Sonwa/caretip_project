@@ -125,7 +125,7 @@ export default function HospitalityBusinessesMarquee() {
   );
 
   return (
-    <div className="relative w-full overflow-hidden bg-transparent py-7 sm:py-8">
+    <div className="caretip-hospitality-marquee relative w-full overflow-hidden bg-transparent py-7 sm:py-8">
       <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
       <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
 

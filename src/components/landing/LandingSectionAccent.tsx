@@ -29,7 +29,7 @@ export function LandingSectionAccent({
       role="presentation"
     >
       {!muted ? (
-        <span aria-hidden className={landingUi.sectionAccentGlow} />
+        <span aria-hidden className={landingUi.sectionAccentGlow} data-accent-glow="" />
       ) : null}
       {variant === "line" && !muted ? (
         <span aria-hidden className={landingUi.sectionAccentLine} />
