@@ -23,6 +23,12 @@ import {
 } from '../lib/api';
 import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
+import {
+  caretipBtnPrimaryCompact,
+  caretipBtnPrimaryFull,
+  caretipBtnSecondaryFull,
+} from '@/lib/caretipButtonSystem';
+import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
 import { commitAuthUser } from '../lib/authUserStore';
@@ -422,7 +428,7 @@ export function AuthPage() {
                   type="button"
                   disabled={!user}
                   onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
-                  className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+                  className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
                 >
                   {t('auth.page.crossSessionContinue')}
                 </button>
@@ -563,7 +569,7 @@ export function AuthPage() {
                         getPasswordStrength(password).strength === 'strong'
                           ? '#111827'
                           : getPasswordStrength(password).strength === 'fair'
-                            ? '#EB992C'
+                            ? '#e9781c'
                             : '#6B7280',
                       opacity: getPasswordStrength(password).strength === 'weak' ? 0.45 : 1,
                     }}
@@ -662,7 +668,7 @@ export function AuthPage() {
                   type="button"
                   onClick={() => void handleResendVerification()}
                   disabled={resendBusy || isSubmitting}
-                  className="inline-flex h-10 w-full items-center justify-center rounded-lg border border-gray-200 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-900/70"
+                  className={cn(caretipBtnSecondaryFull, "h-10 min-h-10 text-sm disabled:cursor-not-allowed")}
                 >
                   {resendBusy ? (
                     <>
@@ -690,7 +696,7 @@ export function AuthPage() {
             <button
               type="submit"
               disabled={isSubmitting || resumeSessionPending || (!isLogin && signUpDisabled)}
-              className="relative mt-1 flex h-11 w-full min-h-11 items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+              className={cn(caretipBtnPrimaryFull, "relative mt-1 disabled:cursor-not-allowed")}
             >
               {isSubmitting ? (
                 <>

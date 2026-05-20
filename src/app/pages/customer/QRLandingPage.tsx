@@ -27,7 +27,7 @@ import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
-const BRAND_ORANGE = "#EB992C";
+const BRAND_ORANGE = "#e9781c";
 const presetAmounts = [5, 10, 15, 20];
 
 export function QRLandingPage() {
@@ -559,7 +559,7 @@ export function QRLandingPage() {
     return (
       <div className={cf.stateCenter}>
         <p className={cf.stateError}>{t("tipFlow.errors.businessNotFound")}</p>
-        <button type="button" onClick={goHome} className={`${cf.btnSecondaryLg} mt-5 max-w-xs border-0 shadow-none`}>
+        <button type="button" onClick={goHome} className={`${cf.btnSecondaryLg} mt-5 max-w-xs`}>
           {t("tipFlow.common.goHomeButton")}
         </button>
       </div>

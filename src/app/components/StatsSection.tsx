@@ -58,7 +58,7 @@ export function StatsSection() {
                     {data.map((entry, index) => (
                       <Cell 
                         key={`cell-${entry.month}-${index}`} 
-                        fill={index === data.length - 1 ? '#EB992C' : '#6B7280'} 
+                        fill={index === data.length - 1 ? '#e9781c' : '#6B7280'} 
                       />
                     ))}
                   </Bar>

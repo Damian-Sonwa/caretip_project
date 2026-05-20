@@ -3,7 +3,6 @@
     "howItWorks": "Wie es funktioniert",
     "features": "Funktionen",
     "pricing": "Preise",
-    "solutions": "Lösungen",
     "fees": "Preise",
     "logIn": "Anmelden",
     "signIn": "Anmelden",
@@ -177,51 +176,6 @@
           "f4": "Account Manager",
           "button": "Vertrieb kontaktieren"
         }
-      }
-    },
-    "solutions": {
-      "title": "Lösungen für jeden Gastronomie-Alltag",
-      "subtitle": "CareTip passt sich Ihrem Betrieb an, vom Salon und Café bis zur Standortgruppe, ohne den Gäste-Flow zu verändern.",
-      "segmentCta": "So funktioniert es",
-      "platformTitle": "Eine Plattform für jeden Service-Moment",
-      "platformBody": "Salonplätze, Tische, Bars, Rezeption und Event-Stationen nutzen denselben Trinkgeld-Flow, Team-Überblick und klare Auszahlungen.",
-      "ctaTitle": "CareTip in Ihrem Betrieb sehen?",
-      "ctaBody": "Sprechen Sie mit uns über Rollout, Branding und Gebühren für Ihre Gastronomie-Gruppe.",
-      "ctaPricing": "Preise ansehen",
-      "restaurants": {
-        "title": "Restaurants & Gastronomie",
-        "body": "Jeder Tisch wird zum Trinkgeld-Moment. Gäste scannen, wählen Service und zahlen in Sekunden, während Ihr Team im Service bleibt.",
-        "b0": "Tisch- und Bereichs-QR-Codes",
-        "b1": "Trinkgeld pro Servicekraft",
-        "b2": "Leistung pro Schicht"
-      },
-      "hotels": {
-        "title": "Hotels & Resorts",
-        "body": "Concierge, Housekeeping und Rezeption mit gebrandetem Trinkgeld, das zur Gäste-Reise passt.",
-        "b0": "Codes an Rezeption und Zimmer",
-        "b1": "Rollenbasierte Team-Einladungen",
-        "b2": "Reporting über Abteilungen"
-      },
-      "cafes": {
-        "title": "Cafés & Bars",
-        "body": "Schneller Counter braucht schnelles Trinkgeld. CareTip hält den Gäste-Flow leicht, während Tips live eintreffen.",
-        "b0": "Counter- und Bar-QR-Platzierung",
-        "b1": "Sofort-Benachrichtigungen fürs Team",
-        "b2": "Klare Auszahlungs-Status"
-      },
-      "events": {
-        "title": "Events & Catering",
-        "body": "Temporäre Servicepunkte und mobiles Personal bleiben mit portablen Codes und klaren Verdiensten verbunden.",
-        "b0": "Codes für temporäre Stationen",
-        "b1": "Trinkgeld nach Dienstplan",
-        "b2": "Auszahlungs-Übersicht nach Events"
-      },
-      "salonBarbershop": {
-        "title": "Salons & Friseursalons",
-        "body": "Kunden geben nach Schnitt, Farbe oder Behandlung direkt Trinkgeld. Persönliche QR-Codes ordnen es der richtigen Kraft am Platz zu, ohne den Checkout zu bremsen.",
-        "b0": "Persönliche QR-Codes pro Stylist",
-        "b1": "Trinkgeld nach dem Termin",
-        "b2": "Mitarbeiterprofile und Stammkunden-Überblick"
       }
     },
     "help": {
@@ -1087,6 +1041,7 @@
       "heroTitleSuffix": "",
       "heroTitleLine2Prefix": "Hervorragenden ",
       "heroTitleLine2Emphasis": "Service",
+      "heroRotatingWords": ["Service", "Gastfreundschaft", "Teams", "Personal", "Erlebnisse"],
       "heroTitleLine2Suffix": " sofort belohnen.",
       "heroTitleLine2": "",
       "heroTitleLine3": "",
@@ -1348,7 +1303,6 @@
     "linkForEmployees": "Für Mitarbeitende",
     "linkFeatures": "Funktionen",
     "linkHowItWorks": "Wie es funktioniert",
-    "linkSolutions": "Lösungen",
     "linkPricing": "Preise",
     "linkAbout": "Über uns",
     "linkContact": "Kontakt",

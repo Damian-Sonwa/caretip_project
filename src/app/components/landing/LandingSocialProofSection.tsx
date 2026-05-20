@@ -11,7 +11,7 @@ import {
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
-  "flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
+  "caretip-landing-card flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
   "px-4 pb-5 pt-4 max-lg:px-4 max-lg:pb-5 max-lg:pt-4 sm:px-7 sm:pb-7 sm:pt-7",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.06)]",
   "transition-[box-shadow,border-color] duration-300",
@@ -46,14 +46,13 @@ export function LandingSocialProofSection() {
       id="social-proof"
       className={cn(
         landingUi.section,
-        "relative overflow-hidden border-y border-neutral-200/60 dark:border-neutral-800/80",
-        "bg-[linear-gradient(180deg,#faf9f7_0%,#f4f2ef_48%,#faf9f7_100%)]",
-        "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#121110_50%,#0a0a0a_100%)]",
+        landingUi.landingSurface,
+        "caretip-landing-social-proof relative overflow-hidden dark:bg-neutral-950",
       )}
     >
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_85%_50%_at_50%_100%,rgba(235,153,44,0.05),transparent_58%)]"
+        className="pointer-events-none absolute inset-0"
       />
 
       <div className="relative mx-auto max-w-7xl">
@@ -105,7 +104,7 @@ export function LandingSocialProofSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: idx * 0.08 }}
-              className={cardClassName}
+              className={cn(cardClassName, "caretip-social-proof-card")}
             >
               <Quote
                 className="mb-3 h-7 w-7 text-primary/55 max-lg:mb-3 max-lg:h-7 max-lg:w-7 dark:text-primary/65 sm:mb-5 sm:h-9 sm:w-9"

@@ -72,7 +72,7 @@ export function LiveInMinutesLaptopDemo({
         />
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(235,153,44,0.22),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(233,120,28,0.22),transparent_55%)]"
         />
 
         <motion.div

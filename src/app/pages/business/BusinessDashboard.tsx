@@ -498,7 +498,7 @@ export function BusinessDashboard() {
                     {t("business.hero.manageQr")}
                   </Link>
                 </Button>
-                <Button type="button" variant="ghost" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
                   <Link to="/dashboard/staff-management" className={businessUi.heroCtaLink}>
                     <Users className="h-4 w-4 shrink-0" aria-hidden />
                     {t("business.hero.manageTeam")}

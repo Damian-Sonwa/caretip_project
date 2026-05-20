@@ -470,7 +470,7 @@ export function CinematicHero({
                             cy="88"
                             r="64"
                             fill="none"
-                            stroke="#EB992C"
+                            stroke="#e9781c"
                             strokeWidth="12"
                           />
                         </svg>

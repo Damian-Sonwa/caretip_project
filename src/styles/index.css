@@ -1,6 +1,11 @@
+/* Font faces load from /caretip-font-faces.css in index.html (before JS). */
 @import "./fonts.css";
 @import "./globals.css";
 @import "./tailwind.css";
 @import "./caretip-typography.css";
 @import "./caretip-polish.css";
+@import "./caretip-optical-balance.css";
+@import "./caretip-brand.css";
+@import "./caretip-buttons.css";
+@import "./caretip-landing-atmosphere.css";
 @import "./theme.css";

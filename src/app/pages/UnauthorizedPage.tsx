@@ -1,5 +1,6 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
 
 export function UnauthorizedPage() {
   const { t } = useTranslation();
@@ -11,13 +12,13 @@ export function UnauthorizedPage() {
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             to="/"
-            className="inline-flex justify-center px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted"
+            className={`${caretipBtnSecondary} no-underline`}
           >
             {t("auth.unauthorized.home")}
           </Link>
           <Link
             to="/platform-admin/login"
-            className="inline-flex justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover"
+            className={`${caretipBtnPrimary} no-underline`}
           >
             {t("auth.unauthorized.platformLogin")}
           </Link>

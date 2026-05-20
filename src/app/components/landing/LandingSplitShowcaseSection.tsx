@@ -53,6 +53,7 @@ export function LandingSplitShowcaseSection({
   return (
     <section
       id={id}
+      data-landing-tone={tone}
       className={cn(
         landingUi.showcaseSection,
         tone === "muted" ? landingUi.showcaseSectionToneMuted : landingUi.showcaseSectionToneWarm,

@@ -156,7 +156,7 @@ export function DashboardHero({
           className={cn(
             stackHeroOnMobile && "font-sans text-feature-copy font-semibold",
             stackHeroOnMobile &&
-              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
+              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#e9781c] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
           {t("dashboardHero.overview")}
@@ -166,7 +166,7 @@ export function DashboardHero({
           className={cn(
             stackHeroOnMobile && "font-sans text-feature-copy font-semibold",
             stackHeroOnMobile &&
-              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#EB992C] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
+              "rounded-full border-0 shadow-none data-[state=inactive]:bg-transparent data-[state=active]:bg-[#e9781c] data-[state=active]:text-white data-[state=active]:shadow-none data-[state=active]:ring-0",
           )}
         >
           {t("dashboardHero.shortcuts")}

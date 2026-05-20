@@ -29,7 +29,7 @@ export function HospitalityTeamsUnifiedSection() {
       id="built-for-hospitality"
       className={cn(
         landingUi.hospitalitySection,
-        "bg-[linear-gradient(180deg,#f4f5f7_0%,#f1f0ee_48%,#f7f6f4_100%)] dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
+        "caretip-landing-hospitality relative dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
       )}
     >
       <motion.div className="mx-auto w-full max-w-7xl min-w-0" {...landingFadeReveal}>

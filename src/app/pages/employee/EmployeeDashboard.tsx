@@ -502,27 +502,27 @@ export function EmployeeDashboard() {
                   type="button"
                   onClick={() => void handleQrQuickAction()}
                   disabled={slugLoading || generatingSlug}
-                  className={cn(employeeUi.btnPrimary, "min-w-0 shrink-0")}
+                  className={cn(employeeUi.btnPrimary, employeeUi.heroCtaBtn)}
                 >
                   {generatingSlug ? (
                     <>
-                      <Loader2 className="mr-2 h-4 w-4 shrink-0 animate-spin" />
+                      <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
                       {t("employee.hero.generating")}
                     </>
                   ) : (
                     <>
-                      <QrCode className="mr-2 h-4 w-4 shrink-0" />
+                      <QrCode className="h-4 w-4 shrink-0" />
                       {t("employee.hero.myQr")}
                     </>
                   )}
                 </Button>
                 <Button
                   type="button"
-                  variant="ghost"
-                  className={cn(employeeUi.btnSecondary, "min-w-0 shrink-0")}
+                  variant="outline"
+                  className={cn(employeeUi.btnSecondary, employeeUi.heroCtaBtn)}
                   asChild
                 >
-                  <Link to="/employee/tip-goals" className="inline-flex items-center justify-center gap-2">
+                  <Link to="/employee/tip-goals" className={employeeUi.heroCtaLink}>
                     <Target className="h-4 w-4 shrink-0" />
                     {t("employee.hero.setTipGoal")}
                   </Link>
@@ -717,8 +717,8 @@ export function EmployeeDashboard() {
                     <AreaChart key={analyticsTimeframe} data={chartData} margin={{ top: 10, right: 14, left: 4, bottom: 10 }}>
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
-                          <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
+                          <stop offset="5%" stopColor="#e9781c" stopOpacity={0.35} />
+                          <stop offset="95%" stopColor="#e9781c" stopOpacity={0} />
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#e5e5e5" />

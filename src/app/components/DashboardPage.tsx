@@ -239,8 +239,8 @@ export function DashboardPage() {
                   <AreaChart data={tipVolumeData}>
                     <defs>
                       <linearGradient id="colorTips" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#EB992C" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
+                        <stop offset="5%" stopColor="#e9781c" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="#e9781c" stopOpacity={0} />
                       </linearGradient>
                       <linearGradient id="colorAvgTip" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#6B7280" stopOpacity={0.25} />
@@ -260,7 +260,7 @@ export function DashboardPage() {
                     <Area
                       type="monotone"
                       dataKey="tips"
-                      stroke="#EB992C"
+                      stroke="#e9781c"
                       strokeWidth={2}
                       fillOpacity={1}
                       fill="url(#colorTips)"
@@ -309,7 +309,7 @@ export function DashboardPage() {
                         borderRadius: '8px',
                       }}
                     />
-                    <Bar dataKey="scans" fill="#EB992C" radius={[8, 8, 0, 0]} name={t("sampleDashboard.legendScans")} />
+                    <Bar dataKey="scans" fill="#e9781c" radius={[8, 8, 0, 0]} name={t("sampleDashboard.legendScans")} />
                   </BarChart>
                 </ResponsiveContainer>
               </motion.div>

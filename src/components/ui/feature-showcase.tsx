@@ -147,7 +147,7 @@ export function FeatureShowcase({
         <>
           <motion.div
             aria-hidden
-            className="pointer-events-none absolute inset-x-0 top-0 min-h-[min(88vh,900px)] bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(235,153,44,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%),radial-gradient(ellipse_100%_58%_at_100%_54%,rgba(235,153,44,0.036),transparent_58%)] dark:opacity-40"
+            className="pointer-events-none absolute inset-x-0 top-0 min-h-[min(88vh,900px)] bg-[radial-gradient(ellipse_150%_68%_at_50%_-10%,rgba(233,120,28,0.065),transparent_62%),radial-gradient(ellipse_100%_58%_at_0%_40%,rgba(120,113,105,0.042),transparent_58%),radial-gradient(ellipse_100%_58%_at_100%_54%,rgba(233,120,28,0.036),transparent_58%)] dark:opacity-40"
             initial={reduceMotion ? false : { opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, ease: "easeOut" }}
@@ -174,7 +174,7 @@ export function FeatureShowcase({
                 <motion.div
                   aria-hidden
                   className="pointer-events-none absolute -left-28 -top-28 h-[360px] w-[360px] rounded-full blur-3xl"
-                  style={{ background: "rgba(235,153,44,0.20)" }}
+                  style={{ background: "rgba(233,120,28,0.20)" }}
                   animate={{ x: [0, 22, 0], y: [0, 14, 0] }}
                   transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }}
                 />
@@ -250,7 +250,7 @@ export function FeatureShowcase({
                   className="pointer-events-none absolute inset-0"
                   style={{
                     background:
-                      "radial-gradient(900px circle at 85% 35%, rgba(235,153,44,0.45), transparent 60%), radial-gradient(1200px circle at 30% 75%, rgba(0,0,0,0.06), transparent 62%)",
+                      "radial-gradient(900px circle at 85% 35%, rgba(233,120,28,0.45), transparent 60%), radial-gradient(1200px circle at 30% 75%, rgba(0,0,0,0.06), transparent 62%)",
                   }}
                 />
                 <div aria-hidden className="pointer-events-none absolute -right-28 -top-28 h-[420px] w-[420px] rounded-full border border-black/10 bg-white/20" />
@@ -391,7 +391,7 @@ export function FeatureShowcase({
                     asChild
                     size="lg"
                     variant="default"
-                    className="h-12 w-[min(64%,280px)] rounded-2xl bg-[#EB992C] px-6 font-bold leading-none text-white hover:bg-[#d88926] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#EB992C]"
+                    className="w-[min(64%,280px)]"
                   >
                     <Link to={primaryCtaTo} className="whitespace-nowrap">
                       {primaryCtaLabel}
@@ -401,7 +401,7 @@ export function FeatureShowcase({
                     asChild
                     size="lg"
                     variant="outline"
-                    className="h-12 w-[min(64%,280px)] rounded-2xl border-2 border-primary bg-transparent px-6 font-semibold leading-none text-foreground hover:bg-muted"
+                    className="w-[min(64%,280px)]"
                   >
                     <Link to={secondaryCtaTo} className="whitespace-nowrap">
                       {secondaryCtaLabel}
@@ -433,11 +433,11 @@ export function FeatureShowcase({
                   size={260}
                   duration={14}
                   borderWidth={1.5}
-                  colorFrom="#EB992C"
+                  colorFrom="#e9781c"
                   colorTo="#F97316"
                   delay={1}
                 />
-                <div className="relative z-[1] bg-[rgba(235,153,44,0.12)] p-2 sm:p-3">
+                <div className="relative z-[1] bg-[rgba(233,120,28,0.12)] p-2 sm:p-3">
                   {useAnimatedHero ? (
                     <LandingImageFrame className="mx-auto w-full max-w-[520px]">
                       <CareTipHeroAnimation />
@@ -473,7 +473,7 @@ export function FeatureShowcase({
                   <div className={cn("relative min-h-0", landingUi.heroMediaShellLegacy)}>
                     <div
                       aria-hidden
-                      className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[8%] max-md:h-[min(140px,38vw)] max-md:w-[88%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(235,153,44,0.16)_0%,rgba(235,153,44,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
+                      className="pointer-events-none absolute left-1/2 top-[12%] z-0 h-[min(380px,56vw)] w-[min(480px,100%)] max-md:top-[8%] max-md:h-[min(140px,38vw)] max-md:w-[88%] -translate-x-1/2 rounded-[48%] bg-[radial-gradient(circle,rgba(233,120,28,0.16)_0%,rgba(233,120,28,0.05)_38%,transparent_72%)] blur-3xl opacity-90 dark:opacity-45"
                     />
                     <div
                       aria-hidden

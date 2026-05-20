@@ -15,7 +15,7 @@ import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
-const BRAND_ORANGE = "#EB992C";
+const BRAND_ORANGE = "#e9781c";
 const BLACK = "#000000";
 
 /**

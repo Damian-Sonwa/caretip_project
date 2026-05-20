@@ -32,13 +32,13 @@ export function FeatureShowcaseCard({
       whileHover={{ y: -3 }}
       className={cn(
         "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_14px_40px_-18px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color] duration-300",
-        "hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(235,153,44,0.18)] dark:border-neutral-800 dark:bg-neutral-950/90 dark:hover:border-primary/25",
+        "hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(233,120,28,0.18)] dark:border-neutral-800 dark:bg-neutral-950/90 dark:hover:border-primary/25",
         featured && "lg:min-h-[22rem]",
       )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(235,153,44,0.12),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-[radial-gradient(circle,rgba(233,120,28,0.12),transparent_70%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
 
       <FeatureProductVisual variant={visual} featured={featured} className="m-3 mb-0 sm:m-4 sm:mb-0" />

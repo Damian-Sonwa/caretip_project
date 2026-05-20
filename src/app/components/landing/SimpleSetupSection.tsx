@@ -28,15 +28,13 @@ export function SimpleSetupSection() {
       id="how-it-works"
       className={cn(
         landingUi.section,
-        "relative overflow-hidden max-md:overflow-x-hidden",
-        "border-y border-neutral-200/50 dark:border-neutral-800/80",
-        "bg-[linear-gradient(180deg,#fffcfa_0%,#f7f3ee_42%,#fffcfa_100%)]",
-        "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
+        landingUi.landingSurface,
+        "relative overflow-hidden max-md:overflow-x-hidden dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
       )}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_72%_42%,rgba(235,153,44,0.07),transparent_62%)]"
+        className="pointer-events-none absolute inset-0 opacity-0"
       />
 
       <motion.div
@@ -69,7 +67,7 @@ export function SimpleSetupSection() {
           >
             <div
               aria-hidden
-              className="absolute bottom-3 left-[1.125rem] top-3 w-px bg-gradient-to-b from-primary/35 via-amber-200/50 to-transparent dark:via-amber-900/40 sm:left-5"
+              className="absolute bottom-3 left-[1.125rem] top-3 w-px bg-gradient-to-b from-neutral-300/80 via-neutral-200/60 to-transparent dark:from-neutral-600 dark:via-neutral-700/60 sm:left-5"
             />
             <div className="space-y-2 sm:space-y-2.5">
               {steps.map((step, idx) => {
@@ -84,8 +82,8 @@ export function SimpleSetupSection() {
                     className={cn(
                       "group relative w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,box-shadow] duration-300 sm:rounded-2xl sm:px-4 sm:py-4",
                       isActive
-                        ? "border-amber-200/70 bg-[#fffdf9] shadow-[0_4px_24px_-8px_rgba(235,153,44,0.18)] dark:border-amber-900/40 dark:bg-neutral-900/90"
-                        : "border-neutral-200/80 bg-white/80 shadow-none hover:border-neutral-300/90 hover:bg-white dark:border-neutral-800 dark:bg-neutral-950/60 dark:hover:border-neutral-700",
+                        ? "caretip-landing-card dark:border-neutral-600 dark:bg-neutral-900"
+                        : "border-neutral-200/85 bg-white shadow-[0_1px_2px_rgba(17,17,17,0.04)] hover:border-neutral-300/90 hover:shadow-[0_2px_4px_rgba(17,17,17,0.05),0_12px_32px_-8px_rgba(17,17,17,0.07)] dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-neutral-700",
                     )}
                   >
                     <motion.div className="flex items-start gap-3 sm:gap-3.5">
@@ -93,7 +91,7 @@ export function SimpleSetupSection() {
                         className={cn(
                           "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-card-title font-bold tabular-nums transition-colors sm:h-9 sm:w-9",
                           isActive
-                            ? "bg-primary text-white shadow-[0_4px_12px_rgba(235,153,44,0.28)]"
+                            ? "bg-primary text-white shadow-[0_4px_12px_rgba(233,120,28,0.28)]"
                             : "bg-neutral-100/90 text-neutral-600 group-hover:bg-neutral-200/80 dark:bg-neutral-800 dark:text-neutral-300",
                         )}
                       >

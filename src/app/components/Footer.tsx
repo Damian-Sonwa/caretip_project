@@ -28,7 +28,6 @@ export function Footer({
         { name: t("footer.linkForEmployees"), to: "/#for-employees" },
         { name: t("footer.linkFeatures"), to: "/features" },
         { name: t("footer.linkHowItWorks"), to: "/how-it-works" },
-        { name: t("footer.linkSolutions"), to: "/solutions" },
         { name: t("footer.linkPricing"), to: "/pricing" },
       ],
       Company: [
@@ -75,7 +74,7 @@ export function Footer({
         <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl" aria-hidden />
         <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl" aria-hidden />
 
-        <div className="relative mx-auto max-w-7xl px-6 py-12 sm:py-16">
+        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-12 grid grid-cols-1 gap-8 sm:mb-16 sm:gap-12 md:grid-cols-2 lg:grid-cols-10 lg:gap-8">
             <div className="space-y-6 lg:col-span-4">
               <h3 className="text-xl font-bold text-white">{t("footer.brandTitle")}</h3>

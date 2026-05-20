@@ -4,6 +4,7 @@ import { Link2, Smartphone, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import newly01Img from "../../../../images/newly01.png";
+import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 
 /** Unsplash: people at a table paying with phone / card (original left-panel image) */
 const IMG_PEOPLE_PAYMENT = newly01Img;
@@ -23,7 +24,7 @@ function InstantTipSplitIllustration() {
         decoding="async"
       />
       <div className="absolute bottom-3 left-1/2 -translate-x-1/2 sm:left-4 sm:translate-x-0">
-        <span className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-[0_6px_18px_rgba(235,153,44,0.22)]">
+        <span className="inline-flex items-center rounded-lg bg-accent px-4 py-2 text-sm font-bold text-accent-foreground shadow-[0_6px_18px_rgba(233,120,28,0.22)]">
           Pay
         </span>
       </div>
@@ -117,7 +118,7 @@ export function QRTippingSection() {
             <div className="pt-4">
               <Link
                 to="/auth?mode=signup&role=business&from=landing"
-                className="inline-flex items-center justify-center rounded-2xl bg-primary px-8 py-4 text-base font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90"
+                className={caretipBtnPrimary}
               >
                 Create your QR
               </Link>

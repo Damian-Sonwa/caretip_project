@@ -35,7 +35,7 @@ export function LandingHeroShowcase({ src, alt, className }: LandingHeroShowcase
           aria-hidden
           className={cn(
             landingUi.heroShowcaseGlow,
-            "blur-2xl opacity-[0.52] max-lg:blur-xl max-lg:opacity-40 lg:blur-xl lg:opacity-45",
+            "caretip-hero-showcase-glow blur-2xl opacity-[0.52] max-lg:blur-xl max-lg:opacity-40 lg:blur-xl lg:opacity-45",
           )}
         />
         <motion.div

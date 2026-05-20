@@ -8,6 +8,7 @@ import { Footer } from "../components/Footer";
 import { validateInviteCode } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
+import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 
 export function JoinPage() {
   const { t } = useTranslation();
@@ -77,7 +78,7 @@ export function JoinPage() {
               <button
                 type="submit"
                 disabled={!code.trim() || busy}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className={`${caretipBtnPrimaryFull} disabled:cursor-not-allowed disabled:opacity-60`}
               >
                 {busy ? (
                   <>

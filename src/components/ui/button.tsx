@@ -2,37 +2,35 @@ import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
+import { caretipBtnSizeCompact, caretipBtnSizePrimary } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   [
     "inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap",
-    "rounded-xl text-sm font-semibold",
-    "touch-manipulation transition-[color,background-color,border-color,box-shadow,opacity]",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+    "rounded-xl font-sans !leading-none tracking-tight",
+    "touch-manipulation transition-[box-shadow,background-color,border-color,opacity] duration-200 ease-out",
+    "active:opacity-[0.96]",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#e9781c]/45 focus-visible:ring-offset-2 focus-visible:ring-offset-background",
     "disabled:pointer-events-none disabled:opacity-50",
     "[&_svg]:pointer-events-none [&_svg]:shrink-0",
   ].join(" "),
   {
     variants: {
       variant: {
-        default:
-          "bg-primary text-primary-foreground hover:bg-primary-hover",
+        default: "caretip-btn-primary border-0 text-white font-bold shadow-none",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-border bg-background text-foreground hover:bg-muted",
-        secondary:
-          "border border-border bg-muted/40 text-foreground hover:bg-muted/60",
-        ghost:
-          "bg-transparent text-foreground hover:bg-muted",
+          "bg-destructive text-destructive-foreground font-semibold hover:bg-destructive/90",
+        outline: "caretip-btn-secondary font-semibold",
+        secondary: "caretip-btn-secondary font-semibold",
+        ghost: "caretip-btn-ghost font-semibold",
         link: "font-semibold text-primary underline-offset-4 hover:underline",
       },
       size: {
-        default: "h-11 px-5",
-        sm: "h-10 px-4",
-        lg: "h-12 px-6",
-        icon: "h-11 w-11 px-0",
+        default: caretipBtnSizePrimary,
+        sm: caretipBtnSizeCompact,
+        lg: caretipBtnSizePrimary,
+        icon: "h-11 w-11 min-h-11 min-w-11 px-0 lg:h-12 lg:w-12 lg:min-h-12 lg:min-w-12",
       },
     },
     defaultVariants: {

@@ -59,6 +59,8 @@ export default defineConfig(({ mode }) => {
         'icon-192.png',
         'icon-512.png',
         'favicon-32.png',
+        'caretip-font-faces.css',
+        'fonts/**/*.woff2',
       ],
       manifest: {
         /** Stable id helps Chromium replace the installed app manifest on updates (splash colors). */

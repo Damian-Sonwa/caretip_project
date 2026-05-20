@@ -1,7 +1,7 @@
 import { cn } from "./utils";
 
 /** CareTip brand orange — initial fallback circles */
-export const CARETIP_BRAND_ORANGE = "#EB992C";
+export const CARETIP_BRAND_ORANGE = "#e9781c";
 
 interface LetterAvatarProps {
   name: string;

@@ -33,7 +33,7 @@ function MomentShell({ label, className, children, imageSrc, imageClassName }: M
     <div className={cn("relative mx-auto w-full max-w-md lg:max-w-none", className)}>
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-4 rounded-[1.75rem] bg-[radial-gradient(ellipse_at_50%_42%,rgba(235,153,44,0.12),transparent_72%)] blur-xl opacity-80"
+        className="pointer-events-none absolute -inset-4 rounded-[1.75rem] bg-[radial-gradient(ellipse_at_50%_42%,rgba(233,120,28,0.12),transparent_72%)] blur-xl opacity-80"
       />
       <figure className={frame}>
         {imageSrc ? (
@@ -283,7 +283,7 @@ export function ImageMoment({
     <div className={cn("relative mx-auto w-full max-w-md lg:max-w-none", className)}>
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-4 rounded-[1.75rem] bg-[radial-gradient(ellipse_at_50%_42%,rgba(235,153,44,0.12),transparent_72%)] blur-xl opacity-80"
+        className="pointer-events-none absolute -inset-4 rounded-[1.75rem] bg-[radial-gradient(ellipse_at_50%_42%,rgba(233,120,28,0.12),transparent_72%)] blur-xl opacity-80"
       />
       <figure className={frame}>
         <img

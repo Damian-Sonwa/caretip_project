@@ -1,0 +1,29 @@
+/**
+ * Landing — clean white canvas; orange reserved for CTAs and headline accents only.
+ */
+
+html:not(.dark) .caretip-landing.caretip-landing--premium {
+  background: #ffffff !important;
+}
+
+/* Final CTA band — charcoal with controlled orange highlight */
+html:not(.dark) .caretip-landing .caretip-landing-final-cta {
+  background: linear-gradient(165deg, #1a1614 0%, #12100e 50%, #181412 100%) !important;
+  border-top: 1px solid rgba(17, 17, 17, 0.06) !important;
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-final-cta > .pointer-events-none {
+  background: radial-gradient(
+    ellipse 90% 65% at 50% 0%,
+    rgba(233, 120, 28, 0.09) 0%,
+    transparent 52%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-final-cta h2 {
+  color: #fafafa !important;
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-final-cta p {
+  color: rgba(250, 250, 250, 0.72) !important;
+}

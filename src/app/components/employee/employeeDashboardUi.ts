@@ -3,6 +3,8 @@
  * Presentation only — no logic.
  */
 
+import { caretipBtnGhost, caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
+
 /** Root wrapper class on `.caretip-dashboard-shell` (see EmployeeLayout). */
 export const EMPLOYEE_DASHBOARD_ROOT = "employee-dashboard";
 
@@ -27,10 +29,9 @@ export const employeeUi = {
   pageTitle: "text-xl font-bold tracking-tight text-foreground sm:text-2xl",
   pageDesc: "mt-1.5 max-w-prose text-sm leading-relaxed text-muted-foreground",
 
-  btnPrimary: "h-11 min-h-[2.75rem] rounded-xl bg-primary px-5 shadow-sm hover:bg-primary/90",
-  btnSecondary:
-    "h-11 min-h-[2.75rem] rounded-xl border border-border/70 bg-white/90 px-5 text-foreground shadow-none hover:bg-muted/50",
-  btnGhost: "h-11 min-h-[2.75rem] rounded-xl hover:bg-muted/60",
+  btnPrimary: caretipBtnPrimary,
+  btnSecondary: caretipBtnSecondary,
+  btnGhost: caretipBtnGhost,
 
   iconTile: "inline-flex rounded-xl bg-primary/10 p-2.5",
   iconTileMuted: "inline-flex rounded-xl bg-stone-100 p-2.5 text-stone-600",
@@ -41,6 +42,12 @@ export const employeeUi = {
     "min-h-10 flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:flex-initial sm:px-4 sm:text-sm",
   periodBtnActive: "bg-primary text-primary-foreground shadow-sm",
   periodBtnIdle: "text-muted-foreground hover:bg-stone-50",
+
+  /** Hero CTA pair — allow long labels (e.g. DE “Trinkgeldziel setzen”) to wrap */
+  heroCtaBtn:
+    "min-w-0 flex-1 basis-0 !h-auto min-h-11 py-2 !whitespace-normal text-center !leading-snug [text-wrap:balance]",
+  heroCtaLink:
+    "inline-flex min-w-0 w-full items-center justify-center gap-1.5 text-center leading-snug [text-wrap:balance] sm:gap-2",
 
   listItem:
     "employee-list-item rounded-2xl border border-neutral-200/70 bg-white shadow-[0_6px_24px_-12px_rgba(15,23,42,0.08)] transition-colors",

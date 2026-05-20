@@ -8,7 +8,7 @@ import { toUserFriendlyMessage } from "../../../lib/errorMessages";
 import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
 import type { useBusinessSettingsData } from "./useBusinessSettingsData";
 
-const TEAL = "#EB992C";
+const TEAL = "#e9781c";
 
 type Props = Pick<
   ReturnType<typeof useBusinessSettingsData>,

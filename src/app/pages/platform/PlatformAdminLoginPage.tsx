@@ -10,6 +10,8 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
 import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole } from "../../lib/authSession";
+import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
+import { cn } from "@/lib/utils";
 
 const FIELD_CLASS =
   "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-sans dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
@@ -88,7 +90,7 @@ export function PlatformAdminLoginPage() {
                     type="button"
                     disabled={!user}
                     onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
-                    className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm transition hover:opacity-95 disabled:opacity-50"
+                    className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
                   >
                     {t("auth.page.crossSessionContinue")}
                   </button>
@@ -218,7 +220,7 @@ export function PlatformAdminLoginPage() {
                   <button
                     type="submit"
                     disabled={submitting || Boolean(user && !sessionValidated)}
-                    className="relative mt-1 flex h-11 w-full min-h-11 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-[0_8px_22px_rgba(235,153,44,0.28)] active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={cn(caretipBtnPrimaryFull, "relative mt-1 disabled:cursor-not-allowed")}
                   >
                     {submitting ? (
                       <>

@@ -68,7 +68,7 @@ export function LandingRealLifeSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: idx * 0.06 }}
-              className="group flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-gray-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:max-w-none dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none"
+              className="caretip-landing-card group flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:max-w-none dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden">
                 <img

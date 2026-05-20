@@ -33,7 +33,7 @@ export function FeaturesPageHero() {
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute -right-12 top-0 h-full w-[min(72%,420px)] bg-[radial-gradient(ellipse_at_70%_30%,rgba(235,153,44,0.14),transparent_62%)]"
+          className="pointer-events-none absolute -right-12 top-0 h-full w-[min(72%,420px)] bg-[radial-gradient(ellipse_at_70%_30%,rgba(233,120,28,0.14),transparent_62%)]"
         />
         <img
           src={dashboardImg}

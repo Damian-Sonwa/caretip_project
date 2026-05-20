@@ -20,7 +20,7 @@ import {
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 
-const ACTION_TEAL = "#EB992C";
+const ACTION_TEAL = "#e9781c";
 
 export function LocationsPage() {
   const { t } = useTranslation();

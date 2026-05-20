@@ -188,8 +188,8 @@ export function DashboardOverviewPage() {
                 <AreaChart data={tipsData}>
                   <defs>
                     <linearGradient id="tipsGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#EB992C" stopOpacity={0.35} />
-                      <stop offset="95%" stopColor="#EB992C" stopOpacity={0} />
+                      <stop offset="5%" stopColor="#e9781c" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#e9781c" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
@@ -205,7 +205,7 @@ export function DashboardOverviewPage() {
                   <Area
                     type="monotone"
                     dataKey="tips"
-                    stroke="#EB992C"
+                    stroke="#e9781c"
                     strokeWidth={3}
                     fill="url(#tipsGradient)"
                     name={t("sampleDashboard.legendTips")}

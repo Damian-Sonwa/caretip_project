@@ -5,11 +5,13 @@
  * while maintaining core brand identity (Orange, White, Black)
  */
 
+import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
+
 // ============================================
 // BRAND COLORS (PRIMARY)
 // ============================================
 export const BRAND_COLORS = {
-  PRIMARY_ORANGE: "#EB992C",
+  PRIMARY_ORANGE: "#e9781c",
   WHITE: "#FFFFFF",
   BLACK: "#000000",
 } as const;
@@ -20,9 +22,9 @@ export const BRAND_COLORS = {
 export const PREMIUM_GRADIENTS = {
   /**
    * Color-system compliant gradients.
-   * Only uses: Primary (#EB992C), white, surface (#F9FAFB), border (#E5E7EB), and text tones.
+   * Only uses: Primary (#e9781c), white, surface (#F9FAFB), border (#E5E7EB), and text tones.
    */
-  ORANGE_SUBTLE: "linear-gradient(135deg, rgba(235, 153, 44, 0.10) 0%, rgba(235, 153, 44, 0.00) 100%)",
+  ORANGE_SUBTLE: "linear-gradient(135deg, rgba(233, 120, 28, 0.10) 0%, rgba(233, 120, 28, 0.00) 100%)",
   SOFT_LIGHT: "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)",
   DARK_WARM: "linear-gradient(135deg, #111827 0%, #111827 100%)",
 } as const;
@@ -33,10 +35,10 @@ export const PREMIUM_GRADIENTS = {
 export const SUPPORT_COLORS = {
   SOFT_GRAY: "#F9FAFB",
   CHARCOAL: "#111827",
-  WARM_GOLD: "#EB992C",
-  SUCCESS_GREEN: "#EB992C",
+  WARM_GOLD: "#e9781c",
+  SUCCESS_GREEN: "#e9781c",
   ERROR_RED: "#111827",
-  WARNING_AMBER: "#EB992C",
+  WARNING_AMBER: "#e9781c",
 } as const;
 
 // ============================================
@@ -47,8 +49,8 @@ export const SHADOWS = {
   SOFT: "0 4px 6px rgba(0, 0, 0, 0.07)",
   MEDIUM: "0 10px 15px rgba(0, 0, 0, 0.1)",
   ELEVATED: "0 20px 25px rgba(0, 0, 0, 0.15)",
-  HOVER: "0 25px 35px rgba(235, 153, 44, 0.15)",
-  GLOW_ORANGE: "0 0 20px rgba(235, 153, 44, 0.25)",
+  HOVER: "0 25px 35px rgba(233, 120, 28, 0.15)",
+  GLOW_ORANGE: "0 0 20px rgba(233, 120, 28, 0.25)",
 } as const;
 
 // ============================================
@@ -71,9 +73,8 @@ export const ICON_CONTAINER_PREMIUM =
 export const ICON_CONTAINER_DARK =
   "inline-flex items-center justify-center rounded-xl border border-gray-200 bg-gray-50 p-3 shadow-sm transition-all duration-300 group-hover:shadow-md dark:border-neutral-800 dark:bg-neutral-900";
 
-/** CTA Button base - premium with hover effects */
-export const CTA_BUTTON_PREMIUM =
-  "inline-flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-[box-shadow,colors,opacity] duration-200 hover:bg-primary/90 hover:shadow-[0_10px_28px_rgba(235,153,44,0.32)] active:opacity-90";
+/** CTA Button base — landing orange + global sizing */
+export const CTA_BUTTON_PREMIUM = caretipBtnPrimary;
 
 /** Badge - premium styled with subtle gradient */
 export const BADGE_PREMIUM =

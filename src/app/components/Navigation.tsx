@@ -13,7 +13,6 @@ const NAV_ROUTES = [
   { to: "/how-it-works" as const, nameKey: "nav.howItWorks" },
   { to: "/features" as const, nameKey: "nav.features" },
   { to: "/pricing" as const, nameKey: "nav.pricing" },
-  { to: "/solutions" as const, nameKey: "nav.solutions" },
 ] as const;
 
 export type NavigationVariant = "default" | "dark";
@@ -54,7 +53,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
       )}
     >
       <nav
-        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-3.5"
+        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-3.5 lg:px-8"
         aria-label={t("nav.mainNav")}
       >
         <div className="relative z-50 flex min-h-0 min-w-0 max-w-full items-center justify-between gap-2 sm:gap-4">
@@ -95,17 +94,14 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 type="button"
                 className={cn(
                   "rounded-xl border px-4 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow,transform] duration-200 active:opacity-95",
-                  "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(235,153,44,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
+                  "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(233,120,28,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
                 )}
               >
                 {t("nav.logIn")}
               </button>
             </Link>
             <Link to="/contact">
-              <button
-                type="button"
-                className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] duration-200 hover:bg-primary-hover hover:shadow-[0_10px_28px_-8px_rgba(235,153,44,0.5)] active:opacity-95"
-              >
+              <button type="button" className={landingUi.navCtaPrimary}>
                 {t("nav.requestDemo")}
               </button>
             </Link>

@@ -11,12 +11,12 @@ export function LandingFinalCtaSection() {
     <section
       className={cn(
         landingUi.section,
-        "relative overflow-hidden bg-[linear-gradient(180deg,#ffffff_0%,#fcfbf9_50%,#fffefb_100%)] dark:bg-neutral-950",
+        "caretip-landing-final-cta relative overflow-hidden dark:bg-neutral-950",
       )}
     >
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_130%_75%_at_50%_0%,rgba(235,153,44,0.09),transparent_58%),radial-gradient(ellipse_120%_60%_at_20%_80%,rgba(0,0,0,0.028),transparent_55%),radial-gradient(ellipse_120%_60%_at_85%_70%,rgba(0,0,0,0.022),transparent_55%)]"
+        className="pointer-events-none absolute inset-0"
       />
       <motion.div
         data-polish-view

@@ -28,7 +28,6 @@ import { FAQPage } from './pages/FAQPage';
 import { MobileAppPage } from './pages/MobileAppPage';
 import { HowItWorksPage } from './pages/HowItWorksPage';
 import { FeaturesPage } from './pages/FeaturesPage';
-import { SolutionsPage } from './pages/SolutionsPage';
 import HeroSectionDemoPage from './pages/HeroSectionDemoPage';
 import { HeroAnimationDemoPage } from './pages/HeroAnimationDemoPage';
 import SaasDashboard3DHeroPage from './pages/SaasDashboard3DHeroPage';
@@ -441,11 +440,6 @@ const routes: RouteObject[] = [
   {
     path: '/how-it-works',
     Component: HowItWorksPage,
-    errorElement: <ErrorBoundary />,
-  },
-  {
-    path: '/solutions',
-    Component: SolutionsPage,
     errorElement: <ErrorBoundary />,
   },
   {

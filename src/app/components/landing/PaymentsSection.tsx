@@ -8,7 +8,7 @@ import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
-  "group relative flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
+  "caretip-landing-card group relative flex h-full flex-col rounded-2xl border border-neutral-200/95 bg-white",
   "px-3.5 pb-4 pt-3.5 max-md:px-3.5 max-md:pb-4 max-md:pt-3.5 sm:px-6 sm:pb-8 sm:pt-7",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.06)]",
   "transition-[box-shadow,border-color,transform] duration-300 ease-out",
@@ -46,15 +46,11 @@ export function PaymentsSection() {
       id="payments-trust"
       className={cn(
         landingUi.section,
-        "relative overflow-hidden border-y border-neutral-200/70 dark:border-neutral-800/80",
-        "bg-[linear-gradient(180deg,#f8f6f3_0%,#f3f1ed_42%,#f8f6f3_100%)]",
-        "dark:bg-[linear-gradient(180deg,#0c0c0c_0%,#111010_45%,#0c0c0c_100%)]",
+        landingUi.landingSurface,
+        "relative overflow-hidden dark:bg-[linear-gradient(180deg,#0c0c0c_0%,#111010_45%,#0c0c0c_100%)]",
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_55%_at_50%_0%,rgba(235,153,44,0.06),transparent_62%)] dark:bg-[radial-gradient(ellipse_90%_55%_at_50%_0%,rgba(235,153,44,0.08),transparent_62%)]"
-      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
 
       <div className="relative mx-auto max-w-7xl">
         <motion.div

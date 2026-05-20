@@ -2,10 +2,10 @@
  * CareTip global design system
  * ─────────────────────────────
  * Brand (canonical hex):
- *   Orange (primary): #EB992C
+ *   Orange (primary): #e9781c (landing CTA; light #ff9e2d, hover #ffb04a)
  *   Background:       #FFFFFF
  *   Text:              #000000
- * Typography: Inter via --font-inter (@fontsource) — see fonts.css + caretip-typography.css
+ * Typography: Inter + Manrope (self-hosted) — see caretip-font-faces.css + caretip-typography.css
  *
  * HSL tokens use space-separated components for hsl(var(--token)).
  */
@@ -227,11 +227,10 @@ textarea::placeholder {
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-size: 16px;
 
-  /* #EB992C — primary fills, focus ring, highlights */
-  --primary: 33 82% 55%;
-  --primary-hover: 33 82% 46%;
-  /* Headline emphasis — #E79B2F; brand orange, slightly softer than solid CTA fills */
-  --headline-accent: 33 76% 54%;
+  /* #e9781c — primary fills, focus ring, highlights (landing CTA base) */
+  --primary: 31 79% 51%;
+  --primary-hover: 38 94% 59%;
+  --headline-accent: 31 79% 51%;
   /* White text on orange (buttons, tags on primary) */
   --primary-foreground: 0 0% 100%;
 
@@ -250,7 +249,7 @@ textarea::placeholder {
   --muted-foreground: 0 0% 22%;
 
   /* Accent = brand orange (chips: bg-accent/10 + text-accent; ghost hovers use muted) */
-  --accent: 33 82% 55%;
+  --accent: 31 79% 51%;
   --accent-foreground: 0 0% 100%;
 
   --success: 33 55% 94%;
@@ -264,9 +263,9 @@ textarea::placeholder {
   --input-background: 0 0% 100%;
   --switch-background: 0 0% 25%;
   /* Focus ring: brand orange */
-  --ring: 33 82% 55%;
+  --ring: 31 79% 51%;
 
-  --chart-1: 33 82% 55%;
+  --chart-1: 31 79% 51%;
   --chart-2: 0 0% 0%;
   --chart-3: 0 0% 35%;
   --chart-4: 0 0% 55%;
@@ -276,12 +275,12 @@ textarea::placeholder {
 
   --sidebar: 0 0% 100%;
   --sidebar-foreground: 0 0% 0%;
-  --sidebar-primary: 33 82% 55%;
+  --sidebar-primary: 31 79% 51%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 33 35% 96%;
   --sidebar-accent-foreground: 0 0% 0%;
   --sidebar-border: 0 0% 88%;
-  --sidebar-ring: 33 82% 55%;
+  --sidebar-ring: 31 79% 51%;
 
   --muted-2: 0 0% 92%;
   --muted-2-foreground: 0 0% 22%;
@@ -295,8 +294,8 @@ textarea::placeholder {
   --popover: 0 0% 9%;
   --popover-foreground: 0 0% 98%;
 
-  --primary: 33 82% 55%;
-  --primary-hover: 33 82% 48%;
+  --primary: 31 79% 51%;
+  --primary-hover: 38 94% 59%;
   --primary-foreground: 0 0% 100%;
   --headline-accent: 33 74% 62%;
 
@@ -305,7 +304,7 @@ textarea::placeholder {
   --muted: 0 0% 15%;
   /* Readable on dark surfaces */
   --muted-foreground: 0 0% 82%;
-  --accent: 33 82% 55%;
+  --accent: 31 79% 51%;
   --accent-foreground: 0 0% 100%;
 
   --success: 33 30% 20%;
@@ -317,9 +316,9 @@ textarea::placeholder {
   --border: 0 0% 25%;
   --input: 0 0% 25%;
   --input-background: 0 0% 9%;
-  --ring: 33 82% 55%;
+  --ring: 31 79% 51%;
 
-  --chart-1: 33 82% 55%;
+  --chart-1: 31 79% 51%;
   --chart-2: 0 0% 98%;
   --chart-3: 0 0% 55%;
   --chart-4: 0 0% 45%;
@@ -327,12 +326,12 @@ textarea::placeholder {
 
   --sidebar: 0 0% 0%;
   --sidebar-foreground: 0 0% 98%;
-  --sidebar-primary: 33 82% 55%;
+  --sidebar-primary: 31 79% 51%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 0 0% 15%;
   --sidebar-accent-foreground: 0 0% 98%;
   --sidebar-border: 0 0% 25%;
-  --sidebar-ring: 33 82% 55%;
+  --sidebar-ring: 31 79% 51%;
 
   --muted-2: 0 0% 15%;
   --muted-2-foreground: 0 0% 82%;
@@ -687,9 +686,14 @@ textarea::placeholder {
 
 .employee-dashboard-hero .employee-hero-cta-row > :is(a, button) {
   flex: 1 1 0;
+  min-width: 0;
   min-height: 2.75rem;
-  height: 2.75rem !important;
+  height: auto !important;
   justify-content: center;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.25;
+  padding-block: 0.5rem;
 }
 
 .employee-dashboard-hero .employee-hero-account-stats {

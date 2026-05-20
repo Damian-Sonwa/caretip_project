@@ -23,7 +23,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
 
   const triggerStyles = isInline
     ? "border-white/25 bg-white/10 text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] hover:border-white/35 hover:bg-white/[0.14] focus-visible:ring-white/40 focus-visible:ring-offset-neutral-950"
-    : "border-neutral-200/90 bg-white text-neutral-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_14px_rgba(15,23,42,0.06)] hover:border-neutral-300 hover:bg-neutral-50/90 focus-visible:ring-[#EB992C]/35 focus-visible:ring-offset-background";
+    : "border-neutral-200/90 bg-white text-neutral-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_14px_rgba(15,23,42,0.06)] hover:border-neutral-300 hover:bg-neutral-50/90 focus-visible:ring-[#e9781c]/35 focus-visible:ring-offset-background";
 
   const menuSurface = isInline
     ? "border-white/15 bg-neutral-950/98 p-1.5 text-white shadow-xl backdrop-blur-md"

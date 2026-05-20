@@ -3,7 +3,7 @@ import { Bell, Settings, LogOut } from "lucide-react";
 import type { User } from "../../hooks/useAuth";
 import { ProfileAvatar } from "../ui/profile-avatar";
 
-const TEAL = "#EB992C";
+const TEAL = "#e9781c";
 
 interface EmployeeHeaderProps {
   user: User;

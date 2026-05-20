@@ -10,11 +10,11 @@ import { Trans, useTranslation } from "react-i18next";
 
 /** Palette 84 — CareTip brand accents */
 const P = {
-  teal: "#EB992C",
+  teal: "#e9781c",
   deep: "#111827",
   sage: "#F9FAFB",
   gray: "#6B7280",
-  tomato: "#EB992C",
+  tomato: "#e9781c",
 } as const;
 
 interface CareTipUsageGuidelinesDialogProps {

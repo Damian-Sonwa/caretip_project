@@ -4,6 +4,8 @@
  * Presentation only — no flow or payment logic.
  */
 
+import { caretipBtnPrimaryFull, caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
+
 export const customerFlowUi = {
   /** Root shell */
   page: "customer-flow min-h-screen bg-background",
@@ -64,16 +66,13 @@ export const customerFlowUi = {
   dashedCustomTrigger:
     "w-full rounded-2xl border-2 border-dashed border-border/60 bg-muted/15 py-6 transition-colors hover:border-primary/30 hover:bg-muted/25",
 
-  /** Primary dashboard-aligned CTA (matches employeeUi.btnPrimary weight) */
-  btnPrimaryLg:
-    "inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-2xl bg-primary px-5 text-base font-semibold text-primary-foreground shadow-[0_12px_34px_-18px_rgba(15,23,42,0.35)] transition-colors hover:bg-primary/92 active:opacity-95 disabled:pointer-events-none disabled:opacity-45",
+  /** Primary CTA — landing orange + global button scale */
+  btnPrimaryLg: caretipBtnPrimaryFull,
 
-  btnSecondaryLg:
-    "inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-2xl border border-border/80 bg-background px-5 text-sm font-semibold text-foreground shadow-[0_4px_18px_-12px_rgba(15,23,42,0.08)] transition-colors hover:bg-muted/50",
+  btnSecondaryLg: caretipBtnSecondaryFull,
 
-  /** Payment sheet — accent for pay action (distinct from browse CTAs) */
-  btnAccentLg:
-    "inline-flex min-h-[3.25rem] w-full items-center justify-center gap-2 rounded-2xl bg-accent px-5 text-base font-semibold text-accent-foreground shadow-[0_12px_34px_-18px_rgba(235,153,44,0.35)] transition-colors hover:bg-accent/90 active:opacity-95 disabled:pointer-events-none disabled:opacity-45",
+  /** Payment / tip confirm — same primary system as browse CTAs */
+  btnAccentLg: caretipBtnPrimaryFull,
 
   paymentMethodRow:
     "flex w-full min-h-[4.5rem] items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all sm:min-h-[4.75rem]",

@@ -43,7 +43,7 @@ export function HowItWorksTimelineStep({
       >
         <div className="flex min-w-0 gap-4 sm:gap-5">
           <div className="relative shrink-0">
-            <div className="relative z-[1] flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold tabular-nums text-white shadow-[0_4px_14px_rgba(235,153,44,0.32)] sm:h-11 sm:w-11">
+            <div className="relative z-[1] flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-bold tabular-nums text-white shadow-[0_4px_14px_rgba(233,120,28,0.32)] sm:h-11 sm:w-11">
               {step}
             </div>
             <div className="absolute -inset-1.5 rounded-full bg-primary/10" aria-hidden />

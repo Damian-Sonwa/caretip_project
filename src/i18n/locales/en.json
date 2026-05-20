@@ -3,7 +3,6 @@
     "howItWorks": "How It Works",
     "features": "Features",
     "pricing": "Pricing",
-    "solutions": "Solutions",
     "fees": "Pricing",
     "logIn": "Log In",
     "signIn": "Sign In",
@@ -177,51 +176,6 @@
           "f4": "Account manager",
           "button": "Contact sales"
         }
-      }
-    },
-    "solutions": {
-      "title": "Solutions for every hospitality floor",
-      "subtitle": "CareTip adapts to how your venue runs, from salons and restaurants to multi-location groups, without changing how guests tip.",
-      "segmentCta": "See how it works",
-      "platformTitle": "One platform, every service moment",
-      "platformBody": "Salon chairs, tables, bars, reception desks, and event stations share the same tipping flow, team visibility, and payout clarity.",
-      "ctaTitle": "Ready to see CareTip in your venue?",
-      "ctaBody": "Talk with our team about rollout, branding, and fee tiers for your hospitality group.",
-      "ctaPricing": "View pricing",
-      "restaurants": {
-        "title": "Restaurants & dining",
-        "body": "Turn every table into a tipping touchpoint. Guests scan, choose their server, and pay in seconds while your floor stays focused on service.",
-        "b0": "Table and section QR codes",
-        "b1": "Per-server tip routing",
-        "b2": "Shift-level performance insight"
-      },
-      "hotels": {
-        "title": "Hotels & resorts",
-        "body": "Support concierge, housekeeping, and front desk teams with branded tipping that feels native to your guest journey.",
-        "b0": "Desk and room-service codes",
-        "b1": "Role-based team invites",
-        "b2": "Multi-department reporting"
-      },
-      "cafes": {
-        "title": "Cafés & bars",
-        "body": "Fast counter service needs fast tipping. CareTip keeps the guest flow light while staff see tips land in real time.",
-        "b0": "Counter and bar QR placement",
-        "b1": "Instant employee notifications",
-        "b2": "Simple same-day payout states"
-      },
-      "events": {
-        "title": "Events & catering",
-        "body": "Pop-up service points and roaming staff stay connected with portable codes and clear earnings for every event shift.",
-        "b0": "Temporary service point codes",
-        "b1": "Roster-based tip allocation",
-        "b2": "Post-event payout summaries"
-      },
-      "salonBarbershop": {
-        "title": "Salons & barbershops",
-        "body": "Let clients tip their stylist after every cut, color, or treatment. Personal QR codes keep recognition with the right chair, without slowing checkout.",
-        "b0": "Per-stylist personal QR codes",
-        "b1": "Service-based tipping after appointments",
-        "b2": "Staff profiles and repeat-client visibility"
       }
     },
     "help": {
@@ -1088,6 +1042,7 @@
       "heroTitleLine2": "",
       "heroTitleLine2Prefix": "reward great ",
       "heroTitleLine2Emphasis": "service",
+      "heroRotatingWords": ["service", "hospitality", "teams", "staff", "experiences"],
       "heroTitleLine2Suffix": "",
       "heroTitleLine3": "instantly.",
       "heroMetric1Value": "Instant",
@@ -1348,7 +1303,6 @@
     "linkForEmployees": "For Employees",
     "linkFeatures": "Features",
     "linkHowItWorks": "How It Works",
-    "linkSolutions": "Solutions",
     "linkPricing": "Pricing",
     "linkAbout": "About Us",
     "linkContact": "Contact",

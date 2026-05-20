@@ -1,0 +1,119 @@
+/**
+ * Optical balance — shared gutters, centering, and rhythm (no layout redesign).
+ */
+
+@layer base {
+  .caretip-landing,
+  .caretip-public-page {
+    --caretip-rail: 1rem;
+    --caretip-rail-sm: 1.5rem;
+    --caretip-rail-lg: 2rem;
+  }
+
+  @media (min-width: 640px) {
+    .caretip-landing,
+    .caretip-public-page {
+      --caretip-rail: var(--caretip-rail-sm);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .caretip-landing,
+    .caretip-public-page {
+      --caretip-rail: var(--caretip-rail-lg);
+    }
+  }
+
+  /* Section intros — optically centered */
+  .caretip-landing .caretip-section-intro,
+  .caretip-public-page .caretip-section-intro {
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .caretip-landing .caretip-section-intro p,
+  .caretip-public-page header p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Inner rails align to hero / nav max-w-7xl */
+  .caretip-landing section[id] > .mx-auto.max-w-7xl,
+  .caretip-landing .caretip-landing-surface > .mx-auto.max-w-7xl {
+    width: 100%;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* Split sections — vertical optical center on large screens */
+  @media (min-width: 1024px) {
+    .caretip-landing .caretip-split-section-grid {
+      align-items: center;
+    }
+  }
+
+  /* Hero split — leveled columns */
+  @media (min-width: 1024px) {
+    .caretip-landing .caretip-hero-split {
+      align-items: center;
+    }
+
+    .caretip-landing .caretip-hero-copy--en,
+    .caretip-landing .caretip-hero-copy--de {
+      padding-left: var(--caretip-rail);
+      padding-right: var(--caretip-rail);
+    }
+
+    .caretip-landing .caretip-hero-showcase-col {
+      padding-left: calc(var(--caretip-rail) * 0.5);
+      padding-right: calc(var(--caretip-rail) * 0.5);
+    }
+  }
+
+  /* Mobile hero — symmetric text block (no L/R drift) */
+  @media (max-width: 1023px) {
+    .caretip-landing .caretip-hero-headline,
+    .caretip-landing .caretip-hero-copy-block {
+      padding-left: 0;
+      padding-right: 0;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .caretip-landing .caretip-hero-headline--en {
+      max-width: min(100%, 20.5rem);
+    }
+
+    .caretip-landing .caretip-hero-cta-cluster {
+      width: 100%;
+      align-items: center;
+    }
+  }
+
+  /* Card grids — even gaps and centered tracks */
+  .caretip-landing section[id] ul.grid,
+  .caretip-public-page ul.grid {
+    width: 100%;
+  }
+
+  .caretip-landing section[id] .grid > li,
+  .caretip-landing section[id] .grid > article {
+    height: 100%;
+  }
+
+  /* Public marketing content blocks */
+  .caretip-public-page main > div {
+    width: 100%;
+  }
+
+  .caretip-public-page .mx-auto.max-w-7xl,
+  .caretip-public-page .mx-auto.max-w-5xl,
+  .caretip-public-page .mx-auto.max-w-4xl {
+    margin-left: auto;
+    margin-right: auto;
+  }
+}

@@ -111,7 +111,7 @@ export function HeroNestedCardSection({
                 >
                   <Link
                     to={primaryCtaTo}
-                    className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary-hover"
+                    className="inline-flex items-center justify-center rounded-full bg-primary px-6 py-3 text-sm font-bold text-white shadow-[0_8px_22px_rgba(233,120,28,0.28)] transition-colors hover:bg-primary-hover"
                   >
                     {primaryCtaLabel}
                   </Link>
@@ -125,7 +125,7 @@ export function HeroNestedCardSection({
               </div>
 
               {/* Right: visual block with integrated image */}
-              <div className="relative min-h-[360px] overflow-hidden bg-[#EB992C] lg:min-h-[520px]">
+              <div className="relative min-h-[360px] overflow-hidden bg-[#e9781c] lg:min-h-[520px]">
                 <div
                   aria-hidden
                   className="pointer-events-none absolute inset-0 opacity-70"

@@ -11,12 +11,11 @@ import {
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
-  "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/95 bg-white",
+  "caretip-landing-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/95 bg-white",
   "px-3.5 pb-4 pt-3.5 max-md:px-3.5 max-md:pb-4 max-md:pt-3.5 sm:px-6 sm:pb-7 sm:pt-6",
   "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.05)]",
   "transition-[transform,box-shadow,border-color] duration-300 ease-out",
-  "md:hover:border-primary/20",
-  "md:hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_16px_40px_rgba(235,153,44,0.1)]",
+  "md:hover:border-neutral-300/90 md:hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_16px_40px_rgba(15,15,15,0.08)]",
   "dark:border-neutral-700/90 dark:bg-neutral-900",
   "dark:shadow-[0_1px_2px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.42)]",
   "dark:md:hover:border-primary/30 dark:md:hover:shadow-[0_18px_44px_rgba(0,0,0,0.5)]",
@@ -90,18 +89,9 @@ export function LandingFeaturesSection() {
   return (
     <section
       id="features"
-      className={cn(
-        landingUi.section,
-        "relative overflow-hidden lg:py-24",
-        "border-y border-neutral-200/60 dark:border-neutral-800/80",
-        "bg-[linear-gradient(180deg,#ffffff_0%,#f7f5f2_42%,#ffffff_100%)]",
-        "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#10100f_48%,#0a0a0a_100%)]",
-      )}
+      className={cn(landingUi.section, landingUi.landingSurface, "relative overflow-hidden lg:py-24 dark:bg-neutral-950")}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_45%_at_50%_0%,rgba(235,153,44,0.05),transparent_55%)]"
-      />
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
 
       <div className="relative mx-auto max-w-7xl">
         <div className={landingUi.sectionIntro}>

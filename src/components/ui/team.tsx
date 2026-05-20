@@ -14,6 +14,7 @@ import {
 
 import { Marquee } from "@/components/ui/marquee";
 import { landingImageFrameClassName } from "@/components/ui/landing-image-frame";
+import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
 import hotelsImg from "../../../images/Hotels.png";
@@ -126,8 +127,8 @@ export default function HospitalityBusinessesMarquee() {
 
   return (
     <div className="caretip-hospitality-marquee relative w-full overflow-hidden bg-transparent py-7 sm:py-8">
-      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
-      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white via-white/80 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
+      <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-white via-white/90 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
+      <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-white via-white/90 to-transparent dark:from-neutral-950 dark:via-neutral-950/80 sm:w-20" />
 
       <Marquee className="[--gap:1rem]" pauseOnHover durationSeconds={65} gapPx={16}>
             {businesses.map((b) => (
@@ -135,7 +136,7 @@ export default function HospitalityBusinessesMarquee() {
                 <div
                   className={cn(
                     landingImageFrameClassName,
-                    "relative aspect-[4/5] w-full bg-neutral-100 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:bg-neutral-900 dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)]",
+                    "caretip-hospitality-marquee-card relative aspect-[4/5] w-full bg-neutral-100 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:bg-neutral-900 dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)]",
                   )}
                 >
                   <img
@@ -146,9 +147,14 @@ export default function HospitalityBusinessesMarquee() {
                     decoding="async"
                     referrerPolicy="no-referrer"
                   />
-                  <div className="absolute inset-x-0 bottom-0 border-t border-neutral-200/60 bg-white/92 px-2.5 py-2 max-md:backdrop-blur-none md:backdrop-blur-[4px] dark:border-neutral-800/80 dark:bg-neutral-950/88 sm:px-3 sm:py-2.5">
+                  <div className="caretip-hospitality-marquee-caption absolute inset-x-0 bottom-0 border-t border-neutral-200/60 bg-white px-2.5 py-2 dark:border-neutral-800/80 dark:bg-neutral-950 sm:px-3 sm:py-2.5">
                     <div className="flex items-start gap-2">
-                      <span className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary sm:h-8 sm:w-8">
+                      <span
+                        className={cn(
+                          landingUi.brandAccentIconWrap,
+                          "h-7 w-7 sm:h-8 sm:w-8",
+                        )}
+                      >
                         <b.Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </span>
                       <div className="min-w-0">

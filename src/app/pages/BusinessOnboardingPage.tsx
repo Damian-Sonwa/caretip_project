@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
+import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 
 export function BusinessOnboardingPage() {
   const { t } = useTranslation();
@@ -249,7 +250,7 @@ export function BusinessOnboardingPage() {
                   }
                 }}
                 disabled={!canContinue}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-3.5 text-sm font-bold text-white shadow-[0_8px_22px_rgba(235,153,44,0.28)] transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-60"
+                className={`${caretipBtnPrimaryFull} disabled:cursor-not-allowed disabled:opacity-60`}
               >
                 {busy ? (
                   <>

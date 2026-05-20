@@ -41,7 +41,7 @@ import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
 
-const TEAL = "#EB992C";
+const TEAL = "#e9781c";
 
 export function EmployeeSettingsPage() {
   const { t } = useTranslation();

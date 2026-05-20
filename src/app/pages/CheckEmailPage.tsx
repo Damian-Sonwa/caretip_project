@@ -13,6 +13,8 @@ import {
 } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { authDebug } from "@/app/lib/authDebugLog";
+import { caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
+import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 
 /**
@@ -274,7 +276,7 @@ export function CheckEmailPage() {
             type="button"
             onClick={() => void handleResendVerification()}
             disabled={resendBusy}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-white text-sm font-semibold text-neutral-900 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-900/70"
+            className={cn(caretipBtnSecondaryFull, "text-sm disabled:cursor-not-allowed")}
           >
             {resendBusy ? (
               <>

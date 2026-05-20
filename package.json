@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "generate-pwa-icons": "node scripts/generate-pwa-icons.mjs",
-    "prebuild": "node scripts/generate-pwa-icons.mjs",
+    "sync-font-assets": "node scripts/sync-font-assets.mjs",
+    "prebuild": "node scripts/generate-pwa-icons.mjs && node scripts/sync-font-assets.mjs",
+    "predev": "node scripts/sync-font-assets.mjs",
     "build": "vite build",
     "dev": "vite",
     "dev:api": "npm --prefix backend run dev",
