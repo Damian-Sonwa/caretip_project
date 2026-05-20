@@ -1,0 +1,57 @@
+/**
+ * Landing mobile content flow (max-lg only).
+ * Headline + tagline stay grouped → image → follow-up content.
+ * Hero is excluded. Desktop layout unchanged.
+ */
+
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-landing-mobile-stack {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+  }
+
+  .caretip-landing .caretip-mobile-stack-intro {
+    order: 1;
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .caretip-landing .caretip-mobile-section-headline {
+    font-size: clamp(1.875rem, 6.5vw, 2.375rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+
+  .caretip-landing .caretip-mobile-stack-intro .caretip-mobile-stack-tagline {
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+  }
+
+  .caretip-landing .caretip-mobile-stack-visual {
+    order: 2;
+    width: 100%;
+    margin-top: 0.625rem;
+    margin-bottom: 0;
+  }
+
+  .caretip-landing .caretip-mobile-stack-after {
+    order: 3;
+    width: 100%;
+    margin-top: 1rem;
+    margin-bottom: 0;
+  }
+
+  /* Flatten wrappers so intro / visual / after participate in parent grid */
+  .caretip-landing .caretip-mobile-stack-flatten {
+    display: contents;
+  }
+
+  /* Scenario cards: headline → image → body */
+  .caretip-landing .caretip-landing-mobile-stack-card {
+    display: flex;
+    flex-direction: column;
+  }
+}

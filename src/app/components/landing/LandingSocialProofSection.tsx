@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import {
   LandingSectionAccent,
@@ -25,6 +25,7 @@ const statAccentVariants: LandingAccentVariant[] = ["trend", "spark", "arrow"];
 
 export function LandingSocialProofSection() {
   const { t } = useTranslation();
+  const sectionSubtitle = t("landing.socialProof.subtitle");
 
   const stats = useMemo(
     () => [t("landing.socialProof.stat1"), t("landing.socialProof.stat2"), t("landing.socialProof.stat3")],
@@ -65,11 +66,9 @@ export function LandingSocialProofSection() {
           <h2 className={landingUi.sectionTitle}>
             {t("landing.socialProof.title")}
           </h2>
-          <p
-            className={landingUi.sectionSubtitle}
-          >
-            {t("landing.socialProof.subtitle")}
-          </p>
+          {landingCopyVisible(sectionSubtitle) ? (
+            <p className={landingUi.sectionSubtitle}>{sectionSubtitle}</p>
+          ) : null}
         </motion.div>
 
         <motion.ul

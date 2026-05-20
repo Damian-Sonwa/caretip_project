@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import {
   LandingSectionAccent,
@@ -46,7 +46,6 @@ export function LandingSplitShowcaseSection({
   visual,
   benefitsAriaLabel,
 }: LandingSplitShowcaseSectionProps) {
-  const visualFirstOnMobile = true;
   const visualLgOrder = visualPosition === "left" ? "lg:order-1" : "lg:order-2";
   const copyLgOrder = visualPosition === "left" ? "lg:order-2" : "lg:order-1";
 
@@ -66,11 +65,7 @@ export function LandingSplitShowcaseSection({
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className={cn(
-            landingUi.showcaseVisualCol,
-            visualFirstOnMobile ? "order-1" : "order-2",
-            visualLgOrder,
-          )}
+          className={cn(landingUi.showcaseVisualCol, landingUi.mobileStackVisual, visualLgOrder)}
         >
           <div className="relative w-full">{visual}</div>
         </motion.div>
@@ -81,11 +76,7 @@ export function LandingSplitShowcaseSection({
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className={cn(
-            landingUi.showcaseCopy,
-            visualFirstOnMobile ? "order-2 max-lg:mt-1" : "order-1",
-            copyLgOrder,
-          )}
+          className={cn(landingUi.showcaseCopy, "lg:flex lg:flex-col", copyLgOrder)}
         >
           <div className={landingUi.showcaseIntro}>
             <LandingSectionAccent variant={eyebrowVariant}>{eyebrow}</LandingSectionAccent>
@@ -95,10 +86,12 @@ export function LandingSplitShowcaseSection({
                 <span className={landingUi.showcaseHeadlineAccent}>{titleLine2}</span>
               ) : null}
             </h2>
-            <p className={landingUi.showcaseSubtitle}>{subtitle}</p>
+            {landingCopyVisible(subtitle) ? (
+              <p className={landingUi.showcaseSubtitle}>{subtitle}</p>
+            ) : null}
           </div>
 
-          <div className={landingUi.showcaseActionCluster}>
+          <div className={cn(landingUi.showcaseActionCluster, landingUi.mobileStackAfter)}>
             <div
               className={cn(
                 landingUi.showcaseBenefits,

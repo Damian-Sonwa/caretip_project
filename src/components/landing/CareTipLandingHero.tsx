@@ -4,7 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
 import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
 import {
@@ -50,6 +50,8 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
     const fallback = t("landing.showcase.heroTitleLine2Emphasis");
     return fallback ? [fallback] : [];
   }, [t, i18n.language]);
+
+  const heroDescription = t("landing.showcase.description");
 
   const metrics = [
     { value: t("landing.showcase.heroMetric1Value"), label: t("landing.showcase.heroMetric1Label") },
@@ -162,17 +164,19 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             ) : null}
           </motion.h1>
 
-          <motion.p
-            className={cn(
-              landingUi.heroSubtitle,
-              isDe
-                ? "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
-                : "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
-            )}
-            variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
-          >
-            {t("landing.showcase.description")}
-          </motion.p>
+          {landingCopyVisible(heroDescription) ? (
+            <motion.p
+              className={cn(
+                landingUi.heroSubtitle,
+                isDe
+                  ? "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
+                  : "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
+              )}
+              variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
+            >
+              {heroDescription}
+            </motion.p>
+          ) : null}
 
           <motion.div
             className={cn(

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import {
   LandingSectionAccent,
@@ -42,6 +42,7 @@ const featureAccentVariants: LandingAccentVariant[] = [
 
 export function LandingFeaturesSection() {
   const { t } = useTranslation();
+  const sectionSubtitle = t("landing.features.subtitle");
 
   const items = useMemo(
     () =>
@@ -103,15 +104,17 @@ export function LandingFeaturesSection() {
           >
             {t("landing.features.title")}
           </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.05 }}
-            className={landingUi.sectionSubtitle}
-          >
-            {t("landing.features.subtitle")}
-          </motion.p>
+          {landingCopyVisible(sectionSubtitle) ? (
+            <motion.p
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.05 }}
+              className={landingUi.sectionSubtitle}
+            >
+              {sectionSubtitle}
+            </motion.p>
+          ) : null}
         </div>
 
         <ul className="grid grid-cols-1 gap-2.5 max-md:gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">

@@ -2,11 +2,13 @@ import { motion } from "motion/react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
 export function LandingFinalCtaSection() {
   const { t } = useTranslation();
+  const sectionSubtitle = t("landing.finalCta.subtitle");
+
   return (
     <section
       className={cn(
@@ -27,7 +29,9 @@ export function LandingFinalCtaSection() {
         className={cn(landingUi.sectionIntro, landingUi.sectionShell, "relative mb-0")}
       >
         <h2 className={landingUi.sectionTitle}>{t("landing.finalCta.title")}</h2>
-        <p className={landingUi.sectionSubtitle}>{t("landing.finalCta.subtitle")}</p>
+        {landingCopyVisible(sectionSubtitle) ? (
+          <p className={landingUi.sectionSubtitle}>{sectionSubtitle}</p>
+        ) : null}
         <div className="flex w-full justify-center max-lg:px-0">
           <Link
             to="/auth?mode=signup&role=business&from=landing"

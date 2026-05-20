@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "motion/react";
 import { CreditCard, Smartphone, Clock, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
@@ -29,6 +29,7 @@ const iconClassName =
 
 export function PaymentsSection() {
   const { t } = useTranslation();
+  const sectionSubtitle = t("landing.paymentsTrust.subtitle");
 
   const bullets = useMemo(
     () =>
@@ -65,9 +66,9 @@ export function PaymentsSection() {
           <h2 className={landingUi.sectionTitle}>
             {t("landing.paymentsTrust.title")}
           </h2>
-          <p className={landingUi.sectionSubtitle}>
-            {t("landing.paymentsTrust.subtitle")}
-          </p>
+          {landingCopyVisible(sectionSubtitle) ? (
+            <p className={landingUi.sectionSubtitle}>{sectionSubtitle}</p>
+          ) : null}
         </motion.div>
 
         <ul className="grid gap-2.5 max-md:gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-4 lg:gap-6">

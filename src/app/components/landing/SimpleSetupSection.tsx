@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
-import { landingUi } from "@/components/landing/landingUi";
+import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingFadeReveal } from "@/lib/motionPerf";
@@ -11,6 +11,8 @@ import { cn } from "@/lib/utils";
 export function SimpleSetupSection() {
   const { t } = useTranslation();
   const [activeStep, setActiveStep] = useState(0);
+  const pillSub = t("landing.simpleSetup.pillSub");
+  const sectionSubtitle = t("landing.simpleSetup.subtitle");
 
   const steps = useMemo(
     () =>
@@ -44,25 +46,30 @@ export function SimpleSetupSection() {
           "relative lg:gap-10 xl:gap-14",
         )}
       >
-        <div className={cn(landingUi.copyColumn, "lg:order-1 lg:max-w-md xl:max-w-lg")}>
-          <motion.div {...landingFadeReveal} className={cn(landingUi.copyStack, "mb-7 sm:mb-8")}>
+        <div className={cn(landingUi.copyColumn, "lg:order-1 lg:flex lg:flex-col lg:max-w-md xl:max-w-lg")}>
+          <motion.div
+            {...landingFadeReveal}
+            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-7 max-lg:mb-0 sm:mb-8 lg:mb-7")}
+          >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
               <LandingSectionAccent variant="spark">{t("landing.simpleSetup.pill")}</LandingSectionAccent>
-              <LandingSectionAccent variant="arrow" muted>
-                {t("landing.simpleSetup.pillSub")}
-              </LandingSectionAccent>
+              {landingCopyVisible(pillSub) ? (
+                <LandingSectionAccent variant="arrow" muted>
+                  {pillSub}
+                </LandingSectionAccent>
+              ) : null}
             </div>
 
             <h2 className={landingUi.headline}>{t("landing.simpleSetup.title")}</h2>
-            <p className={cn(landingUi.subtitle, "max-md:max-w-[min(280px,30ch)]")}>
-              {t("landing.simpleSetup.subtitle")}
-            </p>
+            {landingCopyVisible(sectionSubtitle) ? (
+              <p className={cn(landingUi.subtitle, "max-md:max-w-[min(280px,30ch)]")}>{sectionSubtitle}</p>
+            ) : null}
           </motion.div>
 
           <motion.div
             role="list"
             aria-label={t("landing.simpleSetup.stepsAria")}
-            className="relative w-full"
+            className={cn("relative w-full", landingUi.mobileStackAfter)}
             {...landingFadeReveal}
           >
             <div
@@ -107,7 +114,9 @@ export function SimpleSetupSection() {
                         >
                           {step.title}
                         </p>
-                        <p className={cn(landingType.featureBody, "leading-relaxed")}>{step.description}</p>
+                        {landingCopyVisible(step.description) ? (
+                          <p className={cn(landingType.featureBody, "leading-relaxed")}>{step.description}</p>
+                        ) : null}
                       </div>
                     </motion.div>
                   </button>
@@ -121,7 +130,7 @@ export function SimpleSetupSection() {
           {...landingFadeReveal}
           className={cn(
             landingUi.visualColumn,
-            "lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 xl:pl-6",
+            "lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
           )}
         >
           <LiveInMinutesLaptopDemo

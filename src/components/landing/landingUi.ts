@@ -5,6 +5,11 @@ import {
   caretipBtnSecondary,
 } from "@/lib/caretipButtonSystem";
 
+/** True when landing copy should render (non-empty after trim). */
+export function landingCopyVisible(text: string | undefined): boolean {
+  return Boolean(text?.trim());
+}
+
 /** Rich amber gradient — shared by hero animated keyword and section accents. */
 const brandAccentGradient =
   "caretip-hero-headline-accent bg-gradient-to-br from-[#F59E0B] via-[#E68A2E] to-[#D97706] bg-clip-text text-transparent dark:from-[#FBBF24] dark:via-[#F59E0B] dark:to-[#E68A2E]";
@@ -108,12 +113,22 @@ export const landingUi = {
   sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-w-full sm:mb-10`,
   sectionAfterIntro: "mb-8 sm:mb-10",
 
+  /** Mobile: intro (headline+tagline) → visual → after. Desktop unchanged. */
+  mobileStackGrid: "caretip-landing-mobile-stack",
+  mobileStackFlatten: "caretip-mobile-stack-flatten max-lg:contents",
+  mobileStackIntro: "caretip-mobile-stack-intro w-full max-lg:items-center max-lg:text-center",
+  mobileStackTagline: "caretip-mobile-stack-tagline",
+  mobileStackVisual: "caretip-mobile-stack-visual",
+  mobileStackAfter: "caretip-mobile-stack-after",
+  mobileSectionHeadline: "caretip-mobile-section-headline",
+  mobileStackCard: "caretip-landing-mobile-stack-card",
+
   splitGrid:
-    "caretip-split-section-grid mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-7 sm:gap-9 lg:grid-cols-2 lg:items-center lg:gap-12",
+    "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
   copyColumn:
-    "order-1 flex w-full min-w-0 flex-col items-start text-left max-lg:items-center max-lg:text-center max-lg:space-y-4 lg:max-w-none",
+    "caretip-mobile-stack-flatten flex w-full min-w-0 flex-col items-start text-left max-lg:contents max-lg:text-center lg:max-w-none",
   visualColumn:
-    "order-2 flex w-full min-w-0 max-w-full flex-col items-center justify-center max-lg:pt-1 lg:order-none",
+    "caretip-mobile-stack-visual flex w-full min-w-0 max-w-full flex-col items-center justify-center max-lg:mx-auto lg:order-none",
 
   /** Row of lightweight section accents (replaces pill chips). */
   sectionAccentRow:
@@ -139,10 +154,10 @@ export const landingUi = {
     `${sectionLeadReadable} text-neutral-600 max-lg:text-center sm:text-left lg:mx-0 lg:max-w-md lg:text-left dark:text-neutral-400`,
   ),
   headline: cnSectionHeadline(
-    "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
+    "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
   ),
   subtitle: cnSectionLead(
-    `${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
+    `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   cardFeatureBody: `${landingType.featureBody} mt-2 leading-snug sm:mt-2.5 text-neutral-700 dark:text-neutral-300`,
   /** In-card body / quote — same scale as hero subtitle & section leads. */
@@ -167,16 +182,16 @@ export const landingUi = {
   showcaseSectionToneWarm: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#121110_50%,#0a0a0a_100%)]",
   showcaseSectionToneMuted: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_48%,#0a0a0a_100%)]",
   showcaseGrid:
-    "caretip-split-section-grid relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden sm:gap-10 lg:grid-cols-2 lg:items-center lg:gap-12",
+    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
   showcaseCopy:
-    "flex w-full min-w-0 max-w-xl flex-col items-start max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
-  showcaseIntro: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
+    "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
+  showcaseIntro: `caretip-mobile-stack-intro flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   showcaseHeadline: cnSectionHeadline(
-    "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
+    "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
   ),
   showcaseHeadlineAccent: "mt-1 block text-primary max-md:mt-1 sm:mt-1.5 lg:mt-2",
   showcaseSubtitle: cnSectionLead(
-    `${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
+    `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   showcaseActionCluster:
     "mt-8 flex w-full min-w-0 flex-col gap-4 max-lg:items-start sm:mt-10 sm:gap-4 lg:mx-0 lg:max-w-none",
@@ -202,15 +217,15 @@ export const landingUi = {
 
   hospitalitySection:
     "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20",
-  hospitalityIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full sm:mb-10`,
+  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-lg:mb-0 max-lg:text-center sm:mb-10 lg:mb-8`,
   hospitalityTitle: cnSectionHeadline(
-    "mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
+    "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
   ),
   hospitalitySubtitle: cnSectionLead(
-    `${sectionLeadReadable} text-center max-lg:px-0`,
+    `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0`,
   ),
   hospitalityGrid:
-    "grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden sm:gap-9 lg:grid-cols-2 lg:gap-12",
+    "caretip-mobile-stack-flatten grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden max-lg:contents max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:gap-12",
   hospitalityFeaturePanel:
     "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
   hospitalityMediaStack:
