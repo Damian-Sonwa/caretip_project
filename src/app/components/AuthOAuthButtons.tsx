@@ -54,7 +54,7 @@ export function AuthOAuthButtons({
   return (
     <div
       className={cn(
-        "flex w-full justify-center [&>div]:!w-full",
+        "caretip-auth-oauth flex w-full justify-center [&>div]:!w-full [&_iframe]:!mx-auto",
         !isLogin && !canOAuthSignUp && "pointer-events-none opacity-40",
       )}
       title={!isLogin && !canOAuthSignUp ? t("auth.oauth.signupBlockedTitle") : undefined}

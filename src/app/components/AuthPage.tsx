@@ -42,7 +42,7 @@ const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as
 export type { AuthRole };
 
 const FIELD_CLASS =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-sans dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
+  "caretip-auth-field w-full rounded-xl border border-neutral-200/90 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400/75 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow] duration-200 focus:border-[#e9781c]/45 focus:outline-none focus:ring-[3px] focus:ring-[#e9781c]/18 font-sans dark:border-neutral-700/90 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500";
 
 const FIELD_ICON = `${FIELD_CLASS} pl-10`;
 
@@ -375,7 +375,7 @@ export function AuthPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900"
+        className="caretip-auth-shell flex min-h-[100dvh] flex-col items-center justify-center"
       >
         <AppLoader />
       </motion.div>
@@ -387,7 +387,7 @@ export function AuthPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="flex min-h-[100dvh] flex-col items-center justify-center bg-gray-50 dark:bg-neutral-900"
+        className="caretip-auth-shell flex min-h-[100dvh] flex-col items-center justify-center"
       >
         <AppLoader />
       </motion.div>
@@ -411,7 +411,7 @@ export function AuthPage() {
           : user?.role ?? '';
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-sans dark:bg-neutral-900">
+    <div className="caretip-auth-shell relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
 
@@ -686,7 +686,7 @@ export function AuthPage() {
               <div className="flex justify-end pt-0.5">
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-neutral-600 transition-colors hover:text-primary dark:text-neutral-400"
+                  className="text-xs font-medium text-neutral-500 transition-colors hover:text-[#e9781c] dark:text-neutral-400/90"
                 >
                   {t('auth.page.forgotPassword')}
                 </Link>
@@ -716,14 +716,15 @@ export function AuthPage() {
               </p>
             )}
 
-            <div className="relative my-1 flex items-center">
-              <div className="flex-grow border-t border-neutral-200" />
-              <span className="mx-3 text-[11px] font-medium uppercase tracking-wide text-neutral-400">
+            <div className="relative my-2 flex items-center gap-3" role="separator" aria-label={t('auth.page.dividerOr')}>
+              <div className="caretip-auth-divider-line" aria-hidden />
+              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400/90">
                 {t('auth.page.dividerOr')}
               </span>
-              <div className="flex-grow border-t border-neutral-200" />
+              <div className="caretip-auth-divider-line" aria-hidden />
             </div>
 
+            <div className="caretip-auth-oauth">
             <AuthOAuthButtons
               isLogin={isLogin}
               role={role}
@@ -732,8 +733,9 @@ export function AuthPage() {
               inviteCode={inviteCode}
               onGoogleCredential={(t) => void runGoogleOAuth(t)}
             />
+            </div>
 
-            <p className="pt-1 text-center text-xs text-neutral-600 dark:text-neutral-400">
+            <p className="pt-0.5 text-center text-xs leading-snug text-neutral-500 dark:text-neutral-400/90">
               {isLogin ? t('auth.page.footerNoAccount') : t('auth.page.footerHasAccount')}
               <button
                 type="button"

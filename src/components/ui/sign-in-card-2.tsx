@@ -54,7 +54,7 @@ export function SignInCard2({
   return (
     <main
       className={cn(
-        "relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-10 pt-20 sm:pt-24 dark:bg-neutral-900",
+        "caretip-auth-shell relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden px-4 py-8 pt-[4.75rem] sm:py-10 sm:pt-24",
         authFont,
         className,
       )}
@@ -74,24 +74,23 @@ export function SignInCard2({
         >
           <div
             className={cn(
-              "relative overflow-hidden rounded-2xl bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-7 dark:bg-neutral-900",
-              "border border-gray-200 dark:border-neutral-800",
+              "caretip-auth-card relative overflow-hidden rounded-2xl border bg-white p-5 sm:p-6 dark:bg-neutral-900",
             )}
           >
-            <div className={cn("relative space-y-1 text-center", sessionActive ? "mb-6" : "mb-5")}>
+            <div className={cn("relative space-y-0.5 text-center", sessionActive ? "mb-5" : "mb-4")}>
               <motion.div
-                initial={{ scale: 0.96, opacity: 0 }}
+                initial={{ scale: 0.98, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
-                transition={{ type: "spring", duration: 0.65 }}
-                className="mx-auto flex h-[3.25rem] w-full max-w-[280px] items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+                transition={{ type: "spring", duration: 0.55, bounce: 0.2 }}
+                className="caretip-auth-logo-wrap mx-auto flex h-11 w-full max-w-[232px] items-center justify-center overflow-visible rounded-xl border bg-white/95 px-2 py-1 dark:border-neutral-800/80 dark:bg-neutral-900/95"
               >
-                <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
+                <CareTipLogo size="auth" align="center" layoutIsolatedDouble visualScale={1.35} />
               </motion.div>
               <motion.h1
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.08 }}
-                className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl"
+                className="pt-2.5 text-xl font-bold tracking-tight text-neutral-950 dark:text-neutral-50 sm:text-2xl"
               >
                 {sessionActive
                   ? t("auth.signInCard.titleCareTip")
@@ -103,7 +102,7 @@ export function SignInCard2({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.12 }}
-                className="text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                className="text-xs font-medium leading-snug text-neutral-500 dark:text-neutral-400/90"
               >
                 {sessionActive
                   ? t("auth.signInCard.subtitleSession")
@@ -116,7 +115,7 @@ export function SignInCard2({
             {!sessionActive ? (
               <>
                 <div
-                  className="mb-5 flex rounded-full border border-gray-200 bg-gray-50 p-1 dark:border-neutral-800 dark:bg-neutral-900"
+                  className="mb-4 flex rounded-full border border-neutral-200/80 bg-neutral-50/90 p-0.5 dark:border-neutral-800 dark:bg-neutral-900/80"
                   role="tablist"
                   aria-label={t("auth.signInCard.tablistAria")}
                 >
@@ -129,10 +128,8 @@ export function SignInCard2({
                       if (!isLogin) onToggleMode();
                     }}
                     className={cn(
-                      "flex-1 rounded-full py-2.5 text-sm font-semibold transition-all",
-                      isLogin
-                        ? "bg-primary text-white shadow-md"
-                        : "text-neutral-600 hover:bg-white/90 dark:text-neutral-400 dark:hover:bg-neutral-900/70",
+                      "flex-1 rounded-full py-2 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
+                      isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",
                       formBusy && "cursor-not-allowed opacity-60",
                     )}
                   >
@@ -147,10 +144,8 @@ export function SignInCard2({
                       if (isLogin) onToggleMode();
                     }}
                     className={cn(
-                      "flex-1 rounded-full py-2.5 text-sm font-semibold transition-all",
-                      !isLogin
-                        ? "bg-primary text-white shadow-md"
-                        : "text-neutral-600 hover:bg-white/90 dark:text-neutral-400 dark:hover:bg-neutral-900/70",
+                      "flex-1 rounded-full py-2 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
+                      !isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",
                       formBusy && "cursor-not-allowed opacity-60",
                     )}
                   >
@@ -158,10 +153,10 @@ export function SignInCard2({
                   </button>
                 </div>
 
-                <div className="mb-5 w-full">
+                <div className="mb-4 w-full">
                   <label
                     htmlFor="auth-role-select"
-                    className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                    className="mb-1.5 block text-left text-xs font-medium text-neutral-500 dark:text-neutral-400/90"
                   >
                     {t("auth.signInCard.accountTypeLabel")}
                   </label>
@@ -172,8 +167,8 @@ export function SignInCard2({
                       value={role}
                       onChange={(e) => onRoleChange(e.target.value as AuthRole)}
                       className={cn(
-                        "h-10 w-full appearance-none rounded-lg border border-gray-200 bg-white pl-3 pr-10 text-sm text-neutral-900 outline-none transition dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100",
-                        "focus:border-primary focus:ring-[3px] focus:ring-primary/25",
+                        "caretip-auth-field h-10 w-full appearance-none rounded-xl border border-neutral-200/90 bg-white pl-3 pr-10 text-sm text-neutral-900 shadow-[0_1px_2px_rgba(15,23,42,0.04)] outline-none transition-[border-color,box-shadow] duration-200 dark:border-neutral-700/90 dark:bg-neutral-900 dark:text-neutral-100",
+                        "focus:border-[#e9781c]/45 focus:ring-[3px] focus:ring-[#e9781c]/18",
                         "disabled:cursor-not-allowed disabled:opacity-50",
                         "[&>option]:bg-white [&>option]:text-neutral-900 dark:[&>option]:bg-neutral-900 dark:[&>option]:text-neutral-100",
                       )}

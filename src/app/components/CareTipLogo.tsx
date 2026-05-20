@@ -108,7 +108,7 @@ export function CareTipLogo({
     return (
       <span
         className={cn(
-          "relative flex h-16 w-full max-w-[360px] items-center justify-center overflow-visible",
+          "relative flex h-10 w-full max-w-[220px] items-center justify-center overflow-hidden",
           className
         )}
       >
@@ -119,11 +119,11 @@ export function CareTipLogo({
           height={240}
           className={cn(
             imgBase,
-            "pointer-events-none absolute top-1/2 left-1/2 max-h-none w-auto max-w-[min(360px,88vw)] -translate-x-1/2 -translate-y-1/2 object-center"
+            "pointer-events-none absolute top-1/2 left-1/2 max-h-none w-auto max-w-[min(220px,82vw)] -translate-x-1/2 -translate-y-1/2 object-center drop-shadow-[0_1px_1px_rgba(0,0,0,0.08)]"
           )}
           style={{
-            height: `${m * 4}rem`,
-            maxWidth: "min(360px, 88vw)",
+            height: `${m * 2.75}rem`,
+            maxWidth: "min(220px, 82vw)",
           }}
           loading="lazy"
           decoding="async"
