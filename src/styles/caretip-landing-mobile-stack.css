@@ -55,3 +55,13 @@
     flex-direction: column;
   }
 }
+
+/* Real life section title — match other landing section H2s on desktop only */
+@media (min-width: 1024px) {
+  .caretip-landing #real-life .caretip-section-intro > h2 {
+    font-size: var(--caretip-section-size);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.028em;
+  }
+}
