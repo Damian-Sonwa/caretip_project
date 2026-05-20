@@ -1237,16 +1237,16 @@
     "realLife": {
       "title": "So funktioniert CareTip im Alltag",
       "s1Headline": "Am Tisch",
-      "s1Text": "",
+      "s1Text": "Gäste scannen den QR Code auf dem Tisch und tippen sofort, ohne Warten und ohne Bargeld.",
       "s1Alt": "QR Code auf dem Restauranttisch für sofortiges Tippen",
       "s2Headline": "An der Rezeption",
-      "s2Text": "",
+      "s2Text": "Gäste tippen Personal schnell beim Check-in oder Check-out mit einem einfachen Scan.",
       "s2Alt": "Hotelrezeption mit Tippen beim Check-in oder Check-out",
       "s3Headline": "Nach der Dienstleistung",
-      "s3Text": "",
+      "s3Text": "Kunden zeigen Wertschätzung direkt nach dem Service, schnell und nahtlos.",
       "s3Alt": "Salon nach einer Behandlung",
       "s4Headline": "Unterwegs",
-      "s4Text": "",
+      "s4Text": "Kunden tippen von überall per geteiltem Link oder QR Code.",
       "s4Alt": "Tippen zu Hause und beim mobilen Service"
     },
     "paymentsTrust": {

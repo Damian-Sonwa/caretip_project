@@ -1237,16 +1237,16 @@
     "realLife": {
       "title": "How CareTip works in real life",
       "s1Headline": "At the table",
-      "s1Text": "",
+      "s1Text": "Customers scan a QR code placed on the table and tip instantly, with no waiting and no cash.",
       "s1Alt": "QR code on a restaurant table for instant tipping",
       "s2Headline": "At reception",
-      "s2Text": "",
+      "s2Text": "Guests tip staff quickly at check-in or check-out with a simple scan.",
       "s2Alt": "Hotel reception with guest tipping at check-in or check-out",
       "s3Headline": "After service",
-      "s3Text": "",
+      "s3Text": "Clients show appreciation right after their service, fast and seamless.",
       "s3Alt": "Salon after a service",
       "s4Headline": "On the go",
-      "s4Text": "",
+      "s4Text": "Customers tip from anywhere using a shared link or QR code.",
       "s4Alt": "Home and mobile service tipping moment"
     },
     "paymentsTrust": {
