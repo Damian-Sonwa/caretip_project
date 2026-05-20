@@ -27,15 +27,14 @@
     }
   }
 
-  /* English hero — stacked lines on mobile; single editorial line on desktop */
+  /* English hero — stacked lines on desktop (match DE editorial rhythm); mobile unchanged */
   @media (min-width: 1024px) {
     .caretip-landing .caretip-hero-headline--en > span {
-      display: inline;
-      margin-top: 0 !important;
+      display: block;
     }
 
-    .caretip-landing .caretip-hero-headline--en > span + span::before {
-      content: " ";
+    .caretip-landing .caretip-hero-headline--en > span + span {
+      margin-top: 0.5rem;
     }
   }
 

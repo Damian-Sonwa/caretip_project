@@ -1,4 +1,4 @@
-﻿import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
@@ -148,7 +148,9 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           <motion.p
             className={cn(
               landingUi.heroSubtitle,
-              "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]",
+              isDe
+                ? "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
+                : "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[26rem] lg:!mt-6 xl:max-w-[28rem]",
             )}
             variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
           >

@@ -207,7 +207,7 @@ export const landingUi = {
     "relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0 md:pr-1 lg:pr-2 xl:pr-3",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "caretip-hero-headline caretip-hero-headline--en w-full antialiased text-left max-lg:max-w-[min(100%,19rem)] max-lg:pl-0.5 max-lg:pr-2 lg:max-w-[30ch] xl:max-w-[32ch]",
+    "caretip-hero-headline caretip-hero-headline--en w-full antialiased text-left max-lg:max-w-[min(100%,19rem)] max-lg:pl-0.5 max-lg:pr-2 lg:max-w-[26ch] xl:max-w-[28ch]",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
     "w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
@@ -275,7 +275,7 @@ export const landingUi = {
   heroCopyDesktopDe:
     "lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pr-8 lg:pb-10 lg:pt-[3.5rem] xl:px-10 xl:pr-10 xl:pb-11 xl:pt-[4rem]",
   heroCopyDesktopEn:
-    "lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pr-8 lg:pb-10 lg:pt-[3.5rem] xl:px-10 xl:pr-10 xl:pb-11 xl:pt-[4rem]",
+    "lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pr-8 lg:pb-10 lg:pt-[3.5rem] xl:px-10 xl:pr-10 xl:pb-11 xl:pt-[4rem]",
   heroShowcaseColDesktopDe: "lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:pl-2",
   heroShowcaseColDesktopEn: "lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:pl-2",
   heroPhoneFrame:
