@@ -3,7 +3,7 @@ import { landingType } from "@/components/landing/landingTypography";
 /**
  * Landing page design system — layout, spacing, typography (TipJar-inspired rhythm).
  *
- * Typography: Inter (UI/body); Plus Jakarta Sans for landing hero H1 via `font-hero-display`.
+ * Typography: Inter (UI/body); Manrope for landing hero H1 via `font-hero-display`.
  * Responsive rules:
  * - Phone (<md): left-aligned hero; centered section intros below lg
  * - clamp()-based type scale in `caretip-typography.css`
@@ -264,20 +264,21 @@ export const landingUi = {
   heroShowcaseDesktopStageDe:
     "flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-2 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-3 sm:max-lg:pb-2 lg:absolute lg:inset-0 lg:h-full lg:px-3 lg:py-2 lg:pt-5 xl:px-4 xl:py-3 xl:pt-6",
   heroShowcaseDesktopStageEn:
-    "flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-2 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-3 sm:max-lg:pb-2 lg:absolute lg:inset-0 lg:h-full lg:px-4 lg:py-2 lg:pt-5 xl:px-5 xl:py-3 xl:pt-6",
+    "flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-2 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-3 sm:max-lg:pb-2 lg:absolute lg:inset-x-0 lg:bottom-8 lg:top-3 lg:flex lg:h-[calc(100%-2.75rem)] lg:items-start lg:justify-center lg:px-4 lg:py-0 xl:bottom-9 xl:top-3.5 xl:px-5",
   heroShowcaseDesktopShellDe:
     "lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,42rem)] lg:flex-1 lg:flex-col lg:justify-center lg:translate-x-0 lg:mx-auto lg:[&_img]:object-[58%_36%]",
   heroShowcaseDesktopShellEn:
-    "lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,42rem)] lg:flex-1 lg:flex-col lg:justify-center lg:translate-x-0 lg:mx-auto lg:[&_img]:object-[66%_38%]",
+    "lg:mx-auto lg:mt-0 lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,42rem)] lg:flex-1 lg:flex-col lg:justify-start lg:translate-x-0 lg:[&_img]:object-[66%_38%]",
   /** Split hero row — tight editorial gap between copy and product art. */
   heroSplitRowDesktop:
     "caretip-hero-split lg:flex-row lg:items-stretch lg:gap-0 xl:gap-2",
   heroCopyDesktopDe:
     "lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pr-8 lg:pb-10 lg:pt-[3.5rem] xl:px-10 xl:pr-10 xl:pb-11 xl:pt-[4rem]",
   heroCopyDesktopEn:
-    "lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pr-8 lg:pb-10 lg:pt-[3.5rem] xl:px-10 xl:pr-10 xl:pb-11 xl:pt-[4rem]",
+    "caretip-hero-copy--en lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:min-h-full lg:flex-col lg:justify-between lg:px-8 lg:pr-8 lg:pb-12 lg:pt-[3rem] xl:px-10 xl:pr-10 xl:pb-[3.25rem] xl:pt-[3.5rem]",
   heroShowcaseColDesktopDe: "lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:pl-2",
-  heroShowcaseColDesktopEn: "lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:pl-2",
+  heroShowcaseColDesktopEn:
+    "lg:mt-0 lg:flex lg:w-[min(100%,46%)] lg:flex-1 lg:flex-col lg:justify-start lg:pb-9 lg:pl-2 lg:pt-4 xl:pb-10 xl:pt-5",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */

@@ -1,11 +1,14 @@
 {
   "nav": {
-    "howItWorks": "How it Works",
+    "howItWorks": "How It Works",
     "features": "Features",
-    "fees": "Fees",
+    "pricing": "Pricing",
+    "solutions": "Solutions",
+    "fees": "Pricing",
     "logIn": "Log In",
     "signIn": "Sign In",
-    "requestDemo": "Request a Demo",
+    "staffLogin": "Staff Login",
+    "requestDemo": "Request Demo",
     "openMenu": "Open menu",
     "closeMenu": "Close menu",
     "mainNav": "Main",
@@ -48,7 +51,15 @@
   },
   "staticPages": {
     "common": {
-      "backToHome": "Back to Home"
+      "backToHome": "Back to Home",
+      "trustChipsAria": "Product highlights",
+      "trustChips": {
+        "liveMinutes": "Live in minutes",
+        "noApp": "No app download",
+        "instantPayouts": "Instant payouts",
+        "secureOnboarding": "Secure onboarding",
+        "worksInstantly": "Works instantly"
+      }
     },
     "contact": {
       "title": "Contact Us",
@@ -83,16 +94,46 @@
       "subtitle": "A clear view of the platform, built for hospitality teams and designed for fast tipping.",
       "f1Title": "QR Code Tipping",
       "f1Desc": "Guests scan and tip in seconds, with no app installs and no friction.",
+      "f1Tag": "Guest flow",
       "f2Title": "Employee Performance Tracking",
       "f2Desc": "Track tips, ratings, and goals in one place so staff stay motivated.",
+      "f2Tag": "Team view",
       "f3Title": "Business Dashboard Insights",
       "f3Desc": "See team performance, trends, and activity across shifts and venues.",
+      "f3Tag": "Analytics",
       "f4Title": "Secure Payments (Stripe)",
       "f4Desc": "Trusted checkout and modern security so payments stay reliable and safe.",
+      "f4Tag": "Stripe secured",
       "f5Title": "Real-time Updates",
       "f5Desc": "Live activity and notifications so you can coach and respond fast.",
+      "f5Tag": "Live alerts",
       "f6Title": "Multi-location Support",
-      "f6Desc": "Manage multiple venues, locations, and tables without losing clarity."
+      "f6Desc": "Manage multiple venues, locations, and tables without losing clarity.",
+      "f6Tag": "Multi venue",
+      "momentsTitle": "Product moments that matter",
+      "momentsSubtitle": "Focused views of how CareTip works for guests, staff, managers, and finance.",
+      "moments": {
+        "qr": {
+          "title": "QR experience",
+          "body": "Branded codes and tipping pages that feel native to your floor."
+        },
+        "employee": {
+          "title": "Employee experience",
+          "body": "Instant tip alerts, earnings clarity, and motivation on every shift."
+        },
+        "payouts": {
+          "title": "Payouts & security",
+          "body": "Secure processing and clear payout states your team can trust."
+        },
+        "analytics": {
+          "title": "Analytics visibility",
+          "body": "Shift trends, top performers, and live activity without spreadsheet chaos."
+        }
+      },
+      "mock": {
+        "tipAlert": "New tip received",
+        "tipAmount": "€24.00"
+      }
     },
     "pricing": {
       "pageTitle": "Simple tipping economics",
@@ -100,6 +141,8 @@
       "sectionTitle": "Transparent tip fees",
       "sectionSubtitle": "CareTip is built for one-time guest tips. You pay a small processing fee per successful tip; no monthly software subscription required on Starter.",
       "popular": "Popular",
+      "ctaTitle": "Questions about your venue?",
+      "ctaBody": "Our team can walk you through setup, branding, and the right fee tier for your hospitality operation.",
       "tiers": {
         "starter": {
           "name": "Starter",
@@ -134,6 +177,51 @@
           "f4": "Account manager",
           "button": "Contact sales"
         }
+      }
+    },
+    "solutions": {
+      "title": "Solutions for every hospitality floor",
+      "subtitle": "CareTip adapts to how your venue runs, from salons and restaurants to multi-location groups, without changing how guests tip.",
+      "segmentCta": "See how it works",
+      "platformTitle": "One platform, every service moment",
+      "platformBody": "Salon chairs, tables, bars, reception desks, and event stations share the same tipping flow, team visibility, and payout clarity.",
+      "ctaTitle": "Ready to see CareTip in your venue?",
+      "ctaBody": "Talk with our team about rollout, branding, and fee tiers for your hospitality group.",
+      "ctaPricing": "View pricing",
+      "restaurants": {
+        "title": "Restaurants & dining",
+        "body": "Turn every table into a tipping touchpoint. Guests scan, choose their server, and pay in seconds while your floor stays focused on service.",
+        "b0": "Table and section QR codes",
+        "b1": "Per-server tip routing",
+        "b2": "Shift-level performance insight"
+      },
+      "hotels": {
+        "title": "Hotels & resorts",
+        "body": "Support concierge, housekeeping, and front desk teams with branded tipping that feels native to your guest journey.",
+        "b0": "Desk and room-service codes",
+        "b1": "Role-based team invites",
+        "b2": "Multi-department reporting"
+      },
+      "cafes": {
+        "title": "Cafés & bars",
+        "body": "Fast counter service needs fast tipping. CareTip keeps the guest flow light while staff see tips land in real time.",
+        "b0": "Counter and bar QR placement",
+        "b1": "Instant employee notifications",
+        "b2": "Simple same-day payout states"
+      },
+      "events": {
+        "title": "Events & catering",
+        "body": "Pop-up service points and roaming staff stay connected with portable codes and clear earnings for every event shift.",
+        "b0": "Temporary service point codes",
+        "b1": "Roster-based tip allocation",
+        "b2": "Post-event payout summaries"
+      },
+      "salonBarbershop": {
+        "title": "Salons & barbershops",
+        "body": "Let clients tip their stylist after every cut, color, or treatment. Personal QR codes keep recognition with the right chair, without slowing checkout.",
+        "b0": "Per-stylist personal QR codes",
+        "b1": "Service-based tipping after appointments",
+        "b2": "Staff profiles and repeat-client visibility"
       }
     },
     "help": {
@@ -221,38 +309,110 @@
     },
     "howItWorks": {
       "title": "How It Works",
-      "subtitle": "From signup to guest payment. Here's how Caretip powers digital tipping for your team.",
+      "subtitle": "The full CareTip journey, from account setup and team onboarding to guest tipping, instant employee notifications, manager insights, payouts, and growth.",
       "stepBadge": "STEP {{n}}",
-      "s1Title": "Create your business",
-      "s1Body": "Sign up as a business, add your locations, and invite managers or staff. Complete any verification steps so you can accept tips and run payouts according to your CareTip agreement and fee tier.",
-      "s1TipLabel": "Tip:",
-      "s1TipBody": "Add each location you operate so QR codes and reporting stay organized from day one.",
-      "s2Title": "Issue QR codes for your team",
-      "s2Body": "Generate QR codes for individuals, roles, or shared team pools. Print table tents, add codes to name badges, or show them on receipts. Guests always land on a fast, mobile-friendly tipping page.",
-      "s2chip1t": "Per person",
-      "s2chip1s": "Direct to staff",
-      "s2chip2t": "Team pool",
-      "s2chip2s": "Split fairly",
-      "s2chip3t": "Link share",
-      "s2chip3s": "No print needed",
-      "s3Title": "Guests scan, tip, and pay",
-      "s3Body": "Guests use their phone camera with no app install required. They pick an amount, pay with card or wallet, and can leave optional feedback. You get a clear record for the business and your team.",
-      "s3GuestLabel": "Guest-friendly:",
-      "s3GuestBody": "Works on common mobile browsers; receipts can be emailed when enabled.",
-      "s4Title": "Notify, reconcile, and pay out",
-      "s4Body": "Employees can receive alerts when tips arrive. Owners and finance teams use reporting by location and date range. Payouts follow your processor and bank setup. See earnings in the dashboard when they settle.",
-      "s4stat1t": "Live",
-      "s4stat1s": "Tip notifications",
-      "s4stat2t": "Clear",
-      "s4stat2s": "Payout visibility",
+      "s1Title": "Create your account",
+      "s1Body": "Register your business workspace in minutes. Add your venue details, verify your account, and get a clean dashboard ready for locations, staff, and payouts.",
+      "s1TipLabel": "Fast start:",
+      "s1TipBody": "Most teams complete setup in one sitting. No heavy IT project required.",
+      "s2Title": "Add your team",
+      "s2Body": "Invite managers and staff with email or invite codes. Assign roles, organize by location, and keep everyone connected to the right tipping permissions.",
+      "s2chip1t": "Invite modal",
+      "s2chip1s": "Email or code",
+      "s2chip2t": "Roles",
+      "s2chip2s": "Server, bar, pool",
+      "s2chip3t": "Staff cards",
+      "s2chip3s": "Live roster",
+      "s3Title": "Generate QR codes",
+      "s3Body": "Create branded QR codes for individuals, team pools, or tables. Preview designs, export print ready PDFs, and share dynamic links when you do not need print.",
+      "s3chip1t": "Per person",
+      "s3chip1s": "Direct to staff",
+      "s3chip2t": "Table QR",
+      "s3chip2s": "Print ready",
+      "s3chip3t": "Dynamic link",
+      "s3chip3s": "No print needed",
+      "s4Title": "Place QR at tables & service points",
+      "s4Body": "Put codes where guests naturally interact: restaurant tables, hotel desks, bar counters, and reception. CareTip stays subtle and on brand in real hospitality environments.",
+      "s5Title": "Guests scan & tip",
+      "s5Body": "Guests scan with their phone camera. No app download. They choose an amount, pay with card or wallet, and land on a clear confirmation in seconds.",
+      "s5GuestLabel": "Guest friendly:",
+      "s5GuestBody": "Works in mobile browsers; optional receipts and feedback when enabled.",
+      "s6Title": "Employees receive tips instantly",
+      "s6Body": "Staff get real-time notifications when a tip lands. They see live earnings, activity in their wallet, and confidence that great service was recognized immediately.",
+      "s6stat1t": "Instant",
+      "s6stat1s": "Tip alerts",
+      "s6stat2t": "Live",
+      "s6stat2s": "Earnings view",
+      "s7Title": "Managers track performance",
+      "s7Body": "Owners and managers monitor tips by location, shift, and team member. Analytics widgets, top performer cards, and activity feeds keep the floor and back office aligned.",
+      "s7stat1t": "248",
+      "s7stat1s": "Tips this week",
+      "s7stat2t": "Top team",
+      "s7stat2s": "Leaderboard",
+      "s8Title": "Instant payouts & withdrawals",
+      "s8Body": "Earnings move through secure processors to your configured payout method. Employees and finance teams see clear transfer states: initiated, processing, and paid.",
+      "s8stat1t": "Same day",
+      "s8stat1s": "Payout speed",
+      "s8stat2t": "Clear",
+      "s8stat2s": "Transfer status",
+      "s9Title": "Your business grows with better service",
+      "s9Body": "Higher tip participation, happier teams, and stronger guest experiences compound over time. CareTip helps you measure engagement and celebrate momentum across every location.",
+      "s9stat1t": "+18%",
+      "s9stat1s": "Tip engagement",
+      "s9stat2t": "Stronger",
+      "s9stat2s": "Team morale",
       "trustTitle": "Trust and speed for every shift",
       "trust1Title": "Payments you can stand behind",
       "trust1Body": "Card data is handled by certified processors; connections use modern encryption so guest payments and business data stay protected end to end.",
       "trust2Title": "Built for busy floors",
       "trust2Body": "Web and mobile experiences stay in sync so managers and staff see updates whether they are on site or on the go.",
       "ctaTitle": "Ready to roll out digital tipping?",
-      "ctaBody": "See fee tiers built for hospitality teams, from single venues to multi-location groups.",
-      "ctaPricing": "View pricing"
+      "ctaBody": "See fee tiers built for hospitality teams, from single venues to multiple location groups.",
+      "ctaPricing": "View pricing",
+      "visual": {
+        "account": "Workspace setup",
+        "team": "Team & invites",
+        "qrGenerate": "QR generation",
+        "qrPlace": "On the floor",
+        "customerTip": "Guest payment",
+        "employeeTip": "Employee notification",
+        "analytics": "Manager dashboard",
+        "payout": "Payouts & withdrawals",
+        "growth": "Business growth"
+      },
+      "mock": {
+        "workspace": "Business workspace",
+        "registerTitle": "Create your CareTip account",
+        "registerCta": "Continue setup",
+        "verifyHint": "Verification keeps payouts secure",
+        "inviteTitle": "Invite team member",
+        "inviteEmail": "alex@yourvenue.com",
+        "roleServer": "Server",
+        "roleBar": "Bar",
+        "tipReceivedTitle": "Tip received",
+        "tipAmount": "€24.00",
+        "tipReceivedSub": "From a guest · just now",
+        "earningsToday": "Today's earnings",
+        "earningsValue": "€186.50",
+        "earningsDelta": "+12% vs yesterday",
+        "payoutSuccess": "Payout initiated",
+        "payoutSub": "Transfer to your bank account",
+        "withdrawLabel": "Available balance",
+        "withdrawAmount": "€1,240.00",
+        "withdrawCta": "Withdraw",
+        "metricTips": "Tips this week",
+        "metricTop": "Top performer",
+        "metricTopName": "Mina K. · Front of house",
+        "activityFeed": "Live activity",
+        "activityLine": "€18 tip · Table 12 · 2 min ago",
+        "growthBadge": "Engagement up",
+        "growthEngagement": "Happier teams",
+        "paymentSuccess": "Tip sent successfully",
+        "tipPaid": "€15.00",
+        "paymentMethod": "Apple Pay",
+        "qrTable": "Table QR",
+        "qrStaff": "Staff QR"
+      }
     },
     "cookies": {
       "title": "Cookie Policy",
@@ -1188,6 +1348,7 @@
     "linkForEmployees": "For Employees",
     "linkFeatures": "Features",
     "linkHowItWorks": "How It Works",
+    "linkSolutions": "Solutions",
     "linkPricing": "Pricing",
     "linkAbout": "About Us",
     "linkContact": "Contact",

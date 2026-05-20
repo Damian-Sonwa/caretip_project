@@ -150,7 +150,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               landingUi.heroSubtitle,
               isDe
                 ? "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
-                : "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[26rem] lg:!mt-6 xl:max-w-[28rem]",
+                : "max-w-lg max-lg:!mt-5 max-lg:pr-1 md:max-w-[32rem] lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
             )}
             variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
           >
@@ -158,7 +158,11 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           </motion.p>
 
           <motion.div
-            className={cn(landingUi.heroCtaRow, "max-lg:!mt-5 max-lg:w-full max-lg:pb-0 !mt-6 lg:!mt-8")}
+            className={cn(
+              landingUi.heroCtaRow,
+              "max-lg:!mt-5 max-lg:w-full max-lg:pb-0 !mt-6",
+              isDe ? "lg:!mt-8" : "lg:!mt-7",
+            )}
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
           >
             <Link to="/auth?mode=signup&role=business&from=landing" className={landingUi.heroCtaPrimary}>
@@ -170,7 +174,11 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             </Link>
           </motion.div>
 
-          {metricsRow("mt-9 hidden lg:flex sm:mt-10")}
+          {metricsRow(
+            isDe
+              ? "mt-9 hidden lg:flex sm:mt-10"
+              : "mt-9 hidden lg:mt-auto lg:flex lg:border-t-neutral-200/70 lg:pt-9 xl:pt-10 sm:mt-10",
+          )}
         </motion.div>
 
         {/* Product showcase ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â primary focal point on mobile */}

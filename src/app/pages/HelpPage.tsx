@@ -1,7 +1,6 @@
 import { Link } from "react-router";
 import { useMemo, useState } from "react";
 import {
-  ArrowLeft,
   Search,
   Book,
   Video,
@@ -12,13 +11,15 @@ import {
   Users,
   QrCode,
   Wallet,
+  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
-import AnimatedShaderBackground from "../components/ui/animated-shader-background";
+import { PublicPageShell } from "@/components/public/PublicPageShell";
+import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { publicPageUi } from "@/components/public/publicPageUi";
+import { cn } from "@/lib/utils";
 
 type HelpCategoryId =
   | "gettingStarted"
@@ -72,140 +73,118 @@ export function HelpPage() {
   }, [helpCategories, searchQuery]);
 
   return (
-    <div className="min-h-screen relative">
-      <AnimatedShaderBackground />
-      <div className="relative z-10">
-        <Navigation />
+    <PublicPageShell maxWidth="wide">
+      <PublicPageHeader
+        centered
+        showTrustChips
+        title={t("staticPages.help.title")}
+        subtitle={t("staticPages.help.subtitle")}
+      />
 
-        <main className="min-h-[70vh] px-6 py-20">
-          <div className="max-w-6xl mx-auto">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">{t("staticPages.common.backToHome")}</span>
-            </Link>
-
-            <div className="space-y-8">
-              <div className="space-y-4 text-center">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">{t("staticPages.help.title")}</h1>
-                <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto">{t("staticPages.help.subtitle")}</p>
-              </div>
-
-              <div className="max-w-2xl mx-auto pt-4">
-                <div className="relative">
-                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-                  <input
-                    type="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t("staticPages.help.searchPlaceholder")}
-                    autoComplete="off"
-                    aria-label={t("staticPages.help.searchAria")}
-                    className="w-full pl-12 pr-4 py-4 rounded-xl bg-card border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-8">
-                <Link
-                  to="/faq"
-                  className="p-6 rounded-xl bg-card border border-border hover:border-accent/50 transition-all text-center group"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/20 transition-colors">
-                    <HelpCircle className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-1">{t("staticPages.help.cardFaqTitle")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("staticPages.help.cardFaqDesc")}</p>
-                </Link>
-
-                <div className="p-6 rounded-xl bg-card border border-border hover:border-accent/50 transition-all text-center group cursor-pointer">
-                  <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/20 transition-colors">
-                    <Video className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-1">{t("staticPages.help.cardVideoTitle")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("staticPages.help.cardVideoDesc")}</p>
-                </div>
-
-                <Link
-                  to="/contact"
-                  className="p-6 rounded-xl bg-card border border-border hover:border-accent/50 transition-all text-center group"
-                >
-                  <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center mx-auto mb-3 group-hover:bg-accent/20 transition-colors">
-                    <MessageCircle className="w-6 h-6 text-accent" />
-                  </div>
-                  <h3 className="font-semibold text-foreground mb-1">{t("staticPages.help.cardContactTitle")}</h3>
-                  <p className="text-sm text-muted-foreground">{t("staticPages.help.cardContactDesc")}</p>
-                </Link>
-              </div>
-
-              <div className="pt-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-6">{t("staticPages.help.browseTitle")}</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredCategories.length === 0 ? (
-                    <div className="col-span-full py-12 text-center text-muted-foreground">
-                      {t("staticPages.help.noResults")}{" "}
-                      <button
-                        type="button"
-                        className="font-medium text-accent underline underline-offset-2"
-                        onClick={() => setSearchQuery("")}
-                      >
-                        {t("staticPages.help.clearSearch")}
-                      </button>
-                      .
-                    </div>
-                  ) : (
-                    filteredCategories.map((category) => {
-                      const Icon = category.icon;
-                      return (
-                        <div
-                          key={category.id}
-                          className="p-6 rounded-xl bg-card border border-border hover:border-accent/50 transition-all"
-                        >
-                          <div className="flex items-center gap-3 mb-4">
-                            <div className="w-10 h-10 rounded-lg bg-accent/10 flex items-center justify-center">
-                              <Icon className="w-5 h-5 text-accent" />
-                            </div>
-                            <h3 className="font-semibold text-foreground">{category.title}</h3>
-                          </div>
-                          <ul className="space-y-2">
-                            {category.articles.map((article, articleIndex) => (
-                              <li key={articleIndex}>
-                                <a
-                                  href="#"
-                                  className="text-sm text-muted-foreground hover:text-accent transition-colors flex items-center gap-2 group"
-                                >
-                                  <span className="w-1 h-1 rounded-full bg-muted-foreground group-hover:bg-accent transition-colors" />
-                                  {article}
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-
-              <div className="mt-12 p-8 rounded-2xl bg-gradient-to-br from-accent/10 to-primary/10 border border-accent/20 text-center">
-                <h3 className="text-2xl font-semibold text-foreground mb-3">{t("staticPages.help.ctaTitle")}</h3>
-                <p className="text-muted-foreground mb-6">{t("staticPages.help.ctaBody")}</p>
-                <Link
-                  to="/contact"
-                  className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-all"
-                >
-                  {t("staticPages.help.ctaButton")}
-                  <MessageCircle className="w-4 h-4" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </main>
-
-        <Footer />
+      <div className={cn(publicPageUi.sectionGap, "relative mx-auto max-w-2xl")}>
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder={t("staticPages.help.searchPlaceholder")}
+          autoComplete="off"
+          aria-label={t("staticPages.help.searchAria")}
+          className="w-full rounded-xl border border-neutral-200/90 bg-white py-3.5 pl-12 pr-4 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+        />
       </div>
-    </div>
+
+      <div className={cn(publicPageUi.sectionGap, "grid grid-cols-1 gap-4 sm:grid-cols-3")}>
+        {[
+          { to: "/faq", Icon: HelpCircle, title: t("staticPages.help.cardFaqTitle"), desc: t("staticPages.help.cardFaqDesc") },
+          { Icon: Video, title: t("staticPages.help.cardVideoTitle"), desc: t("staticPages.help.cardVideoDesc"), static: true },
+          { to: "/contact", Icon: MessageCircle, title: t("staticPages.help.cardContactTitle"), desc: t("staticPages.help.cardContactDesc") },
+        ].map(({ to, Icon, title, desc, static: isStatic }) => {
+          const inner = (
+            <>
+              <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/15">
+                <Icon className="h-5 w-5 text-primary" />
+              </div>
+              <h3 className="mb-1 font-semibold text-neutral-950 dark:text-neutral-50">{title}</h3>
+              <p className="text-sm text-neutral-700 dark:text-neutral-300">{desc}</p>
+            </>
+          );
+
+          const className = cn(
+            publicPageUi.card,
+            publicPageUi.cardPad,
+            "group text-center transition-colors hover:border-primary/20",
+            isStatic && "cursor-default",
+          );
+
+          return to ? (
+            <Link key={title} to={to} className={className}>
+              {inner}
+            </Link>
+          ) : (
+            <div key={title} className={className}>
+              {inner}
+            </div>
+          );
+        })}
+      </div>
+
+      <section className={publicPageUi.sectionGap}>
+        <h2 className="mb-5 text-xl font-semibold text-neutral-950 sm:text-2xl dark:text-neutral-50">
+          {t("staticPages.help.browseTitle")}
+        </h2>
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+          {filteredCategories.length === 0 ? (
+            <div className="col-span-full py-10 text-center text-neutral-600 dark:text-neutral-400">
+              {t("staticPages.help.noResults")}{" "}
+              <button
+                type="button"
+                className="font-medium text-primary underline underline-offset-2"
+                onClick={() => setSearchQuery("")}
+              >
+                {t("staticPages.help.clearSearch")}
+              </button>
+              .
+            </div>
+          ) : (
+            filteredCategories.map((category) => {
+              const Icon = category.icon;
+              return (
+                <div key={category.id} className={cn(publicPageUi.card, publicPageUi.cardPad, "hover:border-primary/15")}>
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-neutral-950 dark:text-neutral-50">{category.title}</h3>
+                  </div>
+                  <ul className="space-y-2">
+                    {category.articles.map((article, articleIndex) => (
+                      <li key={articleIndex}>
+                        <a
+                          href="#"
+                          className="group flex items-center gap-2 text-sm text-neutral-700 transition-colors hover:text-primary dark:text-neutral-300"
+                        >
+                          <span className="h-1 w-1 rounded-full bg-neutral-400 transition-colors group-hover:bg-primary" />
+                          {article}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </section>
+
+      <section className={cn(publicPageUi.sectionGap, publicPageUi.ctaPanel)}>
+        <h3 className="mb-2 text-2xl font-semibold text-neutral-950 dark:text-neutral-50">{t("staticPages.help.ctaTitle")}</h3>
+        <p className="mx-auto mb-6 max-w-lg text-neutral-700 dark:text-neutral-300">{t("staticPages.help.ctaBody")}</p>
+        <Link to="/contact" className={publicPageUi.ctaPrimary}>
+          {t("staticPages.help.ctaButton")}
+          <ArrowRight className="h-4 w-4" />
+        </Link>
+      </section>
+    </PublicPageShell>
   );
 }

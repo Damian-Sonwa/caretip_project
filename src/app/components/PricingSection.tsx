@@ -31,8 +31,10 @@ export function PricingSection({ tiers }: PricingSectionProps) {
   return (
     <div className="space-y-8">
       <div className="text-center space-y-4">
-        <h2 className="text-3xl font-semibold text-foreground">{t("staticPages.pricing.sectionTitle")}</h2>
-        <p className="text-muted-foreground max-w-2xl mx-auto">
+        <h2 className="font-hero-display text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
+          {t("staticPages.pricing.sectionTitle")}
+        </h2>
+        <p className="mx-auto max-w-2xl text-neutral-700 dark:text-neutral-300">
           {t("staticPages.pricing.sectionSubtitle")}
         </p>
       </div>

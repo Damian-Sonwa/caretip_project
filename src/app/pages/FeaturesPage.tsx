@@ -1,74 +1,72 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
-import { QrCode, ShieldCheck, Zap, BarChart3, Users, Building2, type LucideIcon } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
-import { AuthLikePageBackground } from "../components/AuthLikePageBackground";
-import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
-
-const FEATURE_ICONS: LucideIcon[] = [QrCode, Users, BarChart3, ShieldCheck, Zap, Building2];
-const FEATURE_NUMS = ["1", "2", "3", "4", "5", "6"] as const;
+import { PublicPageShell } from "@/components/public/PublicPageShell";
+import { FeaturesPageHero } from "@/components/public/features/FeaturesPageHero";
+import { FeatureShowcaseCard } from "@/components/public/features/FeatureShowcaseCard";
+import { FeaturesProductMoments } from "@/components/public/features/FeaturesProductMoments";
+import { FEATURES_PAGE_ITEMS } from "@/components/public/features/featuresPageConfig";
+import { cn } from "@/lib/utils";
 
 export function FeaturesPage() {
   const { t } = useTranslation();
-  const features = useMemo(
+
+  const items = useMemo(
     () =>
-      FEATURE_NUMS.map((n, idx) => ({
-        Icon: FEATURE_ICONS[idx],
-        title: t(`staticPages.features.f${n}Title`),
-        description: t(`staticPages.features.f${n}Desc`),
+      FEATURES_PAGE_ITEMS.map((item) => ({
+        ...item,
+        title: t(`staticPages.features.f${item.id}Title`),
+        description: t(`staticPages.features.f${item.id}Desc`),
+        tag: t(`staticPages.features.${item.tagKey}`),
       })),
     [t],
   );
 
+  const featured = items.filter((f) => f.featured);
+  const standard = items.filter((f) => !f.featured);
+
   return (
-    <div className="relative min-h-[100dvh] bg-white">
-      <AuthLikePageBackground />
-      <div className="relative z-10 min-w-0">
-        <Navigation />
+    <PublicPageShell maxWidth="wide" contentClassName="pb-4">
+      <FeaturesPageHero />
 
-        <main className="min-w-0 px-6 pb-20 pt-24 sm:pt-28">
-          <div className="mx-auto max-w-5xl">
-            <motion.div
-              initial={{ y: 14, opacity: 0 }}
-              whileInView={{ y: 0, opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.55 }}
-              className="mb-10 space-y-4 text-center"
-            >
-              <h1 className="text-4xl font-bold text-neutral-900 sm:text-5xl md:text-6xl">{t("staticPages.features.title")}</h1>
-              <p className="mx-auto max-w-2xl text-lg text-neutral-600 sm:text-xl">{t("staticPages.features.subtitle")}</p>
-            </motion.div>
+      <section className="relative">
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
+          {featured.map((f, idx) => (
+            <FeatureShowcaseCard
+              key={f.id}
+              title={f.title}
+              description={f.description}
+              tag={f.tag}
+              Icon={f.Icon}
+              visual={f.visual}
+              featured
+              index={idx}
+            />
+          ))}
+        </div>
+      </section>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              {features.map((f, idx) => (
-                <motion.div
-                  key={f.title}
-                  initial={{ y: 14, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: idx * 0.06 }}
-                >
-                  <LandingBorderedCard cardClassName="p-6 shadow-sm">
-                    <div className="flex items-start gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[hsl(33_82%_55%_/_0.12)]">
-                        <f.Icon className="h-6 w-6 text-[hsl(33_82%_55%)]" />
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className="text-lg font-semibold text-foreground">{f.title}</h2>
-                        <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{f.description}</p>
-                      </div>
-                    </div>
-                  </LandingBorderedCard>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </main>
+      <section
+        className={cn(
+          "relative mt-8 rounded-2xl border border-neutral-200/50 bg-[#f3f1ed]/60 px-1 py-6 sm:mt-10 sm:rounded-3xl sm:px-2 sm:py-8",
+          "dark:border-neutral-800/80 dark:bg-neutral-900/40",
+        )}
+      >
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-2 xl:grid-cols-4">
+          {standard.map((f, idx) => (
+            <FeatureShowcaseCard
+              key={f.id}
+              title={f.title}
+              description={f.description}
+              tag={f.tag}
+              Icon={f.Icon}
+              visual={f.visual}
+              index={idx + featured.length}
+            />
+          ))}
+        </div>
+      </section>
 
-        <Footer />
-      </div>
-    </div>
+      <FeaturesProductMoments />
+    </PublicPageShell>
   );
 }

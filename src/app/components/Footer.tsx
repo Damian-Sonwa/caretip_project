@@ -28,6 +28,7 @@ export function Footer({
         { name: t("footer.linkForEmployees"), to: "/#for-employees" },
         { name: t("footer.linkFeatures"), to: "/features" },
         { name: t("footer.linkHowItWorks"), to: "/how-it-works" },
+        { name: t("footer.linkSolutions"), to: "/solutions" },
         { name: t("footer.linkPricing"), to: "/pricing" },
       ],
       Company: [

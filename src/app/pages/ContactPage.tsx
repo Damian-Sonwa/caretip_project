@@ -1,168 +1,139 @@
 import { Link } from "react-router";
 import { ArrowLeft, Mail, MessageSquare, Phone, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
-import AnimatedShaderBackground from "../components/ui/animated-shader-background";
+import { PublicPageShell } from "@/components/public/PublicPageShell";
+import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { publicPageUi } from "@/components/public/publicPageUi";
+import { cn } from "@/lib/utils";
 
 export function ContactPage() {
   const { t } = useTranslation();
+
   return (
-    <div className="min-h-screen relative">
-      <AnimatedShaderBackground />
-      <div className="relative z-10">
-        <Navigation />
+    <PublicPageShell>
+      <PublicPageHeader
+        title={t("staticPages.contact.title")}
+        subtitle={t("staticPages.contact.subtitle")}
+        showTrustChips
+      />
 
-        <main className="min-h-[70vh] px-6 py-20">
-          <div className="max-w-4xl mx-auto">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              <span className="text-sm">{t("staticPages.common.backToHome")}</span>
-            </Link>
+      <div className={cn(publicPageUi.sectionGap, "grid grid-cols-1 gap-6 lg:grid-cols-2 lg:gap-8")}>
+        <div className={cn(publicPageUi.card, publicPageUi.cardPad, publicPageUi.cardInteractive)}>
+          <h2 className="mb-5 font-hero-display text-xl font-bold text-neutral-950 dark:text-neutral-50">
+            {t("staticPages.contact.formTitle")}
+          </h2>
+          <form className="space-y-4">
+            <div>
+              <label htmlFor="name" className="mb-2 block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("staticPages.contact.labelName")}
+              </label>
+              <input
+                type="text"
+                id="name"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                placeholder={t("staticPages.contact.placeholderName")}
+              />
+            </div>
 
-            <div className="space-y-8">
-              <div className="space-y-4">
-                <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground">{t("staticPages.contact.title")}</h1>
-                <p className="text-lg sm:text-xl text-muted-foreground">{t("staticPages.contact.subtitle")}</p>
-              </div>
+            <div>
+              <label htmlFor="email" className="mb-2 block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("staticPages.contact.labelEmail")}
+              </label>
+              <input
+                type="email"
+                id="email"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                placeholder={t("staticPages.contact.placeholderEmail")}
+              />
+            </div>
 
-              <div className="pt-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  <div className="p-8 rounded-2xl bg-card border border-border">
-                    <h2 className="text-2xl font-semibold text-foreground mb-6">{t("staticPages.contact.formTitle")}</h2>
-                    <form className="space-y-5">
-                      <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                          {t("staticPages.contact.labelName")}
-                        </label>
-                        <input
-                          type="text"
-                          id="name"
-                          className="w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-                          placeholder={t("staticPages.contact.placeholderName")}
-                        />
-                      </div>
+            <div>
+              <label htmlFor="subject" className="mb-2 block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("staticPages.contact.labelSubject")}
+              </label>
+              <input
+                type="text"
+                id="subject"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                placeholder={t("staticPages.contact.placeholderSubject")}
+              />
+            </div>
 
-                      <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                          {t("staticPages.contact.labelEmail")}
-                        </label>
-                        <input
-                          type="email"
-                          id="email"
-                          className="w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-                          placeholder={t("staticPages.contact.placeholderEmail")}
-                        />
-                      </div>
+            <div>
+              <label htmlFor="message" className="mb-2 block text-sm font-medium text-neutral-900 dark:text-neutral-100">
+                {t("staticPages.contact.labelMessage")}
+              </label>
+              <textarea
+                id="message"
+                rows={5}
+                className="w-full resize-none rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                placeholder={t("staticPages.contact.placeholderMessage")}
+              />
+            </div>
 
-                      <div>
-                        <label htmlFor="subject" className="block text-sm font-medium text-foreground mb-2">
-                          {t("staticPages.contact.labelSubject")}
-                        </label>
-                        <input
-                          type="text"
-                          id="subject"
-                          className="w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all"
-                          placeholder={t("staticPages.contact.placeholderSubject")}
-                        />
-                      </div>
+            <button type="submit" className={cn(publicPageUi.ctaPrimary, "w-full py-3.5")}>
+              {t("staticPages.contact.submit")}
+            </button>
+          </form>
+        </div>
 
-                      <div>
-                        <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                          {t("staticPages.contact.labelMessage")}
-                        </label>
-                        <textarea
-                          id="message"
-                          rows={5}
-                          className="w-full px-4 py-3 rounded-lg bg-background border border-border text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent transition-all resize-none"
-                          placeholder={t("staticPages.contact.placeholderMessage")}
-                        />
-                      </div>
-
-                      <button
-                        type="submit"
-                        className="w-full px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-all"
-                      >
-                        {t("staticPages.contact.submit")}
-                      </button>
-                    </form>
+        <div className="space-y-5">
+          <div className={cn(publicPageUi.card, publicPageUi.cardPad, publicPageUi.cardInteractive)}>
+            <h2 className="mb-5 font-hero-display text-xl font-bold text-neutral-950 dark:text-neutral-50">
+              {t("staticPages.contact.asideTitle")}
+            </h2>
+            <div className="space-y-5">
+              {[
+                { Icon: Mail, title: t("staticPages.contact.emailHeading"), lines: ["support@caretip.com", "sales@caretip.com"] },
+                {
+                  Icon: Phone,
+                  title: t("staticPages.contact.phoneHeading"),
+                  lines: [t("staticPages.contact.phoneLine1"), t("staticPages.contact.phoneLine2")],
+                },
+                {
+                  Icon: MessageSquare,
+                  title: t("staticPages.contact.chatHeading"),
+                  lines: [t("staticPages.contact.chatLine")],
+                  action: t("staticPages.contact.chatCta"),
+                },
+                {
+                  Icon: MapPin,
+                  title: t("staticPages.contact.hqHeading"),
+                  lines: [t("staticPages.contact.hqLine1"), t("staticPages.contact.hqLine2")],
+                },
+              ].map(({ Icon, title, lines, action }) => (
+                <div key={title} className="flex items-start gap-4">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+                    <Icon className="h-5 w-5 text-primary" />
                   </div>
-
-                  <div className="space-y-6">
-                    <div className="p-8 rounded-2xl bg-card border border-border">
-                      <h2 className="text-2xl font-semibold text-foreground mb-6">{t("staticPages.contact.asideTitle")}</h2>
-                      <div className="space-y-6">
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <Mail className="w-6 h-6 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground mb-1">{t("staticPages.contact.emailHeading")}</h3>
-                            <p className="text-muted-foreground text-sm">support@caretip.com</p>
-                            <p className="text-muted-foreground text-sm">sales@caretip.com</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <Phone className="w-6 h-6 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground mb-1">{t("staticPages.contact.phoneHeading")}</h3>
-                            <p className="text-muted-foreground text-sm">{t("staticPages.contact.phoneLine1")}</p>
-                            <p className="text-muted-foreground text-sm">{t("staticPages.contact.phoneLine2")}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <MessageSquare className="w-6 h-6 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground mb-1">{t("staticPages.contact.chatHeading")}</h3>
-                            <p className="text-muted-foreground text-sm">{t("staticPages.contact.chatLine")}</p>
-                            <button type="button" className="text-accent text-sm font-medium hover:underline mt-1">
-                              {t("staticPages.contact.chatCta")}
-                            </button>
-                          </div>
-                        </div>
-
-                        <div className="flex items-start gap-4">
-                          <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
-                            <MapPin className="w-6 h-6 text-accent" />
-                          </div>
-                          <div>
-                            <h3 className="font-semibold text-foreground mb-1">{t("staticPages.contact.hqHeading")}</h3>
-                            <p className="text-muted-foreground text-sm">{t("staticPages.contact.hqLine1")}</p>
-                            <p className="text-muted-foreground text-sm">{t("staticPages.contact.hqLine2")}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="p-6 rounded-2xl bg-accent/10 border border-accent/20">
-                      <h3 className="font-semibold text-foreground mb-2">{t("staticPages.contact.faqTeaserTitle")}</h3>
-                      <p className="text-sm text-muted-foreground mb-4">{t("staticPages.contact.faqTeaserBody")}</p>
-                      <Link
-                        to="/faq"
-                        className="inline-flex items-center gap-2 text-accent font-medium text-sm hover:underline"
-                      >
-                        {t("staticPages.contact.faqTeaserLink")}
-                        <ArrowLeft className="w-4 h-4 rotate-180" />
-                      </Link>
-                    </div>
+                  <div>
+                    <h3 className="mb-1 font-semibold text-neutral-950 dark:text-neutral-50">{title}</h3>
+                    {lines.map((line) => (
+                      <p key={line} className="text-sm text-neutral-700 dark:text-neutral-300">
+                        {line}
+                      </p>
+                    ))}
+                    {action ? (
+                      <button type="button" className="mt-1 text-sm font-medium text-primary hover:underline">
+                        {action}
+                      </button>
+                    ) : null}
                   </div>
                 </div>
-              </div>
+              ))}
             </div>
           </div>
-        </main>
 
-        <Footer />
+          <div className={cn(publicPageUi.insetPanel, "border-primary/15 bg-primary/[0.06]")}>
+            <h3 className="mb-2 font-semibold text-neutral-950 dark:text-neutral-50">{t("staticPages.contact.faqTeaserTitle")}</h3>
+            <p className="mb-4 text-sm text-neutral-700 dark:text-neutral-300">{t("staticPages.contact.faqTeaserBody")}</p>
+            <Link to="/faq" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+              {t("staticPages.contact.faqTeaserLink")}
+              <ArrowLeft className="h-4 w-4 rotate-180" />
+            </Link>
+          </div>
+        </div>
       </div>
-    </div>
+    </PublicPageShell>
   );
 }

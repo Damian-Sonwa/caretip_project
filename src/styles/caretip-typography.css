@@ -1,11 +1,11 @@
 /**
- * CareTip typography system — Inter only (locked).
+ * CareTip typography — Inter (body/UI); Manrope (public marketing headings).
  * Hierarchy: hero-title → section-title → card-title → body-copy → feature-copy → button-text
  */
 
 :root {
   --font-inter: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-hero-display: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-hero-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
   --font-body: var(--font-inter);
   --font-display: var(--font-inter);
 
@@ -51,7 +51,7 @@ html.caretip-font-inter {
   font-family: var(--font-inter);
 }
 
-/** Landing hero H1 only — geometric display face (Plus Jakarta Sans). */
+/** Public marketing headings — Manrope display face. */
 @utility font-hero-display {
   font-family: var(--font-hero-display);
   font-feature-settings: "kern" 1, "liga" 1;

@@ -12,7 +12,8 @@ import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 const NAV_ROUTES = [
   { to: "/how-it-works" as const, nameKey: "nav.howItWorks" },
   { to: "/features" as const, nameKey: "nav.features" },
-  { to: "/pricing" as const, nameKey: "nav.fees" },
+  { to: "/pricing" as const, nameKey: "nav.pricing" },
+  { to: "/solutions" as const, nameKey: "nav.solutions" },
 ] as const;
 
 export type NavigationVariant = "default" | "dark";
@@ -33,11 +34,14 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
     setMobileMenuOpen(false);
   }, [location.pathname, location.hash]);
 
-  const linkClass =
-    "text-sm font-semibold text-neutral-800 transition-colors hover:text-primary active:opacity-85 rounded-lg px-2 py-1.5 hover:bg-neutral-900/[0.04] dark:text-neutral-100 dark:hover:bg-white/[0.06]";
+  const linkClass = cn(
+    "caretip-public-nav-link text-sm font-semibold text-neutral-800 transition-[color,background-color,opacity] duration-200",
+    "hover:text-primary active:opacity-85 rounded-lg px-2.5 py-1.5 hover:bg-neutral-900/[0.04]",
+    "dark:text-neutral-100 dark:hover:bg-white/[0.06]",
+  );
 
   const headerSurface = cn(
-    "border-b border-stone-200/88 dark:border-neutral-700/75",
+    "caretip-public-nav border-b border-stone-200/88 dark:border-neutral-700/75",
     "bg-white/88 backdrop-blur-md dark:bg-neutral-950/88 md:backdrop-blur-lg",
     "shadow-[0_6px_32px_-18px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_-16px_rgba(0,0,0,0.45)]",
   );
@@ -50,15 +54,15 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
       )}
     >
       <nav
-        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-4"
+        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-3.5"
         aria-label={t("nav.mainNav")}
       >
         <div className="relative z-50 flex min-h-0 min-w-0 max-w-full items-center justify-between gap-2 sm:gap-4">
           <Link
             to="/"
             className={cn(
-              "relative z-[1] flex h-16 min-h-[3.75rem] min-w-0 flex-1 items-center overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-[3.5rem] sm:min-h-[3.5rem] md:h-16 md:min-h-[4rem] xl:h-[4.25rem] xl:min-h-[4.25rem]",
-              "max-w-[calc(100%-3.25rem)] md:min-w-[10rem] lg:max-w-[min(560px,92vw)] lg:min-w-[12rem] lg:flex-none lg:shrink-0 xl:min-w-[14rem]",
+              "relative z-[2] flex h-16 min-h-[3.75rem] min-w-0 items-center overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-[3.5rem] sm:min-h-[3.5rem] md:h-16 md:min-h-[4rem] xl:h-[4.25rem] xl:min-h-[4.25rem]",
+              "max-w-[calc(100%-7.5rem)] shrink-0 md:max-w-[min(220px,42vw)] lg:max-w-[min(240px,32vw)]",
               "touch-manipulation",
               isDark && "rounded-xl bg-card px-2 py-1 shadow-sm ring-1 ring-border/60",
             )}
@@ -66,37 +70,48 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
             <CareTipLogo size="header" layoutIsolatedDouble />
           </Link>
 
-          <div className="hidden items-center gap-8 lg:flex xl:gap-10">
+          <div
+            className="pointer-events-none absolute left-1/2 top-1/2 z-[1] hidden -translate-x-1/2 -translate-y-1/2 items-center gap-6 lg:pointer-events-auto lg:flex xl:gap-8"
+            aria-hidden={false}
+          >
             {navLinks.map((link) => (
-              <Link key={link.to} to={link.to} className={linkClass}>
+              <Link
+                key={link.to}
+                to={link.to}
+                className={cn(
+                  linkClass,
+                  location.pathname === link.to && "text-primary bg-primary/[0.06] dark:bg-primary/[0.1]",
+                )}
+              >
                 {link.label}
               </Link>
             ))}
-            <LanguageSwitcher />
-            <div className="flex items-center gap-3 shrink-0">
-              <Link to="/login">
-                <button
-                  type="button"
-                  className={cn(
-                    "rounded-xl border px-4 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow,transform] active:opacity-95",
-                    "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(235,153,44,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
-                  )}
-                >
-                  {t("nav.logIn")}
-                </button>
-              </Link>
-              <Link to="/contact">
-                <button
-                  type="button"
-                  className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] hover:bg-primary-hover hover:shadow-[0_10px_28px_-8px_rgba(235,153,44,0.5)] active:opacity-95"
-                >
-                  {t("nav.requestDemo")}
-                </button>
-              </Link>
-            </div>
           </div>
 
-          <div className="flex items-center gap-2 lg:hidden">
+          <div className="relative z-[2] hidden items-center gap-3 lg:flex shrink-0">
+            <LanguageSwitcher />
+            <Link to="/login">
+              <button
+                type="button"
+                className={cn(
+                  "rounded-xl border px-4 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow,transform] duration-200 active:opacity-95",
+                  "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(235,153,44,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
+                )}
+              >
+                {t("nav.logIn")}
+              </button>
+            </Link>
+            <Link to="/contact">
+              <button
+                type="button"
+                className="rounded-xl bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-[0_8px_24px_-10px_rgba(235,153,44,0.45)] transition-[colors,opacity,box-shadow,transform] duration-200 hover:bg-primary-hover hover:shadow-[0_10px_28px_-8px_rgba(235,153,44,0.5)] active:opacity-95"
+              >
+                {t("nav.requestDemo")}
+              </button>
+            </Link>
+          </div>
+
+          <div className="relative z-[2] flex items-center gap-2 lg:hidden">
             <LanguageSwitcher />
             <button
               type="button"
@@ -159,6 +174,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                         className={cn(
                           "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-colors active:bg-muted/90",
                           "text-foreground hover:bg-muted/60",
+                          location.pathname === link.to && "bg-primary/[0.08] text-primary",
                         )}
                         onClick={() => setMobileMenuOpen(false)}
                       >
@@ -190,7 +206,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                         "w-full max-lg:min-w-0 max-lg:max-w-full",
                       )}
                     >
-                      {t("nav.signIn")}
+                      {t("nav.staffLogin")}
                     </Link>
                   </div>
                 </div>
