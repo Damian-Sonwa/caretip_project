@@ -1,6 +1,8 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { ArrowRight, QrCode, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
 
 type Shortcut = {
@@ -57,7 +59,7 @@ export function BusinessSettingsShortcutsPanel({ variant }: { variant: "team" | 
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block text-sm font-semibold text-foreground">{t(item.titleKey)}</span>
-                  <span className="mt-0.5 block text-sm text-muted-foreground">{t(item.descKey)}</span>
+                  <span className={cn("mt-0.5 block text-sm", businessUi.cardDesc)}>{t(item.descKey)}</span>
                 </span>
                 <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
               </Link>

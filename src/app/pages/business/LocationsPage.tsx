@@ -19,6 +19,8 @@ import {
 } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
+import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 const ACTION_TEAL = "#e9781c";
 
@@ -115,7 +117,7 @@ export function LocationsPage() {
         {loading ? (
           <CareTipPageLoader variant="section" message={t("business.locationsPage.loading")} />
         ) : locations.length === 0 ? (
-          <div className="text-center py-16 rounded-xl border border-dashed border-border text-muted-foreground">
+          <div className={cn(businessUi.cardStatic, "py-16 text-center text-muted-foreground border-dashed")}>
             <MapPin className="w-10 h-10 mx-auto mb-3 opacity-50" />
             <p>{t("business.locationsPage.empty")}</p>
           </div>
@@ -124,7 +126,7 @@ export function LocationsPage() {
             {locations.map((loc) => (
               <li
                 key={loc.id}
-                className="rounded-xl border border-border bg-card p-4 flex gap-3 items-start"
+                className={cn(businessUi.cardStatic, "flex gap-3 items-start p-4")}
               >
                 <div
                   className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0"

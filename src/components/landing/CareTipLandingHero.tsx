@@ -169,8 +169,8 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               className={cn(
                 landingUi.heroSubtitle,
                 isDe
-                  ? "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
-                  : "max-w-lg max-lg:!mt-5 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
+                  ? "max-w-lg max-lg:!mt-4 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
+                  : "max-w-lg max-lg:!mt-4 max-lg:mx-auto md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
               )}
               variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
             >
@@ -182,7 +182,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             className={cn(
               landingUi.heroCtaRow,
               "caretip-hero-cta-cluster",
-              "max-lg:!mt-5 max-lg:w-full max-lg:pb-0 !mt-6",
+              "max-lg:!mt-4 max-lg:w-full max-lg:pb-0 !mt-6",
               isDe ? "lg:!mt-8" : "lg:!mt-7",
             )}
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
@@ -209,7 +209,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         {/* Product showcase ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â primary focal point on mobile */}
         <motion.div
           className={cn(
-            "relative z-0 w-full max-lg:mt-2 max-lg:pb-0 sm:max-lg:mt-3 sm:max-lg:pb-1",
+            "relative z-0 w-full max-lg:mt-1 max-lg:pb-0 sm:max-lg:mt-1.5 sm:max-lg:pb-0",
             isDe ? landingUi.heroShowcaseColDesktopDe : landingUi.heroShowcaseColDesktopEn,
             isDe ? landingUi.heroShowcaseDesktopColDe : landingUi.heroShowcaseDesktopColEn,
           )}
@@ -225,7 +225,10 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           />
 
           <motion.div
-            className={isDe ? landingUi.heroShowcaseDesktopStageDe : landingUi.heroShowcaseDesktopStageEn}
+            className={cn(
+              "caretip-hero-showcase-stage",
+              isDe ? landingUi.heroShowcaseDesktopStageDe : landingUi.heroShowcaseDesktopStageEn,
+            )}
             initial={
               reduceMotion ? false : isLargeScreen ? { opacity: 0 } : { opacity: 0, scale: 0.99 }
             }
@@ -273,7 +276,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
         </motion.div>
 
         <motion.div
-          className="relative z-10 pb-10 pt-6 max-lg:px-0 sm:pb-12 sm:pt-7 lg:hidden"
+          className="caretip-hero-mobile-metrics relative z-10 pb-10 pt-6 max-lg:px-0 max-lg:pb-8 max-lg:pt-5 sm:pb-12 sm:max-lg:pb-8 sm:max-lg:pt-5 sm:pt-7 lg:hidden"
           variants={landingHeroTextReveal}
         >
           {metricsRow(

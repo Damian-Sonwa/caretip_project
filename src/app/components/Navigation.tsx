@@ -53,14 +53,14 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
       )}
     >
       <nav
-        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2.5 sm:px-6 sm:py-3.5 lg:px-8"
+        className="relative mx-auto max-w-7xl min-h-0 min-w-0 px-4 py-2 sm:px-6 sm:py-2.5 lg:px-8 lg:py-3.5"
         aria-label={t("nav.mainNav")}
       >
         <div className="relative z-50 flex min-h-0 min-w-0 max-w-full items-center justify-between gap-2 sm:gap-4">
           <Link
             to="/"
             className={cn(
-              "relative z-[2] flex h-16 min-h-[3.75rem] min-w-0 items-center overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-[3.5rem] sm:min-h-[3.5rem] md:h-16 md:min-h-[4rem] xl:h-[4.25rem] xl:min-h-[4.25rem]",
+              "relative z-[2] flex h-[3.5rem] min-h-[3.5rem] min-w-0 items-center overflow-hidden rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/40 sm:h-[3.5rem] sm:min-h-[3.5rem] md:h-16 md:min-h-[4rem] lg:h-16 lg:min-h-[4rem] xl:h-[4.25rem] xl:min-h-[4.25rem]",
               "max-w-[calc(100%-7.5rem)] shrink-0 md:max-w-[min(220px,42vw)] lg:max-w-[min(240px,32vw)]",
               "touch-manipulation",
               isDark && "rounded-xl bg-card px-2 py-1 shadow-sm ring-1 ring-border/60",

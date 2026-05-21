@@ -28,9 +28,9 @@ const heroHeadlineTone =
   "font-hero-display font-extrabold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
 /** Below md only — desktop uses `heroHeadlineDesktop`. */
 const heroHeadlineMobile =
-  "max-lg:text-[2.25rem] max-lg:leading-[0.98] max-lg:tracking-[-0.038em]";
+  "max-lg:text-[2.125rem] max-lg:leading-[1.02] max-lg:tracking-[-0.036em]";
 const heroHeadlineMobileDe =
-  "max-lg:text-[2.125rem] max-lg:leading-[1] max-lg:tracking-[-0.036em]";
+  "max-lg:text-[2rem] max-lg:leading-[1.04] max-lg:tracking-[-0.034em]";
 const heroHeadlineDesktop =
   "lg:text-[3.25rem] lg:leading-[0.95] lg:tracking-[-0.04em] xl:text-[3.75rem] xl:leading-[0.94] xl:tracking-[-0.042em]";
 
@@ -49,7 +49,7 @@ function cnHeroSubtitle(layout: string) {
 
 /** Clears fixed nav + compact gap below nav (mobile includes safe-area). */
 const heroSectionPadTop =
-  "pt-[calc(5.25rem+env(safe-area-inset-top,0px)+0.875rem)] pb-2 max-lg:pb-3 lg:pt-[calc(6.75rem+1.35rem)] lg:pb-0";
+  "max-lg:pt-[calc(4.875rem+env(safe-area-inset-top,0px)+0.5rem)] max-lg:pb-2 lg:pt-[calc(6.75rem+1.35rem)] lg:pb-0";
 /** Mobile-first stack rhythm between headline, lead, actions, and mockup. */
 const heroStackGapMobile = "mt-6 md:mt-7";
 /** Tighter gap above product shot on stacked mobile hero */
@@ -122,6 +122,12 @@ export const landingUi = {
   mobileStackAfter: "caretip-mobile-stack-after",
   mobileSectionHeadline: "caretip-mobile-section-headline",
   mobileStackCard: "caretip-landing-mobile-stack-card",
+  /** Real-life scenario cards — mobile polish hooks (desktop unchanged). */
+  realLifeCard: "caretip-real-life-card",
+  realLifeCardIntro: "caretip-real-life-card-intro",
+  realLifeCardTitle: "caretip-real-life-card-title",
+  realLifeCardImage: "caretip-real-life-card-image",
+  realLifeCardBody: "caretip-real-life-card-body",
 
   splitGrid:
     "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
@@ -243,12 +249,12 @@ export const landingUi = {
     "caretip-hero-headline caretip-hero-headline--en w-full antialiased text-left max-lg:max-w-[min(100%,20.5rem)] max-lg:mx-auto lg:mx-0 lg:max-w-[30ch] xl:max-w-[32ch]",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
-    "w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
+    "caretip-hero-headline caretip-hero-headline--de w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
   ),
   /** Hero animated keyword — same gradient as section accents (see `.caretip-hero-headline-accent`). */
   heroHeadlineEmphasis: `font-inherit ${brandAccentGradient}`,
   heroHeadlineLine:
-    "block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-1.5 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
+    "block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-1 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
   heroSubtitle: cnHeroSubtitle(
     `w-full max-w-2xl text-left ${heroStackGapMobile} max-lg:max-w-[min(100%,21.5rem)] max-lg:text-[0.9375rem] max-lg:leading-[1.68] max-lg:pt-0 lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
@@ -257,7 +263,7 @@ export const landingUi = {
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "relative z-10 mt-6 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-3 lg:flex-row lg:items-center lg:justify-start lg:gap-3 md:mt-0",
+    "relative z-10 mt-6 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-center lg:justify-start lg:gap-3 md:mt-0",
   heroCtaPrimary: cnCtaPrimary(
     `${caretipBtnPrimary} shrink-0 text-center no-underline max-lg:mx-auto max-lg:w-auto ${ctaPrimarySize}`,
   ),

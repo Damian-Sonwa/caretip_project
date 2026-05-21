@@ -3,6 +3,7 @@
  * Presentation only — no logic.
  */
 
+import { dashboardSharedUi } from "../dashboard/dashboardSharedUi";
 import { employeeUi } from "../employee/employeeDashboardUi";
 
 /** Root wrapper class on `.caretip-dashboard-shell` (see BusinessLayout). */
@@ -31,10 +32,13 @@ export const businessUi = {
   /** Hero dashboard CTA pair — wrap long labels (e.g. Manage QR codes). */
   heroCtaLink:
     "inline-flex min-w-0 items-center justify-center gap-1.5 px-2 text-center text-xs font-semibold leading-snug [text-wrap:balance] sm:gap-2 sm:px-3 sm:text-sm",
-  atAGlanceCard: "dashboard-at-a-glance mt-3 w-full rounded-2xl border border-gray-100 bg-white shadow-none max-lg:mt-2.5",
+  atAGlanceCard:
+    "business-card dashboard-at-a-glance mt-3 w-full rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] max-lg:mt-2.5",
   atAGlanceContent: "dashboard-at-a-glance__content p-0",
   atAGlanceLabel: "dashboard-at-a-glance__label mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground",
   atAGlanceStatLabel: "text-[11px] font-medium uppercase text-muted-foreground",
   atAGlanceStatValue: "dashboard-at-a-glance__stat-value font-bold tabular-nums text-foreground",
   subPageMain: "dashboard-subpage-after-metrics mx-auto max-w-7xl px-4 sm:px-6",
+
+  ...dashboardSharedUi,
 } as const;

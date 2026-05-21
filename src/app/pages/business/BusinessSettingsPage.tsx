@@ -16,6 +16,7 @@ import { BusinessSettingsNotificationsPanel } from "../../components/business/se
 import { BusinessSettingsBillingPanel } from "../../components/business/settings/BusinessSettingsBillingPanel";
 import { BusinessSettingsShortcutsPanel } from "../../components/business/settings/BusinessSettingsShortcutsPanel";
 import { useBusinessSettingsData } from "../../components/business/settings/useBusinessSettingsData";
+import { businessUi } from "../../components/business/businessDashboardUi";
 
 export function BusinessSettingsPage() {
   const { t } = useTranslation();
@@ -53,7 +54,7 @@ export function BusinessSettingsPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {t("business.settings.title")}
           </h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
             {t("business.settings.subtitle")}
           </p>
         </header>
@@ -73,13 +74,13 @@ export function BusinessSettingsPage() {
                     type="button"
                     onClick={() => setSection(item.id)}
                     className={cn(
-                      "inline-flex min-h-[44px] shrink-0 touch-manipulation items-center gap-2.5 rounded-xl border-2 px-3.5 py-2.5 text-left text-sm font-medium transition-colors lg:w-full",
+                      "inline-flex min-h-[44px] shrink-0 touch-manipulation items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition-colors lg:w-full",
                       active
-                        ? "border-accent/50 bg-accent/10 text-foreground shadow-sm"
-                        : "border-border bg-card text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                        ? "border-primary/30 bg-primary/[0.06] text-foreground shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)]"
+                        : cn(businessUi.cardStatic, "text-muted-foreground hover:border-neutral-200 hover:text-foreground"),
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active && "text-accent")} aria-hidden />
+                    <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} aria-hidden />
                     <span className="whitespace-nowrap">{t(item.labelKey)}</span>
                   </button>
                 );

@@ -3,6 +3,7 @@
  * Presentation only — no logic.
  */
 
+import { dashboardSharedUi } from "../dashboard/dashboardSharedUi";
 import { caretipBtnGhost, caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
 
 /** Root wrapper class on `.caretip-dashboard-shell` (see EmployeeLayout). */
@@ -21,7 +22,7 @@ export const employeeUi = {
   cardPad: "p-4 sm:p-5 md:p-6",
   cardHeader: "border-b border-neutral-100/90 px-4 py-3.5 sm:px-6 sm:py-4",
   cardTitle: "text-base font-semibold tracking-tight text-foreground",
-  cardDesc: "mt-1 text-sm leading-relaxed text-muted-foreground",
+  cardDesc: "mt-1 text-sm leading-relaxed text-muted-foreground dashboard-card-desc",
 
   pageHeader:
     "employee-page-header mb-6 overflow-hidden rounded-2xl border border-neutral-200/80 bg-gradient-to-br from-white via-white to-stone-50/95 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
@@ -65,6 +66,9 @@ export const employeeUi = {
   emptyTitle: "mt-5 text-base font-semibold text-foreground",
   emptyDesc: "mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground",
 
-  settingsSection: "employee-settings-section space-y-4 rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] sm:p-6",
+  settingsSection:
+    "employee-settings-section dashboard-settings-panel space-y-4 rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] sm:p-6",
   settingsHeading: "text-base font-semibold tracking-tight text-foreground",
+
+  ...dashboardSharedUi,
 } as const;

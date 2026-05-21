@@ -39,7 +39,7 @@ export function LiveInMinutesLaptopDemo({
   if (videoSrc) {
     return (
       <motion.div
-        className="relative mx-auto w-full max-w-[min(100%,20rem)] overflow-hidden rounded-[1.5rem] shadow-[0_20px_50px_-24px_rgba(15,23,42,0.28)] ring-1 ring-neutral-900/[0.06] sm:max-w-[22rem] dark:ring-white/[0.08]"
+        className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,20rem)] overflow-hidden rounded-[1.5rem] shadow-[0_28px_56px_-26px_rgba(30,24,16,0.32),0_10px_22px_-12px_rgba(30,24,16,0.14)] ring-1 ring-neutral-900/[0.06] sm:max-w-[22rem] dark:ring-white/[0.08]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -50,9 +50,13 @@ export function LiveInMinutesLaptopDemo({
   }
 
   return (
-    <div className="relative mx-auto w-full max-w-[min(100%,20rem)] sm:max-w-[22rem]">
+    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,20rem)] sm:max-w-[22rem]">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-8 w-[72%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.08] blur-xl dark:bg-black/40"
+      />
       <motion.div
-        className="relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_28px_60px_-28px_rgba(30,24,16,0.35)] ring-1 ring-neutral-900/[0.05] dark:ring-white/[0.08]"
+        className="caretip-live-minutes-device-lift relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_32px_64px_-30px_rgba(30,24,16,0.38),0_12px_28px_-14px_rgba(30,24,16,0.16)] ring-1 ring-neutral-900/[0.05] dark:ring-white/[0.08]"
         initial={{ opacity: 0, y: 8 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-8%" }}
@@ -72,7 +76,11 @@ export function LiveInMinutesLaptopDemo({
         />
         <motion.div
           aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_20%,rgba(233,120,28,0.22),transparent_55%)]"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_18%,rgba(255,220,180,0.18),transparent_52%)]"
+        />
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_50%_22%,rgba(233,120,28,0.14),transparent_58%)]"
         />
 
         <motion.div
@@ -131,7 +139,11 @@ export function LiveInMinutesLaptopDemo({
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
     <motion.div className="relative h-full w-full max-w-[11.25rem] sm:max-w-[12rem]">
-      <motion.div className="relative h-full rounded-[1.65rem] bg-neutral-900/90 p-[3px] shadow-[0_16px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-white/10">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-1 left-1/2 z-0 h-4 w-[88%] -translate-x-1/2 rounded-[100%] bg-neutral-900/25 blur-md"
+      />
+      <motion.div className="relative z-[1] h-full rounded-[1.65rem] bg-neutral-900/90 p-[3px] shadow-[0_20px_44px_-14px_rgba(0,0,0,0.5),0_6px_14px_-4px_rgba(0,0,0,0.25)] ring-1 ring-white/10">
         <span
           aria-hidden
           className="absolute left-1/2 top-1.5 z-10 h-[3px] w-10 -translate-x-1/2 rounded-full bg-neutral-700"

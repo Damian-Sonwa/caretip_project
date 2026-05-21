@@ -13,13 +13,19 @@ type BusinessStatCardProps = {
 
 export function BusinessStatCard({ label, value, change, icon, featured, className }: BusinessStatCardProps) {
   return (
-    <div className={cn(businessUi.statCard, featured && "max-lg:col-span-2", className)}>
-      <div className="flex items-start justify-between gap-2">
+    <div
+      className={cn(
+        businessUi.statCard,
+        featured && "max-lg:col-span-2 business-stat-card--featured",
+        className,
+      )}
+    >
+      <div className="business-stat-card__label-row flex items-start justify-between gap-2">
         <p className={businessUi.statLabel}>{label}</p>
         {icon ? <div className="shrink-0 text-primary/80">{icon}</div> : null}
       </div>
-      <p className={businessUi.statValue}>{value}</p>
-      {change ? <p className={businessUi.statChange}>{change}</p> : null}
+      <p className={cn(businessUi.statValue, "business-stat-card__value")}>{value}</p>
+      {change ? <p className={cn(businessUi.statChange, "business-stat-card__change")}>{change}</p> : null}
     </div>
   );
 }

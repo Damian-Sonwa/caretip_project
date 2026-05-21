@@ -11,6 +11,8 @@ import {
   Heart,
 } from "lucide-react";
 import { Link } from "react-router";
+import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 interface Notification {
   id: string;
@@ -94,32 +96,34 @@ export function NotificationsPage() {
   };
 
   return (
-    <main className="bg-background px-4 py-8 pb-20 lg:px-8">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <main className={cn(businessUi.page, businessUi.pageShell, "overflow-x-hidden")}>
+      <div className={businessUi.pageInner}>
+      <div className="mb-6 flex flex-col gap-4 sm:mb-8 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="mb-2 text-2xl font-semibold text-foreground sm:text-3xl">{t("business.notifications.title")}</h1>
-          <p className="text-muted-foreground">{t("business.notifications.subtitle")}</p>
+          <p className={businessUi.cardDesc}>{t("business.notifications.subtitle")}</p>
         </div>
         {unreadCount > 0 && (
           <button
             type="button"
             onClick={handleMarkAllRead}
-            className="text-sm font-medium text-accent hover:text-accent/80"
+            className="text-sm font-medium text-primary transition-colors hover:text-primary/80"
           >
             {t("business.notifications.markAllRead")}
           </button>
         )}
       </div>
 
-      <div className="mb-6 flex flex-wrap gap-2">
+      <div className={cn(businessUi.periodToggle, "mb-6 w-full sm:w-fit")} role="group" aria-label={t("business.notifications.title")}>
         {(["all", "unread", "promo"] as const).map((f) => (
           <button
             key={f}
             type="button"
             onClick={() => setFilter(f)}
-            className={`rounded-lg px-4 py-2 text-sm font-medium capitalize ${
-              filter === f ? "bg-accent text-accent-foreground" : "border border-border hover:bg-muted"
-            }`}
+            className={cn(
+              businessUi.periodBtn,
+              filter === f ? businessUi.periodBtnActive : businessUi.periodBtnIdle,
+            )}
           >
             {filterLabel(f)}
             {f === "unread" && unreadCount > 0 ? ` (${unreadCount})` : ""}
@@ -136,32 +140,33 @@ export function NotificationsPage() {
               layout
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
-              className={`flex gap-4 rounded-xl border p-4 sm:p-5 ${
-                n.read ? "border-border bg-card" : "border-accent/20 bg-accent/5"
-              }`}
+              className={cn(
+                "flex gap-4",
+                n.read ? businessUi.notificationCard : businessUi.notificationCardUnread,
+              )}
             >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${n.bgColor}`}>
+              <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", businessUi.iconTileMuted)}>
                 <Icon className={`h-5 w-5 ${n.color}`} />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex items-start justify-between gap-2">
                   <h2 className="font-semibold text-foreground">{n.title}</h2>
-                  {!n.read && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-accent" />}
+                  {!n.read && <span className="mt-2 h-2 w-2 shrink-0 rounded-full bg-primary" />}
                 </div>
-                <p className="mb-3 text-sm text-muted-foreground">{n.message}</p>
+                <p className={cn("mb-3 text-sm", businessUi.cardDesc)}>{n.message}</p>
                 <p className="mb-3 text-xs text-muted-foreground">{n.date}</p>
                 <div className="flex flex-wrap gap-2">
                   {!n.read && (
                     <button
                       type="button"
                       onClick={() => handleMarkAsRead(n.id)}
-                      className="text-xs font-medium text-accent"
+                      className="text-xs font-medium text-primary transition-colors hover:text-primary/80"
                     >
                       {t("business.notifications.markRead")}
                     </button>
                   )}
                   {n.actionUrl && n.actionLabel && (
-                    <Link to={n.actionUrl} className="inline-flex items-center gap-1 text-xs font-medium text-accent">
+                    <Link to={n.actionUrl} className="inline-flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80">
                       {n.actionLabel}
                       <ArrowRight className="h-3 w-3" />
                     </Link>
@@ -171,6 +176,7 @@ export function NotificationsPage() {
             </motion.div>
           );
         })}
+      </div>
       </div>
     </main>
   );

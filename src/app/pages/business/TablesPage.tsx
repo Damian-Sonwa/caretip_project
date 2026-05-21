@@ -26,6 +26,8 @@ import {
 } from "../../components/ui/dialog";
 import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
+import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
 
@@ -134,7 +136,7 @@ export function TablesPage() {
         {loading ? (
           <CareTipPageLoader variant="section" message={t("business.tablesPage.loading")} />
         ) : locations.length === 0 ? (
-          <div className="text-center py-16 rounded-xl border border-dashed border-border text-muted-foreground">
+          <div className={cn(businessUi.cardStatic, "py-16 text-center text-muted-foreground border-dashed")}>
             <LayoutGrid className="w-10 h-10 mx-auto mb-3 opacity-50" />
             <p className="mb-4">{t("business.tablesPage.emptyNeedLocation")}</p>
             <Link
@@ -145,12 +147,12 @@ export function TablesPage() {
             </Link>
           </div>
         ) : tables.length === 0 ? (
-          <div className="text-center py-16 rounded-xl border border-dashed border-border text-muted-foreground">
+          <div className={cn(businessUi.cardStatic, "py-16 text-center text-muted-foreground border-dashed")}>
             <LayoutGrid className="w-10 h-10 mx-auto mb-3 opacity-50" />
             <p>{t("business.tablesPage.emptyNoTables")}</p>
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto rounded-xl border border-border px-4 sm:mx-0 sm:px-0">
+          <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
             <table className="w-full min-w-[520px] text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40 text-left">

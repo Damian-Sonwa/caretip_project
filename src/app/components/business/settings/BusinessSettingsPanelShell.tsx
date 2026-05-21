@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function BusinessSettingsPanelShell({
   title,
@@ -14,15 +15,12 @@ export function BusinessSettingsPanelShell({
 }) {
   return (
     <section
-      className={cn(
-        "rounded-xl border-2 border-border bg-card p-5 shadow-sm sm:p-6",
-        className,
-      )}
+      className={cn(businessUi.cardStatic, businessUi.settingsPanel, "p-5 sm:p-6", className)}
     >
-      <header className="mb-6 border-b border-border/60 pb-5">
+      <header className="mb-6 border-b border-neutral-100/90 pb-5">
         <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">{title}</h2>
         {description ? (
-          <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted-foreground">{description}</p>
+          <p className={cn("mt-1.5 max-w-2xl", businessUi.cardDesc)}>{description}</p>
         ) : null}
       </header>
       {children}

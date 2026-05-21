@@ -18,6 +18,7 @@ import {
   ChevronDown,
   Sparkles,
   BarChart3,
+  HelpCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
@@ -59,6 +60,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BusinessStatCard } from "../../components/business/BusinessStatCard";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
+import {
+  BUSINESS_CHART_AXIS,
+  BUSINESS_CHART_BAR_SOFT,
+  BUSINESS_CHART_GRID,
+  businessChartBarFill,
+  businessChartTooltipStyle,
+} from "../../components/business/businessDashboardChartTheme";
 import {
   devMockBusinessEmployeePerformance,
   devMockBusinessOperationalPulse,
@@ -372,6 +380,18 @@ export function BusinessDashboard() {
   }, [useDevDemo, stats?.employees]);
 
   const hasTipActivityInPeriod = useDevDemo || (analyticsStats?.totalTips ?? 0) > 0;
+
+  const tipDistributionTotal = useMemo(
+    () => tipDistributionData.reduce((acc, row) => acc + (Number(row.amount) || 0), 0),
+    [tipDistributionData],
+  );
+
+  const employeeGoalsSummary = useMemo(() => {
+    const goals = stats?.employeeGoals ?? [];
+    if (goals.length === 0) return null;
+    const onTrack = goals.filter((g) => g.status === "achieved" || g.status === "on_track").length;
+    return { total: goals.length, onTrack };
+  }, [stats?.employeeGoals]);
 
   const analyticsPeriodLabel = (period: "week" | "month" | "year") => {
     if (period === "week") return t("dashboard.filter_week");
@@ -697,8 +717,20 @@ export function BusinessDashboard() {
                     aria-hidden
                   />
                 </button>
-                <CardDescription className="hidden lg:block text-pretty">{t("business.dashboard.employeeGoalsDesc")}</CardDescription>
-                <div className="lg:hidden space-y-2">
+                <CardDescription className={cn(businessUi.cardDesc, "hidden text-pretty lg:block")}>
+                  {t("business.dashboard.employeeGoalsDesc")}
+                </CardDescription>
+                {employeeGoalsSummary ? (
+                  <div className="business-dashboard-goals-summary" aria-label={t("business.dashboard.goalsSummaryAria")}>
+                    <span className="business-dashboard-goals-pill business-dashboard-goals-pill--accent">
+                      {t("business.dashboard.goalsOnTrack", { count: employeeGoalsSummary.onTrack })}
+                    </span>
+                    <span className="business-dashboard-goals-pill">
+                      {t("business.dashboard.goalsTracked", { count: employeeGoalsSummary.total })}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="space-y-2 lg:hidden">
                   <p className="text-sm leading-snug text-muted-foreground">{t("business.dashboard.employeeGoalsDescShort")}</p>
                   {employeeGoalsDetailOpen ? (
                     <>
@@ -777,10 +809,10 @@ export function BusinessDashboard() {
               {...dashboardBlockMotion}
               transition={{ delay: 0.4 }}
             >
-              <Card className={cn(businessUi.cardStatic, "w-full")}>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card w-full")}>
                 <CardHeader>
                   <CardTitle className="text-lg">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
-                  <CardDescription>
+                  <CardDescription className={businessUi.cardDesc}>
                     {analyticsTimeframe === "week" && t("business.dashboard.dailyTipDistDescWeek")}
                     {analyticsTimeframe === "month" && t("business.dashboard.dailyTipDistDescMonth")}
                     {analyticsTimeframe === "year" && t("business.dashboard.dailyTipDistDescYear")}
@@ -788,34 +820,61 @@ export function BusinessDashboard() {
                 </CardHeader>
                 <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                   {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
-                    <div className={cn(businessUi.cardPad)}>
+                    <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
                       <EmployeeEmptyState
-                        className="py-10 sm:py-12"
+                        className="relative z-[1] py-10 sm:py-12"
                         icon={<BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />}
                         title={t("format.metricNoActivity")}
                         description={t("business.dashboard.chartEmptyDesc")}
                       />
                     </div>
                   ) : (
-                    <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                        <BarChart data={tipDistributionChartData} margin={{ top: 10, right: 12, left: 8, bottom: 8 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                          <XAxis dataKey="dayLabel" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
-                          <YAxis stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} width={48} />
-                          <Tooltip
-                            formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                            contentStyle={{
-                              backgroundColor: "#ffffff",
-                              border: "1px solid #E5E7EB",
-                              borderRadius: "8px",
-                              color: "#000000",
-                            }}
-                          />
-                          <Bar dataKey="amount" fill="#197278" radius={[8, 8, 0, 0]} />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <>
+                      <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                          <BarChart
+                            data={tipDistributionChartData}
+                            margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
+                            barCategoryGap="18%"
+                          >
+                            <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
+                            <XAxis
+                              dataKey="dayLabel"
+                              stroke={BUSINESS_CHART_AXIS}
+                              tickLine={false}
+                              axisLine={{ stroke: BUSINESS_CHART_GRID }}
+                              style={{ fontSize: "11px" }}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              stroke={BUSINESS_CHART_AXIS}
+                              tickLine={false}
+                              axisLine={false}
+                              style={{ fontSize: "11px" }}
+                              tickMargin={8}
+                              width={48}
+                            />
+                            <Tooltip
+                              formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
+                              contentStyle={businessChartTooltipStyle}
+                              cursor={{ fill: "rgba(25, 114, 120, 0.06)" }}
+                            />
+                            <Bar
+                              dataKey="amount"
+                              fill={BUSINESS_CHART_BAR_SOFT}
+                              radius={[6, 6, 0, 0]}
+                              maxBarSize={44}
+                              minPointSize={3}
+                            />
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="business-dashboard-chart-insight">
+                        {t("business.dashboard.chartDistributionTotal", {
+                          total: formatEur(tipDistributionTotal),
+                        })}
+                      </p>
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -826,10 +885,12 @@ export function BusinessDashboard() {
               {...dashboardBlockMotion}
               transition={{ delay: 0.5 }}
             >
-              <Card className={cn(businessUi.cardStatic, "w-full")}>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card w-full")}>
                 <CardHeader>
                   <CardTitle className="text-lg">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
-                  <CardDescription>{t("business.dashboard.employeePerformanceDesc")}</CardDescription>
+                  <CardDescription className={businessUi.cardDesc}>
+                    {t("business.dashboard.employeePerformanceDesc")}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                   {(stats?.employeeCount ?? 0) === 0 ? (
@@ -860,40 +921,57 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <div className="flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                        <BarChart
-                          data={employeePerformance}
-                          layout="vertical"
-                          margin={{ top: 10, right: 16, left: 4, bottom: 8 }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                          <XAxis type="number" stroke="#64748b" style={{ fontSize: "12px" }} tickMargin={8} />
-                          <YAxis
-                            dataKey="name"
-                            type="category"
-                            stroke="#64748b"
-                            style={{ fontSize: "12px" }}
-                            width={100}
-                            tickMargin={6}
-                          />
-                          <Tooltip
-                            formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                            contentStyle={{
-                              backgroundColor: "#ffffff",
-                              border: "1px solid #e5e5e5",
-                              borderRadius: "8px",
-                              color: "#000000",
-                            }}
-                          />
-                          <Bar dataKey="tips" radius={[0, 8, 8, 0]}>
-                            {employeePerformance.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={entry.color} />
-                            ))}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </div>
+                    <>
+                      <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                          <BarChart
+                            data={employeePerformance}
+                            layout="vertical"
+                            margin={{ top: 12, right: 16, left: 4, bottom: 4 }}
+                            barCategoryGap="16%"
+                          >
+                            <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} horizontal={false} />
+                            <XAxis
+                              type="number"
+                              stroke={BUSINESS_CHART_AXIS}
+                              tickLine={false}
+                              axisLine={{ stroke: BUSINESS_CHART_GRID }}
+                              style={{ fontSize: "11px" }}
+                              tickMargin={8}
+                            />
+                            <YAxis
+                              dataKey="name"
+                              type="category"
+                              stroke={BUSINESS_CHART_AXIS}
+                              tickLine={false}
+                              axisLine={false}
+                              style={{ fontSize: "11px" }}
+                              width={100}
+                              tickMargin={6}
+                            />
+                            <Tooltip
+                              formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
+                              contentStyle={businessChartTooltipStyle}
+                              cursor={{ fill: "rgba(25, 114, 120, 0.05)" }}
+                            />
+                            <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4}>
+                              {employeePerformance.map((entry, index) => (
+                                <Cell
+                                  key={`cell-${entry.name}`}
+                                  fill={businessChartBarFill(index, employeePerformance.length)}
+                                />
+                              ))}
+                            </Bar>
+                          </BarChart>
+                        </ResponsiveContainer>
+                      </div>
+                      <p className="business-dashboard-chart-insight">
+                        {t("business.dashboard.chartPerformanceLeader", {
+                          name: employeePerformance[0]?.name ?? "—",
+                          amount: formatEur(employeePerformance[0]?.tips ?? 0),
+                        })}
+                      </p>
+                    </>
                   )}
                 </CardContent>
               </Card>
@@ -909,28 +987,37 @@ export function BusinessDashboard() {
               className="lg:col-span-2"
             >
               <Card className={cn(businessUi.cardStatic, "w-full")}>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0">
-                  <button
-                    type="button"
-                    onClick={() => setTopPerformersExpanded((v) => !v)}
-                    className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
-                    aria-expanded={topPerformersExpanded}
-                  >
-                    <CardTitle className="text-lg">{t("business.dashboard.topPerformers")}</CardTitle>
-                    <ChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
-                        topPerformersExpanded && "rotate-180",
-                      )}
-                      aria-hidden
-                    />
-                  </button>
+                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <button
+                      type="button"
+                      onClick={() => setTopPerformersExpanded((v) => !v)}
+                      className="flex w-full min-w-0 items-center justify-between gap-3 text-left"
+                      aria-expanded={topPerformersExpanded}
+                    >
+                      <CardTitle className="text-lg">{t("business.dashboard.topPerformers")}</CardTitle>
+                      <ChevronDown
+                        className={cn(
+                          "h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200",
+                          topPerformersExpanded && "rotate-180",
+                        )}
+                        aria-hidden
+                      />
+                    </button>
+                    {topPerformersExpanded && topEmployees.length > 0 ? (
+                      <CardDescription className={cn(businessUi.cardDesc, "pr-2")}>
+                        {t("business.dashboard.topPerformersPeriodHint", {
+                          period: analyticsPeriodLabel(analyticsTimeframe),
+                        })}
+                      </CardDescription>
+                    ) : null}
+                  </div>
                   <Link
                     to="/dashboard/staff-management"
-                    className="ml-3 flex shrink-0 items-center gap-1 text-sm font-medium text-foreground hover:underline"
+                    className="ml-3 flex shrink-0 items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary hover:underline"
                   >
                     {t("dashboard.viewAll")}
-                    <ArrowUpRight className="h-4 w-4" />
+                    <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </Link>
                 </CardHeader>
                 {topPerformersExpanded ? (
@@ -951,30 +1038,46 @@ export function BusinessDashboard() {
                             key={employee.id}
                             className={cn(
                               businessUi.listItem,
-                              "flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4",
+                              "business-dashboard-top-performer-row flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:gap-4",
                             )}
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3">
-                              <div className="relative">
-                                <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
-                                {index === 0 && (
-                                  <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                                    <Award className="h-4 w-4" />
-                                  </div>
+                              <span
+                                className={cn(
+                                  "business-dashboard-top-performer-rank",
+                                  index === 0 && "bg-primary/10 text-primary",
                                 )}
+                                aria-hidden
+                              >
+                                {index + 1}
+                              </span>
+                              <div className="relative shrink-0">
+                                <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
+                                {index === 0 ? (
+                                  <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                                    <Award className="h-3.5 w-3.5" aria-hidden />
+                                  </div>
+                                ) : null}
                               </div>
                               <div className="min-w-0 flex-1">
-                                <h3 className="truncate font-semibold text-foreground">{employee.name}</h3>
-                                <p className="truncate text-sm text-muted-foreground">{employee.role}</p>
+                                <h3 className="business-dashboard-top-performer-name font-semibold text-foreground">
+                                  {employee.name}
+                                </h3>
+                                <p className="business-dashboard-top-performer-role text-sm text-muted-foreground">
+                                  {employee.role}
+                                </p>
                               </div>
                             </div>
-                            <div className="shrink-0 text-left sm:text-right">
+                            <div className="shrink-0 pl-10 text-left sm:pl-0 sm:text-right">
+                              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                                {t("charts.tooltip.tips")}
+                              </p>
                               <p className="text-lg font-bold tabular-nums text-foreground">{formatEur(employee.tips)}</p>
-                              <div className="flex items-center justify-end gap-1 text-sm">
+                              <div className="mt-0.5 flex items-center gap-1 text-sm sm:justify-end">
                                 {employee.rating != null ? (
                                   <>
-                                    <Star className="h-3 w-3 fill-primary text-primary" />
-                                    <span className="text-muted-foreground">{employee.rating}</span>
+                                    <Star className="h-3 w-3 fill-primary text-primary" aria-hidden />
+                                    <span className="tabular-nums text-muted-foreground">{employee.rating}</span>
                                   </>
                                 ) : (
                                   <span className="text-xs text-muted-foreground">
@@ -1072,13 +1175,32 @@ export function BusinessDashboard() {
                 ) : null}
               </Card>
 
-              <Card className={cn(businessUi.cardStatic, "w-full")}>
-                <CardHeader>
-                  <CardTitle className="text-base">{t("business.dashboard.needHelpTitle")}</CardTitle>
-                  <CardDescription>{t("business.dashboard.needHelpDesc")}</CardDescription>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card w-full")}>
+                <CardHeader className="pb-3">
+                  <div className="business-dashboard-help-head">
+                    <div
+                      className={cn(
+                        businessUi.iconTileMuted,
+                        "flex h-10 w-10 shrink-0 items-center justify-center text-primary/85",
+                      )}
+                      aria-hidden
+                    >
+                      <HelpCircle className="h-5 w-5" />
+                    </div>
+                    <div className="business-dashboard-help-copy space-y-1">
+                      <CardTitle className="text-base leading-snug">{t("business.dashboard.needHelpTitle")}</CardTitle>
+                      <CardDescription className={cn(businessUi.cardDesc, "text-sm")}>
+                        {t("business.dashboard.needHelpDesc")}
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Button type="button" className={cn(businessUi.btnPrimary, "w-full")} onClick={() => setGuidelinesOpen(true)}>
+                <CardContent className="pt-0">
+                  <Button
+                    type="button"
+                    className={cn(businessUi.btnPrimary, "w-full transition-transform active:scale-[0.99]")}
+                    onClick={() => setGuidelinesOpen(true)}
+                  >
                     {t("business.dashboard.viewGuidelines")}
                   </Button>
                 </CardContent>

@@ -49,12 +49,12 @@ export function LandingRealLifeSection() {
       className={cn(landingUi.section, landingUi.sectionWhite)}
     >
       <div className="mx-auto max-w-7xl">
-        <div className={landingUi.sectionIntro}>
+        <div className={cn(landingUi.sectionIntro, "caretip-real-life-section-intro")}>
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className={cn(landingUi.sectionTitle, "max-lg:caretip-mobile-section-headline")}
+            className={cn(landingUi.sectionTitle, "max-lg:caretip-mobile-section-headline caretip-real-life-section-title")}
           >
             {t("landing.realLife.title")}
           </motion.h2>
@@ -77,13 +77,14 @@ export function LandingRealLifeSection() {
                 className={cn(
                   landingUi.cardCopyStack,
                   landingUi.mobileStackIntro,
-                  "order-1 px-5 pb-0 pt-5 sm:px-6 sm:pt-6 lg:order-2 lg:pb-0 lg:pt-0",
+                  landingUi.realLifeCardIntro,
+                  "order-1 px-5 pb-0 pt-5 sm:px-6 sm:pt-6 max-lg:px-4 max-lg:pt-3 max-lg:pb-1 lg:order-2 lg:pb-0 lg:pt-0",
                 )}
               >
                 <h3
                   className={cn(
                     landingType.cardTitle,
-                    landingUi.mobileSectionHeadline,
+                    landingUi.realLifeCardTitle,
                     "tracking-tight max-lg:text-center lg:text-left",
                   )}
                 >
@@ -94,13 +95,14 @@ export function LandingRealLifeSection() {
                 className={cn(
                   "relative aspect-[16/10] w-full overflow-hidden",
                   landingUi.mobileStackVisual,
+                  landingUi.realLifeCardImage,
                   "order-2 lg:order-1",
                 )}
               >
                 <img
                   src={item.img}
                   alt={item.alt}
-                  className="h-full w-full object-cover object-center"
+                  className="h-full w-full object-cover object-center max-lg:rounded-[inherit]"
                   loading="lazy"
                 />
               </div>
@@ -109,7 +111,8 @@ export function LandingRealLifeSection() {
                   className={cn(
                     landingUi.cardCopyStack,
                     landingUi.mobileStackAfter,
-                    "order-3 px-5 pb-5 pt-0 sm:px-6 sm:pb-6 lg:px-6 lg:pb-6 lg:pt-0",
+                    landingUi.realLifeCardBody,
+                    "order-3 px-5 pb-5 pt-0 sm:px-6 sm:pb-6 max-lg:px-4 max-lg:pb-4 lg:px-6 lg:pb-6 lg:pt-0",
                   )}
                 >
                   <p className={cn(landingUi.cardFeatureBody, "max-lg:text-center lg:mt-2")}>{item.text}</p>
@@ -122,4 +125,4 @@ export function LandingRealLifeSection() {
     </section>
   );
 }
-
+

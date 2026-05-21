@@ -1,0 +1,82 @@
+/**
+ * Business overview — features specific to the home dashboard.
+ * Shared card/chart/stat polish lives in dashboard-ecosystem-polish.css.
+ */
+
+@import "./dashboard-ecosystem-polish.css";
+
+/* Team goals */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-goals-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-goals-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(248, 250, 252, 0.95);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-goals-pill--accent {
+  border-color: hsl(var(--primary) / 0.2);
+  background: hsl(var(--primary) / 0.06);
+  color: hsl(var(--primary));
+}
+
+/* Top performers */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-rank {
+  display: flex;
+  height: 1.75rem;
+  width: 1.75rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  background: rgba(241, 245, 249, 0.95);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-name {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  text-wrap: pretty;
+  line-height: 1.35;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-role {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+  text-wrap: pretty;
+}
+
+/* Help card */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card .business-dashboard-help-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card .business-dashboard-help-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card .business-dashboard-help-copy p {
+  text-wrap: pretty;
+  line-height: 1.55;
+}

@@ -1,0 +1,262 @@
+/**
+ * Unified dashboard polish — business + employee shells only.
+ * Presentation only; does not change layout or responsive logic.
+ */
+
+.caretip-dashboard-shell.business-dashboard,
+.caretip-dashboard-shell.employee-dashboard {
+  --dashboard-card-radius: 1rem;
+}
+
+/* Cards */
+.caretip-dashboard-shell .business-card,
+.caretip-dashboard-shell .employee-card {
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.18s ease;
+}
+
+@media (hover: hover) {
+  .caretip-dashboard-shell .business-card:hover,
+  .caretip-dashboard-shell .employee-card:hover {
+    border-color: rgba(226, 232, 240, 0.95);
+  }
+}
+
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell .business-card:active,
+  .caretip-dashboard-shell .employee-card:active,
+  .caretip-dashboard-shell .business-stat-card:active,
+  .caretip-dashboard-shell .employee-stat-card:active {
+    transform: scale(0.995);
+  }
+}
+
+/* Legacy / one-off panels harmonized with overview cards */
+.caretip-dashboard-shell .dashboard-surface-panel,
+.caretip-dashboard-shell .dashboard-filter-panel,
+.caretip-dashboard-shell .dashboard-settings-panel,
+.caretip-dashboard-shell .dashboard-page-shell > .dashboard-filter-panel {
+  border-radius: var(--dashboard-card-radius);
+  border-color: rgba(226, 232, 240, 0.88);
+  background: #ffffff;
+  box-shadow: 0 10px 36px -14px rgba(15, 23, 42, 0.1);
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* KPI stat cards */
+.caretip-dashboard-shell .business-stat-card,
+.caretip-dashboard-shell .employee-stat-card {
+  gap: 0.35rem;
+  justify-content: space-between;
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease,
+    transform 0.18s ease;
+}
+
+.caretip-dashboard-shell .business-stat-card--featured,
+.caretip-dashboard-shell .employee-stat-card--featured {
+  border-color: hsl(var(--primary) / 0.22);
+  box-shadow:
+    0 10px 36px -14px rgba(15, 23, 42, 0.1),
+    inset 0 1px 0 0 hsl(var(--primary) / 0.06);
+}
+
+.caretip-dashboard-shell .business-stat-card .business-stat-card__label-row,
+.caretip-dashboard-shell .employee-stat-card .employee-stat-card__label-row {
+  align-items: flex-start;
+}
+
+.caretip-dashboard-shell .business-stat-card .business-stat-card__value,
+.caretip-dashboard-shell .employee-stat-card .employee-stat-card__value {
+  margin-top: 0.15rem;
+}
+
+.caretip-dashboard-shell .business-stat-card .business-stat-card__change,
+.caretip-dashboard-shell .employee-stat-card .employee-stat-card__change {
+  padding-top: 0.35rem;
+}
+
+/* Period segmented controls */
+.caretip-dashboard-shell .business-period-toggle button,
+.caretip-dashboard-shell .employee-period-toggle button {
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+.caretip-dashboard-shell .business-period-toggle button:active,
+.caretip-dashboard-shell .employee-period-toggle button:active {
+  transform: scale(0.98);
+}
+
+/* Typography helpers */
+.caretip-dashboard-shell .dashboard-card-desc,
+.caretip-dashboard-shell .business-dashboard-card-desc {
+  text-wrap: pretty;
+  line-height: 1.55;
+}
+
+.caretip-dashboard-shell .dashboard-page-shell h1 {
+  text-wrap: pretty;
+  line-height: 1.2;
+}
+
+.caretip-dashboard-shell .dashboard-page-shell > header p,
+.caretip-dashboard-shell .dashboard-page-shell > div > p {
+  text-wrap: pretty;
+  line-height: 1.55;
+}
+
+/* Charts */
+.caretip-dashboard-shell .dashboard-chart-card .dashboard-chart-frame,
+.caretip-dashboard-shell .business-dashboard-chart-card .business-dashboard-chart-frame,
+.caretip-dashboard-shell .business-dashboard-chart-card .dashboard-chart-frame {
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.65) 0%, rgba(255, 255, 255, 0) 100%);
+  padding: 0.35rem 0.15rem 0.15rem;
+}
+
+.caretip-dashboard-shell .dashboard-chart-card [class*="recharts-cartesian-grid"] line,
+.caretip-dashboard-shell .business-dashboard-chart-card [class*="recharts-cartesian-grid"] line {
+  stroke: rgba(148, 163, 184, 0.28);
+}
+
+.caretip-dashboard-shell .dashboard-chart-insight,
+.caretip-dashboard-shell .business-dashboard-chart-insight {
+  margin-top: 0.75rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
+}
+
+.caretip-dashboard-shell .dashboard-chart-empty,
+.caretip-dashboard-shell .business-dashboard-chart-empty {
+  position: relative;
+  overflow: hidden;
+  border-radius: 0.75rem;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(255, 255, 255, 0.4) 100%);
+}
+
+.caretip-dashboard-shell .dashboard-chart-empty::before,
+.caretip-dashboard-shell .business-dashboard-chart-empty::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  opacity: 0.45;
+  background-image: repeating-linear-gradient(
+    90deg,
+    rgba(25, 114, 120, 0.08) 0,
+    rgba(25, 114, 120, 0.08) 1px,
+    transparent 1px,
+    transparent 12%
+  );
+  pointer-events: none;
+}
+
+/* List rows */
+.caretip-dashboard-shell .dashboard-list-row,
+.caretip-dashboard-shell .employee-list-item,
+.caretip-dashboard-shell .business-dashboard-top-performer-row {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.15s ease;
+}
+
+@media (hover: hover) {
+  .caretip-dashboard-shell .dashboard-list-row:hover,
+  .caretip-dashboard-shell .employee-list-item:hover,
+  .caretip-dashboard-shell .business-dashboard-top-performer-row:hover {
+    border-color: rgba(226, 232, 240, 1);
+    box-shadow: 0 8px 28px -14px rgba(15, 23, 42, 0.1);
+  }
+}
+
+.caretip-dashboard-shell .dashboard-list-row:active,
+.caretip-dashboard-shell .employee-list-item:active,
+.caretip-dashboard-shell .business-dashboard-top-performer-row:active {
+  transform: scale(0.995);
+}
+
+/* Empty states */
+.caretip-dashboard-shell .employee-empty {
+  text-wrap: pretty;
+}
+
+.caretip-dashboard-shell .employee-empty p {
+  line-height: 1.55;
+}
+
+/* At-a-glance */
+.caretip-dashboard-shell .dashboard-at-a-glance {
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__grid > div {
+  padding: 0.35rem 0.25rem;
+}
+
+.caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__stat-value {
+  margin-top: 0.2rem;
+}
+
+/* Sub-page tables */
+.caretip-dashboard-shell .dashboard-table-panel thead {
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.caretip-dashboard-shell .dashboard-table-panel tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+@media (hover: hover) {
+  .caretip-dashboard-shell .dashboard-table-panel tbody tr:hover {
+    background: rgba(248, 250, 252, 0.55);
+  }
+}
+
+/* Activity / notification cards */
+.caretip-dashboard-shell .dashboard-notification-card {
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.15s ease;
+}
+
+@media (hover: hover) {
+  .caretip-dashboard-shell .dashboard-notification-card:hover {
+    border-color: rgba(226, 232, 240, 0.95);
+    box-shadow: 0 8px 28px -14px rgba(15, 23, 42, 0.08);
+  }
+}
+
+/* Employee page header matches card system */
+.caretip-dashboard-shell .employee-page-header {
+  border-color: rgba(226, 232, 240, 0.88);
+  box-shadow: 0 10px 36px -14px rgba(15, 23, 42, 0.1);
+}
+
+.caretip-dashboard-shell .employee-settings-section {
+  transition:
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
+}
+
+/* Section intro rhythm (analytics blocks) */
+.caretip-dashboard-shell #business-analytics-period-heading + p {
+  text-wrap: pretty;
+  line-height: 1.5;
+}

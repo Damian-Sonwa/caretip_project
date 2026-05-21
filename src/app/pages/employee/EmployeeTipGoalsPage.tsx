@@ -134,7 +134,7 @@ export function EmployeeTipGoalsPage() {
           }
         />
 
-        <Card className={cn(employeeUi.cardStatic, "w-full p-0 shadow-none hover:shadow-none")}>
+        <Card className={cn(employeeUi.cardStatic, "w-full p-0")}>
           <div className={employeeUi.cardHeader}>
             <h2 className={employeeUi.cardTitle}>{t("employee.tipGoals.manageTitle")}</h2>
             <p className={employeeUi.cardDesc}>{t("employee.tipGoals.manageSubtitle")}</p>

@@ -19,6 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
@@ -226,15 +227,15 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
           <p className="mt-2 max-w-xl text-sm text-muted-foreground">{t("business.profilePage.pageDesc")}</p>
         </header>
       ) : (
-        <p className="rounded-lg border border-border/80 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
+        <p className={cn(businessUi.filterPanel, "px-4 py-3 text-sm text-muted-foreground")}>
           {t("business.settings.panels.businessIntro")}
         </p>
       )}
 
-      <Card className="overflow-hidden border-border shadow-sm">
-        <CardHeader className="border-b border-border/60 bg-muted/30">
+      <Card className={cn(businessUi.cardStatic, "w-full")}>
+        <CardHeader className="border-b border-neutral-100/90">
           <CardTitle className="text-base">{t("business.profilePage.logoTitle")}</CardTitle>
-          <CardDescription>{t("business.profilePage.logoDesc")}</CardDescription>
+          <CardDescription className={businessUi.cardDesc}>{t("business.profilePage.logoDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-6 pt-6 sm:flex-row sm:items-start">
           <div className="flex flex-col items-center gap-3 sm:items-start">
@@ -288,10 +289,10 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-sm">
-        <CardHeader>
+      <Card className={cn(businessUi.cardStatic, "w-full")}>
+        <CardHeader className="border-b border-neutral-100/90">
           <CardTitle className="text-base">{t("business.profilePage.venueDetailsTitle")}</CardTitle>
-          <CardDescription>{t("business.profilePage.venueDetailsDesc")}</CardDescription>
+          <CardDescription className={businessUi.cardDesc}>{t("business.profilePage.venueDetailsDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-5">
           <div className="space-y-2">
@@ -335,7 +336,7 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
             />
           </div>
           <div className="flex flex-wrap gap-3 pt-2">
-            <Button type="button" onClick={() => void handleSave()} disabled={saving || !isDirty || !name.trim()}>
+            <Button type="button" className={businessUi.btnPrimary} onClick={() => void handleSave()} disabled={saving || !isDirty || !name.trim()}>
               {saving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -358,10 +359,10 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
         </CardContent>
       </Card>
 
-      <Card className="border-border shadow-sm">
-        <CardHeader>
+      <Card className={cn(businessUi.cardStatic, "w-full")}>
+        <CardHeader className="border-b border-neutral-100/90">
           <CardTitle className="text-base">{t("business.profilePage.publicTitle")}</CardTitle>
-          <CardDescription>{t("business.profilePage.publicDesc")}</CardDescription>
+          <CardDescription className={businessUi.cardDesc}>{t("business.profilePage.publicDesc")}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div>

@@ -7,6 +7,9 @@ import { ChevronDown, CreditCard, Download, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { employeeUi } from "@/app/components/employee/employeeDashboardUi";
 import { CareTipPageLoader } from "@/app/components/CareTipPageLoader";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import { logClientError } from "@/app/lib/clientLog";
@@ -119,19 +122,21 @@ export function TipsActivityPage() {
   }, [items, q]);
 
   const exportDisabled = exporting || loading || filtered.length === 0;
+  const ui = user?.role === "employee" ? employeeUi : businessUi;
 
   return (
-    <main className="bg-background px-4 py-8 pb-20 lg:px-8">
-      <div className="mb-8">
+    <main className={cn(ui.page, ui.pageShell, "overflow-x-hidden")}>
+      <div className={ui.pageInner}>
+      <header className="mb-6 sm:mb-8">
         <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{t("business.tipsActivity.title")}</h1>
-        <p className="mt-2 text-muted-foreground">{t("business.tipsActivity.subtitle")}</p>
-      </div>
+        <p className={cn("mt-2", ui.cardDesc)}>{t("business.tipsActivity.subtitle")}</p>
+      </header>
 
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-card border border-border rounded-xl p-6 mb-6"
+        className={cn(ui.filterPanel, "mb-6 p-6")}
       >
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
@@ -248,14 +253,14 @@ export function TipsActivityPage() {
       </motion.div>
 
       {error ? (
-        <div className="mb-6 rounded-xl border border-border bg-card p-4 text-sm text-muted-foreground">{error}</div>
+        <div className={cn(ui.filterPanel, "mb-6 p-4 text-sm text-muted-foreground")}>{error}</div>
       ) : null}
 
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-card border border-border rounded-xl overflow-hidden"
+        className={cn(ui.tablePanel, "overflow-hidden")}
       >
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -334,6 +339,7 @@ export function TipsActivityPage() {
           </div>
         </div>
       ) : null}
+      </div>
     </main>
   );
 }

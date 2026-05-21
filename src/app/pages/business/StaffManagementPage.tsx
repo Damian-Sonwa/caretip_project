@@ -48,7 +48,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import {
-  dashStatCard,
   DASH_BTN_PRIMARY,
   DASH_BTN_SECONDARY,
   DASH_EMPTY_ICON,
@@ -706,10 +705,10 @@ export function StaffManagementPage() {
 
       <TracingBeam className={cn(businessUi.subPageMain, "min-w-0 pb-4")}>
         <div className="min-w-0 space-y-6">
-          <Card className="rounded-xl bg-white border border-black/[0.06] shadow-sm">
+          <Card className={cn(businessUi.cardStatic, "w-full")}>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">Search</CardTitle>
-              <CardDescription>{t("business.staffPage.filterDesc")}</CardDescription>
+              <CardDescription className={businessUi.cardDesc}>{t("business.staffPage.filterDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="relative">
@@ -726,7 +725,7 @@ export function StaffManagementPage() {
           </Card>
 
         {/* Desktop Table View — horizontal scroll so Actions column stays reachable on narrow viewports */}
-        <div className="hidden max-w-full overflow-x-auto overflow-y-visible rounded-xl border border-black/[0.06] bg-white pb-1 shadow-sm lg:block">
+        <div className={cn(businessUi.tablePanel, "hidden lg:block")}>
           <table className="w-full min-w-[72rem]">
             <thead className="bg-muted/50">
               <tr>
@@ -918,12 +917,11 @@ export function StaffManagementPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={[
-                "bg-card rounded-xl border border-border p-4",
-                !employee.isActive ? "border-dashed bg-muted/25 opacity-95" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
+              className={cn(
+                businessUi.listItem,
+                "p-4",
+                !employee.isActive && "border-dashed bg-muted/25 opacity-95",
+              )}
             >
               <div className="flex items-start justify-between mb-4 gap-2">
                 <div className="flex items-center gap-3 min-w-0">

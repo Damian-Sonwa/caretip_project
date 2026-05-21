@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 
 export function SimpleSetupSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
   const [activeStep, setActiveStep] = useState(0);
   const pillSub = t("landing.simpleSetup.pillSub");
   const sectionSubtitle = t("landing.simpleSetup.subtitle");
@@ -80,23 +81,24 @@ export function SimpleSetupSection() {
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (
-                  <button
+                  <motion.button
                     key={step.title}
                     type="button"
                     role="listitem"
                     aria-current={isActive ? "step" : undefined}
                     onClick={() => setActiveStep(idx)}
+                    whileHover={reduceMotion ? undefined : { y: isActive ? 0 : -1 }}
+                    whileTap={reduceMotion ? undefined : { scale: 0.995 }}
+                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                     className={cn(
-                      "group relative w-full rounded-xl border px-3.5 py-3 text-left transition-[border-color,background-color,box-shadow] duration-300 sm:rounded-2xl sm:px-4 sm:py-4",
-                      isActive
-                        ? "caretip-landing-card dark:border-neutral-600 dark:bg-neutral-900"
-                        : "border-neutral-200/85 bg-white shadow-[0_1px_2px_rgba(17,17,17,0.04)] hover:border-neutral-300/90 hover:shadow-[0_2px_4px_rgba(17,17,17,0.05),0_12px_32px_-8px_rgba(17,17,17,0.07)] dark:border-neutral-800 dark:bg-neutral-950 dark:hover:border-neutral-700",
+                      "caretip-live-minutes-step group relative w-full rounded-xl border px-3.5 py-3 text-left sm:rounded-2xl sm:px-4 sm:py-4",
+                      isActive && "caretip-live-minutes-step--active",
                     )}
                   >
                     <motion.div className="flex items-start gap-3 sm:gap-3.5">
                       <span
                         className={cn(
-                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-card-title font-bold tabular-nums transition-colors sm:h-9 sm:w-9",
+                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-card-title font-bold tabular-nums transition-[background-color,color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-9 sm:w-9",
                           isActive
                             ? "bg-primary text-white shadow-[0_4px_12px_rgba(233,120,28,0.28)]"
                             : "bg-neutral-100/90 text-neutral-600 group-hover:bg-neutral-200/80 dark:bg-neutral-800 dark:text-neutral-300",
@@ -119,7 +121,7 @@ export function SimpleSetupSection() {
                         ) : null}
                       </div>
                     </motion.div>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -130,8 +132,10 @@ export function SimpleSetupSection() {
           {...landingFadeReveal}
           className={cn(
             landingUi.visualColumn,
-            "lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
+            "caretip-live-minutes-visual-wrap lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
           )}
+          whileHover={reduceMotion ? undefined : { y: -2 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <LiveInMinutesLaptopDemo
             videoSrc={import.meta.env.VITE_LIVE_IN_MINUTES_DEMO_VIDEO}

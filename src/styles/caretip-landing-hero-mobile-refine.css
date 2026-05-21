@@ -1,0 +1,95 @@
+/**
+ * Landing hero — mobile-only precision refinements (max-lg).
+ * Does not alter desktop layout, typography tokens, or hero structure.
+ */
+
+@media (max-width: 1023px) {
+  /* Slightly earlier hero start (pairs with compact nav) */
+  .caretip-landing .caretip-hero-section {
+    padding-bottom: 0.5rem;
+  }
+
+  /* Text block — compact but readable */
+  .caretip-landing .caretip-hero-headline {
+    line-height: 1.02;
+    letter-spacing: -0.036em;
+  }
+
+  .caretip-landing .caretip-hero-headline > span + span {
+    margin-top: 0.375rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(2rem, 8.2vw, 2.2rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--en > p,
+  .caretip-landing .caretip-hero-copy--de > p {
+    line-height: 1.62;
+    max-width: min(100%, 19.5rem);
+  }
+
+  /* Paragraph → CTAs → image rhythm */
+  .caretip-landing .caretip-hero-cta-cluster {
+    margin-top: 1rem !important;
+    padding-bottom: 0 !important;
+  }
+
+  .caretip-landing .caretip-hero-showcase-col {
+    margin-top: 0.25rem !important;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+
+  .caretip-landing .caretip-hero-showcase-stage {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  .caretip-landing .caretip-hero-cta-row {
+    gap: 0.625rem;
+  }
+
+  /* Product image — mobile crop emphasizes device */
+  .caretip-landing .caretip-hero-section .hero-showcase-card {
+    box-shadow:
+      0 16px 44px -14px rgba(15, 23, 42, 0.1),
+      0 1px 2px rgba(15, 23, 42, 0.04);
+    border-color: rgba(255, 255, 255, 0.72);
+  }
+
+  .caretip-landing .caretip-hero-section .hero-showcase-card-media {
+    border-radius: inherit;
+  }
+
+  .caretip-landing .caretip-hero-section .hero-showcase-card-media img {
+    object-position: 50% 42% !important;
+    transform: scale(1.14);
+    transform-origin: 50% 92%;
+  }
+
+  .caretip-landing .caretip-hero-visual--en .hero-showcase-card-media img {
+    object-position: 50% 40% !important;
+    transform: scale(1.16);
+    transform-origin: 50% 90%;
+  }
+
+  .caretip-landing .caretip-hero-mobile-metrics {
+    padding-top: 1.25rem;
+    padding-bottom: 2rem;
+  }
+}
+
+/* Mobile nav — slightly shorter bar; desktop unchanged */
+@media (max-width: 1023px) {
+  .caretip-public-nav nav {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .caretip-public-nav nav a[href="/"] {
+    height: 3.5rem;
+    min-height: 3.5rem;
+  }
+}

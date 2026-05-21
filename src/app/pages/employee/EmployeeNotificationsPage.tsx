@@ -264,6 +264,7 @@ export function EmployeeNotificationsPage() {
                     key={tipRow.id}
                     className={cn(
                       employeeUi.listItem,
+                      employeeUi.listRow,
                       selected && employeeUi.listItemSelected,
                       selected && "border-l-4 border-l-primary",
                     )}

@@ -63,7 +63,7 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { dashStatCard, DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
+import { DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { cn } from "@/lib/utils";
 
@@ -567,7 +567,7 @@ export function QRCodeManagementPage() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className={dashStatCard("text-foreground")}
+      className={cn(businessUi.cardStatic, businessUi.cardPad, "text-foreground")}
     >
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="flex-shrink-0">
@@ -857,10 +857,10 @@ export function QRCodeManagementPage() {
 
       <TracingBeam className={cn(businessUi.subPageMain, "pb-4")}>
         <div className="space-y-6">
-          <Card className="border-2 border-border shadow-sm">
+          <Card className={cn(businessUi.cardStatic, "w-full")}>
             <CardHeader className="pb-2">
               <CardTitle className="text-base">{t("business.qrPage.sectionsTitle")}</CardTitle>
-              <CardDescription>{t("business.qrPage.sectionsDesc")}</CardDescription>
+              <CardDescription className={businessUi.cardDesc}>{t("business.qrPage.sectionsDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/50 p-1">
@@ -952,7 +952,7 @@ export function QRCodeManagementPage() {
                     {t("business.qrPage.staffTagsDesc")}
                   </p>
                   {employees.length === 0 ? (
-                    <div className="rounded-xl border-2 border-border bg-card py-12 text-center">
+                    <div className={cn(businessUi.cardStatic, businessUi.chartEmpty, "py-12 text-center")}>
                       <p className="mb-2 text-muted-foreground">{t("business.qrPage.noEmployees")}</p>
                       <Link
                         to="/dashboard/staff-management"
