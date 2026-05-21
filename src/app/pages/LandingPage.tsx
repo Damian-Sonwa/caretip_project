@@ -21,7 +21,7 @@ export function LandingPage() {
   const heroVisual = isDe ? heroVisualDe : heroVisualEn;
 
   return (
-    <div className="caretip-landing caretip-landing--premium relative min-h-screen w-full min-w-0 bg-white font-sans dark:bg-neutral-950">
+    <div className="caretip-landing caretip-landing--premium relative min-h-screen w-full min-w-0 font-sans dark:bg-neutral-950">
       <div
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-0 bottom-0 z-0 min-h-[100dvh]"
@@ -47,7 +47,7 @@ export function LandingPage() {
           <LandingSocialProofSection />
           <LandingFinalCtaSection />
         </main>
-        <Footer />
+        <Footer className="caretip-landing-footer" />
       </div>
     </div>
   );

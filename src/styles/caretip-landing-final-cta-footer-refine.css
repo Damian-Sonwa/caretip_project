@@ -1,0 +1,275 @@
+/**
+ * Final CTA + landing footer — premium closing statement.
+ * Scoped to `.caretip-landing`; preserves section shell, not footer structure.
+ */
+
+/* —— CTA band: layered depth (not flat black) —— */
+.caretip-landing .caretip-landing-final-cta {
+  background: linear-gradient(
+    180deg,
+    #161412 0%,
+    #12100e 38%,
+    #100e0c 72%,
+    #0e0d0b 100%
+  ) !important;
+  border-top: none !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+html.dark .caretip-landing .caretip-landing-final-cta {
+  background: linear-gradient(
+    180deg,
+    #111010 0%,
+    #0c0c0c 42%,
+    #0a0a0a 78%,
+    #090909 100%
+  ) !important;
+}
+
+/* Atmosphere layers */
+.caretip-landing .caretip-final-cta-atmosphere {
+  background:
+    radial-gradient(ellipse 85% 55% at 50% 28%, rgba(233, 120, 28, 0.14) 0%, transparent 58%),
+    radial-gradient(ellipse 50% 40% at 15% 80%, rgba(233, 120, 28, 0.05) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 35% at 88% 70%, rgba(245, 158, 11, 0.04) 0%, transparent 48%);
+}
+
+.caretip-landing .caretip-final-cta-texture {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 42%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.2) 0%, transparent 32%);
+  opacity: 0.7;
+}
+
+.caretip-landing .caretip-final-cta-noise {
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+/* Floating UI chips */
+.caretip-landing .caretip-final-cta-float {
+  position: absolute;
+  opacity: 0.55;
+  filter: blur(0.2px);
+  transition: opacity 0.4s ease;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-final-cta-float {
+    opacity: 0.62;
+  }
+}
+
+.caretip-landing .caretip-final-cta-float--qr {
+  transform: rotate(-6deg);
+}
+
+.caretip-landing .caretip-final-cta-float--pay {
+  transform: rotate(5deg);
+}
+
+.caretip-landing .caretip-final-cta-float--wallet {
+  transform: rotate(-4deg);
+}
+
+.caretip-landing .caretip-final-cta-float--mobile {
+  transform: rotate(7deg);
+}
+
+.caretip-landing .caretip-final-cta-orb {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+/* Fade into footer — no hard cut */
+.caretip-landing .caretip-landing-final-cta::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  height: 5rem;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0%, rgba(14, 13, 11, 0.85) 72%, #0e0d0b 100%);
+}
+
+html.dark .caretip-landing .caretip-landing-final-cta::after {
+  background: linear-gradient(180deg, transparent 0%, rgba(10, 10, 10, 0.9) 70%, #090909 100%);
+}
+
+/* —— Content hierarchy —— */
+.caretip-landing .caretip-final-cta-eyebrow {
+  color: rgba(233, 120, 28, 0.92);
+}
+
+.caretip-landing .caretip-final-cta-headline {
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.06;
+  letter-spacing: -0.038em;
+  color: #fafafa;
+}
+
+.caretip-landing .caretip-final-cta-subtitle {
+  font-size: clamp(0.9375rem, 1.6vw, 1.0625rem);
+  line-height: 1.62;
+  font-weight: 400;
+  color: rgba(250, 250, 250, 0.62);
+  letter-spacing: -0.01em;
+}
+
+.caretip-landing .caretip-final-cta-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.caretip-landing .caretip-final-cta-action {
+  position: relative;
+  isolation: isolate;
+}
+
+.caretip-landing .caretip-final-cta-button-glow {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 0;
+  width: 14rem;
+  height: 5rem;
+  transform: translate(-50%, -48%);
+  background: radial-gradient(
+    ellipse 75% 100% at 50% 50%,
+    rgba(233, 120, 28, 0.32) 0%,
+    rgba(233, 120, 28, 0.1) 45%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  opacity: 0.8;
+}
+
+.caretip-landing .caretip-final-cta-button {
+  min-height: 2.875rem;
+  padding-inline: 2rem !important;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1) !important;
+  background: linear-gradient(
+    180deg,
+    #ff9e2d 0%,
+    #e9781c 48%,
+    #d96f18 100%
+  ) !important;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.28) inset,
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 12px 28px -6px rgba(233, 120, 28, 0.45),
+    0 0 36px -8px rgba(255, 158, 45, 0.2) !important;
+}
+
+@media (hover: hover) {
+  .caretip-landing .caretip-final-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.32) inset,
+      0 16px 36px -6px rgba(233, 120, 28, 0.52),
+      0 0 40px -6px rgba(255, 158, 45, 0.26) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing .caretip-final-cta-button:hover {
+    transform: none;
+  }
+
+  .caretip-landing .caretip-final-cta-float {
+    transition: none;
+  }
+}
+
+html.dark .caretip-landing .caretip-final-cta-button {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.18) inset,
+    0 12px 28px -6px rgba(233, 120, 28, 0.48),
+    0 0 32px -8px rgba(233, 120, 28, 0.22) !important;
+}
+
+/* —— Landing footer blend (structure unchanged) —— */
+.caretip-landing .caretip-landing-footer {
+  border-top: none !important;
+  margin-top: -2.5rem;
+  padding-top: 0.5rem;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-bg {
+  background: linear-gradient(
+    180deg,
+    #0e0d0b 0%,
+    #0c0c0c 6%,
+    #0a0a0a 18%,
+    #090909 100%
+  ) !important;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-texture {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 70% 45% at 50% 0%, rgba(233, 120, 28, 0.05) 0%, transparent 52%);
+  opacity: 0.8;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-ambient-r,
+.caretip-landing .caretip-landing-footer .caretip-site-footer-ambient-l {
+  opacity: 0.35;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-blurb {
+  line-height: 1.68;
+  color: rgba(212, 212, 212, 0.82);
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-link {
+  color: rgba(163, 163, 163, 0.95);
+}
+
+@media (hover: hover) {
+  .caretip-landing .caretip-landing-footer .caretip-site-footer-link:hover {
+    color: rgba(255, 255, 255, 0.92);
+  }
+}
+
+.caretip-landing .caretip-landing-footer h3,
+.caretip-landing .caretip-landing-footer h4 {
+  color: #fafafa;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-bottom {
+  border-top: 1px solid transparent !important;
+  border-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.05) 15%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.05) 85%,
+    transparent 100%
+  )
+    1;
+}
+
+.caretip-landing .caretip-landing-footer .caretip-site-footer-columns {
+  row-gap: 2.25rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-landing-footer .caretip-site-footer-columns {
+    column-gap: 2.75rem;
+  }
+}
+
+/* Legacy overrides from atmosphere.css — keep headline legible on dark band */
+html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta-headline {
+  color: #fafafa !important;
+}

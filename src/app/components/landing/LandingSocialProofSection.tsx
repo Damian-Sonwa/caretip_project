@@ -4,10 +4,8 @@ import { Quote } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
-import {
-  LandingSectionAccent,
-  type LandingAccentVariant,
-} from "@/components/landing/LandingSectionAccent";
+import { LandingTrustMetricsRow } from "@/app/components/landing/LandingTrustMetricsRow";
+import { LandingVenueLogoStrip } from "@/app/components/landing/LandingVenueLogoStrip";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -21,16 +19,9 @@ const cardClassName = cn(
   "dark:hover:border-neutral-600",
 );
 
-const statAccentVariants: LandingAccentVariant[] = ["trend", "spark", "arrow"];
-
 export function LandingSocialProofSection() {
   const { t } = useTranslation();
   const sectionSubtitle = t("landing.socialProof.subtitle");
-
-  const stats = useMemo(
-    () => [t("landing.socialProof.stat1"), t("landing.socialProof.stat2"), t("landing.socialProof.stat3")],
-    [t],
-  );
 
   const quotes = useMemo(
     () =>
@@ -61,7 +52,7 @@ export function LandingSocialProofSection() {
           initial={{ opacity: 0, y: 12 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className={landingUi.sectionIntro}
+          className={cn(landingUi.sectionIntro, "caretip-social-proof-intro")}
         >
           <h2 className={landingUi.sectionTitle}>
             {t("landing.socialProof.title")}
@@ -71,27 +62,13 @@ export function LandingSocialProofSection() {
           ) : null}
         </motion.div>
 
-        <motion.ul
-          initial={{ opacity: 0, y: 8 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className={cn(
-            landingUi.sectionAfterIntro,
-            "flex flex-wrap items-center justify-center gap-x-6 gap-y-3 sm:gap-x-8",
-          )}
-          aria-label={t("landing.socialProof.chipsAria")}
-        >
-          {stats.map((stat, idx) => (
-            <li key={stat}>
-              <LandingSectionAccent variant={statAccentVariants[idx % statAccentVariants.length]}>
-                {stat}
-              </LandingSectionAccent>
-            </li>
-          ))}
-        </motion.ul>
+        <div className="caretip-landing-trust-band caretip-social-proof-trust-band mx-auto w-full min-w-0 max-w-7xl overflow-x-clip">
+          <LandingVenueLogoStrip className="caretip-landing-venue-logos--lead" />
+          <LandingTrustMetricsRow className="caretip-landing-trust-metrics--follows-logos" />
+        </div>
 
         <motion.div
-          className="grid gap-3 max-lg:gap-3.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6"
+          className="caretip-social-proof-quotes grid gap-3 max-lg:gap-3.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}

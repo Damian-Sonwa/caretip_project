@@ -1,0 +1,182 @@
+/**
+ * Hero visual refinement — depth, warmth, floating cards (presentation only).
+ * Does not alter hero grid, typography, or image scale rules.
+ */
+
+/* Warm hospitality ambiance behind showcase */
+.caretip-landing .caretip-hero-warm-ambience {
+  background: radial-gradient(
+    ellipse 72% 62% at 52% 44%,
+    rgba(255, 236, 210, 0.32) 0%,
+    rgba(233, 120, 28, 0.07) 42%,
+    transparent 70%
+  );
+  opacity: 0.9;
+}
+
+html.dark .caretip-landing .caretip-hero-warm-ambience {
+  background: radial-gradient(
+    ellipse 72% 62% at 52% 44%,
+    rgba(233, 120, 28, 0.14) 0%,
+    rgba(233, 120, 28, 0.04) 38%,
+    transparent 68%
+  );
+  opacity: 0.6;
+}
+
+/* Stage depth — layered contact shadow */
+.caretip-landing .caretip-hero-showcase-stage {
+  isolation: isolate;
+}
+
+.caretip-landing .caretip-hero-showcase-stage::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2%;
+  z-index: 0;
+  width: 72%;
+  height: 14%;
+  transform: translateX(-50%);
+  border-radius: 100%;
+  background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(30, 24, 18, 0.12), transparent 70%);
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+/* Composition edge fade — soft vignette without blurring the image */
+.caretip-landing .caretip-hero-showcase-composition::after {
+  content: "";
+  position: absolute;
+  inset: -3% -4%;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: inherit;
+  background: radial-gradient(
+    ellipse 90% 84% at 50% 46%,
+    transparent 54%,
+    rgba(250, 248, 245, 0.1) 76%,
+    rgba(250, 248, 245, 0.26) 100%
+  );
+}
+
+html.dark .caretip-landing .caretip-hero-showcase-composition::after {
+  background: radial-gradient(
+    ellipse 90% 84% at 50% 46%,
+    transparent 54%,
+    rgba(23, 23, 23, 0.12) 76%,
+    rgba(23, 23, 23, 0.28) 100%
+  );
+}
+
+/* Showcase frame — subtle edge luminance */
+.caretip-landing .caretip-hero-showcase-edge-glow {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.18);
+  opacity: 0.85;
+}
+
+.caretip-landing .caretip-hero-showcase-card-glow {
+  position: absolute;
+  inset: -10%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 68% 56% at 50% 40%,
+    rgba(233, 120, 28, 0.16) 0%,
+    rgba(255, 220, 180, 0.07) 38%,
+    transparent 70%
+  );
+  filter: blur(22px);
+  opacity: 0.8;
+}
+
+.caretip-landing .caretip-hero-showcase-glow {
+  opacity: 0.48 !important;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-showcase-glow {
+    opacity: 0.42 !important;
+  }
+}
+
+/* Card media — soft overlay lighting */
+.caretip-landing .caretip-hero-showcase-light-overlay {
+  background: linear-gradient(
+    165deg,
+    rgba(255, 252, 248, 0.1) 0%,
+    transparent 44%,
+    rgba(28, 22, 16, 0.03) 100%
+  );
+  mix-blend-mode: soft-light;
+  opacity: 0.55;
+}
+
+/* Stronger layered shadow on hero card (additive) */
+.caretip-landing .caretip-hero-showcase-card--depth {
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 14px 36px -10px rgba(15, 23, 42, 0.09),
+    0 24px 52px -18px rgba(30, 24, 16, 0.1);
+}
+
+/* Outer card edge soften */
+.caretip-landing .caretip-hero-section .hero-showcase-card {
+  border-color: rgba(255, 255, 255, 0.52);
+}
+
+/* Float cards — glass depth, softer shadows */
+.caretip-landing .caretip-hero-float-card {
+  opacity: 1;
+  visibility: visible;
+  border-color: rgba(255, 255, 255, 0.48) !important;
+  background: rgba(255, 255, 255, 0.74) !important;
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 18px -4px rgba(15, 23, 42, 0.07),
+    0 12px 32px -10px rgba(15, 23, 42, 0.09) !important;
+  --tw-ring-color: rgba(255, 255, 255, 0.35);
+}
+
+html.dark .caretip-landing .caretip-hero-float-card {
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  background: rgba(28, 28, 30, 0.72) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.12),
+    0 8px 24px -6px rgba(0, 0, 0, 0.28) !important;
+}
+
+/* Hero CTAs — slightly slimmer vertical presence; tap-friendly min-heights preserved */
+.caretip-landing .caretip-hero-cta-cluster a {
+  height: 2.625rem;
+  min-height: 2.625rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-cta-cluster a {
+    height: 2.875rem;
+    min-height: 2.875rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing .caretip-hero-float-card {
+    animation: none !important;
+  }
+}
+
+/* Mobile: keep floats inside showcase, away from headline */
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-hero-float-cards {
+    clip-path: inset(-4% -2% -2% -2%);
+  }
+}

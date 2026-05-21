@@ -141,7 +141,7 @@ export function LandingShowcaseVisualFrame({
   className?: string;
 }) {
   return (
-    <div className={cn("relative w-full", className)}>
+    <div className={cn("caretip-showcase-depth relative w-full", className)}>
       <div aria-hidden className={landingUi.showcaseVisualGlow} />
       {children}
     </div>
@@ -153,11 +153,14 @@ export function LandingShowcaseCoverImage({
   alt,
   objectPosition = "center",
   className,
+  floatHint,
 }: {
   src: string;
   alt: string;
   objectPosition?: string;
   className?: string;
+  /** Optional floating stat line on desktop (presentation only). */
+  floatHint?: string;
 }) {
   return (
     <LandingShowcaseVisualFrame>
@@ -171,6 +174,13 @@ export function LandingShowcaseCoverImage({
           decoding="async"
         />
       </div>
+      {floatHint ? (
+        <div aria-hidden className="caretip-showcase-float-card hidden lg:block">
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+            {floatHint}
+          </p>
+        </div>
+      ) : null}
     </LandingShowcaseVisualFrame>
   );
 }

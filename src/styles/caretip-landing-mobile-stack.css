@@ -100,11 +100,20 @@
     margin-top: 0.625rem;
   }
 
-  .caretip-landing #real-life .caretip-real-life-card-body p {
+  .caretip-landing #real-life .caretip-real-life-card-body p,
+  .caretip-landing #real-life .caretip-expandable-info-card__body p {
     max-width: 32ch;
     margin-inline: auto;
     line-height: 1.5;
     text-wrap: pretty;
+  }
+
+  .caretip-landing #real-life .caretip-expandable-info-card__body {
+    text-align: center;
+  }
+
+  .caretip-landing #real-life .caretip-expandable-info-card__body button {
+    margin-inline: auto;
   }
 }
 

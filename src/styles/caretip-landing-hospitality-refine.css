@@ -1,0 +1,267 @@
+/**
+ * Where CareTip Works (#built-for-hospitality) — premium refinement only.
+ * Does not alter grid, breakpoints, or section layout structure.
+ */
+
+/* Section tone — caretip-landing-section-flow.css; ambient glow only here */
+.caretip-landing #built-for-hospitality.caretip-landing-hospitality::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 90% 55% at 50% 0%,
+    rgba(233, 120, 28, 0.05) 0%,
+    transparent 58%
+  );
+  opacity: 0.9;
+}
+
+html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
+  background: linear-gradient(180deg, #171717 0%, #141414 48%, #171717 100%);
+}
+
+html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality::before {
+  background: radial-gradient(
+    ellipse 85% 50% at 50% 0%,
+    rgba(233, 120, 28, 0.08) 0%,
+    transparent 55%
+  );
+  opacity: 0.65;
+}
+
+/* Feature nav — editorial list, no cards */
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-panel {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+  padding: 0;
+  cursor: default;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-nav {
+  gap: 0;
+  cursor: default;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-nav * {
+  cursor: default;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-item {
+  padding-block: 0.875rem;
+  cursor: default;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-item:hover {
+  cursor: default;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item {
+    padding-block: 1rem;
+  }
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--divided {
+  border-top: 1px solid rgba(17, 17, 17, 0.06);
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--divided {
+  border-top-color: rgba(255, 255, 255, 0.07);
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-entry {
+  padding-inline: 0.125rem;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-heading {
+  width: auto;
+  max-width: 100%;
+  cursor: default;
+}
+
+/* Feature markers — icon only, no circular hover/active glow */
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-heading [aria-hidden] {
+  box-shadow: none !important;
+  background: transparent !important;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-desc {
+  padding-left: calc(1.25rem + 0.625rem);
+  opacity: 0.88;
+  transition: opacity 0.3s ease;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-desc {
+    padding-left: calc(1.5rem + 0.75rem);
+  }
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-desc {
+  opacity: 0.95;
+}
+
+/* Media column — tight to the feature list on desktop */
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-stack {
+  padding-inline: 0;
+  padding-block: 0;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-media-stack {
+    padding-inline: 0;
+    padding-block: 0;
+  }
+
+  .caretip-landing #built-for-hospitality .caretip-hospitality-media-stage {
+    margin-top: -0.25rem;
+  }
+}
+
+/* Media stage — cinematic depth */
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-stage {
+  isolation: isolate;
+}
+
+/* “Where CareTip Works” — anchored on the animated marquee, not the section header */
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-eyebrow {
+  pointer-events: none;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-pill {
+  display: inline-flex;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 6px 20px -6px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-pill {
+  border-color: rgba(255, 255, 255, 0.14);
+  background: rgba(23, 23, 23, 0.82);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    0 8px 24px -8px rgba(0, 0, 0, 0.45);
+}
+
+/* Slight top fade so the pill sits in the image frame, not on a hard edge */
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 2;
+  height: 28%;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 248, 0.55) 0%,
+    rgba(255, 252, 248, 0.12) 45%,
+    transparent 100%
+  );
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-stage::after {
+  background: linear-gradient(
+    180deg,
+    rgba(23, 23, 23, 0.65) 0%,
+    rgba(23, 23, 23, 0.2) 50%,
+    transparent 100%
+  );
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-card {
+  box-shadow:
+    0 2px 4px rgba(15, 23, 42, 0.04),
+    0 18px 48px -14px rgba(15, 23, 42, 0.12),
+    0 28px 64px -24px rgba(30, 24, 16, 0.1);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-card {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.22),
+    0 22px 52px -16px rgba(0, 0, 0, 0.45);
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-glow {
+  position: absolute;
+  inset: -6%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 58% at 50% 42%,
+    rgba(233, 120, 28, 0.1) 0%,
+    rgba(255, 236, 210, 0.05) 40%,
+    transparent 68%
+  );
+  filter: blur(18px);
+  opacity: 0.85;
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 248, 0.08) 0%,
+    transparent 28%,
+    transparent 72%,
+    rgba(28, 22, 16, 0.04) 100%
+  );
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-media-vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  box-shadow: inset 0 0 40px 8px rgba(250, 248, 245, 0.22);
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-vignette {
+  box-shadow: inset 0 0 36px 10px rgba(23, 23, 23, 0.35);
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-marquee {
+  position: relative;
+  z-index: 3;
+}
+
+/* Float chips — glass depth */
+.caretip-landing #built-for-hospitality .caretip-hospitality-float-chip {
+  border-color: rgba(255, 255, 255, 0.45) !important;
+  background: rgba(255, 255, 255, 0.72) !important;
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 16px -4px rgba(15, 23, 42, 0.07) !important;
+}
+
+html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-float-chip {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(30, 30, 32, 0.74) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-float-chip {
+    animation: none !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-float-chips {
+    clip-path: inset(-2% -1% -2% -1%);
+  }
+}

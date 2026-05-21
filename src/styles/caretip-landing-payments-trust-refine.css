@@ -1,0 +1,38 @@
+/**
+ * Payments & trust (#payments-trust) — lightweight icon features (presentation only).
+ */
+
+.caretip-landing #payments-trust .caretip-payments-trust-ambient {
+  background: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgba(233, 120, 28, 0.04) 0%,
+    transparent 55%
+  );
+  opacity: 0.85;
+}
+
+html.dark .caretip-landing #payments-trust .caretip-payments-trust-ambient {
+  background: radial-gradient(
+    ellipse 75% 45% at 50% 0%,
+    rgba(233, 120, 28, 0.07) 0%,
+    transparent 58%
+  );
+  opacity: 0.55;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-item {
+  cursor: default;
+}
+
+@media (hover: hover) {
+  .caretip-landing #payments-trust .caretip-payments-trust-item:hover .caretip-payments-trust-icon {
+    box-shadow: 0 6px 18px -10px rgba(233, 120, 28, 0.18);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing #payments-trust .caretip-payments-trust-item:hover .caretip-payments-trust-icon,
+  .caretip-landing #payments-trust .caretip-payments-trust-icon {
+    transform: none !important;
+  }
+}

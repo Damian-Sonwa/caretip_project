@@ -6,7 +6,7 @@ import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
-import { landingType } from "@/components/landing/landingTypography";
+import { ExpandableInfoCard } from "@/components/ui/expandable-info-card";
 import { cn } from "@/lib/utils";
 
 export function LandingRealLifeSection() {
@@ -17,25 +17,33 @@ export function LandingRealLifeSection() {
       [
         {
           headline: t("landing.realLife.s1Headline"),
+          tag: t("landing.realLife.s1Tag"),
           text: t("landing.realLife.s1Text"),
+          detail: t("landing.realLife.s1Detail"),
           img: tableQrImg,
           alt: t("landing.realLife.s1Alt"),
         },
         {
           headline: t("landing.realLife.s2Headline"),
+          tag: t("landing.realLife.s2Tag"),
           text: t("landing.realLife.s2Text"),
+          detail: t("landing.realLife.s2Detail"),
           img: atReceptionImg,
           alt: t("landing.realLife.s2Alt"),
         },
         {
           headline: t("landing.realLife.s3Headline"),
+          tag: t("landing.realLife.s3Tag"),
           text: t("landing.realLife.s3Text"),
+          detail: t("landing.realLife.s3Detail"),
           img: salonImg,
           alt: t("landing.realLife.s3Alt"),
         },
         {
           headline: t("landing.realLife.s4Headline"),
+          tag: t("landing.realLife.s4Tag"),
           text: t("landing.realLife.s4Text"),
+          detail: t("landing.realLife.s4Detail"),
           img: homeImg,
           alt: t("landing.realLife.s4Alt"),
         },
@@ -43,18 +51,21 @@ export function LandingRealLifeSection() {
     [t],
   );
 
+  const learnMore = t("landing.realLife.learnMore");
+  const learnLess = t("landing.realLife.learnLess");
+
   return (
-    <section
-      id="real-life"
-      className={cn(landingUi.section, landingUi.sectionWhite)}
-    >
+    <section id="real-life" className={cn(landingUi.section, landingUi.sectionWhite, "caretip-landing-rhythm-stone")}>
       <div className="mx-auto max-w-7xl">
         <div className={cn(landingUi.sectionIntro, "caretip-real-life-section-intro")}>
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className={cn(landingUi.sectionTitle, "max-lg:caretip-mobile-section-headline caretip-real-life-section-title")}
+            className={cn(
+              landingUi.sectionTitle,
+              "max-lg:caretip-mobile-section-headline caretip-real-life-section-title",
+            )}
           >
             {t("landing.realLife.title")}
           </motion.h2>
@@ -62,67 +73,42 @@ export function LandingRealLifeSection() {
 
         <div className="grid grid-cols-1 justify-items-center gap-4 sm:grid-cols-2 sm:justify-items-stretch sm:gap-6 lg:gap-7">
           {scenarios.map((item, idx) => (
-            <motion.article
+            <motion.div
               key={item.headline}
               initial={{ opacity: 0, y: 16 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.45, delay: idx * 0.06 }}
-              className={cn(
-                "caretip-landing-card group flex w-full max-w-md flex-col overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_8px_30px_rgba(0,0,0,0.04)] sm:max-w-none dark:border-neutral-800 dark:bg-neutral-950 dark:shadow-none",
-                landingUi.mobileStackCard,
-              )}
+              className="w-full max-w-md sm:max-w-none"
             >
-              <div
+              <ExpandableInfoCard
+                imageSrc={item.img}
+                imageAlt={item.alt}
+                title={item.headline}
+                tag={landingCopyVisible(item.tag) ? item.tag : undefined}
+                summary={item.text}
+                detail={item.detail}
+                learnMoreLabel={learnMore}
+                learnLessLabel={learnLess}
                 className={cn(
-                  landingUi.cardCopyStack,
-                  landingUi.mobileStackIntro,
-                  landingUi.realLifeCardIntro,
-                  "order-1 px-5 pb-0 pt-5 sm:px-6 sm:pt-6 max-lg:px-4 max-lg:pt-3 max-lg:pb-1 lg:order-2 lg:pb-0 lg:pt-0",
+                  landingUi.mobileStackCard,
+                  landingUi.realLifeCard,
+                  "caretip-real-life-card",
                 )}
-              >
-                <h3
-                  className={cn(
-                    landingType.cardTitle,
-                    landingUi.realLifeCardTitle,
-                    "tracking-tight max-lg:text-center lg:text-left",
-                  )}
-                >
-                  {item.headline}
-                </h3>
-              </div>
-              <div
-                className={cn(
-                  "relative aspect-[16/10] w-full overflow-hidden",
+                imageClassName={cn(
                   landingUi.mobileStackVisual,
                   landingUi.realLifeCardImage,
-                  "order-2 lg:order-1",
+                  "caretip-real-life-card-image max-lg:mx-auto max-lg:w-[calc(100%-2rem)] max-lg:rounded-xl",
                 )}
-              >
-                <img
-                  src={item.img}
-                  alt={item.alt}
-                  className="h-full w-full object-cover object-center max-lg:rounded-[inherit]"
-                  loading="lazy"
-                />
-              </div>
-              {landingCopyVisible(item.text) ? (
-                <div
-                  className={cn(
-                    landingUi.cardCopyStack,
-                    landingUi.mobileStackAfter,
-                    landingUi.realLifeCardBody,
-                    "order-3 px-5 pb-5 pt-0 sm:px-6 sm:pb-6 max-lg:px-4 max-lg:pb-4 lg:px-6 lg:pb-6 lg:pt-0",
-                  )}
-                >
-                  <p className={cn(landingUi.cardFeatureBody, "max-lg:text-center lg:mt-2")}>{item.text}</p>
-                </div>
-              ) : null}
-            </motion.article>
+                titleClassName={cn(
+                  landingUi.realLifeCardTitle,
+                  "max-lg:text-center lg:text-left",
+                )}
+              />
+            </motion.div>
           ))}
         </div>
       </div>
     </section>
   );
 }
-

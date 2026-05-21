@@ -108,35 +108,6 @@
   }
 }
 
-/* Hero float metric — present for layout stability; fully invisible (no display:none) */
-.caretip-hero-float-metric__glow {
-  display: none !important;
-}
-
-.caretip-hero-float-metric__card,
-.caretip-landing .caretip-hero-float-metric__card {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  pointer-events: none !important;
-  border-color: transparent !important;
-  background: transparent !important;
-  box-shadow: none !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-ring-color: transparent !important;
-  filter: none !important;
-  backdrop-filter: none !important;
-}
-
-.caretip-hero-float-metric__card *,
-.caretip-landing .caretip-hero-float-metric__card * {
-  opacity: 0 !important;
-  visibility: hidden !important;
-  color: transparent !important;
-  box-shadow: none !important;
-  --tw-ring-shadow: 0 0 #0000 !important;
-  --tw-ring-color: transparent !important;
-}
-
 /* EN hero — extend image into float-card zone; centered origin for optical balance */
 .caretip-landing .caretip-hero-visual--en .hero-showcase-card-media img {
   object-position: 50% 36% !important;

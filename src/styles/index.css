@@ -9,8 +9,15 @@
 @import "./caretip-buttons.css";
 @import "./caretip-auth.css";
 @import "./caretip-landing-atmosphere.css";
+@import "./caretip-landing-section-flow.css";
 @import "./caretip-landing-mobile-stack.css";
 @import "./caretip-landing-hero-mobile-refine.css";
+@import "./caretip-landing-hero-visual-refine.css";
+@import "./caretip-landing-hospitality-refine.css";
+@import "./caretip-landing-trust-metrics-refine.css";
 @import "./caretip-landing-live-minutes-refine.css";
+@import "./caretip-landing-payments-trust-refine.css";
+@import "./caretip-landing-final-cta-footer-refine.css";
+@import "./caretip-landing-premium-refine.css";
 @import "./business-dashboard-polish.css";
 @import "./theme.css";

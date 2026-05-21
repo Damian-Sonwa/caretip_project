@@ -1,0 +1,297 @@
+/**
+ * Social proof trust band (#social-proof) — logos → metrics optical polish only.
+ * Scoped to this section; does not affect other landing areas.
+ */
+
+.caretip-landing #social-proof .caretip-landing-trust-band {
+  position: relative;
+}
+
+/* —— Vertical rhythm: headline → logos → stats → quotes —— */
+.caretip-landing #social-proof .caretip-social-proof-intro {
+  margin-bottom: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-social-proof-intro {
+    margin-bottom: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-social-proof-intro {
+    margin-bottom: 1.625rem !important;
+  }
+}
+
+.caretip-landing #social-proof .caretip-social-proof-trust-band {
+  margin-bottom: 0;
+}
+
+.caretip-landing #social-proof .caretip-social-proof-quotes {
+  margin-top: 2.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-social-proof-quotes {
+    margin-top: 3.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-social-proof-quotes {
+    margin-top: 3.75rem;
+  }
+}
+
+/* —— Logo row —— */
+.caretip-landing #social-proof .caretip-landing-venue-logos {
+  margin-top: 0;
+  border: none;
+  padding: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.caretip-landing #social-proof .caretip-landing-venue-logos--lead {
+  padding-bottom: 0;
+}
+
+.caretip-landing #social-proof .caretip-landing-partner-logos .caretip-venue-logos-marquee {
+  position: relative;
+  min-height: 3.75rem;
+  padding-block: 0.125rem;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    #000 6%,
+    #000 94%,
+    transparent 100%
+  );
+}
+
+.caretip-landing #social-proof .caretip-hospitality-partner-logo-item {
+  flex-shrink: 0;
+  min-width: 5.25rem;
+}
+
+.caretip-landing #social-proof .caretip-hospitality-partner-logo {
+  color: #737373;
+  opacity: 0.68;
+  transition:
+    opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    color 0.35s ease;
+}
+
+html.dark .caretip-landing #social-proof .caretip-hospitality-partner-logo {
+  color: #d4d4d4;
+  opacity: 0.62;
+}
+
+@media (hover: hover) {
+  .caretip-landing #social-proof .caretip-hospitality-partner-logo-item:hover .caretip-hospitality-partner-logo {
+    opacity: 0.78;
+    color: #525252;
+  }
+
+  html.dark .caretip-landing #social-proof .caretip-hospitality-partner-logo-item:hover .caretip-hospitality-partner-logo {
+    opacity: 0.72;
+    color: #e5e5e5;
+  }
+}
+
+/* Mobile / tablet logo grid — optical center, even gaps */
+.caretip-landing #social-proof .caretip-social-proof-logo-grid {
+  min-height: 4.75rem;
+  padding-block: 0.375rem;
+}
+
+/* —— Logos → metrics bridge —— */
+.caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics,
+.caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos {
+  margin-top: 2.75rem;
+  padding-top: 2.5rem;
+  position: relative;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics,
+  .caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos {
+    margin-top: 3.25rem;
+    padding-top: 2.875rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics,
+  .caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos {
+    margin-top: 3.75rem;
+    padding-top: 3.25rem;
+  }
+}
+
+.caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics::before,
+.caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos::before {
+  content: "";
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(17, 17, 17, 0.07) 18%,
+    rgba(17, 17, 17, 0.07) 82%,
+    transparent 100%
+  );
+  pointer-events: none;
+}
+
+html.dark .caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics::before,
+html.dark .caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos::before {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.09) 18%,
+    rgba(255, 255, 255, 0.09) 82%,
+    transparent 100%
+  );
+}
+
+/* —— Metrics row —— */
+.caretip-landing #social-proof .caretip-landing-trust-metrics {
+  padding-top: 0;
+  padding-bottom: 0;
+  width: 100%;
+  min-width: 0;
+}
+
+.caretip-landing #social-proof .caretip-trust-metrics-grid {
+  width: 100%;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.caretip-landing #social-proof .caretip-trust-metric-item {
+  min-width: 0;
+  padding-inline: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-trust-metric-item {
+    padding-inline: 0.875rem;
+  }
+}
+
+.caretip-landing #social-proof .caretip-trust-metric-value {
+  font-size: clamp(1.75rem, 4.5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  min-height: 1.05em;
+  min-width: 5.75ch;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground, #171717);
+}
+
+html.dark .caretip-landing #social-proof .caretip-trust-metric-value {
+  color: #fafafa;
+}
+
+.caretip-landing #social-proof .caretip-trust-metric-label {
+  margin-top: 0.5rem;
+  max-width: 12.5rem;
+  margin-inline: auto;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-align: center;
+  text-wrap: pretty;
+  color: rgba(115, 115, 115, 0.88);
+}
+
+html.dark .caretip-landing #social-proof .caretip-trust-metric-label {
+  color: rgba(163, 163, 163, 0.82);
+}
+
+/* Tablet 2×2 — divider between columns only */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-landing #social-proof .caretip-trust-metric-item:nth-child(even) {
+    border-left: 1px solid rgba(17, 17, 17, 0.07);
+  }
+
+  html.dark .caretip-landing #social-proof .caretip-trust-metric-item:nth-child(even) {
+    border-left-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item:nth-child(n + 3) {
+    margin-top: 0.125rem;
+    padding-top: 0.25rem;
+  }
+}
+
+/* Desktop — equal columns, centered optics, balanced dividers */
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-trust-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item {
+    min-height: 4.75rem;
+    padding-inline: 1.25rem;
+    justify-content: center;
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item:first-child {
+    padding-inline-start: 0.75rem;
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item:last-child {
+    padding-inline-end: 0.75rem;
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item:not(:first-child) {
+    border-left: 1px solid rgba(17, 17, 17, 0.08);
+  }
+
+  html.dark .caretip-landing #social-proof .caretip-trust-metric-item:not(:first-child) {
+    border-left-color: rgba(255, 255, 255, 0.09);
+  }
+}
+
+/* Desktop hover — no layout shift */
+@media (min-width: 1024px) and (hover: hover) {
+  .caretip-landing #social-proof .caretip-trust-metric-item {
+    border-radius: 0.75rem;
+    transition:
+      background-color 0.35s ease,
+      box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .caretip-landing #social-proof .caretip-trust-metric-item:hover {
+    background: rgba(255, 255, 255, 0.45);
+    box-shadow: 0 6px 24px -12px rgba(17, 17, 17, 0.08);
+  }
+
+  html.dark .caretip-landing #social-proof .caretip-trust-metric-item:hover {
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 8px 28px -12px rgba(0, 0, 0, 0.35);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing #social-proof .caretip-venue-logos-marquee .animate-marquee {
+    animation: none !important;
+  }
+}

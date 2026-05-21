@@ -100,14 +100,14 @@ const ctaSecondarySize =
   "h-11 min-h-11 lg:h-12 lg:min-h-12 px-6 max-lg:min-w-[11.5rem] max-lg:max-w-[min(100%,260px)] lg:min-w-[10.5rem]";
 
 export const landingUi = {
-  /** Clean white section surface. */
-  landingSurface: "caretip-landing-surface relative bg-white dark:bg-neutral-950",
+  /** Section surface — background from caretip-landing-section-flow.css (light). */
+  landingSurface: "caretip-landing-surface relative dark:bg-neutral-950",
 
   sectionShell: "mx-auto w-full min-w-0 max-w-7xl",
   section:
     "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20",
-  sectionMuted: "caretip-landing-surface relative bg-white dark:bg-neutral-900",
-  sectionWhite: "caretip-landing-surface relative bg-white dark:bg-neutral-950",
+  sectionMuted: "caretip-landing-surface relative dark:bg-neutral-900",
+  sectionWhite: "caretip-landing-surface relative dark:bg-neutral-950",
 
   /** Eyebrow → headline → tagline stack (centered sections). */
   sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-w-full sm:mb-10`,
@@ -145,15 +145,15 @@ export const landingUi = {
   sectionAccentTextMuted:
     "text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600 dark:text-neutral-400",
   sectionAccentIcon:
-    "h-3 w-3 shrink-0 text-[#E68A2E] dark:text-[#FBBF24]",
+    "h-3 w-3 shrink-0 text-primary",
   sectionAccentIconMuted:
     "h-3 w-3 shrink-0 text-neutral-500/90 dark:text-neutral-500",
   sectionAccentGlow:
-    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(245,158,11,0.14),transparent_72%)] opacity-55 blur-md",
+    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,120,28,0.14),transparent_72%)] opacity-55 blur-md",
   sectionAccentLine:
-    "h-px w-6 shrink-0 bg-gradient-to-r from-[#F59E0B]/60 via-[#E68A2E]/35 to-transparent",
+    "h-px w-6 shrink-0 bg-gradient-to-r from-primary/60 via-primary/35 to-transparent",
   brandAccentIconWrap:
-    "inline-flex shrink-0 items-center justify-center rounded-lg bg-[#F59E0B]/10 text-[#D97706] dark:bg-[#F59E0B]/15 dark:text-[#FBBF24]",
+    "inline-flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15",
 
   copyStack: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   eyebrowSecondary: cnSectionLead(
@@ -213,7 +213,7 @@ export const landingUi = {
   showcaseVisualGlow:
     "pointer-events-none absolute -inset-3 rounded-[2rem] bg-[radial-gradient(ellipse_80%_70%_at_50%_55%,rgba(17,17,17,0.04),transparent_68%)] max-lg:-inset-2 sm:-inset-6",
   showcaseVisualFrame:
-    "relative mx-auto w-full overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_4px_8px_rgba(15,15,15,0.04),0_20px_48px_rgba(15,15,15,0.1)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_20px_48px_rgba(0,0,0,0.4)]",
+    "caretip-showcase-visual-frame relative mx-auto w-full overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_4px_8px_rgba(15,15,15,0.04),0_20px_48px_rgba(15,15,15,0.1)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_20px_48px_rgba(0,0,0,0.4)]",
   showcaseVisualImg: "aspect-[5/4] w-full object-cover",
 
   visualFrame:
@@ -231,7 +231,7 @@ export const landingUi = {
     `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0`,
   ),
   hospitalityGrid:
-    "caretip-mobile-stack-flatten grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden max-lg:contents max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:gap-12",
+    "caretip-mobile-stack-flatten grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden max-lg:contents max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-start lg:gap-10 xl:gap-11",
   hospitalityFeaturePanel:
     "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
   hospitalityMediaStack:

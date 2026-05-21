@@ -3,9 +3,9 @@ import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
-import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
+import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
+import { HospitalityMediaFloatChips } from "@/components/landing/HospitalityMediaFloatChips";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
-import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingFadeReveal } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,7 @@ export function HospitalityTeamsUnifiedSection() {
       id="built-for-hospitality"
       className={cn(
         landingUi.hospitalitySection,
-        "caretip-landing-hospitality relative dark:bg-[linear-gradient(180deg,#171717_0%,#101010_52%,#171717_100%)]",
+        "caretip-landing-hospitality relative",
       )}
     >
       <motion.div
@@ -42,29 +42,35 @@ export function HospitalityTeamsUnifiedSection() {
           {landingCopyVisible(sectionSubtitle) ? (
             <p className={landingUi.hospitalitySubtitle}>{sectionSubtitle}</p>
           ) : null}
-          <LandingSectionAccent variant="line" className="max-lg:mx-auto lg:mx-0">
-            {t("landing.hospitality.pill")}
-          </LandingSectionAccent>
         </header>
 
         <motion.div className={cn(landingUi.hospitalityGrid, "lg:grid")}>
           <div className={cn("min-w-0", landingUi.mobileStackAfter, "lg:order-1")}>
             <div className={landingUi.hospitalityFeaturePanel}>
-              {features.map((f, idx) => (
-                <LandingBenefitBlock
-                  key={`hospitality-feature-${idx}`}
-                  variant="split"
-                  title={f.title}
-                  description={f.text}
-                  className={landingUi.showcaseBenefitRow}
-                />
-              ))}
+              <HospitalityFeaturePanel features={features} />
             </div>
           </div>
 
           <div className={cn("min-w-0", landingUi.mobileStackVisual, "lg:order-2")}>
             <div className={landingUi.hospitalityMediaStack}>
-              <div className={landingUi.hospitalityMediaCard}>
+              <div
+                className={cn(
+                  landingUi.hospitalityMediaCard,
+                  "caretip-hospitality-media-stage relative",
+                )}
+              >
+                <div
+                  className="caretip-hospitality-media-eyebrow pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-start px-4 pt-4 sm:px-5 sm:pt-5 lg:px-6 lg:pt-5"
+                  aria-hidden
+                >
+                  <span className="caretip-hospitality-media-pill font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-800 dark:text-neutral-100">
+                    {t("landing.hospitality.pill")}
+                  </span>
+                </div>
+                <div aria-hidden className="caretip-hospitality-media-glow" />
+                <div aria-hidden className="caretip-hospitality-media-overlay" />
+                <div aria-hidden className="caretip-hospitality-media-vignette" />
+                <HospitalityMediaFloatChips />
                 <HospitalityBusinessesMarquee />
               </div>
             </div>
@@ -74,4 +80,3 @@ export function HospitalityTeamsUnifiedSection() {
     </section>
   );
 }
-

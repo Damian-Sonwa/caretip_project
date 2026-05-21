@@ -73,10 +73,6 @@ export function SimpleSetupSection() {
             className={cn("relative w-full", landingUi.mobileStackAfter)}
             {...landingFadeReveal}
           >
-            <div
-              aria-hidden
-              className="absolute bottom-3 left-[1.125rem] top-3 w-px bg-gradient-to-b from-neutral-300/80 via-neutral-200/60 to-transparent dark:from-neutral-600 dark:via-neutral-700/60 sm:left-5"
-            />
             <div className="space-y-2 sm:space-y-2.5">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;

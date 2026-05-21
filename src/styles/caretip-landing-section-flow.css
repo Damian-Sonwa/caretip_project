@@ -1,0 +1,224 @@
+/**
+ * Landing section flow — ivory rhythm, soft transitions, unified surfaces.
+ * Presentation only; does not change layout grids or typography.
+ */
+
+html:not(.dark) .caretip-landing.caretip-landing--premium {
+  --caretip-ivory-base: #faf8f5;
+  --caretip-ivory-soft: #f9f7f4;
+  --caretip-ivory-depth: #f8f6f3;
+  --caretip-ivory-stone: #f7f5f2;
+  --caretip-ivory-white: #ffffff;
+  --caretip-landing-border: rgba(17, 17, 17, 0.06);
+  --caretip-landing-card-bg: rgba(255, 255, 255, 0.94);
+  --caretip-landing-card-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.03),
+    0 8px 24px -6px rgba(17, 17, 17, 0.05);
+  --caretip-landing-card-shadow-hover:
+    0 2px 4px rgba(17, 17, 17, 0.04),
+    0 14px 36px -8px rgba(17, 17, 17, 0.07);
+
+  background-color: var(--caretip-ivory-base) !important;
+}
+
+/* Surfaces inherit section tone — no forced pure white blocks */
+html:not(.dark) .caretip-landing .caretip-landing-surface {
+  background-color: transparent;
+}
+
+/* —— Section rhythm (top → bottom) —— */
+
+html:not(.dark) .caretip-landing .caretip-hero-section {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-base) 0%,
+    var(--caretip-ivory-white) 58%,
+    var(--caretip-ivory-soft) 100%
+  );
+}
+
+html:not(.dark) .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-soft) 0%,
+    #fbf7f2 46%,
+    var(--caretip-ivory-base) 100%
+  );
+}
+
+html:not(.dark) .caretip-landing #how-it-works {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-base) 0%,
+    var(--caretip-ivory-white) 40%,
+    var(--caretip-ivory-white) 60%,
+    var(--caretip-ivory-soft) 100%
+  );
+}
+
+html:not(.dark) .caretip-landing #for-employees {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-soft) 0%,
+    #faf9f6 50%,
+    var(--caretip-ivory-depth) 100%
+  );
+}
+
+html:not(.dark) .caretip-landing #for-employees::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 68% 48% at 28% 42%,
+    rgba(233, 120, 28, 0.045) 0%,
+    transparent 62%
+  );
+}
+
+html:not(.dark) .caretip-landing #business-section {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-depth) 0%,
+    var(--caretip-ivory-base) 48%,
+    var(--caretip-ivory-white) 100%
+  );
+}
+
+html:not(.dark) .caretip-landing #business-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 50% at 72% 38%,
+    rgba(233, 120, 28, 0.04) 0%,
+    transparent 60%
+  );
+}
+
+/* Dark ecosystem band — intentional; soften edges into neighbors */
+html:not(.dark) .caretip-landing #features.caretip-landing-ecosystem-dark {
+  border-top: none;
+  border-bottom: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    0 20px 48px -28px rgba(26, 22, 20, 0.14);
+}
+
+html:not(.dark) .caretip-landing #payments-trust {
+  background: linear-gradient(
+    180deg,
+    #f5f3f0 0%,
+    #fafaf9 28%,
+    var(--caretip-ivory-white) 62%,
+    var(--caretip-ivory-soft) 100%
+  ) !important;
+}
+
+/* Icon features — no card surfaces on this band */
+html:not(.dark) .caretip-landing #payments-trust .caretip-payments-trust-item {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+html:not(.dark) .caretip-landing #real-life {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-soft) 0%,
+    var(--caretip-ivory-stone) 50%,
+    var(--caretip-ivory-depth) 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing #social-proof {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-depth) 0%,
+    var(--caretip-ivory-white) 38%,
+    var(--caretip-ivory-base) 100%
+  ) !important;
+}
+
+/* —— Unified card & container surfaces (exclude dark ecosystem band) —— */
+
+html:not(.dark) .caretip-landing .caretip-landing-card:not(.caretip-landing-ecosystem-card) {
+  border-color: var(--caretip-landing-border) !important;
+  background: var(--caretip-landing-card-bg) !important;
+  box-shadow: var(--caretip-landing-card-shadow) !important;
+}
+
+@media (hover: hover) {
+  html:not(.dark) .caretip-landing .caretip-landing-card:not(.caretip-landing-ecosystem-card):hover {
+    border-color: rgba(17, 17, 17, 0.08) !important;
+    box-shadow: var(--caretip-landing-card-shadow-hover) !important;
+  }
+}
+
+/* Platform ecosystem — glass cards on dark band; keep light text */
+html:not(.dark) .caretip-landing #features .caretip-landing-ecosystem-card {
+  border-color: rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.2),
+    0 12px 32px rgba(0, 0, 0, 0.28) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+html:not(.dark) .caretip-landing #features .caretip-landing-ecosystem-card h3 {
+  color: #f5f5f5 !important;
+}
+
+html:not(.dark) .caretip-landing #features .caretip-landing-ecosystem-card p {
+  color: rgba(245, 245, 245, 0.72) !important;
+}
+
+html:not(.dark) .caretip-landing #features .caretip-landing-ecosystem-card [data-landing-accent] {
+  color: rgba(250, 250, 250, 0.88) !important;
+}
+
+html:not(.dark) .caretip-landing .caretip-hospitality-media-card {
+  border-color: var(--caretip-landing-border);
+  background: var(--caretip-landing-card-bg);
+}
+
+html:not(.dark) .caretip-landing .hero-showcase-card,
+html:not(.dark) .caretip-landing .caretip-hospitality-media-card {
+  box-shadow:
+    0 2px 4px rgba(17, 17, 17, 0.03),
+    0 16px 40px -12px rgba(17, 17, 17, 0.08);
+}
+
+html:not(.dark) .caretip-landing .caretip-showcase-visual-frame,
+html:not(.dark) .caretip-landing .caretip-hospitality-media-card {
+  border-color: rgba(17, 17, 17, 0.07);
+  background: var(--caretip-landing-card-bg);
+  box-shadow: var(--caretip-landing-card-shadow);
+}
+
+/* Hospitality feature nav — no card surfaces on warm sections */
+html:not(.dark) .caretip-landing .caretip-hospitality-feature-panel {
+  background: transparent;
+}
+
+/* Soft separation instead of hard divider lines */
+html:not(.dark) .caretip-landing .caretip-landing-social-proof .caretip-landing-venue-logos {
+  border-top-color: rgba(17, 17, 17, 0.05);
+  border-bottom-color: rgba(17, 17, 17, 0.05);
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-surface.dark\:border-neutral-800\/80 {
+  border-color: transparent;
+}
+
+/* Dark mode — keep existing section gradients from components */
+html.dark .caretip-landing .caretip-landing-surface {
+  background-color: transparent;
+}
+
+html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
+  background: linear-gradient(180deg, #171717 0%, #141414 48%, #171717 100%);
+}

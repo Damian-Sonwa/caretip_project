@@ -132,7 +132,7 @@ export default function HospitalityBusinessesMarquee() {
 
       <Marquee className="[--gap:1rem]" pauseOnHover durationSeconds={65} gapPx={16}>
             {businesses.map((b) => (
-              <div className="group flex w-[17.5rem] shrink-0 flex-col sm:w-[19rem]" key={b.id} tabIndex={0}>
+              <div className="group flex w-[17.5rem] shrink-0 flex-col sm:w-[19rem]" key={b.id}>
                 <div
                   className={cn(
                     landingImageFrameClassName,

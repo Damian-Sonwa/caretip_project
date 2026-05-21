@@ -13,10 +13,12 @@ const APP_VERSION =
 export function Footer({
   variant = "default",
   surface = "light",
+  className,
 }: {
   variant?: "default" | "minimal";
   /** Used with `variant="minimal"` for dark auth pages */
   surface?: "light" | "dark";
+  className?: string;
 }) {
   const { t } = useTranslation();
   const year = new Date().getFullYear();
@@ -69,16 +71,31 @@ export function Footer({
 
   return (
     <>
-      <footer className="relative overflow-hidden border-t border-white/10">
-        <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-zinc-900 to-neutral-950" />
-        <div className="absolute right-0 top-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl" aria-hidden />
-        <div className="absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl" aria-hidden />
+      <footer
+        className={cn(
+          "caretip-site-footer relative overflow-hidden border-t border-white/10",
+          className,
+        )}
+      >
+        <div
+          aria-hidden
+          className="caretip-site-footer-bg absolute inset-0 bg-gradient-to-br from-neutral-900 via-zinc-900 to-neutral-950"
+        />
+        <div aria-hidden className="caretip-site-footer-texture pointer-events-none absolute inset-0" />
+        <div
+          className="caretip-site-footer-ambient-r absolute right-0 top-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
+          aria-hidden
+        />
+        <div
+          className="caretip-site-footer-ambient-l absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+          aria-hidden
+        />
 
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <div className="mb-12 grid grid-cols-1 gap-8 sm:mb-16 sm:gap-12 md:grid-cols-2 lg:grid-cols-10 lg:gap-8">
+          <div className="caretip-site-footer-columns mb-12 grid grid-cols-1 gap-9 sm:mb-16 sm:gap-11 md:grid-cols-2 lg:grid-cols-10 lg:gap-10">
             <div className="space-y-6 lg:col-span-4">
               <h3 className="text-xl font-bold text-white">{t("footer.brandTitle")}</h3>
-              <p className="max-w-sm leading-relaxed text-neutral-300">{t("footer.brandBlurb")}</p>
+              <p className="caretip-site-footer-blurb max-w-sm text-neutral-400">{t("footer.brandBlurb")}</p>
 
               <div className="flex items-center gap-4 pt-2">
                 <a
@@ -105,14 +122,14 @@ export function Footer({
               </div>
             </div>
 
-            <div className="space-y-5 lg:col-span-2">
+            <div className="caretip-site-footer-col space-y-5 lg:col-span-2">
               <h4 className="text-sm font-semibold uppercase tracking-wider text-white">{t("footer.colProduct")}</h4>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {footerLinks.Product.map((link) => (
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="inline-block text-sm text-neutral-300 transition-colors hover:text-white"
+                      className="caretip-site-footer-link inline-block text-sm text-neutral-400 transition-[color,opacity] duration-300 ease-out hover:text-white/95"
                       onClick={link.to.startsWith("/#") ? undefined : handleLinkClick}
                     >
                       {link.name}
@@ -122,14 +139,14 @@ export function Footer({
               </ul>
             </div>
 
-            <div className="space-y-5 lg:col-span-2">
+            <div className="caretip-site-footer-col space-y-5 lg:col-span-2">
               <h4 className="text-sm font-semibold uppercase tracking-wider text-white">{t("footer.colCompany")}</h4>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {footerLinks.Company.map((link) => (
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="inline-block text-sm text-neutral-300 transition-colors hover:text-white"
+                      className="caretip-site-footer-link inline-block text-sm text-neutral-400 transition-[color,opacity] duration-300 ease-out hover:text-white/95"
                       onClick={link.to.startsWith("/#") ? undefined : handleLinkClick}
                     >
                       {link.name}
@@ -139,14 +156,14 @@ export function Footer({
               </ul>
             </div>
 
-            <div className="space-y-5 lg:col-span-2">
+            <div className="caretip-site-footer-col space-y-5 lg:col-span-2">
               <h4 className="text-sm font-semibold uppercase tracking-wider text-white">{t("footer.colResources")}</h4>
-              <ul className="space-y-3">
+              <ul className="space-y-3.5">
                 {footerLinks.Resources.map((link) => (
                   <li key={link.to}>
                     <Link
                       to={link.to}
-                      className="inline-block text-sm text-neutral-300 transition-colors hover:text-white"
+                      className="caretip-site-footer-link inline-block text-sm text-neutral-400 transition-[color,opacity] duration-300 ease-out hover:text-white/95"
                       onClick={handleLinkClick}
                     >
                       {link.name}
@@ -157,18 +174,30 @@ export function Footer({
             </div>
           </div>
 
-          <div className="border-t border-white/10 pt-8">
+          <div className="caretip-site-footer-bottom border-t border-white/[0.06] pt-8">
             <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
-              <div className="flex flex-col items-center gap-6 text-sm text-neutral-300 md:flex-row">
+              <div className="flex flex-col items-center gap-6 text-sm text-neutral-400 md:flex-row">
                 <p>{t("footer.copyright", { year })}</p>
                 <div className="flex items-center gap-6">
-                  <Link to="/privacy" className="transition-colors hover:text-white" onClick={handleLinkClick}>
+                  <Link
+                    to="/privacy"
+                    className="caretip-site-footer-link transition-[color,opacity] duration-300 ease-out hover:text-white/95"
+                    onClick={handleLinkClick}
+                  >
                     {t("footer.privacy")}
                   </Link>
-                  <Link to="/terms" className="transition-colors hover:text-white" onClick={handleLinkClick}>
+                  <Link
+                    to="/terms"
+                    className="caretip-site-footer-link transition-[color,opacity] duration-300 ease-out hover:text-white/95"
+                    onClick={handleLinkClick}
+                  >
                     {t("footer.terms")}
                   </Link>
-                  <Link to="/cookies" className="transition-colors hover:text-white" onClick={handleLinkClick}>
+                  <Link
+                    to="/cookies"
+                    className="caretip-site-footer-link transition-[color,opacity] duration-300 ease-out hover:text-white/95"
+                    onClick={handleLinkClick}
+                  >
                     {t("footer.cookies")}
                   </Link>
                 </div>

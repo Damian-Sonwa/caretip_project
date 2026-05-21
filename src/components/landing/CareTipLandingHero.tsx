@@ -1,4 +1,4 @@
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
+import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloatingCards";
 import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
 import {
   landingHeroCopyStagger,
@@ -18,12 +19,6 @@ import {
 } from "@/components/landing/landingHeroMotion";
 import { useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
-
-const heroFloatCardClass =
-  "caretip-hero-float-metric__card pointer-events-none absolute z-30 flex items-center rounded-xl border border-neutral-200/70 bg-white ring-1 ring-neutral-950/[0.04] drop-shadow-[0_4px_14px_rgba(15,23,42,0.08),0_16px_40px_-12px_rgba(15,23,42,0.14)] max-lg:bottom-[9%] max-lg:left-auto max-lg:right-[5%] max-lg:max-w-[min(calc(100%-1.5rem),138px)] max-lg:translate-x-0 max-lg:scale-[0.78] max-lg:origin-bottom-right max-lg:gap-1.5 max-lg:px-2 max-lg:py-1.5 sm:max-lg:bottom-[10%] sm:max-lg:right-[6%] sm:max-lg:scale-[0.82] sm:max-lg:max-w-[min(calc(100%-1.75rem),148px)] md:bottom-[11%] md:right-[6%] md:max-w-[min(100%,172px)] md:scale-[0.92] md:gap-2 md:px-2.5 md:py-2 lg:bottom-[11%] lg:right-[7%] lg:max-w-[min(100%,188px)] lg:scale-100 lg:gap-2.5 lg:px-3 lg:py-2.5 lg:rounded-2xl";
-
-const heroFloatCardGlowClass =
-  "caretip-hero-float-metric__glow pointer-events-none absolute z-20 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,120,28,0.16)_0%,transparent_70%)] blur-sm max-lg:bottom-[12%] max-lg:left-auto max-lg:right-[10%] max-lg:h-9 max-lg:w-16 max-lg:opacity-40 sm:max-lg:bottom-[13%] sm:max-lg:right-[11%] md:bottom-[14%] md:right-[11%] md:h-11 md:w-20 md:opacity-75 lg:bottom-[14%] lg:right-[11%] lg:h-11 lg:w-20 lg:opacity-60";
 
 export type CareTipLandingHeroProps = {
   id?: string;
@@ -67,19 +62,14 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
       )}
       variants={landingHeroTextReveal}
     >
-      {metrics.map((metric, index) => (
-        <div key={metric.label} className="flex items-center gap-5 sm:gap-6 max-lg:gap-0">
-          {index > 0 ? (
-            <span className="hidden h-9 w-px shrink-0 bg-neutral-200 sm:block dark:bg-neutral-700" aria-hidden />
-          ) : null}
-          <div className="max-lg:text-center">
-            <strong className="block font-sans text-lg font-semibold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-xl lg:text-2xl">
-              {metric.value}
-            </strong>
-            <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mt-0.5 sm:text-[11px]">
-              {metric.label}
-            </span>
-          </div>
+      {metrics.map((metric) => (
+        <div key={metric.label} className="max-lg:text-center">
+          <strong className="block font-sans text-lg font-semibold tabular-nums tracking-tight text-neutral-900 dark:text-neutral-50 sm:text-xl lg:text-2xl">
+            {metric.value}
+          </strong>
+          <span className="mt-1 block text-[10px] font-medium uppercase tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:mt-0.5 sm:text-[11px]">
+            {metric.label}
+          </span>
         </div>
       ))}
     </motion.div>
@@ -235,6 +225,10 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             animate={{ opacity: 1, ...(isLargeScreen ? {} : { scale: 1 }) }}
             transition={{ duration: 0.45, ease: landingHeroEaseOut, delay: 0.1 }}
           >
+            <div
+              aria-hidden
+              className="caretip-hero-warm-ambience pointer-events-none absolute inset-0 z-0"
+            />
             <LandingHeroShowcase
               src={imageSrc}
               alt={imageAlt}
@@ -246,32 +240,8 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             />
           </motion.div>
 
-          <div className={cn("caretip-hero-float-metric", landingUi.heroFloatLayer)} aria-hidden>
-            <motion.div aria-hidden className={heroFloatCardGlowClass} />
-            <motion.div
-              className={heroFloatCardClass}
-              initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, delay: 0.4, ease: landingHeroEaseOut }}
-            >
-              <div className="flex w-full items-center max-lg:gap-1.5 md:gap-2">
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-primary/10 ring-1 ring-primary/12 max-lg:h-5 max-lg:w-5 md:h-7 md:w-7 md:rounded-lg lg:h-8 lg:w-8 lg:rounded-xl">
-                  <TrendingUp
-                    className="h-3 w-3 text-primary md:h-3.5 md:w-3.5 lg:h-4 lg:w-4"
-                    strokeWidth={2.25}
-                    aria-hidden
-                  />
-                </span>
-                <div className="min-w-0">
-                  <strong className="block font-sans text-xs font-semibold tabular-nums tracking-tight text-neutral-900 md:text-sm lg:text-base">
-                    {t("landing.showcase.floatCardValue")}
-                  </strong>
-                  <span className="text-[9px] leading-snug text-neutral-600 md:text-[10px] lg:text-[11px]">
-                    {t("landing.showcase.floatCardLabel")}
-                  </span>
-                </div>
-              </div>
-            </motion.div>
+          <div className={cn(landingUi.heroFloatLayer)}>
+            <LandingHeroFloatingCards />
           </div>
         </motion.div>
 
