@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { Marquee } from "@/components/ui/marquee";
 import { HOSPITALITY_PARTNER_BRANDS } from "@/components/landing/HospitalityPartnerWordmarks";
+import { LogoCloud } from "@/components/ui/logo-cloud-4";
 import { cn } from "@/lib/utils";
 
 function PartnerLogoItem({
@@ -16,12 +16,12 @@ function PartnerLogoItem({
   return (
     <span
       className={cn(
-        "caretip-hospitality-partner-logo-item inline-flex min-w-0 items-center justify-center px-2 py-2 transition-opacity duration-300 ease-out max-lg:px-2.5 max-lg:py-1.5 lg:px-3.5 lg:py-2.5",
+        "caretip-hospitality-partner-logo-item inline-flex min-w-0 shrink-0 items-center justify-center px-3 py-2 sm:px-4",
         className,
       )}
       title={label}
     >
-      <Logo />
+      <Logo className="caretip-hospitality-partner-logo h-auto w-auto" />
       <span className="sr-only">{label}</span>
     </span>
   );
@@ -30,43 +30,25 @@ function PartnerLogoItem({
 export function LandingVenueLogoStrip({ className }: { className?: string }) {
   const { t } = useTranslation();
 
-  const partners = useMemo(
-    () =>
-      HOSPITALITY_PARTNER_BRANDS.map((brand) => ({
-        ...brand,
-        label: t(brand.labelKey),
-      })),
-    [t],
-  );
+  const partners = useMemo(() => HOSPITALITY_PARTNER_BRANDS, []);
 
   return (
     <div
-      className={cn("caretip-landing-venue-logos caretip-landing-partner-logos", className)}
+      className={cn("caretip-landing-venue-logos caretip-landing-partner-logos w-full", className)}
       aria-label={t("landing.trustedVenues.aria")}
     >
-      <div className="caretip-venue-logos-marquee hidden lg:block">
-        <Marquee durationSeconds={56} gapPx={64} pauseOnHover>
-          {partners.map((partner) => (
-            <PartnerLogoItem
-              key={partner.id}
-              label={partner.label}
-              Logo={partner.Logo}
-              className="shrink-0"
-            />
-          ))}
-        </Marquee>
-      </div>
-
-      <ul className="caretip-hospitality-partner-grid caretip-social-proof-logo-grid mx-auto grid w-full max-w-sm grid-cols-2 items-center justify-items-center gap-x-6 gap-y-5 px-0 sm:max-w-md sm:gap-x-8 sm:gap-y-5 lg:hidden">
-        {partners.map((partner) => {
-          const Logo = partner.Logo;
-          return (
-            <li key={partner.id} className="flex items-center justify-center">
-              <PartnerLogoItem label={partner.label} Logo={Logo} />
-            </li>
-          );
-        })}
-      </ul>
+      <LogoCloud
+        className="caretip-landing-logo-cloud w-full max-w-none md:max-w-4xl lg:max-w-5xl"
+        fadeRgb="249, 247, 242"
+      >
+        {partners.map((partner) => (
+          <PartnerLogoItem
+            key={partner.id}
+            label={partner.a11yLabel}
+            Logo={partner.Logo}
+          />
+        ))}
+      </LogoCloud>
     </div>
   );
 }

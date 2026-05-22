@@ -68,6 +68,17 @@ export function LandingSocialProofSection() {
         </div>
 
         <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="caretip-social-proof-testimonials-intro mx-auto max-w-2xl text-center"
+        >
+          <h3 className={landingUi.sectionTitle}>
+            {t("landing.socialProof.testimonialsTitle")}
+          </h3>
+        </motion.div>
+
+        <motion.div
           className="caretip-social-proof-quotes grid gap-3 max-lg:gap-3.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6"
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}

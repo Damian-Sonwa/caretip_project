@@ -1141,12 +1141,16 @@
       "aria": "Hospitality brands using CareTip",
       "partners": {
         "aurelia": "Aurelia Hotels",
+        "zurLinde": "Zur Linde Gasthaus",
         "palmPlate": "Palm & Plate",
-        "solisCafe": "Solis Café",
+        "rheingold": "Rheingold Hotel",
         "noirLounge": "Noir Lounge",
         "harborDining": "Harbor Dining",
+        "konditoreiWeber": "Konditorei Weber",
         "casaVerde": "Casa Verde",
+        "alpenstubeBerlin": "Alpenstube Berlin",
         "emberSuites": "Ember Suites",
+        "solisCafe": "Solis Café",
         "velvetBistro": "Velvet Bistro"
       }
     },
@@ -1326,7 +1330,8 @@
       "q2Role": "Salon owner",
       "q3Quote": "Closing used to mean chasing cash envelopes. Tips show up where they should, and I can share clear numbers with the team.",
       "q3Name": "James T.",
-      "q3Role": "Hotel F&B manager"
+      "q3Role": "Hotel F&B manager",
+      "testimonialsTitle": "What teams are saying"
     },
     "earningsPulse": {
       "label": "Today's tips",

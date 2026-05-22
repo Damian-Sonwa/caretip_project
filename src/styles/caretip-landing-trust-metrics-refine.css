@@ -28,8 +28,27 @@
   margin-bottom: 0;
 }
 
+.caretip-landing #social-proof .caretip-social-proof-testimonials-intro {
+  margin-top: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-social-proof-testimonials-intro {
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-social-proof-testimonials-intro {
+    margin-top: 3.5rem;
+    margin-bottom: 1.75rem;
+  }
+}
+
 .caretip-landing #social-proof .caretip-social-proof-quotes {
-  margin-top: 2.75rem;
+  margin-top: 0;
 }
 
 @media (min-width: 640px) {
@@ -57,24 +76,19 @@
   padding-bottom: 0;
 }
 
-.caretip-landing #social-proof .caretip-landing-partner-logos .caretip-venue-logos-marquee {
-  position: relative;
-  min-height: 3.75rem;
-  padding-block: 0.125rem;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    #000 6%,
-    #000 94%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent 0%,
-    #000 6%,
-    #000 94%,
-    transparent 100%
-  );
+.caretip-landing #social-proof .caretip-landing-logo-cloud {
+  width: 100%;
+  max-width: none;
+}
+
+.caretip-landing #social-proof .caretip-landing-logo-cloud .overflow-hidden {
+  min-height: 3.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-landing-logo-cloud .overflow-hidden {
+    min-height: 3.5rem;
+  }
 }
 
 .caretip-landing #social-proof .caretip-hospitality-partner-logo-item {
@@ -266,19 +280,6 @@ html.dark .caretip-landing #social-proof .caretip-trust-metric-label {
     gap: 0;
   }
 
-  .caretip-landing #social-proof .caretip-social-proof-logo-grid {
-    min-height: 0;
-    padding-block: 0;
-    row-gap: 1.125rem;
-    column-gap: 1.5rem;
-  }
-
-  .caretip-landing #social-proof .caretip-hospitality-partner-logo-item {
-    min-width: 0;
-    width: 100%;
-    max-width: 9.5rem;
-  }
-
   .caretip-landing #social-proof .caretip-landing-venue-logos + .caretip-landing-trust-metrics,
   .caretip-landing #social-proof .caretip-landing-trust-metrics--follows-logos {
     margin-top: 1.375rem;
@@ -337,8 +338,9 @@ html.dark .caretip-landing #social-proof .caretip-trust-metric-label {
     text-wrap: balance;
   }
 
-  .caretip-landing #social-proof .caretip-social-proof-quotes {
-    margin-top: 2.25rem;
+  .caretip-landing #social-proof .caretip-social-proof-testimonials-intro {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
   }
 }
 

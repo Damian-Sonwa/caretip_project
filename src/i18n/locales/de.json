@@ -1143,12 +1143,16 @@
       "aria": "Hospitality-Marken mit CareTip",
       "partners": {
         "aurelia": "Aurelia Hotels",
+        "zurLinde": "Gasthaus Zur Linde",
         "palmPlate": "Palm & Plate",
-        "solisCafe": "Solis Café",
+        "rheingold": "Rheingold Hotel",
         "noirLounge": "Noir Lounge",
         "harborDining": "Harbor Dining",
+        "konditoreiWeber": "Konditorei Weber",
         "casaVerde": "Casa Verde",
+        "alpenstubeBerlin": "Alpenstube Berlin",
         "emberSuites": "Ember Suites",
+        "solisCafe": "Solis Café",
         "velvetBistro": "Velvet Bistro"
       }
     },
@@ -1328,7 +1332,8 @@
       "q2Role": "Saloninhaberin",
       "q3Quote": "Früher hieß Abschluss: Bargeld-Umschläge nachjagen. Jetzt landen Trinkgelder dort, wo sie sollen, mit klaren Zahlen fürs Team.",
       "q3Name": "James T.",
-      "q3Role": "Hotel F&B Manager"
+      "q3Role": "Hotel F&B Manager",
+      "testimonialsTitle": "Das sagen Teams"
     },
     "earningsPulse": {
       "label": "Trinkgelder heute",

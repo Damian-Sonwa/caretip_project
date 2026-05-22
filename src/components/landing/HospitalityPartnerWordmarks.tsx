@@ -97,27 +97,72 @@ export function VelvetBistroLogo({ className }: WordmarkProps) {
   );
 }
 
+/** German-market venue wordmarks — fixed display text (not locale-swapped). */
+export function ZurLindeGasthausLogo({ className }: WordmarkProps) {
+  return (
+    <span className={cn(logoClass(className), "min-w-[6.25rem]")} aria-hidden>
+      <span className={wordSerifPrimary}>ZUR LINDE</span>
+      <span className={wordSerifSecondary}>GASTHAUS</span>
+    </span>
+  );
+}
+
+export function RheingoldHotelLogo({ className }: WordmarkProps) {
+  return (
+    <span className={cn(logoClass(className), "min-w-[6rem]")} aria-hidden>
+      <span className={wordPrimary}>RHEINGOLD</span>
+      <span className={wordSecondary}>HOTEL</span>
+    </span>
+  );
+}
+
+export function KonditoreiWeberLogo({ className }: WordmarkProps) {
+  return (
+    <span className={cn(logoClass(className), "min-w-[6.5rem]")} aria-hidden>
+      <span className={wordPrimary}>KONDITOREI</span>
+      <span className={wordSecondary}>WEBER</span>
+    </span>
+  );
+}
+
+export function AlpenstubeBerlinLogo({ className }: WordmarkProps) {
+  return (
+    <span className={cn(logoClass(className), "min-w-[6.5rem]")} aria-hidden>
+      <span className={wordPrimary}>ALPENSTUBE</span>
+      <span className={wordSecondary}>BERLIN</span>
+    </span>
+  );
+}
+
 export type HospitalityPartnerId =
   | "aurelia"
+  | "zurLinde"
   | "palmPlate"
-  | "solisCafe"
-  | "noirLounge"
+  | "rheingold"
   | "harborDining"
+  | "konditoreiWeber"
+  | "noirLounge"
+  | "alpenstubeBerlin"
+  | "solisCafe"
   | "casaVerde"
   | "emberSuites"
   | "velvetBistro";
 
-export const HOSPITALITY_PARTNER_BRANDS: {
+export type HospitalityPartnerBrand = {
   id: HospitalityPartnerId;
-  labelKey: string;
+  /** Screen-reader label — proper venue name, fixed per brand. */
+  a11yLabel: string;
   Logo: ComponentType<WordmarkProps>;
-}[] = [
-  { id: "aurelia", labelKey: "landing.trustedVenues.partners.aurelia", Logo: AureliaHotelsLogo },
-  { id: "palmPlate", labelKey: "landing.trustedVenues.partners.palmPlate", Logo: PalmPlateLogo },
-  { id: "solisCafe", labelKey: "landing.trustedVenues.partners.solisCafe", Logo: SolisCafeLogo },
-  { id: "noirLounge", labelKey: "landing.trustedVenues.partners.noirLounge", Logo: NoirLoungeLogo },
-  { id: "harborDining", labelKey: "landing.trustedVenues.partners.harborDining", Logo: HarborDiningLogo },
-  { id: "casaVerde", labelKey: "landing.trustedVenues.partners.casaVerde", Logo: CasaVerdeLogo },
-  { id: "emberSuites", labelKey: "landing.trustedVenues.partners.emberSuites", Logo: EmberSuitesLogo },
-  { id: "velvetBistro", labelKey: "landing.trustedVenues.partners.velvetBistro", Logo: VelvetBistroLogo },
+};
+
+/** Mixed EN + DE venues, interleaved — same strip in every locale. */
+export const HOSPITALITY_PARTNER_BRANDS: HospitalityPartnerBrand[] = [
+  { id: "aurelia", a11yLabel: "Aurelia Hotels", Logo: AureliaHotelsLogo },
+  { id: "zurLinde", a11yLabel: "Zur Linde Gasthaus", Logo: ZurLindeGasthausLogo },
+  { id: "palmPlate", a11yLabel: "Palm & Plate", Logo: PalmPlateLogo },
+  { id: "rheingold", a11yLabel: "Rheingold Hotel", Logo: RheingoldHotelLogo },
+  { id: "harborDining", a11yLabel: "Harbor Dining", Logo: HarborDiningLogo },
+  { id: "konditoreiWeber", a11yLabel: "Konditorei Weber", Logo: KonditoreiWeberLogo },
+  { id: "noirLounge", a11yLabel: "Noir Lounge", Logo: NoirLoungeLogo },
+  { id: "alpenstubeBerlin", a11yLabel: "Alpenstube Berlin", Logo: AlpenstubeBerlinLogo },
 ];
