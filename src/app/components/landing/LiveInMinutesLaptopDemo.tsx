@@ -112,21 +112,6 @@ export function LiveInMinutesLaptopDemo({
             </AnimatePresence>
           </PhoneFrame>
         </motion.div>
-
-        {stepId === "celebrate" ? (
-          <motion.div
-            aria-hidden
-            className="pointer-events-none absolute bottom-5 right-4 rounded-xl border border-white/25 bg-white/12 px-2.5 py-1.5 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.15 }}
-          >
-            <p className="text-[9px] font-medium uppercase tracking-[0.12em] text-white/70">
-              {t("landing.simpleSetup.visualWhisperLabel")}
-            </p>
-            <p className="text-xs font-semibold tabular-nums text-white">€284</p>
-          </motion.div>
-        ) : null}
       </motion.div>
 
       <p className="mt-4 text-center font-sans text-[13px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:text-sm">

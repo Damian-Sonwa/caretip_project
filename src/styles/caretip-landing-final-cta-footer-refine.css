@@ -199,8 +199,13 @@ html.dark .caretip-landing .caretip-final-cta-button {
 /* —— Landing footer blend (structure unchanged) —— */
 .caretip-landing .caretip-landing-footer {
   border-top: none !important;
-  margin-top: -2.5rem;
-  padding-top: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-landing-footer {
+    margin-top: -2.5rem;
+    padding-top: 0.5rem;
+  }
 }
 
 .caretip-landing .caretip-landing-footer .caretip-site-footer-bg {
@@ -272,4 +277,150 @@ html.dark .caretip-landing .caretip-final-cta-button {
 /* Legacy overrides from atmosphere.css — keep headline legible on dark band */
 html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta-headline {
   color: #fafafa !important;
+}
+
+/* —— Final CTA: mobile visibility + overflow (max-lg only) —— */
+@media (max-width: 1023px) {
+  .caretip-landing #final-cta.caretip-landing-final-cta,
+  .caretip-landing .caretip-landing-final-cta {
+    overflow-x: clip;
+    overflow-y: visible;
+    min-height: 0;
+    padding-inline: 0.875rem;
+    padding-top: 2.75rem;
+    padding-bottom: 2.75rem;
+    box-sizing: border-box;
+  }
+
+  /* Bottom fade sits behind copy — was covering CTA on small screens */
+  .caretip-landing #final-cta.caretip-landing-final-cta::after,
+  .caretip-landing .caretip-landing-final-cta::after {
+    z-index: 0;
+    height: 2.5rem;
+    pointer-events: none;
+  }
+
+  .caretip-landing .caretip-final-cta-scene {
+    overflow: hidden;
+    contain: paint;
+  }
+
+  .caretip-landing .caretip-final-cta-atmosphere {
+    background:
+      radial-gradient(ellipse 100% 50% at 50% 22%, rgba(233, 120, 28, 0.12) 0%, transparent 62%),
+      radial-gradient(ellipse 40% 30% at 12% 75%, rgba(233, 120, 28, 0.04) 0%, transparent 50%),
+      radial-gradient(ellipse 40% 30% at 88% 72%, rgba(245, 158, 11, 0.03) 0%, transparent 48%);
+  }
+
+  .caretip-landing .caretip-final-cta-orb {
+    width: 5.5rem;
+    height: 5.5rem;
+    opacity: 0.5;
+    filter: blur(28px);
+  }
+
+  .caretip-landing .caretip-final-cta-orb--a {
+    left: 8%;
+    top: 38%;
+  }
+
+  .caretip-landing .caretip-final-cta-orb--b {
+    right: 8%;
+    left: auto;
+    top: 42%;
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  .caretip-landing .caretip-final-cta-stage {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    padding-inline: 0;
+    box-sizing: border-box;
+  }
+
+  .caretip-landing .caretip-final-cta-eyebrow {
+    display: block;
+    max-width: 100%;
+    padding-inline: 0.125rem;
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    line-height: 1.45;
+    text-wrap: balance;
+  }
+
+  .caretip-landing .caretip-final-cta-headline {
+    font-size: clamp(1.625rem, 7.8vw, 2.125rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    padding-inline: 0.125rem;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  .caretip-landing .caretip-final-cta-subtitle {
+    max-width: 100%;
+    padding-inline: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    text-wrap: pretty;
+  }
+
+  .caretip-landing .caretip-final-cta-actions {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 1.5rem;
+    padding-inline: 0;
+  }
+
+  .caretip-landing .caretip-final-cta-action {
+    width: 100%;
+    max-width: 20rem;
+    margin-inline: auto;
+  }
+
+  .caretip-landing .caretip-final-cta-button-glow {
+    width: min(12rem, 88vw);
+    height: 4rem;
+    filter: blur(14px);
+    opacity: 0.65;
+  }
+
+  .caretip-landing .caretip-final-cta-button {
+    width: auto;
+    max-width: 100%;
+    min-height: 2.75rem;
+    padding-inline: 1.375rem !important;
+    white-space: normal;
+    text-align: center;
+    line-height: 1.25;
+  }
+
+  /* Prevent footer negative margin from overlapping CTA on mobile */
+  .caretip-landing .caretip-landing-footer {
+    margin-top: 0;
+    padding-top: 1.25rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-landing #final-cta.caretip-landing-final-cta,
+  .caretip-landing .caretip-landing-final-cta {
+    padding-inline: 1.25rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .caretip-landing .caretip-final-cta-headline {
+    font-size: clamp(1.75rem, 5.5vw, 2.25rem);
+  }
+
+  .caretip-landing .caretip-final-cta-subtitle {
+    font-size: 0.9375rem;
+    max-width: 28rem;
+    margin-inline: auto;
+  }
 }

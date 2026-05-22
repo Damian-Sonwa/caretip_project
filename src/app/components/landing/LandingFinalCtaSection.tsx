@@ -26,7 +26,7 @@ export function LandingFinalCtaSection() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-8% 0px" }}
         transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-        className="caretip-final-cta-stage relative z-[1] mx-auto w-full max-w-3xl text-center"
+        className="caretip-final-cta-stage relative z-[1] mx-auto w-full min-w-0 max-w-3xl px-0.5 text-center max-lg:max-w-full"
       >
         <p className="caretip-final-cta-eyebrow font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/90 sm:text-xs">
           {t("landing.finalCta.eyebrow")}
@@ -42,14 +42,14 @@ export function LandingFinalCtaSection() {
           </p>
         ) : null}
 
-        <div className="caretip-final-cta-actions mt-8 sm:mt-9">
-          <div className="caretip-final-cta-action relative inline-flex justify-center">
+        <div className="caretip-final-cta-actions mt-8 w-full min-w-0 sm:mt-9">
+          <div className="caretip-final-cta-action relative flex w-full min-w-0 justify-center">
             <div aria-hidden className="caretip-final-cta-button-glow pointer-events-none" />
             <Link
               to="/auth?mode=signup&role=business&from=landing"
               className={cn(
                 landingUi.heroCtaPrimary,
-                "caretip-final-cta-button relative z-[1] gap-2 px-8 lg:min-w-[13.5rem]",
+                "caretip-final-cta-button relative z-[1] max-w-full gap-2 px-8 max-lg:px-6 lg:min-w-[13.5rem]",
               )}
             >
               {t("landing.finalCta.cta")}

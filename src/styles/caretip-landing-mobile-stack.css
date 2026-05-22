@@ -66,11 +66,29 @@
     margin-bottom: 0;
   }
 
+  /* Real-life cards: image → tag → title → copy → CTA (DOM order; no stack reorder) */
   .caretip-landing #real-life .caretip-real-life-card {
     border-color: rgba(226, 232, 240, 0.92);
     box-shadow:
       0 4px 22px -6px rgba(15, 23, 42, 0.06),
       0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__media {
+    order: 0;
+    width: 100%;
+    margin: 0;
+    border-radius: 0;
+  }
+
+  .caretip-landing #real-life .caretip-real-life-card-image {
+    aspect-ratio: 16 / 10;
+  }
+
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body {
+    order: 0;
+    padding: 0.875rem 1rem 1rem;
+    text-align: center;
   }
 
   .caretip-landing #real-life .caretip-real-life-card-title {
@@ -80,40 +98,55 @@
     letter-spacing: -0.02em;
   }
 
-  .caretip-landing #real-life .caretip-real-life-card-image {
-    box-sizing: border-box;
-    width: calc(100% - 2rem);
-    margin-top: 0.375rem;
-    margin-left: auto;
-    margin-right: auto;
-    border-radius: 0.75rem;
-    overflow: hidden;
-    isolation: isolate;
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body > p:first-child {
+    margin-bottom: 0.375rem;
   }
 
-  .caretip-landing #real-life .caretip-mobile-stack-visual.caretip-real-life-card-image {
-    margin-top: 0.375rem;
-    margin-bottom: 0;
-  }
-
-  .caretip-landing #real-life .caretip-real-life-card-body.caretip-mobile-stack-after {
-    margin-top: 0.625rem;
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body > h3 + p {
+    margin-top: 0.5rem;
   }
 
   .caretip-landing #real-life .caretip-real-life-card-body p,
-  .caretip-landing #real-life .caretip-expandable-info-card__body p {
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body p {
     max-width: 32ch;
     margin-inline: auto;
     line-height: 1.5;
     text-wrap: pretty;
   }
 
-  .caretip-landing #real-life .caretip-expandable-info-card__body {
-    text-align: center;
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__cta {
+    width: auto;
+    align-self: center;
+    min-height: 2.375rem;
+    height: auto;
+    padding: 0.5rem 1.125rem;
+    margin-top: 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Desktop real-life cards — unchanged layout */
+@media (min-width: 1024px) {
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body {
+    padding: 1.25rem 1.5rem 1.5rem;
+    text-align: left;
   }
 
-  .caretip-landing #real-life .caretip-expandable-info-card__body button {
-    margin-inline: auto;
+  .caretip-landing #real-life .caretip-real-life-card-title {
+    text-align: left;
+  }
+
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__body p {
+    margin-inline: 0;
+    max-width: none;
+  }
+
+  .caretip-landing #real-life .caretip-real-life-card .caretip-expandable-info-card__cta {
+    width: auto;
+    margin-top: 1rem;
+    font-size: inherit;
+    min-height: unset;
+    padding: unset;
   }
 }
 

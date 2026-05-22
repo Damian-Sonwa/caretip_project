@@ -95,11 +95,7 @@ export function LandingRealLifeSection() {
                   landingUi.realLifeCard,
                   "caretip-real-life-card",
                 )}
-                imageClassName={cn(
-                  landingUi.mobileStackVisual,
-                  landingUi.realLifeCardImage,
-                  "caretip-real-life-card-image max-lg:mx-auto max-lg:w-[calc(100%-2rem)] max-lg:rounded-xl",
-                )}
+                imageClassName={cn(landingUi.realLifeCardImage, "caretip-real-life-card-image")}
                 titleClassName={cn(
                   landingUi.realLifeCardTitle,
                   "max-lg:text-center lg:text-left",

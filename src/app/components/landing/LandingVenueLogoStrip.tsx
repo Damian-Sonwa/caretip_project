@@ -16,7 +16,7 @@ function PartnerLogoItem({
   return (
     <span
       className={cn(
-        "caretip-hospitality-partner-logo-item inline-flex min-w-0 items-center justify-center px-3 py-2.5 transition-opacity duration-300 ease-out sm:px-3.5",
+        "caretip-hospitality-partner-logo-item inline-flex min-w-0 items-center justify-center px-2 py-2 transition-opacity duration-300 ease-out max-lg:px-2.5 max-lg:py-1.5 lg:px-3.5 lg:py-2.5",
         className,
       )}
       title={label}
@@ -57,7 +57,7 @@ export function LandingVenueLogoStrip({ className }: { className?: string }) {
         </Marquee>
       </div>
 
-      <ul className="caretip-hospitality-partner-grid caretip-social-proof-logo-grid mx-auto grid w-full max-w-4xl grid-cols-2 items-center justify-items-center gap-x-7 gap-y-7 px-1 sm:grid-cols-4 sm:gap-x-9 sm:gap-y-8 sm:px-2 lg:hidden">
+      <ul className="caretip-hospitality-partner-grid caretip-social-proof-logo-grid mx-auto grid w-full max-w-sm grid-cols-2 items-center justify-items-center gap-x-6 gap-y-5 px-0 sm:max-w-md sm:gap-x-8 sm:gap-y-5 lg:hidden">
         {partners.map((partner) => {
           const Logo = partner.Logo;
           return (

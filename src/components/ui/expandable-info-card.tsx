@@ -100,7 +100,7 @@ export function ExpandableInfoCard({
           type="button"
           variant={expanded ? "outline" : "default"}
           className={cn(
-            "mt-4 w-full sm:w-auto",
+            "caretip-expandable-info-card__cta mt-4 w-full sm:mt-4 sm:w-auto",
             expanded ? caretipBtnSecondary : caretipBtnPrimary,
             "gap-1.5",
           )}

@@ -59,7 +59,7 @@ export function formatTrustMetricValue(
     case "scans":
       return isDe ? `${Math.round(value)} T+` : `${Math.round(value)}K+`;
     case "tips":
-      return isDe ? `${Math.round(value)} Tsd. €+` : `€${Math.round(value)}K+`;
+      return isDe ? `${Math.round(value)}\u00a0Tsd.\u00a0€+` : `€${Math.round(value)}K+`;
     case "staff":
       return isDe
         ? `${(decimals > 0 ? value.toFixed(decimals) : String(Math.round(value))).replace(".", ",")} T+`

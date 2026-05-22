@@ -54,7 +54,7 @@ export function LandingTrustMetricsRow({ className }: { className?: string }) {
       className={cn("caretip-landing-trust-metrics", className)}
       aria-label={t("landing.trustMetrics.aria")}
     >
-      <ul className="caretip-trust-metrics-grid grid w-full min-w-0 grid-cols-2 gap-x-6 gap-y-9 sm:gap-x-10 sm:gap-y-10 lg:grid-cols-4 lg:gap-x-0 lg:gap-y-0">
+      <ul className="caretip-trust-metrics-grid grid w-full min-w-0 grid-cols-2 gap-x-4 gap-y-7 sm:gap-x-6 sm:gap-y-7 lg:grid-cols-4 lg:gap-x-0 lg:gap-y-0">
         {TRUST_METRIC_ANIM_SPECS.map((spec, idx) => (
           <motion.li
             key={spec.id}
@@ -81,7 +81,7 @@ export function LandingTrustMetricsRow({ className }: { className?: string }) {
               active={active}
               delayMs={idx * 120}
             />
-            <p className="caretip-trust-metric-label max-w-[14ch] text-pretty font-sans">
+            <p className="caretip-trust-metric-label font-sans">
               {t(spec.labelKey)}
             </p>
           </motion.li>

@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
-import { HospitalityMediaFloatChips } from "@/components/landing/HospitalityMediaFloatChips";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingFadeReveal } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
@@ -56,22 +55,20 @@ export function HospitalityTeamsUnifiedSection() {
               <div
                 className={cn(
                   landingUi.hospitalityMediaCard,
-                  "caretip-hospitality-media-stage relative",
+                  "caretip-hospitality-media-stage flex flex-col overflow-hidden",
                 )}
               >
-                <div
-                  className="caretip-hospitality-media-eyebrow pointer-events-none absolute inset-x-0 top-0 z-30 flex justify-start px-4 pt-4 sm:px-5 sm:pt-5 lg:px-6 lg:pt-5"
-                  aria-hidden
-                >
-                  <span className="caretip-hospitality-media-pill font-sans text-[11px] font-semibold uppercase tracking-[0.18em] text-neutral-800 dark:text-neutral-100">
+                <div className="caretip-hospitality-media-eyebrow shrink-0 px-4 pb-2.5 pt-4 text-center sm:px-5 sm:pt-5 lg:px-6 lg:pb-3 lg:pt-5 lg:text-left">
+                  <span className="caretip-hospitality-media-label font-sans text-[11px] font-semibold uppercase tracking-[0.16em]">
                     {t("landing.hospitality.pill")}
                   </span>
                 </div>
-                <div aria-hidden className="caretip-hospitality-media-glow" />
-                <div aria-hidden className="caretip-hospitality-media-overlay" />
-                <div aria-hidden className="caretip-hospitality-media-vignette" />
-                <HospitalityMediaFloatChips />
-                <HospitalityBusinessesMarquee />
+                <div className="caretip-hospitality-media-visual relative min-h-0 flex-1 overflow-hidden">
+                  <div aria-hidden className="caretip-hospitality-media-glow" />
+                  <div aria-hidden className="caretip-hospitality-media-overlay" />
+                  <div aria-hidden className="caretip-hospitality-media-vignette" />
+                  <HospitalityBusinessesMarquee />
+                </div>
               </div>
             </div>
           </div>
