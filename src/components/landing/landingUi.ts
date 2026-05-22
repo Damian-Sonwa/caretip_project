@@ -285,7 +285,8 @@ export const landingUi = {
     "relative w-full max-w-full overflow-hidden max-lg:mx-auto max-lg:w-full lg:h-full lg:min-h-0",
   heroShowcaseStack: "hero-showcase-stack relative z-[1] h-full min-h-0 w-full overflow-hidden max-lg:h-auto",
   /** Float stats — out of flow; anchored to showcase column in CareTipLandingHero. */
-  heroFloatLayer: "pointer-events-none absolute inset-0 z-30 overflow-hidden",
+  heroFloatLayer:
+    "pointer-events-none absolute inset-0 z-30 overflow-hidden max-lg:overflow-visible",
   /** Mobile hero — same scale/aspect as Live in Minutes demo (desktop unchanged via child tokens). */
   heroShowcaseMobileShell:
     "max-lg:[&_.hero-showcase-card-media]:rounded-[1.5rem] max-lg:[&_.hero-showcase-card-media]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",

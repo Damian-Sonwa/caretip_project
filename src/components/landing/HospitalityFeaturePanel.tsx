@@ -1,5 +1,8 @@
 import { useState } from "react";
-import { HospitalityFeatureMarker } from "@/components/landing/HospitalityFeatureMarker";
+import {
+  LandingLiveMinutesMarker,
+  landingLiveMinutesRowClass,
+} from "@/components/landing/LandingLiveMinutesMarker";
 import { caretipType } from "@/lib/typography/caretipType";
 import { cn } from "@/lib/utils";
 
@@ -38,29 +41,29 @@ export function HospitalityFeaturePanel({ features, className }: HospitalityFeat
               isActive && "caretip-hospitality-feature-item--active",
             )}
           >
-            <div className="caretip-hospitality-feature-entry cursor-default">
-              <div className="caretip-hospitality-feature-heading inline-flex max-w-full cursor-default items-start gap-2.5 sm:gap-3">
-                <HospitalityFeatureMarker active={isActive} className="shrink-0 self-start" />
-                <span
+            <div className={cn(landingLiveMinutesRowClass, "caretip-hospitality-feature-entry cursor-default")}>
+              <LandingLiveMinutesMarker className="mt-0.5 shrink-0 self-start" />
+              <div className="min-w-0 flex-1 space-y-1 max-md:space-y-1 sm:space-y-1.5 lg:space-y-2">
+                <div
                   className={cn(
-                    caretipType.featureCopy,
-                    "min-w-0 cursor-default pt-1 transition-[color,font-weight,opacity] duration-300 ease-out",
+                    caretipType.featureCopySemibold,
+                    "caretip-hospitality-feature-heading cursor-default tracking-tight transition-[color,opacity] duration-300 ease-out",
                     isActive
-                      ? "font-semibold text-neutral-900 dark:text-neutral-50"
-                      : "font-medium text-neutral-700 group-hover:text-neutral-900 dark:text-neutral-300 dark:group-hover:text-neutral-100",
+                      ? "text-neutral-900 dark:text-neutral-50"
+                      : "text-neutral-800 dark:text-neutral-100",
                   )}
                 >
                   {feature.title}
-                </span>
+                </div>
+                <p
+                  className={cn(
+                    caretipType.bodyCopyMuted,
+                    "caretip-hospitality-feature-desc max-w-prose cursor-default leading-relaxed",
+                  )}
+                >
+                  {feature.text}
+                </p>
               </div>
-              <p
-                className={cn(
-                  caretipType.bodyCopyMuted,
-                  "caretip-hospitality-feature-desc mt-1.5 max-w-prose cursor-default leading-relaxed",
-                )}
-              >
-                {feature.text}
-              </p>
             </div>
           </li>
         );

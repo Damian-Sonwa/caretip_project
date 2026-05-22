@@ -174,9 +174,10 @@ html.dark .caretip-landing .caretip-hero-float-card {
   }
 }
 
-/* Mobile: keep floats inside showcase, away from headline */
+/* Mobile: allow all float cards to extend slightly past the frame without clipping */
 @media (max-width: 1023px) {
   .caretip-landing .caretip-hero-float-cards {
-    clip-path: inset(-4% -2% -2% -2%);
+    clip-path: none;
+    overflow: visible;
   }
 }

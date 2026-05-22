@@ -10,9 +10,6 @@ type FloatSpec = {
   labelKey: string;
   Icon: LucideIcon;
   position: string;
-  /** Hide below this breakpoint utility class */
-  hideBelowLg?: boolean;
-  hideBelowMd?: boolean;
   floatDuration: number;
   floatDelay: number;
 };
@@ -43,7 +40,6 @@ export function LandingHeroFloatingCards() {
         labelKey: "landing.showcase.heroFloatTipLabel",
         Icon: Coins,
         position: "top-[5.5%] left-[0.5%] sm:top-[7.5%] sm:left-[1.5%] lg:top-[10.5%] lg:left-[4.5%] lg:z-[31]",
-        hideBelowMd: true,
         floatDuration: 7.5,
         floatDelay: 0,
       },
@@ -62,7 +58,6 @@ export function LandingHeroFloatingCards() {
         labelKey: "landing.showcase.heroFloatPayoutLabel",
         Icon: CheckCircle2,
         position: "bottom-[21%] left-[0.5%] sm:bottom-[20.5%] sm:left-[0.5%] lg:bottom-[23.5%] lg:left-[3.5%] lg:z-[30]",
-        hideBelowLg: true,
         floatDuration: 7.8,
         floatDelay: 1.1,
       },
@@ -79,23 +74,17 @@ export function LandingHeroFloatingCards() {
     [],
   );
 
-  const visibleOnMobile = new Set(["review", "staff"]);
-
   return (
-    <div className="caretip-hero-float-cards pointer-events-none absolute inset-0 z-30 overflow-hidden" aria-hidden>
+    <div
+      className="caretip-hero-float-cards pointer-events-none absolute inset-0 z-30 overflow-visible max-lg:overflow-visible lg:overflow-hidden"
+      aria-hidden
+    >
       {cards.map((card) => {
         const Icon = card.Icon;
-        const hiddenMobile = !visibleOnMobile.has(card.id);
         return (
           <motion.div
             key={card.id}
-            className={cn(
-              FLOAT_CARD_BASE,
-              card.position,
-              card.hideBelowLg && "hidden lg:block",
-              card.hideBelowMd && "hidden md:block",
-              hiddenMobile && "max-lg:hidden",
-            )}
+            className={cn(FLOAT_CARD_BASE, card.position)}
             initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={
               reduceMotion

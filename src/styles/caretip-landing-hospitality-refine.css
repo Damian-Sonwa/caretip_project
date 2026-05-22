@@ -82,22 +82,9 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-i
   cursor: default;
 }
 
-/* Feature markers — icon only, no circular hover/active glow */
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-heading [aria-hidden] {
-  box-shadow: none !important;
-  background: transparent !important;
-}
-
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-desc {
-  padding-left: calc(1.25rem + 0.625rem);
   opacity: 0.88;
   transition: opacity 0.3s ease;
-}
-
-@media (min-width: 640px) {
-  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-desc {
-    padding-left: calc(1.5rem + 0.75rem);
-  }
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-desc {
