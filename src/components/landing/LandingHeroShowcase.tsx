@@ -58,7 +58,7 @@ export function LandingHeroShowcase({ src, alt, className }: LandingHeroShowcase
         >
           <div className={cn(landingUi.heroShowcaseCard, "caretip-hero-showcase-card--depth relative h-full w-full")}>
             <div aria-hidden className="caretip-hero-showcase-edge-glow rounded-[inherit]" />
-            <div className={cn(landingUi.heroShowcaseCardMedia, "relative")}>
+            <div className={landingUi.heroShowcaseCardMedia}>
               <div aria-hidden className="caretip-hero-showcase-light-overlay pointer-events-none absolute inset-0 z-[1]" />
               <img
                 src={src}

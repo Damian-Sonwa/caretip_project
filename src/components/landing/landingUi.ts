@@ -288,13 +288,12 @@ export const landingUi = {
   heroFloatLayer:
     "pointer-events-none absolute inset-0 z-30 overflow-hidden max-lg:overflow-visible",
   /** Mobile hero — same scale/aspect as Live in Minutes demo (desktop unchanged via child tokens). */
-  heroShowcaseMobileShell:
-    "max-lg:[&_.hero-showcase-card-media]:rounded-[1.5rem]",
-  /** Image mount — no visible card chrome (borders/shadows handled in CSS). */
+  heroShowcaseMobileShell: "",
+  /** Outer mount — transparent; soft curve + shadow live on `.caretip-hero-showcase-soft-frame`. */
   heroShowcaseCard:
-    "hero-showcase-card caretip-hero-showcase-card--frameless relative z-[1] block w-full max-w-full overflow-visible rounded-[28px] border-0 bg-transparent p-0 leading-[0] shadow-none ring-0 sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] max-lg:rounded-[1.5rem] sm:max-lg:max-w-[22rem] sm:max-lg:rounded-[1.5rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)] lg:overflow-hidden",
+    "hero-showcase-card caretip-hero-showcase-card--frameless relative z-[1] block w-full max-w-full overflow-visible border-0 bg-transparent p-0 leading-[0] shadow-none ring-0 max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] sm:max-lg:max-w-[22rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)]",
   heroShowcaseCardMedia:
-    "hero-showcase-card-media h-full w-full overflow-hidden rounded-[inherit] bg-transparent",
+    "hero-showcase-card-media caretip-hero-showcase-soft-frame relative h-full w-full",
   heroShowcaseGlow:
     "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(233,120,28,0.16)_0%,rgba(233,120,28,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 lg:-inset-3 lg:blur-xl dark:opacity-50",
   heroShowcaseImg:

@@ -116,15 +116,10 @@
     gap: 0.625rem;
   }
 
-  .caretip-landing .caretip-hero-section .hero-showcase-card,
-  .caretip-landing .caretip-hero-section .hero-showcase-card-media {
+  .caretip-landing .caretip-hero-section .hero-showcase-card {
     border: none !important;
     box-shadow: none !important;
     background: transparent !important;
-  }
-
-  .caretip-landing .caretip-hero-section .hero-showcase-card-media {
-    border-radius: inherit;
   }
 
   .caretip-landing .caretip-hero-section .hero-showcase-card-media img {

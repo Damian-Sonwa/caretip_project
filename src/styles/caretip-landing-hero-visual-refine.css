@@ -59,12 +59,12 @@ html.dark .caretip-landing .caretip-hero-warm-ambience {
 }
 
 .caretip-landing .caretip-hero-showcase-glow {
-  opacity: 0.48 !important;
+  opacity: 0.34 !important;
 }
 
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-showcase-glow {
-    opacity: 0.42 !important;
+    opacity: 0.28 !important;
   }
 }
 
@@ -73,7 +73,7 @@ html.dark .caretip-landing .caretip-hero-warm-ambience {
   display: none !important;
 }
 
-/* Hero image mount — no visible card box */
+/* Outer wrappers — no card box */
 .caretip-landing .caretip-hero-section .hero-showcase-card,
 .caretip-landing .caretip-hero-showcase-card--depth,
 .caretip-landing .caretip-hero-showcase-card--frameless {
@@ -84,31 +84,73 @@ html.dark .caretip-landing .caretip-hero-warm-ambience {
   --tw-ring-offset-shadow: 0 0 #0000 !important;
 }
 
-.caretip-landing .caretip-hero-section .hero-showcase-card-media {
-  background: transparent !important;
-  box-shadow: none !important;
+/* Stripe-style soft frame — curved clip + ambient float (not a card) */
+.caretip-landing .caretip-hero-showcase-soft-frame {
+  --caretip-hero-soft-radius: 1.125rem;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: none;
+  border-radius: var(--caretip-hero-soft-radius);
+  background: transparent;
+  box-shadow:
+    0 20px 44px -26px rgba(26, 22, 18, 0.14),
+    0 8px 20px -12px rgba(26, 22, 18, 0.06);
 }
 
-/* Desktop — no white column fade or rounded “card” clip around the device image */
+.caretip-landing .caretip-hero-showcase-soft-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.42);
+  opacity: 0.65;
+}
+
+.caretip-landing .caretip-hero-showcase-soft-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: 0 0 0 1px rgba(17, 17, 17, 0.045);
+}
+
+html.dark .caretip-landing .caretip-hero-showcase-soft-frame {
+  box-shadow:
+    0 24px 52px -28px rgba(0, 0, 0, 0.42),
+    0 10px 24px -14px rgba(0, 0, 0, 0.28);
+}
+
+html.dark .caretip-landing .caretip-hero-showcase-soft-frame::before {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  opacity: 0.5;
+}
+
+html.dark .caretip-landing .caretip-hero-showcase-soft-frame::after {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-hero-showcase-soft-frame {
+    --caretip-hero-soft-radius: 1.25rem;
+  }
+}
+
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-showcase-radial {
     background: transparent !important;
     opacity: 0 !important;
   }
 
-  .caretip-landing .caretip-hero-section .hero-showcase-card,
-  .caretip-landing .caretip-hero-section .hero-showcase-card-media,
-  .caretip-landing .caretip-hero-showcase-composition,
-  .caretip-landing .caretip-hero-showcase-frame-depth {
-    border-radius: 0 !important;
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-  }
-
-  .caretip-landing .caretip-hero-section .hero-showcase-card-media img {
-    border-radius: 0 !important;
-    box-shadow: none !important;
+  .caretip-landing .caretip-hero-showcase-soft-frame {
+    --caretip-hero-soft-radius: 1.375rem;
+    box-shadow:
+      0 28px 56px -32px rgba(26, 22, 18, 0.13),
+      0 10px 24px -14px rgba(26, 22, 18, 0.05);
   }
 }
 
