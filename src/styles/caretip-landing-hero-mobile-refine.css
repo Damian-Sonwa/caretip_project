@@ -19,9 +19,35 @@
     margin-top: 0.375rem;
   }
 
+  /* Rotating keyword + suffix stay one visual unit (fixes isolated “sofort” on DE mobile) */
+  .caretip-landing .caretip-hero-headline-line--rotating {
+    text-wrap: balance;
+    max-width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-cluster {
+    display: inline;
+    white-space: normal;
+    word-break: normal;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-suffix {
+    white-space: normal;
+  }
+
+  .caretip-landing .caretip-hero-animated-word--compact {
+    position: relative;
+    max-width: 100%;
+    vertical-align: baseline;
+  }
+
   .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    font-size: clamp(2rem, 8.2vw, 2.2rem);
+    font-size: clamp(1.875rem, 7.6vw, 2.2rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    max-width: min(100%, 21.5rem);
   }
 
   .caretip-landing .caretip-hero-copy--en > p,
@@ -78,6 +104,41 @@
   .caretip-landing .caretip-hero-mobile-metrics {
     padding-top: 1.25rem;
     padding-bottom: 2rem;
+  }
+}
+
+/* Narrow phones — tighter headline rhythm (320–480px) */
+@media (max-width: 480px) {
+  .caretip-landing .caretip-hero-headline {
+    font-size: clamp(1.75rem, 8.4vw, 2rem);
+    line-height: 1.06;
+    letter-spacing: -0.034em;
+  }
+
+  .caretip-landing .caretip-hero-headline > span + span {
+    margin-top: 0.3125rem;
+  }
+
+  .caretip-landing .caretip-hero-headline-line--rotating {
+    text-wrap: pretty;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-cluster {
+    display: inline;
+  }
+
+  .caretip-landing .caretip-hero-animated-word--compact,
+  .caretip-landing .caretip-hero-headline-rotating-suffix {
+    display: inline;
+    white-space: nowrap;
+  }
+
+  .caretip-landing .caretip-hero-animated-word__viewport {
+    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    max-width: min(100%, 20rem);
   }
 }
 

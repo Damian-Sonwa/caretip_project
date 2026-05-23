@@ -38,6 +38,16 @@ export function markClientSessionRevoked(): void {
   }
 }
 
+/** IANA timezone from the browser (e.g. Europe/Berlin) for login security emails. */
+export function getBrowserTimeZone(): string | undefined {
+  try {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return typeof tz === "string" && tz.trim() ? tz.trim() : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function clearClientSessionRevoked(): void {
   try {
     localStorage.removeItem(SESSION_REVOKED_STORAGE_KEY);
@@ -557,6 +567,7 @@ export async function loginAPI(
   intendedRole: "business" | "employee" | "platform_admin",
   locale?: "en" | "de"
 ): Promise<AuthResponse> {
+  const timeZone = getBrowserTimeZone();
   return apiRequest<AuthResponse>(apiPath("/api/auth/signin"), {
     method: "POST",
     headers: getHeaders(),
@@ -565,6 +576,7 @@ export async function loginAPI(
       password,
       intendedRole: toBackendIntendedRole(intendedRole),
       ...(locale ? { locale } : {}),
+      ...(timeZone ? { timeZone } : {}),
     }),
     credentials: "include",
   });
@@ -701,6 +713,7 @@ export async function oauthAPI(payload: {
   inviteCode?: string;
   locale?: "en" | "de";
 }): Promise<AuthResponse> {
+  const timeZone = getBrowserTimeZone();
   return apiRequest<AuthResponse>(apiPath("/api/auth/oauth"), {
     method: "POST",
     headers: getHeaders(),
@@ -715,6 +728,7 @@ export async function oauthAPI(payload: {
       ...(payload.location ? { location: payload.location } : {}),
       ...(payload.inviteCode ? { inviteCode: payload.inviteCode } : {}),
       ...(payload.locale ? { locale: payload.locale } : {}),
+      ...(timeZone ? { timeZone } : {}),
     }),
     credentials: "include",
   });

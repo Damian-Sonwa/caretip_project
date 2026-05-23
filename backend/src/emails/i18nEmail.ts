@@ -2,6 +2,13 @@
  * Transactional email copy (en / de). Missing keys fall back to English at render time.
  */
 
+import {
+  formatLoginAlertDevice,
+  formatLoginAlertTimestamp,
+  maskIpForLoginAlert,
+  resolveLoginAlertTimeZone,
+} from "./loginAlertFormat.js";
+
 export type EmailLocale = "en" | "de";
 
 const SUPPORTED = new Set<EmailLocale>(["en", "de"]);
@@ -250,59 +257,152 @@ ${salutationHtml}
   return { subject: copy.subject, html, text };
 }
 
+function loginAlertDetailRow(label: string, value: string): string {
+  return `<tr>
+<td style="padding:14px 18px;border-top:1px solid #eceae6;">
+<p style="margin:0 0 4px;font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:#6b7280;">${esc(label)}</p>
+<p style="margin:0;font-size:15px;line-height:1.45;font-weight:500;color:#111111;">${esc(value)}</p>
+</td>
+</tr>`;
+}
+
 export function buildLoginAlertContent(input: {
   locale: EmailLocale;
-  whenIso: string;
+  /** Sign-in instant (prefer `when` over legacy `whenIso`). */
+  when?: Date;
+  whenIso?: string;
   ip?: string | null;
   userAgent?: string | null;
+  timeZone?: string | null;
+  appBaseUrl?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
+  const when = input.when ?? new Date(input.whenIso ?? Date.now());
+  const timeZone = resolveLoginAlertTimeZone(input.timeZone);
+  const whenFormatted = formatLoginAlertTimestamp(when, loc, timeZone);
+  const device = formatLoginAlertDevice(input.userAgent, loc);
+  const ipMasked = maskIpForLoginAlert(input.ip, loc);
+  const appBase = (input.appBaseUrl?.trim() || "https://caretip.de").replace(/\/$/, "");
+  const securityUrl = `${appBase}/forgot-password`;
+
   const copy =
     loc === "de"
       ? {
-          subject: "Neue Anmeldung bei Ihrem Konto",
-          line1: "Es wurde eine neue Anmeldung bei Ihrem CareTip-Konto erkannt.",
+          subject: "Neue Anmeldung bei Ihrem CareTip-Konto",
+          preheader: "Wir haben eine neue Anmeldung bei Ihrem Konto festgestellt.",
+          headline: "Neue Anmeldung",
+          intro:
+            "Es gab soeben eine Anmeldung bei Ihrem CareTip-Konto. Hier sind die Details:",
           whenLabel: "Zeit",
-          ipLabel: "IP-Adresse",
           deviceLabel: "Gerät",
-          warn: "Wenn Sie das nicht waren, ändern Sie bitte umgehend Ihr Passwort.",
+          locationLabel: "Standort (IP)",
+          okLine:
+            "Wenn Sie das waren, ist keine Aktion nötig — Sie können diese E-Mail ignorieren.",
+          warnTitle: "Sie waren das nicht?",
+          warnBody:
+            "Sichern Sie Ihr Konto umgehend, indem Sie Ihr Passwort ändern und prüfen, ob Ihre E-Mail-Adresse noch korrekt ist.",
+          cta: "Konto absichern",
+          help:
+            "Bei Fragen besuchen Sie unsere Hilfe oder wenden Sie sich an Ihren Administrator.",
+          detailsTitle: "Anmeldedetails",
         }
       : {
-          subject: "New sign-in to your account",
-          line1: "A new sign-in to your CareTip account was detected.",
+          subject: "New sign-in to your CareTip account",
+          preheader: "We noticed a new sign-in to your account.",
+          headline: "New sign-in",
+          intro: "Someone just signed in to your CareTip account. Here are the details:",
           whenLabel: "Time",
-          ipLabel: "IP address",
           deviceLabel: "Device",
-          warn: "If this was not you, change your password immediately.",
+          locationLabel: "Location (IP)",
+          okLine: "If this was you, no action is needed — you can ignore this email.",
+          warnTitle: "Don't recognize this activity?",
+          warnBody:
+            "Secure your account right away by changing your password and confirming your email address is still correct.",
+          cta: "Secure my account",
+          help: "Questions? Visit our Help Center or contact your administrator.",
+          detailsTitle: "Sign-in details",
         };
-  const ipLine =
-    input.ip != null && String(input.ip).length > 0
-      ? `<p>${esc(copy.ipLabel)}: ${esc(String(input.ip))}</p>`
-      : "";
-  const ipText =
-    input.ip != null && String(input.ip).length > 0
-      ? `${copy.ipLabel}: ${input.ip}\n`
-      : "";
-  const ua = input.userAgent?.trim();
-  const deviceLine =
-    ua && ua.length > 0
-      ? `<p>${esc(copy.deviceLabel)}: ${esc(ua)}</p>`
-      : "";
-  const deviceText =
-    ua && ua.length > 0 ? `${copy.deviceLabel}: ${ua}\n` : "";
+
+  const detailRows = [
+    loginAlertDetailRow(copy.whenLabel, whenFormatted),
+    ...(device ? [loginAlertDetailRow(copy.deviceLabel, device)] : []),
+    ...(ipMasked ? [loginAlertDetailRow(copy.locationLabel, ipMasked)] : []),
+  ].join("");
+
   const html = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head><body style="font-family:system-ui,sans-serif;line-height:1.5;color:#111">
-<p>${esc(b.greeting)}</p>
-<p>${esc(copy.line1)}</p>
-<p>${esc(copy.whenLabel)}: ${esc(input.whenIso)}</p>
-${ipLine}
-${deviceLine}
-<p style="font-size:14px;color:#555">${esc(copy.warn)}</p>
-<p style="font-size:12px;color:#888">${esc(b.footer)}</p>
+<html lang="${loc}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>${esc(copy.subject)}</title>
+<!--[if mso]><style type="text/css">body,table,td{font-family:Arial,Helvetica,sans-serif!important;}</style><![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#f5f4f1;-webkit-text-size-adjust:100%;">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${esc(copy.preheader)}</div>
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color:#f5f4f1;">
+<tr><td align="center" style="padding:28px 16px 32px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:560px;width:100%;">
+<tr><td style="padding:0 4px 14px;text-align:center;">
+<span style="font-size:13px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#e9781c;">${esc(b.brand)}</span>
+</td></tr>
+<tr><td style="background:#ffffff;border:1px solid #e8e6e1;border-radius:14px;overflow:hidden;box-shadow:0 8px 28px rgba(17,17,17,0.06);">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+<tr><td style="padding:28px 24px 8px;background:linear-gradient(180deg,#fffaf5 0%,#ffffff 42%);">
+<p style="margin:0 0 10px;font-size:22px;line-height:1.25;font-weight:700;color:#111111;">${esc(copy.headline)}</p>
+<p style="margin:0;font-size:15px;line-height:1.55;color:#4b5563;">${esc(b.greeting)}</p>
+<p style="margin:12px 0 0;font-size:15px;line-height:1.55;color:#374151;">${esc(copy.intro)}</p>
+</td></tr>
+<tr><td style="padding:4px 12px 8px;">
+<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#fafaf8;border:1px solid #eceae6;border-radius:10px;">
+<tr><td style="padding:12px 18px 4px;font-size:12px;font-weight:600;letter-spacing:0.05em;text-transform:uppercase;color:#6b7280;">${esc(copy.detailsTitle)}</td></tr>
+${detailRows}
+</table>
+</td></tr>
+<tr><td style="padding:8px 24px 4px;">
+<p style="margin:0;font-size:14px;line-height:1.55;color:#4b5563;">${esc(copy.okLine)}</p>
+</td></tr>
+<tr><td style="padding:12px 24px 20px;">
+<p style="margin:0 0 6px;font-size:14px;line-height:1.45;font-weight:600;color:#111111;">${esc(copy.warnTitle)}</p>
+<p style="margin:0 0 16px;font-size:14px;line-height:1.55;color:#4b5563;">${esc(copy.warnBody)}</p>
+<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 auto;">
+<tr><td align="center" style="border-radius:10px;background-color:#e9781c;">
+<a href="${esc(securityUrl)}" style="display:inline-block;padding:12px 22px;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none;border-radius:10px;line-height:1.2;">${esc(copy.cta)}</a>
+</td></tr>
+</table>
+</td></tr>
+</table>
+</td></tr>
+<tr><td style="padding:18px 8px 0;text-align:center;">
+<p style="margin:0 0 8px;font-size:12px;line-height:1.5;color:#6b7280;">${esc(copy.help)}</p>
+<p style="margin:0;font-size:11px;line-height:1.5;color:#9ca3af;">${esc(b.footer)}</p>
+</td></tr>
+</table>
+</td></tr>
+</table>
 </body></html>`;
-  const text = `${b.greeting}\n\n${copy.line1}\n\n${copy.whenLabel}: ${input.whenIso}\n${ipText}${deviceText}\n${copy.warn}\n\n${b.footer}`;
-  return { subject: copy.subject, html, text };
+
+  const textLines = [
+    b.greeting,
+    "",
+    copy.intro,
+    "",
+    `${copy.whenLabel}: ${whenFormatted}`,
+    ...(device ? [`${copy.deviceLabel}: ${device}`] : []),
+    ...(ipMasked ? [`${copy.locationLabel}: ${ipMasked}`] : []),
+    "",
+    copy.okLine,
+    "",
+    `${copy.warnTitle} ${copy.warnBody}`,
+    `${copy.cta}: ${securityUrl}`,
+    "",
+    copy.help,
+    "",
+    b.footer,
+  ];
+
+  return { subject: copy.subject, html, text: textLines.join("\n") };
 }
 
 export function buildGenericNotificationContent(input: {

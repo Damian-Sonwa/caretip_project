@@ -126,15 +126,21 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             </motion.span>
             {heroRotatingWords.length > 0 || t("landing.showcase.heroTitleLine2Emphasis") ? (
               <motion.span
-                className={landingUi.heroHeadlineLine}
+                className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--rotating")}
                 variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
               >
                 {t("landing.showcase.heroTitleLine2Prefix")}
-                <LandingHeroAnimatedWord
-                  words={heroRotatingWords}
-                  className={landingUi.heroHeadlineEmphasis}
-                />
-                {t("landing.showcase.heroTitleLine2Suffix")}
+                <span className="caretip-hero-headline-rotating-cluster">
+                  <LandingHeroAnimatedWord
+                    words={heroRotatingWords}
+                    className={landingUi.heroHeadlineEmphasis}
+                  />
+                  {t("landing.showcase.heroTitleLine2Suffix") ? (
+                    <span className="caretip-hero-headline-rotating-suffix">
+                      {t("landing.showcase.heroTitleLine2Suffix")}
+                    </span>
+                  ) : null}
+                </span>
               </motion.span>
             ) : t("landing.showcase.heroTitleLine2") ? (
               <motion.span

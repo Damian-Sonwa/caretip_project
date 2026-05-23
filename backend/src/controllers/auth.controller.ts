@@ -29,6 +29,44 @@ import {
 } from "../utils/httpErrors.js";
 import { sendNewLoginAlertEmail } from "../services/loginAlertEmail.service.js";
 
+function parseClientTimeZone(body: Record<string, unknown>): string | undefined {
+  return typeof body.timeZone === "string" && body.timeZone.trim()
+    ? body.timeZone.trim()
+    : undefined;
+}
+
+async function notifyLoginSecurityAlerts(
+  req: Request,
+  userId: string,
+  email: string,
+  opts: { explicitLocale?: string; clientTimeZone?: string },
+): Promise<void> {
+  const settings = await prisma.userSettings.findUnique({
+    where: { userId },
+    select: { notifyNewLogin: true },
+  });
+  if (!settings?.notifyNewLogin) return;
+
+  const ip =
+    (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
+    (req.socket.remoteAddress ?? null);
+  const ua = String(req.headers["user-agent"] ?? "");
+
+  await sendNewLoginAlertEmail({
+    to: email,
+    ip,
+    userAgent: ua,
+    explicitLocale: opts.explicitLocale,
+    timeZone: opts.clientTimeZone,
+    acceptLanguage:
+      typeof req.headers["accept-language"] === "string"
+        ? req.headers["accept-language"]
+        : undefined,
+  });
+  const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
+  onLoginSecurityAlert(userId);
+}
+
 /** Thrown by auth.service.login — always safe to return to the client as 401. */
 const LOGIN_CLIENT_MESSAGES = new Set([
   "Invalid email or password",
@@ -197,31 +235,13 @@ export async function login(req: Request, res: Response) {
         .catch(() => {});
     }
 
-    // Best-effort session alert email (opt-in via user_settings.notify_new_login).
+    // Best-effort session alert email + push (opt-in via user_settings.notify_new_login).
     void (async () => {
       try {
-        const settings = await prisma.userSettings.findUnique({
-          where: { userId: result.user.id },
-          select: { notifyNewLogin: true },
-        });
-        if (!settings?.notifyNewLogin) return;
-
-        const ip =
-          (req.headers["x-forwarded-for"] as string | undefined)?.split(",")[0]?.trim() ??
-          (req.socket.remoteAddress ?? null);
-        const ua = String(req.headers["user-agent"] ?? "");
-        await sendNewLoginAlertEmail({
-          to: result.user.email,
-          ip,
-          userAgent: ua,
+        await notifyLoginSecurityAlerts(req, result.user.id, result.user.email, {
           explicitLocale: loginClientLocale,
-          acceptLanguage:
-            typeof req.headers["accept-language"] === "string"
-              ? req.headers["accept-language"]
-              : undefined,
+          clientTimeZone: parseClientTimeZone(body),
         });
-        const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
-        onLoginSecurityAlert(result.user.id);
       } catch (e) {
         logServerError("auth.login.sessionAlertEmail", e);
       }
@@ -513,17 +533,16 @@ export async function oauth(req: Request, res: Response) {
       logServerError("auth.oauth.issueRefreshToken", e);
     }
     if (isLogin) {
+      const oauthClientLocale =
+        locale === "en" || locale === "de" ? locale : undefined;
       void (async () => {
         try {
-          const settings = await prisma.userSettings.findUnique({
-            where: { userId: result.user.id },
-            select: { notifyNewLogin: true },
+          await notifyLoginSecurityAlerts(req, result.user.id, result.user.email, {
+            explicitLocale: oauthClientLocale,
+            clientTimeZone: parseClientTimeZone(body),
           });
-          if (!settings?.notifyNewLogin) return;
-          const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
-          onLoginSecurityAlert(result.user.id);
         } catch (e) {
-          logServerError("auth.oauth.loginPush", e);
+          logServerError("auth.oauth.loginSecurityAlert", e);
         }
       })();
     }

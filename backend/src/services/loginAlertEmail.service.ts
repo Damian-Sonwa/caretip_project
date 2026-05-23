@@ -10,6 +10,11 @@ function renderLoginAlert(input: Parameters<typeof buildLoginAlertContent>[0]) {
   }
 }
 
+function appBaseUrl(): string {
+  const u = process.env.FRONTEND_URL?.trim();
+  return u ? u.replace(/\/$/, "") : "https://caretip.de";
+}
+
 export async function sendNewLoginAlertEmail(input: {
   to: string;
   ip?: string | null;
@@ -17,6 +22,8 @@ export async function sendNewLoginAlertEmail(input: {
   acceptLanguage?: string | null;
   /** Client app language at sign-in (e.g. JSON body `locale`). */
   explicitLocale?: string | null;
+  /** IANA timezone from the client when available (e.g. `Europe/Berlin`). */
+  timeZone?: string | null;
 }): Promise<void> {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
@@ -33,12 +40,14 @@ export async function sendNewLoginAlertEmail(input: {
   });
 
   const from = getResendFromAddress();
-  const whenIso = new Date().toISOString();
+  const when = new Date();
   const { subject, html, text } = renderLoginAlert({
     locale,
-    whenIso,
+    when,
     ip: input.ip,
     userAgent: input.userAgent,
+    timeZone: input.timeZone,
+    appBaseUrl: appBaseUrl(),
   });
 
   const ok = await sendResendEmail("login-alert", { from, to: [to], subject, html, text });
