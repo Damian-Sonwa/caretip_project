@@ -1,74 +1,68 @@
 import { useMemo } from "react";
-import { CheckCircle2, Coins, Star, Users, type LucideIcon } from "lucide-react";
+import { Coins, Star, Users, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
-type FloatSpec = {
+type FloatPillSpec = {
   id: string;
-  valueKey: string;
-  labelKey: string;
+  pillKey: string;
   Icon: LucideIcon;
   position: string;
   floatDuration: number;
   floatDelay: number;
+  floatOffset: number;
 };
 
-const FLOAT_CARD_BASE = cn(
-  "caretip-hero-float-card pointer-events-none absolute",
-  "max-w-[min(calc(100%-1rem),168px)] rounded-xl border border-white/50",
-  "bg-white/76 shadow-[0_2px_8px_rgba(15,23,42,0.05),0_10px_28px_-8px_rgba(15,23,42,0.09)]",
-  "backdrop-blur-lg ring-1 ring-white/40",
-  "max-lg:max-w-[min(calc(100%-0.75rem),132px)] max-lg:scale-[0.78] max-lg:origin-center",
-  "sm:max-lg:max-w-[min(calc(100%-1rem),142px)] sm:max-lg:scale-[0.84]",
-  "md:max-w-[min(100%,156px)] md:scale-[0.9]",
-  "lg:max-w-[min(100%,172px)] lg:scale-100",
+const FLOAT_PILL_BASE = cn(
+  "caretip-hero-float-pill pointer-events-none absolute z-[28]",
+  "inline-flex max-w-[min(calc(100%-0.5rem),11.5rem)] items-center gap-1.5",
+  "rounded-full border border-white/55 bg-white/48 px-2.5 py-1",
+  "shadow-[0_1px_2px_rgba(15,23,42,0.03)] backdrop-blur-md",
+  "ring-1 ring-white/30",
+  "text-[10px] font-medium leading-none tracking-tight text-neutral-800",
+  "sm:gap-2 sm:px-3 sm:py-1.5 sm:text-[11px]",
+  "lg:z-[31]",
 );
 
 /**
- * Lightweight glass float cards around the hero showcase — presentation only.
+ * Lightweight glass metric pills anchored to the hero device edges.
  */
 export function LandingHeroFloatingCards() {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
-  const cards = useMemo<FloatSpec[]>(
+  const pills = useMemo<FloatPillSpec[]>(
     () => [
       {
         id: "tip",
-        valueKey: "landing.showcase.heroFloatTipValue",
-        labelKey: "landing.showcase.heroFloatTipLabel",
+        pillKey: "landing.showcase.heroFloatPillTip",
         Icon: Coins,
-        position: "top-[5.5%] left-[0.5%] sm:top-[7.5%] sm:left-[1.5%] lg:top-[10.5%] lg:left-[4.5%] lg:z-[31]",
-        floatDuration: 7.5,
+        position:
+          "top-[11%] left-0 max-lg:top-[10%] max-lg:-left-0.5 sm:max-lg:left-0 lg:top-[13%] lg:left-[1.5%]",
+        floatDuration: 13,
         floatDelay: 0,
+        floatOffset: -2.5,
       },
       {
-        id: "review",
-        valueKey: "landing.showcase.heroFloatReviewValue",
-        labelKey: "landing.showcase.heroFloatReviewLabel",
+        id: "rating",
+        pillKey: "landing.showcase.heroFloatPillRating",
         Icon: Star,
-        position: "top-[8.5%] right-[2.5%] sm:top-[10%] sm:right-[3.5%] lg:top-[13%] lg:right-[5.5%] lg:z-[33]",
-        floatDuration: 8.2,
-        floatDelay: 0.6,
-      },
-      {
-        id: "payout",
-        valueKey: "landing.showcase.heroFloatPayoutValue",
-        labelKey: "landing.showcase.heroFloatPayoutLabel",
-        Icon: CheckCircle2,
-        position: "bottom-[21%] left-[0.5%] sm:bottom-[20.5%] sm:left-[0.5%] lg:bottom-[23.5%] lg:left-[3.5%] lg:z-[30]",
-        floatDuration: 7.8,
-        floatDelay: 1.1,
+        position:
+          "top-[13%] right-0 max-lg:top-[12%] max-lg:-right-0.5 sm:max-lg:right-0 lg:top-[15%] lg:right-[2%] lg:z-[32]",
+        floatDuration: 14.5,
+        floatDelay: 0.8,
+        floatOffset: -2,
       },
       {
         id: "staff",
-        valueKey: "landing.showcase.heroFloatStaffValue",
-        labelKey: "landing.showcase.heroFloatStaffLabel",
+        pillKey: "landing.showcase.heroFloatPillStaff",
         Icon: Users,
-        position: "bottom-[10%] right-[4%] sm:bottom-[11%] sm:right-[5%] lg:bottom-[12%] lg:right-[7%]",
-        floatDuration: 8.5,
-        floatDelay: 0.35,
+        position:
+          "bottom-[15%] right-0 max-lg:bottom-[14%] max-lg:-right-0.5 sm:max-lg:right-0 lg:bottom-[17%] lg:right-[2.5%]",
+        floatDuration: 12.5,
+        floatDelay: 0.4,
+        floatOffset: -2.5,
       },
     ],
     [],
@@ -79,55 +73,41 @@ export function LandingHeroFloatingCards() {
       className="caretip-hero-float-cards pointer-events-none absolute inset-0 z-30 overflow-visible max-lg:overflow-visible lg:overflow-hidden"
       aria-hidden
     >
-      {cards.map((card) => {
-        const Icon = card.Icon;
+      {pills.map((pill) => {
+        const Icon = pill.Icon;
         return (
           <motion.div
-            key={card.id}
-            className={cn(FLOAT_CARD_BASE, card.position)}
-            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+            key={pill.id}
+            className={cn(FLOAT_PILL_BASE, pill.position)}
+            initial={reduceMotion ? false : { opacity: 0, y: 5 }}
             animate={
               reduceMotion
                 ? { opacity: 1, y: 0 }
                 : {
                     opacity: 1,
-                    y:
-                      card.id === "tip"
-                        ? [0, -4, 0]
-                        : card.id === "review"
-                          ? [0, -6, 0]
-                          : card.id === "payout"
-                            ? [0, -5, 1]
-                            : [0, -5, 0],
+                    y: [0, pill.floatOffset, 0],
                   }
             }
             transition={
               reduceMotion
-                ? { duration: 0.45, delay: card.floatDelay * 0.15 }
+                ? { duration: 0.5, delay: pill.floatDelay * 0.12 }
                 : {
-                    opacity: { duration: 0.45, delay: card.floatDelay * 0.15 },
+                    opacity: { duration: 0.55, delay: pill.floatDelay * 0.12, ease: "easeOut" },
                     y: {
-                      duration: card.floatDuration,
+                      duration: pill.floatDuration,
                       repeat: Infinity,
                       ease: "easeInOut",
-                      delay: card.floatDelay,
+                      delay: pill.floatDelay,
                     },
                   }
             }
           >
-            <div className="flex items-center gap-2 px-2.5 py-2 sm:gap-2.5 sm:px-3 sm:py-2.5 lg:rounded-2xl">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 ring-1 ring-primary/15 sm:h-8 sm:w-8">
-                <Icon className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4" strokeWidth={2.25} aria-hidden />
-              </span>
-              <div className="min-w-0">
-                <strong className="block font-sans text-[11px] font-semibold tabular-nums tracking-tight text-neutral-900 sm:text-xs lg:text-sm">
-                  {t(card.valueKey)}
-                </strong>
-                <span className="block text-[9px] leading-snug text-neutral-600 sm:text-[10px]">
-                  {t(card.labelKey)}
-                </span>
-              </div>
-            </div>
+            <Icon
+              className="h-3 w-3 shrink-0 text-primary/75 sm:h-3.5 sm:w-3.5"
+              strokeWidth={2}
+              aria-hidden
+            />
+            <span className="min-w-0 truncate whitespace-nowrap">{t(pill.pillKey)}</span>
           </motion.div>
         );
       })}

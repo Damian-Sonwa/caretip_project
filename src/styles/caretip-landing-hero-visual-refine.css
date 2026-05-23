@@ -132,27 +132,27 @@ html.dark .caretip-landing .caretip-hero-showcase-composition::after {
   border-color: rgba(255, 255, 255, 0.52);
 }
 
-/* Float cards — glass depth, softer shadows */
-.caretip-landing .caretip-hero-float-card {
-  opacity: 1;
+/* Float metric pills — light glass, edge-anchored */
+.caretip-landing .caretip-hero-float-pill {
+  opacity: 0.94;
   visibility: visible;
-  border-color: rgba(255, 255, 255, 0.48) !important;
-  background: rgba(255, 255, 255, 0.74) !important;
-  backdrop-filter: blur(14px) saturate(1.15);
-  -webkit-backdrop-filter: blur(14px) saturate(1.15);
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 6px 18px -4px rgba(15, 23, 42, 0.07),
-    0 12px 32px -10px rgba(15, 23, 42, 0.09) !important;
-  --tw-ring-color: rgba(255, 255, 255, 0.35);
+  border-color: rgba(255, 255, 255, 0.52) !important;
+  background: rgba(255, 255, 255, 0.5) !important;
+  backdrop-filter: blur(10px) saturate(1.08);
+  -webkit-backdrop-filter: blur(10px) saturate(1.08);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04) !important;
+  --tw-ring-color: rgba(255, 255, 255, 0.28);
 }
 
-html.dark .caretip-landing .caretip-hero-float-card {
-  border-color: rgba(255, 255, 255, 0.14) !important;
-  background: rgba(28, 28, 30, 0.72) !important;
-  box-shadow:
-    0 1px 2px rgba(0, 0, 0, 0.12),
-    0 8px 24px -6px rgba(0, 0, 0, 0.28) !important;
+html.dark .caretip-landing .caretip-hero-float-pill {
+  border-color: rgba(255, 255, 255, 0.12) !important;
+  background: rgba(24, 24, 27, 0.55) !important;
+  color: rgba(250, 250, 250, 0.92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.18) !important;
+}
+
+html.dark .caretip-landing .caretip-hero-float-pill svg {
+  color: rgba(251, 191, 36, 0.85);
 }
 
 /* Hero CTAs — slightly slimmer vertical presence; tap-friendly min-heights preserved */
@@ -169,15 +169,29 @@ html.dark .caretip-landing .caretip-hero-float-card {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .caretip-landing .caretip-hero-float-card {
+  .caretip-landing .caretip-hero-float-pill {
     animation: none !important;
   }
 }
 
-/* Mobile: allow all float cards to extend slightly past the frame without clipping */
+/* Mobile: pills sit at device edges without heavy overlap */
 @media (max-width: 1023px) {
   .caretip-landing .caretip-hero-float-cards {
     clip-path: none;
     overflow: visible;
+  }
+
+  .caretip-landing .caretip-hero-float-pill {
+    opacity: 0.9;
+    max-width: min(calc(100% - 0.25rem), 10.25rem);
+    padding-inline: 0.5625rem;
+    padding-block: 0.3125rem;
+    font-size: 0.625rem;
+  }
+}
+
+@media (max-width: 399px) {
+  .caretip-landing .caretip-hero-float-pill {
+    max-width: min(calc(100% - 0.125rem), 9.5rem);
   }
 }
