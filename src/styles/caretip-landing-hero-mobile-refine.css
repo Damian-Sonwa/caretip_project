@@ -1,62 +1,101 @@
 /**
  * Landing hero — mobile-only precision refinements (max-lg).
- * Does not alter desktop layout, typography tokens, or hero structure.
+ * Rotating line: prefix → fixed emphasis slot → suffix (no inline wrap with prefix).
  */
 
 @media (max-width: 1023px) {
-  /* Slightly earlier hero start (pairs with compact nav) */
   .caretip-landing .caretip-hero-section {
     padding-bottom: 0.5rem;
   }
 
-  /* Text block — compact but readable */
   .caretip-landing .caretip-hero-headline {
-    line-height: 1.02;
-    letter-spacing: -0.036em;
+    line-height: 1.1;
+    letter-spacing: -0.032em;
+    text-wrap: wrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
   }
 
   .caretip-landing .caretip-hero-headline > span + span {
-    margin-top: 0.375rem;
+    margin-top: 0.5rem;
   }
 
-  /* Rotating keyword + suffix stay one visual unit (fixes isolated “sofort” on DE mobile) */
   .caretip-landing .caretip-hero-headline-line--rotating {
-    text-wrap: balance;
     max-width: 100%;
   }
 
-  .caretip-landing .caretip-hero-headline-rotating-cluster {
-    display: inline;
-    white-space: normal;
-    word-break: normal;
+  /* Locked vertical rhythm — static lines never share a row with the animated slot */
+  .caretip-landing .caretip-hero-headline-rotating-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: 0.375rem;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-prefix,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line,
+  .caretip-landing .caretip-hero-headline-rotating-suffix {
+    display: block;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-prefix {
+    line-height: 1.08;
+  }
+
+  /* Reserved animated-word band — fixed height, no collapse when short words show */
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line {
+    position: relative;
+    min-height: 1.12em;
+    line-height: 1.12;
+    contain: layout style;
+    isolation: isolate;
+    padding: 0.0625rem 0;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    display: inline-grid;
+    vertical-align: top;
+    max-width: 100%;
+    min-height: 1.12em;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport {
+    vertical-align: top;
   }
 
   .caretip-landing .caretip-hero-headline-rotating-suffix {
+    line-height: 1.1;
     white-space: normal;
-  }
-
-  .caretip-landing .caretip-hero-animated-word--compact {
-    position: relative;
-    max-width: 100%;
-    vertical-align: baseline;
+    text-wrap: pretty;
+    margin-top: 0.0625rem;
   }
 
   .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    font-size: clamp(1.875rem, 7.6vw, 2.2rem);
+    font-size: clamp(1.875rem, 7.2vw, 2.25rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    max-width: min(100%, 21.5rem);
   }
 
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    max-width: min(100%, 21.5rem);
+    max-width: min(100%, 22.5rem);
   }
 
   .caretip-landing .caretip-hero-copy--en > p,
   .caretip-landing .caretip-hero-copy--de > p {
     line-height: 1.62;
-    max-width: min(100%, 19.5rem);
+    max-width: min(100%, 20rem);
   }
 
-  /* Paragraph → CTAs → image rhythm */
   .caretip-landing .caretip-hero-cta-cluster {
     margin-top: 1rem !important;
     padding-bottom: 0 !important;
@@ -77,7 +116,6 @@
     gap: 0.625rem;
   }
 
-  /* Product image — mobile crop emphasizes device */
   .caretip-landing .caretip-hero-section .hero-showcase-card {
     box-shadow:
       0 16px 44px -14px rgba(15, 23, 42, 0.1),
@@ -107,38 +145,46 @@
   }
 }
 
-/* Narrow phones — tighter headline rhythm (320–480px) */
-@media (max-width: 480px) {
+@media (max-width: 639px) {
   .caretip-landing .caretip-hero-headline {
-    font-size: clamp(1.75rem, 8.4vw, 2rem);
+    line-height: 1.08;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(1.8125rem, 7.4vw, 2.125rem);
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-stack {
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 399px) {
+  .caretip-landing .caretip-hero-headline {
+    font-size: clamp(1.6875rem, 6.8vw, 1.9375rem);
     line-height: 1.06;
-    letter-spacing: -0.034em;
+    letter-spacing: -0.03em;
   }
 
   .caretip-landing .caretip-hero-headline > span + span {
-    margin-top: 0.3125rem;
+    margin-top: 0.5625rem;
   }
 
   .caretip-landing .caretip-hero-headline-line--rotating {
-    text-wrap: pretty;
+    margin-top: 0.5rem;
   }
 
-  .caretip-landing .caretip-hero-headline-rotating-cluster {
-    display: inline;
+  .caretip-landing .caretip-hero-headline-rotating-stack {
+    gap: 0.375rem;
   }
 
-  .caretip-landing .caretip-hero-animated-word--compact,
-  .caretip-landing .caretip-hero-headline-rotating-suffix {
-    display: inline;
-    white-space: nowrap;
-  }
-
-  .caretip-landing .caretip-hero-animated-word__viewport {
-    transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    max-width: min(100%, 20.75rem);
   }
 
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    max-width: min(100%, 20rem);
+    max-width: min(100%, 21.75rem);
   }
 }
 
