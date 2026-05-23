@@ -4,6 +4,7 @@ import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { patchMyAccountSettings } from "../../../lib/api";
 import { logClientError } from "../../../lib/clientLog";
+import { PushNotificationTestButton } from "../../PushNotificationTestButton";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../../lib/fcmPush";
 import { toUserFriendlyMessage } from "../../../lib/errorMessages";
 import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
@@ -168,6 +169,7 @@ export function BusinessSettingsNotificationsPanel({
               void savePrefs({ notifyNewLogin: next });
             }}
           />
+          <PushNotificationTestButton />
         </div>
       )}
     </BusinessSettingsPanelShell>

@@ -1518,6 +1518,22 @@ export async function deletePushDeviceTokenApi(token: string): Promise<void> {
   });
 }
 
+export type SendTestPushResult = {
+  sent: boolean;
+  successCount: number;
+  failureCount: number;
+  tokenCount: number;
+  message: string;
+};
+
+export async function sendTestPushNotificationApi(): Promise<SendTestPushResult> {
+  return apiRequest<SendTestPushResult>(apiPath("/api/push/test"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
 export async function deleteAllPushDeviceTokensApi(): Promise<void> {
   await apiRequest<void>(apiPath("/api/push/tokens/all"), {
     method: "DELETE",

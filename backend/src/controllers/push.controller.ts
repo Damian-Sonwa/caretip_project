@@ -4,7 +4,9 @@ import {
   registerPushDeviceToken,
   removeAllPushDeviceTokensForUser,
   removePushDeviceToken,
+  sendTestPushToUser,
 } from "../services/push/pushNotification.service.js";
+import { isFcmConfigured } from "../services/push/fcmAdmin.js";
 import { CLIENT_FALLBACK, clientSafeMessage, logServerError } from "../utils/httpErrors.js";
 
 function getUserId(req: Request): string | null {
@@ -77,6 +79,39 @@ export async function deleteAllTokens(req: Request, res: Response) {
     return res.status(204).send();
   } catch (err) {
     logServerError("push.deleteAllTokens", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.generic),
+    });
+  }
+}
+
+/** Sends a test push to the authenticated user's registered device tokens. */
+export async function sendTestNotification(req: Request, res: Response) {
+  try {
+    const userId = getUserId(req);
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    if (!getPublicFirebaseWebConfig()) {
+      return res.status(503).json({
+        message: "Push notifications are not configured.",
+        code: "FCM_NOT_CONFIGURED",
+      });
+    }
+    if (!isFcmConfigured()) {
+      return res.status(503).json({
+        message: "FCM server credentials are not configured.",
+        code: "FCM_ADMIN_NOT_CONFIGURED",
+      });
+    }
+    const result = await sendTestPushToUser(userId);
+    if (!result.sent) {
+      const status = result.tokenCount === 0 ? 400 : 502;
+      return res.status(status).json(result);
+    }
+    return res.json(result);
+  } catch (err) {
+    logServerError("push.sendTestNotification", err);
     return res.status(500).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.generic),
     });

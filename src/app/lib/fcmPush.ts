@@ -72,25 +72,59 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   return Notification.requestPermission();
 }
 
-export async function registerFcmDeviceToken(): Promise<boolean> {
-  if (!isWebPushSupported()) return false;
+async function obtainFcmTokenFromBrowser(): Promise<string | null> {
+  if (!isWebPushSupported()) return null;
   const config = await loadConfig();
-  if (!config) return false;
+  if (!config) return null;
 
   const permission = await requestNotificationPermission();
-  if (permission !== "granted") return false;
+  if (permission !== "granted") return null;
 
   const reg = await serviceWorkerRegistration();
-  if (!reg) return false;
+  if (!reg) return null;
 
   const msg = getMessagingInstance(config);
-  if (!msg) return false;
+  if (!msg) return null;
 
   try {
-    const token = await getToken(msg, {
+    return await getToken(msg, {
       vapidKey: config.vapidKey,
       serviceWorkerRegistration: reg,
     });
+  } catch (err) {
+    logClientError("fcmPush.obtainFcmTokenFromBrowser", err);
+    return null;
+  }
+}
+
+/** Returns the current FCM token without persisting it on the server. */
+export async function getCurrentFcmDeviceToken(): Promise<string | null> {
+  return obtainFcmTokenFromBrowser();
+}
+
+export type FcmDiagnostics = {
+  supported: boolean;
+  permission: NotificationPermission;
+  configAvailable: boolean;
+  hasToken: boolean;
+};
+
+export async function getFcmDiagnostics(): Promise<FcmDiagnostics> {
+  const supported = isWebPushSupported();
+  const permission = supported ? Notification.permission : "denied";
+  const config = supported ? await loadConfig() : null;
+  const configAvailable = Boolean(config);
+  let hasToken = false;
+  if (configAvailable && permission === "granted") {
+    const token = await obtainFcmTokenFromBrowser();
+    hasToken = Boolean(token);
+  }
+  return { supported, permission, configAvailable, hasToken };
+}
+
+export async function registerFcmDeviceToken(): Promise<boolean> {
+  try {
+    const token = await obtainFcmTokenFromBrowser();
     if (!token) return false;
     await registerPushDeviceTokenApi(token);
     return true;

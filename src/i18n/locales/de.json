@@ -28,6 +28,24 @@
     "metricZeroGoals": "0 Ziele",
     "metricZeroRatings": "0 Bewertungen"
   },
+  "push": {
+    "test": {
+      "title": "Push-Benachrichtigung testen",
+      "hint": "Registriert diesen Browser und sendet eine Testnachricht an Ihr gespeichertes Gerät.",
+      "button": "Testbenachrichtigung senden",
+      "sending": "Wird gesendet…",
+      "statusChecking": "Push-Einrichtung wird geprüft…",
+      "statusUnsupported": "Push wird in diesem Browser nicht unterstützt.",
+      "statusNoConfig": "Push ist auf dem Server nicht konfiguriert.",
+      "statusDenied": "Benachrichtigungen sind blockiert. Erlauben Sie sie in den Browser-Einstellungen.",
+      "statusPrompt": "Erlauben Sie Benachrichtigungen, wenn Sie dazu aufgefordert werden.",
+      "statusNoToken": "Kein Gerätetoken erhalten. VAPID-Schlüssel und Service Worker prüfen.",
+      "statusReady": "Bereit — Token für diesen Browser verfügbar.",
+      "toastSuccess": "Testbenachrichtigung gesendet.",
+      "toastFailed": "Testbenachrichtigung konnte nicht gesendet werden.",
+      "toastRegisterFailed": "Gerät konnte nicht für Push registriert werden. Berechtigungen und Firebase-Konfiguration prüfen."
+    }
+  },
   "common": {
     "settingUp": "Wird für Sie eingerichtet…",
     "onlyAMoment": "Das dauert nur einen Moment.",

@@ -20,6 +20,7 @@ import {
 } from "../../lib/passwordValidation";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
+import { PushNotificationTestButton } from "../../components/PushNotificationTestButton";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
@@ -360,6 +361,7 @@ export function EmployeeSettingsPage() {
             <Switch id="push-n" checked={pushNotif} onCheckedChange={setPushNotif} />
           </div>
           <p className="text-xs text-muted-foreground">{t("employee.settings.prefsHint")}</p>
+          <PushNotificationTestButton />
         </section>
 
         <section className={employeeUi.settingsSection}>

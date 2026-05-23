@@ -28,6 +28,24 @@
     "metricZeroGoals": "0 goals",
     "metricZeroRatings": "0 ratings"
   },
+  "push": {
+    "test": {
+      "title": "Test push notification",
+      "hint": "Registers this browser and sends a test message to your saved device token.",
+      "button": "Send test notification",
+      "sending": "Sending…",
+      "statusChecking": "Checking push setup…",
+      "statusUnsupported": "Push is not supported in this browser.",
+      "statusNoConfig": "Push is not configured on the server.",
+      "statusDenied": "Notifications are blocked. Allow them in browser settings.",
+      "statusPrompt": "Allow notifications when prompted.",
+      "statusNoToken": "Could not obtain a device token. Check VAPID key and service worker.",
+      "statusReady": "Ready — token available for this browser.",
+      "toastSuccess": "Test notification sent.",
+      "toastFailed": "Could not send test notification.",
+      "toastRegisterFailed": "Could not register this device for push. Check permissions and Firebase config."
+    }
+  },
   "common": {
     "settingUp": "Setting things up for you…",
     "onlyAMoment": "This will only take a moment.",

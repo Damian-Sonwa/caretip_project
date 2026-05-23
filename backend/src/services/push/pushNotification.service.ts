@@ -16,6 +16,14 @@ function truncateUserAgent(ua: string | undefined): string | null {
   return t.length > 512 ? t.slice(0, 512) : t;
 }
 
+function envFirst(...keys: string[]): string {
+  for (const key of keys) {
+    const v = process.env[key]?.trim();
+    if (v) return v;
+  }
+  return "";
+}
+
 export function getPublicFirebaseWebConfig(): {
   apiKey: string;
   authDomain: string;
@@ -25,18 +33,23 @@ export function getPublicFirebaseWebConfig(): {
   appId: string;
   vapidKey: string;
 } | null {
-  const apiKey = process.env.FIREBASE_WEB_API_KEY?.trim();
-  const projectId = process.env.FIREBASE_PROJECT_ID?.trim();
-  const messagingSenderId = process.env.FIREBASE_MESSAGING_SENDER_ID?.trim();
-  const appId = process.env.FIREBASE_WEB_APP_ID?.trim();
-  const vapidKey = process.env.FIREBASE_WEB_VAPID_KEY?.trim();
+  const apiKey = envFirst("FIREBASE_WEB_API_KEY", "VITE_FIREBASE_API_KEY");
+  const projectId = envFirst("FIREBASE_PROJECT_ID", "VITE_FIREBASE_PROJECT_ID");
+  const messagingSenderId = envFirst(
+    "FIREBASE_MESSAGING_SENDER_ID",
+    "VITE_FIREBASE_MESSAGING_SENDER_ID",
+  );
+  const appId = envFirst("FIREBASE_WEB_APP_ID", "VITE_FIREBASE_APP_ID");
+  const vapidKey = envFirst("FIREBASE_WEB_VAPID_KEY", "VITE_FIREBASE_VAPID_KEY");
   if (!apiKey || !projectId || !messagingSenderId || !appId || !vapidKey) {
     return null;
   }
   const authDomain =
-    process.env.FIREBASE_AUTH_DOMAIN?.trim() || `${projectId}.firebaseapp.com`;
+    envFirst("FIREBASE_AUTH_DOMAIN", "VITE_FIREBASE_AUTH_DOMAIN") ||
+    `${projectId}.firebaseapp.com`;
   const storageBucket =
-    process.env.FIREBASE_STORAGE_BUCKET?.trim() || `${projectId}.appspot.com`;
+    envFirst("FIREBASE_STORAGE_BUCKET", "VITE_FIREBASE_STORAGE_BUCKET") ||
+    `${projectId}.appspot.com`;
   return {
     apiKey,
     authDomain,
@@ -273,4 +286,93 @@ export async function notifySystemAlertPush(
   body: string,
 ): Promise<void> {
   await sendPushToUser(userId, "system_alert", { title, body }, { type: "system_alert" });
+}
+
+export type SendTestPushResult = {
+  sent: boolean;
+  successCount: number;
+  failureCount: number;
+  tokenCount: number;
+  message: string;
+};
+
+/** Sends a test notification to all tokens for the user (ignores preference toggles). */
+export async function sendTestPushToUser(userId: string): Promise<SendTestPushResult> {
+  const tokens = await listTokensForUser(userId);
+  if (tokens.length === 0) {
+    return {
+      sent: false,
+      successCount: 0,
+      failureCount: 0,
+      tokenCount: 0,
+      message: "No device tokens registered. Enable push and allow browser notifications first.",
+    };
+  }
+  if (!isFcmConfigured()) {
+    return {
+      sent: false,
+      successCount: 0,
+      failureCount: 0,
+      tokenCount: tokens.length,
+      message: "FCM is not configured on the server (FIREBASE_SERVICE_ACCOUNT_JSON).",
+    };
+  }
+  const messaging = getFirebaseMessaging();
+  if (!messaging) {
+    return {
+      sent: false,
+      successCount: 0,
+      failureCount: 0,
+      tokenCount: tokens.length,
+      message: "Firebase Admin failed to initialize.",
+    };
+  }
+
+  const notification = {
+    title: "CareTip test",
+    body: "Push notifications are working.",
+  };
+
+  try {
+    const res = await messaging.sendEachForMulticast({
+      tokens,
+      notification,
+      data: { event: "system_alert", type: "test" },
+      webpush: { notification: { icon: "/icon-192.png" } },
+    });
+    const invalid: string[] = [];
+    res.responses.forEach((r, i) => {
+      if (!r.success && r.error?.code && FCM_INVALID_TOKEN_CODES.has(r.error.code)) {
+        invalid.push(tokens[i]!);
+      }
+    });
+    if (invalid.length > 0) {
+      await prisma.pushDeviceToken.deleteMany({ where: { token: { in: invalid } } });
+    }
+    await prisma.pushDeviceToken.updateMany({
+      where: { userId, token: { in: tokens } },
+      data: { lastUsedAt: new Date() },
+    });
+
+    const sent = res.successCount > 0;
+    return {
+      sent,
+      successCount: res.successCount,
+      failureCount: res.failureCount,
+      tokenCount: tokens.length,
+      message: sent
+        ? `Test notification sent to ${res.successCount} device(s).`
+        : "Failed to deliver to any registered device.",
+    };
+  } catch (err) {
+    await pruneInvalidTokens(tokens, err);
+    console.error("[push] test send failed:", err instanceof Error ? err.message : err);
+    return {
+      sent: false,
+      successCount: 0,
+      failureCount: tokens.length,
+      tokenCount: tokens.length,
+      message: err instanceof Error ? err.message : "Test notification failed.",
+    };
+  }
 }
