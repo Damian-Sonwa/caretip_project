@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import type { Prisma } from "@prisma/client";
+import { Role, type Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import {
   emitBusinessDataChanged,
@@ -341,14 +341,16 @@ export type PlatformAnnouncementAudience = "all" | "managers" | "employees";
 export async function resolveAnnouncementRecipientIds(
   audience: PlatformAnnouncementAudience,
 ): Promise<string[]> {
-  const roleFilter =
-    audience === "managers"
-      ? { role: "MANAGER" as const }
-      : audience === "employees"
-        ? { role: "EMPLOYEE" as const }
-        : { role: { in: ["MANAGER", "EMPLOYEE"] as const } };
+  const where: Prisma.UserWhereInput = { isActive: true };
+  if (audience === "managers") {
+    where.role = Role.MANAGER;
+  } else if (audience === "employees") {
+    where.role = Role.EMPLOYEE;
+  } else {
+    where.role = { in: [Role.MANAGER, Role.EMPLOYEE] };
+  }
   const rows = await prisma.user.findMany({
-    where: { ...roleFilter, isActive: true },
+    where,
     select: { id: true },
   });
   return rows.map((r) => r.id);
