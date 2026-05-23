@@ -2,6 +2,7 @@ node_modules
 dist
 .env
 .env.local
+FIREBASE_SERVICE_ACCOUNT_JSON_COPY.md
 *.log
 .DS_Store
 

@@ -318,12 +318,65 @@ export async function setBusinessLogoPath(businessId: string, publicPath: string
 }
 
 export async function setBusinessVerificationDocumentPath(businessId: string, publicPath: string) {
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { name: true },
+  });
   await prisma.business.update({
     where: { id: businessId },
     data: { verificationDocumentPath: publicPath },
   });
   emitBusinessDataChanged(businessId, "verification_doc_updated");
   emitPlatformDataUpdated("verification_document");
+  if (business?.name) {
+    const { onBusinessVerificationDocumentUploaded } = await import(
+      "./push/notification.triggers.js"
+    );
+    onBusinessVerificationDocumentUploaded(businessId, business.name);
+  }
+}
+
+export type PlatformAnnouncementAudience = "all" | "managers" | "employees";
+
+export async function resolveAnnouncementRecipientIds(
+  audience: PlatformAnnouncementAudience,
+): Promise<string[]> {
+  const roleFilter =
+    audience === "managers"
+      ? { role: "MANAGER" as const }
+      : audience === "employees"
+        ? { role: "EMPLOYEE" as const }
+        : { role: { in: ["MANAGER", "EMPLOYEE"] as const } };
+  const rows = await prisma.user.findMany({
+    where: { ...roleFilter, isActive: true },
+    select: { id: true },
+  });
+  return rows.map((r) => r.id);
+}
+
+/** Push broadcast to managers and/or employees (FCM). */
+export async function sendPlatformAnnouncement(input: {
+  title: string;
+  body: string;
+  url?: string;
+  audience: PlatformAnnouncementAudience;
+  announcementId?: string;
+}): Promise<{ recipientCount: number }> {
+  const title = input.title.trim();
+  const body = input.body.trim();
+  if (!title || !body) {
+    throw new Error("title and body are required");
+  }
+  const userIds = await resolveAnnouncementRecipientIds(input.audience);
+  const { onAdminAnnouncement } = await import("./push/notification.triggers.js");
+  onAdminAnnouncement({
+    userIds,
+    title,
+    body,
+    url: input.url?.trim() || undefined,
+    announcementId: input.announcementId,
+  });
+  return { recipientCount: userIds.length };
 }
 
 export async function impersonateBusinessManager(

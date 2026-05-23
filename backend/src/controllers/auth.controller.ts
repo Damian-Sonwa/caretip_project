@@ -220,10 +220,8 @@ export async function login(req: Request, res: Response) {
               ? req.headers["accept-language"]
               : undefined,
         });
-        const { notifyNewLoginPush } = await import(
-          "../services/push/pushNotification.service.js"
-        );
-        await notifyNewLoginPush(result.user.id);
+        const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
+        onLoginSecurityAlert(result.user.id);
       } catch (e) {
         logServerError("auth.login.sessionAlertEmail", e);
       }
@@ -522,10 +520,8 @@ export async function oauth(req: Request, res: Response) {
             select: { notifyNewLogin: true },
           });
           if (!settings?.notifyNewLogin) return;
-          const { notifyNewLoginPush } = await import(
-            "../services/push/pushNotification.service.js"
-          );
-          await notifyNewLoginPush(result.user.id);
+          const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
+          onLoginSecurityAlert(result.user.id);
         } catch (e) {
           logServerError("auth.oauth.loginPush", e);
         }

@@ -71,6 +71,7 @@ const handlerBody = `
 firebase.initializeApp(${JSON.stringify(firebaseConfig)});
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function (payload) {
+  if (payload.data && (payload.data.type === "test" || payload.data.event === "test")) return;
   const title =
     (payload.notification && payload.notification.title) ||
     (payload.data && payload.data.title) ||

@@ -16,9 +16,15 @@ export async function getLocationById(req: Request, res: Response) {
     if (!ctx) {
       return res.status(404).json({ message: "Location not found" });
     }
-    if ("locked" in ctx && ctx.locked) {
+    if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
+      notifyQrScanForBusiness({
+        businessId: ctx.business.id,
+        locationName: ctx.location.name,
+      });
+    });
     return res.json(ctx);
   } catch (err) {
     logServerError("tippingContext.getLocationById", err);
@@ -39,9 +45,17 @@ export async function getTableById(req: Request, res: Response) {
     if (!ctx) {
       return res.status(404).json({ message: "Table not found" });
     }
-    if ("locked" in ctx && ctx.locked) {
+    if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
+      notifyQrScanForBusiness({
+        businessId: ctx.business.id,
+        locationName: ctx.location.name,
+        tableName: ctx.table.name,
+        qrSlug: ctx.table.qrSlug,
+      });
+    });
     return res.json(ctx);
   } catch (err) {
     logServerError("tippingContext.getTableById", err);
@@ -61,9 +75,17 @@ export async function getByQrSlug(req: Request, res: Response) {
     if (!ctx) {
       return res.status(404).json({ message: "Table not found for this code" });
     }
-    if ("locked" in ctx && ctx.locked) {
+    if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
+      notifyQrScanForBusiness({
+        businessId: ctx.businessId,
+        locationName: ctx.locationName,
+        tableName: ctx.tableName,
+        qrSlug,
+      });
+    });
     return res.json({
       locationName: ctx.locationName,
       tableName: ctx.tableName,

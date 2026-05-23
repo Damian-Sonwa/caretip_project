@@ -199,6 +199,25 @@ export async function unregisterFcmDeviceToken(): Promise<void> {
   }
 }
 
+const USER_FACING_PUSH_EVENTS = new Set([
+  "tip_received",
+  "payout_paid",
+  "new_login",
+  "employee_invited",
+  "qr_scan",
+  "qr_payment_success",
+  "admin_announcement",
+  "system_alert",
+]);
+
+/** Suppress test/debug pushes from UI (system notification + in-app toast). */
+export function shouldDisplayUserFacingPush(data?: Record<string, string>): boolean {
+  if (data?.type === "test") return false;
+  const event = data?.event;
+  if (event) return USER_FACING_PUSH_EVENTS.has(event);
+  return true;
+}
+
 function payloadTitleBody(payload: MessagePayload): { title: string; body: string } {
   const title =
     payload.notification?.title ?? payload.data?.title ?? "CareTip";
@@ -243,7 +262,7 @@ export async function showPushNotification(
 
 /** Foreground messages — visible system notification + optional in-app callback. */
 export function subscribeForegroundPushMessages(
-  onPayload?: (title: string, body: string) => void,
+  onPayload?: (title: string, body: string, data?: Record<string, string>) => void,
 ): () => void {
   let cancelled = false;
   let unsubscribeOnMessage: (() => void) | null = null;
@@ -260,7 +279,8 @@ export function subscribeForegroundPushMessages(
     unsubscribeOnMessage = onMessage(msg, (payload) => {
       const { title, body } = payloadTitleBody(payload);
       const data = payload.data as Record<string, string> | undefined;
-      onPayload?.(title, body);
+      if (!shouldDisplayUserFacingPush(data)) return;
+      onPayload?.(title, body, data);
       void showPushNotification(title, body, data);
     });
   })();

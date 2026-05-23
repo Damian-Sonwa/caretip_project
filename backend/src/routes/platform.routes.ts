@@ -49,5 +49,6 @@ router.post(
   platformController.uploadVerificationDocument,
 );
 router.post("/impersonate", platformController.impersonate);
+router.post("/announcements", platformController.sendAnnouncement);
 
 export default router;

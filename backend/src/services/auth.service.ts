@@ -665,6 +665,18 @@ export async function activateEmployee(token: string, password: string): Promise
 
   await employeeActivationService.consumeActivationToken(employee.id);
 
+  const businessName =
+    (
+      await prisma.business.findUnique({
+        where: { id: employee.businessId },
+        select: { name: true },
+      })
+    )?.name?.trim() || "CareTip";
+
+  void import("./push/notification.triggers.js").then(({ onEmployeeAccountActivated }) => {
+    onEmployeeAccountActivated(resolvedUserId, businessName);
+  });
+
   const refreshed = await loadUserForAuthResult(resolvedUserId);
   return authResultForUserRecord(refreshed);
 }

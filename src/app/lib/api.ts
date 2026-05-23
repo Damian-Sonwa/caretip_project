@@ -9,6 +9,7 @@ import {
   fallbackMessageForHttpStatus,
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
   API_WAKEUP_NETWORK_MESSAGE,
+  isAbortError,
 } from "./errorMessages";
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
@@ -360,6 +361,7 @@ async function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<R
   try {
     return await fetch(url, init);
   } catch (err) {
+    if (isAbortError(err)) throw err;
     if (flags?.__caretipNetworkRetried || !isCrossOriginApi() || !isNetworkFetchFailure(err)) {
       throw err;
     }
@@ -397,6 +399,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   try {
     res = await fetchWithNetworkRetry(url, attachLatestBearer(init));
   } catch (err) {
+    if (isAbortError(err)) throw err;
     logClientError("api.apiRequest", err, { url });
     const baseMsg = toUserFriendlyMessage(err);
     const devHint = import.meta.env.DEV ? apiConfigHintForFailedFetch(url) : "";
@@ -1515,22 +1518,6 @@ export async function deletePushDeviceTokenApi(token: string): Promise<void> {
     headers: getHeaders(),
     credentials: "include",
     body: JSON.stringify({ token }),
-  });
-}
-
-export type SendTestPushResult = {
-  sent: boolean;
-  successCount: number;
-  failureCount: number;
-  tokenCount: number;
-  message: string;
-};
-
-export async function sendTestPushNotificationApi(): Promise<SendTestPushResult> {
-  return apiRequest<SendTestPushResult>(apiPath("/api/push/test"), {
-    method: "POST",
-    headers: getHeaders(),
-    credentials: "include",
   });
 }
 

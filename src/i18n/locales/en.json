@@ -28,24 +28,6 @@
     "metricZeroGoals": "0 goals",
     "metricZeroRatings": "0 ratings"
   },
-  "push": {
-    "test": {
-      "title": "Test push notification",
-      "hint": "Registers this browser and sends a test message to your saved device token.",
-      "button": "Send test notification",
-      "sending": "Sending…",
-      "statusChecking": "Checking push setup…",
-      "statusUnsupported": "Push is not supported in this browser.",
-      "statusNoConfig": "Push is not configured on the server.",
-      "statusDenied": "Notifications are blocked. Allow them in browser settings.",
-      "statusPrompt": "Allow notifications when prompted.",
-      "statusNoToken": "Could not obtain a device token. Check VAPID key and service worker.",
-      "statusReady": "Ready — token available for this browser.",
-      "toastSuccess": "Test notification sent.",
-      "toastFailed": "Could not send test notification.",
-      "toastRegisterFailed": "Could not register this device for push. Check permissions and Firebase config."
-    }
-  },
   "common": {
     "settingUp": "Setting things up for you…",
     "onlyAMoment": "This will only take a moment.",
@@ -2328,7 +2310,19 @@
     "platformSettingsPage": {
       "title": "System settings",
       "subtitle": "Global platform configuration. Additional controls can be wired here as your operations grow.",
-      "cardBody": "No mutable settings are exposed in this build. Use environment variables and your deployment pipeline for infrastructure changes."
+      "cardBody": "Infrastructure changes remain in environment variables and your deployment pipeline. User broadcasts can be sent via POST /api/platform/announcements."
+    },
+    "platformSettings": {
+      "notifications": {
+        "title": "Push notifications",
+        "desc": "Browser alerts for platform operations and account security on this device.",
+        "systemTitle": "Operational alerts",
+        "systemDesc": "Verification uploads, queue updates, and other platform events.",
+        "loginTitle": "Sign-in alerts",
+        "loginDesc": "Notify when your admin account is used to sign in.",
+        "hint": "Allow browser notifications when prompted so this device can receive alerts.",
+        "toastSaved": "Notification preferences saved."
+      }
     },
     "userManagementPage": {
       "title": "User management",

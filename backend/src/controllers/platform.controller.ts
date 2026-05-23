@@ -287,6 +287,39 @@ export async function updateBusiness(req: Request, res: Response) {
   }
 }
 
+export async function sendAnnouncement(req: Request, res: Response) {
+  try {
+    const body = req.body as Record<string, unknown>;
+    const title = typeof body.title === "string" ? body.title : "";
+    const message = typeof body.message === "string" ? body.message : typeof body.body === "string" ? body.body : "";
+    const url = typeof body.url === "string" ? body.url : undefined;
+    const audienceRaw = typeof body.audience === "string" ? body.audience : "all";
+    const audience =
+      audienceRaw === "managers" || audienceRaw === "employees" ? audienceRaw : "all";
+    if (!title.trim() || !message.trim()) {
+      return res.status(400).json({ message: "title and message are required" });
+    }
+    const result = await platformService.sendPlatformAnnouncement({
+      title,
+      body: message,
+      url,
+      audience,
+      announcementId:
+        typeof body.announcementId === "string" ? body.announcementId : undefined,
+    });
+    return res.json({
+      success: true,
+      recipientCount: result.recipientCount,
+      message: `Announcement queued for ${result.recipientCount} user(s).`,
+    });
+  } catch (err) {
+    logServerError("platform.sendAnnouncement", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't send that announcement. Try again."),
+    });
+  }
+}
+
 export async function impersonate(req: Request, res: Response) {
   try {
     const adminId = req.user?.userId ?? req.user?.id;

@@ -935,6 +935,14 @@ export async function createEmployeeWithActivation(
 
   emitBusinessDataChanged(businessId, "staff_created");
 
+  void import("./push/notification.triggers.js").then(({ onEmployeeInvited }) => {
+    onEmployeeInvited({
+      businessId,
+      employeeName: employee.name,
+      employeeEmail: trimmedEmail,
+    });
+  });
+
   return {
     id: employee.id,
     name: employee.name,

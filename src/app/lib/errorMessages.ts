@@ -31,6 +31,17 @@ export const SERVICE_UNAVAILABLE_CLIENT_MESSAGE = "Service temporarily unavailab
 export const API_WAKEUP_NETWORK_MESSAGE =
   "Unable to connect to the server. The API may still be waking up. Wait a few seconds and try again.";
 
+/** Fetch cancelled via AbortSignal (React effect cleanup, navigation, strict mode). */
+export function isAbortError(error: unknown): boolean {
+  if (error == null) return false;
+  if (typeof error === "object" && "name" in error) {
+    const name = (error as { name: unknown }).name;
+    if (name === "AbortError") return true;
+  }
+  const message = error instanceof Error ? error.message : String(error);
+  return /operation was aborted|request aborted|aborted/i.test(message);
+}
+
 const ERROR_MAP: Record<string, string> = {
   // Auth
   "Email already registered": "This email is already in use. Try signing in or use a different email.",
@@ -253,6 +264,7 @@ export function fallbackMessageForHttpStatus(status: number): string | undefined
  */
 export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMessageOptions): string {
   if (error == null) return localizeFriendlyMessageCopy(GENERIC_UNKNOWN_ERROR);
+  if (isAbortError(error)) return "";
 
   if (isApiRequestError(error) && error.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
     return localizeFriendlyMessageCopy(error.message);

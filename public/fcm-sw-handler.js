@@ -3,6 +3,7 @@
 firebase.initializeApp({"apiKey":"AIzaSyBpM5duD7VFcFIeFO1AwL19amzqV18xr8k","authDomain":"caretip-de812.firebaseapp.com","projectId":"caretip-de812","storageBucket":"caretip-de812.firebasestorage.app","messagingSenderId":"915087749520","appId":"1:915087749520:web:2b622dfc37d7ca2defc315"});
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function (payload) {
+  if (payload.data && payload.data.type === "test") return;
   const title =
     (payload.notification && payload.notification.title) ||
     (payload.data && payload.data.title) ||

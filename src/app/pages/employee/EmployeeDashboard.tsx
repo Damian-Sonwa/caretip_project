@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import i18n from "@/i18n/i18n";
-import { toUserFriendlyMessage } from "../../lib/errorMessages";
+import { isAbortError, toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
   TrendingUp,
@@ -239,8 +239,7 @@ export function EmployeeDashboard() {
 
     void fetchAccountSummary(controller.signal, gen)
       .catch((e: unknown) => {
-        if ((e as { name?: string })?.name === "AbortError") return;
-        if (gen !== accountSummaryFetchGen.current) return;
+        if (isAbortError(e) || gen !== accountSummaryFetchGen.current) return;
         logClientError("EmployeeDashboard.fetchAccountSummary", e);
       })
       .finally(() => {
@@ -261,8 +260,7 @@ export function EmployeeDashboard() {
 
     void fetchAnalyticsForTimeframe(analyticsTimeframe, controller.signal, gen)
       .catch((e: unknown) => {
-        if ((e as { name?: string })?.name === "AbortError") return;
-        if (gen !== analyticsFetchGen.current) return;
+        if (isAbortError(e) || gen !== analyticsFetchGen.current) return;
         logClientError("EmployeeDashboard.fetchAnalytics", e);
         setError(toUserFriendlyMessage(e, { audience: "employee" }));
         setTips([]);

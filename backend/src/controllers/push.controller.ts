@@ -85,9 +85,18 @@ export async function deleteAllTokens(req: Request, res: Response) {
   }
 }
 
-/** Sends a test push to the authenticated user's registered device tokens. */
+function isPushTestApiEnabled(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" || process.env.ENABLE_PUSH_TEST === "true"
+  );
+}
+
+/** Sends a test push to the authenticated user's registered device tokens (non-production only). */
 export async function sendTestNotification(req: Request, res: Response) {
   try {
+    if (!isPushTestApiEnabled()) {
+      return res.status(404).json({ message: "Not found" });
+    }
     const userId = getUserId(req);
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });

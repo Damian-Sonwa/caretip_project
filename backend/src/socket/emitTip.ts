@@ -26,9 +26,7 @@ export function emitNewTip(payload: NewTipPayload): void {
     io.to(`business:${payload.businessId}`).emit("tip_received", payload);
   }
 
-  void import("../services/push/pushNotification.service.js")
-    .then(({ notifyTipReceivedPush }) => notifyTipReceivedPush(payload))
-    .catch((err) => {
-      console.error("[push] notifyTipReceivedPush:", err instanceof Error ? err.message : err);
-    });
+  void import("../services/push/notification.triggers.js").then(({ onTipReceived }) => {
+    onTipReceived(payload);
+  });
 }

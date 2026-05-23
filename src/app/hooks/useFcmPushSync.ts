@@ -22,6 +22,13 @@ function managerWantsPush(prefs: {
   );
 }
 
+function platformAdminWantsPush(prefs: {
+  systemAlerts: boolean;
+  notifyNewLogin: boolean;
+}): boolean {
+  return prefs.systemAlerts || prefs.notifyNewLogin;
+}
+
 /**
  * Syncs FCM registration with stored notification preferences (no UI).
  */
@@ -36,7 +43,7 @@ export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void 
     if (!isWebPushSupported()) return;
 
     const role = user.role;
-    if (role !== "employee" && role !== "business") return;
+    if (role !== "employee" && role !== "business" && role !== "platform_admin") return;
 
     let cancelled = false;
 
@@ -46,6 +53,9 @@ export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void 
         if (role === "employee") {
           const profile = await getEmployeeProfile();
           wantsPush = profile.pushNotifications !== false;
+        } else if (role === "platform_admin") {
+          const settings = await getMyAccountSettings();
+          wantsPush = platformAdminWantsPush(settings);
         } else {
           const settings = await getMyAccountSettings();
           wantsPush = managerWantsPush(settings);
@@ -90,7 +100,13 @@ export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void 
   useEffect(() => {
     if (authStatus !== "authenticated" || !user) return undefined;
     if (!isWebPushSupported() || Notification.permission !== "granted") return undefined;
-    if (user.role !== "employee" && user.role !== "business") return undefined;
+    if (
+      user.role !== "employee" &&
+      user.role !== "business" &&
+      user.role !== "platform_admin"
+    ) {
+      return undefined;
+    }
 
     const refreshToken = () => {
       if (document.visibilityState !== "visible") return;
