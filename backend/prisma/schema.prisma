@@ -104,6 +104,7 @@ model User {
   emailVerificationTokens EmailVerificationToken[]
   refreshTokens RefreshToken[]
   settings UserSettings?
+  pushDeviceTokens PushDeviceToken[]
 
   /** Account-level security features (optional; does not change auth flow unless enforced). */
   twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
@@ -129,6 +130,23 @@ model UserSettings {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_settings")
+}
+
+/// FCM web push registration for a signed-in user (browser/device).
+model PushDeviceToken {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  /** FCM registration token from the browser. */
+  token      String   @unique
+  platform   String   @default("web")
+  userAgent  String?  @map("user_agent") @db.VarChar(512)
+  createdAt  DateTime @default(now()) @map("created_at")
+  lastUsedAt DateTime @default(now()) @map("last_used_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("push_device_tokens")
 }
 
 /// Long-lived refresh tokens for session continuity (hashed at rest; rotated on every use).

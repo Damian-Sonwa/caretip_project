@@ -34,6 +34,21 @@ console.log(
   "ADMIN_SEED_SECRET:",
   !hasAdminSeed ? "MISSING (required for npm run admin:create)" : adminSeedOk ? "set" : "too short (use at least 8 characters)",
 );
+const fcmServer = Boolean(
+  process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim() ||
+    process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim(),
+);
+const fcmWeb = Boolean(
+  process.env.FIREBASE_WEB_API_KEY?.trim() &&
+    process.env.FIREBASE_PROJECT_ID?.trim() &&
+    process.env.FIREBASE_MESSAGING_SENDER_ID?.trim() &&
+    process.env.FIREBASE_WEB_APP_ID?.trim() &&
+    process.env.FIREBASE_WEB_VAPID_KEY?.trim(),
+);
+console.log(
+  "FCM push (server + web config):",
+  fcmServer && fcmWeb ? "set" : "optional (push disabled until configured)",
+);
 if (!hasJwt || !dbOk) {
   process.exitCode = 1;
 }

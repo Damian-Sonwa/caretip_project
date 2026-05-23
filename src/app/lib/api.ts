@@ -1477,6 +1477,55 @@ export type MyAccountSettings = {
   preferredLocale?: string | null;
 };
 
+export type FirebaseWebConfig = {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  storageBucket: string;
+  messagingSenderId: string;
+  appId: string;
+  vapidKey: string;
+};
+
+export async function fetchPushFirebaseConfig(): Promise<FirebaseWebConfig | null> {
+  try {
+    const res = await fetch(apiPath("/api/push/config"), {
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) return null;
+    return (await res.json()) as FirebaseWebConfig;
+  } catch (err) {
+    logClientError("api.fetchPushFirebaseConfig", err);
+    return null;
+  }
+}
+
+export async function registerPushDeviceTokenApi(token: string): Promise<void> {
+  await apiRequest<void>(apiPath("/api/push/tokens"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function deletePushDeviceTokenApi(token: string): Promise<void> {
+  await apiRequest<void>(apiPath("/api/push/tokens"), {
+    method: "DELETE",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ token }),
+  });
+}
+
+export async function deleteAllPushDeviceTokensApi(): Promise<void> {
+  await apiRequest<void>(apiPath("/api/push/tokens/all"), {
+    method: "DELETE",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
 export async function getMyAccountSettings(): Promise<MyAccountSettings> {
   return apiRequest(apiPath("/api/me/settings"), {
     method: "GET",

@@ -115,6 +115,11 @@ export default defineConfig(({ mode }) => {
          * but keep large images out via `globIgnores` above.
          */
         maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+        importScripts: [
+          'https://www.gstatic.com/firebasejs/11.6.0/firebase-app-compat.js',
+          'https://www.gstatic.com/firebasejs/11.6.0/firebase-messaging-compat.js',
+          '/fcm-sw-handler.js',
+        ],
         runtimeCaching: [
           {
             // Cache built static images at runtime (fast repeat visits, no huge update downloads).

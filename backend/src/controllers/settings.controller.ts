@@ -56,6 +56,17 @@ export async function patchMySettings(req: Request, res: Response) {
       update: data,
     });
 
+    const allPushPrefsOff =
+      updated.tipReceivedNotifications === false &&
+      updated.systemAlerts === false &&
+      updated.notifyNewLogin === false;
+    if (allPushPrefsOff) {
+      const { removeAllPushDeviceTokensForUser } = await import(
+        "../services/push/pushNotification.service.js"
+      );
+      await removeAllPushDeviceTokensForUser(userId);
+    }
+
     if (body.preferredLocale !== undefined) {
       const pl = body.preferredLocale;
       if (pl === null) {

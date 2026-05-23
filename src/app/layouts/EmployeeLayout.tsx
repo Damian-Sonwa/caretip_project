@@ -11,6 +11,7 @@ import { syncEmployeeNotificationTips } from "../lib/employeeNotificationStore";
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
 import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
+import { PushNotificationSync } from "../components/PushNotificationSync";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -71,6 +72,7 @@ export function EmployeeLayout() {
 
   return (
     <div className="relative min-h-screen bg-background">
+      <PushNotificationSync />
       <div className="relative z-10">
         {isAppReady ? (
           <EmployeeSidebar businessBranding={branding} />

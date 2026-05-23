@@ -4,6 +4,7 @@ import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { patchMyAccountSettings } from "../../../lib/api";
 import { logClientError } from "../../../lib/clientLog";
+import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../../lib/fcmPush";
 import { toUserFriendlyMessage } from "../../../lib/errorMessages";
 import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
 import type { useBusinessSettingsData } from "./useBusinessSettingsData";
@@ -90,6 +91,15 @@ export function BusinessSettingsNotificationsPanel({
       setSummaryEmails(updated.summaryEmails);
       setSystemAlerts(updated.systemAlerts);
       setNotifyNewLogin(updated.notifyNewLogin);
+      const wantsPush =
+        updated.tipReceivedNotifications ||
+        updated.systemAlerts ||
+        updated.notifyNewLogin;
+      if (wantsPush) {
+        await registerFcmDeviceToken();
+      } else {
+        await unregisterFcmDeviceToken();
+      }
       toast.success(t("business.accountSettings.toastPrefsSaved"), {
         style: { background: TEAL, color: "#fff" },
       });

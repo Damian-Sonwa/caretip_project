@@ -27,6 +27,7 @@ import paymentRoutes from "./routes/payment.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
 import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
+import pushRoutes from "./routes/push.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
@@ -120,6 +121,7 @@ app.use("/api/tipping-context", tippingContextRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/platform", platformRoutes);
+app.use("/api/push", pushRoutes);
 /** Alias for SuperAdmin clients (same handlers as `/api/platform`). */
 app.use("/api/admin", platformRoutes);
 

@@ -20,6 +20,7 @@ import {
 } from "../../lib/passwordValidation";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
+import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { Input } from "../../components/ui/input";
@@ -105,6 +106,11 @@ export function EmployeeSettingsPage() {
         emailNotifications: emailNotif,
         pushNotifications: pushNotif,
       });
+      if (pushNotif) {
+        await registerFcmDeviceToken();
+      } else {
+        await unregisterFcmDeviceToken();
+      }
       updateUser({ name: updated.name, avatar: updated.avatar ?? undefined });
       toast.success(t("employee.settings.toastProfileSaved"), { style: { background: TEAL, color: "#fff" } });
     } catch (e) {

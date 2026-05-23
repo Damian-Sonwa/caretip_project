@@ -81,6 +81,12 @@ export async function patchMyProfile(req: Request, res: Response) {
       ...(emailNotifications !== undefined ? { emailNotifications: Boolean(emailNotifications) } : {}),
       ...(pushNotifications !== undefined ? { pushNotifications: Boolean(pushNotifications) } : {}),
     });
+    if (pushNotifications === false) {
+      const { removeAllPushDeviceTokensForUser } = await import(
+        "../services/push/pushNotification.service.js"
+      );
+      await removeAllPushDeviceTokensForUser(userId);
+    }
     return res.json(updated);
   } catch (err) {
     logServerError("employee.patchMyProfile", err);

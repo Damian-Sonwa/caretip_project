@@ -19,10 +19,16 @@ export interface NewTipPayload {
  */
 export function emitNewTip(payload: NewTipPayload): void {
   const io = getSocketIO();
-  if (!io) return;
+  if (io) {
+    io.to(`employee:${payload.employeeId}`).emit("new_tip", payload);
+    io.to(`business:${payload.businessId}`).emit("new_tip", payload);
+    io.to(`employee:${payload.employeeId}`).emit("tip_received", payload);
+    io.to(`business:${payload.businessId}`).emit("tip_received", payload);
+  }
 
-  io.to(`employee:${payload.employeeId}`).emit("new_tip", payload);
-  io.to(`business:${payload.businessId}`).emit("new_tip", payload);
-  io.to(`employee:${payload.employeeId}`).emit("tip_received", payload);
-  io.to(`business:${payload.businessId}`).emit("tip_received", payload);
+  void import("../services/push/pushNotification.service.js")
+    .then(({ notifyTipReceivedPush }) => notifyTipReceivedPush(payload))
+    .catch((err) => {
+      console.error("[push] notifyTipReceivedPush:", err instanceof Error ? err.message : err);
+    });
 }

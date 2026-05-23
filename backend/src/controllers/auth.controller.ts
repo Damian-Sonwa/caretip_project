@@ -220,6 +220,10 @@ export async function login(req: Request, res: Response) {
               ? req.headers["accept-language"]
               : undefined,
         });
+        const { notifyNewLoginPush } = await import(
+          "../services/push/pushNotification.service.js"
+        );
+        await notifyNewLoginPush(result.user.id);
       } catch (e) {
         logServerError("auth.login.sessionAlertEmail", e);
       }
@@ -510,6 +514,23 @@ export async function oauth(req: Request, res: Response) {
     } catch (e) {
       logServerError("auth.oauth.issueRefreshToken", e);
     }
+    if (isLogin) {
+      void (async () => {
+        try {
+          const settings = await prisma.userSettings.findUnique({
+            where: { userId: result.user.id },
+            select: { notifyNewLogin: true },
+          });
+          if (!settings?.notifyNewLogin) return;
+          const { notifyNewLoginPush } = await import(
+            "../services/push/pushNotification.service.js"
+          );
+          await notifyNewLoginPush(result.user.id);
+        } catch (e) {
+          logServerError("auth.oauth.loginPush", e);
+        }
+      })();
+    }
     return res.status(isLogin ? 200 : 201).json(result);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
@@ -592,6 +613,17 @@ export async function logout(req: Request, res: Response) {
     const refreshCookie = parseCookie(cookieHeader, refreshCookieName());
     if (refreshCookie) {
       await revokeRefreshToken(refreshCookie);
+    }
+
+    if (refreshCookie) {
+      const { userIdForRefreshToken } = await import("../services/refreshToken.service.js");
+      const { removeAllPushDeviceTokensForUser } = await import(
+        "../services/push/pushNotification.service.js"
+      );
+      const logoutUserId = await userIdForRefreshToken(refreshCookie);
+      if (logoutUserId) {
+        await removeAllPushDeviceTokensForUser(logoutUserId);
+      }
     }
 
     clearRefreshCookie(res);
