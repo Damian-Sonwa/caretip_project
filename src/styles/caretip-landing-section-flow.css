@@ -185,7 +185,12 @@ html:not(.dark) .caretip-landing .caretip-hospitality-media-card {
   background: var(--caretip-landing-card-bg);
 }
 
-html:not(.dark) .caretip-landing .hero-showcase-card,
+html:not(.dark) .caretip-landing .hero-showcase-card {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
 html:not(.dark) .caretip-landing .caretip-hospitality-media-card {
   box-shadow:
     0 2px 4px rgba(17, 17, 17, 0.03),

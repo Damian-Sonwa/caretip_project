@@ -222,7 +222,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             className={cn(
               "caretip-hero-showcase-radial pointer-events-none absolute inset-0",
               "max-lg:bg-[linear-gradient(105deg,#ffffff_0%,#ffffff_14%,rgba(255,255,255,0.98)_24%,rgba(255,255,255,0.88)_36%,rgba(255,255,255,0.45)_50%,transparent_62%)]",
-              "lg:bg-[linear-gradient(90deg,#ffffff_0%,rgba(255,255,255,0.72)_10%,rgba(255,255,255,0.28)_20%,transparent_30%,transparent_70%,rgba(255,255,255,0.28)_80%,rgba(255,255,255,0.72)_90%,#ffffff_100%)]",
+              "lg:bg-transparent",
             )}
           />
 

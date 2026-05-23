@@ -11,25 +11,23 @@ import {
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
-  "caretip-landing-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/95 bg-white",
-  "px-3.5 pb-4 pt-3.5 max-md:px-3.5 max-md:pb-4 max-md:pt-3.5 sm:px-6 sm:pb-7 sm:pt-6",
-  "shadow-[0_1px_2px_rgba(15,15,15,0.04),0_10px_28px_rgba(15,15,15,0.05)]",
-  "transition-[transform,box-shadow,border-color] duration-300 ease-out",
-  "md:hover:border-neutral-300/90 md:hover:shadow-[0_2px_4px_rgba(15,15,15,0.05),0_16px_40px_rgba(15,15,15,0.08)]",
-  "dark:border-neutral-700/90 dark:bg-neutral-900",
-  "dark:shadow-[0_1px_2px_rgba(0,0,0,0.35),0_12px_32px_rgba(0,0,0,0.42)]",
-  "dark:md:hover:border-primary/30 dark:md:hover:shadow-[0_18px_44px_rgba(0,0,0,0.5)]",
+  "caretip-landing-card caretip-landing-feature-card group relative flex h-full flex-col overflow-hidden rounded-2xl",
+  "border border-neutral-200/80 bg-white/95",
+  "px-4 pb-4 pt-4 sm:px-6 sm:pb-7 sm:pt-6",
+  "dark:border-neutral-700/85 dark:bg-neutral-900/95",
 );
 
 const iconWrapClassName = cn(
-  "mb-2.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg max-md:mb-2.5 max-md:h-9 max-md:w-9 sm:mb-5 sm:h-[52px] sm:w-[52px] sm:rounded-xl",
-  "bg-primary/[0.14] text-primary ring-1 ring-primary/25",
-  "transition-colors duration-300 group-hover:bg-primary/[0.18] group-hover:ring-primary/35",
-  "dark:bg-primary/20 dark:text-[#f0a84d] dark:ring-primary/35",
+  "caretip-landing-feature-icon mb-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:mb-5 sm:h-[52px] sm:w-[52px]",
+  "bg-primary/[0.14] text-primary ring-1 ring-primary/20",
+  "transition-[background-color,box-shadow,transform] duration-300 ease-out",
+  "group-hover:bg-primary/[0.17] group-hover:ring-primary/30",
+  "md:group-hover:-translate-y-px",
+  "dark:bg-primary/20 dark:text-[#f0a84d] dark:ring-primary/30",
 );
 
 const iconClassName =
-  "h-4 w-4 stroke-[2.25] text-primary max-md:h-4 max-md:w-4 dark:text-[#f0a84d] sm:h-[22px] sm:w-[22px]";
+  "h-4 w-4 stroke-[2.25] text-primary sm:h-[22px] sm:w-[22px] dark:text-[#f0a84d]";
 
 const featureAccentVariants: LandingAccentVariant[] = [
   "spark",
@@ -90,10 +88,12 @@ export function LandingFeaturesSection() {
   return (
     <section
       id="features"
-      className={cn(landingUi.section, landingUi.landingSurface, "relative overflow-hidden lg:py-24 dark:bg-neutral-950")}
+      className={cn(
+        landingUi.section,
+        landingUi.landingSurface,
+        "caretip-landing-features-section relative overflow-hidden lg:py-24 dark:bg-neutral-950",
+      )}
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
-
       <div className="relative mx-auto max-w-7xl">
         <div className={landingUi.sectionIntro}>
           <motion.h2
@@ -117,7 +117,7 @@ export function LandingFeaturesSection() {
           ) : null}
         </div>
 
-        <ul className="grid grid-cols-1 gap-2.5 max-md:gap-2.5 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">
+        <ul className="caretip-landing-features-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, idx) => {
             const Icon = item.icon;
             return (
@@ -132,17 +132,17 @@ export function LandingFeaturesSection() {
                 <article className={cardClassName}>
                   <LandingSectionAccent
                     variant={featureAccentVariants[idx % featureAccentVariants.length]}
-                    className="mb-2 max-md:mb-2"
+                    className="caretip-landing-feature-accent mb-2.5 sm:mb-3"
                   >
                     {item.tag}
                   </LandingSectionAccent>
                   <div className={iconWrapClassName}>
                     <Icon className={iconClassName} aria-hidden />
                   </div>
-                  <h3 className={cn(landingType.cardTitle, "tracking-tight")}>
+                  <h3 className={cn(landingType.cardTitle, "tracking-tight text-neutral-900 dark:text-neutral-50")}>
                     {item.title}
                   </h3>
-                  <p className={cn(landingUi.cardFeatureBody, "flex-1")}>
+                  <p className={cn(landingUi.cardFeatureBody, "flex-1 text-neutral-600 dark:text-neutral-400")}>
                     {item.text}
                   </p>
                 </article>

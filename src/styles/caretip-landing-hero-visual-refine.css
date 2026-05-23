@@ -44,57 +44,18 @@ html.dark .caretip-landing .caretip-hero-warm-ambience {
   pointer-events: none;
 }
 
-/* Composition edge fade — soft vignette without blurring the image */
+/* Composition edge fade — disabled (image-only; no faux card edge) */
 .caretip-landing .caretip-hero-showcase-composition::after {
-  content: "";
-  position: absolute;
-  inset: -3% -4%;
-  z-index: 4;
-  pointer-events: none;
-  border-radius: inherit;
-  background: radial-gradient(
-    ellipse 90% 84% at 50% 46%,
-    transparent 54%,
-    rgba(250, 248, 245, 0.1) 76%,
-    rgba(250, 248, 245, 0.26) 100%
-  );
+  display: none !important;
 }
 
-html.dark .caretip-landing .caretip-hero-showcase-composition::after {
-  background: radial-gradient(
-    ellipse 90% 84% at 50% 46%,
-    transparent 54%,
-    rgba(23, 23, 23, 0.12) 76%,
-    rgba(23, 23, 23, 0.28) 100%
-  );
-}
-
-/* Showcase frame — subtle edge luminance */
+/* Showcase frame — hidden (image-only hero; no visible card chrome) */
 .caretip-landing .caretip-hero-showcase-edge-glow {
-  position: absolute;
-  inset: -1px;
-  z-index: 2;
-  border-radius: inherit;
-  pointer-events: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55),
-    0 0 0 1px rgba(255, 255, 255, 0.18);
-  opacity: 0.85;
+  display: none !important;
 }
 
 .caretip-landing .caretip-hero-showcase-card-glow {
-  position: absolute;
-  inset: -10%;
-  z-index: 0;
-  pointer-events: none;
-  background: radial-gradient(
-    ellipse 68% 56% at 50% 40%,
-    rgba(233, 120, 28, 0.16) 0%,
-    rgba(255, 220, 180, 0.07) 38%,
-    transparent 70%
-  );
-  filter: blur(22px);
-  opacity: 0.8;
+  display: none !important;
 }
 
 .caretip-landing .caretip-hero-showcase-glow {
@@ -107,29 +68,48 @@ html.dark .caretip-landing .caretip-hero-showcase-composition::after {
   }
 }
 
-/* Card media — soft overlay lighting */
+/* Card media overlay — hidden */
 .caretip-landing .caretip-hero-showcase-light-overlay {
-  background: linear-gradient(
-    165deg,
-    rgba(255, 252, 248, 0.1) 0%,
-    transparent 44%,
-    rgba(28, 22, 16, 0.03) 100%
-  );
-  mix-blend-mode: soft-light;
-  opacity: 0.55;
+  display: none !important;
 }
 
-/* Stronger layered shadow on hero card (additive) */
-.caretip-landing .caretip-hero-showcase-card--depth {
-  box-shadow:
-    0 2px 4px rgba(15, 23, 42, 0.04),
-    0 14px 36px -10px rgba(15, 23, 42, 0.09),
-    0 24px 52px -18px rgba(30, 24, 16, 0.1);
+/* Hero image mount — no visible card box */
+.caretip-landing .caretip-hero-section .hero-showcase-card,
+.caretip-landing .caretip-hero-showcase-card--depth,
+.caretip-landing .caretip-hero-showcase-card--frameless {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
 }
 
-/* Outer card edge soften */
-.caretip-landing .caretip-hero-section .hero-showcase-card {
-  border-color: rgba(255, 255, 255, 0.52);
+.caretip-landing .caretip-hero-section .hero-showcase-card-media {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Desktop — no white column fade or rounded “card” clip around the device image */
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-showcase-radial {
+    background: transparent !important;
+    opacity: 0 !important;
+  }
+
+  .caretip-landing .caretip-hero-section .hero-showcase-card,
+  .caretip-landing .caretip-hero-section .hero-showcase-card-media,
+  .caretip-landing .caretip-hero-showcase-composition,
+  .caretip-landing .caretip-hero-showcase-frame-depth {
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+  }
+
+  .caretip-landing .caretip-hero-section .hero-showcase-card-media img {
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
 }
 
 /* Float metric pills — light glass, edge-anchored */

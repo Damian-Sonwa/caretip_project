@@ -1,0 +1,191 @@
+/**
+ * Landing #features — soft elevated cards, warm section atmosphere.
+ * Presentation only; layout grid unchanged.
+ */
+
+/* —— Section atmosphere —— */
+html:not(.dark) .caretip-landing #features.caretip-landing-features-section {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-white) 0%,
+    #f9f6f2 34%,
+    #f4f0ea 72%,
+    var(--caretip-ivory-soft) 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing #features.caretip-landing-features-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 72% 48% at 14% 18%, rgba(233, 120, 28, 0.055) 0%, transparent 58%),
+    radial-gradient(ellipse 58% 42% at 92% 82%, rgba(233, 120, 28, 0.04) 0%, transparent 56%);
+}
+
+html.dark .caretip-landing #features.caretip-landing-features-section {
+  background: linear-gradient(180deg, #0a0a0a 0%, #111111 48%, #090909 100%) !important;
+}
+
+html.dark .caretip-landing #features.caretip-landing-features-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 50% at 50% 0%,
+    rgba(233, 120, 28, 0.07) 0%,
+    transparent 62%
+  );
+}
+
+/* —— Feature cards —— */
+.caretip-landing .caretip-landing-feature-card {
+  border-radius: 1rem;
+  transition:
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.32s ease;
+}
+
+.caretip-landing .caretip-landing-feature-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.caretip-landing .caretip-landing-feature-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-feature-card {
+  border-color: rgba(17, 17, 17, 0.075) !important;
+  background: linear-gradient(
+    168deg,
+    rgba(255, 255, 255, 0.99) 0%,
+    rgba(255, 252, 248, 0.97) 45%,
+    rgba(250, 247, 242, 0.95) 100%
+  ) !important;
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.025),
+    0 14px 40px -16px rgba(26, 22, 18, 0.08),
+    0 28px 64px -32px rgba(26, 22, 18, 0.06) !important;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+html:not(.dark) .caretip-landing .caretip-landing-feature-card::before {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+@media (hover: hover) {
+  html:not(.dark) .caretip-landing .caretip-landing-feature-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(233, 120, 28, 0.16) !important;
+    box-shadow:
+      0 1px 2px rgba(17, 17, 17, 0.03),
+      0 20px 48px -14px rgba(26, 22, 18, 0.11),
+      0 0 0 1px rgba(233, 120, 28, 0.07) !important;
+  }
+}
+
+html.dark .caretip-landing .caretip-landing-feature-card {
+  border-color: rgba(255, 255, 255, 0.09) !important;
+  background: linear-gradient(
+    168deg,
+    rgba(36, 36, 38, 0.94) 0%,
+    rgba(28, 28, 30, 0.9) 55%,
+    rgba(24, 24, 26, 0.88) 100%
+  ) !important;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.28),
+    0 16px 44px -18px rgba(0, 0, 0, 0.45) !important;
+}
+
+html.dark .caretip-landing .caretip-landing-feature-card::before {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}
+
+@media (hover: hover) {
+  html.dark .caretip-landing .caretip-landing-feature-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(233, 120, 28, 0.28) !important;
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.32),
+      0 22px 50px -16px rgba(0, 0, 0, 0.52) !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing .caretip-landing-feature-card {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .caretip-landing .caretip-landing-feature-card:hover {
+    transform: none !important;
+  }
+}
+
+/* Icon + accent hierarchy */
+html:not(.dark) .caretip-landing .caretip-landing-feature-icon {
+  background: linear-gradient(145deg, rgba(233, 120, 28, 0.16) 0%, rgba(233, 120, 28, 0.1) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 1px 2px rgba(233, 120, 28, 0.08);
+}
+
+html.dark .caretip-landing .caretip-landing-feature-icon {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.caretip-landing .caretip-landing-feature-card [data-landing-accent] {
+  margin-bottom: 0.125rem;
+}
+
+.caretip-landing .caretip-landing-feature-card [data-landing-accent] [class*="tracking-"] {
+  letter-spacing: 0.2em;
+}
+
+.caretip-landing .caretip-landing-feature-card h3 {
+  margin-top: 0.125rem;
+}
+
+.caretip-landing .caretip-landing-feature-card p {
+  margin-top: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-landing-feature-card p {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Grid rhythm */
+.caretip-landing .caretip-landing-features-grid {
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-landing-features-grid {
+    gap: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-landing-features-grid {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 639px) {
+  html:not(.dark) .caretip-landing .caretip-landing-feature-card {
+    box-shadow:
+      0 1px 2px rgba(17, 17, 17, 0.028),
+      0 10px 32px -14px rgba(26, 22, 18, 0.09) !important;
+  }
+}

@@ -289,12 +289,12 @@ export const landingUi = {
     "pointer-events-none absolute inset-0 z-30 overflow-hidden max-lg:overflow-visible",
   /** Mobile hero — same scale/aspect as Live in Minutes demo (desktop unchanged via child tokens). */
   heroShowcaseMobileShell:
-    "max-lg:[&_.hero-showcase-card-media]:rounded-[1.5rem] max-lg:[&_.hero-showcase-card-media]:shadow-[0_20px_56px_-16px_rgba(15,23,42,0.14)]",
-  /** Outer frame — visible overflow so float card + shadows are not clipped. */
+    "max-lg:[&_.hero-showcase-card-media]:rounded-[1.5rem]",
+  /** Image mount — no visible card chrome (borders/shadows handled in CSS). */
   heroShowcaseCard:
-    "hero-showcase-card relative z-[1] block w-full max-w-full overflow-visible rounded-[28px] border border-white/60 bg-transparent p-0 leading-[0] shadow-[0_30px_80px_rgba(0,0,0,0.18)] ring-1 ring-black/[0.04] dark:border-white/10 dark:shadow-[0_30px_80px_rgba(0,0,0,0.42)] sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] max-lg:rounded-[1.5rem] sm:max-lg:max-w-[22rem] sm:max-lg:rounded-[1.5rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)] lg:overflow-hidden lg:shadow-[0_28px_72px_-24px_rgba(0,0,0,0.22)]",
+    "hero-showcase-card caretip-hero-showcase-card--frameless relative z-[1] block w-full max-w-full overflow-visible rounded-[28px] border-0 bg-transparent p-0 leading-[0] shadow-none ring-0 sm:rounded-[32px] max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] max-lg:rounded-[1.5rem] sm:max-lg:max-w-[22rem] sm:max-lg:rounded-[1.5rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)] lg:overflow-hidden",
   heroShowcaseCardMedia:
-    "hero-showcase-card-media h-full w-full overflow-hidden rounded-[inherit] bg-neutral-950",
+    "hero-showcase-card-media h-full w-full overflow-hidden rounded-[inherit] bg-transparent",
   heroShowcaseGlow:
     "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(233,120,28,0.16)_0%,rgba(233,120,28,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 lg:-inset-3 lg:blur-xl dark:opacity-50",
   heroShowcaseImg:
