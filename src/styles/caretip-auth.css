@@ -89,3 +89,43 @@
   display: flex !important;
   justify-content: center !important;
 }
+
+/* Business onboarding — keep CTAs inside the card at all breakpoints */
+.business-onboarding-card {
+  width: 100%;
+  max-width: 100%;
+}
+
+.business-onboarding-actions {
+  width: 100%;
+  min-width: 0;
+}
+
+.business-onboarding-continue.caretip-btn-primary {
+  box-sizing: border-box;
+  flex-shrink: 1;
+  min-width: 0;
+  max-width: 100%;
+  text-align: center;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .business-onboarding-continue.caretip-btn-primary {
+    flex: 1 1 0;
+    width: auto;
+    max-width: min(100%, 14.5rem);
+  }
+
+  .business-onboarding-back {
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 639px) {
+  .business-onboarding-continue.caretip-btn-primary,
+  .business-onboarding-back {
+    width: 100%;
+    max-width: 100%;
+  }
+}

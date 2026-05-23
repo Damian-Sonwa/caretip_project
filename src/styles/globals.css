@@ -561,6 +561,14 @@ textarea::placeholder {
   .business-dashboard-hero .dashboard-hero-container.hidden.lg\:grid {
     column-gap: 3rem;
     row-gap: 1.5rem;
+    align-items: center;
+  }
+
+  .employee-dashboard-hero .employee-hero-visual,
+  .business-dashboard-hero .business-hero-visual {
+    margin-left: auto;
+    margin-right: auto;
+    justify-self: center;
   }
 }
 

@@ -444,7 +444,7 @@ export function EmployeeDashboard() {
           hideTabs
           actionsPlacement="belowText"
           mobileAlign="left"
-          className="employee-dashboard-hero mb-8 lg:mb-6"
+          className="employee-dashboard-hero mb-7 sm:mb-8 lg:mb-7"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
           badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
           titleClassName="max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
@@ -473,7 +473,7 @@ export function EmployeeDashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
-              className="employee-hero-visual relative flex w-full flex-col items-center justify-center touch-manipulation max-lg:-mx-4 max-lg:w-[calc(100%+2rem)] max-lg:max-w-none sm:max-lg:-mx-5 sm:max-lg:w-[calc(100%+2.5rem)] lg:ml-auto lg:w-full lg:max-w-full"
+              className="employee-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
             >
               <motion.div
                 className={cn(
@@ -566,9 +566,9 @@ export function EmployeeDashboard() {
         />
       </div>
 
-      <TracingBeam className={cn(employeeUi.pageInner, "!pt-3 sm:!pt-2")}>
-        <section className="mb-4 space-y-3" aria-labelledby="employee-analytics-period-heading">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+      <TracingBeam className={cn(employeeUi.pageInner, "employee-dashboard-body !pt-2 sm:!pt-3")}>
+        <section className="employee-dashboard-analytics-intro mb-1" aria-labelledby="employee-analytics-period-heading">
+          <div className="employee-dashboard-analytics-intro__head">
             <div className="min-w-0 space-y-1">
               <h2
                 id="employee-analytics-period-heading"
@@ -613,7 +613,7 @@ export function EmployeeDashboard() {
           </div>
         </section>
 
-        <div className={cn(employeeUi.section, "pb-6 pt-2")}>
+        <div className={cn(employeeUi.section, "employee-dashboard-section pb-6 pt-1")}>
           <FixPrompt
             id="profilePhoto"
             issueActive={!user.avatar}
@@ -628,7 +628,7 @@ export function EmployeeDashboard() {
             {...dashboardBlockMotion}
             className={cn("transition-opacity duration-200", !valuesMatchAnalyticsPeriod && "opacity-[0.92]")}
           >
-            <div className="relative mb-2 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 lg:gap-6">
+            <div className={cn(employeeUi.statsGrid, "relative")}>
               {analyticsLoading && !useDevDemo ? (
                 <div
                   aria-hidden

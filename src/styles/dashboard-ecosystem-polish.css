@@ -6,6 +6,24 @@
 .caretip-dashboard-shell.business-dashboard,
 .caretip-dashboard-shell.employee-dashboard {
   --dashboard-card-radius: 1rem;
+  --dashboard-section-gap: 1.25rem;
+  --dashboard-block-gap: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard,
+  .caretip-dashboard-shell.employee-dashboard {
+    --dashboard-section-gap: 1.5rem;
+    --dashboard-block-gap: 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.business-dashboard,
+  .caretip-dashboard-shell.employee-dashboard {
+    --dashboard-section-gap: 1.75rem;
+    --dashboard-block-gap: 2rem;
+  }
 }
 
 /* Cards */
@@ -52,10 +70,28 @@
 .caretip-dashboard-shell .employee-stat-card {
   gap: 0.35rem;
   justify-content: space-between;
+  height: 100%;
   transition:
     box-shadow 0.22s ease,
     border-color 0.22s ease,
     transform 0.18s ease;
+}
+
+.caretip-dashboard-shell .employee-dashboard-stats-grid,
+.caretip-dashboard-shell .business-dashboard-stats-grid {
+  align-items: stretch;
+}
+
+.caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card,
+.caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card {
+  min-height: 7.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card,
+  .caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card {
+    min-height: 8.25rem;
+  }
 }
 
 .caretip-dashboard-shell .business-stat-card--featured,
@@ -256,7 +292,64 @@
 }
 
 /* Section intro rhythm (analytics blocks) */
-.caretip-dashboard-shell #business-analytics-period-heading + p {
+.caretip-dashboard-shell #business-analytics-period-heading + p,
+.caretip-dashboard-shell #employee-analytics-period-heading + p {
   text-wrap: pretty;
   line-height: 1.5;
+}
+
+.caretip-dashboard-shell .employee-dashboard-analytics-intro,
+.caretip-dashboard-shell .business-dashboard-analytics-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.caretip-dashboard-shell .employee-dashboard-analytics-intro__head,
+.caretip-dashboard-shell .business-dashboard-analytics-intro__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .employee-dashboard-analytics-intro__head,
+  .caretip-dashboard-shell .business-dashboard-analytics-intro__head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+.caretip-dashboard-shell.employee-dashboard .employee-dashboard-body,
+.caretip-dashboard-shell.business-dashboard .business-dashboard-body {
+  padding-top: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .employee-dashboard-hero .employee-hero-visual,
+  .business-dashboard-hero .business-hero-visual {
+    width: 100%;
+    max-width: 34rem;
+  }
+}
+
+/* Laptop-width dashboard balance (1024–1279px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .caretip-dashboard-shell.business-dashboard .caretip-container,
+  .caretip-dashboard-shell.employee-dashboard .caretip-container {
+    padding-left: max(1.25rem, env(safe-area-inset-left));
+    padding-right: max(1.25rem, env(safe-area-inset-right));
+  }
+
+  .caretip-dashboard-shell .business-dashboard-stats-grid,
+  .caretip-dashboard-shell .employee-dashboard-stats-grid {
+    gap: 1rem;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-analytics-grid,
+  .caretip-dashboard-shell .employee-dashboard-analytics-grid {
+    gap: 1.25rem;
+  }
 }

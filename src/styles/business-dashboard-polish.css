@@ -5,6 +5,166 @@
 
 @import "./dashboard-ecosystem-polish.css";
 
+/* —— Page rhythm & hero → body continuity —— */
+.caretip-dashboard-shell.business-dashboard .business-page__inner,
+.caretip-dashboard-shell.business-dashboard .business-dashboard-body {
+  width: 100%;
+  max-width: 100%;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero {
+  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-body {
+  padding-top: 0.25rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-section {
+  width: 100%;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-block {
+  width: 100%;
+}
+
+/* —— Analytics period intro —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  margin-bottom: 0.125rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro__head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro__head {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+/* —— KPI stat grid —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid {
+  align-items: stretch;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
+  height: 100%;
+  min-height: 7.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
+    min-height: 8.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
+    min-height: 8.5rem;
+  }
+}
+
+/* —— Panel cards (shared header/content rhythm) —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card__header {
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card__header {
+    padding: 1.5rem 1.5rem 0.875rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card__content {
+  padding: 0 1.25rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card__content {
+    padding: 0 1.5rem 1.5rem;
+  }
+}
+
+/* —— Chart row — equal height, aligned baselines —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid {
+  align-items: stretch;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-grid > * {
+  display: flex;
+  min-height: 100%;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-chart-card.business-dashboard-panel-card {
+  min-height: 22.5rem;
+}
+
+@media (min-width: 1024px) and (max-width: 1279px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-chart-card.business-dashboard-panel-card {
+    min-height: 21.5rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-chart-card .business-dashboard-chart-frame {
+  flex: 1 1 auto;
+  min-height: 15.5rem;
+}
+
+/* —— Bottom grid (performers + quick actions) —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid {
+  align-items: stretch;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid__main,
+.caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid__aside {
+  min-width: 0;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid__aside {
+  justify-content: flex-start;
+}
+
+/* —— Hero optical centering (desktop) —— */
+@media (min-width: 1024px) {
+  .business-dashboard-hero .dashboard-hero-container.hidden.lg\:grid {
+    align-items: center;
+  }
+
+  .business-dashboard-hero .business-hero-visual {
+    margin-left: auto;
+    margin-right: auto;
+    justify-self: center;
+    width: 100%;
+    max-width: 34rem;
+  }
+
+  .business-dashboard-hero .business-hero-chart-frame {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .business-dashboard-hero .dashboard-hero-container .lg\:col-span-5 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+}
+
 /* Team goals */
 .caretip-dashboard-shell.business-dashboard .business-dashboard-goals-summary {
   display: flex;
@@ -62,6 +222,21 @@
   -webkit-line-clamp: 1;
   overflow: hidden;
   text-wrap: pretty;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-row {
+  align-items: center;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-metrics {
+  min-width: 5.75rem;
+  padding-left: 0;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-metrics {
+    text-align: right;
+  }
 }
 
 /* Help card */

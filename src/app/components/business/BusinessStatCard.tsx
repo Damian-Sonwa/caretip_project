@@ -16,7 +16,8 @@ export function BusinessStatCard({ label, value, change, icon, featured, classNa
     <div
       className={cn(
         businessUi.statCard,
-        featured && "max-lg:col-span-2 business-stat-card--featured",
+        "h-full",
+        featured && "business-stat-card--featured",
         className,
       )}
     >

@@ -454,7 +454,7 @@ export function BusinessDashboard() {
           hideTabs
           actionsPlacement="belowText"
           mobileAlign="left"
-          className="business-dashboard-hero mb-8 lg:mb-6"
+          className="business-dashboard-hero mb-7 sm:mb-8 lg:mb-7"
           cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
           badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
           titleClassName="max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
@@ -483,7 +483,7 @@ export function BusinessDashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
-              className="business-hero-visual relative flex w-full flex-col items-center justify-center touch-manipulation max-lg:-mx-4 max-lg:w-[calc(100%+2rem)] max-lg:max-w-none sm:max-lg:-mx-5 sm:max-lg:w-[calc(100%+2.5rem)] lg:ml-auto lg:w-full lg:max-w-full"
+              className="business-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
             >
               <div
                 className={cn(
@@ -577,7 +577,7 @@ export function BusinessDashboard() {
         />
       </div>
 
-      <TracingBeam className={cn(businessUi.pageInner, "!pt-3 sm:!pt-2")}>
+      <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body !pt-2 sm:!pt-3")}>
         <div className={businessUi.section}>
           <FixPrompt
             id="missingQR"
@@ -589,8 +589,8 @@ export function BusinessDashboard() {
             actionTo="/dashboard/qr-code-management"
           />
 
-          <section className="space-y-3" aria-labelledby="business-analytics-period-heading">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <section className="business-dashboard-analytics-intro" aria-labelledby="business-analytics-period-heading">
+            <div className="business-dashboard-analytics-intro__head">
               <div className="min-w-0 space-y-1">
                 <h2
                   id="business-analytics-period-heading"
@@ -640,8 +640,8 @@ export function BusinessDashboard() {
             </div>
           </section>
 
-          <motion.div {...dashboardBlockMotion}>
-            <div className="relative mb-2 grid grid-cols-2 gap-4 lg:grid-cols-4 lg:gap-6">
+          <motion.div {...dashboardBlockMotion} className="business-dashboard-block">
+            <div className={businessUi.statsGrid}>
               <BusinessStatCard
                 featured
                 label={
@@ -694,9 +694,10 @@ export function BusinessDashboard() {
           <motion.div
             {...dashboardBlockMotion}
             transition={{ delay: 0.35 }}
+            className="business-dashboard-block"
           >
-            <Card className={cn(businessUi.cardStatic, "w-full")}>
-              <CardHeader className="space-y-3 pb-4">
+            <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
+              <CardHeader className="business-dashboard-panel-card__header space-y-3">
                 <button
                   type="button"
                   onClick={() => setEmployeeGoalsExpanded((v) => !v)}
@@ -803,22 +804,23 @@ export function BusinessDashboard() {
           </motion.div>
 
           {/* Charts Section */}
-          <div className="w-full grid gap-6 lg:grid-cols-2">
+          <div className={businessUi.analyticsChartsGrid}>
             {/* Tip Distribution Chart */}
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.4 }}
+              className="flex h-full min-h-0 w-full"
             >
-              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card w-full")}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
+                <CardHeader className="business-dashboard-panel-card__header">
+                  <CardTitle className="text-lg leading-snug">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
                   <CardDescription className={businessUi.cardDesc}>
                     {analyticsTimeframe === "week" && t("business.dashboard.dailyTipDistDescWeek")}
                     {analyticsTimeframe === "month" && t("business.dashboard.dailyTipDistDescMonth")}
                     {analyticsTimeframe === "year" && t("business.dashboard.dailyTipDistDescYear")}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
+                <CardContent className="business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible">
                   {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
                     <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
                       <EmployeeEmptyState
@@ -884,15 +886,16 @@ export function BusinessDashboard() {
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.5 }}
+              className="flex h-full min-h-0 w-full"
             >
-              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card w-full")}>
-                <CardHeader>
-                  <CardTitle className="text-lg">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
+                <CardHeader className="business-dashboard-panel-card__header">
+                  <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
                   <CardDescription className={businessUi.cardDesc}>
                     {t("business.dashboard.employeePerformanceDesc")}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
+                <CardContent className="business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible">
                   {(stats?.employeeCount ?? 0) === 0 ? (
                     <div className={cn(businessUi.cardPad)}>
                       <EmployeeEmptyState
@@ -979,15 +982,15 @@ export function BusinessDashboard() {
           </div>
 
           {/* Top Performers & Quick Actions */}
-          <div className="w-full grid gap-6 lg:grid-cols-3">
+          <div className={businessUi.bottomGrid}>
             {/* Top Performers */}
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.6 }}
-              className="lg:col-span-2"
+              className="business-dashboard-bottom-grid__main lg:col-span-2"
             >
-              <Card className={cn(businessUi.cardStatic, "w-full")}>
-                <CardHeader className="flex flex-row items-start justify-between space-y-0">
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card h-full w-full")}>
+                <CardHeader className="business-dashboard-panel-card__header flex flex-row items-center justify-between gap-4 space-y-0">
                   <div className="min-w-0 flex-1 space-y-1">
                     <button
                       type="button"
@@ -1068,7 +1071,7 @@ export function BusinessDashboard() {
                                 </p>
                               </div>
                             </div>
-                            <div className="shrink-0 pl-10 text-left sm:pl-0 sm:text-right">
+                            <div className="business-dashboard-top-performer-metrics shrink-0 text-left sm:text-right">
                               <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                                 {t("charts.tooltip.tips")}
                               </p>
@@ -1099,10 +1102,10 @@ export function BusinessDashboard() {
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.7 }}
-              className="space-y-4"
+              className="business-dashboard-bottom-grid__aside flex h-full flex-col gap-5 sm:gap-6"
             >
-              <Card className={cn(businessUi.cardStatic, "w-full")}>
-                <CardHeader>
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
+                <CardHeader className="business-dashboard-panel-card__header">
                   <button
                     type="button"
                     onClick={() => setQuickActionsExpanded((v) => !v)}
@@ -1175,8 +1178,8 @@ export function BusinessDashboard() {
                 ) : null}
               </Card>
 
-              <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card w-full")}>
-                <CardHeader className="pb-3">
+              <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card business-dashboard-panel-card mt-auto w-full")}>
+                <CardHeader className="business-dashboard-panel-card__header !pb-2">
                   <div className="business-dashboard-help-head">
                     <div
                       className={cn(

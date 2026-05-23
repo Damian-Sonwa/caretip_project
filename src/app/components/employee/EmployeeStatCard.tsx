@@ -7,7 +7,7 @@ type EmployeeStatCardProps = {
   value: ReactNode;
   change?: ReactNode;
   icon?: ReactNode;
-  /** On viewports below `lg`, span full width of the stats grid. */
+  /** Accent border treatment (grid cell size stays uniform). */
   featured?: boolean;
   className?: string;
 };
@@ -17,7 +17,8 @@ export function EmployeeStatCard({ label, value, change, icon, featured, classNa
     <div
       className={cn(
         employeeUi.statCard,
-        featured && "max-lg:col-span-2 employee-stat-card--featured",
+        "h-full",
+        featured && "employee-stat-card--featured",
         className,
       )}
     >

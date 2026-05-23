@@ -14,6 +14,14 @@ export const businessUi = {
   ...employeeUi,
   page: "business-page min-h-0 pb-16 sm:pb-20",
   pageInner: "caretip-container business-page__inner pt-4 max-lg:pt-3.5 sm:pt-7",
+  /** Overview analytics stack — consistent vertical rhythm below hero. */
+  section: "employee-section business-dashboard-section space-y-5 sm:space-y-6 lg:space-y-7",
+  statsGrid:
+    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5",
+  analyticsChartsGrid:
+    "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
+  bottomGrid:
+    "business-dashboard-bottom-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-3 lg:gap-6",
   card: "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] transition-shadow hover:shadow-[0_14px_40px_-16px_rgba(15,23,42,0.14)]",
   cardStatic:
     "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
