@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { toast } from "sonner";
 import type { AuthStatus } from "../lib/authSession";
 import type { User } from "./useAuth";
 import {
@@ -80,6 +81,23 @@ export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void 
 
   useEffect(() => {
     if (authStatus !== "authenticated") return undefined;
-    return subscribeForegroundPushMessages();
+    return subscribeForegroundPushMessages((title, body) => {
+      toast(title, { description: body || undefined });
+    });
   }, [authStatus, user?.id]);
+
+  /** Re-register FCM token after refresh or when returning to the tab (production token rotation). */
+  useEffect(() => {
+    if (authStatus !== "authenticated" || !user) return undefined;
+    if (!isWebPushSupported() || Notification.permission !== "granted") return undefined;
+    if (user.role !== "employee" && user.role !== "business") return undefined;
+
+    const refreshToken = () => {
+      if (document.visibilityState !== "visible") return;
+      void registerFcmDeviceToken().catch((err) => logClientError("useFcmPushSync.refreshToken", err));
+    };
+
+    document.addEventListener("visibilitychange", refreshToken);
+    return () => document.removeEventListener("visibilitychange", refreshToken);
+  }, [authStatus, user?.id, user?.role]);
 }

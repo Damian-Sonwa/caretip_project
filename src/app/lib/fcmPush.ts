@@ -1,5 +1,11 @@
 import { initializeApp, type FirebaseApp } from "firebase/app";
-import { getMessaging, getToken, onMessage, type Messaging } from "firebase/messaging";
+import {
+  getMessaging,
+  getToken,
+  onMessage,
+  type MessagePayload,
+  type Messaging,
+} from "firebase/messaging";
 import {
   deleteAllPushDeviceTokensApi,
   deletePushDeviceTokenApi,
@@ -28,19 +34,52 @@ async function loadConfig(): Promise<FirebaseWebConfig | null> {
   return configCache;
 }
 
-async function serviceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+const FCM_SW_URL = "/firebase-messaging-sw.js";
+const FCM_SW_SCOPE = "/";
+
+let swRegistrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+
+async function waitForServiceWorkerActive(reg: ServiceWorkerRegistration): Promise<void> {
+  if (reg.active) return;
+  const worker = reg.installing ?? reg.waiting;
+  if (!worker) return;
+  await new Promise<void>((resolve) => {
+    if (reg.active) {
+      resolve();
+      return;
+    }
+    worker.addEventListener("statechange", () => {
+      if (reg.active) resolve();
+    });
+  });
+}
+
+async function resolveServiceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
   if (!("serviceWorker" in navigator)) return null;
   try {
     if (import.meta.env.PROD) {
-      return await navigator.serviceWorker.ready;
+      const reg = await navigator.serviceWorker.ready;
+      await waitForServiceWorkerActive(reg);
+      return reg;
     }
-    const existing = await navigator.serviceWorker.getRegistration("/firebase-messaging-sw.js");
-    if (existing) return existing;
-    return await navigator.serviceWorker.register("/firebase-messaging-sw.js");
+    let reg = await navigator.serviceWorker.getRegistration(FCM_SW_SCOPE);
+    if (!reg) {
+      reg = await navigator.serviceWorker.register(FCM_SW_URL, { scope: FCM_SW_SCOPE });
+    }
+    await waitForServiceWorkerActive(reg);
+    await navigator.serviceWorker.ready;
+    return reg;
   } catch (err) {
     logClientError("fcmPush.serviceWorkerRegistration", err);
     return null;
   }
+}
+
+async function serviceWorkerRegistration(): Promise<ServiceWorkerRegistration | null> {
+  if (!swRegistrationPromise) {
+    swRegistrationPromise = resolveServiceWorkerRegistration();
+  }
+  return swRegistrationPromise;
 }
 
 function getMessagingInstance(config: FirebaseWebConfig): Messaging | null {
@@ -160,26 +199,75 @@ export async function unregisterFcmDeviceToken(): Promise<void> {
   }
 }
 
-/** Foreground messages — show a simple notification when tab is focused. */
+function payloadTitleBody(payload: MessagePayload): { title: string; body: string } {
+  const title =
+    payload.notification?.title ?? payload.data?.title ?? "CareTip";
+  const body = payload.notification?.body ?? payload.data?.body ?? "";
+  return { title, body };
+}
+
+/** Shows a system notification via the FCM service worker (works in Firefox on localhost). */
+export async function showPushNotification(
+  title: string,
+  body: string,
+  data?: Record<string, string>,
+): Promise<void> {
+  if (typeof window === "undefined" || Notification.permission !== "granted") {
+    return;
+  }
+  const options: NotificationOptions = {
+    body: body || undefined,
+    icon: "/icon-192.png",
+    badge: "/icon-192.png",
+    data: data ? { ...data } : {},
+    tag: [data?.event, data?.tipId, data?.transactionId, data?.type]
+      .filter(Boolean)
+      .join("-") || "caretip-notification",
+  };
+  try {
+    const reg = await serviceWorkerRegistration();
+    if (reg) {
+      await reg.showNotification(title, options);
+      return;
+    }
+    new Notification(title, options);
+  } catch (err) {
+    logClientError("fcmPush.showPushNotification", err);
+    try {
+      new Notification(title, { body: body || undefined, icon: "/icon-192.png" });
+    } catch (fallbackErr) {
+      logClientError("fcmPush.showPushNotification.fallback", fallbackErr);
+    }
+  }
+}
+
+/** Foreground messages — visible system notification + optional in-app callback. */
 export function subscribeForegroundPushMessages(
   onPayload?: (title: string, body: string) => void,
 ): () => void {
   let cancelled = false;
+  let unsubscribeOnMessage: (() => void) | null = null;
+
   void (async () => {
+    if (!isWebPushSupported()) return;
     const config = await loadConfig();
     if (!config || cancelled) return;
+    const reg = await serviceWorkerRegistration();
+    if (!reg || cancelled) return;
     const msg = getMessagingInstance(config);
     if (!msg || cancelled) return;
-    onMessage(msg, (payload) => {
-      const title = payload.notification?.title ?? "CareTip";
-      const body = payload.notification?.body ?? "";
-      if (onPayload) onPayload(title, body);
-      else if (Notification.permission === "granted") {
-        new Notification(title, { body, icon: "/icon-192.png" });
-      }
+
+    unsubscribeOnMessage = onMessage(msg, (payload) => {
+      const { title, body } = payloadTitleBody(payload);
+      const data = payload.data as Record<string, string> | undefined;
+      onPayload?.(title, body);
+      void showPushNotification(title, body, data);
     });
   })();
+
   return () => {
     cancelled = true;
+    unsubscribeOnMessage?.();
+    unsubscribeOnMessage = null;
   };
 }

@@ -1,13 +1,14 @@
 import { prisma } from "../../prisma.js";
-import { getFirebaseMessaging, isFcmConfigured } from "./fcmAdmin.js";
+import { isFcmConfigured } from "./fcmAdmin.js";
 import type { NewTipPayload } from "../../socket/emitTip.js";
+import {
+  logPush,
+  maintainPushTokensForUser,
+  sendWebPushMulticast,
+  stringifyPushData,
+} from "./pushSend.js";
 
 export type PushEventType = "tip_received" | "payout_paid" | "new_login" | "system_alert";
-
-const FCM_INVALID_TOKEN_CODES = new Set([
-  "messaging/invalid-registration-token",
-  "messaging/registration-token-not-registered",
-]);
 
 function truncateUserAgent(ua: string | undefined): string | null {
   if (!ua) return null;
@@ -85,6 +86,7 @@ export async function registerPushDeviceToken(
       lastUsedAt: new Date(),
     },
   });
+  await maintainPushTokensForUser(userId);
 }
 
 export async function removePushDeviceToken(userId: string, token: string): Promise<void> {
@@ -149,18 +151,19 @@ async function listTokensForUser(userId: string): Promise<string[]> {
   return rows.map((r) => r.token);
 }
 
-async function pruneInvalidTokens(tokens: string[], error: unknown): Promise<void> {
-  const code =
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    typeof (error as { code: unknown }).code === "string"
-      ? (error as { code: string }).code
-      : "";
-  if (!FCM_INVALID_TOKEN_CODES.has(code)) return;
-  await prisma.pushDeviceToken.deleteMany({
-    where: { token: { in: tokens } },
-  });
+function deepLinkForEvent(event: PushEventType, data?: Record<string, string>): string {
+  switch (event) {
+    case "tip_received":
+      return "/employee/dashboard";
+    case "payout_paid":
+      return "/employee/dashboard";
+    case "new_login":
+      return "/employee/settings";
+    case "system_alert":
+      return data?.type === "test" ? "/dashboard/settings" : "/dashboard";
+    default:
+      return "/";
+  }
 }
 
 async function sendPushToUser(
@@ -170,42 +173,35 @@ async function sendPushToUser(
   data?: Record<string, string>,
 ): Promise<void> {
   if (!isFcmConfigured()) return;
-  const messaging = getFirebaseMessaging();
-  if (!messaging) return;
 
   const allowed = await userWantsPush(userId, event);
-  if (!allowed) return;
+  if (!allowed) {
+    logPush("info", "skipped (preferences)", { userId, event });
+    return;
+  }
 
   const tokens = await listTokensForUser(userId);
   if (tokens.length === 0) return;
 
-  try {
-    const res = await messaging.sendEachForMulticast({
-      tokens,
-      notification,
-      data: { event, ...data },
-      webpush: {
-        notification: {
-          icon: "/icon-192.png",
-        },
-      },
-    });
-    const invalid: string[] = [];
-    res.responses.forEach((r, i) => {
-      if (!r.success && r.error?.code && FCM_INVALID_TOKEN_CODES.has(r.error.code)) {
-        invalid.push(tokens[i]!);
-      }
-    });
-    if (invalid.length > 0) {
-      await prisma.pushDeviceToken.deleteMany({ where: { token: { in: invalid } } });
-    }
+  const payload = stringifyPushData({
+    event,
+    url: data?.url ?? deepLinkForEvent(event, data),
+    ...data,
+  });
+
+  const result = await sendWebPushMulticast(tokens, notification, payload);
+  if (!result) return;
+
+  const stillValid = tokens.filter((t) => !result.invalidTokens.includes(t));
+  if (stillValid.length > 0) {
     await prisma.pushDeviceToken.updateMany({
-      where: { userId, token: { in: tokens } },
+      where: { userId, token: { in: stillValid } },
       data: { lastUsedAt: new Date() },
     });
-  } catch (err) {
-    await pruneInvalidTokens(tokens, err);
-    console.error("[push] send failed:", err instanceof Error ? err.message : err);
+  }
+
+  if (result.successCount === 0 && result.failureCount > 0) {
+    logPush("warn", "no devices accepted message", { userId, event });
   }
 }
 
@@ -215,68 +211,110 @@ function formatEur(amount: number): string {
 
 /** After a successful tip (socket + optional push). */
 export async function notifyTipReceivedPush(payload: NewTipPayload): Promise<void> {
-  const employee = await prisma.employee.findUnique({
-    where: { id: payload.employeeId },
-    select: { userId: true, name: true },
-  });
-  if (!employee) return;
+  try {
+    const employee = await prisma.employee.findUnique({
+      where: { id: payload.employeeId },
+      select: { userId: true, name: true },
+    });
+    if (!employee) return;
 
-  const amountLabel = formatEur(payload.tip.amount);
-  const title = "New tip received";
-  const body = `${amountLabel} — ${employee.name}`;
+    const amountLabel = formatEur(payload.tip.amount);
+    const title = "New tip received";
+    const body = `${amountLabel} — ${employee.name}`;
 
-  await sendPushToUser(employee.userId, "tip_received", { title, body }, {
-    tipId: payload.tip.id,
-    employeeId: payload.employeeId,
-    businessId: payload.businessId,
-  });
-
-  const business = await prisma.business.findUnique({
-    where: { id: payload.businessId },
-    select: { userId: true },
-  });
-  if (business?.userId && business.userId !== employee.userId) {
-    await sendPushToUser(business.userId, "tip_received", {
-      title: "New tip at your venue",
-      body: `${amountLabel} for ${employee.name}`,
-    }, {
+    await sendPushToUser(employee.userId, "tip_received", { title, body }, {
       tipId: payload.tip.id,
       employeeId: payload.employeeId,
       businessId: payload.businessId,
+      url: "/employee/dashboard",
+    });
+
+    const business = await prisma.business.findUnique({
+      where: { id: payload.businessId },
+      select: { userId: true },
+    });
+    if (business?.userId && business.userId !== employee.userId) {
+      await sendPushToUser(business.userId, "tip_received", {
+        title: "New tip at your venue",
+        body: `${amountLabel} for ${employee.name}`,
+      }, {
+        tipId: payload.tip.id,
+        employeeId: payload.employeeId,
+        businessId: payload.businessId,
+        url: "/dashboard",
+      });
+    }
+  } catch (err) {
+    logPush("error", "notifyTipReceivedPush failed", {
+      message: err instanceof Error ? err.message : String(err),
     });
   }
 }
 
 /** Security alert (respects notify_new_login; no IP in push body). */
 export async function notifyNewLoginPush(userId: string): Promise<void> {
-  await sendPushToUser(
-    userId,
-    "new_login",
-    {
-      title: "New sign-in",
-      body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
-    },
-    { type: "new_login" },
-  );
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    const settingsUrl =
+      user?.role === "MANAGER" ? "/dashboard/settings" : "/employee/settings";
+    await sendPushToUser(
+      userId,
+      "new_login",
+      {
+        title: "New sign-in",
+        body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
+      },
+      { type: "new_login", url: settingsUrl },
+    );
+  } catch (err) {
+    logPush("error", "notifyNewLoginPush failed", {
+      userId,
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
-/**
- * Call when a transaction payout status becomes `paid` (e.g. future admin/payout API).
- */
 export async function notifyPayoutPaidPush(
   userId: string,
   amount: number,
   transactionId: string,
 ): Promise<void> {
-  await sendPushToUser(
-    userId,
-    "payout_paid",
-    {
-      title: "Payout completed",
-      body: `A payout of ${formatEur(amount)} was processed.`,
+  try {
+    await sendPushToUser(
+      userId,
+      "payout_paid",
+      {
+        title: "Payout completed",
+        body: `A payout of ${formatEur(amount)} was processed.`,
+      },
+      { transactionId, payoutStatus: "paid" },
+    );
+  } catch (err) {
+    logPush("error", "notifyPayoutPaidPush failed", {
+      userId,
+      transactionId,
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
+}
+
+/**
+ * Call when a transaction's payoutStatus becomes `paid` (Stripe/admin payout flow).
+ */
+export async function notifyPayoutPaidForTransaction(transactionId: string): Promise<void> {
+  const tx = await prisma.transaction.findUnique({
+    where: { id: transactionId },
+    select: {
+      payoutStatus: true,
+      amount: true,
+      employee: { select: { userId: true } },
     },
-    { transactionId, payoutStatus: "paid" },
-  );
+  });
+  if (!tx || tx.payoutStatus !== "paid" || !tx.employee?.userId) return;
+  await notifyPayoutPaidPush(tx.employee.userId, Number(tx.amount), transactionId);
 }
 
 /** Generic system message (respects system_alerts / employee push toggle). */
@@ -285,7 +323,14 @@ export async function notifySystemAlertPush(
   title: string,
   body: string,
 ): Promise<void> {
-  await sendPushToUser(userId, "system_alert", { title, body }, { type: "system_alert" });
+  try {
+    await sendPushToUser(userId, "system_alert", { title, body }, { type: "system_alert" });
+  } catch (err) {
+    logPush("error", "notifySystemAlertPush failed", {
+      userId,
+      message: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 export type SendTestPushResult = {
@@ -317,62 +362,44 @@ export async function sendTestPushToUser(userId: string): Promise<SendTestPushRe
       message: "FCM is not configured on the server (FIREBASE_SERVICE_ACCOUNT_JSON).",
     };
   }
-  const messaging = getFirebaseMessaging();
-  if (!messaging) {
-    return {
-      sent: false,
-      successCount: 0,
-      failureCount: 0,
-      tokenCount: tokens.length,
-      message: "Firebase Admin failed to initialize.",
-    };
-  }
 
   const notification = {
     title: "CareTip test",
     body: "Push notifications are working.",
   };
 
-  try {
-    const res = await messaging.sendEachForMulticast({
-      tokens,
-      notification,
-      data: { event: "system_alert", type: "test" },
-      webpush: { notification: { icon: "/icon-192.png" } },
-    });
-    const invalid: string[] = [];
-    res.responses.forEach((r, i) => {
-      if (!r.success && r.error?.code && FCM_INVALID_TOKEN_CODES.has(r.error.code)) {
-        invalid.push(tokens[i]!);
-      }
-    });
-    if (invalid.length > 0) {
-      await prisma.pushDeviceToken.deleteMany({ where: { token: { in: invalid } } });
-    }
-    await prisma.pushDeviceToken.updateMany({
-      where: { userId, token: { in: tokens } },
-      data: { lastUsedAt: new Date() },
-    });
+  const result = await sendWebPushMulticast(tokens, notification, {
+    event: "system_alert",
+    type: "test",
+    url: "/dashboard/settings",
+  });
 
-    const sent = res.successCount > 0;
-    return {
-      sent,
-      successCount: res.successCount,
-      failureCount: res.failureCount,
-      tokenCount: tokens.length,
-      message: sent
-        ? `Test notification sent to ${res.successCount} device(s).`
-        : "Failed to deliver to any registered device.",
-    };
-  } catch (err) {
-    await pruneInvalidTokens(tokens, err);
-    console.error("[push] test send failed:", err instanceof Error ? err.message : err);
+  if (!result) {
     return {
       sent: false,
       successCount: 0,
       failureCount: tokens.length,
       tokenCount: tokens.length,
-      message: err instanceof Error ? err.message : "Test notification failed.",
+      message: "Firebase Admin failed to initialize.",
     };
   }
+
+  const stillValid = tokens.filter((t) => !result.invalidTokens.includes(t));
+  if (stillValid.length > 0) {
+    await prisma.pushDeviceToken.updateMany({
+      where: { userId, token: { in: stillValid } },
+      data: { lastUsedAt: new Date() },
+    });
+  }
+
+  const sent = result.successCount > 0;
+  return {
+    sent,
+    successCount: result.successCount,
+    failureCount: result.failureCount,
+    tokenCount: tokens.length,
+    message: sent
+      ? `Test notification sent to ${result.successCount} device(s).`
+      : "Failed to deliver to any registered device.",
+  };
 }

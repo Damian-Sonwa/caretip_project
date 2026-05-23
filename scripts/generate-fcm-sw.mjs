@@ -71,15 +71,45 @@ const handlerBody = `
 firebase.initializeApp(${JSON.stringify(firebaseConfig)});
 const messaging = firebase.messaging();
 messaging.onBackgroundMessage(function (payload) {
-  const title = payload.notification && payload.notification.title ? payload.notification.title : "CareTip";
-  const body = payload.notification && payload.notification.body ? payload.notification.body : "";
-  const options = {
+  const title =
+    (payload.notification && payload.notification.title) ||
+    (payload.data && payload.data.title) ||
+    "CareTip";
+  const body =
+    (payload.notification && payload.notification.body) ||
+    (payload.data && payload.data.body) ||
+    "";
+  const tag =
+    (payload.data && (payload.data.event || payload.data.type)) || "caretip-notification";
+  return self.registration.showNotification(title, {
     body: body,
     icon: "/icon-192.png",
     badge: "/icon-192.png",
     data: payload.data || {},
-  };
-  self.registration.showNotification(title, options);
+    tag: tag,
+  });
+});
+
+self.addEventListener("notificationclick", function (event) {
+  event.notification.close();
+  var data = event.notification.data || {};
+  var target = data.url || "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then(function (list) {
+      for (var i = 0; i < list.length; i++) {
+        var client = list[i];
+        if ("focus" in client) {
+          if (target && "navigate" in client) {
+            return client.focus().then(function () {
+              return client.navigate(target);
+            });
+          }
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(target);
+    }),
+  );
 });
 `;
 

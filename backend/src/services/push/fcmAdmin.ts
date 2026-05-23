@@ -1,12 +1,35 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
 import admin from "firebase-admin";
 
 let initAttempted = false;
 
+function credentialsPathConfigured(): boolean {
+  const path = process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim();
+  if (!path) return false;
+  const resolved =
+    path.startsWith("/") || /^[A-Za-z]:[\\/]/.test(path)
+      ? resolve(path)
+      : resolve(process.cwd(), path);
+  if (!existsSync(resolved)) {
+    console.warn("[fcm] GOOGLE_APPLICATION_CREDENTIALS file not found:", resolved);
+    return false;
+  }
+  return true;
+}
+
 export function isFcmConfigured(): boolean {
-  return Boolean(
-    process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim() ||
-      process.env.GOOGLE_APPLICATION_CREDENTIALS?.trim(),
-  );
+  const inline = process.env.FIREBASE_SERVICE_ACCOUNT_JSON?.trim();
+  if (inline) {
+    if (inline.length <= 2 || !inline.startsWith("{")) {
+      console.warn(
+        "[fcm] FIREBASE_SERVICE_ACCOUNT_JSON appears invalid; use GOOGLE_APPLICATION_CREDENTIALS with a JSON file",
+      );
+    } else if (inline.length > 32) {
+      return true;
+    }
+  }
+  return credentialsPathConfigured();
 }
 
 function parseServiceAccount(): admin.ServiceAccount | null {
