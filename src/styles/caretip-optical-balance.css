@@ -84,8 +84,8 @@
       margin-right: auto;
     }
 
-    .caretip-landing .caretip-hero-headline--en {
-      max-width: min(100%, 20.5rem);
+    .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+      max-width: min(100%, 19.25rem);
     }
 
     .caretip-landing .caretip-hero-cta-cluster {

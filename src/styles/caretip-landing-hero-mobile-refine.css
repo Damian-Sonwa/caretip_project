@@ -9,20 +9,55 @@
   }
 
   .caretip-landing .caretip-hero-headline {
-    line-height: 1.1;
-    letter-spacing: -0.032em;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.036em;
     text-wrap: wrap;
     overflow-wrap: normal;
     word-break: normal;
     hyphens: manual;
+    text-rendering: geometricPrecision;
   }
 
   .caretip-landing .caretip-hero-headline > span + span {
-    margin-top: 0.5rem;
+    margin-top: 0.3125rem;
   }
 
   .caretip-landing .caretip-hero-headline-line--rotating {
     max-width: 100%;
+  }
+
+  /* English — denser rhythm, stronger anchor (shorter words) */
+  .caretip-landing .caretip-hero-headline--en {
+    line-height: 0.98;
+    letter-spacing: -0.04em;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    font-size: clamp(1.9375rem, 7.5vw, 2.3125rem);
+    max-width: min(100%, 19.25rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(1.875rem, 7.2vw, 2.25rem);
+    line-height: 1.02;
+    max-width: min(100%, 22.5rem);
+  }
+
+  /* Animated / gradient emphasis — match headline visual weight */
+  .caretip-landing .caretip-hero-headline-accent,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word span {
+    font-weight: 800;
+    letter-spacing: -0.034em;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    filter: drop-shadow(0 1px 0 rgba(217, 119, 6, 0.14));
+  }
+
+  html.dark .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    filter: drop-shadow(0 1px 0 rgba(251, 191, 36, 0.1));
   }
 
   /* Locked vertical rhythm — static lines never share a row with the animated slot */
@@ -31,7 +66,7 @@
     flex-direction: column;
     align-items: flex-start;
     flex-wrap: nowrap;
-    gap: 0.375rem;
+    gap: 0.25rem;
     width: 100%;
     max-width: 100%;
   }
@@ -46,24 +81,33 @@
   }
 
   .caretip-landing .caretip-hero-headline-rotating-prefix {
-    line-height: 1.08;
+    line-height: 1;
+  }
+
+  .caretip-landing .caretip-hero-headline--en .caretip-hero-headline-rotating-prefix {
+    line-height: 0.98;
   }
 
   /* Reserved animated-word band — fixed height, no collapse when short words show */
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line {
     position: relative;
-    min-height: 1.12em;
-    line-height: 1.12;
+    min-height: 1em;
+    line-height: 1;
     contain: layout style;
     isolation: isolate;
-    padding: 0.0625rem 0;
+    padding: 0;
+  }
+
+  .caretip-landing .caretip-hero-headline--en .caretip-hero-headline-rotating-emphasis-line {
+    line-height: 0.98;
+    min-height: 0.98em;
   }
 
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
     display: inline-grid;
     vertical-align: top;
     max-width: 100%;
-    min-height: 1.12em;
+    min-height: 1em;
   }
 
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport {
@@ -71,29 +115,20 @@
   }
 
   .caretip-landing .caretip-hero-headline-rotating-suffix {
-    line-height: 1.1;
+    line-height: 1.02;
     white-space: normal;
     text-wrap: pretty;
-    margin-top: 0.0625rem;
-  }
-
-  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
-  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    font-size: clamp(1.875rem, 7.2vw, 2.25rem);
-  }
-
-  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
-    max-width: min(100%, 21.5rem);
-  }
-
-  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
-    max-width: min(100%, 22.5rem);
+    margin-top: 0;
   }
 
   .caretip-landing .caretip-hero-copy--en > p,
   .caretip-landing .caretip-hero-copy--de > p {
-    line-height: 1.62;
+    line-height: 1.58;
     max-width: min(100%, 20rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--en > p {
+    max-width: min(100%, 19.25rem);
   }
 
   .caretip-landing .caretip-hero-cta-cluster {
@@ -142,44 +177,57 @@
 
 @media (max-width: 639px) {
   .caretip-landing .caretip-hero-headline {
-    line-height: 1.08;
+    line-height: 0.99;
   }
 
-  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline,
+  .caretip-landing .caretip-hero-headline--en {
+    line-height: 0.97;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    font-size: clamp(1.875rem, 7.65vw, 2.1875rem);
+  }
+
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
     font-size: clamp(1.8125rem, 7.4vw, 2.125rem);
   }
 
   .caretip-landing .caretip-hero-headline-rotating-stack {
-    gap: 0.35rem;
+    gap: 0.22rem;
   }
 }
 
 @media (max-width: 399px) {
   .caretip-landing .caretip-hero-headline {
-    font-size: clamp(1.6875rem, 6.8vw, 1.9375rem);
-    line-height: 1.06;
-    letter-spacing: -0.03em;
+    line-height: 0.98;
+    letter-spacing: -0.034em;
+  }
+
+  .caretip-landing .caretip-hero-headline--en {
+    line-height: 0.96;
+    letter-spacing: -0.038em;
   }
 
   .caretip-landing .caretip-hero-headline > span + span {
-    margin-top: 0.5625rem;
+    margin-top: 0.28rem;
   }
 
   .caretip-landing .caretip-hero-headline-line--rotating {
-    margin-top: 0.5rem;
+    margin-top: 0.28rem;
   }
 
   .caretip-landing .caretip-hero-headline-rotating-stack {
-    gap: 0.375rem;
+    gap: 0.2rem;
   }
 
   .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
-    max-width: min(100%, 20.75rem);
+    font-size: clamp(1.75rem, 7.1vw, 2rem);
+    max-width: min(100%, 18.5rem);
   }
 
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
     max-width: min(100%, 21.75rem);
+    font-size: clamp(1.6875rem, 6.8vw, 1.9375rem);
   }
 }
 
