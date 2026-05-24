@@ -1,4 +1,5 @@
--- In-app notification inbox + platform announcement audit (idempotent)
+-- Repair: prior deploy may have applied 20260523120000_notification_inbox with empty SQL.
+-- Idempotent — safe if tables already exist from a fixed migration or manual repair.
 
 DO $$ BEGIN
   CREATE TYPE "public"."NotificationPriority" AS ENUM ('normal', 'high');
