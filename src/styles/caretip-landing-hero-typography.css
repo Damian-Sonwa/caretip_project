@@ -1,0 +1,207 @@
+/**
+ * Landing hero typography — mobile/tablet only (max-lg). Desktop (lg+) unchanged.
+ * Locale tokens, stable animated slot, anchored text stack (Stripe/Linear-style).
+ */
+
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-hero-copy--en,
+  .caretip-landing .caretip-hero-copy--de {
+    align-items: flex-start !important;
+    text-align: left;
+  }
+
+  .caretip-landing .caretip-hero-copy-block {
+    --caretip-hero-headline-lh: 1;
+    --caretip-hero-headline-track: -0.036em;
+    --caretip-hero-animated-slot: 1em;
+    --caretip-hero-line-gap: 0.26rem;
+    --caretip-hero-rotating-stack-gap: 0.2rem;
+    --caretip-hero-headline-max: 21rem;
+    --caretip-hero-subtitle-gap: 0.8125rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en {
+    --caretip-hero-headline-lh: 0.98;
+    --caretip-hero-headline-track: -0.041em;
+    --caretip-hero-headline-max: 20.75rem;
+    --caretip-hero-subtitle-max: 20.75rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--de {
+    --caretip-hero-headline-lh: 1.02;
+    --caretip-hero-headline-track: -0.034em;
+    --caretip-hero-headline-max: 23rem;
+    --caretip-hero-subtitle-max: 22.5rem;
+  }
+
+  /* Anchored headline — flush left within copy column */
+  .caretip-landing .caretip-hero-headline-anchor {
+    display: block;
+    width: 100%;
+    max-width: min(100%, var(--caretip-hero-headline-max));
+    margin-inline: 0;
+    align-self: flex-start;
+    text-align: left;
+  }
+
+  .caretip-landing .caretip-hero-headline {
+    font-weight: 800;
+    line-height: var(--caretip-hero-headline-lh);
+    letter-spacing: var(--caretip-hero-headline-track);
+    text-wrap: wrap;
+    overflow-wrap: normal;
+    word-break: normal;
+    hyphens: manual;
+    text-rendering: geometricPrecision;
+    font-synthesis: none;
+  }
+
+  .caretip-landing .caretip-hero-headline > span {
+    display: block;
+    text-wrap: balance;
+  }
+
+  .caretip-landing .caretip-hero-headline > span + span {
+    margin-top: var(--caretip-hero-line-gap);
+  }
+
+  .caretip-landing .caretip-hero-headline-line--rotating {
+    max-width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    font-size: clamp(2.1875rem, 8.35vw, 2.5625rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(2rem, 7.85vw, 2.375rem);
+  }
+
+  /* Gradient + animated keyword — integrated weight */
+  .caretip-landing .caretip-hero-headline-accent,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word span {
+    font-weight: 800;
+    letter-spacing: inherit;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    filter: drop-shadow(0 1px 0 rgba(217, 119, 6, 0.1));
+  }
+
+  html.dark .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    filter: drop-shadow(0 1px 0 rgba(251, 191, 36, 0.07));
+  }
+
+  /* Rotating line — stable dedicated rows */
+  .caretip-landing .caretip-hero-headline-rotating-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    flex-wrap: nowrap;
+    gap: var(--caretip-hero-rotating-stack-gap);
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-prefix,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line,
+  .caretip-landing .caretip-hero-headline-rotating-suffix {
+    display: block;
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    line-height: var(--caretip-hero-headline-lh);
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line {
+    position: relative;
+    min-height: var(--caretip-hero-animated-slot);
+    contain: layout style;
+    isolation: isolate;
+    padding: 0;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
+    display: inline-grid;
+    vertical-align: top;
+    max-width: 100%;
+    min-height: var(--caretip-hero-animated-slot);
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word--static,
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word [data-measure-word],
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport > span > span {
+    height: var(--caretip-hero-animated-slot) !important;
+    min-height: var(--caretip-hero-animated-slot) !important;
+    line-height: var(--caretip-hero-animated-slot) !important;
+  }
+
+  .caretip-landing .caretip-hero-headline-rotating-suffix {
+    white-space: normal;
+    text-wrap: pretty;
+    margin-top: 0;
+  }
+
+  /* Supporting copy — aligned to headline measure */
+  .caretip-landing .caretip-hero-copy--en > p,
+  .caretip-landing .caretip-hero-copy--de > p {
+    width: 100%;
+    max-width: min(100%, var(--caretip-hero-subtitle-max, var(--caretip-hero-headline-max)));
+    margin-inline: 0 !important;
+    align-self: flex-start !important;
+    margin-top: var(--caretip-hero-subtitle-gap) !important;
+    font-size: 0.9375rem;
+    line-height: 1.56;
+    letter-spacing: -0.012em;
+    color: rgb(82 82 82);
+  }
+
+  html.dark .caretip-landing .caretip-hero-copy--en > p,
+  html.dark .caretip-landing .caretip-hero-copy--de > p {
+    color: rgb(163 163 163);
+  }
+}
+
+@media (max-width: 639px) {
+  .caretip-landing .caretip-hero-copy-block {
+    --caretip-hero-line-gap: 0.24rem;
+    --caretip-hero-rotating-stack-gap: 0.18rem;
+    --caretip-hero-subtitle-gap: 0.75rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    font-size: clamp(2.0625rem, 8.45vw, 2.4375rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(1.9375rem, 8.1vw, 2.3125rem);
+  }
+}
+
+@media (max-width: 399px) {
+  .caretip-landing .caretip-hero-copy--en {
+    --caretip-hero-headline-max: 19.75rem;
+    --caretip-hero-subtitle-max: 19.75rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--de {
+    --caretip-hero-headline-max: 22.25rem;
+    --caretip-hero-subtitle-max: 22rem;
+  }
+
+  .caretip-landing .caretip-hero-copy-block {
+    --caretip-hero-line-gap: 0.22rem;
+    --caretip-hero-rotating-stack-gap: 0.16rem;
+    --caretip-hero-subtitle-gap: 0.6875rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
+    font-size: clamp(2rem, 8vw, 2.25rem);
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
+    font-size: clamp(1.875rem, 7.5vw, 2.0625rem);
+  }
+}

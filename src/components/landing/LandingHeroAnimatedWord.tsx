@@ -3,9 +3,11 @@ import { motion, useReducedMotion } from "motion/react";
 import { landingHeroEaseOut } from "@/components/landing/landingHeroMotion";
 import { cn } from "@/lib/utils";
 
-const ROTATE_MS = 2800;
-/** Matches hero headline rhythm; slot height is fixed so transitions never reflow. */
-const SLOT_LINE_HEIGHT = "1.12em";
+const ROTATE_MS = 3400;
+/** Synced to headline line box via CSS `--caretip-hero-animated-slot` (1em) on mobile. */
+const SLOT_LINE_HEIGHT = "1em";
+/** Calm premium reel — not snappy */
+const REEL_TRANSITION = { duration: 0.78, ease: landingHeroEaseOut } as const;
 
 type LandingHeroAnimatedWordProps = {
   words: string[];
@@ -78,7 +80,7 @@ export function LandingHeroAnimatedWord({ words, className }: LandingHeroAnimate
         <motion.span
           className="flex flex-col items-start will-change-transform"
           animate={{ y: `calc(${-activeIndex} * ${SLOT_LINE_HEIGHT})` }}
-          transition={{ duration: 0.62, ease: landingHeroEaseOut }}
+          transition={REEL_TRANSITION}
         >
           {safeWords.map((word) => (
             <span

@@ -26,11 +26,9 @@ const brandAccentGradient =
 /** Hero headline — Manrope extrabold, oversized display scale. */
 const heroHeadlineTone =
   "font-hero-display font-extrabold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
-/** Below lg — desktop uses `heroHeadlineDesktop`; size tuned in mobile-refine CSS. */
-const heroHeadlineMobile =
-  "max-lg:leading-[1] max-lg:tracking-[-0.038em]";
-const heroHeadlineMobileDe =
-  "max-lg:leading-[1.02] max-lg:tracking-[-0.034em]";
+/** Below lg — size/rhythm from caretip-landing-hero-typography.css */
+const heroHeadlineMobile = "max-lg:tracking-[inherit]";
+const heroHeadlineMobileDe = "max-lg:tracking-[inherit]";
 const heroHeadlineDesktop =
   "lg:text-[3.25rem] lg:leading-[0.95] lg:tracking-[-0.04em] xl:text-[3.75rem] xl:leading-[0.94] xl:tracking-[-0.042em]";
 
@@ -246,15 +244,15 @@ export const landingUi = {
     "caretip-hero-copy-block relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
   heroHeadlineEn: cnHeroHeadline(
-    "caretip-hero-headline caretip-hero-headline--en w-full antialiased text-left max-lg:mx-auto lg:mx-0 lg:max-w-[30ch] xl:max-w-[32ch]",
+    "caretip-hero-headline caretip-hero-headline--en caretip-hero-headline-anchor w-full antialiased text-left max-lg:mx-auto lg:mx-0 lg:max-w-[30ch] xl:max-w-[32ch]",
   ),
   heroHeadlineDe: cnHeroHeadlineDe(
-    "caretip-hero-headline caretip-hero-headline--de w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
+    "caretip-hero-headline caretip-hero-headline--de caretip-hero-headline-anchor w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
   ),
   /** Hero animated keyword — same gradient as section accents (see `.caretip-hero-headline-accent`). */
-  heroHeadlineEmphasis: `font-inherit font-extrabold max-lg:tracking-[-0.034em] ${brandAccentGradient}`,
+  heroHeadlineEmphasis: `font-inherit font-extrabold max-lg:tracking-[inherit] ${brandAccentGradient}`,
   heroHeadlineLine:
-    "block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-[0.3125rem] [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
+    "caretip-hero-headline-line block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-0 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
   heroSubtitle: cnHeroSubtitle(
     `w-full max-w-2xl text-left ${heroStackGapMobile} max-lg:max-w-[min(100%,21.5rem)] max-lg:text-[0.9375rem] max-lg:leading-[1.68] max-lg:pt-0 lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
   ),
@@ -315,9 +313,9 @@ export const landingUi = {
   heroSplitRowDesktop:
     "caretip-hero-split lg:flex-row lg:items-center lg:gap-0 xl:gap-2",
   heroCopyDesktopDe:
-    "caretip-hero-copy--de lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pb-10 lg:pt-[2rem] xl:px-10 xl:pb-11 xl:pt-[2.5rem]",
+    "caretip-hero-copy--de max-lg:items-start max-lg:text-left lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pb-10 lg:pt-[2rem] xl:px-10 xl:pb-11 xl:pt-[2.5rem]",
   heroCopyDesktopEn:
-    "caretip-hero-copy--en lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:min-h-full lg:flex-col lg:justify-between lg:px-8 lg:pb-10 lg:pt-[1.75rem] xl:px-10 xl:pb-11 xl:pt-[2.25rem]",
+    "caretip-hero-copy--en max-lg:items-start max-lg:text-left lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:min-h-full lg:flex-col lg:justify-between lg:px-8 lg:pb-10 lg:pt-[1.75rem] xl:px-10 xl:pb-11 xl:pt-[2.25rem]",
   heroShowcaseColDesktopDe:
     "caretip-hero-showcase-col lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:px-2 lg:pt-0",
   heroShowcaseColDesktopEn:

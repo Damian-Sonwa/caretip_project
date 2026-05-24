@@ -74,18 +74,13 @@
     }
   }
 
-  /* Mobile hero — symmetric text block (no L/R drift) */
+  /* Mobile hero — copy column centered; text stack left-anchored inside */
   @media (max-width: 1023px) {
-    .caretip-landing .caretip-hero-headline,
     .caretip-landing .caretip-hero-copy-block {
       padding-left: 0;
       padding-right: 0;
       margin-left: auto;
       margin-right: auto;
-    }
-
-    .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
-      max-width: min(100%, 20.25rem);
     }
 
     .caretip-landing .caretip-hero-cta-cluster {
