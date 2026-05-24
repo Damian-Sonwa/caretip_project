@@ -171,8 +171,8 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               className={cn(
                 landingUi.heroSubtitle,
                 isDe
-                  ? "caretip-hero-subtitle max-w-lg max-lg:mx-0 md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] lg:!mt-6 xl:max-w-[39rem]"
-                  : "caretip-hero-subtitle max-w-lg max-lg:mx-0 md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:!mt-6 lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] xl:!mt-6 dark:lg:text-neutral-300",
+                  ? "caretip-hero-subtitle max-w-lg max-lg:mx-0 md:max-w-[32rem] lg:mx-0 lg:max-w-[38rem] xl:max-w-[39rem]"
+                  : "caretip-hero-subtitle max-w-lg max-lg:mx-0 md:max-w-[32rem] lg:mx-0 lg:max-w-[26rem] lg:text-neutral-700 lg:leading-[1.64] lg:[text-wrap:pretty] xl:max-w-[28rem] dark:lg:text-neutral-300",
               )}
               variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
             >

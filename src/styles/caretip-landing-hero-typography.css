@@ -1,6 +1,6 @@
 /**
- * Landing hero typography — mobile/tablet only (max-lg). Desktop (lg+) unchanged.
- * Locale tokens, stable animated slot, anchored text stack (Stripe/Linear-style).
+ * Landing hero typography — locale tokens, stable animated slot, headline/subtitle rhythm.
+ * Headline scale on max-lg only; subtitle gap scales at all breakpoints below xl tweaks.
  */
 
 @media (max-width: 1023px) {
@@ -17,7 +17,7 @@
     --caretip-hero-line-gap: 0.26rem;
     --caretip-hero-rotating-stack-gap: 0.2rem;
     --caretip-hero-headline-max: 21rem;
-    --caretip-hero-subtitle-gap: 0.8125rem;
+    --caretip-hero-subtitle-gap: 1.0625rem;
   }
 
   .caretip-landing .caretip-hero-copy--en {
@@ -25,6 +25,8 @@
     --caretip-hero-headline-track: -0.041em;
     --caretip-hero-headline-max: 20.75rem;
     --caretip-hero-subtitle-max: 20.75rem;
+    /* Taller EN stack (rotating line + closing line) — slightly more pause */
+    --caretip-hero-subtitle-gap: 1.125rem;
   }
 
   .caretip-landing .caretip-hero-copy--de {
@@ -32,6 +34,7 @@
     --caretip-hero-headline-track: -0.034em;
     --caretip-hero-headline-max: 23rem;
     --caretip-hero-subtitle-max: 22.5rem;
+    --caretip-hero-subtitle-gap: 1rem;
   }
 
   /* Anchored headline — flush left within copy column */
@@ -42,6 +45,7 @@
     margin-inline: 0;
     align-self: flex-start;
     text-align: left;
+    margin-bottom: 0.0625rem;
   }
 
   .caretip-landing .caretip-hero-headline {
@@ -164,11 +168,28 @@
   }
 }
 
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-landing .caretip-hero-copy--en {
+    --caretip-hero-subtitle-gap: 1.1875rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--de {
+    --caretip-hero-subtitle-gap: 1.0625rem;
+  }
+}
+
 @media (max-width: 639px) {
   .caretip-landing .caretip-hero-copy-block {
     --caretip-hero-line-gap: 0.24rem;
     --caretip-hero-rotating-stack-gap: 0.18rem;
-    --caretip-hero-subtitle-gap: 0.75rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en {
+    --caretip-hero-subtitle-gap: 1.0625rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--de {
+    --caretip-hero-subtitle-gap: 0.9375rem;
   }
 
   .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
@@ -194,7 +215,14 @@
   .caretip-landing .caretip-hero-copy-block {
     --caretip-hero-line-gap: 0.22rem;
     --caretip-hero-rotating-stack-gap: 0.16rem;
-    --caretip-hero-subtitle-gap: 0.6875rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--en {
+    --caretip-hero-subtitle-gap: 1rem;
+  }
+
+  .caretip-landing .caretip-hero-copy--de {
+    --caretip-hero-subtitle-gap: 0.9375rem;
   }
 
   .caretip-landing .caretip-hero-copy--en .caretip-hero-headline {
@@ -203,5 +231,16 @@
 
   .caretip-landing .caretip-hero-copy--de .caretip-hero-headline {
     font-size: clamp(1.875rem, 7.5vw, 2.0625rem);
+  }
+}
+
+/* Desktop — controlled pause after headline (compact, not detached) */
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-copy--en .caretip-hero-subtitle {
+    margin-top: 1.75rem !important;
+  }
+
+  .caretip-landing .caretip-hero-copy--de .caretip-hero-subtitle {
+    margin-top: 1.625rem !important;
   }
 }
