@@ -2276,8 +2276,8 @@
       "navLogs": "Audit logs",
       "navSettings": "System settings",
       "navUsers": "User management",
-      "navNotifications": "Notifications",
-      "navAnnouncements": "Announcements",
+      "navNotifications": "My inbox",
+      "navAnnouncements": "Communication",
       "signOut": "Sign out",
       "closeMenuAria": "Close menu"
     },
@@ -2296,6 +2296,10 @@
       "redirecting": "Opening your admin dashboard…"
     },
     "announcements": {
+      "centerTitle": "Communication center",
+      "centerSubtitle": "Send platform announcements and review delivery history.",
+      "composeSection": "New announcement",
+      "historySection": "Sent announcements",
       "title": "Send announcement",
       "subtitle": "Broadcast to managers and staff. Delivered in-app and via push when enabled.",
       "fieldTitle": "Title",
@@ -2305,16 +2309,27 @@
       "fieldPriority": "Priority",
       "fieldChannels": "Delivery channels",
       "audienceAll": "All business users",
-      "audienceManagers": "Managers only",
+      "audienceManagers": "Business managers",
       "audienceEmployees": "Staff only",
+      "audienceAdmins": "Platform admins",
       "priorityNormal": "Normal",
       "priorityHigh": "High priority",
-      "channelInApp": "In-app notification",
-      "channelPush": "Push notification",
+      "channelInApp": "In-app",
+      "channelPush": "Push",
       "channelEmail": "Email",
       "send": "Send announcement",
       "sending": "Sending…",
-      "validationRequired": "Title and message are required."
+      "validationRequired": "Title and message are required.",
+      "historyLoading": "Loading history…",
+      "historyEmpty": "No announcements sent yet.",
+      "historyFooter": "Showing {{shown}} of {{total}} sent",
+      "colSent": "Sent",
+      "colTitle": "Announcement",
+      "colAudience": "Audience",
+      "colDelivery": "Channels",
+      "colStatus": "Delivery",
+      "statusDelivered": "Sent to {{count}}",
+      "statusNoRecipients": "No recipients"
     },
     "auditLogsPage": {
       "title": "Audit logs",
@@ -2354,7 +2369,7 @@
     "platformSettingsPage": {
       "title": "System settings",
       "subtitle": "Global platform configuration. Additional controls can be wired here as your operations grow.",
-      "cardBody": "Infrastructure changes remain in environment variables and your deployment pipeline. User broadcasts can be sent via POST /api/platform/announcements."
+      "cardBody": "Infrastructure changes remain in environment variables and your deployment pipeline. User broadcasts are managed under Communication in the sidebar."
     },
     "platformSettings": {
       "notifications": {

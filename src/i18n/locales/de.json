@@ -2278,8 +2278,8 @@
       "navLogs": "Audit-Protokolle",
       "navSettings": "Systemeinstellungen",
       "navUsers": "Benutzerverwaltung",
-      "navNotifications": "Benachrichtigungen",
-      "navAnnouncements": "Ankündigungen",
+      "navNotifications": "Mein Posteingang",
+      "navAnnouncements": "Kommunikation",
       "signOut": "Abmelden",
       "closeMenuAria": "Menü schließen"
     },
@@ -2298,6 +2298,10 @@
       "redirecting": "Admin-Dashboard wird geöffnet…"
     },
     "announcements": {
+      "centerTitle": "Kommunikationszentrale",
+      "centerSubtitle": "Plattform-Ankündigungen senden und den Versandverlauf einsehen.",
+      "composeSection": "Neue Ankündigung",
+      "historySection": "Gesendete Ankündigungen",
       "title": "Ankündigung senden",
       "subtitle": "Broadcast an Manager und Team. In-App und per Push, wenn aktiviert.",
       "fieldTitle": "Titel",
@@ -2307,16 +2311,27 @@
       "fieldPriority": "Priorität",
       "fieldChannels": "Zustellkanäle",
       "audienceAll": "Alle Geschäftsnutzer",
-      "audienceManagers": "Nur Manager",
+      "audienceManagers": "Unternehmens-Manager",
       "audienceEmployees": "Nur Team",
+      "audienceAdmins": "Plattform-Admins",
       "priorityNormal": "Normal",
       "priorityHigh": "Hohe Priorität",
-      "channelInApp": "In-App-Benachrichtigung",
-      "channelPush": "Push-Benachrichtigung",
+      "channelInApp": "In-App",
+      "channelPush": "Push",
       "channelEmail": "E-Mail",
       "send": "Ankündigung senden",
       "sending": "Wird gesendet…",
-      "validationRequired": "Titel und Nachricht sind erforderlich."
+      "validationRequired": "Titel und Nachricht sind erforderlich.",
+      "historyLoading": "Verlauf wird geladen…",
+      "historyEmpty": "Noch keine Ankündigungen gesendet.",
+      "historyFooter": "{{shown}} von {{total}} gesendet",
+      "colSent": "Gesendet",
+      "colTitle": "Ankündigung",
+      "colAudience": "Zielgruppe",
+      "colDelivery": "Kanäle",
+      "colStatus": "Zustellung",
+      "statusDelivered": "An {{count}} gesendet",
+      "statusNoRecipients": "Keine Empfänger"
     },
     "auditLogsPage": {
       "title": "Audit-Protokolle",
@@ -2356,7 +2371,7 @@
     "platformSettingsPage": {
       "title": "Systemeinstellungen",
       "subtitle": "Globale Plattformkonfiguration. Weitere Steuerungen können hier angebunden werden, sobald Ihr Betrieb wächst.",
-      "cardBody": "Infrastrukturänderungen erfolgen über Umgebungsvariablen und Ihre Deployment-Pipeline. Broadcasts an Nutzer: POST /api/platform/announcements."
+      "cardBody": "Infrastrukturänderungen erfolgen über Umgebungsvariablen und Ihre Deployment-Pipeline. Broadcasts verwalten Sie unter Kommunikation in der Seitenleiste."
     },
     "platformSettings": {
       "notifications": {

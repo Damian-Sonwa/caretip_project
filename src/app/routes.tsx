@@ -381,7 +381,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/admin/notifications',
-    element: <Navigate to="/platform-admin/dashboard" replace />,
+    element: <Navigate to="/platform-admin/announcements" replace />,
     errorElement: <ErrorBoundary />,
   },
   {

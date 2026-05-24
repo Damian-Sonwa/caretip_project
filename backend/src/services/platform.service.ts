@@ -336,7 +336,7 @@ export async function setBusinessVerificationDocumentPath(businessId: string, pu
   }
 }
 
-export type PlatformAnnouncementAudience = "all" | "managers" | "employees";
+export type PlatformAnnouncementAudience = "all" | "managers" | "employees" | "admins";
 
 export async function resolveAnnouncementRecipientIds(
   audience: PlatformAnnouncementAudience,
@@ -346,6 +346,8 @@ export async function resolveAnnouncementRecipientIds(
     where.role = Role.MANAGER;
   } else if (audience === "employees") {
     where.role = Role.EMPLOYEE;
+  } else if (audience === "admins") {
+    where.role = Role.SUPER_ADMIN;
   } else {
     where.role = { in: [Role.MANAGER, Role.EMPLOYEE] };
   }
@@ -427,6 +429,35 @@ export async function sendPlatformAnnouncement(input: {
   );
 
   return { recipientCount: userIds.length, announcementId: announcement.id };
+}
+
+export async function listAnnouncementsForAdmin(params: { take: number; skip: number }) {
+  const [rows, total] = await Promise.all([
+    prisma.announcement.findMany({
+      orderBy: { createdAt: "desc" },
+      take: params.take,
+      skip: params.skip,
+      include: {
+        createdBy: { select: { email: true } },
+      },
+    }),
+    prisma.announcement.count(),
+  ]);
+  return {
+    items: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      message: r.message,
+      audience: r.audience,
+      priority: r.priority,
+      channels: r.channels,
+      url: r.url,
+      recipientCount: r.recipientCount,
+      createdByEmail: r.createdBy.email,
+      createdAt: r.createdAt.toISOString(),
+    })),
+    total,
+  };
 }
 
 export async function impersonateBusinessManager(

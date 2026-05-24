@@ -287,6 +287,20 @@ export async function updateBusiness(req: Request, res: Response) {
   }
 }
 
+export async function listAnnouncements(req: Request, res: Response) {
+  try {
+    const take = Math.min(Math.max(Number(req.query.take) || 50, 1), 200);
+    const skip = Math.max(Number(req.query.skip) || 0, 0);
+    const result = await platformService.listAnnouncementsForAdmin({ take, skip });
+    return res.json(result);
+  } catch (err) {
+    logServerError("platform.listAnnouncements", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load announcement history. Try again."),
+    });
+  }
+}
+
 export async function sendAnnouncement(req: Request, res: Response) {
   try {
     const body = req.body as Record<string, unknown>;
@@ -294,8 +308,12 @@ export async function sendAnnouncement(req: Request, res: Response) {
     const message = typeof body.message === "string" ? body.message : typeof body.body === "string" ? body.body : "";
     const url = typeof body.url === "string" ? body.url : undefined;
     const audienceRaw = typeof body.audience === "string" ? body.audience : "all";
-    const audience =
-      audienceRaw === "managers" || audienceRaw === "employees" ? audienceRaw : "all";
+    const audience: platformService.PlatformAnnouncementAudience =
+      audienceRaw === "managers" ||
+      audienceRaw === "employees" ||
+      audienceRaw === "admins"
+        ? audienceRaw
+        : "all";
     if (!title.trim() || !message.trim()) {
       return res.status(400).json({ message: "title and message are required" });
     }

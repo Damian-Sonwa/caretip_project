@@ -1625,10 +1625,37 @@ export async function markAllNotificationsReadApi(): Promise<{ updated: number; 
   });
 }
 
+export type PlatformAnnouncementRow = {
+  id: string;
+  title: string;
+  message: string;
+  audience: string;
+  priority: string;
+  channels: string[];
+  url: string | null;
+  recipientCount: number;
+  createdByEmail: string;
+  createdAt: string;
+};
+
+export async function fetchPlatformAnnouncements(params: {
+  take?: number;
+  skip?: number;
+}): Promise<{ items: PlatformAnnouncementRow[]; total: number }> {
+  const sp = new URLSearchParams();
+  if (params.take != null) sp.set("take", String(params.take));
+  if (params.skip != null) sp.set("skip", String(params.skip));
+  const qs = sp.toString();
+  return apiRequest(apiPath(`/api/platform/announcements${qs ? `?${qs}` : ""}`), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
 export async function sendPlatformAnnouncementApi(payload: {
   title: string;
   message: string;
-  audience: "all" | "managers" | "employees";
+  audience: "all" | "managers" | "employees" | "admins";
   url?: string;
   priority?: "normal" | "high";
   channels?: { inApp?: boolean; push?: boolean; email?: boolean };
