@@ -12,9 +12,10 @@ import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole } from "../../lib/authSession";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
+import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
 
-const FIELD_CLASS =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 font-sans dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
+const FIELD_CLASS = "caretip-auth-field";
+const FIELD_PASSWORD = "caretip-auth-field caretip-auth-field--password-toggle";
 
 export function PlatformAdminLoginPage() {
   const { t } = useTranslation();
@@ -78,12 +79,13 @@ export function PlatformAdminLoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-[100dvh] flex-col overflow-x-hidden bg-gray-50 font-sans dark:bg-neutral-900">
+    <div className="caretip-auth-page relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
-        <main className="relative flex min-h-0 flex-1 flex-col items-center justify-center overflow-hidden bg-gray-50 px-4 py-12 sm:py-16 dark:bg-neutral-900">
+        <main className="caretip-auth-stage relative flex min-h-0 flex-1 flex-col">
+          <AuthPageAtmosphere />
           {showCrossSessionHint ? (
-            <div className="mb-6 w-full max-w-sm" role="region" aria-label={t("auth.page.crossSessionRegionAria")}>
-              <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+            <div className="caretip-auth-notice-banner !pb-0" role="region" aria-label={t("auth.page.crossSessionRegionAria")}>
+              <div className="caretip-auth-notice mb-6">
                 <p className="font-medium leading-snug">{t("auth.page.crossSessionBody", { role: sessionRoleLabel })}</p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   <button
@@ -113,35 +115,31 @@ export function PlatformAdminLoginPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="relative z-10 w-full max-w-sm"
+            className="caretip-auth-card-wrap relative z-10"
           >
-            <div
-              className={
-                "relative overflow-hidden rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-7 dark:border-neutral-800 dark:bg-neutral-900"
-              }
-            >
-              <div className="relative mb-5 space-y-1 text-center">
+            <div className="caretip-auth-card">
+              <div className="caretip-auth-header !mb-5">
                 <motion.div
-                  initial={{ scale: 0.96, opacity: 0 }}
+                  initial={{ scale: 0.98, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: "spring", duration: 0.65 }}
-                  className="mx-auto flex h-[3.25rem] w-full max-w-[280px] items-center justify-center rounded-xl border border-gray-200 bg-white px-3 py-2 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className="caretip-auth-logo-wrap max-w-[17.5rem]"
                 >
                   <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
                 </motion.div>
                 <motion.h1
-                  initial={{ opacity: 0, y: 8 }}
+                  initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.08 }}
-                  className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl"
+                  transition={{ delay: 0.06, duration: 0.4 }}
+                  className="caretip-auth-title"
                 >
                   {t("admin.loginPage.title")}
                 </motion.h1>
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1 }}
-                  className="flex flex-wrap items-center justify-center gap-2"
+                  transition={{ delay: 0.1, duration: 0.4 }}
+                  className="mt-2 flex flex-wrap items-center justify-center gap-2"
                 >
                   <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
                     <ShieldCheck className="h-3 w-3" strokeWidth={2} aria-hidden />
@@ -151,7 +149,7 @@ export function PlatformAdminLoginPage() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.12 }}
-                    className="w-full text-xs font-medium text-neutral-600 dark:text-neutral-400"
+                    className="caretip-auth-subtitle w-full"
                   >
                     {t("admin.loginPage.subtitle")}
                   </motion.p>
@@ -167,7 +165,7 @@ export function PlatformAdminLoginPage() {
                 <form
                   onSubmit={(e) => void handleSubmit(e)}
                   aria-busy={submitting || Boolean(user && !sessionValidated)}
-                  className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
+                  className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
                   method="post"
                   action=""
                   noValidate
@@ -193,12 +191,12 @@ export function PlatformAdminLoginPage() {
                       autoComplete="current-password"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className={`${FIELD_CLASS} pr-11`}
+                      className={FIELD_PASSWORD}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword((v) => !v)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                      className="caretip-auth-field-toggle"
                       aria-label={showPassword ? t("admin.loginPage.hidePassword") : t("admin.loginPage.showPassword")}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -220,7 +218,7 @@ export function PlatformAdminLoginPage() {
                   <button
                     type="submit"
                     disabled={submitting || Boolean(user && !sessionValidated)}
-                    className={cn(caretipBtnPrimaryFull, "relative mt-1 disabled:cursor-not-allowed")}
+                    className={cn(caretipBtnPrimaryFull, "caretip-auth-submit relative disabled:cursor-not-allowed")}
                   >
                     {submitting ? (
                       <>
@@ -234,7 +232,7 @@ export function PlatformAdminLoginPage() {
                 </form>
               )}
 
-              <p className="mt-6 text-center text-xs text-neutral-600 dark:text-neutral-400">
+              <p className="caretip-auth-form-footer mt-6">
                 <Link
                   to="/login"
                   className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline dark:text-neutral-100"

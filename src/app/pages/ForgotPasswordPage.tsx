@@ -7,8 +7,8 @@ import { requestPasswordReset } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
 
-const FIELD =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
+import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
+import { cn } from "@/lib/utils";
 
 export function ForgotPasswordPage() {
   const { t, i18n } = useTranslation();
@@ -42,13 +42,13 @@ export function ForgotPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.forgot.sentTitle")}</h1>
-          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          <h1 className="caretip-auth-title !pt-0">{t("auth.forgot.sentTitle")}</h1>
+          <p className="caretip-auth-subtitle !mt-2">
             {t("auth.forgot.sentBody", { email: email.trim() })}
           </p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit no-underline")}
           >
             {t("auth.forgot.backToLogin")}
           </Link>
@@ -60,15 +60,15 @@ export function ForgotPasswordPage() {
   return (
     <AuthRecoveryLayout>
       <div className="space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.forgot.title")}</h1>
-          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+        <div className="caretip-auth-header !mb-5">
+          <h1 className="caretip-auth-title !pt-0">{t("auth.forgot.title")}</h1>
+          <p className="caretip-auth-subtitle">
             {t("auth.forgot.subtitle")}
           </p>
         </div>
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4" noValidate>
+        <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form" noValidate>
           <div>
-            <label htmlFor="forgot-email" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
+            <label htmlFor="forgot-email" className="caretip-auth-label">
               {t("auth.forgot.emailLabel")}
             </label>
             <input
@@ -78,7 +78,7 @@ export function ForgotPasswordPage() {
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={FIELD}
+              className="caretip-auth-field"
               placeholder="you@example.com"
             />
           </div>
@@ -90,7 +90,7 @@ export function ForgotPasswordPage() {
           <button
             type="submit"
             disabled={submitting}
-            className="flex h-12 w-full min-h-12 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2 disabled:cursor-not-allowed")}
           >
             {submitting ? (
               <>

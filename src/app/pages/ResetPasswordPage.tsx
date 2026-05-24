@@ -7,9 +7,10 @@ import { resetPasswordWithToken } from "@/app/lib/api";
 import { isPasswordStrong } from "@/app/lib/passwordValidation";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
+import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
+import { cn } from "@/lib/utils";
 
-const FIELD =
-  "w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 pr-11 text-sm text-neutral-900 placeholder:text-neutral-400 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-400";
+const FIELD_PASSWORD = "caretip-auth-field caretip-auth-field--password-toggle";
 
 export function ResetPasswordPage() {
   const { t } = useTranslation();
@@ -66,12 +67,12 @@ export function ResetPasswordPage() {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.reset.doneTitle")}</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.reset.doneSubtitle")}</p>
+          <h1 className="caretip-auth-title !pt-0">{t("auth.reset.doneTitle")}</h1>
+          <p className="caretip-auth-subtitle !mt-2">{t("auth.reset.doneSubtitle")}</p>
           <button
             type="button"
             onClick={() => navigate("/login", { replace: true })}
-            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit")}
           >
             {t("auth.reset.backToLogin")}
           </button>
@@ -83,13 +84,13 @@ export function ResetPasswordPage() {
   return (
     <AuthRecoveryLayout>
       <div className="space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">{t("auth.reset.title")}</h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.reset.subtitle")}</p>
+        <div className="caretip-auth-header !mb-5">
+          <h1 className="caretip-auth-title !pt-0">{t("auth.reset.title")}</h1>
+          <p className="caretip-auth-subtitle">{t("auth.reset.subtitle")}</p>
         </div>
-        <form onSubmit={(e) => void handleSubmit(e)} className="space-y-4">
+        <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form">
           <div>
-            <label htmlFor="reset-new" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
+            <label htmlFor="reset-new" className="caretip-auth-label">
               {t("auth.reset.labelNew")}
             </label>
             <div className="relative">
@@ -99,11 +100,11 @@ export function ResetPasswordPage() {
                 autoComplete="new-password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className={FIELD}
+                className={FIELD_PASSWORD}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                className="caretip-auth-field-toggle"
                 onClick={() => setShowNew(!showNew)}
                 aria-label={showNew ? t("auth.reset.hidePassword") : t("auth.reset.showPassword")}
               >
@@ -112,7 +113,7 @@ export function ResetPasswordPage() {
             </div>
           </div>
           <div>
-            <label htmlFor="reset-confirm" className="mb-2 block text-left text-xs font-medium text-neutral-600 dark:text-neutral-400">
+            <label htmlFor="reset-confirm" className="caretip-auth-label">
               {t("auth.reset.labelConfirm")}
             </label>
             <div className="relative">
@@ -122,11 +123,11 @@ export function ResetPasswordPage() {
                 autoComplete="new-password"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
-                className={FIELD}
+                className={FIELD_PASSWORD}
               />
               <button
                 type="button"
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                className="caretip-auth-field-toggle"
                 onClick={() => setShowConfirm(!showConfirm)}
                 aria-label={showConfirm ? t("auth.reset.hidePassword") : t("auth.reset.showPassword")}
               >
@@ -145,7 +146,7 @@ export function ResetPasswordPage() {
           <button
             type="submit"
             disabled={!canSubmit}
-            className="flex h-12 w-full min-h-12 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2 disabled:cursor-not-allowed")}
           >
             {submitting ? (
               <>
@@ -157,7 +158,7 @@ export function ResetPasswordPage() {
             )}
           </button>
           {!strong && newPassword.length > 0 ? (
-            <p className="text-center text-xs text-neutral-600 dark:text-neutral-400">
+            <p className="caretip-auth-helper text-center">
               {t("auth.reset.hintWeak")}
             </p>
           ) : null}

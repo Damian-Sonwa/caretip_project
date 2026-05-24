@@ -1,6 +1,8 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import { motion, useReducedMotion } from "motion/react";
 import { CareTipLogo } from "@/app/components/CareTipLogo";
+import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
 
 type AuthRecoveryLayoutProps = {
   children: React.ReactNode;
@@ -9,28 +11,34 @@ type AuthRecoveryLayoutProps = {
 };
 
 /**
- * Soft light (alabaster) canvas + white elevated card + centered CareTip logo.
+ * Password recovery / activation — shared premium auth canvas + elevated card.
  */
 export function AuthRecoveryLayout({ children, showFooterLink = true }: AuthRecoveryLayoutProps) {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+
   return (
-    <div className="min-h-[100dvh] bg-white font-sans dark:bg-neutral-950">
-      <div className="mx-auto flex min-h-[100dvh] max-w-md flex-col justify-center px-4 py-12">
-        <div className="mb-8 flex justify-center">
-          <div className="rounded-xl border border-gray-200 bg-white px-4 py-2 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
-            <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
+    <div className="caretip-auth-page relative min-h-[100dvh] font-sans">
+      <AuthPageAtmosphere />
+      <div className="caretip-auth-recovery-stage">
+        <motion.div
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: reduceMotion ? 0 : 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="caretip-auth-recovery-inner"
+        >
+          <div className="mb-7 flex justify-center">
+            <div className="caretip-auth-logo-wrap max-w-[15rem]">
+              <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
+            </div>
           </div>
-        </div>
-        <div className="rounded-[24px] border border-gray-200 bg-white p-6 shadow-[0_10px_30px_rgba(0,0,0,0.06)] sm:p-8 dark:border-neutral-800 dark:bg-neutral-900">
-          {children}
-        </div>
-        {showFooterLink ? (
-          <p className="mt-8 text-center text-xs text-neutral-600 dark:text-neutral-400">
-            <Link to="/login" className="font-medium text-primary hover:underline">
-              {t("auth.recovery.backToSignIn")}
-            </Link>
-          </p>
-        ) : null}
+          <div className="caretip-auth-card">{children}</div>
+          {showFooterLink ? (
+            <p className="caretip-auth-footer-link">
+              <Link to="/login">{t("auth.recovery.backToSignIn")}</Link>
+            </p>
+          ) : null}
+        </motion.div>
       </div>
     </div>
   );

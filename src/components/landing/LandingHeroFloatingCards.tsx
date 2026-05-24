@@ -5,10 +5,9 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
 type FloatPillSpec = {
-  id: string;
+  id: "tip" | "rating" | "staff";
   pillKey: string;
   Icon: LucideIcon;
-  position: string;
   floatDuration: number;
   floatDelay: number;
   floatOffset: number;
@@ -16,7 +15,7 @@ type FloatPillSpec = {
 
 const FLOAT_PILL_BASE = cn(
   "caretip-hero-float-pill pointer-events-none absolute z-[28]",
-  "inline-flex max-w-[min(calc(100%-0.5rem),11.5rem)] items-center gap-1.5",
+  "inline-flex max-w-[min(100%,11.5rem)] items-center gap-1.5",
   "rounded-full border border-white/55 bg-white/48 px-2.5 py-1",
   "shadow-[0_1px_2px_rgba(15,23,42,0.03)] backdrop-blur-md",
   "ring-1 ring-white/30",
@@ -26,7 +25,8 @@ const FLOAT_PILL_BASE = cn(
 );
 
 /**
- * Lightweight glass metric pills anchored to the hero device edges.
+ * Glass metric pills — positions from caretip-landing-hero-visual-refine.css
+ * (anchored to the device composition, not the full column).
  */
 export function LandingHeroFloatingCards() {
   const { t } = useTranslation();
@@ -38,48 +38,39 @@ export function LandingHeroFloatingCards() {
         id: "tip",
         pillKey: "landing.showcase.heroFloatPillTip",
         Icon: Coins,
-        position:
-          "top-[11%] left-0 max-lg:top-[10%] max-lg:-left-0.5 sm:max-lg:left-0 lg:top-[13%] lg:left-[1.5%]",
-        floatDuration: 13,
+        floatDuration: 14,
         floatDelay: 0,
-        floatOffset: -2.5,
+        floatOffset: -1.5,
       },
       {
         id: "rating",
         pillKey: "landing.showcase.heroFloatPillRating",
         Icon: Star,
-        position:
-          "top-[13%] right-0 max-lg:top-[12%] max-lg:-right-0.5 sm:max-lg:right-0 lg:top-[15%] lg:right-[2%] lg:z-[32]",
-        floatDuration: 14.5,
-        floatDelay: 0.8,
-        floatOffset: -2,
+        floatDuration: 15,
+        floatDelay: 0.7,
+        floatOffset: -1.25,
       },
       {
         id: "staff",
         pillKey: "landing.showcase.heroFloatPillStaff",
         Icon: Users,
-        position:
-          "bottom-[15%] right-0 max-lg:bottom-[14%] max-lg:-right-0.5 sm:max-lg:right-0 lg:bottom-[17%] lg:right-[2.5%]",
-        floatDuration: 12.5,
-        floatDelay: 0.4,
-        floatOffset: -2.5,
+        floatDuration: 13.5,
+        floatDelay: 0.35,
+        floatOffset: -1.5,
       },
     ],
     [],
   );
 
   return (
-    <div
-      className="caretip-hero-float-cards pointer-events-none absolute inset-0 z-30 overflow-visible max-lg:overflow-visible lg:overflow-hidden"
-      aria-hidden
-    >
+    <div className="caretip-hero-float-cards" aria-hidden>
       {pills.map((pill) => {
         const Icon = pill.Icon;
         return (
           <motion.div
             key={pill.id}
-            className={cn(FLOAT_PILL_BASE, pill.position)}
-            initial={reduceMotion ? false : { opacity: 0, y: 5 }}
+            className={cn(FLOAT_PILL_BASE, `caretip-hero-float-pill--${pill.id}`)}
+            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
             animate={
               reduceMotion
                 ? { opacity: 1, y: 0 }

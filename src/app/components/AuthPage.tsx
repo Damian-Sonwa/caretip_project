@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
 import { commitAuthUser } from '../lib/authUserStore';
+import { AuthPageAtmosphere } from './auth/AuthPageAtmosphere';
 import {
   isPublicAuthenticationPath,
   sessionMatchesBusinessStaffAuthTarget,
@@ -41,10 +42,9 @@ const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as
 
 export type { AuthRole };
 
-const FIELD_CLASS =
-  "caretip-auth-field w-full rounded-xl border border-neutral-200/90 bg-white px-3.5 py-2.5 text-sm text-neutral-900 placeholder:text-neutral-400/75 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,box-shadow] duration-200 focus:border-[#e9781c]/45 focus:outline-none focus:ring-[3px] focus:ring-[#e9781c]/18 font-sans dark:border-neutral-700/90 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500";
-
-const FIELD_ICON = `${FIELD_CLASS} pl-10`;
+const FIELD_CLASS = "caretip-auth-field";
+const FIELD_ICON = "caretip-auth-field caretip-auth-field--has-icon";
+const FIELD_PASSWORD = "caretip-auth-field caretip-auth-field--password-toggle";
 
 const FIELD = {
   name: 'fullName',
@@ -375,9 +375,12 @@ export function AuthPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="caretip-auth-shell flex min-h-[100dvh] flex-col items-center justify-center"
+        className="caretip-auth-page relative flex min-h-[100dvh] flex-col items-center justify-center"
       >
-        <AppLoader />
+        <AuthPageAtmosphere />
+        <div className="relative z-10">
+          <AppLoader />
+        </div>
       </motion.div>
     );
   }
@@ -387,9 +390,12 @@ export function AuthPage() {
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="caretip-auth-shell flex min-h-[100dvh] flex-col items-center justify-center"
+        className="caretip-auth-page relative flex min-h-[100dvh] flex-col items-center justify-center"
       >
-        <AppLoader />
+        <AuthPageAtmosphere />
+        <div className="relative z-10">
+          <AppLoader />
+        </div>
       </motion.div>
     );
   }
@@ -411,17 +417,17 @@ export function AuthPage() {
           : user?.role ?? '';
 
   return (
-    <div className="caretip-auth-shell relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
+    <div className="caretip-auth-page relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <Navigation />
 
         {showCrossSessionHint ? (
           <div
-            className="mx-auto w-full max-w-lg px-4 pt-20 sm:pt-24"
+            className="caretip-auth-notice-banner"
             role="region"
             aria-label={t('auth.page.crossSessionRegionAria')}
           >
-            <div className="rounded-xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm text-amber-950 shadow-sm dark:border-amber-500/30 dark:bg-amber-950/40 dark:text-amber-50">
+            <div className="caretip-auth-notice">
               <p className="font-medium leading-snug">{t('auth.page.crossSessionBody', { role: sessionRoleLabel })}</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <button
@@ -460,7 +466,7 @@ export function AuthPage() {
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting || resumeSessionPending}
-            className="flex w-full flex-col gap-4 text-neutral-900 dark:text-neutral-100"
+            className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
             noValidate
           >
             <input
@@ -498,7 +504,7 @@ export function AuthPage() {
                 animate={{ opacity: 1, x: 0 }}
                 className="relative"
               >
-                <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-600 dark:text-neutral-400" />
+                <KeyRound className="caretip-auth-field-icon" aria-hidden />
                 <input
                   placeholder={t('auth.page.placeholderInviteCode')}
                   type="text"
@@ -549,18 +555,18 @@ export function AuthPage() {
                     setShowPasswordChecklist(false);
                   }
                 }}
-                className={`${FIELD_CLASS} pr-11`}
+                className={FIELD_PASSWORD}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                className="caretip-auth-field-toggle"
                 aria-label={showPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
               >
                 {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
               {!isLogin && (
-                <div className="mt-2 h-1 overflow-hidden rounded-full bg-neutral-200">
+                <div className="caretip-auth-password-meter">
                   <div
                     className="h-full min-w-0 rounded-full transition-all duration-300"
                     style={{
@@ -589,12 +595,12 @@ export function AuthPage() {
                     autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`${FIELD_CLASS} pr-11`}
+                    className={FIELD_PASSWORD}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                    className="caretip-auth-field-toggle"
                     aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
                   >
                     {showConfirmPassword ? (
@@ -604,7 +610,7 @@ export function AuthPage() {
                     )}
                   </button>
                 </div>
-                <ul className="space-y-1 text-[11px] text-neutral-600 dark:text-neutral-400">
+                <ul className="caretip-auth-password-rules">
                   {[
                     { key: 'minLength', label: t('auth.page.passwordRuleMinLength'), met: getPasswordChecklist(password).minLength },
                     { key: 'upper', label: t('auth.page.passwordRuleUpper'), met: getPasswordChecklist(password).hasUppercase },
@@ -638,12 +644,12 @@ export function AuthPage() {
                     autoComplete="new-password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={`${FIELD_CLASS} pr-11`}
+                    className={FIELD_PASSWORD}
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute top-1/2 right-3 -translate-y-1/2 p-1 text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100"
+                    className="caretip-auth-field-toggle"
                     aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
                   >
                     {showConfirmPassword ? (
@@ -686,7 +692,7 @@ export function AuthPage() {
               <div className="flex justify-end pt-0.5">
                 <Link
                   to="/forgot-password"
-                  className="text-xs font-medium text-neutral-500 transition-colors hover:text-[#e9781c] dark:text-neutral-400/90"
+                  className="caretip-auth-inline-link"
                 >
                   {t('auth.page.forgotPassword')}
                 </Link>
@@ -696,7 +702,7 @@ export function AuthPage() {
             <button
               type="submit"
               disabled={isSubmitting || resumeSessionPending || (!isLogin && signUpDisabled)}
-              className={cn(caretipBtnPrimaryFull, "relative mt-1 disabled:cursor-not-allowed")}
+              className={cn(caretipBtnPrimaryFull, "caretip-auth-submit relative disabled:cursor-not-allowed")}
             >
               {isSubmitting ? (
                 <>
@@ -735,7 +741,7 @@ export function AuthPage() {
             />
             </div>
 
-            <p className="pt-0.5 text-center text-xs leading-snug text-neutral-500 dark:text-neutral-400/90">
+            <p className="caretip-auth-form-footer">
               {isLogin ? t('auth.page.footerNoAccount') : t('auth.page.footerHasAccount')}
               <button
                 type="button"

@@ -154,7 +154,102 @@ html.dark .caretip-landing .caretip-hero-showcase-soft-frame::after {
   }
 }
 
-/* Float metric pills — light glass, edge-anchored */
+/* Float pills — anchored to device composition (triangular balance) */
+.caretip-landing .caretip-hero-showcase-stage {
+  position: relative;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-showcase-col {
+    overflow: visible;
+  }
+}
+
+.caretip-landing .caretip-hero-float-layer {
+  overflow: visible !important;
+}
+
+.caretip-landing .caretip-hero-float-cards {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 30;
+  width: min(92%, 20.5rem);
+  height: min(96%, 100%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.caretip-landing .caretip-hero-float-pill--tip {
+  top: 12%;
+  left: 5%;
+  right: auto;
+  bottom: auto;
+}
+
+.caretip-landing .caretip-hero-float-pill--rating {
+  top: 14%;
+  right: 5%;
+  left: auto;
+  bottom: auto;
+}
+
+.caretip-landing .caretip-hero-float-pill--staff {
+  top: auto;
+  bottom: 26%;
+  right: 7%;
+  left: auto;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-hero-float-cards {
+    width: min(90%, 21.5rem);
+  }
+
+  .caretip-landing .caretip-hero-float-pill--tip {
+    top: 13%;
+    left: 6%;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--rating {
+    top: 15%;
+    right: 6%;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--staff {
+    bottom: 24%;
+    right: 8%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-float-cards {
+    width: min(78%, 26rem);
+    height: min(94%, 100%);
+  }
+
+  .caretip-landing .caretip-hero-float-pill--tip {
+    top: 14%;
+    left: 4%;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--rating {
+    top: 16%;
+    right: 4%;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--staff {
+    bottom: 22%;
+    right: 6%;
+  }
+
+  .caretip-landing .caretip-hero-visual--en .caretip-hero-float-pill--staff {
+    bottom: 20%;
+    right: 5%;
+  }
+}
+
+/* Float metric pills — light glass */
 .caretip-landing .caretip-hero-float-pill {
   opacity: 0.94;
   visibility: visible;
@@ -196,16 +291,10 @@ html.dark .caretip-landing .caretip-hero-float-pill svg {
   }
 }
 
-/* Mobile: pills sit at device edges without heavy overlap */
 @media (max-width: 1023px) {
-  .caretip-landing .caretip-hero-float-cards {
-    clip-path: none;
-    overflow: visible;
-  }
-
   .caretip-landing .caretip-hero-float-pill {
-    opacity: 0.9;
-    max-width: min(calc(100% - 0.25rem), 10.25rem);
+    opacity: 0.92;
+    max-width: min(calc(100% - 0.5rem), 10.5rem);
     padding-inline: 0.5625rem;
     padding-block: 0.3125rem;
     font-size: 0.625rem;

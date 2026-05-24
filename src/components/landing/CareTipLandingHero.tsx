@@ -245,16 +245,15 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               src={imageSrc}
               alt={imageAlt}
               className={cn(
-                "relative mx-auto flex w-full justify-center",
+                "relative z-[1] mx-auto flex w-full justify-center",
                 landingUi.heroShowcaseMobileShell,
                 isDe ? landingUi.heroShowcaseDesktopShellDe : landingUi.heroShowcaseDesktopShellEn,
               )}
             />
+            <div className={cn(landingUi.heroFloatLayer)}>
+              <LandingHeroFloatingCards />
+            </div>
           </motion.div>
-
-          <div className={cn(landingUi.heroFloatLayer)}>
-            <LandingHeroFloatingCards />
-          </div>
         </motion.div>
 
         <motion.div

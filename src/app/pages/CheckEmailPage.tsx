@@ -13,7 +13,7 @@ import {
 } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { authDebug } from "@/app/lib/authDebugLog";
-import { caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
+import { caretipBtnPrimaryFull, caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 
@@ -64,13 +64,11 @@ function VerifyEmailFromToken({ token }: { token: string }) {
     return (
       <AuthRecoveryLayout showFooterLink={false}>
         <div className="space-y-4 text-center">
-          <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
-            {t("auth.checkEmail.emailVerifiedTitle")}
-          </h1>
-          <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.checkEmail.emailVerifiedBody")}</p>
+          <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.emailVerifiedTitle")}</h1>
+          <p className="caretip-auth-subtitle !mt-2">{t("auth.checkEmail.emailVerifiedBody")}</p>
           <Link
             to="/login"
-            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit no-underline")}
           >
             {t("auth.checkEmail.continueToSignIn")}
           </Link>
@@ -82,10 +80,8 @@ function VerifyEmailFromToken({ token }: { token: string }) {
   return (
     <AuthRecoveryLayout showFooterLink={false}>
       <div className="space-y-3 text-center">
-        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
-          {t("auth.checkEmail.verifyingTitle")}
-        </h1>
-        <p className="text-sm text-neutral-600 dark:text-neutral-400">{t("auth.checkEmail.verifyingBody")}</p>
+        <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.verifyingTitle")}</h1>
+        <p className="caretip-auth-subtitle">{t("auth.checkEmail.verifyingBody")}</p>
       </div>
     </AuthRecoveryLayout>
   );
@@ -183,19 +179,17 @@ export function CheckEmailPage() {
             {verifyErrorBanner}
           </div>
         ) : null}
-        <h1 className="text-xl font-bold text-neutral-900 dark:text-neutral-100 sm:text-2xl">
-          {t("auth.checkEmail.title")}
-        </h1>
+        <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.title")}</h1>
         {hasSessionUser ? (
-          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          <p className="caretip-auth-subtitle !mt-2">
             {t("auth.checkEmail.introSession", { email: user!.email })}
           </p>
         ) : (
-          <p className="text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+          <p className="caretip-auth-subtitle !mt-2">
             {t("auth.checkEmail.introResend")}
           </p>
         )}
-        <p className="text-xs text-neutral-600 dark:text-neutral-400">
+        <p className="caretip-auth-helper">
           {t("auth.checkEmail.dashboardLocked")}
         </p>
 
@@ -204,7 +198,7 @@ export function CheckEmailPage() {
             <button
               type="button"
               onClick={openInbox}
-              className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center gap-2 rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
+              className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2")}
             >
               <Mail className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               {t("auth.checkEmail.openMyEmail")}
@@ -226,7 +220,7 @@ export function CheckEmailPage() {
             <button
               type="button"
               onClick={() => void copyAddressAndHint()}
-              className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+              className={cn(caretipBtnSecondaryFull, "gap-2 text-sm")}
             >
               <Copy className="h-4 w-4 shrink-0 opacity-80" aria-hidden />
               {t("auth.checkEmail.goToInboxManually")}
@@ -234,35 +228,31 @@ export function CheckEmailPage() {
           ) : (
             <div className="space-y-2 text-left">
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">
-                  {t("auth.checkEmail.emailLabel")}
-                </span>
+                <span className="caretip-auth-label">{t("auth.checkEmail.emailLabel")}</span>
                 <input
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="h-11 w-full rounded-lg border border-gray-200 bg-white px-3 text-sm font-medium text-neutral-900 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+                  className="caretip-auth-field"
                   placeholder={t("auth.checkEmail.placeholderEmail")}
                   autoComplete="email"
                 />
               </label>
               <label className="block">
-                <span className="mb-1 block text-xs font-semibold text-neutral-600 dark:text-neutral-400">
-                  {t("auth.checkEmail.passwordLabel")}
-                </span>
+                <span className="caretip-auth-label">{t("auth.checkEmail.passwordLabel")}</span>
                 <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" aria-hidden />
+                  <Lock className="caretip-auth-field-icon" aria-hidden />
                   <input
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     type={showPassword ? "text" : "password"}
-                    className="h-11 w-full rounded-lg border border-gray-200 bg-white pl-10 pr-10 text-sm font-medium text-neutral-900 focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+                    className="caretip-auth-field caretip-auth-field--has-icon caretip-auth-field--password-toggle"
                     placeholder={t("auth.checkEmail.placeholderPassword")}
                     autoComplete="current-password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword((s) => !s)}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-md p-2 text-neutral-500 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                    className="caretip-auth-field-toggle"
                     aria-label={showPassword ? t("auth.page.hidePassword") : t("auth.page.showPassword")}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -305,7 +295,7 @@ export function CheckEmailPage() {
             onClick={() => {
               void handleContinueAfterVerify();
             }}
-            className="inline-flex h-11 w-full min-h-11 touch-manipulation items-center justify-center rounded-lg bg-primary text-sm font-semibold text-white shadow-md transition-[box-shadow,colors,opacity] hover:shadow-lg active:opacity-90"
+            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit")}
           >
             {t("auth.checkEmail.continue")}
           </button>
@@ -315,7 +305,7 @@ export function CheckEmailPage() {
               logout();
               navigate("/signup", { replace: true });
             }}
-            className="inline-flex h-11 w-full items-center justify-center rounded-lg border border-gray-200 bg-gray-50 text-sm font-semibold text-neutral-900 transition hover:bg-gray-50/80 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+            className={cn(caretipBtnSecondaryFull, "text-sm")}
           >
             {t("auth.checkEmail.useDifferentEmail")}
           </button>
