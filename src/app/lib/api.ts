@@ -1562,6 +1562,96 @@ export async function patchMyAccountSettings(
   });
 }
 
+export type InboxNotification = {
+  id: string;
+  type: string;
+  title: string;
+  message: string;
+  metadata: Record<string, unknown>;
+  priority: "normal" | "high";
+  channels: string[];
+  read: boolean;
+  readAt: string | null;
+  createdAt: string;
+  url: string | null;
+};
+
+export type NotificationsListResponse = {
+  items: InboxNotification[];
+  nextCursor: string | null;
+  unreadCount: number;
+};
+
+export async function fetchMyNotifications(params?: {
+  limit?: number;
+  cursor?: string;
+  unreadOnly?: boolean;
+}): Promise<NotificationsListResponse> {
+  const q = new URLSearchParams();
+  if (params?.limit) q.set("limit", String(params.limit));
+  if (params?.cursor) q.set("cursor", params.cursor);
+  if (params?.unreadOnly) q.set("unreadOnly", "true");
+  const suffix = q.toString() ? `?${q.toString()}` : "";
+  return apiRequest(apiPath(`/api/me/notifications${suffix}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function fetchMyUnreadNotificationCount(): Promise<{ unreadCount: number }> {
+  return apiRequest(apiPath("/api/me/notifications/unread-count"), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function markNotificationReadApi(
+  id: string,
+): Promise<{ notification: InboxNotification; unreadCount: number }> {
+  return apiRequest(apiPath(`/api/me/notifications/${id}/read`), {
+    method: "PATCH",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function markAllNotificationsReadApi(): Promise<{ updated: number; unreadCount: number }> {
+  return apiRequest(apiPath("/api/me/notifications/read-all"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function sendPlatformAnnouncementApi(payload: {
+  title: string;
+  message: string;
+  audience: "all" | "managers" | "employees";
+  url?: string;
+  priority?: "normal" | "high";
+  channels?: { inApp?: boolean; push?: boolean; email?: boolean };
+}): Promise<{ success: boolean; recipientCount: number; announcementId: string; message: string }> {
+  return apiRequest(apiPath("/api/platform/announcements"), {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({
+      title: payload.title,
+      message: payload.message,
+      audience: payload.audience,
+      url: payload.url,
+      priority: payload.priority ?? "normal",
+      channels: {
+        inApp: payload.channels?.inApp !== false,
+        push: payload.channels?.push !== false,
+        email: payload.channels?.email === true,
+      },
+    }),
+    credentials: "include",
+  });
+}
+
 export async function getTwoFactorStatus(): Promise<{ enabled: boolean }> {
   return apiRequest(apiPath("/api/auth/2fa/status"), {
     method: "GET",

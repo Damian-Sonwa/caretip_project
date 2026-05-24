@@ -40,7 +40,8 @@ import { ActivateEmployeePage } from './pages/ActivateEmployeePage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
 import { TransactionsPage } from './components/TransactionsPage';
-import { NotificationsPage } from './components/NotificationsPage';
+import { NotificationInboxPage } from './pages/shared/NotificationInboxPage';
+import { PlatformAnnouncementsPage } from './pages/platform/PlatformAnnouncementsPage';
 import { TipsActivityPage } from './pages/shared/TipsActivityPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { PlatformAdminRoute } from './components/PlatformAdminRoute';
@@ -304,7 +305,7 @@ const routes: RouteObject[] = [
       { path: 'transactions', Component: TipsActivityPage },
       { path: 'profile-settings', element: <Navigate to="/dashboard/settings?section=general" replace /> },
       { path: 'support', element: <Navigate to="/dashboard" replace /> },
-      { path: 'notifications', Component: NotificationsPage },
+      { path: 'notifications', Component: NotificationInboxPage },
       { path: 'subscriptions', element: <Navigate to="/dashboard/transactions" replace /> },
       { path: 'customers', element: <Navigate to="/dashboard" replace /> },
       { path: 'analytics', element: <Navigate to="/dashboard" replace /> },
@@ -343,6 +344,8 @@ const routes: RouteObject[] = [
       { path: 'logs', Component: AuditLogsPage },
       { path: 'settings', Component: PlatformSettingsPage },
       { path: 'users', Component: PlatformUserManagementPage },
+      { path: 'notifications', Component: NotificationInboxPage },
+      { path: 'announcements', Component: PlatformAnnouncementsPage },
       { index: true, element: <Navigate to="/platform-admin/dashboard" replace /> },
     ],
   },
@@ -532,6 +535,7 @@ const routes: RouteObject[] = [
       { path: 'dashboard', Component: EmployeeDashboard },
       { path: 'transactions', Component: TipsActivityPage },
       { path: 'notifications', Component: EmployeeNotificationsPage },
+      { path: 'inbox', Component: NotificationInboxPage },
       { path: 'tip-goals', Component: EmployeeTipGoalsPage },
       { path: 'settings', Component: EmployeeSettingsPage },
     ],

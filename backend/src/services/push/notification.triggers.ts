@@ -2,7 +2,10 @@ import { prisma } from "../../prisma.js";
 import type { NewTipPayload } from "../../socket/emitTip.js";
 import { logPush } from "./pushSend.js";
 import { NotificationType } from "./notification.types.js";
-import { sendNotification, sendNotificationToUsers } from "./notification.service.js";
+import {
+  deliverNotificationToUsers,
+  deliverUserNotification,
+} from "../notifications/notificationOrchestrator.service.js";
 
 function formatEur(amount: number): string {
   return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(amount);
@@ -36,9 +39,9 @@ export function onTipReceived(payload: NewTipPayload): void {
     const amountLabel = formatEur(payload.tip.amount);
     const ts = new Date().toISOString();
 
-    await sendNotification(
-      employee.userId,
-      {
+    await deliverUserNotification({
+      userId: employee.userId,
+      payload: {
         type: NotificationType.TIP_RECEIVED,
         title: "New tip received",
         body: `${amountLabel} — ${employee.name}`,
@@ -51,17 +54,17 @@ export function onTipReceived(payload: NewTipPayload): void {
           businessId: payload.businessId,
         },
       },
-      { dedupeKey: `tip:${payload.tip.id}:employee:${employee.userId}` },
-    );
+      dedupeKey: `tip:${payload.tip.id}:employee:${employee.userId}`,
+    });
 
     const business = await prisma.business.findUnique({
       where: { id: payload.businessId },
       select: { userId: true },
     });
     if (business?.userId && business.userId !== employee.userId) {
-      await sendNotification(
-        business.userId,
-        {
+      await deliverUserNotification({
+        userId: business.userId,
+        payload: {
           type: NotificationType.TIP_RECEIVED,
           title: "New tip at your venue",
           body: `${amountLabel} for ${employee.name}`,
@@ -74,8 +77,8 @@ export function onTipReceived(payload: NewTipPayload): void {
             businessId: payload.businessId,
           },
         },
-        { dedupeKey: `tip:${payload.tip.id}:business:${business.userId}` },
-      );
+        dedupeKey: `tip:${payload.tip.id}:business:${business.userId}`,
+      });
     }
   });
 }
@@ -87,17 +90,17 @@ export function onPayoutCompleted(
   transactionId: string,
 ): void {
   safeTrigger("onPayoutCompleted", async () => {
-    await sendNotification(
+    await deliverUserNotification({
       userId,
-      {
+      payload: {
         type: NotificationType.PAYOUT_COMPLETED,
         title: "Payout completed",
         body: `A payout of ${formatEur(amount)} was processed.`,
         timestamp: new Date().toISOString(),
         metadata: { entityId: transactionId, transactionId, payoutStatus: "paid" },
       },
-      { dedupeKey: `payout:${transactionId}:${userId}` },
-    );
+      dedupeKey: `payout:${transactionId}:${userId}`,
+    });
   });
 }
 
@@ -126,9 +129,9 @@ export function onLoginSecurityAlert(userId: string): void {
     const url =
       user?.role === "MANAGER" ? "/dashboard/settings" : "/employee/settings";
 
-    await sendNotification(
+    await deliverUserNotification({
       userId,
-      {
+      payload: {
         type: NotificationType.LOGIN_SECURITY,
         title: "New sign-in",
         body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
@@ -136,8 +139,9 @@ export function onLoginSecurityAlert(userId: string): void {
         timestamp: new Date().toISOString(),
         metadata: { entityId: userId },
       },
-      { dedupeKey: `login:${userId}:${new Date().toISOString().slice(0, 13)}` },
-    );
+      dedupeKey: `login:${userId}:${new Date().toISOString().slice(0, 13)}`,
+      channels: { in_app: true, push: true, email: true },
+    });
   });
 }
 
@@ -154,9 +158,9 @@ export function onEmployeeInvited(params: {
     });
     if (!business?.userId) return;
 
-    await sendNotification(
-      business.userId,
-      {
+    await deliverUserNotification({
+      userId: business.userId,
+      payload: {
         type: NotificationType.EMPLOYEE_INVITED,
         title: "Team invitation sent",
         body: `${params.employeeName} was invited to join ${business.name}.`,
@@ -167,17 +171,17 @@ export function onEmployeeInvited(params: {
           businessId: params.businessId,
         },
       },
-      { dedupeKey: `invite:${params.businessId}:${params.employeeEmail}` },
-    );
+      dedupeKey: `invite:${params.businessId}:${params.employeeEmail}`,
+    });
   });
 }
 
 /** 4b. Employee welcomed when activation completes. */
 export function onEmployeeAccountActivated(userId: string, businessName: string): void {
   safeTrigger("onEmployeeAccountActivated", async () => {
-    await sendNotification(
+    await deliverUserNotification({
       userId,
-      {
+      payload: {
         type: NotificationType.EMPLOYEE_INVITED,
         title: "Welcome to CareTip",
         body: `Your account for ${businessName} is ready. You can sign in and start receiving tips.`,
@@ -185,8 +189,8 @@ export function onEmployeeAccountActivated(userId: string, businessName: string)
         timestamp: new Date().toISOString(),
         metadata: { entityId: userId },
       },
-      { dedupeKey: `activated:${userId}` },
-    );
+      dedupeKey: `activated:${userId}`,
+    });
   });
 }
 
@@ -211,9 +215,9 @@ export function onQrScanActivity(params: {
 
     const dedupeSlug = params.qrSlug ?? params.tableName ?? params.businessId;
 
-    await sendNotification(
-      business.userId,
-      {
+    await deliverUserNotification({
+      userId: business.userId,
+      payload: {
         type: NotificationType.QR_SCAN,
         title: "QR code scanned",
         body: `A guest opened the tipping page for ${place}.`,
@@ -224,8 +228,8 @@ export function onQrScanActivity(params: {
           businessId: params.businessId,
         },
       },
-      { dedupeKey: `qr_scan:${params.businessId}:${dedupeSlug}` },
-    );
+      dedupeKey: `qr_scan:${params.businessId}:${dedupeSlug}`,
+    });
   });
 }
 
@@ -245,9 +249,9 @@ export function onQrPaymentSuccessful(params: {
 
     const amountLabel = formatEur(params.amount);
 
-    await sendNotification(
-      business.userId,
-      {
+    await deliverUserNotification({
+      userId: business.userId,
+      payload: {
         type: NotificationType.QR_PAYMENT_SUCCESS,
         title: "QR payment received",
         body: `${amountLabel} via QR for ${params.employeeName}.`,
@@ -259,8 +263,8 @@ export function onQrPaymentSuccessful(params: {
           businessId: params.businessId,
         },
       },
-      { dedupeKey: `qr_pay:${params.transactionId}:${business.userId}` },
-    );
+      dedupeKey: `qr_pay:${params.transactionId}:${business.userId}`,
+    });
   });
 }
 
@@ -275,7 +279,7 @@ export function onPlatformOperationalAlert(params: {
     const adminIds = await listPlatformAdminUserIds();
     if (adminIds.length === 0) return;
     const entityId = params.entityId ?? params.title;
-    await sendNotificationToUsers(
+    await deliverNotificationToUsers(
       adminIds,
       {
         type: NotificationType.SYSTEM_ALERT,
@@ -313,7 +317,7 @@ export function onAdminAnnouncement(params: {
 }): void {
   safeTrigger("onAdminAnnouncement", async () => {
     const id = params.announcementId ?? `announcement:${Date.now()}`;
-    await sendNotificationToUsers(
+    await deliverNotificationToUsers(
       params.userIds,
       {
         type: NotificationType.ADMIN_ANNOUNCEMENT,
@@ -331,12 +335,15 @@ export function onAdminAnnouncement(params: {
 /** Generic system alert (replaces legacy notifySystemAlertPush). */
 export function onSystemAlert(userId: string, title: string, body: string, url?: string): void {
   safeTrigger("onSystemAlert", async () => {
-    await sendNotification(userId, {
-      type: NotificationType.SYSTEM_ALERT,
-      title,
-      body,
-      url,
-      timestamp: new Date().toISOString(),
+    await deliverUserNotification({
+      userId,
+      payload: {
+        type: NotificationType.SYSTEM_ALERT,
+        title,
+        body,
+        url,
+        timestamp: new Date().toISOString(),
+      },
     });
   });
 }

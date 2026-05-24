@@ -356,29 +356,77 @@ export async function resolveAnnouncementRecipientIds(
   return rows.map((r) => r.id);
 }
 
-/** Push broadcast to managers and/or employees (FCM). */
+export type AnnouncementChannelInput = {
+  inApp?: boolean;
+  push?: boolean;
+  email?: boolean;
+};
+
+/** Broadcast to managers and/or employees — inbox, push, optional email. */
 export async function sendPlatformAnnouncement(input: {
   title: string;
   body: string;
   url?: string;
   audience: PlatformAnnouncementAudience;
   announcementId?: string;
-}): Promise<{ recipientCount: number }> {
+  createdById: string;
+  priority?: "normal" | "high";
+  channels?: AnnouncementChannelInput;
+}): Promise<{ recipientCount: number; announcementId: string }> {
   const title = input.title.trim();
   const body = input.body.trim();
   if (!title || !body) {
     throw new Error("title and body are required");
   }
+
+  const channelList: string[] = [];
+  const ch = input.channels ?? { inApp: true, push: true, email: false };
+  if (ch.inApp !== false) channelList.push("in_app");
+  if (ch.push !== false) channelList.push("push");
+  if (ch.email === true) channelList.push("email");
+  if (channelList.length === 0) channelList.push("in_app");
+
   const userIds = await resolveAnnouncementRecipientIds(input.audience);
-  const { onAdminAnnouncement } = await import("./push/notification.triggers.js");
-  onAdminAnnouncement({
-    userIds,
-    title,
-    body,
-    url: input.url?.trim() || undefined,
-    announcementId: input.announcementId,
+  const announcement = await prisma.announcement.create({
+    data: {
+      createdById: input.createdById,
+      title,
+      message: body,
+      audience: input.audience,
+      priority: input.priority ?? "normal",
+      channels: channelList,
+      url: input.url?.trim() || null,
+      recipientCount: userIds.length,
+    },
   });
-  return { recipientCount: userIds.length };
+
+  const { deliverNotificationToUsers } = await import(
+    "./notifications/notificationOrchestrator.service.js"
+  );
+  const { NotificationType } = await import("./push/notification.types.js");
+
+  void deliverNotificationToUsers(
+    userIds,
+    {
+      type: NotificationType.ADMIN_ANNOUNCEMENT,
+      title,
+      body,
+      url: input.url?.trim() || undefined,
+      timestamp: new Date().toISOString(),
+      metadata: { entityId: announcement.id, announcementId: announcement.id },
+    },
+    {
+      dedupeKeyPrefix: `admin:${announcement.id}`,
+      priority: input.priority ?? "normal",
+      channels: {
+        in_app: channelList.includes("in_app"),
+        push: channelList.includes("push"),
+        email: channelList.includes("email"),
+      },
+    },
+  );
+
+  return { recipientCount: userIds.length, announcementId: announcement.id };
 }
 
 export async function impersonateBusinessManager(

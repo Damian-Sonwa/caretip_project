@@ -659,6 +659,24 @@
       "platformLogin": "Plattform-Admin-Anmeldung"
     }
   },
+  "notifications": {
+    "bell": {
+      "aria": "Benachrichtigungen",
+      "unreadAria": "{{count}} ungelesene Benachrichtigungen",
+      "title": "Benachrichtigungen",
+      "markAllRead": "Alle als gelesen markieren",
+      "empty": "Alles erledigt",
+      "viewAll": "Alle Benachrichtigungen anzeigen"
+    },
+    "inbox": {
+      "title": "Benachrichtigungen",
+      "subtitle": "Betriebliche Updates für Ihr Konto",
+      "markAllRead": "Alle als gelesen markieren",
+      "emptyTitle": "Noch keine Benachrichtigungen",
+      "emptyBody": "Trinkgelder, Hinweise und Ankündigungen erscheinen hier.",
+      "loadMore": "Mehr laden"
+    }
+  },
   "tipFlow": {
     "common": {
       "teamMember": "Teammitglied",
@@ -2260,6 +2278,8 @@
       "navLogs": "Audit-Protokolle",
       "navSettings": "Systemeinstellungen",
       "navUsers": "Benutzerverwaltung",
+      "navNotifications": "Benachrichtigungen",
+      "navAnnouncements": "Ankündigungen",
       "signOut": "Abmelden",
       "closeMenuAria": "Menü schließen"
     },
@@ -2276,6 +2296,27 @@
       "bothRequired": "Bitte E-Mail und Passwort eingeben.",
       "businessStaffLink": "Anmeldung für Unternehmen oder Team",
       "redirecting": "Admin-Dashboard wird geöffnet…"
+    },
+    "announcements": {
+      "title": "Ankündigung senden",
+      "subtitle": "Broadcast an Manager und Team. In-App und per Push, wenn aktiviert.",
+      "fieldTitle": "Titel",
+      "fieldMessage": "Nachricht",
+      "fieldUrl": "Link (optional)",
+      "fieldAudience": "Zielgruppe",
+      "fieldPriority": "Priorität",
+      "fieldChannels": "Zustellkanäle",
+      "audienceAll": "Alle Geschäftsnutzer",
+      "audienceManagers": "Nur Manager",
+      "audienceEmployees": "Nur Team",
+      "priorityNormal": "Normal",
+      "priorityHigh": "Hohe Priorität",
+      "channelInApp": "In-App-Benachrichtigung",
+      "channelPush": "Push-Benachrichtigung",
+      "channelEmail": "E-Mail",
+      "send": "Ankündigung senden",
+      "sending": "Wird gesendet…",
+      "validationRequired": "Titel und Nachricht sind erforderlich."
     },
     "auditLogsPage": {
       "title": "Audit-Protokolle",

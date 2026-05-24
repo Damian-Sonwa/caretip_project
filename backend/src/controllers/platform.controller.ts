@@ -299,17 +299,35 @@ export async function sendAnnouncement(req: Request, res: Response) {
     if (!title.trim() || !message.trim()) {
       return res.status(400).json({ message: "title and message are required" });
     }
+    const adminId = req.user?.userId ?? req.user?.id;
+    if (!adminId) return res.status(401).json({ message: "Authentication required" });
+
+    const priorityRaw = typeof body.priority === "string" ? body.priority : "normal";
+    const priority = priorityRaw === "high" ? "high" : "normal";
+    const channelsBody =
+      body.channels && typeof body.channels === "object"
+        ? (body.channels as Record<string, unknown>)
+        : undefined;
+
     const result = await platformService.sendPlatformAnnouncement({
       title,
       body: message,
       url,
       audience,
+      createdById: adminId,
+      priority,
+      channels: {
+        inApp: channelsBody?.inApp !== false,
+        push: channelsBody?.push !== false,
+        email: channelsBody?.email === true,
+      },
       announcementId:
         typeof body.announcementId === "string" ? body.announcementId : undefined,
     });
     return res.json({
       success: true,
       recipientCount: result.recipientCount,
+      announcementId: result.announcementId,
       message: `Announcement queued for ${result.recipientCount} user(s).`,
     });
   } catch (err) {

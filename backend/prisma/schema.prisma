@@ -67,6 +67,11 @@ enum EmployeeActivationStatus {
   pending_verification
 }
 
+enum NotificationPriority {
+  normal
+  high
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -105,6 +110,8 @@ model User {
   refreshTokens RefreshToken[]
   settings UserSettings?
   pushDeviceTokens PushDeviceToken[]
+  notifications Notification[]
+  announcementsCreated Announcement[] @relation("AnnouncementCreatedBy")
 
   /** Account-level security features (optional; does not change auth flow unless enforced). */
   twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
@@ -147,6 +154,50 @@ model PushDeviceToken {
 
   @@index([userId])
   @@map("push_device_tokens")
+}
+
+/// In-app notification inbox (push/email are delivery channels on the row).
+model Notification {
+  id        String               @id @default(cuid())
+  userId    String               @map("user_id")
+  type      String               @db.VarChar(64)
+  title     String               @db.VarChar(256)
+  message   String               @db.Text
+  metadata  Json                 @default("{}")
+  priority  NotificationPriority @default(normal)
+  /** Channels used for this delivery: in_app, push, email */
+  channels  String[]             @default(["in_app"])
+  readAt    DateTime?            @map("read_at")
+  /** Optional dedupe key per user (e.g. tip:id:employee:userId). */
+  dedupeKey String?              @map("dedupe_key") @db.VarChar(191)
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([userId, readAt])
+  @@unique([userId, dedupeKey])
+  @@map("notifications")
+}
+
+/// Platform admin broadcast audit record.
+model Announcement {
+  id             String               @id @default(cuid())
+  createdById    String               @map("created_by_id")
+  title          String               @db.VarChar(256)
+  message        String               @db.Text
+  audience       String               @db.VarChar(32)
+  priority       NotificationPriority @default(normal)
+  channels       String[]             @default(["in_app", "push"])
+  url            String?              @db.VarChar(512)
+  recipientCount Int                  @default(0) @map("recipient_count")
+  metadata       Json                 @default("{}")
+  createdAt      DateTime             @default(now()) @map("created_at")
+
+  createdBy User @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+
+  @@index([createdAt(sort: Desc)])
+  @@map("announcements")
 }
 
 /// Long-lived refresh tokens for session continuity (hashed at rest; rotated on every use).

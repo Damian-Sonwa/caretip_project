@@ -659,6 +659,24 @@
       "platformLogin": "Platform admin login"
     }
   },
+  "notifications": {
+    "bell": {
+      "aria": "Notifications",
+      "unreadAria": "{{count}} unread notifications",
+      "title": "Notifications",
+      "markAllRead": "Mark all read",
+      "empty": "You're all caught up",
+      "viewAll": "View all notifications"
+    },
+    "inbox": {
+      "title": "Notifications",
+      "subtitle": "Operational updates for your account",
+      "markAllRead": "Mark all read",
+      "emptyTitle": "No notifications yet",
+      "emptyBody": "Tips, alerts, and announcements will appear here.",
+      "loadMore": "Load more"
+    }
+  },
   "tipFlow": {
     "common": {
       "teamMember": "Team Member",
@@ -2258,6 +2276,8 @@
       "navLogs": "Audit logs",
       "navSettings": "System settings",
       "navUsers": "User management",
+      "navNotifications": "Notifications",
+      "navAnnouncements": "Announcements",
       "signOut": "Sign out",
       "closeMenuAria": "Close menu"
     },
@@ -2274,6 +2294,27 @@
       "bothRequired": "Please enter both email and password.",
       "businessStaffLink": "Business or staff sign in",
       "redirecting": "Opening your admin dashboard…"
+    },
+    "announcements": {
+      "title": "Send announcement",
+      "subtitle": "Broadcast to managers and staff. Delivered in-app and via push when enabled.",
+      "fieldTitle": "Title",
+      "fieldMessage": "Message",
+      "fieldUrl": "Link (optional)",
+      "fieldAudience": "Audience",
+      "fieldPriority": "Priority",
+      "fieldChannels": "Delivery channels",
+      "audienceAll": "All business users",
+      "audienceManagers": "Managers only",
+      "audienceEmployees": "Staff only",
+      "priorityNormal": "Normal",
+      "priorityHigh": "High priority",
+      "channelInApp": "In-app notification",
+      "channelPush": "Push notification",
+      "channelEmail": "Email",
+      "send": "Send announcement",
+      "sending": "Sending…",
+      "validationRequired": "Title and message are required."
     },
     "auditLogsPage": {
       "title": "Audit logs",

@@ -122,6 +122,7 @@ export function initSocketServer(httpServer: HttpServer): Server {
 
     const userId = socket.data.userId as string;
     socketUserMap.set(socket.id, userId);
+    socket.join(`user:${userId}`);
 
     if (socket.data.employeeId) {
       socket.join(`employee:${socket.data.employeeId}`);

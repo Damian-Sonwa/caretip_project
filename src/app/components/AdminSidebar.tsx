@@ -9,6 +9,8 @@ import {
   Building2,
   FileText,
   Settings,
+  Megaphone,
+  Bell,
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
@@ -30,6 +32,8 @@ function useAdminNavItems(t: (key: string) => string): NavItem[] {
       { name: t('admin.sidebar.navBusinesses'), href: '/platform-admin/businesses', icon: Building2 },
       { name: t('admin.sidebar.navTransactions'), href: '/platform-admin/transactions', icon: CreditCard },
       { name: t('admin.sidebar.navLogs'), href: '/platform-admin/logs', icon: FileText },
+      { name: t('admin.sidebar.navNotifications'), href: '/platform-admin/notifications', icon: Bell },
+      { name: t('admin.sidebar.navAnnouncements'), href: '/platform-admin/announcements', icon: Megaphone },
       { name: t('admin.sidebar.navSettings'), href: '/platform-admin/settings', icon: Settings },
       { name: t('admin.sidebar.navUsers'), href: '/platform-admin/users', icon: Users },
     ],

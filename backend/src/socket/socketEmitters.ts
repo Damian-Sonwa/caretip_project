@@ -27,3 +27,24 @@ export function emitPlatformDataUpdated(reason: string): void {
   if (!io) return;
   io.to("platform").emit("platform_data_updated", { reason, at: new Date().toISOString() });
 }
+
+export function emitNotificationCreated(
+  userId: string,
+  payload: { notification: unknown; unreadCount: number },
+): void {
+  const io = getSocketIO();
+  if (!io) return;
+  io.to(`user:${userId}`).emit("notification_created", {
+    ...payload,
+    at: new Date().toISOString(),
+  });
+}
+
+export function emitNotificationUnreadCount(userId: string, unreadCount: number): void {
+  const io = getSocketIO();
+  if (!io) return;
+  io.to(`user:${userId}`).emit("notification_unread_count", {
+    unreadCount,
+    at: new Date().toISOString(),
+  });
+}

@@ -1,7 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { Link, useNavigate } from "react-router";
-import { Bell, Search, Menu } from "lucide-react";
+import { Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { CareTipLogo } from "./CareTipLogo";
@@ -19,8 +19,6 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const employeeUnreadCount = useEmployeeUnreadCount();
-  const showNotificationBadge = user?.role === "employee" && employeeUnreadCount > 0;
   const isPlatformAdmin = user?.role === "platform_admin";
   const isBusinessManager = user?.role === "business";
   const { venueName, logo: businessLogo } = useBusinessVenueBrand();
@@ -99,43 +97,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             isPlatformAdmin ? "gap-1 max-lg:gap-1.5 sm:gap-3" : "gap-2 sm:gap-3",
           )}
         >
-          <button
-            type="button"
-            onClick={() => {
-              if (user?.role === "employee") {
-                navigate("/employee/notifications");
-                return;
-              }
-              if (user?.role === "business") {
-                navigate("/dashboard/notifications");
-                return;
-              }
-              if (user?.role === "platform_admin") {
-                navigate("/platform-admin/dashboard");
-                return;
-              }
-              navigate("/faq");
-            }}
-            className="relative inline-flex touch-manipulation items-center justify-center rounded-xl min-h-[44px] min-w-[44px] p-2 transition-colors hover:bg-muted active:opacity-90"
-            aria-label={
-              showNotificationBadge
-                ? t("shell.header.notificationsUnreadAria", { count: employeeUnreadCount })
-                : t("shell.header.notificationsAria")
-            }
-          >
-            <Bell className="w-5 h-5 text-foreground" />
-            {showNotificationBadge ? (
-              <span
-                className={cn(
-                  "absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground shadow-sm",
-                  "animate-in fade-in zoom-in-75 duration-200",
-                )}
-                aria-hidden
-              >
-                {employeeUnreadCount > 9 ? "9+" : employeeUnreadCount}
-              </span>
-            ) : null}
-          </button>
+          {user?.role === "employee" || user?.role === "business" || user?.role === "platform_admin" ? (
+            <NotificationBell />
+          ) : null}
 
           {isBusinessManager ? (
             <Link

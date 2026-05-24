@@ -28,6 +28,7 @@ import feedbackRoutes from "./routes/feedback.routes.js";
 import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import pushRoutes from "./routes/push.routes.js";
+import notificationsRoutes from "./routes/notifications.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
@@ -101,6 +102,7 @@ app.use(
 app.use("/api/test", testRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/me", meRoutes);
+app.use("/api/me/notifications", notificationsRoutes);
 /** Registered on the app (not the sub-router) so `/me/stats` is never interpreted as `/:businessId`. */
 app.get(
   "/api/business/me/stats",
