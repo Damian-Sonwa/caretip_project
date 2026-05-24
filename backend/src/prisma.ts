@@ -1,12 +1,26 @@
 import dns from "node:dns";
 import { PrismaClient } from "@prisma/client";
+import { getDatabaseUrlForPrisma } from "./databaseUrl.js";
 
 // Prefer IPv4 when resolving hostnames (helps avoid Prisma P1001 to Supabase pooler on Windows).
 dns.setDefaultResultOrder("ipv4first");
 
+const isProd = process.env.NODE_ENV === "production";
+
 /**
- * One Prisma client; datasource URL comes only from env via DATABASE_URL.
+ * One Prisma client per process; URL is normalized for Supabase pool limits.
  */
 export const prisma = new PrismaClient({
-  log: ["query", "info", "warn", "error"],
+  datasources: {
+    db: { url: getDatabaseUrlForPrisma() },
+  },
+  log: isProd ? ["error"] : ["warn", "error"],
 });
+
+if (isProd) {
+  const shutdown = () => {
+    void prisma.$disconnect().catch(() => undefined);
+  };
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
+}

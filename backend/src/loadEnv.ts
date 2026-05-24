@@ -30,6 +30,11 @@ applyEnvFiles();
 
 if (process.env.NODE_ENV !== "production") {
   const u = process.env.DATABASE_URL?.trim();
+  if (u?.includes("pooler.supabase.com:5432") && process.env.DATABASE_USE_SESSION_POOLER !== "true") {
+    console.warn(
+      "[env] DATABASE_URL uses Supabase session pooler (5432). Prefer transaction pooler (6543) in Render env, or let the API rewrite at runtime.",
+    );
+  }
   if (u) {
     try {
       const parsed = new URL(u.replace(/^postgresql:\/\//i, "http://"));
