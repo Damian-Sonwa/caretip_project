@@ -911,7 +911,8 @@
   "dashboardNav": {
     "employee": {
       "overview": "Overview",
-      "notifications": "Notifications",
+      "inbox": "Inbox",
+      "notifications": "Tip alerts",
       "tipGoals": "Tip goals",
       "settings": "Settings"
     },

@@ -911,7 +911,8 @@
   "dashboardNav": {
     "employee": {
       "overview": "Überblick",
-      "notifications": "Benachrichtigungen",
+      "inbox": "Posteingang",
+      "notifications": "Trinkgeld-Hinweise",
       "tipGoals": "Trinkgeldziele",
       "settings": "Einstellungen"
     },
