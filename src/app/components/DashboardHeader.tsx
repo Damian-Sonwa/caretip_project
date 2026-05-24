@@ -8,7 +8,7 @@ import { CareTipLogo } from "./CareTipLogo";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { ProfileAvatar } from "./ui/profile-avatar";
 import { useBusinessVenueBrand } from "../hooks/useBusinessVenueBrand";
-import { useEmployeeUnreadCount } from "../hooks/useEmployeeUnreadNotifications";
+import { NotificationBell } from "@/app/components/notifications/NotificationBell";
 import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
