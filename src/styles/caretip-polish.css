@@ -95,7 +95,7 @@
     .caretip-landing #how-it-works,
     .caretip-landing #built-for-hospitality {
       content-visibility: auto;
-      contain-intrinsic-size: auto 520px;
+      contain-intrinsic-size: auto 420px;
     }
 
     .caretip-landing [data-landing-accent] [data-accent-glow] {

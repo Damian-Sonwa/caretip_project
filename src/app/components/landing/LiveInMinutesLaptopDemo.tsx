@@ -3,6 +3,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { Heart, QrCode, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import atmosphereImg from "../../../../images/beauty-r.png";
 import caretipLogo from "@/assets/brand/company_logo.png";
 
@@ -23,6 +24,8 @@ export function LiveInMinutesLaptopDemo({
 }: LiveInMinutesLaptopDemoProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
+  const enableFloatMotion = !reduceMotion && isLgUp;
   const index = Math.min(Math.max(0, activeIndex), STEP_IDS.length - 1);
   const stepId = STEP_IDS[index];
 
@@ -39,7 +42,7 @@ export function LiveInMinutesLaptopDemo({
   if (videoSrc) {
     return (
       <motion.div
-        className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,20rem)] overflow-hidden rounded-[1.5rem] shadow-[0_28px_56px_-26px_rgba(30,24,16,0.32),0_10px_22px_-12px_rgba(30,24,16,0.14)] ring-1 ring-neutral-900/[0.06] sm:max-w-[22rem] dark:ring-white/[0.08]"
+        className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,15.75rem)] overflow-hidden rounded-[1.35rem] shadow-[0_20px_40px_-24px_rgba(30,24,16,0.26),0_8px_18px_-10px_rgba(30,24,16,0.12)] ring-1 ring-neutral-900/[0.06] sm:max-w-[20rem] sm:rounded-[1.5rem] lg:max-w-[22rem] dark:ring-white/[0.08]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -50,17 +53,17 @@ export function LiveInMinutesLaptopDemo({
   }
 
   return (
-    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,20rem)] sm:max-w-[22rem]">
+    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,15.75rem)] sm:max-w-[20rem] lg:max-w-[22rem]">
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-8 w-[72%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.08] blur-xl dark:bg-black/40"
+        className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-6 w-[68%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.07] blur-lg sm:h-8 sm:w-[72%] sm:blur-xl dark:bg-black/40"
       />
       <motion.div
-        className="caretip-live-minutes-device-lift relative aspect-[3/4] overflow-hidden rounded-[1.5rem] shadow-[0_32px_64px_-30px_rgba(30,24,16,0.38),0_12px_28px_-14px_rgba(30,24,16,0.16)] ring-1 ring-neutral-900/[0.05] dark:ring-white/[0.08]"
-        initial={{ opacity: 0, y: 8 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-8%" }}
-        transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+        className="caretip-live-minutes-device-lift relative aspect-[5/6] overflow-hidden rounded-[1.35rem] shadow-[0_24px_48px_-28px_rgba(30,24,16,0.32),0_8px_20px_-10px_rgba(30,24,16,0.14)] ring-1 ring-neutral-900/[0.05] sm:aspect-[3/4] sm:rounded-[1.5rem] sm:shadow-[0_32px_64px_-30px_rgba(30,24,16,0.38),0_12px_28px_-14px_rgba(30,24,16,0.16)] dark:ring-white/[0.08]"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true, margin: "-6%" }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
         <img
           src={atmosphereImg}
@@ -84,12 +87,12 @@ export function LiveInMinutesLaptopDemo({
         />
 
         <motion.div
-          className="absolute inset-x-0 top-[10%] bottom-[14%] flex items-center justify-center px-6"
-          animate={reduceMotion ? undefined : { y: [0, -5, 0] }}
+          className="caretip-live-minutes-phone-float absolute inset-x-0 top-[9%] bottom-[12%] flex items-center justify-center px-5 sm:top-[10%] sm:bottom-[14%] sm:px-6"
+          animate={enableFloatMotion ? { y: [0, -5, 0] } : undefined}
           transition={
-            reduceMotion
-              ? undefined
-              : { duration: 7, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }
+            enableFloatMotion
+              ? { duration: 7, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }
+              : undefined
           }
         >
           <PhoneFrame>
@@ -114,7 +117,7 @@ export function LiveInMinutesLaptopDemo({
         </motion.div>
       </motion.div>
 
-      <p className="mt-4 text-center font-sans text-[13px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:text-sm">
+      <p className="caretip-live-minutes-caption mt-2.5 text-center font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-4 sm:text-[13px] lg:text-sm">
         {captions[index]}
       </p>
     </div>
@@ -123,7 +126,7 @@ export function LiveInMinutesLaptopDemo({
 
 function PhoneFrame({ children }: { children: React.ReactNode }) {
   return (
-    <motion.div className="relative h-full w-full max-w-[11.25rem] sm:max-w-[12rem]">
+    <motion.div className="relative h-full w-full max-w-[10.25rem] sm:max-w-[11.25rem] lg:max-w-[12rem]">
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-1 left-1/2 z-0 h-4 w-[88%] -translate-x-1/2 rounded-[100%] bg-neutral-900/25 blur-md"

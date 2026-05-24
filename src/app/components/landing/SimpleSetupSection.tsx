@@ -5,12 +5,13 @@ import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
-import { landingFadeReveal } from "@/lib/motionPerf";
+import { landingFadeReveal, useMinWidthMedia } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export function SimpleSetupSection() {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const [activeStep, setActiveStep] = useState(0);
   const pillSub = t("landing.simpleSetup.pillSub");
   const sectionSubtitle = t("landing.simpleSetup.subtitle");
@@ -32,7 +33,7 @@ export function SimpleSetupSection() {
       className={cn(
         landingUi.section,
         landingUi.landingSurface,
-        "relative overflow-hidden max-md:overflow-x-hidden dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
+        "caretip-live-minutes-section relative overflow-x-clip max-md:overflow-y-visible dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
       )}
     >
       <div
@@ -50,7 +51,7 @@ export function SimpleSetupSection() {
         <div className={cn(landingUi.copyColumn, "lg:order-1 lg:flex lg:flex-col lg:max-w-md xl:max-w-lg")}>
           <motion.div
             {...landingFadeReveal}
-            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-7 max-lg:mb-0 sm:mb-8 lg:mb-7")}
+            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-5 max-lg:mb-0 sm:mb-8 lg:mb-7")}
           >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
               <LandingSectionAccent variant="spark">{t("landing.simpleSetup.pill")}</LandingSectionAccent>
@@ -73,7 +74,7 @@ export function SimpleSetupSection() {
             className={cn("relative w-full", landingUi.mobileStackAfter)}
             {...landingFadeReveal}
           >
-            <div className="space-y-2 sm:space-y-2.5">
+            <div className="caretip-live-minutes-steps space-y-1.5 sm:space-y-2.5">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (
@@ -84,10 +85,10 @@ export function SimpleSetupSection() {
                     aria-current={isActive ? "step" : undefined}
                     onClick={() => setActiveStep(idx)}
                     whileHover={reduceMotion ? undefined : { y: isActive ? 0 : -1 }}
-                    whileTap={reduceMotion ? undefined : { scale: 0.995 }}
+                    whileTap={reduceMotion || !isLgUp ? undefined : { scale: 0.995 }}
                     transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                     className={cn(
-                      "caretip-live-minutes-step group relative w-full rounded-xl border px-3.5 py-3 text-left sm:rounded-2xl sm:px-4 sm:py-4",
+                      "caretip-live-minutes-step group relative w-full rounded-xl border px-3 py-2.5 text-left sm:rounded-2xl sm:px-4 sm:py-4",
                       isActive && "caretip-live-minutes-step--active",
                     )}
                   >
@@ -130,7 +131,7 @@ export function SimpleSetupSection() {
             landingUi.visualColumn,
             "caretip-live-minutes-visual-wrap lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
           )}
-          whileHover={reduceMotion ? undefined : { y: -2 }}
+          whileHover={reduceMotion || !isLgUp ? undefined : { y: -2 }}
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <LiveInMinutesLaptopDemo
