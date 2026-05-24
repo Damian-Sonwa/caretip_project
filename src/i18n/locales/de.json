@@ -1725,6 +1725,7 @@
       "toastTeamMember": "Teammitglied",
       "exportFailed": "Export fehlgeschlagen. Bitte erneut versuchen.",
       "topPerformers": "Top-Performer",
+      "topPerformerBadge": "Top-Performer",
       "newMember": "Neu im Team",
       "quickActions": "Schnellaktionen",
       "quickActionsDesc": "Häufige Aufgaben im Lokal",

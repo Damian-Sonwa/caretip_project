@@ -57,9 +57,7 @@ export function Footer({
           <p>{t("footer.copyright", { year })}</p>
           {APP_VERSION ? (
             <p className="mt-1 text-xs opacity-80">{t("footer.version", { version: APP_VERSION })}</p>
-          ) : (
-            <p className="mt-1 text-xs opacity-80">{t("footer.platformAdmin")}</p>
-          )}
+          ) : null}
         </div>
       </footer>
     );

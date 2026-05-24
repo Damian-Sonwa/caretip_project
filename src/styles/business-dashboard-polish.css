@@ -228,6 +228,15 @@
   align-items: center;
 }
 
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-avatar {
+  overflow: visible;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-badge {
+  pointer-events: none;
+  transform: translate(25%, -25%);
+}
+
 .caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-metrics {
   min-width: 5.75rem;
   padding-left: 0;

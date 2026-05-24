@@ -202,7 +202,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                         "w-full max-lg:min-w-0 max-lg:max-w-full",
                       )}
                     >
-                      {t("nav.staffLogin")}
+                      {t("nav.logIn")}
                     </Link>
                   </div>
                 </div>

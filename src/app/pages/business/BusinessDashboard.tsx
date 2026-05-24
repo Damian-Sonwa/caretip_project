@@ -1054,12 +1054,16 @@ export function BusinessDashboard() {
                               >
                                 {index + 1}
                               </span>
-                              <div className="relative shrink-0">
+                              <div className="business-dashboard-top-performer-avatar relative shrink-0">
                                 <ProfileAvatar src={employee.avatar} displayName={employee.name} className="h-12 w-12" />
                                 {index === 0 ? (
-                                  <div className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
+                                  <span
+                                    className="business-dashboard-top-performer-badge absolute right-0 top-0 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-md ring-2 ring-background"
+                                    role="img"
+                                    aria-label={t("business.dashboard.topPerformerBadge")}
+                                  >
                                     <Award className="h-3.5 w-3.5" aria-hidden />
-                                  </div>
+                                  </span>
                                 ) : null}
                               </div>
                               <div className="min-w-0 flex-1">
