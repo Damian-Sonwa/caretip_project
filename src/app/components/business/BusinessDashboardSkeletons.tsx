@@ -3,7 +3,7 @@
  * Kept as thin aliases so existing dashboard imports stay stable.
  */
 export {
-  DashboardSectionSpinner as BusinessDashboardChartSkeleton,
+  DashboardChartSkeleton as BusinessDashboardChartSkeleton,
   DashboardStatsGridSpinner as BusinessDashboardStatsSkeleton,
   DashboardHeroMetricSkeleton as BusinessHeroPulseSkeleton,
 } from "@/app/components/dashboard/DashboardAnalyticsLoader";

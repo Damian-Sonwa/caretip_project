@@ -55,9 +55,9 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+  DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
-  DashboardSectionSpinner,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
@@ -564,9 +564,6 @@ export function EmployeeDashboard() {
                   {period === "week" && t("employee.earnings_week")}
                   {period === "month" && t("employee.earnings_month")}
                 </span>
-                {period === analyticsTimeframe && (showMetricsLoading || showChartLoading) ? (
-                  <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin opacity-90" aria-hidden />
-                ) : null}
               </button>
             ))}
           </div>
@@ -630,10 +627,7 @@ export function EmployeeDashboard() {
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 {showChartLoading ? (
-                  <DashboardSectionSpinner
-                    minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]"
-                    ariaLabel={t("employee.dashboard.loadingChart")}
-                  />
+                  <DashboardChartSkeleton minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]" />
                 ) : chartData.length === 0 ? (
                   <div className={cn(employeeUi.cardPad, employeeUi.chartEmpty)}>
                     <EmployeeEmptyState
@@ -643,7 +637,12 @@ export function EmployeeDashboard() {
                     />
                   </div>
                 ) : (
-                  <div className={cn(employeeUi.chartFrame, "flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]")}>
+                  <div
+                    className={cn(
+                      employeeUi.chartFrame,
+                      "dashboard-hero-metric-value--live flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]",
+                    )}
+                  >
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                     <AreaChart
                       key={`emp-chart-${analyticsTimeframe}`}

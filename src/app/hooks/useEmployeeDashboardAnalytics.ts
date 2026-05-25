@@ -11,6 +11,7 @@ import {
   createDashboardSwrStore,
   DASHBOARD_SWR_METRICS_TTL_MS,
 } from "../lib/dashboardSwrCache";
+import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
 import { isAbortError, isApiConnectivityError, toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import {
@@ -91,6 +92,7 @@ export function useEmployeeDashboardAnalytics(
   const abortRef = useRef(new Map<EmployeeAnalyticsTimeframe, AbortController>());
   const summaryPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const analyticsPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
+  const hasSettledLiveUiRef = useRef(false);
 
   const syncTipsFromResponse = useCallback(
     (data: EmployeeTipsResponse) => {
@@ -154,7 +156,11 @@ export function useEmployeeDashboardAnalytics(
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const cached = affectsUi ? hydrateFromSwr(tf) : null;
+      const cached =
+        affectsUi &&
+        canUseDashboardSwrCache({ hasSettledLiveUi: hasSettledLiveUiRef.current, soft: opts?.soft })
+          ? hydrateFromSwr(tf)
+          : null;
 
       if (affectsUi) {
         setIsRevalidating(true);
@@ -244,6 +250,9 @@ export function useEmployeeDashboardAnalytics(
 
       try {
         await Promise.all([summaryPromise, analyticsPromise]);
+        if (!controller.signal.aborted) {
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+        }
       } catch {
         /* per-branch handlers */
       } finally {
@@ -264,6 +273,7 @@ export function useEmployeeDashboardAnalytics(
       abortRef.current.clear();
       clearEmployeeTipsClientCache();
       employeePeriodSwrStore.clear();
+      hasSettledLiveUiRef.current = false;
       summaryPartialRef.current.clear();
       analyticsPartialRef.current.clear();
       setPayload(null);

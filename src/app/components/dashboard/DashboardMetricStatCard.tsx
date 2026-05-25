@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
+import { DashboardHeroMetricSkeleton } from "./DashboardAnalyticsLoader";
 
 export type DashboardMetricStatCardTokens = {
   statCard: string;
@@ -64,26 +64,25 @@ export function DashboardMetricStatCard({
       >
         <p className={cn(tokens.statLabel, "min-w-0 flex-1")}>{label}</p>
         {icon ? (
-          <div className="shrink-0 text-primary/80" aria-hidden={loading || undefined}>
-            {loading ? (
-              <LoadingSpinner size="sm" className="!h-4 !w-4 border-[1.5px]" />
-            ) : (
-              icon
-            )}
+          <div className="shrink-0 text-primary/80" aria-hidden>
+            {icon}
           </div>
         ) : null}
       </div>
 
-      <p
+      <div
         className={cn(
           tokens.statValue,
           tokens.valueClass,
           "dashboard-metric-stat-card__value shrink-0",
-          loading && "text-muted-foreground/35 animate-pulse",
         )}
       >
-        {loading ? "—" : value}
-      </p>
+        {loading ? (
+          <DashboardHeroMetricSkeleton variant="currency" />
+        ) : (
+          <span className="dashboard-hero-metric-value--live block">{value}</span>
+        )}
+      </div>
 
       <p
         className={cn(

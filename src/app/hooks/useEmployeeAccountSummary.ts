@@ -8,6 +8,7 @@ import {
   createDashboardSwrStore,
   DASHBOARD_SWR_BALANCE_TTL_MS,
 } from "../lib/dashboardSwrCache";
+import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
 import { isAbortError, isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
@@ -27,6 +28,7 @@ export function useEmployeeAccountSummary(enabled: boolean) {
   const abortRef = useRef<AbortController | null>(null);
   const snapshotRef = useRef(snapshot);
   snapshotRef.current = snapshot;
+  const hasSettledLiveUiRef = useRef(false);
 
   const loadAccount = useCallback(
     async (opts?: { soft?: boolean }) => {
@@ -36,7 +38,13 @@ export function useEmployeeAccountSummary(enabled: boolean) {
       const controller = new AbortController();
       abortRef.current = controller;
 
-      const cached = accountSwrStore.get(ACCOUNT_SWR_KEY, DASHBOARD_SWR_BALANCE_TTL_MS);
+      const useCache = canUseDashboardSwrCache({
+        hasSettledLiveUi: hasSettledLiveUiRef.current,
+        soft: opts?.soft,
+      });
+      const cached = useCache
+        ? accountSwrStore.get(ACCOUNT_SWR_KEY, DASHBOARD_SWR_BALANCE_TTL_MS)
+        : null;
       setIsRevalidating(true);
 
       if (cached) {
@@ -60,6 +68,7 @@ export function useEmployeeAccountSummary(enabled: boolean) {
         setLastUpdatedAt(Date.now());
         setDataRevision((n) => n + 1);
         setLoading(false);
+        markDashboardLiveSettled(hasSettledLiveUiRef);
       } catch (err) {
         if (isAbortError(err) || controller.signal.aborted) return;
         if (!isApiConnectivityError(err)) {
@@ -86,6 +95,7 @@ export function useEmployeeAccountSummary(enabled: boolean) {
       abortRef.current = null;
       clearEmployeeAccountClientCache();
       accountSwrStore.clear();
+      hasSettledLiveUiRef.current = false;
       setSnapshot(null);
       setLoading(true);
       setIsRevalidating(false);

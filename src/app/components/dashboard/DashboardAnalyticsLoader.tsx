@@ -95,6 +95,41 @@ export function DashboardHeroStatPlaceholder() {
   return <DashboardHeroMetricSkeleton variant="currency" />;
 }
 
+/** Chart region placeholder — bar silhouette, no centered spinner. */
+export function DashboardChartSkeleton({
+  className,
+  minHeightClass = "min-h-[220px] sm:min-h-[260px]",
+  barHeights = [42, 68, 35, 82, 55, 74, 48, 90, 62, 40],
+}: {
+  className?: string;
+  minHeightClass?: string;
+  barHeights?: number[];
+}) {
+  return (
+    <div
+      className={cn(
+        "dashboard-chart-skeleton flex w-full flex-col justify-end px-1",
+        minHeightClass,
+        className,
+      )}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading chart"
+    >
+      <div className="flex h-[72%] min-h-[120px] w-full items-end justify-between gap-1 sm:gap-1.5">
+        {barHeights.map((h, i) => (
+          <span
+            key={i}
+            className="dashboard-chart-skeleton__bar flex-1 rounded-t-md"
+            style={{ height: `${h}%` }}
+            aria-hidden
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Small pill overlay while period stats refresh (employee + business). */
 export function DashboardRefreshingBadge({
   label,

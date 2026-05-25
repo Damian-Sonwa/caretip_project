@@ -783,6 +783,23 @@ textarea::placeholder {
   animation: dashboard-hero-value-in 0.28s ease-out forwards;
 }
 
+.dashboard-chart-skeleton__bar {
+  display: block;
+  min-height: 0.75rem;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted) / 0.22) 0%,
+    hsl(var(--muted) / 0.42) 45%,
+    hsl(var(--muted) / 0.22) 100%
+  );
+  background-size: 200% 100%;
+  animation: dashboard-hero-shimmer 1.6s ease-in-out infinite;
+}
+
+.dashboard-metric-stat-card[aria-busy="true"] .dashboard-metric-stat-card__change {
+  visibility: hidden;
+}
+
 .employee-hero-account-stats.dashboard-hero-account-stats--loading,
 .business-hero-account-stats.dashboard-hero-account-stats--loading {
   position: relative;
@@ -790,7 +807,8 @@ textarea::placeholder {
 
 @media (prefers-reduced-motion: reduce) {
   .dashboard-hero-metric-skeleton__bar,
-  .dashboard-hero-metric-skeleton__sub {
+  .dashboard-hero-metric-skeleton__sub,
+  .dashboard-chart-skeleton__bar {
     animation: none;
     background: hsl(var(--muted) / 0.4);
   }

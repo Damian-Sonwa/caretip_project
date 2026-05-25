@@ -32,15 +32,15 @@ import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport } from "../../lib/api";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
 import {
+  DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import {
-  AnalyticsLoadingState,
   DashboardAnalyticsPhaseHint,
+  DashboardListSkeleton,
   DeferredContentFade,
   GoalsTableLoadingShell,
-  SectionLoader,
 } from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import type {
@@ -143,6 +143,7 @@ export function BusinessDashboard() {
     displayMetrics,
     isMetricsInitialLoad,
     isAnalyticsSectionLoading,
+    isGoalsInitialLoad,
     isPeriodRefreshing,
     dataRevision,
     lastUpdatedAt,
@@ -329,7 +330,8 @@ export function BusinessDashboard() {
 
   const heroPulseLoading = !heroStats && !operationalPulse && !useDevDemo;
   const showMetricsSkeleton = isMetricsInitialLoad && !useDevDemo;
-  const showSectionLoading = isAnalyticsSectionLoading && !useDevDemo;
+  const showChartsLoading = isAnalyticsSectionLoading && !useDevDemo;
+  const showGoalsLoading = isGoalsInitialLoad && !useDevDemo;
 
   return (
     <div className={cn(businessUi.page, "overflow-x-hidden")}>
@@ -579,7 +581,7 @@ export function BusinessDashboard() {
               </button>
             ))}
             </div>
-            {isAnalyticsSectionLoading && !useDevDemo ? (
+            {showChartsLoading ? (
               <DashboardAnalyticsPhaseHint
                 className="mt-3"
                 label={t("dashboard.loading.analytics")}
@@ -688,7 +690,7 @@ export function BusinessDashboard() {
                     "min-w-0 overflow-x-auto transition-opacity duration-300",
                   )}
                 >
-                  {showSectionLoading ? (
+                  {showGoalsLoading ? (
                     <GoalsTableLoadingShell
                       label={t("dashboard.loading.goals")}
                       columnLabels={goalsTableColumns}
@@ -703,7 +705,7 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                    <DeferredContentFade show={!showGoalsLoading || useDevDemo}>
                       <table className="w-full min-w-[640px] border-collapse text-sm">
                         <thead>
                           <tr className="border-b border-border text-left text-muted-foreground">
@@ -760,11 +762,8 @@ export function BusinessDashboard() {
                     "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
                   )}
                 >
-                  {showSectionLoading ? (
-                    <AnalyticsLoadingState
-                      label={t("dashboard.loading.chart")}
-                      minHeightClass="min-h-[260px] sm:min-h-[290px]"
-                    />
+                  {showChartsLoading ? (
+                    <DashboardChartSkeleton minHeightClass="min-h-[260px] sm:min-h-[290px]" />
                   ) : !hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
                     <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
                       <EmployeeEmptyState
@@ -775,7 +774,7 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                    <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                       <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                           <BarChart
@@ -845,11 +844,8 @@ export function BusinessDashboard() {
                     "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
                   )}
                 >
-                  {showSectionLoading ? (
-                    <AnalyticsLoadingState
-                      label={t("dashboard.loading.chart")}
-                      minHeightClass="min-h-[260px] sm:min-h-[290px]"
-                    />
+                  {showChartsLoading ? (
+                    <DashboardChartSkeleton minHeightClass="min-h-[260px] sm:min-h-[290px]" />
                   ) : (displayStats?.employeeCount ?? 0) === 0 ? (
                     <div className={cn(businessUi.cardPad)}>
                       <EmployeeEmptyState
@@ -878,7 +874,7 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                    <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                       <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                           <BarChart
@@ -985,11 +981,8 @@ export function BusinessDashboard() {
                     )}
                   >
                     <div className="space-y-3">
-                      {showSectionLoading ? (
-                        <SectionLoader
-                          label={t("dashboard.loading.secondary")}
-                          minHeightClass="min-h-[160px] sm:min-h-[180px]"
-                        />
+                      {showChartsLoading ? (
+                        <DashboardListSkeleton minHeightClass="min-h-[160px] sm:min-h-[180px]" />
                       ) : topEmployees.length === 0 ? (
                         <div className={cn(businessUi.cardPad)}>
                           <EmployeeEmptyState
@@ -1000,7 +993,7 @@ export function BusinessDashboard() {
                           />
                         </div>
                       ) : (
-                        <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                        <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                         {topEmployees.map((employee, index) => (
                           <div
                             key={employee.id}

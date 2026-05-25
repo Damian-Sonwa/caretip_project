@@ -117,11 +117,53 @@ export function GoalsTableLoadingShell({
             ))}
           </tr>
         </thead>
+        <tbody>
+          <tr>
+            <td colSpan={columnLabels.length} className="pt-3">
+              <div className="space-y-2.5" role="status" aria-busy="true" aria-label={label}>
+                {[0, 1, 2, 3].map((row) => (
+                  <div key={row} className="flex gap-3 py-1">
+                    <span className="dashboard-hero-metric-skeleton__bar h-4 w-[28%] max-w-[9rem] rounded-md" aria-hidden />
+                    <span className="dashboard-hero-metric-skeleton__bar h-4 w-[18%] max-w-[5rem] rounded-md" aria-hidden />
+                    <span className="dashboard-hero-metric-skeleton__bar h-4 w-[14%] max-w-[4rem] rounded-md" aria-hidden />
+                    <span className="dashboard-hero-metric-skeleton__bar h-4 w-[12%] max-w-[3.5rem] rounded-md" aria-hidden />
+                  </div>
+                ))}
+              </div>
+            </td>
+          </tr>
+        </tbody>
       </table>
-      <AnalyticsLoadingState
-        label={label}
-        minHeightClass="min-h-[180px] sm:min-h-[200px]"
-      />
+    </div>
+  );
+}
+
+/** Compact list rows for secondary panels (top performers, etc.). */
+export function DashboardListSkeleton({
+  rows = 3,
+  className,
+  minHeightClass = "min-h-[160px] sm:min-h-[180px]",
+}: {
+  rows?: number;
+  className?: string;
+  minHeightClass?: string;
+}) {
+  return (
+    <div
+      className={cn("space-y-3", minHeightClass, className)}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+    >
+      {Array.from({ length: rows }).map((_, i) => (
+        <div key={i} className="flex items-center gap-3 py-1">
+          <span className="dashboard-hero-metric-skeleton__bar h-9 w-9 shrink-0 rounded-full" aria-hidden />
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <span className="dashboard-hero-metric-skeleton__bar h-3.5 w-[42%] max-w-[10rem] rounded-md" aria-hidden />
+            <span className="dashboard-hero-metric-skeleton__bar h-2.5 w-[28%] max-w-[6rem] rounded-md" aria-hidden />
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

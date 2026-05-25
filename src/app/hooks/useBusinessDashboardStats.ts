@@ -6,6 +6,7 @@ import {
   mergeBusinessDashboardStats,
 } from "../lib/api";
 import { createDashboardSwrStore, DASHBOARD_SWR_METRICS_TTL_MS } from "../lib/dashboardSwrCache";
+import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
 import { isAbortError, toUserFriendlyMessage } from "../lib/errorMessages";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
 
@@ -51,6 +52,7 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
   const abortByTfRef = useRef(new Map<AnalyticsTimeframe, AbortController>());
   const summaryPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const analyticsPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
+  const hasSettledLiveUiRef = useRef(false);
 
   const persistSwr = useCallback((tf: AnalyticsTimeframe) => {
     const summary = summaryPartialRef.current.get(tf);
@@ -118,7 +120,11 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const cached = affectsUi ? hydrateFromSwr(tf) : null;
+      const cached =
+        affectsUi &&
+        canUseDashboardSwrCache({ hasSettledLiveUi: hasSettledLiveUiRef.current, soft: opts?.soft })
+          ? hydrateFromSwr(tf)
+          : null;
 
       if (affectsUi) {
         setIsRevalidating(true);
@@ -211,6 +217,9 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
       try {
         await Promise.all([summaryPromise, analyticsPromise]);
+        if (!controller.signal.aborted) {
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+        }
       } catch {
         /* per-branch handlers */
       } finally {
@@ -237,7 +246,13 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
   const loadHeroMonthSummary = useCallback(async () => {
     if (!sessionValidated || !enabled) return;
-    const cached = businessSwrStore.get(swrKey("month"), DASHBOARD_SWR_METRICS_TTL_MS);
+    const useCache = canUseDashboardSwrCache({
+      hasSettledLiveUi: hasSettledLiveUiRef.current,
+      soft: true,
+    });
+    const cached = useCache
+      ? businessSwrStore.get(swrKey("month"), DASHBOARD_SWR_METRICS_TTL_MS)
+      : null;
     if (cached) {
       summaryPartialRef.current.set("month", cached.summary);
       analyticsPartialRef.current.set("month", cached.analytics);
@@ -265,6 +280,7 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       abortByTfRef.current.clear();
       clearBusinessStatsClientCache();
       businessSwrStore.clear();
+      hasSettledLiveUiRef.current = false;
       summaryPartialRef.current.clear();
       analyticsPartialRef.current.clear();
       setHeroStats(null);
@@ -366,6 +382,13 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
   const isPeriodRefreshing =
     isRevalidating && Boolean(displayMetrics) && !isMetricsInitialLoad;
 
+  const isGoalsInitialLoad =
+    enabled &&
+    sessionValidated &&
+    !pendingVerification &&
+    isAnalyticsSectionLoading &&
+    (displayStats?.employeeGoals?.length ?? 0) === 0;
+
   return {
     analyticsTimeframe,
     setAnalyticsTimeframe,
@@ -386,7 +409,7 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
     isMetricsInitialLoad,
     isAnalyticsSectionLoading,
     isAnalyticsInitialLoad: isAnalyticsSectionLoading,
-    isGoalsInitialLoad: isAnalyticsSectionLoading,
+    isGoalsInitialLoad,
     isSecondarySectionLoading: isAnalyticsSectionLoading,
     isPeriodRefreshing,
     isDashboardHydrating: isMetricsInitialLoad,
