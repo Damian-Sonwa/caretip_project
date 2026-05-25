@@ -7,9 +7,13 @@ const router = Router();
 
 const pushTokenLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 30,
+  max: process.env.NODE_ENV === "production" ? 40 : 200,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    const uid = req.user?.userId ?? req.user?.id;
+    return typeof uid === "string" && uid.trim() ? `user:${uid.trim()}` : `ip:${req.ip ?? "unknown"}`;
+  },
   message: { message: "Too many push registration attempts. Try again later." },
 });
 

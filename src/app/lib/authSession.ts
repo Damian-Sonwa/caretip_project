@@ -29,9 +29,15 @@ export type AuthStatus = "initializing" | "authenticated" | "unauthenticated";
 
 export function resolveAuthStatus(
   user: SessionUserLike | null,
-  flags: { authHydrated: boolean; sessionValidated: boolean },
+  flags: {
+    authHydrated: boolean;
+    sessionValidated: boolean;
+    /** Storage still holds credentials while user snapshot is empty (bootstrap race). */
+    pendingStoredSession?: boolean;
+  },
 ): AuthStatus {
   if (!flags.authHydrated || !flags.sessionValidated) return "initializing";
+  if (flags.pendingStoredSession && !user) return "initializing";
   return user ? "authenticated" : "unauthenticated";
 }
 

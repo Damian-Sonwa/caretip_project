@@ -1,10 +1,9 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Link } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
-  Euro,
   Users,
   TrendingUp,
   Award,
@@ -30,7 +29,19 @@ import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { FixPrompt } from "../../components/FixPrompt";
-import { downloadBusinessTransactionsExport, getBusinessStats } from "../../lib/api";
+import { downloadBusinessTransactionsExport } from "../../lib/api";
+import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
+import {
+  DashboardHeroStatPlaceholder,
+  DashboardRefreshIndicator,
+} from "../../components/dashboard/DashboardAnalyticsLoader";
+import {
+  AnalyticsLoadingState,
+  DashboardAnalyticsPhaseHint,
+  DeferredContentFade,
+  GoalsTableLoadingShell,
+  SectionLoader,
+} from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import type {
   BusinessDashboardStats,
@@ -57,7 +68,7 @@ import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BusinessStatCard } from "../../components/business/BusinessStatCard";
+import { BusinessDashboardMetricsGrid } from "../../components/business/BusinessDashboardMetricsGrid";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import {
@@ -111,7 +122,8 @@ export function BusinessDashboard() {
       }) satisfies Record<GoalPeriod, string>,
     [t],
   );
-  const { user, logout, isBusiness, exitImpersonation, sessionValidated } = useRequireAuth();
+  const { user, logout, isBusiness, exitImpersonation, sessionValidated, authReady } =
+    useRequireAuth();
 
   const handleLogout = () => {
     if (user?.impersonation) {
@@ -120,9 +132,24 @@ export function BusinessDashboard() {
     }
     logout();
   };
-  /** Body analytics period — independent from hero venue overview (month). */
-  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<"week" | "month" | "year">("month");
-  const [heroStats, setHeroStats] = useState<BusinessDashboardStats | null>(null);
+  const {
+    analyticsTimeframe,
+    setAnalyticsTimeframe,
+    heroStats,
+    analyticsTimeframeLoading,
+    statsLoadFailed,
+    pendingVerification,
+    displayStats,
+    displayMetrics,
+    isMetricsInitialLoad,
+    isAnalyticsSectionLoading,
+    lastUpdatedAt,
+    showStatsSkeleton,
+    valuesMatchAnalyticsPeriod,
+    refreshStatsQuiet,
+    retryStats,
+  } = useBusinessDashboardStats(user?.role === "business" && authReady, sessionValidated);
+
   const [exportLoading, setExportLoading] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const [topPerformersExpanded, setTopPerformersExpanded] = useState(true);
@@ -130,128 +157,7 @@ export function BusinessDashboard() {
   /** Mobile-only: expand long “how it works” copy under the employee goals title. */
   const [employeeGoalsDetailOpen, setEmployeeGoalsDetailOpen] = useState(false);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
-  const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
-  /** Stats fetch only — do not block rendering the dashboard shell. */
-  const [statsLoading, setStatsLoading] = useState(true);
-  /** Lightweight loading indicator for analyticsTimeframe toggles (no blocking spinner). */
-  const [analyticsTimeframeLoading, setAnalyticsTimeframeLoading] = useState<null | "week" | "month" | "year">(null);
-  const [error, setError] = useState<string | null>(null);
-  const [pendingVerification, setPendingVerification] = useState(false);
-
-  const statsCacheRef = useRef(
-    new Map<"week" | "month" | "year", { stats: BusinessDashboardStats; pendingVerification: false } | { stats: null; pendingVerification: true }>()
-  );
-  /**
-   * Only tracks *UI-affecting* requests for the currently selected analyticsTimeframe.
-   * Background prefetches must never invalidate the foreground request, otherwise the first load
-   * can populate the cache but fail to update cards until the user toggles.
-   */
-  const uiRequestSeqRef = useRef(0);
-
-  const loadStatsFor = useCallback(
-    async (tf: "week" | "month" | "year", opts?: { background?: boolean }) => {
-      if (!sessionValidated || !user?.businessId) return;
-
-      const cached = statsCacheRef.current.get(tf);
-      if (cached) {
-        if (tf === "month" && !cached.pendingVerification) {
-          setHeroStats(cached.stats);
-        }
-        if (tf === analyticsTimeframe) {
-          setPendingVerification(cached.pendingVerification);
-          setError(null);
-          setStats(cached.pendingVerification ? null : cached.stats);
-          setStatsLoading(false);
-          setAnalyticsTimeframeLoading(null);
-        }
-        return;
-      }
-
-      const affectsUi = !opts?.background && tf === analyticsTimeframe;
-      const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      if (affectsUi) {
-        setAnalyticsTimeframeLoading(tf);
-      }
-      try {
-        const data = await getBusinessStats(tf);
-        statsCacheRef.current.set(tf, { stats: data, pendingVerification: false });
-        if (tf === "month") {
-          setHeroStats(data);
-        }
-        if (tf === analyticsTimeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
-          setPendingVerification(false);
-          setError(null);
-          setStats(data);
-        }
-      } catch (err) {
-        const msg = toUserFriendlyMessage(err);
-        if (msg.toLowerCase().includes("pending verification")) {
-          statsCacheRef.current.set(tf, { stats: null, pendingVerification: true });
-          if (tf === analyticsTimeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
-            setPendingVerification(true);
-            setError(null);
-            setStats(null);
-          }
-        } else if (!opts?.background) {
-          logClientError("BusinessDashboard.fetchStats", err);
-          if (tf === analyticsTimeframe && (!affectsUi || uiRequestSeqRef.current === seq)) {
-            setError(msg);
-            setStats(null);
-          }
-        } else {
-          logClientError("BusinessDashboard.prefetchStats", err);
-        }
-      } finally {
-        if (affectsUi) {
-          setStatsLoading(false);
-          setAnalyticsTimeframeLoading(null);
-        }
-      }
-    },
-    [analyticsTimeframe, user?.businessId, sessionValidated]
-  );
-
-  const fetchStats = useCallback(async () => {
-    if (!sessionValidated || !user?.businessId) {
-      setStatsLoading(false);
-      return;
-    }
-    // Only show loading if this analyticsTimeframe is not cached.
-    if (!statsCacheRef.current.get(analyticsTimeframe)) setStatsLoading(true);
-    await loadStatsFor(analyticsTimeframe);
-  }, [user?.businessId, sessionValidated, analyticsTimeframe, loadStatsFor]);
-
-  const refreshStatsQuiet = useCallback(async () => {
-    if (!sessionValidated || !user?.businessId) return;
-    try {
-      const data = await getBusinessStats(analyticsTimeframe);
-      statsCacheRef.current.set(analyticsTimeframe, { stats: data, pendingVerification: false });
-      if (analyticsTimeframe === "month") {
-        setHeroStats(data);
-      }
-      setStats(data);
-    } catch (err) {
-      logClientError("BusinessDashboard.refreshStatsQuiet", err);
-      /* keep existing stats on background refresh failure */
-    }
-  }, [user?.businessId, analyticsTimeframe, sessionValidated]);
-
-  useEffect(() => {
-    void fetchStats();
-  }, [fetchStats]);
-
-  // Prefetch other analyticsTimeframes after first load for instant toggles.
-  useEffect(() => {
-    if (!sessionValidated || !user?.businessId) return;
-    const others = (["week", "month", "year"] as const).filter((t) => t !== analyticsTimeframe);
-    // Defer so it never blocks interaction.
-    const id = window.setTimeout(() => {
-      others.forEach((t) => void loadStatsFor(t, { background: true }));
-    }, 250);
-    return () => window.clearTimeout(id);
-  }, [loadStatsFor, analyticsTimeframe, user?.businessId, sessionValidated]);
-
-  const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "business");
+  const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshStatsQuiet);
@@ -311,7 +217,8 @@ export function BusinessDashboard() {
     }
   };
 
-  const topEmployees = (stats?.employees ?? [])
+  const rosterEmployees = displayStats?.employees ?? [];
+  const topEmployees = rosterEmployees
     .filter((e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true)
     .sort((a, b) => b.tipsTotal - a.tipsTotal)
     .slice(0, 5)
@@ -327,29 +234,28 @@ export function BusinessDashboard() {
 
   const useDevDemo = shouldUseBusinessDashboardDevDemo({
     isDev: import.meta.env.DEV,
-    statsLoading,
+    statsLoading: isMetricsInitialLoad,
     pendingVerification,
-    tipCount: stats?.tipCount ?? 0,
+    tipCount: displayStats?.tipCount ?? 0,
   });
 
   const devPeriod = useDevDemo ? devMockBusinessPeriodStats(analyticsTimeframe) : null;
   const analyticsStats: BusinessDashboardStats | null = useDevDemo
     ? {
-        ...(stats ?? {}),
+        ...(displayStats ?? {}),
         totalTips: devPeriod!.totalTips,
         tipCount: devPeriod!.tipCount,
         employeeCount: devPeriod!.employeeCount,
       }
-    : stats;
+    : displayStats;
 
-  const pulseSourceStats = heroStats ?? stats ?? null;
   const operationalPulse = useDevDemo
     ? devMockBusinessOperationalPulse()
-    : pulseSourceStats?.operationalPulse;
+    : (heroStats?.operationalPulse ?? displayStats?.operationalPulse);
 
   const tipDistributionData = useDevDemo
     ? devMockBusinessTipDistribution(analyticsTimeframe)
-    : (stats?.dailyTipDistribution ?? []);
+    : (displayStats?.dailyTipDistribution ?? []);
 
   const tipDistributionChartData = useMemo(() => {
     return tipDistributionData.map((row) => ({
@@ -367,7 +273,9 @@ export function BusinessDashboard() {
     if (useDevDemo) {
       return devMockBusinessEmployeePerformance([...BUSINESS_CHART_COLORS]);
     }
-    const list = [...(stats?.employees ?? [])].sort((a, b) => b.tipsTotal - a.tipsTotal);
+    const list = [...(displayStats?.employees ?? [])].sort(
+      (a, b) => b.tipsTotal - a.tipsTotal,
+    );
     return list.map((e, i) => ({
       name:
         e.name.split(" ").length > 1
@@ -377,21 +285,33 @@ export function BusinessDashboard() {
       rating: e.rating ?? 0,
       color: BUSINESS_CHART_COLORS[i % BUSINESS_CHART_COLORS.length],
     }));
-  }, [useDevDemo, stats?.employees]);
+  }, [useDevDemo, displayStats?.employees]);
 
-  const hasTipActivityInPeriod = useDevDemo || (analyticsStats?.totalTips ?? 0) > 0;
+  const hasTipActivityInPeriod = useDevDemo || (displayMetrics?.totalTips ?? 0) > 0;
 
   const tipDistributionTotal = useMemo(
     () => tipDistributionData.reduce((acc, row) => acc + (Number(row.amount) || 0), 0),
     [tipDistributionData],
   );
 
+  const employeeGoalsList = displayStats?.employeeGoals ?? [];
+  const goalsTableColumns = useMemo(
+    () => [
+      t("business.dashboard.tableTeamMember"),
+      t("business.dashboard.tablePeriod"),
+      t("business.dashboard.tableTarget"),
+      t("business.dashboard.tableCurrent"),
+      t("business.dashboard.tableProgress"),
+      t("business.dashboard.tableStatus"),
+    ],
+    [t],
+  );
   const employeeGoalsSummary = useMemo(() => {
-    const goals = stats?.employeeGoals ?? [];
+    const goals = employeeGoalsList;
     if (goals.length === 0) return null;
     const onTrack = goals.filter((g) => g.status === "achieved" || g.status === "on_track").length;
     return { total: goals.length, onTrack };
-  }, [stats?.employeeGoals]);
+  }, [employeeGoalsList]);
 
   const analyticsPeriodLabel = (period: "week" | "month" | "year") => {
     if (period === "week") return t("dashboard.filter_week");
@@ -400,29 +320,29 @@ export function BusinessDashboard() {
   };
 
   const brokenQrLinks =
-    (stats?.employees ?? []).length > 0 &&
-    (stats?.employees ?? []).some((e) => e.slug == null || e.slug === "");
+    (displayStats?.employees ?? []).length > 0 &&
+    (displayStats?.employees ?? []).some((e) => e.slug == null || e.slug === "");
 
   if (!user) return null;
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="text-center">
-          <p className="mb-2 text-sm font-medium text-destructive">{error}</p>
+  const heroPulseLoading = !heroStats && !operationalPulse && !useDevDemo;
+  const showMetricsSkeleton = isMetricsInitialLoad && !useDevDemo;
+  const showSectionLoading = isAnalyticsSectionLoading && !useDevDemo;
+
+  return (
+    <div className={cn(businessUi.page, "overflow-x-hidden")}>
+      {statsLoadFailed && !isMetricsInitialLoad && !showStatsSkeleton && (
+        <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+          <p className="font-medium">{statsLoadFailed}</p>
           <button
-            onClick={() => window.location.reload()}
-            className="text-primary hover:underline text-sm"
+            type="button"
+            onClick={retryStats}
+            className="mt-2 text-primary hover:underline text-sm font-medium"
           >
             {t("dashboard.tryAgain")}
           </button>
         </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className={cn(businessUi.page, "overflow-x-hidden")}>
+      )}
       {user?.impersonation && (
         <div
           className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-2 border-b border-border bg-primary/15 px-4 py-2.5 text-sm text-foreground"
@@ -529,7 +449,9 @@ export function BusinessDashboard() {
                 <div>
                   <dt>{t("business.hero.pulse.lastHour")}</dt>
                   <dd>
-                    {operationalPulse ? (
+                    {heroPulseLoading ? (
+                      <DashboardHeroStatPlaceholder />
+                    ) : operationalPulse ? (
                       <>
                         <span className="block tabular-nums">
                           {operationalPulse.tipsLast60m.count === 0
@@ -550,7 +472,9 @@ export function BusinessDashboard() {
                 <div>
                   <dt>{t("business.hero.pulse.today")}</dt>
                   <dd>
-                    {operationalPulse ? (
+                    {heroPulseLoading ? (
+                      <DashboardHeroStatPlaceholder />
+                    ) : operationalPulse ? (
                       <>
                         <span className="block tabular-nums">
                           {operationalPulse.tipsToday.count === 0
@@ -604,7 +528,13 @@ export function BusinessDashboard() {
                   })}
                 </p>
               </div>
-              <LiveConnectionBadge status={connectionStatus} />
+              <div className="flex flex-wrap items-center gap-2">
+                <LiveConnectionBadge status={connectionStatus} />
+                <DashboardRefreshIndicator
+                  isRefreshing={false}
+                  lastUpdatedAt={lastUpdatedAt}
+                />
+              </div>
             </div>
             <div
               className={businessUi.periodToggle}
@@ -638,57 +568,37 @@ export function BusinessDashboard() {
               </button>
             ))}
             </div>
+            {isAnalyticsSectionLoading && !useDevDemo ? (
+              <DashboardAnalyticsPhaseHint
+                className="mt-3"
+                label={t("dashboard.loading.analytics")}
+              />
+            ) : null}
           </section>
 
-          <motion.div {...dashboardBlockMotion} className="business-dashboard-block">
-            <div className={businessUi.statsGrid}>
-              <BusinessStatCard
-                featured
-                label={
-                  analyticsTimeframe === "week"
-                    ? t("business.dashboard.statsTotalTipsWeek")
-                    : analyticsTimeframe === "month"
-                      ? t("business.dashboard.statsTotalTipsMonth")
-                      : t("business.dashboard.statsTotalTipsYear")
-                }
-                value={formatEur(analyticsStats?.totalTips ?? 0)}
-                change={
-                  hasTipActivityInPeriod
-                    ? t("business.dashboard.statsLiveTotals")
-                    : t("format.metricZeroTips")
-                }
-                icon={<Euro className="h-5 w-5" aria-hidden />}
-              />
-              <BusinessStatCard
-                label={t("business.dashboard.activeEmployees")}
-                value={String(analyticsStats?.employeeCount ?? 0)}
-                change={
-                  topEmployees.length > 0
-                    ? t("business.dashboard.activeEmployeesTopHint", { count: topEmployees.length })
-                    : undefined
-                }
-                icon={<Users className="h-5 w-5" aria-hidden />}
-              />
-              <BusinessStatCard
-                label={t("business.dashboard.tipsCount")}
-                value={String(analyticsStats?.tipCount ?? 0)}
-                change={hasTipActivityInPeriod ? t("business.dashboard.tipsCountHint") : undefined}
-                icon={<Award className="h-5 w-5" aria-hidden />}
-              />
-              <BusinessStatCard
-                label={t("business.dashboard.avgTipPerEmployee")}
-                value={
-                  analyticsStats?.employeeCount && analyticsStats?.totalTips
-                    ? formatEur(analyticsStats.totalTips / analyticsStats.employeeCount, {
-                        minFrac: 0,
-                        maxFrac: 0,
-                      })
-                    : formatEur(0, { minFrac: 0, maxFrac: 0 })
-                }
-                change={t("business.dashboard.avgTipCoaching")}
-                icon={<TrendingUp className="h-5 w-5" aria-hidden />}
-              />
-            </div>
+          <motion.div
+            {...dashboardBlockMotion}
+            className="business-dashboard-block"
+            initial={false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <BusinessDashboardMetricsGrid
+              analyticsTimeframe={analyticsTimeframe}
+              metrics={
+                useDevDemo && devPeriod
+                  ? {
+                      totalTips: devPeriod.totalTips,
+                      tipCount: devPeriod.tipCount,
+                      employeeCount: devPeriod.employeeCount,
+                    }
+                  : displayMetrics
+              }
+              loading={showMetricsSkeleton}
+              isPeriodRefreshing={false}
+              hasTipActivityInPeriod={hasTipActivityInPeriod}
+              topPerformersCount={topEmployees.length}
+            />
           </motion.div>
 
           <motion.div
@@ -758,8 +668,17 @@ export function BusinessDashboard() {
                 </div>
               </CardHeader>
               {employeeGoalsExpanded ? (
-                <CardContent className="min-w-0 overflow-x-auto">
-                  {!stats?.employeeGoals || stats.employeeGoals.length === 0 ? (
+                <CardContent
+                  className={cn(
+                    "min-w-0 overflow-x-auto transition-opacity duration-300",
+                  )}
+                >
+                  {showSectionLoading ? (
+                    <GoalsTableLoadingShell
+                      label={t("dashboard.loading.goals")}
+                      columnLabels={goalsTableColumns}
+                    />
+                  ) : employeeGoalsList.length === 0 ? (
                     <div className={cn(businessUi.cardPad)}>
                       <EmployeeEmptyState
                         className="py-10 sm:py-12"
@@ -769,34 +688,35 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <table className="w-full min-w-[640px] border-collapse text-sm">
-                      <thead>
-                        <tr className="border-b border-border text-left text-muted-foreground">
-                          <th className="pb-2 pr-3 font-medium">{t("business.dashboard.tableTeamMember")}</th>
-                          <th className="pb-2 pr-3 font-medium">{t("business.dashboard.tablePeriod")}</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableTarget")}</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableCurrent")}</th>
-                          <th className="pb-2 pr-3 font-medium tabular-nums">{t("business.dashboard.tableProgress")}</th>
-                          <th className="pb-2 font-medium">{t("business.dashboard.tableStatus")}</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {stats.employeeGoals.map((g) => (
-                          <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
-                            <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
-                            <td className="py-3 pr-3 text-muted-foreground">
-                              {goalPeriodLabels[g.goalPeriod]}
-                            </td>
-                            <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
-                            <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
-                            <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
-                            <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
-                              {t(`business.goalStatus.${g.status}`)}
-                            </td>
+                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                      <table className="w-full min-w-[640px] border-collapse text-sm">
+                        <thead>
+                          <tr className="border-b border-border text-left text-muted-foreground">
+                            {goalsTableColumns.map((col) => (
+                              <th key={col} className="pb-2 pr-3 font-medium last:pr-0">
+                                {col}
+                              </th>
+                            ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {employeeGoalsList.map((g) => (
+                            <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
+                              <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
+                              <td className="py-3 pr-3 text-muted-foreground">
+                                {goalPeriodLabels[g.goalPeriod]}
+                              </td>
+                              <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
+                              <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
+                              <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
+                              <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
+                                {t(`business.goalStatus.${g.status}`)}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </DeferredContentFade>
                   )}
                 </CardContent>
               ) : null}
@@ -820,8 +740,17 @@ export function BusinessDashboard() {
                     {analyticsTimeframe === "year" && t("business.dashboard.dailyTipDistDescYear")}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible">
-                  {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
+                <CardContent
+                  className={cn(
+                    "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
+                  )}
+                >
+                  {showSectionLoading ? (
+                    <AnalyticsLoadingState
+                      label={t("dashboard.loading.chart")}
+                      minHeightClass="min-h-[260px] sm:min-h-[290px]"
+                    />
+                  ) : !hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
                     <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
                       <EmployeeEmptyState
                         className="relative z-[1] py-10 sm:py-12"
@@ -831,10 +760,11 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <>
+                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
                       <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                           <BarChart
+                            key={`dist-${analyticsTimeframe}`}
                             data={tipDistributionChartData}
                             margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                             barCategoryGap="18%"
@@ -876,7 +806,7 @@ export function BusinessDashboard() {
                           total: formatEur(tipDistributionTotal),
                         })}
                       </p>
-                    </>
+                    </DeferredContentFade>
                   )}
                 </CardContent>
               </Card>
@@ -895,8 +825,17 @@ export function BusinessDashboard() {
                     {t("business.dashboard.employeePerformanceDesc")}
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible">
-                  {(stats?.employeeCount ?? 0) === 0 ? (
+                <CardContent
+                  className={cn(
+                    "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
+                  )}
+                >
+                  {showSectionLoading ? (
+                    <AnalyticsLoadingState
+                      label={t("dashboard.loading.chart")}
+                      minHeightClass="min-h-[260px] sm:min-h-[290px]"
+                    />
+                  ) : (displayStats?.employeeCount ?? 0) === 0 ? (
                     <div className={cn(businessUi.cardPad)}>
                       <EmployeeEmptyState
                         className="py-10 sm:py-12"
@@ -924,10 +863,11 @@ export function BusinessDashboard() {
                       />
                     </div>
                   ) : (
-                    <>
+                    <DeferredContentFade show={!showSectionLoading || useDevDemo}>
                       <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                         <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                           <BarChart
+                            key={`perf-${analyticsTimeframe}`}
                             data={employeePerformance}
                             layout="vertical"
                             margin={{ top: 12, right: 16, left: 4, bottom: 4 }}
@@ -974,7 +914,7 @@ export function BusinessDashboard() {
                           amount: formatEur(employeePerformance[0]?.tips ?? 0),
                         })}
                       </p>
-                    </>
+                    </DeferredContentFade>
                   )}
                 </CardContent>
               </Card>
@@ -1024,9 +964,18 @@ export function BusinessDashboard() {
                   </Link>
                 </CardHeader>
                 {topPerformersExpanded ? (
-                  <CardContent>
+                  <CardContent
+                    className={cn(
+                      "transition-opacity duration-300",
+                    )}
+                  >
                     <div className="space-y-3">
-                      {topEmployees.length === 0 ? (
+                      {showSectionLoading ? (
+                        <SectionLoader
+                          label={t("dashboard.loading.secondary")}
+                          minHeightClass="min-h-[160px] sm:min-h-[180px]"
+                        />
+                      ) : topEmployees.length === 0 ? (
                         <div className={cn(businessUi.cardPad)}>
                           <EmployeeEmptyState
                             className="py-8 sm:py-10"
@@ -1036,7 +985,8 @@ export function BusinessDashboard() {
                           />
                         </div>
                       ) : (
-                        topEmployees.map((employee, index) => (
+                        <DeferredContentFade show={!showSectionLoading || useDevDemo}>
+                        {topEmployees.map((employee, index) => (
                           <div
                             key={employee.id}
                             className={cn(
@@ -1094,7 +1044,8 @@ export function BusinessDashboard() {
                               </div>
                             </div>
                           </div>
-                        ))
+                        ))}
+                        </DeferredContentFade>
                       )}
                     </div>
                   </CardContent>

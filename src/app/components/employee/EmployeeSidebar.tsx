@@ -24,7 +24,7 @@ export function EmployeeSidebar({
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   const venueName =
     String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
@@ -36,10 +36,10 @@ export function EmployeeSidebar({
       transition={{ duration: 0.5 }}
       className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
     >
-      <div className={cn("flex flex-col gap-3 px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
+      <div className={cn("px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
         <Link
           to={EMPLOYEE_DASHBOARD_HOME}
-          className="flex min-w-0 items-start gap-3 rounded-lg outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          className="flex min-w-0 items-center gap-3 rounded-lg outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
           <BusinessLogoMark
             logoPathOrUrl={businessBranding?.businessLogo ?? null}
@@ -48,16 +48,10 @@ export function EmployeeSidebar({
             rounded="rounded-xl"
             className="shrink-0"
           />
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-sidebar-foreground">{venueName}</p>
-          </div>
-        </Link>
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-sidebar-foreground">
-            {user?.name || t("dashboard.teamMemberFallback")}
+          <p className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-foreground">
+            {venueName}
           </p>
-          <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
-        </div>
+        </Link>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-5">

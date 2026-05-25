@@ -3,6 +3,7 @@ import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { getLoginPathForAllowedRoles, resolveAuthenticatedAppGuard } from "../lib/authSession";
 import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
+import { isAuthRestorePending } from "../lib/authRestore";
 import { hasClientStoredSession } from "../lib/authUserStore";
 import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
@@ -21,7 +22,7 @@ export function RoleProtectedRoute({ allowedRoles, children }: RoleProtectedRout
   const { user, authStatus } = useAuth();
   const location = useLocation();
 
-  if (authStatus === "initializing") {
+  if (authStatus === "initializing" || isAuthRestorePending()) {
     return <AppLoader />;
   }
 

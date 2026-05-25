@@ -114,8 +114,16 @@ export class EmailNotVerifiedLoginError extends Error {
   }
 }
 
-export function logServerError(context: string, err: unknown): void {
-  console.error(`[${context}]`, err);
+export function logServerError(
+  context: string,
+  err: unknown,
+  meta?: Record<string, unknown>,
+): void {
+  if (meta && Object.keys(meta).length > 0) {
+    console.error(`[${context}]`, meta, err);
+  } else {
+    console.error(`[${context}]`, err);
+  }
   if (err instanceof Error && err.stack) {
     console.error(err.stack);
   }
@@ -212,6 +220,7 @@ export const CLIENT_FALLBACK = {
   loginUnexpected: "Sign-in is temporarily unavailable. Please try again in a few moments.",
   changePassword: "We couldn't update your password. Please try again.",
   business: "We couldn't save your venue or team data. Please try again.",
+  businessStats: "We couldn't load dashboard stats. Please try again in a moment.",
   employee: "We couldn't update staff or your profile. Please try again.",
   staff: "We couldn't load this team member or directory. Please try again.",
   tips: "We couldn't process your tip. Please try again.",

@@ -110,24 +110,6 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                 <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
               </button>
             </div>
-
-            <div className="border-t border-sidebar-border p-4">
-              <Link
-                to="/dashboard/settings"
-                onClick={onClose}
-                className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5"
-              >
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
-                  {(user?.name?.trim().charAt(0) ?? "U").toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-foreground">
-                    {user?.name || t("dashboard.managerFallback")}
-                  </p>
-                  <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
-                </div>
-              </Link>
-            </div>
           </motion.aside>
         </>
       )}

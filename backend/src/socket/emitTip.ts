@@ -29,4 +29,8 @@ export function emitNewTip(payload: NewTipPayload): void {
   void import("../services/push/notification.triggers.js").then(({ onTipReceived }) => {
     onTipReceived(payload);
   });
+
+  void import("../services/business.service.js").then(({ invalidateBusinessStatsCache }) => {
+    invalidateBusinessStatsCache(payload.businessId);
+  });
 }

@@ -1,13 +1,13 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import i18n from "@/i18n/i18n";
-import { isAbortError, toUserFriendlyMessage } from "../../lib/errorMessages";
+import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
   TrendingUp,
@@ -31,23 +31,34 @@ import {
   ResponsiveContainer
 } from "recharts";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { isProtectedApiReady } from "../../lib/authRestore";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
-import { getTipsByEmployee, getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
+import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
+import { useEmployeeAccountSummary } from "../../hooks/useEmployeeAccountSummary";
+import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
+import { EmployeeDashboardMetricsGrid } from "../../components/employee/EmployeeDashboardMetricsGrid";
 import { formatEur } from "../../lib/formatEur";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import { recordNewEmployeeTip } from "../../lib/employeeNotificationStore";
+import {
+  recordNewEmployeeTip,
+  syncEmployeeNotificationTips,
+} from "../../lib/employeeNotificationStore";
 import employeeHeroImage from "../../../../images/ICT_employee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { EmployeeStatCard } from "../../components/employee/EmployeeStatCard";
+import {
+  DashboardHeroStatPlaceholder,
+  DashboardRefreshIndicator,
+  DashboardSectionSpinner,
+} from "../../components/dashboard/DashboardAnalyticsLoader";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import {
@@ -101,21 +112,36 @@ export function EmployeeDashboard() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  /** Body analytics only — does not affect hero account summary. */
-  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<AnalyticsTimeframe>("today");
-  const [tips, setTips] = useState<TipItem[]>([]);
-  const [monthlyGoal, setMonthlyGoal] = useState<number | null>(null);
-  const [currentMonthTotal, setCurrentMonthTotal] = useState(0);
-  const [goalProgress, setGoalProgress] = useState<EmployeeGoalProgress | null>(null);
+  const dashboardEnabled = isProtectedApiReady() && user?.role === "employee";
+
+  const {
+    displayAccount,
+    isInitialLoad: accountInitialLoad,
+    refreshQuiet: refreshAccountQuiet,
+  } = useEmployeeAccountSummary(dashboardEnabled);
+
+  const {
+    analyticsTimeframe,
+    setAnalyticsTimeframe,
+    displayPayload,
+    displayMetrics,
+    valuesMatchAnalyticsPeriod,
+    isMetricsInitialLoad,
+    isAnalyticsInitialLoad,
+    lastUpdatedAt: analyticsLastUpdatedAt,
+    error: analyticsError,
+    refreshQuiet: refreshAnalyticsQuiet,
+  } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId);
+
+  const isHeroLoading = accountInitialLoad;
+  const showMetricsLoading = isMetricsInitialLoad;
+  const showChartLoading = isAnalyticsInitialLoad;
+
+  const refreshDashboardQuiet = useCallback(async () => {
+    await Promise.all([refreshAccountQuiet(), refreshAnalyticsQuiet()]);
+  }, [refreshAccountQuiet, refreshAnalyticsQuiet]);
+
   const [error, setError] = useState<string | null>(null);
-  const [businessTimezone, setBusinessTimezone] = useState<string | null>(null);
-  const [periodTipCount, setPeriodTipCount] = useState(0);
-  const [periodAmountEur, setPeriodAmountEur] = useState(0);
-  const [chartSeries, setChartSeries] = useState<Array<{ label: string; amount: number }>>([]);
-  const [analyticsLoading, setAnalyticsLoading] = useState(true);
-  /** Matches analytics payload to the selected body period tab. */
-  const [dataAnalyticsTimeframe, setDataAnalyticsTimeframe] = useState<AnalyticsTimeframe>("today");
-  const [accountSummaryLoading, setAccountSummaryLoading] = useState(true);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
   const [staffSlug, setStaffSlug] = useState<string | null | undefined>(undefined);
   /** Public venue slug from `/api/employees/me` for canonical tip URLs */
@@ -125,82 +151,10 @@ export function EmployeeDashboard() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
-  const [accountSummary, setAccountSummary] = useState({
-    totalEarningsEur: 0,
-    availableBalanceEur: 0,
-    totalSupporters: 0,
-    loaded: false,
-  });
 
-  const analyticsTimeframeRef = useRef(analyticsTimeframe);
-  analyticsTimeframeRef.current = analyticsTimeframe;
-  const analyticsFetchGen = useRef(0);
-  const accountSummaryFetchGen = useRef(0);
-
-  const applyAccountSummary = useCallback((data: Awaited<ReturnType<typeof getTipsByEmployee>>) => {
-    setAccountSummary({
-      totalEarningsEur: typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : 0,
-      availableBalanceEur: typeof data.availableBalanceEur === "number" ? data.availableBalanceEur : 0,
-      totalSupporters: typeof data.totalSupporters === "number" ? data.totalSupporters : 0,
-      loaded: true,
-    });
-  }, []);
-
-  const applyAnalyticsPayload = useCallback(
-    (data: Awaited<ReturnType<typeof getTipsByEmployee>>, requestedTf: AnalyticsTimeframe) => {
-      setTips(data.tips ?? []);
-      setMonthlyGoal(data.monthlyGoal ?? null);
-      setCurrentMonthTotal(data.currentMonthTotal ?? 0);
-      setGoalProgress(data.goal ?? null);
-      const tz = (data as { businessTimezone?: string }).businessTimezone;
-      setBusinessTimezone(tz ?? null);
-      const tipsArr = data.tips ?? [];
-      const nCount = data.periodTipCount;
-      const nAmount = data.periodAmountEur;
-      setPeriodTipCount(typeof nCount === "number" ? nCount : tipsArr.length);
-      setPeriodAmountEur(
-        typeof nAmount === "number" ? nAmount : tipsArr.reduce((s, t) => s + t.amount, 0),
-      );
-      setChartSeries(Array.isArray(data.chartSeries) ? data.chartSeries : []);
-      setDataAnalyticsTimeframe(requestedTf);
-    },
-    [],
+  const socketReady = useDeferSocketConnect(
+    isProtectedApiReady() && user?.role === "employee",
   );
-
-  const fetchAccountSummary = useCallback(
-    async (signal: AbortSignal, gen: number) => {
-      const data = await getTipsByEmployee(undefined, { signal });
-      if (gen !== accountSummaryFetchGen.current) return;
-      applyAccountSummary(data);
-    },
-    [applyAccountSummary],
-  );
-
-  const fetchAnalyticsForTimeframe = useCallback(
-    async (tf: AnalyticsTimeframe, signal: AbortSignal, gen: number) => {
-      const data = await getTipsByEmployee(tf, { signal });
-      if (gen !== analyticsFetchGen.current) return;
-      applyAnalyticsPayload(data, tf);
-    },
-    [applyAnalyticsPayload],
-  );
-
-  const refreshDashboardQuiet = useCallback(async () => {
-    const role = user?.role;
-    if (!authHydrated || !sessionValidated || role !== "employee") return;
-    try {
-      const [summaryData, analyticsData] = await Promise.all([
-        getTipsByEmployee(undefined),
-        getTipsByEmployee(analyticsTimeframeRef.current),
-      ]);
-      applyAccountSummary(summaryData);
-      applyAnalyticsPayload(analyticsData, analyticsTimeframeRef.current);
-    } catch (e) {
-      logClientError("EmployeeDashboard.refreshDashboardQuiet", e);
-    }
-  }, [authHydrated, sessionValidated, applyAccountSummary, applyAnalyticsPayload, user?.role]);
-
-  const socketReady = useDeferSocketConnect(sessionValidated && user?.role === "employee");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshDashboardQuiet);
@@ -231,54 +185,8 @@ export function EmployeeDashboard() {
   }, [authHydrated, sessionValidated, user?.id, user?.role, updateUser]);
 
   useEffect(() => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
-    const controller = new AbortController();
-    accountSummaryFetchGen.current += 1;
-    const gen = accountSummaryFetchGen.current;
-    setAccountSummaryLoading(true);
-
-    void fetchAccountSummary(controller.signal, gen)
-      .catch((e: unknown) => {
-        if (isAbortError(e) || gen !== accountSummaryFetchGen.current) return;
-        logClientError("EmployeeDashboard.fetchAccountSummary", e);
-      })
-      .finally(() => {
-        if (gen !== accountSummaryFetchGen.current) return;
-        setAccountSummaryLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [authHydrated, fetchAccountSummary, sessionValidated, user?.role, user?.id]);
-
-  useEffect(() => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;
-    const controller = new AbortController();
-    analyticsFetchGen.current += 1;
-    const gen = analyticsFetchGen.current;
-    setAnalyticsLoading(true);
-    setError(null);
-
-    void fetchAnalyticsForTimeframe(analyticsTimeframe, controller.signal, gen)
-      .catch((e: unknown) => {
-        if (isAbortError(e) || gen !== analyticsFetchGen.current) return;
-        logClientError("EmployeeDashboard.fetchAnalytics", e);
-        setError(toUserFriendlyMessage(e, { audience: "employee" }));
-        setTips([]);
-        setPeriodTipCount(0);
-        setPeriodAmountEur(0);
-        setChartSeries([]);
-        setMonthlyGoal(null);
-        setCurrentMonthTotal(0);
-        setGoalProgress(null);
-        setBusinessTimezone(null);
-      })
-      .finally(() => {
-        if (gen !== analyticsFetchGen.current) return;
-        setAnalyticsLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [authHydrated, fetchAnalyticsForTimeframe, sessionValidated, analyticsTimeframe, user?.role, user?.id]);
+    if (analyticsError) setError(analyticsError);
+  }, [analyticsError]);
 
   useEffect(() => {
     if (!socket || user?.role !== "employee" || !user.employeeId) return;
@@ -288,8 +196,6 @@ export function EmployeeDashboard() {
 
       recordNewEmployeeTip(user.employeeId, payload.tip);
 
-      setCurrentMonthTotal(payload.currentMonthTotal);
-      setMonthlyGoal(payload.monthlyGoal);
       void refreshDashboardQuiet();
 
       playChaChingSound();
@@ -302,14 +208,16 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t]);
 
+  const accountLoaded = displayAccount != null;
+
   const useDevDemo = shouldUseEmployeeDashboardDevDemo({
     isDev: import.meta.env.DEV,
     hasError: Boolean(error),
-    accountSummaryLoaded: accountSummary.loaded,
-    accountSummaryLoading,
-    analyticsLoading,
-    totalEarningsEur: accountSummary.totalEarningsEur,
-    totalSupporters: accountSummary.totalSupporters,
+    accountSummaryLoaded: accountLoaded,
+    accountSummaryLoading: isHeroLoading,
+    analyticsLoading: showMetricsLoading || showChartLoading,
+    totalEarningsEur: displayAccount?.totalEarningsEur ?? 0,
+    totalSupporters: displayAccount?.totalSupporters ?? 0,
   });
 
   const devGoalBundle = useDevDemo ? devMockEmployeeGoalBundle() : null;
@@ -317,26 +225,48 @@ export function EmployeeDashboard() {
 
   const displayAccountSummary = useDevDemo
     ? { ...devMockEmployeeAccountSummary(), loaded: true }
-    : accountSummary;
+    : displayAccount
+      ? {
+          totalEarningsEur: displayAccount.totalEarningsEur,
+          availableBalanceEur: displayAccount.availableBalanceEur,
+          totalSupporters: displayAccount.totalSupporters,
+          loaded: true,
+        }
+      : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
 
-  const displayPeriodTipCount = devPeriodSummary?.tips ?? periodTipCount;
-  const displayPeriodAmountEur = devPeriodSummary?.amount ?? periodAmountEur;
+  const displayPeriodTipCount = devPeriodSummary?.tips ?? displayPayload?.periodTipCount ?? 0;
+  const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayPayload?.periodAmountEur ?? 0;
   const displayChartSeries = useDevDemo
     ? devMockEmployeeChartSeries(analyticsTimeframe)
-    : chartSeries;
-  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : tips;
-  const displayMonthlyGoal = devGoalBundle?.monthlyGoal ?? monthlyGoal;
-  const displayCurrentMonthTotal = devGoalBundle?.currentMonthTotal ?? currentMonthTotal;
-  const displayGoalProgress = devGoalBundle?.goal ?? goalProgress;
+    : (displayPayload?.chartSeries ?? []);
+  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : (displayPayload?.tips ?? []);
+  const displayMonthlyGoal = devGoalBundle?.monthlyGoal ?? displayPayload?.monthlyGoal ?? null;
+  const displayCurrentMonthTotal =
+    devGoalBundle?.currentMonthTotal ?? displayPayload?.currentMonthTotal ?? 0;
+  const displayGoalProgress = devGoalBundle?.goal ?? displayPayload?.goalProgress ?? null;
+  const businessTimezone = displayPayload?.businessTimezone ?? null;
 
-  const totalAmount = displayPeriodAmountEur;
-  const avgTipFromServer = displayPeriodTipCount > 0 ? totalAmount / displayPeriodTipCount : 0;
-  const stats = {
-    tips: displayPeriodTipCount,
-    avgTip: avgTipFromServer,
-    amount: totalAmount,
-    rating: useDevDemo ? devMockEmployeeRating() : null,
-  };
+  const periodMetrics = useMemo(() => {
+    const periodTipCount = devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? displayPeriodTipCount;
+    const periodAmountEur = devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? displayPeriodAmountEur;
+    const rating = useDevDemo ? devMockEmployeeRating() : null;
+    const goalPct =
+      displayGoalProgress != null && displayGoalProgress.goalAmount > 0
+        ? displayGoalProgress.percent
+        : displayMonthlyGoal != null && displayMonthlyGoal > 0
+          ? Math.min(100, Math.round((displayCurrentMonthTotal / displayMonthlyGoal) * 100))
+          : null;
+    return { periodTipCount, periodAmountEur, goalPct, rating };
+  }, [
+    devPeriodSummary,
+    displayMetrics,
+    displayPeriodTipCount,
+    displayPeriodAmountEur,
+    useDevDemo,
+    displayGoalProgress,
+    displayMonthlyGoal,
+    displayCurrentMonthTotal,
+  ]);
 
   const chartData = useMemo(() => {
     return displayChartSeries.map((p) => ({
@@ -351,18 +281,10 @@ export function EmployeeDashboard() {
     return t("employee.period.month");
   };
 
-  /** False while analytics fetch is in flight or data lags behind the selected body period tab. */
-  const valuesMatchAnalyticsPeriod =
-    useDevDemo || (dataAnalyticsTimeframe === analyticsTimeframe && !analyticsLoading);
+  const valuesMatchPeriod = useDevDemo || valuesMatchAnalyticsPeriod;
 
-  const displayGoalPct =
-    displayGoalProgress != null && displayGoalProgress.goalAmount > 0
-      ? displayGoalProgress.percent
-      : displayMonthlyGoal != null && displayMonthlyGoal > 0
-        ? Math.min(100, Math.round((displayCurrentMonthTotal / displayMonthlyGoal) * 100))
-        : null;
-
-  const recentTips = displayTips.slice(0, 6).map((tipRow) => ({
+  const recentTipsSource = displayTips;
+  const recentTips = recentTipsSource.slice(0, 6).map((tipRow) => ({
     id: tipRow.id,
     amount: tipRow.amount,
     customer: t("employee.dashboard.anonymous"),
@@ -420,7 +342,7 @@ export function EmployeeDashboard() {
 
   if (!user) return null;
 
-  if (error) {
+  if (error && !displayPayload && showMetricsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="text-center">
@@ -536,25 +458,41 @@ export function EmployeeDashboard() {
                 <div>
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
                   <dd>
-                    {displayAccountSummary.loaded && !accountSummaryLoading
-                      ? formatEur(displayAccountSummary.totalEarningsEur)
-                      : t("format.noDataYet")}
+                    {isHeroLoading && !useDevDemo ? (
+                      <DashboardHeroStatPlaceholder />
+                    ) : (
+                      <span className="block tabular-nums">
+                        {displayAccountSummary.totalEarningsEur > 0
+                          ? formatEur(displayAccountSummary.totalEarningsEur)
+                          : t("format.metricZeroTips")}
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt>{t("employee.hero.statAvailableBalance")}</dt>
                   <dd>
-                    {displayAccountSummary.loaded && !accountSummaryLoading
-                      ? formatEur(displayAccountSummary.availableBalanceEur)
-                      : t("format.noDataYet")}
+                    {isHeroLoading && !useDevDemo ? (
+                      <DashboardHeroStatPlaceholder />
+                    ) : (
+                      <span className="block tabular-nums">
+                        {displayAccountSummary.availableBalanceEur > 0
+                          ? formatEur(displayAccountSummary.availableBalanceEur)
+                          : formatEur(0)}
+                      </span>
+                    )}
                   </dd>
                 </div>
                 <div>
                   <dt>{t("employee.hero.statTotalSupporters")}</dt>
                   <dd>
-                    {displayAccountSummary.loaded && !accountSummaryLoading
-                      ? String(displayAccountSummary.totalSupporters)
-                      : t("format.noDataYet")}
+                    {isHeroLoading && !useDevDemo ? (
+                      <DashboardHeroStatPlaceholder />
+                    ) : (
+                      <span className="block tabular-nums">
+                        {String(displayAccountSummary.totalSupporters)}
+                      </span>
+                    )}
                   </dd>
                 </div>
               </dl>
@@ -582,7 +520,13 @@ export function EmployeeDashboard() {
                 })}
               </p>
             </div>
-            <LiveConnectionBadge status={connectionStatus} />
+            <div className="flex flex-wrap items-center gap-2">
+              <LiveConnectionBadge status={connectionStatus} />
+              <DashboardRefreshIndicator
+                isRefreshing={false}
+                lastUpdatedAt={analyticsLastUpdatedAt}
+              />
+            </div>
           </div>
           <div
             className={employeeUi.periodToggle}
@@ -605,7 +549,7 @@ export function EmployeeDashboard() {
                   {period === "week" && t("employee.earnings_week")}
                   {period === "month" && t("employee.earnings_month")}
                 </span>
-                {period === analyticsTimeframe && analyticsLoading ? (
+                {period === analyticsTimeframe && (showMetricsLoading || showChartLoading) ? (
                   <Loader2 className="h-3.5 w-3.5 shrink-0 animate-spin opacity-90" aria-hidden />
                 ) : null}
               </button>
@@ -626,57 +570,16 @@ export function EmployeeDashboard() {
 
           <motion.div
             {...dashboardBlockMotion}
-            className={cn("transition-opacity duration-200", !valuesMatchAnalyticsPeriod && "opacity-[0.92]")}
+            className="transition-opacity duration-300"
+            initial={false}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className={cn(employeeUi.statsGrid, "relative")}>
-              {analyticsLoading && !useDevDemo ? (
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-center rounded-xl bg-transparent"
-                >
-                  <div className="mx-auto flex items-center gap-2 rounded-full border border-border/60 bg-white/90 px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm backdrop-blur-sm">
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                    {t("employee.dashboard.overlayUpdating")}
-                  </div>
-                </div>
-              ) : null}
-              <EmployeeStatCard
-                label={t("employee.dashboard.statTotalTips")}
-                value={valuesMatchAnalyticsPeriod ? String(stats.tips) : t("format.noDataYet")}
-                change={
-                  analyticsLoading && !valuesMatchAnalyticsPeriod
-                    ? t("employee.dashboard.statChangeUpdating")
-                    : displayPeriodTipCount > 0 && valuesMatchAnalyticsPeriod
-                      ? t("employee.dashboard.statChangeEarned", {
-                          amount: formatEur(stats.amount),
-                          count: displayPeriodTipCount,
-                        })
-                      : valuesMatchAnalyticsPeriod
-                        ? t("format.metricZeroTips")
-                        : t("employee.dashboard.statChangeEllipsis")
-                }
-                icon={<TrendingUp className="h-5 w-5" aria-hidden />}
-                featured
-              />
-              <EmployeeStatCard
-                label={
-                  stats.rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
-                }
-                value={stats.rating != null ? String(stats.rating) : t("format.notAvailable")}
-                change={stats.rating != null ? undefined : t("format.metricZeroRatings")}
-                icon={<Star className="h-5 w-5" aria-hidden />}
-              />
-              <EmployeeStatCard
-                label={t("employee.dashboard.statMonthlyGoal")}
-                value={displayGoalPct != null ? `${Math.round(Number(displayGoalPct))}%` : t("format.notAvailable")}
-                change={
-                  displayGoalPct != null
-                    ? t("employee.dashboard.statGoalProgress")
-                    : t("employee.dashboard.statGoalSetHint")
-                }
-                icon={<Target className="h-5 w-5" aria-hidden />}
-              />
-            </div>
+            <EmployeeDashboardMetricsGrid
+              loading={showMetricsLoading}
+              isPeriodRefreshing={false}
+              metrics={periodMetrics}
+            />
           </motion.div>
 
           <motion.div
@@ -702,13 +605,11 @@ export function EmployeeDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {(analyticsLoading && !useDevDemo) || !valuesMatchAnalyticsPeriod ? (
-                  <div className="flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]">
-                    <Loader2
-                      className="h-8 w-8 animate-spin text-muted-foreground"
-                      aria-label={t("employee.dashboard.loadingChart")}
-                    />
-                  </div>
+                {showChartLoading ? (
+                  <DashboardSectionSpinner
+                    minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]"
+                    ariaLabel={t("employee.dashboard.loadingChart")}
+                  />
                 ) : chartData.length === 0 ? (
                   <div className={cn(employeeUi.cardPad, employeeUi.chartEmpty)}>
                     <EmployeeEmptyState
@@ -720,7 +621,11 @@ export function EmployeeDashboard() {
                 ) : (
                   <div className={cn(employeeUi.chartFrame, "flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]")}>
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <AreaChart key={analyticsTimeframe} data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 4 }}>
+                    <AreaChart
+                      key={`emp-chart-${analyticsTimeframe}`}
+                      data={chartData}
+                      margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
+                    >
                       <defs>
                         <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />

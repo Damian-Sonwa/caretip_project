@@ -1,6 +1,6 @@
 /**
  * Single client-side session bootstrap per app load (until logout reset).
- * Prevents duplicate refresh calls and handler loss when `useAuth` instances unmount.
+ * Prevents duplicate refresh calls; always keeps the latest result handler (Strict Mode safe).
  */
 
 import { getSessionEpoch } from "./authSessionEpoch";
@@ -23,19 +23,19 @@ export function resetAuthSessionClient(): void {
 
 /**
  * Runs refresh/bootstrap once and applies the result via `applyResult`.
- * Safe to call from every `useAuth()` instance — only the first call runs the network work.
+ * Safe to call from every `useAuth()` / `AuthProvider` mount — only the first call runs the network work;
+ * later calls update the handler so the active tree receives the bootstrap result.
  */
 export function ensureAuthSessionBootstrap(
   run: () => Promise<SessionBootstrapResult>,
   applyResult: BootstrapApplyFn,
 ): void {
-  if (bootstrapStarted) return;
-  bootstrapStarted = true;
-
   const epochAtStart = getSessionEpoch();
   registerBootstrapResultHandler((result) => {
     applyResult(result, epochAtStart);
   });
 
+  if (bootstrapStarted) return;
+  bootstrapStarted = true;
   void runSessionBootstrapOnce(run);
 }

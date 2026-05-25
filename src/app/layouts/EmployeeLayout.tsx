@@ -3,12 +3,11 @@ import { Outlet } from "react-router";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
+import { isProtectedApiReady } from "../lib/authRestore";
 import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 import { EmployeeSidebar } from "../components/employee/EmployeeSidebar";
 import { EmployeeMobileSidebar } from "../components/employee/EmployeeMobileSidebar";
-import { getEmployeeProfile, getTipsByEmployee } from "../lib/api";
-import { syncEmployeeNotificationTips } from "../lib/employeeNotificationStore";
-import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
+import { getEmployeeProfile } from "../lib/api";
 import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
@@ -24,7 +23,8 @@ type EmployeeBusinessBranding = {
 export function EmployeeLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, authStatus } = useAuth();
-  const isAppReady = authStatus === "authenticated" && user?.role === "employee";
+  const isAppReady =
+    authStatus === "authenticated" && user?.role === "employee" && isProtectedApiReady();
   const [branding, setBranding] = useState<EmployeeBusinessBranding | null>(null);
 
   useEffect(() => {
@@ -47,28 +47,6 @@ export function EmployeeLayout() {
       cancelled = true;
     };
   }, [isAppReady]);
-
-  useEffect(() => {
-    if (!user?.employeeId || user.role !== "employee") return;
-    let cancelled = false;
-    void (async () => {
-      try {
-        const data = await getTipsByEmployee();
-        if (!cancelled) {
-          const tips = resolveEmployeeTipsWithDevPreview(data.tips ?? [], {
-            totalEarningsEur: data.totalEarningsEur,
-            totalSupporters: data.totalSupporters,
-          });
-          syncEmployeeNotificationTips(user.employeeId!, tips);
-        }
-      } catch {
-        // Header badge stays hidden until tips load elsewhere
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user?.employeeId, user?.role]);
 
   return (
     <div className="relative min-h-screen bg-background">

@@ -3,14 +3,19 @@ import { toast } from "sonner";
 import type { AuthStatus } from "../lib/authSession";
 import type { User } from "./useAuth";
 import {
+  clearFcmClientRegistrationCache,
+  hasNotificationPermissionGranted,
+  isPushRegistrationRateLimited,
   isWebPushSupported,
   registerFcmDeviceToken,
+  shouldDisplayUserFacingPush,
   subscribeForegroundPushMessages,
   unregisterFcmDeviceToken,
+  wasPushRegistrationRateLimited,
 } from "../lib/fcmPush";
-import { getMyAccountSettings } from "../lib/api";
-import { getEmployeeProfile } from "../lib/api";
+import { getMyAccountSettings, getEmployeeProfile, hasClientAccessToken } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { isApiConnectivityError } from "../lib/errorMessages";
 
 function managerWantsPush(prefs: {
   tipReceivedNotifications: boolean;
@@ -29,77 +34,162 @@ function platformAdminWantsPush(prefs: {
   return prefs.systemAlerts || prefs.notifyNewLogin;
 }
 
+const INITIAL_SYNC_DELAY_MS = 2_500;
+const RETRY_SYNC_DELAY_MS = 15_000;
+const VISIBILITY_REFRESH_MIN_MS = 5 * 60_000;
+
+/** App-wide guard so Strict Mode / layout remounts do not schedule duplicate syncs. */
+const globalPushSync = {
+  userId: null as string | null,
+  running: false,
+};
+
 /**
  * Syncs FCM registration with stored notification preferences (no UI).
+ * Waits until session bootstrap completes; never prompts for permission (settings only).
  */
-export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void {
+export function useFcmPushSync(
+  user: User | null,
+  authStatus: AuthStatus,
+  apiReady: boolean,
+): void {
   const syncedRef = useRef(false);
+  const lastVisibilityRefreshRef = useRef(0);
+  const prefsAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (authStatus !== "authenticated" || !user) {
+    if (authStatus !== "authenticated" || !user || !apiReady) {
       syncedRef.current = false;
+      prefsAbortRef.current?.abort();
+      prefsAbortRef.current = null;
+      if (authStatus === "unauthenticated") {
+        clearFcmClientRegistrationCache();
+        globalPushSync.userId = null;
+        globalPushSync.running = false;
+      }
       return;
     }
+    if (!hasClientAccessToken()) return;
     if (!isWebPushSupported()) return;
 
     const role = user.role;
     if (role !== "employee" && role !== "business" && role !== "platform_admin") return;
 
-    let cancelled = false;
+    const userId = user.id;
+    if (syncedRef.current) return undefined;
+    if (globalPushSync.running && globalPushSync.userId === userId) return undefined;
 
-    const run = async () => {
+    let cancelled = false;
+    const abort = new AbortController();
+    prefsAbortRef.current = abort;
+    globalPushSync.userId = userId;
+    globalPushSync.running = true;
+
+    const markSynced = () => {
+      syncedRef.current = true;
+      globalPushSync.running = false;
+    };
+
+    const run = async (): Promise<boolean> => {
+      if (isPushRegistrationRateLimited()) {
+        return true;
+      }
       try {
         let wantsPush = false;
         if (role === "employee") {
           const profile = await getEmployeeProfile();
+          if (abort.signal.aborted || cancelled) return false;
           wantsPush = profile.pushNotifications !== false;
         } else if (role === "platform_admin") {
           const settings = await getMyAccountSettings();
+          if (abort.signal.aborted || cancelled) return false;
           wantsPush = platformAdminWantsPush(settings);
         } else {
           const settings = await getMyAccountSettings();
+          if (abort.signal.aborted || cancelled) return false;
           wantsPush = managerWantsPush(settings);
         }
-        if (cancelled) return;
 
         if (!wantsPush) {
           await unregisterFcmDeviceToken();
-          syncedRef.current = true;
-          return;
+          return true;
         }
 
-        if (Notification.permission === "denied") {
-          syncedRef.current = true;
-          return;
+        if (!hasNotificationPermissionGranted()) {
+          return true;
         }
 
-        await registerFcmDeviceToken();
-        syncedRef.current = true;
+        const ok = await registerFcmDeviceToken({ requestPermission: false, dedupe: true });
+        if (wasPushRegistrationRateLimited()) return true;
+        return ok;
       } catch (err) {
-        logClientError("useFcmPushSync", err);
+        if (!isApiConnectivityError(err)) {
+          logClientError("useFcmPushSync", err);
+        }
+        return false;
       }
     };
 
-    if (!syncedRef.current) {
-      void run();
-    }
+    const schedule = async () => {
+      await new Promise((r) => window.setTimeout(r, INITIAL_SYNC_DELAY_MS));
+      if (cancelled || abort.signal.aborted || syncedRef.current) {
+        globalPushSync.running = false;
+        return;
+      }
+      const ok = await run();
+      if (cancelled || abort.signal.aborted) {
+        globalPushSync.running = false;
+        return;
+      }
+      if (ok) {
+        markSynced();
+        return;
+      }
+      if (isPushRegistrationRateLimited()) {
+        markSynced();
+        return;
+      }
+      await new Promise((r) => window.setTimeout(r, RETRY_SYNC_DELAY_MS));
+      if (cancelled || abort.signal.aborted || syncedRef.current) {
+        globalPushSync.running = false;
+        return;
+      }
+      if (isPushRegistrationRateLimited()) {
+        markSynced();
+        return;
+      }
+      const retryOk = await run();
+      if (!cancelled && !abort.signal.aborted && (retryOk || wasPushRegistrationRateLimited())) {
+        markSynced();
+      } else {
+        globalPushSync.running = false;
+      }
+    };
+
+    void schedule();
 
     return () => {
       cancelled = true;
+      abort.abort();
+      if (globalPushSync.userId === userId) {
+        globalPushSync.running = false;
+      }
     };
-  }, [authStatus, user?.id, user?.role]);
+  }, [authStatus, apiReady, user?.id, user?.role]);
 
   useEffect(() => {
     if (authStatus !== "authenticated") return undefined;
-    return subscribeForegroundPushMessages((title, body) => {
+    return subscribeForegroundPushMessages((title, body, data) => {
+      if (!shouldDisplayUserFacingPush(data)) return;
       toast(title, { description: body || undefined });
     });
-  }, [authStatus, user?.id]);
+  }, [authStatus]);
 
-  /** Re-register FCM token after refresh or when returning to the tab (production token rotation). */
+  /** Re-register FCM token when returning to the tab (throttled; permission already granted). */
   useEffect(() => {
-    if (authStatus !== "authenticated" || !user) return undefined;
-    if (!isWebPushSupported() || Notification.permission !== "granted") return undefined;
+    if (authStatus !== "authenticated" || !user || !apiReady) return undefined;
+    if (!hasClientAccessToken()) return undefined;
+    if (!isWebPushSupported() || !hasNotificationPermissionGranted()) return undefined;
     if (
       user.role !== "employee" &&
       user.role !== "business" &&
@@ -110,10 +200,16 @@ export function useFcmPushSync(user: User | null, authStatus: AuthStatus): void 
 
     const refreshToken = () => {
       if (document.visibilityState !== "visible") return;
-      void registerFcmDeviceToken().catch((err) => logClientError("useFcmPushSync.refreshToken", err));
+      if (isPushRegistrationRateLimited()) return;
+      const now = Date.now();
+      if (now - lastVisibilityRefreshRef.current < VISIBILITY_REFRESH_MIN_MS) return;
+      lastVisibilityRefreshRef.current = now;
+      void registerFcmDeviceToken({ requestPermission: false, dedupe: true }).then((ok) => {
+        if (ok || wasPushRegistrationRateLimited()) syncedRef.current = true;
+      });
     };
 
     document.addEventListener("visibilitychange", refreshToken);
     return () => document.removeEventListener("visibilitychange", refreshToken);
-  }, [authStatus, user?.id, user?.role]);
+  }, [authStatus, apiReady, user?.id, user?.role]);
 }

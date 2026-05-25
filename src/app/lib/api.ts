@@ -10,12 +10,18 @@ import {
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
   API_WAKEUP_NETWORK_MESSAGE,
   isAbortError,
+  isApiConnectivityError,
 } from "./errorMessages";
 import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { validateImageFileForUpload } from "./imageClientUpload";
 import { authDebug } from "./authDebugLog";
+import {
+  getAuthSessionFlags,
+  isSessionBootstrapInProgress,
+  whenSessionBootstrapSettled,
+} from "./authSessionBootstrap";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
 
@@ -70,6 +76,8 @@ type RefreshSessionResult =
 
 /** Single-flight refresh: shared by `refreshSessionAPI` and 401 recovery (`refreshAccessToken`). */
 let refreshSingleton: Promise<RefreshSessionResult> | null = null;
+let refreshFailureCooldownUntil = 0;
+const REFRESH_FAILURE_COOLDOWN_MS = 15_000;
 
 function parseAuthRefreshPayload(data: unknown): AuthResponse | null {
   if (!data || typeof data !== "object") return null;
@@ -92,6 +100,10 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
   if (isClientSessionRevoked()) {
     clearAuthStorage();
     return { ok: false, shouldClearSession: true, status: 401 };
+  }
+
+  if (Date.now() < refreshFailureCooldownUntil) {
+    return { ok: false, shouldClearSession: false, status: 503 };
   }
 
   for (let attempt = 0; attempt < 2; attempt++) {
@@ -122,6 +134,7 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
       const parsed = parseAuthRefreshPayload(raw);
       if (parsed) {
         setToken(parsed.token);
+        refreshFailureCooldownUntil = 0;
         return { ok: true, data: parsed };
       }
       return { ok: false, shouldClearSession: true, status: res.status };
@@ -140,13 +153,20 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
 
     if (transient) {
       if (attempt < 1) continue;
+      refreshFailureCooldownUntil = Date.now() + REFRESH_FAILURE_COOLDOWN_MS;
       return { ok: false, shouldClearSession: false, status: res.status };
     }
 
     return { ok: false, shouldClearSession: true, status: res.status };
   }
 
+  refreshFailureCooldownUntil = Date.now() + REFRESH_FAILURE_COOLDOWN_MS;
   return { ok: false, shouldClearSession: true, status: 0 };
+}
+
+function mayClearClientAuthStorage(): boolean {
+  const { authHydrated, sessionValidated } = getAuthSessionFlags();
+  return authHydrated && sessionValidated;
 }
 
 async function ensureRefreshedSession(): Promise<RefreshSessionResult> {
@@ -154,7 +174,7 @@ async function ensureRefreshedSession(): Promise<RefreshSessionResult> {
   refreshSingleton = (async (): Promise<RefreshSessionResult> => {
     try {
       const out = await runRefreshAuthWithRetries();
-      if (!out.ok && out.shouldClearSession) {
+      if (!out.ok && out.shouldClearSession && mayClearClientAuthStorage()) {
         clearAuthStorage();
       }
       return out;
@@ -183,6 +203,11 @@ function getToken(): string | null {
   return localStorage.getItem("caretip_token");
 }
 
+export function hasClientAccessToken(): boolean {
+  const t = getToken();
+  return typeof t === "string" && t.trim().length > 0;
+}
+
 function setToken(token: string | null): void {
   if (token && token.trim()) localStorage.setItem("caretip_token", token);
   else localStorage.removeItem("caretip_token");
@@ -191,6 +216,8 @@ function setToken(token: string | null): void {
 /** Clears access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
 export function clearClientAuthStorage(options?: { notifySync?: boolean }): void {
   cancelPendingSessionRefresh();
+  refreshFailureCooldownUntil = 0;
+  clearEmployeeProfileClientCache();
   try {
     localStorage.removeItem("caretip_token");
     localStorage.removeItem("caretip_user");
@@ -300,7 +327,7 @@ function getAuthHeadersOnly(): HeadersInit {
   return headers;
 }
 
-async function handleRes<T>(res: Response): Promise<T> {
+async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise<T> {
   const ct = res.headers.get("content-type") ?? "";
   let data: unknown = {};
   if (ct.includes("application/json")) {
@@ -310,11 +337,14 @@ async function handleRes<T>(res: Response): Promise<T> {
     data = text.trim() ? { message: text.trim().slice(0, 300) } : {};
   }
   if (!res.ok) {
-    logClientError("api.handleRes", new Error(`HTTP ${res.status}`), {
-      status: res.status,
-      url: res.url,
-      body: data,
-    });
+    const refreshPath = typeof res.url === "string" && res.url.includes(AUTH_REFRESH_PATHNAME);
+    if (!opts?.silent && !(refreshPath && res.status >= 500)) {
+      logClientError("api.handleRes", new Error(`HTTP ${res.status}`), {
+        status: res.status,
+        url: res.url,
+        body: data,
+      });
+    }
     const body = data as { message?: string; code?: string; canResend?: boolean };
     const bodyMsg = body.message?.trim();
     const fromStatus = fallbackMessageForHttpStatus(res.status);
@@ -330,7 +360,7 @@ async function handleRes<T>(res: Response): Promise<T> {
     if (body.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
       throw new ApiRequestError(base, res.status, body.code);
     }
-    throw new Error(base);
+    throw new ApiRequestError(base, res.status, body.code, body.canResend === true);
   }
   return data as T;
 }
@@ -363,6 +393,7 @@ type CaretipRequestInit = RequestInit & {
   __caretipRetried?: boolean;
   __caretipDelayedRetried?: boolean;
   __caretipNetworkRetried?: boolean;
+  caretipSilentErrors?: boolean;
 };
 
 /** One delayed retry for cross-origin /api calls when the host is cold-starting (e.g. Render free tier). */
@@ -406,11 +437,23 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
   const initFlags = init as CaretipRequestInit | undefined;
 
+  if (
+    requestUsesCaretipProtectedApi(url) &&
+    !isAuthRefreshRequestUrl(url) &&
+    isSessionBootstrapInProgress()
+  ) {
+    await whenSessionBootstrapSettled();
+  }
+
   try {
     res = await fetchWithNetworkRetry(url, attachLatestBearer(init));
   } catch (err) {
     if (isAbortError(err)) throw err;
-    logClientError("api.apiRequest", err, { url });
+    if (isApiConnectivityError(err)) {
+      authDebug("api_request_network", { path: requestUrlPathname(url) });
+    } else if (!initFlags?.caretipSilentErrors) {
+      logClientError("api.apiRequest", err, { url });
+    }
     const baseMsg = toUserFriendlyMessage(err);
     const devHint = import.meta.env.DEV ? apiConfigHintForFailedFetch(url) : "";
     throw new Error(baseMsg + devHint);
@@ -436,14 +479,14 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
     if (isAuthRefresh && isCaretipApi) {
       refreshDeemedInvalid = true;
-      clearAuthStorage();
-    } else if (canAttemptRefresh && !alreadyRetried) {
+      if (mayClearClientAuthStorage()) clearAuthStorage();
+    } else if (canAttemptRefresh && !alreadyRetried && Date.now() >= refreshFailureCooldownUntil) {
       const { token: nextToken, shouldClearAccessToken } = await refreshAccessToken();
       if (shouldClearAccessToken) refreshDeemedInvalid = true;
       if (nextToken) {
         const retriedInit: CaretipRequestInit = { ...(init ?? {}), __caretipRetried: true };
         res = await fetchWithNetworkRetry(url, attachLatestBearer(retriedInit));
-      } else if (shouldClearAccessToken) {
+      } else if (shouldClearAccessToken && mayClearClientAuthStorage()) {
         clearAuthStorage();
       }
     }
@@ -461,7 +504,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
     // Clear session only when the refresh flow marked tokens invalid, or no token remains.
     // Avoids logging users out on a stray 401 while a token is still present (e.g. permission mismatch).
-    if (res.status === 401 && isCaretipApi) {
+    if (res.status === 401 && isCaretipApi && mayClearClientAuthStorage()) {
       const t = getToken()?.trim();
       if (!t || refreshDeemedInvalid) {
         clearAuthStorage();
@@ -469,12 +512,15 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     }
   }
 
-  return handleRes<T>(res);
+  return handleRes<T>(res, { silent: initFlags?.caretipSilentErrors === true });
 }
 
 /** Fetch a protected file (PDF/image) with Bearer auth and return an object URL. */
 export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
   const url = apiPath(inputUrl);
+  if (requestUsesCaretipProtectedApi(url) && isSessionBootstrapInProgress()) {
+    await whenSessionBootstrapSettled();
+  }
   const baseGet: RequestInit = { method: "GET", credentials: "include" };
   let res = await fetch(url, attachLatestBearer(baseGet));
   let refreshDeemedInvalid = false;
@@ -484,12 +530,12 @@ export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
     if (shouldClearAccessToken) refreshDeemedInvalid = true;
     if (nextToken) {
       res = await fetch(url, attachLatestBearer(baseGet));
-    } else if (shouldClearAccessToken) {
+    } else if (shouldClearAccessToken && mayClearClientAuthStorage()) {
       clearAuthStorage();
     }
   }
 
-  if (res.status === 401 && requestUsesCaretipProtectedApi(url)) {
+  if (res.status === 401 && requestUsesCaretipProtectedApi(url) && mayClearClientAuthStorage()) {
     const t = getToken()?.trim();
     if (!t || refreshDeemedInvalid) {
       clearAuthStorage();
@@ -838,18 +884,102 @@ export interface BusinessDashboardStats {
  * Dashboard stats for the authenticated business owner (business resolved from JWT, not URL).
  * Avoids 404 when `caretip_user.businessId` is stale vs the database.
  */
+/** In-flight dedupe only — no TTL metric cache (dashboards are live-first). */
+const businessStatsInflight = new Map<string, Promise<BusinessDashboardStats>>();
+
+export type BusinessStatsScope = "summary" | "analytics" | "full";
+
+function businessStatsClientCacheKey(timeframe: string, scope: BusinessStatsScope = "full"): string {
+  try {
+    const raw = localStorage.getItem("caretip_user");
+    if (!raw) return `anon:${scope}:${timeframe}`;
+    const parsed = JSON.parse(raw) as { id?: unknown };
+    const userId = typeof parsed?.id === "string" && parsed.id.trim() ? parsed.id.trim() : "anon";
+    return `${userId}:${scope}:${timeframe}`;
+  } catch {
+    return `anon:${scope}:${timeframe}`;
+  }
+}
+
+/** Merge summary + analytics payloads from split dashboard stats requests. */
+export function mergeBusinessDashboardStats(
+  summary: Partial<BusinessDashboardStats> | null | undefined,
+  analytics: Partial<BusinessDashboardStats> | null | undefined,
+): BusinessDashboardStats | null {
+  if (!summary && !analytics) return null;
+  const pulseS = summary?.operationalPulse;
+  const pulseA = analytics?.operationalPulse;
+  return {
+    ...(analytics ?? {}),
+    ...(summary ?? {}),
+    totalTips:
+      summary?.totalTips != null ? summary.totalTips : (analytics?.totalTips ?? summary?.totalTips),
+    tipCount:
+      summary?.tipCount != null ? summary.tipCount : (analytics?.tipCount ?? summary?.tipCount),
+    employeeCount:
+      summary?.employeeCount != null
+        ? summary.employeeCount
+        : (analytics?.employeeCount ?? summary?.employeeCount),
+    operationalPulse:
+      pulseS || pulseA
+        ? {
+            tipsLast60m: pulseS?.tipsLast60m ?? { amount: 0, count: 0 },
+            tipsToday: pulseS?.tipsToday ?? { amount: 0, count: 0 },
+            tippingReadyEmployees: pulseS?.tippingReadyEmployees ?? 0,
+            rosterTotal: pulseS?.rosterTotal ?? 0,
+            employeesMissingQr: pulseS?.employeesMissingQr ?? 0,
+            goalsTracked: pulseA?.goalsTracked ?? pulseS?.goalsTracked ?? 0,
+            goalsOnTrackOrBetter:
+              pulseA?.goalsOnTrackOrBetter ?? pulseS?.goalsOnTrackOrBetter ?? 0,
+          }
+        : undefined,
+  } as BusinessDashboardStats;
+}
+
+export function clearBusinessStatsClientCache(timeframe?: "week" | "month" | "year" | "all"): void {
+  if (timeframe) {
+    for (const key of [...businessStatsInflight.keys()]) {
+      if (key.includes(`:${timeframe}`)) {
+        businessStatsInflight.delete(key);
+      }
+    }
+    return;
+  }
+  businessStatsInflight.clear();
+}
+
 export async function getBusinessStats(
-  timeframe?: "week" | "month" | "year" | "all"
+  timeframe?: "week" | "month" | "year" | "all",
+  opts?: { silent?: boolean; signal?: AbortSignal; scope?: BusinessStatsScope },
 ): Promise<BusinessDashboardStats> {
+  const tf = timeframe ?? "month";
+  const scope = opts?.scope ?? "full";
+  if (opts?.signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+  const cacheKey = businessStatsClientCacheKey(tf, scope);
+  const inflight = businessStatsInflight.get(cacheKey);
+  if (inflight) return inflight;
+
   const sp = new URLSearchParams();
-  if (timeframe) sp.set("timeframe", timeframe);
-  const qs = sp.toString();
-  return apiRequest<BusinessDashboardStats>(
-    apiPath(`/api/business/me/stats${qs ? `?${qs}` : ""}`),
+  sp.set("timeframe", tf);
+  sp.set("scope", scope);
+  const promise = apiRequest<BusinessDashboardStats>(
+    apiPath(`/api/business/me/stats?${sp.toString()}`),
     {
       headers: getHeaders(),
+      credentials: "include",
+      signal: opts?.signal,
+      caretipSilentErrors: opts?.silent === true,
+    } as CaretipRequestInit,
+  ).finally(() => {
+    if (businessStatsInflight.get(cacheKey) === promise) {
+      businessStatsInflight.delete(cacheKey);
     }
-  );
+  });
+
+  businessStatsInflight.set(cacheKey, promise);
+  return promise;
 }
 
 /**
@@ -914,8 +1044,37 @@ export async function getBusinessById(businessId: string): Promise<BusinessInfo 
 }
 
 /** Authenticated manager: returns only the business tied to the JWT (not arbitrary IDs). */
-export async function fetchBusinessProfile(): Promise<BusinessInfo> {
-  return apiRequest(apiPath("/api/business/profile"), { headers: getHeaders() });
+let businessProfileInflight: Promise<BusinessInfo> | null = null;
+let businessProfileCache: { at: number; data: BusinessInfo } | null = null;
+const BUSINESS_PROFILE_CLIENT_TTL_MS = 15_000;
+
+export function clearBusinessProfileClientCache(): void {
+  businessProfileCache = null;
+  businessProfileInflight = null;
+}
+
+export async function fetchBusinessProfile(opts?: { silent?: boolean }): Promise<BusinessInfo> {
+  const now = Date.now();
+  if (businessProfileCache && now - businessProfileCache.at < BUSINESS_PROFILE_CLIENT_TTL_MS) {
+    return businessProfileCache.data;
+  }
+  if (businessProfileInflight) return businessProfileInflight;
+
+  const promise = apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
+    headers: getHeaders(),
+    credentials: "include",
+    caretipSilentErrors: opts?.silent === true,
+  } as CaretipRequestInit)
+    .then((data) => {
+      businessProfileCache = { at: Date.now(), data };
+      return data;
+    })
+    .finally(() => {
+      businessProfileInflight = null;
+    });
+
+  businessProfileInflight = promise;
+  return promise;
 }
 
 export async function regenerateBusinessSlug(): Promise<{ slug: string }> {
@@ -1400,12 +1559,119 @@ export async function deleteEmployeeGoal(): Promise<void> {
   });
 }
 
+/** In-flight dedupe only — no TTL metric cache (dashboards are live-first). */
+const employeeTipsInflight = new Map<string, Promise<EmployeeTipsResponse>>();
+
+export type EmployeeTipsScope = "account" | "summary" | "analytics" | "full";
+
+export type EmployeeAccountSnapshot = {
+  totalEarningsEur: number;
+  availableBalanceEur: number;
+  totalSupporters: number;
+};
+
+function employeeTipsCacheKey(timeframe: string, scope: EmployeeTipsScope = "full"): string {
+  try {
+    const raw = localStorage.getItem("caretip_user");
+    if (!raw) return `anon:${scope}:${timeframe}`;
+    const parsed = JSON.parse(raw) as { id?: unknown };
+    const userId = typeof parsed?.id === "string" && parsed.id.trim() ? parsed.id.trim() : "anon";
+    return `${userId}:${scope}:${timeframe}`;
+  } catch {
+    return `anon:${scope}:${timeframe}`;
+  }
+}
+
+export function mergeEmployeeTipsResponse(
+  summary: Partial<EmployeeTipsResponse> | null | undefined,
+  analytics: Partial<EmployeeTipsResponse> | null | undefined,
+): EmployeeTipsResponse | null {
+  if (!summary && !analytics) return null;
+  return {
+    tips: analytics?.tips ?? summary?.tips ?? [],
+    monthlyGoal: summary?.monthlyGoal ?? analytics?.monthlyGoal ?? null,
+    currentMonthTotal: summary?.currentMonthTotal ?? analytics?.currentMonthTotal ?? 0,
+    goal: summary?.goal ?? analytics?.goal ?? null,
+    businessTimezone: summary?.businessTimezone ?? analytics?.businessTimezone,
+    periodAmountEur:
+      typeof summary?.periodAmountEur === "number"
+        ? summary.periodAmountEur
+        : (analytics?.periodAmountEur ?? 0),
+    periodTipCount:
+      typeof summary?.periodTipCount === "number"
+        ? summary.periodTipCount
+        : (analytics?.periodTipCount ?? 0),
+    chartSeries: analytics?.chartSeries ?? summary?.chartSeries ?? [],
+    totalEarningsEur: summary?.totalEarningsEur ?? analytics?.totalEarningsEur,
+    availableBalanceEur: summary?.availableBalanceEur ?? analytics?.availableBalanceEur,
+    totalSupporters: summary?.totalSupporters ?? analytics?.totalSupporters,
+  };
+}
+
+export function clearEmployeeTipsClientCache(timeframe?: "today" | "week" | "month"): void {
+  if (timeframe) {
+    for (const key of [...employeeTipsInflight.keys()]) {
+      if (key.includes(`:${timeframe}`)) {
+        employeeTipsInflight.delete(key);
+      }
+    }
+    return;
+  }
+  employeeTipsInflight.clear();
+}
+
+export function clearEmployeeAccountClientCache(): void {
+  for (const key of [...employeeTipsInflight.keys()]) {
+    if (key.includes(":account:")) {
+      employeeTipsInflight.delete(key);
+    }
+  }
+}
+
+export async function getEmployeeAccountSnapshot(
+  init?: CaretipRequestInit & { silent?: boolean },
+): Promise<EmployeeAccountSnapshot> {
+  const data = await getTipsByEmployee("today", { ...init, scope: "account" });
+  return {
+    totalEarningsEur: typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : 0,
+    availableBalanceEur:
+      typeof data.availableBalanceEur === "number" ? data.availableBalanceEur : 0,
+    totalSupporters: typeof data.totalSupporters === "number" ? data.totalSupporters : 0,
+  };
+}
+
 export async function getTipsByEmployee(
   timeframe?: "today" | "week" | "month",
-  init?: Pick<RequestInit, "signal">,
+  init?: CaretipRequestInit & { silent?: boolean; scope?: EmployeeTipsScope },
 ): Promise<EmployeeTipsResponse> {
-  const qs = timeframe ? `?timeframe=${encodeURIComponent(timeframe)}` : "";
-  return apiRequest(apiPath(`/api/tips/employee${qs}`), { headers: getHeaders(), ...(init ?? {}) });
+  const tf = timeframe ?? "today";
+  const scope = init?.scope ?? "full";
+  if (init?.signal?.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+  const cacheKey = employeeTipsCacheKey(tf, scope);
+  const inflight = employeeTipsInflight.get(cacheKey);
+  if (inflight) return inflight;
+
+  const sp = new URLSearchParams();
+  sp.set("timeframe", tf);
+  sp.set("scope", scope);
+  const promise = apiRequest<EmployeeTipsResponse>(
+    apiPath(`/api/tips/employee?${sp.toString()}`),
+    {
+      headers: getHeaders(),
+      credentials: "include",
+      signal: init?.signal,
+      caretipSilentErrors: init?.silent === true,
+    } as CaretipRequestInit,
+  ).finally(() => {
+    if (employeeTipsInflight.get(cacheKey) === promise) {
+      employeeTipsInflight.delete(cacheKey);
+    }
+  });
+
+  employeeTipsInflight.set(cacheKey, promise);
+  return promise;
 }
 
 export interface EmployeeSelfProfile {
@@ -1432,8 +1698,41 @@ export interface EmployeeSelfProfile {
   businessTimezone?: string;
 }
 
-export async function getEmployeeProfile(): Promise<EmployeeSelfProfile> {
-  return apiRequest(apiPath("/api/employees/me"), { headers: getHeaders(), credentials: "include" });
+const EMPLOYEE_PROFILE_CACHE_TTL_MS = 30_000;
+let employeeProfileCache: { data: EmployeeSelfProfile; at: number } | null = null;
+let employeeProfileInflight: Promise<EmployeeSelfProfile> | null = null;
+
+export function clearEmployeeProfileClientCache(): void {
+  employeeProfileCache = null;
+  employeeProfileInflight = null;
+}
+
+export async function getEmployeeProfile(
+  init?: CaretipRequestInit & { silent?: boolean },
+): Promise<EmployeeSelfProfile> {
+  const now = Date.now();
+  if (employeeProfileCache && now - employeeProfileCache.at < EMPLOYEE_PROFILE_CACHE_TTL_MS) {
+    return employeeProfileCache.data;
+  }
+  if (employeeProfileInflight && !init?.signal) return employeeProfileInflight;
+
+  const promise = apiRequest<EmployeeSelfProfile>(apiPath("/api/employees/me"), {
+    headers: getHeaders(),
+    credentials: "include",
+    signal: init?.signal,
+    caretipSilentErrors: init?.silent === true || init?.caretipSilentErrors === true,
+  }).then((data) => {
+    employeeProfileCache = { data, at: Date.now() };
+    return data;
+  });
+
+  if (!init?.signal) {
+    employeeProfileInflight = promise.finally(() => {
+      employeeProfileInflight = null;
+    });
+    return employeeProfileInflight;
+  }
+  return promise;
 }
 
 /** Ensures a unique staff slug exists (for QR / public page). Safe to call when slug already set. */
@@ -1512,18 +1811,24 @@ export async function fetchPushFirebaseConfig(): Promise<FirebaseWebConfig | nul
     if (!res.ok) return null;
     return (await res.json()) as FirebaseWebConfig;
   } catch (err) {
-    logClientError("api.fetchPushFirebaseConfig", err);
+    if (!isApiConnectivityError(err)) {
+      logClientError("api.fetchPushFirebaseConfig", err);
+    }
     return null;
   }
 }
 
-export async function registerPushDeviceTokenApi(token: string): Promise<void> {
+export async function registerPushDeviceTokenApi(
+  token: string,
+  opts?: { silent?: boolean },
+): Promise<void> {
   await apiRequest<void>(apiPath("/api/push/tokens"), {
     method: "POST",
     headers: getHeaders(),
     credentials: "include",
     body: JSON.stringify({ token }),
-  });
+    caretipSilentErrors: opts?.silent === true,
+  } as CaretipRequestInit);
 }
 
 export async function deletePushDeviceTokenApi(token: string): Promise<void> {
@@ -1592,11 +1897,23 @@ export async function fetchMyNotifications(params?: {
   if (params?.cursor) q.set("cursor", params.cursor);
   if (params?.unreadOnly) q.set("unreadOnly", "true");
   const suffix = q.toString() ? `?${q.toString()}` : "";
-  return apiRequest(apiPath(`/api/me/notifications${suffix}`), {
+  const raw = await apiRequest<
+    NotificationsListResponse & { notifications?: InboxNotification[] }
+  >(apiPath(`/api/me/notifications${suffix}`), {
     method: "GET",
     headers: getHeaders(),
     credentials: "include",
   });
+  const items = Array.isArray(raw.items)
+    ? raw.items
+    : Array.isArray(raw.notifications)
+      ? raw.notifications
+      : [];
+  return {
+    items,
+    nextCursor: raw.nextCursor ?? null,
+    unreadCount: typeof raw.unreadCount === "number" ? raw.unreadCount : 0,
+  };
 }
 
 export async function fetchMyUnreadNotificationCount(): Promise<{ unreadCount: number }> {
@@ -1604,7 +1921,8 @@ export async function fetchMyUnreadNotificationCount(): Promise<{ unreadCount: n
     method: "GET",
     headers: getHeaders(),
     credentials: "include",
-  });
+    caretipSilentErrors: true,
+  } as CaretipRequestInit);
 }
 
 export async function markNotificationReadApi(

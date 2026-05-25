@@ -28,7 +28,7 @@ export function EmployeeMobileSidebar({
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
 
   const venueName = String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
@@ -114,15 +114,6 @@ export function EmployeeMobileSidebar({
                 <LogOut className="h-5 w-5" />
                 <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
               </button>
-            </div>
-
-            <div className="border-t border-sidebar-border p-4">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-foreground">
-                  {user?.name || t("dashboard.teamMemberFallback")}
-                </p>
-                <p className="truncate text-xs text-muted-foreground">{user?.email || ""}</p>
-              </div>
             </div>
           </motion.aside>
         </>

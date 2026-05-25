@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { Prisma } from "@prisma/client";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import {
@@ -6,6 +7,20 @@ import {
   clientSafeMessage,
   CLIENT_FALLBACK,
 } from "../utils/httpErrors.js";
+import { STATS_FETCH_ERROR_CODE, StatsFetchError } from "../utils/statsErrors.js";
+
+function statsErrorHttpStatus(err: unknown): number {
+  if (err instanceof StatsFetchError) {
+    const reason = err.meta?.reason;
+    if (reason === "missing_business_id" || reason === "business_row_missing") return 404;
+  }
+  if (err instanceof Error && err.message === "Business not found") return 404;
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2021" || err.code === "P2022") return 503;
+    if (["P1001", "P1002", "P1008", "P1017"].includes(err.code)) return 503;
+  }
+  return 500;
+}
 import { uploadManagerBusinessLogoImage } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 
@@ -31,14 +46,32 @@ export async function getMyProfile(req: Request, res: Response) {
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    const profile = await businessService.getManagerBusinessProfile(userId);
+    const business = await businessService.getBusinessByUserId(userId);
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        code: "BUSINESS_NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    const profile = await businessService.getBusinessById(business.id);
     if (!profile) {
-      return res.status(404).json({ message: "Business not found" });
+      return res.status(404).json({
+        success: false,
+        code: "BUSINESS_NOT_FOUND",
+        message: "Business not found",
+      });
     }
     return res.json(profile);
   } catch (err) {
-    logServerError("business.getMyProfile", err);
-    return res.status(404).json({
+    logServerError("business.getMyProfile", err, { userId: req.user?.userId ?? req.user?.id });
+    const status =
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      ["P1001", "P1002", "P1008", "P1017", "P2021", "P2022"].includes(err.code)
+        ? 503
+        : 500;
+    return res.status(status).json({
+      success: false,
       message: clientSafeMessage(err, "We couldn't load your business profile."),
     });
   }
@@ -179,26 +212,56 @@ export async function getById(req: Request, res: Response) {
 }
 
 export async function getMyStats(req: Request, res: Response) {
+  const userId = req.user?.userId ?? req.user?.id;
+  const tf = req.query.timeframe;
+  const timeframe =
+    tf === "week" || tf === "month" || tf === "year" || tf === "all"
+      ? tf
+      : "month";
+  const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
+  const scope =
+    scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
+
   try {
-    const userId = req.user?.userId ?? req.user?.id;
     if (!userId) {
-      return res.status(401).json({ message: "Authentication required" });
+      return res.status(401).json({
+        success: false,
+        code: "AUTH_REQUIRED",
+        message: "Authentication required",
+      });
     }
-    const business = await businessService.getBusinessIdForManagerUser(userId);
+    const business = await businessService.getBusinessByUserId(userId);
     if (!business) {
-      return res.status(404).json({ message: "Business not found" });
+      return res.status(404).json({
+        success: false,
+        code: "BUSINESS_NOT_FOUND",
+        message: "Business not found",
+      });
     }
-    const tf = req.query.timeframe;
-    const timeframe =
-      tf === "week" || tf === "month" || tf === "year" || tf === "all"
-        ? tf
-        : "month";
-    const stats = await businessService.getBusinessStats(business.id, timeframe);
+    const stats = await businessService.getBusinessStats(business.id, timeframe, scope);
     return res.json(stats);
   } catch (err) {
-    logServerError("business.getMyStats", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    const businessRow = userId
+      ? await businessService.getBusinessIdForManagerUser(userId).catch(() => null)
+      : null;
+    logServerError("business.getMyStats", err, {
+      userId,
+      timeframe,
+      businessId: businessRow?.id ?? null,
+    });
+    if (err instanceof StatsFetchError) {
+      const status = statsErrorHttpStatus(err);
+      return res.status(status).json({
+        success: false,
+        code: err.code,
+        message: clientSafeMessage(err, CLIENT_FALLBACK.businessStats),
+      });
+    }
+    const status = statsErrorHttpStatus(err);
+    return res.status(status).json({
+      success: false,
+      code: STATS_FETCH_ERROR_CODE,
+      message: clientSafeMessage(err, CLIENT_FALLBACK.businessStats),
     });
   }
 }
@@ -214,7 +277,10 @@ export async function getStats(req: Request, res: Response) {
       tf === "week" || tf === "month" || tf === "year" || tf === "all"
         ? tf
         : "month";
-    const stats = await businessService.getBusinessStats(businessId, timeframe);
+    const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
+    const scope =
+      scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
+    const stats = await businessService.getBusinessStats(businessId, timeframe, scope);
     return res.json(stats);
   } catch (err) {
     logServerError("business.getStats", err);

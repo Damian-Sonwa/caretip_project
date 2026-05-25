@@ -6,10 +6,22 @@ import * as goalService from "../services/goal.service.js";
 import * as businessService from "../services/business.service.js";
 import {
   loadEmployeeAccountSummary,
+  loadEmployeeCurrentMonthTotal,
+  loadEmployeePeriodAnalytics,
+  loadEmployeePeriodSummary,
   loadEmployeeTipsDashboardForTimeframe,
 } from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
+
+function tipsErrorHttpStatus(err: unknown): number {
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    if (err.code === "P2024" || err.code === "P2021" || err.code === "P2022") return 503;
+    if (["P1001", "P1002", "P1008", "P1017"].includes(err.code)) return 503;
+  }
+  return 400;
+}
 
 async function findEmployeeForTipsByUserId(
   userId: string,
@@ -57,55 +69,121 @@ export async function getByEmployee(req: Request, res: Response) {
       timeframeRaw === "today" || timeframeRaw === "week" || timeframeRaw === "month"
         ? (timeframeRaw as "today" | "week" | "month")
         : null;
+    const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
+    const scope =
+      scopeRaw === "account" || scopeRaw === "summary" || scopeRaw === "analytics"
+        ? scopeRaw
+        : "full";
 
-    const [dash, accountSummary] = await Promise.all([
-      loadEmployeeTipsDashboardForTimeframe({
-        employeeId: employee.id,
+    if (scope === "account") {
+      const accountSummary = await loadEmployeeAccountSummary(employee.id);
+      return res.json({
+        tips: [],
+        monthlyGoal: employee.monthlyGoal,
+        currentMonthTotal: 0,
         businessTimezone: employee.businessTimezone,
-        timeframe,
-      }),
-      loadEmployeeAccountSummary(employee.id),
-    ]);
-
-    const monthRange = businessUtcRangeForTimeframe("month", employee.businessTimezone);
-    let currentMonthTotal = 0;
-    if (monthRange) {
-      const currentMonthTotalAgg = await prisma.transaction.aggregate({
-        where: {
-          employeeId: employee.id,
-          status: "success",
-          createdAt: {
-            gte: monthRange.startUtc,
-            lte: monthRange.endUtc,
-          },
-        },
-        _sum: { amount: true },
+        periodAmountEur: 0,
+        periodTipCount: 0,
+        chartSeries: [],
+        goal: null,
+        totalEarningsEur: accountSummary.totalEarningsEur,
+        availableBalanceEur: accountSummary.availableBalanceEur,
+        totalSupporters: accountSummary.totalSupporters,
       });
-      currentMonthTotal = Number(currentMonthTotalAgg._sum.amount ?? 0);
     }
-    const monthlyGoal = employee.monthlyGoal;
-    let goal = null as Awaited<ReturnType<typeof goalService.getMyGoalWithProgress>>;
-    try {
-      goal = await goalService.getMyGoalWithProgress(userId);
-    } catch {
-      /* optional before migration */
+
+    if (timeframe == null) {
+      const accountSummary = await loadEmployeeAccountSummary(employee.id);
+      const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
+        employee.id,
+        employee.businessTimezone,
+      );
+      const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
+      return res.json({
+        tips: [],
+        monthlyGoal: employee.monthlyGoal,
+        currentMonthTotal,
+        businessTimezone: employee.businessTimezone,
+        periodAmountEur: 0,
+        periodTipCount: 0,
+        chartSeries: [],
+        goal,
+        totalEarningsEur: accountSummary.totalEarningsEur,
+        availableBalanceEur: accountSummary.availableBalanceEur,
+        totalSupporters: accountSummary.totalSupporters,
+      });
     }
+
+    if (scope === "summary") {
+      const summary = await runSerializedByKey("prisma", () =>
+        loadEmployeePeriodSummary({
+          employeeId: employee.id,
+          businessTimezone: employee.businessTimezone,
+          timeframe,
+        }),
+      );
+      const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
+        employee.id,
+        employee.businessTimezone,
+      );
+      const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
+      return res.json({
+        tips: [],
+        monthlyGoal: employee.monthlyGoal,
+        currentMonthTotal,
+        businessTimezone: employee.businessTimezone,
+        periodAmountEur: summary.periodAmountEur,
+        periodTipCount: summary.periodTipCount,
+        chartSeries: [],
+        goal,
+      });
+    }
+
+    if (scope === "analytics") {
+      const analytics = await runSerializedByKey("prisma", () =>
+        loadEmployeePeriodAnalytics({
+          employeeId: employee.id,
+          businessTimezone: employee.businessTimezone,
+          timeframe,
+        }),
+      );
+      return res.json({
+        tips: analytics.tips,
+        businessTimezone: employee.businessTimezone,
+        periodAmountEur: 0,
+        periodTipCount: 0,
+        chartSeries: analytics.chartSeries,
+      });
+    }
+
+    const accountSummary = await loadEmployeeAccountSummary(employee.id);
+    const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
+      employee.id,
+      employee.businessTimezone,
+    );
+    const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
+    const dash = await loadEmployeeTipsDashboardForTimeframe({
+      employeeId: employee.id,
+      businessTimezone: employee.businessTimezone,
+      timeframe,
+    });
+
     return res.json({
-      tips: dash.tips,
-      monthlyGoal,
+      monthlyGoal: employee.monthlyGoal,
       currentMonthTotal,
       businessTimezone: employee.businessTimezone,
-      periodAmountEur: dash.periodAmountEur,
-      periodTipCount: dash.periodTipCount,
-      chartSeries: dash.chartSeries,
       goal,
       totalEarningsEur: accountSummary.totalEarningsEur,
       availableBalanceEur: accountSummary.availableBalanceEur,
       totalSupporters: accountSummary.totalSupporters,
+      tips: dash.tips,
+      periodAmountEur: dash.periodAmountEur,
+      periodTipCount: dash.periodTipCount,
+      chartSeries: dash.chartSeries,
     });
   } catch (err) {
     logServerError("tips.getByEmployee", err);
-    return res.status(400).json({
+    return res.status(tipsErrorHttpStatus(err)).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.tips),
     });
   }

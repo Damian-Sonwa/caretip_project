@@ -53,6 +53,111 @@ function staggeredTipDate(daysAgo: number): Date {
   return d;
 }
 
+/** Tips within the last hour so operational pulse shows live activity on demo dashboards. */
+function recentTipDate(minutesAgo: number): Date {
+  const d = new Date();
+  d.setMinutes(d.getMinutes() - minutesAgo);
+  return d;
+}
+
+async function ensureActiveEmployeeGoal(
+  prisma: PrismaClient,
+  employeeId: string,
+  goal: { goalAmount: number; goalPeriod: "monthly"; startDate: Date },
+): Promise<void> {
+  const existing = await prisma.employeeGoal.findFirst({
+    where: { employeeId, status: "active" },
+    orderBy: { createdAt: "desc" },
+    select: { id: true },
+  });
+  if (existing) {
+    await prisma.employeeGoal.update({
+      where: { id: existing.id },
+      data: {
+        goalAmount: goal.goalAmount,
+        goalPeriod: goal.goalPeriod,
+        startDate: goal.startDate,
+      },
+    });
+    return;
+  }
+  await prisma.employeeGoal.create({
+    data: {
+      employeeId,
+      goalAmount: goal.goalAmount,
+      goalPeriod: goal.goalPeriod,
+      startDate: goal.startDate,
+      status: "active",
+    },
+  });
+}
+
+async function seedDemoInboxNotifications(
+  prisma: PrismaClient,
+  users: { managerId: string; employeeUserId: string | null },
+): Promise<void> {
+  const rows: Array<{
+    userId: string;
+    type: string;
+    title: string;
+    message: string;
+    dedupeKey: string;
+    metadata: Record<string, unknown>;
+    channels: string[];
+  }> = [
+    {
+      userId: users.managerId,
+      type: "demo_welcome",
+      title: "Welcome to CareTip",
+      message: "Your walkthrough venue is live. Open the dashboard to review tips, staff, and goals.",
+      dedupeKey: "walkthrough:manager:welcome",
+      metadata: { url: "/dashboard" },
+      channels: ["in_app"],
+    },
+    {
+      userId: users.managerId,
+      type: "demo_tips",
+      title: "Tips are flowing in",
+      message: "Seeded demo tips are available across week, month, and year views.",
+      dedupeKey: "walkthrough:manager:tips",
+      metadata: { url: "/dashboard" },
+      channels: ["in_app"],
+    },
+  ];
+  if (users.employeeUserId) {
+    rows.push({
+      userId: users.employeeUserId,
+      type: "demo_welcome",
+      title: "Your tip dashboard is ready",
+      message: "Track earnings, goals, and recent tips from your employee dashboard.",
+      dedupeKey: "walkthrough:employee:welcome",
+      metadata: { url: "/employee/dashboard" },
+      channels: ["in_app"],
+    });
+  }
+  for (const row of rows) {
+    await prisma.notification.upsert({
+      where: { userId_dedupeKey: { userId: row.userId, dedupeKey: row.dedupeKey } },
+      update: {
+        title: row.title,
+        message: row.message,
+        metadata: row.metadata,
+        channels: row.channels,
+        readAt: null,
+      },
+      create: {
+        userId: row.userId,
+        type: row.type,
+        title: row.title,
+        message: row.message,
+        metadata: row.metadata,
+        channels: row.channels,
+        dedupeKey: row.dedupeKey,
+      },
+    });
+  }
+}
+
 export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   const passwordHash = await bcrypt.hash(WALKTHROUGH_DEMO_MANAGER_PASSWORD, 10);
 
@@ -112,6 +217,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     update: {
       name: BUSINESS_NAME,
       slug,
+      inviteCode: "DEMO42",
       verificationStatus: "verified",
       businessType: "Restaurant",
       location: "Berlin-Mitte, Germany",
@@ -122,6 +228,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     create: {
       name: BUSINESS_NAME,
       slug,
+      inviteCode: "DEMO42",
       userId: manager.id,
       verificationStatus: "verified",
       businessType: "Restaurant",
@@ -298,6 +405,18 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         employeeName: STAFF[1].name,
       },
     });
+    const e2 = employeeRows[2];
+    if (e2) {
+      await prisma.employeeTableAssignment.upsert({
+        where: { employeeId_tableId: { employeeId: e2.id, tableId: tableMain.id } },
+        update: { employeeName: STAFF[2].name },
+        create: {
+          employeeId: e2.id,
+          tableId: tableMain.id,
+          employeeName: STAFF[2].name,
+        },
+      });
+    }
   }
 
   await prisma.employeeTableAssignment.upsert({
@@ -327,7 +446,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         businessId: business.id,
         locationId: locMain.id,
         tableId: i % 2 === 0 ? tableMain.id : tableGarden.id,
-        createdAt: staggeredTipDate(i % 18),
+        createdAt: staggeredTipDate(i % 45),
       },
       create: {
         id,
@@ -338,7 +457,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         businessId: business.id,
         locationId: locMain.id,
         tableId: i % 2 === 0 ? tableMain.id : tableGarden.id,
-        createdAt: staggeredTipDate(i % 18),
+        createdAt: staggeredTipDate(i % 45),
       },
     });
   }
@@ -356,7 +475,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         businessId: business.id,
         locationId: locGarden.id,
         tableId: tableGarden.id,
-        createdAt: staggeredTipDate((j + 3) % 18),
+        createdAt: staggeredTipDate((j + 3) % 45),
       },
       create: {
         id,
@@ -367,7 +486,39 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         businessId: business.id,
         locationId: locGarden.id,
         tableId: tableGarden.id,
-        createdAt: staggeredTipDate((j + 3) % 18),
+        createdAt: staggeredTipDate((j + 3) % 45),
+      },
+    });
+  }
+
+  const recentPulseTips = [
+    { id: "wdemotip033", amount: 12, employeeId: demoPrimaryEmployee.id, minutesAgo: 42 },
+    { id: "wdemotip034", amount: 18.5, employeeId: employeeRows[0]?.id ?? demoPrimaryEmployee.id, minutesAgo: 18 },
+    { id: "wdemotip035", amount: 9, employeeId: employeeRows[1]?.id ?? demoPrimaryEmployee.id, minutesAgo: 5 },
+  ] as const;
+  for (const tip of recentPulseTips) {
+    await prisma.transaction.upsert({
+      where: { id: tip.id },
+      update: {
+        amount: tip.amount,
+        status: "success",
+        payoutStatus: "pending",
+        employeeId: tip.employeeId,
+        businessId: business.id,
+        locationId: locMain.id,
+        tableId: tableMain.id,
+        createdAt: recentTipDate(tip.minutesAgo),
+      },
+      create: {
+        id: tip.id,
+        amount: tip.amount,
+        status: "success",
+        payoutStatus: "pending",
+        employeeId: tip.employeeId,
+        businessId: business.id,
+        locationId: locMain.id,
+        tableId: tableMain.id,
+        createdAt: recentTipDate(tip.minutesAgo),
       },
     });
   }
@@ -375,37 +526,31 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   const now = new Date();
   const goalMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));
 
-  const firstEmp = employeeRows[0];
-  if (firstEmp) {
-    await prisma.employeeGoal.upsert({
-      where: { employeeId: firstEmp.id },
-      update: {
-        goalAmount: 500,
-        goalPeriod: "monthly",
-        startDate: goalMonthStart,
-      },
-      create: {
-        employeeId: firstEmp.id,
-        goalAmount: 500,
-        goalPeriod: "monthly",
-        startDate: goalMonthStart,
-      },
+  const goalByStaffIndex = [STAFF[0].monthlyGoal, STAFF[1].monthlyGoal, STAFF[2].monthlyGoal] as const;
+  for (let i = 0; i < employeeRows.length; i++) {
+    const row = employeeRows[i];
+    const amount = goalByStaffIndex[i];
+    if (!row || amount == null) continue;
+    await ensureActiveEmployeeGoal(prisma, row.id, {
+      goalAmount: amount,
+      goalPeriod: "monthly",
+      startDate: goalMonthStart,
     });
   }
 
-  await prisma.employeeGoal.upsert({
-    where: { employeeId: demoPrimaryEmployee.id },
-    update: {
-      goalAmount: 350,
-      goalPeriod: "monthly",
-      startDate: goalMonthStart,
-    },
-    create: {
-      employeeId: demoPrimaryEmployee.id,
-      goalAmount: 350,
-      goalPeriod: "monthly",
-      startDate: goalMonthStart,
-    },
+  await ensureActiveEmployeeGoal(prisma, demoPrimaryEmployee.id, {
+    goalAmount: 650,
+    goalPeriod: "monthly",
+    startDate: goalMonthStart,
+  });
+
+  const employeeUser = await prisma.user.findFirst({
+    where: { email: WALKTHROUGH_DEMO_EMPLOYEE_EMAIL },
+    select: { id: true },
+  });
+  await seedDemoInboxNotifications(prisma, {
+    managerId: manager.id,
+    employeeUserId: employeeUser?.id ?? null,
   });
 
   await prisma.auditLog.deleteMany({
@@ -443,7 +588,8 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   console.log(`  Staff:    ${STAFF.map((x) => x.name).join(", ")}, Mina Schmidt (primary demo employee login)`);
   console.log("  Tables:   Main + Garden (QR slugs seeded)");
   console.log(
-    `  Tips:     ${tipAmounts.length + demoEmpExtraAmounts.length} successful transactions (includes employee@ row)`,
+    `  Tips:     ${tipAmounts.length + demoEmpExtraAmounts.length + recentPulseTips.length} successful transactions (includes employee@ row + live pulse)`,
   );
+  console.log("  Goals:    Active monthly goals for all staff (aligned with monthlyGoal targets)");
   console.log("  (Other staff demo emails reuse the same password for optional sign-in tests.)");
 }

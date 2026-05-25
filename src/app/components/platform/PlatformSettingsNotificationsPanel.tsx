@@ -48,7 +48,7 @@ export function PlatformSettingsNotificationsPanel() {
       setNotifyNewLogin(updated.notifyNewLogin);
       const wantsPush = updated.systemAlerts || updated.notifyNewLogin;
       if (wantsPush) {
-        await registerFcmDeviceToken();
+        await registerFcmDeviceToken({ requestPermission: true, dedupe: false });
       } else {
         await unregisterFcmDeviceToken();
       }

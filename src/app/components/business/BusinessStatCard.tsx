@@ -1,6 +1,20 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import {
+  DashboardMetricStatCard,
+  type DashboardMetricStatCardTokens,
+} from "../dashboard/DashboardMetricStatCard";
 import { businessUi } from "./businessDashboardUi";
+
+const businessMetricTokens: DashboardMetricStatCardTokens = {
+  statCard: businessUi.statCard,
+  statLabel: businessUi.statLabel,
+  statValue: businessUi.statValue,
+  statChange: businessUi.statChange,
+  featuredClass: "business-stat-card--featured",
+  labelRowClass: "business-stat-card__label-row",
+  valueClass: "business-stat-card__value",
+  changeClass: "business-stat-card__change",
+};
 
 type BusinessStatCardProps = {
   label: string;
@@ -9,24 +23,9 @@ type BusinessStatCardProps = {
   icon?: ReactNode;
   featured?: boolean;
   className?: string;
+  loading?: boolean;
 };
 
-export function BusinessStatCard({ label, value, change, icon, featured, className }: BusinessStatCardProps) {
-  return (
-    <div
-      className={cn(
-        businessUi.statCard,
-        "h-full",
-        featured && "business-stat-card--featured",
-        className,
-      )}
-    >
-      <div className="business-stat-card__label-row flex items-start justify-between gap-2">
-        <p className={businessUi.statLabel}>{label}</p>
-        {icon ? <div className="shrink-0 text-primary/80">{icon}</div> : null}
-      </div>
-      <p className={cn(businessUi.statValue, "business-stat-card__value")}>{value}</p>
-      {change ? <p className={cn(businessUi.statChange, "business-stat-card__change")}>{change}</p> : null}
-    </div>
-  );
+export function BusinessStatCard(props: BusinessStatCardProps) {
+  return <DashboardMetricStatCard tokens={businessMetricTokens} {...props} />;
 }

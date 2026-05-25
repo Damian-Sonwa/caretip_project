@@ -1,4 +1,6 @@
-import type { EmployeeActivationStatus } from "@prisma/client";
+import { TipStatus, type EmployeeActivationStatus } from "@prisma/client";
+import { DateTime } from "luxon";
+import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
 import { randomBytes } from "node:crypto";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
@@ -11,6 +13,9 @@ import {
   businessUtcRangeForTimeframe,
   sanitizeIanaTimezone,
 } from "../utils/businessTime.js";
+import { getCachedOrLoad, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+
+const BUSINESS_STATS_CACHE_TTL_MS = 30_000;
 
 /** Avoid collision with SPA routes at `/{slug}` and legacy `/business/{slug}` paths. */
 const RESERVED_BUSINESS_SLUGS = new Set([
@@ -208,29 +213,27 @@ function buildDailyTipDistribution(
     byDay.set(key, (byDay.get(key) ?? 0) + Number(t.amount));
   }
 
-  const wdShort = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+  const tz = sanitizeIanaTimezone(businessTimezone);
 
   if (tf === "week") {
     const out: { day: string; amount: number }[] = [];
-    const start = new Date(rangeStartUtc);
+    let cur = DateTime.fromJSDate(rangeStartUtc, { zone: "utc" }).setZone(tz).startOf("day");
     for (let i = 0; i < 7; i++) {
-      const cur = new Date(start);
-      cur.setUTCDate(start.getUTCDate() + i);
-      const key = businessDayKey(cur, businessTimezone);
-      out.push({ day: wdShort[i], amount: byDay.get(key) ?? 0 });
+      const key = cur.toFormat("yyyy-LL-dd");
+      out.push({ day: cur.toFormat("ccc"), amount: byDay.get(key) ?? 0 });
+      cur = cur.plus({ days: 1 });
     }
     return out;
   }
 
   if (tf === "month") {
     const out: { day: string; amount: number }[] = [];
-    const y = rangeStartUtc.getUTCFullYear();
-    const mo = rangeStartUtc.getUTCMonth();
-    const daysInMonth = new Date(Date.UTC(y, mo + 1, 0)).getUTCDate();
-    for (let dom = 1; dom <= daysInMonth; dom++) {
-      const cur = new Date(Date.UTC(y, mo, dom));
-      const key = businessDayKey(cur, businessTimezone);
-      out.push({ day: String(dom), amount: byDay.get(key) ?? 0 });
+    const monthStart = DateTime.fromJSDate(rangeStartUtc, { zone: "utc" }).setZone(tz).startOf("month");
+    const daysInMonth = monthStart.daysInMonth ?? 31;
+    for (let dom = 0; dom < daysInMonth; dom++) {
+      const cur = monthStart.plus({ days: dom });
+      const key = cur.toFormat("yyyy-LL-dd");
+      out.push({ day: String(dom + 1), amount: byDay.get(key) ?? 0 });
     }
     return out;
   }
@@ -238,15 +241,127 @@ function buildDailyTipDistribution(
   const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const monthTotals = new Array(12).fill(0);
   for (const t of tipRows) {
-    monthTotals[t.createdAt.getUTCMonth()] += Number(t.amount);
+    const key = businessDayKey(t.createdAt, businessTimezone);
+    const monthIdx = Number(key.slice(5, 7)) - 1;
+    if (monthIdx >= 0 && monthIdx < 12) {
+      monthTotals[monthIdx] += Number(t.amount);
+    }
   }
   return monthNames.map((day, i) => ({ day, amount: monthTotals[i] }));
 }
 
-export async function getBusinessStats(
+const MONTH_CHART_LABELS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+/** Monthly buckets for year/all charts — Prisma-only (avoids PG enum casting issues in raw SQL). */
+async function monthlyTipTotalsForRange(
   businessId: string,
-  timeframe: BusinessDashboardTimeframe = "month"
-) {
+  startUtc: Date,
+  endUtc: Date,
+  businessTimezone: string,
+): Promise<number[]> {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  const monthTotals = new Array(12).fill(0);
+  const tips = await prisma.transaction.findMany({
+    where: {
+      businessId,
+      status: TipStatus.success,
+      createdAt: { gte: startUtc, lte: endUtc },
+    },
+    select: { amount: true, createdAt: true },
+  });
+  for (const t of tips) {
+    const key = businessDayKey(t.createdAt, tz);
+    const monthIdx = Number(key.slice(5, 7)) - 1;
+    if (monthIdx >= 0 && monthIdx < 12) {
+      monthTotals[monthIdx] += Number(t.amount);
+    }
+  }
+  return monthTotals;
+}
+
+function buildYearChartFromMonthTotals(monthTotals: number[]): { day: string; amount: number }[] {
+  return MONTH_CHART_LABELS.map((day, i) => ({ day, amount: monthTotals[i] ?? 0 }));
+}
+
+export type BusinessStatsScope = "summary" | "analytics" | "full";
+
+export function invalidateBusinessStatsCache(businessId: string): void {
+  invalidateCacheKeyPrefix(`business-stats:${businessId}:`);
+  invalidateCacheKeyPrefix(`business-stats-summary:${businessId}:`);
+  invalidateCacheKeyPrefix(`business-stats-analytics:${businessId}:`);
+}
+
+export function getBusinessStats(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+  scope: BusinessStatsScope = "full",
+): Promise<Awaited<ReturnType<typeof getBusinessStatsImpl>>> {
+  if (scope === "summary") {
+    const cacheKey = `business-stats-summary:${businessId}:${timeframe}`;
+    return getCachedOrLoad(cacheKey, BUSINESS_STATS_CACHE_TTL_MS, () =>
+      getBusinessStatsSummaryImpl(businessId, timeframe),
+    ) as Promise<Awaited<ReturnType<typeof getBusinessStatsImpl>>>;
+  }
+  if (scope === "analytics") {
+    const cacheKey = `business-stats-analytics:${businessId}:${timeframe}`;
+    return getCachedOrLoad(cacheKey, BUSINESS_STATS_CACHE_TTL_MS, () =>
+      getBusinessStatsAnalyticsImpl(businessId, timeframe),
+    ) as Promise<Awaited<ReturnType<typeof getBusinessStatsImpl>>>;
+  }
+  const cacheKey = `business-stats:${businessId}:${timeframe}`;
+  return getCachedOrLoad(cacheKey, BUSINESS_STATS_CACHE_TTL_MS, () =>
+    getBusinessStatsImpl(businessId, timeframe),
+  );
+}
+
+type BusinessStatsContext = {
+  business: {
+    id: string;
+    name: string;
+    slug: string | null;
+    verificationStatus: string;
+    timezone: string | null;
+  };
+  tz: string;
+  timeframe: BusinessDashboardTimeframe;
+  tipWhere: {
+    businessId: string;
+    status: typeof TipStatus.success;
+    createdAt?: { gte: Date; lte: Date };
+  };
+  rangeStart: Date;
+  rangeEnd: Date;
+  todayRange: { startUtc: Date; endUtc: Date };
+  sixtyAgo: Date;
+  ctx: { businessId: string; timeframe: BusinessDashboardTimeframe };
+};
+
+const statsContextInflight = new Map<string, Promise<BusinessStatsContext>>();
+
+/** Dedupe business row + range resolution when summary and analytics load in parallel. */
+function loadBusinessStatsContext(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe,
+): Promise<BusinessStatsContext> {
+  const key = `${businessId}:${timeframe}`;
+  const hit = statsContextInflight.get(key);
+  if (hit) return hit;
+  const promise = resolveBusinessStatsContext(businessId, timeframe).finally(() => {
+    if (statsContextInflight.get(key) === promise) statsContextInflight.delete(key);
+  });
+  statsContextInflight.set(key, promise);
+  return promise;
+}
+
+async function resolveBusinessStatsContext(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe,
+): Promise<BusinessStatsContext> {
+  const ctx = { businessId, timeframe };
+  if (!businessId?.trim()) {
+    throw new StatsFetchError("Business not found", { ...ctx, reason: "missing_business_id" });
+  }
+
   const business = await prisma.business.findUnique({
     where: { id: businessId },
     select: {
@@ -259,62 +374,136 @@ export async function getBusinessStats(
   });
 
   if (!business) {
-    throw new Error("Business not found");
+    throw new StatsFetchError("Business not found", { ...ctx, reason: "business_row_missing" });
   }
 
   const tz = sanitizeIanaTimezone(business.timezone);
   const range = businessUtcRangeForTimeframe(timeframe === "all" ? "all" : timeframe, tz);
   const rangeStart = range?.startUtc ?? new Date(0);
-  const rangeEnd = range?.endUtc ?? new Date(8640000000000000);
-
-  const todayRange = businessUtcRangeForTimeframe("today", tz);
-  if (!todayRange) {
-    throw new Error("[getBusinessStats] today timezone range could not be computed");
-  }
+  /** Prisma rejects JS max-date; for `all`, bound chart queries to now. */
+  const rangeEnd = range?.endUtc ?? new Date();
+  const now = new Date();
+  const todayRange = businessUtcRangeForTimeframe("today", tz) ?? {
+    startUtc: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())),
+    endUtc: now,
+  };
   const sixtyAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-  const [tipRows, tipsLast60mAgg, tipsTodayAgg] = await Promise.all([
-    prisma.transaction.findMany({
-      where: {
-        businessId,
-        status: "success",
-        ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
-      },
-      select: { amount: true, employeeId: true, createdAt: true },
+  const tipWhere = {
+    businessId,
+    status: TipStatus.success,
+    ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
+  };
+
+  return {
+    business,
+    tz,
+    timeframe,
+    tipWhere,
+    rangeStart,
+    rangeEnd,
+    todayRange,
+    sixtyAgo,
+    ctx,
+  };
+}
+
+async function getBusinessStatsSummaryImpl(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+) {
+  const { business, tipWhere, todayRange, sixtyAgo, ctx } =
+    await loadBusinessStatsContext(businessId, timeframe);
+  logStatsPhase("summary_start", ctx);
+
+  const [
+    tipAgg,
+    tipsLast60mAgg,
+    tipsTodayAgg,
+    rosterTotal,
+    tippingReadyEmployees,
+    employeesMissingQr,
+  ] = await Promise.all([
+    prisma.transaction.aggregate({
+      where: tipWhere,
+      _sum: { amount: true },
+      _count: { _all: true },
     }),
     prisma.transaction.aggregate({
-      where: { businessId, status: "success", createdAt: { gte: sixtyAgo } },
+      where: { businessId, status: TipStatus.success, createdAt: { gte: sixtyAgo } },
       _sum: { amount: true },
       _count: { _all: true },
     }),
     prisma.transaction.aggregate({
       where: {
         businessId,
-        status: "success",
+        status: TipStatus.success,
         createdAt: { gte: todayRange.startUtc, lte: todayRange.endUtc },
       },
       _sum: { amount: true },
       _count: { _all: true },
     }),
+    prisma.employee.count({ where: { businessId } }),
+    prisma.employee.count({
+      where: {
+        businessId,
+        isActive: true,
+        activationStatus: "active" as EmployeeActivationStatus,
+        user: { emailVerified: true },
+      },
+    }),
+    prisma.employee.count({
+      where: {
+        businessId,
+        OR: [{ slug: null }, { slug: "" }],
+      },
+    }),
   ]);
 
-  const totalTips = tipRows.reduce((sum, t) => sum + Number(t.amount), 0);
-  const tipCount = tipRows.length;
+  const totalTips = Number(tipAgg._sum.amount ?? 0);
+  const tipCount = tipAgg._count._all;
 
-  const dailyTipDistribution = buildDailyTipDistribution(
-    tipRows,
+  logStatsPhase("summary_ok", { ...ctx, totalTips, tipCount, employeeCount: rosterTotal });
+
+  return {
+    id: business.id,
+    name: business.name,
+    slug: business.slug,
+    verificationStatus: business.verificationStatus,
     timeframe,
-    rangeStart,
-    tz,
-  );
+    totalTips,
+    tipCount,
+    employeeCount: rosterTotal,
+    operationalPulse: {
+      tipsLast60m: {
+        amount: Number(tipsLast60mAgg._sum.amount ?? 0),
+        count: tipsLast60mAgg._count._all,
+      },
+      tipsToday: {
+        amount: Number(tipsTodayAgg._sum.amount ?? 0),
+        count: tipsTodayAgg._count._all,
+      },
+      tippingReadyEmployees,
+      rosterTotal,
+      employeesMissingQr,
+      goalsTracked: 0,
+      goalsOnTrackOrBetter: 0,
+    },
+  };
+}
 
-  const tipsByEmp = new Map<string, { total: number; count: number }>();
-  for (const t of tipRows) {
-    const cur = tipsByEmp.get(t.employeeId) ?? { total: 0, count: 0 };
-    cur.total += Number(t.amount);
-    cur.count += 1;
-    tipsByEmp.set(t.employeeId, cur);
-  }
+async function getBusinessStatsAnalyticsImpl(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+) {
+  const { business, tz, tipWhere, rangeStart, rangeEnd, ctx } =
+    await loadBusinessStatsContext(businessId, timeframe);
+  logStatsPhase("analytics_start", ctx);
+
+  const needsRowLevelChart = timeframe === "week" || timeframe === "month";
+  const needsSqlMonthChart = timeframe === "year";
+  /** All-time staff/roster views need employees + aggregates, not a 12-bucket calendar chart. */
+  const skipMonthChart = timeframe === "all";
 
   const legacyEmployeeSelect = {
     id: true,
@@ -342,74 +531,125 @@ export async function getBusinessStats(
     tableAssignments: { select: { table: { select: { id: true } } } },
   } as const;
 
-  let employees: Array<{
-    id: string;
-    slug: string | null;
-    name: string;
-    jobTitle: string;
-    avatar: string | null;
-    phone: string | null;
-    isActive: boolean;
-    activationStatus: EmployeeActivationStatus;
-    monthlyGoal: unknown;
+  const minimalEmployeeSelect = {
+    id: true,
+    slug: true,
+    name: true,
+    jobTitle: true,
+    avatar: true,
+    phone: true,
+    isActive: true,
+    activationStatus: true,
+    monthlyGoal: true,
     user: {
-      email: string;
-      emailVerified: boolean;
-      passwordHash: string | null;
-      oauthProvider: string | null;
-    };
-    locationId?: string | null;
-    tableAssignments?: { table: { id: string } }[];
-  }>;
+      select: {
+        email: true,
+        emailVerified: true,
+        passwordHash: true,
+        oauthProvider: true,
+      },
+    },
+  } as const;
 
-  /**
-   * Owner dashboard / staff-management: every employee row for this business (not deleted),
-   * including deactivated (`is_active` false), so the roster matches the database until removal.
-   */
-  const dashboardStaffWhere = { businessId };
-
-  try {
-    employees = await prisma.employee.findMany({
-      where: dashboardStaffWhere,
-      orderBy: [{ isActive: "desc" }, { name: "asc" }],
-      select: extendedEmployeeSelect,
-    });
-  } catch (extendedErr) {
+  const employeesPromise = (async () => {
     try {
-      employees = await prisma.employee.findMany({
-        where: dashboardStaffWhere,
+      return await prisma.employee.findMany({
+        where: { businessId },
         orderBy: [{ isActive: "desc" }, { name: "asc" }],
-        select: legacyEmployeeSelect,
+        select: extendedEmployeeSelect,
       });
-      console.warn(
-        "[getBusinessStats] Extended employee select failed (DB may need migration); using legacy columns. Run: npm run db:migrate:deploy in backend.",
-        extendedErr instanceof Error ? extendedErr.message : extendedErr
-      );
-    } catch {
-      throw extendedErr;
+    } catch (extendedErr) {
+      try {
+        const rows = await prisma.employee.findMany({
+          where: { businessId },
+          orderBy: [{ isActive: "desc" }, { name: "asc" }],
+          select: legacyEmployeeSelect,
+        });
+        console.warn(
+          "[getBusinessStats] Extended employee select failed (DB may need migration); using legacy columns.",
+          extendedErr instanceof Error ? extendedErr.message : extendedErr,
+        );
+        return rows;
+      } catch (legacyErr) {
+        console.warn(
+          "[getBusinessStats] Legacy employee select failed; using minimal columns.",
+          legacyErr instanceof Error ? legacyErr.message : legacyErr,
+        );
+        return prisma.employee.findMany({
+          where: { businessId },
+          orderBy: [{ isActive: "desc" }, { name: "asc" }],
+          select: minimalEmployeeSelect,
+        });
+      }
     }
+  })();
+
+  const [tipsByEmployeeAgg, chartTipRows, monthChartTotals, employees] = await Promise.all([
+    prisma.transaction.groupBy({
+      by: ["employeeId"],
+      where: tipWhere,
+      _sum: { amount: true },
+      _count: { _all: true },
+      orderBy: { employeeId: "asc" },
+    }),
+    needsRowLevelChart
+      ? prisma.transaction.findMany({
+          where: tipWhere,
+          select: { amount: true, createdAt: true },
+        })
+      : Promise.resolve([] as { amount: unknown; createdAt: Date }[]),
+    needsSqlMonthChart
+      ? monthlyTipTotalsForRange(businessId, rangeStart, rangeEnd, tz)
+      : skipMonthChart
+        ? Promise.resolve(new Array(12).fill(0))
+        : Promise.resolve(null as number[] | null),
+    employeesPromise,
+  ]);
+
+  let dailyTipDistribution: { day: string; amount: number }[];
+  if ((needsSqlMonthChart || skipMonthChart) && monthChartTotals) {
+    dailyTipDistribution = buildYearChartFromMonthTotals(monthChartTotals);
+  } else {
+    dailyTipDistribution = buildDailyTipDistribution(chartTipRows, timeframe, rangeStart, tz);
+  }
+
+  const tipsByEmp = new Map<string, { total: number; count: number }>();
+  for (const row of tipsByEmployeeAgg) {
+    tipsByEmp.set(row.employeeId, {
+      total: Number(row._sum.amount ?? 0),
+      count: row._count._all,
+    });
   }
 
   const employeeStats = employees.map((emp) => {
     const agg = tipsByEmp.get(emp.id) ?? { total: 0, count: 0 };
+    const account = emp.user ?? {
+      email: "",
+      emailVerified: false,
+      passwordHash: null as string | null,
+      oauthProvider: null as string | null,
+    };
     const passwordIsSet =
-      (emp.user.passwordHash != null && emp.user.passwordHash.length > 0) ||
-      (emp.user.oauthProvider != null && emp.user.oauthProvider.trim().length > 0);
+      (account.passwordHash != null && account.passwordHash.length > 0) ||
+      (account.oauthProvider != null && account.oauthProvider.trim().length > 0);
     return {
       id: emp.id,
-      slug: emp.slug,
-      name: emp.name,
-      jobTitle: emp.jobTitle,
+      slug: emp.slug ?? null,
+      name: emp.name ?? "Staff",
+      jobTitle: emp.jobTitle ?? "",
       avatar: absolutizePublicMediaPath(emp.avatar),
-      phone: emp.phone,
-      isActive: emp.isActive,
-      activationStatus: emp.activationStatus,
-      email: emp.user.email,
-      emailVerified: emp.user.emailVerified,
+      phone: emp.phone ?? null,
+      isActive: emp.isActive ?? false,
+      activationStatus: emp.activationStatus ?? "active",
+      email: account.email,
+      emailVerified: account.emailVerified === true,
       passwordIsSet,
       monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
-      locationId: emp.locationId ?? null,
-      assignedTableIds: emp.tableAssignments?.map((ta) => ta.table.id) ?? [],
+      locationId: "locationId" in emp ? (emp.locationId ?? null) : null,
+      assignedTableIds:
+        "tableAssignments" in emp && Array.isArray(emp.tableAssignments)
+          ? emp.tableAssignments.map((ta: { table: { id: string } }) => ta.table.id)
+          : [],
       tipsTotal: agg.total,
       tipCount: agg.count,
       rating: agg.count > 0 ? 4.8 : null,
@@ -418,50 +658,78 @@ export async function getBusinessStats(
 
   let employeeGoals: Awaited<ReturnType<typeof listEmployeeGoalsForBusiness>> = [];
   try {
-    employeeGoals = await listEmployeeGoalsForBusiness(businessId);
-  } catch {
-    /* optional: table missing before migration */
+    employeeGoals = await listEmployeeGoalsForBusiness(businessId, { maxGoals: 25 });
+  } catch (goalsErr) {
+    console.warn(
+      "[getBusinessStats] employee goals omitted",
+      goalsErr instanceof Error ? goalsErr.message : goalsErr,
+    );
   }
 
-  const tippingReadyEmployees = employeeStats.filter(
-    (e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true,
-  ).length;
-  const employeesMissingQr = employeeStats.filter((e) => String(e.slug ?? "").trim().length === 0).length;
   const goalsTracked = employeeGoals.length;
   const goalsOnTrackOrBetter = employeeGoals.filter(
     (g) => g.status === "on_track" || g.status === "achieved",
   ).length;
 
-  const operationalPulse = {
-    tipsLast60m: {
-      amount: Number(tipsLast60mAgg._sum.amount ?? 0),
-      count: tipsLast60mAgg._count._all,
-    },
-    tipsToday: {
-      amount: Number(tipsTodayAgg._sum.amount ?? 0),
-      count: tipsTodayAgg._count._all,
-    },
-    tippingReadyEmployees,
-    rosterTotal: employeeStats.length,
-    employeesMissingQr,
-    goalsTracked,
-    goalsOnTrackOrBetter,
-  };
+  logStatsPhase("analytics_ok", {
+    ...ctx,
+    employeeCount: employees.length,
+    chartPoints: dailyTipDistribution.length,
+  });
 
   return {
     id: business.id,
-    name: business.name,
-    slug: business.slug,
-    verificationStatus: business.verificationStatus,
     timeframe,
-    totalTips,
-    tipCount,
-    employeeCount: employees.length,
     dailyTipDistribution,
     employees: employeeStats,
     employeeGoals,
-    operationalPulse,
+    operationalPulse: {
+      goalsTracked,
+      goalsOnTrackOrBetter,
+    },
   };
+}
+
+async function getBusinessStatsImpl(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+) {
+  const ctx = { businessId, timeframe };
+  logStatsPhase("start", ctx);
+  try {
+    const [summary, analytics] = await Promise.all([
+      getBusinessStatsSummaryImpl(businessId, timeframe),
+      getBusinessStatsAnalyticsImpl(businessId, timeframe),
+    ]);
+    const pulseGoals = analytics.operationalPulse;
+    const payload = {
+      ...summary,
+      timeframe,
+      dailyTipDistribution: analytics.dailyTipDistribution,
+      employees: analytics.employees,
+      employeeGoals: analytics.employeeGoals,
+      operationalPulse: {
+        ...summary.operationalPulse,
+        goalsTracked: pulseGoals.goalsTracked,
+        goalsOnTrackOrBetter: pulseGoals.goalsOnTrackOrBetter,
+      },
+    };
+    logStatsPhase("ok", {
+      ...ctx,
+      totalTips: payload.totalTips,
+      tipCount: payload.tipCount,
+      employeeCount: payload.employeeCount,
+      chartPoints: payload.dailyTipDistribution?.length ?? 0,
+    });
+    return payload;
+  } catch (err) {
+    logStatsPhase("failed", ctx, err);
+    if (err instanceof StatsFetchError) throw err;
+    if (err instanceof Error && err.message === "Business not found") {
+      throw new StatsFetchError(err.message, ctx, { cause: err });
+    }
+    throw new StatsFetchError("Unable to load stats", ctx, { cause: err });
+  }
 }
 
 /** All tips for a business (export); caller must ensure businessId is authorized. */

@@ -1,12 +1,14 @@
 import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 import { getLoginPathFromAppPath } from "../lib/authSession";
+import { isAuthRestorePending } from "../lib/authRestore";
+import { hasClientStoredSession } from "../lib/authUserStore";
+import { isClientSessionRevoked } from "../lib/api";
 import { useAuth } from "./useAuth";
 
 /**
  * Ensures protected pages only redirect after auth hydration.
- * While `isAuthLoading` is true, do not navigate away or show duplicate full-page auth spinners
- * (route guards already render {@link AppLoader}).
+ * While session restore is in flight, do not navigate away (route guards render {@link AppLoader}).
  */
 export function useRequireAuth() {
   const {
@@ -14,6 +16,7 @@ export function useRequireAuth() {
     authHydrated,
     sessionValidated,
     authStatus,
+    authReady,
     isAuthLoading,
     isBusiness,
     isEmployee,
@@ -25,17 +28,20 @@ export function useRequireAuth() {
   const location = useLocation();
 
   useEffect(() => {
-    if (authStatus === "initializing") return;
+    if (authStatus === "initializing" || isAuthRestorePending()) return;
+    if (!sessionValidated) return;
+    if (!user && !isClientSessionRevoked() && hasClientStoredSession()) return;
     if (authStatus === "unauthenticated") {
       navigate(getLoginPathFromAppPath(location.pathname), { replace: true });
     }
-  }, [authStatus, navigate, location.pathname]);
+  }, [authStatus, sessionValidated, navigate, location.pathname, user]);
 
   return {
     user,
     authHydrated,
     sessionValidated,
     authStatus,
+    authReady,
     isAuthLoading,
     isBusiness,
     isEmployee,

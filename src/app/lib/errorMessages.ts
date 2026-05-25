@@ -31,6 +31,21 @@ export const SERVICE_UNAVAILABLE_CLIENT_MESSAGE = "Service temporarily unavailab
 export const API_WAKEUP_NETWORK_MESSAGE =
   "Unable to connect to the server. The API may still be waking up. Wait a few seconds and try again.";
 
+/** True when the browser could not reach the CareTip API (offline, backend stopped, cold start). */
+export function isApiConnectivityError(error: unknown): boolean {
+  if (error == null) return false;
+  if (isAbortError(error)) return false;
+  if (error instanceof TypeError) return true;
+  const message = error instanceof Error ? error.message : String(error);
+  if (!message.trim()) return false;
+  const lower = message.toLowerCase();
+  return (
+    /failed to fetch|networkerror|load failed|network request failed|unable to connect to the server/i.test(
+      lower,
+    ) || /vite\.config\.ts|port 3001|npm run dev/i.test(lower)
+  );
+}
+
 /** Fetch cancelled via AbortSignal (React effect cleanup, navigation, strict mode). */
 export function isAbortError(error: unknown): boolean {
   if (error == null) return false;
@@ -62,6 +77,12 @@ const ERROR_MAP: Record<string, string> = {
     "This account isn’t a platform admin. Use Platform Admin sign-in only for super-admin accounts, or run admin:create.",
   "Use the Platform Admin sign-in for this account.":
     "Use the Platform Admin login page (/platform-admin/login) for this account. It’s a platform admin.",
+  "We couldn't load dashboard stats. Please try again in a moment.":
+    "We couldn't load dashboard stats. Please try again in a moment.",
+  "Unable to load stats": "We couldn't load dashboard stats. Please try again in a moment.",
+  "STATS_FETCH_ERROR": "We couldn't load dashboard stats. Please try again in a moment.",
+  "We couldn't save your venue or team data. Please try again.":
+    "We couldn't load dashboard data. Please try again in a moment.",
   "Registration failed": "We couldn't create your account. Please try again.",
   "Login failed": "We couldn't sign you in. Please check your email and password.",
   "We couldn't create your account. Please try again.":
@@ -272,6 +293,10 @@ export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMe
 
   if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
     return error.message;
+  }
+
+  if (isApiRequestError(error) && error.code && ERROR_MAP[error.code]) {
+    return localizeFriendlyMessageCopy(ERROR_MAP[error.code]);
   }
 
   const resolved = ((): string => {

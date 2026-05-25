@@ -13,7 +13,8 @@ import {
   isClientSessionRevoked,
   type AuthResponse,
 } from "../lib/api";
-import { ensureAuthSessionBootstrap, resetAuthSessionClient } from "../lib/authBootstrap";
+import { resetAuthSessionClient } from "../lib/authBootstrap";
+import { hasPendingStoredSessionWithoutUser } from "../lib/authRestore";
 import {
   getAuthSessionFlags,
   markOnboardingStatusFromServer,
@@ -88,33 +89,6 @@ function loadUserFromStorage(): User | null {
     logClientError("useAuth.localStorage", err);
     return null;
   }
-}
-
-function applyBootstrapResult(
-  result: import("../lib/authSessionBootstrap").SessionBootstrapResult,
-  epochAtStart: number,
-): void {
-  if (getSessionEpoch() !== epochAtStart) {
-    markSessionBootstrapSettled();
-    return;
-  }
-
-  if (result.kind === "authenticated") {
-    commitAuthUser(persistAuthResponse(result.data));
-    markOnboardingStatusFromServer();
-    markSessionBootstrapSettled();
-    return;
-  }
-
-  if (result.kind === "unauthenticated") {
-    commitAuthUser(null);
-    markSessionBootstrapSettled();
-    return;
-  }
-
-  const stored = loadUserFromStorage();
-  commitAuthUser(stored);
-  markSessionBootstrapSettled();
 }
 
 function notifyAuthStorageSync() {
@@ -261,8 +235,10 @@ function isTransientRefreshErrorMessage(msg: string): boolean {
     msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE ||
     msg === API_WAKEUP_NETWORK_MESSAGE ||
     msg === fallbackMessageForHttpStatus(500) ||
+    msg === fallbackMessageForHttpStatus(502) ||
     msg === fallbackMessageForHttpStatus(503) ||
-    msg === fallbackMessageForHttpStatus(504)
+    msg === fallbackMessageForHttpStatus(504) ||
+    msg === fallbackMessageForHttpStatus(429)
   );
 }
 
@@ -292,47 +268,9 @@ export function useAuth() {
     return () => window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onStorageSync);
   }, []);
 
-  useEffect(() => {
-    ensureAuthSessionBootstrap(
-      async () => {
-        if (isClientSessionRevoked()) {
-          clearStoredSession();
-          return { kind: "unauthenticated" };
-        }
-
-        try {
-          const data = await refreshSessionAPI();
-          return { kind: "authenticated", data };
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : "";
-          const hadLocalSession =
-            Boolean(readStoredAccessToken()) || Boolean(loadUserFromStorage());
-
-          if (isTransientRefreshErrorMessage(msg) && hadLocalSession) {
-            if (msg === SERVICE_UNAVAILABLE_CLIENT_MESSAGE) {
-              toast.error(SERVICE_UNAVAILABLE_CLIENT_MESSAGE, { id: "caretip-auth-refresh-503" });
-            } else if (msg === fallbackMessageForHttpStatus(500)) {
-              toast.error(msg, { id: "caretip-auth-refresh-500" });
-            }
-            logClientError("useAuth.sessionBootstrap.transient", err);
-            return { kind: "transient_error" };
-          }
-
-          if (!isTransientRefreshErrorMessage(msg)) {
-            logClientError("useAuth.sessionBootstrap", err);
-          }
-
-          clearStoredSession();
-          return { kind: "unauthenticated" };
-        }
-      },
-      applyBootstrapResult,
-    );
-  }, []);
-
   /** Proactively refresh shortly before access token expiry so API calls rarely see 401. */
   useEffect(() => {
-    if (!user || !accessTokenSnapshot) return;
+    if (!user || !accessTokenSnapshot || !sessionValidated) return;
     const payload = decodeJwtPayload(accessTokenSnapshot);
     if (!payload || typeof payload !== "object") return;
     const exp = (payload as { exp?: unknown }).exp;
@@ -357,7 +295,7 @@ export function useAuth() {
       cancelled = true;
       window.clearTimeout(id);
     };
-  }, [user?.id, accessTokenSnapshot]);
+  }, [user?.id, accessTokenSnapshot, sessionValidated]);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated) return;
@@ -538,7 +476,12 @@ export function useAuth() {
   const authReady = authHydrated && sessionValidated;
 
   const authStatus: AuthStatus = useMemo(
-    () => resolveAuthStatus(user, { authHydrated, sessionValidated }),
+    () =>
+      resolveAuthStatus(user, {
+        authHydrated,
+        sessionValidated,
+        pendingStoredSession: hasPendingStoredSessionWithoutUser(user),
+      }),
     [user, authHydrated, sessionValidated],
   );
 
@@ -554,6 +497,8 @@ export function useAuth() {
 
   return {
     user,
+    /** True when bootstrap finished — safe to run protected API hooks (notifications, stats). */
+    authReady,
     /** @deprecated Prefer `authState.isLoading` or `!authReady`. */
     isLoadingUser: authStatus === "initializing",
     /** True while session restoration is in flight; route guards must wait and must not redirect. */

@@ -1,4 +1,4 @@
-import { EmployeeGoalStatus, GoalPeriod } from "@prisma/client";
+import { EmployeeGoalStatus, GoalPeriod, TipStatus } from "@prisma/client";
 import { prisma } from "../prisma.js";
 
 export type GoalProgressStatus = "achieved" | "on_track" | "below_target";
@@ -120,7 +120,7 @@ async function sumTips(employeeId: string, start: Date, end: Date): Promise<numb
   const agg = await prisma.transaction.aggregate({
     where: {
       employeeId,
-      status: "success",
+      status: TipStatus.success,
       createdAt: { gte: start, lte: end },
     },
     _sum: { amount: true },
@@ -233,7 +233,10 @@ export async function deleteMyGoal(userId: string): Promise<void> {
   await prisma.employeeGoal.deleteMany({ where: { employeeId: emp.id, status: EmployeeGoalStatus.active } });
 }
 
-export async function listEmployeeGoalsForBusiness(businessId: string): Promise<
+export async function listEmployeeGoalsForBusiness(
+  businessId: string,
+  opts?: { maxGoals?: number },
+): Promise<
   Array<{
     employeeId: string;
     name: string;
@@ -248,6 +251,8 @@ export async function listEmployeeGoalsForBusiness(businessId: string): Promise<
   const rows = await prisma.employeeGoal.findMany({
     where: { employee: { businessId } },
     include: { employee: { select: { id: true, name: true } } },
+    orderBy: [{ updatedAt: "desc" }],
+    ...(opts?.maxGoals != null ? { take: Math.max(1, opts.maxGoals) } : {}),
   });
 
   const out: Array<{
@@ -261,23 +266,38 @@ export async function listEmployeeGoalsForBusiness(businessId: string): Promise<
     status: GoalProgressStatus;
   }> = [];
 
-  for (const r of rows) {
-    const p = await getGoalProgressForEmployee(r.employeeId, {
-      id: r.id,
-      goalAmount: r.goalAmount,
-      goalPeriod: r.goalPeriod,
-      startDate: r.startDate,
-    });
-    out.push({
-      employeeId: r.employeeId,
-      name: r.employee.name,
-      goalAmount: p.goalAmount,
-      goalPeriod: p.goalPeriod,
-      startDate: p.startDate,
-      currentAmount: p.currentAmount,
-      percent: p.percent,
-      status: p.status,
-    });
+  const progressRows = await Promise.all(
+    rows.map(async (r) => {
+      try {
+        const p = await getGoalProgressForEmployee(r.employeeId, {
+          id: r.id,
+          goalAmount: r.goalAmount,
+          goalPeriod: r.goalPeriod,
+          startDate: r.startDate,
+        });
+        return {
+          employeeId: r.employeeId,
+          name: r.employee.name,
+          goalAmount: p.goalAmount,
+          goalPeriod: p.goalPeriod,
+          startDate: p.startDate,
+          currentAmount: p.currentAmount,
+          percent: p.percent,
+          status: p.status,
+        };
+      } catch (err) {
+        console.warn(
+          "[listEmployeeGoalsForBusiness] skipped goal row",
+          r.id,
+          err instanceof Error ? err.message : err,
+        );
+        return null;
+      }
+    }),
+  );
+
+  for (const row of progressRows) {
+    if (row) out.push(row);
   }
 
   return out.sort((a, b) => a.name.localeCompare(b.name));

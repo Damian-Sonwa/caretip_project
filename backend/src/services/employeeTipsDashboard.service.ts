@@ -1,6 +1,8 @@
-import type { Prisma } from "@prisma/client";
+import { TipStatus, type Prisma } from "@prisma/client";
 import { DateTime } from "luxon";
 import { prisma } from "../prisma.js";
+import { getCachedOrLoad } from "../utils/shortLivedCache.js";
+import { runSerializedByKey } from "../utils/serializedByKey.js";
 import type { TipForEmployee } from "./tips.service.js";
 import { businessDayKey, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 
@@ -88,53 +90,64 @@ function buildChart(
   }));
 }
 
-export async function loadEmployeeTipsDashboardForTimeframe(opts: {
-  employeeId: string;
-  businessTimezone: string;
-  timeframe: EmployeeDashboardTimeframe | null;
-}): Promise<{
-  tips: TipForEmployee[];
-  /** Sum of successful tips in selected period — single source with list + chart */
-  periodAmountEur: number;
-  /** Count of tips in selected period */
-  periodTipCount: number;
-  chartSeries: Array<{ label: string; amount: number }>;
-}> {
-  const tz = sanitizeIanaTimezone(opts.businessTimezone);
-  const tf = opts.timeframe ?? null;
-
+function periodWhere(
+  employeeId: string,
+  tf: EmployeeDashboardTimeframe | null,
+  tz: string,
+): Prisma.TransactionWhereInput {
   const whereBase: Prisma.TransactionWhereInput = {
-    employeeId: opts.employeeId,
-    status: "success",
+    employeeId,
+    status: TipStatus.success,
   };
-
   if (tf != null) {
     const r = businessUtcRangeForTimeframe(tf, tz);
     if (r) {
-      whereBase.createdAt = {
-        gte: r.startUtc,
-        lte: r.endUtc,
-      };
+      whereBase.createdAt = { gte: r.startUtc, lte: r.endUtc };
     }
   }
+  return whereBase;
+}
 
-  const [rowsList, aggregates] = await Promise.all([
-    prisma.transaction.findMany({
-      where: whereBase,
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        amount: true,
-        status: true,
-        createdAt: true,
-      },
-    }),
-    prisma.transaction.aggregate({
-      where: whereBase,
-      _sum: { amount: true },
-      _count: { _all: true },
-    }),
-  ]);
+/** Fast period totals for metric cards — no tip rows or chart buckets. */
+export async function loadEmployeePeriodSummary(opts: {
+  employeeId: string;
+  businessTimezone: string;
+  timeframe: EmployeeDashboardTimeframe;
+}): Promise<{ periodAmountEur: number; periodTipCount: number }> {
+  const tz = sanitizeIanaTimezone(opts.businessTimezone);
+  const whereBase = periodWhere(opts.employeeId, opts.timeframe, tz);
+  const aggregates = await prisma.transaction.aggregate({
+    where: whereBase,
+    _sum: { amount: true },
+    _count: { _all: true },
+  });
+  return {
+    periodAmountEur: Number(aggregates._sum.amount ?? 0),
+    periodTipCount: aggregates._count._all,
+  };
+}
+
+/** Charts + recent tips for period analytics sections. */
+export async function loadEmployeePeriodAnalytics(opts: {
+  employeeId: string;
+  businessTimezone: string;
+  timeframe: EmployeeDashboardTimeframe;
+}): Promise<{
+  tips: TipForEmployee[];
+  chartSeries: Array<{ label: string; amount: number }>;
+}> {
+  const tz = sanitizeIanaTimezone(opts.businessTimezone);
+  const whereBase = periodWhere(opts.employeeId, opts.timeframe, tz);
+  const rowsList = await prisma.transaction.findMany({
+    where: whereBase,
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      amount: true,
+      status: true,
+      createdAt: true,
+    },
+  });
 
   const tips: TipForEmployee[] = rowsList.map((t) => ({
     id: t.id,
@@ -143,24 +156,68 @@ export async function loadEmployeeTipsDashboardForTimeframe(opts: {
     createdAt: t.createdAt.toISOString(),
   }));
 
-  const periodAmountEur = Number(aggregates._sum.amount ?? 0);
-  const periodTipCount = aggregates._count._all;
+  const chartSeries = buildChart(
+    rowsList.map((r) => ({ createdAt: r.createdAt, amount: Number(r.amount) })),
+    opts.timeframe,
+    tz,
+  );
 
-  const chartSeries =
-    tf != null
-      ? buildChart(
-          rowsList.map((r) => ({ createdAt: r.createdAt, amount: Number(r.amount) })),
-          tf,
-          tz,
-        )
-      : ([] as Array<{ label: string; amount: number }>);
+  return { tips, chartSeries };
+}
+
+export async function loadEmployeeTipsDashboardForTimeframe(opts: {
+  employeeId: string;
+  businessTimezone: string;
+  timeframe: EmployeeDashboardTimeframe | null;
+}): Promise<{
+  tips: TipForEmployee[];
+  periodAmountEur: number;
+  periodTipCount: number;
+  chartSeries: Array<{ label: string; amount: number }>;
+}> {
+  const tf = opts.timeframe ?? null;
+  if (tf == null) {
+    return { tips: [], periodAmountEur: 0, periodTipCount: 0, chartSeries: [] };
+  }
+
+  const summary = await loadEmployeePeriodSummary({
+    employeeId: opts.employeeId,
+    businessTimezone: opts.businessTimezone,
+    timeframe: tf,
+  });
+  const analytics = await loadEmployeePeriodAnalytics({
+    employeeId: opts.employeeId,
+    businessTimezone: opts.businessTimezone,
+    timeframe: tf,
+  });
 
   return {
-    tips,
-    periodAmountEur,
-    periodTipCount,
-    chartSeries,
+    tips: analytics.tips,
+    periodAmountEur: summary.periodAmountEur,
+    periodTipCount: summary.periodTipCount,
+    chartSeries: analytics.chartSeries,
   };
+}
+
+const EMPLOYEE_ACCOUNT_SUMMARY_TTL_MS = 8_000;
+
+export async function loadEmployeeCurrentMonthTotal(
+  employeeId: string,
+  businessTimezone: string,
+): Promise<number> {
+  const monthRange = businessUtcRangeForTimeframe("month", businessTimezone);
+  if (!monthRange) return 0;
+  return runSerializedByKey("prisma", async () => {
+    const agg = await prisma.transaction.aggregate({
+      where: {
+        employeeId,
+        status: TipStatus.success,
+        createdAt: { gte: monthRange.startUtc, lte: monthRange.endUtc },
+      },
+      _sum: { amount: true },
+    });
+    return Number(agg._sum.amount ?? 0);
+  });
 }
 
 /** Lifetime account summary for employee dashboard hero (not period-scoped). */
@@ -169,23 +226,25 @@ export async function loadEmployeeAccountSummary(employeeId: string): Promise<{
   availableBalanceEur: number;
   totalSupporters: number;
 }> {
-  const base = { employeeId, status: "success" as const };
-  const [totalAgg, paidAgg, supporterCount] = await Promise.all([
-    prisma.transaction.aggregate({
-      where: base,
-      _sum: { amount: true },
-    }),
-    prisma.transaction.aggregate({
-      where: { ...base, payoutStatus: "paid" },
-      _sum: { amount: true },
-    }),
-    prisma.transaction.count({ where: base }),
-  ]);
+  return getCachedOrLoad(`emp-account:${employeeId}`, EMPLOYEE_ACCOUNT_SUMMARY_TTL_MS, () =>
+    runSerializedByKey("prisma", async () => {
+      const base = { employeeId, status: TipStatus.success };
+      const totalAgg = await prisma.transaction.aggregate({
+        where: base,
+        _sum: { amount: true },
+      });
+      const paidAgg = await prisma.transaction.aggregate({
+        where: { ...base, payoutStatus: "paid" },
+        _sum: { amount: true },
+      });
+      const supporterCount = await prisma.transaction.count({ where: base });
 
-  return {
-    totalEarningsEur: Number(totalAgg._sum.amount ?? 0),
-    availableBalanceEur: Number(paidAgg._sum.amount ?? 0),
-    /** Each successful tip counts as one supporter interaction (guests are anonymous). */
-    totalSupporters: supporterCount,
-  };
+      return {
+        totalEarningsEur: Number(totalAgg._sum.amount ?? 0),
+        availableBalanceEur: Number(paidAgg._sum.amount ?? 0),
+        /** Each successful tip counts as one supporter interaction (guests are anonymous). */
+        totalSupporters: supporterCount,
+      };
+    }),
+  );
 }

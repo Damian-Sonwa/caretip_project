@@ -1,3 +1,4 @@
+import { useCallback, useMemo, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -28,7 +29,21 @@ export function AuthOAuthButtons({
 }: AuthOAuthButtonsProps) {
   const { t, i18n } = useTranslation();
   const googleClientId = googleOAuthWebClientId();
-  const gsiLocale = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
+  const [gsiOriginError, setGsiOriginError] = useState(false);
+  const gsiLocale = useMemo(() => {
+    const lang = (i18n.resolvedLanguage ?? i18n.language ?? "en").toLowerCase();
+    return lang.startsWith("de") ? "de" : "en";
+  }, [i18n.resolvedLanguage, i18n.language]);
+  const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
+
+  const onGoogleError = useCallback(() => {
+    setGsiOriginError(true);
+    if (siteOrigin) {
+      toast.error(t("auth.oauth.googleOriginError", { origin: siteOrigin }), {
+        id: "caretip-google-gsi-error",
+      });
+    }
+  }, [siteOrigin, t]);
 
   const canOAuthSignUp =
     isLogin ||
@@ -56,17 +71,16 @@ export function AuthOAuthButtons({
       className={cn(
         "caretip-auth-oauth flex w-full justify-center [&>div]:!w-full [&_iframe]:!mx-auto",
         !isLogin && !canOAuthSignUp && "pointer-events-none opacity-40",
+        gsiOriginError && "opacity-60",
       )}
       title={!isLogin && !canOAuthSignUp ? t("auth.oauth.signupBlockedTitle") : undefined}
     >
       <GoogleLogin
         onSuccess={(cred) => {
+          setGsiOriginError(false);
           if (cred.credential) onGoogleCredential(cred.credential);
         }}
-        onError={() => {
-          const origin = typeof window !== "undefined" ? window.location.origin : "";
-          toast.error(t("auth.oauth.googleOriginError", { origin }), { id: "caretip-google-gsi-error" });
-        }}
+        onError={onGoogleError}
         useOneTap={false}
         theme="outline"
         size="large"

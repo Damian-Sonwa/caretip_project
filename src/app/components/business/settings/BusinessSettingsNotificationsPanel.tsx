@@ -96,7 +96,7 @@ export function BusinessSettingsNotificationsPanel({
         updated.systemAlerts ||
         updated.notifyNewLogin;
       if (wantsPush) {
-        await registerFcmDeviceToken();
+        await registerFcmDeviceToken({ requestPermission: true, dedupe: false });
       } else {
         await unregisterFcmDeviceToken();
       }

@@ -67,9 +67,10 @@
 
 /* KPI stat cards */
 .caretip-dashboard-shell .business-stat-card,
-.caretip-dashboard-shell .employee-stat-card {
-  gap: 0.35rem;
-  justify-content: space-between;
+.caretip-dashboard-shell .employee-stat-card,
+.caretip-dashboard-shell .dashboard-metric-stat-card {
+  gap: 0.5rem;
+  justify-content: flex-start;
   height: 100%;
   transition:
     box-shadow 0.22s ease,
@@ -107,14 +108,14 @@
   align-items: flex-start;
 }
 
-.caretip-dashboard-shell .business-stat-card .business-stat-card__value,
-.caretip-dashboard-shell .employee-stat-card .employee-stat-card__value {
-  margin-top: 0.15rem;
+.caretip-dashboard-shell .dashboard-metric-stat-card__value {
+  margin-top: 0;
 }
 
-.caretip-dashboard-shell .business-stat-card .business-stat-card__change,
-.caretip-dashboard-shell .employee-stat-card .employee-stat-card__change {
-  padding-top: 0.35rem;
+.caretip-dashboard-shell .dashboard-metric-stat-card__change {
+  min-height: 2.5rem;
+  margin-top: auto;
+  padding-top: 0.15rem;
 }
 
 /* Period segmented controls */

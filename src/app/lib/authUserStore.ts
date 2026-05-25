@@ -36,6 +36,7 @@ export function setAuthUser(next: User | null): void {
 
 /**
  * Commit user + force subscribed hooks to render before navigation / route guards run.
+ * Use {@link setAuthUser} during session bootstrap (avoids flushSync during effects).
  */
 export function commitAuthUser(next: User | null): void {
   currentUser = next;

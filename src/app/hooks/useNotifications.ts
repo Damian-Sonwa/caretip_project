@@ -6,17 +6,23 @@ import {
   markNotificationReadApi,
   type InboxNotification,
 } from "../lib/api";
-import { useSocket } from "./useSocket";
+import { isProtectedApiReady } from "../lib/authRestore";
+import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
+import { useSocket, useDeferSocketConnect } from "./useSocket";
 
 type UseNotificationsOptions = {
+  /** Caller intends notifications when the user is signed in (role checks, etc.). */
   enabled: boolean;
   /** Prefetch list when dropdown opens */
   loadList?: boolean;
 };
 
 export function useNotifications({ enabled, loadList = false }: UseNotificationsOptions) {
-  const { socket, connected } = useSocket(enabled);
+  const apiReady = isProtectedApiReady();
+  const active = enabled && apiReady;
+  const socketReady = useDeferSocketConnect(active);
+  const { socket, connected } = useSocket(socketReady);
   const [unreadCount, setUnreadCount] = useState(0);
   const [items, setItems] = useState<InboxNotification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,18 +30,20 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
   const loadedRef = useRef(false);
 
   const refreshUnread = useCallback(async () => {
-    if (!enabled) return;
+    if (!active) return;
     try {
       const { unreadCount: count } = await fetchMyUnreadNotificationCount();
       setUnreadCount(count);
     } catch (err) {
-      logClientError("useNotifications.refreshUnread", err);
+      if (!isApiConnectivityError(err)) {
+        logClientError("useNotifications.refreshUnread", err);
+      }
     }
-  }, [enabled]);
+  }, [active]);
 
   const loadNotifications = useCallback(
     async (opts?: { append?: boolean; cursor?: string | null }) => {
-      if (!enabled) return;
+      if (!active) return;
       setLoading(true);
       try {
         const res = await fetchMyNotifications({
@@ -44,17 +52,20 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
         });
         setUnreadCount(res.unreadCount);
         setNextCursor(res.nextCursor);
+        const nextItems = res.items;
         setItems((prev) =>
-          opts?.append ? [...prev, ...res.items] : res.items,
+          opts?.append ? [...(prev ?? []), ...nextItems] : nextItems,
         );
         loadedRef.current = true;
       } catch (err) {
-        logClientError("useNotifications.load", err);
+        if (!isApiConnectivityError(err)) {
+          logClientError("useNotifications.load", err);
+        }
       } finally {
         setLoading(false);
       }
     },
-    [enabled],
+    [active],
   );
 
   const markRead = useCallback(async (id: string) => {
@@ -62,7 +73,9 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
       const res = await markNotificationReadApi(id);
       setUnreadCount(res.unreadCount);
       setItems((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, read: true, readAt: res.notification.readAt } : n)),
+        (prev ?? []).map((n) =>
+          n.id === id ? { ...n, read: true, readAt: res.notification.readAt } : n,
+        ),
       );
     } catch (err) {
       logClientError("useNotifications.markRead", err);
@@ -73,28 +86,35 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
     try {
       const res = await markAllNotificationsReadApi();
       setUnreadCount(res.unreadCount);
-      setItems((prev) => prev.map((n) => ({ ...n, read: true, readAt: n.readAt ?? new Date().toISOString() })));
+      setItems((prev) =>
+        (prev ?? []).map((n) => ({
+          ...n,
+          read: true,
+          readAt: n.readAt ?? new Date().toISOString(),
+        })),
+      );
     } catch (err) {
       logClientError("useNotifications.markAllRead", err);
     }
   }, []);
 
   useEffect(() => {
-    if (!enabled) {
+    if (!active) {
       setUnreadCount(0);
       setItems([]);
+      loadedRef.current = false;
       return;
     }
     void refreshUnread();
-  }, [enabled, refreshUnread]);
+  }, [active, refreshUnread]);
 
   useEffect(() => {
-    if (!enabled || !loadList) return;
+    if (!active || !loadList) return;
     if (!loadedRef.current) void loadNotifications();
-  }, [enabled, loadList, loadNotifications]);
+  }, [active, loadList, loadNotifications]);
 
   useEffect(() => {
-    if (!socket || !enabled) return;
+    if (!socket || !active) return;
 
     const onCreated = (payload: { notification?: InboxNotification; unreadCount?: number }) => {
       if (typeof payload.unreadCount === "number") {
@@ -102,8 +122,9 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
       }
       if (payload.notification) {
         setItems((prev) => {
-          if (prev.some((n) => n.id === payload.notification!.id)) return prev;
-          return [payload.notification!, ...prev].slice(0, 50);
+          const list = prev ?? [];
+          if (list.some((n) => n.id === payload.notification!.id)) return list;
+          return [payload.notification!, ...list].slice(0, 50);
         });
       }
     };
@@ -118,12 +139,12 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
       socket.off("notification_created", onCreated);
       socket.off("notification_unread_count", onUnread);
     };
-  }, [socket, enabled]);
+  }, [socket, active]);
 
   useEffect(() => {
-    if (!enabled || !connected) return;
+    if (!active || !connected) return;
     void refreshUnread();
-  }, [connected, enabled, refreshUnread]);
+  }, [connected, active, refreshUnread]);
 
   return {
     unreadCount,

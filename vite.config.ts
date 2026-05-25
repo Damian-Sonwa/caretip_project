@@ -172,6 +172,9 @@ export default defineConfig(({ mode }) => {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        secure: false,
+        /** Keep refresh cookie on the Vite dev origin (localhost:5173). */
+        cookieDomainRewrite: '',
       },
       '/socket.io': {
         target: 'http://localhost:3001',
@@ -191,6 +194,9 @@ export default defineConfig(({ mode }) => {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
+        secure: false,
+        /** Keep refresh cookie on the Vite dev origin (localhost:5173). */
+        cookieDomainRewrite: '',
       },
       '/socket.io': {
         target: 'http://localhost:3001',

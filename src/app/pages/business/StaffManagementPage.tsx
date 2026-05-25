@@ -215,7 +215,7 @@ export function StaffManagementPage() {
       setEmployees([]);
     }
     try {
-      const data = await getBusinessStats("all");
+      const data = await getBusinessStats("all", { scope: "analytics" });
       const empList = data.employees ?? [];
       const mapped: StaffRow[] = empList.map((e) => ({
         id: e.id,

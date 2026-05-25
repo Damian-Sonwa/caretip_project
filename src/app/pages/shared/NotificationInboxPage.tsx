@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Bell, CheckCheck, Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -28,13 +27,12 @@ function formatTimestamp(iso: string, locale: string): string {
 export function NotificationInboxPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  useRequireAuth();
+  const { user, authStatus, authReady } = useRequireAuth();
+  const notificationsEnabled =
+    authReady && authStatus === "authenticated" && Boolean(user);
   const { unreadCount, items, loading, nextCursor, loadNotifications, markRead, markAllRead } =
-    useNotifications({ enabled: true, loadList: true });
-
-  useEffect(() => {
-    void loadNotifications();
-  }, [loadNotifications]);
+    useNotifications({ enabled: notificationsEnabled, loadList: true });
+  const list = items ?? [];
 
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
@@ -53,11 +51,11 @@ export function NotificationInboxPage() {
         ) : null}
       </div>
 
-      {loading && items.length === 0 ? (
+      {loading && list.length === 0 ? (
         <div className="flex justify-center py-16">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
         </div>
-      ) : items.length === 0 ? (
+      ) : list.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
           <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground/70" aria-hidden />
           <p className="text-sm font-medium text-foreground">{t("notifications.inbox.emptyTitle")}</p>
@@ -65,7 +63,7 @@ export function NotificationInboxPage() {
         </div>
       ) : (
         <ul className="space-y-2">
-          {items.map((n) => (
+          {list.map((n) => (
             <li key={n.id}>
               <button
                 type="button"

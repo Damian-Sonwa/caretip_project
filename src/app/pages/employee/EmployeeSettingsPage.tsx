@@ -107,7 +107,7 @@ export function EmployeeSettingsPage() {
         pushNotifications: pushNotif,
       });
       if (pushNotif) {
-        await registerFcmDeviceToken();
+        await registerFcmDeviceToken({ requestPermission: true, dedupe: false });
       } else {
         await unregisterFcmDeviceToken();
       }

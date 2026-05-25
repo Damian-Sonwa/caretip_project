@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
@@ -408,6 +408,7 @@ export function AdminDashboard() {
   const [businessesExpanded, setBusinessesExpanded] = useState(true);
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
+  const dashboardLoadGenRef = useRef(0);
 
   const emptyAnalytics = useMemo<PlatformAnalytics>(() => {
     const rangeDays = 30;
@@ -471,10 +472,12 @@ export function AdminDashboard() {
 
   const loadDashboardData = useCallback(async () => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
+    const loadGen = ++dashboardLoadGenRef.current;
     try {
       setServiceIssue(null);
       // Keep core dashboard (stats + KYC table) resilient even if analytics fails.
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
+      if (loadGen !== dashboardLoadGenRef.current) return;
       setStats(s);
       setBusinesses(
         [...b.businesses].sort((a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0)),
@@ -482,12 +485,15 @@ export function AdminDashboard() {
 
       try {
         const a = await fetchPlatformAnalytics(30, analyticsTimezone);
+        if (loadGen !== dashboardLoadGenRef.current) return;
         setAnalytics(a ?? emptyAnalytics);
       } catch (e) {
+        if (loadGen !== dashboardLoadGenRef.current) return;
         logClientError("AdminDashboard.analytics", e);
         setAnalytics(emptyAnalytics);
       }
     } catch (err) {
+      if (loadGen !== dashboardLoadGenRef.current) return;
       logClientError("AdminDashboard", err);
       const msg = toUserFriendlyMessage(err);
       setStats((prev) => prev ?? ({} as PlatformGlobalStats));
@@ -506,7 +512,9 @@ export function AdminDashboard() {
         setServiceIssue(msg || t("admin.serviceGenericError"));
       }
     } finally {
-      setInitialDashLoading(false);
+      if (loadGen === dashboardLoadGenRef.current) {
+        setInitialDashLoading(false);
+      }
     }
   }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics, t]);
 
@@ -550,7 +558,7 @@ export function AdminDashboard() {
     return (
       <main className={platformUi.pageMain}>
         <div className={cn(platformUi.page, "flex min-h-[min(70vh,calc(100vh-5rem))] flex-col items-center justify-center py-16")}>
-          <PageLoader message={t("admin.loadingDashboard")} />
+          <PageLoader variant="wait" message={t("admin.loadingDashboard")} />
         </div>
       </main>
     );

@@ -1,6 +1,9 @@
 import type { ReactNode } from "react";
 import { Navigate, useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { isAuthRestorePending } from "../lib/authRestore";
+import { hasClientStoredSession } from "../lib/authUserStore";
+import { isClientSessionRevoked } from "../lib/api";
 import { AppLoader } from "./AppLoader";
 
 interface PlatformAdminRouteProps {
@@ -12,11 +15,14 @@ export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
   const { user, authStatus } = useAuth();
   const location = useLocation();
 
-  if (authStatus === "initializing") {
+  if (authStatus === "initializing" || isAuthRestorePending()) {
     return <AppLoader />;
   }
 
   if (!user) {
+    if (!isClientSessionRevoked() && hasClientStoredSession()) {
+      return <AppLoader />;
+    }
     return <Navigate to="/platform-admin/login" replace state={{ from: location.pathname }} />;
   }
 

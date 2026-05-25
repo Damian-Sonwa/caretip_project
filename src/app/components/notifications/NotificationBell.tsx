@@ -41,9 +41,15 @@ type NotificationBellProps = {
 export function NotificationBell({ className }: NotificationBellProps) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, authStatus, authReady } = useAuth();
   const [open, setOpen] = useState(false);
-  const enabled = Boolean(user && user.role !== "guest");
+  const enabled =
+    authReady &&
+    authStatus === "authenticated" &&
+    Boolean(user) &&
+    (user.role === "employee" ||
+      user.role === "business" ||
+      user.role === "platform_admin");
   const {
     unreadCount,
     items,
@@ -55,14 +61,12 @@ export function NotificationBell({ className }: NotificationBellProps) {
 
   const badge = unreadCount > 0;
   const inboxPath = inboxPathForRole(user?.role);
+  const list = items ?? [];
 
   return (
     <DropdownMenu
       open={open}
-      onOpenChange={(next) => {
-        setOpen(next);
-        if (next) void loadNotifications();
-      }}
+      onOpenChange={setOpen}
     >
       <DropdownMenuTrigger asChild>
         <button
@@ -103,17 +107,17 @@ export function NotificationBell({ className }: NotificationBellProps) {
           ) : null}
         </div>
         <div className="max-h-[min(60vh,20rem)] overflow-y-auto">
-          {loading && items.length === 0 ? (
+          {loading && list.length === 0 ? (
             <div className="flex justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
             </div>
-          ) : items.length === 0 ? (
+          ) : list.length === 0 ? (
             <p className="px-3 py-8 text-center text-sm text-muted-foreground">
               {t("notifications.bell.empty")}
             </p>
           ) : (
             <ul className="divide-y divide-border">
-              {items.slice(0, 8).map((n) => (
+              {list.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <button
                     type="button"

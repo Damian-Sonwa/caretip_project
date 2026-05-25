@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
-import { fetchBusinessProfile } from "../lib/api";
+import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
+import { isApiConnectivityError } from "../lib/errorMessages";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
 import { PageLoader } from "./PageLoader";
 
 function mapDbVerificationToStatus(
-  v: "pending" | "verified" | "rejected" | undefined
+  v: "pending" | "verified" | "rejected" | undefined,
 ): BusinessAccountStatus | undefined {
   if (v === "pending") return "PENDING";
   if (v === "verified") return "APPROVED";
@@ -22,11 +23,18 @@ function mapDbVerificationToStatus(
  */
 export function ApprovedBusinessGate() {
   const { t } = useTranslation();
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, sessionValidated, authStatus } = useAuth();
   const [ready, setReady] = useState(false);
 
+  const canSyncProfile =
+    sessionValidated &&
+    authStatus === "authenticated" &&
+    hasClientAccessToken() &&
+    user?.role === "business" &&
+    !user.impersonation;
+
   useEffect(() => {
-    if (!user || user.role !== "business" || user.impersonation) {
+    if (!canSyncProfile) {
       setReady(true);
       return;
     }
@@ -38,7 +46,9 @@ export function ApprovedBusinessGate() {
         if (s) updateUser({ status: s });
       })
       .catch((err: unknown) => {
-        logClientError("ApprovedBusinessGate", err);
+        if (!isApiConnectivityError(err)) {
+          logClientError("ApprovedBusinessGate", err);
+        }
       })
       .finally(() => {
         if (!cancelled) setReady(true);
@@ -46,12 +56,13 @@ export function ApprovedBusinessGate() {
     return () => {
       cancelled = true;
     };
-  }, [user?.id, user?.role, user?.impersonation, updateUser]);
+  }, [canSyncProfile, updateUser]);
 
   useEffect(() => {
-    if (!user || user.role !== "business" || user.impersonation) return;
+    if (!canSyncProfile) return;
     const refresh = () => {
-      void fetchBusinessProfile()
+      if (!hasClientAccessToken()) return;
+      void fetchBusinessProfile({ silent: true })
         .then((p) => {
           const s = mapDbVerificationToStatus(p.verificationStatus);
           if (s) updateUser({ status: s });
@@ -60,7 +71,7 @@ export function ApprovedBusinessGate() {
     };
     window.addEventListener("focus", refresh);
     return () => window.removeEventListener("focus", refresh);
-  }, [user?.id, user?.role, user?.impersonation, updateUser]);
+  }, [canSyncProfile, updateUser]);
 
   if (!user) return null;
 
@@ -68,7 +79,7 @@ export function ApprovedBusinessGate() {
     return <Outlet />;
   }
 
-  if (user.role === "business" && !user.impersonation && !ready) {
+  if (user.role === "business" && !user.impersonation && canSyncProfile && !ready) {
     return <PageLoader message={t("common.syncingAccountStatus")} />;
   }
 

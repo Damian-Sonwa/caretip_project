@@ -1,33 +1,31 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
+import {
+  DashboardMetricStatCard,
+  type DashboardMetricStatCardTokens,
+} from "../dashboard/DashboardMetricStatCard";
 import { employeeUi } from "./employeeDashboardUi";
+
+const employeeMetricTokens: DashboardMetricStatCardTokens = {
+  statCard: employeeUi.statCard,
+  statLabel: employeeUi.statLabel,
+  statValue: employeeUi.statValue,
+  statChange: employeeUi.statChange,
+  featuredClass: "employee-stat-card--featured",
+  labelRowClass: "employee-stat-card__label-row",
+  valueClass: "employee-stat-card__value",
+  changeClass: "employee-stat-card__change",
+};
 
 type EmployeeStatCardProps = {
   label: string;
   value: ReactNode;
   change?: ReactNode;
   icon?: ReactNode;
-  /** Accent border treatment (grid cell size stays uniform). */
   featured?: boolean;
   className?: string;
+  loading?: boolean;
 };
 
-export function EmployeeStatCard({ label, value, change, icon, featured, className }: EmployeeStatCardProps) {
-  return (
-    <div
-      className={cn(
-        employeeUi.statCard,
-        "h-full",
-        featured && "employee-stat-card--featured",
-        className,
-      )}
-    >
-      <div className="employee-stat-card__label-row flex items-start justify-between gap-2">
-        <p className={employeeUi.statLabel}>{label}</p>
-        {icon ? <div className="shrink-0 text-primary/80">{icon}</div> : null}
-      </div>
-      <p className={cn(employeeUi.statValue, "employee-stat-card__value")}>{value}</p>
-      {change ? <p className={cn(employeeUi.statChange, "employee-stat-card__change")}>{change}</p> : null}
-    </div>
-  );
+export function EmployeeStatCard(props: EmployeeStatCardProps) {
+  return <DashboardMetricStatCard tokens={employeeMetricTokens} {...props} />;
 }

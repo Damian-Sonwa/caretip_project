@@ -6,6 +6,7 @@ import { TipFlowProvider } from './context/TipFlowContext';
 import { AppLoadingSplashProvider } from './context/AppLoadingSplashContext';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
+import { AuthProvider } from "./components/AuthProvider";
 import { googleOAuthWebClientId } from "./lib/googleOAuthWebClientId";
 
 const googleClientId = googleOAuthWebClientId();
@@ -16,7 +17,9 @@ export default function App() {
     return (
       <TipFlowProvider>
         <AppLoadingSplashProvider>
-          <RouterProvider router={router} />
+          <AuthProvider>
+            <RouterProvider router={router} />
+          </AuthProvider>
           <Toaster theme={mode} position="top-center" closeButton />
           <PwaInstallPrompt />
         </AppLoadingSplashProvider>

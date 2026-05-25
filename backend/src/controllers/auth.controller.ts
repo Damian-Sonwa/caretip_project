@@ -605,18 +605,35 @@ export async function refresh(req: Request, res: Response) {
 
     if (rtCookie) {
       const rotated = await rotateRefreshToken(rtCookie);
-      if (!rotated) {
-        clearRefreshCookie(res);
-        return res.status(401).json({ message: "Invalid or expired session" });
+      if (rotated) {
+        setRefreshCookie(res, rotated.newToken, { maxAgeMs: refreshCookieMaxAgeMs(rotated.newExpiresAt) });
+        const result = await authService.authResultForUserId(rotated.userId);
+        return res.json(result);
       }
-      setRefreshCookie(res, rotated.newToken, { maxAgeMs: refreshCookieMaxAgeMs(rotated.newExpiresAt) });
-      const result = await authService.authResultForUserId(rotated.userId);
-      return res.json(result);
+      clearRefreshCookie(res);
+    }
+
+    const authHeader = req.headers.authorization;
+    const bearer = authHeader?.startsWith("Bearer ") ? authHeader.slice(7).trim() : "";
+    if (bearer) {
+      const { userIdFromAccessTokenForRefresh } = await import("../lib/accessTokenRefresh.js");
+      const userId = userIdFromAccessTokenForRefresh(bearer);
+      if (userId) {
+        const rt = await issueRefreshToken(userId);
+        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
+        const result = await authService.authResultForUserId(userId);
+        return res.json(result);
+      }
     }
 
     return res.status(401).json({ message: "Authentication required" });
   } catch (err) {
     logServerError("auth.refresh", err);
+    const msg = err instanceof Error ? err.message : "";
+    if (msg === "Authentication required" || msg.toLowerCase().includes("not found")) {
+      clearRefreshCookie(res);
+      return res.status(401).json({ message: "Authentication required" });
+    }
     return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });
   }
 }

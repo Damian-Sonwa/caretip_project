@@ -19,14 +19,29 @@ let sessionValidated = false;
 /** True after login/refresh/bootstrap returned onboarding status from the API (not stale cache). */
 let onboardingStatusFromServer = false;
 let bootstrapPromise: Promise<SessionBootstrapResult> | null = null;
+let lastBootstrapResult: SessionBootstrapResult | null = null;
 
 export type BootstrapResultHandler = (result: SessionBootstrapResult) => void;
 
 let bootstrapResultHandler: BootstrapResultHandler | null = null;
 
+function deliverBootstrapResult(result: SessionBootstrapResult): void {
+  lastBootstrapResult = result;
+  queueMicrotask(() => {
+    bootstrapResultHandler?.(result);
+    authHydrated = true;
+    // Transient refresh failures must NOT unlock protected APIs (prevents 401/500 storms).
+    sessionValidated = result.kind === "authenticated" || result.kind === "unauthenticated";
+    notify();
+  });
+}
+
 /** Registers the handler that applies bootstrap results to shared auth state. */
 export function registerBootstrapResultHandler(handler: BootstrapResultHandler): void {
   bootstrapResultHandler = handler;
+  if (lastBootstrapResult) {
+    queueMicrotask(() => bootstrapResultHandler?.(lastBootstrapResult!));
+  }
 }
 
 function notify() {
@@ -63,6 +78,7 @@ export function markSessionBootstrapSettled(): void {
 export function resetSessionBootstrap(): void {
   bootstrapPromise = null;
   bootstrapResultHandler = null;
+  lastBootstrapResult = null;
   authHydrated = false;
   sessionValidated = false;
   onboardingStatusFromServer = false;
@@ -82,11 +98,30 @@ export function runSessionBootstrapOnce(run: BootstrapRunner): Promise<SessionBo
         return { kind: "unauthenticated" };
       }
     })().then((result) => {
-      bootstrapResultHandler?.(result);
-      authHydrated = true;
-      notify();
+      deliverBootstrapResult(result);
       return result;
     });
   }
   return bootstrapPromise;
+}
+
+/** True while the initial refresh/bootstrap pass is still running. */
+export function isSessionBootstrapInProgress(): boolean {
+  return !authHydrated;
+}
+
+/**
+ * Resolves when bootstrap has finished its first pass (success, invalid, or transient).
+ * Callers must still gate on {@link isProtectedApiReady} / `sessionValidated` before protected APIs.
+ */
+export function whenSessionBootstrapSettled(): Promise<void> {
+  if (authHydrated) return Promise.resolve();
+  return new Promise((resolve) => {
+    const unsub = subscribeAuthSessionFlags(() => {
+      if (authHydrated) {
+        unsub();
+        resolve();
+      }
+    });
+  });
 }

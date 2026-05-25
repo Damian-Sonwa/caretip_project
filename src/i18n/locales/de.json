@@ -589,7 +589,8 @@
       "envHintOr": "oder",
       "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu. Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
       "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben",
-      "googleOriginError": "Google-Anmeldung ist für diese Website ({{origin}}) nicht freigeschaltet. In der Google Cloud Console → APIs & Dienste → Anmeldedaten → Ihr Web-Client diese URL unter „Autorisierte JavaScript-Quellen“ eintragen, speichern und einige Minuten warten."
+      "googleOriginError": "Google-Anmeldung ist für diese Website ({{origin}}) nicht freigeschaltet. In der Google Cloud Console → APIs & Dienste → Anmeldedaten → Ihr Web-Client diese URL unter „Autorisierte JavaScript-Quellen“ eintragen, speichern und einige Minuten warten.",
+      "devOriginHint": "Entwicklung: {{origin}} unter „Autorisierte JavaScript-Quellen“ eintragen (ggf. auch http://127.0.0.1:5173)."
     },
     "recovery": {
       "backToSignIn": "Zurück zur Anmeldung"
@@ -885,6 +886,16 @@
     "clearSearch": "Suche zurücksetzen"
   },
   "dashboard": {
+    "refresh": {
+      "updating": "Aktualisierung…",
+      "justNow": "Gerade aktualisiert"
+    },
+    "loading": {
+      "analytics": "Analysen werden geladen…",
+      "chart": "Diagrammdaten werden vorbereitet…",
+      "goals": "Teamziele werden synchronisiert…",
+      "secondary": "Team-Einblicke werden geladen…"
+    },
     "live_status": "Aktiv",
     "filter_today": "Heute",
     "filter_week": "Diese Woche",
