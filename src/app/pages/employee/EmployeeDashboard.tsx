@@ -55,7 +55,7 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  DashboardHeroStatPlaceholder,
+  DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
   DashboardSectionSpinner,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
@@ -117,6 +117,9 @@ export function EmployeeDashboard() {
   const {
     displayAccount,
     isInitialLoad: accountInitialLoad,
+    isPeriodRefreshing: accountPeriodRefreshing,
+    dataRevision: accountDataRevision,
+    lastUpdatedAt: accountLastUpdatedAt,
     refreshQuiet: refreshAccountQuiet,
   } = useEmployeeAccountSummary(dashboardEnabled);
 
@@ -128,12 +131,13 @@ export function EmployeeDashboard() {
     valuesMatchAnalyticsPeriod,
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
+    isPeriodRefreshing: analyticsPeriodRefreshing,
+    dataRevision: analyticsDataRevision,
     lastUpdatedAt: analyticsLastUpdatedAt,
     error: analyticsError,
     refreshQuiet: refreshAnalyticsQuiet,
   } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId);
 
-  const isHeroLoading = accountInitialLoad;
   const showMetricsLoading = isMetricsInitialLoad;
   const showChartLoading = isAnalyticsInitialLoad;
 
@@ -214,7 +218,7 @@ export function EmployeeDashboard() {
     isDev: import.meta.env.DEV,
     hasError: Boolean(error),
     accountSummaryLoaded: accountLoaded,
-    accountSummaryLoading: isHeroLoading,
+    accountSummaryLoading: accountInitialLoad,
     analyticsLoading: showMetricsLoading || showChartLoading,
     totalEarningsEur: displayAccount?.totalEarningsEur ?? 0,
     totalSupporters: displayAccount?.totalSupporters ?? 0,
@@ -233,6 +237,8 @@ export function EmployeeDashboard() {
           loaded: true,
         }
       : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
+
+  const showHeroMetricsLoading = !useDevDemo && !displayAccountSummary.loaded;
 
   const displayPeriodTipCount = devPeriodSummary?.tips ?? displayPayload?.periodTipCount ?? 0;
   const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayPayload?.periodAmountEur ?? 0;
@@ -454,14 +460,23 @@ export function EmployeeDashboard() {
                   </Link>
                 </Button>
               </div>
-              <dl className="employee-hero-account-stats" aria-label={t("employee.hero.accountOverviewLabel")}>
+              <dl
+                className={cn(
+                  "employee-hero-account-stats dashboard-swr-swap",
+                  showHeroMetricsLoading && "dashboard-hero-account-stats--loading",
+                  accountPeriodRefreshing && "dashboard-swr-swap--revalidating",
+                )}
+                aria-label={t("employee.hero.accountOverviewLabel")}
+                aria-busy={showHeroMetricsLoading}
+                key={`hero-account-${accountDataRevision}`}
+              >
                 <div>
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
                   <dd>
-                    {isHeroLoading && !useDevDemo ? (
-                      <DashboardHeroStatPlaceholder />
+                    {showHeroMetricsLoading ? (
+                      <DashboardHeroMetricSkeleton variant="currency" />
                     ) : (
-                      <span className="block tabular-nums">
+                      <span className="dashboard-hero-metric-value--live tabular-nums">
                         {displayAccountSummary.totalEarningsEur > 0
                           ? formatEur(displayAccountSummary.totalEarningsEur)
                           : t("format.metricZeroTips")}
@@ -472,10 +487,10 @@ export function EmployeeDashboard() {
                 <div>
                   <dt>{t("employee.hero.statAvailableBalance")}</dt>
                   <dd>
-                    {isHeroLoading && !useDevDemo ? (
-                      <DashboardHeroStatPlaceholder />
+                    {showHeroMetricsLoading ? (
+                      <DashboardHeroMetricSkeleton variant="currency" />
                     ) : (
-                      <span className="block tabular-nums">
+                      <span className="dashboard-hero-metric-value--live tabular-nums">
                         {displayAccountSummary.availableBalanceEur > 0
                           ? formatEur(displayAccountSummary.availableBalanceEur)
                           : formatEur(0)}
@@ -486,10 +501,10 @@ export function EmployeeDashboard() {
                 <div>
                   <dt>{t("employee.hero.statTotalSupporters")}</dt>
                   <dd>
-                    {isHeroLoading && !useDevDemo ? (
-                      <DashboardHeroStatPlaceholder />
+                    {showHeroMetricsLoading ? (
+                      <DashboardHeroMetricSkeleton variant="count" />
                     ) : (
-                      <span className="block tabular-nums">
+                      <span className="dashboard-hero-metric-value--live tabular-nums">
                         {String(displayAccountSummary.totalSupporters)}
                       </span>
                     )}
@@ -523,8 +538,8 @@ export function EmployeeDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <LiveConnectionBadge status={connectionStatus} />
               <DashboardRefreshIndicator
-                isRefreshing={false}
-                lastUpdatedAt={analyticsLastUpdatedAt}
+                isRefreshing={accountPeriodRefreshing || analyticsPeriodRefreshing}
+                lastUpdatedAt={analyticsLastUpdatedAt ?? accountLastUpdatedAt}
               />
             </div>
           </div>
@@ -570,21 +585,30 @@ export function EmployeeDashboard() {
 
           <motion.div
             {...dashboardBlockMotion}
-            className="transition-opacity duration-300"
+            className={cn(
+              "dashboard-swr-swap",
+              analyticsPeriodRefreshing && "dashboard-swr-swap--revalidating",
+            )}
             initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
+            key={`emp-metrics-${analyticsDataRevision}`}
           >
             <EmployeeDashboardMetricsGrid
               loading={showMetricsLoading}
-              isPeriodRefreshing={false}
+              isPeriodRefreshing={analyticsPeriodRefreshing}
               metrics={periodMetrics}
             />
           </motion.div>
 
           <motion.div
             {...dashboardBlockMotion}
+            className={cn(
+              "dashboard-swr-swap",
+              analyticsPeriodRefreshing && "dashboard-swr-swap--revalidating",
+            )}
             transition={{ delay: 0.4 }}
+            key={`emp-chart-${analyticsDataRevision}`}
           >
             <Card className={cn(employeeUi.cardStatic, employeeUi.chartCard, "w-full")}>
               <CardHeader className={employeeUi.cardHeader}>

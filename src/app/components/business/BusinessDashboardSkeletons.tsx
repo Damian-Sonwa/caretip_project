@@ -5,5 +5,5 @@
 export {
   DashboardSectionSpinner as BusinessDashboardChartSkeleton,
   DashboardStatsGridSpinner as BusinessDashboardStatsSkeleton,
-  DashboardHeroStatPlaceholder as BusinessHeroPulseSkeleton,
+  DashboardHeroMetricSkeleton as BusinessHeroPulseSkeleton,
 } from "@/app/components/dashboard/DashboardAnalyticsLoader";

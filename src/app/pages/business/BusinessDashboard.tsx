@@ -32,7 +32,7 @@ import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport } from "../../lib/api";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
 import {
-  DashboardHeroStatPlaceholder,
+  DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import {
@@ -143,6 +143,8 @@ export function BusinessDashboard() {
     displayMetrics,
     isMetricsInitialLoad,
     isAnalyticsSectionLoading,
+    isPeriodRefreshing,
+    dataRevision,
     lastUpdatedAt,
     showStatsSkeleton,
     valuesMatchAnalyticsPeriod,
@@ -445,21 +447,30 @@ export function BusinessDashboard() {
                   </Link>
                 </Button>
               </div>
-              <dl className="business-hero-account-stats" aria-label={t("business.hero.pulse.sectionLabel")}>
+              <dl
+                className={cn(
+                  "business-hero-account-stats dashboard-swr-swap",
+                  heroPulseLoading && "dashboard-hero-account-stats--loading",
+                  isPeriodRefreshing && "dashboard-swr-swap--revalidating",
+                )}
+                aria-label={t("business.hero.pulse.sectionLabel")}
+                aria-busy={heroPulseLoading}
+                key={`biz-hero-pulse-${dataRevision}`}
+              >
                 <div>
                   <dt>{t("business.hero.pulse.lastHour")}</dt>
                   <dd>
                     {heroPulseLoading ? (
-                      <DashboardHeroStatPlaceholder />
+                      <DashboardHeroMetricSkeleton variant="pulse" />
                     ) : operationalPulse ? (
                       <>
-                        <span className="block tabular-nums">
+                        <span className="dashboard-hero-metric-value--live tabular-nums">
                           {operationalPulse.tipsLast60m.count === 0
                             ? t("format.metricZeroTips")
                             : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsLast60m.count })}
                         </span>
                         {operationalPulse.tipsLast60m.count > 0 ? (
-                          <span className="business-hero-pulse-subline text-muted-foreground/90">
+                          <span className="business-hero-pulse-subline dashboard-hero-metric-value--live text-muted-foreground/90">
                             {t("business.hero.pulse.volume", { amount: formatEur(operationalPulse.tipsLast60m.amount) })}
                           </span>
                         ) : null}
@@ -473,16 +484,16 @@ export function BusinessDashboard() {
                   <dt>{t("business.hero.pulse.today")}</dt>
                   <dd>
                     {heroPulseLoading ? (
-                      <DashboardHeroStatPlaceholder />
+                      <DashboardHeroMetricSkeleton variant="pulse" />
                     ) : operationalPulse ? (
                       <>
-                        <span className="block tabular-nums">
+                        <span className="dashboard-hero-metric-value--live tabular-nums">
                           {operationalPulse.tipsToday.count === 0
                             ? t("format.metricZeroTips")
                             : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsToday.count })}
                         </span>
                         {operationalPulse.tipsToday.count > 0 ? (
-                          <span className="business-hero-pulse-subline text-muted-foreground/90">
+                          <span className="business-hero-pulse-subline dashboard-hero-metric-value--live text-muted-foreground/90">
                             {t("business.hero.pulse.volume", { amount: formatEur(operationalPulse.tipsToday.amount) })}
                           </span>
                         ) : null}
@@ -531,7 +542,7 @@ export function BusinessDashboard() {
               <div className="flex flex-wrap items-center gap-2">
                 <LiveConnectionBadge status={connectionStatus} />
                 <DashboardRefreshIndicator
-                  isRefreshing={false}
+                  isRefreshing={isPeriodRefreshing}
                   lastUpdatedAt={lastUpdatedAt}
                 />
               </div>
@@ -578,10 +589,14 @@ export function BusinessDashboard() {
 
           <motion.div
             {...dashboardBlockMotion}
-            className="business-dashboard-block"
+            className={cn(
+              "business-dashboard-block dashboard-swr-swap",
+              isPeriodRefreshing && "dashboard-swr-swap--revalidating",
+            )}
             initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
+            key={`biz-metrics-${dataRevision}`}
           >
             <BusinessDashboardMetricsGrid
               analyticsTimeframe={analyticsTimeframe}
@@ -595,7 +610,7 @@ export function BusinessDashboard() {
                   : displayMetrics
               }
               loading={showMetricsSkeleton}
-              isPeriodRefreshing={false}
+              isPeriodRefreshing={isPeriodRefreshing}
               hasTipActivityInPeriod={hasTipActivityInPeriod}
               topPerformersCount={topEmployees.length}
             />

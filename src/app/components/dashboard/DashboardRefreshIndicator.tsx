@@ -30,14 +30,15 @@ export function DashboardRefreshIndicator({
     : t("dashboard.refresh.justNow");
 
   return (
-    <p
+    <div
       className={cn(
         "text-[11px] font-medium tracking-wide text-muted-foreground/80 tabular-nums",
         className,
       )}
+      role="status"
       aria-live="polite"
     >
       {label}
-    </p>
+    </div>
   );
 }

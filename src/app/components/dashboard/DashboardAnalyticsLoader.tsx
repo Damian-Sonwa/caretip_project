@@ -62,13 +62,37 @@ export function DashboardStatsGridSpinner({ className }: { className?: string })
   );
 }
 
-/** Hero pulse / account stat placeholder — soft pulse, no skeleton bars. */
-export function DashboardHeroStatPlaceholder() {
+/** Inline shimmer placeholder inside hero metric cells (currency, count, or pulse + subline). */
+export function DashboardHeroMetricSkeleton({
+  variant = "currency",
+  className,
+}: {
+  variant?: "currency" | "count" | "pulse";
+  className?: string;
+}) {
   return (
-    <span className="inline-block min-w-[3ch] tabular-nums text-muted-foreground/30 animate-pulse">
-      —
+    <span
+      className={cn(
+        "dashboard-hero-metric-skeleton",
+        variant === "count" && "dashboard-hero-metric-skeleton--count",
+        variant === "pulse" && "dashboard-hero-metric-skeleton--pulse",
+        variant === "currency" && "dashboard-hero-metric-skeleton--currency",
+        className,
+      )}
+      role="status"
+      aria-busy="true"
+    >
+      <span className="dashboard-hero-metric-skeleton__bar" aria-hidden />
+      {variant === "pulse" ? (
+        <span className="dashboard-hero-metric-skeleton__sub" aria-hidden />
+      ) : null}
     </span>
   );
+}
+
+/** @deprecated Use DashboardHeroMetricSkeleton */
+export function DashboardHeroStatPlaceholder() {
+  return <DashboardHeroMetricSkeleton variant="currency" />;
 }
 
 /** Small pill overlay while period stats refresh (employee + business). */
