@@ -29,6 +29,7 @@ import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import pushRoutes from "./routes/push.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import landingAiRoutes from "./routes/landingAi.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
@@ -122,6 +123,7 @@ app.use("/api/tables", tablesRoutes);
 app.use("/api/tipping-context", tippingContextRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/feedback", feedbackRoutes);
+app.use("/api/landing-ai", landingAiRoutes);
 app.use("/api/platform", platformRoutes);
 app.use("/api/push", pushRoutes);
 /** Alias for SuperAdmin clients (same handlers as `/api/platform`). */

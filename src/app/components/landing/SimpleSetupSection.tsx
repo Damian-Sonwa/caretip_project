@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { dispatchLandingIntent } from "../../lib/landingAiIntent";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
@@ -13,6 +14,15 @@ export function SimpleSetupSection() {
   const reduceMotion = useReducedMotion();
   const isLgUp = useMinWidthMedia(1024);
   const [activeStep, setActiveStep] = useState(0);
+  const onboardingIntentSent = useRef(false);
+
+  useEffect(() => {
+    if (activeStep > 0 && !onboardingIntentSent.current) {
+      onboardingIntentSent.current = true;
+      dispatchLandingIntent("onboarding_attempt");
+    }
+  }, [activeStep]);
+
   const pillSub = t("landing.simpleSetup.pillSub");
   const sectionSubtitle = t("landing.simpleSetup.subtitle");
 

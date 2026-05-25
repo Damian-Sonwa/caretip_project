@@ -1377,6 +1377,26 @@
       "subtitle": "Launch QR tipping in an afternoon, with payouts and team visibility built in.",
       "cta": "Get started",
       "secondary": "See how it works"
+    },
+    "assistant": {
+      "title": "CareTip guide",
+      "subtitle": "Onboarding concierge",
+      "launcherLabel": "Questions about CareTip?",
+      "launcherShort": "Ask CareTip",
+      "welcome": "I help with setup, pricing, QR codes, and how teams get paid. Ask anything about CareTip.",
+      "inputPlaceholder": "Ask about CareTip…",
+      "send": "Send",
+      "close": "Close assistant",
+      "error": "Could not reach the assistant. Try again in a moment.",
+      "ctaSignup": "Start free business signup →",
+      "prompts": {
+        "how_it_works": "How does CareTip work?",
+        "setup_time": "How long does setup take?",
+        "qr_customize": "Can restaurants customize QR codes?",
+        "gdpr": "Is CareTip GDPR compliant?",
+        "employee_tips": "How do employees receive tips?",
+        "multi_venue": "Does CareTip support multiple venues?"
+      }
     }
   },
   "footer": {

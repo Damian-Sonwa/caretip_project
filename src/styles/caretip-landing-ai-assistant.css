@@ -1,0 +1,203 @@
+/* Landing onboarding AI — floating concierge (not support-widget chrome) */
+
+.caretip-landing-ai-launcher {
+  position: fixed;
+  z-index: 45;
+  right: max(1rem, env(safe-area-inset-right, 0px));
+  bottom: max(1rem, env(safe-area-inset-bottom, 0px));
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border) / 0.65);
+  background: hsl(var(--background) / 0.92);
+  padding: 0.5rem 0.875rem 0.5rem 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+  box-shadow:
+    0 12px 40px -12px rgba(15, 23, 42, 0.22),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+  backdrop-filter: blur(12px);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    opacity 0.24s ease;
+}
+
+.caretip-landing-ai-launcher:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 44px -14px rgba(15, 23, 42, 0.28);
+}
+
+.caretip-landing-ai-launcher--nudge {
+  animation: caretip-landing-ai-nudge 2.4s ease-in-out 1;
+}
+
+@keyframes caretip-landing-ai-nudge {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-3px);
+  }
+}
+
+.caretip-landing-ai-launcher__icon {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, hsl(var(--primary) / 0.92), hsl(var(--primary) / 0.72));
+  color: hsl(var(--primary-foreground));
+}
+
+.caretip-landing-ai-panel {
+  position: fixed;
+  z-index: 46;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid hsl(var(--border) / 0.7);
+  background: hsl(var(--background) / 0.97);
+  backdrop-filter: blur(16px);
+  box-shadow: 0 24px 64px -20px rgba(15, 23, 42, 0.35);
+}
+
+@media (min-width: 768px) {
+  .caretip-landing-ai-panel {
+    right: max(1.25rem, env(safe-area-inset-right, 0px));
+    bottom: max(5rem, calc(1rem + env(safe-area-inset-bottom, 0px)));
+    width: min(22rem, calc(100vw - 2rem));
+    max-height: min(32rem, calc(100dvh - 6rem));
+    border-radius: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .caretip-landing-ai-panel {
+    left: 0;
+    right: 0;
+    bottom: 0;
+    max-height: min(78dvh, 540px);
+    border-radius: 1.125rem 1.125rem 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .caretip-landing-ai-panel__handle {
+    margin: 0.5rem auto 0;
+    height: 0.25rem;
+    width: 2.5rem;
+    border-radius: 9999px;
+    background: hsl(var(--muted-foreground) / 0.35);
+  }
+}
+
+.caretip-landing-ai-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.5);
+}
+
+.caretip-landing-ai-panel__messages {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.875rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.caretip-landing-ai-bubble {
+  max-width: 92%;
+  border-radius: 0.875rem;
+  padding: 0.625rem 0.875rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.caretip-landing-ai-bubble--assistant {
+  align-self: flex-start;
+  background: hsl(var(--muted) / 0.45);
+  color: hsl(var(--foreground));
+}
+
+.caretip-landing-ai-bubble--user {
+  align-self: flex-end;
+  background: hsl(var(--primary) / 0.12);
+  color: hsl(var(--foreground));
+  border: 1px solid hsl(var(--primary) / 0.2);
+}
+
+.caretip-landing-ai-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  padding: 0 1rem 0.75rem;
+}
+
+.caretip-landing-ai-prompt-btn {
+  border-radius: 9999px;
+  border: 1px solid hsl(var(--border) / 0.8);
+  background: hsl(var(--background));
+  padding: 0.375rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: hsl(var(--muted-foreground));
+  text-align: left;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+
+.caretip-landing-ai-prompt-btn:hover:not(:disabled) {
+  border-color: hsl(var(--primary) / 0.45);
+  color: hsl(var(--foreground));
+  background: hsl(var(--primary) / 0.06);
+}
+
+.caretip-landing-ai-compose {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem 1rem;
+  border-top: 1px solid hsl(var(--border) / 0.5);
+}
+
+.caretip-landing-ai-compose input {
+  flex: 1;
+  min-width: 0;
+  border-radius: 0.625rem;
+  border: 1px solid hsl(var(--border));
+  background: hsl(var(--background));
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8125rem;
+  outline: none;
+}
+
+.caretip-landing-ai-compose input:focus-visible {
+  border-color: hsl(var(--primary) / 0.55);
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.15);
+}
+
+.caretip-landing-ai-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 44;
+  background: rgba(15, 23, 42, 0.28);
+  backdrop-filter: blur(2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing-ai-launcher--nudge {
+    animation: none;
+  }
+}

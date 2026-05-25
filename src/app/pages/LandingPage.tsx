@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LandingOnboardingAssistantHost } from "../components/landing/LandingOnboardingAssistantHost";
 import heroVisualDe from "../../../images/cca.png";
 import heroVisualEn from "../../../images/en-hero.png";
 import { Navigation } from "../components/Navigation";
@@ -17,11 +19,15 @@ import { Footer } from "../components/Footer";
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
+  const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
   const heroVisual = isDe ? heroVisualDe : heroVisualEn;
 
   return (
-    <div className="caretip-landing caretip-landing--premium relative min-h-screen w-full min-w-0 font-sans dark:bg-neutral-950">
+    <div
+      ref={setLandingRoot}
+      className="caretip-landing caretip-landing--premium relative min-h-screen w-full min-w-0 font-sans dark:bg-neutral-950"
+    >
       <div
         aria-hidden
         className="pointer-events-none fixed inset-x-0 top-0 bottom-0 z-0 min-h-[100dvh]"
@@ -49,6 +55,7 @@ export function LandingPage() {
         </main>
         <Footer className="caretip-landing-footer" />
       </div>
+      <LandingOnboardingAssistantHost rootEl={landingRoot} />
     </div>
   );
 }

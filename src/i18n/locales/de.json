@@ -1379,6 +1379,26 @@
       "subtitle": "QR-Trinkgeld in einem Nachmittag live, mit Auszahlungen und Teameinblick inklusive.",
       "cta": "Loslegen",
       "secondary": "So funktioniert es"
+    },
+    "assistant": {
+      "title": "CareTip Guide",
+      "subtitle": "Onboarding-Concierge",
+      "launcherLabel": "Fragen zu CareTip?",
+      "launcherShort": "CareTip fragen",
+      "welcome": "Ich helfe bei Setup, Preisen, QR-Codes und Auszahlungen. Nur zu CareTip.",
+      "inputPlaceholder": "Frage zu CareTip…",
+      "send": "Senden",
+      "close": "Assistent schließen",
+      "error": "Assistent gerade nicht erreichbar. Bitte kurz warten.",
+      "ctaSignup": "Kostenlos als Betrieb starten →",
+      "prompts": {
+        "how_it_works": "Wie funktioniert CareTip?",
+        "setup_time": "Wie lange dauert die Einrichtung?",
+        "qr_customize": "Können QR-Codes angepasst werden?",
+        "gdpr": "Ist CareTip DSGVO-konform?",
+        "employee_tips": "Wie erhalten Mitarbeitende Trinkgeld?",
+        "multi_venue": "Mehrere Standorte möglich?"
+      }
     }
   },
   "footer": {
