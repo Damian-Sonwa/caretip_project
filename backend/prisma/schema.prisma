@@ -215,6 +215,7 @@ model RefreshToken {
   replaces RefreshToken[] @relation("RefreshTokenReplacedBy")
 
   @@index([userId])
+  @@index([userId, revokedAt])
   @@index([expiresAt])
   @@map("refresh_tokens")
 }
@@ -408,6 +409,7 @@ model Employee {
   activationTokens   EmployeeActivationToken[]
 
   @@index([businessId, locationId])
+  @@index([businessId, isActive, name])
   @@map("employees")
 }
 
@@ -426,7 +428,7 @@ model EmployeeGoal {
   employee Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@index([employeeId])
-  @@index([employeeId, status])
+  @@index([employeeId, status, updatedAt(sort: Desc)])
   @@map("employee_goals")
 }
 
@@ -451,7 +453,9 @@ model Transaction {
   feedback TipFeedback?
 
   @@index([businessId])
-  @@index([businessId, status])
+  @@index([employeeId, status, createdAt(sort: Desc)])
+  @@index([businessId, status, createdAt(sort: Desc)])
+  @@index([employeeId, status, payoutStatus])
   @@map("tips")
 }
 
