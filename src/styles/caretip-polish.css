@@ -53,20 +53,52 @@
     }
   }
 
-  /* Hero accent — gradient on typed text only */
+  /* Hero accent — gradient on typed text only (single painted layer; no filter shadow) */
   .caretip-landing .caretip-hero-headline-accent {
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: none;
+    filter: none;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .caretip-landing .caretip-hero-animated-word {
     vertical-align: baseline;
+    filter: none;
   }
 
   .caretip-landing .caretip-hero-animated-word__viewport {
     overflow: hidden;
+    filter: none;
+    contain: paint;
+    isolation: isolate;
+  }
+
+  /* Slide uses top/opacity — never transform on bg-clip-text (WebKit orange halo) */
+  .caretip-landing .caretip-hero-animated-word__slide {
+    left: 0;
+    right: auto;
+    width: max-content;
+    max-width: 100%;
+    filter: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+  }
+
+  /* Sizing ghosts only — no gradient clip on hidden measure layer (prevents orange subpixel halo) */
+  .caretip-landing .caretip-hero-animated-word [data-measure-word] {
+    background: none !important;
+    -webkit-background-clip: border-box !important;
+    background-clip: border-box !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+    filter: none !important;
+    text-shadow: none !important;
   }
 
   /* App: consistent card radius and icon alignment in shells */

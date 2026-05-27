@@ -89,14 +89,6 @@
     letter-spacing: inherit;
   }
 
-  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
-    filter: drop-shadow(0 1px 0 rgba(217, 119, 6, 0.1));
-  }
-
-  html.dark .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word {
-    filter: drop-shadow(0 1px 0 rgba(251, 191, 36, 0.07));
-  }
-
   /* Rotating line — stable dedicated rows */
   .caretip-landing .caretip-hero-headline-rotating-stack {
     display: flex;
@@ -136,7 +128,7 @@
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport,
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word--static,
   .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word [data-measure-word],
-  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word__viewport > span > span {
+  .caretip-landing .caretip-hero-headline-rotating-emphasis-line .caretip-hero-animated-word [data-reel-word] {
     height: var(--caretip-hero-animated-slot) !important;
     min-height: var(--caretip-hero-animated-slot) !important;
     line-height: var(--caretip-hero-animated-slot) !important;

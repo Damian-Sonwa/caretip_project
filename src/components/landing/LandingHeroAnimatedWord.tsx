@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { landingHeroEaseOut } from "@/components/landing/landingHeroMotion";
 import { cn } from "@/lib/utils";
 
-const ROTATE_MS = 3400;
+const ROTATE_MS = 4200;
 /** Synced to headline line box via CSS `--caretip-hero-animated-slot` (1em) on mobile. */
 const SLOT_LINE_HEIGHT = "1em";
 /** Calm premium reel — not snappy */
-const REEL_TRANSITION = { duration: 0.78, ease: landingHeroEaseOut } as const;
+const REEL_TRANSITION = { duration: 0.95, ease: landingHeroEaseOut } as const;
 
 type LandingHeroAnimatedWordProps = {
   words: string[];
@@ -17,6 +17,9 @@ type LandingHeroAnimatedWordProps = {
 /**
  * Premium hero keyword — vertical word reel with a fixed slot sized to the
  * longest candidate so width/height never change during transitions.
+ *
+ * Uses top/opacity per word (not translateY on a gradient column) to avoid
+ * WebKit painting an orange halo under bg-clip-text during slides.
  */
 export function LandingHeroAnimatedWord({ words, className }: LandingHeroAnimatedWordProps) {
   const reduceMotion = useReducedMotion();
@@ -32,6 +35,7 @@ export function LandingHeroAnimatedWord({ words, className }: LandingHeroAnimate
   }, [reduceMotion, safeWords.length]);
 
   const activeIndex = reduceMotion ? 0 : index % safeWords.length;
+  const activeWord = safeWords[activeIndex];
 
   if (!safeWords.length) return null;
 
@@ -63,10 +67,7 @@ export function LandingHeroAnimatedWord({ words, className }: LandingHeroAnimate
           key={`measure-${word}`}
           data-measure-word
           aria-hidden
-          className={cn(
-            "col-start-1 row-start-1 whitespace-nowrap opacity-0 pointer-events-none select-none",
-            className,
-          )}
+          className="col-start-1 row-start-1 whitespace-nowrap opacity-0 pointer-events-none select-none font-inherit font-extrabold"
           style={{ height: SLOT_LINE_HEIGHT, lineHeight: SLOT_LINE_HEIGHT }}
         >
           {word}
@@ -74,24 +75,26 @@ export function LandingHeroAnimatedWord({ words, className }: LandingHeroAnimate
       ))}
 
       <span
-        className="caretip-hero-animated-word__viewport col-start-1 row-start-1 inline-block overflow-hidden align-top"
+        className="caretip-hero-animated-word__viewport relative col-start-1 row-start-1 inline-block overflow-hidden align-top"
         style={{ height: SLOT_LINE_HEIGHT, minHeight: SLOT_LINE_HEIGHT }}
       >
-        <motion.span
-          className="flex flex-col items-start will-change-transform"
-          animate={{ y: `calc(${-activeIndex} * ${SLOT_LINE_HEIGHT})` }}
-          transition={REEL_TRANSITION}
-        >
-          {safeWords.map((word) => (
-            <span
-              key={word}
-              className={cn("flex shrink-0 items-center whitespace-nowrap", className)}
-              style={{ height: SLOT_LINE_HEIGHT, lineHeight: SLOT_LINE_HEIGHT }}
-            >
-              {word}
-            </span>
-          ))}
-        </motion.span>
+        <AnimatePresence initial={false} mode="wait">
+          <motion.span
+            key={`${activeIndex}-${activeWord}`}
+            data-reel-word
+            initial={{ top: "100%", opacity: 0 }}
+            animate={{ top: "0%", opacity: 1 }}
+            exit={{ top: "-100%", opacity: 0 }}
+            transition={REEL_TRANSITION}
+            className={cn(
+              "caretip-hero-animated-word__slide absolute inset-x-0 flex items-center whitespace-nowrap",
+              className,
+            )}
+            style={{ height: SLOT_LINE_HEIGHT, lineHeight: SLOT_LINE_HEIGHT }}
+          >
+            {activeWord}
+          </motion.span>
+        </AnimatePresence>
       </span>
     </span>
   );
