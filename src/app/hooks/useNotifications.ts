@@ -10,6 +10,7 @@ import { isProtectedApiReady } from "../lib/authRestore";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
+import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 type UseNotificationsOptions = {
   /** Caller intends notifications when the user is signed in (role checks, etc.). */
@@ -31,13 +32,16 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
 
   const refreshUnread = useCallback(async () => {
     if (!active) return;
+    devSetHydrationPhase("notifications", "loading");
     try {
       const { unreadCount: count } = await fetchMyUnreadNotificationCount();
       setUnreadCount(count);
+      devSetHydrationPhase("notifications", "ready");
     } catch (err) {
       if (!isApiConnectivityError(err)) {
         logClientError("useNotifications.refreshUnread", err);
       }
+      devSetHydrationPhase("notifications", "error");
     }
   }, [active]);
 
@@ -103,6 +107,7 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
       setUnreadCount(0);
       setItems([]);
       loadedRef.current = false;
+      devSetHydrationPhase("notifications", "idle");
       return;
     }
     void refreshUnread();

@@ -18,6 +18,12 @@ import { logClientError } from "./clientLog";
 import { validateImageFileForUpload } from "./imageClientUpload";
 import { authDebug } from "./authDebugLog";
 import {
+  devTrackDeduped,
+  devTrackEnd,
+  devTrackStart,
+  resolveDashboardApiDebugTarget,
+} from "./dashboardDevDebug";
+import {
   getAuthSessionFlags,
   isSessionBootstrapInProgress,
   whenSessionBootstrapSettled,
@@ -170,14 +176,22 @@ function mayClearClientAuthStorage(): boolean {
 }
 
 async function ensureRefreshedSession(): Promise<RefreshSessionResult> {
-  if (refreshSingleton) return refreshSingleton;
+  if (refreshSingleton) {
+    devTrackDeduped("auth:refresh", "auth:refresh", { inflight: true });
+    return refreshSingleton;
+  }
+  devTrackStart("auth:refresh", "auth:refresh");
   refreshSingleton = (async (): Promise<RefreshSessionResult> => {
     try {
       const out = await runRefreshAuthWithRetries();
       if (!out.ok && out.shouldClearSession && mayClearClientAuthStorage()) {
         clearAuthStorage();
       }
+      devTrackEnd("auth:refresh", "auth:refresh", "completed");
       return out;
+    } catch (err) {
+      devTrackEnd("auth:refresh", "auth:refresh", "error", err);
+      throw err;
     } finally {
       refreshSingleton = null;
     }
@@ -379,6 +393,21 @@ function isCrossOriginApi(): boolean {
   return Boolean(resolveApiBaseUrl());
 }
 
+function abortableDelay(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) {
+    return Promise.reject(new DOMException("Aborted", "AbortError"));
+  }
+  return new Promise((resolve, reject) => {
+    const t = setTimeout(resolve, ms);
+    if (!signal) return;
+    const onAbort = () => {
+      clearTimeout(t);
+      reject(new DOMException("Aborted", "AbortError"));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
 function isNetworkFetchFailure(err: unknown): boolean {
   if (err instanceof TypeError) return true;
   if (err instanceof Error) {
@@ -409,7 +438,7 @@ async function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<R
     const pathname = requestUrlPathname(url);
     if (!pathname.startsWith("/api/")) throw err;
 
-    await new Promise((r) => setTimeout(r, NETWORK_RETRY_DELAY_MS));
+    await abortableDelay(NETWORK_RETRY_DELAY_MS, init?.signal);
     const retried: CaretipRequestInit = { ...(init ?? {}), __caretipNetworkRetried: true };
     try {
       return await fetch(url, retried);
@@ -436,6 +465,7 @@ export function wakeRemoteApi(): void {
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   let res: Response;
   const initFlags = init as CaretipRequestInit | undefined;
+  const devDebug = resolveDashboardApiDebugTarget(url);
 
   if (
     requestUsesCaretipProtectedApi(url) &&
@@ -446,14 +476,19 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
   }
 
   try {
+    if (devDebug) devTrackStart(devDebug.group, devDebug.key, devDebug.meta);
     res = await fetchWithNetworkRetry(url, attachLatestBearer(init));
   } catch (err) {
-    if (isAbortError(err)) throw err;
+    if (isAbortError(err)) {
+      if (devDebug) devTrackEnd(devDebug.group, devDebug.key, "aborted", err);
+      throw err;
+    }
     if (isApiConnectivityError(err)) {
       authDebug("api_request_network", { path: requestUrlPathname(url) });
     } else if (!initFlags?.caretipSilentErrors) {
       logClientError("api.apiRequest", err, { url });
     }
+    if (devDebug) devTrackEnd(devDebug.group, devDebug.key, "error", err);
     const baseMsg = toUserFriendlyMessage(err);
     const devHint = import.meta.env.DEV ? apiConfigHintForFailedFetch(url) : "";
     throw new Error(baseMsg + devHint);
@@ -496,7 +531,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     if (!isAuthRefresh && canAttemptRefresh && res.status === 401) {
       const alreadyDelayedRetry = initFlags?.__caretipDelayedRetried === true;
       if (!alreadyDelayedRetry) {
-        await new Promise((r) => setTimeout(r, 250));
+        await abortableDelay(250, init?.signal);
         const delayedInit: CaretipRequestInit = { ...(init ?? {}), __caretipDelayedRetried: true };
         res = await fetchWithNetworkRetry(url, attachLatestBearer(delayedInit));
       }
@@ -512,7 +547,14 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     }
   }
 
-  return handleRes<T>(res, { silent: initFlags?.caretipSilentErrors === true });
+  try {
+    const out = await handleRes<T>(res, { silent: initFlags?.caretipSilentErrors === true });
+    if (devDebug) devTrackEnd(devDebug.group, devDebug.key, "completed");
+    return out;
+  } catch (err) {
+    if (devDebug) devTrackEnd(devDebug.group, devDebug.key, "error", err);
+    throw err;
+  }
 }
 
 /** Fetch a protected file (PDF/image) with Bearer auth and return an object URL. */
@@ -890,15 +932,10 @@ const businessStatsInflight = new Map<string, Promise<BusinessDashboardStats>>()
 export type BusinessStatsScope = "summary" | "analytics" | "full";
 
 function businessStatsClientCacheKey(timeframe: string, scope: BusinessStatsScope = "full"): string {
-  try {
-    const raw = localStorage.getItem("caretip_user");
-    if (!raw) return `anon:${scope}:${timeframe}`;
-    const parsed = JSON.parse(raw) as { id?: unknown };
-    const userId = typeof parsed?.id === "string" && parsed.id.trim() ? parsed.id.trim() : "anon";
-    return `${userId}:${scope}:${timeframe}`;
-  } catch {
-    return `anon:${scope}:${timeframe}`;
-  }
+  // Endpoint is scoped to the authenticated session (business resolved from JWT),
+  // so using `caretip_user.id` here can cause *real* duplicate fetches during auth bootstrap
+  // (first call sees anon, next call sees user) while the request is still in-flight.
+  return `me:${scope}:${timeframe}`;
 }
 
 /** Merge summary + analytics payloads from split dashboard stats requests. */
@@ -959,13 +996,17 @@ export async function getBusinessStats(
   }
   const cacheKey = businessStatsClientCacheKey(tf, scope);
   const inflight = businessStatsInflight.get(cacheKey);
-  if (inflight) return inflight;
+  const statsUrl = apiPath(
+    `/api/business/me/stats?${new URLSearchParams({ timeframe: tf, scope }).toString()}`,
+  );
+  if (inflight) {
+    const target = resolveDashboardApiDebugTarget(statsUrl);
+    if (target) devTrackDeduped(target.group, target.key, { ...target.meta, inflight: true });
+    return inflight;
+  }
 
-  const sp = new URLSearchParams();
-  sp.set("timeframe", tf);
-  sp.set("scope", scope);
   const promise = apiRequest<BusinessDashboardStats>(
-    apiPath(`/api/business/me/stats?${sp.toString()}`),
+    statsUrl,
     {
       headers: getHeaders(),
       credentials: "include",
@@ -1571,15 +1612,9 @@ export type EmployeeAccountSnapshot = {
 };
 
 function employeeTipsCacheKey(timeframe: string, scope: EmployeeTipsScope = "full"): string {
-  try {
-    const raw = localStorage.getItem("caretip_user");
-    if (!raw) return `anon:${scope}:${timeframe}`;
-    const parsed = JSON.parse(raw) as { id?: unknown };
-    const userId = typeof parsed?.id === "string" && parsed.id.trim() ? parsed.id.trim() : "anon";
-    return `${userId}:${scope}:${timeframe}`;
-  } catch {
-    return `anon:${scope}:${timeframe}`;
-  }
+  // Endpoint is scoped to the authenticated session (employee resolved from JWT),
+  // so using `caretip_user.id` can cause *real* duplicate fetches during auth bootstrap.
+  return `me:${scope}:${timeframe}`;
 }
 
 export function mergeEmployeeTipsResponse(
@@ -1651,13 +1686,17 @@ export async function getTipsByEmployee(
   }
   const cacheKey = employeeTipsCacheKey(tf, scope);
   const inflight = employeeTipsInflight.get(cacheKey);
-  if (inflight) return inflight;
+  const tipsUrl = apiPath(
+    `/api/tips/employee?${new URLSearchParams({ timeframe: tf, scope }).toString()}`,
+  );
+  if (inflight) {
+    const target = resolveDashboardApiDebugTarget(tipsUrl);
+    if (target) devTrackDeduped(target.group, target.key, { ...target.meta, inflight: true });
+    return inflight;
+  }
 
-  const sp = new URLSearchParams();
-  sp.set("timeframe", tf);
-  sp.set("scope", scope);
   const promise = apiRequest<EmployeeTipsResponse>(
-    apiPath(`/api/tips/employee?${sp.toString()}`),
+    tipsUrl,
     {
       headers: getHeaders(),
       credentials: "include",

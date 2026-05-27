@@ -20,6 +20,7 @@ import {
 } from "../lib/employeeNotificationStore";
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
+import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
 
@@ -93,6 +94,30 @@ export function useEmployeeDashboardAnalytics(
   const summaryPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const analyticsPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const hasSettledLiveUiRef = useRef(false);
+  const loadForRef = useRef<
+    (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
+  >(async () => {});
+
+  const abortInactiveTimeframes = useCallback((activeTf: EmployeeAnalyticsTimeframe) => {
+    for (const [tf, controller] of abortRef.current) {
+      if (tf === activeTf) continue;
+      controller.abort();
+      abortRef.current.delete(tf);
+    }
+    for (const tf of ["today", "week", "month"] as const) {
+      if (tf !== activeTf) clearEmployeeTipsClientCache(tf);
+    }
+  }, []);
+
+  const setAnalyticsTimeframeControlled = useCallback(
+    (tf: EmployeeAnalyticsTimeframe) => {
+      if (tf === tfRef.current) return;
+      abortInactiveTimeframes(tf);
+      uiRequestSeqRef.current += 1;
+      setAnalyticsTimeframe(tf);
+    },
+    [abortInactiveTimeframes],
+  );
 
   const syncTipsFromResponse = useCallback(
     (data: EmployeeTipsResponse) => {
@@ -170,6 +195,8 @@ export function useEmployeeDashboardAnalytics(
           setDataTimeframe(tf);
           setSummaryLoading(false);
           setAnalyticsLoading(true);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("charts", "loading");
         } else if (!opts?.soft) {
           setPayload(null);
           setDataTimeframe(null);
@@ -177,86 +204,80 @@ export function useEmployeeDashboardAnalytics(
           analyticsPartialRef.current.delete(tf);
           setSummaryLoading(true);
           setAnalyticsLoading(true);
+          devSetHydrationPhase("metrics", "loading");
+          devSetHydrationPhase("charts", "loading");
+          devSetHydrationPhase("goals", "loading");
         } else {
           setSummaryLoading(!payloadRef.current);
           setAnalyticsLoading(true);
+          if (!payloadRef.current) {
+            devSetHydrationPhase("metrics", "loading");
+            devSetHydrationPhase("charts", "loading");
+          }
         }
       }
 
       const prev = abortRef.current.get(tf);
       prev?.abort();
+      clearEmployeeTipsClientCache(tf);
       const controller = new AbortController();
       abortRef.current.set(tf, controller);
 
-      const summaryPromise = getTipsByEmployee(tf, {
-        scope: "summary",
-        signal: controller.signal,
-        silent: opts?.silent === true || Boolean(cached),
-      });
-      const analyticsPromise = getTipsByEmployee(tf, {
-        scope: "analytics",
-        signal: controller.signal,
-        silent: opts?.silent === true || Boolean(cached),
-      });
+      const silent = opts?.silent === true || Boolean(cached);
+      const revalidate = opts?.soft === true;
+      const stillActive = () =>
+        !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      void summaryPromise
-        .then((summaryData) => {
-          if (controller.signal.aborted) return;
-          summaryPartialRef.current.set(tf, summaryData);
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setSummaryLoading(false);
-            commitUiPayload(tf, seq, true);
-          }
-        })
-        .catch((err) => {
-          if (isAbortError(err) || controller.signal.aborted) return;
-          if (!opts?.silent && affectsUi && uiRequestSeqRef.current === seq) {
-            if (!isApiConnectivityError(err)) {
-              logClientError("useEmployeeDashboardAnalytics.load.summary", err);
-            }
-            setSummaryLoading(false);
-            if (!payloadRef.current) {
-              setError(toUserFriendlyMessage(err, { audience: "employee" }));
-            }
-          }
-        });
-
-      void analyticsPromise
-        .then((analyticsData) => {
-          if (controller.signal.aborted) return;
-          analyticsPartialRef.current.set(tf, analyticsData);
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setAnalyticsLoading(false);
-            commitUiPayload(tf, seq, true);
-            const merged = mergeEmployeeTipsResponse(
-              summaryPartialRef.current.get(tf),
-              analyticsData,
-            );
-            if (merged) syncTipsFromResponse(merged);
-          }
-        })
-        .catch((err) => {
-          if (isAbortError(err) || controller.signal.aborted) return;
-          if (!opts?.silent && affectsUi && uiRequestSeqRef.current === seq) {
-            if (!isApiConnectivityError(err)) {
-              logClientError("useEmployeeDashboardAnalytics.load.analytics", err);
-            }
-            setAnalyticsLoading(false);
-            if (!payloadRef.current) {
-              setError(toUserFriendlyMessage(err, { audience: "employee" }));
-            }
-          }
-        });
+      let summarySettled = !revalidate && Boolean(cached && summaryPartialRef.current.has(tf));
+      let analyticsSettled = !revalidate && Boolean(cached && analyticsPartialRef.current.has(tf));
 
       try {
-        await Promise.all([summaryPromise, analyticsPromise]);
-        if (!controller.signal.aborted) {
+        if (!summarySettled) {
+          const summaryData = await getTipsByEmployee(tf, {
+            scope: "summary",
+            signal: controller.signal,
+            silent,
+          });
+          if (!stillActive()) return;
+          summaryPartialRef.current.set(tf, summaryData);
+          summarySettled = true;
+          if (affectsUi && uiRequestSeqRef.current === seq) {
+            setSummaryLoading(false);
+            devSetHydrationPhase("metrics", "ready");
+            devSetHydrationPhase("goals", "ready");
+            commitUiPayload(tf, seq, true);
+          }
+        }
+
+        if (!stillActive()) return;
+
+        if (!analyticsSettled) {
+          const analyticsData = await getTipsByEmployee(tf, {
+            scope: "analytics",
+            signal: controller.signal,
+            silent,
+          });
+          if (!stillActive()) return;
+          analyticsPartialRef.current.set(tf, analyticsData);
+          analyticsSettled = true;
+          if (affectsUi && uiRequestSeqRef.current === seq) {
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("charts", "ready");
+            commitUiPayload(tf, seq, true);
+            const merged = mergeEmployeeTipsResponse(summaryPartialRef.current.get(tf), analyticsData);
+            if (merged) syncTipsFromResponse(merged);
+          }
+        }
+
+        if (stillActive()) {
           markDashboardLiveSettled(hasSettledLiveUiRef);
         }
       } catch {
         /* per-branch handlers */
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
+          if (!summarySettled) setSummaryLoading(false);
+          if (!analyticsSettled) setAnalyticsLoading(false);
           setIsRevalidating(false);
         }
         if (abortRef.current.get(tf) === controller) {
@@ -266,6 +287,8 @@ export function useEmployeeDashboardAnalytics(
     },
     [enabled, commitUiPayload, syncTipsFromResponse, hydrateFromSwr],
   );
+
+  loadForRef.current = loadFor;
 
   useEffect(() => {
     if (!enabled) {
@@ -282,15 +305,22 @@ export function useEmployeeDashboardAnalytics(
       setAnalyticsLoading(true);
       setIsRevalidating(false);
       setError(null);
+      devSetHydrationPhase("metrics", "idle");
+      devSetHydrationPhase("charts", "idle");
+      devSetHydrationPhase("goals", "idle");
       return;
     }
   }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
-    void loadFor(analyticsTimeframe, { affectsUi: true });
-    return () => abortRef.current.get(analyticsTimeframe)?.abort();
-  }, [enabled, analyticsTimeframe, loadFor]);
+    void loadForRef.current(analyticsTimeframe, { affectsUi: true });
+    return () => {
+      abortRef.current.get(analyticsTimeframe)?.abort();
+      abortRef.current.delete(analyticsTimeframe);
+      clearEmployeeTipsClientCache(analyticsTimeframe);
+    };
+  }, [enabled, analyticsTimeframe]);
 
   const refetchLive = useCallback(() => {
     clearEmployeeTipsClientCache();
@@ -306,12 +336,13 @@ export function useEmployeeDashboardAnalytics(
     setIsRevalidating(true);
     clearEmployeeTipsClientCache(tf);
     try {
-      const [summaryData, analyticsData] = await Promise.all([
-        getTipsByEmployee(tf, { scope: "summary", silent: true }),
-        getTipsByEmployee(tf, { scope: "analytics", silent: true }),
-      ]);
+      const summaryData = await getTipsByEmployee(tf, { scope: "summary", silent: true });
       if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       summaryPartialRef.current.set(tf, summaryData);
+      commitUiPayload(tf, seq, true);
+
+      const analyticsData = await getTipsByEmployee(tf, { scope: "analytics", silent: true });
+      if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       analyticsPartialRef.current.set(tf, analyticsData);
       commitUiPayload(tf, seq, true);
       const merged = mergeEmployeeTipsResponse(summaryData, analyticsData);
@@ -359,7 +390,7 @@ export function useEmployeeDashboardAnalytics(
 
   return {
     analyticsTimeframe,
-    setAnalyticsTimeframe,
+    setAnalyticsTimeframe: setAnalyticsTimeframeControlled,
     displayPayload,
     displayMetrics,
     payload,

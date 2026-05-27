@@ -90,6 +90,7 @@ import { ApprovedBusinessGate } from './components/ApprovedBusinessGate';
 import { PendingVerificationAllowedGate } from './components/PendingVerificationAllowedGate';
 import { PendingVerification } from './components/PendingVerification';
 import { logClientError } from './lib/clientLog';
+import { DashboardDevDebugOverlayRoot } from './components/dashboard/DashboardDevDebugOverlayRoot';
 
 /** Canonical alias: `/qr/business/:id` → existing `/qr-landing/:id` (no behavior change). */
 function RedirectQrBusiness() {
@@ -160,6 +161,7 @@ function RootLayout() {
     <>
       <ScrollToTop />
       <Outlet />
+      {import.meta.env.DEV ? <DashboardDevDebugOverlayRoot /> : null}
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { TipStatus, type EmployeeActivationStatus } from "@prisma/client";
+import { Prisma, TipStatus, type EmployeeActivationStatus } from "@prisma/client";
 import { DateTime } from "luxon";
 import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
 import { randomBytes } from "node:crypto";
@@ -13,9 +13,27 @@ import {
   businessUtcRangeForTimeframe,
   sanitizeIanaTimezone,
 } from "../utils/businessTime.js";
-import { getCachedOrLoad, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+import {
+  getCachedOrLoad,
+  invalidateCacheKey,
+  invalidateCacheKeyPrefix,
+} from "../utils/shortLivedCache.js";
+import { logDashboardPhase } from "../utils/dashboardTiming.js";
+import {
+  buildBusinessDailyTipDistribution,
+  queryBusinessDashboardSqlBundle,
+  type BusinessDashboardSqlBundle,
+} from "../utils/tipChartBuckets.js";
 
 const BUSINESS_STATS_CACHE_TTL_MS = 30_000;
+/** Business row + roster pulse (single SQL). */
+const BUSINESS_META_ROSTER_CACHE_TTL_MS = 5 * 60_000;
+/** Per-timeframe tips CTE bundle — keep warm for timeframe switching. */
+const BUSINESS_SQL_BUNDLE_CACHE_TTL_MS = 5 * 60_000;
+/** Manager lookup caching for stats endpoints. */
+const BUSINESS_MANAGER_ID_CACHE_TTL_MS = 60_000;
+/** Employees + goals — timeframe independent. */
+const BUSINESS_ANALYTICS_EXTRAS_CACHE_TTL_MS = 60_000;
 
 /** Avoid collision with SPA routes at `/{slug}` and legacy `/business/{slug}` paths. */
 const RESERVED_BUSINESS_SLUGS = new Set([
@@ -286,6 +304,10 @@ function buildYearChartFromMonthTotals(monthTotals: number[]): { day: string; am
 export type BusinessStatsScope = "summary" | "analytics" | "full";
 
 export function invalidateBusinessStatsCache(businessId: string): void {
+  invalidateCacheKeyPrefix(`biz-dash-sql:${businessId}:`);
+  invalidateCacheKey(`biz-dash-extras:${businessId}`);
+  invalidateCacheKey(`biz-dash-meta-roster:${businessId}`);
+  invalidateCacheKeyPrefix(`biz-employee-goals:${businessId}:`);
   invalidateCacheKeyPrefix(`business-stats:${businessId}:`);
   invalidateCacheKeyPrefix(`business-stats-summary:${businessId}:`);
   invalidateCacheKeyPrefix(`business-stats-analytics:${businessId}:`);
@@ -314,7 +336,24 @@ export function getBusinessStats(
   );
 }
 
-type BusinessStatsContext = {
+type BusinessRosterPulse = {
+  roster_total: number;
+  tipping_ready: number;
+  missing_qr: number;
+};
+
+type BusinessDashboardMetaRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  verification_status: string;
+  timezone: string | null;
+  roster_total: number;
+  tipping_ready: number;
+  missing_qr: number;
+};
+
+type BusinessDashboardContext = {
   business: {
     id: string;
     name: string;
@@ -323,188 +362,154 @@ type BusinessStatsContext = {
     timezone: string | null;
   };
   tz: string;
-  timeframe: BusinessDashboardTimeframe;
-  tipWhere: {
-    businessId: string;
-    status: typeof TipStatus.success;
-    createdAt?: { gte: Date; lte: Date };
-  };
+  roster: BusinessRosterPulse;
+};
+
+type BusinessSqlBundleSlice = {
+  bundle: BusinessDashboardSqlBundle;
   rangeStart: Date;
   rangeEnd: Date;
-  todayRange: { startUtc: Date; endUtc: Date };
-  sixtyAgo: Date;
+  timeframe: BusinessDashboardTimeframe;
   ctx: { businessId: string; timeframe: BusinessDashboardTimeframe };
 };
 
-const statsContextInflight = new Map<string, Promise<BusinessStatsContext>>();
+type BusinessSqlBundleCache = BusinessDashboardContext & BusinessSqlBundleSlice;
 
-/** Dedupe business row + range resolution when summary and analytics load in parallel. */
-function loadBusinessStatsContext(
-  businessId: string,
-  timeframe: BusinessDashboardTimeframe,
-): Promise<BusinessStatsContext> {
-  const key = `${businessId}:${timeframe}`;
-  const hit = statsContextInflight.get(key);
-  if (hit) return hit;
-  const promise = resolveBusinessStatsContext(businessId, timeframe).finally(() => {
-    if (statsContextInflight.get(key) === promise) statsContextInflight.delete(key);
+/** Meta + roster pulse, cached 5 minutes. */
+function loadBusinessDashboardMetaAndRoster(businessId: string): Promise<BusinessDashboardContext> {
+  return getCachedOrLoad(`biz-dash-meta-roster:${businessId}`, BUSINESS_META_ROSTER_CACHE_TTL_MS, async () => {
+    if (!businessId?.trim()) {
+      throw new StatsFetchError("Business not found", { businessId, reason: "missing_business_id" });
+    }
+
+    // Scalar-subquery shape avoids a large join + GROUP BY aggregate on cold.
+    const [row] = await logDashboardPhase("business.myStats.summary", "metaRosterSql", () =>
+      prisma.$queryRaw<BusinessDashboardMetaRow[]>(Prisma.sql`
+        SELECT
+          b.id,
+          b.name,
+          b.slug,
+          b.verification_status,
+          b.timezone,
+          (
+            SELECT COUNT(*)::int
+            FROM employees e
+            WHERE e.business_id = b.id
+          ) AS roster_total,
+          (
+            SELECT COUNT(*)::int
+            FROM employees e
+            WHERE e.business_id = b.id
+              AND e.is_active = true
+              AND e.activation_status = 'active'
+              AND EXISTS (
+                SELECT 1
+                FROM "User" u
+                WHERE u.id = e.user_id
+                  AND u.email_verified = true
+              )
+          ) AS tipping_ready,
+          (
+            SELECT COUNT(*)::int
+            FROM employees e
+            WHERE e.business_id = b.id
+              AND (e.slug IS NULL OR e.slug = '')
+          ) AS missing_qr
+        FROM businesses b
+        WHERE b.id = ${businessId}
+      `),
+    );
+
+    if (!row) {
+      throw new StatsFetchError("Business not found", { businessId, reason: "business_row_missing" });
+    }
+
+    return {
+      business: {
+        id: row.id,
+        name: row.name,
+        slug: row.slug,
+        verificationStatus: row.verification_status,
+        timezone: row.timezone,
+      },
+      tz: sanitizeIanaTimezone(row.timezone),
+      roster: {
+        roster_total: Number(row.roster_total ?? 0),
+        tipping_ready: Number(row.tipping_ready ?? 0),
+        missing_qr: Number(row.missing_qr ?? 0),
+      },
+    };
   });
-  statsContextInflight.set(key, promise);
-  return promise;
 }
 
-async function resolveBusinessStatsContext(
+async function loadBusinessSqlBundleSlice(
   businessId: string,
   timeframe: BusinessDashboardTimeframe,
-): Promise<BusinessStatsContext> {
+  meta: BusinessDashboardContext,
+): Promise<BusinessSqlBundleSlice> {
+  const { tz } = meta;
   const ctx = { businessId, timeframe };
-  if (!businessId?.trim()) {
-    throw new StatsFetchError("Business not found", { ...ctx, reason: "missing_business_id" });
-  }
-
-  const business = await prisma.business.findUnique({
-    where: { id: businessId },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      verificationStatus: true,
-      timezone: true,
-    },
-  });
-
-  if (!business) {
-    throw new StatsFetchError("Business not found", { ...ctx, reason: "business_row_missing" });
-  }
-
-  const tz = sanitizeIanaTimezone(business.timezone);
+  const now = new Date();
   const range = businessUtcRangeForTimeframe(timeframe === "all" ? "all" : timeframe, tz);
   const rangeStart = range?.startUtc ?? new Date(0);
-  /** Prisma rejects JS max-date; for `all`, bound chart queries to now. */
-  const rangeEnd = range?.endUtc ?? new Date();
-  const now = new Date();
+  const rangeEnd = range?.endUtc ?? now;
+  const scanStart = timeframe === "all" ? new Date(0) : rangeStart;
+  const scanEnd = rangeEnd;
   const todayRange = businessUtcRangeForTimeframe("today", tz) ?? {
     startUtc: new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())),
     endUtc: now,
   };
   const sixtyAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-  const tipWhere = {
-    businessId,
-    status: TipStatus.success,
-    ...(range ? { createdAt: { gte: rangeStart, lte: rangeEnd } } : {}),
-  };
+  const bundle = await logDashboardPhase("business.myStats.summary", "sqlBundle", () =>
+    queryBusinessDashboardSqlBundle({
+      businessId,
+      timeframe,
+      rangeStart,
+      rangeEnd,
+      scanStart,
+      scanEnd,
+      sixtyAgo,
+      todayStart: todayRange.startUtc,
+      todayEnd: todayRange.endUtc,
+      timezone: tz,
+    }),
+  );
 
-  return {
-    business,
-    tz,
-    timeframe,
-    tipWhere,
-    rangeStart,
-    rangeEnd,
-    todayRange,
-    sixtyAgo,
-    ctx,
-  };
+  return { bundle, rangeStart, rangeEnd, timeframe, ctx };
 }
 
-async function getBusinessStatsSummaryImpl(
+async function loadBusinessSqlBundleCached(
   businessId: string,
-  timeframe: BusinessDashboardTimeframe = "month",
-) {
-  const { business, tipWhere, todayRange, sixtyAgo, ctx } =
-    await loadBusinessStatsContext(businessId, timeframe);
-  logStatsPhase("summary_start", ctx);
-
-  const [
-    tipAgg,
-    tipsLast60mAgg,
-    tipsTodayAgg,
-    rosterTotal,
-    tippingReadyEmployees,
-    employeesMissingQr,
-  ] = await Promise.all([
-    prisma.transaction.aggregate({
-      where: tipWhere,
-      _sum: { amount: true },
-      _count: { _all: true },
-    }),
-    prisma.transaction.aggregate({
-      where: { businessId, status: TipStatus.success, createdAt: { gte: sixtyAgo } },
-      _sum: { amount: true },
-      _count: { _all: true },
-    }),
-    prisma.transaction.aggregate({
-      where: {
-        businessId,
-        status: TipStatus.success,
-        createdAt: { gte: todayRange.startUtc, lte: todayRange.endUtc },
-      },
-      _sum: { amount: true },
-      _count: { _all: true },
-    }),
-    prisma.employee.count({ where: { businessId } }),
-    prisma.employee.count({
-      where: {
-        businessId,
-        isActive: true,
-        activationStatus: "active" as EmployeeActivationStatus,
-        user: { emailVerified: true },
-      },
-    }),
-    prisma.employee.count({
-      where: {
-        businessId,
-        OR: [{ slug: null }, { slug: "" }],
-      },
-    }),
-  ]);
-
-  const totalTips = Number(tipAgg._sum.amount ?? 0);
-  const tipCount = tipAgg._count._all;
-
-  logStatsPhase("summary_ok", { ...ctx, totalTips, tipCount, employeeCount: rosterTotal });
-
-  return {
-    id: business.id,
-    name: business.name,
-    slug: business.slug,
-    verificationStatus: business.verificationStatus,
-    timeframe,
-    totalTips,
-    tipCount,
-    employeeCount: rosterTotal,
-    operationalPulse: {
-      tipsLast60m: {
-        amount: Number(tipsLast60mAgg._sum.amount ?? 0),
-        count: tipsLast60mAgg._count._all,
-      },
-      tipsToday: {
-        amount: Number(tipsTodayAgg._sum.amount ?? 0),
-        count: tipsTodayAgg._count._all,
-      },
-      tippingReadyEmployees,
-      rosterTotal,
-      employeesMissingQr,
-      goalsTracked: 0,
-      goalsOnTrackOrBetter: 0,
-    },
-  };
+  timeframe: BusinessDashboardTimeframe,
+): Promise<BusinessSqlBundleCache> {
+  const meta = await loadBusinessDashboardMetaAndRoster(businessId);
+  const slice = await getCachedOrLoad(
+    `biz-dash-sql:${businessId}:${timeframe}`,
+    BUSINESS_SQL_BUNDLE_CACHE_TTL_MS,
+    () => loadBusinessSqlBundleSlice(businessId, timeframe, meta),
+  );
+  return { ...meta, ...slice };
 }
 
-async function getBusinessStatsAnalyticsImpl(
+function buildChartFromSqlBundle(
+  timeframe: BusinessDashboardTimeframe,
+  rangeStart: Date,
+  tz: string,
+  bundle: BusinessDashboardSqlBundle,
+): { day: string; amount: number }[] {
+  if (timeframe === "year" && bundle.monthTotals) return buildYearChartFromMonthTotals(bundle.monthTotals);
+  if (timeframe === "all") return buildYearChartFromMonthTotals(new Array(12).fill(0));
+  if (timeframe === "week" || timeframe === "month") {
+    return buildBusinessDailyTipDistribution(timeframe, bundle.dailyByYmd, rangeStart, tz);
+  }
+  return [];
+}
+
+async function loadBusinessAnalyticsEmployees(
   businessId: string,
-  timeframe: BusinessDashboardTimeframe = "month",
+  opts?: { includeAssignments?: boolean },
 ) {
-  const { business, tz, tipWhere, rangeStart, rangeEnd, ctx } =
-    await loadBusinessStatsContext(businessId, timeframe);
-  logStatsPhase("analytics_start", ctx);
-
-  const needsRowLevelChart = timeframe === "week" || timeframe === "month";
-  const needsSqlMonthChart = timeframe === "year";
-  /** All-time staff/roster views need employees + aggregates, not a 12-bucket calendar chart. */
-  const skipMonthChart = timeframe === "all";
-
   const legacyEmployeeSelect = {
     id: true,
     slug: true,
@@ -525,10 +530,14 @@ async function getBusinessStatsAnalyticsImpl(
     },
   } as const;
 
+  const includeAssignments = opts?.includeAssignments === true;
+
   const extendedEmployeeSelect = {
     ...legacyEmployeeSelect,
     locationId: true,
-    tableAssignments: { select: { table: { select: { id: true } } } },
+    ...(includeAssignments
+      ? { tableAssignments: { select: { table: { select: { id: true } } } } }
+      : {}),
   } as const;
 
   const minimalEmployeeSelect = {
@@ -551,78 +560,75 @@ async function getBusinessStatsAnalyticsImpl(
     },
   } as const;
 
-  const employeesPromise = (async () => {
-    try {
+  try {
       return await prisma.employee.findMany({
+      where: { businessId },
+      orderBy: [{ isActive: "desc" }, { name: "asc" }],
+      select: extendedEmployeeSelect,
+    });
+  } catch (extendedErr) {
+    try {
+      const rows = await prisma.employee.findMany({
         where: { businessId },
         orderBy: [{ isActive: "desc" }, { name: "asc" }],
-        select: extendedEmployeeSelect,
+        select: legacyEmployeeSelect,
       });
-    } catch (extendedErr) {
-      try {
-        const rows = await prisma.employee.findMany({
-          where: { businessId },
-          orderBy: [{ isActive: "desc" }, { name: "asc" }],
-          select: legacyEmployeeSelect,
-        });
-        console.warn(
-          "[getBusinessStats] Extended employee select failed (DB may need migration); using legacy columns.",
-          extendedErr instanceof Error ? extendedErr.message : extendedErr,
-        );
-        return rows;
-      } catch (legacyErr) {
-        console.warn(
-          "[getBusinessStats] Legacy employee select failed; using minimal columns.",
-          legacyErr instanceof Error ? legacyErr.message : legacyErr,
-        );
-        return prisma.employee.findMany({
-          where: { businessId },
-          orderBy: [{ isActive: "desc" }, { name: "asc" }],
-          select: minimalEmployeeSelect,
-        });
-      }
+      console.warn(
+        "[getBusinessStats] Extended employee select failed (DB may need migration); using legacy columns.",
+        extendedErr instanceof Error ? extendedErr.message : extendedErr,
+      );
+      return rows;
+    } catch (legacyErr) {
+      console.warn(
+        "[getBusinessStats] Legacy employee select failed; using minimal columns.",
+        legacyErr instanceof Error ? legacyErr.message : legacyErr,
+      );
+      return prisma.employee.findMany({
+        where: { businessId },
+        orderBy: [{ isActive: "desc" }, { name: "asc" }],
+        select: minimalEmployeeSelect,
+      });
     }
-  })();
-
-  const [tipsByEmployeeAgg, chartTipRows, monthChartTotals, employees] = await Promise.all([
-    prisma.transaction.groupBy({
-      by: ["employeeId"],
-      where: tipWhere,
-      _sum: { amount: true },
-      _count: { _all: true },
-      orderBy: { employeeId: "asc" },
-    }),
-    needsRowLevelChart
-      ? prisma.transaction.findMany({
-          where: tipWhere,
-          select: { amount: true, createdAt: true },
-        })
-      : Promise.resolve([] as { amount: unknown; createdAt: Date }[]),
-    needsSqlMonthChart
-      ? monthlyTipTotalsForRange(businessId, rangeStart, rangeEnd, tz)
-      : skipMonthChart
-        ? Promise.resolve(new Array(12).fill(0))
-        : Promise.resolve(null as number[] | null),
-    employeesPromise,
-  ]);
-
-  let dailyTipDistribution: { day: string; amount: number }[];
-  if ((needsSqlMonthChart || skipMonthChart) && monthChartTotals) {
-    dailyTipDistribution = buildYearChartFromMonthTotals(monthChartTotals);
-  } else {
-    dailyTipDistribution = buildDailyTipDistribution(chartTipRows, timeframe, rangeStart, tz);
   }
+}
 
-  const tipsByEmp = new Map<string, { total: number; count: number }>();
-  for (const row of tipsByEmployeeAgg) {
-    tipsByEmp.set(row.employeeId, {
-      total: Number(row._sum.amount ?? 0),
-      count: row._count._all,
-    });
-  }
+type BusinessAnalyticsExtras = {
+  employees: Awaited<ReturnType<typeof loadBusinessAnalyticsEmployees>>;
+  employeeGoals: Awaited<ReturnType<typeof listEmployeeGoalsForBusiness>>;
+};
 
-  const employeeStats = employees.map((emp) => {
-    const agg = tipsByEmp.get(emp.id) ?? { total: 0, count: 0 };
+function loadBusinessAnalyticsExtras(
+  businessId: string,
+  opts?: { includeAssignments?: boolean },
+): Promise<BusinessAnalyticsExtras> {
+  const includeAssignments = opts?.includeAssignments === true;
+  const cacheKey = includeAssignments
+    ? `biz-dash-extras:${businessId}:withAssignments`
+    : `biz-dash-extras:${businessId}:noAssignments`;
+  return getCachedOrLoad(cacheKey, BUSINESS_ANALYTICS_EXTRAS_CACHE_TTL_MS, async () => {
+    // One connection: run sequentially (parallel only queues on transaction pooler).
+    const employees = await logDashboardPhase("business.myStats.analytics", "employeesSql", () =>
+      loadBusinessAnalyticsEmployees(businessId, { includeAssignments }),
+    );
+    const employeeGoals = await logDashboardPhase("business.myStats.analytics", "goalsSql", () =>
+      listEmployeeGoalsForBusiness(businessId, { maxGoals: 25 }).catch((goalsErr) => {
+        console.warn(
+          "[getBusinessStats] employee goals omitted",
+          goalsErr instanceof Error ? goalsErr.message : goalsErr,
+        );
+        return [] as Awaited<ReturnType<typeof listEmployeeGoalsForBusiness>>;
+      }),
+    );
+    return { employees, employeeGoals };
+  });
+}
+
+function mapEmployeesToStats(
+  employees: Awaited<ReturnType<typeof loadBusinessAnalyticsEmployees>>,
+  tipsByEmployee: Map<string, { total: number; count: number }>,
+) {
+  return employees.map((emp) => {
+    const agg = tipsByEmployee.get(emp.id) ?? { total: 0, count: 0 };
     const account = emp.user ?? {
       email: "",
       emailVerified: false,
@@ -655,16 +661,59 @@ async function getBusinessStatsAnalyticsImpl(
       rating: agg.count > 0 ? 4.8 : null,
     };
   });
+}
 
-  let employeeGoals: Awaited<ReturnType<typeof listEmployeeGoalsForBusiness>> = [];
-  try {
-    employeeGoals = await listEmployeeGoalsForBusiness(businessId, { maxGoals: 25 });
-  } catch (goalsErr) {
-    console.warn(
-      "[getBusinessStats] employee goals omitted",
-      goalsErr instanceof Error ? goalsErr.message : goalsErr,
-    );
-  }
+async function getBusinessStatsSummaryImpl(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+) {
+  const { business, roster, bundle, ctx } = await loadBusinessSqlBundleCached(businessId, timeframe);
+  logStatsPhase("summary_start", ctx);
+
+  const totalTips = bundle.summary.periodAmount;
+  const tipCount = bundle.summary.periodCount;
+
+  logStatsPhase("summary_ok", {
+    ...ctx,
+    totalTips,
+    tipCount,
+    employeeCount: roster.roster_total,
+  });
+
+  return {
+    id: business.id,
+    name: business.name,
+    slug: business.slug,
+    verificationStatus: business.verificationStatus,
+    timeframe,
+    totalTips,
+    tipCount,
+    employeeCount: roster.roster_total,
+    operationalPulse: {
+      tipsLast60m: { amount: bundle.summary.last60Amount, count: bundle.summary.last60Count },
+      tipsToday: { amount: bundle.summary.todayAmount, count: bundle.summary.todayCount },
+      tippingReadyEmployees: roster.tipping_ready,
+      rosterTotal: roster.roster_total,
+      employeesMissingQr: roster.missing_qr,
+      goalsTracked: 0,
+      goalsOnTrackOrBetter: 0,
+    },
+  };
+}
+
+async function getBusinessStatsAnalyticsImpl(
+  businessId: string,
+  timeframe: BusinessDashboardTimeframe = "month",
+) {
+  const { business, tz, bundle, rangeStart, ctx } = await loadBusinessSqlBundleCached(businessId, timeframe);
+  logStatsPhase("analytics_start", ctx);
+
+  // Table assignments are only needed for staff management views (timeframe=all).
+  const { employees, employeeGoals } = await loadBusinessAnalyticsExtras(businessId, {
+    includeAssignments: timeframe === "all",
+  });
+  const dailyTipDistribution = buildChartFromSqlBundle(timeframe, rangeStart, tz, bundle);
+  const employeeStats = mapEmployeesToStats(employees, bundle.tipsByEmployee);
 
   const goalsTracked = employeeGoals.length;
   const goalsOnTrackOrBetter = employeeGoals.filter(
@@ -683,10 +732,7 @@ async function getBusinessStatsAnalyticsImpl(
     dailyTipDistribution,
     employees: employeeStats,
     employeeGoals,
-    operationalPulse: {
-      goalsTracked,
-      goalsOnTrackOrBetter,
-    },
+    operationalPulse: { goalsTracked, goalsOnTrackOrBetter },
   };
 }
 

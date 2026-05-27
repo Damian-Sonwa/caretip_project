@@ -12,6 +12,7 @@ import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashbo
 import { isAbortError, isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
+import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 const ACCOUNT_SWR_KEY = "employee:account";
 const accountSwrStore = createDashboardSwrStore<EmployeeAccountSnapshot>();
@@ -29,6 +30,7 @@ export function useEmployeeAccountSummary(enabled: boolean) {
   const snapshotRef = useRef(snapshot);
   snapshotRef.current = snapshot;
   const hasSettledLiveUiRef = useRef(false);
+  const loadAccountRef = useRef<(opts?: { soft?: boolean }) => Promise<void>>(async () => {});
 
   const loadAccount = useCallback(
     async (opts?: { soft?: boolean }) => {
@@ -53,8 +55,10 @@ export function useEmployeeAccountSummary(enabled: boolean) {
       } else if (!opts?.soft) {
         setSnapshot(null);
         setLoading(true);
+        devSetHydrationPhase("hero", "loading");
       } else {
         setLoading(!snapshotRef.current);
+        if (!snapshotRef.current) devSetHydrationPhase("hero", "loading");
       }
 
       try {
@@ -68,12 +72,14 @@ export function useEmployeeAccountSummary(enabled: boolean) {
         setLastUpdatedAt(Date.now());
         setDataRevision((n) => n + 1);
         setLoading(false);
+        devSetHydrationPhase("hero", "ready");
         markDashboardLiveSettled(hasSettledLiveUiRef);
       } catch (err) {
         if (isAbortError(err) || controller.signal.aborted) return;
         if (!isApiConnectivityError(err)) {
           logClientError("useEmployeeAccountSummary", err);
         }
+        devSetHydrationPhase("hero", "error");
         setLoading(false);
       } finally {
         if (!controller.signal.aborted) setIsRevalidating(false);
@@ -81,6 +87,8 @@ export function useEmployeeAccountSummary(enabled: boolean) {
     },
     [enabled],
   );
+
+  loadAccountRef.current = loadAccount;
 
   const refetchLive = useCallback(() => {
     clearEmployeeAccountClientCache();
@@ -100,14 +108,15 @@ export function useEmployeeAccountSummary(enabled: boolean) {
       setLoading(true);
       setIsRevalidating(false);
       setLastUpdatedAt(null);
+      devSetHydrationPhase("hero", "idle");
       return;
     }
 
-    void loadAccount();
+    void loadAccountRef.current();
     return () => {
       abortRef.current?.abort();
     };
-  }, [enabled, loadAccount]);
+  }, [enabled]);
 
   const displayAccount = loading && !snapshot ? null : snapshot;
 

@@ -25,6 +25,11 @@ export function getCachedOrLoad<T>(key: string, ttlMs: number, loader: () => Pro
   return promise;
 }
 
+export function invalidateCacheKey(key: string): void {
+  cache.delete(key);
+  inflight.delete(key);
+}
+
 export function invalidateCacheKeyPrefix(prefix: string): void {
   for (const key of cache.keys()) {
     if (key.startsWith(prefix)) cache.delete(key);

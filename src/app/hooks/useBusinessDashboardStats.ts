@@ -9,6 +9,11 @@ import { createDashboardSwrStore, DASHBOARD_SWR_METRICS_TTL_MS } from "../lib/da
 import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
 import { isAbortError, toUserFriendlyMessage } from "../lib/errorMessages";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
+import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
+import {
+  abortTimeframeControllers,
+  BUSINESS_HERO_MONTH_DEFER_MS,
+} from "../lib/dashboardTimeframeOrchestration";
 
 export type AnalyticsTimeframe = "week" | "month" | "year";
 
@@ -31,7 +36,7 @@ function hasMetricValues(data: BusinessDashboardStats | null | undefined): boole
 }
 
 export function useBusinessDashboardStats(enabled: boolean, sessionValidated: boolean) {
-  const [analyticsTimeframe, setAnalyticsTimeframe] = useState<AnalyticsTimeframe>("month");
+  const [analyticsTimeframe, setAnalyticsTimeframeState] = useState<AnalyticsTimeframe>("month");
   const [heroStats, setHeroStats] = useState<BusinessDashboardStats | null>(null);
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
   const [statsTimeframe, setStatsTimeframe] = useState<AnalyticsTimeframe | null>(null);
@@ -53,6 +58,12 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
   const summaryPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const analyticsPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const hasSettledLiveUiRef = useRef(false);
+  const loadStatsForRef = useRef<
+    (tf: AnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
+  >(async () => {});
+  const loadHeroMonthSummaryRef = useRef<() => Promise<void>>(async () => {});
+  const heroDeferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heroAbortRef = useRef<AbortController | null>(null);
 
   const persistSwr = useCallback((tf: AnalyticsTimeframe) => {
     const summary = summaryPartialRef.current.get(tf);
@@ -111,6 +122,32 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
     [],
   );
 
+  const cancelDeferredHeroMonth = useCallback(() => {
+    if (heroDeferTimerRef.current != null) {
+      clearTimeout(heroDeferTimerRef.current);
+      heroDeferTimerRef.current = null;
+    }
+    heroAbortRef.current?.abort();
+    heroAbortRef.current = null;
+  }, []);
+
+  const scheduleDeferredHeroMonth = useCallback(() => {
+    if (tfRef.current === "month") return;
+    cancelDeferredHeroMonth();
+    heroDeferTimerRef.current = setTimeout(() => {
+      heroDeferTimerRef.current = null;
+      if (tfRef.current === "month" || !sessionValidated || !enabled) return;
+      void loadHeroMonthSummaryRef.current();
+    }, BUSINESS_HERO_MONTH_DEFER_MS);
+  }, [cancelDeferredHeroMonth, enabled, sessionValidated]);
+
+  const abortInactiveTimeframes = useCallback((activeTf: AnalyticsTimeframe) => {
+    abortTimeframeControllers(abortByTfRef.current, activeTf);
+    for (const tf of ["week", "month", "year"] as const) {
+      if (tf !== activeTf) clearBusinessStatsClientCache(tf);
+    }
+  }, []);
+
   const loadStatsFor = useCallback(
     async (
       tf: AnalyticsTimeframe,
@@ -119,6 +156,10 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       if (!sessionValidated || !enabled) return;
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
+      if (affectsUi) {
+        abortInactiveTimeframes(tf);
+        cancelDeferredHeroMonth();
+      }
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
       const cached =
         affectsUi &&
@@ -131,6 +172,8 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
         setStatsLoadFailed(null);
         if (cached) {
           applyCachedToUi(tf, cached);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("charts", "loading");
         } else if (!opts?.soft) {
           setStats(null);
           setStatsTimeframe(null);
@@ -138,90 +181,119 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
           analyticsPartialRef.current.delete(tf);
           setSummaryLoading(true);
           setAnalyticsLoading(true);
+          devSetHydrationPhase("metrics", "loading");
+          devSetHydrationPhase("charts", "loading");
+          devSetHydrationPhase("goals", "loading");
         } else {
           setSummaryLoading(!hasMetricValues(statsRef.current));
           setAnalyticsLoading(true);
+          if (!hasMetricValues(statsRef.current)) devSetHydrationPhase("metrics", "loading");
+          devSetHydrationPhase("charts", "loading");
         }
       }
 
       const prev = abortByTfRef.current.get(tf);
       prev?.abort();
+      clearBusinessStatsClientCache(tf);
       const controller = new AbortController();
       abortByTfRef.current.set(tf, controller);
 
-      let summarySettled = Boolean(cached && summaryPartialRef.current.has(tf));
-      let analyticsSettled = Boolean(cached && analyticsPartialRef.current.has(tf));
+      const silent = opts?.silent === true || Boolean(cached);
+      const revalidate = opts?.soft === true;
+      const stillActive = () =>
+        !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      const summaryPromise = getBusinessStats(tf, {
-        scope: "summary",
-        silent: opts?.silent === true || Boolean(cached),
-        signal: controller.signal,
-      });
-      const analyticsPromise = getBusinessStats(tf, {
-        scope: "analytics",
-        silent: opts?.silent === true || Boolean(cached),
-        signal: controller.signal,
-      });
+      let summarySettled =
+        !revalidate && Boolean(cached && summaryPartialRef.current.has(tf));
+      let analyticsSettled =
+        !revalidate && Boolean(cached && analyticsPartialRef.current.has(tf));
 
-      void summaryPromise
-        .then((summaryData) => {
-          if (controller.signal.aborted) return;
-          summaryPartialRef.current.set(tf, summaryData);
-          summarySettled = true;
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setSummaryLoading(false);
-            commitUiStats(tf, seq, true);
-          }
-          applyHeroFromMonth(tf);
-        })
-        .catch((err) => {
-          if (isAbortError(err) || controller.signal.aborted) return;
-          const msg = toUserFriendlyMessage(err);
-          if (msg.toLowerCase().includes("pending verification")) {
-            if (affectsUi && uiRequestSeqRef.current === seq) {
-              setPendingVerification(true);
-              setStats(null);
-              setStatsTimeframe(null);
-              setSummaryLoading(false);
-              setAnalyticsLoading(false);
-              setIsRevalidating(false);
-            }
-            return;
-          }
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setSummaryLoading(false);
-            if (!hasMetricValues(statsRef.current)) setStatsLoadFailed(msg);
-          }
-        });
-
-      void analyticsPromise
-        .then((analyticsData) => {
-          if (controller.signal.aborted) return;
-          analyticsPartialRef.current.set(tf, analyticsData);
-          analyticsSettled = true;
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setAnalyticsLoading(false);
-            commitUiStats(tf, seq, true);
-          }
-          applyHeroFromMonth(tf);
-        })
-        .catch((err) => {
-          if (isAbortError(err) || controller.signal.aborted) return;
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setAnalyticsLoading(false);
-            if (!hasMetricValues(statsRef.current) && !statsLoadFailed) {
-              setStatsLoadFailed(toUserFriendlyMessage(err));
-            }
-          }
-        });
+      const handlePendingVerification = (msg: string) => {
+        if (!msg.toLowerCase().includes("pending verification")) return false;
+        if (affectsUi && uiRequestSeqRef.current === seq) {
+          setPendingVerification(true);
+          setStats(null);
+          setStatsTimeframe(null);
+          setSummaryLoading(false);
+          setAnalyticsLoading(false);
+          setIsRevalidating(false);
+        }
+        return true;
+      };
 
       try {
-        await Promise.all([summaryPromise, analyticsPromise]);
-        if (!controller.signal.aborted) {
-          markDashboardLiveSettled(hasSettledLiveUiRef);
+        if (summarySettled && analyticsSettled) {
+          if (affectsUi && stillActive()) {
+            setSummaryLoading(false);
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("metrics", "ready");
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+            commitUiStats(tf, seq, true);
+            markDashboardLiveSettled(hasSettledLiveUiRef);
+            scheduleDeferredHeroMonth();
+          }
+          return;
         }
-      } catch {
-        /* per-branch handlers */
+
+        if (!summarySettled) {
+          const summaryData = await getBusinessStats(tf, {
+            scope: "summary",
+            silent,
+            signal: controller.signal,
+          });
+          if (!stillActive()) return;
+          summaryPartialRef.current.set(tf, summaryData);
+          summarySettled = true;
+          if (affectsUi) {
+            setSummaryLoading(false);
+            devSetHydrationPhase("metrics", "ready");
+            commitUiStats(tf, seq, true);
+          }
+          applyHeroFromMonth(tf);
+          if (tf === "month") devSetHydrationPhase("hero", "ready");
+        }
+
+        if (!stillActive()) return;
+
+        if (!analyticsSettled) {
+          const analyticsData = await getBusinessStats(tf, {
+            scope: "analytics",
+            silent,
+            signal: controller.signal,
+          });
+          if (!stillActive()) return;
+          analyticsPartialRef.current.set(tf, analyticsData);
+          analyticsSettled = true;
+          if (affectsUi) {
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+            commitUiStats(tf, seq, true);
+          }
+          applyHeroFromMonth(tf);
+        }
+
+        if (stillActive()) {
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+          if (affectsUi) scheduleDeferredHeroMonth();
+        }
+      } catch (err) {
+        if (isAbortError(err) || controller.signal.aborted) return;
+        const msg = toUserFriendlyMessage(err);
+        if (handlePendingVerification(msg)) return;
+        if (affectsUi && uiRequestSeqRef.current === seq) {
+          if (!summarySettled) {
+            setSummaryLoading(false);
+            devSetHydrationPhase("metrics", "error");
+            if (!hasMetricValues(statsRef.current)) setStatsLoadFailed(msg);
+          } else if (!analyticsSettled) {
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("charts", "error");
+            devSetHydrationPhase("goals", "error");
+            if (!hasMetricValues(statsRef.current)) setStatsLoadFailed(msg);
+          }
+        }
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (!summarySettled) setSummaryLoading(false);
@@ -240,12 +312,23 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       applyHeroFromMonth,
       hydrateFromSwr,
       applyCachedToUi,
-      statsLoadFailed,
+      abortInactiveTimeframes,
+      cancelDeferredHeroMonth,
+      scheduleDeferredHeroMonth,
     ],
   );
 
+  loadStatsForRef.current = loadStatsFor;
+
   const loadHeroMonthSummary = useCallback(async () => {
     if (!sessionValidated || !enabled) return;
+    const activeAtStart = tfRef.current;
+    if (activeAtStart === "month") return;
+
+    heroAbortRef.current?.abort();
+    const controller = new AbortController();
+    heroAbortRef.current = controller;
+
     const useCache = canUseDashboardSwrCache({
       hasSettledLiveUi: hasSettledLiveUiRef.current,
       soft: true,
@@ -257,9 +340,18 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       summaryPartialRef.current.set("month", cached.summary);
       analyticsPartialRef.current.set("month", cached.analytics);
       setHeroStats(cached.merged);
+      devSetHydrationPhase("hero", "ready");
+      return;
     }
+
+    devSetHydrationPhase("hero", "loading");
     try {
-      const summaryData = await getBusinessStats("month", { scope: "summary", silent: true });
+      const summaryData = await getBusinessStats("month", {
+        scope: "summary",
+        silent: true,
+        signal: controller.signal,
+      });
+      if (controller.signal.aborted || tfRef.current !== activeAtStart) return;
       summaryPartialRef.current.set("month", summaryData);
       const merged = mergeBusinessDashboardStats(
         summaryData,
@@ -268,14 +360,32 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       if (merged) {
         persistSwr("month");
         setHeroStats(merged);
+        devSetHydrationPhase("hero", "ready");
       }
-    } catch {
-      /* hero pulse optional */
+    } catch (err) {
+      if (isAbortError(err) || controller.signal.aborted) return;
+      devSetHydrationPhase("hero", "error");
+    } finally {
+      if (heroAbortRef.current === controller) heroAbortRef.current = null;
     }
   }, [enabled, sessionValidated, persistSwr]);
 
+  loadHeroMonthSummaryRef.current = loadHeroMonthSummary;
+
+  const setAnalyticsTimeframe = useCallback(
+    (tf: AnalyticsTimeframe) => {
+      if (tf === tfRef.current) return;
+      abortInactiveTimeframes(tf);
+      cancelDeferredHeroMonth();
+      uiRequestSeqRef.current += 1;
+      setAnalyticsTimeframeState(tf);
+    },
+    [abortInactiveTimeframes, cancelDeferredHeroMonth],
+  );
+
   useEffect(() => {
     if (!enabled || !sessionValidated) {
+      cancelDeferredHeroMonth();
       abortByTfRef.current.forEach((c) => c.abort());
       abortByTfRef.current.clear();
       clearBusinessStatsClientCache();
@@ -292,21 +402,23 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       setStatsLoadFailed(null);
       setPendingVerification(false);
       setLastUpdatedAt(null);
+      devSetHydrationPhase("hero", "idle");
+      devSetHydrationPhase("metrics", "idle");
+      devSetHydrationPhase("charts", "idle");
+      devSetHydrationPhase("goals", "idle");
       return;
     }
-  }, [enabled, sessionValidated]);
+  }, [enabled, sessionValidated, cancelDeferredHeroMonth]);
 
   useEffect(() => {
     if (!sessionValidated || !enabled) return;
-    void loadStatsFor(analyticsTimeframe, { affectsUi: true });
-    return () => abortByTfRef.current.get(analyticsTimeframe)?.abort();
-  }, [enabled, sessionValidated, analyticsTimeframe, loadStatsFor, refetchTick]);
-
-  useEffect(() => {
-    if (!sessionValidated || !enabled) return;
-    if (analyticsTimeframe === "month") return;
-    void loadHeroMonthSummary();
-  }, [enabled, sessionValidated, analyticsTimeframe, loadHeroMonthSummary, refetchTick]);
+    void loadStatsForRef.current(analyticsTimeframe, { affectsUi: true });
+    return () => {
+      abortByTfRef.current.get(analyticsTimeframe)?.abort();
+      abortByTfRef.current.delete(analyticsTimeframe);
+      clearBusinessStatsClientCache(analyticsTimeframe);
+    };
+  }, [enabled, sessionValidated, analyticsTimeframe, refetchTick]);
 
   const refetchLive = useCallback(() => {
     clearBusinessStatsClientCache();
@@ -322,22 +434,30 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
     setIsRevalidating(true);
     clearBusinessStatsClientCache(tf);
     try {
-      const [summaryData, analyticsData] = await Promise.all([
-        getBusinessStats(tf, { scope: "summary", silent: true }),
-        getBusinessStats(tf, { scope: "analytics", silent: true }),
-      ]);
+      const summaryData = await getBusinessStats(tf, { scope: "summary", silent: true });
       if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       summaryPartialRef.current.set(tf, summaryData);
+      commitUiStats(tf, seq, true);
+      applyHeroFromMonth(tf);
+
+      const analyticsData = await getBusinessStats(tf, { scope: "analytics", silent: true });
+      if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       analyticsPartialRef.current.set(tf, analyticsData);
       commitUiStats(tf, seq, true);
       applyHeroFromMonth(tf);
-      if (tf !== "month") void loadHeroMonthSummary();
+      if (tf !== "month") scheduleDeferredHeroMonth();
     } catch {
       /* keep last live stats */
     } finally {
       if (uiRequestSeqRef.current === seq) setIsRevalidating(false);
     }
-  }, [enabled, sessionValidated, commitUiStats, applyHeroFromMonth, loadHeroMonthSummary]);
+  }, [
+    enabled,
+    sessionValidated,
+    commitUiStats,
+    applyHeroFromMonth,
+    scheduleDeferredHeroMonth,
+  ]);
 
   const retryStats = useCallback(() => {
     setStatsLoadFailed(null);

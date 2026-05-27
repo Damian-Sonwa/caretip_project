@@ -1,5 +1,17 @@
-import { EmployeeGoalStatus, GoalPeriod, TipStatus } from "@prisma/client";
+import { EmployeeGoalStatus, GoalPeriod, Prisma, TipStatus } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { getCachedOrLoad, invalidateCacheKey, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+
+const BUSINESS_GOALS_CACHE_TTL_MS = 60_000;
+
+function invalidateBusinessGoalsListCache(businessId: string): void {
+  invalidateCacheKeyPrefix(`biz-employee-goals:${businessId}:`);
+}
+
+function invalidateUserGoalProgressCache(userId: string): void {
+  invalidateCacheKey(`goal-progress:${userId}`);
+  invalidateCacheKeyPrefix(`emp-tips-ctx:${userId}`);
+}
 
 export type GoalProgressStatus = "achieved" | "on_track" | "below_target";
 
@@ -128,6 +140,127 @@ async function sumTips(employeeId: string, start: Date, end: Date): Promise<numb
   return agg._sum.amount != null ? Number(agg._sum.amount) : 0;
 }
 
+type GoalProgressRow = {
+  employeeId: string;
+  goalAmount: unknown;
+  goalPeriod: GoalPeriod;
+  startDate: Date;
+};
+
+function goalWindowKey(period: GoalPeriod, startDate: Date, now: Date): string {
+  const { start, end } = effectivePeriodBounds(period, startDate, now);
+  return `${period}:${start.getTime()}:${end.getTime()}`;
+}
+
+/** One tip fetch for all goal windows, then sum in memory (avoids N groupBy round-trips on connection_limit=1). */
+async function batchTipTotalsForGoalRows(
+  rows: GoalProgressRow[],
+  now = new Date(),
+  businessId?: string,
+): Promise<Map<string, number>> {
+  if (rows.length === 0) return new Map();
+
+  const windows = new Map<
+    string,
+    { employeeId: string; start: Date; end: Date }
+  >();
+  const employeeIds = new Set<string>();
+  let scanStartMs = now.getTime();
+  let scanEndMs = 0;
+
+  for (const r of rows) {
+    const { start, end } = effectivePeriodBounds(r.goalPeriod, r.startDate, now);
+    const wk = goalWindowKey(r.goalPeriod, r.startDate, now);
+    const key = `${r.employeeId}:${wk}`;
+    if (!windows.has(key)) {
+      windows.set(key, { employeeId: r.employeeId, start, end });
+      employeeIds.add(r.employeeId);
+      scanStartMs = Math.min(scanStartMs, start.getTime());
+      scanEndMs = Math.max(scanEndMs, end.getTime());
+    }
+  }
+
+  if (employeeIds.size === 0) return new Map();
+
+  const tips = await prisma.transaction.findMany({
+    where: {
+      ...(businessId
+        ? { businessId, employeeId: { in: [...employeeIds] } }
+        : { employeeId: { in: [...employeeIds] } }),
+      status: TipStatus.success,
+      createdAt: {
+        gte: new Date(scanStartMs),
+        lte: new Date(scanEndMs),
+      },
+    },
+    select: { employeeId: true, amount: true, createdAt: true },
+  });
+
+  const totals = new Map<string, number>();
+  for (const [key, w] of windows) {
+    const startMs = w.start.getTime();
+    const endMs = w.end.getTime();
+    let sum = 0;
+    for (const t of tips) {
+      if (t.employeeId !== w.employeeId) continue;
+      const ts = t.createdAt.getTime();
+      if (ts >= startMs && ts <= endMs) sum += Number(t.amount);
+    }
+    totals.set(key, sum);
+  }
+  return totals;
+}
+
+/** Build API goal payload from a precomputed tip sum (avoids extra DB round trip). */
+export function buildActiveGoalWithProgress(
+  g: {
+    id: string;
+    employeeId: string;
+    name: string;
+    goalAmount: unknown;
+    goalPeriod: GoalPeriod;
+    startDate: Date;
+    status: EmployeeGoalStatus;
+  },
+  currentAmount: number,
+  now = new Date(),
+): GoalWithProgress {
+  const p = goalProgressFromAmount(
+    {
+      id: g.id,
+      employeeId: g.employeeId,
+      goalAmount: g.goalAmount,
+      goalPeriod: g.goalPeriod,
+      startDate: g.startDate,
+    },
+    currentAmount,
+    now,
+  );
+  return { ...p, name: g.name, lifecycleStatus: g.status };
+}
+
+function goalProgressFromAmount(
+  row: GoalProgressRow & { id: string },
+  currentAmount: number,
+  now: Date,
+): Omit<GoalWithProgress, "status"> & { status: GoalProgressStatus } {
+  const goalAmount = Number(row.goalAmount);
+  const percent = goalAmount > 0 ? Math.min(100, Math.round((currentAmount / goalAmount) * 100)) : 0;
+  const status = computeStatus(currentAmount, goalAmount, row.goalPeriod, now);
+  return {
+    id: row.id,
+    employeeId: row.employeeId,
+    name: "Tip goal",
+    lifecycleStatus: "active",
+    goalAmount,
+    goalPeriod: row.goalPeriod,
+    startDate: row.startDate.toISOString().slice(0, 10),
+    currentAmount,
+    percent,
+    status,
+  };
+}
+
 export async function getGoalProgressForEmployee(
   employeeId: string,
   row: { id: string; goalAmount: unknown; goalPeriod: GoalPeriod; startDate: Date },
@@ -152,26 +285,32 @@ export async function getGoalProgressForEmployee(
   };
 }
 
-export async function getMyGoalWithProgress(userId: string): Promise<GoalWithProgress | null> {
-  const emp = await prisma.employee.findUnique({
-    where: { userId },
-    select: {
-      id: true,
-      employeeGoals: {
-        where: { status: EmployeeGoalStatus.active },
-        orderBy: [{ updatedAt: "desc" }],
-        take: 1,
-      },
-    },
+const GOAL_PROGRESS_CACHE_TTL_MS = 10_000;
+
+export async function getMyGoalWithProgressForEmployee(
+  employeeId: string,
+  userId: string,
+): Promise<GoalWithProgress | null> {
+  return getCachedOrLoad(`goal-progress:${userId}`, GOAL_PROGRESS_CACHE_TTL_MS, async () => {
+    const g = await prisma.employeeGoal.findFirst({
+      where: { employeeId, status: EmployeeGoalStatus.active },
+      orderBy: [{ updatedAt: "desc" }],
+    });
+    if (!g) return null;
+    const p = await getGoalProgressForEmployee(employeeId, {
+      id: g.id,
+      goalAmount: g.goalAmount,
+      goalPeriod: g.goalPeriod,
+      startDate: g.startDate,
+    });
+    return { ...p, name: g.name, lifecycleStatus: g.status };
   });
-  const g = emp?.employeeGoals?.[0];
-  if (!emp?.id || !g) return null;
-  return getGoalProgressForEmployee(emp.id, {
-    id: g.id,
-    goalAmount: g.goalAmount,
-    goalPeriod: g.goalPeriod,
-    startDate: g.startDate,
-  }).then((p) => ({ ...p, name: g.name, lifecycleStatus: g.status }));
+}
+
+export async function getMyGoalWithProgress(userId: string): Promise<GoalWithProgress | null> {
+  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  if (!emp) return null;
+  return getMyGoalWithProgressForEmployee(emp.id, userId);
 }
 
 export async function upsertMyGoal(
@@ -223,14 +362,25 @@ export async function upsertMyGoal(
     goalPeriod: row.goalPeriod,
     startDate: row.startDate,
   });
+  invalidateUserGoalProgressCache(userId);
+  const empBiz = await prisma.employee.findUnique({
+    where: { id: emp.id },
+    select: { businessId: true },
+  });
+  if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
   return { ...(p as GoalWithProgress), name: row.name, lifecycleStatus: row.status };
 }
 
 export async function deleteMyGoal(userId: string): Promise<void> {
-  const emp = await prisma.employee.findUnique({ where: { userId }, select: { id: true } });
+  const emp = await prisma.employee.findUnique({
+    where: { userId },
+    select: { id: true, businessId: true },
+  });
   if (!emp) throw new Error("Employee not found");
   // Back-compat: delete active goal only.
   await prisma.employeeGoal.deleteMany({ where: { employeeId: emp.id, status: EmployeeGoalStatus.active } });
+  invalidateUserGoalProgressCache(userId);
+  invalidateBusinessGoalsListCache(emp.businessId);
 }
 
 export async function listEmployeeGoalsForBusiness(
@@ -248,12 +398,89 @@ export async function listEmployeeGoalsForBusiness(
     status: GoalProgressStatus;
   }>
 > {
-  const rows = await prisma.employeeGoal.findMany({
-    where: { employee: { businessId } },
-    include: { employee: { select: { id: true, name: true } } },
-    orderBy: [{ updatedAt: "desc" }],
-    ...(opts?.maxGoals != null ? { take: Math.max(1, opts.maxGoals) } : {}),
-  });
+  const maxGoals = opts?.maxGoals ?? 25;
+  const cacheKey = `biz-employee-goals:${businessId}:${maxGoals}`;
+  return getCachedOrLoad(cacheKey, BUSINESS_GOALS_CACHE_TTL_MS, () =>
+    listEmployeeGoalsForBusinessImpl(businessId, maxGoals),
+  );
+}
+
+async function listEmployeeGoalsForBusinessImpl(
+  businessId: string,
+  maxGoals: number,
+): Promise<
+  Array<{
+    employeeId: string;
+    name: string;
+    goalAmount: number;
+    goalPeriod: GoalPeriod;
+    startDate: string;
+    currentAmount: number;
+    percent: number;
+    status: GoalProgressStatus;
+  }>
+> {
+  const limit = Math.max(1, maxGoals);
+  const now = new Date();
+  const dayStart = startOfUtcDay(now);
+  const weekStart = startOfUtcWeekMonday(now);
+  const monthStart = startOfUtcMonth(now);
+
+  const rows = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      employee_id: string;
+      goal_amount: unknown;
+      goal_period: GoalPeriod;
+      start_date: Date;
+      employee_name: string;
+      current_amount: number;
+    }>
+  >(Prisma.sql`
+    WITH goals AS (
+      SELECT
+        g.id,
+        g.employee_id,
+        g.goal_amount,
+        g.goal_period,
+        g.start_date,
+        e.name AS employee_name,
+        CASE g.goal_period
+          WHEN 'daily' THEN ${dayStart}::timestamptz
+          WHEN 'weekly' THEN ${weekStart}::timestamptz
+          ELSE ${monthStart}::timestamptz
+        END AS period_start
+      FROM employee_goals g
+      INNER JOIN employees e ON e.id = g.employee_id
+      WHERE e.business_id = ${businessId}
+        AND g.status = 'active'
+      ORDER BY g.updated_at DESC
+      LIMIT ${limit}
+    )
+    SELECT
+      goals.id,
+      goals.employee_id,
+      goals.goal_amount,
+      goals.goal_period,
+      goals.start_date,
+      goals.employee_name,
+      COALESCE(SUM(t.amount), 0)::float AS current_amount
+    FROM goals
+    LEFT JOIN tips t
+      ON t.business_id = ${businessId}
+     AND t.employee_id = goals.employee_id
+     AND t.status = 'success'
+     AND t.created_at >= GREATEST(goals.start_date, goals.period_start)
+     AND t.created_at <= ${now}
+     AND t.created_at >= ${monthStart}
+    GROUP BY
+      goals.id,
+      goals.employee_id,
+      goals.goal_amount,
+      goals.goal_period,
+      goals.start_date,
+      goals.employee_name
+  `);
 
   const out: Array<{
     employeeId: string;
@@ -266,38 +493,37 @@ export async function listEmployeeGoalsForBusiness(
     status: GoalProgressStatus;
   }> = [];
 
-  const progressRows = await Promise.all(
-    rows.map(async (r) => {
-      try {
-        const p = await getGoalProgressForEmployee(r.employeeId, {
+  for (const r of rows) {
+    try {
+      const currentAmount = Number(r.current_amount ?? 0);
+      const p = goalProgressFromAmount(
+        {
           id: r.id,
-          goalAmount: r.goalAmount,
-          goalPeriod: r.goalPeriod,
-          startDate: r.startDate,
-        });
-        return {
-          employeeId: r.employeeId,
-          name: r.employee.name,
-          goalAmount: p.goalAmount,
-          goalPeriod: p.goalPeriod,
-          startDate: p.startDate,
-          currentAmount: p.currentAmount,
-          percent: p.percent,
-          status: p.status,
-        };
-      } catch (err) {
-        console.warn(
-          "[listEmployeeGoalsForBusiness] skipped goal row",
-          r.id,
-          err instanceof Error ? err.message : err,
-        );
-        return null;
-      }
-    }),
-  );
-
-  for (const row of progressRows) {
-    if (row) out.push(row);
+          employeeId: r.employee_id,
+          goalAmount: r.goal_amount,
+          goalPeriod: r.goal_period,
+          startDate: r.start_date,
+        },
+        currentAmount,
+        now,
+      );
+      out.push({
+        employeeId: r.employee_id,
+        name: r.employee_name,
+        goalAmount: p.goalAmount,
+        goalPeriod: p.goalPeriod,
+        startDate: p.startDate,
+        currentAmount: p.currentAmount,
+        percent: p.percent,
+        status: p.status,
+      });
+    } catch (err) {
+      console.warn(
+        "[listEmployeeGoalsForBusiness] skipped goal row",
+        r.id,
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 
   return out.sort((a, b) => a.name.localeCompare(b.name));

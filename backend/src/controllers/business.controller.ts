@@ -8,6 +8,7 @@ import {
   CLIENT_FALLBACK,
 } from "../utils/httpErrors.js";
 import { STATS_FETCH_ERROR_CODE, StatsFetchError } from "../utils/statsErrors.js";
+import { logDashboardTiming } from "../utils/dashboardTiming.js";
 
 function statsErrorHttpStatus(err: unknown): number {
   if (err instanceof StatsFetchError) {
@@ -230,7 +231,7 @@ export async function getMyStats(req: Request, res: Response) {
         message: "Authentication required",
       });
     }
-    const business = await businessService.getBusinessByUserId(userId);
+    const business = await businessService.getBusinessIdForManagerUser(userId);
     if (!business) {
       return res.status(404).json({
         success: false,
@@ -238,7 +239,11 @@ export async function getMyStats(req: Request, res: Response) {
         message: "Business not found",
       });
     }
-    const stats = await businessService.getBusinessStats(business.id, timeframe, scope);
+    const stats = await logDashboardTiming(
+      `business.myStats.${scope}`,
+      { businessId: business.id, timeframe, scope },
+      () => businessService.getBusinessStats(business.id, timeframe, scope),
+    );
     return res.json(stats);
   } catch (err) {
     const businessRow = userId
@@ -280,7 +285,11 @@ export async function getStats(req: Request, res: Response) {
     const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
     const scope =
       scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
-    const stats = await businessService.getBusinessStats(businessId, timeframe, scope);
+    const stats = await logDashboardTiming(
+      `business.stats.${scope}`,
+      { businessId, timeframe, scope },
+      () => businessService.getBusinessStats(businessId, timeframe, scope),
+    );
     return res.json(stats);
   } catch (err) {
     logServerError("business.getStats", err);

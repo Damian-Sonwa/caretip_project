@@ -109,54 +109,56 @@ export async function rotateRefreshToken(
   const tokenHash = sha256Hex(raw);
 
   try {
-    return await prisma.$transaction(async (tx) => {
-      const existing = await tx.refreshToken.findUnique({
-        where: { tokenHash },
-        select: { id: true, userId: true, expiresAt: true, revokedAt: true, replacedByTokenId: true },
-      });
-      if (!existing) return null;
-
-      if (existing.revokedAt) {
-        // If the token was explicitly revoked (e.g. via logout), do not revoke other devices' sessions.
-        // If the token was revoked due to rotation/reuse, `replacedByTokenId` is set and we treat it as reuse.
-        if (existing.replacedByTokenId == null) return null;
-        await tx.refreshToken.updateMany({
-          where: { userId: existing.userId, revokedAt: null },
-          data: { revokedAt: new Date() },
-        });
-        return null;
-      }
-      if (existing.expiresAt.getTime() <= Date.now()) return null;
-
-      const newPlain = crypto.randomBytes(48).toString("base64url");
-      const newHash = sha256Hex(newPlain);
-      const newExpiresAt = nowPlusDays(refreshTokenTtlDays());
-
-      const created = await tx.refreshToken.create({
-        data: {
-          tokenHash: newHash,
-          userId: existing.userId,
-          expiresAt: newExpiresAt,
-          revokedAt: null,
-          replacedByTokenId: null,
-        },
-        select: { id: true },
-      });
-
-      const updated = await tx.refreshToken.updateMany({
-        where: { id: existing.id, revokedAt: null },
-        data: { revokedAt: new Date(), replacedByTokenId: created.id },
-      });
-      if (updated.count !== 1) {
-        await tx.refreshToken.update({
-          where: { id: created.id },
-          data: { revokedAt: new Date() },
-        });
-        return null;
-      }
-
-      return { userId: existing.userId, newToken: newPlain, newExpiresAt };
+    // Avoid interactive transactions (Prisma $transaction callback) because with
+    // Supabase transaction pooler + connection_limit=1 they can intermittently fail
+    // to start under dashboard load (P2028). This stays race-resistant via a
+    // conditional update; worst case is an extra created token that we immediately revoke.
+    const existing = await prisma.refreshToken.findUnique({
+      where: { tokenHash },
+      select: { id: true, userId: true, expiresAt: true, revokedAt: true, replacedByTokenId: true },
     });
+    if (!existing) return null;
+
+    if (existing.revokedAt) {
+      // If the token was explicitly revoked (e.g. via logout), do not revoke other devices' sessions.
+      // If the token was revoked due to rotation/reuse, `replacedByTokenId` is set and we treat it as reuse.
+      if (existing.replacedByTokenId == null) return null;
+      await prisma.refreshToken.updateMany({
+        where: { userId: existing.userId, revokedAt: null },
+        data: { revokedAt: new Date() },
+      });
+      return null;
+    }
+    if (existing.expiresAt.getTime() <= Date.now()) return null;
+
+    const newPlain = crypto.randomBytes(48).toString("base64url");
+    const newHash = sha256Hex(newPlain);
+    const newExpiresAt = nowPlusDays(refreshTokenTtlDays());
+
+    const created = await prisma.refreshToken.create({
+      data: {
+        tokenHash: newHash,
+        userId: existing.userId,
+        expiresAt: newExpiresAt,
+        revokedAt: null,
+        replacedByTokenId: null,
+      },
+      select: { id: true },
+    });
+
+    const updated = await prisma.refreshToken.updateMany({
+      where: { id: existing.id, revokedAt: null },
+      data: { revokedAt: new Date(), replacedByTokenId: created.id },
+    });
+    if (updated.count !== 1) {
+      await prisma.refreshToken.update({
+        where: { id: created.id },
+        data: { revokedAt: new Date() },
+      });
+      return null;
+    }
+
+    return { userId: existing.userId, newToken: newPlain, newExpiresAt };
   } catch (e) {
     console.warn("[refreshToken.rotate]", e);
     return null;

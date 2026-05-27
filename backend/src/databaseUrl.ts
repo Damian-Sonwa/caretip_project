@@ -1,6 +1,7 @@
 /**
  * Runtime Postgres URL for PrismaClient (Express): **`DATABASE_URL` only** (Supabase pooler).
  * Transaction pooler uses port **6543** + `pgbouncer=true` + `connection_limit=1`.
+ * With one connection, `Promise.all` DB work serializes — dashboard handlers use single-query bundles per scope.
  * Session pooler (5432) is for migrations only — using it at runtime exhausts Supabase session slots.
  *
  * SSL: ensures `sslmode=require` when missing.

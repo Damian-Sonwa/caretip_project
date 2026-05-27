@@ -5,14 +5,15 @@ import { createPaymentIntent, isStripeConfigured } from "../services/stripe.serv
 import * as goalService from "../services/goal.service.js";
 import * as businessService from "../services/business.service.js";
 import {
+  getEmployeeTipsContext,
   loadEmployeeAccountSummary,
   loadEmployeeCurrentMonthTotal,
+  loadEmployeeDashboardSummaryBundle,
   loadEmployeePeriodAnalytics,
-  loadEmployeePeriodSummary,
   loadEmployeeTipsDashboardForTimeframe,
 } from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
-import { runSerializedByKey } from "../utils/serializedByKey.js";
+import { logDashboardTiming } from "../utils/dashboardTiming.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 
 function tipsErrorHttpStatus(err: unknown): number {
@@ -23,44 +24,13 @@ function tipsErrorHttpStatus(err: unknown): number {
   return 400;
 }
 
-async function findEmployeeForTipsByUserId(
-  userId: string,
-): Promise<{ id: string; monthlyGoal: number | null; businessTimezone: string } | null> {
-  try {
-    const row = await prisma.employee.findUnique({
-      where: { userId },
-      select: { id: true, monthlyGoal: true, business: { select: { timezone: true } } },
-    });
-    if (!row) return null;
-    return {
-      id: row.id,
-      monthlyGoal: row.monthlyGoal != null ? Number(row.monthlyGoal) : null,
-      businessTimezone: sanitizeIanaTimezone((row as any).business?.timezone),
-    };
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
-      const row = await prisma.employee.findUnique({
-        where: { userId },
-        select: { id: true, business: { select: { timezone: true } } },
-      });
-      if (!row) return null;
-      return {
-        id: row.id,
-        monthlyGoal: null,
-        businessTimezone: sanitizeIanaTimezone((row as any).business?.timezone),
-      };
-    }
-    throw e;
-  }
-}
-
 export async function getByEmployee(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? req.user?.id;
     if (!userId) {
       return res.status(401).json({ message: "Authentication required" });
     }
-    const employee = await findEmployeeForTipsByUserId(userId);
+    const employee = await getEmployeeTipsContext(userId);
     if (!employee) {
       return res.status(403).json({ message: "Insufficient permissions" });
     }
@@ -76,7 +46,11 @@ export async function getByEmployee(req: Request, res: Response) {
         : "full";
 
     if (scope === "account") {
-      const accountSummary = await loadEmployeeAccountSummary(employee.id);
+      const accountSummary = await logDashboardTiming(
+        "employee.tips.account",
+        { employeeId: employee.id, scope },
+        () => loadEmployeeAccountSummary(employee.id),
+      );
       return res.json({
         tips: [],
         monthlyGoal: employee.monthlyGoal,
@@ -115,37 +89,40 @@ export async function getByEmployee(req: Request, res: Response) {
     }
 
     if (scope === "summary") {
-      const summary = await runSerializedByKey("prisma", () =>
-        loadEmployeePeriodSummary({
-          employeeId: employee.id,
-          businessTimezone: employee.businessTimezone,
-          timeframe,
-        }),
+      const summary = await logDashboardTiming(
+        "employee.tips.summary",
+        { employeeId: employee.id, timeframe, scope },
+        () =>
+          loadEmployeeDashboardSummaryBundle({
+            employeeId: employee.id,
+            userId,
+            businessTimezone: employee.businessTimezone,
+            timeframe,
+            activeGoal: employee.activeGoal,
+          }),
       );
-      const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
-        employee.id,
-        employee.businessTimezone,
-      );
-      const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
       return res.json({
         tips: [],
         monthlyGoal: employee.monthlyGoal,
-        currentMonthTotal,
+        currentMonthTotal: summary.currentMonthTotal,
         businessTimezone: employee.businessTimezone,
         periodAmountEur: summary.periodAmountEur,
         periodTipCount: summary.periodTipCount,
         chartSeries: [],
-        goal,
+        goal: summary.goal,
       });
     }
 
     if (scope === "analytics") {
-      const analytics = await runSerializedByKey("prisma", () =>
-        loadEmployeePeriodAnalytics({
-          employeeId: employee.id,
-          businessTimezone: employee.businessTimezone,
-          timeframe,
-        }),
+      const analytics = await logDashboardTiming(
+        "employee.tips.analytics",
+        { employeeId: employee.id, timeframe, scope },
+        () =>
+          loadEmployeePeriodAnalytics({
+            employeeId: employee.id,
+            businessTimezone: employee.businessTimezone,
+            timeframe,
+          }),
       );
       return res.json({
         tips: analytics.tips,
@@ -316,7 +293,7 @@ export async function listByEmployee(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? req.user?.id;
     if (!userId) return res.status(401).json({ message: "Authentication required" });
-    const employee = await findEmployeeForTipsByUserId(userId);
+    const employee = await getEmployeeTipsContext(userId);
     if (!employee) return res.status(403).json({ message: "Insufficient permissions" });
 
     const { take, skip } = parseTakeSkip(req);
