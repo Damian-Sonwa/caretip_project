@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
@@ -151,6 +151,7 @@ export function BusinessDashboard() {
     valuesMatchAnalyticsPeriod,
     refreshStatsQuiet,
     retryStats,
+    applyLiveTip,
   } = useBusinessDashboardStats(user?.role === "business" && authReady, sessionValidated);
 
   const [exportLoading, setExportLoading] = useState(false);
@@ -160,6 +161,7 @@ export function BusinessDashboard() {
   /** Mobile-only: expand long “how it works” copy under the employee goals title. */
   const [employeeGoalsDetailOpen, setEmployeeGoalsDetailOpen] = useState(false);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
+  const refreshTimerRef = useRef<number | null>(null);
   const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
@@ -198,14 +200,21 @@ export function BusinessDashboard() {
         }),
         TOAST_OK,
       );
-      void refreshStatsQuiet();
+      applyLiveTip(payload);
+
+      // Avoid websocket-triggered request storms: apply event instantly, verify once.
+      if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = window.setTimeout(() => {
+        refreshTimerRef.current = null;
+        void refreshStatsQuiet();
+      }, 900);
     };
 
     socket.on("new_tip", onNewTip);
     return () => {
       socket.off("new_tip", onNewTip);
     };
-  }, [socket, user?.role, user?.businessId, refreshStatsQuiet, t, timeLocale]);
+  }, [socket, user?.role, user?.businessId, refreshStatsQuiet, t, timeLocale, applyLiveTip]);
 
   const handleExport = async () => {
     if (!isBusiness) return;

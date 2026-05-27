@@ -24,6 +24,13 @@ import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
 
+type LiveNewTipPayload = {
+  tip: TipItem;
+  employeeId: string;
+  currentMonthTotal: number;
+  monthlyGoal: number | null;
+};
+
 type AnalyticsPayload = {
   tips: TipItem[];
   monthlyGoal: number | null;
@@ -94,6 +101,7 @@ export function useEmployeeDashboardAnalytics(
   const summaryPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const analyticsPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
   const hasSettledLiveUiRef = useRef(false);
+  const analyticsDeferTimerRef = useRef<number | null>(null);
   const loadForRef = useRef<
     (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
   >(async () => {});
@@ -113,6 +121,10 @@ export function useEmployeeDashboardAnalytics(
     (tf: EmployeeAnalyticsTimeframe) => {
       if (tf === tfRef.current) return;
       abortInactiveTimeframes(tf);
+      if (analyticsDeferTimerRef.current != null) {
+        window.clearTimeout(analyticsDeferTimerRef.current);
+        analyticsDeferTimerRef.current = null;
+      }
       uiRequestSeqRef.current += 1;
       setAnalyticsTimeframe(tf);
     },
@@ -230,6 +242,7 @@ export function useEmployeeDashboardAnalytics(
 
       let summarySettled = !revalidate && Boolean(cached && summaryPartialRef.current.has(tf));
       let analyticsSettled = !revalidate && Boolean(cached && analyticsPartialRef.current.has(tf));
+      let analyticsDeferred = false;
 
       try {
         if (!summarySettled) {
@@ -246,26 +259,57 @@ export function useEmployeeDashboardAnalytics(
             devSetHydrationPhase("metrics", "ready");
             devSetHydrationPhase("goals", "ready");
             commitUiPayload(tf, seq, true);
+            // Summary completion marks dashboard as ready/interactive.
+            setIsRevalidating(false);
           }
         }
 
         if (!stillActive()) return;
 
         if (!analyticsSettled) {
-          const analyticsData = await getTipsByEmployee(tf, {
-            scope: "analytics",
-            signal: controller.signal,
-            silent,
-          });
-          if (!stillActive()) return;
-          analyticsPartialRef.current.set(tf, analyticsData);
-          analyticsSettled = true;
-          if (affectsUi && uiRequestSeqRef.current === seq) {
-            setAnalyticsLoading(false);
-            devSetHydrationPhase("charts", "ready");
-            commitUiPayload(tf, seq, true);
-            const merged = mergeEmployeeTipsResponse(summaryPartialRef.current.get(tf), analyticsData);
-            if (merged) syncTipsFromResponse(merged);
+          if (affectsUi) {
+            analyticsDeferred = true;
+            const runAnalytics = async () => {
+              if (!stillActive() || analyticsSettled) return;
+              try {
+                const analyticsData = await getTipsByEmployee(tf, {
+                  scope: "analytics",
+                  signal: controller.signal,
+                  silent,
+                });
+                if (!stillActive()) return;
+                analyticsPartialRef.current.set(tf, analyticsData);
+                analyticsSettled = true;
+                setAnalyticsLoading(false);
+                devSetHydrationPhase("charts", "ready");
+                commitUiPayload(tf, seq, true);
+                const merged = mergeEmployeeTipsResponse(summaryPartialRef.current.get(tf), analyticsData);
+                if (merged) syncTipsFromResponse(merged);
+              } catch (e) {
+                if (isAbortError(e) || controller.signal.aborted) return;
+                if (stillActive()) {
+                  setAnalyticsLoading(false);
+                  devSetHydrationPhase("charts", "error");
+                  // Keep metrics; analytics can fail independently.
+                }
+              }
+            };
+
+            requestAnimationFrame(() => {
+              analyticsDeferTimerRef.current = window.setTimeout(() => {
+                analyticsDeferTimerRef.current = null;
+                void runAnalytics();
+              }, 0);
+            });
+          } else {
+            const analyticsData = await getTipsByEmployee(tf, {
+              scope: "analytics",
+              signal: controller.signal,
+              silent,
+            });
+            if (!stillActive()) return;
+            analyticsPartialRef.current.set(tf, analyticsData);
+            analyticsSettled = true;
           }
         }
 
@@ -277,8 +321,8 @@ export function useEmployeeDashboardAnalytics(
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled) setAnalyticsLoading(false);
-          setIsRevalidating(false);
+          if (!analyticsSettled && !analyticsDeferred) setAnalyticsLoading(false);
+          if (!analyticsDeferred) setIsRevalidating(false);
         }
         if (abortRef.current.get(tf) === controller) {
           abortRef.current.delete(tf);
@@ -292,6 +336,10 @@ export function useEmployeeDashboardAnalytics(
 
   useEffect(() => {
     if (!enabled) {
+      if (analyticsDeferTimerRef.current != null) {
+        window.clearTimeout(analyticsDeferTimerRef.current);
+        analyticsDeferTimerRef.current = null;
+      }
       abortRef.current.forEach((c) => c.abort());
       abortRef.current.clear();
       clearEmployeeTipsClientCache();
@@ -340,13 +388,24 @@ export function useEmployeeDashboardAnalytics(
       if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       summaryPartialRef.current.set(tf, summaryData);
       commitUiPayload(tf, seq, true);
+      setIsRevalidating(false);
 
-      const analyticsData = await getTipsByEmployee(tf, { scope: "analytics", silent: true });
-      if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
-      analyticsPartialRef.current.set(tf, analyticsData);
-      commitUiPayload(tf, seq, true);
-      const merged = mergeEmployeeTipsResponse(summaryData, analyticsData);
-      if (merged) syncTipsFromResponse(merged);
+      requestAnimationFrame(() => {
+        void (async () => {
+          try {
+            const analyticsData = await getTipsByEmployee(tf, { scope: "analytics", silent: true });
+            if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
+            analyticsPartialRef.current.set(tf, analyticsData);
+            commitUiPayload(tf, seq, true);
+            const merged = mergeEmployeeTipsResponse(summaryData, analyticsData);
+            if (merged) syncTipsFromResponse(merged);
+          } catch (e) {
+            if (!isApiConnectivityError(e)) {
+              logClientError("useEmployeeDashboardAnalytics.refreshQuiet", e);
+            }
+          }
+        })();
+      });
     } catch (e) {
       if (!isApiConnectivityError(e)) {
         logClientError("useEmployeeDashboardAnalytics.refreshQuiet", e);
@@ -355,6 +414,38 @@ export function useEmployeeDashboardAnalytics(
       if (uiRequestSeqRef.current === seq) setIsRevalidating(false);
     }
   }, [enabled, commitUiPayload, syncTipsFromResponse]);
+
+  const applyLiveTip = useCallback(
+    (p: LiveNewTipPayload) => {
+      if (!enabled) return;
+      if (!employeeId || p.employeeId !== employeeId) return;
+
+      // Only reconcile the *currently visible* period immediately.
+      // Authoritative server fetch still wins and will reconcile final state.
+      const tf = tfRef.current;
+      const prevMerged = mergeEmployeeTipsResponse(
+        summaryPartialRef.current.get(tf),
+        analyticsPartialRef.current.get(tf),
+      );
+      if (!prevMerged) return;
+
+      const existing = prevMerged.tips ?? [];
+      const nextTips = [p.tip, ...existing].slice(0, 50);
+
+      const summaryNext: Partial<EmployeeTipsResponse> = {
+        ...summaryPartialRef.current.get(tf),
+        tips: nextTips,
+        periodTipCount: (prevMerged.periodTipCount ?? existing.length) + 1,
+        periodAmountEur: (prevMerged.periodAmountEur ?? 0) + p.tip.amount,
+        currentMonthTotal: p.currentMonthTotal,
+        monthlyGoal: p.monthlyGoal,
+      };
+
+      summaryPartialRef.current.set(tf, summaryNext);
+      commitUiPayload(tf, uiRequestSeqRef.current, false);
+    },
+    [enabled, employeeId, commitUiPayload],
+  );
 
   const valuesMatchAnalyticsPeriod = dataTimeframe === analyticsTimeframe;
 
@@ -408,5 +499,6 @@ export function useEmployeeDashboardAnalytics(
     error,
     refreshQuiet,
     refetchLive,
+    applyLiveTip,
   };
 }

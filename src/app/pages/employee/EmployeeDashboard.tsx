@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
@@ -136,6 +136,7 @@ export function EmployeeDashboard() {
     lastUpdatedAt: analyticsLastUpdatedAt,
     error: analyticsError,
     refreshQuiet: refreshAnalyticsQuiet,
+    applyLiveTip,
   } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId);
 
   const showMetricsLoading = isMetricsInitialLoad;
@@ -155,6 +156,7 @@ export function EmployeeDashboard() {
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
   const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
+  const refreshTimerRef = useRef<number | null>(null);
 
   const socketReady = useDeferSocketConnect(
     isProtectedApiReady() && user?.role === "employee",
@@ -200,7 +202,20 @@ export function EmployeeDashboard() {
 
       recordNewEmployeeTip(user.employeeId, payload.tip);
 
-      void refreshDashboardQuiet();
+      applyLiveTip({
+        tip: payload.tip,
+        employeeId: payload.employeeId,
+        currentMonthTotal: payload.currentMonthTotal,
+        monthlyGoal: payload.monthlyGoal,
+      });
+
+      // Avoid websocket-triggered request storms: reconcile instantly from the event,
+      // then verify authoritatively with a single debounced refresh.
+      if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = window.setTimeout(() => {
+        refreshTimerRef.current = null;
+        void refreshDashboardQuiet();
+      }, 900);
 
       playChaChingSound();
       toast.success(t("employee.dashboard.toastNewTip"), TOAST_OK);
@@ -210,7 +225,7 @@ export function EmployeeDashboard() {
     return () => {
       socket.off("new_tip", onNewTip);
     };
-  }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t]);
+  }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t, applyLiveTip]);
 
   const accountLoaded = displayAccount != null;
 

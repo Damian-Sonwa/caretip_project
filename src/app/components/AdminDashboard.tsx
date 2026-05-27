@@ -176,6 +176,17 @@ const ADMIN_ANALYTICS_TZ_OPTIONS = [
   "Australia/Sydney",
 ] as const;
 
+// Session-memory snapshot (no persistence): paints instantly within same session.
+type AdminSessionSnapshot = {
+  stats: PlatformGlobalStats | null;
+  businesses: PlatformBusinessRow[];
+  analytics: PlatformAnalytics | null;
+  health: PlatformHealthResponse | null;
+  at: number;
+};
+
+let adminSessionSnapshot: AdminSessionSnapshot | null = null;
+
 function formatCompact(n: number): string {
   try {
     return new Intl.NumberFormat(undefined, { notation: "compact" }).format(n);
@@ -409,6 +420,8 @@ export function AdminDashboard() {
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
   const dashboardLoadGenRef = useRef(0);
+  const [isSyncing, setIsSyncing] = useState(false);
+  const refreshTimerRef = useRef<number | null>(null);
 
   const emptyAnalytics = useMemo<PlatformAnalytics>(() => {
     const rangeDays = 30;
@@ -474,23 +487,46 @@ export function AdminDashboard() {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     const loadGen = ++dashboardLoadGenRef.current;
     try {
+      setIsSyncing(true);
       setServiceIssue(null);
       // Keep core dashboard (stats + KYC table) resilient even if analytics fails.
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
       if (loadGen !== dashboardLoadGenRef.current) return;
-      setStats(s);
-      setBusinesses(
-        [...b.businesses].sort((a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0)),
+      const sortedBusinesses = [...b.businesses].sort(
+        (a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0),
       );
+      setStats(s);
+      setBusinesses(sortedBusinesses);
+      adminSessionSnapshot = {
+        stats: s,
+        businesses: sortedBusinesses,
+        analytics,
+        health,
+        at: Date.now(),
+      };
 
       try {
         const a = await fetchPlatformAnalytics(30, analyticsTimezone);
         if (loadGen !== dashboardLoadGenRef.current) return;
         setAnalytics(a ?? emptyAnalytics);
+        adminSessionSnapshot = {
+          stats: s,
+          businesses: sortedBusinesses,
+          analytics: a ?? emptyAnalytics,
+          health,
+          at: Date.now(),
+        };
       } catch (e) {
         if (loadGen !== dashboardLoadGenRef.current) return;
         logClientError("AdminDashboard.analytics", e);
         setAnalytics(emptyAnalytics);
+        adminSessionSnapshot = {
+          stats: s,
+          businesses: sortedBusinesses,
+          analytics: emptyAnalytics,
+          health,
+          at: Date.now(),
+        };
       }
     } catch (err) {
       if (loadGen !== dashboardLoadGenRef.current) return;
@@ -514,13 +550,23 @@ export function AdminDashboard() {
     } finally {
       if (loadGen === dashboardLoadGenRef.current) {
         setInitialDashLoading(false);
+        setIsSyncing(false);
       }
     }
   }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics, t]);
 
   useEffect(() => {
+    // Session-memory snapshot hydration (same session only; no persistence).
+    if (adminSessionSnapshot && !stats && businesses.length === 0 && !analytics) {
+      setStats(adminSessionSnapshot.stats);
+      setBusinesses(adminSessionSnapshot.businesses);
+      setAnalytics(adminSessionSnapshot.analytics);
+      setHealth(adminSessionSnapshot.health);
+      setInitialDashLoading(false);
+      setIsSyncing(true);
+    }
     void loadDashboardData();
-  }, [loadDashboardData]);
+  }, [loadDashboardData, stats, businesses.length, analytics]);
 
   useEffect(() => {
     if (!authHydrated) return;
@@ -538,7 +584,13 @@ export function AdminDashboard() {
 
   useEffect(() => {
     if (!socket || user?.role !== "platform_admin") return;
-    const sync = () => void loadDashboardData();
+    const sync = () => {
+      if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = window.setTimeout(() => {
+        refreshTimerRef.current = null;
+        void loadDashboardData();
+      }, 900);
+    };
     socket.on("platform_data_updated", sync);
     socket.on("platform_verification_updated", sync);
     return () => {
@@ -552,16 +604,6 @@ export function AdminDashboard() {
   }
   if (user.role !== "platform_admin") {
     return <Navigate to="/unauthorized" replace />;
-  }
-
-  if (initialDashLoading) {
-    return (
-      <main className={platformUi.pageMain}>
-        <div className={cn(platformUi.page, "flex min-h-[min(70vh,calc(100vh-5rem))] flex-col items-center justify-center py-16")}>
-          <PageLoader variant="wait" message={t("admin.loadingDashboard")} />
-        </div>
-      </main>
-    );
   }
 
   return (
