@@ -24,6 +24,7 @@ type EmployeeStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  showSpinner?: boolean;
 };
 
 export function EmployeeStatCard(props: EmployeeStatCardProps) {

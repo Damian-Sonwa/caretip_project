@@ -197,12 +197,13 @@ export function EmployeeDashboard() {
   }, [analyticsError]);
 
   useEffect(() => {
-    if (!socket || user?.role !== "employee" || !user.employeeId) return;
+    const employeeId = user?.role === "employee" ? user.employeeId : undefined;
+    if (!socket || !employeeId) return;
 
     const onNewTip = (payload: NewTipPayload) => {
-      if (user.employeeId && payload.employeeId !== user.employeeId) return;
+      if (payload.employeeId !== employeeId) return;
 
-      recordNewEmployeeTip(user.employeeId, payload.tip);
+      recordNewEmployeeTip(employeeId, payload.tip);
 
       applyLiveTip({
         tip: payload.tip,
@@ -491,7 +492,7 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="currency" />
+                      <DashboardHeroMetricSkeleton variant="currency" showSpinner />
                     ) : (
                       <span className="dashboard-hero-metric-value--live tabular-nums">
                         {displayAccountSummary.totalEarningsEur > 0
@@ -505,7 +506,7 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statAvailableBalance")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="currency" />
+                      <DashboardHeroMetricSkeleton variant="currency" showSpinner />
                     ) : (
                       <span className="dashboard-hero-metric-value--live tabular-nums">
                         {displayAccountSummary.availableBalanceEur > 0
@@ -519,7 +520,7 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statTotalSupporters")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="count" />
+                      <DashboardHeroMetricSkeleton variant="count" showSpinner />
                     ) : (
                       <span className="dashboard-hero-metric-value--live tabular-nums">
                         {String(displayAccountSummary.totalSupporters)}
@@ -537,7 +538,14 @@ export function EmployeeDashboard() {
       </div>
 
       <TracingBeam className={cn(employeeUi.pageInner, "employee-dashboard-body !pt-2 sm:!pt-3")}>
-        <section className="employee-dashboard-analytics-intro mb-1" aria-labelledby="employee-analytics-period-heading">
+        <section
+          className={cn(
+            "employee-dashboard-analytics-intro mb-1",
+            (showMetricsLoading || showChartLoading) && "employee-dashboard-analytics-intro--loading",
+          )}
+          aria-labelledby="employee-analytics-period-heading"
+          aria-busy={showMetricsLoading || showChartLoading || undefined}
+        >
           <div className="employee-dashboard-analytics-intro__head">
             <div className="min-w-0 space-y-1">
               <h2

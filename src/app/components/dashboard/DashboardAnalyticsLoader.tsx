@@ -66,9 +66,12 @@ export function DashboardStatsGridSpinner({ className }: { className?: string })
 export function DashboardHeroMetricSkeleton({
   variant = "currency",
   className,
+  showSpinner = false,
 }: {
   variant?: "currency" | "count" | "pulse";
   className?: string;
+  /** Subtle inline spinner (admin/employee dashboards); default off for unchanged consumers. */
+  showSpinner?: boolean;
 }) {
   return (
     <span
@@ -77,11 +80,16 @@ export function DashboardHeroMetricSkeleton({
         variant === "count" && "dashboard-hero-metric-skeleton--count",
         variant === "pulse" && "dashboard-hero-metric-skeleton--pulse",
         variant === "currency" && "dashboard-hero-metric-skeleton--currency",
+        showSpinner && "dashboard-hero-metric-skeleton--with-spinner",
         className,
       )}
       role="status"
       aria-busy="true"
+      aria-label="Loading"
     >
+      {showSpinner ? (
+        <LoadingSpinner size="sm" className="dashboard-hero-metric-skeleton__spinner shrink-0" />
+      ) : null}
       <span className="dashboard-hero-metric-skeleton__bar" aria-hidden />
       {variant === "pulse" ? (
         <span className="dashboard-hero-metric-skeleton__sub" aria-hidden />

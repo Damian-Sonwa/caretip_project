@@ -120,8 +120,11 @@ function StatCard({
         wideOnTablet && "sm:col-span-2 lg:col-span-2 min-[1536px]:col-span-1",
       )}
     >
-      <Card className={platformUi.statCard}>
-        {beam && !reduceMotion ? (
+      <Card
+        className={cn(platformUi.statCard, loading && "platform-admin-stat-card--loading")}
+        aria-busy={loading || undefined}
+      >
+        {beam && !reduceMotion && !loading ? (
           <BorderBeam size={220} duration={20} colorFrom="#e9932f" colorTo="#000000" />
         ) : null}
         <CardHeader className={platformUi.statCardHeader}>
@@ -142,12 +145,22 @@ function StatCard({
           <CardDescription className={platformUi.statCardLabel}>{title}</CardDescription>
           <CardTitle className={platformUi.statCardValue} title={loading ? undefined : value}>
             {loading ? (
-              <DashboardHeroMetricSkeleton variant={loadingVariant} />
+              <DashboardHeroMetricSkeleton variant={loadingVariant} showSpinner />
             ) : (
               value
             )}
           </CardTitle>
-          {change ? <p className={platformUi.statCardChange}>{change}</p> : null}
+          {loading || change ? (
+            <p
+              className={cn(
+                platformUi.statCardChange,
+                loading && "invisible select-none text-muted-foreground/25",
+              )}
+              aria-hidden={loading || undefined}
+            >
+              {loading ? "\u00a0" : change}
+            </p>
+          ) : null}
         </CardHeader>
       </Card>
     </motion.div>
@@ -760,12 +773,13 @@ export function AdminDashboard() {
     ? mergeTipStatusForCharts(chartAnalytics, stats)
     : analyticsMeta.tipStatus;
   const chartsLookEmpty =
-    Boolean(chartAnalytics) &&
     Boolean(stats?.successTransactionCount) &&
-    !analyticsHasVisibleData({
-      ...chartAnalytics,
-      tipStatus: chartAnalytics ? mergeTipStatusForCharts(chartAnalytics, stats) : [],
-    });
+    (chartAnalytics
+      ? !analyticsHasVisibleData({
+          ...chartAnalytics,
+          tipStatus: chartTipStatus,
+        })
+      : false);
 
   return (
     <main className="bg-background">
@@ -786,7 +800,13 @@ export function AdminDashboard() {
             onAction={() => void loadDashboardData()}
             className="mb-6"
           />
-          <div className={cn(platformUi.statGrid)}>
+          <div
+            className={cn(
+              platformUi.statGrid,
+              showStatLoading && "platform-admin-stat-grid--loading",
+            )}
+            aria-busy={showStatLoading || undefined}
+          >
           <StatCard
             title={t("admin.statTips")}
             value={stats ? `€${stats.totalVolumeEurFormatted}` : t("format.notAvailable")}
@@ -848,7 +868,12 @@ export function AdminDashboard() {
           initial={showChartSkeletons ? false : { y: 16, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.5, delay: showChartSkeletons ? 0 : 0.18 }}
-          className={cn(platformUi.analyticsSection, "relative")}
+          className={cn(
+            platformUi.analyticsSection,
+            "relative",
+            showChartSkeletons && "platform-admin-analytics-section--loading",
+          )}
+          aria-busy={showChartSkeletons || undefined}
         >
           <DashboardRefreshIndicator
             isRefreshing={analyticsSyncing}
@@ -921,7 +946,12 @@ export function AdminDashboard() {
               })}
             </p>
           ) : null}
-          <div className={cn(platformUi.analyticsChartsGrid)}>
+          <div
+            className={cn(
+              platformUi.analyticsChartsGrid,
+              showChartSkeletons && "platform-admin-charts-grid--loading",
+            )}
+          >
             {showChartSkeletons ? (
               <>
                 <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>

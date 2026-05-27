@@ -23,6 +23,7 @@ export type DashboardMetricStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  showSpinner?: boolean;
 };
 
 const CHANGE_PLACEHOLDER = "\u00a0";
@@ -40,6 +41,7 @@ export function DashboardMetricStatCard({
   featured,
   className,
   loading,
+  showSpinner = false,
 }: DashboardMetricStatCardProps) {
   const changeVisible =
     !loading && change != null && change !== "" && change !== CHANGE_PLACEHOLDER;
@@ -78,7 +80,7 @@ export function DashboardMetricStatCard({
         )}
       >
         {loading ? (
-          <DashboardHeroMetricSkeleton variant="currency" />
+          <DashboardHeroMetricSkeleton variant="currency" showSpinner={showSpinner} />
         ) : (
           <span className="dashboard-hero-metric-value--live block">{value}</span>
         )}

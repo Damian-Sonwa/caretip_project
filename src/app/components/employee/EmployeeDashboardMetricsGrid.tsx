@@ -43,6 +43,7 @@ function EmployeeDashboardMetricsGridInner({
       <EmployeeStatCard
         featured
         loading={loading}
+        showSpinner={loading}
         label={t("employee.dashboard.statTotalTips")}
         value={String(periodTipCount)}
         change={
@@ -57,6 +58,7 @@ function EmployeeDashboardMetricsGridInner({
       />
       <EmployeeStatCard
         loading={loading}
+        showSpinner={loading}
         label={
           rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
         }
@@ -66,6 +68,7 @@ function EmployeeDashboardMetricsGridInner({
       />
       <EmployeeStatCard
         loading={loading}
+        showSpinner={loading}
         label={t("employee.dashboard.statMonthlyGoal")}
         value={goalPct != null ? `${Math.round(goalPct)}%` : t("format.notAvailable")}
         change={

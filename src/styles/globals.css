@@ -741,6 +741,16 @@ textarea::placeholder {
   min-height: inherit;
 }
 
+.dashboard-hero-metric-skeleton--with-spinner {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dashboard-hero-metric-skeleton__spinner {
+  opacity: 0.65;
+}
+
 .dashboard-hero-metric-skeleton__bar,
 .dashboard-hero-metric-skeleton__sub {
   display: block;
