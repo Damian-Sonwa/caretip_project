@@ -4,6 +4,7 @@ import { Check, ChevronDown, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { patchMyAccountSettings } from "@/app/lib/api";
+import { changeAppLanguage, type AppLanguage } from "@/i18n/i18n";
 
 type LanguageSwitcherProps = {
   className?: string;
@@ -38,16 +39,21 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
 
   const rowActive = isInline ? "bg-white/12 text-white" : "bg-[#fff6e8] text-neutral-900";
 
-  const setLang = (lng: "en" | "de") => {
-    void i18n.changeLanguage(lng);
-    setOpen(false);
-    try {
-      if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")?.trim()) {
-        void patchMyAccountSettings({ preferredLocale: lng });
-      }
-    } catch {
-      /* logged-out or network — ignore */
-    }
+  const setLang = (lng: AppLanguage) => {
+    void changeAppLanguage(lng)
+      .then(() => {
+        setOpen(false);
+        try {
+          if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")?.trim()) {
+            void patchMyAccountSettings({ preferredLocale: lng });
+          }
+        } catch {
+          /* logged-out or network — ignore */
+        }
+      })
+      .catch(() => {
+        /* Keep menu open if bundle load fails */
+      });
   };
 
   return (

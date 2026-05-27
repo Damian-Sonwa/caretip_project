@@ -11,7 +11,6 @@ import {
 import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
 import { isAbortError, isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
-import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 const ACCOUNT_SWR_KEY = "employee:account";
@@ -94,8 +93,6 @@ export function useEmployeeAccountSummary(enabled: boolean) {
     clearEmployeeAccountClientCache();
     void loadAccount({ soft: true });
   }, [loadAccount]);
-
-  useDashboardTabRefocus(refetchLive, enabled);
 
   useEffect(() => {
     if (!enabled) {

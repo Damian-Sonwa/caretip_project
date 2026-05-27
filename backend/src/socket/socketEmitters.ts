@@ -28,6 +28,13 @@ export function emitPlatformDataUpdated(reason: string): void {
   io.to("platform").emit("platform_data_updated", { reason, at: new Date().toISOString() });
 }
 
+/** Lightweight platform-admin refresh (stat cards + charts only). */
+export function emitPlatformMetricsUpdated(reason: string): void {
+  const io = getSocketIO();
+  if (!io) return;
+  io.to("platform").emit("platform_metrics_updated", { reason, at: new Date().toISOString() });
+}
+
 export function emitNotificationCreated(
   userId: string,
   payload: { notification: unknown; unreadCount: number },

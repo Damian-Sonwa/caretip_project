@@ -1,5 +1,5 @@
 import Stripe from "stripe";
-import { Role, type Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import {
   emitBusinessDataChanged,
@@ -8,7 +8,11 @@ import {
 } from "../socket/socketEmitters.js";
 import { CARETIP_FEE_PERCENT } from "../config/fees.js";
 import { signImpersonationToken } from "./auth.service.js";
-import { getCachedOrLoad, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+import {
+  getCachedOrLoad,
+  invalidateCacheKey,
+  invalidateCacheKeyPrefix,
+} from "../utils/shortLivedCache.js";
 
 const PLATFORM_STATS_CACHE_TTL_MS = 45_000;
 const PLATFORM_BUSINESSES_CACHE_TTL_MS = 45_000;
@@ -16,6 +20,13 @@ const PLATFORM_BUSINESSES_CACHE_TTL_MS = 45_000;
 /** Invalidate platform admin dashboard caches (stats, businesses list). */
 export function invalidatePlatformDashboardCache(): void {
   invalidateCacheKeyPrefix("platform:");
+}
+
+/** Invalidate fast-moving platform admin caches after tips (stats, charts, per-business tip totals). */
+export function invalidatePlatformMetricsCache(): void {
+  invalidateCacheKey("platform:stats");
+  invalidateCacheKey("platform:businesses");
+  invalidateCacheKeyPrefix("platform:analytics:");
 }
 
 export async function checkDatabaseHealth(): Promise<"online" | "offline"> {
@@ -39,56 +50,36 @@ export async function checkStripeHealth(): Promise<"online" | "offline"> {
   }
 }
 
-/** Per-business successful tip totals (live from `tips` / Transaction, keyed by businessId). */
-async function getSuccessTipStatsForBusinessIds(
-  ids: string[]
-): Promise<Map<string, { totalTipsEur: number; successTipCount: number }>> {
-  if (ids.length === 0) return new Map();
-  const rows = await prisma.transaction.groupBy({
-    by: ["businessId"],
-    where: { status: "success", businessId: { in: ids } },
-    _sum: { amount: true },
-    _count: { _all: true },
-  });
-  const m = new Map<string, { totalTipsEur: number; successTipCount: number }>();
-  for (const r of rows) {
-    m.set(r.businessId, {
-      totalTipsEur: Number(r._sum.amount ?? 0),
-      successTipCount: r._count._all,
-    });
-  }
-  return m;
-}
+type PlatformTxAggRow = {
+  transaction_count: bigint;
+  success_count: bigint;
+  total_volume: number | null;
+  businesses_with_success: bigint;
+};
 
-/** Aggregates for SuperAdmin dashboard (EUR = tip amounts stored in DB). Platform tip total = SUM(success tips) across all businesses. */
+/** Aggregates for SuperAdmin dashboard (EUR = tip amounts stored in DB). */
 async function getGlobalPlatformStatsImpl() {
-  const [
-    transactionCount,
-    successCount,
-    businessesCount,
-    employeesCount,
-    locationsCount,
-    usersActive,
-    perBusinessSuccessTips,
-  ] = await Promise.all([
-    prisma.transaction.count(),
-    prisma.transaction.count({ where: { status: "success" } }),
-    prisma.business.count(),
-    prisma.employee.count(),
-    prisma.location.count(),
-    prisma.user.count({ where: { isActive: true } }),
-    prisma.transaction.groupBy({
-      by: ["businessId"],
-      where: { status: "success" },
-      _sum: { amount: true },
-    }),
-  ]);
+  const [txAggRows, businessesCount, employeesCount, locationsCount, usersActive] =
+    await Promise.all([
+      prisma.$queryRaw<PlatformTxAggRow[]>(Prisma.sql`
+        SELECT
+          COUNT(*)::bigint AS transaction_count,
+          COUNT(*) FILTER (WHERE status = 'success')::bigint AS success_count,
+          COALESCE(SUM(amount) FILTER (WHERE status = 'success'), 0)::float AS total_volume,
+          COUNT(DISTINCT business_id) FILTER (WHERE status = 'success')::bigint AS businesses_with_success
+        FROM tips
+      `),
+      prisma.business.count(),
+      prisma.employee.count(),
+      prisma.location.count(),
+      prisma.user.count({ where: { isActive: true } }),
+    ]);
 
-  const platformTotalFromBusinessRollup = perBusinessSuccessTips.reduce(
-    (s, r) => s + Number(r._sum.amount ?? 0),
-    0,
-  );
-  const totalVolumeEur = platformTotalFromBusinessRollup;
+  const txAgg = txAggRows[0];
+  const transactionCount = Number(txAgg?.transaction_count ?? 0);
+  const successCount = Number(txAgg?.success_count ?? 0);
+  const totalVolumeEur = Number(txAgg?.total_volume ?? 0);
+  const businessesWithSuccessfulTips = Number(txAgg?.businesses_with_success ?? 0);
 
   return {
     totalVolumeEur,
@@ -102,8 +93,8 @@ async function getGlobalPlatformStatsImpl() {
     employeesCount,
     locationsCount,
     activeUsersCount: usersActive,
-    businessesWithSuccessfulTips: perBusinessSuccessTips.length,
-    platformTotalTipsFromBusinessRollupEur: platformTotalFromBusinessRollup,
+    businessesWithSuccessfulTips,
+    platformTotalTipsFromBusinessRollupEur: totalVolumeEur,
     platformTotalsConsistent: true,
   };
 }
@@ -166,42 +157,82 @@ export async function listGlobalTransactions(params: {
   return { items, total };
 }
 
+type PlatformBusinessActivityRow = {
+  id: string;
+  name: string;
+  slug: string;
+  verification_status: string;
+  legal_contact_name: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  website: string | null;
+  registered_address: string | null;
+  logo_path: string | null;
+  verification_document_path: string | null;
+  owner_user_id: string;
+  owner_email: string;
+  staff_count: number;
+  location_count: number;
+  total_tips_eur: number;
+  success_tip_count: number;
+};
+
 /**
  * SuperAdmin “all businesses” view: KYC fields plus live staff/location counts and successful tip totals per business.
  */
 async function getAllBusinessActivityImpl() {
-  const businesses = await prisma.business.findMany({
-    orderBy: { name: "asc" },
-    include: {
-      user: { select: { id: true, email: true } },
-      _count: { select: { employees: true, locations: true } },
-    },
-  });
+  const rows = await prisma.$queryRaw<PlatformBusinessActivityRow[]>(Prisma.sql`
+    SELECT
+      b.id,
+      b.name,
+      b.slug,
+      b.verification_status,
+      b.legal_contact_name,
+      b.contact_email,
+      b.contact_phone,
+      b.website,
+      b.registered_address,
+      b.logo_path,
+      b.verification_document_path,
+      u.id AS owner_user_id,
+      u.email AS owner_email,
+      (SELECT COUNT(*)::int FROM employees e WHERE e.business_id = b.id) AS staff_count,
+      (SELECT COUNT(*)::int FROM locations l WHERE l.business_id = b.id) AS location_count,
+      COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
+      COALESCE(ts.success_tip_count, 0)::int AS success_tip_count
+    FROM businesses b
+    INNER JOIN "User" u ON u.id = b.user_id
+    LEFT JOIN (
+      SELECT
+        business_id,
+        SUM(amount)::float AS total_tips_eur,
+        COUNT(*)::int AS success_tip_count
+      FROM tips
+      WHERE status = 'success'
+      GROUP BY business_id
+    ) ts ON ts.business_id = b.id
+    ORDER BY COALESCE(ts.total_tips_eur, 0) DESC, b.name ASC
+  `);
 
-  const tipStats = await getSuccessTipStatsForBusinessIds(businesses.map((b) => b.id));
-
-  return businesses.map((b) => {
-    const tips = tipStats.get(b.id) ?? { totalTipsEur: 0, successTipCount: 0 };
-    return {
-      id: b.id,
-      name: b.name,
-      slug: b.slug,
-      verificationStatus: b.verificationStatus,
-      legalContactName: b.legalContactName,
-      contactEmail: b.contactEmail,
-      contactPhone: b.contactPhone,
-      website: (b as any).website ?? null,
-      registeredAddress: b.registeredAddress,
-      ownerUserId: b.user.id,
-      ownerEmail: b.user.email,
-      staffCount: b._count.employees,
-      locationCount: b._count.locations,
-      logoPath: b.logoPath,
-      verificationDocumentPath: b.verificationDocumentPath,
-      totalTipsEur: tips.totalTipsEur,
-      successTipCount: tips.successTipCount,
-    };
-  });
+  return rows.map((b) => ({
+    id: b.id,
+    name: b.name,
+    slug: b.slug,
+    verificationStatus: b.verification_status,
+    legalContactName: b.legal_contact_name,
+    contactEmail: b.contact_email,
+    contactPhone: b.contact_phone,
+    website: b.website,
+    registeredAddress: b.registered_address,
+    ownerUserId: b.owner_user_id,
+    ownerEmail: b.owner_email,
+    staffCount: Number(b.staff_count ?? 0),
+    locationCount: Number(b.location_count ?? 0),
+    logoPath: b.logo_path,
+    verificationDocumentPath: b.verification_document_path,
+    totalTipsEur: Number(b.total_tips_eur ?? 0),
+    successTipCount: Number(b.success_tip_count ?? 0),
+  }));
 }
 
 export async function getAllBusinessActivity() {

@@ -2332,11 +2332,18 @@ export type PlatformAnalytics = {
   growth: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }>;
   tipVolume: Array<{ date: string; tipsEur: number; tipCount: number }>;
   topBusinessesByTips: Array<{ businessId: string; businessName: string; tipsEur: number }>;
+  /** Present when the API returned a safe empty fallback after an error. */
+  warning?: string;
 };
 
 const platformStatsInflight = new Map<string, Promise<PlatformGlobalStats>>();
 const platformBusinessesInflight = new Map<string, Promise<{ businesses: PlatformBusinessRow[] }>>();
 const platformAnalyticsInflight = new Map<string, Promise<PlatformAnalytics>>();
+
+export function clearPlatformAnalyticsClientCache(days = 30, timezone?: string): void {
+  const cacheKey = `platform:analytics:${days}:${timezone ?? ""}`;
+  platformAnalyticsInflight.delete(cacheKey);
+}
 
 export function clearPlatformDashboardClientCache(): void {
   platformStatsInflight.clear();

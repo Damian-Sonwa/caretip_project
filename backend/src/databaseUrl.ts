@@ -79,7 +79,9 @@ export function getDatabaseUrlForPrisma(): string {
         parsed.port = "6543";
         parsed.searchParams.set("pgbouncer", "true");
         parsed.searchParams.set("connection_limit", "1");
-        parsed.searchParams.delete("pool_timeout");
+        if (!parsed.searchParams.has("pool_timeout")) {
+          parsed.searchParams.set("pool_timeout", "30");
+        }
         url = parsed.toString();
         usedSessionPooler = true;
       } else if (port === "6543") {
@@ -88,6 +90,9 @@ export function getDatabaseUrlForPrisma(): string {
         }
         if (!parsed.searchParams.has("connection_limit")) {
           parsed.searchParams.set("connection_limit", "1");
+        }
+        if (!parsed.searchParams.has("pool_timeout")) {
+          parsed.searchParams.set("pool_timeout", "30");
         }
         url = parsed.toString();
       } else if (port === "5432" && forceSession) {
@@ -98,14 +103,26 @@ export function getDatabaseUrlForPrisma(): string {
         usedSessionPooler = true;
       }
     } else if (url.includes("pooler.supabase.com:6543")) {
-      url = ensureQueryParams(url, { pgbouncer: "true", connection_limit: "1" });
+      url = ensureQueryParams(url, {
+        pgbouncer: "true",
+        connection_limit: "1",
+        pool_timeout: "30",
+      });
     }
   } catch {
     if (url.includes("pooler.supabase.com:6543")) {
-      url = ensureQueryParams(url, { pgbouncer: "true", connection_limit: "1" });
+      url = ensureQueryParams(url, {
+        pgbouncer: "true",
+        connection_limit: "1",
+        pool_timeout: "30",
+      });
     } else if (url.includes("pooler.supabase.com:5432")) {
       url = url.replace(":5432/", ":6543/");
-      url = ensureQueryParams(url, { pgbouncer: "true", connection_limit: "1" });
+      url = ensureQueryParams(url, {
+        pgbouncer: "true",
+        connection_limit: "1",
+        pool_timeout: "30",
+      });
       usedSessionPooler = true;
     }
   }

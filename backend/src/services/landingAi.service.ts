@@ -1,28 +1,39 @@
 import {
-  getKnowledgeReply,
+  buildFaqGroundingBlock,
+  CARETIP_PRODUCT_CONTEXT,
+  composeFallbackReply,
   isLikelyOffTopic,
   LANDING_AI_SCOPE_REFUSAL,
+  rankFaqEntries,
 } from "./landingAiKnowledge.js";
 
 export type LandingChatMessage = { role: "user" | "assistant"; content: string };
 
-const SYSTEM_PROMPT = `You are CareTip's premium onboarding concierge on the marketing website.
-Your job: help interested hospitality operators understand CareTip and move toward signup warmly, concisely, and honestly.
+const ASSISTANT_ROLE = `You are Ask CareTip: a knowledgeable, conversational product guide on the marketing website.
+You help hospitality operators and curious visitors understand CareTip and move toward signup when it fits naturally.
 
-STRICT SCOPE: only discuss:
-- CareTip platform and value proposition
-- Onboarding and setup (QR codes, staff, venues)
-- Pricing and fees (high level; direct to Pricing page for numbers)
-- Employee and business workflows
-- Tipping flows for guests
-- GDPR, security, and data handling at a high level
+RESPONSE MODEL (AI-first):
+- Reason from product context and FAQ reference snippets below.
+- Paraphrase in your own words. Do NOT paste FAQ text verbatim or repeat the same template every turn.
+- Use the conversation history for follow-ups (pronouns, "that", "also", comparisons).
+- Ask one short clarifying question when the user's goal is ambiguous.
+- Be warm, intelligent, and concise: usually 2 to 5 sentences. No bullet walls unless the user asked for a list.
 
-NEVER: general knowledge, unrelated products, legal/medical advice, or writing arbitrary code.
-If off-topic, politely redirect to CareTip topics in one short sentence.
+SCOPE:
+- CareTip product, onboarding, QR tipping, dashboards, payouts, pricing (high level), security/GDPR, employee and business workflows.
+- Politely decline unrelated topics (general knowledge, code, medical/legal advice) in one sentence and invite a CareTip question.
 
-STYLE: 2 to 4 sentences max, premium SaaS tone, no bullet walls, no hype spam.
-Use periods and commas only. Do not use em dashes or en dashes.
-End with a soft CTA when natural (e.g. start free signup, view pricing, or contact sales).`;
+SAFETY (strict):
+- NEVER invent account balances, payout amounts, verification status, or claim a specific payment succeeded.
+- NEVER promise features not described in the product context.
+- For exact fees or tiers, point to the Pricing page rather than guessing numbers.
+- For account-specific issues, suggest Help Center, FAQs, or contacting support.
+
+STYLE:
+- Premium SaaS tone, natural spoken English/German as requested.
+- Use periods and commas only. Do not use em dashes or en dashes.
+- Vary openings; avoid robotic phrases like "Certainly!" or "I'd be happy to help with that request."
+- End with a soft CTA only when natural (signup, pricing, FAQ).`;
 
 /** Strip em/en dashes from assistant copy for a cleaner chat UI. */
 export function polishLandingAiReply(text: string): string {
@@ -35,11 +46,24 @@ export function polishLandingAiReply(text: string): string {
 }
 
 const MAX_USER_LEN = 600;
-const MAX_HISTORY = 10;
+const MAX_HISTORY = 12;
 
-function buildSystem(locale: string): string {
+function buildSystem(locale: string, faqGrounding: string, promptId?: string): string {
   const lang = locale.toLowerCase().startsWith("de") ? "German" : "English";
-  return `${SYSTEM_PROMPT}\n\nRespond in ${lang}.`;
+  const promptHint = promptId
+    ? `\nThe user may have tapped a suggested topic related to: ${promptId}. Address that topic naturally while staying conversational.`
+    : "";
+
+  return `${ASSISTANT_ROLE}
+
+## Product context
+${CARETIP_PRODUCT_CONTEXT}
+
+## FAQ reference (ground truth — paraphrase, do not copy verbatim)
+${faqGrounding}
+${promptHint}
+
+Respond in ${lang}.`;
 }
 
 export function validateChatBody(body: unknown): {
@@ -72,19 +96,27 @@ export function validateChatBody(body: unknown): {
 async function callOpenAi(
   messages: LandingChatMessage[],
   locale: string,
+  faqGrounding: string,
+  promptId?: string,
 ): Promise<string | null> {
   const apiKey = process.env.LANDING_AI_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim();
   if (!apiKey) return null;
 
-  const model = process.env.LANDING_AI_OPENAI_MODEL?.trim() || "gpt-4o-mini";
-  const base = process.env.LANDING_AI_OPENAI_BASE_URL?.trim() || "https://api.openai.com/v1";
+  const model =
+    process.env.LANDING_AI_OPENAI_MODEL?.trim() ||
+    process.env.OPENAI_MODEL?.trim() ||
+    "gpt-4o-mini";
+  const base =
+    process.env.LANDING_AI_OPENAI_BASE_URL?.trim() ||
+    process.env.OPENAI_BASE_URL?.trim() ||
+    "https://api.openai.com/v1";
 
   const payload = {
     model,
-    temperature: 0.35,
-    max_tokens: 320,
+    temperature: 0.58,
+    max_tokens: 480,
     messages: [
-      { role: "system", content: buildSystem(locale) },
+      { role: "system", content: buildSystem(locale, faqGrounding, promptId) },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
     ],
   };
@@ -124,33 +156,16 @@ export async function generateLandingAiReply(input: {
     return { reply: polishLandingAiReply(LANDING_AI_SCOPE_REFUSAL), source: "knowledge" };
   }
 
-  const llm = await callOpenAi(input.messages, input.locale);
+  const faqEntries = rankFaqEntries(userText, input.promptId, 4);
+  const faqGrounding = buildFaqGroundingBlock(faqEntries, input.locale);
+
+  const llm = await callOpenAi(input.messages, input.locale, faqGrounding, input.promptId);
   if (llm) return { reply: polishLandingAiReply(llm), source: "openai" };
 
-  if (input.promptId) {
-    return {
-      reply: polishLandingAiReply(getKnowledgeReply(input.promptId, input.locale)),
-      source: "knowledge",
-    };
-  }
-
-  const lower = userText.toLowerCase();
-  const id =
-    lower.includes("gdpr") || lower.includes("dsgvo")
-      ? "gdpr"
-      : lower.includes("qr") || lower.includes("custom")
-        ? "qr_customize"
-        : lower.includes("setup") || lower.includes("long") || lower.includes("minute")
-          ? "setup_time"
-          : lower.includes("price") || lower.includes("cost") || lower.includes("fee")
-            ? "pricing"
-            : lower.includes("employee") || lower.includes("staff") || lower.includes("receive")
-              ? "employee_tips"
-              : lower.includes("venue") || lower.includes("location") || lower.includes("multiple")
-                ? "multi_venue"
-                : lower.includes("how") && lower.includes("work")
-                  ? "how_it_works"
-                  : undefined;
-
-  return { reply: polishLandingAiReply(getKnowledgeReply(id, input.locale)), source: "knowledge" };
+  const reply = composeFallbackReply({
+    userText,
+    locale: input.locale,
+    promptId: input.promptId,
+  });
+  return { reply: polishLandingAiReply(reply), source: "knowledge" };
 }

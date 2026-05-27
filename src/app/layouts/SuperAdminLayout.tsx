@@ -9,6 +9,7 @@ import { useAuth } from "../hooks/useAuth";
 import { isWalkthroughDemoPlatformAdmin } from "../lib/walkthroughDemo";
 import { PLATFORM_DASHBOARD_ROOT } from "../components/platform/platformDashboardUi";
 import { PushNotificationSync } from "../components/PushNotificationSync";
+import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { cn } from "@/lib/utils";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
@@ -42,7 +43,9 @@ export function SuperAdminLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="min-h-0 flex-1">
-            <Outlet />
+            <RouteChunkBoundary>
+              <Outlet />
+            </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />
         </div>

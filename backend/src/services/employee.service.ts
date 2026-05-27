@@ -89,49 +89,54 @@ export interface EmployeeListItem {
   phone?: string;
 }
 
+type EmployeeRosterAggRow = {
+  id: string;
+  slug: string | null;
+  name: string;
+  job_title: string;
+  avatar: string | null;
+  is_active: boolean;
+  email: string;
+  tip_count: number;
+};
+
 /** Dashboard / manager list: read filter only — does not change database rows. */
 export async function getEmployeesByBusinessId(businessId: string): Promise<EmployeeListItem[]> {
-  const employees = await prisma.employee.findMany({
-    where: {
-      businessId,
-      isActive: true,
-      activationStatus: "active",
-    },
-    select: {
-      id: true,
-      slug: true,
-      name: true,
-      jobTitle: true,
-      avatar: true,
-      isActive: true,
-      transactions: {
-        where: { status: "success" },
-        select: { amount: true },
-      },
-      user: { select: { email: true } },
-    },
+  const rows = await prisma.$queryRaw<EmployeeRosterAggRow[]>(Prisma.sql`
+    SELECT
+      e.id,
+      e.slug,
+      e.name,
+      e.job_title,
+      e.avatar,
+      e.is_active,
+      u.email,
+      COUNT(t.id) FILTER (WHERE t.status = 'success')::int AS tip_count
+    FROM employees e
+    INNER JOIN "User" u ON u.id = e.user_id
+    LEFT JOIN tips t ON t.employee_id = e.id
+    WHERE e.business_id = ${businessId}
+      AND e.is_active = true
+      AND e.activation_status = 'active'
+    GROUP BY e.id, e.slug, e.name, e.job_title, e.avatar, e.is_active, u.email
+    ORDER BY e.name ASC
+  `);
+
+  return rows.map((emp) => {
+    const tipCount = Number(emp.tip_count ?? 0);
+    return {
+      id: emp.id,
+      slug: emp.slug,
+      name: emp.name,
+      role: emp.job_title,
+      avatar: absolutizePublicMediaPath(emp.avatar),
+      isActive: emp.is_active,
+      email: emp.email ?? "",
+      rating: tipCount > 0 ? 4.8 : null,
+      tips: tipCount,
+      topRated: tipCount > 200,
+    };
   });
-
-  const withStats = await Promise.all(
-    employees.map(async (emp) => {
-      const tipCount = emp.transactions.length;
-      const tipsTotal = emp.transactions.reduce((s, t) => s + Number(t.amount), 0);
-      return {
-        id: emp.id,
-        slug: emp.slug,
-        name: emp.name,
-        role: emp.jobTitle,
-        avatar: absolutizePublicMediaPath(emp.avatar),
-        isActive: emp.isActive,
-        email: emp.user?.email ?? "", // Handle nullable user/email
-        rating: tipCount > 0 ? 4.8 : null,
-        tips: tipCount,
-        topRated: tipCount > 200,
-      };
-    })
-  );
-
-  return withStats;
 }
 
 export interface EmployeeDetail {
@@ -167,16 +172,6 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       businessId: true,
       business: { select: { verificationStatus: true, slug: true, logoPath: true, name: true } },
       user: { select: { emailVerified: true } },
-      transactions: {
-        where: {
-          status: "success",
-          createdAt: {
-            gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-            lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
-          },
-        },
-        select: { amount: true },
-      },
     },
   });
   if (!emp) {
@@ -208,7 +203,17 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
   if (emp.business.verificationStatus !== "verified") {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
-  const currentMonthTotal = emp.transactions.reduce((s, t) => s + Number(t.amount), 0);
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+  const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
+  const monthAgg = await prisma.transaction.aggregate({
+    where: {
+      employeeId: emp.id,
+      status: "success",
+      createdAt: { gte: monthStart, lt: monthEnd },
+    },
+    _sum: { amount: true },
+  });
+  const currentMonthTotal = Number(monthAgg._sum.amount ?? 0);
   return {
     id: emp.id,
     name: emp.name,

@@ -10,6 +10,7 @@ import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 import { BUSINESS_DASHBOARD_ROOT } from "../components/business/businessDashboardUi";
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
+import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -44,7 +45,9 @@ export function BusinessLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="flex-1">
-            <Outlet />
+            <RouteChunkBoundary>
+              <Outlet />
+            </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />
         </div>

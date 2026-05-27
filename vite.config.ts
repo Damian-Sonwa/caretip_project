@@ -45,7 +45,23 @@ export default defineConfig(({ mode }) => {
   },
   build: {
     outDir: 'dist',
-    chunkSizeWarningLimit: 2500,
+    chunkSizeWarningLimit: 1500,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('recharts') || id.includes('d3-')) return 'vendor-recharts';
+          if (id.includes('socket.io-client') || id.includes('engine.io-client')) return 'vendor-socket';
+          if (id.includes('firebase')) return 'vendor-firebase';
+          if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
+          if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
+          if (id.includes('html2canvas')) return 'vendor-html2canvas';
+          if (id.includes('@radix-ui')) return 'vendor-radix';
+          if (id.includes('react-router') || id.includes('@remix-run/router')) return 'vendor-router';
+          if (id.includes('react-dom') || id.includes('/react/')) return 'vendor-react';
+        },
+      },
+    },
   },
   plugins: [
     // The React and Tailwind plugins are both required for Make, even if

@@ -338,6 +338,7 @@ model Location {
   transactions Transaction[]
   employees    Employee[]
 
+  @@index([businessId])
   @@map("locations")
 }
 

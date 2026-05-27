@@ -14,6 +14,7 @@ import {
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/businessTime.js";
 import { DateTime } from "luxon";
+import { isPrismaPoolTimeout } from "../utils/prismaErrors.js";
 
 export async function getHealth(_req: Request, res: Response) {
   try {
@@ -84,6 +85,11 @@ export async function getAnalytics(req: Request, res: Response) {
     return res.json(data);
   } catch (err) {
     logServerError("platform.getAnalytics", err);
+    if (isPrismaPoolTimeout(err)) {
+      return res.status(503).json({
+        message: "The server is busy. Please try again in a moment.",
+      });
+    }
     // Safe empty analytics payload: charts must not break the admin dashboard.
     const rawDays = typeof req.query.days === "string" ? Number(req.query.days) : 30;
     const rangeDays = Number.isFinite(rawDays) ? Math.min(Math.max(Math.floor(rawDays), 7), 120) : 30;

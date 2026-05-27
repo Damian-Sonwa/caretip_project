@@ -1,13 +1,13 @@
 import "./lib/fonts/inter";
 import "./lib/fonts/heroDisplay";
 import "./app/lib/pwaInstallDeferred";
-import "./i18n/i18n";
 import React from "react";
 import { createRoot } from "react-dom/client";
 import { registerSW } from "virtual:pwa-register";
 import App from "./app/App";
 import { GlobalErrorBoundary } from "./app/components/GlobalErrorBoundary";
 import { wakeRemoteApi } from "./app/lib/api";
+import { ensureI18nReady } from "./i18n/i18n";
 import "./styles/index.css";
 
 wakeRemoteApi();
@@ -21,8 +21,10 @@ const updateSW = registerSW({
   },
 });
 
-createRoot(document.getElementById("root")!).render(
-  <GlobalErrorBoundary>
-    <App />
-  </GlobalErrorBoundary>
-);
+void ensureI18nReady().then(() => {
+  createRoot(document.getElementById("root")!).render(
+    <GlobalErrorBoundary>
+      <App />
+    </GlobalErrorBoundary>,
+  );
+});

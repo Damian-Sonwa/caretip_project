@@ -34,6 +34,7 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { isProtectedApiReady } from "../../lib/authRestore";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
+import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeAccountSummary } from "../../hooks/useEmployeeAccountSummary";
@@ -164,6 +165,7 @@ export function EmployeeDashboard() {
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshDashboardQuiet);
+  useDashboardTabRefocus(refreshDashboardQuiet, dashboardEnabled);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;

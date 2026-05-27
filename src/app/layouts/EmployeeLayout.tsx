@@ -11,6 +11,7 @@ import { getEmployeeProfile } from "../lib/api";
 import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
+import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -71,7 +72,9 @@ export function EmployeeLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="flex-1">
-            <Outlet />
+            <RouteChunkBoundary>
+              <Outlet />
+            </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />
         </div>

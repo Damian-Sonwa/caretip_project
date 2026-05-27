@@ -1381,11 +1381,11 @@
       "secondary": "So funktioniert es"
     },
     "assistant": {
-      "title": "CareTip Guide",
-      "subtitle": "Onboarding-Concierge",
+      "title": "CareTip fragen",
+      "subtitle": "Produkt-Guide",
       "launcherLabel": "Fragen zu CareTip?",
       "launcherShort": "CareTip fragen",
-      "welcome": "Ich helfe bei Setup, Preisen, QR-Codes und Auszahlungen. Nur zu CareTip.",
+      "welcome": "Fragen Sie mich zu CareTip: Setup, QR-Trinkgeld, Dashboards, Auszahlungen oder Preise. Ich behalte den Chatverlauf im Blick, Follow-ups funktionieren natürlich.",
       "inputPlaceholder": "Frage zu CareTip…",
       "send": "Senden",
       "close": "Assistent schließen",
@@ -2230,6 +2230,8 @@
     "loadingDashboard": "Plattformdashboard wird geladen…",
     "loadErrorTitle": "Plattformdaten konnten nicht geladen werden.",
     "retry": "Erneut versuchen",
+    "analyticsLoadFailed": "Diagramme konnten nicht geladen werden.",
+    "analyticsPeriodEmpty": "In diesem Diagrammzeitraum gibt es noch keine Trinkgelder. Die Kennzahlkarten zeigen Plattform-Gesamtwerte.",
     "statTips": "Erfolgreiche Trinkgelder (EUR)",
     "statTipsChange": "Summe aller erfolgreichen Trinkgelder: {{success}} erfolgreich von {{total}} gesamt{{biz}}",
     "statTipsBizPart": ", {{count}} Lokale mit Trinkgeldern",

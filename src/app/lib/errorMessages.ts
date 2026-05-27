@@ -35,6 +35,9 @@ export const API_WAKEUP_NETWORK_MESSAGE =
 export function isApiConnectivityError(error: unknown): boolean {
   if (error == null) return false;
   if (isAbortError(error)) return false;
+  if (isApiRequestError(error) && (error.status === 503 || error.status === 502 || error.status === 504)) {
+    return true;
+  }
   if (error instanceof TypeError) return true;
   const message = error instanceof Error ? error.message : String(error);
   if (!message.trim()) return false;

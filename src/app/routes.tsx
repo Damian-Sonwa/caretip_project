@@ -15,6 +15,7 @@ import {
   useAppLoadingCoordinator,
   useMarkAppShellReadyOptional,
 } from "./context/AppLoadingSplashContext";
+import { RouteChunkBoundary } from "./routing/RouteChunkBoundary";
 import { LandingPage } from './pages/LandingPage';
 import { PricingPage } from './pages/PricingPage';
 import { PrivacyPage } from './pages/PrivacyPage';
@@ -28,59 +29,52 @@ import { FAQPage } from './pages/FAQPage';
 import { MobileAppPage } from './pages/MobileAppPage';
 import { HowItWorksPage } from './pages/HowItWorksPage';
 import { FeaturesPage } from './pages/FeaturesPage';
-import HeroSectionDemoPage from './pages/HeroSectionDemoPage';
-import { HeroAnimationDemoPage } from './pages/HeroAnimationDemoPage';
-import SaasDashboard3DHeroPage from './pages/SaasDashboard3DHeroPage';
 import { JoinPage } from './pages/JoinPage';
-import { BusinessOnboardingPage } from './pages/BusinessOnboardingPage';
 import { AuthPage } from './components/AuthPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ActivateEmployeePage } from './pages/ActivateEmployeePage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { CheckEmailPage } from './pages/CheckEmailPage';
-import { TransactionsPage } from './components/TransactionsPage';
-import { NotificationInboxPage } from './pages/shared/NotificationInboxPage';
-import { PlatformAnnouncementsPage } from './pages/platform/PlatformAnnouncementsPage';
-import { TipsActivityPage } from './pages/shared/TipsActivityPage';
-import { AdminDashboard } from './components/AdminDashboard';
 import { PlatformAdminRoute } from './components/PlatformAdminRoute';
 import { PlatformAdminLoginPage } from './pages/platform/PlatformAdminLoginPage';
-import { GlobalTransactionsPage } from './pages/platform/GlobalTransactionsPage';
-import { BusinessVerificationPage } from './pages/platform/BusinessVerificationPage';
-import { BusinessDetailPage } from './pages/platform/BusinessDetailPage';
-import { AuditLogsPage } from './pages/platform/AuditLogsPage';
-import { PlatformSettingsPage } from './pages/platform/PlatformSettingsPage';
-import { PlatformUserManagementPage } from './pages/platform/PlatformUserManagementPage';
-
-// Customer Flow Pages
-import { QRLandingPage } from './pages/customer/QRLandingPage';
-import { StaffLandingPage } from './pages/customer/StaffLandingPage';
-// Employee selection is handled by QR landing / staff directory.
-import { TipAmountPage } from './pages/customer/TipAmountPage';
-import { PaymentPage } from './pages/customer/PaymentPage';
-import { SuccessPage } from './pages/customer/SuccessPage';
-import { RatingPage } from './pages/customer/RatingPage';
-import { BusinessStaffDirectoryPage } from './pages/customer/BusinessStaffDirectoryPage';
-import { StaffTipByPublicPathPage } from './pages/customer/StaffTipByPublicPathPage';
-import { LocationQrLandingPage } from './pages/customer/LocationQrLandingPage';
-import { TableQrLandingPage } from './pages/customer/TableQrLandingPage';
-import { EmployeeQrEntryPage } from './pages/customer/EmployeeQrEntryPage';
-
-// Employee Dashboard Pages
-import { EmployeeDashboard } from './pages/employee/EmployeeDashboard';
-import { EmployeeNotificationsPage } from './pages/employee/EmployeeNotificationsPage';
-import { EmployeeSettingsPage } from './pages/employee/EmployeeSettingsPage';
-import { EmployeeTipGoalsPage } from './pages/employee/EmployeeTipGoalsPage';
-
-// Business Dashboard Pages
-import { BusinessDashboard } from './pages/business/BusinessDashboard';
-import { StaffManagementPage } from './pages/business/StaffManagementPage';
-import { QRCodeManagementPage } from './pages/business/QRCodeManagementPage';
-import { LocationsPage } from './pages/business/LocationsPage';
-import { TablesPage } from './pages/business/TablesPage';
-import { BusinessProfilePage } from './pages/business/BusinessProfilePage';
-import { BusinessSettingsPage } from './pages/business/BusinessSettingsPage';
+import {
+  AdminDashboard,
+  AuditLogsPage,
+  BusinessDetailPage,
+  BusinessOnboardingPage,
+  BusinessSettingsPage,
+  BusinessStaffDirectoryPage,
+  BusinessVerificationPage,
+  EmployeeDashboard,
+  EmployeeNotificationsPage,
+  EmployeeQrEntryPage,
+  EmployeeSettingsPage,
+  EmployeeTipGoalsPage,
+  GlobalTransactionsPage,
+  HeroAnimationDemoPage,
+  HeroSectionDemoPage,
+  LocationQrLandingPage,
+  NotificationInboxPage,
+  PaymentPage,
+  PlatformAnnouncementsPage,
+  PlatformSettingsPage,
+  PlatformUserManagementPage,
+  QRCodeManagementPage,
+  QRLandingPage,
+  RatingPage,
+  SaasDashboard3DHeroPage,
+  StaffLandingPage,
+  StaffManagementPage,
+  StaffTipByPublicPathPage,
+  SuccessPage,
+  TableQrLandingPage,
+  TablesPage,
+  TipAmountPage,
+  TipsActivityPage,
+  BusinessDashboard,
+  LocationsPage,
+} from './routing/lazyPages';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { SuperAdminLayout } from './layouts/SuperAdminLayout';
 import { BusinessLayout } from './layouts/BusinessLayout';
@@ -160,7 +154,9 @@ function RootLayout() {
   return (
     <>
       <ScrollToTop />
-      <Outlet />
+      <RouteChunkBoundary variant="minimal">
+        <Outlet />
+      </RouteChunkBoundary>
       {import.meta.env.DEV ? <DashboardDevDebugOverlayRoot /> : null}
     </>
   );

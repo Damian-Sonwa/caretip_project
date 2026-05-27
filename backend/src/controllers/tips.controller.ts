@@ -67,12 +67,11 @@ export async function getByEmployee(req: Request, res: Response) {
     }
 
     if (timeframe == null) {
-      const accountSummary = await loadEmployeeAccountSummary(employee.id);
-      const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
-        employee.id,
-        employee.businessTimezone,
-      );
-      const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
+      const [accountSummary, currentMonthTotal, goal] = await Promise.all([
+        loadEmployeeAccountSummary(employee.id),
+        loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
+        goalService.getMyGoalWithProgress(userId).catch(() => null),
+      ]);
       return res.json({
         tips: [],
         monthlyGoal: employee.monthlyGoal,
@@ -133,17 +132,16 @@ export async function getByEmployee(req: Request, res: Response) {
       });
     }
 
-    const accountSummary = await loadEmployeeAccountSummary(employee.id);
-    const currentMonthTotal = await loadEmployeeCurrentMonthTotal(
-      employee.id,
-      employee.businessTimezone,
-    );
-    const goal = await goalService.getMyGoalWithProgress(userId).catch(() => null);
-    const dash = await loadEmployeeTipsDashboardForTimeframe({
-      employeeId: employee.id,
-      businessTimezone: employee.businessTimezone,
-      timeframe,
-    });
+    const [accountSummary, currentMonthTotal, goal, dash] = await Promise.all([
+      loadEmployeeAccountSummary(employee.id),
+      loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
+      goalService.getMyGoalWithProgress(userId).catch(() => null),
+      loadEmployeeTipsDashboardForTimeframe({
+        employeeId: employee.id,
+        businessTimezone: employee.businessTimezone,
+        timeframe,
+      }),
+    ]);
 
     return res.json({
       monthlyGoal: employee.monthlyGoal,

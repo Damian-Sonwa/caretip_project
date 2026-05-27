@@ -1379,11 +1379,11 @@
       "secondary": "See how it works"
     },
     "assistant": {
-      "title": "CareTip guide",
-      "subtitle": "Onboarding concierge",
+      "title": "Ask CareTip",
+      "subtitle": "Product guide",
       "launcherLabel": "Questions about CareTip?",
       "launcherShort": "Ask CareTip",
-      "welcome": "I help with setup, pricing, QR codes, and how teams get paid. Ask anything about CareTip.",
+      "welcome": "Ask me anything about CareTip: setup, QR tipping, dashboards, payouts, or pricing. I remember our chat, so follow-ups work naturally.",
       "inputPlaceholder": "Ask about CareTip…",
       "send": "Send",
       "close": "Close assistant",
@@ -2228,6 +2228,8 @@
     "loadingDashboard": "Loading platform dashboard…",
     "loadErrorTitle": "We’re having trouble loading platform data.",
     "retry": "Retry",
+    "analyticsLoadFailed": "Charts could not be loaded.",
+    "analyticsPeriodEmpty": "No tips in this chart period yet. Stat cards show all-time platform totals.",
     "statTips": "Successful tips (EUR)",
     "statTipsChange": "Sum of all successful tips: {{success}} successful of {{total}} total{{biz}}",
     "statTipsBizPart": ", {{count}} businesses with tips",

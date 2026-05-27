@@ -20,6 +20,7 @@ import {
   fetchPlatformStats,
   fetchPlatformBusinesses,
   fetchPlatformAnalytics,
+  clearPlatformAnalyticsClientCache,
   type PlatformHealthResponse,
   type PlatformGlobalStats,
   type PlatformBusinessRow,
@@ -40,6 +41,11 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platform/platformDashboardUi";
 import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
+import {
+  DashboardChartSkeleton,
+  DashboardHeroMetricSkeleton,
+  DashboardRefreshIndicator,
+} from "./dashboard/DashboardAnalyticsLoader";
 import {
   Select,
   SelectContent,
@@ -85,15 +91,34 @@ interface StatCardProps {
   trend?: "up" | "down";
   beam?: boolean;
   wideOnTablet?: boolean;
+  loading?: boolean;
+  loadingVariant?: "currency" | "count" | "pulse";
 }
 
-function StatCard({ title, value, change, icon: Icon, delay, trend, beam, wideOnTablet }: StatCardProps) {
+function StatCard({
+  title,
+  value,
+  change,
+  icon: Icon,
+  delay,
+  trend,
+  beam,
+  wideOnTablet,
+  loading,
+  loadingVariant = "count",
+}: StatCardProps) {
   const reduceMotion = useReducedMotion();
   return (
     <motion.div
       {...dashboardBlockMotion}
-      transition={{ ...dashboardBlockMotion.transition, delay: reduceMotion ? 0 : delay * 0.5 }}
-      className={cn("h-full", wideOnTablet && "sm:col-span-2 lg:col-span-1")}
+      transition={{
+        ...dashboardBlockMotion.transition,
+        delay: reduceMotion || !loading ? 0 : delay * 0.5,
+      }}
+      className={cn(
+        "h-full min-w-0",
+        wideOnTablet && "sm:col-span-2 lg:col-span-2 min-[1536px]:col-span-1",
+      )}
     >
       <Card className={platformUi.statCard}>
         {beam && !reduceMotion ? (
@@ -101,12 +126,12 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam, wideOn
         ) : null}
         <CardHeader className={platformUi.statCardHeader}>
           <div className="flex items-start justify-between gap-3">
-            <div className="rounded-lg border border-border bg-muted p-2">
+            <div className="shrink-0 rounded-lg border border-border bg-muted p-2">
               <Icon className="h-5 w-5 text-foreground" />
             </div>
             {trend && (
               <div
-                className={`flex items-center gap-1 text-sm ${
+                className={`flex shrink-0 items-center gap-1 text-sm ${
                   trend === "up" ? "text-primary" : "text-red-600"
                 }`}
               >
@@ -115,7 +140,13 @@ function StatCard({ title, value, change, icon: Icon, delay, trend, beam, wideOn
             )}
           </div>
           <CardDescription className={platformUi.statCardLabel}>{title}</CardDescription>
-          <CardTitle className={platformUi.statCardValue}>{value}</CardTitle>
+          <CardTitle className={platformUi.statCardValue} title={loading ? undefined : value}>
+            {loading ? (
+              <DashboardHeroMetricSkeleton variant={loadingVariant} />
+            ) : (
+              value
+            )}
+          </CardTitle>
           {change ? <p className={platformUi.statCardChange}>{change}</p> : null}
         </CardHeader>
       </Card>
@@ -192,6 +223,32 @@ function formatCompact(n: number): string {
   } catch {
     return String(n);
   }
+}
+
+function analyticsHasVisibleData(a: PlatformAnalytics): boolean {
+  const tipVol = a.tipVolume.reduce((s, r) => s + (r.tipsEur ?? 0), 0);
+  const tipCount = a.tipStatus.reduce((s, r) => s + (r.count ?? 0), 0);
+  const users = a.userDistribution.reduce((s, r) => s + (r.count ?? 0), 0);
+  const growth = a.growth.some((r) => r.newUsers > 0 || r.newBusinesses > 0 || r.newTips > 0);
+  return tipVol > 0 || tipCount > 0 || users > 0 || growth || (a.topBusinessesByTips?.length ?? 0) > 0;
+}
+
+/** Align tip-status chart with lifetime stat cards when analytics status rows are empty. */
+function mergeTipStatusForCharts(
+  analytics: PlatformAnalytics,
+  stats: PlatformGlobalStats | null,
+): PlatformAnalytics["tipStatus"] {
+  const rows = analytics.tipStatus;
+  const sum = rows.reduce((s, r) => s + (r.count ?? 0), 0);
+  if (sum > 0 || !stats) return rows;
+  const success = stats.successTransactionCount ?? 0;
+  const total = stats.transactionCount ?? 0;
+  const pending = Math.max(0, total - success);
+  return [
+    { status: "success", count: success },
+    { status: "pending", count: pending },
+    { status: "failed", count: 0 },
+  ];
 }
 
 function UserDistributionChart({
@@ -426,10 +483,14 @@ export function AdminDashboard() {
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
   const dashboardLoadGenRef = useRef(0);
+  const analyticsLoadGenRef = useRef(0);
   const [isSyncing, setIsSyncing] = useState(false);
   const [analyticsSyncing, setAnalyticsSyncing] = useState(false);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+  const [analyticsUpdatedAt, setAnalyticsUpdatedAt] = useState<number | null>(null);
+  const businessesDeferTimerRef = useRef<number | null>(null);
   const refreshTimerRef = useRef<number | null>(null);
-  const analyticsDeferTimerRef = useRef<number | null>(null);
+  const metricsRefreshTimerRef = useRef<number | null>(null);
   const sessionHydratedRef = useRef(false);
   const analyticsTimezoneRef = useRef(analyticsTimezone);
   analyticsTimezoneRef.current = analyticsTimezone;
@@ -515,90 +576,111 @@ export function AdminDashboard() {
   );
 
   const loadAnalytics = useCallback(
-    async (gen: number) => {
+    async (gen: number, opts?: { bustCache?: boolean }) => {
+      const tz = analyticsTimezoneRef.current;
+      if (opts?.bustCache) clearPlatformAnalyticsClientCache(30, tz);
       setAnalyticsSyncing(true);
+      setAnalyticsError(null);
       try {
-        const a = await fetchPlatformAnalytics(30, analyticsTimezoneRef.current);
-        if (gen !== dashboardLoadGenRef.current) return;
-        const resolved = a ?? emptyAnalytics;
-        setAnalytics(resolved);
-        persistSessionSnapshot({ analytics: resolved });
+        const a = await fetchPlatformAnalytics(30, tz);
+        if (gen !== analyticsLoadGenRef.current) return;
+        if (a.warning) {
+          throw new Error(a.warning);
+        }
+        setAnalytics(a);
+        setAnalyticsUpdatedAt(Date.now());
+        persistSessionSnapshot({ analytics: a });
       } catch (e) {
-        if (gen !== dashboardLoadGenRef.current) return;
+        if (gen !== analyticsLoadGenRef.current) return;
         logClientError("AdminDashboard.analytics", e);
-        setAnalytics(emptyAnalytics);
-        persistSessionSnapshot({ analytics: emptyAnalytics });
+        const msg = toUserFriendlyMessage(e);
+        setAnalyticsError(msg || t("admin.analyticsLoadFailed"));
+        setAnalytics((prev) => prev ?? null);
       } finally {
-        if (gen === dashboardLoadGenRef.current) setAnalyticsSyncing(false);
+        if (gen === analyticsLoadGenRef.current) setAnalyticsSyncing(false);
       }
     },
-    [emptyAnalytics, persistSessionSnapshot],
+    [persistSessionSnapshot, t],
   );
 
-  const scheduleDeferredAnalytics = useCallback(
-    (gen: number) => {
-      if (analyticsDeferTimerRef.current != null) {
-        window.clearTimeout(analyticsDeferTimerRef.current);
-        analyticsDeferTimerRef.current = null;
-      }
-      requestAnimationFrame(() => {
-        analyticsDeferTimerRef.current = window.setTimeout(() => {
-          analyticsDeferTimerRef.current = null;
-          void loadAnalytics(gen);
-        }, 0);
-      });
+  const refreshStats = useCallback(
+    async (loadGen: number) => {
+      const s = await fetchPlatformStats();
+      if (loadGen !== dashboardLoadGenRef.current) return;
+      setStats(s);
+      persistSessionSnapshot({ stats: s });
     },
-    [loadAnalytics],
+    [persistSessionSnapshot],
+  );
+
+  const refreshBusinesses = useCallback(
+    async (loadGen: number) => {
+      const b = await fetchPlatformBusinesses();
+      if (loadGen !== dashboardLoadGenRef.current) return;
+      setBusinesses(b.businesses);
+      persistSessionSnapshot({ businesses: b.businesses });
+    },
+    [persistSessionSnapshot],
+  );
+
+  const refreshMetrics = useCallback(() => {
+    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
+    const statsGen = ++dashboardLoadGenRef.current;
+    const analyticsGen = ++analyticsLoadGenRef.current;
+    void refreshStats(statsGen).catch((err: unknown) => {
+      logClientError("AdminDashboard.refreshStats", err);
+    });
+    void loadAnalytics(analyticsGen, { bustCache: true });
+  }, [user, authHydrated, sessionValidated, refreshStats, loadAnalytics]);
+
+  const scheduleDeferredBusinesses = useCallback(
+    (loadGen: number) => {
+      if (businessesDeferTimerRef.current != null) {
+        window.clearTimeout(businessesDeferTimerRef.current);
+      }
+      businessesDeferTimerRef.current = window.setTimeout(() => {
+        businessesDeferTimerRef.current = null;
+        void refreshBusinesses(loadGen).catch((err: unknown) => {
+          logClientError("AdminDashboard.refreshBusinesses", err);
+        });
+      }, 50);
+    },
+    [refreshBusinesses],
   );
 
   const loadDashboardData = useCallback(async () => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     const loadGen = ++dashboardLoadGenRef.current;
-    try {
-      setIsSyncing(true);
-      setServiceIssue(null);
-      const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
-      if (loadGen !== dashboardLoadGenRef.current) return;
-      const sortedBusinesses = [...b.businesses].sort(
-        (a, b) => (b.totalTipsEur ?? 0) - (a.totalTipsEur ?? 0),
-      );
-      setStats(s);
-      setBusinesses(sortedBusinesses);
-      persistSessionSnapshot({ stats: s, businesses: sortedBusinesses });
+    const analyticsGen = ++analyticsLoadGenRef.current;
+    setIsSyncing(true);
+    setServiceIssue(null);
+    setAnalytics(null);
+    setAnalyticsError(null);
+
+    void refreshStats(loadGen)
+      .then(() => {
+        if (loadGen === dashboardLoadGenRef.current) setInitialDashLoading(false);
+      })
+      .catch((err: unknown) => {
+        if (loadGen !== dashboardLoadGenRef.current) return;
+        logClientError("AdminDashboard.refreshStats", err);
+      });
+
+    void loadAnalytics(analyticsGen, { bustCache: true });
+
+    scheduleDeferredBusinesses(loadGen);
+
+    if (loadGen === dashboardLoadGenRef.current) {
       setInitialDashLoading(false);
       setIsSyncing(false);
-
-      scheduleDeferredAnalytics(loadGen);
-    } catch (err) {
-      if (loadGen !== dashboardLoadGenRef.current) return;
-      logClientError("AdminDashboard", err);
-      const msg = toUserFriendlyMessage(err);
-      setStats((prev) => prev ?? ({} as PlatformGlobalStats));
-      setBusinesses((prev) => prev ?? []);
-      setAnalytics((prev) => prev ?? emptyAnalytics);
-      if (
-        msg.toLowerCase().includes("service temporarily unavailable") ||
-        msg.toLowerCase().includes("http 503")
-      ) {
-        setServiceIssue(t("admin.serviceUnavailable"));
-        setHealth((h) => h ?? { database: "offline", stripe: "offline" });
-      } else {
-        setServiceIssue(msg || t("admin.serviceGenericError"));
-      }
-    } finally {
-      if (loadGen === dashboardLoadGenRef.current) {
-        setInitialDashLoading(false);
-        setIsSyncing(false);
-      }
     }
   }, [
     user,
     authHydrated,
     sessionValidated,
-    emptyAnalytics,
-    t,
-    persistSessionSnapshot,
-    scheduleDeferredAnalytics,
+    refreshStats,
+    loadAnalytics,
+    scheduleDeferredBusinesses,
   ]);
 
   useEffect(() => {
@@ -608,6 +690,7 @@ export function AdminDashboard() {
       setStats(adminSessionSnapshot.stats);
       setBusinesses(adminSessionSnapshot.businesses);
       setAnalytics(adminSessionSnapshot.analytics);
+      if (adminSessionSnapshot.analytics) setAnalyticsUpdatedAt(adminSessionSnapshot.at);
       setHealth(adminSessionSnapshot.health);
       setInitialDashLoading(false);
     }
@@ -618,32 +701,49 @@ export function AdminDashboard() {
   useEffect(() => {
     if (!authHydrated) return;
     return () => {
-      if (analyticsDeferTimerRef.current != null) {
-        window.clearTimeout(analyticsDeferTimerRef.current);
-        analyticsDeferTimerRef.current = null;
+      if (metricsRefreshTimerRef.current != null) {
+        window.clearTimeout(metricsRefreshTimerRef.current);
+        metricsRefreshTimerRef.current = null;
+      }
+      if (businessesDeferTimerRef.current != null) {
+        window.clearTimeout(businessesDeferTimerRef.current);
+        businessesDeferTimerRef.current = null;
       }
     };
   }, [authHydrated]);
 
   // If the API is down (503), don't keep hammering it on a timer.
-  useRealtimeFallback(connected || Boolean(serviceIssue), loadDashboardData);
+  useRealtimeFallback(connected || Boolean(serviceIssue), refreshMetrics);
 
   useEffect(() => {
     if (!socket || user?.role !== "platform_admin") return;
-    const sync = () => {
+    const scheduleFullRefresh = () => {
       if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = window.setTimeout(() => {
         refreshTimerRef.current = null;
         void loadDashboardData();
       }, 900);
     };
-    socket.on("platform_data_updated", sync);
-    socket.on("platform_verification_updated", sync);
-    return () => {
-      socket.off("platform_data_updated", sync);
-      socket.off("platform_verification_updated", sync);
+    const scheduleMetricsRefresh = () => {
+      if (metricsRefreshTimerRef.current != null) window.clearTimeout(metricsRefreshTimerRef.current);
+      metricsRefreshTimerRef.current = window.setTimeout(() => {
+        metricsRefreshTimerRef.current = null;
+        refreshMetrics();
+      }, 600);
     };
-  }, [socket, user?.role, loadDashboardData]);
+    socket.on("platform_data_updated", scheduleFullRefresh);
+    socket.on("platform_verification_updated", scheduleFullRefresh);
+    socket.on("platform_metrics_updated", scheduleMetricsRefresh);
+    return () => {
+      socket.off("platform_data_updated", scheduleFullRefresh);
+      socket.off("platform_verification_updated", scheduleFullRefresh);
+      socket.off("platform_metrics_updated", scheduleMetricsRefresh);
+      if (metricsRefreshTimerRef.current != null) {
+        window.clearTimeout(metricsRefreshTimerRef.current);
+        metricsRefreshTimerRef.current = null;
+      }
+    };
+  }, [socket, user?.role, loadDashboardData, refreshMetrics]);
 
   if (!user) {
     return null;
@@ -651,6 +751,21 @@ export function AdminDashboard() {
   if (user.role !== "platform_admin") {
     return <Navigate to="/unauthorized" replace />;
   }
+
+  const showStatLoading = !stats && (initialDashLoading || isSyncing);
+  const chartAnalytics = analytics;
+  const showChartSkeletons = !chartAnalytics;
+  const analyticsMeta = chartAnalytics ?? emptyAnalytics;
+  const chartTipStatus = chartAnalytics
+    ? mergeTipStatusForCharts(chartAnalytics, stats)
+    : analyticsMeta.tipStatus;
+  const chartsLookEmpty =
+    Boolean(chartAnalytics) &&
+    Boolean(stats?.successTransactionCount) &&
+    !analyticsHasVisibleData({
+      ...chartAnalytics,
+      tipStatus: chartAnalytics ? mergeTipStatusForCharts(chartAnalytics, stats) : [],
+    });
 
   return (
     <main className="bg-background">
@@ -675,6 +790,8 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statTips")}
             value={stats ? `€${stats.totalVolumeEurFormatted}` : t("format.notAvailable")}
+            loading={showStatLoading}
+            loadingVariant="currency"
             change={
               stats
                 ? t("admin.statTipsChange", {
@@ -695,6 +812,7 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statVenues")}
             value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
+            loading={showStatLoading}
             change={t("admin.statVenuesChange")}
             icon={Building2}
             delay={0.15}
@@ -702,6 +820,7 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statLocations")}
             value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
+            loading={showStatLoading}
             change={t("admin.statLocationsChange")}
             icon={MapPin}
             delay={0.18}
@@ -709,6 +828,7 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statStaff")}
             value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
+            loading={showStatLoading}
             change={t("admin.statStaffChange")}
             icon={Users}
             delay={0.2}
@@ -716,83 +836,128 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statActiveUsers")}
             value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
+            loading={showStatLoading}
             change={t("admin.statActiveUsersChange")}
             icon={UserCheck}
             delay={0.25}
           />
         </div>
 
-        {/* Analytics charts */}
-        {(analytics ?? emptyAnalytics) ? (
-          <motion.section
-            initial={{ y: 16, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.18 }}
-            className={platformUi.analyticsSection}
-          >
-            <div className={platformUi.analyticsHeader}>
-              <div className={platformUi.analyticsHeaderCopy}>
-                <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
-                <p className="text-pretty text-sm leading-relaxed text-muted-foreground max-lg:line-clamp-3 lg:line-clamp-none">
-                  {t("admin.analyticsSubtitle", {
-                    days: (analytics ?? emptyAnalytics).rangeDays,
-                    tz: (analytics ?? emptyAnalytics).timezone ?? analyticsTimezone,
-                  })}
-                </p>
-              </div>
-              <div className={platformUi.analyticsControls}>
-                <Select
-                  value={analyticsTimezone}
-                  onValueChange={(v) => {
-                    setAnalyticsTimezone(v);
-                    analyticsTimezoneRef.current = v;
-                    try {
-                      localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                    } catch {
-                      // ignore
-                    }
-                    void loadAnalytics(++dashboardLoadGenRef.current);
-                  }}
-                >
-                  <SelectTrigger size="sm" className="w-full" aria-label={t("admin.timezoneAria")}>
-                    <SelectValue placeholder={t("admin.timezonePlaceholder")} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
-                      <SelectItem key={tz} value={tz}>
-                        {tz}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <span className="text-xs font-medium leading-snug text-muted-foreground max-lg:line-clamp-2">
-                  {t("admin.tipStatusNote")}
-                </span>
-              </div>
+        {/* Analytics charts — mount Recharts only after server analytics hydrate */}
+        <motion.section
+          initial={showChartSkeletons ? false : { y: 16, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.5, delay: showChartSkeletons ? 0 : 0.18 }}
+          className={cn(platformUi.analyticsSection, "relative")}
+        >
+          <DashboardRefreshIndicator
+            isRefreshing={analyticsSyncing}
+            lastUpdatedAt={analyticsUpdatedAt}
+            className="absolute right-0 top-0 sm:right-2"
+          />
+          <div className={platformUi.analyticsHeader}>
+            <div className={platformUi.analyticsHeaderCopy}>
+              <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
+              <p className="text-pretty text-sm leading-relaxed text-muted-foreground max-lg:line-clamp-3 lg:line-clamp-none">
+                {t("admin.analyticsSubtitle", {
+                  days: analyticsMeta.rangeDays,
+                  tz: analyticsMeta.timezone ?? analyticsTimezone,
+                })}
+              </p>
             </div>
-
-            <div className={cn(platformUi.analyticsChartsGrid)}>
-              <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
-                <UserDistributionChart data={(analytics ?? emptyAnalytics).userDistribution} />
-              </AnalyticsCard>
-
-              <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
-                <TipStatusChart data={(analytics ?? emptyAnalytics).tipStatus} />
-              </AnalyticsCard>
-
-              <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
-                <GrowthChart data={(analytics ?? emptyAnalytics).growth} />
-              </AnalyticsCard>
-
-              <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
-                <TipVolumeChart
-                  data={(analytics ?? emptyAnalytics).tipVolume}
-                  top={(analytics ?? emptyAnalytics).topBusinessesByTips}
-                />
-              </AnalyticsCard>
+            <div className={platformUi.analyticsControls}>
+              <Select
+                value={analyticsTimezone}
+                onValueChange={(v) => {
+                  setAnalyticsTimezone(v);
+                  analyticsTimezoneRef.current = v;
+                  try {
+                    localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                  } catch {
+                    // ignore
+                  }
+                  const nextGen = ++analyticsLoadGenRef.current;
+                  void loadAnalytics(nextGen, { bustCache: true });
+                }}
+                disabled={analyticsSyncing}
+              >
+                <SelectTrigger size="sm" className="w-full" aria-label={t("admin.timezoneAria")}>
+                  <SelectValue placeholder={t("admin.timezonePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
+                    <SelectItem key={tz} value={tz}>
+                      {tz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <span className="text-xs font-medium leading-snug text-muted-foreground max-lg:line-clamp-2">
+                {t("admin.tipStatusNote")}
+              </span>
             </div>
-          </motion.section>
-        ) : null}
+          </div>
+
+          {analyticsError && !chartAnalytics ? (
+            <p className="mb-3 text-sm text-destructive" role="alert">
+              {analyticsError}{" "}
+              <button
+                type="button"
+                className="font-semibold underline underline-offset-2"
+                onClick={() => {
+                  const nextGen = ++analyticsLoadGenRef.current;
+                  void loadAnalytics(nextGen, { bustCache: true });
+                }}
+              >
+                {t("admin.retry")}
+              </button>
+            </p>
+          ) : null}
+          {chartsLookEmpty ? (
+            <p className="mb-3 text-sm text-muted-foreground">
+              {t("admin.analyticsPeriodEmpty", {
+                defaultValue:
+                  "No tips in this chart period yet. Stat cards show all-time platform totals.",
+              })}
+            </p>
+          ) : null}
+          <div className={cn(platformUi.analyticsChartsGrid)}>
+            {showChartSkeletons ? (
+              <>
+                <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
+                  <DashboardChartSkeleton />
+                </AnalyticsCard>
+                <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
+                  <DashboardChartSkeleton />
+                </AnalyticsCard>
+                <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
+                  <DashboardChartSkeleton barHeights={[38, 62, 44, 78, 52, 66, 40, 84, 58, 46]} />
+                </AnalyticsCard>
+                <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
+                  <DashboardChartSkeleton barHeights={[55, 72, 48, 88, 60, 76, 42, 80, 64, 50]} />
+                </AnalyticsCard>
+              </>
+            ) : (
+              <>
+                <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
+                  <UserDistributionChart data={chartAnalytics.userDistribution} />
+                </AnalyticsCard>
+
+                <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
+                  <TipStatusChart data={chartTipStatus} />
+                </AnalyticsCard>
+
+                <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
+                  <GrowthChart data={chartAnalytics.growth} />
+                </AnalyticsCard>
+
+                <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
+                  <TipVolumeChart data={chartAnalytics.tipVolume} top={chartAnalytics.topBusinessesByTips} />
+                </AnalyticsCard>
+              </>
+            )}
+          </div>
+        </motion.section>
 
         <motion.div
           {...dashboardBlockMotion}

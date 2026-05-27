@@ -36,4 +36,10 @@ export function emitNewTip(payload: NewTipPayload): void {
   void import("../services/employeeTipsDashboard.service.js").then(({ invalidateEmployeeDashboardCache }) => {
     invalidateEmployeeDashboardCache(payload.employeeId);
   });
+  void import("../services/platform.service.js").then(({ invalidatePlatformMetricsCache }) => {
+    invalidatePlatformMetricsCache();
+  });
+  void import("./socketEmitters.js").then(({ emitPlatformMetricsUpdated }) => {
+    emitPlatformMetricsUpdated("new_tip");
+  });
 }

@@ -1,6 +1,14 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
 import { CLIENT_FALLBACK, clientSafeMessage, logServerError } from "../utils/httpErrors.js";
+import { isPrismaPoolTimeout } from "../utils/prismaErrors.js";
+
+const DEFAULT_SETTINGS = {
+  tipReceivedNotifications: true,
+  summaryEmails: false,
+  systemAlerts: true,
+  notifyNewLogin: true,
+} as const;
 
 function getUserId(req: Request): string | null {
   const uid = req.user?.userId ?? req.user?.id;
@@ -12,25 +20,25 @@ export async function getMySettings(req: Request, res: Response) {
     const userId = getUserId(req);
     if (!userId) return res.status(401).json({ message: "Authentication required" });
 
-    const [row, user] = await Promise.all([
-      prisma.userSettings.findUnique({ where: { userId } }),
-      prisma.user.findUnique({
-        where: { id: userId },
-        select: { preferredLocale: true },
-      }),
-    ]);
-    // Do not force-create the row on read; defaults are defined in schema.
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        preferredLocale: true,
+        settings: true,
+      },
+    });
+    const row = user?.settings;
     return res.json({
-      ...(row ?? {
-        tipReceivedNotifications: true,
-        summaryEmails: false,
-        systemAlerts: true,
-        notifyNewLogin: true,
-      }),
+      ...(row ?? DEFAULT_SETTINGS),
       preferredLocale: user?.preferredLocale ?? null,
     });
   } catch (err) {
     logServerError("settings.getMySettings", err);
+    if (isPrismaPoolTimeout(err)) {
+      return res.status(503).json({
+        message: "The server is busy. Please try again in a moment.",
+      });
+    }
     return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.generic) });
   }
 }

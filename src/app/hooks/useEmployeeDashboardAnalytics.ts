@@ -19,7 +19,6 @@ import {
   syncEmployeeNotificationTips,
 } from "../lib/employeeNotificationStore";
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
-import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
@@ -374,8 +373,6 @@ export function useEmployeeDashboardAnalytics(
     clearEmployeeTipsClientCache();
     void loadFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
   }, [loadFor]);
-
-  useDashboardTabRefocus(refetchLive, enabled);
 
   const refreshQuiet = useCallback(async () => {
     if (!enabled) return;
