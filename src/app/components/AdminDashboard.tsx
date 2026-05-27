@@ -30,7 +30,6 @@ import { formatEur } from "../lib/formatEur";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
-import { PageLoader } from "./PageLoader";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../hooks/useSocket";
 import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
@@ -413,7 +412,14 @@ export function AdminDashboard() {
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
   const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
-  const [analyticsTimezone, setAnalyticsTimezone] = useState<string>(ADMIN_ANALYTICS_TZ_DEFAULT);
+  const [analyticsTimezone, setAnalyticsTimezone] = useState<string>(() => {
+    try {
+      const raw = localStorage.getItem(ADMIN_ANALYTICS_TZ_KEY);
+      return raw?.trim() || ADMIN_ANALYTICS_TZ_DEFAULT;
+    } catch {
+      return ADMIN_ANALYTICS_TZ_DEFAULT;
+    }
+  });
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
   const [businessSearchQuery, setBusinessSearchQuery] = useState("");
   const [businessesExpanded, setBusinessesExpanded] = useState(true);
@@ -421,7 +427,12 @@ export function AdminDashboard() {
   const [initialDashLoading, setInitialDashLoading] = useState(true);
   const dashboardLoadGenRef = useRef(0);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [analyticsSyncing, setAnalyticsSyncing] = useState(false);
   const refreshTimerRef = useRef<number | null>(null);
+  const analyticsDeferTimerRef = useRef<number | null>(null);
+  const sessionHydratedRef = useRef(false);
+  const analyticsTimezoneRef = useRef(analyticsTimezone);
+  analyticsTimezoneRef.current = analyticsTimezone;
 
   const emptyAnalytics = useMemo<PlatformAnalytics>(() => {
     const rangeDays = 30;
@@ -483,13 +494,69 @@ export function AdminDashboard() {
     };
   }, [user, authHydrated, sessionValidated]);
 
+  const persistSessionSnapshot = useCallback(
+    (
+      next: Partial<{
+        stats: PlatformGlobalStats | null;
+        businesses: PlatformBusinessRow[];
+        analytics: PlatformAnalytics | null;
+        health: PlatformHealthResponse | null;
+      }>,
+    ) => {
+      adminSessionSnapshot = {
+        stats: next.stats ?? adminSessionSnapshot?.stats ?? null,
+        businesses: next.businesses ?? adminSessionSnapshot?.businesses ?? [],
+        analytics: next.analytics ?? adminSessionSnapshot?.analytics ?? null,
+        health: next.health ?? adminSessionSnapshot?.health ?? null,
+        at: Date.now(),
+      };
+    },
+    [],
+  );
+
+  const loadAnalytics = useCallback(
+    async (gen: number) => {
+      setAnalyticsSyncing(true);
+      try {
+        const a = await fetchPlatformAnalytics(30, analyticsTimezoneRef.current);
+        if (gen !== dashboardLoadGenRef.current) return;
+        const resolved = a ?? emptyAnalytics;
+        setAnalytics(resolved);
+        persistSessionSnapshot({ analytics: resolved });
+      } catch (e) {
+        if (gen !== dashboardLoadGenRef.current) return;
+        logClientError("AdminDashboard.analytics", e);
+        setAnalytics(emptyAnalytics);
+        persistSessionSnapshot({ analytics: emptyAnalytics });
+      } finally {
+        if (gen === dashboardLoadGenRef.current) setAnalyticsSyncing(false);
+      }
+    },
+    [emptyAnalytics, persistSessionSnapshot],
+  );
+
+  const scheduleDeferredAnalytics = useCallback(
+    (gen: number) => {
+      if (analyticsDeferTimerRef.current != null) {
+        window.clearTimeout(analyticsDeferTimerRef.current);
+        analyticsDeferTimerRef.current = null;
+      }
+      requestAnimationFrame(() => {
+        analyticsDeferTimerRef.current = window.setTimeout(() => {
+          analyticsDeferTimerRef.current = null;
+          void loadAnalytics(gen);
+        }, 0);
+      });
+    },
+    [loadAnalytics],
+  );
+
   const loadDashboardData = useCallback(async () => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     const loadGen = ++dashboardLoadGenRef.current;
     try {
       setIsSyncing(true);
       setServiceIssue(null);
-      // Keep core dashboard (stats + KYC table) resilient even if analytics fails.
       const [s, b] = await Promise.all([fetchPlatformStats(), fetchPlatformBusinesses()]);
       if (loadGen !== dashboardLoadGenRef.current) return;
       const sortedBusinesses = [...b.businesses].sort(
@@ -497,37 +564,11 @@ export function AdminDashboard() {
       );
       setStats(s);
       setBusinesses(sortedBusinesses);
-      adminSessionSnapshot = {
-        stats: s,
-        businesses: sortedBusinesses,
-        analytics,
-        health,
-        at: Date.now(),
-      };
+      persistSessionSnapshot({ stats: s, businesses: sortedBusinesses });
+      setInitialDashLoading(false);
+      setIsSyncing(false);
 
-      try {
-        const a = await fetchPlatformAnalytics(30, analyticsTimezone);
-        if (loadGen !== dashboardLoadGenRef.current) return;
-        setAnalytics(a ?? emptyAnalytics);
-        adminSessionSnapshot = {
-          stats: s,
-          businesses: sortedBusinesses,
-          analytics: a ?? emptyAnalytics,
-          health,
-          at: Date.now(),
-        };
-      } catch (e) {
-        if (loadGen !== dashboardLoadGenRef.current) return;
-        logClientError("AdminDashboard.analytics", e);
-        setAnalytics(emptyAnalytics);
-        adminSessionSnapshot = {
-          stats: s,
-          businesses: sortedBusinesses,
-          analytics: emptyAnalytics,
-          health,
-          at: Date.now(),
-        };
-      }
+      scheduleDeferredAnalytics(loadGen);
     } catch (err) {
       if (loadGen !== dashboardLoadGenRef.current) return;
       logClientError("AdminDashboard", err);
@@ -535,14 +576,11 @@ export function AdminDashboard() {
       setStats((prev) => prev ?? ({} as PlatformGlobalStats));
       setBusinesses((prev) => prev ?? []);
       setAnalytics((prev) => prev ?? emptyAnalytics);
-      // Do not wipe the UI on transient outages; keep the last known values.
-      // Surface a clear message instead. Invalid sessions are cleared by the shared API client.
       if (
         msg.toLowerCase().includes("service temporarily unavailable") ||
         msg.toLowerCase().includes("http 503")
       ) {
         setServiceIssue(t("admin.serviceUnavailable"));
-        // Best-effort: reflect degraded health badge.
         setHealth((h) => h ?? { database: "offline", stripe: "offline" });
       } else {
         setServiceIssue(msg || t("admin.serviceGenericError"));
@@ -553,30 +591,38 @@ export function AdminDashboard() {
         setIsSyncing(false);
       }
     }
-  }, [user, authHydrated, sessionValidated, analyticsTimezone, emptyAnalytics, t]);
+  }, [
+    user,
+    authHydrated,
+    sessionValidated,
+    emptyAnalytics,
+    t,
+    persistSessionSnapshot,
+    scheduleDeferredAnalytics,
+  ]);
 
   useEffect(() => {
-    // Session-memory snapshot hydration (same session only; no persistence).
-    if (adminSessionSnapshot && !stats && businesses.length === 0 && !analytics) {
+    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
+    if (!sessionHydratedRef.current && adminSessionSnapshot) {
+      sessionHydratedRef.current = true;
       setStats(adminSessionSnapshot.stats);
       setBusinesses(adminSessionSnapshot.businesses);
       setAnalytics(adminSessionSnapshot.analytics);
       setHealth(adminSessionSnapshot.health);
       setInitialDashLoading(false);
-      setIsSyncing(true);
     }
     void loadDashboardData();
-  }, [loadDashboardData, stats, businesses.length, analytics]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per auth session
+  }, [authHydrated, sessionValidated, user?.id, user?.role]);
 
   useEffect(() => {
     if (!authHydrated) return;
-    try {
-      const raw = localStorage.getItem(ADMIN_ANALYTICS_TZ_KEY);
-      const tz = raw?.trim();
-      if (tz) setAnalyticsTimezone(tz);
-    } catch {
-      // ignore
-    }
+    return () => {
+      if (analyticsDeferTimerRef.current != null) {
+        window.clearTimeout(analyticsDeferTimerRef.current);
+        analyticsDeferTimerRef.current = null;
+      }
+    };
   }, [authHydrated]);
 
   // If the API is down (503), don't keep hammering it on a timer.
@@ -699,11 +745,13 @@ export function AdminDashboard() {
                   value={analyticsTimezone}
                   onValueChange={(v) => {
                     setAnalyticsTimezone(v);
+                    analyticsTimezoneRef.current = v;
                     try {
                       localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
                     } catch {
                       // ignore
                     }
+                    void loadAnalytics(++dashboardLoadGenRef.current);
                   }}
                 >
                   <SelectTrigger size="sm" className="w-full" aria-label={t("admin.timezoneAria")}>

@@ -2324,13 +2324,6 @@ export interface PlatformGlobalStats {
   platformTotalsConsistent?: boolean;
 }
 
-export async function fetchPlatformStats(): Promise<PlatformGlobalStats> {
-  return apiRequest<PlatformGlobalStats>(apiPath("/api/platform/stats"), {
-    headers: getHeaders(),
-    credentials: "include",
-  });
-}
-
 export type PlatformAnalytics = {
   timezone?: string;
   rangeDays: number;
@@ -2341,17 +2334,45 @@ export type PlatformAnalytics = {
   topBusinessesByTips: Array<{ businessId: string; businessName: string; tipsEur: number }>;
 };
 
+const platformStatsInflight = new Map<string, Promise<PlatformGlobalStats>>();
+const platformBusinessesInflight = new Map<string, Promise<{ businesses: PlatformBusinessRow[] }>>();
+const platformAnalyticsInflight = new Map<string, Promise<PlatformAnalytics>>();
+
+export function clearPlatformDashboardClientCache(): void {
+  platformStatsInflight.clear();
+  platformBusinessesInflight.clear();
+  platformAnalyticsInflight.clear();
+}
+
+export async function fetchPlatformStats(): Promise<PlatformGlobalStats> {
+  const cacheKey = "platform:stats";
+  const inflight = platformStatsInflight.get(cacheKey);
+  if (inflight) return inflight;
+  const promise = apiRequest<PlatformGlobalStats>(apiPath("/api/platform/stats"), {
+    headers: getHeaders(),
+    credentials: "include",
+  }).finally(() => {
+    if (platformStatsInflight.get(cacheKey) === promise) platformStatsInflight.delete(cacheKey);
+  });
+  platformStatsInflight.set(cacheKey, promise);
+  return promise;
+}
+
 export async function fetchPlatformAnalytics(days = 30, timezone?: string): Promise<PlatformAnalytics> {
   const sp = new URLSearchParams();
   sp.set("days", String(days));
   if (timezone) sp.set("timezone", timezone);
-  // Optional: analytics timezone for day-bucketing on backend.
-  // When omitted, backend uses its safe default (Europe/Berlin).
-  // We keep this param optional for backward compatibility.
-  return apiRequest<PlatformAnalytics>(apiPath(`/api/platform/analytics?${sp.toString()}`), {
+  const cacheKey = `platform:analytics:${days}:${timezone ?? ""}`;
+  const inflight = platformAnalyticsInflight.get(cacheKey);
+  if (inflight) return inflight;
+  const promise = apiRequest<PlatformAnalytics>(apiPath(`/api/platform/analytics?${sp.toString()}`), {
     headers: getHeaders(),
     credentials: "include",
+  }).finally(() => {
+    if (platformAnalyticsInflight.get(cacheKey) === promise) platformAnalyticsInflight.delete(cacheKey);
   });
+  platformAnalyticsInflight.set(cacheKey, promise);
+  return promise;
 }
 
 export interface GlobalTransactionRow {
@@ -2408,10 +2429,17 @@ export interface PlatformBusinessRow {
 }
 
 export async function fetchPlatformBusinesses(): Promise<{ businesses: PlatformBusinessRow[] }> {
-  return apiRequest(apiPath("/api/platform/businesses"), {
+  const cacheKey = "platform:businesses";
+  const inflight = platformBusinessesInflight.get(cacheKey);
+  if (inflight) return inflight;
+  const promise = apiRequest<{ businesses: PlatformBusinessRow[] }>(apiPath("/api/platform/businesses"), {
     headers: getHeaders(),
     credentials: "include",
+  }).finally(() => {
+    if (platformBusinessesInflight.get(cacheKey) === promise) platformBusinessesInflight.delete(cacheKey);
   });
+  platformBusinessesInflight.set(cacheKey, promise);
+  return promise;
 }
 
 export type PlatformVerificationAction = "verified" | "rejected" | "pending";

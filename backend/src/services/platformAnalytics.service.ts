@@ -2,6 +2,14 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { DateTime } from "luxon";
 import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/businessTime.js";
+import { getCachedOrLoad, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+
+const PLATFORM_ANALYTICS_CACHE_TTL_MS = 60_000;
+const createdAtColumnCache = new Map<string, string | null>();
+
+export function invalidatePlatformAnalyticsCache(): void {
+  invalidateCacheKeyPrefix("platform:analytics:");
+}
 
 export type PlatformAnalyticsResponse = {
   timezone: string;
@@ -52,6 +60,9 @@ function eachLocalDayIso(rangeDays: number, timezone: string): { startUtc: Date;
 }
 
 async function resolveCreatedAtColumn(tableName: string): Promise<string | null> {
+  if (createdAtColumnCache.has(tableName)) {
+    return createdAtColumnCache.get(tableName) ?? null;
+  }
   // Some deployed DBs historically used camelCase columns; newer ones use snake_case via @map("created_at").
   // Detect without crashing so analytics stays accurate across environments.
   const rows = await prisma.$queryRaw<Array<{ column_name: string }>>(Prisma.sql`
@@ -63,8 +74,9 @@ async function resolveCreatedAtColumn(tableName: string): Promise<string | null>
     ORDER BY CASE column_name WHEN 'created_at' THEN 0 ELSE 1 END;
   `);
   const col = rows?.[0]?.column_name;
-  if (col === "created_at" || col === "createdAt") return col;
-  return null;
+  const resolved = col === "created_at" || col === "createdAt" ? col : null;
+  createdAtColumnCache.set(tableName, resolved);
+  return resolved;
 }
 
 function colIdent(col: string) {
@@ -75,7 +87,10 @@ function colIdent(col: string) {
 }
 
 /** Analytics aggregates for Super Admin dashboard charts (Postgres/Supabase). */
-export async function getPlatformAnalytics(input?: { days?: unknown; timezone?: unknown }): Promise<PlatformAnalyticsResponse> {
+async function getPlatformAnalyticsImpl(input?: {
+  days?: unknown;
+  timezone?: unknown;
+}): Promise<PlatformAnalyticsResponse> {
   const rangeDays = clampDays(input?.days, 30);
 
   const timezone =
@@ -213,5 +228,19 @@ export async function getPlatformAnalytics(input?: { days?: unknown; timezone?: 
     })),
     topBusinessesByTips,
   };
+}
+
+/** Analytics aggregates for Super Admin dashboard charts (Postgres/Supabase). */
+export async function getPlatformAnalytics(input?: {
+  days?: unknown;
+  timezone?: unknown;
+}): Promise<PlatformAnalyticsResponse> {
+  const rangeDays = clampDays(input?.days, 30);
+  const timezone =
+    typeof input?.timezone === "string" ? sanitizeIanaTimezone(input.timezone) : DEFAULT_BUSINESS_TIMEZONE;
+  const cacheKey = `platform:analytics:${rangeDays}:${timezone}`;
+  return getCachedOrLoad(cacheKey, PLATFORM_ANALYTICS_CACHE_TTL_MS, () =>
+    getPlatformAnalyticsImpl(input),
+  );
 }
 
