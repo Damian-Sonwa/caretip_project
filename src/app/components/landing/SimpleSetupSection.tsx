@@ -84,7 +84,7 @@ export function SimpleSetupSection() {
             className={cn("relative w-full", landingUi.mobileStackAfter)}
             {...landingFadeReveal}
           >
-            <div className="caretip-live-minutes-steps space-y-1.5 sm:space-y-2.5">
+            <div className="caretip-live-minutes-steps space-y-1 sm:space-y-2.5">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (

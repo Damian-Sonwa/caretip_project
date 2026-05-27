@@ -47,7 +47,14 @@ export function LiveInMinutesLaptopDemo({
         animate={{ opacity: 1 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       >
-        <video autoPlay muted loop playsInline className="aspect-[3/4] w-full object-cover" src={videoSrc} />
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="aspect-[6/5] w-full object-cover sm:aspect-[3/4]"
+          src={videoSrc}
+        />
       </motion.div>
     );
   }
@@ -59,7 +66,7 @@ export function LiveInMinutesLaptopDemo({
         className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-6 w-[68%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.07] blur-lg sm:h-8 sm:w-[72%] sm:blur-xl dark:bg-black/40"
       />
       <motion.div
-        className="caretip-live-minutes-device-lift relative aspect-[5/6] overflow-hidden rounded-[1.35rem] shadow-[0_24px_48px_-28px_rgba(30,24,16,0.32),0_8px_20px_-10px_rgba(30,24,16,0.14)] ring-1 ring-neutral-900/[0.05] sm:aspect-[3/4] sm:rounded-[1.5rem] sm:shadow-[0_32px_64px_-30px_rgba(30,24,16,0.38),0_12px_28px_-14px_rgba(30,24,16,0.16)] dark:ring-white/[0.08]"
+        className="caretip-live-minutes-device-lift relative aspect-[6/5] overflow-hidden rounded-[1.35rem] shadow-[0_24px_48px_-28px_rgba(30,24,16,0.32),0_8px_20px_-10px_rgba(30,24,16,0.14)] ring-1 ring-neutral-900/[0.05] sm:aspect-[3/4] sm:rounded-[1.5rem] sm:shadow-[0_32px_64px_-30px_rgba(30,24,16,0.38),0_12px_28px_-14px_rgba(30,24,16,0.16)] dark:ring-white/[0.08]"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true, margin: "-6%" }}
@@ -117,7 +124,7 @@ export function LiveInMinutesLaptopDemo({
         </motion.div>
       </motion.div>
 
-      <p className="caretip-live-minutes-caption mt-2.5 text-center font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-4 sm:text-[13px] lg:text-sm">
+      <p className="caretip-live-minutes-caption mt-2 text-center font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-4 sm:text-[13px] lg:text-sm">
         {captions[index]}
       </p>
     </div>
