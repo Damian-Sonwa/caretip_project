@@ -30,8 +30,8 @@ export function emitNewTip(payload: NewTipPayload): void {
     onTipReceived(payload);
   });
 
-  void import("../services/business.service.js").then(({ invalidateBusinessStatsCache }) => {
-    invalidateBusinessStatsCache(payload.businessId);
+  void import("../services/business.service.js").then(({ invalidateBusinessStatsTipCaches }) => {
+    invalidateBusinessStatsTipCaches(payload.businessId);
   });
   void import("../services/employeeTipsDashboard.service.js").then(({ invalidateEmployeeDashboardCache }) => {
     invalidateEmployeeDashboardCache(payload.employeeId);

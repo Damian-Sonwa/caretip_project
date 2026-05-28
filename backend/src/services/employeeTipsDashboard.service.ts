@@ -1,12 +1,15 @@
 import { EmployeeGoalStatus, type GoalPeriod, Prisma, TipStatus } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { getCachedOrLoad, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+import { runSerializedByKey } from "../utils/serializedByKey.js";
 import type { TipForEmployee } from "./tips.service.js";
 import { businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 import { logDashboardPhase } from "../utils/dashboardTiming.js";
 import {
   buildEmployeeChartSeries,
   queryEmployeeAnalyticsBundle,
+  queryEmployeeDashboardSummaryMetrics,
+  type EmployeeDashboardSqlSummary,
 } from "../utils/tipChartBuckets.js";
 import {
   buildActiveGoalWithProgress,
@@ -24,6 +27,9 @@ export type EmployeeDashboardTimeframe = "today" | "week" | "month";
 
 const EMPLOYEE_PERIOD_CACHE_TTL_MS = 30_000;
 const EMPLOYEE_TIPS_CTX_TTL_MS = 60_000;
+/** Per-timeframe tips SQL bundle — shared by summary + analytics scopes. */
+const EMPLOYEE_SQL_BUNDLE_CACHE_TTL_MS = 90_000;
+const RECENT_TIPS_TAKE = 30;
 
 export type EmployeeActiveGoalContext = {
   id: string;
@@ -37,10 +43,196 @@ export type EmployeeActiveGoalContext = {
 
 export type EmployeeTipsContext = {
   id: string;
+  businessId: string;
   monthlyGoal: number | null;
   businessTimezone: string;
   activeGoal: EmployeeActiveGoalContext | null;
 };
+
+type EmployeeSqlBundleSlice = {
+  summary: EmployeeDashboardSqlSummary;
+  analytics: Awaited<ReturnType<typeof queryEmployeeAnalyticsBundle>>;
+  rangeStart: Date;
+  rangeEnd: Date;
+  timeframe: EmployeeDashboardTimeframe;
+};
+
+function runEmployeeDashboardDb<T>(employeeId: string, fn: () => Promise<T>): Promise<T> {
+  return runSerializedByKey(`emp-dash-db:${employeeId}`, fn);
+}
+
+function emptyEmployeeSqlBundleSlice(
+  timeframe: EmployeeDashboardTimeframe,
+): EmployeeSqlBundleSlice {
+  const now = new Date();
+  return {
+    summary: { periodAmount: 0, periodCount: 0, monthAmount: 0 },
+    analytics: { recentTips: [], dailyByYmd: new Map(), hourlyByHour: new Map() },
+    rangeStart: now,
+    rangeEnd: now,
+    timeframe,
+  };
+}
+
+async function loadEmployeeSqlBundleSlice(
+  employeeId: string,
+  timeframe: EmployeeDashboardTimeframe,
+  tz: string,
+): Promise<EmployeeSqlBundleSlice> {
+  const periodRange = businessUtcRangeForTimeframe(timeframe, tz);
+  const monthRange = businessUtcRangeForTimeframe("month", tz);
+  if (!periodRange || !monthRange) {
+    return emptyEmployeeSqlBundleSlice(timeframe);
+  }
+
+  const scanStart =
+    periodRange.startUtc.getTime() < monthRange.startUtc.getTime()
+      ? periodRange.startUtc
+      : monthRange.startUtc;
+  const scanEnd =
+    periodRange.endUtc.getTime() > monthRange.endUtc.getTime()
+      ? periodRange.endUtc
+      : monthRange.endUtc;
+
+  const label = `employee.${timeframe}`;
+
+  const summary = await logDashboardPhase(label, "summarySql", () =>
+    queryEmployeeDashboardSummaryMetrics({
+      employeeId,
+      periodStart: periodRange.startUtc,
+      periodEnd: periodRange.endUtc,
+      monthStart: monthRange.startUtc,
+      monthEnd: monthRange.endUtc,
+      scanStart,
+      scanEnd,
+    }),
+  );
+
+  const analytics = await logDashboardPhase(label, "sqlBundle", () =>
+    queryEmployeeAnalyticsBundle({
+      employeeId,
+      startUtc: periodRange.startUtc,
+      endUtc: periodRange.endUtc,
+      timezone: tz,
+      timeframe,
+      recentTake: RECENT_TIPS_TAKE,
+    }),
+  );
+
+  return {
+    summary,
+    analytics,
+    rangeStart: periodRange.startUtc,
+    rangeEnd: periodRange.endUtc,
+    timeframe,
+  };
+}
+
+function loadEmployeeSqlBundleSliceCached(
+  employeeId: string,
+  timeframe: EmployeeDashboardTimeframe,
+  businessTimezone: string,
+): Promise<EmployeeSqlBundleSlice> {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  return getCachedOrLoad(
+    `emp-dash-sql:${employeeId}:${timeframe}:${tz}`,
+    EMPLOYEE_SQL_BUNDLE_CACHE_TTL_MS,
+    () =>
+      runEmployeeDashboardDb(employeeId, () =>
+        loadEmployeeSqlBundleSlice(employeeId, timeframe, tz),
+      ),
+  );
+}
+
+function mapAnalyticsBundleToResponse(
+  analytics: EmployeeSqlBundleSlice["analytics"],
+  timeframe: EmployeeDashboardTimeframe,
+  tz: string,
+): {
+  tips: TipForEmployee[];
+  chartSeries: Array<{ label: string; amount: number }>;
+} {
+  const tips: TipForEmployee[] = analytics.recentTips.map((t) => ({
+    id: t.id,
+    amount: t.amount,
+    status: t.status as TipForEmployee["status"],
+    createdAt: t.createdAt.toISOString(),
+  }));
+
+  const chartSeries = buildEmployeeChartSeries(
+    timeframe,
+    tz,
+    analytics.dailyByYmd,
+    analytics.hourlyByHour,
+  );
+
+  return { tips, chartSeries };
+}
+
+async function resolveGoalForSummaryBundle(opts: {
+  employeeId: string;
+  userId: string;
+  businessTimezone: string;
+  timeframe: EmployeeDashboardTimeframe;
+  activeGoal: EmployeeActiveGoalContext | null;
+  periodRange: { startUtc: Date; endUtc: Date };
+  monthRange: { startUtc: Date; endUtc: Date };
+  periodAmountEur: number;
+}): Promise<GoalWithProgress | null> {
+  const activeGoal = opts.activeGoal;
+  if (!activeGoal) return null;
+
+  const tz = sanitizeIanaTimezone(opts.businessTimezone);
+  const now = new Date();
+  const goalBounds = effectivePeriodBounds(
+    activeGoal.goalPeriod,
+    activeGoal.startDate,
+    now,
+    tz,
+  );
+
+  const label = `employee.summary.${opts.timeframe}`;
+
+  if (opts.timeframe === "month") {
+    const rows = await logDashboardPhase(label, "goalSqlMonth", () =>
+      prisma.$queryRaw<Array<{ goal_amount: number }>>(Prisma.sql`
+        SELECT COALESCE(SUM(amount) FILTER (
+          WHERE created_at >= ${goalBounds.start} AND created_at <= ${goalBounds.end}
+        ), 0)::float AS goal_amount
+        FROM tips
+        WHERE employee_id = ${opts.employeeId}
+          AND status = 'success'
+          AND created_at >= ${opts.monthRange.startUtc}
+          AND created_at <= ${opts.monthRange.endUtc}
+      `),
+    );
+    return buildActiveGoalWithProgress(activeGoal, Number(rows[0]?.goal_amount ?? 0), now, tz);
+  }
+
+  const goalFitsPeriod =
+    goalBounds.start.getTime() >= opts.periodRange.startUtc.getTime() &&
+    goalBounds.end.getTime() <= opts.periodRange.endUtc.getTime();
+
+  if (goalFitsPeriod) {
+    const rows = await logDashboardPhase(label, "goalSqlPeriod", () =>
+      prisma.$queryRaw<Array<{ goal_amount: number }>>(Prisma.sql`
+        SELECT COALESCE(SUM(amount) FILTER (
+          WHERE created_at >= ${goalBounds.start} AND created_at <= ${goalBounds.end}
+        ), 0)::float AS goal_amount
+        FROM tips
+        WHERE employee_id = ${opts.employeeId}
+          AND status = 'success'
+          AND created_at >= ${opts.periodRange.startUtc}
+          AND created_at <= ${opts.periodRange.endUtc}
+      `),
+    );
+    return buildActiveGoalWithProgress(activeGoal, Number(rows[0]?.goal_amount ?? 0), now, tz);
+  }
+
+  return logDashboardPhase(label, "goalProgress", () =>
+    getMyGoalWithProgressForEmployee(opts.employeeId, opts.userId, tz).catch(() => null),
+  );
+}
 
 function mapActiveGoal(
   employeeId: string,
@@ -89,13 +281,14 @@ export async function getEmployeeTipsContext(userId: string): Promise<EmployeeTi
         select: {
           id: true,
           monthlyGoal: true,
-          business: { select: { timezone: true } },
+          business: { select: { id: true, timezone: true } },
           employeeGoals: goalSelect,
         },
       });
-      if (!row) return null;
+      if (!row?.business?.id) return null;
       return {
         id: row.id,
+        businessId: row.business.id,
         monthlyGoal: row.monthlyGoal != null ? Number(row.monthlyGoal) : null,
         businessTimezone: sanitizeIanaTimezone(row.business?.timezone),
         activeGoal: mapActiveGoal(row.id, row.employeeGoals[0]),
@@ -104,11 +297,12 @@ export async function getEmployeeTipsContext(userId: string): Promise<EmployeeTi
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
         const row = await prisma.employee.findUnique({
           where: { userId },
-          select: { id: true, business: { select: { timezone: true } } },
+          select: { id: true, business: { select: { id: true, timezone: true } } },
         });
-        if (!row) return null;
+        if (!row?.business?.id) return null;
         return {
           id: row.id,
+          businessId: row.business.id,
           monthlyGoal: null,
           businessTimezone: sanitizeIanaTimezone(row.business?.timezone),
           activeGoal: null,
@@ -124,6 +318,7 @@ export function invalidateEmployeeTipsContext(userId: string): void {
 }
 
 export function invalidateEmployeeDashboardCache(employeeId: string): void {
+  invalidateCacheKeyPrefix(`emp-dash-sql:${employeeId}:`);
   invalidateCacheKeyPrefix(`emp-period-summary:${employeeId}:`);
   invalidateCacheKeyPrefix(`emp-dash-summary:${employeeId}:`);
   invalidateCacheKeyPrefix(`emp-dash-summary-bundle:${employeeId}:`);
@@ -132,7 +327,7 @@ export function invalidateEmployeeDashboardCache(employeeId: string): void {
   invalidateCacheKeyPrefix(`emp-account:${employeeId}`);
 }
 
-/** Period metrics + current-month total in a single DB round trip. */
+/** Period metrics + current-month total (cached SQL bundle). */
 export async function loadEmployeeDashboardSummary(opts: {
   employeeId: string;
   businessTimezone: string;
@@ -144,59 +339,20 @@ export async function loadEmployeeDashboardSummary(opts: {
 }> {
   const cacheKey = `emp-dash-summary:${opts.employeeId}:${opts.timeframe}:${opts.businessTimezone}`;
   return getCachedOrLoad(cacheKey, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
-    const label = `employee.summary.${opts.timeframe}`;
-    return logDashboardPhase(label, "sql", async () => {
-      const tz = sanitizeIanaTimezone(opts.businessTimezone);
-      const periodRange = businessUtcRangeForTimeframe(opts.timeframe, tz);
-      const monthRange = businessUtcRangeForTimeframe("month", tz);
-      if (!periodRange || !monthRange) {
-        return { periodAmountEur: 0, periodTipCount: 0, currentMonthTotal: 0 };
-      }
-
-      const scanStart =
-        periodRange.startUtc.getTime() < monthRange.startUtc.getTime()
-          ? periodRange.startUtc
-          : monthRange.startUtc;
-      const scanEnd =
-        periodRange.endUtc.getTime() > monthRange.endUtc.getTime()
-          ? periodRange.endUtc
-          : monthRange.endUtc;
-
-      const rows = await prisma.$queryRaw<
-        Array<{
-          period_amount: number;
-          period_count: number;
-          month_amount: number;
-        }>
-      >(Prisma.sql`
-        SELECT
-          COALESCE(SUM(amount) FILTER (
-            WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-          ), 0)::float AS period_amount,
-          (COUNT(*) FILTER (
-            WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-          ))::int AS period_count,
-          COALESCE(SUM(amount) FILTER (
-            WHERE created_at >= ${monthRange.startUtc} AND created_at <= ${monthRange.endUtc}
-          ), 0)::float AS month_amount
-        FROM tips
-        WHERE employee_id = ${opts.employeeId}
-          AND status = 'success'
-          AND created_at >= ${scanStart}
-          AND created_at <= ${scanEnd}
-      `);
-
-      const row = rows[0];
-      return {
-        periodAmountEur: Number(row?.period_amount ?? 0),
-        periodTipCount: Number(row?.period_count ?? 0),
-        currentMonthTotal: Number(row?.month_amount ?? 0),
-      };
-    });
+    const slice = await loadEmployeeSqlBundleSliceCached(
+      opts.employeeId,
+      opts.timeframe,
+      opts.businessTimezone,
+    );
+    return {
+      periodAmountEur: slice.summary.periodAmount,
+      periodTipCount: slice.summary.periodCount,
+      currentMonthTotal: slice.summary.monthAmount,
+    };
   });
 }
 
-/** Summary metrics + goal (narrow scans for today/week; month uses one monthly scan). */
+/** Summary metrics + goal (reuses cached SQL bundle; goal may add one narrow query). */
 export async function loadEmployeeDashboardSummaryBundle(opts: {
   employeeId: string;
   userId: string;
@@ -208,217 +364,53 @@ export async function loadEmployeeDashboardSummaryBundle(opts: {
   periodTipCount: number;
   currentMonthTotal: number;
   goal: GoalWithProgress | null;
+  tips: TipForEmployee[];
+  chartSeries: Array<{ label: string; amount: number }>;
 }> {
   const cacheKey = `emp-dash-summary-bundle:${opts.employeeId}:${opts.timeframe}:${opts.businessTimezone}`;
   return getCachedOrLoad(cacheKey, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
-    const label = `employee.summary.${opts.timeframe}`;
     const tz = sanitizeIanaTimezone(opts.businessTimezone);
+    const slice = await loadEmployeeSqlBundleSliceCached(opts.employeeId, opts.timeframe, tz);
     const periodRange = businessUtcRangeForTimeframe(opts.timeframe, tz);
     const monthRange = businessUtcRangeForTimeframe("month", tz);
-    if (!periodRange || !monthRange) {
-      return {
-        periodAmountEur: 0,
-        periodTipCount: 0,
-        currentMonthTotal: 0,
-        goal: null,
-      };
-    }
 
-    const now = new Date();
-    const activeGoal = opts.activeGoal ?? null;
-    const goalBounds = activeGoal
-      ? effectivePeriodBounds(activeGoal.goalPeriod, activeGoal.startDate, now)
-      : null;
-
-    if (opts.timeframe === "month") {
-      const row = await logDashboardPhase(label, "sqlMonth", () =>
-        goalBounds
-          ? prisma.$queryRaw<
-              Array<{
-                period_amount: number;
-                period_count: number;
-                goal_amount: number;
-              }>
-            >(Prisma.sql`
-              SELECT
-                COALESCE(SUM(amount), 0)::float AS period_amount,
-                COUNT(*)::int AS period_count,
-                COALESCE(SUM(amount) FILTER (
-                  WHERE created_at >= ${goalBounds.start} AND created_at <= ${goalBounds.end}
-                ), 0)::float AS goal_amount
-              FROM tips
-              WHERE employee_id = ${opts.employeeId}
-                AND status = 'success'
-                AND created_at >= ${monthRange.startUtc}
-                AND created_at <= ${monthRange.endUtc}
-            `)
-          : prisma.$queryRaw<
-              Array<{ period_amount: number; period_count: number }>
-            >(Prisma.sql`
-              SELECT
-                COALESCE(SUM(amount), 0)::float AS period_amount,
-                COUNT(*)::int AS period_count
-              FROM tips
-              WHERE employee_id = ${opts.employeeId}
-                AND status = 'success'
-                AND created_at >= ${monthRange.startUtc}
-                AND created_at <= ${monthRange.endUtc}
-            `),
-      );
-      const hit = row[0];
-      const periodAmountEur = Number(hit?.period_amount ?? 0);
-      const goal =
-        activeGoal && goalBounds
-          ? buildActiveGoalWithProgress(
-              activeGoal,
-              Number((hit as { goal_amount?: number }).goal_amount ?? 0),
-              now,
-            )
-          : null;
-      return {
-        periodAmountEur,
-        periodTipCount: Number(hit?.period_count ?? 0),
-        currentMonthTotal: periodAmountEur,
-        goal,
-      };
-    }
-
-    const goalFitsPeriod =
-      goalBounds != null &&
-      goalBounds.start.getTime() >= periodRange.startUtc.getTime() &&
-      goalBounds.end.getTime() <= periodRange.endUtc.getTime();
-
-    const scanStart =
-      monthRange.startUtc.getTime() < periodRange.startUtc.getTime()
-        ? monthRange.startUtc
-        : periodRange.startUtc;
-    const scanEnd =
-      monthRange.endUtc.getTime() > periodRange.endUtc.getTime()
-        ? monthRange.endUtc
-        : periodRange.endUtc;
-
-    const periodRows = await logDashboardPhase(label, "sqlPeriodMonth", () =>
-      goalBounds && goalFitsPeriod
-        ? prisma.$queryRaw<
-            Array<{
-              period_amount: number;
-              period_count: number;
-              month_amount: number;
-              goal_amount: number;
-            }>
-          >(Prisma.sql`
-            SELECT
-              COALESCE(SUM(amount) FILTER (
-                WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-              ), 0)::float AS period_amount,
-              (COUNT(*) FILTER (
-                WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-              ))::int AS period_count,
-              COALESCE(SUM(amount) FILTER (
-                WHERE created_at >= ${monthRange.startUtc} AND created_at <= ${monthRange.endUtc}
-              ), 0)::float AS month_amount,
-              COALESCE(SUM(amount) FILTER (
-                WHERE created_at >= ${goalBounds.start} AND created_at <= ${goalBounds.end}
-              ), 0)::float AS goal_amount
-            FROM tips
-            WHERE employee_id = ${opts.employeeId}
-              AND status = 'success'
-              AND created_at >= ${scanStart}
-              AND created_at <= ${scanEnd}
-          `)
-        : prisma.$queryRaw<
-            Array<{
-              period_amount: number;
-              period_count: number;
-              month_amount: number;
-            }>
-          >(Prisma.sql`
-            SELECT
-              COALESCE(SUM(amount) FILTER (
-                WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-              ), 0)::float AS period_amount,
-              (COUNT(*) FILTER (
-                WHERE created_at >= ${periodRange.startUtc} AND created_at <= ${periodRange.endUtc}
-              ))::int AS period_count,
-              COALESCE(SUM(amount) FILTER (
-                WHERE created_at >= ${monthRange.startUtc} AND created_at <= ${monthRange.endUtc}
-              ), 0)::float AS month_amount
-            FROM tips
-            WHERE employee_id = ${opts.employeeId}
-              AND status = 'success'
-              AND created_at >= ${scanStart}
-              AND created_at <= ${scanEnd}
-          `),
-    );
-
-    const periodHit = periodRows[0];
-    const currentMonthTotal = Number(periodHit?.month_amount ?? 0);
+    const periodAmountEur = slice.summary.periodAmount;
+    const periodTipCount = slice.summary.periodCount;
+    const currentMonthTotal = slice.summary.monthAmount;
+    const { tips, chartSeries } = mapAnalyticsBundleToResponse(slice.analytics, opts.timeframe, tz);
 
     let goal: GoalWithProgress | null = null;
-    if (activeGoal && goalBounds) {
-      if (goalFitsPeriod) {
-        goal = buildActiveGoalWithProgress(
-          activeGoal,
-          Number((periodHit as { goal_amount?: number }).goal_amount ?? 0),
-          now,
-        );
-      } else {
-        goal = await logDashboardPhase(label, "goalProgress", () =>
-          getMyGoalWithProgressForEmployee(opts.employeeId, opts.userId).catch(() => null),
-        );
-      }
+    if (periodRange && monthRange) {
+      goal = await resolveGoalForSummaryBundle({
+        employeeId: opts.employeeId,
+        userId: opts.userId,
+        businessTimezone: tz,
+        timeframe: opts.timeframe,
+        activeGoal: opts.activeGoal ?? null,
+        periodRange,
+        monthRange,
+        periodAmountEur,
+      });
     }
 
-    return {
-      periodAmountEur: Number(periodHit?.period_amount ?? 0),
-      periodTipCount: Number(periodHit?.period_count ?? 0),
-      currentMonthTotal,
-      goal,
-    };
+    return { periodAmountEur, periodTipCount, currentMonthTotal, goal, tips, chartSeries };
   });
 }
 
-function periodWhere(
-  employeeId: string,
-  tf: EmployeeDashboardTimeframe | null,
-  tz: string,
-): Prisma.TransactionWhereInput {
-  const whereBase: Prisma.TransactionWhereInput = {
-    employeeId,
-    status: TipStatus.success,
-  };
-  if (tf != null) {
-    const r = businessUtcRangeForTimeframe(tf, tz);
-    if (r) {
-      whereBase.createdAt = { gte: r.startUtc, lte: r.endUtc };
-    }
-  }
-  return whereBase;
-}
-
-/** Fast period totals for metric cards — no tip rows or chart buckets. */
+/** Fast period totals for metric cards — from cached SQL bundle (no duplicate aggregate). */
 export async function loadEmployeePeriodSummary(opts: {
   employeeId: string;
   businessTimezone: string;
   timeframe: EmployeeDashboardTimeframe;
 }): Promise<{ periodAmountEur: number; periodTipCount: number }> {
-  const cacheKey = `emp-period-summary:${opts.employeeId}:${opts.timeframe}:${opts.businessTimezone}`;
-  return getCachedOrLoad(cacheKey, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
-    const tz = sanitizeIanaTimezone(opts.businessTimezone);
-    const whereBase = periodWhere(opts.employeeId, opts.timeframe, tz);
-    const aggregates = await prisma.transaction.aggregate({
-      where: whereBase,
-      _sum: { amount: true },
-      _count: { _all: true },
-    });
-    return {
-      periodAmountEur: Number(aggregates._sum.amount ?? 0),
-      periodTipCount: aggregates._count._all,
-    };
-  });
+  const summary = await loadEmployeeDashboardSummary(opts);
+  return {
+    periodAmountEur: summary.periodAmountEur,
+    periodTipCount: summary.periodTipCount,
+  };
 }
 
-/** Charts + recent tips for period analytics sections. */
+/** Charts + recent tips for period analytics (cached SQL bundle). */
 export async function loadEmployeePeriodAnalytics(opts: {
   employeeId: string;
   businessTimezone: string;
@@ -429,46 +421,9 @@ export async function loadEmployeePeriodAnalytics(opts: {
 }> {
   const cacheKey = `emp-period-analytics:${opts.employeeId}:${opts.timeframe}:${opts.businessTimezone}`;
   return getCachedOrLoad(cacheKey, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
-    const label = `employee.analytics.${opts.timeframe}`;
     const tz = sanitizeIanaTimezone(opts.businessTimezone);
-    const range = businessUtcRangeForTimeframe(opts.timeframe, tz);
-    const RECENT_TIPS_TAKE = 30;
-
-    if (!range) {
-      return { tips: [], chartSeries: [] };
-    }
-
-    const bundle = await logDashboardPhase(label, "sqlBundle", () =>
-      queryEmployeeAnalyticsBundle({
-        employeeId: opts.employeeId,
-        startUtc: range.startUtc,
-        endUtc: range.endUtc,
-        timezone: tz,
-        timeframe: opts.timeframe,
-        recentTake: RECENT_TIPS_TAKE,
-      }),
-    );
-    const rowsList = bundle.recentTips;
-    const buckets = {
-      dailyByYmd: bundle.dailyByYmd,
-      hourlyByHour: bundle.hourlyByHour,
-    };
-
-    const tips: TipForEmployee[] = rowsList.map((t) => ({
-      id: t.id,
-      amount: t.amount,
-      status: t.status as TipForEmployee["status"],
-      createdAt: t.createdAt.toISOString(),
-    }));
-
-    const chartSeries = buildEmployeeChartSeries(
-      opts.timeframe,
-      tz,
-      buckets.dailyByYmd,
-      buckets.hourlyByHour,
-    );
-
-    return { tips, chartSeries };
+    const slice = await loadEmployeeSqlBundleSliceCached(opts.employeeId, opts.timeframe, tz);
+    return mapAnalyticsBundleToResponse(slice.analytics, opts.timeframe, tz);
   });
 }
 
@@ -487,28 +442,18 @@ export async function loadEmployeeTipsDashboardForTimeframe(opts: {
     return { tips: [], periodAmountEur: 0, periodTipCount: 0, chartSeries: [] };
   }
 
-  const [summary, analytics] = await Promise.all([
-    loadEmployeePeriodSummary({
-      employeeId: opts.employeeId,
-      businessTimezone: opts.businessTimezone,
-      timeframe: tf,
-    }),
-    loadEmployeePeriodAnalytics({
-      employeeId: opts.employeeId,
-      businessTimezone: opts.businessTimezone,
-      timeframe: tf,
-    }),
-  ]);
-
-  return {
-    tips: analytics.tips,
-    periodAmountEur: summary.periodAmountEur,
-    periodTipCount: summary.periodTipCount,
-    chartSeries: analytics.chartSeries,
-  };
+  return runSerializedByKey(`emp-stats-full:${opts.employeeId}:${tf}`, async () => {
+    const tz = sanitizeIanaTimezone(opts.businessTimezone);
+    const slice = await loadEmployeeSqlBundleSliceCached(opts.employeeId, tf, tz);
+    const { tips, chartSeries } = mapAnalyticsBundleToResponse(slice.analytics, tf, tz);
+    return {
+      tips,
+      periodAmountEur: slice.summary.periodAmount,
+      periodTipCount: slice.summary.periodCount,
+      chartSeries,
+    };
+  });
 }
-
-const EMPLOYEE_ACCOUNT_SUMMARY_TTL_MS = 30_000;
 
 export async function loadEmployeeCurrentMonthTotal(
   employeeId: string,
@@ -516,17 +461,12 @@ export async function loadEmployeeCurrentMonthTotal(
 ): Promise<number> {
   const cacheKey = `emp-month-total:${employeeId}:${businessTimezone}`;
   return getCachedOrLoad(cacheKey, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
-    const monthRange = businessUtcRangeForTimeframe("month", businessTimezone);
-    if (!monthRange) return 0;
-    const agg = await prisma.transaction.aggregate({
-      where: {
-        employeeId,
-        status: TipStatus.success,
-        createdAt: { gte: monthRange.startUtc, lte: monthRange.endUtc },
-      },
-      _sum: { amount: true },
+    const summary = await loadEmployeeDashboardSummary({
+      employeeId,
+      businessTimezone,
+      timeframe: "month",
     });
-    return Number(agg._sum.amount ?? 0);
+    return summary.currentMonthTotal;
   });
 }
 
@@ -536,7 +476,7 @@ export async function loadEmployeeAccountSummary(employeeId: string): Promise<{
   availableBalanceEur: number;
   totalSupporters: number;
 }> {
-  return getCachedOrLoad(`emp-account:${employeeId}`, EMPLOYEE_ACCOUNT_SUMMARY_TTL_MS, async () => {
+  return getCachedOrLoad(`emp-account:${employeeId}`, EMPLOYEE_PERIOD_CACHE_TTL_MS, async () => {
     const rows = await logDashboardPhase("employee.account", "sql", () =>
       prisma.$queryRaw<
         Array<{

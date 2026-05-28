@@ -1,6 +1,7 @@
 import { randomBytes } from "crypto";
 import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
+import { invalidateBusinessStatsCache } from "./business.service.js";
 import * as locationsService from "./locations.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
@@ -67,6 +68,7 @@ export async function createTableForBusinessUser(
     },
   });
   emitBusinessDataChanged(business.id, "table_created");
+  invalidateBusinessStatsCache(business.id);
   return table;
 }
 

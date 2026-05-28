@@ -70,6 +70,83 @@ export function businessDayKey(utcDate: Date, businessTimezone: string): string 
  * Converts business-local YYYY-MM-DD inputs into UTC instants for DB filtering.
  * The resulting range is inclusive of the entire local days.
  */
+/** Goal periods use the same business-local calendar boundaries as dashboard timeframes. */
+export type GoalCalendarPeriod = "daily" | "weekly" | "monthly";
+
+export function goalPeriodToBusinessTimeframe(
+  period: GoalCalendarPeriod,
+): Exclude<BusinessTimeframe, "year" | "all"> {
+  if (period === "daily") return "today";
+  if (period === "weekly") return "week";
+  return "month";
+}
+
+/** UTC range for the current goal period (identical to dashboard `today` / `week` / `month`). */
+export function businessUtcRangeForGoalPeriod(
+  period: GoalCalendarPeriod,
+  businessTimezone: string,
+  nowUtc = DateTime.utc(),
+): { startUtc: Date; endUtc: Date } | null {
+  return businessUtcRangeForTimeframe(
+    goalPeriodToBusinessTimeframe(period),
+    businessTimezone,
+    nowUtc,
+  );
+}
+
+/**
+ * Start of the goal's calendar start date in business-local time, as a UTC instant.
+ * `startDate` is stored as noon UTC on the chosen YYYY-MM-DD.
+ */
+export function businessUtcStartOfGoalStartDate(
+  startDate: Date,
+  businessTimezone: string,
+): Date {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  const ymd = DateTime.fromJSDate(startDate, { zone: "utc" }).toFormat("yyyy-LL-dd");
+  return DateTime.fromISO(ymd, { zone: tz }).startOf("day").toUTC().toJSDate();
+}
+
+/**
+ * Effective tip-counting window: current business period intersected with [goalStartDate, now].
+ * Period boundaries match `businessUtcRangeForTimeframe` for the mapped dashboard timeframe.
+ */
+export function effectiveGoalPeriodBounds(
+  period: GoalCalendarPeriod,
+  startDate: Date,
+  businessTimezone: string,
+  now = new Date(),
+): { startUtc: Date; endUtc: Date } {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  const nowUtc = DateTime.fromJSDate(now, { zone: "utc" });
+  if (!nowUtc.isValid) throw new Error("invalid now");
+  const range = businessUtcRangeForGoalPeriod(period, tz, nowUtc);
+  if (!range) throw new Error("unexpected goal period");
+  const goalStart = businessUtcStartOfGoalStartDate(startDate, tz);
+  const startUtc =
+    range.startUtc.getTime() < goalStart.getTime() ? goalStart : range.startUtc;
+  return { startUtc, endUtc: now };
+}
+
+/** Elapsed fraction of the current business-local goal period (0–1), for pacing. */
+export function elapsedRatioInGoalPeriod(
+  period: GoalCalendarPeriod,
+  businessTimezone: string,
+  now = new Date(),
+): number {
+  const tz = sanitizeIanaTimezone(businessTimezone);
+  const nowUtc = DateTime.fromJSDate(now, { zone: "utc" });
+  if (!nowUtc.isValid) return 1;
+  const range = businessUtcRangeForGoalPeriod(period, tz, nowUtc);
+  if (!range) return 1;
+  const startMs = range.startUtc.getTime();
+  const endMs = range.endUtc.getTime();
+  const nowMs = now.getTime();
+  const span = endMs - startMs;
+  if (span <= 0) return 1;
+  return Math.min(1, Math.max(0, (nowMs - startMs) / span));
+}
+
 export function businessUtcRangeForLocalDates(
   fromYmd: string | undefined,
   toYmd: string | undefined,

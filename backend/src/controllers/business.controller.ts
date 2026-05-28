@@ -9,6 +9,12 @@ import {
 } from "../utils/httpErrors.js";
 import { STATS_FETCH_ERROR_CODE, StatsFetchError } from "../utils/statsErrors.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
+import { isStatsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
+import {
+  getSubscriptionTierForBusinessId,
+  subscriptionBypass,
+  subscriptionRequiredPayload,
+} from "../services/subscriptionEntitlement.service.js";
 
 function statsErrorHttpStatus(err: unknown): number {
   if (err instanceof StatsFetchError) {
@@ -239,6 +245,12 @@ export async function getMyStats(req: Request, res: Response) {
         message: "Business not found",
       });
     }
+    if (!subscriptionBypass(req)) {
+      const tier = await getSubscriptionTierForBusinessId(business.id);
+      if (!isStatsScopeAllowedForTier(tier, scope)) {
+        return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+      }
+    }
     const stats = await logDashboardTiming(
       `business.myStats.${scope}`,
       { businessId: business.id, timeframe, scope },
@@ -285,6 +297,12 @@ export async function getStats(req: Request, res: Response) {
     const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
     const scope =
       scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
+    if (!subscriptionBypass(req)) {
+      const tier = await getSubscriptionTierForBusinessId(businessId);
+      if (!isStatsScopeAllowedForTier(tier, scope)) {
+        return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+      }
+    }
     const stats = await logDashboardTiming(
       `business.stats.${scope}`,
       { businessId, timeframe, scope },

@@ -13,7 +13,8 @@ const ASSISTANT_ROLE = `You are Ask CareTip: a knowledgeable, conversational pro
 You help hospitality operators and curious visitors understand CareTip and move toward signup when it fits naturally.
 
 RESPONSE MODEL (AI-first):
-- Reason from product context and FAQ reference snippets below.
+- Reason from product context and FAQ reference snippets below. FAQ snippets are hints, not scripts.
+- For strategy questions (growth, KPIs, motivation, comparisons), synthesize hospitality advice AND tie relevant CareTip capabilities. Do not default to a generic product overview.
 - Paraphrase in your own words. Do NOT paste FAQ text verbatim or repeat the same template every turn.
 - Use the conversation history for follow-ups (pronouns, "that", "also", comparisons).
 - Ask one short clarifying question when the user's goal is ambiguous.
@@ -47,6 +48,30 @@ export function polishLandingAiReply(text: string): string {
 
 const MAX_USER_LEN = 600;
 const MAX_HISTORY = 12;
+const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
+
+export type LandingAiFallbackReason =
+  | "off_topic"
+  | "no_api_key"
+  | "openai_http_error"
+  | "openai_empty"
+  | null;
+
+function resolveOpenAiConfig(): { apiKey: string; model: string; base: string } | null {
+  const apiKey =
+    process.env.LANDING_AI_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim();
+  if (!apiKey) return null;
+  const model =
+    process.env.LANDING_AI_OPENAI_MODEL?.trim() ||
+    process.env.OPENAI_MODEL?.trim() ||
+    DEFAULT_OPENAI_MODEL;
+  const base = (
+    process.env.LANDING_AI_OPENAI_BASE_URL?.trim() ||
+    process.env.OPENAI_BASE_URL?.trim() ||
+    "https://api.openai.com/v1"
+  ).replace(/\/+$/, "");
+  return { apiKey, model, base };
+}
 
 function buildSystem(locale: string, faqGrounding: string, promptId?: string): string {
   const lang = locale.toLowerCase().startsWith("de") ? "German" : "English";
@@ -98,33 +123,24 @@ async function callOpenAi(
   locale: string,
   faqGrounding: string,
   promptId?: string,
-): Promise<string | null> {
-  const apiKey = process.env.LANDING_AI_OPENAI_API_KEY?.trim() || process.env.OPENAI_API_KEY?.trim();
-  if (!apiKey) return null;
-
-  const model =
-    process.env.LANDING_AI_OPENAI_MODEL?.trim() ||
-    process.env.OPENAI_MODEL?.trim() ||
-    "gpt-4o-mini";
-  const base =
-    process.env.LANDING_AI_OPENAI_BASE_URL?.trim() ||
-    process.env.OPENAI_BASE_URL?.trim() ||
-    "https://api.openai.com/v1";
+): Promise<{ text: string | null; httpStatus?: number }> {
+  const cfg = resolveOpenAiConfig();
+  if (!cfg) return { text: null };
 
   const payload = {
-    model,
-    temperature: 0.58,
-    max_tokens: 480,
+    model: cfg.model,
+    temperature: 0.62,
+    max_tokens: 520,
     messages: [
       { role: "system", content: buildSystem(locale, faqGrounding, promptId) },
       ...messages.map((m) => ({ role: m.role, content: m.content })),
     ],
   };
 
-  const res = await fetch(`${base.replace(/\/+$/, "")}/chat/completions`, {
+  const res = await fetch(`${cfg.base}/chat/completions`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `Bearer ${cfg.apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify(payload),
@@ -133,39 +149,91 @@ async function callOpenAi(
 
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    console.warn("[landing-ai] OpenAI error", res.status, text.slice(0, 200));
-    return null;
+    console.warn("[landing-ai] OpenAI error", res.status, cfg.model, text.slice(0, 200));
+    return { text: null, httpStatus: res.status };
   }
 
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
   const reply = data.choices?.[0]?.message?.content?.trim();
-  return reply || null;
+  return { text: reply || null, httpStatus: res.status };
 }
 
 export async function generateLandingAiReply(input: {
   messages: LandingChatMessage[];
   promptId?: string;
   locale: string;
-}): Promise<{ reply: string; source: "openai" | "knowledge" }> {
+}): Promise<{
+  reply: string;
+  source: "openai" | "knowledge";
+  fallbackReason: LandingAiFallbackReason;
+}> {
   const lastUser = [...input.messages].reverse().find((m) => m.role === "user");
   const userText = lastUser?.content ?? "";
 
   if (isLikelyOffTopic(userText)) {
-    return { reply: polishLandingAiReply(LANDING_AI_SCOPE_REFUSAL), source: "knowledge" };
+    return {
+      reply: polishLandingAiReply(LANDING_AI_SCOPE_REFUSAL),
+      source: "knowledge",
+      fallbackReason: "off_topic",
+    };
   }
 
   const faqEntries = rankFaqEntries(userText, input.promptId, 4);
   const faqGrounding = buildFaqGroundingBlock(faqEntries, input.locale);
 
+  if (!resolveOpenAiConfig()) {
+    const reply = composeFallbackReply({
+      userText,
+      locale: input.locale,
+      promptId: input.promptId,
+    });
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[landing-ai] fallback=no_api_key");
+    }
+    return {
+      reply: polishLandingAiReply(reply),
+      source: "knowledge",
+      fallbackReason: "no_api_key",
+    };
+  }
+
   const llm = await callOpenAi(input.messages, input.locale, faqGrounding, input.promptId);
-  if (llm) return { reply: polishLandingAiReply(llm), source: "openai" };
+  if (llm.text) {
+    return {
+      reply: polishLandingAiReply(llm.text),
+      source: "openai",
+      fallbackReason: null,
+    };
+  }
 
   const reply = composeFallbackReply({
     userText,
     locale: input.locale,
     promptId: input.promptId,
   });
-  return { reply: polishLandingAiReply(reply), source: "knowledge" };
+  const fallbackReason: LandingAiFallbackReason = llm.httpStatus
+    ? "openai_http_error"
+    : "openai_empty";
+  if (process.env.NODE_ENV !== "production") {
+    console.info("[landing-ai] fallback=", fallbackReason, "http=", llm.httpStatus ?? "n/a");
+  }
+  return { reply: polishLandingAiReply(reply), source: "knowledge", fallbackReason };
+}
+
+/** Startup-safe check for ops dashboards (no secrets). */
+export function getLandingAiConfigStatus(): {
+  openAiConfigured: boolean;
+  model: string;
+  keySource: "landing" | "shared" | "none";
+} {
+  const landing = !!process.env.LANDING_AI_OPENAI_API_KEY?.trim();
+  const shared = !!process.env.OPENAI_API_KEY?.trim();
+  const cfg = resolveOpenAiConfig();
+  return {
+    openAiConfigured: !!cfg,
+    model: cfg?.model ?? DEFAULT_OPENAI_MODEL,
+    keySource: landing ? "landing" : shared ? "shared" : "none",
+  };
 }

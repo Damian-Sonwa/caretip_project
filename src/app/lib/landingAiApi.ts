@@ -13,7 +13,7 @@ export async function postLandingAiChat(body: {
   promptId?: string;
   locale: string;
   signal?: AbortSignal;
-}): Promise<{ reply: string; source?: string }> {
+}): Promise<{ reply: string; source?: string; fallbackReason?: string | null }> {
   const res = await fetch(landingAiPath("/chat"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -31,5 +31,9 @@ export async function postLandingAiChat(body: {
     throw new Error(data.message ?? "Could not reach the assistant");
   }
   if (!data.reply) throw new Error("Empty reply");
-  return { reply: data.reply, source: data.source };
+  return {
+    reply: data.reply,
+    source: (data as { source?: string }).source,
+    fallbackReason: (data as { fallbackReason?: string | null }).fallbackReason,
+  };
 }

@@ -2499,7 +2499,13 @@
       "openLogo": "Logo öffnen",
       "openKycDocument": "KYC-Dokument öffnen",
       "editDetails": "Details bearbeiten",
-      "labelWebsite": "Website"
+      "labelWebsite": "Website",
+      "dtSubscriptionTier": "SaaS-Tarif",
+      "subscriptionTierBasic": "Basic",
+      "subscriptionTierPremium": "Premium",
+      "subscriptionTierEnterprise": "Enterprise",
+      "saveSubscriptionTier": "Tarif speichern",
+      "toastSubscriptionTierSaved": "Tarif aktualisiert."
     },
     "fallbackAdminName": "Admin"
   }

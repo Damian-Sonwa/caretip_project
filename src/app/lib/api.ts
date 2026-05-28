@@ -12,7 +12,12 @@ import {
   isAbortError,
   isApiConnectivityError,
 } from "./errorMessages";
-import { ApiRequestError, EMAIL_NOT_VERIFIED_CODE, GOOGLE_ACCOUNT_NOT_REGISTERED_CODE } from "./apiError";
+import {
+  ApiRequestError,
+  EMAIL_NOT_VERIFIED_CODE,
+  GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+  SUBSCRIPTION_REQUIRED_CODE,
+} from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { validateImageFileForUpload } from "./imageClientUpload";
@@ -372,6 +377,9 @@ async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise
       throw new ApiRequestError(base, res.status, body.code, body.canResend === true);
     }
     if (body.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
+      throw new ApiRequestError(base, res.status, body.code);
+    }
+    if (body.code === SUBSCRIPTION_REQUIRED_CODE) {
       throw new ApiRequestError(base, res.status, body.code);
     }
     throw new ApiRequestError(base, res.status, body.code, body.canResend === true);
@@ -926,8 +934,13 @@ export interface BusinessDashboardStats {
  * Dashboard stats for the authenticated business owner (business resolved from JWT, not URL).
  * Avoids 404 when `caretip_user.businessId` is stale vs the database.
  */
-/** In-flight dedupe only — no TTL metric cache (dashboards are live-first). */
+/** In-flight dedupe + short TTL so aborted/remounted loads reuse fresh responses. */
 const businessStatsInflight = new Map<string, Promise<BusinessDashboardStats>>();
+const businessStatsResultCache = new Map<
+  string,
+  { at: number; value: BusinessDashboardStats }
+>();
+const BUSINESS_STATS_CLIENT_RESULT_TTL_MS = 90_000;
 
 export type BusinessStatsScope = "summary" | "analytics" | "full";
 
@@ -956,7 +969,7 @@ export function mergeBusinessDashboardStats(
     employeeCount:
       summary?.employeeCount != null
         ? summary.employeeCount
-        : (analytics?.employeeCount ?? summary?.employeeCount),
+        : (analytics?.employeeCount ?? summary?.employeeCount ?? 0),
     operationalPulse:
       pulseS || pulseA
         ? {
@@ -980,14 +993,29 @@ export function clearBusinessStatsClientCache(timeframe?: "week" | "month" | "ye
         businessStatsInflight.delete(key);
       }
     }
+    for (const key of [...businessStatsResultCache.keys()]) {
+      if (key.includes(`:${timeframe}`)) {
+        businessStatsResultCache.delete(key);
+      }
+    }
     return;
   }
   businessStatsInflight.clear();
+  businessStatsResultCache.clear();
+}
+
+export function invalidateBusinessStatsClientCache(timeframe?: "week" | "month" | "year" | "all"): void {
+  clearBusinessStatsClientCache(timeframe);
 }
 
 export async function getBusinessStats(
   timeframe?: "week" | "month" | "year" | "all",
-  opts?: { silent?: boolean; signal?: AbortSignal; scope?: BusinessStatsScope },
+  opts?: {
+    silent?: boolean;
+    signal?: AbortSignal;
+    scope?: BusinessStatsScope;
+    revalidate?: boolean;
+  },
 ): Promise<BusinessDashboardStats> {
   const tf = timeframe ?? "month";
   const scope = opts?.scope ?? "full";
@@ -995,14 +1023,29 @@ export async function getBusinessStats(
     throw new DOMException("Aborted", "AbortError");
   }
   const cacheKey = businessStatsClientCacheKey(tf, scope);
+  if (opts?.revalidate) {
+    businessStatsResultCache.delete(cacheKey);
+  }
+  const resultHit = businessStatsResultCache.get(cacheKey);
+  if (
+    !opts?.revalidate &&
+    resultHit &&
+    Date.now() - resultHit.at < BUSINESS_STATS_CLIENT_RESULT_TTL_MS
+  ) {
+    return resultHit.value;
+  }
   const inflight = businessStatsInflight.get(cacheKey);
   const statsUrl = apiPath(
     `/api/business/me/stats?${new URLSearchParams({ timeframe: tf, scope }).toString()}`,
   );
   if (inflight) {
-    const target = resolveDashboardApiDebugTarget(statsUrl);
-    if (target) devTrackDeduped(target.group, target.key, { ...target.meta, inflight: true });
-    return inflight;
+    if (opts?.revalidate) {
+      businessStatsInflight.delete(cacheKey);
+    } else {
+      const target = resolveDashboardApiDebugTarget(statsUrl);
+      if (target) devTrackDeduped(target.group, target.key, { ...target.meta, inflight: true });
+      return inflight;
+    }
   }
 
   const promise = apiRequest<BusinessDashboardStats>(
@@ -1013,11 +1056,16 @@ export async function getBusinessStats(
       signal: opts?.signal,
       caretipSilentErrors: opts?.silent === true,
     } as CaretipRequestInit,
-  ).finally(() => {
-    if (businessStatsInflight.get(cacheKey) === promise) {
-      businessStatsInflight.delete(cacheKey);
-    }
-  });
+  )
+    .then((value) => {
+      businessStatsResultCache.set(cacheKey, { at: Date.now(), value });
+      return value;
+    })
+    .finally(() => {
+      if (businessStatsInflight.get(cacheKey) === promise) {
+        businessStatsInflight.delete(cacheKey);
+      }
+    });
 
   businessStatsInflight.set(cacheKey, promise);
   return promise;
@@ -1078,6 +1126,8 @@ export interface BusinessInfo {
   website?: string | null;
   employeeCount: number;
   verificationStatus?: "pending" | "verified" | "rejected";
+  /** SaaS tier for entitlement UI; defaults to premium on API when unset. */
+  subscriptionTier?: "basic" | "premium" | "enterprise";
 }
 
 export async function getBusinessById(businessId: string): Promise<BusinessInfo | null> {
@@ -1509,6 +1559,8 @@ export interface EmployeeTipsResponse {
   periodAmountEur?: number;
   periodTipCount?: number;
   chartSeries?: Array<{ label: string; amount: number }>;
+  /** Summary scope includes chart/tips from the same SQL bundle (skip analytics round-trip). */
+  analyticsBundled?: boolean;
   /** Lifetime successful tips — hero account summary */
   totalEarningsEur?: number;
   availableBalanceEur?: number;
@@ -1735,6 +1787,8 @@ export interface EmployeeSelfProfile {
   slug: string | null;
   /** Business IANA timezone for analytics reporting. */
   businessTimezone?: string;
+  /** Venue SaaS tier for entitlement UI. */
+  subscriptionTier?: "basic" | "premium" | "enterprise";
 }
 
 const EMPLOYEE_PROFILE_CACHE_TTL_MS = 30_000;
@@ -2433,6 +2487,7 @@ export interface PlatformBusinessRow {
   successTipCount?: number;
   logoPath?: string | null;
   verificationDocumentPath?: string | null;
+  subscriptionTier?: "basic" | "premium" | "enterprise";
 }
 
 export async function fetchPlatformBusinesses(): Promise<{ businesses: PlatformBusinessRow[] }> {
@@ -2516,6 +2571,21 @@ export async function updatePlatformBusinessKyc(
     body: JSON.stringify(body),
     credentials: "include",
   });
+}
+
+export async function updatePlatformBusinessSubscriptionTier(
+  businessId: string,
+  subscriptionTier: "basic" | "premium" | "enterprise",
+): Promise<{ success: boolean; business: PlatformBusinessRow }> {
+  return apiRequest(
+    apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/subscription-tier`),
+    {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: JSON.stringify({ subscriptionTier }),
+      credentials: "include",
+    },
+  );
 }
 
 export async function uploadPlatformBusinessLogo(

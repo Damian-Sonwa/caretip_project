@@ -271,6 +271,24 @@ export async function listAuditLogs(req: Request, res: Response) {
   }
 }
 
+export async function updateBusinessSubscriptionTier(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const tier = req.body?.subscriptionTier;
+    if (tier !== "basic" && tier !== "premium" && tier !== "enterprise") {
+      return res.status(400).json({ message: "subscriptionTier must be basic, premium, or enterprise" });
+    }
+    const business = await platformService.updateBusinessSubscriptionTier(id, tier);
+    return res.json({ success: true, business });
+  } catch (err) {
+    logServerError("platform.updateBusinessSubscriptionTier", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't update the subscription tier. Try again."),
+    });
+  }
+}
+
 export async function updateBusiness(req: Request, res: Response) {
   try {
     const { id } = req.params;

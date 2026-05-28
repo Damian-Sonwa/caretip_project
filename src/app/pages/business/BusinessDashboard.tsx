@@ -31,6 +31,7 @@ import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport } from "../../lib/api";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import {
   DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
@@ -132,6 +133,13 @@ export function BusinessDashboard() {
     }
     logout();
   };
+
+  const { advancedAnalyticsEnabled, hasCapability } = useSubscriptionEntitlements({
+    enabled: user?.role === "business" && authReady,
+    role: user?.role === "business" ? "business" : null,
+  });
+  const canExportCsv = hasCapability("csvExport");
+
   const {
     analyticsTimeframe,
     setAnalyticsTimeframe,
@@ -152,7 +160,11 @@ export function BusinessDashboard() {
     refreshStatsQuiet,
     retryStats,
     applyLiveTip,
-  } = useBusinessDashboardStats(user?.role === "business" && authReady, sessionValidated);
+  } = useBusinessDashboardStats(
+    user?.role === "business" && authReady,
+    sessionValidated,
+    advancedAnalyticsEnabled,
+  );
 
   const [exportLoading, setExportLoading] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
@@ -169,7 +181,7 @@ export function BusinessDashboard() {
 
   useEffect(() => {
     if (!socket || user?.role !== "business") return;
-    const sync = () => void refreshStatsQuiet();
+    const sync = () => refreshStatsQuiet();
     socket.on("business_data_updated", sync);
     socket.on("verification_updated", sync);
     return () => {
@@ -206,7 +218,7 @@ export function BusinessDashboard() {
       if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = window.setTimeout(() => {
         refreshTimerRef.current = null;
-        void refreshStatsQuiet();
+        refreshStatsQuiet();
       }, 900);
     };
 
@@ -1129,23 +1141,25 @@ export function BusinessDashboard() {
                         {t("business.dashboard.actionManageLocations")}
                       </Link>
                     </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
-                      onClick={handleExport}
-                      disabled={exportLoading || !isBusiness}
-                      aria-busy={exportLoading}
-                    >
-                      <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
-                        {exportLoading ? (
-                          <LoadingSpinner size="sm" />
-                        ) : (
-                          <Download className="h-5 w-5" aria-hidden />
-                        )}
-                      </span>
-                      {t("business.dashboard.actionExportReports")}
-                    </Button>
+                    {canExportCsv ? (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
+                        onClick={handleExport}
+                        disabled={exportLoading || !isBusiness}
+                        aria-busy={exportLoading}
+                      >
+                        <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
+                          {exportLoading ? (
+                            <LoadingSpinner size="sm" />
+                          ) : (
+                            <Download className="h-5 w-5" aria-hidden />
+                          )}
+                        </span>
+                        {t("business.dashboard.actionExportReports")}
+                      </Button>
+                    ) : null}
                   </CardContent>
                 ) : null}
               </Card>

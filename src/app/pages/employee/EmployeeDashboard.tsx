@@ -37,8 +37,8 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
-import { useEmployeeAccountSummary } from "../../hooks/useEmployeeAccountSummary";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { EmployeeDashboardMetricsGrid } from "../../components/employee/EmployeeDashboardMetricsGrid";
 import { formatEur } from "../../lib/formatEur";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
@@ -115,14 +115,10 @@ export function EmployeeDashboard() {
 
   const dashboardEnabled = isProtectedApiReady() && user?.role === "employee";
 
-  const {
-    displayAccount,
-    isInitialLoad: accountInitialLoad,
-    isPeriodRefreshing: accountPeriodRefreshing,
-    dataRevision: accountDataRevision,
-    lastUpdatedAt: accountLastUpdatedAt,
-    refreshQuiet: refreshAccountQuiet,
-  } = useEmployeeAccountSummary(dashboardEnabled);
+  const { advancedAnalyticsEnabled } = useSubscriptionEntitlements({
+    enabled: dashboardEnabled,
+    role: user?.role === "employee" ? "employee" : null,
+  });
 
   const {
     analyticsTimeframe,
@@ -136,16 +132,12 @@ export function EmployeeDashboard() {
     dataRevision: analyticsDataRevision,
     lastUpdatedAt: analyticsLastUpdatedAt,
     error: analyticsError,
-    refreshQuiet: refreshAnalyticsQuiet,
+    refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
-  } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId);
+  } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId, advancedAnalyticsEnabled);
 
   const showMetricsLoading = isMetricsInitialLoad;
   const showChartLoading = isAnalyticsInitialLoad;
-
-  const refreshDashboardQuiet = useCallback(async () => {
-    await Promise.all([refreshAccountQuiet(), refreshAnalyticsQuiet()]);
-  }, [refreshAccountQuiet, refreshAnalyticsQuiet]);
 
   const [error, setError] = useState<string | null>(null);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
@@ -230,16 +222,14 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t, applyLiveTip]);
 
-  const accountLoaded = displayAccount != null;
-
   const useDevDemo = shouldUseEmployeeDashboardDevDemo({
     isDev: import.meta.env.DEV,
     hasError: Boolean(error),
-    accountSummaryLoaded: accountLoaded,
-    accountSummaryLoading: accountInitialLoad,
+    accountSummaryLoaded: displayPayload != null && typeof displayPayload.totalEarningsEur === "number",
+    accountSummaryLoading: isMetricsInitialLoad,
     analyticsLoading: showMetricsLoading || showChartLoading,
-    totalEarningsEur: displayAccount?.totalEarningsEur ?? 0,
-    totalSupporters: displayAccount?.totalSupporters ?? 0,
+    totalEarningsEur: displayPayload?.totalEarningsEur ?? 0,
+    totalSupporters: displayPayload?.totalSupporters ?? 0,
   });
 
   const devGoalBundle = useDevDemo ? devMockEmployeeGoalBundle() : null;
@@ -247,11 +237,11 @@ export function EmployeeDashboard() {
 
   const displayAccountSummary = useDevDemo
     ? { ...devMockEmployeeAccountSummary(), loaded: true }
-    : displayAccount
+    : displayPayload != null && typeof displayPayload.totalEarningsEur === "number"
       ? {
-          totalEarningsEur: displayAccount.totalEarningsEur,
-          availableBalanceEur: displayAccount.availableBalanceEur,
-          totalSupporters: displayAccount.totalSupporters,
+          totalEarningsEur: displayPayload.totalEarningsEur,
+          availableBalanceEur: displayPayload.availableBalanceEur ?? 0,
+          totalSupporters: displayPayload.totalSupporters ?? 0,
           loaded: true,
         }
       : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
@@ -482,11 +472,11 @@ export function EmployeeDashboard() {
                 className={cn(
                   "employee-hero-account-stats dashboard-swr-swap",
                   showHeroMetricsLoading && "dashboard-hero-account-stats--loading",
-                  accountPeriodRefreshing && "dashboard-swr-swap--revalidating",
+                  analyticsPeriodRefreshing && "dashboard-swr-swap--revalidating",
                 )}
                 aria-label={t("employee.hero.accountOverviewLabel")}
                 aria-busy={showHeroMetricsLoading}
-                key={`hero-account-${accountDataRevision}`}
+                key={`hero-account-${analyticsDataRevision}`}
               >
                 <div>
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
@@ -563,8 +553,8 @@ export function EmployeeDashboard() {
             <div className="flex flex-wrap items-center gap-2">
               <LiveConnectionBadge status={connectionStatus} />
               <DashboardRefreshIndicator
-                isRefreshing={accountPeriodRefreshing || analyticsPeriodRefreshing}
-                lastUpdatedAt={analyticsLastUpdatedAt ?? accountLastUpdatedAt}
+                isRefreshing={analyticsPeriodRefreshing}
+                lastUpdatedAt={analyticsLastUpdatedAt}
               />
             </div>
           </div>

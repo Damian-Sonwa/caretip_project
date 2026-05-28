@@ -300,7 +300,24 @@ export async function getBusinessForAdmin(businessId: string) {
     verificationDocumentPath: b.verificationDocumentPath,
     totalTipsEur: Number(tipSum._sum.amount ?? 0),
     successTipCount,
+    subscriptionTier: b.subscriptionTier,
   };
+}
+
+export async function updateBusinessSubscriptionTier(
+  businessId: string,
+  tier: "basic" | "premium" | "enterprise",
+) {
+  await prisma.business.update({
+    where: { id: businessId },
+    data: { subscriptionTier: tier },
+  });
+  const refreshed = await getBusinessForAdmin(businessId);
+  if (!refreshed) throw new Error("Business not found");
+  emitBusinessDataChanged(businessId, "subscription_tier_updated");
+  invalidatePlatformDashboardCache();
+  emitPlatformDataUpdated("subscription_tier");
+  return refreshed;
 }
 
 export async function listAuditLogsForAdmin(params: { take: number; skip: number }) {

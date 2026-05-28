@@ -20,6 +20,7 @@ import {
 } from "../lib/employeeNotificationStore";
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
+import { primeEmployeeAccountSnapshot } from "./useEmployeeAccountSummary";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
 
@@ -39,9 +40,9 @@ type AnalyticsPayload = {
   periodTipCount: number;
   periodAmountEur: number;
   chartSeries: Array<{ label: string; amount: number }>;
-  totalEarningsEur: number;
-  availableBalanceEur: number;
-  totalSupporters: number;
+  totalEarningsEur?: number;
+  availableBalanceEur?: number;
+  totalSupporters?: number;
 };
 
 type EmployeeSwrEntry = {
@@ -71,15 +72,19 @@ function payloadFromResponse(data: EmployeeTipsResponse): AnalyticsPayload {
     periodAmountEur:
       typeof nAmount === "number" ? nAmount : tipsArr.reduce((s, t) => s + t.amount, 0),
     chartSeries: Array.isArray(data.chartSeries) ? data.chartSeries : [],
-    totalEarningsEur: typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : 0,
-    availableBalanceEur: typeof data.availableBalanceEur === "number" ? data.availableBalanceEur : 0,
-    totalSupporters: typeof data.totalSupporters === "number" ? data.totalSupporters : 0,
+    totalEarningsEur:
+      typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : undefined,
+    availableBalanceEur:
+      typeof data.availableBalanceEur === "number" ? data.availableBalanceEur : undefined,
+    totalSupporters:
+      typeof data.totalSupporters === "number" ? data.totalSupporters : undefined,
   };
 }
 
 export function useEmployeeDashboardAnalytics(
   enabled: boolean,
   employeeId: string | undefined,
+  advancedAnalyticsEnabled = true,
 ) {
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState<EmployeeAnalyticsTimeframe>("today");
   const [payload, setPayload] = useState<AnalyticsPayload | null>(null);
@@ -104,6 +109,9 @@ export function useEmployeeDashboardAnalytics(
   const loadForRef = useRef<
     (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
   >(async () => {});
+  const advancedAnalyticsEnabledRef = useRef(advancedAnalyticsEnabled);
+  advancedAnalyticsEnabledRef.current = advancedAnalyticsEnabled;
+  const mountGenerationRef = useRef(0);
 
   const abortInactiveTimeframes = useCallback((activeTf: EmployeeAnalyticsTimeframe) => {
     for (const [tf, controller] of abortRef.current) {
@@ -115,20 +123,6 @@ export function useEmployeeDashboardAnalytics(
       if (tf !== activeTf) clearEmployeeTipsClientCache(tf);
     }
   }, []);
-
-  const setAnalyticsTimeframeControlled = useCallback(
-    (tf: EmployeeAnalyticsTimeframe) => {
-      if (tf === tfRef.current) return;
-      abortInactiveTimeframes(tf);
-      if (analyticsDeferTimerRef.current != null) {
-        window.clearTimeout(analyticsDeferTimerRef.current);
-        analyticsDeferTimerRef.current = null;
-      }
-      uiRequestSeqRef.current += 1;
-      setAnalyticsTimeframe(tf);
-    },
-    [abortInactiveTimeframes],
-  );
 
   const syncTipsFromResponse = useCallback(
     (data: EmployeeTipsResponse) => {
@@ -183,6 +177,40 @@ export function useEmployeeDashboardAnalytics(
     [persistSwr, syncTipsFromResponse],
   );
 
+  const setAnalyticsTimeframeControlled = useCallback(
+    (tf: EmployeeAnalyticsTimeframe) => {
+      if (tf === tfRef.current) return;
+      abortInactiveTimeframes(tf);
+      if (analyticsDeferTimerRef.current != null) {
+        window.clearTimeout(analyticsDeferTimerRef.current);
+        analyticsDeferTimerRef.current = null;
+      }
+      uiRequestSeqRef.current += 1;
+      setAnalyticsTimeframe(tf);
+
+      const summaryPartial = summaryPartialRef.current.get(tf);
+      if (summaryPartial && typeof summaryPartial.periodAmountEur === "number") {
+        const seq = uiRequestSeqRef.current;
+        setSummaryLoading(false);
+        devSetHydrationPhase("metrics", "ready");
+        const hasAnalytics =
+          summaryPartial.analyticsBundled === true ||
+          Boolean(analyticsPartialRef.current.get(tf)) ||
+          !advancedAnalyticsEnabledRef.current;
+        if (hasAnalytics) {
+          setAnalyticsLoading(false);
+          devSetHydrationPhase("charts", "ready");
+          devSetHydrationPhase("goals", "ready");
+        } else {
+          setAnalyticsLoading(true);
+          devSetHydrationPhase("charts", "loading");
+        }
+        commitUiPayload(tf, seq, false);
+      }
+    },
+    [abortInactiveTimeframes, commitUiPayload],
+  );
+
   const loadFor = useCallback(
     async (
       tf: EmployeeAnalyticsTimeframe,
@@ -230,7 +258,6 @@ export function useEmployeeDashboardAnalytics(
 
       const prev = abortRef.current.get(tf);
       prev?.abort();
-      clearEmployeeTipsClientCache(tf);
       const controller = new AbortController();
       abortRef.current.set(tf, controller);
 
@@ -239,9 +266,25 @@ export function useEmployeeDashboardAnalytics(
       const stillActive = () =>
         !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      let summarySettled = !revalidate && Boolean(cached && summaryPartialRef.current.has(tf));
-      let analyticsSettled = !revalidate && Boolean(cached && analyticsPartialRef.current.has(tf));
-      let analyticsDeferred = false;
+      let summarySettled = !revalidate && Boolean(cached);
+      let analyticsSettled = !revalidate && Boolean(cached);
+
+      const applyBundledAnalyticsFromSummary = (summaryData: EmployeeTipsResponse) => {
+        if (typeof summaryData.totalEarningsEur === "number") {
+          primeEmployeeAccountSnapshot({
+            totalEarningsEur: summaryData.totalEarningsEur,
+            availableBalanceEur: summaryData.availableBalanceEur ?? 0,
+            totalSupporters: summaryData.totalSupporters ?? 0,
+          });
+        }
+        if (summaryData.analyticsBundled !== true) return false;
+        analyticsPartialRef.current.set(tf, {
+          tips: summaryData.tips ?? [],
+          chartSeries: summaryData.chartSeries ?? [],
+          businessTimezone: summaryData.businessTimezone,
+        });
+        return true;
+      };
 
       try {
         if (!summarySettled) {
@@ -253,12 +296,18 @@ export function useEmployeeDashboardAnalytics(
           if (!stillActive()) return;
           summaryPartialRef.current.set(tf, summaryData);
           summarySettled = true;
+          if (applyBundledAnalyticsFromSummary(summaryData)) {
+            analyticsSettled = true;
+          }
           if (affectsUi && uiRequestSeqRef.current === seq) {
             setSummaryLoading(false);
             devSetHydrationPhase("metrics", "ready");
             devSetHydrationPhase("goals", "ready");
+            if (analyticsSettled) {
+              setAnalyticsLoading(false);
+              devSetHydrationPhase("charts", "ready");
+            }
             commitUiPayload(tf, seq, true);
-            // Summary completion marks dashboard as ready/interactive.
             setIsRevalidating(false);
           }
         }
@@ -266,40 +315,13 @@ export function useEmployeeDashboardAnalytics(
         if (!stillActive()) return;
 
         if (!analyticsSettled) {
-          if (affectsUi) {
-            analyticsDeferred = true;
-            const runAnalytics = async () => {
-              if (!stillActive() || analyticsSettled) return;
-              try {
-                const analyticsData = await getTipsByEmployee(tf, {
-                  scope: "analytics",
-                  signal: controller.signal,
-                  silent,
-                });
-                if (!stillActive()) return;
-                analyticsPartialRef.current.set(tf, analyticsData);
-                analyticsSettled = true;
-                setAnalyticsLoading(false);
-                devSetHydrationPhase("charts", "ready");
-                commitUiPayload(tf, seq, true);
-                const merged = mergeEmployeeTipsResponse(summaryPartialRef.current.get(tf), analyticsData);
-                if (merged) syncTipsFromResponse(merged);
-              } catch (e) {
-                if (isAbortError(e) || controller.signal.aborted) return;
-                if (stillActive()) {
-                  setAnalyticsLoading(false);
-                  devSetHydrationPhase("charts", "error");
-                  // Keep metrics; analytics can fail independently.
-                }
-              }
-            };
-
-            requestAnimationFrame(() => {
-              analyticsDeferTimerRef.current = window.setTimeout(() => {
-                analyticsDeferTimerRef.current = null;
-                void runAnalytics();
-              }, 0);
-            });
+          if (!advancedAnalyticsEnabledRef.current) {
+            analyticsSettled = true;
+            if (affectsUi && stillActive()) {
+              setAnalyticsLoading(false);
+              devSetHydrationPhase("charts", "ready");
+              commitUiPayload(tf, seq, true);
+            }
           } else {
             const analyticsData = await getTipsByEmployee(tf, {
               scope: "analytics",
@@ -309,19 +331,33 @@ export function useEmployeeDashboardAnalytics(
             if (!stillActive()) return;
             analyticsPartialRef.current.set(tf, analyticsData);
             analyticsSettled = true;
+            if (affectsUi && stillActive()) {
+              setAnalyticsLoading(false);
+              devSetHydrationPhase("charts", "ready");
+              commitUiPayload(tf, seq, true);
+              const merged = mergeEmployeeTipsResponse(
+                summaryPartialRef.current.get(tf),
+                analyticsData,
+              );
+              if (merged) syncTipsFromResponse(merged);
+            }
           }
         }
 
         if (stillActive()) {
           markDashboardLiveSettled(hasSettledLiveUiRef);
         }
-      } catch {
-        /* per-branch handlers */
+      } catch (e) {
+        if (isAbortError(e) || controller.signal.aborted) return;
+        if (affectsUi && stillActive() && !summarySettled) {
+          setError(toUserFriendlyMessage(e));
+          devSetHydrationPhase("metrics", "error");
+        }
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled && !analyticsDeferred) setAnalyticsLoading(false);
-          if (!analyticsDeferred) setIsRevalidating(false);
+          if (!analyticsSettled) setAnalyticsLoading(false);
+          setIsRevalidating(false);
         }
         if (abortRef.current.get(tf) === controller) {
           abortRef.current.delete(tf);
@@ -361,11 +397,16 @@ export function useEmployeeDashboardAnalytics(
 
   useEffect(() => {
     if (!enabled) return;
-    void loadForRef.current(analyticsTimeframe, { affectsUi: true });
+    const generation = ++mountGenerationRef.current;
+    const tf = analyticsTimeframe;
+    const timer = window.setTimeout(() => {
+      if (mountGenerationRef.current !== generation) return;
+      void loadForRef.current(tf, { affectsUi: true });
+    }, 0);
     return () => {
-      abortRef.current.get(analyticsTimeframe)?.abort();
-      abortRef.current.delete(analyticsTimeframe);
-      clearEmployeeTipsClientCache(analyticsTimeframe);
+      window.clearTimeout(timer);
+      abortRef.current.get(tf)?.abort();
+      abortRef.current.delete(tf);
     };
   }, [enabled, analyticsTimeframe]);
 
@@ -384,25 +425,30 @@ export function useEmployeeDashboardAnalytics(
       const summaryData = await getTipsByEmployee(tf, { scope: "summary", silent: true });
       if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
       summaryPartialRef.current.set(tf, summaryData);
+      if (summaryData.analyticsBundled === true) {
+        analyticsPartialRef.current.set(tf, {
+          tips: summaryData.tips ?? [],
+          chartSeries: summaryData.chartSeries ?? [],
+          businessTimezone: summaryData.businessTimezone,
+        });
+      }
       commitUiPayload(tf, seq, true);
-      setIsRevalidating(false);
-
-      requestAnimationFrame(() => {
-        void (async () => {
-          try {
-            const analyticsData = await getTipsByEmployee(tf, { scope: "analytics", silent: true });
-            if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
-            analyticsPartialRef.current.set(tf, analyticsData);
-            commitUiPayload(tf, seq, true);
-            const merged = mergeEmployeeTipsResponse(summaryData, analyticsData);
-            if (merged) syncTipsFromResponse(merged);
-          } catch (e) {
-            if (!isApiConnectivityError(e)) {
-              logClientError("useEmployeeDashboardAnalytics.refreshQuiet", e);
-            }
-          }
-        })();
-      });
+      const merged = mergeEmployeeTipsResponse(
+        summaryData,
+        analyticsPartialRef.current.get(tf),
+      );
+      if (merged) syncTipsFromResponse(merged);
+      if (
+        summaryData.analyticsBundled !== true &&
+        advancedAnalyticsEnabledRef.current
+      ) {
+        const analyticsData = await getTipsByEmployee(tf, { scope: "analytics", silent: true });
+        if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
+        analyticsPartialRef.current.set(tf, analyticsData);
+        commitUiPayload(tf, seq, true);
+        const mergedAfter = mergeEmployeeTipsResponse(summaryData, analyticsData);
+        if (mergedAfter) syncTipsFromResponse(mergedAfter);
+      }
     } catch (e) {
       if (!isApiConnectivityError(e)) {
         logClientError("useEmployeeDashboardAnalytics.refreshQuiet", e);

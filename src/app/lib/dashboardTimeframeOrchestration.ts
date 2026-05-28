@@ -7,7 +7,7 @@
 export type BusinessAnalyticsTimeframe = "week" | "month" | "year";
 
 /** Defer hero (month summary) refresh until the active timeframe pipeline settles. */
-export const BUSINESS_HERO_MONTH_DEFER_MS = 2_000;
+export const BUSINESS_HERO_MONTH_DEFER_MS = 4_000;
 
 export function abortTimeframeControllers(
   controllers: Map<BusinessAnalyticsTimeframe, AbortController>,

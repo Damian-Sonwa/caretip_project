@@ -26,6 +26,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:platform-analytics-demo": "tsx prisma/seedPlatformAnalyticsDemo.ts",
     "smoke:timezone": "tsx src/scripts/smokeTimezone.ts",
+    "verify:goal-timezone": "tsx src/scripts/verifyGoalTimezoneSync.ts",
+    "audit:landing-ai": "tsx src/scripts/auditLandingAi.ts",
     "db:backfill-slugs": "tsx prisma/backfill-slugs.ts",
     "admin:create": "tsx scripts/createAdmin.js",
     "admin:create:extra": "node scripts/runCreateAdminExtra.mjs",

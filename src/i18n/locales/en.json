@@ -2497,7 +2497,13 @@
       "openLogo": "Open logo",
       "openKycDocument": "Open KYC document",
       "editDetails": "Edit details",
-      "labelWebsite": "Website"
+      "labelWebsite": "Website",
+      "dtSubscriptionTier": "SaaS plan tier",
+      "subscriptionTierBasic": "Basic",
+      "subscriptionTierPremium": "Premium",
+      "subscriptionTierEnterprise": "Enterprise",
+      "saveSubscriptionTier": "Save plan tier",
+      "toastSubscriptionTierSaved": "Plan tier updated."
     },
     "fallbackAdminName": "Admin"
   }

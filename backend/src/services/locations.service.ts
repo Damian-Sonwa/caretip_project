@@ -1,5 +1,8 @@
+import { BusinessSubscriptionTier } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { BASIC_MAX_LOCATIONS, hasSubscriptionCapability } from "../config/subscriptionCapabilities.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
+import { invalidateBusinessStatsCache } from "./business.service.js";
 
 export async function listLocationsForBusinessUser(userId: string) {
   const business = await prisma.business.findUnique({ where: { userId } });
@@ -21,9 +24,19 @@ export async function createLocationForBusinessUser(
   if (!trimmed) {
     throw new Error("Location name is required");
   }
-  const business = await prisma.business.findUnique({ where: { userId } });
+  const business = await prisma.business.findUnique({
+    where: { userId },
+    select: { id: true, subscriptionTier: true },
+  });
   if (!business) {
     throw new Error("Business not found");
+  }
+  const tier = business.subscriptionTier ?? BusinessSubscriptionTier.premium;
+  if (!hasSubscriptionCapability(tier, "multiLocation")) {
+    const count = await prisma.location.count({ where: { businessId: business.id } });
+    if (count >= BASIC_MAX_LOCATIONS) {
+      throw new Error("Your plan supports one location. Upgrade to Premium for multi-location support.");
+    }
   }
   const desc = description?.trim();
   const loc = await prisma.location.create({
@@ -34,6 +47,7 @@ export async function createLocationForBusinessUser(
     },
   });
   emitBusinessDataChanged(business.id, "location_created");
+  invalidateBusinessStatsCache(business.id);
   return loc;
 }
 

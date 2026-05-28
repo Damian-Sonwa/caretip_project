@@ -8,6 +8,7 @@ import {
   isApiRequestError,
   EMAIL_NOT_VERIFIED_CODE,
   GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+  SUBSCRIPTION_REQUIRED_CODE,
 } from "./apiError";
 import { translateFriendlyMessageToDe } from "./friendlyMessageDe";
 
@@ -296,6 +297,12 @@ export function toUserFriendlyMessage(error: unknown, options?: ToUserFriendlyMe
 
   if (isApiRequestError(error) && error.code === EMAIL_NOT_VERIFIED_CODE) {
     return error.message;
+  }
+
+  if (isApiRequestError(error) && error.code === SUBSCRIPTION_REQUIRED_CODE) {
+    return localizeFriendlyMessageCopy(
+      error.message?.trim() || "This feature requires a Premium subscription.",
+    );
   }
 
   if (isApiRequestError(error) && error.code && ERROR_MAP[error.code]) {

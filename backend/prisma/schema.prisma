@@ -33,6 +33,12 @@ enum BusinessVerificationStatus {
   rejected
 }
 
+enum BusinessSubscriptionTier {
+  basic
+  premium
+  enterprise
+}
+
 enum PayoutStatus {
   pending
   processing
@@ -319,6 +325,10 @@ model Business {
    * KYC / verification document path under /uploads.
    */
   verificationDocumentPath String?                    @map("verification_document_path")
+  /**
+   * SaaS packaging tier for entitlement checks. Defaults to premium so existing venues keep full access until billing assigns a plan.
+   */
+  subscriptionTier         BusinessSubscriptionTier   @default(premium) @map("subscription_tier")
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   employees    Employee[]

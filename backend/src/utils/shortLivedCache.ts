@@ -25,6 +25,11 @@ export function getCachedOrLoad<T>(key: string, ttlMs: number, loader: () => Pro
   return promise;
 }
 
+/** Warm cache after a combined loader (e.g. meta+summary single SQL). */
+export function primeCachedValue<T>(key: string, ttlMs: number, value: T): void {
+  cache.set(key, { expiresAt: Date.now() + ttlMs, value });
+}
+
 export function invalidateCacheKey(key: string): void {
   cache.delete(key);
   inflight.delete(key);

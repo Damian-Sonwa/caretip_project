@@ -88,13 +88,22 @@ export function LandingOnboardingAssistant({
       setLoading(true);
       setError(null);
       try {
-        const { reply } = await postLandingAiChat({
+        const { reply, source, fallbackReason } = await postLandingAiChat({
           messages: nextMessages,
           promptId,
           locale: i18n.language,
           signal: controller.signal,
         });
         if (controller.signal.aborted) return;
+        if (import.meta.env.DEV) {
+          console.info("[Ask CareTip]", { source, fallbackReason: fallbackReason ?? "none" });
+        }
+        trackLandingAiEvent("question_asked", {
+          via: promptId ? "prompt" : "typed",
+          ...(promptId ? { promptId } : {}),
+          aiSource: source ?? "unknown",
+          ...(fallbackReason ? { fallbackReason } : {}),
+        });
         setMessages((prev) => [...prev, { id: nextId(), role: "assistant", content: reply }]);
       } catch (e) {
         if (controller.signal.aborted) return;
@@ -128,7 +137,6 @@ export function LandingOnboardingAssistant({
       };
       const history: LandingChatMessage[] = [...messages, userMsg];
       setMessages((prev) => [...prev, userMsg]);
-      trackLandingAiEvent("question_asked", { via: "prompt", promptId: id });
       void sendMessages(history, id);
     },
     [messages, sendMessages, t],
@@ -144,7 +152,6 @@ export function LandingOnboardingAssistant({
       const userMsg: UiMessage = { id: nextId(), role: "user", content: text };
       const history: LandingChatMessage[] = [...messages, userMsg];
       setMessages((prev) => [...prev, userMsg]);
-      trackLandingAiEvent("question_asked", { via: "typed" });
       void sendMessages(history);
     },
     [input, loading, messages, sendMessages],

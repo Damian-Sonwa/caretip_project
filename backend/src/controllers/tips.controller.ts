@@ -14,7 +14,14 @@ import {
 } from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
+import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
+import { isEmployeeTipsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
+import {
+  getSubscriptionTierForBusinessId,
+  subscriptionBypass,
+  subscriptionRequiredPayload,
+} from "../services/subscriptionEntitlement.service.js";
 
 function tipsErrorHttpStatus(err: unknown): number {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
@@ -66,6 +73,13 @@ export async function getByEmployee(req: Request, res: Response) {
       });
     }
 
+    if (!subscriptionBypass(req)) {
+      const tier = await getSubscriptionTierForBusinessId(employee.businessId);
+      if (!isEmployeeTipsScopeAllowedForTier(tier, scope)) {
+        return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+      }
+    }
+
     if (timeframe == null) {
       const [accountSummary, currentMonthTotal, goal] = await Promise.all([
         loadEmployeeAccountSummary(employee.id),
@@ -88,27 +102,35 @@ export async function getByEmployee(req: Request, res: Response) {
     }
 
     if (scope === "summary") {
-      const summary = await logDashboardTiming(
+      const { summary, accountSummary } = await logDashboardTiming(
         "employee.tips.summary",
         { employeeId: employee.id, timeframe, scope },
         () =>
-          loadEmployeeDashboardSummaryBundle({
-            employeeId: employee.id,
-            userId,
-            businessTimezone: employee.businessTimezone,
-            timeframe,
-            activeGoal: employee.activeGoal,
+          runSerializedByKey(`emp-stats-summary:${employee.id}:${timeframe}`, async () => {
+            const summaryResult = await loadEmployeeDashboardSummaryBundle({
+              employeeId: employee.id,
+              userId,
+              businessTimezone: employee.businessTimezone,
+              timeframe,
+              activeGoal: employee.activeGoal,
+            });
+            const accountResult = await loadEmployeeAccountSummary(employee.id);
+            return { summary: summaryResult, accountSummary: accountResult };
           }),
       );
       return res.json({
-        tips: [],
+        tips: summary.tips,
         monthlyGoal: employee.monthlyGoal,
         currentMonthTotal: summary.currentMonthTotal,
         businessTimezone: employee.businessTimezone,
         periodAmountEur: summary.periodAmountEur,
         periodTipCount: summary.periodTipCount,
-        chartSeries: [],
+        chartSeries: summary.chartSeries,
         goal: summary.goal,
+        analyticsBundled: true,
+        totalEarningsEur: accountSummary.totalEarningsEur,
+        availableBalanceEur: accountSummary.availableBalanceEur,
+        totalSupporters: accountSummary.totalSupporters,
       });
     }
 
@@ -117,11 +139,13 @@ export async function getByEmployee(req: Request, res: Response) {
         "employee.tips.analytics",
         { employeeId: employee.id, timeframe, scope },
         () =>
-          loadEmployeePeriodAnalytics({
-            employeeId: employee.id,
-            businessTimezone: employee.businessTimezone,
-            timeframe,
-          }),
+          runSerializedByKey(`emp-stats-summary:${employee.id}:${timeframe}`, () =>
+            loadEmployeePeriodAnalytics({
+              employeeId: employee.id,
+              businessTimezone: employee.businessTimezone,
+              timeframe,
+            }),
+          ),
       );
       return res.json({
         tips: analytics.tips,
@@ -132,15 +156,17 @@ export async function getByEmployee(req: Request, res: Response) {
       });
     }
 
-    const [accountSummary, currentMonthTotal, goal, dash] = await Promise.all([
-      loadEmployeeAccountSummary(employee.id),
-      loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
-      goalService.getMyGoalWithProgress(userId).catch(() => null),
+    const dash = await runSerializedByKey(`emp-stats-full:${employee.id}:${timeframe}`, () =>
       loadEmployeeTipsDashboardForTimeframe({
         employeeId: employee.id,
         businessTimezone: employee.businessTimezone,
         timeframe,
       }),
+    );
+    const [accountSummary, currentMonthTotal, goal] = await Promise.all([
+      loadEmployeeAccountSummary(employee.id),
+      loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
+      goalService.getMyGoalWithProgress(userId).catch(() => null),
     ]);
 
     return res.json({

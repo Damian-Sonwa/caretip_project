@@ -9,6 +9,11 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
+import {
+  hasSubscriptionCapability,
+  type BusinessSubscriptionTier,
+  type SubscriptionCapability,
+} from "../../lib/subscriptionCapabilities";
 
 export const BUSINESS_DASHBOARD_HOME_HREF = "/dashboard" as const;
 
@@ -28,6 +33,22 @@ export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
   { labelKey: "dashboardNav.business.notifications", href: "/dashboard/notifications", icon: Bell },
   { labelKey: "dashboardNav.business.settings", href: "/dashboard/settings", icon: Settings },
 ] as const;
+
+/** Premium-only nav targets (Basic keeps locations for single-site management). */
+const BUSINESS_NAV_CAPABILITY_BY_HREF: Partial<Record<string, SubscriptionCapability>> = {
+  "/dashboard/tables": "tableQr",
+};
+
+export function filterBusinessDashboardNavItems(
+  items: readonly BusinessDashboardNavItem[],
+  tier: BusinessSubscriptionTier | undefined | null,
+): BusinessDashboardNavItem[] {
+  return items.filter((item) => {
+    const cap = BUSINESS_NAV_CAPABILITY_BY_HREF[item.href];
+    if (!cap) return true;
+    return hasSubscriptionCapability(tier, cap);
+  });
+}
 
 const BUSINESS_SETTINGS_LEGACY_PATHS = ["/dashboard/profile", "/dashboard/profile-settings"] as const;
 

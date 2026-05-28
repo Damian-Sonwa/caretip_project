@@ -43,7 +43,11 @@ function hasMetricValues(data: BusinessDashboardStats | null | undefined): boole
   return data.totalTips != null || data.tipCount != null || data.employeeCount != null;
 }
 
-export function useBusinessDashboardStats(enabled: boolean, sessionValidated: boolean) {
+export function useBusinessDashboardStats(
+  enabled: boolean,
+  sessionValidated: boolean,
+  advancedAnalyticsEnabled = true,
+) {
   const [analyticsTimeframe, setAnalyticsTimeframeState] = useState<AnalyticsTimeframe>("month");
   const [heroStats, setHeroStats] = useState<BusinessDashboardStats | null>(null);
   const [stats, setStats] = useState<BusinessDashboardStats | null>(null);
@@ -73,6 +77,14 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
   const heroDeferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const heroAbortRef = useRef<AbortController | null>(null);
   const analyticsDeferTimerRef = useRef<number | null>(null);
+  const advancedAnalyticsEnabledRef = useRef(advancedAnalyticsEnabled);
+  advancedAnalyticsEnabledRef.current = advancedAnalyticsEnabled;
+  const quietRefreshInFlightRef = useRef<Promise<void> | null>(null);
+  const statsLoadInflightByTfRef = useRef(new Map<AnalyticsTimeframe, Promise<void>>());
+  const refreshQuietDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  /** Bumps on effect cleanup so Strict Mode double-mount only runs the latest load. */
+  const statsMountGenerationRef = useRef(0);
+  const scheduleInactivePrefetchRef = useRef<(activeTf: AnalyticsTimeframe) => void>(() => {});
 
   const persistSwr = useCallback((tf: AnalyticsTimeframe) => {
     const summary = summaryPartialRef.current.get(tf);
@@ -159,9 +171,6 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
   const abortInactiveTimeframes = useCallback((activeTf: AnalyticsTimeframe) => {
     abortTimeframeControllers(abortByTfRef.current, activeTf);
-    for (const tf of ["week", "month", "year"] as const) {
-      if (tf !== activeTf) clearBusinessStatsClientCache(tf);
-    }
   }, []);
 
   const loadStatsFor = useCallback(
@@ -170,6 +179,10 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean },
     ): Promise<void> => {
       if (!sessionValidated || !enabled) return;
+
+      const revalidate = opts?.soft === true;
+      const existingInflight = statsLoadInflightByTfRef.current.get(tf);
+      if (existingInflight && !revalidate) return existingInflight;
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       if (affectsUi) {
@@ -184,10 +197,28 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
           ? hydrateFromSwr(tf)
           : null;
 
+      const summaryPartial = summaryPartialRef.current.get(tf);
+      const summaryFromMemory =
+        Boolean(summaryPartial) &&
+        (!revalidate || hasMetricValues(summaryPartial as BusinessDashboardStats));
+      let summarySettled = summaryFromMemory || Boolean(cached && summaryPartialRef.current.has(tf));
+      const analyticsInMemory = Boolean(analyticsPartialRef.current.get(tf));
+      let analyticsSettled =
+        analyticsInMemory &&
+        (!revalidate || Boolean(cached && analyticsPartialRef.current.has(tf)));
+
       if (affectsUi) {
         setIsRevalidating(true);
         setStatsLoadFailed(null);
-        if (cached) {
+        if (summaryFromMemory && !opts?.soft) {
+          commitUiStats(tf, seq, true);
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
+          if (!analyticsSettled) {
+            setAnalyticsLoading(true);
+            devSetHydrationPhase("charts", "loading");
+          }
+        } else if (cached) {
           applyCachedToUi(tf, cached);
           devSetHydrationPhase("metrics", "ready");
           devSetHydrationPhase("charts", "loading");
@@ -211,19 +242,13 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
       const prev = abortByTfRef.current.get(tf);
       prev?.abort();
-      clearBusinessStatsClientCache(tf);
       const controller = new AbortController();
       abortByTfRef.current.set(tf, controller);
 
       const silent = opts?.silent === true || Boolean(cached);
-      const revalidate = opts?.soft === true;
       const stillActive = () =>
         !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      let summarySettled =
-        !revalidate && Boolean(cached && summaryPartialRef.current.has(tf));
-      let analyticsSettled =
-        !revalidate && Boolean(cached && analyticsPartialRef.current.has(tf));
       let analyticsDeferred = false;
 
       const handlePendingVerification = (msg: string) => {
@@ -239,35 +264,39 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
         return true;
       };
 
-      try {
-        if (summarySettled && analyticsSettled) {
-          if (affectsUi && stillActive()) {
-            setSummaryLoading(false);
-            setAnalyticsLoading(false);
-            devSetHydrationPhase("metrics", "ready");
-            devSetHydrationPhase("charts", "ready");
-            devSetHydrationPhase("goals", "ready");
-            commitUiStats(tf, seq, true);
-            markDashboardLiveSettled(hasSettledLiveUiRef);
-            scheduleDeferredHeroMonth();
+      const run = (async () => {
+        try {
+          if (summarySettled && analyticsSettled) {
+            if (affectsUi && stillActive()) {
+              setSummaryLoading(false);
+              setAnalyticsLoading(false);
+              devSetHydrationPhase("metrics", "ready");
+              devSetHydrationPhase("charts", "ready");
+              devSetHydrationPhase("goals", "ready");
+              commitUiStats(tf, seq, true);
+              markDashboardLiveSettled(hasSettledLiveUiRef);
+              scheduleDeferredHeroMonth();
+            }
+            return;
           }
-          return;
-        }
 
         if (!summarySettled) {
-          const summaryData = await getBusinessStats(tf, {
-            scope: "summary",
-            silent,
-            signal: controller.signal,
-          });
-          if (!stillActive()) return;
-          summaryPartialRef.current.set(tf, summaryData);
-          summarySettled = true;
+          if (!summaryFromMemory) {
+            const summaryData = await getBusinessStats(tf, {
+              scope: "summary",
+              silent,
+              signal: controller.signal,
+              revalidate,
+            });
+            if (!stillActive()) return;
+            summaryPartialRef.current.set(tf, summaryData);
+            summarySettled = true;
+          }
           if (affectsUi) {
             setSummaryLoading(false);
             devSetHydrationPhase("metrics", "ready");
+            if (!analyticsSettled) setAnalyticsLoading(true);
             commitUiStats(tf, seq, true);
-            // Summary completion marks dashboard as ready/interactive.
             setIsRevalidating(false);
           }
           applyHeroFromMonth(tf);
@@ -277,7 +306,15 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
         if (!stillActive()) return;
 
         if (!analyticsSettled) {
-          if (affectsUi) {
+          if (!advancedAnalyticsEnabledRef.current) {
+            analyticsSettled = true;
+            if (affectsUi && stillActive()) {
+              setAnalyticsLoading(false);
+              devSetHydrationPhase("charts", "ready");
+              devSetHydrationPhase("goals", "ready");
+              commitUiStats(tf, seq, true);
+            }
+          } else if (affectsUi) {
             analyticsDeferred = true;
             const runAnalytics = async () => {
               if (!stillActive() || analyticsSettled) return;
@@ -286,6 +323,7 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
                   scope: "analytics",
                   silent,
                   signal: controller.signal,
+                  revalidate,
                 });
                 if (!stillActive()) return;
                 analyticsPartialRef.current.set(tf, analyticsData);
@@ -320,6 +358,7 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
               scope: "analytics",
               silent,
               signal: controller.signal,
+              revalidate,
             });
             if (!stillActive()) return;
             analyticsPartialRef.current.set(tf, analyticsData);
@@ -330,7 +369,10 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
         if (stillActive()) {
           markDashboardLiveSettled(hasSettledLiveUiRef);
-          if (affectsUi) scheduleDeferredHeroMonth();
+          if (affectsUi) {
+            scheduleDeferredHeroMonth();
+            if (tf === tfRef.current) scheduleInactivePrefetchRef.current(tf);
+          }
         }
       } catch (err) {
         if (isAbortError(err) || controller.signal.aborted) return;
@@ -359,6 +401,15 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
           abortByTfRef.current.delete(tf);
         }
       }
+      })();
+
+      statsLoadInflightByTfRef.current.set(tf, run);
+      run.finally(() => {
+        if (statsLoadInflightByTfRef.current.get(tf) === run) {
+          statsLoadInflightByTfRef.current.delete(tf);
+        }
+      });
+      return run;
     },
     [
       enabled,
@@ -389,6 +440,19 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       hasSettledLiveUi: hasSettledLiveUiRef.current,
       soft: true,
     });
+    const monthSummary = summaryPartialRef.current.get("month");
+    if (monthSummary && hasMetricValues(monthSummary as BusinessDashboardStats)) {
+      const merged = mergeBusinessDashboardStats(
+        monthSummary,
+        analyticsPartialRef.current.get("month"),
+      );
+      if (merged) {
+        setHeroStats(merged);
+        devSetHydrationPhase("hero", "ready");
+        return;
+      }
+    }
+
     const cached = useCache
       ? businessSwrStore.get(swrKey("month"), DASHBOARD_SWR_METRICS_TTL_MS)
       : null;
@@ -428,6 +492,35 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
   loadHeroMonthSummaryRef.current = loadHeroMonthSummary;
 
+  const prefetchQueueRef = useRef<number | null>(null);
+  const scheduleInactivePrefetch = useCallback(
+    (activeTf: AnalyticsTimeframe) => {
+      if (prefetchQueueRef.current != null) {
+        window.clearTimeout(prefetchQueueRef.current);
+      }
+      const others: AnalyticsTimeframe[] = ["week", "month", "year"].filter(
+        (t): t is AnalyticsTimeframe => t !== activeTf,
+      );
+      let idx = 0;
+      const step = () => {
+        if (idx >= others.length) return;
+        const nextTf = others[idx++]!;
+        if (nextTf === tfRef.current) {
+          step();
+          return;
+        }
+        void loadStatsFor(nextTf, { affectsUi: false, silent: true }).finally(step);
+      };
+      prefetchQueueRef.current = window.setTimeout(() => {
+        prefetchQueueRef.current = null;
+        if (!sessionValidated || !enabled) return;
+        step();
+      }, 1200);
+    },
+    [enabled, sessionValidated, loadStatsFor],
+  );
+  scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
+
   const setAnalyticsTimeframe = useCallback(
     (tf: AnalyticsTimeframe) => {
       if (tf === tfRef.current) return;
@@ -436,8 +529,25 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
       cancelDeferredAnalytics();
       uiRequestSeqRef.current += 1;
       setAnalyticsTimeframeState(tf);
+
+      const partial = summaryPartialRef.current.get(tf);
+      if (partial && hasMetricValues(partial as BusinessDashboardStats)) {
+        const seq = uiRequestSeqRef.current;
+        setSummaryLoading(false);
+        devSetHydrationPhase("metrics", "ready");
+        const hasAnalytics = Boolean(analyticsPartialRef.current.get(tf));
+        if (!advancedAnalyticsEnabledRef.current || hasAnalytics) {
+          setAnalyticsLoading(false);
+          devSetHydrationPhase("charts", "ready");
+          devSetHydrationPhase("goals", "ready");
+        } else {
+          setAnalyticsLoading(true);
+          devSetHydrationPhase("charts", "loading");
+        }
+        commitUiStats(tf, seq, false);
+      }
     },
-    [abortInactiveTimeframes, cancelDeferredHeroMonth, cancelDeferredAnalytics],
+    [abortInactiveTimeframes, cancelDeferredHeroMonth, cancelDeferredAnalytics, commitUiStats],
   );
 
   useEffect(() => {
@@ -470,11 +580,14 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
   useEffect(() => {
     if (!sessionValidated || !enabled) return;
-    void loadStatsForRef.current(analyticsTimeframe, { affectsUi: true });
+    const generation = ++statsMountGenerationRef.current;
+    const handle = window.setTimeout(() => {
+      if (statsMountGenerationRef.current !== generation) return;
+      void loadStatsForRef.current(analyticsTimeframe, { affectsUi: true });
+    }, 0);
     return () => {
-      abortByTfRef.current.get(analyticsTimeframe)?.abort();
-      abortByTfRef.current.delete(analyticsTimeframe);
-      clearBusinessStatsClientCache(analyticsTimeframe);
+      window.clearTimeout(handle);
+      statsMountGenerationRef.current += 1;
     };
   }, [enabled, sessionValidated, analyticsTimeframe, refetchTick]);
 
@@ -485,46 +598,28 @@ export function useBusinessDashboardStats(enabled: boolean, sessionValidated: bo
 
   useDashboardTabRefocus(refetchLive, enabled && sessionValidated);
 
-  const refreshStatsQuiet = useCallback(async () => {
+  const refreshStatsQuiet = useCallback(() => {
     if (!sessionValidated || !enabled) return;
-    const tf = tfRef.current;
-    const seq = ++uiRequestSeqRef.current;
-    setIsRevalidating(true);
-    clearBusinessStatsClientCache(tf);
-    try {
-      const summaryData = await getBusinessStats(tf, { scope: "summary", silent: true });
-      if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
-      summaryPartialRef.current.set(tf, summaryData);
-      commitUiStats(tf, seq, true);
-      applyHeroFromMonth(tf);
-      setIsRevalidating(false);
-
-      requestAnimationFrame(() => {
-        void (async () => {
-          try {
-            const analyticsData = await getBusinessStats(tf, { scope: "analytics", silent: true });
-            if (uiRequestSeqRef.current !== seq || tf !== tfRef.current) return;
-            analyticsPartialRef.current.set(tf, analyticsData);
-            commitUiStats(tf, seq, true);
-            applyHeroFromMonth(tf);
-            if (tf !== "month") scheduleDeferredHeroMonth();
-          } catch {
-            /* keep last live stats */
-          }
-        })();
-      });
-    } catch {
-      /* keep last live stats */
-    } finally {
-      if (uiRequestSeqRef.current === seq) setIsRevalidating(false);
+    if (refreshQuietDebounceRef.current != null) {
+      clearTimeout(refreshQuietDebounceRef.current);
     }
-  }, [
-    enabled,
-    sessionValidated,
-    commitUiStats,
-    applyHeroFromMonth,
-    scheduleDeferredHeroMonth,
-  ]);
+    refreshQuietDebounceRef.current = setTimeout(() => {
+      refreshQuietDebounceRef.current = null;
+      if (!sessionValidated || !enabled) return;
+      if (quietRefreshInFlightRef.current) return;
+
+      clearBusinessStatsClientCache(tfRef.current);
+      const run = loadStatsFor(tfRef.current, {
+        affectsUi: true,
+        soft: true,
+        silent: true,
+      });
+      quietRefreshInFlightRef.current = run;
+      void run.finally(() => {
+        if (quietRefreshInFlightRef.current === run) quietRefreshInFlightRef.current = null;
+      });
+    }, 600);
+  }, [enabled, sessionValidated, loadStatsFor]);
 
   const applyLiveTip = useCallback(
     (p: LiveBusinessTipPayload) => {

@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { DateTime } from "luxon";
 import { prisma } from "../prisma.js";
+import { runSerializedByKey } from "./serializedByKey.js";
 import { businessDayKey, sanitizeIanaTimezone } from "./businessTime.js";
 
 function mondayOfWeekContaining(localDay: DateTime): DateTime {
@@ -338,6 +339,117 @@ export type BusinessDashboardSqlSummary = {
   todayCount: number;
 };
 
+export type BusinessDashboardMetaSummaryRow = {
+  id: string;
+  name: string;
+  slug: string | null;
+  verification_status: string;
+  timezone: string | null;
+  roster_total: number;
+  tipping_ready: number;
+  missing_qr: number;
+  period_amount: number;
+  period_count: number;
+  last60_amount: number;
+  last60_count: number;
+  today_amount: number;
+  today_count: number;
+};
+
+/**
+ * Business row + roster pulse + period summary in one round trip (summary scope).
+ */
+export async function queryBusinessDashboardMetaAndSummaryMetrics(opts: {
+  businessId: string;
+  timeframe: BusinessDashboardTimeframe;
+  rangeStart: Date;
+  rangeEnd: Date;
+  scanStart: Date;
+  scanEnd: Date;
+  sixtyAgo: Date;
+  todayStart: Date;
+  todayEnd: Date;
+}): Promise<BusinessDashboardMetaSummaryRow> {
+  const shouldLog =
+    process.env.NODE_ENV !== "production" || process.env.DASHBOARD_TIMING === "1";
+  const t0 = performance.now();
+  const [row] = await prisma.$queryRaw<BusinessDashboardMetaSummaryRow[]>(Prisma.sql`
+    WITH scoped AS (
+      SELECT amount, created_at
+      FROM tips
+      WHERE business_id = ${opts.businessId}
+        AND status = 'success'
+        AND created_at >= ${opts.scanStart}
+        AND created_at <= ${opts.scanEnd}
+    ),
+    roster AS (
+      SELECT
+        COUNT(e.id)::int AS roster_total,
+        COUNT(e.id) FILTER (
+          WHERE e.is_active = true
+            AND e.activation_status = 'active'
+            AND u.email_verified = true
+        )::int AS tipping_ready,
+        COUNT(e.id) FILTER (
+          WHERE e.slug IS NULL OR e.slug = ''
+        )::int AS missing_qr
+      FROM employees e
+      LEFT JOIN "User" u ON u.id = e.user_id
+      WHERE e.business_id = ${opts.businessId}
+    )
+    SELECT
+      b.id,
+      b.name,
+      b.slug,
+      b.verification_status,
+      b.timezone,
+      r.roster_total,
+      r.tipping_ready,
+      r.missing_qr,
+      COALESCE(SUM(s.amount) FILTER (
+        WHERE s.created_at >= ${opts.rangeStart} AND s.created_at <= ${opts.rangeEnd}
+      ), 0)::float AS period_amount,
+      COUNT(*) FILTER (
+        WHERE s.created_at >= ${opts.rangeStart} AND s.created_at <= ${opts.rangeEnd}
+      )::int AS period_count,
+      COALESCE(SUM(s.amount) FILTER (WHERE s.created_at >= ${opts.sixtyAgo}), 0)::float AS last60_amount,
+      COUNT(*) FILTER (WHERE s.created_at >= ${opts.sixtyAgo})::int AS last60_count,
+      COALESCE(SUM(s.amount) FILTER (
+        WHERE s.created_at >= ${opts.todayStart} AND s.created_at <= ${opts.todayEnd}
+      ), 0)::float AS today_amount,
+      COUNT(*) FILTER (
+        WHERE s.created_at >= ${opts.todayStart} AND s.created_at <= ${opts.todayEnd}
+      )::int AS today_count
+    FROM businesses b
+    CROSS JOIN roster r
+    LEFT JOIN scoped s ON true
+    WHERE b.id = ${opts.businessId}
+    GROUP BY
+      b.id,
+      b.name,
+      b.slug,
+      b.verification_status,
+      b.timezone,
+      r.roster_total,
+      r.tipping_ready,
+      r.missing_qr
+  `);
+
+  if (!row) {
+    throw new Error("Business not found");
+  }
+
+  const tSql = Math.round(performance.now() - t0);
+  if (shouldLog) {
+    console.info(
+      `[dashboard.timing] business.myStats.${opts.timeframe}.metaSummarySql ${tSql}ms`,
+      { businessId: opts.businessId },
+    );
+  }
+
+  return row;
+}
+
 export type BusinessDashboardSqlBundle = {
   summary: BusinessDashboardSqlSummary;
   tipsByEmployee: Map<string, { total: number; count: number }>;
@@ -345,9 +457,98 @@ export type BusinessDashboardSqlBundle = {
   monthTotals: number[] | null;
 };
 
+/** Per-employee tip totals for a business period (simple GROUP BY — pool-safe). */
+async function queryBusinessTipsByEmployee(opts: {
+  businessId: string;
+  startUtc: Date;
+  endUtc: Date;
+}): Promise<Map<string, { total: number; count: number }>> {
+  const rows = await prisma.$queryRaw<
+    Array<{ employee_id: string; total: number; count: number }>
+  >(Prisma.sql`
+    SELECT
+      employee_id,
+      COALESCE(SUM(amount), 0)::float AS total,
+      COUNT(*)::int AS count
+    FROM tips
+    WHERE business_id = ${opts.businessId}
+      AND status = 'success'
+      AND created_at >= ${opts.startUtc}
+      AND created_at <= ${opts.endUtc}
+    GROUP BY employee_id
+    ORDER BY employee_id ASC
+  `);
+
+  const m = new Map<string, { total: number; count: number }>();
+  for (const r of rows) {
+    m.set(String(r.employee_id), {
+      total: Number(r.total ?? 0),
+      count: Number(r.count ?? 0),
+    });
+  }
+  return m;
+}
+
+export type EmployeeDashboardSqlSummary = {
+  periodAmount: number;
+  periodCount: number;
+  monthAmount: number;
+};
+
+/** Period + current-month totals for employee metric cards (single tips scan). */
+export async function queryEmployeeDashboardSummaryMetrics(opts: {
+  employeeId: string;
+  periodStart: Date;
+  periodEnd: Date;
+  monthStart: Date;
+  monthEnd: Date;
+  scanStart: Date;
+  scanEnd: Date;
+}): Promise<EmployeeDashboardSqlSummary> {
+  const shouldLog =
+    process.env.NODE_ENV !== "production" || process.env.DASHBOARD_TIMING === "1";
+  const t0 = performance.now();
+  const [row] = await prisma.$queryRaw<
+    Array<{
+      period_amount: number;
+      period_count: number;
+      month_amount: number;
+    }>
+  >(Prisma.sql`
+    SELECT
+      COALESCE(SUM(amount) FILTER (
+        WHERE created_at >= ${opts.periodStart} AND created_at <= ${opts.periodEnd}
+      ), 0)::float AS period_amount,
+      (COUNT(*) FILTER (
+        WHERE created_at >= ${opts.periodStart} AND created_at <= ${opts.periodEnd}
+      ))::int AS period_count,
+      COALESCE(SUM(amount) FILTER (
+        WHERE created_at >= ${opts.monthStart} AND created_at <= ${opts.monthEnd}
+      ), 0)::float AS month_amount
+    FROM tips
+    WHERE employee_id = ${opts.employeeId}
+      AND status = 'success'
+      AND created_at >= ${opts.scanStart}
+      AND created_at <= ${opts.scanEnd}
+  `);
+
+  const tSql = Math.round(performance.now() - t0);
+  if (shouldLog) {
+    console.info(`[dashboard.timing] employee.summaryMetrics ${tSql}ms`, {
+      employeeId: opts.employeeId,
+    });
+  }
+
+  return {
+    periodAmount: Number(row?.period_amount ?? 0),
+    periodCount: Number(row?.period_count ?? 0),
+    monthAmount: Number(row?.month_amount ?? 0),
+  };
+}
+
 /**
  * One tips-table scan (CTE) for summary hero metrics + analytics chart/employee aggregates.
- * Mirrors employee `loadEmployeeDashboardSummaryBundle` / `queryEmployeeAnalyticsBundle`.
+ * Mirrors employee `loadEmployeeSqlBundleSlice` / `queryEmployeeDashboardSummaryMetrics`.
  */
 export async function queryBusinessDashboardSqlBundle(opts: {
   businessId: string;
@@ -365,18 +566,76 @@ export async function queryBusinessDashboardSqlBundle(opts: {
     process.env.NODE_ENV !== "production" || process.env.DASHBOARD_TIMING === "1";
   const t0 = performance.now();
   const tz = sanitizeIanaTimezone(opts.timezone);
-  const includeTimeRange = opts.timeframe !== "all";
-  const periodFilter = includeTimeRange
-    ? Prisma.sql`AND created_at >= ${opts.rangeStart} AND created_at <= ${opts.rangeEnd}`
-    : Prisma.empty;
+  const periodStart = opts.timeframe === "all" ? opts.scanStart : opts.rangeStart;
+  const periodEnd = opts.timeframe === "all" ? opts.scanEnd : opts.rangeEnd;
 
-  const includeDaily = opts.timeframe === "week" || opts.timeframe === "month";
-  const includeMonth = opts.timeframe === "year";
+  const summary = await queryBusinessDashboardSummaryMetrics({
+    businessId: opts.businessId,
+    timeframe: opts.timeframe,
+    rangeStart: opts.rangeStart,
+    rangeEnd: opts.rangeEnd,
+    scanStart: opts.scanStart,
+    scanEnd: opts.scanEnd,
+    sixtyAgo: opts.sixtyAgo,
+    todayStart: opts.todayStart,
+    todayEnd: opts.todayEnd,
+  });
 
-  type TipsRow = { employeeId: string; total: number; count: number };
-  type DailyRow = { d: string; total: number };
-  type MonthRow = { m: number; total: number };
+  const tipsByEmployee = await queryBusinessTipsByEmployee({
+    businessId: opts.businessId,
+    startUtc: periodStart,
+    endUtc: periodEnd,
+  });
 
+  let dailyByYmd = new Map<string, number>();
+  if (opts.timeframe === "week" || opts.timeframe === "month") {
+    dailyByYmd = await queryDailyTipBuckets({
+      businessId: opts.businessId,
+      startUtc: periodStart,
+      endUtc: periodEnd,
+      timezone: tz,
+    });
+  }
+
+  let monthTotals: number[] | null = null;
+  if (opts.timeframe === "year") {
+    monthTotals = await queryMonthlyTipTotalsForRange({
+      businessId: opts.businessId,
+      startUtc: periodStart,
+      endUtc: periodEnd,
+      timezone: tz,
+    });
+  }
+
+  const tSql = Math.round(performance.now() - t0);
+  if (shouldLog) {
+    console.info(
+      `[dashboard.timing] business.myStats.${opts.timeframe}.sqlBundle ${tSql}ms`,
+      { businessId: opts.businessId },
+    );
+  }
+
+  return { summary, tipsByEmployee, dailyByYmd, monthTotals };
+}
+
+/**
+ * Hero/summary cards only — same period + pulse totals as the full bundle, without
+ * per-employee or chart JSON aggregates (cheaper on a single-connection pool).
+ */
+export async function queryBusinessDashboardSummaryMetrics(opts: {
+  businessId: string;
+  timeframe: BusinessDashboardTimeframe;
+  rangeStart: Date;
+  rangeEnd: Date;
+  scanStart: Date;
+  scanEnd: Date;
+  sixtyAgo: Date;
+  todayStart: Date;
+  todayEnd: Date;
+}): Promise<BusinessDashboardSqlSummary> {
+  const shouldLog =
+    process.env.NODE_ENV !== "production" || process.env.DASHBOARD_TIMING === "1";
+  const t0 = performance.now();
   const [row] = await prisma.$queryRaw<
     Array<{
       period_amount: number;
@@ -385,13 +644,10 @@ export async function queryBusinessDashboardSqlBundle(opts: {
       last60_count: number;
       today_amount: number;
       today_count: number;
-      tips_json: unknown;
-      daily_json: unknown;
-      month_json: unknown;
     }>
   >(Prisma.sql`
-    WITH scoped AS MATERIALIZED (
-      SELECT employee_id, amount, created_at
+    WITH scoped AS (
+      SELECT amount, created_at
       FROM tips
       WHERE business_id = ${opts.businessId}
         AND status = 'success'
@@ -412,82 +668,19 @@ export async function queryBusinessDashboardSqlBundle(opts: {
       ), 0)::float AS today_amount,
       COUNT(*) FILTER (
         WHERE created_at >= ${opts.todayStart} AND created_at <= ${opts.todayEnd}
-      )::int AS today_count,
-      (
-        SELECT COALESCE(
-          json_agg(
-            json_build_object(
-              'employeeId', employee_id,
-              'total', total_amount,
-              'count', total_count
-            )
-          ),
-          '[]'::json
-        )
-        FROM (
-          SELECT
-            employee_id,
-            COALESCE(SUM(amount), 0)::float AS total_amount,
-            COUNT(*)::int AS total_count
-          FROM scoped
-          WHERE true
-            ${periodFilter}
-          GROUP BY employee_id
-          ORDER BY employee_id ASC
-        ) t
-      ) AS tips_json,
-      ${
-        includeDaily
-          ? Prisma.sql`(
-              SELECT COALESCE(
-                json_agg(json_build_object('d', d, 'total', total_amount)),
-                '[]'::json
-              )
-              FROM (
-                SELECT
-                  to_char(date_trunc('day', created_at AT TIME ZONE ${tz}), 'YYYY-MM-DD') AS d,
-                  COALESCE(SUM(amount), 0)::float AS total_amount
-                FROM scoped
-                WHERE true
-                  ${periodFilter}
-                GROUP BY 1
-                ORDER BY 1 ASC
-              ) x
-            )`
-          : Prisma.sql`'[]'::json`
-      } AS daily_json,
-      ${
-        includeMonth
-          ? Prisma.sql`(
-              SELECT COALESCE(
-                json_agg(json_build_object('m', m, 'total', total_amount)),
-                '[]'::json
-              )
-              FROM (
-                SELECT
-                  EXTRACT(MONTH FROM (created_at AT TIME ZONE ${tz}))::int AS m,
-                  COALESCE(SUM(amount), 0)::float AS total_amount
-                FROM scoped
-                WHERE true
-                  ${periodFilter}
-                GROUP BY 1
-                ORDER BY 1 ASC
-              ) y
-            )`
-          : Prisma.sql`'[]'::json`
-      } AS month_json
+      )::int AS today_count
     FROM scoped
   `);
 
   const tSql = Math.round(performance.now() - t0);
   if (shouldLog) {
     console.info(
-      `[dashboard.timing] business.myStats.${opts.timeframe}.sqlBundle ${tSql}ms`,
+      `[dashboard.timing] business.myStats.${opts.timeframe}.summarySql ${tSql}ms`,
       { businessId: opts.businessId },
     );
   }
 
-  const summary: BusinessDashboardSqlSummary = {
+  return {
     periodAmount: Number(row?.period_amount ?? 0),
     periodCount: Number(row?.period_count ?? 0),
     last60Amount: Number(row?.last60_amount ?? 0),
@@ -495,34 +688,6 @@ export async function queryBusinessDashboardSqlBundle(opts: {
     todayAmount: Number(row?.today_amount ?? 0),
     todayCount: Number(row?.today_count ?? 0),
   };
-
-  const tipsArr = parseJsonArray<TipsRow>(row?.tips_json);
-  const tipsByEmployee = new Map<string, { total: number; count: number }>();
-  for (const r of tipsArr) {
-    tipsByEmployee.set(String(r.employeeId), {
-      total: Number(r.total ?? 0),
-      count: Number(r.count ?? 0),
-    });
-  }
-
-  const dailyArr = parseJsonArray<DailyRow>(row?.daily_json);
-  const dailyByYmd = new Map<string, number>();
-  for (const r of dailyArr) {
-    const key = String(r.d).slice(0, 10);
-    if (key) dailyByYmd.set(key, Number(r.total ?? 0));
-  }
-
-  let monthTotals: number[] | null = null;
-  if (includeMonth) {
-    monthTotals = new Array(12).fill(0);
-    const monthArr = parseJsonArray<MonthRow>(row?.month_json);
-    for (const r of monthArr) {
-      const idx = Number(r.m) - 1;
-      if (idx >= 0 && idx < 12) monthTotals[idx] = Number(r.total ?? 0);
-    }
-  }
-
-  return { summary, tipsByEmployee, dailyByYmd, monthTotals };
 }
 
 /** @deprecated Use queryBusinessDashboardSqlBundle — kept for callers that only need chart slices. */

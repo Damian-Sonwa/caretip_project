@@ -354,10 +354,14 @@ export async function createTipCheckoutSession(
 }
 
 export async function handlePaymentSuccess(paymentIntentId: string): Promise<void> {
-  await prisma.transaction.updateMany({
+  const { count } = await prisma.transaction.updateMany({
     where: { stripePaymentIntentId: paymentIntentId, status: "pending" },
     data: { status: "success" },
   });
+
+  if (count === 0) {
+    return;
+  }
 
   const tip = await prisma.transaction.findFirst({
     where: { stripePaymentIntentId: paymentIntentId },

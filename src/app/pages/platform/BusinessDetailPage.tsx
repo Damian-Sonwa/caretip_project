@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import {
   fetchPlatformBusiness,
   updatePlatformBusinessVerificationStatus,
+  updatePlatformBusinessSubscriptionTier,
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
@@ -29,6 +30,8 @@ export function BusinessDetailPage() {
   const [row, setRow] = useState<PlatformBusinessRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [subscriptionTier, setSubscriptionTier] = useState<"basic" | "premium" | "enterprise">("premium");
+  const [tierSaving, setTierSaving] = useState(false);
   const [form, setForm] = useState({
     legalContactName: "",
     contactEmail: "",
@@ -65,6 +68,7 @@ export function BusinessDetailPage() {
       website: row.website ?? "",
       registeredAddress: row.registeredAddress ?? "",
     });
+    setSubscriptionTier(row.subscriptionTier ?? "premium");
   }, [row]);
 
   const handleStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
@@ -186,6 +190,44 @@ export function BusinessDetailPage() {
                 </div>
               </div>
               <div className="flex flex-col items-start gap-2">{statusBadge(row)}</div>
+            </div>
+
+            <div className="rounded-lg border border-border/80 bg-muted/20 p-4 space-y-3">
+              <p className="text-sm font-medium text-foreground">{t("admin.businessDetailPage.dtSubscriptionTier")}</p>
+              <div className="flex flex-wrap items-center gap-3">
+                <select
+                  value={subscriptionTier}
+                  onChange={(e) =>
+                    setSubscriptionTier(e.target.value as "basic" | "premium" | "enterprise")
+                  }
+                  className="rounded-lg border border-border bg-background px-3 py-2 text-sm"
+                >
+                  <option value="basic">{t("admin.businessDetailPage.subscriptionTierBasic")}</option>
+                  <option value="premium">{t("admin.businessDetailPage.subscriptionTierPremium")}</option>
+                  <option value="enterprise">{t("admin.businessDetailPage.subscriptionTierEnterprise")}</option>
+                </select>
+                <button
+                  type="button"
+                  disabled={tierSaving || subscriptionTier === (row.subscriptionTier ?? "premium")}
+                  onClick={() => {
+                    if (!id) return;
+                    setTierSaving(true);
+                    void updatePlatformBusinessSubscriptionTier(id, subscriptionTier)
+                      .then(() => {
+                        toast.success(t("admin.businessDetailPage.toastSubscriptionTierSaved"));
+                        return load();
+                      })
+                      .catch((e) => {
+                        logClientError("BusinessDetailPage.subscriptionTier", e);
+                        toast.error(toUserFriendlyMessage(e));
+                      })
+                      .finally(() => setTierSaving(false));
+                  }}
+                  className={cn(platformUi.btnPrimary, "px-4 py-2 text-sm disabled:opacity-50")}
+                >
+                  {t("admin.businessDetailPage.saveSubscriptionTier")}
+                </button>
+              </div>
             </div>
 
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">

@@ -39,6 +39,13 @@ SECURITY & GDPR:
 ANALYTICS & NOTIFICATIONS:
 - Live dashboards for businesses and employees; analytics by timeframe; push/email notifications where enabled.
 
+HOSPITALITY ADVISORY (general best practices, not account data):
+- Tip volume: visible QR at checkout, tables, and rooms; train staff to mention digital tipping once per visit; branded QR builds trust.
+- KPIs managers watch: tip volume and count by period, per employee/location, goal progress, guest feedback when enabled, payout completion rates.
+- Staff motivation: transparent earnings dashboards, goals, timely notifications; fair QR placement so effort is recognized.
+- vs cash: digital tips reduce cash handling, improve reporting, work for card-first guests; guests need no app.
+- Service quality: faster checkout, optional feedback, recognizing standout staff via employee-specific QR codes.
+
 SUPPORT:
 - Help Center, FAQs, and contact form for account-specific issues. You cannot access user accounts or live data.
 `.trim();
@@ -123,6 +130,58 @@ export const FAQ_ENTRIES: FaqEntry[] = [
     en: "Use the Help Center, FAQs, or contact form. Email support is available; response times depend on volume and business hours.",
     de: "Nutzen Sie Help Center, FAQs oder das Kontaktformular. E-Mail-Support ist verfügbar.",
   },
+  {
+    id: "grow_tips",
+    keywords: [
+      "increase",
+      "grow",
+      "boost",
+      "more tip",
+      "tip volume",
+      "lower",
+      "decline",
+      "down",
+      "slow week",
+    ],
+    en: "Many venues lift tip volume by placing branded QR codes where service ends (tables, bar, reception), training a light mention from staff, and reviewing dashboards to see which locations or shifts perform best. CareTip cannot see your live totals here, but the product is built for that visibility after signup.",
+    de: "Viele Betriebe steigern Trinkgelder mit sichtbaren QR-Codes am Serviceende, einer kurzen Erwähnung durch das Team und Dashboards für Standorte und Schichten. Live-Zahlen sehe ich hier nicht, nach der Anmeldung sind sie im Produkt sichtbar.",
+  },
+  {
+    id: "kpis",
+    keywords: ["kpi", "metric", "monitor", "track", "analytics", "report", "dashboard"],
+    en: "Useful KPIs include tip count and amount by day/week/month, performance by employee or location, goal completion, and feedback trends when guests leave comments. CareTip dashboards are designed around these hospitality metrics.",
+    de: "Sinnvolle KPIs: Trinkgeldanzahl und -summe nach Zeitraum, Leistung pro Mitarbeiter oder Standort, Zielerreichung und Feedback-Trends. CareTip-Dashboards sind darauf ausgelegt.",
+  },
+  {
+    id: "onboard_staff",
+    keywords: ["onboard", "invite staff", "train team", "roll out", "launch staff"],
+    en: "Roll out by inviting staff in CareTip, completing payout profiles, assigning employee or table QR codes, and a short team briefing on where guests scan. Most venues finish setup in under 15 minutes before staff training.",
+    de: "Ausrollen: Team einladen, Auszahlungsprofile vervollständigen, Mitarbeiter- oder Tisch-QR zuweisen und kurz zeigen, wo Gäste scannen. Viele Betriebe sind in unter 15 Minuten startklar.",
+  },
+  {
+    id: "vs_cash",
+    keywords: ["cash", "compare", "versus", "instead of cash", "bargeld"],
+    en: "Compared with cash-only jars, digital QR tipping suits card-first guests, reduces cash handling and reconciliation, and gives managers per-employee reporting. Guests still tip in seconds without downloading an app.",
+    de: "Im Vergleich zu Bargeld-Trinkgelddosen passt digitales QR-Trinkgeld zu kartenzahlenden Gästen, weniger Bargeldaufwand und besserer Auswertung pro Mitarbeiter. Gäste brauchen keine App.",
+  },
+  {
+    id: "hotel_pitch",
+    keywords: ["hotel", "manager", "general manager", "front office", "hospitality group"],
+    en: "For hotel leaders, CareTip centralizes multi-location tipping, branded guest QR journeys, and live dashboards for F&B and rooms teams without hardware terminals at every touchpoint.",
+    de: "Für Hotel-Manager: CareTip bündelt Trinkgelder über Standorte, gebrandete Gäste-QR und Live-Dashboards für F&B und Rooms ohne Terminal an jedem Punkt.",
+  },
+  {
+    id: "motivation",
+    keywords: ["motivation", "morale", "retention", "recognize", "reward staff"],
+    en: "Teams stay motivated when tips are visible quickly, goals are tracked in the employee dashboard, and QR codes credit the right person. Transparent reporting beats opaque cash pools.",
+    de: "Motivation steigt, wenn Trinkgelder schnell sichtbar sind, Ziele im Mitarbeiter-Dashboard zählen und QR dem richtigen Menschen gutgeschrieben werden.",
+  },
+  {
+    id: "guest_experience",
+    keywords: ["customer experience", "guest experience", "service quality", "improve service"],
+    en: "CareTip supports experience with frictionless tipping, optional feedback, and less awkward cash moments, while managers see which teams earn guest appreciation.",
+    de: "CareTip unterstützt das Erlebnis mit reibungslosem Trinkgeld, optionalem Feedback und weniger unangenehmen Bargeld-Momenten, während Manager sehen, welche Teams Anerkennung erhalten.",
+  },
 ];
 
 const FALLBACK_INTROS_EN = [
@@ -153,12 +212,20 @@ function scoreFaqEntry(entry: FaqEntry, userText: string, promptId?: string): nu
   if (promptId && entry.id === promptId) score += 120;
   const lower = userText.toLowerCase();
   for (const kw of entry.keywords) {
-    if (lower.includes(kw.toLowerCase())) score += 12;
+    const k = kw.toLowerCase();
+    if (lower.includes(k)) score += k.length >= 8 ? 18 : 12;
   }
   const userTokens = tokenize(userText);
   const entryTokens = tokenize(`${entry.id} ${entry.keywords.join(" ")}`);
   for (const t of userTokens) {
     if (entryTokens.has(t)) score += 4;
+  }
+  // Deprioritize generic "how it works" unless the question is clearly introductory.
+  if (entry.id === "how_it_works" && !/\b(what is|how does|work|platform)\b/i.test(lower)) {
+    score -= 8;
+  }
+  if (entry.id === "employee_tips" && /\b(motivation|morale|kpi|metric|increase|grow|compare|cash)\b/i.test(lower)) {
+    score -= 14;
   }
   return score;
 }
@@ -179,6 +246,10 @@ export function rankFaqEntries(
   if (scored.length === 0 && promptId) {
     const pinned = FAQ_ENTRIES.find((e) => e.id === promptId);
     if (pinned) return [pinned];
+  }
+
+  if (scored.length === 0) {
+    return [FAQ_ENTRIES.find((e) => e.id === "how_it_works")!].filter(Boolean);
   }
 
   return scored.slice(0, limit).map((x) => x.entry);
@@ -205,7 +276,7 @@ const EN_DEFAULT =
 const DE_DEFAULT =
   "CareTip digitalisiert Trinkgelder per QR mit Live-Reporting für Teams und Manager. Fragen Sie zu Setup, Preisen, DSGVO oder Auszahlungen.";
 
-/** Conversational fallback when OpenAI is unavailable (paraphrase, not verbatim FAQ dump). */
+/** Conversational fallback when OpenAI is unavailable (topic-aware, not generic FAQ dump). */
 export function composeFallbackReply(input: {
   userText: string;
   locale: string;
@@ -216,31 +287,37 @@ export function composeFallbackReply(input: {
   const intros = isDe ? FALLBACK_INTROS_DE : FALLBACK_INTROS_EN;
   const intro = intros[Math.abs(hashString(input.userText)) % intros.length];
 
+  const outageNote = isDe
+    ? " (KI-Antwort gerade nicht verfügbar, Kurzfassung aus CareTip-Wissen.)"
+    : " (AI reply temporarily unavailable, here is a concise CareTip summary.)";
+
   if (ranked.length === 0) {
     const tail = isDe
       ? " Worüber möchten Sie mehr erfahren: Setup, QR-Codes, Preise oder Auszahlungen?"
       : " What should we dig into next: setup, QR codes, pricing, or payouts?";
-    return `${intro} ${getKnowledgeReply(undefined, input.locale)}${tail}`;
+    return `${intro} ${getKnowledgeReply(undefined, input.locale)}${tail}${outageNote}`;
   }
 
   const primary = isDe ? ranked[0].de : ranked[0].en;
   const secondary =
-    ranked.length > 1 ? (isDe ? ranked[1].de : ranked[1].en) : null;
+    ranked.length > 1 && ranked[1].id !== ranked[0].id
+      ? isDe
+        ? ranked[1].de
+        : ranked[1].en
+      : null;
 
   const clarify = isDe
-    ? " Sag Bescheid, wenn Sie ein bestimmtes Szenario meinen (z. B. nur Mitarbeiter-QR oder mehrere Standorte)."
-    : " Tell me if you have a specific scenario in mind (e.g. employee-only QR vs multiple locations).";
+    ? " Nennen Sie gern Ihr Szenario (z. B. Restaurant, Hotel, ein oder mehrere Standorte)."
+    : " Share your scenario if helpful (e.g. restaurant vs hotel, single or multi-site).";
 
   if (!secondary) {
-    return `${intro} ${primary} ${clarify}`;
+    return `${intro} ${primary} ${clarify}${outageNote}`;
   }
 
-  const bridge = isDe
-    ? " Außerdem:"
-    : " Also worth noting:";
+  const bridge = isDe ? " Zusätzlich:" : " Also:";
   const secondaryShort =
-    secondary.length > 160 ? `${secondary.slice(0, 157).trim()}…` : secondary;
-  return `${intro} ${primary} ${bridge} ${secondaryShort} ${clarify}`;
+    secondary.length > 140 ? `${secondary.slice(0, 137).trim()}…` : secondary;
+  return `${intro} ${primary} ${bridge} ${secondaryShort} ${clarify}${outageNote}`;
 }
 
 function hashString(s: string): number {

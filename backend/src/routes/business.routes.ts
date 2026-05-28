@@ -4,6 +4,7 @@ import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware
 import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
 import { businessUploadLogo } from "../middleware/businessUpload.middleware.js";
+import { requireSubscriptionCapability } from "../middleware/requireSubscriptionCapability.middleware.js";
 import { clientSafeMessage } from "../utils/httpErrors.js";
 
 const router = Router();
@@ -44,6 +45,7 @@ router.post(
       }
       next();
     }),
+  requireSubscriptionCapability("brandingCustomization"),
   businessController.uploadMyLogo
 );
 

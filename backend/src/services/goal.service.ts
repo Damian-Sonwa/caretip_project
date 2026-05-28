@@ -1,15 +1,23 @@
 import { EmployeeGoalStatus, GoalPeriod, Prisma, TipStatus } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import {
+  effectiveGoalPeriodBounds,
+  elapsedRatioInGoalPeriod,
+  businessUtcRangeForGoalPeriod,
+  sanitizeIanaTimezone,
+  type GoalCalendarPeriod,
+} from "../utils/businessTime.js";
 import { getCachedOrLoad, invalidateCacheKey, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
 
 const BUSINESS_GOALS_CACHE_TTL_MS = 60_000;
 
 function invalidateBusinessGoalsListCache(businessId: string): void {
   invalidateCacheKeyPrefix(`biz-employee-goals:${businessId}:`);
+  invalidateCacheKey(`biz-dash-goals:${businessId}`);
 }
 
 function invalidateUserGoalProgressCache(userId: string): void {
-  invalidateCacheKey(`goal-progress:${userId}`);
+  invalidateCacheKeyPrefix(`goal-progress:${userId}:`);
   invalidateCacheKeyPrefix(`emp-tips-ctx:${userId}`);
 }
 
@@ -28,101 +36,60 @@ export interface GoalWithProgress {
   status: GoalProgressStatus;
 }
 
-function startOfUtcDay(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0, 0));
+function asGoalCalendarPeriod(period: GoalPeriod): GoalCalendarPeriod {
+  return period as GoalCalendarPeriod;
 }
 
-function startOfUtcWeekMonday(d: Date): Date {
-  const day = d.getUTCDay();
-  const mondayOffset = day === 0 ? -6 : 1 - day;
-  return new Date(
-    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate() + mondayOffset, 0, 0, 0, 0)
-  );
+async function resolveBusinessTimezoneForEmployee(employeeId: string): Promise<string> {
+  const row = await prisma.employee.findUnique({
+    where: { id: employeeId },
+    select: { business: { select: { timezone: true } } },
+  });
+  return sanitizeIanaTimezone(row?.business?.timezone);
 }
 
-function startOfUtcMonth(d: Date): Date {
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1, 0, 0, 0, 0));
-}
-
-/** End of current period (exclusive upper bound for queries). */
-function endOfUtcDay(d: Date): Date {
-  const x = startOfUtcDay(d);
-  x.setUTCDate(x.getUTCDate() + 1);
-  return new Date(x.getTime() - 1);
-}
-
-function endOfUtcWeek(d: Date): Date {
-  const m = startOfUtcWeekMonday(d);
-  const e = new Date(m);
-  e.setUTCDate(e.getUTCDate() + 7);
-  return new Date(e.getTime() - 1);
-}
-
-function endOfUtcMonth(d: Date): Date {
-  const y = d.getUTCFullYear();
-  const mo = d.getUTCMonth();
-  return new Date(Date.UTC(y, mo + 1, 0, 23, 59, 59, 999));
+async function resolveBusinessTimezoneForBusiness(businessId: string): Promise<string> {
+  const row = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { timezone: true },
+  });
+  return sanitizeIanaTimezone(row?.timezone);
 }
 
 /**
- * Effective window for progress: current calendar period intersected with [startDate, now].
+ * Effective window for progress: current business-local period intersected with [startDate, now].
+ * Uses the same IANA timezone and boundaries as dashboard analytics (`businessTime.ts`).
  */
 export function effectivePeriodBounds(
   period: GoalPeriod,
   startDate: Date,
-  now = new Date()
+  now = new Date(),
+  businessTimezone: string,
 ): { start: Date; end: Date } {
-  const sd = startOfUtcDay(startDate);
-  if (period === GoalPeriod.daily) {
-    const dayStart = startOfUtcDay(now);
-    const start = dayStart.getTime() < sd.getTime() ? sd : dayStart;
-    return { start, end: now };
-  }
-  if (period === GoalPeriod.weekly) {
-    const weekStart = startOfUtcWeekMonday(now);
-    const start = weekStart.getTime() < sd.getTime() ? sd : weekStart;
-    return { start, end: now };
-  }
-  const monthStart = startOfUtcMonth(now);
-  const start = monthStart.getTime() < sd.getTime() ? sd : monthStart;
-  return { start, end: now };
-}
-
-/** Expected progress ratio through the period (0–1) for pacing "on track". */
-function elapsedRatioInPeriod(period: GoalPeriod, now: Date): number {
-  const y = now.getUTCFullYear();
-  const m = now.getUTCMonth();
-  const d = now.getUTCDate();
-  const h = now.getUTCHours();
-  const min = now.getUTCMinutes();
-  const sec = now.getUTCSeconds();
-  const msIntoDay = ((h * 60 + min) * 60 + sec) * 1000 + now.getMilliseconds();
-
-  if (period === GoalPeriod.daily) {
-    return Math.min(1, Math.max(0, msIntoDay / 86400000));
-  }
-  if (period === GoalPeriod.weekly) {
-    const mon = startOfUtcWeekMonday(now);
-    const msSinceMon = now.getTime() - mon.getTime();
-    return Math.min(1, Math.max(0, msSinceMon / (7 * 86400000)));
-  }
-  const dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
-  const startM = startOfUtcMonth(now);
-  const msSinceMonth = now.getTime() - startM.getTime();
-  const monthMs = dim * 86400000;
-  return Math.min(1, Math.max(0, msSinceMonth / monthMs));
+  const { startUtc, endUtc } = effectiveGoalPeriodBounds(
+    asGoalCalendarPeriod(period),
+    startDate,
+    businessTimezone,
+    now,
+  );
+  return { start: startUtc, end: endUtc };
 }
 
 function computeStatus(
   current: number,
   goal: number,
   period: GoalPeriod,
-  now: Date
+  now: Date,
+  businessTimezone: string,
 ): GoalProgressStatus {
   if (goal <= 0) return "below_target";
   if (current >= goal) return "achieved";
   const ratio = current / goal;
-  const expected = elapsedRatioInPeriod(period, now);
+  const expected = elapsedRatioInGoalPeriod(
+    asGoalCalendarPeriod(period),
+    businessTimezone,
+    now,
+  );
   const threshold = Math.max(0.05, expected * 0.85);
   if (ratio >= threshold) return "on_track";
   return "below_target";
@@ -147,9 +114,14 @@ type GoalProgressRow = {
   startDate: Date;
 };
 
-function goalWindowKey(period: GoalPeriod, startDate: Date, now: Date): string {
-  const { start, end } = effectivePeriodBounds(period, startDate, now);
-  return `${period}:${start.getTime()}:${end.getTime()}`;
+function goalWindowKey(
+  period: GoalPeriod,
+  startDate: Date,
+  now: Date,
+  businessTimezone: string,
+): string {
+  const { start, end } = effectivePeriodBounds(period, startDate, now, businessTimezone);
+  return `${period}:${businessTimezone}:${start.getTime()}:${end.getTime()}`;
 }
 
 /** One tip fetch for all goal windows, then sum in memory (avoids N groupBy round-trips on connection_limit=1). */
@@ -157,8 +129,13 @@ async function batchTipTotalsForGoalRows(
   rows: GoalProgressRow[],
   now = new Date(),
   businessId?: string,
+  businessTimezone?: string,
 ): Promise<Map<string, number>> {
   if (rows.length === 0) return new Map();
+
+  const tz =
+    businessTimezone ??
+    (businessId ? await resolveBusinessTimezoneForBusiness(businessId) : sanitizeIanaTimezone(undefined));
 
   const windows = new Map<
     string,
@@ -169,8 +146,8 @@ async function batchTipTotalsForGoalRows(
   let scanEndMs = 0;
 
   for (const r of rows) {
-    const { start, end } = effectivePeriodBounds(r.goalPeriod, r.startDate, now);
-    const wk = goalWindowKey(r.goalPeriod, r.startDate, now);
+    const { start, end } = effectivePeriodBounds(r.goalPeriod, r.startDate, now, tz);
+    const wk = goalWindowKey(r.goalPeriod, r.startDate, now, tz);
     const key = `${r.employeeId}:${wk}`;
     if (!windows.has(key)) {
       windows.set(key, { employeeId: r.employeeId, start, end });
@@ -224,6 +201,7 @@ export function buildActiveGoalWithProgress(
   },
   currentAmount: number,
   now = new Date(),
+  businessTimezone: string,
 ): GoalWithProgress {
   const p = goalProgressFromAmount(
     {
@@ -235,6 +213,7 @@ export function buildActiveGoalWithProgress(
     },
     currentAmount,
     now,
+    businessTimezone,
   );
   return { ...p, name: g.name, lifecycleStatus: g.status };
 }
@@ -243,10 +222,11 @@ function goalProgressFromAmount(
   row: GoalProgressRow & { id: string },
   currentAmount: number,
   now: Date,
+  businessTimezone: string,
 ): Omit<GoalWithProgress, "status"> & { status: GoalProgressStatus } {
   const goalAmount = Number(row.goalAmount);
   const percent = goalAmount > 0 ? Math.min(100, Math.round((currentAmount / goalAmount) * 100)) : 0;
-  const status = computeStatus(currentAmount, goalAmount, row.goalPeriod, now);
+  const status = computeStatus(currentAmount, goalAmount, row.goalPeriod, now, businessTimezone);
   return {
     id: row.id,
     employeeId: row.employeeId,
@@ -264,13 +244,15 @@ function goalProgressFromAmount(
 export async function getGoalProgressForEmployee(
   employeeId: string,
   row: { id: string; goalAmount: unknown; goalPeriod: GoalPeriod; startDate: Date },
-  now = new Date()
+  now = new Date(),
+  businessTimezone?: string,
 ): Promise<Omit<GoalWithProgress, "status"> & { status: GoalProgressStatus }> {
+  const tz = businessTimezone ?? (await resolveBusinessTimezoneForEmployee(employeeId));
   const goalAmount = Number(row.goalAmount);
-  const { start, end } = effectivePeriodBounds(row.goalPeriod, row.startDate, now);
+  const { start, end } = effectivePeriodBounds(row.goalPeriod, row.startDate, now, tz);
   const currentAmount = await sumTips(employeeId, start, end);
   const percent = goalAmount > 0 ? Math.min(100, Math.round((currentAmount / goalAmount) * 100)) : 0;
-  const status = computeStatus(currentAmount, goalAmount, row.goalPeriod, now);
+  const status = computeStatus(currentAmount, goalAmount, row.goalPeriod, now, tz);
   return {
     id: row.id,
     employeeId,
@@ -290,19 +272,26 @@ const GOAL_PROGRESS_CACHE_TTL_MS = 10_000;
 export async function getMyGoalWithProgressForEmployee(
   employeeId: string,
   userId: string,
+  businessTimezone?: string,
 ): Promise<GoalWithProgress | null> {
-  return getCachedOrLoad(`goal-progress:${userId}`, GOAL_PROGRESS_CACHE_TTL_MS, async () => {
+  const tz = businessTimezone ?? (await resolveBusinessTimezoneForEmployee(employeeId));
+  return getCachedOrLoad(`goal-progress:${userId}:${tz}`, GOAL_PROGRESS_CACHE_TTL_MS, async () => {
     const g = await prisma.employeeGoal.findFirst({
       where: { employeeId, status: EmployeeGoalStatus.active },
       orderBy: [{ updatedAt: "desc" }],
     });
     if (!g) return null;
-    const p = await getGoalProgressForEmployee(employeeId, {
-      id: g.id,
-      goalAmount: g.goalAmount,
-      goalPeriod: g.goalPeriod,
-      startDate: g.startDate,
-    });
+    const p = await getGoalProgressForEmployee(
+      employeeId,
+      {
+        id: g.id,
+        goalAmount: g.goalAmount,
+        goalPeriod: g.goalPeriod,
+        startDate: g.startDate,
+      },
+      new Date(),
+      tz,
+    );
     return { ...p, name: g.name, lifecycleStatus: g.status };
   });
 }
@@ -422,9 +411,16 @@ async function listEmployeeGoalsForBusinessImpl(
 > {
   const limit = Math.max(1, maxGoals);
   const now = new Date();
-  const dayStart = startOfUtcDay(now);
-  const weekStart = startOfUtcWeekMonday(now);
-  const monthStart = startOfUtcMonth(now);
+  const tz = await resolveBusinessTimezoneForBusiness(businessId);
+  const dayRange = businessUtcRangeForGoalPeriod("daily", tz);
+  const weekRange = businessUtcRangeForGoalPeriod("weekly", tz);
+  const monthRange = businessUtcRangeForGoalPeriod("monthly", tz);
+  if (!dayRange || !weekRange || !monthRange) {
+    return [];
+  }
+  const dayStart = dayRange.startUtc;
+  const weekStart = weekRange.startUtc;
+  const monthStart = monthRange.startUtc;
 
   const rows = await prisma.$queryRaw<
     Array<{
@@ -472,7 +468,6 @@ async function listEmployeeGoalsForBusinessImpl(
      AND t.status = 'success'
      AND t.created_at >= GREATEST(goals.start_date, goals.period_start)
      AND t.created_at <= ${now}
-     AND t.created_at >= ${monthStart}
     GROUP BY
       goals.id,
       goals.employee_id,
@@ -506,6 +501,7 @@ async function listEmployeeGoalsForBusinessImpl(
         },
         currentAmount,
         now,
+        tz,
       );
       out.push({
         employeeId: r.employee_id,
@@ -577,6 +573,12 @@ export async function createMyGoal(
       startDate: sd,
     },
   });
+  invalidateUserGoalProgressCache(userId);
+  const empBiz = await prisma.employee.findUnique({
+    where: { id: emp.id },
+    select: { businessId: true },
+  });
+  if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
   return {
     id: row.id,
     name: row.name,
@@ -610,6 +612,12 @@ export async function updateMyGoal(
       ...(sd !== undefined ? { startDate: sd } : {}),
     },
   });
+  invalidateUserGoalProgressCache(userId);
+  const empBiz = await prisma.employee.findUnique({
+    where: { id: emp.id },
+    select: { businessId: true },
+  });
+  if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
   return {
     id: next.id,
     name: next.name,
@@ -631,6 +639,12 @@ export async function archiveMyGoal(userId: string, goalId: string): Promise<Emp
     where: { id: row.id },
     data: { status: EmployeeGoalStatus.archived },
   });
+  invalidateUserGoalProgressCache(userId);
+  const empBiz = await prisma.employee.findUnique({
+    where: { id: emp.id },
+    select: { businessId: true },
+  });
+  if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
   return {
     id: next.id,
     name: next.name,
@@ -649,4 +663,10 @@ export async function deleteMyGoalById(userId: string, goalId: string): Promise<
   const row = await prisma.employeeGoal.findFirst({ where: { id: goalId, employeeId: emp.id } });
   if (!row) throw new Error("Goal not found");
   await prisma.employeeGoal.delete({ where: { id: row.id } });
+  invalidateUserGoalProgressCache(userId);
+  const empBiz = await prisma.employee.findUnique({
+    where: { id: emp.id },
+    select: { businessId: true },
+  });
+  if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
 }

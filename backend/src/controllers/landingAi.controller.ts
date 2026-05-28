@@ -22,8 +22,11 @@ export async function landingAiChat(req: Request, res: Response) {
       return res.status(400).json({ message: parsed.error });
     }
 
-    const { reply, source } = await generateLandingAiReply(parsed);
-    return res.json({ reply, source });
+    const { reply, source, fallbackReason } = await generateLandingAiReply(parsed);
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[landing-ai:chat]", { source, fallbackReason: fallbackReason ?? "none" });
+    }
+    return res.json({ reply, source, fallbackReason });
   } catch (err) {
     logServerError("landingAi.chat", err);
     return res.status(500).json({

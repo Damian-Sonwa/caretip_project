@@ -7,14 +7,21 @@ import { cn } from "@/lib/utils";
 import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
 import {
   businessDashboardNavItems,
+  filterBusinessDashboardNavItems,
   isBusinessDashboardNavActive,
 } from "./businessDashboardNav";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 
 export function BusinessSidebar() {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
+  const { tier } = useSubscriptionEntitlements({
+    enabled: user?.role === "business",
+    role: user?.role === "business" ? "business" : null,
+  });
+  const navItems = filterBusinessDashboardNavItems(businessDashboardNavItems, tier);
 
   return (
     <motion.aside
@@ -29,7 +36,7 @@ export function BusinessSidebar() {
 
       <nav className="flex-1 overflow-y-auto px-3 py-5">
         <ul className="space-y-0.5">
-          {businessDashboardNavItems.map((item) => {
+          {navItems.map((item) => {
             const isActive = isBusinessDashboardNavActive(item.href, location.pathname);
             const Icon = item.icon;
 

@@ -16,6 +16,12 @@ import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 const ACCOUNT_SWR_KEY = "employee:account";
 const accountSwrStore = createDashboardSwrStore<EmployeeAccountSnapshot>();
 
+/** Prime hero balances from summary scope (avoids a separate account round-trip). */
+export function primeEmployeeAccountSnapshot(snapshot: EmployeeAccountSnapshot): void {
+  if (typeof snapshot.totalEarningsEur !== "number") return;
+  accountSwrStore.set(ACCOUNT_SWR_KEY, snapshot);
+}
+
 /**
  * Hero account balances — short-lived SWR with immediate background revalidation.
  */
@@ -109,7 +115,15 @@ export function useEmployeeAccountSummary(enabled: boolean) {
       return;
     }
 
-    void loadAccountRef.current();
+    const primed = accountSwrStore.get(ACCOUNT_SWR_KEY, DASHBOARD_SWR_BALANCE_TTL_MS);
+    if (primed) {
+      setSnapshot(primed);
+      setLoading(false);
+      devSetHydrationPhase("hero", "ready");
+      void loadAccountRef.current({ soft: true });
+    } else {
+      void loadAccountRef.current();
+    }
     return () => {
       abortRef.current?.abort();
     };

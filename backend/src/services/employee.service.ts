@@ -3,6 +3,12 @@ import { Prisma } from "@prisma/client";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
+import { invalidateBusinessStatsCache } from "./business.service.js";
+
+function notifyBusinessRosterChanged(businessId: string, reason: string): void {
+  notifyBusinessRosterChanged(businessId, reason);
+  invalidateBusinessStatsCache(businessId);
+}
 import * as employeeActivationService from "./employeeActivation.service.js";
 import {
   buildEmployeeActivationUrl,
@@ -360,7 +366,7 @@ export async function updateEmployeeForBusiness(
   });
   if (!updated) throw new Error("Update failed");
 
-  emitBusinessDataChanged(businessId, "staff_updated");
+  notifyBusinessRosterChanged(businessId, "staff_updated");
 
   return {
     id: updated.id,
@@ -420,7 +426,7 @@ export async function updateEmployeeActiveStatusForBusiness(
     });
   });
 
-  emitBusinessDataChanged(businessId, "staff_updated");
+  notifyBusinessRosterChanged(businessId, "staff_updated");
 
   return {
     id: updated.id,
@@ -470,7 +476,7 @@ export async function regenerateEmployeeSlugForBusiness(businessId: string, empl
     include: { user: { select: { email: true } } },
   });
   if (!updated) throw new Error("Update failed");
-  emitBusinessDataChanged(businessId, "staff_slug_updated");
+  notifyBusinessRosterChanged(businessId, "staff_slug_updated");
   return {
     id: updated.id,
     name: updated.name,
@@ -491,7 +497,7 @@ export async function deleteEmployeeForBusiness(businessId: string, employeeId: 
   }
   // Always delete the linked `User` row; Prisma schema cascades remove `employees` and related rows.
   await prisma.user.delete({ where: { id: emp.userId } });
-  emitBusinessDataChanged(businessId, "staff_deleted");
+  notifyBusinessRosterChanged(businessId, "staff_deleted");
 }
 
 export async function createEmployee(input: CreateEmployeeInput) {
@@ -575,7 +581,7 @@ export async function createEmployee(input: CreateEmployeeInput) {
       assignedTableIds: employee.tableAssignments.map((ta) => ta.table.id),
     };
   });
-  emitBusinessDataChanged(businessId, "staff_created");
+  notifyBusinessRosterChanged(businessId, "staff_created");
   return result;
 }
 
@@ -600,6 +606,8 @@ export interface EmployeeSelfProfile {
   businessTimezone?: string;
   /** Public staff page / QR URL segment (Postgres `slug`) */
   slug: string | null;
+  /** Venue SaaS tier for entitlement UI (server remains source of truth). */
+  subscriptionTier?: "basic" | "premium" | "enterprise";
 }
 
 export async function getEmployeeProfileForUser(userId: string): Promise<EmployeeSelfProfile | null> {
@@ -615,7 +623,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     pushNotifications: true,
     businessId: true,
     slug: true,
-    business: { select: { slug: true, timezone: true, name: true, logoPath: true } },
+    business: { select: { slug: true, timezone: true, name: true, logoPath: true, subscriptionTier: true } },
     user: userEmail,
   } as const;
   try {
@@ -641,6 +649,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       businessName: emp.business.name ?? "",
       businessTimezone: (emp.business as any).timezone ?? undefined,
       slug: emp.slug ?? null,
+      subscriptionTier: emp.business.subscriptionTier,
     };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
@@ -938,7 +947,7 @@ export async function createEmployeeWithActivation(
     acceptLanguage: acceptLanguage ?? null,
   });
 
-  emitBusinessDataChanged(businessId, "staff_created");
+  notifyBusinessRosterChanged(businessId, "staff_created");
 
   void import("./push/notification.triggers.js").then(({ onEmployeeInvited }) => {
     onEmployeeInvited({

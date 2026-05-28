@@ -15,6 +15,7 @@ import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import { logClientError } from "@/app/lib/clientLog";
 import { formatEur } from "@/app/lib/formatEur";
 import { listBusinessTips, listEmployeeTips, type TipActivityRow, type TipStatus } from "@/app/lib/api";
+import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
 
 function formatDateTime(iso: string, locale: typeof de, timezone?: string): string {
   try {
@@ -48,6 +49,11 @@ export function TipsActivityPage() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user } = useRequireAuth();
+  const { hasCapability } = useSubscriptionEntitlements({
+    enabled: user?.role === "business",
+    role: user?.role === "business" ? "business" : null,
+  });
+  const canExportCsv = user?.role === "business" && hasCapability("csvExport");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | TipStatus>("all");
   const [range, setRange] = useState<"today" | "week" | "month" | "custom">("month");
@@ -121,7 +127,7 @@ export function TipsActivityPage() {
     });
   }, [items, q]);
 
-  const exportDisabled = exporting || loading || filtered.length === 0;
+  const exportDisabled = !canExportCsv || exporting || loading || filtered.length === 0;
   const ui = user?.role === "employee" ? employeeUi : businessUi;
 
   return (
@@ -204,6 +210,7 @@ export function TipsActivityPage() {
               </div>
             ) : null}
 
+            {canExportCsv ? (
             <Button
               type="button"
               disabled={exportDisabled}
@@ -248,6 +255,7 @@ export function TipsActivityPage() {
                 {exporting ? t("business.tipsActivity.exporting") : t("business.tipsActivity.export")}
               </span>
             </Button>
+            ) : null}
           </div>
         </div>
       </motion.div>

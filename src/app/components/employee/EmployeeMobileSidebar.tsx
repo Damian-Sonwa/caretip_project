@@ -7,7 +7,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
-import { employeeDashboardNavItems, isEmployeeDashboardNavActive } from "./employeeDashboardNav";
+import {
+  employeeDashboardNavItems,
+  filterEmployeeDashboardNavItems,
+  isEmployeeDashboardNavActive,
+} from "./employeeDashboardNav";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 
 const EMPLOYEE_DASHBOARD_HOME = employeeDashboardNavItems[0]!.href;
 
@@ -28,7 +33,12 @@ export function EmployeeMobileSidebar({
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const { tier } = useSubscriptionEntitlements({
+    enabled: user?.role === "employee",
+    role: user?.role === "employee" ? "employee" : null,
+  });
+  const navItems = filterEmployeeDashboardNavItems(employeeDashboardNavItems, tier);
 
   const venueName = String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
@@ -77,7 +87,7 @@ export function EmployeeMobileSidebar({
 
             <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
               <ul className="space-y-0.5">
-                {employeeDashboardNavItems.map((item) => {
+                {navItems.map((item) => {
                   const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);
                   const Icon = item.icon;
                   return (
