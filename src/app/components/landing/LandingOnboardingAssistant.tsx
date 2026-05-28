@@ -18,7 +18,11 @@ export const LANDING_AI_PROMPT_IDS = [
 
 export type LandingAiPromptId = (typeof LANDING_AI_PROMPT_IDS)[number];
 
-type UiMessage = LandingChatMessage & { id: string };
+type UiMessage = LandingChatMessage & {
+  id: string;
+  source?: "openai" | "knowledge";
+  usingKnowledgeFallback?: boolean;
+};
 
 type LandingOnboardingAssistantProps = {
   launcherVisible: boolean;
@@ -44,6 +48,8 @@ export function LandingOnboardingAssistant({
   const [error, setError] = useState<string | null>(null);
   const [nudgeLauncher, setNudgeLauncher] = useState(false);
   const [interactedWithAi, setInteractedWithAi] = useState(false);
+  const [knowledgeFallbackActive, setKnowledgeFallbackActive] = useState(false);
+  const [devSourceHint, setDevSourceHint] = useState<string | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const autoOpenedRef = useRef(false);
@@ -88,7 +94,7 @@ export function LandingOnboardingAssistant({
       setLoading(true);
       setError(null);
       try {
-        const { reply, source, fallbackReason } = await postLandingAiChat({
+        const { reply, source, fallbackReason, usingKnowledgeFallback } = await postLandingAiChat({
           messages: nextMessages,
           promptId,
           locale: i18n.language,
@@ -96,15 +102,28 @@ export function LandingOnboardingAssistant({
         });
         if (controller.signal.aborted) return;
         if (import.meta.env.DEV) {
-          console.info("[Ask CareTip]", { source, fallbackReason: fallbackReason ?? "none" });
+          const hint = `${source ?? "?"}${fallbackReason ? ` · ${fallbackReason}` : ""}`;
+          setDevSourceHint(hint);
+          console.info("[Ask CareTip]", { source, fallbackReason: fallbackReason ?? "none", usingKnowledgeFallback });
         }
+        if (usingKnowledgeFallback) setKnowledgeFallbackActive(true);
         trackLandingAiEvent("question_asked", {
           via: promptId ? "prompt" : "typed",
           ...(promptId ? { promptId } : {}),
           aiSource: source ?? "unknown",
+          usingKnowledgeFallback: usingKnowledgeFallback === true,
           ...(fallbackReason ? { fallbackReason } : {}),
         });
-        setMessages((prev) => [...prev, { id: nextId(), role: "assistant", content: reply }]);
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: nextId(),
+            role: "assistant",
+            content: reply,
+            source,
+            usingKnowledgeFallback,
+          },
+        ]);
       } catch (e) {
         if (controller.signal.aborted) return;
         setError(e instanceof Error ? e.message : t("landing.assistant.error"));
@@ -122,6 +141,8 @@ export function LandingOnboardingAssistant({
 
   const closePanel = useCallback(() => {
     setOpen(false);
+    setKnowledgeFallbackActive(false);
+    setDevSourceHint(null);
     trackLandingAiEvent("panel_dismiss");
     abortRef.current?.abort();
   }, []);
@@ -201,6 +222,11 @@ export function LandingOnboardingAssistant({
                   {t("landing.assistant.title")}
                 </p>
                 <p className="mt-0.5 text-xs text-muted-foreground">{t("landing.assistant.subtitle")}</p>
+                {import.meta.env.DEV && devSourceHint ? (
+                  <p className="mt-1 font-mono text-[10px] text-amber-700 dark:text-amber-400" aria-hidden>
+                    DEV · {devSourceHint}
+                  </p>
+                ) : null}
               </div>
               <button
                 type="button"
@@ -211,6 +237,16 @@ export function LandingOnboardingAssistant({
                 <X className="h-4 w-4" aria-hidden />
               </button>
             </header>
+
+            {knowledgeFallbackActive ? (
+              <p
+                className="caretip-landing-ai-fallback-notice"
+                role="status"
+                aria-live="polite"
+              >
+                {t("landing.assistant.knowledgeFallbackNotice")}
+              </p>
+            ) : null}
 
             <div ref={listRef} className="caretip-landing-ai-panel__messages">
               {messages.length === 0 ? (

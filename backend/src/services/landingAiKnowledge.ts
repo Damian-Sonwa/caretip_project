@@ -287,15 +287,11 @@ export function composeFallbackReply(input: {
   const intros = isDe ? FALLBACK_INTROS_DE : FALLBACK_INTROS_EN;
   const intro = intros[Math.abs(hashString(input.userText)) % intros.length];
 
-  const outageNote = isDe
-    ? " (KI-Antwort gerade nicht verfügbar, Kurzfassung aus CareTip-Wissen.)"
-    : " (AI reply temporarily unavailable, here is a concise CareTip summary.)";
-
   if (ranked.length === 0) {
     const tail = isDe
       ? " Worüber möchten Sie mehr erfahren: Setup, QR-Codes, Preise oder Auszahlungen?"
       : " What should we dig into next: setup, QR codes, pricing, or payouts?";
-    return `${intro} ${getKnowledgeReply(undefined, input.locale)}${tail}${outageNote}`;
+    return `${intro} ${getKnowledgeReply(undefined, input.locale)}${tail}`;
   }
 
   const primary = isDe ? ranked[0].de : ranked[0].en;
@@ -311,13 +307,13 @@ export function composeFallbackReply(input: {
     : " Share your scenario if helpful (e.g. restaurant vs hotel, single or multi-site).";
 
   if (!secondary) {
-    return `${intro} ${primary} ${clarify}${outageNote}`;
+    return `${intro} ${primary} ${clarify}`;
   }
 
   const bridge = isDe ? " Zusätzlich:" : " Also:";
   const secondaryShort =
     secondary.length > 140 ? `${secondary.slice(0, 137).trim()}…` : secondary;
-  return `${intro} ${primary} ${bridge} ${secondaryShort} ${clarify}${outageNote}`;
+  return `${intro} ${primary} ${bridge} ${secondaryShort} ${clarify}`;
 }
 
 function hashString(s: string): number {

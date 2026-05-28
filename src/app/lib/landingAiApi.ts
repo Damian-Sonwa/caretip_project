@@ -8,32 +8,44 @@ function landingAiPath(suffix: string): string {
 
 export type LandingChatMessage = { role: "user" | "assistant"; content: string };
 
-export async function postLandingAiChat(body: {
+export async function postLandingAiChat(input: {
   messages: LandingChatMessage[];
   promptId?: string;
   locale: string;
   signal?: AbortSignal;
-}): Promise<{ reply: string; source?: string; fallbackReason?: string | null }> {
+}): Promise<{
+  reply: string;
+  source?: "openai" | "knowledge";
+  fallbackReason?: string | null;
+  usingKnowledgeFallback?: boolean;
+}> {
   const res = await fetch(landingAiPath("/chat"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "omit",
-    signal: body.signal,
+    signal: input.signal,
     body: JSON.stringify({
-      messages: body.messages,
-      promptId: body.promptId,
-      locale: body.locale,
+      messages: input.messages,
+      promptId: input.promptId,
+      locale: input.locale,
     }),
   });
 
-  const data = (await res.json().catch(() => ({}))) as { message?: string; reply?: string };
+  const data = (await res.json().catch(() => ({}))) as {
+    message?: string;
+    reply?: string;
+    source?: "openai" | "knowledge";
+    fallbackReason?: string | null;
+    usingKnowledgeFallback?: boolean;
+  };
   if (!res.ok) {
     throw new Error(data.message ?? "Could not reach the assistant");
   }
   if (!data.reply) throw new Error("Empty reply");
   return {
     reply: data.reply,
-    source: (data as { source?: string }).source,
-    fallbackReason: (data as { fallbackReason?: string | null }).fallbackReason,
+    source: data.source,
+    fallbackReason: data.fallbackReason,
+    usingKnowledgeFallback: data.usingKnowledgeFallback,
   };
 }

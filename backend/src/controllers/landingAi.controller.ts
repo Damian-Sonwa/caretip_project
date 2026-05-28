@@ -1,5 +1,9 @@
 import type { Request, Response } from "express";
-import { generateLandingAiReply, validateChatBody } from "../services/landingAi.service.js";
+import {
+  generateLandingAiReply,
+  getLandingAiDiagnostics,
+  validateChatBody,
+} from "../services/landingAi.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 
 const ALLOWED_EVENTS = new Set([
@@ -22,11 +26,9 @@ export async function landingAiChat(req: Request, res: Response) {
       return res.status(400).json({ message: parsed.error });
     }
 
-    const { reply, source, fallbackReason } = await generateLandingAiReply(parsed);
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[landing-ai:chat]", { source, fallbackReason: fallbackReason ?? "none" });
-    }
-    return res.json({ reply, source, fallbackReason });
+    const { reply, source, fallbackReason, usingKnowledgeFallback } =
+      await generateLandingAiReply(parsed);
+    return res.json({ reply, source, fallbackReason, usingKnowledgeFallback });
   } catch (err) {
     logServerError("landingAi.chat", err);
     return res.status(500).json({
@@ -60,5 +62,20 @@ export async function landingAiTrackEvent(req: Request, res: Response) {
   } catch (err) {
     logServerError("landingAi.trackEvent", err);
     return res.status(500).json({ message: "Could not record event" });
+  }
+}
+
+/**
+ * GET /api/landing-ai/diagnostics — platform admin only (in-process metrics + live probe).
+ */
+export async function landingAiDiagnostics(_req: Request, res: Response) {
+  try {
+    const diagnostics = await getLandingAiDiagnostics();
+    return res.json(diagnostics);
+  } catch (err) {
+    logServerError("landingAi.diagnostics", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.generic),
+    });
   }
 }

@@ -2631,3 +2631,39 @@ export async function impersonateManagerAPI(businessId: string): Promise<AuthRes
     credentials: "include",
   });
 }
+
+export type LandingAiDiagnosticsResponse = {
+  config: {
+    openAiConfigured: boolean;
+    model: string;
+    keySource: "landing" | "shared" | "none";
+  };
+  metrics: {
+    totalChats: number;
+    openAiSuccess: number;
+    openAiFailures: number;
+    fallbackCount: number;
+    quotaFailures: number;
+    timeoutFailures: number;
+    networkFailures: number;
+    openAiSuccessRate: number;
+    fallbackRate: number;
+    quotaFailureRate: number;
+    lastOpenAiSuccessAt: string | null;
+    lastFallbackAt: string | null;
+    lastFallbackReason: string | null;
+    lastOpenAiHttpStatus: number | null;
+  };
+  probe: {
+    reachable: boolean;
+    httpStatus?: number;
+    errorHint?: string;
+  };
+};
+
+export async function fetchLandingAiDiagnostics(): Promise<LandingAiDiagnosticsResponse> {
+  return apiRequest<LandingAiDiagnosticsResponse>(apiPath("/api/landing-ai/diagnostics"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}

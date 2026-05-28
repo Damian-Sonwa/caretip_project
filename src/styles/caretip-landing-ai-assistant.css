@@ -96,6 +96,17 @@
   }
 }
 
+.caretip-landing-ai-fallback-notice {
+  margin: 0 1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 0.5rem;
+  font-size: 0.6875rem;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+  background: hsl(var(--muted) / 0.45);
+  border: 1px solid hsl(var(--border) / 0.6);
+}
+
 .caretip-landing-ai-panel__header {
   display: flex;
   align-items: flex-start;

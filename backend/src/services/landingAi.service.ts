@@ -6,6 +6,14 @@ import {
   LANDING_AI_SCOPE_REFUSAL,
   rankFaqEntries,
 } from "./landingAiKnowledge.js";
+import {
+  getLandingAiMetricsSnapshot,
+  isOutageKnowledgeFallback,
+  recordLandingAiChatOutcome,
+  type LandingAiFallbackReason,
+} from "./landingAiMetrics.js";
+
+export type { LandingAiFallbackReason };
 
 export type LandingChatMessage = { role: "user" | "assistant"; content: string };
 
@@ -49,13 +57,6 @@ export function polishLandingAiReply(text: string): string {
 const MAX_USER_LEN = 600;
 const MAX_HISTORY = 12;
 const DEFAULT_OPENAI_MODEL = "gpt-4o-mini";
-
-export type LandingAiFallbackReason =
-  | "off_topic"
-  | "no_api_key"
-  | "openai_http_error"
-  | "openai_empty"
-  | null;
 
 function resolveOpenAiConfig(): { apiKey: string; model: string; base: string } | null {
   const apiKey =
@@ -123,7 +124,11 @@ async function callOpenAi(
   locale: string,
   faqGrounding: string,
   promptId?: string,
-): Promise<{ text: string | null; httpStatus?: number }> {
+): Promise<{
+  text: string | null;
+  httpStatus?: number;
+  errorKind?: "timeout" | "network";
+}> {
   const cfg = resolveOpenAiConfig();
   if (!cfg) return { text: null };
 
@@ -137,28 +142,43 @@ async function callOpenAi(
     ],
   };
 
-  const res = await fetch(`${cfg.base}/chat/completions`, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${cfg.apiKey}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(payload),
-    signal: AbortSignal.timeout(25_000),
-  });
+  try {
+    const res = await fetch(`${cfg.base}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cfg.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(25_000),
+    });
 
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    console.warn("[landing-ai] OpenAI error", res.status, cfg.model, text.slice(0, 200));
-    return { text: null, httpStatus: res.status };
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      console.warn("[landing-ai] OpenAI error", res.status, cfg.model, text.slice(0, 200));
+      return { text: null, httpStatus: res.status };
+    }
+
+    const data = (await res.json()) as {
+      choices?: Array<{ message?: { content?: string } }>;
+    };
+    const reply = data.choices?.[0]?.message?.content?.trim();
+    return { text: reply || null, httpStatus: res.status };
+  } catch (err) {
+    const isTimeout =
+      err instanceof Error &&
+      (err.name === "AbortError" || err.name === "TimeoutError" || /aborted/i.test(err.message));
+    console.warn(
+      "[landing-ai] OpenAI fetch failed",
+      cfg.model,
+      isTimeout ? "timeout" : "network",
+      err instanceof Error ? err.message : err,
+    );
+    return { text: null, errorKind: isTimeout ? "timeout" : "network" };
   }
-
-  const data = (await res.json()) as {
-    choices?: Array<{ message?: { content?: string } }>;
-  };
-  const reply = data.choices?.[0]?.message?.content?.trim();
-  return { text: reply || null, httpStatus: res.status };
 }
+
+let metricsLogCounter = 0;
 
 export async function generateLandingAiReply(input: {
   messages: LandingChatMessage[];
@@ -168,16 +188,48 @@ export async function generateLandingAiReply(input: {
   reply: string;
   source: "openai" | "knowledge";
   fallbackReason: LandingAiFallbackReason;
+  usingKnowledgeFallback: boolean;
 }> {
   const lastUser = [...input.messages].reverse().find((m) => m.role === "user");
   const userText = lastUser?.content ?? "";
 
-  if (isLikelyOffTopic(userText)) {
+  const finish = (result: {
+    reply: string;
+    source: "openai" | "knowledge";
+    fallbackReason: LandingAiFallbackReason;
+    httpStatus?: number;
+    errorKind?: "timeout" | "network";
+  }) => {
+    recordLandingAiChatOutcome({
+      source: result.source,
+      fallbackReason: result.fallbackReason,
+      httpStatus: result.httpStatus,
+      errorKind: result.errorKind,
+    });
+    if (process.env.NODE_ENV !== "production" && result.source === "knowledge") {
+      console.info("[landing-ai:chat]", {
+        source: result.source,
+        fallbackReason: result.fallbackReason ?? "none",
+        httpStatus: result.httpStatus,
+      });
+    }
+    if (process.env.NODE_ENV === "production" && shouldLogMetricsSample()) {
+      console.info("[landing-ai:metrics]", getLandingAiMetricsSnapshot());
+    }
     return {
+      reply: result.reply,
+      source: result.source,
+      fallbackReason: result.fallbackReason,
+      usingKnowledgeFallback: isOutageKnowledgeFallback(result.fallbackReason),
+    };
+  };
+
+  if (isLikelyOffTopic(userText)) {
+    return finish({
       reply: polishLandingAiReply(LANDING_AI_SCOPE_REFUSAL),
       source: "knowledge",
       fallbackReason: "off_topic",
-    };
+    });
   }
 
   const faqEntries = rankFaqEntries(userText, input.promptId, 4);
@@ -189,23 +241,21 @@ export async function generateLandingAiReply(input: {
       locale: input.locale,
       promptId: input.promptId,
     });
-    if (process.env.NODE_ENV !== "production") {
-      console.info("[landing-ai] fallback=no_api_key");
-    }
-    return {
+    return finish({
       reply: polishLandingAiReply(reply),
       source: "knowledge",
       fallbackReason: "no_api_key",
-    };
+    });
   }
 
   const llm = await callOpenAi(input.messages, input.locale, faqGrounding, input.promptId);
   if (llm.text) {
-    return {
+    return finish({
       reply: polishLandingAiReply(llm.text),
       source: "openai",
       fallbackReason: null,
-    };
+      httpStatus: llm.httpStatus ?? 200,
+    });
   }
 
   const reply = composeFallbackReply({
@@ -213,13 +263,77 @@ export async function generateLandingAiReply(input: {
     locale: input.locale,
     promptId: input.promptId,
   });
-  const fallbackReason: LandingAiFallbackReason = llm.httpStatus
-    ? "openai_http_error"
-    : "openai_empty";
-  if (process.env.NODE_ENV !== "production") {
-    console.info("[landing-ai] fallback=", fallbackReason, "http=", llm.httpStatus ?? "n/a");
+  const fallbackReason: LandingAiFallbackReason = llm.errorKind
+    ? llm.errorKind === "timeout"
+      ? "openai_timeout"
+      : "openai_network"
+    : llm.httpStatus
+      ? "openai_http_error"
+      : "openai_empty";
+
+  return finish({
+    reply: polishLandingAiReply(reply),
+    source: "knowledge",
+    fallbackReason,
+    httpStatus: llm.httpStatus,
+    errorKind: llm.errorKind,
+  });
+}
+
+function shouldLogMetricsSample(): boolean {
+  metricsLogCounter += 1;
+  return metricsLogCounter % 25 === 0;
+}
+
+export async function probeLandingAiOpenAi(): Promise<{
+  reachable: boolean;
+  httpStatus?: number;
+  errorHint?: string;
+}> {
+  const cfg = resolveOpenAiConfig();
+  if (!cfg) return { reachable: false, errorHint: "no_api_key" };
+
+  try {
+    const res = await fetch(`${cfg.base}/chat/completions`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${cfg.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: cfg.model,
+        messages: [{ role: "user", content: "Reply with exactly: OK" }],
+        max_tokens: 8,
+      }),
+      signal: AbortSignal.timeout(12_000),
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      return {
+        reachable: false,
+        httpStatus: res.status,
+        errorHint: text.slice(0, 80) || "http_error",
+      };
+    }
+    return { reachable: true, httpStatus: res.status };
+  } catch (err) {
+    return {
+      reachable: false,
+      errorHint: err instanceof Error ? err.message : "fetch_failed",
+    };
   }
-  return { reply: polishLandingAiReply(reply), source: "knowledge", fallbackReason };
+}
+
+export async function getLandingAiDiagnostics(): Promise<{
+  config: ReturnType<typeof getLandingAiConfigStatus>;
+  metrics: ReturnType<typeof getLandingAiMetricsSnapshot>;
+  probe: Awaited<ReturnType<typeof probeLandingAiOpenAi>>;
+}> {
+  return {
+    config: getLandingAiConfigStatus(),
+    metrics: getLandingAiMetricsSnapshot(),
+    probe: await probeLandingAiOpenAi(),
+  };
 }
 
 /** Startup-safe check for ops dashboards (no secrets). */

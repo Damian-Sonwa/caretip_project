@@ -1391,6 +1391,8 @@
       "close": "Assistent schließen",
       "error": "Assistent gerade nicht erreichbar. Bitte kurz warten.",
       "ctaSignup": "Kostenlos als Betrieb starten →",
+      "knowledgeFallbackNotice": "Antworten aus der CareTip-Wissensbasis, weil KI-Dienste vorübergehend nicht verfügbar sind.",
+      "knowledgeFallbackInline": "Antwort aus der Wissensbasis (KI vorübergehend nicht verfügbar).",
       "prompts": {
         "how_it_works": "Wie funktioniert CareTip?",
         "setup_time": "Wie lange dauert die Einrichtung?",
@@ -2406,7 +2408,24 @@
     "platformSettingsPage": {
       "title": "Systemeinstellungen",
       "subtitle": "Globale Plattformkonfiguration. Weitere Steuerungen können hier angebunden werden, sobald Ihr Betrieb wächst.",
-      "cardBody": "Infrastrukturänderungen erfolgen über Umgebungsvariablen und Ihre Deployment-Pipeline. Broadcasts verwalten Sie unter Kommunikation in der Seitenleiste."
+      "cardBody": "Infrastrukturänderungen erfolgen über Umgebungsvariablen und Ihre Deployment-Pipeline. Broadcasts verwalten Sie unter Kommunikation in der Seitenleiste.",
+      "landingAi": {
+        "title": "CareTip fragen (Landing-KI)",
+        "subtitle": "OpenAI-Erreichbarkeit und Chat-Kennzahlen seit Start dieses Server-Prozesses.",
+        "refresh": "Aktualisieren",
+        "loading": "Diagnose wird geladen…",
+        "loadError": "Ask-CareTip-Diagnose konnte nicht geladen werden.",
+        "openAiReachable": "OpenAI erreichbar (Live-Test)",
+        "model": "Modell",
+        "keySource": "API-Key-Quelle",
+        "lastAiSuccess": "Letzte erfolgreiche KI-Antwort",
+        "openAiSuccessRate": "OpenAI-Erfolgsrate",
+        "fallbackRate": "Wissensbasis-Fallback-Rate",
+        "quotaFailures": "Kontingent-Fehler (429)",
+        "totalChats": "Chats gesamt (dieser Prozess)",
+        "yes": "Ja",
+        "no": "Nein"
+      }
     },
     "platformSettings": {
       "notifications": {

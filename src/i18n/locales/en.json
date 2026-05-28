@@ -1389,6 +1389,8 @@
       "close": "Close assistant",
       "error": "Could not reach the assistant. Try again in a moment.",
       "ctaSignup": "Start free business signup →",
+      "knowledgeFallbackNotice": "Using knowledge base responses while AI services are temporarily unavailable.",
+      "knowledgeFallbackInline": "Answer from CareTip knowledge base (AI temporarily unavailable).",
       "prompts": {
         "how_it_works": "How does CareTip work?",
         "setup_time": "How long does setup take?",
@@ -2404,7 +2406,24 @@
     "platformSettingsPage": {
       "title": "System settings",
       "subtitle": "Global platform configuration. Additional controls can be wired here as your operations grow.",
-      "cardBody": "Infrastructure changes remain in environment variables and your deployment pipeline. User broadcasts are managed under Communication in the sidebar."
+      "cardBody": "Infrastructure changes remain in environment variables and your deployment pipeline. User broadcasts are managed under Communication in the sidebar.",
+      "landingAi": {
+        "title": "Ask CareTip (landing AI)",
+        "subtitle": "Live OpenAI health and in-process chat metrics since this server started.",
+        "refresh": "Refresh",
+        "loading": "Loading diagnostics…",
+        "loadError": "Could not load Ask CareTip diagnostics.",
+        "openAiReachable": "OpenAI reachable (live probe)",
+        "model": "Model",
+        "keySource": "API key source",
+        "lastAiSuccess": "Last successful AI response",
+        "openAiSuccessRate": "OpenAI success rate",
+        "fallbackRate": "Knowledge fallback rate",
+        "quotaFailures": "Quota failures (429)",
+        "totalChats": "Total chats (this process)",
+        "yes": "Yes",
+        "no": "No"
+      }
     },
     "platformSettings": {
       "notifications": {
