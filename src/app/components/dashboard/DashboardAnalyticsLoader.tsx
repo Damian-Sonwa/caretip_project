@@ -5,6 +5,8 @@ export { DashboardRefreshIndicator } from "./DashboardRefreshIndicator";
 export {
   AnalyticsLoadingState,
   DashboardAnalyticsPhaseHint,
+  DashboardAnalyticsPhaseHintSlot,
+  DashboardStableChartSlot,
   DeferredContentFade,
   GoalsTableLoadingShell,
   InlineSpinner,

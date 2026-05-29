@@ -38,11 +38,13 @@ import {
   DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import {
-  DashboardAnalyticsPhaseHint,
+  DashboardAnalyticsPhaseHintSlot,
   DashboardListSkeleton,
+  DashboardStableChartSlot,
   DeferredContentFade,
   GoalsTableLoadingShell,
 } from "../../components/dashboard/DashboardSectionLoading";
+import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import { formatEur } from "../../lib/formatEur";
 import type {
   BusinessDashboardStats,
@@ -153,7 +155,6 @@ export function BusinessDashboard() {
     isAnalyticsSectionLoading,
     isGoalsInitialLoad,
     isPeriodRefreshing,
-    dataRevision,
     lastUpdatedAt,
     showStatsSkeleton,
     valuesMatchAnalyticsPeriod,
@@ -478,7 +479,6 @@ export function BusinessDashboard() {
                 )}
                 aria-label={t("business.hero.pulse.sectionLabel")}
                 aria-busy={heroPulseLoading}
-                key={`biz-hero-pulse-${dataRevision}`}
               >
                 <div>
                   <dt>{t("business.hero.pulse.lastHour")}</dt>
@@ -580,14 +580,7 @@ export function BusinessDashboard() {
                 key={period}
                 type="button"
                 onClick={() => {
-                  // Prevent scroll jump: preserve scroll position across the state update.
-                  const y = window.scrollY;
-                  setAnalyticsTimeframe(period);
-                  queueMicrotask(() => {
-                    requestAnimationFrame(() => {
-                      window.scrollTo({ top: y, left: 0, behavior: "instant" as ScrollBehavior });
-                    });
-                  });
+                  runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
                 }}
                 aria-pressed={analyticsTimeframe === period}
                 className={cn(
@@ -602,12 +595,11 @@ export function BusinessDashboard() {
               </button>
             ))}
             </div>
-            {showChartsLoading ? (
-              <DashboardAnalyticsPhaseHint
-                className="mt-3"
-                label={t("dashboard.loading.analytics")}
-              />
-            ) : null}
+            <DashboardAnalyticsPhaseHintSlot
+              className="mt-3"
+              show={showChartsLoading}
+              label={t("dashboard.loading.analytics")}
+            />
           </section>
 
           <motion.div
@@ -619,7 +611,6 @@ export function BusinessDashboard() {
             initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            key={`biz-metrics-${dataRevision}`}
           >
             <BusinessDashboardMetricsGrid
               analyticsTimeframe={analyticsTimeframe}
@@ -711,51 +702,57 @@ export function BusinessDashboard() {
                     "min-w-0 overflow-x-auto transition-opacity duration-300",
                   )}
                 >
-                  {showGoalsLoading ? (
-                    <GoalsTableLoadingShell
-                      label={t("dashboard.loading.goals")}
-                      columnLabels={goalsTableColumns}
-                    />
-                  ) : employeeGoalsList.length === 0 ? (
-                    <div className={cn(businessUi.cardPad)}>
-                      <EmployeeEmptyState
-                        className="py-10 sm:py-12"
-                        icon={<Target className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("business.dashboard.noStaffGoals")}
-                        description={t("business.dashboard.noStaffGoalsHint")}
+                  <DashboardStableChartSlot
+                    loading={showGoalsLoading && !useDevDemo}
+                    minHeightClass="min-h-[280px]"
+                    skeleton={
+                      <GoalsTableLoadingShell
+                        label={t("dashboard.loading.goals")}
+                        columnLabels={goalsTableColumns}
                       />
-                    </div>
-                  ) : (
-                    <DeferredContentFade show={!showGoalsLoading || useDevDemo}>
-                      <table className="w-full min-w-[640px] border-collapse text-sm">
-                        <thead>
-                          <tr className="border-b border-border text-left text-muted-foreground">
-                            {goalsTableColumns.map((col) => (
-                              <th key={col} className="pb-2 pr-3 font-medium last:pr-0">
-                                {col}
-                              </th>
-                            ))}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {employeeGoalsList.map((g) => (
-                            <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
-                              <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
-                              <td className="py-3 pr-3 text-muted-foreground">
-                                {goalPeriodLabels[g.goalPeriod]}
-                              </td>
-                              <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
-                              <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
-                              <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
-                              <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
-                                {t(`business.goalStatus.${g.status}`)}
-                              </td>
+                    }
+                  >
+                    {employeeGoalsList.length === 0 ? (
+                      <div className={cn(businessUi.cardPad)}>
+                        <EmployeeEmptyState
+                          className="py-10 sm:py-12"
+                          icon={<Target className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          title={t("business.dashboard.noStaffGoals")}
+                          description={t("business.dashboard.noStaffGoalsHint")}
+                        />
+                      </div>
+                    ) : (
+                      <DeferredContentFade show={!showGoalsLoading || useDevDemo}>
+                        <table className="w-full min-w-[640px] border-collapse text-sm">
+                          <thead>
+                            <tr className="border-b border-border text-left text-muted-foreground">
+                              {goalsTableColumns.map((col) => (
+                                <th key={col} className="pb-2 pr-3 font-medium last:pr-0">
+                                  {col}
+                                </th>
+                              ))}
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </DeferredContentFade>
-                  )}
+                          </thead>
+                          <tbody>
+                            {employeeGoalsList.map((g) => (
+                              <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
+                                <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
+                                <td className="py-3 pr-3 text-muted-foreground">
+                                  {goalPeriodLabels[g.goalPeriod]}
+                                </td>
+                                <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
+                                <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
+                                <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
+                                <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
+                                  {t(`business.goalStatus.${g.status}`)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </DeferredContentFade>
+                    )}
+                  </DashboardStableChartSlot>
                 </CardContent>
               ) : null}
             </Card>
@@ -783,66 +780,71 @@ export function BusinessDashboard() {
                     "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
                   )}
                 >
-                  {showChartsLoading ? (
-                    <DashboardChartSkeleton minHeightClass="min-h-[260px] sm:min-h-[290px]" />
-                  ) : !hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
-                    <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
-                      <EmployeeEmptyState
-                        className="relative z-[1] py-10 sm:py-12"
-                        icon={<BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("format.metricNoActivity")}
-                        description={t("business.dashboard.chartEmptyDesc")}
-                      />
-                    </div>
-                  ) : (
-                    <DeferredContentFade show={!showChartsLoading || useDevDemo}>
-                      <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                          <BarChart
-                            key={`dist-${analyticsTimeframe}`}
-                            data={tipDistributionChartData}
-                            margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
-                            barCategoryGap="18%"
-                          >
-                            <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
-                            <XAxis
-                              dataKey="dayLabel"
-                              stroke={BUSINESS_CHART_AXIS}
-                              tickLine={false}
-                              axisLine={{ stroke: BUSINESS_CHART_GRID }}
-                              style={{ fontSize: "11px" }}
-                              tickMargin={8}
-                            />
-                            <YAxis
-                              stroke={BUSINESS_CHART_AXIS}
-                              tickLine={false}
-                              axisLine={false}
-                              style={{ fontSize: "11px" }}
-                              tickMargin={8}
-                              width={48}
-                            />
-                            <Tooltip
-                              formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                              contentStyle={businessChartTooltipStyle}
-                              cursor={{ fill: "rgba(25, 114, 120, 0.06)" }}
-                            />
-                            <Bar
-                              dataKey="amount"
-                              fill={BUSINESS_CHART_BAR_SOFT}
-                              radius={[6, 6, 0, 0]}
-                              maxBarSize={44}
-                              minPointSize={3}
-                            />
-                          </BarChart>
-                        </ResponsiveContainer>
+                  <DashboardStableChartSlot
+                    loading={showChartsLoading && !useDevDemo}
+                    minHeightClass="min-h-[260px] sm:min-h-[290px]"
+                    skeleton={
+                      <DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />
+                    }
+                  >
+                    {!hasTipActivityInPeriod || tipDistributionData.length === 0 ? (
+                      <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
+                        <EmployeeEmptyState
+                          className="relative z-[1] py-10 sm:py-12"
+                          icon={<BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          title={t("format.metricNoActivity")}
+                          description={t("business.dashboard.chartEmptyDesc")}
+                        />
                       </div>
-                      <p className="business-dashboard-chart-insight">
-                        {t("business.dashboard.chartDistributionTotal", {
-                          total: formatEur(tipDistributionTotal),
-                        })}
-                      </p>
-                    </DeferredContentFade>
-                  )}
+                    ) : (
+                      <DeferredContentFade show={!showChartsLoading || useDevDemo}>
+                        <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                            <BarChart
+                              data={tipDistributionChartData}
+                              margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
+                              barCategoryGap="18%"
+                            >
+                              <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
+                              <XAxis
+                                dataKey="dayLabel"
+                                stroke={BUSINESS_CHART_AXIS}
+                                tickLine={false}
+                                axisLine={{ stroke: BUSINESS_CHART_GRID }}
+                                style={{ fontSize: "11px" }}
+                                tickMargin={8}
+                              />
+                              <YAxis
+                                stroke={BUSINESS_CHART_AXIS}
+                                tickLine={false}
+                                axisLine={false}
+                                style={{ fontSize: "11px" }}
+                                tickMargin={8}
+                                width={48}
+                              />
+                              <Tooltip
+                                formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
+                                contentStyle={businessChartTooltipStyle}
+                                cursor={{ fill: "rgba(25, 114, 120, 0.06)" }}
+                              />
+                              <Bar
+                                dataKey="amount"
+                                fill={BUSINESS_CHART_BAR_SOFT}
+                                radius={[6, 6, 0, 0]}
+                                maxBarSize={44}
+                                minPointSize={3}
+                              />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <p className="business-dashboard-chart-insight">
+                          {t("business.dashboard.chartDistributionTotal", {
+                            total: formatEur(tipDistributionTotal),
+                          })}
+                        </p>
+                      </DeferredContentFade>
+                    )}
+                  </DashboardStableChartSlot>
                 </CardContent>
               </Card>
             </motion.div>
@@ -865,89 +867,94 @@ export function BusinessDashboard() {
                     "business-dashboard-panel-card__content min-w-0 flex-1 overflow-x-auto overflow-y-visible transition-opacity duration-300",
                   )}
                 >
-                  {showChartsLoading ? (
-                    <DashboardChartSkeleton minHeightClass="min-h-[260px] sm:min-h-[290px]" />
-                  ) : (displayStats?.employeeCount ?? 0) === 0 ? (
-                    <div className={cn(businessUi.cardPad)}>
-                      <EmployeeEmptyState
-                        className="py-10 sm:py-12"
-                        icon={<Users className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("business.dashboard.noEmployees")}
-                        description={t("business.dashboard.noEmployeesChartHint")}
-                      />
-                    </div>
-                  ) : !hasTipActivityInPeriod ? (
-                    <div className={cn(businessUi.cardPad)}>
-                      <EmployeeEmptyState
-                        className="py-10 sm:py-12"
-                        icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("format.metricNoActivity")}
-                        description={t("business.dashboard.chartEmptyDesc")}
-                      />
-                    </div>
-                  ) : employeePerformance.length === 0 ? (
-                    <div className={cn(businessUi.cardPad)}>
-                      <EmployeeEmptyState
-                        className="py-10 sm:py-12"
-                        icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                        title={t("format.metricNoActivity")}
-                        description={t("business.dashboard.chartEmptyDesc")}
-                      />
-                    </div>
-                  ) : (
-                    <DeferredContentFade show={!showChartsLoading || useDevDemo}>
-                      <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                        <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                          <BarChart
-                            key={`perf-${analyticsTimeframe}`}
-                            data={employeePerformance}
-                            layout="vertical"
-                            margin={{ top: 12, right: 16, left: 4, bottom: 4 }}
-                            barCategoryGap="16%"
-                          >
-                            <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} horizontal={false} />
-                            <XAxis
-                              type="number"
-                              stroke={BUSINESS_CHART_AXIS}
-                              tickLine={false}
-                              axisLine={{ stroke: BUSINESS_CHART_GRID }}
-                              style={{ fontSize: "11px" }}
-                              tickMargin={8}
-                            />
-                            <YAxis
-                              dataKey="name"
-                              type="category"
-                              stroke={BUSINESS_CHART_AXIS}
-                              tickLine={false}
-                              axisLine={false}
-                              style={{ fontSize: "11px" }}
-                              width={100}
-                              tickMargin={6}
-                            />
-                            <Tooltip
-                              formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                              contentStyle={businessChartTooltipStyle}
-                              cursor={{ fill: "rgba(25, 114, 120, 0.05)" }}
-                            />
-                            <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4}>
-                              {employeePerformance.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${entry.name}`}
-                                  fill={businessChartBarFill(index, employeePerformance.length)}
-                                />
-                              ))}
-                            </Bar>
-                          </BarChart>
-                        </ResponsiveContainer>
+                  <DashboardStableChartSlot
+                    loading={showChartsLoading && !useDevDemo}
+                    minHeightClass="min-h-[260px] sm:min-h-[290px]"
+                    skeleton={
+                      <DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />
+                    }
+                  >
+                    {(displayStats?.employeeCount ?? 0) === 0 ? (
+                      <div className={cn(businessUi.cardPad)}>
+                        <EmployeeEmptyState
+                          className="py-10 sm:py-12"
+                          icon={<Users className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          title={t("business.dashboard.noEmployees")}
+                          description={t("business.dashboard.noEmployeesChartHint")}
+                        />
                       </div>
-                      <p className="business-dashboard-chart-insight">
-                        {t("business.dashboard.chartPerformanceLeader", {
-                          name: employeePerformance[0]?.name ?? "—",
-                          amount: formatEur(employeePerformance[0]?.tips ?? 0),
-                        })}
-                      </p>
-                    </DeferredContentFade>
-                  )}
+                    ) : !hasTipActivityInPeriod ? (
+                      <div className={cn(businessUi.cardPad)}>
+                        <EmployeeEmptyState
+                          className="py-10 sm:py-12"
+                          icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          title={t("format.metricNoActivity")}
+                          description={t("business.dashboard.chartEmptyDesc")}
+                        />
+                      </div>
+                    ) : employeePerformance.length === 0 ? (
+                      <div className={cn(businessUi.cardPad)}>
+                        <EmployeeEmptyState
+                          className="py-10 sm:py-12"
+                          icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          title={t("format.metricNoActivity")}
+                          description={t("business.dashboard.chartEmptyDesc")}
+                        />
+                      </div>
+                    ) : (
+                      <DeferredContentFade show={!showChartsLoading || useDevDemo}>
+                        <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
+                          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                            <BarChart
+                              data={employeePerformance}
+                              layout="vertical"
+                              margin={{ top: 12, right: 16, left: 4, bottom: 4 }}
+                              barCategoryGap="16%"
+                            >
+                              <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} horizontal={false} />
+                              <XAxis
+                                type="number"
+                                stroke={BUSINESS_CHART_AXIS}
+                                tickLine={false}
+                                axisLine={{ stroke: BUSINESS_CHART_GRID }}
+                                style={{ fontSize: "11px" }}
+                                tickMargin={8}
+                              />
+                              <YAxis
+                                dataKey="name"
+                                type="category"
+                                stroke={BUSINESS_CHART_AXIS}
+                                tickLine={false}
+                                axisLine={false}
+                                style={{ fontSize: "11px" }}
+                                width={100}
+                                tickMargin={6}
+                              />
+                              <Tooltip
+                                formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
+                                contentStyle={businessChartTooltipStyle}
+                                cursor={{ fill: "rgba(25, 114, 120, 0.05)" }}
+                              />
+                              <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4}>
+                                {employeePerformance.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${entry.name}`}
+                                    fill={businessChartBarFill(index, employeePerformance.length)}
+                                  />
+                                ))}
+                              </Bar>
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                        <p className="business-dashboard-chart-insight">
+                          {t("business.dashboard.chartPerformanceLeader", {
+                            name: employeePerformance[0]?.name ?? "—",
+                            amount: formatEur(employeePerformance[0]?.tips ?? 0),
+                          })}
+                        </p>
+                      </DeferredContentFade>
+                    )}
+                  </DashboardStableChartSlot>
                 </CardContent>
               </Card>
             </motion.div>
@@ -1001,10 +1008,17 @@ export function BusinessDashboard() {
                       "transition-opacity duration-300",
                     )}
                   >
-                    <div className="space-y-3">
-                      {showChartsLoading ? (
-                        <DashboardListSkeleton minHeightClass="min-h-[160px] sm:min-h-[180px]" />
-                      ) : topEmployees.length === 0 ? (
+                    <DashboardStableChartSlot
+                      loading={showChartsLoading && !useDevDemo}
+                      minHeightClass="min-h-[160px] sm:min-h-[180px]"
+                      skeleton={
+                        <DashboardListSkeleton
+                          minHeightClass="h-full min-h-0"
+                          className="h-full"
+                        />
+                      }
+                    >
+                      {topEmployees.length === 0 ? (
                         <div className={cn(businessUi.cardPad)}>
                           <EmployeeEmptyState
                             className="py-8 sm:py-10"
@@ -1015,6 +1029,7 @@ export function BusinessDashboard() {
                         </div>
                       ) : (
                         <DeferredContentFade show={!showChartsLoading || useDevDemo}>
+                        <div className="space-y-3">
                         {topEmployees.map((employee, index) => (
                           <div
                             key={employee.id}
@@ -1074,9 +1089,10 @@ export function BusinessDashboard() {
                             </div>
                           </div>
                         ))}
+                        </div>
                         </DeferredContentFade>
                       )}
-                    </div>
+                    </DashboardStableChartSlot>
                   </CardContent>
                 ) : null}
               </Card>

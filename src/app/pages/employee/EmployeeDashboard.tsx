@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
+import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import i18n from "@/i18n/i18n";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
@@ -60,6 +61,7 @@ import {
   DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
+import { DashboardStableChartSlot } from "../../components/dashboard/DashboardSectionLoading";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import {
@@ -129,7 +131,6 @@ export function EmployeeDashboard() {
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing: analyticsPeriodRefreshing,
-    dataRevision: analyticsDataRevision,
     lastUpdatedAt: analyticsLastUpdatedAt,
     error: analyticsError,
     refreshQuiet: refreshDashboardQuiet,
@@ -476,7 +477,6 @@ export function EmployeeDashboard() {
                 )}
                 aria-label={t("employee.hero.accountOverviewLabel")}
                 aria-busy={showHeroMetricsLoading}
-                key={`hero-account-${analyticsDataRevision}`}
               >
                 <div>
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
@@ -567,7 +567,9 @@ export function EmployeeDashboard() {
               <button
                 key={period}
                 type="button"
-                onClick={() => setAnalyticsTimeframe(period)}
+                onClick={() => {
+                  runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
+                }}
                 aria-pressed={analyticsTimeframe === period}
                 className={cn(
                   employeeUi.periodBtn,
@@ -604,7 +606,6 @@ export function EmployeeDashboard() {
             initial={false}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
-            key={`emp-metrics-${analyticsDataRevision}`}
           >
             <EmployeeDashboardMetricsGrid
               loading={showMetricsLoading}
@@ -620,7 +621,6 @@ export function EmployeeDashboard() {
               analyticsPeriodRefreshing && "dashboard-swr-swap--revalidating",
             )}
             transition={{ delay: 0.4 }}
-            key={`emp-chart-${analyticsDataRevision}`}
           >
             <Card className={cn(employeeUi.cardStatic, employeeUi.chartCard, "w-full")}>
               <CardHeader className={employeeUi.cardHeader}>
@@ -641,26 +641,30 @@ export function EmployeeDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
-                {showChartLoading ? (
-                  <DashboardChartSkeleton minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]" />
-                ) : chartData.length === 0 ? (
-                  <div className={cn(employeeUi.cardPad, employeeUi.chartEmpty)}>
-                    <EmployeeEmptyState
-                      icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                      title={t("format.metricNoActivity")}
-                      className="relative z-[1] !py-10"
-                    />
-                  </div>
-                ) : (
-                  <div
-                    className={cn(
-                      employeeUi.chartFrame,
-                      "dashboard-hero-metric-value--live flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]",
-                    )}
-                  >
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                    <AreaChart
-                      key={`emp-chart-${analyticsTimeframe}`}
+                <DashboardStableChartSlot
+                  loading={showChartLoading}
+                  minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]"
+                  skeleton={
+                    <DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />
+                  }
+                >
+                  {chartData.length === 0 ? (
+                    <div className={cn(employeeUi.cardPad, employeeUi.chartEmpty)}>
+                      <EmployeeEmptyState
+                        icon={<TrendingUp className="h-6 w-6" aria-hidden />}
+                        title={t("format.metricNoActivity")}
+                        className="relative z-[1] !py-10"
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className={cn(
+                        employeeUi.chartFrame,
+                        "dashboard-hero-metric-value--live flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]",
+                      )}
+                    >
+                      <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                      <AreaChart
                       data={chartData}
                       margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
                     >
@@ -701,7 +705,8 @@ export function EmployeeDashboard() {
                     </AreaChart>
                     </ResponsiveContainer>
                   </div>
-                )}
+                  )}
+                </DashboardStableChartSlot>
               </CardContent>
             </Card>
           </motion.div>

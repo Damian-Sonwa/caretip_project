@@ -46,6 +46,8 @@ import {
   DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "./dashboard/DashboardAnalyticsLoader";
+import { DashboardStableChartSlot } from "./dashboard/DashboardSectionLoading";
+import { runWithViewportScrollPreserved } from "../lib/dashboardScrollStability";
 import {
   Select,
   SelectContent,
@@ -865,14 +867,10 @@ export function AdminDashboard() {
 
         {/* Analytics charts — mount Recharts only after server analytics hydrate */}
         <motion.section
-          initial={showChartSkeletons ? false : { y: 16, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5, delay: showChartSkeletons ? 0 : 0.18 }}
-          className={cn(
-            platformUi.analyticsSection,
-            "relative",
-            showChartSkeletons && "platform-admin-analytics-section--loading",
-          )}
+          initial={false}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.22, ease: "easeOut" }}
+          className={cn(platformUi.analyticsSection, "relative")}
           aria-busy={showChartSkeletons || undefined}
         >
           <DashboardRefreshIndicator
@@ -894,15 +892,17 @@ export function AdminDashboard() {
               <Select
                 value={analyticsTimezone}
                 onValueChange={(v) => {
-                  setAnalyticsTimezone(v);
-                  analyticsTimezoneRef.current = v;
-                  try {
-                    localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                  } catch {
-                    // ignore
-                  }
-                  const nextGen = ++analyticsLoadGenRef.current;
-                  void loadAnalytics(nextGen, { bustCache: true });
+                  runWithViewportScrollPreserved(() => {
+                    setAnalyticsTimezone(v);
+                    analyticsTimezoneRef.current = v;
+                    try {
+                      localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                    } catch {
+                      // ignore
+                    }
+                    const nextGen = ++analyticsLoadGenRef.current;
+                    void loadAnalytics(nextGen, { bustCache: true });
+                  });
                 }}
                 disabled={analyticsSyncing}
               >
@@ -946,46 +946,65 @@ export function AdminDashboard() {
               })}
             </p>
           ) : null}
-          <div
-            className={cn(
-              platformUi.analyticsChartsGrid,
-              showChartSkeletons && "platform-admin-charts-grid--loading",
-            )}
-          >
-            {showChartSkeletons ? (
-              <>
-                <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
-                  <DashboardChartSkeleton />
-                </AnalyticsCard>
-                <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
-                  <DashboardChartSkeleton />
-                </AnalyticsCard>
-                <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
-                  <DashboardChartSkeleton barHeights={[38, 62, 44, 78, 52, 66, 40, 84, 58, 46]} />
-                </AnalyticsCard>
-                <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
-                  <DashboardChartSkeleton barHeights={[55, 72, 48, 88, 60, 76, 42, 80, 64, 50]} />
-                </AnalyticsCard>
-              </>
-            ) : (
-              <>
-                <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
+          <div className={platformUi.analyticsChartsGrid}>
+            <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
+              <DashboardStableChartSlot
+                loading={showChartSkeletons}
+                skeleton={<DashboardChartSkeleton />}
+              >
+                {chartAnalytics ? (
                   <UserDistributionChart data={chartAnalytics.userDistribution} />
-                </AnalyticsCard>
+                ) : (
+                  <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
+                )}
+              </DashboardStableChartSlot>
+            </AnalyticsCard>
 
-                <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
+            <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
+              <DashboardStableChartSlot
+                loading={showChartSkeletons}
+                skeleton={<DashboardChartSkeleton />}
+              >
+                {chartAnalytics ? (
                   <TipStatusChart data={chartTipStatus} />
-                </AnalyticsCard>
+                ) : (
+                  <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
+                )}
+              </DashboardStableChartSlot>
+            </AnalyticsCard>
 
-                <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
+            <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
+              <DashboardStableChartSlot
+                loading={showChartSkeletons}
+                skeleton={
+                  <DashboardChartSkeleton barHeights={[38, 62, 44, 78, 52, 66, 40, 84, 58, 46]} />
+                }
+              >
+                {chartAnalytics ? (
                   <GrowthChart data={chartAnalytics.growth} />
-                </AnalyticsCard>
+                ) : (
+                  <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
+                )}
+              </DashboardStableChartSlot>
+            </AnalyticsCard>
 
-                <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
-                  <TipVolumeChart data={chartAnalytics.tipVolume} top={chartAnalytics.topBusinessesByTips} />
-                </AnalyticsCard>
-              </>
-            )}
+            <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
+              <DashboardStableChartSlot
+                loading={showChartSkeletons}
+                skeleton={
+                  <DashboardChartSkeleton barHeights={[55, 72, 48, 88, 60, 76, 42, 80, 64, 50]} />
+                }
+              >
+                {chartAnalytics ? (
+                  <TipVolumeChart
+                    data={chartAnalytics.tipVolume}
+                    top={chartAnalytics.topBusinessesByTips}
+                  />
+                ) : (
+                  <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
+                )}
+              </DashboardStableChartSlot>
+            </AnalyticsCard>
           </div>
         </motion.section>
 

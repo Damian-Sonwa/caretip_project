@@ -3,6 +3,8 @@ import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 
+export { DashboardStableChartSlot } from "./DashboardStableChartSlot";
+
 /** Compact spinner for inline labels and section headers. */
 export function InlineSpinner({ className }: { className?: string }) {
   return (
@@ -187,6 +189,23 @@ export function DashboardAnalyticsPhaseHint({
     >
       <InlineSpinner />
       <span>{label}</span>
+    </div>
+  );
+}
+
+/** Reserves hint row height while charts load so the section does not jump. */
+export function DashboardAnalyticsPhaseHintSlot({
+  show,
+  label,
+  className,
+}: {
+  show: boolean;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div className={cn("min-h-[1.375rem]", className)} aria-hidden={!show ? true : undefined}>
+      <DashboardAnalyticsPhaseHint label={label} className={cn(!show && "invisible")} />
     </div>
   );
 }
