@@ -46,7 +46,10 @@ import {
   DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "./dashboard/DashboardAnalyticsLoader";
-import { DashboardStableChartSlot } from "./dashboard/DashboardSectionLoading";
+import {
+  DashboardStableChartSlot,
+  InlineSpinner,
+} from "./dashboard/DashboardSectionLoading";
 import { runWithViewportScrollPreserved } from "../lib/dashboardScrollStability";
 import {
   Select,
@@ -785,12 +788,24 @@ export function AdminDashboard() {
           tipStatus: chartTipStatus,
         })
       : false);
+  const showOverviewLoadingSpinner = showStatLoading || showChartSkeletons;
 
   return (
     <main className="bg-background">
       <div className={platformUi.page}>
-        <div className="mb-4 flex justify-end">
-          <LiveConnectionBadge status={connectionStatus} />
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          {showOverviewLoadingSpinner ? (
+            <p
+              className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
+              role="status"
+              aria-live="polite"
+              aria-busy="true"
+            >
+              <InlineSpinner />
+              {t("admin.loadingOverview", { defaultValue: "Loading metrics and charts…" })}
+            </p>
+          ) : null}
+          <LiveConnectionBadge status={connectionStatus} className="ml-auto shrink-0" />
         </div>
         <NetworkOverviewHero health={health} />
 
