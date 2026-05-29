@@ -600,8 +600,11 @@ export function AdminDashboard() {
         const a = await fetchPlatformAnalytics(30, tz);
         if (gen !== analyticsLoadGenRef.current) return;
         if (a.warning) {
-          throw new Error(a.warning);
+          setAnalyticsError(a.warning);
+        } else {
+          setAnalyticsError(null);
         }
+        // Still hydrate charts from the safe payload (zeros) so Recharts mounts; stats cards stay separate.
         setAnalytics(a);
         setAnalyticsUpdatedAt(Date.now());
         persistSessionSnapshot({ analytics: a });
