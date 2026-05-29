@@ -59,8 +59,8 @@ export function notifySupportTicketCreated(params: {
     userId: managerUserId,
     payload: {
       type: NotificationType.SUPPORT_TICKET_CREATED,
-      title: `Support request received — ${ticket.ticketNumber}`,
-      body: `We received your message about "${ticket.subject}". Our team will respond in My Inbox.`,
+      title: `Support request received: ${ticket.ticketNumber}`,
+      body: `We received your message about "${ticket.subject}". Our team will respond shortly.`,
       url: businessTicketUrl(ticket.id),
       timestamp: new Date().toISOString(),
       metadata: {
@@ -91,7 +91,7 @@ export function notifySupportTicketReply(params: {
         adminIds,
         {
           type: NotificationType.SUPPORT_TICKET_REPLY,
-          title: `[TICKET] New reply — ${ticket.ticketNumber}`,
+          title: `[TICKET] New reply: ${ticket.ticketNumber}`,
           body: `${businessName}: ${preview}`,
           url: adminTicketUrl(ticket.id),
           timestamp: new Date().toISOString(),
@@ -115,7 +115,7 @@ export function notifySupportTicketReply(params: {
     userId: managerUserId,
     payload: {
       type: NotificationType.SUPPORT_TICKET_REPLY,
-      title: `CareTip replied — ${ticket.ticketNumber}`,
+      title: `CareTip replied: ${ticket.ticketNumber}`,
       body: preview,
       url: businessTicketUrl(ticket.id),
       timestamp: new Date().toISOString(),

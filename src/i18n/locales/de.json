@@ -708,9 +708,9 @@
     "business": {
       "eyebrow": "Hilfe",
       "title": "CareTip kontaktieren",
-      "subtitle": "Senden Sie eine Support-Anfrage an unser Plattform-Team. Kein Live-Chat — Antworten erhalten Sie im Posteingang.",
+      "subtitle": "Senden Sie eine Support-Anfrage an unser Plattform-Team. Kein Live-Chat. Antworten erhalten Sie im Posteingang.",
       "formTitle": "Neue Anfrage",
-      "formHint": "Beschreiben Sie Ihr Anliegen — wir antworten per E-Mail und In-App-Benachrichtigung.",
+      "formHint": "Beschreiben Sie Ihr Anliegen. Wir antworten per E-Mail und In-App-Benachrichtigung.",
       "subject": "Betreff",
       "subjectPlaceholder": "Kurze Zusammenfassung",
       "category": "Kategorie",

@@ -708,7 +708,7 @@
     "business": {
       "eyebrow": "Help",
       "title": "Contact CareTip",
-      "subtitle": "Send a support request to our platform team. This is not live chat — you will receive replies in your inbox.",
+      "subtitle": "Send a support request to our platform team. This is not live chat. You will receive replies in your inbox.",
       "formTitle": "New request",
       "formHint": "Describe your issue and we will respond by email and in-app notification.",
       "subject": "Subject",

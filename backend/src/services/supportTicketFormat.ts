@@ -20,5 +20,5 @@ export function inboxTitleForSupportTicket(params: {
   status: SupportTicketStatus;
   subject: string;
 }): string {
-  return `[TICKET] ${statusBadge(params.status)} ${params.ticketNumber} — ${params.subject}`;
+  return `[TICKET] ${statusBadge(params.status)} ${params.ticketNumber}: ${params.subject}`;
 }
