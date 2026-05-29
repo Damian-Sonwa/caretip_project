@@ -21,10 +21,21 @@ export async function listMine(req: Request, res: Response) {
     const cursor = typeof req.query.cursor === "string" ? req.query.cursor : undefined;
     const unreadOnly = req.query.unreadOnly === "true" || req.query.unreadOnly === "1";
 
+    const kind =
+      req.query.kind === "support" || req.query.kind === "other"
+        ? req.query.kind
+        : undefined;
+    const search = typeof req.query.q === "string" ? req.query.q : undefined;
+    const supportStatus =
+      typeof req.query.supportStatus === "string" ? req.query.supportStatus : undefined;
+
     const result = await listUserNotifications(userId, {
       limit: Number.isFinite(limit) ? limit : 30,
       cursor,
       unreadOnly,
+      kind,
+      search,
+      supportStatus,
     });
     const unreadCount = await getUnreadNotificationCount(userId);
     return res.json({ ...result, unreadCount });

@@ -672,10 +672,78 @@
     "inbox": {
       "title": "Notifications",
       "subtitle": "Operational updates for your account",
+      "subtitleAdmin": "Support tickets, verification alerts, and platform updates",
       "markAllRead": "Mark all read",
       "emptyTitle": "No notifications yet",
       "emptyBody": "Tips, alerts, and announcements will appear here.",
-      "loadMore": "Load more"
+      "loadMore": "Load more",
+      "search": "Search",
+      "searchPlaceholder": "Search inbox…",
+      "searchAria": "Search notifications",
+      "statusFilterAria": "Filter by ticket status",
+      "filter": {
+        "all": "All",
+        "support": "Support",
+        "other": "Other"
+      }
+    }
+  },
+  "support": {
+    "categories": {
+      "technical": "Technical issue",
+      "billing": "Billing",
+      "kyc": "KYC",
+      "feature_request": "Feature request",
+      "general": "General inquiry"
+    },
+    "status": {
+      "OPEN": "Open",
+      "PENDING": "Pending",
+      "RESOLVED": "Resolved",
+      "CLOSED": "Closed"
+    },
+    "filters": {
+      "allStatuses": "All statuses"
+    },
+    "business": {
+      "eyebrow": "Help",
+      "title": "Contact CareTip",
+      "subtitle": "Send a support request to our platform team. This is not live chat — you will receive replies in your inbox.",
+      "formTitle": "New request",
+      "formHint": "Describe your issue and we will respond by email and in-app notification.",
+      "subject": "Subject",
+      "subjectPlaceholder": "Brief summary of your issue",
+      "category": "Category",
+      "message": "Message",
+      "messagePlaceholder": "Include any relevant details (dates, error messages, staff names, etc.)",
+      "submit": "Submit request",
+      "historyTitle": "Your tickets",
+      "searchPlaceholder": "Search tickets…",
+      "searchAria": "Search support tickets",
+      "emptyHistory": "No support tickets yet.",
+      "loadError": "Could not load your support tickets.",
+      "submitError": "Could not submit your request. Try again.",
+      "createdToast": "Ticket {{number}} created"
+    },
+    "detail": {
+      "backSupport": "Back to support",
+      "backInbox": "Back to My inbox",
+      "loadError": "Could not load this ticket.",
+      "notFound": "Ticket not found.",
+      "statusLabel": "Status",
+      "threadAria": "Conversation",
+      "authorCareTip": "CareTip",
+      "authorYou": "You",
+      "replyPlaceholder": "Write your reply…",
+      "replyAria": "Reply message",
+      "sendReply": "Send reply",
+      "replySent": "Reply sent",
+      "replyError": "Could not send reply.",
+      "statusUpdated": "Status updated",
+      "statusError": "Could not update status.",
+      "closedHint": "This ticket is closed. Open a new request if you need more help.",
+      "viewInbox": "Return to My inbox",
+      "viewAllTickets": "View all tickets"
     }
   },
   "tipFlow": {
@@ -935,6 +1003,7 @@
       "tables": "Tables",
       "tipsActivity": "Tips & activity",
       "notifications": "Notifications",
+      "support": "Contact CareTip",
       "settings": "Settings"
     }
   },
@@ -1436,6 +1505,9 @@
       "title": "Notifications",
       "backAria": "Back",
       "loading": "Loading notifications…",
+      "loadFailed": "We couldn't load your tip alerts. Check your connection and try again.",
+      "loadFailedTitle": "Couldn't load tip alerts",
+      "retry": "Try again",
       "emptyTitle": "You're all caught up!",
       "emptySubtitle": "New tip activity will show up here.",
       "manageHint": "Manage your notifications",

@@ -268,6 +268,15 @@ export function StaffManagementPage() {
     void fetchEmployees();
   }, [fetchEmployees]);
 
+  /** Avoid an indefinite spinner if auth hydration never completes. */
+  useEffect(() => {
+    if (authHydrated && sessionValidated) return;
+    const timer = window.setTimeout(() => {
+      if (!authHydrated || !sessionValidated) setLoading(false);
+    }, 20_000);
+    return () => window.clearTimeout(timer);
+  }, [authHydrated, sessionValidated]);
+
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !isBusiness || !user?.businessId) return;
     let cancelled = false;

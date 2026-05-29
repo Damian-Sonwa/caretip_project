@@ -109,15 +109,53 @@ export async function createInboxNotification(input: {
   }
 }
 
+const SUPPORT_TYPES = [
+  "support_ticket_created",
+  "support_ticket_reply",
+  "support_ticket_status",
+] as const;
+
 export async function listUserNotifications(
   userId: string,
-  options?: { limit?: number; cursor?: string; unreadOnly?: boolean },
+  options?: {
+    limit?: number;
+    cursor?: string;
+    unreadOnly?: boolean;
+    /** `support` = only support ticket alerts; `other` = exclude them */
+    kind?: "support" | "other";
+    search?: string;
+    supportStatus?: string;
+  },
 ): Promise<{ items: InboxNotificationDto[]; nextCursor: string | null }> {
   const limit = Math.min(Math.max(options?.limit ?? 30, 1), 100);
+  const search = options?.search?.trim();
+  const supportStatus = options?.supportStatus?.trim().toUpperCase();
+
   const rows = await prisma.notification.findMany({
     where: {
       userId,
       ...(options?.unreadOnly ? { readAt: null } : {}),
+      ...(options?.kind === "support"
+        ? { type: { in: [...SUPPORT_TYPES] } }
+        : options?.kind === "other"
+          ? { type: { notIn: [...SUPPORT_TYPES] } }
+          : {}),
+      ...(search
+        ? {
+            OR: [
+              { title: { contains: search, mode: "insensitive" } },
+              { message: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+      ...(supportStatus
+        ? {
+            metadata: {
+              path: ["status"],
+              equals: supportStatus,
+            },
+          }
+        : {}),
     },
     orderBy: { createdAt: "desc" },
     take: limit + 1,

@@ -30,6 +30,10 @@ export const BusinessSettingsPage = lazyNamed(
   () => import("../pages/business/BusinessSettingsPage"),
   "BusinessSettingsPage",
 );
+export const BusinessSupportPage = lazyNamed(
+  () => import("../pages/business/BusinessSupportPage"),
+  "BusinessSupportPage",
+);
 export const BusinessOnboardingPage = lazyNamed(
   () => import("../pages/BusinessOnboardingPage"),
   "BusinessOnboardingPage",
@@ -85,6 +89,10 @@ export const PlatformAnnouncementsPage = lazyNamed(
 export const NotificationInboxPage = lazyNamed(
   () => import("../pages/shared/NotificationInboxPage"),
   "NotificationInboxPage",
+);
+export const SupportTicketDetailPage = lazyNamed(
+  () => import("../pages/shared/SupportTicketDetailPage"),
+  "SupportTicketDetailPage",
 );
 export const TipsActivityPage = lazyNamed(
   () => import("../pages/shared/TipsActivityPage"),

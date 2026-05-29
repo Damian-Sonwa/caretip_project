@@ -48,7 +48,7 @@ function downloadCsv(filename: string, csv: string) {
 export function TipsActivityPage() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
-  const { user } = useRequireAuth();
+  const { user, sessionValidated } = useRequireAuth();
   const { hasCapability } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
@@ -83,7 +83,10 @@ export function TipsActivityPage() {
   );
 
   const load = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      if (sessionValidated) setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -108,7 +111,7 @@ export function TipsActivityPage() {
     } finally {
       setLoading(false);
     }
-  }, [customFrom, customTo, range, skip, status, t, user?.id, user?.role]);
+  }, [customFrom, customTo, range, sessionValidated, skip, status, t, user?.id, user?.role]);
 
   useEffect(() => {
     void load();

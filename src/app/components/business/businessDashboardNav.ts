@@ -1,6 +1,7 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Bell,
+  HelpCircle,
   LayoutDashboard,
   LayoutGrid,
   MapPin,
@@ -31,6 +32,7 @@ export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
   { labelKey: "dashboardNav.business.tables", href: "/dashboard/tables", icon: LayoutGrid },
   { labelKey: "dashboardNav.business.tipsActivity", href: "/dashboard/transactions", icon: Wallet },
   { labelKey: "dashboardNav.business.notifications", href: "/dashboard/notifications", icon: Bell },
+  { labelKey: "dashboardNav.business.support", href: "/dashboard/support", icon: HelpCircle },
   { labelKey: "dashboardNav.business.settings", href: "/dashboard/settings", icon: Settings },
 ] as const;
 

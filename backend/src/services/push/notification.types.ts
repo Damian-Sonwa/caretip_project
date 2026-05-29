@@ -8,6 +8,9 @@ export const NotificationType = {
   QR_PAYMENT_SUCCESS: "qr_payment_success",
   ADMIN_ANNOUNCEMENT: "admin_announcement",
   SYSTEM_ALERT: "system_alert",
+  SUPPORT_TICKET_CREATED: "support_ticket_created",
+  SUPPORT_TICKET_REPLY: "support_ticket_reply",
+  SUPPORT_TICKET_STATUS: "support_ticket_status",
 } as const;
 
 export type NotificationType = (typeof NotificationType)[keyof typeof NotificationType];

@@ -78,6 +78,21 @@ enum NotificationPriority {
   high
 }
 
+enum SupportTicketStatus {
+  OPEN
+  PENDING
+  RESOLVED
+  CLOSED
+}
+
+enum SupportTicketCategory {
+  technical
+  billing
+  kyc
+  feature_request
+  general
+}
+
 model User {
   id              String   @id @default(cuid())
   email           String   @unique
@@ -118,6 +133,8 @@ model User {
   pushDeviceTokens PushDeviceToken[]
   notifications Notification[]
   announcementsCreated Announcement[] @relation("AnnouncementCreatedBy")
+  supportTicketsCreated SupportTicket[] @relation("SupportTicketCreatedBy")
+  supportTicketMessages SupportTicketMessage[] @relation("SupportTicketMessageAuthor")
 
   /** Account-level security features (optional; does not change auth flow unless enforced). */
   twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
@@ -204,6 +221,44 @@ model Announcement {
 
   @@index([createdAt(sort: Desc)])
   @@map("announcements")
+}
+
+/// Business → platform support request (thread body in SupportTicketMessage).
+model SupportTicket {
+  id              String               @id @default(cuid())
+  ticketNumber    String               @unique @map("ticket_number") @db.VarChar(32)
+  businessId      String               @map("business_id")
+  createdByUserId String               @map("created_by_user_id")
+  subject         String               @db.VarChar(256)
+  category        SupportTicketCategory
+  status          SupportTicketStatus  @default(OPEN)
+  createdAt       DateTime             @default(now()) @map("created_at")
+  updatedAt       DateTime             @updatedAt @map("updated_at")
+  closedAt        DateTime?            @map("closed_at")
+
+  business  Business               @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdBy User                   @relation("SupportTicketCreatedBy", fields: [createdByUserId], references: [id], onDelete: Cascade)
+  messages  SupportTicketMessage[]
+
+  @@index([businessId, updatedAt(sort: Desc)])
+  @@index([status, updatedAt(sort: Desc)])
+  @@map("support_tickets")
+}
+
+model SupportTicketMessage {
+  id           String   @id @default(cuid())
+  ticketId     String   @map("ticket_id")
+  authorUserId String   @map("author_user_id")
+  /** `business` (manager) or `admin` (platform operator). */
+  authorRole   String   @map("author_role") @db.VarChar(16)
+  body         String   @db.Text
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  ticket SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  author User          @relation("SupportTicketMessageAuthor", fields: [authorUserId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@map("support_ticket_messages")
 }
 
 /// Long-lived refresh tokens for session continuity (hashed at rest; rotated on every use).
@@ -334,6 +389,7 @@ model Business {
   employees    Employee[]
   transactions Transaction[]
   locations    Location[]
+  supportTickets SupportTicket[]
 
   @@map("businesses")
 }

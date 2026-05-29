@@ -1984,11 +1984,17 @@ export async function fetchMyNotifications(params?: {
   limit?: number;
   cursor?: string;
   unreadOnly?: boolean;
+  kind?: "support" | "other";
+  q?: string;
+  supportStatus?: string;
 }): Promise<NotificationsListResponse> {
   const q = new URLSearchParams();
   if (params?.limit) q.set("limit", String(params.limit));
   if (params?.cursor) q.set("cursor", params.cursor);
   if (params?.unreadOnly) q.set("unreadOnly", "true");
+  if (params?.kind) q.set("kind", params.kind);
+  if (params?.q?.trim()) q.set("q", params.q.trim());
+  if (params?.supportStatus?.trim()) q.set("supportStatus", params.supportStatus.trim());
   const suffix = q.toString() ? `?${q.toString()}` : "";
   const raw = await apiRequest<
     NotificationsListResponse & { notifications?: InboxNotification[] }
@@ -2034,6 +2040,153 @@ export async function markAllNotificationsReadApi(): Promise<{ updated: number; 
     headers: getHeaders(),
     credentials: "include",
   });
+}
+
+export type SupportTicketCategory =
+  | "technical"
+  | "billing"
+  | "kyc"
+  | "feature_request"
+  | "general";
+
+export type SupportTicketStatus = "OPEN" | "PENDING" | "RESOLVED" | "CLOSED";
+
+export type SupportTicketSummary = {
+  id: string;
+  ticketNumber: string;
+  businessId: string;
+  businessName: string;
+  subject: string;
+  category: SupportTicketCategory;
+  status: SupportTicketStatus;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string | null;
+  messageCount: number;
+  lastMessagePreview: string | null;
+};
+
+export type SupportTicketMessage = {
+  id: string;
+  authorUserId: string;
+  authorRole: "business" | "admin";
+  body: string;
+  createdAt: string;
+};
+
+export type SupportTicketDetail = SupportTicketSummary & {
+  messages: SupportTicketMessage[];
+};
+
+export async function createBusinessSupportTicket(input: {
+  subject: string;
+  category: SupportTicketCategory;
+  message: string;
+}): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath("/api/business/support/tickets"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify(input),
+  });
+}
+
+export async function fetchBusinessSupportTickets(params?: {
+  status?: SupportTicketStatus;
+  search?: string;
+}): Promise<{ tickets: SupportTicketSummary[] }> {
+  const q = new URLSearchParams();
+  if (params?.status) q.set("status", params.status);
+  if (params?.search?.trim()) q.set("search", params.search.trim());
+  const suffix = q.toString() ? `?${q.toString()}` : "";
+  return apiRequest(apiPath(`/api/business/support/tickets${suffix}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function fetchBusinessSupportTicket(
+  ticketId: string,
+): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath(`/api/business/support/tickets/${ticketId}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function replyBusinessSupportTicket(
+  ticketId: string,
+  body: string,
+): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath(`/api/business/support/tickets/${ticketId}/messages`), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ body }),
+  });
+}
+
+export async function fetchPlatformSupportTickets(params?: {
+  status?: SupportTicketStatus;
+  category?: SupportTicketCategory;
+  search?: string;
+}): Promise<{ tickets: SupportTicketSummary[] }> {
+  const q = new URLSearchParams();
+  if (params?.status) q.set("status", params.status);
+  if (params?.category) q.set("category", params.category);
+  if (params?.search?.trim()) q.set("search", params.search.trim());
+  const suffix = q.toString() ? `?${q.toString()}` : "";
+  return apiRequest(apiPath(`/api/platform/support/tickets${suffix}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function fetchPlatformSupportTicket(
+  ticketId: string,
+): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath(`/api/platform/support/tickets/${ticketId}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function replyPlatformSupportTicket(
+  ticketId: string,
+  body: string,
+): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath(`/api/platform/support/tickets/${ticketId}/messages`), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ body }),
+  });
+}
+
+export async function updatePlatformSupportTicketStatus(
+  ticketId: string,
+  status: SupportTicketStatus,
+): Promise<{ ticket: SupportTicketDetail }> {
+  return apiRequest(apiPath(`/api/platform/support/tickets/${ticketId}/status`), {
+    method: "PATCH",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ status }),
+  });
+}
+
+export const SUPPORT_TICKET_NOTIFICATION_TYPES = [
+  "support_ticket_created",
+  "support_ticket_reply",
+  "support_ticket_status",
+] as const;
+
+export function isSupportTicketNotification(type: string): boolean {
+  return (SUPPORT_TICKET_NOTIFICATION_TYPES as readonly string[]).includes(type);
 }
 
 export type PlatformAnnouncementRow = {

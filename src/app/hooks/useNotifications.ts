@@ -12,14 +12,26 @@ import { logClientError } from "../lib/clientLog";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 
+export type NotificationListFilters = {
+  kind?: "support" | "other";
+  q?: string;
+  supportStatus?: string;
+};
+
 type UseNotificationsOptions = {
   /** Caller intends notifications when the user is signed in (role checks, etc.). */
   enabled: boolean;
   /** Prefetch list when dropdown opens */
   loadList?: boolean;
+  /** Server-side inbox filters (My Inbox page). */
+  listFilters?: NotificationListFilters;
 };
 
-export function useNotifications({ enabled, loadList = false }: UseNotificationsOptions) {
+export function useNotifications({
+  enabled,
+  loadList = false,
+  listFilters,
+}: UseNotificationsOptions) {
   const apiReady = isProtectedApiReady();
   const active = enabled && apiReady;
   const socketReady = useDeferSocketConnect(active);
@@ -45,20 +57,25 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
     }
   }, [active]);
 
+  const filterKey = JSON.stringify(listFilters ?? {});
+
   const loadNotifications = useCallback(
-    async (opts?: { append?: boolean; cursor?: string | null }) => {
+    async (opts?: { append?: boolean; cursor?: string | null; reset?: boolean }) => {
       if (!active) return;
       setLoading(true);
       try {
         const res = await fetchMyNotifications({
           limit: 25,
           cursor: opts?.cursor ?? undefined,
+          kind: listFilters?.kind,
+          q: listFilters?.q,
+          supportStatus: listFilters?.supportStatus,
         });
         setUnreadCount(res.unreadCount);
         setNextCursor(res.nextCursor);
         const nextItems = res.items;
         setItems((prev) =>
-          opts?.append ? [...(prev ?? []), ...nextItems] : nextItems,
+          opts?.append && !opts?.reset ? [...(prev ?? []), ...nextItems] : nextItems,
         );
         loadedRef.current = true;
       } catch (err) {
@@ -69,7 +86,7 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
         setLoading(false);
       }
     },
-    [active],
+    [active, filterKey, listFilters?.kind, listFilters?.q, listFilters?.supportStatus],
   );
 
   const markRead = useCallback(async (id: string) => {
@@ -115,8 +132,9 @@ export function useNotifications({ enabled, loadList = false }: UseNotifications
 
   useEffect(() => {
     if (!active || !loadList) return;
-    if (!loadedRef.current) void loadNotifications();
-  }, [active, loadList, loadNotifications]);
+    loadedRef.current = false;
+    void loadNotifications({ reset: true });
+  }, [active, loadList, loadNotifications, filterKey]);
 
   useEffect(() => {
     if (!socket || !active) return;

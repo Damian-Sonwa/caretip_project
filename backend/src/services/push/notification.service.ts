@@ -27,8 +27,11 @@ function defaultUrlForType(type: NotificationType, role: string | null): string 
       return "/dashboard";
     case "admin_announcement":
     case "system_alert":
-      if (role === "SUPER_ADMIN") return "/platform-admin/dashboard";
-      return role === "MANAGER" ? "/dashboard" : "/employee/dashboard";
+    case "support_ticket_created":
+    case "support_ticket_reply":
+    case "support_ticket_status":
+      if (role === "SUPER_ADMIN") return "/platform-admin/notifications";
+      return role === "MANAGER" ? "/dashboard/notifications" : "/employee/dashboard";
     default:
       if (role === "SUPER_ADMIN") return "/platform-admin/dashboard";
       return role === "MANAGER" ? "/dashboard" : "/employee/dashboard";
@@ -78,6 +81,9 @@ async function userWantsNotification(
     switch (type) {
       case "admin_announcement":
       case "system_alert":
+      case "support_ticket_created":
+      case "support_ticket_reply":
+      case "support_ticket_status":
         return settings?.systemAlerts ?? true;
       case "new_login":
         return settings?.notifyNewLogin ?? true;
@@ -87,6 +93,11 @@ async function userWantsNotification(
   }
 
   switch (type) {
+    case "support_ticket_created":
+    case "support_ticket_reply":
+    case "support_ticket_status":
+      if (user.role === "MANAGER") return settings?.systemAlerts ?? true;
+      return false;
     case "tip_received":
     case "qr_payment_success":
       if (user.role === "EMPLOYEE") return employeePush;

@@ -672,10 +672,78 @@
     "inbox": {
       "title": "Benachrichtigungen",
       "subtitle": "Betriebliche Updates für Ihr Konto",
+      "subtitleAdmin": "Support-Tickets, Verifizierungs-Hinweise und Plattform-Updates",
       "markAllRead": "Alle als gelesen markieren",
       "emptyTitle": "Noch keine Benachrichtigungen",
       "emptyBody": "Trinkgelder, Hinweise und Ankündigungen erscheinen hier.",
-      "loadMore": "Mehr laden"
+      "loadMore": "Mehr laden",
+      "search": "Suchen",
+      "searchPlaceholder": "Posteingang durchsuchen…",
+      "searchAria": "Benachrichtigungen suchen",
+      "statusFilterAria": "Nach Ticket-Status filtern",
+      "filter": {
+        "all": "Alle",
+        "support": "Support",
+        "other": "Sonstige"
+      }
+    }
+  },
+  "support": {
+    "categories": {
+      "technical": "Technisches Problem",
+      "billing": "Abrechnung",
+      "kyc": "KYC",
+      "feature_request": "Funktionswunsch",
+      "general": "Allgemeine Anfrage"
+    },
+    "status": {
+      "OPEN": "Offen",
+      "PENDING": "In Bearbeitung",
+      "RESOLVED": "Gelöst",
+      "CLOSED": "Geschlossen"
+    },
+    "filters": {
+      "allStatuses": "Alle Status"
+    },
+    "business": {
+      "eyebrow": "Hilfe",
+      "title": "CareTip kontaktieren",
+      "subtitle": "Senden Sie eine Support-Anfrage an unser Plattform-Team. Kein Live-Chat — Antworten erhalten Sie im Posteingang.",
+      "formTitle": "Neue Anfrage",
+      "formHint": "Beschreiben Sie Ihr Anliegen — wir antworten per E-Mail und In-App-Benachrichtigung.",
+      "subject": "Betreff",
+      "subjectPlaceholder": "Kurze Zusammenfassung",
+      "category": "Kategorie",
+      "message": "Nachricht",
+      "messagePlaceholder": "Relevante Details (Datum, Fehlermeldungen, Mitarbeitende, …)",
+      "submit": "Anfrage senden",
+      "historyTitle": "Ihre Tickets",
+      "searchPlaceholder": "Tickets suchen…",
+      "searchAria": "Support-Tickets suchen",
+      "emptyHistory": "Noch keine Support-Tickets.",
+      "loadError": "Support-Tickets konnten nicht geladen werden.",
+      "submitError": "Anfrage konnte nicht gesendet werden. Bitte erneut versuchen.",
+      "createdToast": "Ticket {{number}} erstellt"
+    },
+    "detail": {
+      "backSupport": "Zurück zum Support",
+      "backInbox": "Zurück zu Mein Posteingang",
+      "loadError": "Ticket konnte nicht geladen werden.",
+      "notFound": "Ticket nicht gefunden.",
+      "statusLabel": "Status",
+      "threadAria": "Konversation",
+      "authorCareTip": "CareTip",
+      "authorYou": "Sie",
+      "replyPlaceholder": "Antwort schreiben…",
+      "replyAria": "Antwortnachricht",
+      "sendReply": "Antwort senden",
+      "replySent": "Antwort gesendet",
+      "replyError": "Antwort konnte nicht gesendet werden.",
+      "statusUpdated": "Status aktualisiert",
+      "statusError": "Status konnte nicht aktualisiert werden.",
+      "closedHint": "Dieses Ticket ist geschlossen. Eröffnen Sie bei Bedarf eine neue Anfrage.",
+      "viewInbox": "Zum Posteingang",
+      "viewAllTickets": "Alle Tickets anzeigen"
     }
   },
   "tipFlow": {
@@ -935,6 +1003,7 @@
       "tables": "Tische",
       "tipsActivity": "Trinkgelder & Aktivität",
       "notifications": "Benachrichtigungen",
+      "support": "CareTip kontaktieren",
       "settings": "Einstellungen"
     }
   },
@@ -1438,6 +1507,9 @@
       "title": "Benachrichtigungen",
       "backAria": "Zurück",
       "loading": "Benachrichtigungen werden geladen…",
+      "loadFailed": "Trinkgeld-Hinweise konnten nicht geladen werden. Verbindung prüfen und erneut versuchen.",
+      "loadFailedTitle": "Trinkgeld-Hinweise nicht geladen",
+      "retry": "Erneut versuchen",
       "emptyTitle": "Sie sind auf dem neuesten Stand!",
       "emptySubtitle": "Neue Trinkgeldaktivität erscheint hier.",
       "manageHint": "Benachrichtigungen verwalten",

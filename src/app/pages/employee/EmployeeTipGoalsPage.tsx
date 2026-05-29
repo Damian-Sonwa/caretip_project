@@ -38,7 +38,7 @@ const iconBtn =
 
 export function EmployeeTipGoalsPage() {
   const { t } = useTranslation();
-  const { user } = useRequireAuth();
+  const { user, authReady, sessionValidated } = useRequireAuth();
   const [loading, setLoading] = useState(true);
   const [goals, setGoals] = useState<EmployeeGoalRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -65,6 +65,11 @@ export function EmployeeTipGoalsPage() {
   }, [t]);
 
   useEffect(() => {
+    if (!authReady) return;
+    if (sessionValidated && (!user || user.role !== "employee")) {
+      setLoading(false);
+      return;
+    }
     if (!user || user.role !== "employee") return;
     let cancelled = false;
     (async () => {
@@ -78,7 +83,7 @@ export function EmployeeTipGoalsPage() {
     return () => {
       cancelled = true;
     };
-  }, [refresh, user?.role, user?.id]);
+  }, [authReady, refresh, sessionValidated, user?.role, user?.id]);
 
   const openCreate = () => {
     setEditing(null);
@@ -111,6 +116,7 @@ export function EmployeeTipGoalsPage() {
 
   const periodLabel = (p: GoalPeriod) => t(`business.period.${p}`);
 
+  if (!authReady) return <CareTipPageLoader />;
   if (!user || user.role !== "employee") return null;
   if (loading) return <CareTipPageLoader />;
 

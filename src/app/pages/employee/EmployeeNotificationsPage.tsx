@@ -1,10 +1,10 @@
-import { useEffect, useMemo, useReducer, useState } from "react";
+import { useCallback, useEffect, useMemo, useReducer, useState } from "react";
 import { Bell, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket } from "../../hooks/useSocket";
-import { getTipsByEmployee, type TipItem } from "../../lib/api";
+import { listEmployeeTips, type TipActivityRow, type TipItem } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
@@ -33,12 +33,22 @@ interface NewTipPayload {
   monthlyGoal: number | null;
 }
 
+function activityRowsToTipItems(items: TipActivityRow[]): TipItem[] {
+  return items.map((row) => ({
+    id: row.id,
+    amount: row.amount,
+    status: String(row.status),
+    createdAt: row.createdAt,
+  }));
+}
+
 export function EmployeeNotificationsPage() {
   const { t, i18n } = useTranslation();
-  const { user } = useRequireAuth();
+  const { user, authReady, sessionValidated } = useRequireAuth();
   const [tips, setTips] = useState<TipItem[]>([]);
   const [displayTips, setDisplayTips] = useState<TipItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const { socket } = useSocket(user?.role === "employee");
   const [selectionMode, setSelectionMode] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -47,39 +57,40 @@ export function EmployeeNotificationsPage() {
 
   useEffect(() => subscribeEmployeeNotifications(() => syncReadState()), []);
 
-  useEffect(() => {
-    if (!user || user.role !== "employee") return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const data = await getTipsByEmployee();
-        if (!cancelled) {
-          const apiTips = data.tips ?? [];
-          setTips(apiTips);
-          const resolved = resolveEmployeeTipsWithDevPreview(apiTips, {
-            totalEarningsEur: data.totalEarningsEur,
-            totalSupporters: data.totalSupporters,
-          });
-          setDisplayTips(resolved);
-          if (user.employeeId) {
-            syncEmployeeNotificationTips(user.employeeId, resolved);
-          }
-        }
-      } catch (err) {
-        logClientError("EmployeeNotificationsPage", err);
-        if (!cancelled) {
-          setTips([]);
-          setDisplayTips([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+  const loadTips = useCallback(async () => {
+    if (!authReady || !user || user.role !== "employee") return;
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const data = await listEmployeeTips({ take: 100, range: "month" });
+      const apiTips = activityRowsToTipItems(data.items ?? []);
+      setTips(apiTips);
+      const resolved = resolveEmployeeTipsWithDevPreview(apiTips, {
+        totalEarningsEur: 0,
+        totalSupporters: data.total ?? apiTips.length,
+      });
+      setDisplayTips(resolved);
+      if (user.employeeId) {
+        syncEmployeeNotificationTips(user.employeeId, resolved);
       }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
+    } catch (err) {
+      logClientError("EmployeeNotificationsPage", err);
+      setTips([]);
+      setDisplayTips([]);
+      setLoadError(err instanceof Error ? err.message : t("employee.notifications.loadFailed"));
+    } finally {
+      setLoading(false);
+    }
+  }, [authReady, user, t]);
+
+  useEffect(() => {
+    if (!authReady) return;
+    if (sessionValidated && (!user || user.role !== "employee")) {
+      setLoading(false);
+      return;
+    }
+    void loadTips();
+  }, [authReady, sessionValidated, user?.id, user?.role, loadTips]);
 
   useEffect(() => {
     if (loading || !user?.employeeId || displayTips.length === 0) return;
@@ -107,6 +118,16 @@ export function EmployeeNotificationsPage() {
   }, [socket, user?.role, user?.employeeId]);
 
   const allIds = useMemo(() => displayTips.map((tipRow) => tipRow.id), [displayTips]);
+
+  if (!authReady) {
+    return (
+      <div className={employeeUi.page}>
+        <div className={employeeUi.pageInner}>
+          <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
+        </div>
+      </div>
+    );
+  }
 
   if (!user || user.role !== "employee") return null;
 
@@ -197,6 +218,19 @@ export function EmployeeNotificationsPage() {
 
         {loading ? (
           <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
+        ) : loadError ? (
+          <div className={employeeUi.cardStatic}>
+            <EmployeeEmptyState
+              icon={<Bell className="h-6 w-6" aria-hidden />}
+              title={t("employee.notifications.loadFailedTitle")}
+              description={loadError}
+            />
+            <div className="mt-4 flex justify-center">
+              <Button type="button" variant="outline" className={employeeUi.btnSecondary} onClick={() => void loadTips()}>
+                {t("employee.notifications.retry")}
+              </Button>
+            </div>
+          </div>
         ) : displayTips.length === 0 ? (
           <div className={employeeUi.cardStatic}>
             <EmployeeEmptyState

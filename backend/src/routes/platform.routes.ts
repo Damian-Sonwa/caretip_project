@@ -7,6 +7,8 @@ import {
   platformUploadVerification,
 } from "../middleware/platformUpload.middleware.js";
 import * as platformController from "../controllers/platform.controller.js";
+import * as supportTicketController from "../controllers/supportTicket.controller.js";
+import { supportTicketReplyLimiter } from "../middleware/supportTicketRateLimit.middleware.js";
 import { clientSafeMessage } from "../utils/httpErrors.js";
 
 const router = Router();
@@ -52,5 +54,17 @@ router.post(
 router.post("/impersonate", platformController.impersonate);
 router.get("/announcements", platformController.listAnnouncements);
 router.post("/announcements", platformController.sendAnnouncement);
+
+router.get("/support/tickets", supportTicketController.listPlatformTickets);
+router.get("/support/tickets/:ticketId", supportTicketController.getPlatformTicket);
+router.post(
+  "/support/tickets/:ticketId/messages",
+  supportTicketReplyLimiter,
+  supportTicketController.replyPlatformTicket,
+);
+router.patch(
+  "/support/tickets/:ticketId/status",
+  supportTicketController.patchPlatformTicketStatus,
+);
 
 export default router;

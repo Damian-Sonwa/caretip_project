@@ -29,6 +29,7 @@ import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import pushRoutes from "./routes/push.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import supportTicketRoutes from "./routes/supportTicket.routes.js";
 import landingAiRoutes from "./routes/landingAi.routes.js";
 import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
@@ -113,6 +114,7 @@ app.get(
   businessController.getMyStats
 );
 app.use("/api/business", businessRoutes);
+app.use("/api/business/support", supportTicketRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/goals", goalsRoutes);
 app.use("/api/staff", staffRoutes);
