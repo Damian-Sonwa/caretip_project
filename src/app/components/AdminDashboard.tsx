@@ -888,14 +888,9 @@ export function AdminDashboard() {
           initial={false}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
-          className={cn(platformUi.analyticsSection, "relative")}
+          className={platformUi.analyticsSection}
           aria-busy={showChartSkeletons || undefined}
         >
-          <DashboardRefreshIndicator
-            isRefreshing={analyticsSyncing}
-            lastUpdatedAt={analyticsUpdatedAt}
-            className="absolute right-0 top-0 sm:right-2"
-          />
           <div className={platformUi.analyticsHeader}>
             <div className={platformUi.analyticsHeaderCopy}>
               <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
@@ -907,34 +902,41 @@ export function AdminDashboard() {
               </p>
             </div>
             <div className={platformUi.analyticsControls}>
-              <Select
-                value={analyticsTimezone}
-                onValueChange={(v) => {
-                  runWithViewportScrollPreserved(() => {
-                    setAnalyticsTimezone(v);
-                    analyticsTimezoneRef.current = v;
-                    try {
-                      localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                    } catch {
-                      // ignore
-                    }
-                    const nextGen = ++analyticsLoadGenRef.current;
-                    void loadAnalytics(nextGen, { bustCache: true });
-                  });
-                }}
-                disabled={analyticsSyncing}
-              >
-                <SelectTrigger size="sm" className="w-full" aria-label={t("admin.timezoneAria")}>
-                  <SelectValue placeholder={t("admin.timezonePlaceholder")} />
-                </SelectTrigger>
-                <SelectContent>
-                  {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
-                    <SelectItem key={tz} value={tz}>
-                      {tz}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="flex w-full min-w-0 flex-col gap-1.5 sm:items-end">
+                <Select
+                  value={analyticsTimezone}
+                  onValueChange={(v) => {
+                    runWithViewportScrollPreserved(() => {
+                      setAnalyticsTimezone(v);
+                      analyticsTimezoneRef.current = v;
+                      try {
+                        localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                      } catch {
+                        // ignore
+                      }
+                      const nextGen = ++analyticsLoadGenRef.current;
+                      void loadAnalytics(nextGen, { bustCache: true });
+                    });
+                  }}
+                  disabled={analyticsSyncing}
+                >
+                  <SelectTrigger size="sm" className="w-full sm:min-w-[14rem]" aria-label={t("admin.timezoneAria")}>
+                    <SelectValue placeholder={t("admin.timezonePlaceholder")} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
+                      <SelectItem key={tz} value={tz}>
+                        {tz}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <DashboardRefreshIndicator
+                  isRefreshing={analyticsSyncing}
+                  lastUpdatedAt={analyticsUpdatedAt}
+                  className="shrink-0 text-right"
+                />
+              </div>
               <span className="text-xs font-medium leading-snug text-muted-foreground max-lg:line-clamp-2">
                 {t("admin.tipStatusNote")}
               </span>
