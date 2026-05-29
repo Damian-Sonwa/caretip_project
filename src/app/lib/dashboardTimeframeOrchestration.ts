@@ -9,6 +9,9 @@ export type BusinessAnalyticsTimeframe = "week" | "month" | "year";
 /** Defer hero (month summary) refresh until the active timeframe pipeline settles. */
 export const BUSINESS_HERO_MONTH_DEFER_MS = 4_000;
 
+/** Wait after active period settles before hydrating inactive timeframes (post-first-paint). */
+export const DASHBOARD_INACTIVE_PREFETCH_DELAY_MS = 900;
+
 export function abortTimeframeControllers(
   controllers: Map<BusinessAnalyticsTimeframe, AbortController>,
   keep?: BusinessAnalyticsTimeframe,

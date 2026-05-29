@@ -6,13 +6,18 @@ import {
   mergeBusinessDashboardStats,
 } from "../lib/api";
 import { createDashboardSwrStore, DASHBOARD_SWR_METRICS_TTL_MS } from "../lib/dashboardSwrCache";
-import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
+import {
+  canUseDashboardSwrCache,
+  canUsePeriodSwitchCache,
+  markDashboardLiveSettled,
+} from "../lib/dashboardHydration";
 import { isAbortError, toUserFriendlyMessage } from "../lib/errorMessages";
 import { useDashboardTabRefocus } from "./useDashboardTabRefocus";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import {
   abortTimeframeControllers,
   BUSINESS_HERO_MONTH_DEFER_MS,
+  DASHBOARD_INACTIVE_PREFETCH_DELAY_MS,
 } from "../lib/dashboardTimeframeOrchestration";
 
 export type AnalyticsTimeframe = "week" | "month" | "year";
@@ -107,6 +112,26 @@ export function useBusinessDashboardStats(
     return hit.merged;
   }, []);
 
+  const hydratePeriodSessionCache = useCallback(
+    (tf: AnalyticsTimeframe): void => {
+      if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return;
+      hydrateFromSwr(tf);
+    },
+    [hydrateFromSwr],
+  );
+
+  const isPeriodSessionReady = useCallback(
+    (tf: AnalyticsTimeframe): boolean => {
+      const summaryPartial = summaryPartialRef.current.get(tf);
+      if (!summaryPartial || !hasMetricValues(summaryPartial as BusinessDashboardStats)) {
+        return false;
+      }
+      if (!advancedAnalyticsEnabledRef.current) return true;
+      return Boolean(analyticsPartialRef.current.get(tf));
+    },
+    [],
+  );
+
   const commitUiStats = useCallback((tf: AnalyticsTimeframe, seq: number, fromNetwork: boolean) => {
     if (tf !== tfRef.current || uiRequestSeqRef.current !== seq) return;
     const merged = mergeBusinessDashboardStats(
@@ -184,6 +209,8 @@ export function useBusinessDashboardStats(
       const existingInflight = statsLoadInflightByTfRef.current.get(tf);
       if (existingInflight && !revalidate) return existingInflight;
 
+      hydratePeriodSessionCache(tf);
+
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       if (affectsUi) {
         abortInactiveTimeframes(tf);
@@ -204,12 +231,26 @@ export function useBusinessDashboardStats(
       let summarySettled = summaryFromMemory || Boolean(cached && summaryPartialRef.current.has(tf));
       const analyticsInMemory = Boolean(analyticsPartialRef.current.get(tf));
       let analyticsSettled =
-        analyticsInMemory &&
-        (!revalidate || Boolean(cached && analyticsPartialRef.current.has(tf)));
+        !advancedAnalyticsEnabledRef.current ||
+        (analyticsInMemory &&
+          (!revalidate || Boolean(cached && analyticsPartialRef.current.has(tf))));
+      const periodSessionReady = isPeriodSessionReady(tf);
 
       if (affectsUi) {
-        setIsRevalidating(true);
         setStatsLoadFailed(null);
+        if (periodSessionReady && !revalidate) {
+          setSummaryLoading(false);
+          setAnalyticsLoading(false);
+          setIsRevalidating(false);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("charts", "ready");
+          devSetHydrationPhase("goals", "ready");
+          commitUiStats(tf, seq, false);
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+          scheduleDeferredHeroMonth();
+          return;
+        }
+        setIsRevalidating(true);
         if (summaryFromMemory && !opts?.soft) {
           commitUiStats(tf, seq, true);
           setSummaryLoading(false);
@@ -368,6 +409,9 @@ export function useBusinessDashboardStats(
         }
 
         if (stillActive()) {
+          if (!affectsUi && summarySettled && analyticsSettled) {
+            persistSwr(tf);
+          }
           markDashboardLiveSettled(hasSettledLiveUiRef);
           if (affectsUi) {
             scheduleDeferredHeroMonth();
@@ -417,6 +461,9 @@ export function useBusinessDashboardStats(
       commitUiStats,
       applyHeroFromMonth,
       hydrateFromSwr,
+      hydratePeriodSessionCache,
+      isPeriodSessionReady,
+      persistSwr,
       applyCachedToUi,
       abortInactiveTimeframes,
       cancelDeferredHeroMonth,
@@ -515,11 +562,11 @@ export function useBusinessDashboardStats(
         prefetchQueueRef.current = null;
         if (!sessionValidated || !enabled) return;
         step();
-      }, 1200);
+      }, DASHBOARD_INACTIVE_PREFETCH_DELAY_MS);
     },
     [enabled, sessionValidated, loadStatsFor],
   );
-  scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
+      scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
 
   const setAnalyticsTimeframe = useCallback(
     (tf: AnalyticsTimeframe) => {
@@ -530,24 +577,37 @@ export function useBusinessDashboardStats(
       uiRequestSeqRef.current += 1;
       setAnalyticsTimeframeState(tf);
 
-      const partial = summaryPartialRef.current.get(tf);
-      if (partial && hasMetricValues(partial as BusinessDashboardStats)) {
+      hydratePeriodSessionCache(tf);
+
+      if (isPeriodSessionReady(tf)) {
         const seq = uiRequestSeqRef.current;
         setSummaryLoading(false);
+        setAnalyticsLoading(false);
+        setIsRevalidating(false);
         devSetHydrationPhase("metrics", "ready");
-        const hasAnalytics = Boolean(analyticsPartialRef.current.get(tf));
-        if (!advancedAnalyticsEnabledRef.current || hasAnalytics) {
-          setAnalyticsLoading(false);
-          devSetHydrationPhase("charts", "ready");
-          devSetHydrationPhase("goals", "ready");
-        } else {
+        devSetHydrationPhase("charts", "ready");
+        devSetHydrationPhase("goals", "ready");
+        commitUiStats(tf, seq, false);
+      } else {
+        const partial = summaryPartialRef.current.get(tf);
+        if (partial && hasMetricValues(partial as BusinessDashboardStats)) {
+          const seq = uiRequestSeqRef.current;
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
           setAnalyticsLoading(true);
           devSetHydrationPhase("charts", "loading");
+          commitUiStats(tf, seq, false);
         }
-        commitUiStats(tf, seq, false);
       }
     },
-    [abortInactiveTimeframes, cancelDeferredHeroMonth, cancelDeferredAnalytics, commitUiStats],
+    [
+      abortInactiveTimeframes,
+      cancelDeferredHeroMonth,
+      cancelDeferredAnalytics,
+      commitUiStats,
+      hydratePeriodSessionCache,
+      isPeriodSessionReady,
+    ],
   );
 
   useEffect(() => {

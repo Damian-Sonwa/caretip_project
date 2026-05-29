@@ -20,6 +20,11 @@ export function canUseDashboardSwrCache(opts: {
   return Boolean(opts.hasSettledLiveUi && opts.soft);
 }
 
+/** After first live paint, allow session SWR + partial maps on period switches (not cold load). */
+export function canUsePeriodSwitchCache(hasSettledLiveUi: boolean): boolean {
+  return hasSettledLiveUi;
+}
+
 export function markDashboardLiveSettled(ref: { current: boolean }): void {
   ref.current = true;
 }

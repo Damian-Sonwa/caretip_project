@@ -11,7 +11,11 @@ import {
   createDashboardSwrStore,
   DASHBOARD_SWR_METRICS_TTL_MS,
 } from "../lib/dashboardSwrCache";
-import { canUseDashboardSwrCache, markDashboardLiveSettled } from "../lib/dashboardHydration";
+import {
+  canUsePeriodSwitchCache,
+  markDashboardLiveSettled,
+} from "../lib/dashboardHydration";
+import { DASHBOARD_INACTIVE_PREFETCH_DELAY_MS } from "../lib/dashboardTimeframeOrchestration";
 import { isAbortError, isApiConnectivityError, toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import {
@@ -112,15 +116,14 @@ export function useEmployeeDashboardAnalytics(
   const advancedAnalyticsEnabledRef = useRef(advancedAnalyticsEnabled);
   advancedAnalyticsEnabledRef.current = advancedAnalyticsEnabled;
   const mountGenerationRef = useRef(0);
+  const prefetchQueueRef = useRef<number | null>(null);
+  const scheduleInactivePrefetchRef = useRef<(activeTf: EmployeeAnalyticsTimeframe) => void>(() => {});
 
   const abortInactiveTimeframes = useCallback((activeTf: EmployeeAnalyticsTimeframe) => {
     for (const [tf, controller] of abortRef.current) {
       if (tf === activeTf) continue;
       controller.abort();
       abortRef.current.delete(tf);
-    }
-    for (const tf of ["today", "week", "month"] as const) {
-      if (tf !== activeTf) clearEmployeeTipsClientCache(tf);
     }
   }, []);
 
@@ -157,6 +160,26 @@ export function useEmployeeDashboardAnalytics(
     return hit.payload;
   }, []);
 
+  const hydratePeriodSessionCache = useCallback(
+    (tf: EmployeeAnalyticsTimeframe): void => {
+      if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return;
+      hydrateFromSwr(tf);
+    },
+    [hydrateFromSwr],
+  );
+
+  const isPeriodSessionReady = useCallback((tf: EmployeeAnalyticsTimeframe): boolean => {
+    const summaryPartial = summaryPartialRef.current.get(tf);
+    if (!summaryPartial || typeof summaryPartial.periodAmountEur !== "number") {
+      return false;
+    }
+    if (!advancedAnalyticsEnabledRef.current) return true;
+    return (
+      summaryPartial.analyticsBundled === true ||
+      Boolean(analyticsPartialRef.current.get(tf))
+    );
+  }, []);
+
   const commitUiPayload = useCallback(
     (tf: EmployeeAnalyticsTimeframe, seq: number, fromNetwork: boolean) => {
       if (tf !== tfRef.current || uiRequestSeqRef.current !== seq) return;
@@ -188,27 +211,35 @@ export function useEmployeeDashboardAnalytics(
       uiRequestSeqRef.current += 1;
       setAnalyticsTimeframe(tf);
 
-      const summaryPartial = summaryPartialRef.current.get(tf);
-      if (summaryPartial && typeof summaryPartial.periodAmountEur === "number") {
+      hydratePeriodSessionCache(tf);
+
+      if (isPeriodSessionReady(tf)) {
         const seq = uiRequestSeqRef.current;
         setSummaryLoading(false);
+        setAnalyticsLoading(false);
+        setIsRevalidating(false);
         devSetHydrationPhase("metrics", "ready");
-        const hasAnalytics =
-          summaryPartial.analyticsBundled === true ||
-          Boolean(analyticsPartialRef.current.get(tf)) ||
-          !advancedAnalyticsEnabledRef.current;
-        if (hasAnalytics) {
-          setAnalyticsLoading(false);
-          devSetHydrationPhase("charts", "ready");
-          devSetHydrationPhase("goals", "ready");
-        } else {
+        devSetHydrationPhase("charts", "ready");
+        devSetHydrationPhase("goals", "ready");
+        commitUiPayload(tf, seq, false);
+      } else {
+        const summaryPartial = summaryPartialRef.current.get(tf);
+        if (summaryPartial && typeof summaryPartial.periodAmountEur === "number") {
+          const seq = uiRequestSeqRef.current;
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
           setAnalyticsLoading(true);
           devSetHydrationPhase("charts", "loading");
+          commitUiPayload(tf, seq, false);
         }
-        commitUiPayload(tf, seq, false);
       }
     },
-    [abortInactiveTimeframes, commitUiPayload],
+    [
+      abortInactiveTimeframes,
+      commitUiPayload,
+      hydratePeriodSessionCache,
+      isPeriodSessionReady,
+    ],
   );
 
   const loadFor = useCallback(
@@ -218,19 +249,30 @@ export function useEmployeeDashboardAnalytics(
     ): Promise<void> => {
       if (!enabled) return;
 
+      hydratePeriodSessionCache(tf);
+
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const cached =
-        affectsUi &&
-        canUseDashboardSwrCache({ hasSettledLiveUi: hasSettledLiveUiRef.current, soft: opts?.soft })
-          ? hydrateFromSwr(tf)
-          : null;
+      const revalidate = opts?.soft === true;
+      const periodSessionReady = isPeriodSessionReady(tf);
 
       if (affectsUi) {
-        setIsRevalidating(true);
         setError(null);
-        if (cached) {
-          setPayload(cached);
+        if (periodSessionReady && !revalidate) {
+          setSummaryLoading(false);
+          setAnalyticsLoading(false);
+          setIsRevalidating(false);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("charts", "ready");
+          devSetHydrationPhase("goals", "ready");
+          commitUiPayload(tf, seq, false);
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+          return;
+        }
+        setIsRevalidating(true);
+        const swrPayload = hydrateFromSwr(tf);
+        if (swrPayload && canUsePeriodSwitchCache(hasSettledLiveUiRef.current) && opts?.soft) {
+          setPayload(swrPayload);
           setDataTimeframe(tf);
           setSummaryLoading(false);
           setAnalyticsLoading(true);
@@ -261,13 +303,12 @@ export function useEmployeeDashboardAnalytics(
       const controller = new AbortController();
       abortRef.current.set(tf, controller);
 
-      const silent = opts?.silent === true || Boolean(cached);
-      const revalidate = opts?.soft === true;
+      const silent = opts?.silent === true || periodSessionReady;
       const stillActive = () =>
         !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      let summarySettled = !revalidate && Boolean(cached);
-      let analyticsSettled = !revalidate && Boolean(cached);
+      let summarySettled = periodSessionReady && !revalidate;
+      let analyticsSettled = periodSessionReady && !revalidate;
 
       const applyBundledAnalyticsFromSummary = (summaryData: EmployeeTipsResponse) => {
         if (typeof summaryData.totalEarningsEur === "number") {
@@ -345,7 +386,13 @@ export function useEmployeeDashboardAnalytics(
         }
 
         if (stillActive()) {
+          if (!affectsUi && summarySettled && analyticsSettled) {
+            persistSwr(tf);
+          }
           markDashboardLiveSettled(hasSettledLiveUiRef);
+          if (affectsUi && tf === tfRef.current) {
+            scheduleInactivePrefetchRef.current(tf);
+          }
         }
       } catch (e) {
         if (isAbortError(e) || controller.signal.aborted) return;
@@ -364,10 +411,45 @@ export function useEmployeeDashboardAnalytics(
         }
       }
     },
-    [enabled, commitUiPayload, syncTipsFromResponse, hydrateFromSwr],
+    [
+      enabled,
+      commitUiPayload,
+      syncTipsFromResponse,
+      hydratePeriodSessionCache,
+      isPeriodSessionReady,
+      persistSwr,
+    ],
   );
 
   loadForRef.current = loadFor;
+
+  const scheduleInactivePrefetch = useCallback(
+    (activeTf: EmployeeAnalyticsTimeframe) => {
+      if (prefetchQueueRef.current != null) {
+        window.clearTimeout(prefetchQueueRef.current);
+      }
+      const others: EmployeeAnalyticsTimeframe[] = (["today", "week", "month"] as const).filter(
+        (t) => t !== activeTf,
+      );
+      let idx = 0;
+      const step = () => {
+        if (idx >= others.length) return;
+        const nextTf = others[idx++]!;
+        if (nextTf === tfRef.current) {
+          step();
+          return;
+        }
+        void loadFor(nextTf, { affectsUi: false, silent: true }).finally(step);
+      };
+      prefetchQueueRef.current = window.setTimeout(() => {
+        prefetchQueueRef.current = null;
+        if (!enabled) return;
+        step();
+      }, DASHBOARD_INACTIVE_PREFETCH_DELAY_MS);
+    },
+    [enabled, loadFor],
+  );
+  scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
 
   useEffect(() => {
     if (!enabled) {
