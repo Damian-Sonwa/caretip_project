@@ -218,8 +218,6 @@ export function useBusinessDashboardStats(
       if (!sessionValidated || !enabled) return;
 
       const revalidate = opts?.soft === true;
-      const existingInflight = statsLoadInflightByTfRef.current.get(tf);
-      if (existingInflight && !revalidate) return existingInflight;
 
       hydratePeriodSessionCache(tf);
 
@@ -247,6 +245,62 @@ export function useBusinessDashboardStats(
         (analyticsInMemory &&
           (!revalidate || Boolean(cached && analyticsPartialRef.current.has(tf))));
       const periodSessionReady = isPeriodSessionReady(tf);
+
+      const existingInflight = statsLoadInflightByTfRef.current.get(tf);
+      if (existingInflight && !revalidate) {
+        if (!affectsUi) return existingInflight;
+        setStatsLoadFailed(null);
+        if (periodSessionReady) {
+          setSummaryLoading(false);
+          setAnalyticsLoading(false);
+          setIsRevalidating(false);
+          devSetHydrationPhase("metrics", "ready");
+          devSetHydrationPhase("charts", "ready");
+          devSetHydrationPhase("goals", "ready");
+          commitUiStats(tf, seq, false);
+          markDashboardLiveSettled(hasSettledLiveUiRef);
+        } else if (summaryFromMemory && !opts?.soft) {
+          setIsRevalidating(true);
+          commitUiStats(tf, seq, true);
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
+          if (!analyticsSettled) {
+            setAnalyticsLoading(true);
+            devSetHydrationPhase("charts", "loading");
+          } else {
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+          }
+        } else {
+          setIsRevalidating(true);
+          setSummaryLoading(true);
+          setAnalyticsLoading(true);
+          devSetHydrationPhase("metrics", "loading");
+          devSetHydrationPhase("charts", "loading");
+          devSetHydrationPhase("goals", "loading");
+        }
+        void existingInflight
+          .then(() => {
+            if (tf !== tfRef.current || uiRequestSeqRef.current !== seq) return;
+            setSummaryLoading(false);
+            setAnalyticsLoading(false);
+            setIsRevalidating(false);
+            devSetHydrationPhase("metrics", "ready");
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+            commitUiStats(tf, seq, true);
+            markDashboardLiveSettled(hasSettledLiveUiRef);
+            scheduleDeferredHeroMonth();
+            if (tf === tfRef.current) scheduleInactivePrefetchRef.current(tf);
+          })
+          .catch(() => {
+            if (tf !== tfRef.current || uiRequestSeqRef.current !== seq) return;
+            setIsRevalidating(false);
+            setAnalyticsLoading(false);
+          });
+        return existingInflight;
+      }
 
       if (affectsUi) {
         setStatsLoadFailed(null);
@@ -574,9 +628,14 @@ export function useBusinessDashboardStats(
       if (prefetchQueueRef.current != null) {
         window.clearTimeout(prefetchQueueRef.current);
       }
-      const others: AnalyticsTimeframe[] = ["week", "month", "year"].filter(
-        (t): t is AnalyticsTimeframe => t !== activeTf,
-      );
+      // Year is switched often but was previously prefetched last; prioritize it after the active period.
+      const prefetchOrder: AnalyticsTimeframe[] =
+        activeTf === "month"
+          ? ["year", "week"]
+          : activeTf === "week"
+            ? ["month", "year"]
+            : ["month", "week"];
+      const others = prefetchOrder.filter((t) => t !== activeTf);
       let idx = 0;
       const step = () => {
         if (idx >= others.length) return;
@@ -603,39 +662,16 @@ export function useBusinessDashboardStats(
       abortInactiveTimeframes(tf);
       cancelDeferredHeroMonth();
       cancelDeferredAnalytics();
-      uiRequestSeqRef.current += 1;
+      tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
-
       hydratePeriodSessionCache(tf);
-
-      if (isPeriodSessionReady(tf)) {
-        const seq = uiRequestSeqRef.current;
-        setSummaryLoading(false);
-        setAnalyticsLoading(false);
-        setIsRevalidating(false);
-        devSetHydrationPhase("metrics", "ready");
-        devSetHydrationPhase("charts", "ready");
-        devSetHydrationPhase("goals", "ready");
-        commitUiStats(tf, seq, false);
-      } else {
-        const partial = summaryPartialRef.current.get(tf);
-        if (partial && hasMetricValues(partial as BusinessDashboardStats)) {
-          const seq = uiRequestSeqRef.current;
-          setSummaryLoading(false);
-          devSetHydrationPhase("metrics", "ready");
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("charts", "loading");
-          commitUiStats(tf, seq, false);
-        }
-      }
+      void loadStatsForRef.current(tf, { affectsUi: true });
     },
     [
       abortInactiveTimeframes,
       cancelDeferredHeroMonth,
       cancelDeferredAnalytics,
-      commitUiStats,
       hydratePeriodSessionCache,
-      isPeriodSessionReady,
     ],
   );
 
@@ -679,7 +715,7 @@ export function useBusinessDashboardStats(
       window.clearTimeout(handle);
       statsMountGenerationRef.current += 1;
     };
-  }, [enabled, sessionValidated, analyticsTimeframe, refetchTick]);
+  }, [enabled, sessionValidated, refetchTick]);
 
   const refetchLive = useCallback(() => {
     clearBusinessStatsClientCache();
