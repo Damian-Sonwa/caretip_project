@@ -6,6 +6,10 @@ FIREBASE_SERVICE_ACCOUNT_JSON_COPY.md
 *.log
 .DS_Store
 
+# Markdown — only root README.md is tracked
+*.md
+!/README.md
+
 # Playwright
 /test-results/
 /playwright-report/
