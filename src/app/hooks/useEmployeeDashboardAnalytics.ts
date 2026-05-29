@@ -99,6 +99,13 @@ export function useEmployeeDashboardAnalytics(
   const [error, setError] = useState<string | null>(null);
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [dataRevision, setDataRevision] = useState(0);
+  const [lastKnownGoodMetrics, setLastKnownGoodMetrics] = useState<{
+    periodTipCount: number;
+    periodAmountEur: number;
+    monthlyGoal: number | null;
+    currentMonthTotal: number;
+    goalProgress: EmployeeGoalProgress | null;
+  } | null>(null);
 
   const tfRef = useRef(analyticsTimeframe);
   tfRef.current = analyticsTimeframe;
@@ -196,6 +203,13 @@ export function useEmployeeDashboardAnalytics(
       setLastUpdatedAt(Date.now());
       if (fromNetwork) setDataRevision((n) => n + 1);
       if (merged.tips?.length) syncTipsFromResponse(merged);
+      setLastKnownGoodMetrics({
+        periodTipCount: next.periodTipCount,
+        periodAmountEur: next.periodAmountEur,
+        monthlyGoal: next.monthlyGoal,
+        currentMonthTotal: next.currentMonthTotal,
+        goalProgress: next.goalProgress,
+      });
     },
     [persistSwr, syncTipsFromResponse],
   );
@@ -466,6 +480,7 @@ export function useEmployeeDashboardAnalytics(
       analyticsPartialRef.current.clear();
       setPayload(null);
       setDataTimeframe(null);
+      setLastKnownGoodMetrics(null);
       setSummaryLoading(true);
       setAnalyticsLoading(true);
       setIsRevalidating(false);
@@ -596,6 +611,14 @@ export function useEmployeeDashboardAnalytics(
     displayPayload?.goalProgress,
   ]);
 
+  const displayMetricsStable = useMemo(() => {
+    if (displayMetrics) return displayMetrics;
+    if (!enabled) return null;
+    // Preserve last known good values during rapid period switches to avoid “zero flashes”.
+    if (summaryLoading || analyticsLoading || isRevalidating) return lastKnownGoodMetrics;
+    return null;
+  }, [analyticsLoading, displayMetrics, enabled, isRevalidating, lastKnownGoodMetrics, summaryLoading]);
+
   const isMetricsInitialLoad =
     enabled && !displayMetrics && summaryLoading;
 
@@ -608,7 +631,7 @@ export function useEmployeeDashboardAnalytics(
     analyticsTimeframe,
     setAnalyticsTimeframe: setAnalyticsTimeframeControlled,
     displayPayload,
-    displayMetrics,
+    displayMetrics: displayMetricsStable,
     payload,
     valuesMatchAnalyticsPeriod,
     summaryLoading: isMetricsInitialLoad,

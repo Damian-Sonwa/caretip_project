@@ -65,6 +65,11 @@ export function useBusinessDashboardStats(
   const [lastUpdatedAt, setLastUpdatedAt] = useState<number | null>(null);
   const [dataRevision, setDataRevision] = useState(0);
   const [refetchTick, setRefetchTick] = useState(0);
+  const [lastKnownGoodMetrics, setLastKnownGoodMetrics] = useState<{
+    totalTips: number;
+    tipCount: number;
+    employeeCount: number;
+  } | null>(null);
 
   const tfRef = useRef(analyticsTimeframe);
   tfRef.current = analyticsTimeframe;
@@ -146,6 +151,13 @@ export function useBusinessDashboardStats(
     setStatsLoadFailed(null);
     setLastUpdatedAt(Date.now());
     if (fromNetwork) setDataRevision((n) => n + 1);
+    if (hasMetricValues(merged)) {
+      setLastKnownGoodMetrics({
+        totalTips: typeof merged.totalTips === "number" ? merged.totalTips : 0,
+        tipCount: typeof merged.tipCount === "number" ? merged.tipCount : 0,
+        employeeCount: typeof merged.employeeCount === "number" ? merged.employeeCount : 0,
+      });
+    }
   }, [persistSwr]);
 
   const applyHeroFromMonth = useCallback((tf: AnalyticsTimeframe) => {
@@ -291,6 +303,9 @@ export function useBusinessDashboardStats(
         !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
       let analyticsDeferred = false;
+      // If we schedule deferred analytics, this token lets us detect later cancellation/supersession
+      // and avoid leaving `analyticsLoading` stuck on.
+      const deferredToken = { tf, seq };
 
       const handlePendingVerification = (msg: string) => {
         if (!msg.toLowerCase().includes("pending verification")) return false;
@@ -437,7 +452,21 @@ export function useBusinessDashboardStats(
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled && !analyticsDeferred) setAnalyticsLoading(false);
+          if (!analyticsSettled) {
+            // Normal path: no deferred analytics => clear loading here.
+            if (!analyticsDeferred) {
+              setAnalyticsLoading(false);
+            } else {
+              // Deferred analytics was intended, but if it was cancelled (timer cleared) or the request
+              // is no longer current, ensure we don't leave charts/goals stuck loading.
+              const deferredCancelled = analyticsDeferTimerRef.current == null;
+              if (controller.signal.aborted || !stillActive() || deferredCancelled) {
+                setAnalyticsLoading(false);
+                devSetHydrationPhase("charts", "idle");
+                devSetHydrationPhase("goals", "idle");
+              }
+            }
+          }
           // If analytics is deferred, `isRevalidating` already ends on summary settle.
           if (!analyticsDeferred) setIsRevalidating(false);
         }
@@ -630,6 +659,7 @@ export function useBusinessDashboardStats(
       setStatsLoadFailed(null);
       setPendingVerification(false);
       setLastUpdatedAt(null);
+      setLastKnownGoodMetrics(null);
       devSetHydrationPhase("hero", "idle");
       devSetHydrationPhase("metrics", "idle");
       devSetHydrationPhase("charts", "idle");
@@ -735,6 +765,23 @@ export function useBusinessDashboardStats(
     };
   }, [displayStats?.totalTips, displayStats?.tipCount, displayStats?.employeeCount]);
 
+  const displayMetricsStable = useMemo(() => {
+    if (displayMetrics) return displayMetrics;
+    // During fast period switches, keep last known good values visible instead of flashing zeros.
+    if (!enabled || !sessionValidated || pendingVerification) return null;
+    if (summaryLoading || analyticsLoading || isRevalidating) return lastKnownGoodMetrics;
+    return null;
+  }, [
+    analyticsLoading,
+    displayMetrics,
+    enabled,
+    isRevalidating,
+    lastKnownGoodMetrics,
+    pendingVerification,
+    sessionValidated,
+    summaryLoading,
+  ]);
+
   const isMetricsInitialLoad =
     enabled &&
     sessionValidated &&
@@ -765,7 +812,7 @@ export function useBusinessDashboardStats(
     heroStats,
     stats,
     displayStats,
-    displayMetrics,
+    displayMetrics: displayMetricsStable,
     statsTimeframe,
     valuesMatchAnalyticsPeriod,
     statsLoading: isMetricsInitialLoad,
