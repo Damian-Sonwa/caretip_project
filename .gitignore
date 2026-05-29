@@ -1,16 +1,59 @@
 node_modules
 dist
-.env
-.env.local
 FIREBASE_SERVICE_ACCOUNT_JSON_COPY.md
 *.log
 .DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Environment (keep committed examples only)
+.env
+.env.*
+!.env.example
+!**/.env.example
 
 # Markdown — only root README.md is tracked
 *.md
 !/README.md
 
-# Playwright
+# Local restore / accidental paste dumps
+.restore_*.txt
+*.restore_*_report.txt
+
+# Cursor IDE (local rules, agents, state)
+.cursor/
+
+# Qodo local AI tooling
+.qodo/
+
+# GDPR / ROPA compliance artifacts (not for version control)
+GDPR*
+*GDPR*
+
+# Frontend build caches
+.vite/
+dev-dist/
+*.tsbuildinfo
+.eslintcache
+
+# Test & coverage
+coverage/
+.nyc_output/
 /test-results/
 /playwright-report/
 /blob-report/
+playwright/.cache/
+
+# Secrets (see also backend/.gitignore)
+firebase-service-account.json
+**/firebase-service-account.json
+*.pem
+*.p12
+
+# Editor (shared .vscode/settings.json stays tracked)
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
