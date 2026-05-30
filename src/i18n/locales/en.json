@@ -1803,7 +1803,55 @@
     },
     "onboarding": {
       "toastSessionExpired": "Your session expired. Please sign in again.",
-      "toastSavedLoadingDashboard": "Saved. Loading your dashboard…"
+      "toastSavedLoadingDashboard": "Saved. Loading your dashboard…",
+      "eyebrow": "Business onboarding",
+      "headline": "Welcome to CareTip",
+      "description": "Set up your venue profile in a few guided steps. You can update everything later from your dashboard.",
+      "asideAria": "Onboarding overview",
+      "progressAria": "Onboarding progress",
+      "visualBadge": "Venue profile",
+      "steps": {
+        "businessDetails": "Business details",
+        "locationDetails": "Location details",
+        "verificationFinish": "Verification & finish"
+      },
+      "stepDesc": {
+        "businessDetails": "Tell us about your business so guests and staff see the right name and category.",
+        "locationDetails": "Add your registered address and optional contact number for your profile.",
+        "verificationFinish": "Upload your logo and website, then finish to open your dashboard."
+      },
+      "fields": {
+        "legalName": "Legal business name",
+        "legalNamePlaceholder": "e.g. CareTip Hospitality Ltd",
+        "businessType": "Business type",
+        "businessTypePlaceholder": "Select a type",
+        "address": "Address",
+        "addressPlaceholder": "Street, city, postal code",
+        "phone": "Phone number",
+        "website": "Website",
+        "logo": "Logo upload",
+        "logoHint": "Optional. PNG or JPEG works best.",
+        "optional": "Optional"
+      },
+      "businessTypes": {
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "salon": "Salon",
+        "bar": "Bar",
+        "cafe": "Cafe",
+        "other": "Other"
+      },
+      "trust": {
+        "secure": "Secure & encrypted",
+        "fast": "Setup takes less than 5 minutes",
+        "editable": "You can edit everything later"
+      },
+      "actions": {
+        "back": "Back",
+        "continue": "Continue",
+        "finish": "Finish setup",
+        "saving": "Saving…"
+      }
     },
     "goalStatus": {
       "achieved": "Achieved",

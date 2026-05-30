@@ -1805,7 +1805,55 @@
     },
     "onboarding": {
       "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
-      "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…"
+      "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…",
+      "eyebrow": "Business-Onboarding",
+      "headline": "Willkommen bei CareTip",
+      "description": "Richten Sie Ihr Betriebsprofil in wenigen Schritten ein. Alles lässt sich später im Dashboard anpassen.",
+      "asideAria": "Onboarding-Übersicht",
+      "progressAria": "Onboarding-Fortschritt",
+      "visualBadge": "Betriebsprofil",
+      "steps": {
+        "businessDetails": "Betriebsdaten",
+        "locationDetails": "Standort",
+        "verificationFinish": "Abschluss & Profil"
+      },
+      "stepDesc": {
+        "businessDetails": "Name und Kategorie Ihres Betriebs für Gäste und Team.",
+        "locationDetails": "Registrierte Adresse und optional Telefonnummer für Ihr Profil.",
+        "verificationFinish": "Logo und Website hochladen, dann Dashboard öffnen."
+      },
+      "fields": {
+        "legalName": "Rechtlicher Betriebsname",
+        "legalNamePlaceholder": "z. B. CareTip Hospitality GmbH",
+        "businessType": "Betriebstyp",
+        "businessTypePlaceholder": "Typ wählen",
+        "address": "Adresse",
+        "addressPlaceholder": "Straße, Ort, PLZ",
+        "phone": "Telefonnummer",
+        "website": "Website",
+        "logo": "Logo hochladen",
+        "logoHint": "Optional. PNG oder JPEG empfohlen.",
+        "optional": "Optional"
+      },
+      "businessTypes": {
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "salon": "Salon",
+        "bar": "Bar",
+        "cafe": "Café",
+        "other": "Sonstiges"
+      },
+      "trust": {
+        "secure": "Sicher & verschlüsselt",
+        "fast": "Einrichtung in unter 5 Minuten",
+        "editable": "Alles später bearbeitbar"
+      },
+      "actions": {
+        "back": "Zurück",
+        "continue": "Weiter",
+        "finish": "Einrichtung abschließen",
+        "saving": "Speichern…"
+      }
     },
     "goalStatus": {
       "achieved": "Erreicht",

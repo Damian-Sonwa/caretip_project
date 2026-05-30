@@ -1,8 +1,17 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft, ArrowRight, Building2, Globe2, ImagePlus, Loader2, MapPin, Phone } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Globe2,
+  ImagePlus,
+  Loader2,
+  MapPin,
+  Phone,
+} from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
@@ -13,12 +22,29 @@ import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
+import { BusinessOnboardingAside } from "../components/business/BusinessOnboardingAside";
+import {
+  BusinessOnboardingProgress,
+  type OnboardingStep,
+} from "../components/business/BusinessOnboardingProgress";
+
+const STEP_TITLE_KEYS = [
+  "business.onboarding.steps.businessDetails",
+  "business.onboarding.steps.locationDetails",
+  "business.onboarding.steps.verificationFinish",
+] as const;
+
+const STEP_DESC_KEYS = [
+  "business.onboarding.stepDesc.businessDetails",
+  "business.onboarding.stepDesc.locationDetails",
+  "business.onboarding.stepDesc.verificationFinish",
+] as const;
 
 export function BusinessOnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { user, authStatus, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
-  const [step, setStep] = useState<1 | 2 | 3>(1);
+  const [step, setStep] = useState<OnboardingStep>(1);
   const [syncingOnboarding, setSyncingOnboarding] = useState(true);
 
   const [legalBusinessName, setLegalBusinessName] = useState("");
@@ -57,7 +83,7 @@ export function BusinessOnboardingPage() {
     return true;
   }, [step, legalBusinessName, businessType, registeredAddress]);
 
-  const saveStep = async (targetStep: 1 | 2 | 3) => {
+  const saveStep = async (targetStep: OnboardingStep) => {
     // Save progressively to the Business table. This is the only source of truth.
     if (targetStep === 1) {
       await patchBusinessProfile({
@@ -93,186 +119,201 @@ export function BusinessOnboardingPage() {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.55 }}
-      className="relative flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.45 }}
+      className="business-onboarding-page relative flex min-h-screen flex-col overflow-x-hidden font-sans"
     >
       <Navigation />
-      <main className="flex flex-1 items-center justify-center px-4 py-14">
-        <div className="w-full min-w-0 max-w-2xl">
-          <motion.div
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.55 }}
-            className="business-onboarding-card box-border w-full min-w-0 overflow-hidden rounded-3xl border border-gray-200 bg-white p-5 shadow-[0_18px_50px_rgba(0,0,0,0.06)] sm:p-8 dark:border-neutral-800 dark:bg-neutral-950"
+      <main className="business-onboarding-main">
+        <div className="business-onboarding-split">
+          <BusinessOnboardingAside step={step} />
+
+          <section
+            className="business-onboarding-form-panel"
+            aria-labelledby="business-onboarding-step-heading"
           >
-            <div className="mb-8">
-              <p className="text-sm font-semibold text-primary">Business onboarding</p>
-              <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl">
-                Set up your business profile
-              </h1>
-              <p className="mt-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                This information powers your business profile. You can edit it later.
-              </p>
-              <div className="mt-5 flex items-center justify-between text-xs font-semibold text-neutral-600 dark:text-neutral-400">
-                <span className={step === 1 ? "text-neutral-900 dark:text-neutral-100" : ""}>Step 1 of 3</span>
-                <span className={step === 2 ? "text-neutral-900 dark:text-neutral-100" : ""}>Step 2 of 3</span>
-                <span className={step === 3 ? "text-neutral-900 dark:text-neutral-100" : ""}>Step 3 of 3</span>
+            <div className="business-onboarding-form-card">
+              <BusinessOnboardingProgress step={step} className="mb-6 lg:hidden" />
+
+              <div className="mb-6">
+                <h2
+                  id="business-onboarding-step-heading"
+                  className="business-onboarding-form-panel__step-title"
+                >
+                  {t(STEP_TITLE_KEYS[step - 1])}
+                </h2>
+                <p className="business-onboarding-form-panel__step-desc">
+                  {t(STEP_DESC_KEYS[step - 1])}
+                </p>
+              </div>
+
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={step}
+                  initial={{ opacity: 0, x: 12 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -12 }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                >
+                  {step === 1 ? (
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                      <OnboardingField
+                        icon={<Building2 className="h-4 w-4 text-primary" />}
+                        label={t("business.onboarding.fields.legalName")}
+                        placeholder={t("business.onboarding.fields.legalNamePlaceholder")}
+                        value={legalBusinessName}
+                        onChange={setLegalBusinessName}
+                      />
+                      <label className="block">
+                        <span className="business-onboarding-field-label">
+                          <span className="business-onboarding-field-icon">
+                            <Building2 className="h-4 w-4 text-primary" />
+                          </span>
+                          {t("business.onboarding.fields.businessType")}
+                        </span>
+                        <select
+                          value={businessType}
+                          onChange={(e) => setBusinessType(e.target.value)}
+                          className="business-onboarding-input"
+                        >
+                          <option value="">{t("business.onboarding.fields.businessTypePlaceholder")}</option>
+                          <option value="Restaurant">{t("business.onboarding.businessTypes.restaurant")}</option>
+                          <option value="Hotel">{t("business.onboarding.businessTypes.hotel")}</option>
+                          <option value="Salon">{t("business.onboarding.businessTypes.salon")}</option>
+                          <option value="Bar">{t("business.onboarding.businessTypes.bar")}</option>
+                          <option value="Cafe">{t("business.onboarding.businessTypes.cafe")}</option>
+                          <option value="Other">{t("business.onboarding.businessTypes.other")}</option>
+                        </select>
+                      </label>
+                    </div>
+                  ) : null}
+
+                  {step === 2 ? (
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                      <OnboardingField
+                        icon={<MapPin className="h-4 w-4 text-primary" />}
+                        label={t("business.onboarding.fields.address")}
+                        placeholder={t("business.onboarding.fields.addressPlaceholder")}
+                        value={registeredAddress}
+                        onChange={setRegisteredAddress}
+                      />
+                      <OnboardingField
+                        icon={<Phone className="h-4 w-4 text-primary" />}
+                        label={t("business.onboarding.fields.phone")}
+                        placeholder={t("business.onboarding.fields.optional")}
+                        value={contactPhone}
+                        onChange={setContactPhone}
+                      />
+                    </div>
+                  ) : null}
+
+                  {step === 3 ? (
+                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                      <label className="block">
+                        <span className="business-onboarding-field-label">
+                          <span className="business-onboarding-field-icon">
+                            <ImagePlus className="h-4 w-4 text-primary" />
+                          </span>
+                          {t("business.onboarding.fields.logo")}
+                        </span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
+                          className="business-onboarding-input file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary"
+                        />
+                        <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
+                          {t("business.onboarding.fields.logoHint")}
+                        </p>
+                      </label>
+                      <OnboardingField
+                        icon={<Globe2 className="h-4 w-4 text-primary" />}
+                        label={t("business.onboarding.fields.website")}
+                        placeholder={t("business.onboarding.fields.optional")}
+                        value={website}
+                        onChange={setWebsite}
+                      />
+                    </div>
+                  ) : null}
+                </motion.div>
+              </AnimatePresence>
+
+              <div className="business-onboarding-actions mt-8 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (busy) return;
+                    if (step === 1) return;
+                    setStep((s) => (s === 2 ? 1 : 2));
+                  }}
+                  disabled={step === 1}
+                  className={cn(
+                    "business-onboarding-back inline-flex w-full min-w-0 shrink-0 items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-3.5 text-sm font-bold text-neutral-900 shadow-none transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-6 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900",
+                  )}
+                >
+                  <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+                  {t("business.onboarding.actions.back")}
+                </button>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (busy) return;
+                    setBusy(true);
+                    try {
+                      if (!canContinue) return;
+
+                      if (step !== 3) {
+                        await saveStep(step);
+                        setStep((s) => (s === 1 ? 2 : 3));
+                        return;
+                      }
+
+                      await saveStep(3);
+                      await setHasCompletedOnboarding(true);
+                      const refreshed = await refetchUser();
+                      if (!refreshed) {
+                        toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
+                      }
+                      navigate("/dashboard", { replace: true });
+                    } catch (err) {
+                      const msg = err instanceof Error ? err.message : String(err);
+                      if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {
+                        handleAuthFailure();
+                        return;
+                      }
+                      toast.error(toUserFriendlyMessage(err));
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                  disabled={!canContinue || busy}
+                  aria-busy={busy}
+                  className={cn(
+                    caretipBtnPrimary,
+                    "business-onboarding-continue",
+                    "w-full min-w-0 max-w-full shrink px-5",
+                    "sm:ml-auto sm:flex-1 sm:basis-0 sm:px-6",
+                    "disabled:cursor-not-allowed disabled:opacity-60",
+                  )}
+                >
+                  {busy ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      {t("business.onboarding.actions.saving")}
+                    </>
+                  ) : (
+                    <>
+                      {step === 3
+                        ? t("business.onboarding.actions.finish")
+                        : t("business.onboarding.actions.continue")}
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-
-            {step === 1 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <OnboardingField
-                  icon={<Building2 className="h-4 w-4 text-primary" />}
-                  label="Legal business name"
-                  placeholder="e.g. CareTip Hospitality Ltd"
-                  value={legalBusinessName}
-                  onChange={setLegalBusinessName}
-                />
-                <label className="block">
-                  <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                      <Building2 className="h-4 w-4 text-primary" />
-                    </span>
-                    Business type
-                  </span>
-                  <select
-                    value={businessType}
-                    onChange={(e) => setBusinessType(e.target.value)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-neutral-900 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-                  >
-                    <option value="">Select a type</option>
-                    <option value="Restaurant">Restaurant</option>
-                    <option value="Hotel">Hotel</option>
-                    <option value="Salon">Salon</option>
-                    <option value="Bar">Bar</option>
-                    <option value="Cafe">Cafe</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </label>
-              </div>
-            ) : null}
-
-            {step === 2 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <OnboardingField
-                  icon={<MapPin className="h-4 w-4 text-primary" />}
-                  label="Address"
-                  placeholder="Street, city, postal code"
-                  value={registeredAddress}
-                  onChange={setRegisteredAddress}
-                />
-                <OnboardingField
-                  icon={<Phone className="h-4 w-4 text-primary" />}
-                  label="Phone number"
-                  placeholder="Optional"
-                  value={contactPhone}
-                  onChange={setContactPhone}
-                />
-              </div>
-            ) : null}
-
-            {step === 3 ? (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <label className="block">
-                  <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-                      <ImagePlus className="h-4 w-4 text-primary" />
-                    </span>
-                    Logo upload
-                  </span>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-neutral-900 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-                  />
-                  <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
-                    Optional. PNG or JPEG works best.
-                  </p>
-                </label>
-                <OnboardingField
-                  icon={<Globe2 className="h-4 w-4 text-primary" />}
-                  label="Website"
-                  placeholder="Optional"
-                  value={website}
-                  onChange={setWebsite}
-                />
-              </div>
-            ) : null}
-
-            <div className="business-onboarding-actions mt-8 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
-              <button
-                type="button"
-                onClick={async () => {
-                  if (busy) return;
-                  if (step === 1) return;
-                  setStep((s) => (s === 2 ? 1 : 2));
-                }}
-                className="business-onboarding-back inline-flex w-full min-w-0 shrink-0 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-white px-5 py-3.5 text-sm font-bold text-neutral-900 shadow-none transition hover:bg-gray-50 sm:w-auto sm:px-6 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900"
-              >
-                <ArrowLeft className="h-4 w-4 shrink-0" />
-                Back
-              </button>
-              <button
-                type="button"
-                onClick={async () => {
-                  if (busy) return;
-                  setBusy(true);
-                  try {
-                    if (!canContinue) return;
-
-                    if (step !== 3) {
-                      await saveStep(step);
-                      setStep((s) => (s === 1 ? 2 : 3));
-                      return;
-                    }
-
-                    await saveStep(3);
-                    await setHasCompletedOnboarding(true);
-                    const refreshed = await refetchUser();
-                    if (!refreshed) {
-                      // If refresh failed (e.g., backend temporarily down), still try navigation,
-                      // but avoid trapping the user in a loop by showing a clear message.
-                      toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
-                    }
-                    navigate("/dashboard", { replace: true });
-                  } catch (err) {
-                    const msg = err instanceof Error ? err.message : String(err);
-                    if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {
-                      handleAuthFailure();
-                      return;
-                    }
-                    toast.error(toUserFriendlyMessage(err));
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-                disabled={!canContinue}
-                className={cn(
-                  caretipBtnPrimary,
-                  "business-onboarding-continue",
-                  "w-full min-w-0 max-w-full shrink px-5",
-                  "sm:ml-auto sm:flex-1 sm:basis-0 sm:px-6",
-                  "disabled:cursor-not-allowed disabled:opacity-60",
-                )}
-              >
-                {busy ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    Saving…
-                  </>
-                ) : (
-                  <>
-                    {step === 3 ? "Finish setup" : "Continue"}
-                    <ArrowRight className="h-4 w-4" />
-                  </>
-                )}
-              </button>
-            </div>
-          </motion.div>
+          </section>
         </div>
       </main>
       <Footer variant="minimal" surface="dark" />
@@ -289,19 +330,16 @@ function OnboardingField(props: {
 }) {
   return (
     <label className="block">
-      <span className="mb-2 flex items-center gap-2 text-sm font-semibold text-neutral-900 dark:text-neutral-100">
-        <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary/10">
-          {props.icon}
-        </span>
+      <span className="business-onboarding-field-label">
+        <span className="business-onboarding-field-icon">{props.icon}</span>
         {props.label}
       </span>
       <input
         value={props.value}
         onChange={(e) => props.onChange(e.target.value)}
         placeholder={props.placeholder}
-        className="w-full rounded-xl border border-gray-200 bg-white px-3 py-3 text-sm font-medium text-neutral-900 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
+        className="business-onboarding-input"
       />
     </label>
   );
 }
-
