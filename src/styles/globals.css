@@ -751,17 +751,20 @@ textarea::placeholder {
   opacity: 0.65;
 }
 
+/* Dashboard skeleton system — shared shimmer (metrics, charts, tables, lists). */
 .dashboard-hero-metric-skeleton__bar,
 .dashboard-hero-metric-skeleton__sub {
   display: block;
   border-radius: 0.375rem;
-  background: linear-gradient(
+  background-color: hsl(var(--muted) / 0.42);
+  background-image: linear-gradient(
     90deg,
-    hsl(var(--muted) / 0.28) 0%,
-    hsl(var(--muted) / 0.5) 45%,
-    hsl(var(--muted) / 0.28) 100%
+    hsl(var(--muted) / 0.32) 0%,
+    hsl(var(--muted) / 0.62) 48%,
+    hsl(var(--muted) / 0.32) 100%
   );
   background-size: 200% 100%;
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.65);
   animation: dashboard-hero-shimmer 1.5s ease-in-out infinite;
 }
 
@@ -796,14 +799,22 @@ textarea::placeholder {
 .dashboard-chart-skeleton__bar {
   display: block;
   min-height: 0.75rem;
-  background: linear-gradient(
+  background-color: hsl(var(--muted) / 0.38);
+  background-image: linear-gradient(
     90deg,
-    hsl(var(--muted) / 0.22) 0%,
-    hsl(var(--muted) / 0.42) 45%,
-    hsl(var(--muted) / 0.22) 100%
+    hsl(var(--muted) / 0.28) 0%,
+    hsl(var(--muted) / 0.55) 48%,
+    hsl(var(--muted) / 0.28) 100%
   );
   background-size: 200% 100%;
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.5);
   animation: dashboard-hero-shimmer 1.6s ease-in-out infinite;
+}
+
+.dashboard-chart-skeleton {
+  border-radius: 0.5rem;
+  background: hsl(var(--muted) / 0.12);
+  box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.45);
 }
 
 .dashboard-metric-stat-card[aria-busy="true"] .dashboard-metric-stat-card__change {
@@ -820,7 +831,9 @@ textarea::placeholder {
   .dashboard-hero-metric-skeleton__sub,
   .dashboard-chart-skeleton__bar {
     animation: none;
-    background: hsl(var(--muted) / 0.4);
+    background-image: none;
+    background-color: hsl(var(--muted) / 0.5);
+    box-shadow: inset 0 0 0 1px hsl(var(--border) / 0.7);
   }
 
   .dashboard-hero-metric-value--live {

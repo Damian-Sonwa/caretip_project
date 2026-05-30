@@ -169,7 +169,7 @@ export function useAuthInitializer(): void {
       (result, epochAtStart) => {
         applyBootstrapResult(result, epochAtStart);
         if (result.kind === "transient_error") {
-          transientRetryTimer = window.setTimeout(() => {
+          transientRetryTimer = globalThis.setTimeout(() => {
             transientRetryTimer = null;
             if (getSessionEpoch() !== epochAtStart) return;
             const { sessionValidated } = getAuthSessionFlags();

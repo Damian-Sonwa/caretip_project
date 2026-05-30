@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "./CareTipLogo";
+import { CareIcon } from "@/components/icons";
 import { dashboardShellNavItems } from "./dashboardShellNav";
 
 interface DashboardMobileSidebarProps {
@@ -62,8 +63,6 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
               <ul className="space-y-1">
                 {dashboardShellNavItems.map((item) => {
                   const isActive = location.pathname === item.href;
-                  const Icon = item.icon;
-
                   return (
                     <li key={item.href}>
                       <Link
@@ -78,7 +77,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
                           }
                         `}
                       >
-                        <Icon className="w-5 h-5" />
+                        <CareIcon name={item.icon} size="md" />
                         <span className="text-sm font-medium">{t(item.labelKey)}</span>
                       </Link>
                     </li>

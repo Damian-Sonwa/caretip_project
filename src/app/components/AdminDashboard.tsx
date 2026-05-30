@@ -3,18 +3,8 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import {
-  Users,
-  TrendingUp,
-  Heart,
-  Building2,
-  Search,
-  MapPin,
-  UserCheck,
-  CheckCircle,
-  XCircle,
-  ChevronDown,
-} from "lucide-react";
+import { CheckCircle, Search, TrendingUp, XCircle, ChevronDown } from "lucide-react";
+import { CareIcon, createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
   fetchPlatformStats,
@@ -34,13 +24,15 @@ import { FixPrompt } from "./FixPrompt";
 import { useAuth } from "../hooks/useAuth";
 import { useSocket } from "../hooks/useSocket";
 import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
-import { LiveConnectionBadge } from "./LiveConnectionBadge";
+import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
+import { derivePlatformAdminDashboardStatus } from "../lib/dashboardStatus/deriveDashboardStatus";
 import { NetworkOverviewHero } from "./NetworkOverviewHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platform/platformDashboardUi";
 import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
+import { CountUpMetric } from "./dashboard/CountUpMetric";
 import {
   DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
@@ -48,7 +40,6 @@ import {
 } from "./dashboard/DashboardAnalyticsLoader";
 import {
   DashboardStableChartSlot,
-  InlineSpinner,
 } from "./dashboard/DashboardSectionLoading";
 import { runWithViewportScrollPreserved } from "../lib/dashboardScrollStability";
 import {
@@ -90,6 +81,9 @@ import {
 interface StatCardProps {
   title: string;
   value: string;
+  /** When set, animates from prior value instead of swapping the static `value` string. */
+  numericValue?: number;
+  countUpKind?: "eur" | "eur-whole" | "integer" | "decimal" | "percent";
   change?: string;
   icon: React.ElementType;
   delay: number;
@@ -103,6 +97,8 @@ interface StatCardProps {
 function StatCard({
   title,
   value,
+  numericValue,
+  countUpKind = "integer",
   change,
   icon: Icon,
   delay,
@@ -150,7 +146,9 @@ function StatCard({
           <CardDescription className={platformUi.statCardLabel}>{title}</CardDescription>
           <CardTitle className={platformUi.statCardValue} title={loading ? undefined : value}>
             {loading ? (
-              <DashboardHeroMetricSkeleton variant={loadingVariant} showSpinner />
+              <DashboardHeroMetricSkeleton variant={loadingVariant} />
+            ) : numericValue != null && Number.isFinite(numericValue) ? (
+              <CountUpMetric value={numericValue} kind={countUpKind} className="block" />
             ) : (
               value
             )}
@@ -675,7 +673,6 @@ export function AdminDashboard() {
     const analyticsGen = ++analyticsLoadGenRef.current;
     setIsSyncing(true);
     setServiceIssue(null);
-    setAnalytics(null);
     setAnalyticsError(null);
 
     void refreshStats(loadGen)
@@ -685,16 +682,14 @@ export function AdminDashboard() {
       .catch((err: unknown) => {
         if (loadGen !== dashboardLoadGenRef.current) return;
         logClientError("AdminDashboard.refreshStats", err);
+      })
+      .finally(() => {
+        if (loadGen === dashboardLoadGenRef.current) setIsSyncing(false);
       });
 
     void loadAnalytics(analyticsGen, { bustCache: true });
 
     scheduleDeferredBusinesses(loadGen);
-
-    if (loadGen === dashboardLoadGenRef.current) {
-      setInitialDashLoading(false);
-      setIsSyncing(false);
-    }
   }, [
     user,
     authHydrated,
@@ -766,16 +761,11 @@ export function AdminDashboard() {
     };
   }, [socket, user?.role, loadDashboardData, refreshMetrics]);
 
-  if (!user) {
-    return null;
-  }
-  if (user.role !== "platform_admin") {
-    return <Navigate to="/unauthorized" replace />;
-  }
-
-  const showStatLoading = !stats && (initialDashLoading || isSyncing);
   const chartAnalytics = analytics;
-  const showChartSkeletons = !chartAnalytics;
+  const hasPlatformStats = Boolean(stats);
+  const hasPlatformCharts = Boolean(chartAnalytics);
+  const showStatLoading = !hasPlatformStats && initialDashLoading;
+  const showChartSkeletons = !hasPlatformCharts && initialDashLoading;
   const analyticsMeta = chartAnalytics ?? emptyAnalytics;
   const chartTipStatus = chartAnalytics
     ? mergeTipStatusForCharts(chartAnalytics, stats)
@@ -788,24 +778,52 @@ export function AdminDashboard() {
           tipStatus: chartTipStatus,
         })
       : false);
-  const showOverviewLoadingSpinner = showStatLoading || showChartSkeletons;
+
+  const pendingVerificationCount = useMemo(
+    () => businesses.filter((b) => b.verificationStatus === "pending").length,
+    [businesses],
+  );
+
+  const adminStatusItems = useMemo(
+    () =>
+      derivePlatformAdminDashboardStatus(
+        {
+          isInitialLoading: showStatLoading,
+          isSyncing,
+          analyticsSyncing,
+          serviceIssue,
+          socketStatus: connectionStatus,
+          pendingVerificationCount,
+        },
+        t,
+      ),
+    [
+      showStatLoading,
+      isSyncing,
+      analyticsSyncing,
+      serviceIssue,
+      connectionStatus,
+      pendingVerificationCount,
+      t,
+    ],
+  );
+
+  if (!user) {
+    return null;
+  }
+  if (user.role !== "platform_admin") {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   return (
     <main className="bg-background">
       <div className={platformUi.page}>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          {showOverviewLoadingSpinner ? (
-            <p
-              className="flex items-center gap-2 text-xs font-medium text-muted-foreground"
-              role="status"
-              aria-live="polite"
-              aria-busy="true"
-            >
-              <InlineSpinner />
-              {t("admin.loadingOverview", { defaultValue: "Loading metrics and charts…" })}
-            </p>
-          ) : null}
-          <LiveConnectionBadge status={connectionStatus} className="ml-auto shrink-0" />
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+          <DashboardStatusStrip
+            placeholder={showStatLoading}
+            items={adminStatusItems}
+            className="justify-end"
+          />
         </div>
         <NetworkOverviewHero health={health} />
 
@@ -829,7 +847,9 @@ export function AdminDashboard() {
           >
           <StatCard
             title={t("admin.statTips")}
-            value={stats ? `€${stats.totalVolumeEurFormatted}` : t("format.notAvailable")}
+            value={stats ? formatEur(stats.totalVolumeEur) : t("format.notAvailable")}
+            numericValue={stats?.totalVolumeEur}
+            countUpKind="eur"
             loading={showStatLoading}
             loadingVariant="currency"
             change={
@@ -844,7 +864,7 @@ export function AdminDashboard() {
                   })
                 : undefined
             }
-            icon={Heart}
+            icon={createCareStatIcon("tips")}
             delay={0.1}
             beam
             wideOnTablet
@@ -852,33 +872,37 @@ export function AdminDashboard() {
           <StatCard
             title={t("admin.statVenues")}
             value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
+            numericValue={stats?.businessesCount}
             loading={showStatLoading}
             change={t("admin.statVenuesChange")}
-            icon={Building2}
+            icon={createCareStatIcon("hospitalityVenue")}
             delay={0.15}
           />
           <StatCard
             title={t("admin.statLocations")}
             value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
+            numericValue={stats?.locationsCount}
             loading={showStatLoading}
             change={t("admin.statLocationsChange")}
-            icon={MapPin}
+            icon={createCareStatIcon("locations")}
             delay={0.18}
           />
           <StatCard
             title={t("admin.statStaff")}
             value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
+            numericValue={stats?.employeesCount}
             loading={showStatLoading}
             change={t("admin.statStaffChange")}
-            icon={Users}
+            icon={createCareStatIcon("team")}
             delay={0.2}
           />
           <StatCard
             title={t("admin.statActiveUsers")}
             value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
+            numericValue={stats?.activeUsersCount}
             loading={showStatLoading}
             change={t("admin.statActiveUsersChange")}
-            icon={UserCheck}
+            icon={createCareStatIcon("users")}
             delay={0.25}
           />
         </div>
@@ -1041,7 +1065,7 @@ export function AdminDashboard() {
               aria-expanded={businessesExpanded}
             >
               <div className="flex min-w-0 items-center gap-2">
-                <Building2 className="h-5 w-5 text-foreground" />
+                <CareIcon name="hospitalityVenue" size="md" className="text-foreground" />
                 <h3 className="min-w-0 text-base font-semibold leading-snug text-foreground sm:text-lg">
                   <span className="block sm:inline">{t("admin.businessesTitle")}</span>
                   <span className="mt-0.5 block text-xs font-medium text-muted-foreground sm:ml-2 sm:mt-0 sm:inline">

@@ -6,19 +6,16 @@ import type { ImgHTMLAttributes } from "react";
 import {
   Users,
   TrendingUp,
-  Award,
   Download,
   ArrowUpRight,
-  QrCode,
   MapPin,
   Star,
   Building2,
-  Target,
   ChevronDown,
   Sparkles,
-  BarChart3,
   HelpCircle,
 } from "lucide-react";
+import { CareIcon } from "@/components/icons";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -27,7 +24,8 @@ import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/char
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
-import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
+import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
+import { deriveBusinessDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { FixPrompt } from "../../components/FixPrompt";
 import { downloadBusinessTransactionsExport } from "../../lib/api";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
@@ -35,7 +33,6 @@ import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlem
 import {
   DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
-  DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import {
   DashboardAnalyticsPhaseHintSlot,
@@ -44,6 +41,7 @@ import {
   DeferredContentFade,
   GoalsTableLoadingShell,
 } from "../../components/dashboard/DashboardSectionLoading";
+import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import { formatEur } from "../../lib/formatEur";
 import type {
@@ -155,7 +153,6 @@ export function BusinessDashboard() {
     isAnalyticsSectionLoading,
     isGoalsInitialLoad,
     isPeriodRefreshing,
-    lastUpdatedAt,
     showStatsSkeleton,
     valuesMatchAnalyticsPeriod,
     refreshStatsQuiet,
@@ -348,12 +345,37 @@ export function BusinessDashboard() {
     (displayStats?.employees ?? []).length > 0 &&
     (displayStats?.employees ?? []).some((e) => e.slug == null || e.slug === "");
 
-  if (!user) return null;
-
-  const heroPulseLoading = !heroStats && !operationalPulse && !useDevDemo;
   const showMetricsSkeleton = isMetricsInitialLoad && !useDevDemo;
+  const heroPulseLoading =
+    !useDevDemo && showMetricsSkeleton && !heroStats && !operationalPulse;
   const showChartsLoading = isAnalyticsSectionLoading && !useDevDemo;
   const showGoalsLoading = isGoalsInitialLoad && !useDevDemo;
+
+  const dashboardStatusItems = useMemo(
+    () =>
+      deriveBusinessDashboardStatus(
+        {
+          isInitialLoading: showMetricsSkeleton,
+          isPeriodRefreshing,
+          pendingVerification: pendingVerification === true,
+          verificationStatus: displayStats?.verificationStatus,
+          statsLoadFailed,
+          socketStatus: connectionStatus,
+        },
+        t,
+      ),
+    [
+      showMetricsSkeleton,
+      isPeriodRefreshing,
+      pendingVerification,
+      displayStats?.verificationStatus,
+      statsLoadFailed,
+      connectionStatus,
+      t,
+    ],
+  );
+
+  if (!user) return null;
 
   return (
     <div className={cn(businessUi.page, "overflow-x-hidden")}>
@@ -460,7 +482,7 @@ export function BusinessDashboard() {
               <div className="business-hero-cta-row">
                 <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
                   <Link to="/dashboard/qr-code-management" className={businessUi.heroCtaLink}>
-                    <QrCode className="h-4 w-4 shrink-0" aria-hidden />
+                    <CareIcon name="tableQr" size="sm" className="shrink-0" />
                     {t("business.hero.manageQr")}
                   </Link>
                 </Button>
@@ -487,14 +509,27 @@ export function BusinessDashboard() {
                       <DashboardHeroMetricSkeleton variant="pulse" />
                     ) : operationalPulse ? (
                       <>
-                        <span className="dashboard-hero-metric-value--live tabular-nums">
-                          {operationalPulse.tipsLast60m.count === 0
-                            ? t("format.metricZeroTips")
-                            : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsLast60m.count })}
+                        <span className="dashboard-hero-metric-value--live">
+                          <CountUpMetric
+                            value={operationalPulse.tipsLast60m.count}
+                            kind="integer"
+                            format={(n) => {
+                              const count = Math.round(n);
+                              return count === 0
+                                ? t("format.metricZeroTips")
+                                : t("business.hero.pulse.tipsCount", { count });
+                            }}
+                          />
                         </span>
                         {operationalPulse.tipsLast60m.count > 0 ? (
                           <span className="business-hero-pulse-subline dashboard-hero-metric-value--live text-muted-foreground/90">
-                            {t("business.hero.pulse.volume", { amount: formatEur(operationalPulse.tipsLast60m.amount) })}
+                            <CountUpMetric
+                              value={operationalPulse.tipsLast60m.amount}
+                              kind="eur"
+                              format={(n) =>
+                                t("business.hero.pulse.volume", { amount: formatEur(n) })
+                              }
+                            />
                           </span>
                         ) : null}
                       </>
@@ -510,14 +545,27 @@ export function BusinessDashboard() {
                       <DashboardHeroMetricSkeleton variant="pulse" />
                     ) : operationalPulse ? (
                       <>
-                        <span className="dashboard-hero-metric-value--live tabular-nums">
-                          {operationalPulse.tipsToday.count === 0
-                            ? t("format.metricZeroTips")
-                            : t("business.hero.pulse.tipsCount", { count: operationalPulse.tipsToday.count })}
+                        <span className="dashboard-hero-metric-value--live">
+                          <CountUpMetric
+                            value={operationalPulse.tipsToday.count}
+                            kind="integer"
+                            format={(n) => {
+                              const count = Math.round(n);
+                              return count === 0
+                                ? t("format.metricZeroTips")
+                                : t("business.hero.pulse.tipsCount", { count });
+                            }}
+                          />
                         </span>
                         {operationalPulse.tipsToday.count > 0 ? (
                           <span className="business-hero-pulse-subline dashboard-hero-metric-value--live text-muted-foreground/90">
-                            {t("business.hero.pulse.volume", { amount: formatEur(operationalPulse.tipsToday.amount) })}
+                            <CountUpMetric
+                              value={operationalPulse.tipsToday.amount}
+                              kind="eur"
+                              format={(n) =>
+                                t("business.hero.pulse.volume", { amount: formatEur(n) })
+                              }
+                            />
                           </span>
                         ) : null}
                       </>
@@ -562,13 +610,10 @@ export function BusinessDashboard() {
                   })}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <LiveConnectionBadge status={connectionStatus} />
-                <DashboardRefreshIndicator
-                  isRefreshing={isPeriodRefreshing}
-                  lastUpdatedAt={lastUpdatedAt}
-                />
-              </div>
+              <DashboardStatusStrip
+                placeholder={showMetricsSkeleton}
+                items={dashboardStatusItems}
+              />
             </div>
             <div
               className={businessUi.periodToggle}
@@ -597,7 +642,7 @@ export function BusinessDashboard() {
             </div>
             <DashboardAnalyticsPhaseHintSlot
               className="mt-3"
-              show={showChartsLoading}
+              show={showChartsLoading && !showMetricsSkeleton}
               label={t("dashboard.loading.analytics")}
             />
           </section>
@@ -645,7 +690,7 @@ export function BusinessDashboard() {
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <div className={businessUi.iconTileMuted}>
-                      <Target className="h-5 w-5" aria-hidden />
+                      <CareIcon name="goals" size="md" />
                     </div>
                     <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
                   </div>
@@ -716,7 +761,7 @@ export function BusinessDashboard() {
                       <div className={cn(businessUi.cardPad)}>
                         <EmployeeEmptyState
                           className="py-10 sm:py-12"
-                          icon={<Target className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          icon={<CareIcon name="goals" size="lg" className="text-muted-foreground" />}
                           title={t("business.dashboard.noStaffGoals")}
                           description={t("business.dashboard.noStaffGoalsHint")}
                         />
@@ -791,7 +836,7 @@ export function BusinessDashboard() {
                       <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
                         <EmployeeEmptyState
                           className="relative z-[1] py-10 sm:py-12"
-                          icon={<BarChart3 className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                          icon={<CareIcon name="analytics" size="lg" className="text-muted-foreground" />}
                           title={t("format.metricNoActivity")}
                           description={t("business.dashboard.chartEmptyDesc")}
                         />
@@ -1056,7 +1101,7 @@ export function BusinessDashboard() {
                                     role="img"
                                     aria-label={t("business.dashboard.topPerformerBadge")}
                                   >
-                                    <Award className="h-3.5 w-3.5" aria-hidden />
+                                    <CareIcon name="employeePerformance" size="sm" />
                                   </span>
                                 ) : null}
                               </div>
@@ -1141,7 +1186,7 @@ export function BusinessDashboard() {
                     </Button>
                     <Button className={cn(businessUi.btnPrimary, "h-auto min-h-11 w-full justify-start gap-3 py-3")} asChild>
                       <Link to="/dashboard/qr-code-management" className="gap-3">
-                        <QrCode className="h-5 w-5 shrink-0" aria-hidden />
+                        <CareIcon name="tableQr" size="md" className="shrink-0" />
                         {t("business.dashboard.actionGenerateQr")}
                       </Link>
                     </Button>

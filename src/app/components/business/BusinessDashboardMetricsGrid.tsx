@@ -1,8 +1,8 @@
 import { memo } from "react";
-import { Euro, Users, Award, TrendingUp } from "lucide-react";
+import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { BusinessStatCard } from "./BusinessStatCard";
-import { DashboardRefreshingBadge } from "../dashboard/DashboardAnalyticsLoader";
+import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { formatEur } from "../../lib/formatEur";
 import { businessUi } from "./businessDashboardUi";
 import { cn } from "@/lib/utils";
@@ -44,9 +44,6 @@ function BusinessDashboardMetricsGridInner({
         isPeriodRefreshing && "opacity-[0.94]",
       )}
     >
-      {isPeriodRefreshing ? (
-        <DashboardRefreshingBadge label={t("dashboard.refresh.updating")} />
-      ) : null}
       <BusinessStatCard
         featured
         loading={loading}
@@ -57,44 +54,45 @@ function BusinessDashboardMetricsGridInner({
               ? t("business.dashboard.statsTotalTipsMonth")
               : t("business.dashboard.statsTotalTipsYear")
         }
-        value={formatEur(totalTips)}
+        value={<CountUpMetric value={totalTips} kind="eur" />}
         change={
           hasTipActivityInPeriod
             ? t("business.dashboard.statsLiveTotals")
             : t("format.metricZeroTips")
         }
-        icon={<Euro className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="earnings" size="md" />}
       />
       <BusinessStatCard
         loading={loading}
         label={t("business.dashboard.activeEmployees")}
-        value={String(employeeCount)}
+        value={<CountUpMetric value={employeeCount} kind="integer" />}
         change={t("business.dashboard.activeEmployeesTopHint", {
           count: topPerformersCount,
         })}
-        icon={<Users className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="team" size="md" />}
       />
       <BusinessStatCard
         loading={loading}
         label={t("business.dashboard.tipsCount")}
-        value={String(tipCount)}
+        value={<CountUpMetric value={tipCount} kind="integer" />}
         change={
           hasTipActivityInPeriod
             ? t("business.dashboard.tipsCountHint")
             : t("format.metricZeroTips")
         }
-        icon={<Award className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="employeePerformance" size="md" />}
       />
       <BusinessStatCard
         loading={loading}
         label={t("business.dashboard.avgTipPerEmployee")}
         value={
-          employeeCount > 0
-            ? formatEur(totalTips / employeeCount, { minFrac: 0, maxFrac: 0 })
-            : formatEur(0, { minFrac: 0, maxFrac: 0 })
+          <CountUpMetric
+            value={employeeCount > 0 ? totalTips / employeeCount : 0}
+            kind="eur-whole"
+          />
         }
         change={t("business.dashboard.avgTipCoaching")}
-        icon={<TrendingUp className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="analytics" size="md" />}
       />
     </div>
   );

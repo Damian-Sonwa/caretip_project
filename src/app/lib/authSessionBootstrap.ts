@@ -91,11 +91,11 @@ export function resetSessionBootstrap(): void {
  */
 export function runSessionBootstrapOnce(run: BootstrapRunner): Promise<SessionBootstrapResult> {
   if (!bootstrapPromise) {
-    bootstrapPromise = (async () => {
+    bootstrapPromise = (async (): Promise<SessionBootstrapResult> => {
       try {
         return await run();
       } catch {
-        return { kind: "unauthenticated" };
+        return { kind: "unauthenticated" as const };
       }
     })().then((result) => {
       deliverBootstrapResult(result);

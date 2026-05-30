@@ -96,7 +96,14 @@ export function DashboardMetricStatCard({
         )}
         aria-hidden={!changeVisible && !loading ? true : undefined}
       >
-        {changeContent}
+        {loading ? (
+          <span
+            className="dashboard-hero-metric-skeleton__bar mt-0.5 block h-2.5 w-[52%] max-w-[8.5rem] rounded-md"
+            aria-hidden
+          />
+        ) : (
+          changeContent
+        )}
       </p>
     </div>
   );

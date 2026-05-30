@@ -8,7 +8,7 @@ import { createLocationAPI, fetchLocations, type LocationDTO } from "../../lib/a
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { LocationCardGridSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import {
   Dialog,
   DialogContent,
@@ -21,6 +21,11 @@ import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../lib/pageSessionCache";
 
 const ACTION_TEAL = "#e9781c";
 
@@ -34,22 +39,34 @@ export function LocationsPage() {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!isBusiness) {
       setLocations([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    const cacheKey = "business:locations";
+    const cached = getPageSessionCache<LocationDTO[]>(cacheKey, PAGE_CACHE_TTL_LOW_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setLocations(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const list = await fetchLocations();
       setLocations(list);
+      setPageSessionCache(cacheKey, list);
     } catch (e) {
       logClientError("LocationsPage", e);
-      toast.error(toUserFriendlyMessage(e));
-      setLocations([]);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(e));
+        setLocations([]);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [isBusiness]);
 
@@ -115,7 +132,7 @@ export function LocationsPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (
-          <CareTipPageLoader variant="section" message={t("business.locationsPage.loading")} />
+          <LocationCardGridSkeleton />
         ) : locations.length === 0 ? (
           <div className={cn(businessUi.cardStatic, "py-16 text-center text-muted-foreground border-dashed")}>
             <MapPin className="w-10 h-10 mx-auto mb-3 opacity-50" />

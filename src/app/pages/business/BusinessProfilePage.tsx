@@ -20,6 +20,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../lib/pageSessionCache";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
@@ -69,24 +74,38 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
     setBusinessType((p.type ?? "").trim());
   }, []);
 
-  const loadProfile = useCallback(async () => {
+  const loadProfile = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!user?.businessId || user.role !== "business") {
       setProfile(null);
       setLoadState("idle");
       return;
     }
-    setLoadState("loading");
-    setLoadError(null);
+    const cacheKey = `business:profile:${user.businessId}`;
+    const cached = getPageSessionCache<BusinessInfo>(cacheKey, PAGE_CACHE_TTL_LOW_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setProfile(cached);
+      applyProfileToForm(cached);
+      setLoadState("idle");
+      setLoadError(null);
+    } else if (!quiet) {
+      setLoadState("loading");
+      setLoadError(null);
+    }
     try {
       const p = await fetchBusinessProfile();
       setProfile(p);
       applyProfileToForm(p);
+      setPageSessionCache(cacheKey, p);
       setLoadState("idle");
     } catch (e) {
       logClientError("BusinessProfilePage.load", e);
-      setLoadError(toUserFriendlyMessage(e));
-      setLoadState("error");
-      setProfile(null);
+      if (!useCachedFirst) {
+        setLoadError(toUserFriendlyMessage(e));
+        setLoadState("error");
+        setProfile(null);
+      }
     }
   }, [user?.businessId, user?.role, applyProfileToForm]);
 

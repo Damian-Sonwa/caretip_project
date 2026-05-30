@@ -4,7 +4,11 @@ import type { TFunction } from "i18next";
 import { CreditCard } from "lucide-react";
 import { fetchPlatformTransactions, type GlobalTransactionRow } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  DashboardListSkeleton,
+  GlobalTransactionsTableSkeleton,
+  InlineSpinner,
+} from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import {
   PlatformPage,
@@ -14,6 +18,11 @@ import {
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformTransactionMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_HIGH_MS,
+} from "../../lib/pageSessionCache";
 
 function payoutStatusLabel(status: string, t: TFunction) {
   const key = `admin.globalTransactionsPage.payoutStatus.${status}`;
@@ -47,8 +56,21 @@ export function GlobalTransactionsPage() {
     return () => window.clearTimeout(id);
   }, [q]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
+    const cacheKey = `platform:transactions:${debouncedQ || "_"}`;
+    const cached = getPageSessionCache<{ items: GlobalTransactionRow[]; total: number }>(
+      cacheKey,
+      PAGE_CACHE_TTL_HIGH_MS,
+    );
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setItems(cached.items);
+      setTotal(cached.total);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const res = await fetchPlatformTransactions({
         q: debouncedQ || undefined,
@@ -57,12 +79,15 @@ export function GlobalTransactionsPage() {
       });
       setItems(res.items);
       setTotal(res.total);
+      setPageSessionCache(cacheKey, { items: res.items, total: res.total });
     } catch (e) {
       logClientError("GlobalTransactionsPage", e);
-      setItems([]);
-      setTotal(0);
+      if (!useCachedFirst) {
+        setItems([]);
+        setTotal(0);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [debouncedQ]);
 
@@ -71,6 +96,8 @@ export function GlobalTransactionsPage() {
   }, [load]);
 
   const emptyMessage = t("admin.globalTransactionsPage.empty");
+  const isInitialLoad = loading && items.length === 0;
+  const isBackgroundRefresh = loading && items.length > 0;
   const footer =
     !loading && items.length > 0
       ? t("admin.globalTransactionsPage.footerShowing", { shown: items.length, total })
@@ -94,11 +121,22 @@ export function GlobalTransactionsPage() {
         hint={t("admin.globalTransactionsPage.hintLiveSearch")}
       />
 
+      {isBackgroundRefresh ? (
+        <div
+          className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          <InlineSpinner />
+          <span>{t("dashboard.refresh.updating")}</span>
+        </div>
+      ) : null}
+
       <PlatformResponsiveData
         footer={footer}
         mobile={
-          loading ? (
-            <CareTipPageLoader variant="compact" message={t("admin.globalTransactionsPage.loading")} />
+          isInitialLoad ? (
+            <DashboardListSkeleton rows={5} minHeightClass="min-h-[12rem]" />
           ) : items.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
           ) : (
@@ -118,12 +156,8 @@ export function GlobalTransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className={platformUi.tableTd}>
-                    <CareTipPageLoader variant="compact" message={t("admin.globalTransactionsPage.loading")} />
-                  </td>
-                </tr>
+              {isInitialLoad ? (
+                <GlobalTransactionsTableSkeleton />
               ) : items.length === 0 ? (
                 <tr>
                   <td colSpan={6} className={platformUi.emptyState}>

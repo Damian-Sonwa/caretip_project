@@ -36,7 +36,8 @@ import { isProtectedApiReady } from "../../lib/authRestore";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
-import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
+import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
+import { deriveEmployeeDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
@@ -59,8 +60,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import {
   DashboardChartSkeleton,
   DashboardHeroMetricSkeleton,
-  DashboardRefreshIndicator,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
+import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
 import { DashboardStableChartSlot } from "../../components/dashboard/DashboardSectionLoading";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
@@ -131,7 +132,6 @@ export function EmployeeDashboard() {
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing: analyticsPeriodRefreshing,
-    lastUpdatedAt: analyticsLastUpdatedAt,
     error: analyticsError,
     refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
@@ -223,12 +223,17 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t, applyLiveTip]);
 
+  const heroAccountReady =
+    displayPayload != null &&
+    (typeof displayPayload.totalEarningsEur === "number" ||
+      typeof displayPayload.periodAmountEur === "number");
+
   const useDevDemo = shouldUseEmployeeDashboardDevDemo({
     isDev: import.meta.env.DEV,
     hasError: Boolean(error),
-    accountSummaryLoaded: displayPayload != null && typeof displayPayload.totalEarningsEur === "number",
+    accountSummaryLoaded: heroAccountReady,
     accountSummaryLoading: isMetricsInitialLoad,
-    analyticsLoading: showMetricsLoading || showChartLoading,
+    analyticsLoading: showMetricsLoading,
     totalEarningsEur: displayPayload?.totalEarningsEur ?? 0,
     totalSupporters: displayPayload?.totalSupporters ?? 0,
   });
@@ -238,16 +243,16 @@ export function EmployeeDashboard() {
 
   const displayAccountSummary = useDevDemo
     ? { ...devMockEmployeeAccountSummary(), loaded: true }
-    : displayPayload != null && typeof displayPayload.totalEarningsEur === "number"
+    : heroAccountReady && displayPayload
       ? {
-          totalEarningsEur: displayPayload.totalEarningsEur,
+          totalEarningsEur: displayPayload.totalEarningsEur ?? displayPayload.periodAmountEur ?? 0,
           availableBalanceEur: displayPayload.availableBalanceEur ?? 0,
           totalSupporters: displayPayload.totalSupporters ?? 0,
           loaded: true,
         }
       : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
 
-  const showHeroMetricsLoading = !useDevDemo && !displayAccountSummary.loaded;
+  const showHeroMetricsLoading = !useDevDemo && !displayAccountSummary.loaded && showMetricsLoading;
 
   const displayPeriodTipCount = devPeriodSummary?.tips ?? displayPayload?.periodTipCount ?? 0;
   const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayPayload?.periodAmountEur ?? 0;
@@ -297,6 +302,24 @@ export function EmployeeDashboard() {
   };
 
   const valuesMatchPeriod = useDevDemo || valuesMatchAnalyticsPeriod;
+
+  const dashboardStatusItems = useMemo(
+    () =>
+      deriveEmployeeDashboardStatus(
+        {
+          isInitialLoading: showMetricsLoading,
+          isPeriodRefreshing: analyticsPeriodRefreshing,
+          socketStatus: connectionStatus,
+        },
+        t,
+      ),
+    [
+      showMetricsLoading,
+      analyticsPeriodRefreshing,
+      connectionStatus,
+      t,
+    ],
+  );
 
   const recentTipsSource = displayTips;
   const recentTips = recentTipsSource.slice(0, 6).map((tipRow) => ({
@@ -482,12 +505,16 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statTotalEarnings")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="currency" showSpinner />
+                      <DashboardHeroMetricSkeleton variant="currency" />
                     ) : (
-                      <span className="dashboard-hero-metric-value--live tabular-nums">
-                        {displayAccountSummary.totalEarningsEur > 0
-                          ? formatEur(displayAccountSummary.totalEarningsEur)
-                          : t("format.metricZeroTips")}
+                      <span className="dashboard-hero-metric-value--live">
+                        <CountUpMetric
+                          value={displayAccountSummary.totalEarningsEur}
+                          kind="eur"
+                          format={(n) =>
+                            n < 0.005 ? t("format.metricZeroTips") : formatEur(n)
+                          }
+                        />
                       </span>
                     )}
                   </dd>
@@ -496,12 +523,13 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statAvailableBalance")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="currency" showSpinner />
+                      <DashboardHeroMetricSkeleton variant="currency" />
                     ) : (
-                      <span className="dashboard-hero-metric-value--live tabular-nums">
-                        {displayAccountSummary.availableBalanceEur > 0
-                          ? formatEur(displayAccountSummary.availableBalanceEur)
-                          : formatEur(0)}
+                      <span className="dashboard-hero-metric-value--live">
+                        <CountUpMetric
+                          value={displayAccountSummary.availableBalanceEur}
+                          kind="eur"
+                        />
                       </span>
                     )}
                   </dd>
@@ -510,10 +538,13 @@ export function EmployeeDashboard() {
                   <dt>{t("employee.hero.statTotalSupporters")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
-                      <DashboardHeroMetricSkeleton variant="count" showSpinner />
+                      <DashboardHeroMetricSkeleton variant="count" />
                     ) : (
-                      <span className="dashboard-hero-metric-value--live tabular-nums">
-                        {String(displayAccountSummary.totalSupporters)}
+                      <span className="dashboard-hero-metric-value--live">
+                        <CountUpMetric
+                          value={displayAccountSummary.totalSupporters}
+                          kind="integer"
+                        />
                       </span>
                     )}
                   </dd>
@@ -531,10 +562,11 @@ export function EmployeeDashboard() {
         <section
           className={cn(
             "employee-dashboard-analytics-intro mb-1",
-            (showMetricsLoading || showChartLoading) && "employee-dashboard-analytics-intro--loading",
+            (showMetricsLoading || analyticsPeriodRefreshing) &&
+              "employee-dashboard-analytics-intro--loading",
           )}
           aria-labelledby="employee-analytics-period-heading"
-          aria-busy={showMetricsLoading || showChartLoading || undefined}
+          aria-busy={showMetricsLoading || analyticsPeriodRefreshing || undefined}
         >
           <div className="employee-dashboard-analytics-intro__head">
             <div className="min-w-0 space-y-1">
@@ -550,13 +582,10 @@ export function EmployeeDashboard() {
                 })}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <LiveConnectionBadge status={connectionStatus} />
-              <DashboardRefreshIndicator
-                isRefreshing={analyticsPeriodRefreshing}
-                lastUpdatedAt={analyticsLastUpdatedAt}
-              />
-            </div>
+            <DashboardStatusStrip
+              placeholder={showMetricsLoading}
+              items={dashboardStatusItems}
+            />
           </div>
           <div
             className={employeeUi.periodToggle}
@@ -645,7 +674,11 @@ export function EmployeeDashboard() {
                   loading={showChartLoading}
                   minHeightClass="min-h-[220px] sm:min-h-[260px] lg:min-h-[280px]"
                   skeleton={
-                    <DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />
+                    <DashboardChartSkeleton
+                      variant="trend"
+                      minHeightClass="h-full min-h-0"
+                      className="h-full"
+                    />
                   }
                 >
                   {chartData.length === 0 ? (

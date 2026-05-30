@@ -63,7 +63,11 @@ export function useEmployeeAccountSummary(enabled: boolean) {
         devSetHydrationPhase("hero", "loading");
       } else {
         setLoading(!snapshotRef.current);
-        if (!snapshotRef.current) devSetHydrationPhase("hero", "loading");
+        if (!snapshotRef.current) {
+          devSetHydrationPhase("hero", "loading");
+        } else {
+          devSetHydrationPhase("hero", "ready");
+        }
       }
 
       try {

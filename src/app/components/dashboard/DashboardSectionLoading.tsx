@@ -4,6 +4,14 @@ import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 
 export { DashboardStableChartSlot } from "./DashboardStableChartSlot";
+export {
+  TipsActivityTableSkeleton,
+  NotificationInboxListSkeleton,
+  NotificationPreviewListSkeleton,
+  LocationCardGridSkeleton,
+  TablesListSkeleton,
+  GlobalTransactionsTableSkeleton,
+} from "./DashboardContentSkeletons";
 
 /** Compact spinner for inline labels and section headers. */
 export function InlineSpinner({ className }: { className?: string }) {
@@ -140,6 +148,38 @@ export function GoalsTableLoadingShell({
   );
 }
 
+/** KPI grid placeholder for route-level dashboard outlet fallback (skeleton-first). */
+export function DashboardMetricsGridSkeleton({
+  cards = 4,
+  className,
+}: {
+  cards?: number;
+  className?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "mx-auto grid w-full max-w-5xl grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4",
+        className,
+      )}
+      role="status"
+      aria-busy="true"
+      aria-label="Loading"
+    >
+      {Array.from({ length: cards }).map((_, i) => (
+        <div
+          key={i}
+          className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+        >
+          <span className="dashboard-hero-metric-skeleton__bar h-3 w-[58%] max-w-[9rem]" aria-hidden />
+          <span className="dashboard-hero-metric-skeleton__bar h-7 w-[72%] max-w-[11rem]" aria-hidden />
+          <span className="dashboard-hero-metric-skeleton__bar h-2.5 w-[48%] max-w-[7rem]" aria-hidden />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 /** Compact list rows for secondary panels (top performers, etc.). */
 export function DashboardListSkeleton({
   rows = 3,
@@ -187,7 +227,10 @@ export function DashboardAnalyticsPhaseHint({
       role="status"
       aria-live="polite"
     >
-      <InlineSpinner />
+      <span
+        className="h-1.5 w-1.5 shrink-0 animate-pulse rounded-full bg-muted-foreground/50"
+        aria-hidden
+      />
       <span>{label}</span>
     </div>
   );

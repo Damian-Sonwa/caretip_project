@@ -48,6 +48,8 @@ function sanitizePdfText(raw: string): string {
   try {
     s = s.replace(/\p{Extended_Pictographic}/gu, "");
   } catch {
+    // Legacy fallback when `\p{Extended_Pictographic}` is unavailable (eslint: combined chars in class).
+    // eslint-disable-next-line no-misleading-character-class -- intentional emoji strip ranges
     s = s.replace(/[\u231A-\u23FA\u2600-\u26FF\u2700-\u27BF\uFE0F]/g, "");
   }
   s = s.replace(/\uFE0F/g, "").replace(/\u200D/g, "");

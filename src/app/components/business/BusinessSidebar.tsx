@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut } from "lucide-react";
+import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -38,8 +38,6 @@ export function BusinessSidebar() {
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isBusinessDashboardNavActive(item.href, location.pathname);
-            const Icon = item.icon;
-
             return (
               <li key={item.href}>
                 <Link
@@ -51,7 +49,7 @@ export function BusinessSidebar() {
                       : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
                   )}
                 >
-                  <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                  <CareIcon name={item.icon} size="nav" />
                   <span className="tracking-tight">{t(item.labelKey)}</span>
                 </Link>
               </li>
@@ -74,7 +72,7 @@ export function BusinessSidebar() {
           }}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
         >
-          <LogOut className="h-5 w-5" />
+          <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
         </button>
       </div>

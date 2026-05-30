@@ -1,5 +1,9 @@
 import { useMemo, useState } from "react";
 import { Bell, CheckCheck, Loader2, Search } from "lucide-react";
+import {
+  InlineSpinner,
+  NotificationInboxListSkeleton,
+} from "@/app/components/dashboard/DashboardSectionLoading";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
@@ -64,6 +68,8 @@ export function NotificationInboxPage() {
     });
   const list = items ?? [];
   const waitingForAuth = !authReady || authStatus === "initializing";
+  const isInitialInboxLoad = (waitingForAuth || loading) && list.length === 0;
+  const isInboxRefreshing = loading && list.length > 0;
 
   const subtitle = isPlatformAdmin
     ? t("notifications.inbox.subtitleAdmin")
@@ -154,10 +160,19 @@ export function NotificationInboxPage() {
         </div>
       </div>
 
-      {waitingForAuth || (loading && list.length === 0) ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
+      {isInboxRefreshing ? (
+        <div
+          className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          <InlineSpinner />
+          <span>{t("dashboard.refresh.updating")}</span>
         </div>
+      ) : null}
+
+      {isInitialInboxLoad ? (
+        <NotificationInboxListSkeleton />
       ) : list.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-muted/20 px-6 py-14 text-center">
           <Bell className="mx-auto mb-3 h-8 w-8 text-muted-foreground/70" aria-hidden />

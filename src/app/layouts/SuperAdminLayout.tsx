@@ -43,7 +43,7 @@ export function SuperAdminLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="min-h-0 flex-1">
-            <RouteChunkBoundary>
+            <RouteChunkBoundary variant="shell">
               <Outlet />
             </RouteChunkBoundary>
           </main>

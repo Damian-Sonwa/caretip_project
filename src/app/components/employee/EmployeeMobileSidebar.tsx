@@ -1,6 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { LogOut, X } from "lucide-react";
+import { X } from "lucide-react";
+import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -89,7 +90,6 @@ export function EmployeeMobileSidebar({
               <ul className="space-y-0.5">
                 {navItems.map((item) => {
                   const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);
-                  const Icon = item.icon;
                   return (
                     <li key={item.href}>
                       <Link
@@ -102,7 +102,7 @@ export function EmployeeMobileSidebar({
                             : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
                         )}
                       >
-                        <Icon className="h-[1.125rem] w-[1.125rem] shrink-0" />
+                        <CareIcon name={item.icon} size="nav" />
                         <span className="tracking-tight">{t(item.labelKey)}</span>
                       </Link>
                     </li>
@@ -121,7 +121,7 @@ export function EmployeeMobileSidebar({
                 }}
                 className="employee-dash-nav-link flex w-full items-center gap-3 px-3 py-2.5 text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground"
               >
-                <LogOut className="h-5 w-5" />
+                <CareIcon name="signOut" size="md" />
                 <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
               </button>
             </div>

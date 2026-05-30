@@ -401,7 +401,7 @@ function isCrossOriginApi(): boolean {
   return Boolean(resolveApiBaseUrl());
 }
 
-function abortableDelay(ms: number, signal?: AbortSignal): Promise<void> {
+function abortableDelay(ms: number, signal?: AbortSignal | null): Promise<void> {
   if (signal?.aborted) {
     return Promise.reject(new DOMException("Aborted", "AbortError"));
   }
@@ -446,7 +446,7 @@ async function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<R
     const pathname = requestUrlPathname(url);
     if (!pathname.startsWith("/api/")) throw err;
 
-    await abortableDelay(NETWORK_RETRY_DELAY_MS, init?.signal);
+    await abortableDelay(NETWORK_RETRY_DELAY_MS, init?.signal ?? undefined);
     const retried: CaretipRequestInit = { ...(init ?? {}), __caretipNetworkRetried: true };
     try {
       return await fetch(url, retried);
@@ -539,7 +539,7 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
     if (!isAuthRefresh && canAttemptRefresh && res.status === 401) {
       const alreadyDelayedRetry = initFlags?.__caretipDelayedRetried === true;
       if (!alreadyDelayedRetry) {
-        await abortableDelay(250, init?.signal);
+        await abortableDelay(250, init?.signal ?? undefined);
         const delayedInit: CaretipRequestInit = { ...(init ?? {}), __caretipDelayedRetried: true };
         res = await fetchWithNetworkRetry(url, attachLatestBearer(delayedInit));
       }
@@ -1809,12 +1809,13 @@ export async function getEmployeeProfile(
   }
   if (employeeProfileInflight && !init?.signal) return employeeProfileInflight;
 
-  const promise = apiRequest<EmployeeSelfProfile>(apiPath("/api/employees/me"), {
+  const requestInit: CaretipRequestInit = {
     headers: getHeaders(),
     credentials: "include",
-    signal: init?.signal,
+    signal: init?.signal ?? undefined,
     caretipSilentErrors: init?.silent === true || init?.caretipSilentErrors === true,
-  }).then((data) => {
+  };
+  const promise = apiRequest<EmployeeSelfProfile>(apiPath("/api/employees/me"), requestInit).then((data) => {
     employeeProfileCache = { data, at: Date.now() };
     return data;
   });

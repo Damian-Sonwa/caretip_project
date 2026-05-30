@@ -1,10 +1,13 @@
 /** Root class on `.caretip-dashboard-shell` — platform admin shell (see SuperAdminLayout). */
 export const PLATFORM_DASHBOARD_ROOT = "platform-dashboard";
 
+import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
+
 /**
  * Shared rhythm for platform admin pages (presentation only).
  */
 export const platformUi = {
+  btnPrimary: caretipBtnPrimary,
   pageMain: "bg-background",
   page: "caretip-container max-w-[min(100%,96rem)] pb-16 pt-5 sm:pb-20 sm:pt-7",
 

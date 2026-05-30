@@ -15,7 +15,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { qrTableUrl } from "../../lib/appPublicUrl";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { TablesListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,13 @@ import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../lib/pageSessionCache";
+
+type TablesPageCache = { locations: LocationDTO[]; tables: TableDTO[] };
 
 const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
 
@@ -42,29 +49,46 @@ export function TablesPage() {
   const [tableName, setTableName] = useState("");
   const [locationId, setLocationId] = useState("");
 
-  const loadAll = useCallback(async () => {
+  const loadAll = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!isBusiness) {
       setLocations([]);
       setTables([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    const cacheKey = "business:tables-bundle";
+    const cached = getPageSessionCache<TablesPageCache>(cacheKey, PAGE_CACHE_TTL_LOW_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setLocations(cached.locations);
+      setTables(cached.tables);
+      setLocationId((prev) => {
+        if (prev && cached.locations.some((l) => l.id === prev)) return prev;
+        return cached.locations[0]?.id ?? "";
+      });
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const [locList, tblList] = await Promise.all([fetchLocations(), fetchTables()]);
       setLocations(locList);
       setTables(tblList);
+      setPageSessionCache(cacheKey, { locations: locList, tables: tblList });
       setLocationId((prev) => {
         if (prev && locList.some((l) => l.id === prev)) return prev;
         return locList[0]?.id ?? "";
       });
     } catch (e) {
       logClientError("TablesPage", e);
-      toast.error(toUserFriendlyMessage(e));
-      setLocations([]);
-      setTables([]);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(e));
+        setLocations([]);
+        setTables([]);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [isBusiness]);
 
@@ -134,7 +158,9 @@ export function TablesPage() {
 
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {loading ? (
-          <CareTipPageLoader variant="section" message={t("business.tablesPage.loading")} />
+          <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
+            <TablesListSkeleton />
+          </div>
         ) : locations.length === 0 ? (
           <div className={cn(businessUi.cardStatic, "py-16 text-center text-muted-foreground border-dashed")}>
             <LayoutGrid className="w-10 h-10 mx-auto mb-3 opacity-50" />

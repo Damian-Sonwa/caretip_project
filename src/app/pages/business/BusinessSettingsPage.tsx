@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
+import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
-  BUSINESS_SETTINGS_PAGE_ICON,
   BUSINESS_SETTINGS_SECTIONS,
   parseBusinessSettingsSection,
   type BusinessSettingsSectionId,
@@ -26,7 +26,6 @@ export function BusinessSettingsPage() {
   const settings = useBusinessSettingsData();
 
   const activeMeta = BUSINESS_SETTINGS_SECTIONS.find((s) => s.id === section)!;
-  const PageIcon = BUSINESS_SETTINGS_PAGE_ICON;
 
   useEffect(() => {
     if (searchParams.get("section") === section) return;
@@ -46,7 +45,7 @@ export function BusinessSettingsPage() {
       <div className="mx-auto max-w-6xl">
         <header className="mb-8">
           <div className="mb-2 flex items-center gap-2 text-muted-foreground">
-            <PageIcon className="h-5 w-5 shrink-0 text-accent" aria-hidden />
+            <CareIcon name="settings" size="md" className="shrink-0 text-accent" />
             <span className="text-xs font-semibold uppercase tracking-wide">
               {t("business.settings.eyebrow")}
             </span>
@@ -66,7 +65,6 @@ export function BusinessSettingsPage() {
           >
             <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
               {BUSINESS_SETTINGS_SECTIONS.map((item) => {
-                const Icon = item.icon;
                 const active = item.id === section;
                 return (
                   <button
@@ -80,7 +78,11 @@ export function BusinessSettingsPage() {
                         : cn(businessUi.cardStatic, "text-muted-foreground hover:border-neutral-200 hover:text-foreground"),
                     )}
                   >
-                    <Icon className={cn("h-4 w-4 shrink-0", active && "text-primary")} aria-hidden />
+                    <CareIcon
+                      name={item.icon}
+                      size="sm"
+                      className={cn(active && "text-primary")}
+                    />
                     <span className="whitespace-nowrap">{t(item.labelKey)}</span>
                   </button>
                 );

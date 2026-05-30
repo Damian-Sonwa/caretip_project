@@ -42,6 +42,11 @@ import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
@@ -208,11 +213,18 @@ export function StaffManagementPage() {
       }
       return;
     }
-    if (!quiet) {
+    const cacheKey = user.businessId ? `business:staff:${user.businessId}` : null;
+    const cached = cacheKey
+      ? getPageSessionCache<StaffRow[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS)
+      : null;
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setEmployees(cached);
+      setLoading(false);
+      setError(null);
+    } else if (!quiet) {
       setLoading(true);
       setError(null);
-      // Prevent any stale staff list from flashing while loading.
-      setEmployees([]);
     }
     try {
       const data = await getBusinessStats("all", { scope: "analytics" });
@@ -238,14 +250,15 @@ export function StaffManagementPage() {
         assignedTableIds: e.assignedTableIds ?? [],
       }));
       setEmployees(mapped);
+      if (cacheKey) setPageSessionCache(cacheKey, mapped);
     } catch (err) {
       logClientError("StaffManagementPage", err);
-      if (!quiet) {
+      if (!quiet && !useCachedFirst) {
         setError(toUserFriendlyMessage(err));
         setEmployees([]);
       }
     } finally {
-      if (!quiet) setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [user?.businessId, authHydrated, sessionValidated]);
 
@@ -549,11 +562,15 @@ export function StaffManagementPage() {
     }
   };
 
-  if (!authHydrated || !sessionValidated || !user) {
+  const isInitialStaffLoad = loading && employees.length === 0;
+
+  if ((!authHydrated || !sessionValidated || !user) && isInitialStaffLoad) {
     return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
   }
 
-  if (loading) {
+  if (!user) return null;
+
+  if (isInitialStaffLoad) {
     return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
   }
 

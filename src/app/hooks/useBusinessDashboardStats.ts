@@ -19,6 +19,11 @@ import {
   BUSINESS_HERO_MONTH_DEFER_MS,
   DASHBOARD_INACTIVE_PREFETCH_DELAY_MS,
 } from "../lib/dashboardTimeframeOrchestration";
+import {
+  hasBusinessDashboardVisibleContent,
+  hasBusinessKpiValues,
+  hasBusinessSecondaryContent,
+} from "../lib/dashboardVisibleContent";
 
 export type AnalyticsTimeframe = "week" | "month" | "year";
 
@@ -75,6 +80,8 @@ export function useBusinessDashboardStats(
   tfRef.current = analyticsTimeframe;
   const statsRef = useRef(stats);
   statsRef.current = stats;
+  const lastKnownGoodMetricsRef = useRef(lastKnownGoodMetrics);
+  lastKnownGoodMetricsRef.current = lastKnownGoodMetrics;
   const uiRequestSeqRef = useRef(0);
   const abortByTfRef = useRef(new Map<AnalyticsTimeframe, AbortController>());
   const summaryPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
@@ -175,7 +182,11 @@ export function useBusinessDashboardStats(
       setStatsTimeframe(tf);
       setPendingVerification(false);
       setSummaryLoading(false);
-      setAnalyticsLoading(true);
+      const chartsReady =
+        !advancedAnalyticsEnabledRef.current ||
+        Boolean(merged.dailyTipDistribution?.length) ||
+        Boolean((merged.employeeGoals?.length ?? 0) > 0);
+      setAnalyticsLoading(!chartsReady);
     },
     [],
   );
@@ -218,6 +229,25 @@ export function useBusinessDashboardStats(
       if (!sessionValidated || !enabled) return;
 
       const revalidate = opts?.soft === true;
+
+      const kpisVisibleOnScreen = () =>
+        hasBusinessKpiValues(statsRef.current) ||
+        Boolean(lastKnownGoodMetricsRef.current);
+      const chartsVisibleOnScreen = () => hasBusinessSecondaryContent(statsRef.current);
+      const setSummaryLoadingUi = (next: boolean) => {
+        if (next && revalidate && kpisVisibleOnScreen()) {
+          setSummaryLoading(false);
+          return;
+        }
+        setSummaryLoading(next);
+      };
+      const setAnalyticsLoadingUi = (next: boolean) => {
+        if (next && revalidate && chartsVisibleOnScreen()) {
+          setAnalyticsLoading(false);
+          return;
+        }
+        setAnalyticsLoading(next);
+      };
 
       hydratePeriodSessionCache(tf);
 
@@ -265,8 +295,10 @@ export function useBusinessDashboardStats(
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
           if (!analyticsSettled) {
-            setAnalyticsLoading(true);
-            devSetHydrationPhase("charts", "loading");
+            setAnalyticsLoadingUi(true);
+            if (!(revalidate && chartsVisibleOnScreen())) {
+              devSetHydrationPhase("charts", "loading");
+            }
           } else {
             setAnalyticsLoading(false);
             devSetHydrationPhase("charts", "ready");
@@ -274,11 +306,17 @@ export function useBusinessDashboardStats(
           }
         } else {
           setIsRevalidating(true);
-          setSummaryLoading(true);
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("metrics", "loading");
-          devSetHydrationPhase("charts", "loading");
-          devSetHydrationPhase("goals", "loading");
+          setSummaryLoadingUi(!hasMetricValues(statsRef.current));
+          setAnalyticsLoadingUi(
+            !analyticsSettled && advancedAnalyticsEnabledRef.current,
+          );
+          if (!hasMetricValues(statsRef.current) && !(revalidate && kpisVisibleOnScreen())) {
+            devSetHydrationPhase("metrics", "loading");
+          }
+          if (!analyticsSettled && !(revalidate && chartsVisibleOnScreen())) {
+            devSetHydrationPhase("charts", "loading");
+            devSetHydrationPhase("goals", "loading");
+          }
         }
         void existingInflight
           .then(() => {
@@ -316,19 +354,34 @@ export function useBusinessDashboardStats(
           scheduleDeferredHeroMonth();
           return;
         }
+        const preserveVisibleUi =
+          revalidate &&
+          (hasBusinessDashboardVisibleContent(statsRef.current) ||
+            Boolean(lastKnownGoodMetricsRef.current));
+
         setIsRevalidating(true);
-        if (summaryFromMemory && !opts?.soft) {
+        if (preserveVisibleUi) {
+          setSummaryLoading(false);
+          setAnalyticsLoading(false);
+        } else if (summaryFromMemory && !opts?.soft) {
           commitUiStats(tf, seq, true);
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
           if (!analyticsSettled) {
-            setAnalyticsLoading(true);
-            devSetHydrationPhase("charts", "loading");
+            setAnalyticsLoadingUi(true);
+            if (!(revalidate && chartsVisibleOnScreen())) {
+              devSetHydrationPhase("charts", "loading");
+            }
           }
         } else if (cached) {
           applyCachedToUi(tf, cached);
           devSetHydrationPhase("metrics", "ready");
-          devSetHydrationPhase("charts", "loading");
+          if (analyticsPartialRef.current.get(tf) || !advancedAnalyticsEnabledRef.current) {
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+          } else {
+            devSetHydrationPhase("charts", "loading");
+          }
         } else if (!opts?.soft) {
           setStats(null);
           setStatsTimeframe(null);
@@ -340,10 +393,14 @@ export function useBusinessDashboardStats(
           devSetHydrationPhase("charts", "loading");
           devSetHydrationPhase("goals", "loading");
         } else {
-          setSummaryLoading(!hasMetricValues(statsRef.current));
-          setAnalyticsLoading(true);
-          if (!hasMetricValues(statsRef.current)) devSetHydrationPhase("metrics", "loading");
-          devSetHydrationPhase("charts", "loading");
+          setSummaryLoadingUi(!hasMetricValues(statsRef.current));
+          setAnalyticsLoadingUi(!analyticsSettled && advancedAnalyticsEnabledRef.current);
+          if (!hasMetricValues(statsRef.current) && !(revalidate && kpisVisibleOnScreen())) {
+            devSetHydrationPhase("metrics", "loading");
+          }
+          if (!analyticsSettled && !(revalidate && chartsVisibleOnScreen())) {
+            devSetHydrationPhase("charts", "loading");
+          }
         }
       }
 
@@ -405,9 +462,8 @@ export function useBusinessDashboardStats(
           if (affectsUi) {
             setSummaryLoading(false);
             devSetHydrationPhase("metrics", "ready");
-            if (!analyticsSettled) setAnalyticsLoading(true);
+            if (!analyticsSettled) setAnalyticsLoadingUi(true);
             commitUiStats(tf, seq, true);
-            setIsRevalidating(false);
           }
           applyHeroFromMonth(tf);
           if (tf === "month") devSetHydrationPhase("hero", "ready");
@@ -452,6 +508,10 @@ export function useBusinessDashboardStats(
                   if (!hasMetricValues(statsRef.current)) {
                     setStatsLoadFailed(toUserFriendlyMessage(err));
                   }
+                }
+              } finally {
+                if (stillActive() && uiRequestSeqRef.current === seq) {
+                  setIsRevalidating(false);
                 }
               }
             };
@@ -521,7 +581,7 @@ export function useBusinessDashboardStats(
               }
             }
           }
-          // If analytics is deferred, `isRevalidating` already ends on summary settle.
+          // Deferred analytics clears `isRevalidating` in runAnalytics.finally.
           if (!analyticsDeferred) setIsRevalidating(false);
         }
         if (abortByTfRef.current.get(tf) === controller) {
@@ -665,6 +725,41 @@ export function useBusinessDashboardStats(
       tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
       hydratePeriodSessionCache(tf);
+
+      if (isPeriodSessionReady(tf)) {
+        const seq = uiRequestSeqRef.current;
+        setSummaryLoading(false);
+        setAnalyticsLoading(false);
+        setIsRevalidating(false);
+        devSetHydrationPhase("metrics", "ready");
+        devSetHydrationPhase("charts", "ready");
+        devSetHydrationPhase("goals", "ready");
+        commitUiStats(tf, seq, false);
+        markDashboardLiveSettled(hasSettledLiveUiRef);
+      } else {
+        const summaryPartial = summaryPartialRef.current.get(tf);
+        if (summaryPartial && hasMetricValues(summaryPartial as BusinessDashboardStats)) {
+          const seq = uiRequestSeqRef.current;
+          setSummaryLoading(false);
+          devSetHydrationPhase("metrics", "ready");
+          const chartsReady =
+            !advancedAnalyticsEnabledRef.current ||
+            Boolean(analyticsPartialRef.current.get(tf));
+          setAnalyticsLoading(!chartsReady);
+          if (chartsReady) {
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+          } else {
+            devSetHydrationPhase("charts", "loading");
+          }
+          commitUiStats(tf, seq, false);
+        } else {
+          setIsRevalidating(true);
+          setSummaryLoading(!hasMetricValues(statsRef.current));
+          setAnalyticsLoading(true);
+        }
+      }
+
       void loadStatsForRef.current(tf, { affectsUi: true });
     },
     [
@@ -672,6 +767,8 @@ export function useBusinessDashboardStats(
       cancelDeferredHeroMonth,
       cancelDeferredAnalytics,
       hydratePeriodSessionCache,
+      isPeriodSessionReady,
+      commitUiStats,
     ],
   );
 
@@ -709,7 +806,15 @@ export function useBusinessDashboardStats(
     const generation = ++statsMountGenerationRef.current;
     const handle = window.setTimeout(() => {
       if (statsMountGenerationRef.current !== generation) return;
-      void loadStatsForRef.current(analyticsTimeframe, { affectsUi: true });
+      const tf = analyticsTimeframe;
+      const warmMount =
+        hasSettledLiveUiRef.current &&
+        (isPeriodSessionReady(tf) || hasBusinessDashboardVisibleContent(statsRef.current));
+      void loadStatsForRef.current(tf, {
+        affectsUi: true,
+        soft: warmMount,
+        silent: warmMount,
+      });
     }, 0);
     return () => {
       window.clearTimeout(handle);
@@ -718,7 +823,7 @@ export function useBusinessDashboardStats(
   }, [enabled, sessionValidated, refetchTick]);
 
   const refetchLive = useCallback(() => {
-    clearBusinessStatsClientCache();
+    clearBusinessStatsClientCache(tfRef.current);
     void loadStatsFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
   }, [loadStatsFor]);
 
@@ -744,7 +849,7 @@ export function useBusinessDashboardStats(
       void run.finally(() => {
         if (quietRefreshInFlightRef.current === run) quietRefreshInFlightRef.current = null;
       });
-    }, 600);
+    }, 400);
   }, [enabled, sessionValidated, loadStatsFor]);
 
   const applyLiveTip = useCallback(
@@ -788,8 +893,10 @@ export function useBusinessDashboardStats(
     statsTimeframe === analyticsTimeframe && !pendingVerification;
 
   const displayStats = useMemo(() => {
-    if (pendingVerification || !valuesMatchAnalyticsPeriod) return null;
-    return stats;
+    if (pendingVerification || !stats) return null;
+    if (valuesMatchAnalyticsPeriod) return stats;
+    if (hasBusinessDashboardVisibleContent(stats)) return stats;
+    return null;
   }, [pendingVerification, stats, valuesMatchAnalyticsPeriod]);
 
   const displayMetrics = useMemo(() => {
@@ -805,7 +912,14 @@ export function useBusinessDashboardStats(
     if (displayMetrics) return displayMetrics;
     // During fast period switches, keep last known good values visible instead of flashing zeros.
     if (!enabled || !sessionValidated || pendingVerification) return null;
-    if (summaryLoading || analyticsLoading || isRevalidating) return lastKnownGoodMetrics;
+    if (
+      !valuesMatchAnalyticsPeriod ||
+      summaryLoading ||
+      analyticsLoading ||
+      isRevalidating
+    ) {
+      return lastKnownGoodMetrics;
+    }
     return null;
   }, [
     analyticsLoading,
@@ -816,30 +930,49 @@ export function useBusinessDashboardStats(
     pendingVerification,
     sessionValidated,
     summaryLoading,
+    valuesMatchAnalyticsPeriod,
   ]);
+
+  const hasVisibleKpisOnScreen =
+    Boolean(displayMetricsStable) ||
+    hasBusinessKpiValues(stats) ||
+    Boolean(lastKnownGoodMetrics);
+
+  const hasVisibleSecondaryOnScreen =
+    hasBusinessSecondaryContent(displayStats) || hasBusinessSecondaryContent(stats);
 
   const isMetricsInitialLoad =
     enabled &&
     sessionValidated &&
     !pendingVerification &&
-    !displayMetrics &&
-    summaryLoading;
+    !hasVisibleKpisOnScreen &&
+    summaryLoading &&
+    !isRevalidating;
 
   const isAnalyticsSectionLoading =
     enabled &&
     sessionValidated &&
     !pendingVerification &&
     analyticsLoading &&
-    !(displayStats?.dailyTipDistribution?.length ?? 0);
+    !hasVisibleSecondaryOnScreen &&
+    !isRevalidating;
 
+  /** Status strip: stay on Updating until KPIs, charts/goals, and period alignment have all settled. */
   const isPeriodRefreshing =
-    isRevalidating && Boolean(displayMetrics) && !isMetricsInitialLoad;
+    enabled &&
+    sessionValidated &&
+    !pendingVerification &&
+    !isMetricsInitialLoad &&
+    (isRevalidating ||
+      summaryLoading ||
+      analyticsLoading ||
+      !valuesMatchAnalyticsPeriod);
 
   const isGoalsInitialLoad =
     enabled &&
     sessionValidated &&
     !pendingVerification &&
-    isAnalyticsSectionLoading &&
+    analyticsLoading &&
     (displayStats?.employeeGoals?.length ?? 0) === 0;
 
   return {

@@ -16,6 +16,11 @@ import {
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformUserMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 
 export function PlatformUserManagementPage() {
   const { t } = useTranslation();
@@ -26,17 +31,29 @@ export function PlatformUserManagementPage() {
   const { user, replaceUser } = useAuth();
   const navigate = useNavigate();
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
+    const cacheKey = "platform:users-businesses";
+    const cached = getPageSessionCache<PlatformBusinessRow[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setRows(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const res = await fetchPlatformBusinesses();
       setRows(res.businesses);
+      setPageSessionCache(cacheKey, res.businesses);
     } catch (e) {
       logClientError("PlatformUserManagementPage.load", e);
-      toast.error(toUserFriendlyMessage(e));
-      setRows([]);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(e));
+        setRows([]);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, []);
 
@@ -83,6 +100,7 @@ export function PlatformUserManagementPage() {
     rows.length === 0
       ? t("admin.userManagementPage.emptyList")
       : t("admin.userManagementPage.noSearchMatches");
+  const isInitialLoad = loading && rows.length === 0;
 
   return (
     <PlatformPage>
@@ -101,7 +119,7 @@ export function PlatformUserManagementPage() {
 
       <PlatformResponsiveData
         mobile={
-          loading ? (
+          isInitialLoad ? (
             <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
           ) : filteredRows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
@@ -127,7 +145,7 @@ export function PlatformUserManagementPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {isInitialLoad ? (
                 <tr>
                   <td colSpan={4} className={platformUi.tableTd}>
                     <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />

@@ -1,15 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Bell,
-  HelpCircle,
-  LayoutDashboard,
-  LayoutGrid,
-  MapPin,
-  QrCode,
-  Settings,
-  Users,
-  Wallet,
-} from "lucide-react";
+import type { CareIconName } from "@/components/icons";
 import {
   hasSubscriptionCapability,
   type BusinessSubscriptionTier,
@@ -21,19 +10,19 @@ export const BUSINESS_DASHBOARD_HOME_HREF = "/dashboard" as const;
 export type BusinessDashboardNavItem = {
   labelKey: string;
   href: string;
-  icon: LucideIcon;
+  icon: CareIconName;
 };
 
 export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
-  { labelKey: "dashboardNav.business.overview", href: "/dashboard", icon: LayoutDashboard },
-  { labelKey: "dashboardNav.business.team", href: "/dashboard/staff-management", icon: Users },
-  { labelKey: "dashboardNav.business.qrCodes", href: "/dashboard/qr-code-management", icon: QrCode },
-  { labelKey: "dashboardNav.business.locations", href: "/dashboard/locations", icon: MapPin },
-  { labelKey: "dashboardNav.business.tables", href: "/dashboard/tables", icon: LayoutGrid },
-  { labelKey: "dashboardNav.business.tipsActivity", href: "/dashboard/transactions", icon: Wallet },
-  { labelKey: "dashboardNav.business.notifications", href: "/dashboard/notifications", icon: Bell },
-  { labelKey: "dashboardNav.business.support", href: "/dashboard/support", icon: HelpCircle },
-  { labelKey: "dashboardNav.business.settings", href: "/dashboard/settings", icon: Settings },
+  { labelKey: "dashboardNav.business.overview", href: "/dashboard", icon: "overview" },
+  { labelKey: "dashboardNav.business.team", href: "/dashboard/staff-management", icon: "team" },
+  { labelKey: "dashboardNav.business.qrCodes", href: "/dashboard/qr-code-management", icon: "tableQr" },
+  { labelKey: "dashboardNav.business.locations", href: "/dashboard/locations", icon: "locations" },
+  { labelKey: "dashboardNav.business.tables", href: "/dashboard/tables", icon: "tables" },
+  { labelKey: "dashboardNav.business.tipsActivity", href: "/dashboard/transactions", icon: "tipsActivity" },
+  { labelKey: "dashboardNav.business.notifications", href: "/dashboard/notifications", icon: "notifications" },
+  { labelKey: "dashboardNav.business.support", href: "/dashboard/support", icon: "support" },
+  { labelKey: "dashboardNav.business.settings", href: "/dashboard/settings", icon: "settings" },
 ] as const;
 
 /** Premium-only nav targets (Basic keeps locations for single-site management). */

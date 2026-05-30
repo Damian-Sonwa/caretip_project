@@ -1,12 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Outlet } from "react-router";
-import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
+import { primeSubscriptionTierFromSession } from "../lib/subscriptionSessionCache";
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
-import { PageLoader } from "./PageLoader";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined,
@@ -22,9 +21,7 @@ function mapDbVerificationToStatus(
  * Dashboard stays accessible for all managers; QR / public flows gate on `user.status` elsewhere.
  */
 export function ApprovedBusinessGate() {
-  const { t } = useTranslation();
   const { user, updateUser, sessionValidated, authStatus } = useAuth();
-  const [ready, setReady] = useState(false);
 
   const canSyncProfile =
     sessionValidated &&
@@ -34,14 +31,12 @@ export function ApprovedBusinessGate() {
     !user.impersonation;
 
   useEffect(() => {
-    if (!canSyncProfile) {
-      setReady(true);
-      return;
-    }
+    if (!canSyncProfile) return;
     let cancelled = false;
     void fetchBusinessProfile()
       .then((p) => {
         if (cancelled) return;
+        primeSubscriptionTierFromSession(p.subscriptionTier);
         const s = mapDbVerificationToStatus(p.verificationStatus);
         if (s) updateUser({ status: s });
       })
@@ -49,9 +44,6 @@ export function ApprovedBusinessGate() {
         if (!isApiConnectivityError(err)) {
           logClientError("ApprovedBusinessGate", err);
         }
-      })
-      .finally(() => {
-        if (!cancelled) setReady(true);
       });
     return () => {
       cancelled = true;
@@ -77,10 +69,6 @@ export function ApprovedBusinessGate() {
 
   if (user.impersonation) {
     return <Outlet />;
-  }
-
-  if (user.role === "business" && !user.impersonation && canSyncProfile && !ready) {
-    return <PageLoader message={t("common.syncingAccountStatus")} />;
   }
 
   return <Outlet />;

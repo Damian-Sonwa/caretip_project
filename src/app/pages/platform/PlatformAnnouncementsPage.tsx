@@ -14,6 +14,11 @@ import { cn } from "@/lib/utils";
 import { CareTipPageLoader } from "@/app/components/CareTipPageLoader";
 import { PlatformPage, PlatformPageHeader } from "@/app/components/platform/PlatformPageChrome";
 import { platformUi } from "@/app/components/platform/platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "@/app/lib/pageSessionCache";
 
 type Audience = "all" | "managers" | "employees" | "admins";
 
@@ -55,19 +60,35 @@ export function PlatformAnnouncementsPage() {
   const [historyTotal, setHistoryTotal] = useState(0);
   const [historyLoading, setHistoryLoading] = useState(true);
 
-  const loadHistory = useCallback(async () => {
-    setHistoryLoading(true);
+  const loadHistory = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
+    const cacheKey = "platform:announcements-history";
+    const cached = getPageSessionCache<{ items: PlatformAnnouncementRow[]; total: number }>(
+      cacheKey,
+      PAGE_CACHE_TTL_MEDIUM_MS,
+    );
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setHistory(cached.items);
+      setHistoryTotal(cached.total);
+      setHistoryLoading(false);
+    } else if (!quiet) {
+      setHistoryLoading(true);
+    }
     try {
       const res = await fetchPlatformAnnouncements({ take: 100, skip: 0 });
       setHistory(res.items);
       setHistoryTotal(res.total);
+      setPageSessionCache(cacheKey, { items: res.items, total: res.total });
     } catch (err) {
       logClientError("PlatformAnnouncementsPage.loadHistory", err);
-      toast.error(toUserFriendlyMessage(err));
-      setHistory([]);
-      setHistoryTotal(0);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(err));
+        setHistory([]);
+        setHistoryTotal(0);
+      }
     } finally {
-      setHistoryLoading(false);
+      if (!quiet && !useCachedFirst) setHistoryLoading(false);
     }
   }, []);
 
@@ -228,7 +249,7 @@ export function PlatformAnnouncementsPage() {
             {t("admin.announcements.historySection")}
           </h2>
           <div className={platformUi.dataPanel}>
-            {historyLoading ? (
+            {historyLoading && history.length === 0 ? (
               <div className="px-4 py-12">
                 <CareTipPageLoader variant="section" message={t("admin.announcements.historyLoading")} />
               </div>

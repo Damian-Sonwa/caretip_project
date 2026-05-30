@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -27,13 +27,9 @@ export function AuthOAuthButtons({
   inviteCode,
   onGoogleCredential,
 }: AuthOAuthButtonsProps) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const googleClientId = googleOAuthWebClientId();
   const [gsiOriginError, setGsiOriginError] = useState(false);
-  const gsiLocale = useMemo(() => {
-    const lang = (i18n.resolvedLanguage ?? i18n.language ?? "en").toLowerCase();
-    return lang.startsWith("de") ? "de" : "en";
-  }, [i18n.resolvedLanguage, i18n.language]);
   const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
   const onGoogleError = useCallback(() => {
@@ -85,7 +81,6 @@ export function AuthOAuthButtons({
         theme="outline"
         size="large"
         width={320}
-        locale={gsiLocale}
         text={isLogin ? "continue_with" : "signup_with"}
         shape="rectangular"
       />

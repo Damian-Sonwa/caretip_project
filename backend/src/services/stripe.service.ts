@@ -419,19 +419,27 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     // ignore invalid venue metadata
   }
 
-  const tip = await prisma.transaction.create({
-    data: {
-      amount: tipAmount,
-      status: "success",
-      stripePaymentIntentId: piId,
-      employeeId,
-      businessId,
-      locationId: locId,
-      tableId: tblId,
-    },
-  });
+  try {
+    const tip = await prisma.transaction.create({
+      data: {
+        amount: tipAmount,
+        status: "success",
+        stripePaymentIntentId: piId,
+        employeeId,
+        businessId,
+        locationId: locId,
+        tableId: tblId,
+      },
+    });
 
-  await emitTipSocket(tip.id);
+    await emitTipSocket(tip.id);
+  } catch (err) {
+    const code = (err as { code?: string })?.code;
+    if (code === "P2002") {
+      return;
+    }
+    throw err;
+  }
 }
 
 /** @deprecated Use handleSuccessfulTipPayment */

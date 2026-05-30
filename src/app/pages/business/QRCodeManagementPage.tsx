@@ -30,6 +30,12 @@ import {
   type TableDTO,
 } from "../../lib/api";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { PageLoader } from "../../components/PageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
@@ -143,23 +149,35 @@ export function QRCodeManagementPage() {
     }
   };
 
-  const loadEmployees = useCallback(async () => {
+  const loadEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!authHydrated || !sessionValidated) return;
     if (!user?.businessId) {
       setEmployees([]);
       setLoading(false);
       return;
     }
-    setLoading(true);
+    const cacheKey = `business:qr-employees:${user.businessId}`;
+    const cached = getPageSessionCache<EmployeeItem[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setEmployees(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const list = await getEmployees(user.businessId);
       setEmployees(list);
+      setPageSessionCache(cacheKey, list);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
-      setEmployees([]);
-      toast.error(t("business.qrPage.toastStaffListFail"));
+      if (!useCachedFirst) {
+        setEmployees([]);
+        toast.error(t("business.qrPage.toastStaffListFail"));
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [authHydrated, sessionValidated, user?.businessId, t]);
 
@@ -171,16 +189,26 @@ export function QRCodeManagementPage() {
     if (!authHydrated || !sessionValidated) return;
     if (!user?.businessId || !isBusiness) return;
     let cancelled = false;
+    const venueCacheKey = `business:qr-venues:${user.businessId}`;
+    const venueCached = getPageSessionCache<{ locations: LocationDTO[]; tables: TableDTO[] }>(
+      venueCacheKey,
+      PAGE_CACHE_TTL_LOW_MS,
+    );
+    if (venueCached) {
+      setVenueLocations(venueCached.locations);
+      setVenueTables(venueCached.tables);
+    }
     void (async () => {
       try {
         const [locList, tblList] = await Promise.all([fetchLocations(), fetchTables()]);
         if (!cancelled) {
           setVenueLocations(locList);
           setVenueTables(tblList);
+          setPageSessionCache(venueCacheKey, { locations: locList, tables: tblList });
         }
       } catch (err) {
         logClientError("QRCodeManagementPage.venues", err);
-        if (!cancelled) {
+        if (!cancelled && !venueCached) {
           setVenueLocations([]);
           setVenueTables([]);
         }
@@ -901,7 +929,7 @@ export function QRCodeManagementPage() {
       <div className="max-w-7xl">
         {activeTab === "employees" && (
           <>
-            {loading ? (
+            {loading && employees.length === 0 ? (
               <CareTipPageLoader variant="section" message={t("common.loadingTeamMembers")} />
             ) : (
               <div className="space-y-8">

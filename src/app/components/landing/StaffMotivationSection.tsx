@@ -360,7 +360,7 @@ function ExplodedViewStage({
                 aria-hidden
                 initial={false}
                 animate={recognitionHover ? { x: ["-120%", "140%"] } : { x: "-120%" }}
-                transition={recognitionHover ? { duration: 0.95, ease: "easeInOut" } : { duration: 0 } as any}
+                transition={recognitionHover ? { duration: 0.95, ease: "easeInOut" } : { duration: 0 }}
                 className="pointer-events-none absolute inset-y-0 left-0 w-[45%]"
                 style={{
                   opacity: recognitionHover ? 0.85 : 0,

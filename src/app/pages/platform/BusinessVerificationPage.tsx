@@ -29,6 +29,11 @@ import {
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformBusinessVerificationMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 
 export function BusinessVerificationPage() {
   const { t } = useTranslation();
@@ -45,17 +50,29 @@ export function BusinessVerificationPage() {
     registeredAddress: "",
   });
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
+    const cacheKey = "platform:business-verification";
+    const cached = getPageSessionCache<PlatformBusinessRow[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setRows(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const res = await fetchPlatformBusinesses();
       setRows(res.businesses);
+      setPageSessionCache(cacheKey, res.businesses);
     } catch (e) {
       logClientError("BusinessVerificationPage.load", e);
-      toast.error(toUserFriendlyMessage(e));
-      setRows([]);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(e));
+        setRows([]);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, []);
 
@@ -195,6 +212,7 @@ export function BusinessVerificationPage() {
     rows.length === 0
       ? t("admin.businessVerificationPage.emptyList")
       : t("admin.businessVerificationPage.noSearchMatches");
+  const isInitialLoad = loading && rows.length === 0;
 
   return (
     <PlatformPage>
@@ -213,7 +231,7 @@ export function BusinessVerificationPage() {
 
       <PlatformResponsiveData
         mobile={
-          loading ? (
+          isInitialLoad ? (
             <CareTipPageLoader variant="compact" message={t("admin.businessVerificationPage.loading")} />
           ) : filteredRows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
@@ -244,7 +262,7 @@ export function BusinessVerificationPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {isInitialLoad ? (
                 <tr>
                   <td colSpan={7} className={platformUi.tableTd}>
                     <CareTipPageLoader variant="compact" message={t("admin.businessVerificationPage.loading")} />

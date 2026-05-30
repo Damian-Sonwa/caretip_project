@@ -9,6 +9,20 @@ import {
 } from "../../../lib/api";
 import { logClientError } from "../../../lib/clientLog";
 import { toUserFriendlyMessage } from "../../../lib/errorMessages";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../../lib/pageSessionCache";
+
+type BusinessSettingsCache = {
+  contactPhone: string;
+  tipReceivedNotifications: boolean;
+  summaryEmails: boolean;
+  systemAlerts: boolean;
+  notifyNewLogin: boolean;
+  twoFactorEnabled: boolean;
+};
 
 export function useBusinessSettingsData() {
   const { t } = useTranslation();
@@ -25,7 +39,20 @@ export function useBusinessSettingsData() {
   useEffect(() => {
     let cancelled = false;
     if (!user || user.role !== "business") return;
-    setLoading(true);
+    const cacheKey = `business:settings:${user.id}`;
+    const cached = getPageSessionCache<BusinessSettingsCache>(cacheKey, PAGE_CACHE_TTL_LOW_MS);
+    if (cached) {
+      setContactPhone(cached.contactPhone);
+      setInitialPhone(cached.contactPhone);
+      setTipReceivedNotifications(cached.tipReceivedNotifications);
+      setSummaryEmails(cached.summaryEmails);
+      setSystemAlerts(cached.systemAlerts);
+      setNotifyNewLogin(cached.notifyNewLogin);
+      setTwoFactorEnabled(cached.twoFactorEnabled);
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
     void (async () => {
       try {
         const [biz, prefs, two] = await Promise.all([
@@ -45,9 +72,19 @@ export function useBusinessSettingsData() {
         setSystemAlerts(prefs.systemAlerts);
         setNotifyNewLogin(prefs.notifyNewLogin);
         setTwoFactorEnabled(two.enabled);
+        setPageSessionCache(cacheKey, {
+          contactPhone: phone,
+          tipReceivedNotifications: prefs.tipReceivedNotifications,
+          summaryEmails: prefs.summaryEmails,
+          systemAlerts: prefs.systemAlerts,
+          notifyNewLogin: prefs.notifyNewLogin,
+          twoFactorEnabled: two.enabled,
+        });
       } catch (e) {
         logClientError("useBusinessSettingsData.load", e);
-        toast.error(toUserFriendlyMessage(e) || t("business.accountSettings.toastLoadFail"));
+        if (!cached) {
+          toast.error(toUserFriendlyMessage(e) || t("business.accountSettings.toastLoadFail"));
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }

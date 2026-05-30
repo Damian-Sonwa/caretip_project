@@ -62,7 +62,7 @@ function uuid(): string {
   try {
     // Modern browsers
     if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-      return (crypto as any).randomUUID() as string;
+      return crypto.randomUUID();
     }
   } catch {
     // ignore

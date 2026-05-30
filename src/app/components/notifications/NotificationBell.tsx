@@ -1,5 +1,7 @@
 import { useState } from "react";
-import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { CheckCheck } from "lucide-react";
+import { NotificationPreviewListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
+import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router";
 import { useNotifications } from "@/app/hooks/useNotifications";
@@ -43,13 +45,12 @@ export function NotificationBell({ className }: NotificationBellProps) {
   const navigate = useNavigate();
   const { user, authStatus, authReady } = useAuth();
   const [open, setOpen] = useState(false);
+  const role = user?.role;
   const enabled =
     authReady &&
     authStatus === "authenticated" &&
     Boolean(user) &&
-    (user.role === "employee" ||
-      user.role === "business" ||
-      user.role === "platform_admin");
+    (role === "employee" || role === "business" || role === "platform_admin");
   const {
     unreadCount,
     items,
@@ -81,7 +82,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
               : t("notifications.bell.aria")
           }
         >
-          <Bell className="h-5 w-5 text-foreground" />
+          <CareIcon name="notifications" size="md" className="text-foreground" />
           {badge ? (
             <span
               className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground"
@@ -108,9 +109,7 @@ export function NotificationBell({ className }: NotificationBellProps) {
         </div>
         <div className="max-h-[min(60vh,20rem)] overflow-y-auto">
           {loading && list.length === 0 ? (
-            <div className="flex justify-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
-            </div>
+            <NotificationPreviewListSkeleton />
           ) : list.length === 0 ? (
             <p className="px-3 py-8 text-center text-sm text-muted-foreground">
               {t("notifications.bell.empty")}

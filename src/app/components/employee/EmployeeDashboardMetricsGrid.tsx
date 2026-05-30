@@ -1,8 +1,9 @@
 import { memo } from "react";
-import { TrendingUp, Star, Target } from "lucide-react";
+import { Star } from "lucide-react";
+import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { EmployeeStatCard } from "./EmployeeStatCard";
-import { DashboardRefreshingBadge } from "../dashboard/DashboardAnalyticsLoader";
+import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { formatEur } from "../../lib/formatEur";
 import { employeeUi } from "./employeeDashboardUi";
 import { cn } from "@/lib/utils";
@@ -37,15 +38,11 @@ function EmployeeDashboardMetricsGridInner({
         isPeriodRefreshing && "opacity-[0.94]",
       )}
     >
-      {isPeriodRefreshing ? (
-        <DashboardRefreshingBadge label={t("dashboard.refresh.updating")} />
-      ) : null}
       <EmployeeStatCard
         featured
         loading={loading}
-        showSpinner={loading}
         label={t("employee.dashboard.statTotalTips")}
-        value={String(periodTipCount)}
+        value={<CountUpMetric value={periodTipCount} kind="integer" />}
         change={
           periodTipCount > 0
             ? t("employee.dashboard.statChangeEarned", {
@@ -54,29 +51,39 @@ function EmployeeDashboardMetricsGridInner({
               })
             : t("format.metricZeroTips")
         }
-        icon={<TrendingUp className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="tips" size="md" />}
       />
       <EmployeeStatCard
         loading={loading}
-        showSpinner={loading}
         label={
           rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
         }
-        value={rating != null ? String(rating) : t("format.notAvailable")}
+        value={
+          rating != null ? (
+            <CountUpMetric value={rating} format={(n) => String(n)} />
+          ) : (
+            t("format.notAvailable")
+          )
+        }
         change={rating != null ? undefined : t("format.metricZeroRatings")}
         icon={<Star className="h-5 w-5" aria-hidden />}
       />
       <EmployeeStatCard
         loading={loading}
-        showSpinner={loading}
         label={t("employee.dashboard.statMonthlyGoal")}
-        value={goalPct != null ? `${Math.round(goalPct)}%` : t("format.notAvailable")}
+        value={
+          goalPct != null ? (
+            <CountUpMetric value={goalPct} kind="percent" />
+          ) : (
+            t("format.notAvailable")
+          )
+        }
         change={
           goalPct != null
             ? t("employee.dashboard.statGoalProgress")
             : t("employee.dashboard.statGoalSetHint")
         }
-        icon={<Target className="h-5 w-5" aria-hidden />}
+        icon={<CareIcon name="goals" size="md" />}
       />
     </div>
   );

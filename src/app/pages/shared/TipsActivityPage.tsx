@@ -10,12 +10,26 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { employeeUi } from "@/app/components/employee/employeeDashboardUi";
-import { CareTipPageLoader } from "@/app/components/CareTipPageLoader";
+import {
+  InlineSpinner,
+  TipsActivityTableSkeleton,
+} from "@/app/components/dashboard/DashboardSectionLoading";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
 import { logClientError } from "@/app/lib/clientLog";
 import { formatEur } from "@/app/lib/formatEur";
 import { listBusinessTips, listEmployeeTips, type TipActivityRow, type TipStatus } from "@/app/lib/api";
 import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_HIGH_MS,
+} from "@/app/lib/pageSessionCache";
+
+type TipsActivityCache = {
+  items: TipActivityRow[];
+  total: number;
+  timezone: string | null;
+};
 
 function formatDateTime(iso: string, locale: typeof de, timezone?: string): string {
   try {
@@ -71,6 +85,8 @@ export function TipsActivityPage() {
   const take = 50;
   const skip = (page - 1) * take;
   const totalPages = Math.max(1, Math.ceil(total / take));
+  const isInitialTableLoad = loading && items.length === 0;
+  const isBackgroundRefresh = loading && items.length > 0;
 
   const statusLabel = useCallback(
     (s: TipStatus | string) => {
@@ -82,12 +98,23 @@ export function TipsActivityPage() {
     [t],
   );
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!user) {
       if (sessionValidated) setLoading(false);
       return;
     }
-    setLoading(true);
+    const cacheKey = `tips-activity:${user.id}:${user.role}:${status}:${range}:${skip}:${customFrom}:${customTo}`;
+    const cached = getPageSessionCache<TipsActivityCache>(cacheKey, PAGE_CACHE_TTL_HIGH_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setItems(cached.items);
+      setTotal(cached.total);
+      setDataTimezone(cached.timezone);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const common = {
@@ -99,17 +126,23 @@ export function TipsActivityPage() {
       };
       const res =
         user.role === "business" ? await listBusinessTips(common) : await listEmployeeTips(common);
-      setItems(res.items ?? []);
-      setTotal(res.total ?? 0);
-      setDataTimezone((res as { timezone?: string }).timezone ?? null);
+      const nextItems = res.items ?? [];
+      const nextTotal = res.total ?? 0;
+      const nextTz = (res as { timezone?: string }).timezone ?? null;
+      setItems(nextItems);
+      setTotal(nextTotal);
+      setDataTimezone(nextTz);
+      setPageSessionCache(cacheKey, { items: nextItems, total: nextTotal, timezone: nextTz });
     } catch (e) {
       logClientError("TipsActivityPage.load", e);
-      setItems([]);
-      setTotal(0);
-      setDataTimezone(null);
-      setError(e instanceof Error ? e.message : t("business.tipsActivity.loadFailed"));
+      if (!useCachedFirst) {
+        setItems([]);
+        setTotal(0);
+        setDataTimezone(null);
+        setError(e instanceof Error ? e.message : t("business.tipsActivity.loadFailed"));
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [customFrom, customTo, range, sessionValidated, skip, status, t, user?.id, user?.role]);
 
@@ -267,6 +300,17 @@ export function TipsActivityPage() {
         <div className={cn(ui.filterPanel, "mb-6 p-4 text-sm text-muted-foreground")}>{error}</div>
       ) : null}
 
+      {isBackgroundRefresh ? (
+        <div
+          className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+          role="status"
+          aria-live="polite"
+        >
+          <InlineSpinner />
+          <span>{t("dashboard.refresh.updating")}</span>
+        </div>
+      ) : null}
+
       <motion.div
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -285,12 +329,8 @@ export function TipsActivityPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={5} className="px-4 py-10">
-                    <CareTipPageLoader variant="compact" message={t("business.tipsActivity.loading")} />
-                  </td>
-                </tr>
+              {isInitialTableLoad ? (
+                <TipsActivityTableSkeleton />
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">

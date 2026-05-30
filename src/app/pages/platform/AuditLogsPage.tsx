@@ -14,6 +14,11 @@ import {
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformAuditLogMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 
 function formatTime(iso: string): string {
   try {
@@ -45,19 +50,35 @@ export function AuditLogsPage() {
     });
   }, [rows, searchQuery]);
 
-  const load = useCallback(async () => {
-    setLoading(true);
+  const load = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
+    const cacheKey = "platform:audit-logs";
+    const cached = getPageSessionCache<{ items: PlatformAuditLogRow[]; total: number }>(
+      cacheKey,
+      PAGE_CACHE_TTL_MEDIUM_MS,
+    );
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setRows(cached.items);
+      setTotal(cached.total);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     try {
       const res = await fetchPlatformAuditLogs({ take: 200, skip: 0 });
       setRows(res.items);
       setTotal(res.total);
+      setPageSessionCache(cacheKey, { items: res.items, total: res.total });
     } catch (e) {
       logClientError("AuditLogsPage", e);
-      toast.error(toUserFriendlyMessage(e));
-      setRows([]);
-      setTotal(0);
+      if (!useCachedFirst) {
+        toast.error(toUserFriendlyMessage(e));
+        setRows([]);
+        setTotal(0);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, []);
 
@@ -67,6 +88,7 @@ export function AuditLogsPage() {
 
   const emptyMessage = t("admin.auditLogsPage.empty");
   const noMatchMessage = t("admin.auditLogsPage.noSearchMatches");
+  const isInitialLoad = loading && rows.length === 0;
 
   return (
     <PlatformPage>
@@ -87,7 +109,7 @@ export function AuditLogsPage() {
 
       <PlatformResponsiveData
         mobile={
-          loading ? (
+          isInitialLoad ? (
             <CareTipPageLoader variant="compact" message={t("admin.auditLogsPage.loading")} />
           ) : rows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
@@ -110,7 +132,7 @@ export function AuditLogsPage() {
               </tr>
             </thead>
             <tbody>
-              {loading ? (
+              {isInitialLoad ? (
                 <tr>
                   <td colSpan={4} className={platformUi.tableTd}>
                     <CareTipPageLoader variant="compact" message={t("admin.auditLogsPage.loading")} />

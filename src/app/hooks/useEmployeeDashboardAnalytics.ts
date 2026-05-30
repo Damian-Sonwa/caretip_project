@@ -25,6 +25,10 @@ import {
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import { primeEmployeeAccountSnapshot } from "./useEmployeeAccountSummary";
+import {
+  hasEmployeeChartOrTipsContent,
+  hasEmployeePayloadVisibleContent,
+} from "../lib/dashboardVisibleContent";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
 
@@ -111,6 +115,8 @@ export function useEmployeeDashboardAnalytics(
   tfRef.current = analyticsTimeframe;
   const payloadRef = useRef(payload);
   payloadRef.current = payload;
+  const lastKnownGoodMetricsRef = useRef(lastKnownGoodMetrics);
+  lastKnownGoodMetricsRef.current = lastKnownGoodMetrics;
   const uiRequestSeqRef = useRef(0);
   const abortRef = useRef(new Map<EmployeeAnalyticsTimeframe, AbortController>());
   const summaryPartialRef = useRef(new Map<EmployeeAnalyticsTimeframe, Partial<EmployeeTipsResponse>>());
@@ -242,9 +248,21 @@ export function useEmployeeDashboardAnalytics(
           const seq = uiRequestSeqRef.current;
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("charts", "loading");
+          const chartsReady =
+            !advancedAnalyticsEnabledRef.current ||
+            summaryPartial.analyticsBundled === true ||
+            Boolean(analyticsPartialRef.current.get(tf));
+          setAnalyticsLoading(!chartsReady);
+          if (chartsReady) {
+            devSetHydrationPhase("charts", "ready");
+          } else {
+            devSetHydrationPhase("charts", "loading");
+          }
           commitUiPayload(tf, seq, false);
+        } else {
+          setIsRevalidating(true);
+          setSummaryLoading(!payloadRef.current);
+          setAnalyticsLoading(true);
         }
       }
     },
@@ -270,6 +288,26 @@ export function useEmployeeDashboardAnalytics(
       const revalidate = opts?.soft === true;
       const periodSessionReady = isPeriodSessionReady(tf);
 
+      const payloadVisibleOnScreen = () =>
+        hasEmployeePayloadVisibleContent(payloadRef.current) ||
+        Boolean(lastKnownGoodMetricsRef.current);
+      const chartsVisibleOnScreen = () =>
+        hasEmployeeChartOrTipsContent(payloadRef.current);
+      const setSummaryLoadingUi = (next: boolean) => {
+        if (next && revalidate && payloadVisibleOnScreen()) {
+          setSummaryLoading(false);
+          return;
+        }
+        setSummaryLoading(next);
+      };
+      const setAnalyticsLoadingUi = (next: boolean) => {
+        if (next && revalidate && chartsVisibleOnScreen()) {
+          setAnalyticsLoading(false);
+          return;
+        }
+        setAnalyticsLoading(next);
+      };
+
       if (affectsUi) {
         setError(null);
         if (periodSessionReady && !revalidate) {
@@ -283,31 +321,53 @@ export function useEmployeeDashboardAnalytics(
           markDashboardLiveSettled(hasSettledLiveUiRef);
           return;
         }
+        const preserveVisibleUi =
+          revalidate &&
+          (hasEmployeePayloadVisibleContent(payloadRef.current) ||
+            Boolean(lastKnownGoodMetricsRef.current));
+
         setIsRevalidating(true);
-        const swrPayload = hydrateFromSwr(tf);
-        if (swrPayload && canUsePeriodSwitchCache(hasSettledLiveUiRef.current) && opts?.soft) {
-          setPayload(swrPayload);
-          setDataTimeframe(tf);
+        if (preserveVisibleUi) {
           setSummaryLoading(false);
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("metrics", "ready");
-          devSetHydrationPhase("charts", "loading");
-        } else if (!opts?.soft) {
-          setPayload(null);
-          setDataTimeframe(null);
-          summaryPartialRef.current.delete(tf);
-          analyticsPartialRef.current.delete(tf);
-          setSummaryLoading(true);
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("metrics", "loading");
-          devSetHydrationPhase("charts", "loading");
-          devSetHydrationPhase("goals", "loading");
+          setAnalyticsLoading(false);
         } else {
-          setSummaryLoading(!payloadRef.current);
-          setAnalyticsLoading(true);
-          if (!payloadRef.current) {
+          const swrPayload = hydrateFromSwr(tf);
+          if (swrPayload && canUsePeriodSwitchCache(hasSettledLiveUiRef.current) && opts?.soft) {
+            setPayload(swrPayload);
+            setDataTimeframe(tf);
+            setSummaryLoading(false);
+            const chartsReady =
+              !advancedAnalyticsEnabledRef.current ||
+              Boolean(swrPayload.chartSeries?.length);
+            setAnalyticsLoadingUi(!chartsReady);
+            devSetHydrationPhase("metrics", "ready");
+            if (chartsReady) {
+              devSetHydrationPhase("charts", "ready");
+            } else if (!(revalidate && chartsVisibleOnScreen())) {
+              devSetHydrationPhase("charts", "loading");
+            }
+          } else if (!opts?.soft) {
+            setPayload(null);
+            setDataTimeframe(null);
+            summaryPartialRef.current.delete(tf);
+            analyticsPartialRef.current.delete(tf);
+            setSummaryLoading(true);
+            setAnalyticsLoading(true);
             devSetHydrationPhase("metrics", "loading");
             devSetHydrationPhase("charts", "loading");
+            devSetHydrationPhase("goals", "loading");
+          } else {
+            const chartsReady =
+              !advancedAnalyticsEnabledRef.current ||
+              Boolean(payloadRef.current?.chartSeries?.length);
+            setSummaryLoadingUi(!payloadRef.current);
+            setAnalyticsLoadingUi(!chartsReady);
+            if (!payloadRef.current && !(revalidate && payloadVisibleOnScreen())) {
+              devSetHydrationPhase("metrics", "loading");
+            }
+            if (!chartsReady && !(revalidate && chartsVisibleOnScreen())) {
+              devSetHydrationPhase("charts", "loading");
+            }
           }
         }
       }
@@ -363,7 +423,6 @@ export function useEmployeeDashboardAnalytics(
               devSetHydrationPhase("charts", "ready");
             }
             commitUiPayload(tf, seq, true);
-            setIsRevalidating(false);
           }
         }
 
@@ -498,7 +557,14 @@ export function useEmployeeDashboardAnalytics(
     const tf = analyticsTimeframe;
     const timer = window.setTimeout(() => {
       if (mountGenerationRef.current !== generation) return;
-      void loadForRef.current(tf, { affectsUi: true });
+      const warmMount =
+        hasSettledLiveUiRef.current &&
+        (isPeriodSessionReady(tf) || hasEmployeePayloadVisibleContent(payloadRef.current));
+      void loadForRef.current(tf, {
+        affectsUi: true,
+        soft: warmMount,
+        silent: warmMount,
+      });
     }, 0);
     return () => {
       window.clearTimeout(timer);
@@ -508,7 +574,7 @@ export function useEmployeeDashboardAnalytics(
   }, [enabled, analyticsTimeframe]);
 
   const refetchLive = useCallback(() => {
-    clearEmployeeTipsClientCache();
+    clearEmployeeTipsClientCache(tfRef.current);
     void loadFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
   }, [loadFor]);
 
@@ -590,8 +656,10 @@ export function useEmployeeDashboardAnalytics(
   const valuesMatchAnalyticsPeriod = dataTimeframe === analyticsTimeframe;
 
   const displayPayload = useMemo(() => {
-    if (!valuesMatchAnalyticsPeriod) return null;
-    return payload;
+    if (!payload) return null;
+    if (valuesMatchAnalyticsPeriod) return payload;
+    if (hasEmployeePayloadVisibleContent(payload)) return payload;
+    return null;
   }, [dataTimeframe, analyticsTimeframe, payload, valuesMatchAnalyticsPeriod]);
 
   const displayMetrics = useMemo(() => {
@@ -615,17 +683,51 @@ export function useEmployeeDashboardAnalytics(
     if (displayMetrics) return displayMetrics;
     if (!enabled) return null;
     // Preserve last known good values during rapid period switches to avoid “zero flashes”.
-    if (summaryLoading || analyticsLoading || isRevalidating) return lastKnownGoodMetrics;
+    if (
+      !valuesMatchAnalyticsPeriod ||
+      summaryLoading ||
+      analyticsLoading ||
+      isRevalidating
+    ) {
+      return lastKnownGoodMetrics;
+    }
     return null;
-  }, [analyticsLoading, displayMetrics, enabled, isRevalidating, lastKnownGoodMetrics, summaryLoading]);
+  }, [
+    analyticsLoading,
+    displayMetrics,
+    enabled,
+    isRevalidating,
+    lastKnownGoodMetrics,
+    summaryLoading,
+    valuesMatchAnalyticsPeriod,
+  ]);
+
+  const hasVisibleKpisOnScreen =
+    Boolean(displayMetricsStable) ||
+    hasEmployeePayloadVisibleContent(payload) ||
+    Boolean(lastKnownGoodMetrics);
+
+  const hasVisibleSecondaryOnScreen =
+    hasEmployeeChartOrTipsContent(displayPayload) ||
+    hasEmployeeChartOrTipsContent(payload);
 
   const isMetricsInitialLoad =
-    enabled && !displayMetrics && summaryLoading;
+    enabled && !hasVisibleKpisOnScreen && summaryLoading && !isRevalidating;
 
   const isAnalyticsInitialLoad =
-    enabled && analyticsLoading && !(displayPayload?.chartSeries?.length ?? 0);
+    enabled &&
+    analyticsLoading &&
+    !hasVisibleSecondaryOnScreen &&
+    !isRevalidating;
 
-  const isPeriodRefreshing = isRevalidating && Boolean(displayMetrics) && !isMetricsInitialLoad;
+  /** Status strip: stay on Updating until metrics, charts/goals, and period alignment have all settled. */
+  const isPeriodRefreshing =
+    enabled &&
+    !isMetricsInitialLoad &&
+    (isRevalidating ||
+      summaryLoading ||
+      analyticsLoading ||
+      !valuesMatchAnalyticsPeriod);
 
   return {
     analyticsTimeframe,

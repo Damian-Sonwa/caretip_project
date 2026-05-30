@@ -11,6 +11,11 @@ import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_HIGH_MS,
+} from "../lib/pageSessionCache";
 
 export type NotificationListFilters = {
   kind?: "support" | "other";
@@ -41,6 +46,8 @@ export function useNotifications({
   const [loading, setLoading] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const loadedRef = useRef(false);
+  const itemsRef = useRef<InboxNotification[] | null>(null);
+  itemsRef.current = items;
 
   const refreshUnread = useCallback(async () => {
     if (!active) return;
@@ -62,7 +69,23 @@ export function useNotifications({
   const loadNotifications = useCallback(
     async (opts?: { append?: boolean; cursor?: string | null; reset?: boolean }) => {
       if (!active) return;
-      setLoading(true);
+      const inboxCacheKey = `notifications:inbox:${filterKey}`;
+      const cachedInbox = getPageSessionCache<{
+        items: InboxNotification[];
+        unreadCount: number;
+        nextCursor: string | null;
+      }>(inboxCacheKey, PAGE_CACHE_TTL_HIGH_MS);
+      const hasVisible = (itemsRef.current?.length ?? 0) > 0;
+      const useCachedFirst =
+        !opts?.append && !opts?.cursor && cachedInbox !== null && !hasVisible;
+      if (useCachedFirst) {
+        setItems(cachedInbox.items);
+        setUnreadCount(cachedInbox.unreadCount);
+        setNextCursor(cachedInbox.nextCursor);
+        setLoading(false);
+      } else if (!hasVisible || opts?.append) {
+        setLoading(true);
+      }
       try {
         const res = await fetchMyNotifications({
           limit: 25,
@@ -77,6 +100,13 @@ export function useNotifications({
         setItems((prev) =>
           opts?.append && !opts?.reset ? [...(prev ?? []), ...nextItems] : nextItems,
         );
+        if (!opts?.append && !opts?.cursor) {
+          setPageSessionCache(inboxCacheKey, {
+            items: nextItems,
+            unreadCount: res.unreadCount,
+            nextCursor: res.nextCursor,
+          });
+        }
         loadedRef.current = true;
       } catch (err) {
         if (!isApiConnectivityError(err)) {
@@ -132,7 +162,21 @@ export function useNotifications({
 
   useEffect(() => {
     if (!active || !loadList) return;
-    loadedRef.current = false;
+    const inboxCacheKey = `notifications:inbox:${filterKey}`;
+    const cachedInbox = getPageSessionCache<{
+      items: InboxNotification[];
+      unreadCount: number;
+      nextCursor: string | null;
+    }>(inboxCacheKey, PAGE_CACHE_TTL_HIGH_MS);
+    if (cachedInbox) {
+      setItems(cachedInbox.items);
+      setUnreadCount(cachedInbox.unreadCount);
+      setNextCursor(cachedInbox.nextCursor);
+      loadedRef.current = true;
+    } else {
+      setItems([]);
+      loadedRef.current = false;
+    }
     void loadNotifications({ reset: true });
   }, [active, loadList, loadNotifications, filterKey]);
 
@@ -163,11 +207,6 @@ export function useNotifications({
       socket.off("notification_unread_count", onUnread);
     };
   }, [socket, active]);
-
-  useEffect(() => {
-    if (!active || !connected) return;
-    void refreshUnread();
-  }, [connected, active, refreshUnread]);
 
   return {
     unreadCount,

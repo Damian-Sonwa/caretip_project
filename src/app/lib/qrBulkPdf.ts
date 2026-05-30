@@ -13,6 +13,7 @@ function sanitizePdfText(raw: string): string {
   try {
     s = s.replace(/\p{Extended_Pictographic}/gu, "");
   } catch {
+    // eslint-disable-next-line no-misleading-character-class -- legacy emoji strip fallback
     s = s.replace(/[\u231A-\u23FA\u2600-\u26FF\u2700-\u27BF\uFE0F]/g, "");
   }
   s = s.replace(/\uFE0F/g, "").replace(/\u200D/g, "");

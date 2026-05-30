@@ -15,6 +15,11 @@ import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import { resolveEmployeeTipsWithDevPreview } from "../../lib/devAnalyticsMocks";
 import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_HIGH_MS,
+} from "../../lib/pageSessionCache";
+import {
   getEmployeeReadIdsRecord,
   markAllEmployeeTipsRead,
   markEmployeeTipsRead,
@@ -57,9 +62,21 @@ export function EmployeeNotificationsPage() {
 
   useEffect(() => subscribeEmployeeNotifications(() => syncReadState()), []);
 
-  const loadTips = useCallback(async () => {
+  const loadTips = useCallback(async (opts?: { quiet?: boolean }) => {
+    const quiet = opts?.quiet === true;
     if (!authReady || !user || user.role !== "employee") return;
-    setLoading(true);
+    const cacheKey = user.id ? `employee:notifications:${user.id}` : null;
+    const cached = cacheKey
+      ? getPageSessionCache<TipItem[]>(cacheKey, PAGE_CACHE_TTL_HIGH_MS)
+      : null;
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setDisplayTips(cached);
+      setTips(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+    }
     setLoadError(null);
     try {
       const data = await listEmployeeTips({ take: 100, range: "month" });
@@ -70,16 +87,19 @@ export function EmployeeNotificationsPage() {
         totalSupporters: data.total ?? apiTips.length,
       });
       setDisplayTips(resolved);
+      if (cacheKey) setPageSessionCache(cacheKey, resolved);
       if (user.employeeId) {
         syncEmployeeNotificationTips(user.employeeId, resolved);
       }
     } catch (err) {
       logClientError("EmployeeNotificationsPage", err);
-      setTips([]);
-      setDisplayTips([]);
-      setLoadError(err instanceof Error ? err.message : t("employee.notifications.loadFailed"));
+      if (!useCachedFirst) {
+        setTips([]);
+        setDisplayTips([]);
+        setLoadError(err instanceof Error ? err.message : t("employee.notifications.loadFailed"));
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
   }, [authReady, user, t]);
 
@@ -216,9 +236,9 @@ export function EmployeeNotificationsPage() {
           }
         />
 
-        {loading ? (
+        {loading && displayTips.length === 0 ? (
           <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
-        ) : loadError ? (
+        ) : loadError && displayTips.length === 0 ? (
           <div className={employeeUi.cardStatic}>
             <EmployeeEmptyState
               icon={<Bell className="h-6 w-6" aria-hidden />}

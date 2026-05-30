@@ -496,7 +496,9 @@ export function FeatureShowcase({
                           )}
                           style={
                             singleHeroImage.objectPosition
-                              ? ({ ["--hero-object-position" as any]: singleHeroImage.objectPosition } as React.CSSProperties)
+                              ? ({
+                                  ["--hero-object-position"]: singleHeroImage.objectPosition,
+                                } as React.CSSProperties)
                               : undefined
                           }
                         >

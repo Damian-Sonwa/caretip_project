@@ -505,7 +505,7 @@ model Transaction {
   id                    String       @id @default(cuid())
   amount                Decimal      @db.Decimal(10, 2)
   status                TipStatus    @default(pending)
-  stripePaymentIntentId String?      @map("stripe_payment_intent_id")
+  stripePaymentIntentId String?      @unique @map("stripe_payment_intent_id")
   payoutStatus          PayoutStatus @default(not_applicable) @map("payout_status")
   employeeId            String       @map("employee_id")
   businessId            String       @map("business_id")

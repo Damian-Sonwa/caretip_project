@@ -1,13 +1,28 @@
 import { Suspense, type ReactNode } from "react";
-import { DashboardOutletFallback, MinimalRouteFallback } from "./DashboardOutletFallback";
+import {
+  DashboardOutletFallback,
+  DashboardOutletShellHold,
+  MinimalRouteFallback,
+} from "./DashboardOutletFallback";
 
 type RouteChunkBoundaryProps = {
   children: ReactNode;
-  /** dashboard = in-layout content skeleton; minimal = lightweight public transition */
-  variant?: "dashboard" | "minimal";
+  /**
+   * shell = dashboard layout outlet (height hold only; page owns skeletons)
+   * dashboard = full metric skeleton (standalone / non-shell routes)
+   * minimal = public route transition
+   */
+  variant?: "shell" | "dashboard" | "minimal";
 };
 
 export function RouteChunkBoundary({ children, variant = "dashboard" }: RouteChunkBoundaryProps) {
-  const fallback = variant === "minimal" ? <MinimalRouteFallback /> : <DashboardOutletFallback />;
+  const fallback =
+    variant === "minimal" ? (
+      <MinimalRouteFallback />
+    ) : variant === "shell" ? (
+      <DashboardOutletShellHold />
+    ) : (
+      <DashboardOutletFallback />
+    );
   return <Suspense fallback={fallback}>{children}</Suspense>;
 }

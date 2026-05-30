@@ -1,14 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-import {
-  Bell,
-  Building2,
-  CreditCard,
-  Palette,
-  Settings2,
-  Shield,
-  User,
-  Users,
-} from "lucide-react";
+import type { CareIconName } from "@/components/icons";
 
 export type BusinessSettingsSectionId =
   | "general"
@@ -23,7 +13,7 @@ export type BusinessSettingsSection = {
   id: BusinessSettingsSectionId;
   labelKey: string;
   descriptionKey: string;
-  icon: LucideIcon;
+  icon: CareIconName;
 };
 
 export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
@@ -31,43 +21,43 @@ export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
     id: "general",
     labelKey: "business.settings.sections.general",
     descriptionKey: "business.settings.sections.generalDesc",
-    icon: User,
+    icon: "general",
   },
   {
     id: "business",
     labelKey: "business.settings.sections.business",
     descriptionKey: "business.settings.sections.businessDesc",
-    icon: Building2,
+    icon: "hospitalityVenue",
   },
   {
     id: "team",
     labelKey: "business.settings.sections.team",
     descriptionKey: "business.settings.sections.teamDesc",
-    icon: Users,
+    icon: "team",
   },
   {
     id: "notifications",
     labelKey: "business.settings.sections.notifications",
     descriptionKey: "business.settings.sections.notificationsDesc",
-    icon: Bell,
+    icon: "notifications",
   },
   {
     id: "security",
     labelKey: "business.settings.sections.security",
     descriptionKey: "business.settings.sections.securityDesc",
-    icon: Shield,
+    icon: "security",
   },
   {
     id: "billing",
     labelKey: "business.settings.sections.billing",
     descriptionKey: "business.settings.sections.billingDesc",
-    icon: CreditCard,
+    icon: "billing",
   },
   {
     id: "branding",
     labelKey: "business.settings.sections.branding",
     descriptionKey: "business.settings.sections.brandingDesc",
-    icon: Palette,
+    icon: "branding",
   },
 ] as const;
 
@@ -80,5 +70,3 @@ export function parseBusinessSettingsSection(raw: string | null): BusinessSettin
   if (raw && valid) return raw as BusinessSettingsSectionId;
   return BUSINESS_SETTINGS_DEFAULT_SECTION;
 }
-
-export const BUSINESS_SETTINGS_PAGE_ICON = Settings2;

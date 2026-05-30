@@ -24,6 +24,11 @@ import { cn } from "@/lib/utils";
 import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "../../lib/pageSessionCache";
 
 function formatEur(value: number): string {
   try {
@@ -55,14 +60,18 @@ export function EmployeeTipGoalsPage() {
   const refresh = useCallback(async () => {
     try {
       const data = await listMyGoals();
-      setGoals(data.goals ?? []);
+      const next = data.goals ?? [];
+      setGoals(next);
       setLoadError(null);
+      if (user?.id) setPageSessionCache(`employee:goals:${user.id}`, next);
+      return next;
     } catch (e) {
       logClientError("EmployeeTipGoalsPage.refresh", e);
       setGoals([]);
       setLoadError(e instanceof Error ? e.message : t("employee.tipGoals.loadFailed"));
+      return null;
     }
-  }, [t]);
+  }, [t, user?.id]);
 
   useEffect(() => {
     if (!authReady) return;
@@ -72,12 +81,18 @@ export function EmployeeTipGoalsPage() {
     }
     if (!user || user.role !== "employee") return;
     let cancelled = false;
+    const cacheKey = `employee:goals:${user.id}`;
+    const cached = getPageSessionCache<EmployeeGoalRow[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+    if (cached) {
+      setGoals(cached);
+      setLoading(false);
+    }
     (async () => {
-      setLoading(true);
+      if (!cached) setLoading(true);
       try {
         await refresh();
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && !cached) setLoading(false);
       }
     })();
     return () => {
@@ -116,9 +131,11 @@ export function EmployeeTipGoalsPage() {
 
   const periodLabel = (p: GoalPeriod) => t(`business.period.${p}`);
 
-  if (!authReady) return <CareTipPageLoader />;
+  const isInitialGoalsLoad = loading && goals.length === 0;
+
+  if (!authReady && isInitialGoalsLoad) return <CareTipPageLoader />;
   if (!user || user.role !== "employee") return null;
-  if (loading) return <CareTipPageLoader />;
+  if (isInitialGoalsLoad) return <CareTipPageLoader />;
 
   return (
     <div className={employeeUi.page}>

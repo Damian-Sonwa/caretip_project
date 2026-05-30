@@ -72,7 +72,7 @@ export function EmployeeLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="flex-1">
-            <RouteChunkBoundary>
+            <RouteChunkBoundary variant="shell">
               <Outlet />
             </RouteChunkBoundary>
           </main>

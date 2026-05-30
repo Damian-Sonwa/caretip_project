@@ -5,7 +5,7 @@ import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 
-interface CardProps extends React.HTMLAttributes<HTMLDivElement> {}
+type CardProps = React.HTMLAttributes<HTMLDivElement>;
 
 export function AnimatedCard({ className, ...props }: CardProps) {
   return (
@@ -32,13 +32,13 @@ export function CardBody({ className, ...props }: CardProps) {
   );
 }
 
-interface CardTitleProps extends React.HTMLAttributes<HTMLHeadingElement> {}
+type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
 
 export function CardTitle({ className, ...props }: CardTitleProps) {
   return <h3 className={cn("text-lg font-semibold leading-none tracking-tight text-foreground", className)} {...props} />;
 }
 
-interface CardDescriptionProps extends React.HTMLAttributes<HTMLParagraphElement> {}
+type CardDescriptionProps = React.HTMLAttributes<HTMLParagraphElement>;
 
 export function CardDescription({ className, ...props }: CardDescriptionProps) {
   return <p className={cn("text-sm text-muted-foreground", className)} {...props} />;

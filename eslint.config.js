@@ -20,6 +20,8 @@ export default tseslint.config(
       "playwright.config.ts",
       "eslint.config.js",
       "src/imports/pasted_text/**",
+      "public/firebase-messaging-sw.js",
+      "public/fcm-sw-handler.js",
     ],
   },
   eslint.configs.recommended,

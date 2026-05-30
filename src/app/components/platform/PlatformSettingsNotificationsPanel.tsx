@@ -6,6 +6,11 @@ import { logClientError } from "../../lib/clientLog";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { platformUi } from "./platformDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../lib/pageSessionCache";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 
@@ -20,12 +25,26 @@ export function PlatformSettingsNotificationsPanel() {
 
   useEffect(() => {
     let cancelled = false;
+    const cacheKey = "platform:admin-settings-prefs";
+    const cached = getPageSessionCache<{ systemAlerts: boolean; notifyNewLogin: boolean }>(
+      cacheKey,
+      PAGE_CACHE_TTL_LOW_MS,
+    );
+    if (cached) {
+      setSystemAlerts(cached.systemAlerts);
+      setNotifyNewLogin(cached.notifyNewLogin);
+      setLoading(false);
+    }
     void (async () => {
       try {
         const prefs = await getMyAccountSettings();
         if (cancelled) return;
         setSystemAlerts(prefs.systemAlerts);
         setNotifyNewLogin(prefs.notifyNewLogin);
+        setPageSessionCache(cacheKey, {
+          systemAlerts: prefs.systemAlerts,
+          notifyNewLogin: prefs.notifyNewLogin,
+        });
       } catch (e) {
         logClientError("PlatformSettingsNotificationsPanel.load", e);
       } finally {

@@ -41,6 +41,20 @@ import { Button } from "../../components/ui/button";
 import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_LOW_MS,
+} from "../../lib/pageSessionCache";
+
+type EmployeeSettingsCache = {
+  name: string;
+  bio: string;
+  businessName: string;
+  monthlyGoal: string;
+  emailNotif: boolean;
+  pushNotif: boolean;
+};
 
 const TEAL = "#e9781c";
 
@@ -65,21 +79,42 @@ export function EmployeeSettingsPage() {
   useEffect(() => {
     if (!user || user.role !== "employee") return;
     let cancelled = false;
-    (async () => {
+    const cacheKey = `employee:settings:${user.id}`;
+    const cached = getPageSessionCache<EmployeeSettingsCache>(cacheKey, PAGE_CACHE_TTL_LOW_MS);
+    if (cached) {
+      setName(cached.name);
+      setBio(cached.bio);
+      setBusinessName(cached.businessName);
+      setMonthlyGoal(cached.monthlyGoal);
+      setEmailNotif(cached.emailNotif);
+      setPushNotif(cached.pushNotif);
+      setLoading(false);
+    } else {
       setLoading(true);
+    }
+    (async () => {
       try {
         const p = await getEmployeeProfile();
         if (cancelled) return;
-        setName(p.name);
-        setBio(p.bio ?? "");
-        setBusinessName(p.businessName ?? "");
-        setMonthlyGoal(p.monthlyGoal != null ? String(p.monthlyGoal) : "");
-        setEmailNotif(p.emailNotifications);
-        setPushNotif(p.pushNotifications);
+        const snapshot: EmployeeSettingsCache = {
+          name: p.name,
+          bio: p.bio ?? "",
+          businessName: p.businessName ?? "",
+          monthlyGoal: p.monthlyGoal != null ? String(p.monthlyGoal) : "",
+          emailNotif: p.emailNotifications,
+          pushNotif: p.pushNotifications,
+        };
+        setName(snapshot.name);
+        setBio(snapshot.bio);
+        setBusinessName(snapshot.businessName);
+        setMonthlyGoal(snapshot.monthlyGoal);
+        setEmailNotif(snapshot.emailNotif);
+        setPushNotif(snapshot.pushNotif);
+        setPageSessionCache(cacheKey, snapshot);
         updateUser({ avatar: p.avatar ?? undefined, name: p.name });
       } catch (err) {
         logClientError("EmployeeSettingsPage", err);
-        toast.error(t("employee.settings.toastLoadError"));
+        if (!cached) toast.error(t("employee.settings.toastLoadError"));
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -187,7 +222,9 @@ export function EmployeeSettingsPage() {
 
   if (!user || user.role !== "employee") return null;
 
-  if (loading) {
+  const isInitialSettingsLoad = loading && !name && !businessName;
+
+  if (isInitialSettingsLoad) {
     return <CareTipPageLoader />;
   }
 

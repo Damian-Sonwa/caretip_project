@@ -1,5 +1,4 @@
-import type { LucideIcon } from "lucide-react";
-import { Bell, Inbox, LayoutDashboard, Settings, Target } from "lucide-react";
+import type { CareIconName } from "@/components/icons";
 import {
   hasSubscriptionCapability,
   type BusinessSubscriptionTier,
@@ -9,15 +8,15 @@ import {
 export type EmployeeDashboardNavItem = {
   labelKey: string;
   href: string;
-  icon: LucideIcon;
+  icon: CareIconName;
 };
 
 export const employeeDashboardNavItems: readonly EmployeeDashboardNavItem[] = [
-  { labelKey: "dashboardNav.employee.overview", href: "/employee/dashboard", icon: LayoutDashboard },
-  { labelKey: "dashboardNav.employee.inbox", href: "/employee/inbox", icon: Inbox },
-  { labelKey: "dashboardNav.employee.notifications", href: "/employee/notifications", icon: Bell },
-  { labelKey: "dashboardNav.employee.tipGoals", href: "/employee/tip-goals", icon: Target },
-  { labelKey: "dashboardNav.employee.settings", href: "/employee/settings", icon: Settings },
+  { labelKey: "dashboardNav.employee.overview", href: "/employee/dashboard", icon: "overview" },
+  { labelKey: "dashboardNav.employee.inbox", href: "/employee/inbox", icon: "inbox" },
+  { labelKey: "dashboardNav.employee.notifications", href: "/employee/notifications", icon: "notifications" },
+  { labelKey: "dashboardNav.employee.tipGoals", href: "/employee/tip-goals", icon: "tipGoals" },
+  { labelKey: "dashboardNav.employee.settings", href: "/employee/settings", icon: "settings" },
 ] as const;
 
 const EMPLOYEE_NAV_CAPABILITY_BY_HREF: Partial<Record<string, SubscriptionCapability>> = {

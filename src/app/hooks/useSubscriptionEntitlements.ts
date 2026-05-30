@@ -5,6 +5,10 @@ import {
   type BusinessSubscriptionTier,
   type SubscriptionCapability,
 } from "../lib/subscriptionCapabilities";
+import {
+  getSubscriptionTierFromSession,
+  primeSubscriptionTierFromSession,
+} from "../lib/subscriptionSessionCache";
 
 type Role = "business" | "employee";
 
@@ -12,8 +16,9 @@ export function useSubscriptionEntitlements(opts: {
   enabled: boolean;
   role: Role | null | undefined;
 }) {
-  const [tier, setTier] = useState<BusinessSubscriptionTier>("premium");
-  const [ready, setReady] = useState(false);
+  const sessionTier = opts.role === "business" ? getSubscriptionTierFromSession() : null;
+  const [tier, setTier] = useState<BusinessSubscriptionTier>(sessionTier ?? "premium");
+  const [ready, setReady] = useState(Boolean(sessionTier));
 
   useEffect(() => {
     if (!opts.enabled || !opts.role) {
@@ -25,13 +30,17 @@ export function useSubscriptionEntitlements(opts: {
       try {
         if (opts.role === "business") {
           const profile = await fetchBusinessProfile({ silent: true });
-          if (!cancelled) setTier(profile.subscriptionTier ?? "premium");
+          if (!cancelled) {
+            const next = profile.subscriptionTier ?? "premium";
+            primeSubscriptionTierFromSession(next);
+            setTier(next);
+          }
         } else {
           const profile = await getEmployeeProfile({ silent: true });
           if (!cancelled) setTier(profile.subscriptionTier ?? "premium");
         }
       } catch {
-        if (!cancelled) setTier("premium");
+        if (!cancelled) setTier(sessionTier ?? "premium");
       } finally {
         if (!cancelled) setReady(true);
       }

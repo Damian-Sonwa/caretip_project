@@ -8,6 +8,7 @@ export {
   DashboardAnalyticsPhaseHintSlot,
   DashboardStableChartSlot,
   DeferredContentFade,
+  DashboardMetricsGridSkeleton,
   GoalsTableLoadingShell,
   InlineSpinner,
   SectionLoader,
@@ -105,20 +106,94 @@ export function DashboardHeroStatPlaceholder() {
   return <DashboardHeroMetricSkeleton variant="currency" />;
 }
 
-/** Chart region placeholder — bar silhouette, no centered spinner. */
+function DashboardChartBarsPlaceholder({
+  barHeights,
+}: {
+  barHeights: number[];
+}) {
+  return (
+    <div className="flex h-[72%] min-h-[120px] w-full items-end justify-between gap-1 sm:gap-1.5">
+      {barHeights.map((h, i) => (
+        <span
+          key={i}
+          className="dashboard-chart-skeleton__bar flex-1 rounded-t-md"
+          style={{ height: `${h}%` }}
+          aria-hidden
+        />
+      ))}
+    </div>
+  );
+}
+
+function DashboardChartTrendPlaceholder() {
+  return (
+    <>
+      <div
+        className="pointer-events-none absolute bottom-7 left-12 right-3 top-3 sm:left-14"
+        aria-hidden
+      >
+        <svg
+          className="h-full w-full text-muted-foreground/25"
+          viewBox="0 0 320 120"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,92 C40,88 55,72 95,58 S155,38 200,42 280,28 320,18 L320,120 L0,120 Z"
+            fill="currentColor"
+            opacity="0.12"
+          />
+          <path
+            d="M0,92 C40,88 55,72 95,58 S155,38 200,42 280,28 320,18"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            opacity="0.35"
+          />
+        </svg>
+      </div>
+      <div
+        className="absolute bottom-1.5 left-12 right-3 flex justify-between sm:left-14"
+        aria-hidden
+      >
+        {Array.from({ length: 6 }).map((_, i) => (
+          <span
+            key={i}
+            className="dashboard-chart-skeleton__bar h-2 w-5 max-w-[2.25rem] rounded-sm opacity-60"
+          />
+        ))}
+      </div>
+      <div
+        className="absolute bottom-7 left-1.5 top-3 flex w-9 flex-col justify-between sm:left-2"
+        aria-hidden
+      >
+        {Array.from({ length: 4 }).map((_, i) => (
+          <span
+            key={i}
+            className="dashboard-chart-skeleton__bar h-2 w-7 rounded-sm opacity-50"
+          />
+        ))}
+      </div>
+    </>
+  );
+}
+
+/** Chart placeholder — bar columns or area/trend frame with axis ticks. */
 export function DashboardChartSkeleton({
   className,
   minHeightClass = "min-h-[220px] sm:min-h-[260px]",
   barHeights = [42, 68, 35, 82, 55, 74, 48, 90, 62, 40],
+  variant = "bars",
 }: {
   className?: string;
   minHeightClass?: string;
   barHeights?: number[];
+  variant?: "bars" | "trend";
 }) {
   return (
     <div
       className={cn(
-        "dashboard-chart-skeleton flex w-full flex-col justify-end px-1",
+        "dashboard-chart-skeleton relative flex w-full flex-col justify-end px-1",
         minHeightClass,
         className,
       )}
@@ -126,16 +201,13 @@ export function DashboardChartSkeleton({
       aria-busy="true"
       aria-label="Loading chart"
     >
-      <div className="flex h-[72%] min-h-[120px] w-full items-end justify-between gap-1 sm:gap-1.5">
-        {barHeights.map((h, i) => (
-          <span
-            key={i}
-            className="dashboard-chart-skeleton__bar flex-1 rounded-t-md"
-            style={{ height: `${h}%` }}
-            aria-hidden
-          />
-        ))}
-      </div>
+      {variant === "trend" ? (
+        <div className="relative h-full min-h-[120px] w-full flex-1">
+          <DashboardChartTrendPlaceholder />
+        </div>
+      ) : (
+        <DashboardChartBarsPlaceholder barHeights={barHeights} />
+      )}
     </div>
   );
 }
@@ -156,8 +228,8 @@ export function DashboardRefreshingBadge({
       )}
       aria-hidden
     >
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-background/80 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm ring-1 ring-border/50 backdrop-blur-[2px]">
-        <LoadingSpinner size="sm" className="!h-3 !w-3 border-[1.5px]" />
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-background/90 px-2.5 py-1 text-[11px] font-medium text-muted-foreground shadow-sm ring-1 ring-border/60 backdrop-blur-[2px]">
+        <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-amber-500 ring-2 ring-amber-500/25" aria-hidden />
         {label}
       </span>
     </div>
