@@ -7,10 +7,6 @@ import {
   deliverUserNotification,
 } from "../notifications/notificationOrchestrator.service.js";
 
-function formatEur(amount: number): string {
-  return new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR" }).format(amount);
-}
-
 function safeTrigger(label: string, fn: () => Promise<void>): void {
   void fn().catch((err) => {
     logPush("error", `${label} failed`, {
@@ -36,15 +32,22 @@ export function onTipReceived(payload: NewTipPayload): void {
     });
     if (!employee) return;
 
-    const amountLabel = formatEur(payload.tip.amount);
     const ts = new Date().toISOString();
+    const amount = Number(payload.tip.amount);
 
     await deliverUserNotification({
       userId: employee.userId,
       payload: {
         type: NotificationType.TIP_RECEIVED,
         title: "New tip received",
-        body: `${amountLabel} — ${employee.name}`,
+        body: "",
+        localeTemplate: {
+          id: "tip_received_employee",
+          params: {
+            amount,
+            name: employee.name,
+          },
+        },
         url: "/employee/dashboard",
         timestamp: ts,
         metadata: {
@@ -67,7 +70,14 @@ export function onTipReceived(payload: NewTipPayload): void {
         payload: {
           type: NotificationType.TIP_RECEIVED,
           title: "New tip at your venue",
-          body: `${amountLabel} for ${employee.name}`,
+          body: "",
+          localeTemplate: {
+            id: "tip_received_business",
+            params: {
+              amount,
+              employeeName: employee.name,
+            },
+          },
           url: "/dashboard",
           timestamp: ts,
           metadata: {
@@ -95,7 +105,11 @@ export function onPayoutCompleted(
       payload: {
         type: NotificationType.PAYOUT_COMPLETED,
         title: "Payout completed",
-        body: `A payout of ${formatEur(amount)} was processed.`,
+        body: "",
+        localeTemplate: {
+          id: "payout_completed",
+          params: { amount },
+        },
         timestamp: new Date().toISOString(),
         metadata: { entityId: transactionId, transactionId, payoutStatus: "paid" },
       },
@@ -134,7 +148,8 @@ export function onLoginSecurityAlert(userId: string): void {
       payload: {
         type: NotificationType.LOGIN_SECURITY,
         title: "New sign-in",
-        body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
+        body: "",
+        localeTemplate: { id: "login_security" },
         url,
         timestamp: new Date().toISOString(),
         metadata: { entityId: userId },
@@ -163,7 +178,14 @@ export function onEmployeeInvited(params: {
       payload: {
         type: NotificationType.EMPLOYEE_INVITED,
         title: "Team invitation sent",
-        body: `${params.employeeName} was invited to join ${business.name}.`,
+        body: "",
+        localeTemplate: {
+          id: "employee_invited_manager",
+          params: {
+            employeeName: params.employeeName,
+            businessName: business.name,
+          },
+        },
         url: "/dashboard/staff-management",
         timestamp: new Date().toISOString(),
         metadata: {
@@ -184,7 +206,11 @@ export function onEmployeeAccountActivated(userId: string, businessName: string)
       payload: {
         type: NotificationType.EMPLOYEE_INVITED,
         title: "Welcome to CareTip",
-        body: `Your account for ${businessName} is ready. You can sign in and start receiving tips.`,
+        body: "",
+        localeTemplate: {
+          id: "employee_activated",
+          params: { businessName },
+        },
         url: "/employee/dashboard",
         timestamp: new Date().toISOString(),
         metadata: { entityId: userId },
@@ -220,7 +246,8 @@ export function onQrScanActivity(params: {
       payload: {
         type: NotificationType.QR_SCAN,
         title: "QR code scanned",
-        body: `A guest opened the tipping page for ${place}.`,
+        body: "",
+        localeTemplate: { id: "qr_scan", params: { place } },
         url: "/dashboard",
         timestamp: new Date().toISOString(),
         metadata: {
@@ -247,14 +274,19 @@ export function onQrPaymentSuccessful(params: {
     });
     if (!business?.userId) return;
 
-    const amountLabel = formatEur(params.amount);
-
     await deliverUserNotification({
       userId: business.userId,
       payload: {
         type: NotificationType.QR_PAYMENT_SUCCESS,
         title: "QR payment received",
-        body: `${amountLabel} via QR for ${params.employeeName}.`,
+        body: "",
+        localeTemplate: {
+          id: "qr_payment_success",
+          params: {
+            amount: params.amount,
+            employeeName: params.employeeName,
+          },
+        },
         url: "/dashboard",
         timestamp: new Date().toISOString(),
         metadata: {
@@ -274,6 +306,7 @@ export function onPlatformOperationalAlert(params: {
   body: string;
   url?: string;
   entityId?: string;
+  localeTemplate?: import("../../notifications/notificationI18n.js").NotificationTemplate;
 }): void {
   safeTrigger("onPlatformOperationalAlert", async () => {
     const adminIds = await listPlatformAdminUserIds();
@@ -285,6 +318,7 @@ export function onPlatformOperationalAlert(params: {
         type: NotificationType.SYSTEM_ALERT,
         title: params.title,
         body: params.body,
+        localeTemplate: params.localeTemplate,
         url: params.url ?? "/platform-admin/businesses",
         timestamp: new Date().toISOString(),
         metadata: { entityId },
@@ -301,7 +335,11 @@ export function onBusinessVerificationDocumentUploaded(
 ): void {
   onPlatformOperationalAlert({
     title: "Verification document uploaded",
-    body: `${businessName} submitted documents for review.`,
+    body: "",
+    localeTemplate: {
+      id: "verification_document_uploaded",
+      params: { businessName },
+    },
     url: `/platform-admin/businesses/${businessId}`,
     entityId: `verification_doc:${businessId}`,
   });

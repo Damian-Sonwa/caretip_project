@@ -1,4 +1,5 @@
-import { buildEmployeeActivationContent, resolveEmailLocale, type EmailLocale } from "../emails/i18nEmail.js";
+import { buildEmployeeActivationContent, resolveUserPreferredLocale, type EmailLocale } from "../emails/i18nEmail.js";
+import { prisma } from "../prisma.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
 function getFrontendBaseUrl(): string {
@@ -32,10 +33,7 @@ export async function sendEmployeeActivationEmail(input: {
   activationUrl: string;
   expiresInHours?: number;
   businessName: string;
-  /** App / inviter language hints (explicit from API body wins). */
-  explicitLocale?: string | null;
-  inviterPreferredLocale?: string | null;
-  acceptLanguage?: string | null;
+  inviteeUserId?: string | null;
 }): Promise<void> {
   const to = input.to.trim().toLowerCase();
   const activationUrl = input.activationUrl;
@@ -44,11 +42,15 @@ export async function sendEmployeeActivationEmail(input: {
   if (!to) return;
 
   const from = getResendFromAddress();
-  const locale = resolveEmailLocale({
-    explicitLocale: input.explicitLocale,
-    storedLocale: input.inviterPreferredLocale,
-    acceptLanguage: input.acceptLanguage,
-  });
+  let storedLocale: string | null = null;
+  if (input.inviteeUserId) {
+    const u = await prisma.user.findUnique({
+      where: { id: input.inviteeUserId },
+      select: { preferredLocale: true },
+    });
+    storedLocale = u?.preferredLocale ?? null;
+  }
+  const locale = resolveUserPreferredLocale(storedLocale);
   const { subject, html, text } = renderActivation({
     locale,
     businessName: input.businessName,

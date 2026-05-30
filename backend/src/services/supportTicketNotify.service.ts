@@ -6,7 +6,6 @@ import {
 import { NotificationType } from "./push/notification.types.js";
 import { listPlatformAdminUserIds } from "./push/notification.triggers.js";
 import type { SupportTicketDetailDto } from "./supportTicket.service.js";
-import { inboxTitleForSupportTicket, categoryLabel } from "./supportTicketFormat.js";
 
 function adminTicketUrl(ticketId: string): string {
   return `/platform-admin/support/${ticketId}`;
@@ -22,7 +21,6 @@ export function notifySupportTicketCreated(params: {
   managerUserId: string;
 }): void {
   const { ticket, businessName, managerUserId } = params;
-  const cat = categoryLabel(ticket.category);
 
   void listPlatformAdminUserIds().then((adminIds) => {
     if (adminIds.length === 0) return;
@@ -30,12 +28,16 @@ export function notifySupportTicketCreated(params: {
       adminIds,
       {
         type: NotificationType.SUPPORT_TICKET_CREATED,
-        title: inboxTitleForSupportTicket({
-          ticketNumber: ticket.ticketNumber,
-          status: ticket.status,
-          subject: ticket.subject,
-        }),
-        body: `${businessName} · ${cat}. Open the ticket to reply.`,
+        title: `[TICKET] ${ticket.ticketNumber}`,
+        body: "",
+        localeTemplate: {
+          id: "support_created_admin",
+          params: {
+            ticketNumber: ticket.ticketNumber,
+            businessName,
+            category: ticket.category,
+          },
+        },
         url: adminTicketUrl(ticket.id),
         timestamp: new Date().toISOString(),
         metadata: {
@@ -60,7 +62,14 @@ export function notifySupportTicketCreated(params: {
     payload: {
       type: NotificationType.SUPPORT_TICKET_CREATED,
       title: `Support request received: ${ticket.ticketNumber}`,
-      body: `We received your message about "${ticket.subject}". Our team will respond shortly.`,
+      body: "",
+      localeTemplate: {
+        id: "support_created_business",
+        params: {
+          ticketNumber: ticket.ticketNumber,
+          subject: ticket.subject,
+        },
+      },
       url: businessTicketUrl(ticket.id),
       timestamp: new Date().toISOString(),
       metadata: {
@@ -92,7 +101,15 @@ export function notifySupportTicketReply(params: {
         {
           type: NotificationType.SUPPORT_TICKET_REPLY,
           title: `[TICKET] New reply: ${ticket.ticketNumber}`,
-          body: `${businessName}: ${preview}`,
+          body: "",
+          localeTemplate: {
+            id: "support_reply_admin",
+            params: {
+              ticketNumber: ticket.ticketNumber,
+              businessName,
+              preview,
+            },
+          },
           url: adminTicketUrl(ticket.id),
           timestamp: new Date().toISOString(),
           metadata: {
@@ -116,7 +133,14 @@ export function notifySupportTicketReply(params: {
     payload: {
       type: NotificationType.SUPPORT_TICKET_REPLY,
       title: `CareTip replied: ${ticket.ticketNumber}`,
-      body: preview,
+      body: "",
+      localeTemplate: {
+        id: "support_reply_business",
+        params: {
+          ticketNumber: ticket.ticketNumber,
+          preview,
+        },
+      },
       url: businessTicketUrl(ticket.id),
       timestamp: new Date().toISOString(),
       metadata: {
@@ -140,23 +164,23 @@ export function notifySupportTicketStatus(params: {
   const { ticket, managerUserId, previousStatus } = params;
   if (previousStatus === ticket.status) return;
 
-  const statusLine =
+  const localeTemplate =
     ticket.status === "RESOLVED"
-      ? "Your support request has been marked resolved."
+      ? ({ id: "support_status_resolved" } as const)
       : ticket.status === "CLOSED"
-        ? "This support ticket is now closed."
-        : `Ticket status updated to ${ticket.status}.`;
+        ? ({ id: "support_status_closed" } as const)
+        : ({
+            id: "support_status_updated",
+            params: { status: ticket.status },
+          } as const);
 
   void deliverUserNotification({
     userId: managerUserId,
     payload: {
       type: NotificationType.SUPPORT_TICKET_STATUS,
-      title: inboxTitleForSupportTicket({
-        ticketNumber: ticket.ticketNumber,
-        status: ticket.status,
-        subject: ticket.subject,
-      }),
-      body: statusLine,
+      title: `[TICKET] ${ticket.ticketNumber}`,
+      body: "",
+      localeTemplate,
       url: businessTicketUrl(ticket.id),
       timestamp: new Date().toISOString(),
       metadata: {
@@ -167,6 +191,10 @@ export function notifySupportTicketStatus(params: {
       },
     },
     dedupeKey: `support_status:${ticket.id}:${ticket.status}:${managerUserId}`,
-    channels: { in_app: true, push: true, email: ticket.status === "RESOLVED" || ticket.status === "CLOSED" },
+    channels: {
+      in_app: true,
+      push: true,
+      email: ticket.status === "RESOLVED" || ticket.status === "CLOSED",
+    },
   });
 }

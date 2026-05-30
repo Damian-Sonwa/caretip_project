@@ -14,7 +14,7 @@ import * as employeeActivationService from "./employeeActivation.service.js";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
-import { resolveEmailLocale } from "../emails/i18nEmail.js";
+import { resolveEmailLocale, resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -244,11 +244,9 @@ async function sendVerificationEmailBestEffort(
       where: { id: userId },
       select: { preferredLocale: true },
     });
-    const locale = resolveEmailLocale({
-      explicitLocale: opts?.explicitLocale ?? null,
-      storedLocale: u?.preferredLocale ?? null,
-      acceptLanguage: opts?.acceptLanguage ?? null,
-    });
+    const locale = resolveUserPreferredLocale(
+      opts?.explicitLocale ?? u?.preferredLocale ?? null,
+    );
     const { plainToken } = await createEmailVerificationToken(userId);
     await sendEmailVerificationEmail({
       to: email,
@@ -286,11 +284,9 @@ export async function registerBusiness(
   const placeholderBusinessName = `${baseName} venue`;
   const slug = await generateUniqueBusinessSlugForName(placeholderBusinessName);
   const passwordHash = await bcrypt.hash(input.password, 10);
-  const preferredLocale = resolveEmailLocale({
-    explicitLocale: input.locale ?? null,
-    storedLocale: null,
-    acceptLanguage: opts?.acceptLanguage ?? null,
-  });
+  const preferredLocale = input.locale?.trim()
+    ? resolveUserPreferredLocale(input.locale)
+    : null;
 
   const created = await prisma.user.create({
     data: {
@@ -322,7 +318,6 @@ export async function registerBusiness(
   // Managers must verify email for password sign-ups — await so delivery runs before HTTP response (serverless-safe).
   await sendVerificationEmailBestEffort(created.id, created.email, {
     explicitLocale: input.locale,
-    acceptLanguage: opts?.acceptLanguage,
   });
 
   return authResultForUserRecord(created);
@@ -362,11 +357,9 @@ export async function registerEmployee(
   }
 
   const passwordHash = await bcrypt.hash(input.password, 10);
-  const preferredLocale = resolveEmailLocale({
-    explicitLocale: input.locale ?? null,
-    storedLocale: null,
-    acceptLanguage: opts?.acceptLanguage ?? null,
-  });
+  const preferredLocale = input.locale?.trim()
+    ? resolveUserPreferredLocale(input.locale)
+    : null;
 
   const slug =
     business.verificationStatus === "verified"
@@ -405,7 +398,6 @@ export async function registerEmployee(
 
   await sendVerificationEmailBestEffort(created.id, created.email, {
     explicitLocale: input.locale,
-    acceptLanguage: opts?.acceptLanguage,
   });
 
   return authResultForUserRecord(created);

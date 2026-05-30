@@ -14,6 +14,7 @@ import {
   buildEmployeeActivationUrl,
   sendEmployeeActivationEmail,
 } from "./employeeActivationEmail.service.js";
+import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 const VERIFICATION_REQUIRED_MSG = "QR code will be available after business verification.";
@@ -890,6 +891,11 @@ export async function createEmployeeWithActivation(
 
   const resolved = await resolveStaffAssignments(businessId, locIn ?? null, tablesIn ?? []);
 
+  const inviteLocaleSeed = explicitLocale ?? inviter?.preferredLocale ?? null;
+  const seededPreferredLocale = inviteLocaleSeed
+    ? resolveUserPreferredLocale(inviteLocaleSeed)
+    : null;
+
   const employee = await prisma.$transaction(async (tx) => {
     const user = await tx.user.create({
       data: {
@@ -899,6 +905,7 @@ export async function createEmployeeWithActivation(
         isPlatformAdmin: false,
         /** Confirmed when activation completes (password set); see `activateEmployee`. */
         emailVerified: false,
+        preferredLocale: seededPreferredLocale,
       },
     });
     return tx.employee.create({
@@ -942,9 +949,7 @@ export async function createEmployeeWithActivation(
     activationUrl: buildEmployeeActivationUrl(activationToken),
     expiresInHours: 24,
     businessName: business.name?.trim() || "CareTip",
-    explicitLocale: explicitLocale ?? null,
-    inviterPreferredLocale: inviter?.preferredLocale ?? null,
-    acceptLanguage: acceptLanguage ?? null,
+    inviteeUserId: employee.userId,
   });
 
   notifyBusinessRosterChanged(businessId, "staff_created");

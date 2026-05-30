@@ -4,7 +4,7 @@ import { prisma } from "../prisma.js";
 import { normalizeLoginEmail } from "./auth.service.js";
 import { validatePassword } from "../utils/passwordValidation.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
-import { buildPasswordResetContent, resolveEmailLocale, type EmailLocale } from "../emails/i18nEmail.js";
+import { buildPasswordResetContent, resolveUserPreferredLocale, type EmailLocale } from "../emails/i18nEmail.js";
 
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
 const RESET_EXPIRES_HOURS = RESET_TTL_MS / (60 * 60 * 1000);
@@ -73,11 +73,9 @@ export async function requestPasswordReset(
   const resetUrl = `${getFrontendBaseUrl()}/reset-password/${encodeURIComponent(plainToken)}`;
 
   const from = getResendFromAddress();
-  const locale = resolveEmailLocale({
-    explicitLocale: opts?.explicitLocale ?? null,
-    storedLocale: user.preferredLocale,
-    acceptLanguage: opts?.acceptLanguage ?? null,
-  });
+  const locale = resolveUserPreferredLocale(
+    opts?.explicitLocale ?? user.preferredLocale ?? null,
+  );
   const { subject, html, text } = renderPasswordReset(locale, resetUrl);
 
   const ok = await sendResendEmail("password-reset", {

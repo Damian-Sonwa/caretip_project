@@ -56,17 +56,24 @@ export function localeFromAcceptLanguage(
   return null;
 }
 
+export function resolveUserPreferredLocale(
+  storedLocale?: string | null,
+): EmailLocale {
+  const stored = normalizeExplicit(storedLocale ?? undefined);
+  if (stored && SUPPORTED.has(stored)) return stored;
+  return "en";
+}
+
 export function resolveEmailLocale(input: {
   explicitLocale?: string | null;
   storedLocale?: string | null;
+  /** @deprecated Ignored — use User.preferredLocale / explicit CareTip UI locale only. */
   acceptLanguage?: string | null;
 }): EmailLocale {
   const a = normalizeExplicit(input.explicitLocale ?? undefined);
   if (a && SUPPORTED.has(a)) return a;
   const b = normalizeExplicit(input.storedLocale ?? undefined);
   if (b && SUPPORTED.has(b)) return b;
-  const c = localeFromAcceptLanguage(input.acceptLanguage ?? undefined);
-  if (c) return c;
   return "en";
 }
 

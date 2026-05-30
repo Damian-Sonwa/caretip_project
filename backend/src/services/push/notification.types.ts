@@ -1,3 +1,5 @@
+import type { NotificationTemplate } from "../../notifications/notificationI18n.js";
+
 /** Production push notification categories (FCM data `event` field). */
 export const NotificationType = {
   TIP_RECEIVED: "tip_received",
@@ -24,6 +26,8 @@ export type NotificationPayload = {
   type: NotificationType;
   title: string;
   body: string;
+  /** When set, title/body are rendered from User.preferredLocale at delivery time. */
+  localeTemplate?: NotificationTemplate;
   /** In-app route when the user opens the notification. */
   url?: string;
   /** ISO-8601 timestamp included in FCM data payload. */

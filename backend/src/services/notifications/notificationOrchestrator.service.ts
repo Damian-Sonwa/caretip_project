@@ -1,4 +1,5 @@
 import type { NotificationPriority } from "@prisma/client";
+import { localizeNotificationPayload } from "../../notifications/notificationI18n.js";
 import { prisma } from "../../prisma.js";
 import { sendLocalizedUserNotificationEmail } from "../localizedNotificationEmail.service.js";
 import { sendNotification } from "../push/notification.service.js";
@@ -44,13 +45,30 @@ export async function deliverUserNotification(
   input: DeliverNotificationInput,
 ): Promise<{ notification: InboxNotificationDto | null; skipped: boolean }> {
   const channels = resolveChannels(input.payload.type, input.channels);
+  const user = await prisma.user.findUnique({
+    where: { id: input.userId },
+    select: { email: true, preferredLocale: true },
+  });
+
+  const localized = localizeNotificationPayload(user?.preferredLocale, {
+    title: input.payload.title,
+    body: input.payload.body,
+    localeTemplate: input.payload.localeTemplate,
+  });
+
+  const deliveryPayload = {
+    ...input.payload,
+    title: localized.title,
+    body: localized.body,
+  };
+
   const dedupeKey =
     input.dedupeKey ??
-    `${input.payload.type}:${input.userId}:${input.payload.metadata?.entityId ?? input.payload.title}`;
+    `${deliveryPayload.type}:${input.userId}:${deliveryPayload.metadata?.entityId ?? deliveryPayload.title}`;
 
   const metadata: Record<string, unknown> = {
-    ...(input.payload.metadata ?? {}),
-    ...(input.payload.url ? { url: input.payload.url } : {}),
+    ...(deliveryPayload.metadata ?? {}),
+    ...(deliveryPayload.url ? { url: deliveryPayload.url } : {}),
   };
 
   let notification: InboxNotificationDto | null = null;
@@ -58,9 +76,9 @@ export async function deliverUserNotification(
   if (channels.includes("in_app")) {
     notification = await createInboxNotification({
       userId: input.userId,
-      type: input.payload.type,
-      title: input.payload.title,
-      message: input.payload.body,
+      type: deliveryPayload.type,
+      title: deliveryPayload.title,
+      message: deliveryPayload.body,
       metadata,
       priority: input.priority ?? "normal",
       channels,
@@ -74,25 +92,21 @@ export async function deliverUserNotification(
   }
 
   if (channels.includes("push")) {
-    await sendNotification(input.userId, input.payload, {
+    await sendNotification(input.userId, deliveryPayload, {
       bypassPreferences: input.bypassPreferences,
       dedupeKey: `push:${dedupeKey}`,
     });
   }
 
   if (channels.includes("email")) {
-    const user = await prisma.user.findUnique({
-      where: { id: input.userId },
-      select: { email: true, preferredLocale: true },
-    });
     if (user?.email) {
       void sendLocalizedUserNotificationEmail({
         to: user.email,
         userId: input.userId,
-        explicitLocale: user.preferredLocale,
-        title: input.payload.title,
-        bodyText: input.payload.body,
-        actionUrl: input.payload.url ?? null,
+        preferredLocale: user.preferredLocale,
+        title: deliveryPayload.title,
+        bodyText: deliveryPayload.body,
+        actionUrl: deliveryPayload.url ?? null,
       }).catch(() => undefined);
     }
   }

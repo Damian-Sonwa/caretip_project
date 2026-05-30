@@ -1,5 +1,5 @@
 import { prisma } from "../prisma.js";
-import { buildLoginAlertContent, resolveEmailLocale, type EmailLocale } from "../emails/i18nEmail.js";
+import { buildLoginAlertContent, resolveUserPreferredLocale, type EmailLocale } from "../emails/i18nEmail.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
 function renderLoginAlert(input: Parameters<typeof buildLoginAlertContent>[0]) {
@@ -19,8 +19,7 @@ export async function sendNewLoginAlertEmail(input: {
   to: string;
   ip?: string | null;
   userAgent?: string | null;
-  acceptLanguage?: string | null;
-  /** Client app language at sign-in (e.g. JSON body `locale`). */
+  /** CareTip UI language at sign-in (JSON body `locale`). */
   explicitLocale?: string | null;
   /** IANA timezone from the client when available (e.g. `Europe/Berlin`). */
   timeZone?: string | null;
@@ -33,11 +32,9 @@ export async function sendNewLoginAlertEmail(input: {
     select: { preferredLocale: true },
   });
 
-  const locale: EmailLocale = resolveEmailLocale({
-    explicitLocale: input.explicitLocale ?? null,
-    storedLocale: user?.preferredLocale ?? null,
-    acceptLanguage: input.acceptLanguage ?? null,
-  });
+  const locale: EmailLocale = resolveUserPreferredLocale(
+    input.explicitLocale ?? user?.preferredLocale ?? null,
+  );
 
   const from = getResendFromAddress();
   const when = new Date();

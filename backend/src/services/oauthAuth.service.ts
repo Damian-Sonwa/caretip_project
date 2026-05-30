@@ -10,7 +10,7 @@ import {
 import * as businessService from "./business.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
-import { resolveEmailLocale } from "../emails/i18nEmail.js";
+import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 
 const businessIncludeForOAuth = {
   select: {
@@ -92,11 +92,9 @@ export async function authenticateWithOAuth(
     businessType,
     location,
   } = body;
-  const preferredLocale = resolveEmailLocale({
-    explicitLocale: body.locale ?? null,
-    storedLocale: null,
-    acceptLanguage: opts?.acceptLanguage ?? null,
-  });
+  const preferredLocale = body.locale?.trim()
+    ? resolveUserPreferredLocale(body.locale)
+    : null;
   if (!idToken?.trim()) {
     throw new Error("Missing identity token.");
   }

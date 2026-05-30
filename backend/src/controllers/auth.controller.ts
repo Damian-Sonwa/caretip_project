@@ -58,10 +58,6 @@ async function notifyLoginSecurityAlerts(
     userAgent: ua,
     explicitLocale: opts.explicitLocale,
     timeZone: opts.clientTimeZone,
-    acceptLanguage:
-      typeof req.headers["accept-language"] === "string"
-        ? req.headers["accept-language"]
-        : undefined,
   });
   const { onLoginSecurityAlert } = await import("../services/push/notification.triggers.js");
   onLoginSecurityAlert(userId);

@@ -1,0 +1,236 @@
+import type { EmailLocale } from "../emails/i18nEmail.js";
+import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
+import type { SupportTicketCategory } from "@prisma/client";
+import { categoryLabelLocalized } from "../services/supportTicketFormat.js";
+
+export function formatNotificationAmount(amount: number, locale: EmailLocale): string {
+  return new Intl.NumberFormat(locale === "de" ? "de-DE" : "en-GB", {
+    style: "currency",
+    currency: "EUR",
+  }).format(amount);
+}
+
+export type NotificationTemplate =
+  | { id: "tip_received_employee"; params: { amount: number; name: string } }
+  | { id: "tip_received_business"; params: { amount: number; employeeName: string } }
+  | { id: "payout_completed"; params: { amount: number } }
+  | { id: "login_security" }
+  | { id: "employee_invited_manager"; params: { employeeName: string; businessName: string } }
+  | { id: "employee_activated"; params: { businessName: string } }
+  | { id: "qr_scan"; params: { place: string } }
+  | { id: "qr_payment_success"; params: { amount: number; employeeName: string } }
+  | { id: "verification_document_uploaded"; params: { businessName: string } }
+  | { id: "support_created_admin"; params: { ticketNumber: string; businessName: string; category: SupportTicketCategory } }
+  | { id: "support_created_business"; params: { ticketNumber: string; subject: string } }
+  | { id: "support_reply_admin"; params: { ticketNumber: string; businessName: string; preview: string } }
+  | { id: "support_reply_business"; params: { ticketNumber: string; preview: string } }
+  | { id: "support_status_resolved" }
+  | { id: "support_status_closed" }
+  | { id: "support_status_updated"; params: { status: string } }
+  | { id: "support_inbox_title"; params: { ticketNumber: string; status: string; subject: string } };
+
+export function renderNotificationTemplate(
+  locale: EmailLocale,
+  template: NotificationTemplate,
+): { title: string; body: string } {
+  const de = locale === "de";
+  switch (template.id) {
+    case "tip_received_employee": {
+      const amount = formatNotificationAmount(template.params.amount, locale);
+      return de
+        ? { title: "Neues Trinkgeld erhalten", body: `${amount} — ${template.params.name}` }
+        : { title: "New tip received", body: `${amount} — ${template.params.name}` };
+    }
+    case "tip_received_business": {
+      const amount = formatNotificationAmount(template.params.amount, locale);
+      return de
+        ? {
+            title: "Neues Trinkgeld in Ihrem Betrieb",
+            body: `${amount} für ${template.params.employeeName}`,
+          }
+        : {
+            title: "New tip at your venue",
+            body: `${amount} for ${template.params.employeeName}`,
+          };
+    }
+    case "payout_completed": {
+      const amount = formatNotificationAmount(template.params.amount, locale);
+      return de
+        ? {
+            title: "Auszahlung abgeschlossen",
+            body: `Eine Auszahlung über ${amount} wurde verarbeitet.`,
+          }
+        : {
+            title: "Payout completed",
+            body: `A payout of ${amount} was processed.`,
+          };
+    }
+    case "login_security":
+      return de
+        ? {
+            title: "Neue Anmeldung",
+            body: "Ihr CareTip-Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort.",
+          }
+        : {
+            title: "New sign-in",
+            body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
+          };
+    case "employee_invited_manager":
+      return de
+        ? {
+            title: "Teameinladung gesendet",
+            body: `${template.params.employeeName} wurde eingeladen, ${template.params.businessName} beizutreten.`,
+          }
+        : {
+            title: "Team invitation sent",
+            body: `${template.params.employeeName} was invited to join ${template.params.businessName}.`,
+          };
+    case "employee_activated":
+      return de
+        ? {
+            title: "Willkommen bei CareTip",
+            body: `Ihr Konto für ${template.params.businessName} ist bereit. Sie können sich anmelden und Trinkgelder erhalten.`,
+          }
+        : {
+            title: "Welcome to CareTip",
+            body: `Your account for ${template.params.businessName} is ready. You can sign in and start receiving tips.`,
+          };
+    case "qr_scan":
+      return de
+        ? {
+            title: "QR-Code gescannt",
+            body: `Ein Gast hat die Trinkgeld-Seite für ${template.params.place} geöffnet.`,
+          }
+        : {
+            title: "QR code scanned",
+            body: `A guest opened the tipping page for ${template.params.place}.`,
+          };
+    case "qr_payment_success": {
+      const amount = formatNotificationAmount(template.params.amount, locale);
+      return de
+        ? {
+            title: "QR-Zahlung erhalten",
+            body: `${amount} per QR für ${template.params.employeeName}.`,
+          }
+        : {
+            title: "QR payment received",
+            body: `${amount} via QR for ${template.params.employeeName}.`,
+          };
+    }
+    case "verification_document_uploaded":
+      return de
+        ? {
+            title: "Verifizierungsdokument hochgeladen",
+            body: `${template.params.businessName} hat Dokumente zur Prüfung eingereicht.`,
+          }
+        : {
+            title: "Verification document uploaded",
+            body: `${template.params.businessName} submitted documents for review.`,
+          };
+    case "support_created_admin": {
+      const cat = categoryLabelLocalized(template.params.category, locale);
+      return de
+        ? {
+            title: `[TICKET] ${template.params.ticketNumber}`,
+            body: `${template.params.businessName} · ${cat}. Ticket öffnen, um zu antworten.`,
+          }
+        : {
+            title: `[TICKET] ${template.params.ticketNumber}`,
+            body: `${template.params.businessName} · ${cat}. Open the ticket to reply.`,
+          };
+    }
+    case "support_created_business":
+      return de
+        ? {
+            title: `Support-Anfrage erhalten: ${template.params.ticketNumber}`,
+            body: `Wir haben Ihre Nachricht zu „${template.params.subject}" erhalten. Unser Team antwortet in Kürze.`,
+          }
+        : {
+            title: `Support request received: ${template.params.ticketNumber}`,
+            body: `We received your message about "${template.params.subject}". Our team will respond shortly.`,
+          };
+    case "support_reply_admin":
+      return de
+        ? {
+            title: `[TICKET] Neue Antwort: ${template.params.ticketNumber}`,
+            body: `${template.params.businessName}: ${template.params.preview}`,
+          }
+        : {
+            title: `[TICKET] New reply: ${template.params.ticketNumber}`,
+            body: `${template.params.businessName}: ${template.params.preview}`,
+          };
+    case "support_reply_business":
+      return de
+        ? {
+            title: `CareTip hat geantwortet: ${template.params.ticketNumber}`,
+            body: template.params.preview,
+          }
+        : {
+            title: `CareTip replied: ${template.params.ticketNumber}`,
+            body: template.params.preview,
+          };
+    case "support_status_resolved":
+      return de
+        ? {
+            title: "Support-Anfrage erledigt",
+            body: "Ihre Support-Anfrage wurde als erledigt markiert.",
+          }
+        : {
+            title: "Support request resolved",
+            body: "Your support request has been marked resolved.",
+          };
+    case "support_status_closed":
+      return de
+        ? {
+            title: "Support-Ticket geschlossen",
+            body: "Dieses Support-Ticket ist jetzt geschlossen.",
+          }
+        : {
+            title: "Support ticket closed",
+            body: "This support ticket is now closed.",
+          };
+    case "support_status_updated":
+      return de
+        ? {
+            title: "Ticket-Status aktualisiert",
+            body: `Ticket-Status geändert auf ${template.params.status}.`,
+          }
+        : {
+            title: "Ticket status updated",
+            body: `Ticket status updated to ${template.params.status}.`,
+          };
+    case "support_inbox_title":
+      return de
+        ? {
+            title: `[TICKET] [${template.params.status}] ${template.params.ticketNumber}: ${template.params.subject}`,
+            body: "",
+          }
+        : {
+            title: `[TICKET] [${template.params.status}] ${template.params.ticketNumber}: ${template.params.subject}`,
+            body: "",
+          };
+    default:
+      return { title: "", body: "" };
+  }
+}
+
+export function localizeNotificationPayload(
+  preferredLocale: string | null | undefined,
+  input: {
+    title: string;
+    body: string;
+    localeTemplate?: NotificationTemplate;
+  },
+): { title: string; body: string } {
+  if (input.localeTemplate) {
+    const copy = renderNotificationTemplate(
+      resolveUserPreferredLocale(preferredLocale),
+      input.localeTemplate,
+    );
+    return {
+      title: copy.title || input.title,
+      body: copy.body || input.body,
+    };
+  }
+  return { title: input.title, body: input.body };
+}

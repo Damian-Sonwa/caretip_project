@@ -1,20 +1,18 @@
 import { prisma } from "../prisma.js";
 import {
   buildGenericNotificationContent,
-  resolveEmailLocale,
+  resolveUserPreferredLocale,
   type EmailLocale,
 } from "../emails/i18nEmail.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
 /**
- * Sends a generic transactional notification with en/de body from stored user locale
- * and optional request hints. Safe fallback to English if rendering fails.
+ * Sends a generic transactional notification email using User.preferredLocale only.
  */
 export async function sendLocalizedUserNotificationEmail(input: {
   to: string;
   userId?: string | null;
-  explicitLocale?: string | null;
-  acceptLanguage?: string | null;
+  preferredLocale?: string | null;
   title: string;
   bodyText: string;
   actionUrl?: string | null;
@@ -23,8 +21,8 @@ export async function sendLocalizedUserNotificationEmail(input: {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
 
-  let stored: string | null | undefined;
-  if (input.userId) {
+  let stored = input.preferredLocale ?? null;
+  if (stored == null && input.userId) {
     const u = await prisma.user.findUnique({
       where: { id: input.userId },
       select: { preferredLocale: true },
@@ -32,11 +30,7 @@ export async function sendLocalizedUserNotificationEmail(input: {
     stored = u?.preferredLocale ?? null;
   }
 
-  let locale: EmailLocale = resolveEmailLocale({
-    explicitLocale: input.explicitLocale,
-    storedLocale: stored,
-    acceptLanguage: input.acceptLanguage,
-  });
+  let locale: EmailLocale = resolveUserPreferredLocale(stored);
 
   const from = getResendFromAddress();
   let subject: string;
