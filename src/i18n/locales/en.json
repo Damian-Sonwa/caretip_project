@@ -1807,9 +1807,31 @@
       "eyebrow": "Business onboarding",
       "headline": "Welcome to CareTip",
       "description": "Set up your venue profile in a few guided steps. You can update everything later from your dashboard.",
+      "productPitch": "CareTip helps hospitality teams collect digital tips, notify staff instantly, and track performance from one dashboard.",
       "asideAria": "Onboarding overview",
       "progressAria": "Onboarding progress",
-      "visualBadge": "Venue profile",
+      "formStepLabel": "Step {{current}} of {{total}}",
+      "stepsRemaining": {
+        "final": "Final step — almost there"
+      },
+      "stepsRemaining_one": "{{count}} step remaining",
+      "stepsRemaining_other": "{{count}} steps remaining",
+      "preview": {
+        "step1Aria": "Preview of your venue profile on CareTip",
+        "step1Title": "Your venue profile",
+        "step1Subtitle": "Guests see this when they tip your team",
+        "venueLabel": "Venue",
+        "venueExample": "The Harbor Kitchen",
+        "typeExample": "Restaurant",
+        "step2Aria": "Preview of your venue location on CareTip",
+        "step2Title": "Location on your profile",
+        "step2Subtitle": "Helps guests and staff trust your listing",
+        "addressExample": "12 Market Street, Dublin 2, Ireland",
+        "step3Aria": "Preview of QR tipping on CareTip",
+        "step3Title": "QR tipping ready",
+        "step3Subtitle": "Print codes for tables and share links with staff",
+        "readyHint": "Dashboard unlocks after setup"
+      },
       "steps": {
         "businessDetails": "Business details",
         "locationDetails": "Location details",

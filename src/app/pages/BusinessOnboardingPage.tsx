@@ -23,16 +23,7 @@ import { logClientError } from "../lib/clientLog";
 import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { BusinessOnboardingAside } from "../components/business/BusinessOnboardingAside";
-import {
-  BusinessOnboardingProgress,
-  type OnboardingStep,
-} from "../components/business/BusinessOnboardingProgress";
-
-const STEP_TITLE_KEYS = [
-  "business.onboarding.steps.businessDetails",
-  "business.onboarding.steps.locationDetails",
-  "business.onboarding.steps.verificationFinish",
-] as const;
+import type { OnboardingStep } from "../components/business/BusinessOnboardingProgress";
 
 const STEP_DESC_KEYS = [
   "business.onboarding.stepDesc.businessDetails",
@@ -134,18 +125,21 @@ export function BusinessOnboardingPage() {
             aria-labelledby="business-onboarding-step-heading"
           >
             <div className="business-onboarding-form-card">
-              <BusinessOnboardingProgress step={step} className="mb-6 lg:hidden" />
-
               <div className="mb-6">
+                <p className="business-onboarding-form-panel__step-meta">
+                  {t("business.onboarding.formStepLabel", { current: step, total: 3 })}
+                </p>
+                <p className="business-onboarding-form-panel__steps-remaining lg:hidden">
+                  {3 - step === 0
+                    ? t("business.onboarding.stepsRemaining.final")
+                    : t("business.onboarding.stepsRemaining", { count: 3 - step })}
+                </p>
                 <h2
                   id="business-onboarding-step-heading"
                   className="business-onboarding-form-panel__step-title"
                 >
-                  {t(STEP_TITLE_KEYS[step - 1])}
-                </h2>
-                <p className="business-onboarding-form-panel__step-desc">
                   {t(STEP_DESC_KEYS[step - 1])}
-                </p>
+                </h2>
               </div>
 
               <AnimatePresence mode="wait">

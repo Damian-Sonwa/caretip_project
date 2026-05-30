@@ -1809,9 +1809,31 @@
       "eyebrow": "Business-Onboarding",
       "headline": "Willkommen bei CareTip",
       "description": "Richten Sie Ihr Betriebsprofil in wenigen Schritten ein. Alles lässt sich später im Dashboard anpassen.",
+      "productPitch": "CareTip hilft Gastronomie-Teams, digitale Trinkgelder zu sammeln, Mitarbeitende sofort zu benachrichtigen und Leistung in einem Dashboard zu verfolgen.",
       "asideAria": "Onboarding-Übersicht",
       "progressAria": "Onboarding-Fortschritt",
-      "visualBadge": "Betriebsprofil",
+      "formStepLabel": "Schritt {{current}} von {{total}}",
+      "stepsRemaining": {
+        "final": "Letzter Schritt — fast geschafft"
+      },
+      "stepsRemaining_one": "Noch {{count}} Schritt",
+      "stepsRemaining_other": "Noch {{count}} Schritte",
+      "preview": {
+        "step1Aria": "Vorschau Ihres Betriebsprofils auf CareTip",
+        "step1Title": "Ihr Betriebsprofil",
+        "step1Subtitle": "Gäste sehen dies beim Trinkgeldgeben",
+        "venueLabel": "Betrieb",
+        "venueExample": "The Harbor Kitchen",
+        "typeExample": "Restaurant",
+        "step2Aria": "Vorschau Ihres Standorts auf CareTip",
+        "step2Title": "Standort im Profil",
+        "step2Subtitle": "Schafft Vertrauen bei Gästen und Team",
+        "addressExample": "Marktstraße 12, 10115 Berlin",
+        "step3Aria": "Vorschau des QR-Trinkgeldens auf CareTip",
+        "step3Title": "QR-Trinkgeld bereit",
+        "step3Subtitle": "Codes für Tische drucken und Links mit dem Team teilen",
+        "readyHint": "Dashboard nach Abschluss freigeschaltet"
+      },
       "steps": {
         "businessDetails": "Betriebsdaten",
         "locationDetails": "Standort",

@@ -59,7 +59,6 @@ export function BusinessOnboardingProgress({ step, className }: BusinessOnboardi
                 )}
                 aria-current={isActive ? "step" : undefined}
               >
-                {isComplete ? "✓ " : ""}
                 {t(labelKey)}
               </span>
             </div>
