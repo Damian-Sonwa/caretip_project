@@ -1,8 +1,9 @@
+import { isLogoutPending } from "../lib/api";
 import { useTranslation } from "react-i18next";
 
 export function FullPageLoader({ message }: { message?: string }) {
   const { t } = useTranslation();
-  const resolved = message ?? t("common.settingUp");
+  const resolved = message ?? (isLogoutPending() ? t("common.signingOut") : t("common.settingUp"));
   return (
     <div className="flex min-h-[70vh] w-full items-center justify-center px-6 py-14">
       <div className="flex max-w-md flex-col items-center gap-4 text-center">

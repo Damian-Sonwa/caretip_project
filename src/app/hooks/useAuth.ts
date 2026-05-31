@@ -10,7 +10,9 @@ import {
   patchMyOnboardingStatus,
   clearClientSessionRevoked,
   clearClientAuthStorage,
+  clearLogoutPending,
   isClientSessionRevoked,
+  markLogoutPending,
   type AuthResponse,
 } from "../lib/api";
 import { resetAuthSessionClient } from "../lib/authBootstrap";
@@ -367,15 +369,20 @@ export function useAuth() {
   }, [requestLocale]);
 
   const logout = useCallback(async () => {
-    bumpSessionEpoch();
-    clearEmployeeNotifications();
-    resetAuthSessionClient();
-    commitAuthUser(null);
-    await logoutAPI();
-    clearStoredSession();
-    markSessionBootstrapSettled();
-    notifyAuthStorageSync();
-    authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
+    markLogoutPending();
+    try {
+      bumpSessionEpoch();
+      clearEmployeeNotifications();
+      resetAuthSessionClient();
+      commitAuthUser(null);
+      await logoutAPI();
+      clearStoredSession();
+      markSessionBootstrapSettled();
+      notifyAuthStorageSync();
+      authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
+    } finally {
+      clearLogoutPending();
+    }
   }, []);
 
   const switchRole = (newRole: UserRole) => {

@@ -32,6 +32,7 @@
   },
   "common": {
     "settingUp": "Setting things up for you…",
+    "signingOut": "Signing you out securely...",
     "onlyAMoment": "This will only take a moment.",
     "syncingAccountStatus": "Syncing account status…",
     "loadingTeamMembers": "Loading team members…",

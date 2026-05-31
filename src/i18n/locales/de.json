@@ -32,6 +32,7 @@
   },
   "common": {
     "settingUp": "Wird für Sie eingerichtet…",
+    "signingOut": "Sie werden sicher abgemeldet …",
     "onlyAMoment": "Das dauert nur einen Moment.",
     "syncingAccountStatus": "Kontostatus wird synchronisiert…",
     "loadingTeamMembers": "Team wird geladen…",

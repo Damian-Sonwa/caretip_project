@@ -73,6 +73,33 @@ export function clearClientSessionRevoked(): void {
   }
 }
 
+const LOGOUT_PENDING_STORAGE_KEY = "caretip_logout_pending";
+
+/** True while explicit sign-out is in flight (route loaders show signing-out copy). */
+export function isLogoutPending(): boolean {
+  try {
+    return sessionStorage.getItem(LOGOUT_PENDING_STORAGE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markLogoutPending(): void {
+  try {
+    sessionStorage.setItem(LOGOUT_PENDING_STORAGE_KEY, "1");
+  } catch {
+    // ignore
+  }
+}
+
+export function clearLogoutPending(): void {
+  try {
+    sessionStorage.removeItem(LOGOUT_PENDING_STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 export function cancelPendingSessionRefresh(): void {
   refreshSingleton = null;
 }
