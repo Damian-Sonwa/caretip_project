@@ -42,13 +42,20 @@ export function FeaturesPageHero() {
           loading="lazy"
         />
 
-        <div className="relative z-[1] px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-          <h1 className={cn(publicPageUi.title, "mx-auto max-w-3xl")}>{t("staticPages.features.title")}</h1>
-          <p className={cn(publicPageUi.subtitle, "mx-auto mt-3 max-w-2xl text-center")}>
-            {t("staticPages.features.subtitle")}
-          </p>
+        <div className="relative z-[1] flex flex-col items-center px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+          <h1 className={cn(publicPageUi.title, "mx-auto max-w-3xl text-balance")}>
+            {t("staticPages.features.title")}
+          </h1>
+          <div className="mx-auto mt-4 flex w-full max-w-2xl flex-col gap-4">
+            <p className={cn(publicPageUi.subtitle, "text-balance font-semibold text-neutral-900 dark:text-neutral-100")}>
+              {t("staticPages.features.subtitleLead")}
+            </p>
+            <p className={cn(publicPageUi.subtitle, "text-pretty leading-[1.7]")}>
+              {t("staticPages.features.subtitleBody")}
+            </p>
+          </div>
           <div className="mx-auto mt-5 inline-flex max-w-full flex-wrap justify-center gap-2 rounded-2xl border border-neutral-200/60 bg-white/70 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-sm dark:border-neutral-700/80 dark:bg-neutral-900/50">
-            <PublicTrustChips className="justify-center gap-2" />
+            <PublicTrustChips variant="features" className="justify-center gap-2" />
           </div>
         </div>
       </motion.div>

@@ -28,15 +28,11 @@ const heroHeadlineTone =
   "font-hero-display font-extrabold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
 /** Below lg — size/rhythm from caretip-landing-hero-typography.css */
 const heroHeadlineMobile = "max-lg:tracking-[inherit]";
-const heroHeadlineMobileDe = "max-lg:tracking-[inherit]";
-const heroHeadlineDesktop =
-  "lg:text-[3.25rem] lg:leading-[0.95] lg:tracking-[-0.04em] xl:text-[3.75rem] xl:leading-[0.94] xl:tracking-[-0.042em]";
+/** Desktop scale — fluid sizes in caretip-landing-hero-typography.css */
+const heroHeadlineDesktop = "caretip-hero-headline-desktop";
 
 function cnHeroHeadline(layout: string) {
   return `${heroHeadlineTone} ${heroHeadlineMobile} ${heroHeadlineDesktop} ${layout}`;
-}
-function cnHeroHeadlineDe(layout: string) {
-  return `${heroHeadlineTone} ${heroHeadlineMobileDe} ${heroHeadlineDesktop} ${layout}`;
 }
 /** Shared intro/lead copy — hero subtitle + section taglines. */
 const landingLeadCopy =
@@ -47,7 +43,7 @@ function cnHeroSubtitle(layout: string) {
 
 /** Clears fixed nav + compact gap below nav (mobile includes safe-area). */
 const heroSectionPadTop =
-  "max-lg:pt-[calc(4.875rem+env(safe-area-inset-top,0px)+0.5rem)] max-lg:pb-2 lg:pt-[calc(6.75rem+1.35rem)] lg:pb-0";
+  "max-lg:pt-[calc(4.875rem+env(safe-area-inset-top,0px)+0.5rem)] max-lg:pb-3 lg:pt-[calc(6.5rem+1.2rem)] lg:pb-6 xl:pb-8";
 /** Mobile-first stack rhythm between headline, lead, actions, and mockup. */
 const heroStackGapMobile = "mt-6 md:mt-7";
 /** Tighter gap above product shot on stacked mobile hero */
@@ -123,7 +119,7 @@ export const landingUi = {
   /** Real-life scenario cards — mobile polish hooks (desktop unchanged). */
   realLifeCard: "caretip-real-life-card",
   realLifeCardIntro: "caretip-real-life-card-intro",
-  realLifeCardTitle: "caretip-real-life-card-title",
+  realLifeCardTitle: "caretip-real-life-card-title font-bold",
   realLifeCardImage: "caretip-real-life-card-image",
   realLifeCardBody: "caretip-real-life-card-body",
 
@@ -243,25 +239,30 @@ export const landingUi = {
   heroCopy:
     "caretip-hero-copy-block relative z-10 order-1 flex min-w-0 w-full max-w-full flex-col items-start text-left max-md:space-y-0 max-md:pt-0 md:max-w-[540px] md:space-y-0",
   heroTagline: `inline-flex w-fit items-center ${landingType.tagline}`,
+  heroHeadline: cnHeroHeadline(
+    "caretip-hero-headline caretip-hero-headline-anchor w-full antialiased text-left max-lg:mx-0",
+  ),
+  /** @deprecated Use heroHeadline — kept for FeatureShowcase cinematic variant */
   heroHeadlineEn: cnHeroHeadline(
     "caretip-hero-headline caretip-hero-headline--en caretip-hero-headline-anchor w-full antialiased text-left max-lg:mx-auto lg:mx-0 lg:max-w-[30ch] xl:max-w-[32ch]",
   ),
-  heroHeadlineDe: cnHeroHeadlineDe(
-    "caretip-hero-headline caretip-hero-headline--de caretip-hero-headline-anchor w-full max-w-[28ch] antialiased text-left sm:max-w-[30ch] md:max-w-[26ch] lg:max-w-[32ch] xl:max-w-[34ch]",
+  /** @deprecated Use heroHeadline — kept for FeatureShowcase cinematic variant */
+  heroHeadlineDe: cnHeroHeadline(
+    "caretip-hero-headline caretip-hero-headline--de caretip-hero-headline-anchor w-full antialiased text-left max-lg:mx-0",
   ),
   /** Hero animated keyword — same gradient as section accents (see `.caretip-hero-headline-accent`). */
   heroHeadlineEmphasis: `font-inherit font-extrabold max-lg:tracking-[inherit] ${brandAccentGradient}`,
   heroHeadlineLine:
     "caretip-hero-headline-line block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-0 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
   heroSubtitle: cnHeroSubtitle(
-    `w-full max-w-2xl text-left ${heroStackGapMobile} max-lg:max-w-[min(100%,21.5rem)] max-lg:text-[0.9375rem] max-lg:leading-[1.68] max-lg:pt-0 lg:pt-0 md:mt-5 md:max-w-[500px] md:pt-0`,
+    "caretip-hero-subtitle w-full text-left lg:text-neutral-700 dark:lg:text-neutral-300",
   ),
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "relative z-10 mt-6 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-center lg:justify-start lg:gap-3 md:mt-0",
+    "relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-center lg:justify-start lg:gap-3",
   heroCtaPrimary: cnCtaPrimary(
     `${caretipBtnPrimary} shrink-0 text-center no-underline max-lg:mx-auto max-lg:w-auto ${ctaPrimarySize}`,
   ),
@@ -275,51 +276,38 @@ export const landingUi = {
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 max-md:mt-8 max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-end md:self-center`,
   /** Outer shell — shrink-wraps to showcase card / image size. */
   heroMediaShell:
-    "relative mx-auto w-fit min-w-0 max-w-full overflow-hidden md:ml-auto md:mr-0 lg:ml-0 lg:mr-auto lg:h-full lg:w-full lg:max-w-none",
+    "caretip-hero-media-shell relative mx-auto w-fit min-w-0 max-w-full overflow-visible md:ml-auto md:mr-0 lg:ml-auto lg:mr-auto",
   heroMediaShellLegacy:
     "relative mx-auto w-full max-md:max-w-[min(100%,320px)] sm:max-w-[360px] md:max-w-[380px] lg:max-w-[400px]",
   /** Premium product showcase card (Stripe / Linear / fintech hero). */
   heroShowcaseFrame:
-    "relative w-full max-w-full overflow-hidden max-lg:mx-auto max-lg:w-full lg:h-full lg:min-h-0",
-  heroShowcaseStack: "hero-showcase-stack relative z-[1] h-full min-h-0 w-full overflow-hidden max-lg:h-auto",
+    "caretip-hero-showcase-frame relative w-fit max-w-full overflow-visible mx-auto",
+  heroShowcaseStack: "hero-showcase-stack relative z-[1] w-fit max-w-full overflow-visible",
   /** Float stats — out of flow; anchored to showcase column in CareTipLandingHero. */
   heroFloatLayer:
     "caretip-hero-float-layer pointer-events-none absolute inset-0 z-30 overflow-visible",
-  /** Mobile hero — same scale/aspect as Live in Minutes demo (desktop unchanged via child tokens). */
   heroShowcaseMobileShell: "",
-  /** Outer mount — transparent; soft curve + shadow live on `.caretip-hero-showcase-soft-frame`. */
-  heroShowcaseCard:
-    "hero-showcase-card caretip-hero-showcase-card--frameless relative z-[1] block w-full max-w-full overflow-visible border-0 bg-transparent p-0 leading-[0] shadow-none ring-0 max-lg:mx-auto max-lg:aspect-[3/4] max-lg:max-w-[min(100%,20rem)] sm:max-lg:max-w-[22rem] lg:h-full lg:max-h-full lg:min-h-0 lg:max-w-[min(100%,44rem)]",
-  heroShowcaseCardMedia:
-    "hero-showcase-card-media caretip-hero-showcase-soft-frame relative h-full w-full",
-  heroShowcaseGlow:
-    "pointer-events-none absolute -inset-6 z-0 rounded-[40px] bg-[radial-gradient(circle_at_50%_42%,rgba(233,120,28,0.16)_0%,rgba(233,120,28,0.04)_48%,transparent_72%)] blur-2xl opacity-90 max-md:-inset-4 lg:-inset-3 lg:blur-xl dark:opacity-50",
+  heroShowcaseCard: "hero-showcase-card contents",
+  /** @deprecated Use heroMediaClip */
+  heroShowcaseUnit: "caretip-hero-media-clip",
+  heroShowcaseCardMedia: "caretip-hero-media-clip",
+  /** Wrap holds elevation shadow; clip owns radius (see caretip-landing-hero-media.css) */
+  heroMediaWrap: "caretip-hero-media-wrap",
+  heroMediaClip: "caretip-hero-media-clip",
+  heroShowcaseGlow: "caretip-hero-showcase-ambient",
   heroShowcaseImg:
-    "block h-full w-full min-h-0 select-none object-cover object-[center_38%] max-lg:object-[center_36%]",
-  /** Desktop showcase — locale-specific separation so art does not collide with copy. */
-  heroShowcaseDesktopColDe:
-    "relative lg:flex lg:min-h-0 lg:flex-1 lg:self-stretch lg:ml-0 lg:min-w-0 lg:overflow-hidden",
-  heroShowcaseDesktopColEn:
-    "relative lg:flex lg:min-h-0 lg:flex-1 lg:self-stretch lg:ml-0 lg:min-w-0 lg:overflow-hidden",
-  heroShowcaseDesktopStageDe:
-    "flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-1 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-2 sm:max-lg:pb-2 lg:absolute lg:inset-0 lg:h-full lg:px-3 lg:py-1 lg:pt-2 xl:px-4 xl:py-2 xl:pt-3",
-  heroShowcaseDesktopStageEn:
-    "flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-1 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-2 sm:max-lg:pb-2 lg:absolute lg:inset-x-0 lg:bottom-6 lg:top-0 lg:flex lg:h-[calc(100%-2.25rem)] lg:items-start lg:justify-center lg:px-4 lg:py-0 xl:bottom-7 xl:top-0.5 xl:px-5",
-  heroShowcaseDesktopShellDe:
-    "lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,42rem)] lg:flex-1 lg:flex-col lg:justify-center lg:translate-x-0 lg:mx-auto lg:[&_img]:object-[58%_36%]",
-  heroShowcaseDesktopShellEn:
-    "lg:mx-auto lg:mt-0 lg:flex lg:h-full lg:min-h-0 lg:w-full lg:max-w-[min(100%,42rem)] lg:flex-1 lg:flex-col lg:justify-start lg:translate-x-0 lg:[&_img]:object-[66%_38%]",
-  /** Split hero row — tight editorial gap between copy and product art. */
-  heroSplitRowDesktop:
-    "caretip-hero-split lg:flex-row lg:items-center lg:gap-0 xl:gap-2",
-  heroCopyDesktopDe:
-    "caretip-hero-copy--de max-lg:items-start max-lg:text-left lg:w-[min(100%,54%)] lg:max-w-[640px] lg:flex-none lg:self-stretch lg:justify-center lg:px-8 lg:pb-10 lg:pt-[2rem] xl:px-10 xl:pb-11 xl:pt-[2.5rem]",
-  heroCopyDesktopEn:
-    "caretip-hero-copy--en max-lg:items-start max-lg:text-left lg:w-[min(100%,54%)] lg:max-w-[560px] lg:flex-none lg:self-stretch lg:min-h-full lg:flex-col lg:justify-between lg:px-8 lg:pb-10 lg:pt-[1.75rem] xl:px-10 xl:pb-11 xl:pt-[2.25rem]",
-  heroShowcaseColDesktopDe:
-    "caretip-hero-showcase-col lg:mt-0 lg:w-[min(100%,46%)] lg:flex-1 lg:px-2 lg:pt-0",
-  heroShowcaseColDesktopEn:
-    "caretip-hero-showcase-col lg:mt-0 lg:flex lg:w-[min(100%,46%)] lg:flex-1 lg:flex-col lg:justify-start lg:px-2 lg:pb-7 lg:pt-0 xl:pb-8",
+    "caretip-hero-showcase-img block h-full w-full select-none object-cover object-center m-0 p-0 border-0",
+  heroShowcaseDesktopCol:
+    "relative lg:flex lg:min-h-0 lg:flex-1 lg:self-start lg:min-w-0 lg:overflow-visible",
+  heroShowcaseDesktopStage:
+    "caretip-hero-showcase-stage flex w-full items-center justify-center max-lg:relative max-lg:px-4 max-lg:pt-1 max-lg:pb-1 sm:max-lg:px-6 sm:max-lg:pt-2 sm:max-lg:pb-2 lg:relative lg:mx-auto lg:px-2 lg:py-0",
+  heroShowcaseDesktopShell:
+    "lg:mx-auto lg:flex lg:w-fit lg:max-w-full lg:flex-col lg:items-center lg:justify-center",
+  heroSplitRowDesktop: "max-lg:flex max-lg:flex-col max-lg:gap-0",
+  heroCopyDesktop:
+    "max-lg:items-start max-lg:text-left max-lg:pb-0 max-lg:pt-0 lg:min-w-0 lg:px-0",
+  heroShowcaseColDesktop:
+    "relative z-0 w-full max-lg:mt-1 max-lg:pb-0 sm:max-lg:mt-1.5 lg:mt-0 lg:min-w-0 lg:flex-1 lg:px-0",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */

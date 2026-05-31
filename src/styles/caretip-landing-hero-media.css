@@ -1,0 +1,180 @@
+/**
+ * Hero media stack — single border-radius source of truth.
+ * Only `.caretip-hero-media-clip` owns radius + overflow; children are square to the clip.
+ */
+
+.caretip-landing {
+  --caretip-hero-media-radius: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing {
+    --caretip-hero-media-radius: 1.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing {
+    --caretip-hero-media-radius: 1.375rem;
+  }
+}
+
+/* Wrap: sizing + elevation shadow (same radius as clip — no rounded-[40px] glow) */
+.caretip-landing .caretip-hero-media-wrap {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  line-height: 0;
+  font-size: 0;
+  vertical-align: top;
+}
+
+.caretip-landing .caretip-hero-media-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: var(--caretip-hero-media-radius);
+  pointer-events: none;
+  box-shadow:
+    0 20px 44px -26px rgba(26, 22, 18, 0.14),
+    0 8px 20px -14px rgba(26, 22, 18, 0.06);
+}
+
+html.dark .caretip-landing .caretip-hero-media-wrap::before {
+  box-shadow:
+    0 24px 52px -28px rgba(0, 0, 0, 0.42),
+    0 10px 24px -14px rgba(0, 0, 0, 0.28);
+}
+
+/* Clip parent — sole owner of corner curvature; square card hugs art bounds */
+.caretip-landing .caretip-hero-media-clip {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  overflow: hidden;
+  border-radius: var(--caretip-hero-media-radius);
+  width: min(
+    100%,
+    var(--caretip-hero-art-max-w),
+    var(--caretip-hero-art-max-h)
+  );
+  aspect-ratio: var(--caretip-hero-art-aspect-ratio, 1);
+  max-height: var(--caretip-hero-art-max-h);
+  background: #ffffff;
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  isolation: isolate;
+}
+
+html.dark .caretip-landing .caretip-hero-media-clip {
+  background: rgb(23 23 23);
+}
+
+/* Inset polish only — no outer 1px ring (prevents bottom-right corner artifacts) */
+.caretip-landing .caretip-hero-media-clip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38);
+}
+
+.caretip-landing .caretip-hero-media-clip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 1px rgba(17, 17, 17, 0.055);
+}
+
+html.dark .caretip-landing .caretip-hero-media-clip::before {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+html.dark .caretip-landing .caretip-hero-media-clip::after {
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+}
+
+/* Image fills card edge-to-edge; clip owns all corner curvature */
+.caretip-landing .caretip-hero-media-clip .caretip-hero-showcase-img,
+.caretip-landing .caretip-hero-media-clip img {
+  grid-area: 1 / 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0 !important;
+  outline: none;
+  object-fit: cover;
+  object-position: center;
+}
+
+/* Legacy aliases — defer to clip (no nested radius) */
+.caretip-landing .caretip-hero-showcase-unit,
+.caretip-landing .caretip-hero-showcase-soft-frame {
+  border-radius: 0;
+  overflow: visible;
+  box-shadow: none;
+}
+
+.caretip-landing .caretip-hero-showcase-unit::before,
+.caretip-landing .caretip-hero-showcase-unit::after,
+.caretip-landing .caretip-hero-showcase-soft-frame::before,
+.caretip-landing .caretip-hero-showcase-soft-frame::after {
+  display: none;
+}
+
+/* Ambient warmth — elliptical, not a rounded rect (avoids corner conflict) */
+.caretip-landing .caretip-hero-showcase-ambient {
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 42%;
+  z-index: 0;
+  width: 120%;
+  height: 90%;
+  transform: translate(-50%, -50%);
+  border-radius: 0;
+  background: radial-gradient(
+    circle at 50% 42%,
+    rgba(233, 120, 28, 0.14) 0%,
+    rgba(233, 120, 28, 0.04) 48%,
+    transparent 72%
+  );
+  filter: blur(28px);
+  opacity: 0.45;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-showcase-ambient {
+    opacity: 0.32;
+    filter: blur(32px);
+  }
+}
+
+/* Disabled decorative layers that fought the clip radius */
+.caretip-landing .caretip-hero-showcase-glow,
+.caretip-landing .caretip-hero-showcase-edge-glow,
+.caretip-landing .caretip-hero-showcase-card-glow,
+.caretip-landing .caretip-hero-showcase-light-overlay {
+  display: none !important;
+}
+
+/* Ground contact shadow — caretip-landing-hero-visual-refine.css (stage::after) */
+
+/* Float badges sit outside clip; must not inherit media radius */
+.caretip-landing .caretip-hero-float-layer,
+.caretip-landing .caretip-hero-float-cards,
+.caretip-landing .caretip-hero-float-pill {
+  border-radius: 9999px;
+}

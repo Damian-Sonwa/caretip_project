@@ -30,15 +30,6 @@ export function PricingSection({ tiers }: PricingSectionProps) {
   const { t } = useTranslation();
   return (
     <div className="space-y-8">
-      <div className="text-center space-y-4">
-        <h2 className="font-hero-display text-[clamp(1.5rem,3vw,2rem)] font-bold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
-          {t("staticPages.pricing.sectionTitle")}
-        </h2>
-        <p className="mx-auto max-w-2xl text-neutral-700 dark:text-neutral-300">
-          {t("staticPages.pricing.sectionSubtitle")}
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {tiers.map((tier, index) => {
           const Icon = tier.icon;

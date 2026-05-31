@@ -5,23 +5,22 @@
 
 @media (max-width: 1023px) {
   .caretip-landing .caretip-hero-section {
-    padding-bottom: 0.5rem;
+    padding-bottom: 0.75rem;
   }
 
   .caretip-landing .caretip-hero-cta-cluster {
-    margin-top: 1rem !important;
     padding-bottom: 0 !important;
   }
 
   .caretip-landing .caretip-hero-showcase-col {
-    margin-top: 0.25rem !important;
+    margin-top: 0.5rem !important;
     padding-top: 0;
     padding-bottom: 0;
   }
 
   .caretip-landing .caretip-hero-showcase-stage {
     padding-top: 0 !important;
-    padding-bottom: 0 !important;
+    padding-bottom: 0.25rem !important;
   }
 
   .caretip-landing .caretip-hero-cta-row {
@@ -34,16 +33,12 @@
     background: transparent !important;
   }
 
-  .caretip-landing .caretip-hero-section .hero-showcase-card-media img {
-    object-position: 50% 42% !important;
-    transform: scale(1.14);
-    transform-origin: 50% 92%;
-  }
-
-  .caretip-landing .caretip-hero-visual--en .hero-showcase-card-media img {
-    object-position: 50% 40% !important;
-    transform: scale(1.16);
-    transform-origin: 50% 90%;
+  .caretip-landing .caretip-hero-media-clip .caretip-hero-showcase-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    object-position: center !important;
+    transform: none !important;
   }
 
   .caretip-landing .caretip-hero-mobile-metrics {

@@ -1,0 +1,146 @@
+/**
+ * Landing hero layout — translation-safe grid; showcase card shrink-wraps to image.
+ */
+
+.caretip-landing .caretip-hero-grid {
+  --caretip-hero-headline-measure: min(100%, 21.5rem);
+  --caretip-hero-body-measure: min(100%, 22rem);
+  --caretip-hero-gap-tagline: 0.5rem;
+  --caretip-hero-gap-headline-body: 1rem;
+  --caretip-hero-gap-body-cta: 0.875rem;
+  --caretip-hero-art-max-w: min(100%, 20rem);
+  --caretip-hero-art-max-h: min(34rem, 70vh);
+  --caretip-hero-art-aspect-ratio: 1;
+  container-type: inline-size;
+  container-name: caretip-hero;
+}
+
+.caretip-landing .caretip-hero-grid {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+}
+
+.caretip-landing .caretip-hero-grid__message {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.caretip-landing .caretip-hero-grid__showcase {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  display: flex;
+  justify-content: center;
+}
+
+/* Showcase — card hugs intrinsic image size (no empty aspect box) */
+.caretip-landing .caretip-hero-showcase-stage {
+  position: relative;
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  overflow: visible;
+}
+
+.caretip-landing .caretip-hero-media-shell,
+.caretip-landing .caretip-hero-showcase-composition,
+.caretip-landing .caretip-hero-media-wrap,
+.caretip-landing .caretip-hero-showcase-stage {
+  width: fit-content;
+  max-width: 100%;
+  height: auto;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-hero-grid {
+    --caretip-hero-headline-measure: min(100%, 23rem);
+    --caretip-hero-body-measure: min(100%, 25rem);
+    --caretip-hero-art-max-w: min(100%, 22rem);
+    --caretip-hero-art-max-h: min(36rem, 72vh);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023px) {
+  .caretip-landing .caretip-hero-grid {
+    --caretip-hero-headline-measure: min(100%, 24.5rem);
+    --caretip-hero-body-measure: min(100%, 27rem);
+    --caretip-hero-art-max-w: min(100%, 24rem);
+    --caretip-hero-art-max-h: min(34rem, 58vh);
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-grid {
+    --caretip-hero-headline-measure: min(100%, 30ch);
+    --caretip-hero-body-measure: min(100%, 38ch);
+    --caretip-hero-art-max-w: min(100%, 28rem);
+    --caretip-hero-art-max-h: min(44rem, 82vh);
+    display: grid;
+    grid-template-columns: minmax(0, 0.96fr) minmax(0, 1.04fr);
+    align-items: center;
+    column-gap: clamp(1.75rem, 3.5vw, 3rem);
+    row-gap: 0;
+  }
+
+  .caretip-landing .caretip-hero-grid__message {
+    grid-column: 1;
+    grid-row: 1;
+    padding-right: clamp(0.75rem, 2vw, 1.75rem);
+  }
+
+  .caretip-landing .caretip-hero-grid__showcase {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    justify-content: center;
+    padding-left: clamp(0.5rem, 1.5vw, 1.25rem);
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-landing .caretip-hero-grid {
+    --caretip-hero-headline-measure: min(100%, 31ch);
+    --caretip-hero-body-measure: min(100%, 40ch);
+    --caretip-hero-art-max-w: min(100%, 30rem);
+    --caretip-hero-art-max-h: min(46rem, 84vh);
+    column-gap: clamp(2rem, 4vw, 3.5rem);
+  }
+}
+
+@media (min-width: 1440px) {
+  .caretip-landing .caretip-hero-grid {
+    --caretip-hero-headline-measure: min(100%, 30ch);
+    --caretip-hero-art-max-w: min(100%, 32rem);
+    --caretip-hero-art-max-h: min(48rem, 86vh);
+  }
+}
+
+.caretip-landing .caretip-hero-message__tagline {
+  margin-bottom: var(--caretip-hero-gap-tagline);
+}
+
+.caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
+    margin-bottom: 0.3125rem;
+  }
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-hero-grid__showcase {
+    margin-top: 0.5rem;
+  }
+
+  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
+    margin-bottom: 0.375rem;
+  }
+}

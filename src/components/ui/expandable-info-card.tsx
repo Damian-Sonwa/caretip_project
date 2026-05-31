@@ -1,4 +1,4 @@
-import { useId, useState } from "react";
+import { useId, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ export type ExpandableInfoCardProps = {
   imageSrc: string;
   imageAlt: string;
   title: string;
-  summary: string;
+  summary: ReactNode;
   detail: string;
   tag?: string;
   learnMoreLabel: string;

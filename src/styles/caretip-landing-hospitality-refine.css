@@ -113,12 +113,27 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-i
   isolation: isolate;
 }
 
-/* “Where CareTip Works” — card header above image strip (not over photos) */
+/* “Where CareTip Works” — card header above animated marquee (not over photos) */
 .caretip-landing #built-for-hospitality .caretip-hospitality-media-eyebrow {
   position: relative;
-  z-index: 3;
+  z-index: 4;
+  flex-shrink: 0;
+  padding: 0.75rem 1.125rem 0.6875rem;
+  text-align: center;
   background: inherit;
   border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-media-eyebrow {
+    padding: 0.8125rem 1.25rem 0.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-media-eyebrow {
+    text-align: left;
+  }
 }
 
 html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-eyebrow {
@@ -126,12 +141,40 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-eye
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-media-label {
-  color: rgba(82, 82, 82, 0.95);
+  margin: 0;
+  font-family: var(--font-sans, Inter, system-ui, sans-serif);
+  font-size: clamp(0.875rem, 1.65vw, 1rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  color: hsl(var(--primary));
+  text-wrap: balance;
   text-shadow: none;
 }
 
 html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-label {
-  color: rgba(163, 163, 163, 0.95);
+  color: hsl(var(--primary));
+}
+
+/* DE — longer industries title (same scale as EN, wider measure for wrap) */
+.caretip-landing #built-for-hospitality[data-landing-lang="de"] .caretip-hospitality-media-label {
+  font-size: clamp(0.9375rem, 1.85vw, 1.125rem);
+  font-weight: 700;
+  line-height: 1.38;
+  letter-spacing: -0.012em;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #built-for-hospitality[data-landing-lang="de"] .caretip-hospitality-media-label {
+    font-size: clamp(1rem, 1.75vw, 1.1875rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #built-for-hospitality[data-landing-lang="de"] .caretip-hospitality-media-label {
+    font-size: clamp(1.0625rem, 1.25vw, 1.25rem);
+    max-width: 42ch;
+  }
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-media-visual {
@@ -198,4 +241,5 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-media-vig
 .caretip-landing #built-for-hospitality .caretip-hospitality-marquee {
   position: relative;
   z-index: 3;
+  padding-top: 0.25rem;
 }

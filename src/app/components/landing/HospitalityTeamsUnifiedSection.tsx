@@ -1,17 +1,17 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
+import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { landingFadeReveal } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
-  const { t } = useTranslation();
-  const sectionSubtitle = t("landing.hospitality.subtitle");
-
+  const { t, i18n } = useTranslation();
+  const isDe = i18n.language?.toLowerCase().startsWith("de");
   const features = useMemo(
     () =>
       [
@@ -20,13 +20,14 @@ export function HospitalityTeamsUnifiedSection() {
         { title: t("landing.hospitality.f3Title"), text: t("landing.hospitality.f3Text") },
         { title: t("landing.hospitality.f4Title"), text: t("landing.hospitality.f4Text") },
         { title: t("landing.hospitality.f5Title"), text: t("landing.hospitality.f5Text") },
-      ],
+      ].filter((f) => landingCopyVisible(f.title) && landingCopyVisible(f.text)),
     [t],
   );
 
   return (
     <section
       id="built-for-hospitality"
+      data-landing-lang={isDe ? "de" : "en"}
       className={cn(
         landingUi.hospitalitySection,
         "caretip-landing-hospitality relative",
@@ -38,8 +39,13 @@ export function HospitalityTeamsUnifiedSection() {
       >
         <header className={landingUi.hospitalityIntro}>
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
-          {landingCopyVisible(sectionSubtitle) ? (
-            <p className={landingUi.hospitalitySubtitle}>{sectionSubtitle}</p>
+          {landingCopyVisible(t("landing.hospitality.subtitle")) ? (
+            <p className={landingUi.hospitalitySubtitle}>
+              <Trans
+                i18nKey="landing.hospitality.subtitle"
+                components={landingBoldComponents}
+              />
+            </p>
           ) : null}
         </header>
 
@@ -58,11 +64,11 @@ export function HospitalityTeamsUnifiedSection() {
                   "caretip-hospitality-media-stage flex flex-col overflow-hidden",
                 )}
               >
-                <div className="caretip-hospitality-media-eyebrow shrink-0 px-4 pb-2.5 pt-4 text-center sm:px-5 sm:pt-5 lg:px-6 lg:pb-3 lg:pt-5 lg:text-left">
-                  <span className="caretip-hospitality-media-label font-sans text-[11px] font-semibold uppercase tracking-[0.16em]">
-                    {t("landing.hospitality.pill")}
-                  </span>
-                </div>
+                {landingCopyVisible(t("landing.industries.title")) ? (
+                  <div className="caretip-hospitality-media-eyebrow shrink-0">
+                    <p className="caretip-hospitality-media-label">{t("landing.industries.title")}</p>
+                  </div>
+                ) : null}
                 <div className="caretip-hospitality-media-visual relative min-h-0 flex-1 overflow-hidden">
                   <div aria-hidden className="caretip-hospitality-media-glow" />
                   <div aria-hidden className="caretip-hospitality-media-overlay" />

@@ -56,16 +56,15 @@
     }
   }
 
-  /* Hero split — leveled columns */
+  /* Hero split — vertical balance on large screens (see hero-layout.css) */
   @media (min-width: 1024px) {
     .caretip-landing .caretip-hero-split {
-      align-items: center;
+      align-items: stretch;
     }
 
-    .caretip-landing .caretip-hero-copy--en,
-    .caretip-landing .caretip-hero-copy--de {
+    .caretip-landing .caretip-hero-grid__message {
       padding-left: var(--caretip-rail);
-      padding-right: var(--caretip-rail);
+      padding-right: 0;
     }
 
     .caretip-landing .caretip-hero-showcase-col {

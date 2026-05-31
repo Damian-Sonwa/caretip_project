@@ -14,8 +14,10 @@ type HowItWorksStepContentProps = {
 };
 
 export function HowItWorksStepContent({ step, extras }: HowItWorksStepContentProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const n = step;
+  const extrasPanelKey = `staticPages.howItWorks.s${n}ExtrasLabel`;
+  const showOptionalExtras = i18n.exists(extrasPanelKey);
 
   return (
     <>
@@ -37,10 +39,18 @@ export function HowItWorksStepContent({ step, extras }: HowItWorksStepContentPro
       ) : null}
 
       {extras === "guest" ? (
-        <HowItWorksInsetPanel>
-          <strong className="text-neutral-900 dark:text-neutral-50">{t(`staticPages.howItWorks.s${n}GuestLabel`)}</strong>{" "}
-          {t(`staticPages.howItWorks.s${n}GuestBody`)}
-        </HowItWorksInsetPanel>
+        <div className="space-y-3">
+          <HowItWorksInsetPanel>
+            <strong className="text-neutral-900 dark:text-neutral-50">{t(`staticPages.howItWorks.s${n}GuestLabel`)}</strong>{" "}
+            {t(`staticPages.howItWorks.s${n}GuestBody`)}
+          </HowItWorksInsetPanel>
+          {showOptionalExtras ? (
+            <HowItWorksInsetPanel>
+              <strong className="text-neutral-900 dark:text-neutral-50">{t(extrasPanelKey)}</strong>{" "}
+              {t(`staticPages.howItWorks.s${n}ExtrasBody`)}
+            </HowItWorksInsetPanel>
+          ) : null}
+        </div>
       ) : null}
 
       {extras === "employeeStats" || extras === "managerStats" || extras === "payoutStats" || extras === "growthStats" ? (

@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import tableQrImg from "../../../../images/table_QR.png";
 import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
+import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { ExpandableInfoCard } from "@/components/ui/expandable-info-card";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +19,7 @@ export function LandingRealLifeSection() {
         {
           headline: t("landing.realLife.s1Headline"),
           tag: t("landing.realLife.s1Tag"),
-          text: t("landing.realLife.s1Text"),
+          textKey: "landing.realLife.s1Text" as const,
           detail: t("landing.realLife.s1Detail"),
           img: tableQrImg,
           alt: t("landing.realLife.s1Alt"),
@@ -26,7 +27,7 @@ export function LandingRealLifeSection() {
         {
           headline: t("landing.realLife.s2Headline"),
           tag: t("landing.realLife.s2Tag"),
-          text: t("landing.realLife.s2Text"),
+          textKey: "landing.realLife.s2Text" as const,
           detail: t("landing.realLife.s2Detail"),
           img: atReceptionImg,
           alt: t("landing.realLife.s2Alt"),
@@ -34,7 +35,7 @@ export function LandingRealLifeSection() {
         {
           headline: t("landing.realLife.s3Headline"),
           tag: t("landing.realLife.s3Tag"),
-          text: t("landing.realLife.s3Text"),
+          textKey: "landing.realLife.s3Text" as const,
           detail: t("landing.realLife.s3Detail"),
           img: salonImg,
           alt: t("landing.realLife.s3Alt"),
@@ -42,7 +43,7 @@ export function LandingRealLifeSection() {
         {
           headline: t("landing.realLife.s4Headline"),
           tag: t("landing.realLife.s4Tag"),
-          text: t("landing.realLife.s4Text"),
+          textKey: "landing.realLife.s4Text" as const,
           detail: t("landing.realLife.s4Detail"),
           img: homeImg,
           alt: t("landing.realLife.s4Alt"),
@@ -86,7 +87,9 @@ export function LandingRealLifeSection() {
                 imageAlt={item.alt}
                 title={item.headline}
                 tag={landingCopyVisible(item.tag) ? item.tag : undefined}
-                summary={item.text}
+                summary={
+                  <Trans i18nKey={item.textKey} components={landingBoldComponents} />
+                }
                 detail={item.detail}
                 learnMoreLabel={learnMore}
                 learnLessLabel={learnLess}

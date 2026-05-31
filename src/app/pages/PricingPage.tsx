@@ -1,11 +1,13 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { PricingSection } from "../components/PricingSection";
 import { PRICING_TIERS } from "../data/pricingTiers";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { PublicTrustChips } from "@/components/public/PublicTrustChips";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +35,30 @@ export function PricingPage() {
       <main id="pricing" className="scroll-mt-20">
         <PublicPageHeader
           centered
-          showTrustChips
+          showTrustChips={false}
           title={t("staticPages.pricing.pageTitle")}
           subtitle={t("staticPages.pricing.pageSubtitle")}
         />
+
+        <div className={cn(publicPageUi.sectionGap, "flex justify-center px-2")}>
+          <PublicTrustChips variant="pricing" className="justify-center" />
+        </div>
+
+        <section className={cn(publicPageUi.sectionGap, "mx-auto max-w-3xl px-2 text-center")}>
+          <h2 className={cn(publicPageUi.sectionTitle, "text-balance")}>{t("staticPages.pricing.sectionTitle")}</h2>
+          <p className={cn(publicPageUi.subtitle, "mx-auto mt-4 max-w-2xl text-pretty")}>
+            <Trans
+              i18nKey="staticPages.pricing.sectionSubtitle"
+              components={landingBoldComponents}
+            />
+          </p>
+          <p className="mx-auto mt-6 max-w-2xl text-sm font-medium text-neutral-800 dark:text-neutral-200">
+            {t("staticPages.pricing.commitmentNotice")}
+          </p>
+          <p className="mx-auto mt-2 max-w-2xl text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
+            {t("staticPages.pricing.commitmentTerms")}
+          </p>
+        </section>
 
         <div
           className={cn(

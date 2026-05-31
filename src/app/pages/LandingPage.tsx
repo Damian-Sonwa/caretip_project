@@ -13,6 +13,7 @@ import { LandingFeaturesSection } from "../components/landing/LandingFeaturesSec
 import { PaymentsSection } from "../components/landing/PaymentsSection";
 import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSection";
 import { LandingSocialProofSection } from "../components/landing/LandingSocialProofSection";
+import { LandingMotivationSection } from "../components/landing/LandingMotivationSection";
 import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
 
@@ -50,6 +51,7 @@ export function LandingPage() {
           <LandingFeaturesSection />
           <PaymentsSection />
           <LandingRealLifeSection />
+          <LandingMotivationSection />
           <LandingSocialProofSection />
           <LandingFinalCtaSection />
         </main>

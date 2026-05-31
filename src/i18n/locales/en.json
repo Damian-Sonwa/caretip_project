@@ -13,7 +13,9 @@
     "mainNav": "Main",
     "language": "Language",
     "languageEnglish": "English",
-    "languageGerman": "Deutsch"
+    "languageGerman": "Deutsch",
+    "becomePartner": "Get Started",
+    "staffPortal": "Staff Access"
   },
   "dashboardHero": {
     "overview": "Overview",
@@ -58,6 +60,32 @@
         "instantPayouts": "Instant payouts",
         "secureOnboarding": "Secure onboarding",
         "worksInstantly": "Works instantly"
+      },
+      "trustChipsFeatures": {
+        "liveMinutes": "Quick Start",
+        "noApp": "No app download",
+        "instantPayouts": "Instant payouts",
+        "secureOnboarding": "Secure onboarding",
+        "worksInstantly": "Works instantly"
+      },
+      "trustChipsFaq": {
+        "liveMinutes": "Live in minutes",
+        "noApp": "No app download",
+        "instantPayouts": "Instant payouts",
+        "secureOnboarding": "Secure onboarding",
+        "worksInstantly": "Instant results"
+      },
+      "trustChipsPricing": {
+        "noApp": "No app download (Works instantly in the mobile browser)",
+        "instantPayouts": "Fast payouts (Direct to employee accounts)",
+        "secureOnboarding": "Secure onboarding (Quick and privacy-compliant setup)",
+        "worksInstantly": "Ready instantly (No lengthy training or IT effort)"
+      },
+      "trustChipsHowItWorks": {
+        "liveMinutes": "Live in minutes",
+        "noApp": "No app download required",
+        "instantPayouts": "Instant payouts",
+        "secureOnboarding": "Secure onboarding"
       }
     },
     "contact": {
@@ -89,8 +117,9 @@
       "faqTeaserLink": "Visit FAQ"
     },
     "features": {
-      "title": "Everything CareTip Can Do",
-      "subtitle": "A clear view of the platform, built for hospitality teams and designed for fast tipping.",
+      "title": "What CareTip can do for you",
+      "subtitleLead": "Caring is Tipping! Because outstanding dedication deserves real recognition.",
+      "subtitleBody": "Discover a platform passionately tailored to the unique needs of hospitality, healthcare, and personal services. CareTip makes it easier, more intuitive, and more inspiring than ever before for your clients, guests, or patients to say a heartfelt thank you, turning digital appreciation directly into a powerful boost for your team. Make exceptional service unforgettable!",
       "f1Title": "QR Code Tipping",
       "f1Desc": "Guests scan and tip in seconds, with no app installs and no friction.",
       "f1Tag": "Guest flow",
@@ -109,24 +138,28 @@
       "f6Title": "Multi-location Support",
       "f6Desc": "Manage multiple venues, locations, and tables without losing clarity.",
       "f6Tag": "Multi venue",
-      "momentsTitle": "Product moments that matter",
-      "momentsSubtitle": "Focused views of how CareTip works for guests, staff, managers, and finance.",
+      "momentsTitle": "The best for everyone involved",
+      "momentsSubtitle": "Tailored views for your entire environment. See how CareTip makes everyday life easier for guests, teams, managers, and finance.",
       "moments": {
         "qr": {
-          "title": "QR experience",
-          "body": "Branded codes and tipping pages that feel native to your floor."
+          "title": "The QR experience",
+          "subtitle": "Individual design for your public presence",
+          "body": "Branded codes and tipping pages that blend seamlessly into your business appearance."
         },
         "employee": {
-          "title": "Employee experience",
-          "body": "Instant tip alerts, earnings clarity, and motivation on every shift."
+          "title": "Instant notifications, full transparency, and fresh motivation for every shift.",
+          "subtitle": "",
+          "body": "Employees receive real-time tip updates, keep full overview of their earnings, and start every workday highly motivated."
         },
         "payouts": {
           "title": "Payouts & security",
-          "body": "Secure processing and clear payout states your team can trust."
+          "subtitle": "Secure processing and transparent payout status your team can trust.",
+          "body": "Fully protected processing and traceable payout steps provide maximum security and reliability for your employees."
         },
         "analytics": {
-          "title": "Analytics visibility",
-          "body": "Shift trends, top performers, and live activity without spreadsheet chaos."
+          "title": "Full clarity in analytics",
+          "subtitle": "Shift trends, top performers, and live activity, without Excel chaos.",
+          "body": "Track shift development, outstanding team performance, and all activity in real time instead of fighting unclear spreadsheets."
         }
       },
       "mock": {
@@ -137,11 +170,11 @@
     "pricing": {
       "pageTitle": "Simple tipping economics",
       "pageSubtitle": "Guests pay once per tip. CareTip never creates Stripe subscriptions or recurring invoices: only payment intents for each tip.",
-      "sectionTitle": "Transparent tip fees",
-      "sectionSubtitle": "CareTip is built for one-time guest tips. You pay a small processing fee per successful tip; no monthly software subscription required on Starter.",
+      "sectionTitle": "Turning excellent service into pure appreciation – with CARETIP.",
+      "sectionSubtitle": "<bold>Caring is Tipping.</bold> True recognition thrives on simplicity. With CareTip, you make your team's outstanding service visible and reward it directly. Delight your guests, boost employee motivation, and foster long-term brand loyalty.",
       "popular": "Popular",
-      "ctaTitle": "Questions about your venue?",
-      "ctaBody": "Our team can walk you through setup, branding, and the right fee tier for your hospitality operation.",
+      "ctaTitle": "Questions about your business?",
+      "ctaBody": "Our team will guide you step by step through setup, branding, and choosing the right fee model for your service, care, or logistics operation.",
       "tiers": {
         "starter": {
           "name": "Starter",
@@ -176,7 +209,9 @@
           "f4": "Account manager",
           "button": "Contact sales"
         }
-      }
+      },
+      "commitmentNotice": "Choose the perfect plan tailored to your business needs.",
+      "commitmentTerms": "All plans feature a 12-month commitment to ensure continuous stability and planning security for your team. The following introductory prices apply:"
     },
     "help": {
       "title": "Help Center",
@@ -286,11 +321,13 @@
       "s3chip3t": "Dynamic link",
       "s3chip3s": "No print needed",
       "s4Title": "Place QR at tables & service points",
-      "s4Body": "Put codes where guests naturally interact: restaurant tables, hotel desks, bar counters, and reception. CareTip stays subtle and on brand in real hospitality environments.",
+      "s4Body": "Place your QR codes where your customers, patients, or relatives naturally interact: in care units, on flyers, displays, or directly on workwear. CareTip blends subtly and seamlessly into your daily operations and brand identity.",
       "s5Title": "Guests scan & tip",
       "s5Body": "Guests scan with their phone camera. No app download. They choose an amount, pay with card or wallet, and land on a clear confirmation in seconds.",
       "s5GuestLabel": "Guest friendly:",
-      "s5GuestBody": "Works in mobile browsers; optional receipts and feedback when enabled.",
+      "s5GuestBody": "Works in mobile browsers, on site, at the door, or on the ward without barriers.",
+      "s5ExtrasLabel": "Optional extras:",
+      "s5ExtrasBody": "Receipts and feedback options can be enabled when needed to collect valuable praise for your team.",
       "s6Title": "Employees receive tips instantly",
       "s6Body": "Staff get real-time notifications when a tip lands. They see live earnings, activity in their wallet, and confidence that great service was recognized immediately.",
       "s6stat1t": "Instant",
@@ -520,6 +557,80 @@
       "footerLastLabel": "Last Updated:",
       "footerLastDate": "March 24, 2026",
       "footerContact": "Questions? Contact us at legal@caretip.com"
+    },
+    "faq": {
+      "pageTitle": "FAQs",
+      "pageSubtitle": "Frequently asked questions about digital tipping with CareTip.",
+      "whatIs": {
+        "title": "What is CareTip?",
+        "lead": "The smart way to say thank you.",
+        "guestsLabel": "For your guests:",
+        "guestsBody": "they simply scan a QR code, choose the team member or pool, and pay in seconds by card or smartphone (Apple Pay/Google Pay).",
+        "businessLabel": "For your business:",
+        "businessBody": "you manage your team, create individual QR codes, and receive compliant reports for accounting, all on one central platform.",
+        "employeesLabel": "For your employees:",
+        "employeesBody": "the crew sees every appreciation received and tips earned transparently in their own account. That drives motivation and a strong sense of team."
+      },
+      "items": [
+        {
+          "q": "Do guests need to download an app to leave a tip?",
+          "aLead": "No, absolutely not.",
+          "aBody": "Guests can tip instantly from their mobile browser simply by scanning the QR code or clicking the link. No app downloads, accounts, or registrations are required for the guest tipping flow, it takes just a few seconds."
+        },
+        {
+          "q": "How do employees get paid?",
+          "aLead": "Securely, transparently, and directly.",
+          "aBody": "All tips are processed through fully certified, secure payment partners. The exact payout timing and methods depend entirely on your specific business setup and preferences (e.g., direct individual payouts or split team pools). Employees simply need to complete their profile and payout details once within the CareTip app, the system handles the rest automatically."
+        },
+        {
+          "q": "Is paying through CareTip secure?",
+          "aLead": "Yes, absolutely. Security is our top priority.",
+          "aBody": "CareTip utilizes industry-leading security practices and partners exclusively with payment processors that meet the highest PCI-DSS compliance standards. All card data is handled directly and securely by our partners; we never store full card numbers on our servers."
+        },
+        {
+          "q": "What does it cost my business?",
+          "aLead": "Total transparency from day one – with absolutely zero hidden fees.",
+          "aBody": "Pricing depends entirely on the CareTip fee tier you choose. Standard, per-tip processing-style fees apply, which are clearly outlined on our Pricing page or in your specific agreement. There are never any hidden charges beyond what is explicitly disclosed at signup or checkout."
+        },
+        {
+          "q": "Can I use CareTip at multiple locations?",
+          "aLead": "Yes, absolutely. CareTip is built to scale alongside your business.",
+          "aBody": "Our higher tiers offer robust multi-location support and advanced administrative controls. Depending on your specific agreement, you can easily manage staff, custom QR codes, and permissions separated by each individual location."
+        },
+        {
+          "q": "How do QR codes work for staff?",
+          "aLead": "Maximum flexibility, zero effort.",
+          "aBody": "Every employee, specific role, or shared team pool gets their own unique QR Code. Guests simply scan the code, select their tipping amount, and can optionally leave a personal review or feedback. You can display these codes anywhere that fits your workflow: printed on table tents, on staff badges, directly on receipts, or digitally on screens."
+        },
+        {
+          "q": "What if a guest disputes a charge?",
+          "aLead": "Don't worry, we've got your back.",
+          "aBody": "Card networks and banks handle payment disputes according to their standard regulatory rules. To help resolve any issues swiftly, we will share the necessary transaction details with the payment processors. If you ever face a specific case, our support team is right here to guide you through it and minimize the hassle for your business."
+        },
+        {
+          "q": "Do employees see tips in real time?",
+          "aLead": "Yes, and it's a massive motivation booster.",
+          "aBody": "CareTip can notify your employees instantly when a new tip arrives, depending on your specific dashboard settings and their device connectivity. While the exact delivery second may vary slightly based on network speeds and devices, the transparency is there from day one."
+        },
+        {
+          "q": "Can I export my data?",
+          "aLead": "Yes, this feature is available in our advanced tiers.",
+          "aBody": "While our basic plan is designed for getting started, business owners and authorized managers in our higher tiers can easily export reporting and financial data. If you require a full, comprehensive data export for compliance or specific accounting needs, our support team is right here to assist you."
+        },
+        {
+          "q": "How do I get support?",
+          "aLead": "We're here to help whenever you need us.",
+          "aBody": "You can easily access our Help Center, browse our FAQs, or use the contact form on our website. We provide dedicated email support and aim to respond as quickly as possible during regular business hours. For immediate assistance, our Help Center also offers step-by-step guides to solve common issues instantly."
+        },
+        {
+          "q": "Do you offer a mobile app?",
+          "aLead": "Yes, absolutely.",
+          "aBody": "CareTip offers tailored mobile experiences built for your entire team. Employees can use our app to track their tips and performance on the go, while businesses get smart mobile tools to manage tipping workflows from anywhere. Availability may vary by platform; please check our dedicated Mobile App page for full details and downloads."
+        }
+      ],
+      "ctaTitle": "Can't find the answer you're looking for?",
+      "ctaBody": "No worries, our support team is right here to help.",
+      "ctaButton": "Contact Support"
     }
   },
   "auth": {
@@ -1140,18 +1251,63 @@
     "ctaBody": "Guests scan a QR code, choose an amount, and pay once. Funds route through Stripe as a single payment intent. No subscriptions or invoices.",
     "ctaHowItWorks": "How CareTip works",
     "leaders": {
-      "1": { "name": "Maya Chen", "role": "Server", "lastTip": "2h ago", "shift": "Top week" },
-      "2": { "name": "James Okoro", "role": "Bartender", "lastTip": "5h ago", "shift": "Strong bar" },
-      "3": { "name": "Front desk pool", "role": "Shared QR", "lastTip": "1h ago", "shift": "Team pool" },
-      "4": { "name": "Sofia Reyes", "role": "Server", "lastTip": "Yesterday", "shift": "Steady" },
-      "5": { "name": "Kitchen thank-you", "role": "Back-of-house", "lastTip": "3d ago", "shift": "QR on pass" }
+      "1": {
+        "name": "Maya Chen",
+        "role": "Server",
+        "lastTip": "2h ago",
+        "shift": "Top week"
+      },
+      "2": {
+        "name": "James Okoro",
+        "role": "Bartender",
+        "lastTip": "5h ago",
+        "shift": "Strong bar"
+      },
+      "3": {
+        "name": "Front desk pool",
+        "role": "Shared QR",
+        "lastTip": "1h ago",
+        "shift": "Team pool"
+      },
+      "4": {
+        "name": "Sofia Reyes",
+        "role": "Server",
+        "lastTip": "Yesterday",
+        "shift": "Steady"
+      },
+      "5": {
+        "name": "Kitchen thank-you",
+        "role": "Back-of-house",
+        "lastTip": "3d ago",
+        "shift": "QR on pass"
+      }
     },
     "activity": {
-      "1": { "label": "Guest → Maya Chen", "action": "Tip completed", "time": "2h ago" },
-      "2": { "label": "Guest → bar pool", "action": "Tip completed", "time": "5h ago" },
-      "3": { "label": "Guest → James Okoro", "action": "Tip pending", "time": "6h ago" },
-      "4": { "label": "Adjustment", "action": "Refund issued", "time": "1d ago" },
-      "5": { "label": "Guest → Sofia Reyes", "action": "Tip completed", "time": "2d ago" }
+      "1": {
+        "label": "Guest → Maya Chen",
+        "action": "Tip completed",
+        "time": "2h ago"
+      },
+      "2": {
+        "label": "Guest → bar pool",
+        "action": "Tip completed",
+        "time": "5h ago"
+      },
+      "3": {
+        "label": "Guest → James Okoro",
+        "action": "Tip pending",
+        "time": "6h ago"
+      },
+      "4": {
+        "label": "Adjustment",
+        "action": "Refund issued",
+        "time": "1d ago"
+      },
+      "5": {
+        "label": "Guest → Sofia Reyes",
+        "action": "Tip completed",
+        "time": "2d ago"
+      }
     }
   },
   "landing": {
@@ -1199,7 +1355,10 @@
       "heroFloatPayoutValue": "Done",
       "heroFloatPayoutLabel": "Payout completed",
       "heroFloatStaffValue": "3",
-      "heroFloatStaffLabel": "Staff active"
+      "heroFloatStaffLabel": "Staff active",
+      "heroHeadline": "",
+      "heroHeadlineHighlight": "",
+      "heroTagline": "Caring is tipping"
     },
     "simpleSetup": {
       "pill": "Live in minutes",
@@ -1294,9 +1453,9 @@
       }
     },
     "hospitality": {
-      "title": "Built for hospitality teams",
-      "subtitle": "Reward great service instantly, simplify tipping, and see every team perform better across your floor.",
-      "pill": "Where CareTip Works",
+      "title": "Empowering our everyday heroes",
+      "subtitle": "<bold>Caring is Tipping: Reward outstanding dedication right in the moment.</bold> Make tipping effortlessly simple and fuel every single shift with noticeable motivation, genuine appreciation, and well-deserved smiles. Because the people who keep our world moving deserve nothing less than the best.",
+      "pill": "Empowering excellence, wherever people care.",
       "f1Title": "Reward service instantly",
       "f1Text": "Guests tip in seconds with one quick scan.",
       "f2Title": "QR that fits your floor",
@@ -1420,25 +1579,25 @@
       "title": "How CareTip works in real life",
       "learnMore": "Learn more",
       "learnLess": "Show less",
-      "s1Headline": "At the table",
-      "s1Tag": "Restaurants & dining",
-      "s1Text": "Guests scan a table QR and tip in seconds. No app and no cash.",
-      "s1Detail": "Place a branded QR on every table, check presenter, or receipt sleeve. Guests open the tip screen in their mobile browser, choose an amount, and pay with card or wallet. Tips can go to a named server or a shared pool, and your dashboard updates in real time so floor managers always know what came in during service.",
+      "s1Headline": "Right at the Doorstep",
+      "s1Tag": "Logistics & Delivery",
+      "s1Text": "<bold>Customers scan the QR code on the vehicle, delivery notice, or parcel and tip in seconds. No app downloads, no cash needed.</bold>",
+      "s1Detail": "Display your custom QR codes on delivery vans, handheld scanners, missed-delivery cards, or as stickers directly on the packages. The customer opens the tipping screen instantly in their mobile browser, picks an amount, and pays securely using their card or preferred digital wallet. Whether the tip is assigned straight to the individual driver or contributed to a depot-wide pool, your dashboard updates in real time. Operations managers can track performance and boost driver motivation, even during peak delivery seasons.",
       "s1Alt": "QR code on a restaurant table for instant tipping",
-      "s2Headline": "At reception",
-      "s2Tag": "Hotels & front desk",
-      "s2Text": "A quick scan at check-in or check-out, ideal for concierge and bell teams.",
-      "s2Detail": "Reception staff keep a countertop QR or tablet link at the desk. Guests tip porters, concierge, or housekeeping without hunting for cash or awkward envelopes. Finance sees every transaction in one place, which makes shift handovers and month-end reporting far simpler.",
+      "s2Headline": "Right at Reception",
+      "s2Tag": "Hotels & Front Desk",
+      "s2Text": "<bold>A quick scan at check-in or check-out – the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.</bold>",
+      "s2Detail": "Display your branded QR codes as countertop displays at the desk, on key card holders, or via a tablet link at reception. Guests can tip porters, the concierge, or housekeeping effortlessly, without hunting for spare cash or dealing with awkward tip envelopes. Finance sees every single transaction tracked in one central hub, making shift handovers and month-end reporting far simpler for hotel management.",
       "s2Alt": "Hotel reception with guest tipping at check-in or check-out",
-      "s3Headline": "After service",
-      "s3Tag": "Salons & appointments",
-      "s3Text": "Clients thank their stylist or therapist right after the chair, fast and discreet.",
-      "s3Detail": "Share a QR at the mirror, on the receipt, or in a follow-up message. Clients tip while satisfaction is highest, and each team member can see their own activity without sharing login details. Owners set goals and spot trends without digging through paper slips.",
+      "s3Headline": "Right at the Event",
+      "s3Tag": "Events & Hostess Services",
+      "s3Text": "<bold>A quick scan at the exhibition booth or guest check-in – the ultimate solution for hostesses, promoters, and event crews. Mobile, professional, and cashless.</bold>",
+      "s3Detail": "Display your branded QR codes as sleek counter displays, print them onto event badges, or show them directly on a smartphone screen. Clients and event visitors can reward outstanding service, welcoming hospitality, or great support instantly, without needing cash. Agencies and project managers track every tip live in one central dashboard, making post-event accounting completely transparent while giving your crew a powerful motivation boost for every shift.",
       "s3Alt": "Salon after a service",
-      "s4Headline": "On the go",
-      "s4Tag": "Mobile & home visits",
-      "s4Text": "Tip from anywhere with a link or QR, perfect for deliveries and home service.",
-      "s4Detail": "Send a personal link by SMS or print a small QR on a business card. Customers tip when the job is done, even if they never visit a physical location. Field teams stay motivated because appreciation lands in the same system as your in-venue staff.",
+      "s4Headline": "On the Go, Right at the Door",
+      "s4Tag": "Mobile & Home Visits",
+      "s4Text": "<bold>Tip from anywhere via link or QR code – the ultimate solution for field services, home care, and mobile beauty. Seamless, instant, and completely cash-free.</bold>",
+      "s4Detail": "Send a personal tipping link via SMS or WhatsApp right after the job, or print a compact QR code on your business cards. Customers can reward great service from the comfort of their couch, even if your business doesn't have a physical storefront. Your field crew stays highly motivated because their appreciation lands in the exact same system as your in-venue staff.",
       "s4Alt": "Home and mobile service tipping moment"
     },
     "paymentsTrust": {
@@ -1505,11 +1664,46 @@
         "employee_tips": "How do employees receive tips?",
         "multi_venue": "Does CareTip support multiple venues?"
       }
+    },
+    "recognition": {
+      "title": "Empowering our everyday heroes",
+      "body": "<bold>Caring is Tipping: Reward outstanding dedication right in the moment.</bold> Make tipping effortlessly simple and fuel every single shift with noticeable motivation, genuine appreciation, and well-deserved smiles. Because the people who keep our world moving deserve nothing less than the best."
+    },
+    "industries": {
+      "title": "Empowering excellence, wherever people are",
+      "care": {
+        "name": "Healthcare & Nursing (Care)",
+        "role": ""
+      },
+      "delivery": {
+        "name": "Logistics & Delivery Services (Delivery)",
+        "role": ""
+      },
+      "hospitality": {
+        "name": "Hospitality & Guest Services (Hospitality)",
+        "role": ""
+      },
+      "beauty": {
+        "name": "Hair & Beauty Salons (Beauty)",
+        "role": ""
+      },
+      "craftHome": {
+        "name": "Trades & Home Services (Craft & Home)",
+        "role": ""
+      },
+      "petCare": {
+        "name": "Pet Care & Services (Pet Care)",
+        "role": ""
+      }
+    },
+    "motivation": {
+      "title": "Built for those who work hard every single day.",
+      "subtitle": "For the hospitality, care, and delivery heroes who keep things running but are too often overlooked. CareTip puts your team in the fast lane, ensuring they get the digital recognition, visibility, and tips they truly deserve."
     }
   },
   "footer": {
     "brandTitle": "Caretip",
-    "brandBlurb": "Digital tipping for hospitality: QR codes, payouts, and team insight in one platform.",
+    "brandBlurb": "The digital tipping system for modern teams. QR codes, automated payouts, and smart team analytics, united on one secure platform.",
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "github": "GitHub",
@@ -1812,7 +2006,7 @@
       "progressAria": "Onboarding progress",
       "formStepLabel": "Step {{current}} of {{total}}",
       "stepsRemaining": {
-        "final": "Final step — almost there"
+        "final": "Final step, almost there"
       },
       "stepsRemaining_one": "{{count}} step remaining",
       "stepsRemaining_other": "{{count}} steps remaining",

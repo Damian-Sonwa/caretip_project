@@ -49,6 +49,11 @@ export function FeaturesProductMoments() {
                     {t(`staticPages.features.moments.${key}.title`)}
                   </h3>
                 </div>
+                {t(`staticPages.features.moments.${key}.subtitle`) ? (
+                  <p className="mb-1.5 text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                    {t(`staticPages.features.moments.${key}.subtitle`)}
+                  </p>
+                ) : null}
                 <p className="text-xs leading-relaxed text-neutral-700 dark:text-neutral-300">
                   {t(`staticPages.features.moments.${key}.body`)}
                 </p>

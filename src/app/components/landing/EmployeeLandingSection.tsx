@@ -7,10 +7,13 @@ import {
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
-import employeeSectionImg from "../../../../images/FYP.jpeg";
+import employeeSectionImgDe from "../../../../images/FYP.jpeg";
+import employeeSectionImgEn from "../../../../images/English-version.png";
 
 export function EmployeeLandingSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const isDe = i18n.language?.toLowerCase().startsWith("de");
+  const employeeSectionImg = isDe ? employeeSectionImgDe : employeeSectionImgEn;
 
   const benefits = useMemo(
     () => [

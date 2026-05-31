@@ -3,6 +3,7 @@ import { ArrowRight, Shield, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { PublicTrustChips } from "@/components/public/PublicTrustChips";
 import { HowItWorksStepContent } from "@/components/public/HowItWorksStepContent";
 import { HOW_IT_WORKS_STEPS } from "@/components/public/howItWorksFlow";
 import { HowItWorksTimelineStep } from "@/components/public/HowItWorksTimelineStep";
@@ -17,8 +18,12 @@ export function HowItWorksPage() {
       <PublicPageHeader
         title={t("staticPages.howItWorks.title")}
         subtitle={t("staticPages.howItWorks.subtitle")}
-        showTrustChips
+        showTrustChips={false}
       />
+
+      <div className={cn(publicPageUi.sectionGap, "-mt-4 flex justify-center")}>
+        <PublicTrustChips variant="howItWorks" className="justify-center" />
+      </div>
 
       <div className={cn(publicPageUi.sectionGap, "relative space-y-12 sm:space-y-14 lg:space-y-16")}>
         {HOW_IT_WORKS_STEPS.map((def, index) => (
