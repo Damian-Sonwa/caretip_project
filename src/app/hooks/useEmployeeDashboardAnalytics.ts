@@ -228,7 +228,7 @@ export function useEmployeeDashboardAnalytics(
         window.clearTimeout(analyticsDeferTimerRef.current);
         analyticsDeferTimerRef.current = null;
       }
-      uiRequestSeqRef.current += 1;
+      tfRef.current = tf;
       setAnalyticsTimeframe(tf);
 
       hydratePeriodSessionCache(tf);
@@ -242,6 +242,7 @@ export function useEmployeeDashboardAnalytics(
         devSetHydrationPhase("charts", "ready");
         devSetHydrationPhase("goals", "ready");
         commitUiPayload(tf, seq, false);
+        markDashboardLiveSettled(hasSettledLiveUiRef);
       } else {
         const summaryPartial = summaryPartialRef.current.get(tf);
         if (summaryPartial && typeof summaryPartial.periodAmountEur === "number") {
@@ -255,8 +256,11 @@ export function useEmployeeDashboardAnalytics(
           setAnalyticsLoading(!chartsReady);
           if (chartsReady) {
             devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+            setIsRevalidating(false);
           } else {
             devSetHydrationPhase("charts", "loading");
+            setIsRevalidating(true);
           }
           commitUiPayload(tf, seq, false);
         } else {
@@ -265,6 +269,8 @@ export function useEmployeeDashboardAnalytics(
           setAnalyticsLoading(true);
         }
       }
+
+      void loadForRef.current(tf, { affectsUi: true });
     },
     [
       abortInactiveTimeframes,
@@ -326,7 +332,10 @@ export function useEmployeeDashboardAnalytics(
           (hasEmployeePayloadVisibleContent(payloadRef.current) ||
             Boolean(lastKnownGoodMetricsRef.current));
 
-        setIsRevalidating(true);
+        // Background soft refresh with visible KPIs — no status strip / toggle pulse (matches business).
+        if (!(revalidate && preserveVisibleUi)) {
+          setIsRevalidating(true);
+        }
         if (preserveVisibleUi) {
           setSummaryLoading(false);
           setAnalyticsLoading(false);
@@ -712,7 +721,7 @@ export function useEmployeeDashboardAnalytics(
     hasEmployeeChartOrTipsContent(payload);
 
   const isMetricsInitialLoad =
-    enabled && !hasVisibleKpisOnScreen && summaryLoading && !isRevalidating;
+    enabled && !hasVisibleKpisOnScreen && (summaryLoading || isRevalidating);
 
   const isAnalyticsInitialLoad =
     enabled &&
@@ -720,14 +729,25 @@ export function useEmployeeDashboardAnalytics(
     !hasVisibleSecondaryOnScreen &&
     !isRevalidating;
 
-  /** Status strip: stay on Updating until metrics, charts/goals, and period alignment have all settled. */
+  /** True when period data is actively loading (not silent background revalidation). */
+  const isBlockingPeriodFetch =
+    isRevalidating && (summaryLoading || analyticsLoading);
+
+  /**
+   * Status strip + subtle revalidate styling — match business: no "Updating" on every toggle
+   * when cached metrics stay visible during a soft refresh.
+   */
   const isPeriodRefreshing =
     enabled &&
     !isMetricsInitialLoad &&
-    (isRevalidating ||
-      summaryLoading ||
-      analyticsLoading ||
-      !valuesMatchAnalyticsPeriod);
+    (isBlockingPeriodFetch ||
+      (!valuesMatchAnalyticsPeriod &&
+        (summaryLoading || analyticsLoading || isRevalidating)));
+
+  const analyticsTimeframeLoading =
+    isBlockingPeriodFetch && !isMetricsInitialLoad ? analyticsTimeframe : null;
+
+  const showMetricsSkeleton = isMetricsInitialLoad;
 
   return {
     analyticsTimeframe,
@@ -742,6 +762,8 @@ export function useEmployeeDashboardAnalytics(
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing,
+    analyticsTimeframeLoading,
+    showMetricsSkeleton,
     isDashboardHydrating: isMetricsInitialLoad,
     isRevalidating,
     dataRevision,

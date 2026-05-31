@@ -132,13 +132,17 @@ export function EmployeeDashboard() {
     isMetricsInitialLoad,
     isAnalyticsInitialLoad,
     isPeriodRefreshing: analyticsPeriodRefreshing,
+    analyticsTimeframeLoading,
+    showMetricsSkeleton,
     error: analyticsError,
     refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
   } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId, advancedAnalyticsEnabled);
 
-  const showMetricsLoading = isMetricsInitialLoad;
+  const showMetricsLoading = showMetricsSkeleton;
   const showChartLoading = isAnalyticsInitialLoad;
+  const metricsSettledForPeriod =
+    valuesMatchAnalyticsPeriod && !analyticsPeriodRefreshing && Boolean(displayMetrics);
 
   const [error, setError] = useState<string | null>(null);
   /** `undefined` = not loaded yet; `null` = no slug in DB */
@@ -252,7 +256,10 @@ export function EmployeeDashboard() {
         }
       : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
 
-  const showHeroMetricsLoading = !useDevDemo && !displayAccountSummary.loaded && showMetricsLoading;
+  const showHeroMetricsLoading =
+    !useDevDemo &&
+    (!displayAccountSummary.loaded || analyticsPeriodRefreshing) &&
+    (showMetricsLoading || isMetricsInitialLoad);
 
   const displayPeriodTipCount = devPeriodSummary?.tips ?? displayPayload?.periodTipCount ?? 0;
   const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayPayload?.periodAmountEur ?? 0;
@@ -610,6 +617,12 @@ export function EmployeeDashboard() {
                   {period === "week" && t("employee.earnings_week")}
                   {period === "month" && t("employee.earnings_month")}
                 </span>
+                {analyticsTimeframeLoading === period ? (
+                  <span
+                    className="ml-2 inline-block h-2 w-2 animate-pulse rounded-full bg-current/70 align-middle"
+                    aria-hidden
+                  />
+                ) : null}
               </button>
             ))}
           </div>
@@ -639,6 +652,7 @@ export function EmployeeDashboard() {
             <EmployeeDashboardMetricsGrid
               loading={showMetricsLoading}
               isPeriodRefreshing={analyticsPeriodRefreshing}
+              metricsSettledForPeriod={metricsSettledForPeriod}
               metrics={periodMetrics}
             />
           </motion.div>

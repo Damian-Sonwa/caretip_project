@@ -19,16 +19,21 @@ export type EmployeePeriodMetrics = {
 type EmployeeDashboardMetricsGridProps = {
   loading: boolean;
   isPeriodRefreshing: boolean;
+  /** True only after the active period fetch finished (avoids empty-state flash). */
+  metricsSettledForPeriod: boolean;
   metrics: EmployeePeriodMetrics;
 };
 
 function EmployeeDashboardMetricsGridInner({
   loading,
   isPeriodRefreshing,
+  metricsSettledForPeriod,
   metrics,
 }: EmployeeDashboardMetricsGridProps) {
   const { t } = useTranslation();
   const { periodTipCount, periodAmountEur, goalPct, rating } = metrics;
+  const showEmptyTipsState =
+    metricsSettledForPeriod && !loading && periodTipCount === 0;
 
   return (
     <div
@@ -44,12 +49,12 @@ function EmployeeDashboardMetricsGridInner({
         label={t("employee.dashboard.statTotalTips")}
         value={<CountUpMetric value={periodTipCount} kind="integer" />}
         change={
-          periodTipCount > 0
-            ? t("employee.dashboard.statChangeEarned", {
+          showEmptyTipsState
+            ? t("format.metricZeroTips")
+            : t("employee.dashboard.statChangeEarned", {
                 amount: formatEur(periodAmountEur),
                 count: periodTipCount,
               })
-            : t("format.metricZeroTips")
         }
         icon={<CareIcon name="tips" size="md" />}
       />
@@ -59,29 +64,41 @@ function EmployeeDashboardMetricsGridInner({
           rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
         }
         value={
-          rating != null ? (
+          loading ? null : rating != null ? (
             <CountUpMetric value={rating} format={(n) => String(n)} />
-          ) : (
+          ) : metricsSettledForPeriod ? (
             t("format.notAvailable")
-          )
+          ) : null
         }
-        change={rating != null ? undefined : t("format.metricZeroRatings")}
+        change={
+          loading
+            ? undefined
+            : rating != null
+              ? undefined
+              : metricsSettledForPeriod
+                ? t("format.metricZeroRatings")
+                : undefined
+        }
         icon={<Star className="h-5 w-5" aria-hidden />}
       />
       <EmployeeStatCard
         loading={loading}
         label={t("employee.dashboard.statMonthlyGoal")}
         value={
-          goalPct != null ? (
+          loading ? null : goalPct != null ? (
             <CountUpMetric value={goalPct} kind="percent" />
-          ) : (
+          ) : metricsSettledForPeriod ? (
             t("format.notAvailable")
-          )
+          ) : null
         }
         change={
-          goalPct != null
-            ? t("employee.dashboard.statGoalProgress")
-            : t("employee.dashboard.statGoalSetHint")
+          loading
+            ? undefined
+            : goalPct != null
+              ? t("employee.dashboard.statGoalProgress")
+              : metricsSettledForPeriod
+                ? t("employee.dashboard.statGoalSetHint")
+                : undefined
         }
         icon={<CareIcon name="goals" size="md" />}
       />

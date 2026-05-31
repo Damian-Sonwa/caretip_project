@@ -118,27 +118,69 @@ export function emailSupportText(text: string): string {
 
 export function emailCta(href: string, label: string, centered = true): string {
   const align = centered ? "center" : "left";
-  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:24px 0 8px;">
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:20px 0 4px;">
 <tr><td align="${align}">
 <table role="presentation" cellspacing="0" cellpadding="0" border="0">
-<tr><td align="center" style="border-radius:12px;background-color:${EMAIL.brandOrange};box-shadow:0 2px 8px rgba(233,120,28,0.22);">
-<a href="${esc(href)}" style="display:inline-block;padding:13px 24px;font-size:14px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:12px;line-height:1.2;">${esc(label)}</a>
+<tr><td align="center" style="border-radius:10px;background-color:${EMAIL.brandOrange};box-shadow:0 1px 6px rgba(233,120,28,0.18);">
+<a href="${esc(href)}" style="display:inline-block;padding:11px 22px;font-size:13px;font-weight:600;color:#ffffff;text-decoration:none;border-radius:10px;line-height:1.25;">${esc(label)}</a>
 </td></tr>
 </table>
 </td></tr>
 </table>`;
 }
 
+/** Short section label above bullet lists (e.g. “You can now:”). */
+export function emailSectionLabel(text: string): string {
+  return `<p style="margin:20px 0 10px;font-size:14px;line-height:1.45;font-weight:600;color:${EMAIL.text};">${esc(text)}</p>`;
+}
+
+/** Compact checkmark list for onboarding / feature highlights. */
+export function emailBulletList(items: string[]): string {
+  if (items.length === 0) return "";
+  const rows = items
+    .map(
+      (item) =>
+        `<tr><td valign="top" style="padding:0 0 8px;font-size:14px;line-height:1.55;color:${EMAIL.textSecondary};">
+<span style="color:${EMAIL.brandOrange};font-weight:700;padding-right:8px;">&#10003;</span>${esc(item)}
+</td></tr>`,
+    )
+    .join("");
+  return `<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 4px;">${rows}</table>`;
+}
+
 export function emailFinePrint(text: string): string {
   return `<p style="margin:16px 0 0;font-size:13px;line-height:1.5;color:${EMAIL.textMuted};">${esc(text)}</p>`;
 }
 
-export function emailFooterBlock(helpLine: string | null, footer: string): string {
+export type EmailFooterExtras = {
+  brandLine?: string | null;
+  copyrightLine?: string | null;
+  supportEmail?: string | null;
+};
+
+export function emailFooterBlock(
+  helpLine: string | null,
+  disclaimer: string,
+  extras?: EmailFooterExtras,
+): string {
   const help = helpLine
     ? `<p style="margin:0 0 10px;font-size:12px;line-height:1.5;color:${EMAIL.textMuted};">${esc(helpLine)}</p>`
     : "";
-  return `<tr><td style="padding:24px 8px 0;text-align:center;">
+  const brand = extras?.brandLine?.trim()
+    ? `<p style="margin:0 0 6px;font-size:12px;font-weight:600;letter-spacing:0.02em;color:${EMAIL.textMuted};">${esc(extras.brandLine.trim())}</p>`
+    : "";
+  const supportEmail = extras?.supportEmail?.trim();
+  const support = supportEmail
+    ? `<p style="margin:0 0 8px;font-size:11px;line-height:1.5;color:${EMAIL.textFooter};"><a href="mailto:${esc(supportEmail)}" style="color:${EMAIL.brandOrange};text-decoration:none;">${esc(supportEmail)}</a></p>`
+    : "";
+  const copyright = extras?.copyrightLine?.trim()
+    ? `<p style="margin:0 0 10px;font-size:11px;line-height:1.5;color:${EMAIL.textFooter};">${esc(extras.copyrightLine.trim())}</p>`
+    : "";
+  return `<tr><td style="padding:28px 8px 0;text-align:center;border-top:1px solid rgba(17,17,17,0.06);">
 ${help}
-<p style="margin:0;font-size:11px;line-height:1.55;color:${EMAIL.textFooter};">${esc(footer)}</p>
+${brand}
+${support}
+${copyright}
+<p style="margin:0;font-size:11px;line-height:1.55;color:${EMAIL.textFooter};">${esc(disclaimer)}</p>
 </td></tr>`;
 }

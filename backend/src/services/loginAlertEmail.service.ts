@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import { resolveEmailPersonalizationForUser } from "../emails/emailPersonalization.js";
 import { buildLoginAlertContent, resolveUserPreferredLocale, type EmailLocale } from "../emails/i18nEmail.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
 
@@ -29,12 +30,16 @@ export async function sendNewLoginAlertEmail(input: {
 
   const user = await prisma.user.findUnique({
     where: { email: to },
-    select: { preferredLocale: true },
+    select: { id: true, preferredLocale: true },
   });
 
   const locale: EmailLocale = resolveUserPreferredLocale(
     input.explicitLocale ?? user?.preferredLocale ?? null,
   );
+
+  const personalization = user?.id
+    ? await resolveEmailPersonalizationForUser(user.id)
+    : { recipientName: null, businessName: null, accountKind: "other" as const };
 
   const from = getResendFromAddress();
   const when = new Date();
@@ -45,6 +50,8 @@ export async function sendNewLoginAlertEmail(input: {
     userAgent: input.userAgent,
     timeZone: input.timeZone,
     appBaseUrl: appBaseUrl(),
+    recipientName: personalization.recipientName,
+    businessName: personalization.businessName,
   });
 
   const ok = await sendResendEmail("login-alert", { from, to: [to], subject, html, text });

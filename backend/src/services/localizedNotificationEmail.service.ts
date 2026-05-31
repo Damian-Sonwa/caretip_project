@@ -1,4 +1,5 @@
 import { prisma } from "../prisma.js";
+import { resolveEmailPersonalizationForUser } from "../emails/emailPersonalization.js";
 import {
   buildGenericNotificationContent,
   resolveUserPreferredLocale,
@@ -32,27 +33,30 @@ export async function sendLocalizedUserNotificationEmail(input: {
 
   let locale: EmailLocale = resolveUserPreferredLocale(stored);
 
+  const personalization =
+    input.userId != null
+      ? await resolveEmailPersonalizationForUser(input.userId)
+      : { recipientName: null, businessName: null, accountKind: "other" as const };
+
   const from = getResendFromAddress();
   let subject: string;
   let html: string;
   let text: string;
-  try {
-    ({ subject, html, text } = buildGenericNotificationContent({
-      locale,
+  const buildPayload = (loc: EmailLocale) =>
+    buildGenericNotificationContent({
+      locale: loc,
       title: input.title,
       bodyText: input.bodyText,
       actionUrl: input.actionUrl,
       actionLabel: input.actionLabel,
-    }));
+      recipientName: personalization.recipientName,
+      businessName: personalization.businessName,
+    });
+  try {
+    ({ subject, html, text } = buildPayload(locale));
   } catch {
     locale = "en";
-    ({ subject, html, text } = buildGenericNotificationContent({
-      locale: "en",
-      title: input.title,
-      bodyText: input.bodyText,
-      actionUrl: input.actionUrl,
-      actionLabel: input.actionLabel,
-    }));
+    ({ subject, html, text } = buildPayload("en"));
   }
 
   const ok = await sendResendEmail("notification", { from, to: [to], subject, html, text });

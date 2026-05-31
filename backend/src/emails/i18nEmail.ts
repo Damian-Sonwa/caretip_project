@@ -12,6 +12,7 @@ import {
   emailBodyText,
   emailBodyTextLast,
   emailBrandMark,
+  emailBulletList,
   emailCardBody,
   emailCardBodyEnd,
   emailCardClose,
@@ -21,11 +22,13 @@ import {
   emailDocOpen,
   emailFinePrint,
   emailFooterBlock,
+  type EmailFooterExtras,
   emailGreeting,
   emailHeadline,
   emailMetaBlock,
   emailPageWrap,
   emailPreheader,
+  emailSectionLabel,
   emailSubheading,
   emailSupportText,
   esc,
@@ -81,6 +84,8 @@ type Bundle = {
   brand: string;
   greeting: string;
   footer: string;
+  footerBrand: string;
+  footerCopyright: string;
 };
 
 const common: Record<EmailLocale, Bundle> = {
@@ -89,17 +94,63 @@ const common: Record<EmailLocale, Bundle> = {
     greeting: "Hello,",
     footer:
       "If you did not request this email, you can safely ignore it. This mailbox is not monitored.",
+    footerBrand: "CareTip Hospitality Platform",
+    footerCopyright: `© ${new Date().getFullYear()} CareTip`,
   },
   de: {
     brand: "CareTip",
     greeting: "Hallo,",
     footer:
       "Wenn Sie diese E-Mail nicht angefordert haben, können Sie sie ignorieren. Dieses Postfach wird nicht überwacht.",
+    footerBrand: "CareTip Hospitality Platform",
+    footerCopyright: `© ${new Date().getFullYear()} CareTip`,
   },
 };
 
 function bundle(locale: EmailLocale): Bundle {
   return common[locale] ?? common.en;
+}
+
+/** Support address shown in email footers (display only). */
+export function getCareTipSupportEmail(): string {
+  const fromEnv = process.env.CARETIP_SUPPORT_EMAIL?.trim();
+  if (fromEnv && fromEnv.includes("@")) return fromEnv;
+  return "support@caretip.com";
+}
+
+function footerExtras(_locale: EmailLocale): EmailFooterExtras {
+  return {
+    brandLine: bundle(_locale).footerBrand,
+    copyrightLine: bundle(_locale).footerCopyright,
+    supportEmail: getCareTipSupportEmail(),
+  };
+}
+
+export function extractFirstName(fullName: string | null | undefined): string | null {
+  const n = fullName?.trim();
+  if (!n) return null;
+  const first = n.split(/\s+/)[0]?.trim();
+  return first && first.length > 0 ? first : null;
+}
+
+/** Prefer first name, then business/team name, then generic greeting. */
+export function formatEmailGreeting(
+  locale: EmailLocale,
+  input: {
+    recipientName?: string | null;
+    businessName?: string | null;
+  },
+): string {
+  const loc = locale === "de" ? "de" : "en";
+  const first = extractFirstName(input.recipientName);
+  if (first) {
+    return loc === "de" ? `Hallo ${first},` : `Hi ${first},`;
+  }
+  const bn = input.businessName?.trim();
+  if (bn) {
+    return loc === "de" ? `Hallo ${bn},` : `Hi ${bn},`;
+  }
+  return bundle(loc).greeting;
 }
 
 function hoursExpiryPhrase(locale: EmailLocale, hours: number): string {
@@ -119,22 +170,42 @@ function renderStandardEmail(input: {
   subject: string;
   preheader: string;
   headline: string;
+  greeting?: string;
   lines: string[];
+  valueLine?: string;
+  bulletsHeading?: string;
+  bullets?: string[];
   cta?: { href: string; label: string };
   finePrint?: string[];
   helpLine?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
+  const greeting = input.greeting?.trim() || b.greeting;
+  const bullets = input.bullets ?? [];
+  const hasBullets = bullets.length > 0;
+  const hasCta = Boolean(input.cta);
+  const hasFine = (input.finePrint?.length ?? 0) > 0;
+
+  const lineParts: string[] = [];
+  for (let i = 0; i < input.lines.length; i++) {
+    const isLastLine =
+      i === input.lines.length - 1 && !input.valueLine && !hasBullets && !hasCta && !hasFine;
+    lineParts.push(
+      isLastLine ? emailBodyTextLast(input.lines[i]) : emailBodyText(input.lines[i]),
+    );
+  }
 
   const bodyParts = [
     emailHeadline(input.headline),
-    emailGreeting(b.greeting),
-    ...input.lines.map((line, i) =>
-      i === input.lines.length - 1 && !input.cta && !input.finePrint?.length
-        ? emailBodyTextLast(line)
-        : emailBodyText(line),
-    ),
+    emailGreeting(greeting),
+    ...lineParts,
+    ...(input.valueLine ? [emailBodyText(input.valueLine)] : []),
+    ...(hasBullets && input.bulletsHeading
+      ? [emailSectionLabel(input.bulletsHeading), emailBulletList(bullets)]
+      : hasBullets
+        ? [emailBulletList(bullets)]
+        : []),
   ];
 
   const fine = (input.finePrint ?? []).map((t) => emailFinePrint(t)).join("");
@@ -149,7 +220,7 @@ function renderStandardEmail(input: {
     cta,
     emailCardBodyEnd(),
     emailCardClose(),
-    emailFooterBlock(input.helpLine ?? null, b.footer),
+    emailFooterBlock(input.helpLine ?? null, b.footer, footerExtras(loc)),
   ].join("");
 
   const html = [
@@ -159,11 +230,16 @@ function renderStandardEmail(input: {
     emailDocClose(),
   ].join("");
 
-  const textParts = [b.greeting, "", input.headline, "", ...input.lines];
+  const textParts = [greeting, "", input.headline, "", ...input.lines];
+  if (input.valueLine) textParts.push(input.valueLine);
+  if (hasBullets) {
+    if (input.bulletsHeading) textParts.push("", input.bulletsHeading);
+    textParts.push(...bullets.map((item) => `• ${item}`));
+  }
   if (input.finePrint?.length) textParts.push("", ...input.finePrint);
   if (input.cta) textParts.push("", `${input.cta.label}: ${input.cta.href}`);
   if (input.helpLine) textParts.push("", input.helpLine);
-  textParts.push("", b.footer);
+  textParts.push("", b.footerBrand, b.footerCopyright, getCareTipSupportEmail(), "", b.footer);
 
   return { subject: input.subject, html, text: textParts.join("\n") };
 }
@@ -172,23 +248,31 @@ export function buildVerifyEmailContent(input: {
   locale: EmailLocale;
   verifyUrl: string;
   expiresInHours?: number;
+  recipientName?: string | null;
+  businessName?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const expires = hoursExpiryPhrase(loc, input.expiresInHours ?? 1);
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: input.businessName,
+  });
   const copy =
     loc === "de"
       ? {
           subject: "E-Mail-Adresse bestätigen",
           preheader: "Bestätigen Sie Ihre E-Mail für CareTip.",
           headline: "E-Mail bestätigen",
-          line1: "Bitte bestätigen Sie Ihre E-Mail-Adresse für Ihr CareTip-Konto.",
+          line1:
+            "Bitte bestätigen Sie Ihre E-Mail-Adresse, um Ihr CareTip-Konto für digitales Trinkgeld und Team-Einblicke zu aktivieren.",
           cta: "E-Mail bestätigen",
         }
       : {
           subject: "Verify your email",
           preheader: "Confirm your email for CareTip.",
           headline: "Verify your email",
-          line1: "Please verify your email address for your CareTip account.",
+          line1:
+            "Please verify your email address to activate your CareTip account for QR tipping and team insights.",
           cta: "Verify email",
         };
   return renderStandardEmail({
@@ -196,6 +280,7 @@ export function buildVerifyEmailContent(input: {
     subject: copy.subject,
     preheader: copy.preheader,
     headline: copy.headline,
+    greeting,
     lines: [copy.line1],
     cta: { href: input.verifyUrl, label: copy.cta },
     finePrint: [expires],
@@ -206,9 +291,15 @@ export function buildPasswordResetContent(input: {
   locale: EmailLocale;
   resetUrl: string;
   expiresInHours?: number;
+  recipientName?: string | null;
+  businessName?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const expires = hoursExpiryPhrase(loc, input.expiresInHours ?? 1);
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: input.businessName,
+  });
   const copy =
     loc === "de"
       ? {
@@ -232,40 +323,102 @@ export function buildPasswordResetContent(input: {
     subject: copy.subject,
     preheader: copy.preheader,
     headline: copy.headline,
+    greeting,
     lines: [copy.line1],
     cta: { href: input.resetUrl, label: copy.cta },
     finePrint: [expires, copy.warn],
   });
 }
 
+export type WelcomeAccountKind = "manager" | "employee" | "other";
+
 export function buildWelcomeEmailContent(input: {
   locale: EmailLocale;
   dashboardUrl: string;
+  recipientName?: string | null;
+  businessName?: string | null;
+  accountKind?: WelcomeAccountKind;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: input.businessName,
+  });
+  const kind = input.accountKind ?? "other";
+
   const copy =
     loc === "de"
       ? {
           subject: `Willkommen bei ${b.brand}`,
-          preheader: "Ihr CareTip-Konto ist bereit.",
+          preheader: "Ihr CareTip-Konto ist bereit — Trinkgeld per QR und Team-Einblicke.",
           headline: `Willkommen bei ${b.brand}`,
-          line1: "Ihr Konto ist bereit. Sie können jetzt loslegen.",
+          line1: "Ihr Konto ist bereit.",
+          valueLine:
+            "CareTip unterstützt Ihr Hospitality-Team mit QR-Trinkgeld, fairen Auszahlungen und Einblicken in Echtzeit.",
+          bulletsHeading: "Sie können jetzt:",
+          managerBullets: [
+            "Mitarbeitende einladen",
+            "QR-Codes für Trinkgeld erstellen",
+            "Trinkgelder in Echtzeit verfolgen",
+            "Standorte und Tische verwalten",
+          ],
+          employeeBullets: [
+            "Trinkgelder per QR erhalten",
+            "Ihre Einnahmen im Blick behalten",
+            "Mit Ihrem Team verbunden bleiben",
+          ],
+          defaultBullets: [
+            "Trinkgeld per QR anbieten",
+            "Leistung Ihres Teams verfolgen",
+            "Im Dashboard starten",
+          ],
           cta: "Zum Dashboard",
         }
       : {
           subject: `Welcome to ${b.brand}`,
-          preheader: "Your CareTip account is ready.",
+          preheader: "Your CareTip account is ready — QR tipping and real-time team insights.",
           headline: `Welcome to ${b.brand}`,
-          line1: "Your account is ready. You can get started anytime.",
+          line1: "Your account is ready.",
+          valueLine:
+            "CareTip helps your hospitality team collect tips by QR, reward staff fairly, and see performance in real time.",
+          bulletsHeading: "You can now:",
+          managerBullets: [
+            "Invite your team",
+            "Generate QR tipping codes",
+            "Track tips in real time",
+            "Manage locations and tables",
+          ],
+          employeeBullets: [
+            "Receive tips via QR",
+            "Track your earnings",
+            "Stay connected with your team",
+          ],
+          defaultBullets: [
+            "Offer QR tipping for guests",
+            "Track team performance",
+            "Get started in your dashboard",
+          ],
           cta: "Go to dashboard",
         };
+
+  const bullets =
+    kind === "manager"
+      ? copy.managerBullets
+      : kind === "employee"
+        ? copy.employeeBullets
+        : copy.defaultBullets;
+
   return renderStandardEmail({
     locale: loc,
     subject: copy.subject,
     preheader: copy.preheader,
     headline: copy.headline,
+    greeting,
     lines: [copy.line1],
+    valueLine: copy.valueLine,
+    bulletsHeading: copy.bulletsHeading,
+    bullets,
     cta: { href: input.dashboardUrl, label: copy.cta },
   });
 }
@@ -292,8 +445,10 @@ export function buildEmployeeActivationContent(input: {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
   const bn = input.businessName;
-  const nm = input.recipientName?.trim();
-  const greeting = nm ? (loc === "de" ? `Hallo ${nm},` : `Hi ${nm},`) : b.greeting;
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: bn,
+  });
   const expires = hoursExpiryPhraseDays(loc, input.expiresInHours ?? 24);
   const copy =
     loc === "de"
@@ -302,7 +457,8 @@ export function buildEmployeeActivationContent(input: {
           preheader: `Aktivieren Sie Ihr Team-Konto bei ${bn}.`,
           headline: "Konto aktivieren",
           line1: `Sie wurden zu ${bn} auf ${b.brand} eingeladen.`,
-          line2: "Legen Sie Ihr Passwort fest, um Ihr Konto zu aktivieren.",
+          line2:
+            "Legen Sie Ihr Passwort fest, um Trinkgelder per QR zu erhalten und Ihre Leistung im Team sichtbar zu machen.",
           cta: "Konto aktivieren",
         }
       : {
@@ -310,7 +466,8 @@ export function buildEmployeeActivationContent(input: {
           preheader: `Activate your team account at ${bn}.`,
           headline: "Activate your account",
           line1: `You've been invited to join ${bn} on ${b.brand}.`,
-          line2: "Set your password to activate your account.",
+          line2:
+            "Set your password to receive tips by QR and keep your performance visible to the team.",
           cta: "Activate account",
         };
 
@@ -327,7 +484,7 @@ export function buildEmployeeActivationContent(input: {
     emailFinePrint(expires),
     emailCardBodyEnd(),
     emailCardClose(),
-    emailFooterBlock(null, locBundle.footer),
+    emailFooterBlock(null, locBundle.footer, footerExtras(loc)),
   ].join("");
 
   const html = [
@@ -347,6 +504,10 @@ export function buildEmployeeActivationContent(input: {
     "",
     expires,
     "",
+    locBundle.footerBrand,
+    locBundle.footerCopyright,
+    getCareTipSupportEmail(),
+    "",
     locBundle.footer,
   ].join("\n");
 
@@ -361,6 +522,8 @@ export function buildLoginAlertContent(input: {
   userAgent?: string | null;
   timeZone?: string | null;
   appBaseUrl?: string | null;
+  recipientName?: string | null;
+  businessName?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
@@ -413,12 +576,17 @@ export function buildLoginAlertContent(input: {
     ...(ipMasked ? [{ label: copy.locationLabel, value: ipMasked }] : []),
   ];
 
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: input.businessName,
+  });
+
   const inner = [
     emailBrandMark(b.brand),
     emailCardOpen(),
     emailCardBody(),
     emailHeadline(copy.headline),
-    emailGreeting(b.greeting),
+    emailGreeting(greeting),
     emailBodyText(copy.intro),
     emailMetaBlock(metaRows),
     emailSupportText(copy.okLine),
@@ -427,7 +595,7 @@ export function buildLoginAlertContent(input: {
     emailCta(securityUrl, copy.cta),
     emailCardBodyEnd(),
     emailCardClose(),
-    emailFooterBlock(copy.help, b.footer),
+    emailFooterBlock(copy.help, b.footer, footerExtras(loc)),
   ].join("");
 
   const html = [
@@ -438,7 +606,7 @@ export function buildLoginAlertContent(input: {
   ].join("");
 
   const textLines = [
-    b.greeting,
+    greeting,
     "",
     copy.intro,
     "",
@@ -450,6 +618,10 @@ export function buildLoginAlertContent(input: {
     `${copy.cta}: ${securityUrl}`,
     "",
     copy.help,
+    "",
+    b.footerBrand,
+    b.footerCopyright,
+    getCareTipSupportEmail(),
     "",
     b.footer,
   ];
@@ -463,6 +635,8 @@ export function buildGenericNotificationContent(input: {
   bodyText: string;
   actionUrl?: string | null;
   actionLabel?: string | null;
+  recipientName?: string | null;
+  businessName?: string | null;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
   const b = bundle(loc);
@@ -474,17 +648,22 @@ export function buildGenericNotificationContent(input: {
   const preheader =
     loc === "de" ? "Neue Benachrichtigung von CareTip." : "New notification from CareTip.";
 
+  const greeting = formatEmailGreeting(loc, {
+    recipientName: input.recipientName,
+    businessName: input.businessName,
+  });
+
   const inner = [
     emailBrandMark(b.brand),
     emailCardOpen(),
     emailCardBody(),
     emailHeadline(subject),
-    emailGreeting(b.greeting),
+    emailGreeting(greeting),
     emailBodyTextLast(body),
     ...(url && url.length > 0 ? [emailCta(url, actionLabel)] : []),
     emailCardBodyEnd(),
     emailCardClose(),
-    emailFooterBlock(null, b.footer),
+    emailFooterBlock(null, b.footer, footerExtras(loc)),
   ].join("");
 
   const html = [
@@ -495,7 +674,7 @@ export function buildGenericNotificationContent(input: {
   ].join("");
 
   const ctaText = url && url.length > 0 ? `\n${actionLabel}: ${url}\n` : "";
-  const text = `${b.greeting}\n\n${subject}\n\n${body}${ctaText}\n${b.footer}`;
+  const text = `${greeting}\n\n${subject}\n\n${body}${ctaText}\n${b.footerBrand}\n${b.footerCopyright}\n${getCareTipSupportEmail()}\n\n${b.footer}`;
 
   return { subject, html, text };
 }

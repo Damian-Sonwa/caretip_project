@@ -252,6 +252,7 @@ async function sendVerificationEmailBestEffort(
       to: email,
       verifyUrl: buildVerifyEmailUrl(plainToken),
       locale,
+      userId,
     });
   } catch (e) {
     console.error("[auth] Failed to enqueue email verification", { userId, email }, e);

@@ -4,6 +4,7 @@ import { prisma } from "../prisma.js";
 import { normalizeLoginEmail } from "./auth.service.js";
 import { validatePassword } from "../utils/passwordValidation.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
+import { resolveEmailPersonalizationForUser } from "../emails/emailPersonalization.js";
 import { buildPasswordResetContent, resolveUserPreferredLocale, type EmailLocale } from "../emails/i18nEmail.js";
 
 const RESET_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -19,18 +20,26 @@ function getFrontendBaseUrl(): string {
   return "http://localhost:5173";
 }
 
-function renderPasswordReset(locale: EmailLocale, resetUrl: string) {
+function renderPasswordReset(
+  locale: EmailLocale,
+  resetUrl: string,
+  personalization?: { recipientName?: string | null; businessName?: string | null },
+) {
   try {
     return buildPasswordResetContent({
       locale,
       resetUrl,
       expiresInHours: RESET_EXPIRES_HOURS,
+      recipientName: personalization?.recipientName,
+      businessName: personalization?.businessName,
     });
   } catch {
     return buildPasswordResetContent({
       locale: "en",
       resetUrl,
       expiresInHours: RESET_EXPIRES_HOURS,
+      recipientName: personalization?.recipientName,
+      businessName: personalization?.businessName,
     });
   }
 }
@@ -76,7 +85,8 @@ export async function requestPasswordReset(
   const locale = resolveUserPreferredLocale(
     opts?.explicitLocale ?? user.preferredLocale ?? null,
   );
-  const { subject, html, text } = renderPasswordReset(locale, resetUrl);
+  const personalization = await resolveEmailPersonalizationForUser(user.id);
+  const { subject, html, text } = renderPasswordReset(locale, resetUrl, personalization);
 
   const ok = await sendResendEmail("password-reset", {
     from,

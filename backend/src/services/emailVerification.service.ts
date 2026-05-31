@@ -1,11 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 import { prisma } from "../prisma.js";
 import { getResendFromAddress, sendResendEmail } from "./resendClient.js";
+import { resolveEmailPersonalizationForUser } from "../emails/emailPersonalization.js";
 import {
   buildVerifyEmailContent,
   buildWelcomeEmailContent,
   resolveEmailLocale,
   type EmailLocale,
+  type WelcomeAccountKind,
 } from "../emails/i18nEmail.js";
 
 const VERIFY_TTL_MS = 60 * 60 * 1000; // 1 hour
@@ -52,18 +54,26 @@ export async function createEmailVerificationToken(userId: string): Promise<{
   return { plainToken, expiresAt };
 }
 
-function renderVerifyEmail(locale: EmailLocale, verifyUrl: string) {
+function renderVerifyEmail(
+  locale: EmailLocale,
+  verifyUrl: string,
+  personalization?: { recipientName?: string | null; businessName?: string | null },
+) {
   try {
     return buildVerifyEmailContent({
       locale,
       verifyUrl,
       expiresInHours: VERIFY_EMAIL_EXPIRES_HOURS,
+      recipientName: personalization?.recipientName,
+      businessName: personalization?.businessName,
     });
   } catch {
     return buildVerifyEmailContent({
       locale: "en",
       verifyUrl,
       expiresInHours: VERIFY_EMAIL_EXPIRES_HOURS,
+      recipientName: personalization?.recipientName,
+      businessName: personalization?.businessName,
     });
   }
 }
@@ -72,13 +82,17 @@ export async function sendEmailVerificationEmail(input: {
   to: string;
   verifyUrl: string;
   locale: EmailLocale;
+  userId?: string | null;
 }): Promise<void> {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
 
   const from = getResendFromAddress();
   const loc: EmailLocale = input.locale === "de" ? "de" : "en";
-  const { subject, html, text } = renderVerifyEmail(loc, input.verifyUrl);
+  const personalization = input.userId
+    ? await resolveEmailPersonalizationForUser(input.userId)
+    : null;
+  const { subject, html, text } = renderVerifyEmail(loc, input.verifyUrl, personalization ?? undefined);
 
   const ok = await sendResendEmail("email-verify", { from, to: [to], subject, html, text });
   if (!ok && process.env.NODE_ENV !== "production") {
@@ -89,21 +103,48 @@ export async function sendEmailVerificationEmail(input: {
   }
 }
 
-function renderWelcome(locale: EmailLocale, dashboardUrl: string) {
+function renderWelcome(
+  locale: EmailLocale,
+  dashboardUrl: string,
+  personalization: {
+    recipientName?: string | null;
+    businessName?: string | null;
+    accountKind?: WelcomeAccountKind;
+  },
+) {
   try {
-    return buildWelcomeEmailContent({ locale, dashboardUrl });
+    return buildWelcomeEmailContent({
+      locale,
+      dashboardUrl,
+      recipientName: personalization.recipientName,
+      businessName: personalization.businessName,
+      accountKind: personalization.accountKind,
+    });
   } catch {
-    return buildWelcomeEmailContent({ locale: "en", dashboardUrl });
+    return buildWelcomeEmailContent({
+      locale: "en",
+      dashboardUrl,
+      recipientName: personalization.recipientName,
+      businessName: personalization.businessName,
+      accountKind: personalization.accountKind,
+    });
   }
 }
 
-export async function sendWelcomeEmail(input: { to: string; locale: EmailLocale }): Promise<void> {
+export async function sendWelcomeEmail(input: {
+  to: string;
+  locale: EmailLocale;
+  userId?: string | null;
+}): Promise<void> {
   const to = input.to.trim().toLowerCase();
   if (!to) return;
   const from = getResendFromAddress();
   const dashboardUrl = `${getFrontendBaseUrl()}/dashboard`;
   const loc: EmailLocale = input.locale === "de" ? "de" : "en";
-  const { subject, html, text } = renderWelcome(loc, dashboardUrl);
+  const personalization = input.userId
+    ? await resolveEmailPersonalizationForUser(input.userId)
+    : { recipientName: null, businessName: null, accountKind: "other" as const };
+  const { subject, html, text } = renderWelcome(loc, dashboardUrl, personalization);
   const ok = await sendResendEmail("welcome", { from, to: [to], subject, html, text });
   if (!ok && process.env.NODE_ENV !== "production") {
     console.info("[welcome] (dev) Would send welcome to:", to);
@@ -147,7 +188,7 @@ export async function verifyEmailWithToken(plainToken: string): Promise<void> {
       storedLocale: row.user.preferredLocale,
       acceptLanguage: null,
     });
-    void sendWelcomeEmail({ to: email, locale: welcomeLocale }).catch((e) => {
+    void sendWelcomeEmail({ to: email, locale: welcomeLocale, userId: row.userId }).catch((e) => {
       console.error("[email-verify] welcome email failed", { userId: row.userId }, e);
     });
   }
