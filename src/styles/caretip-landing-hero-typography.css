@@ -213,30 +213,18 @@ html.dark .caretip-landing .caretip-hero-subtitle {
   }
 }
 
-/* EN hero copy only (“Tip in seconds…” + description) — DE unchanged */
-.caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-  --caretip-hero-body-size: clamp(1.0625rem, 0.5vw + 0.98rem, 1.1875rem);
-}
-
+/* EN composed headline scale — body uses shared tokens; DE unchanged */
 .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
   --caretip-hero-headline-size: clamp(2.375rem, 9.4vw + 0.45rem, 3.125rem);
 }
 
 @media (min-width: 640px) {
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-size: clamp(1.09375rem, 0.55vw + 1rem, 1.21875rem);
-  }
-
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
     --caretip-hero-headline-size: clamp(2.5rem, 7.8vw + 0.5rem, 3.25rem);
   }
 }
 
 @media (min-width: 768px) and (max-width: 1023px) {
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-size: 1.125rem;
-  }
-
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
     --caretip-hero-headline-size: clamp(2.6875rem, 5.8vw + 1.05rem, 3.375rem);
   }
@@ -244,7 +232,6 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-size: clamp(1.125rem, 0.5cqw + 0.98rem, 1.28125rem);
     --caretip-hero-body-measure: min(100%, 40ch);
   }
 
@@ -256,10 +243,6 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 }
 
 @media (min-width: 1280px) {
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-size: clamp(1.1875rem, 0.55cqw + 1.02rem, 1.375rem);
-  }
-
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
     --caretip-hero-headline-size: clamp(3rem, 2.15cqw + 1.85rem, 4.125rem);
     --caretip-hero-animated-slot: 1.1em;
@@ -267,10 +250,6 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 }
 
 @media (max-width: 399px) {
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-size: clamp(1.03125rem, 3.2vw + 0.88rem, 1.125rem);
-  }
-
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
     --caretip-hero-headline-size: clamp(2.25rem, 9.2vw, 2.625rem);
   }

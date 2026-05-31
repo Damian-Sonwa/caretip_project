@@ -6,6 +6,7 @@
   --caretip-hero-headline-measure: min(100%, 21.5rem);
   --caretip-hero-body-measure: min(100%, 22rem);
   --caretip-hero-gap-tagline: 0.5rem;
+  --caretip-hero-tagline-size: var(--caretip-tagline-size);
   --caretip-hero-gap-headline-body: 1rem;
   --caretip-hero-gap-body-cta: 0.875rem;
   --caretip-hero-art-max-w: min(100%, 20rem);
@@ -125,22 +126,46 @@
   margin-bottom: var(--caretip-hero-gap-tagline);
 }
 
-.caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
-  margin-bottom: 0.25rem;
+/* Hero tagline — identical EN + DE (design-system tagline scale, not 11px accent default) */
+.caretip-landing .caretip-hero-message__tagline [data-landing-accent] > span:last-child {
+  font-size: var(--caretip-hero-tagline-size) !important;
+  letter-spacing: 0.06em !important;
+  line-height: 1.35 !important;
 }
 
-@media (min-width: 1024px) {
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
-    margin-bottom: 0.3125rem;
-  }
+/* EN — subtle warm tint behind “Caring is tipping” */
+.caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline [data-landing-accent] {
+  padding: 0.2rem 0.5rem 0.2rem 0.4rem;
+  margin-inline: -0.4rem 0;
+  border-radius: 0.5rem;
+  background: linear-gradient(
+    105deg,
+    rgba(233, 120, 28, 0.1) 0%,
+    rgba(233, 120, 28, 0.04) 55%,
+    transparent 100%
+  );
+}
+
+.caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline [data-accent-glow] {
+  opacity: 0.72;
+}
+
+html.dark .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline [data-landing-accent] {
+  background: linear-gradient(
+    105deg,
+    rgba(233, 120, 28, 0.16) 0%,
+    rgba(233, 120, 28, 0.07) 55%,
+    transparent 100%
+  );
 }
 
 @media (max-width: 1023px) {
-  .caretip-landing .caretip-hero-grid__showcase {
-    margin-top: 0.5rem;
+  .caretip-landing .caretip-hero-grid {
+    /* ~12.5% above 0.75rem — mobile/tablet only; desktop stays on --caretip-tagline-size */
+    --caretip-hero-tagline-size: 0.84375rem;
   }
 
-  .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-message__tagline {
-    margin-bottom: 0.375rem;
+  .caretip-landing .caretip-hero-grid__showcase {
+    margin-top: 0.5rem;
   }
 }
