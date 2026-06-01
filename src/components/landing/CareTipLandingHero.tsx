@@ -6,7 +6,6 @@ import { useTranslation } from "react-i18next";
 
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingHeroHeadlineWithHighlight } from "@/components/landing/landingHeroHeadline";
-import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
 import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloatingCards";
 import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
@@ -48,8 +47,6 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
   const heroDescription = t("landing.showcase.description");
   const heroHeadline = t("landing.showcase.heroHeadline");
   const heroHeadlineHighlight = t("landing.showcase.heroHeadlineHighlight");
-  const heroTagline = t("landing.showcase.heroTagline");
-  const hasTagline = landingCopyVisible(heroTagline);
   const useStaticHeadline = landingCopyVisible(heroHeadline);
   const headlineMode = useStaticHeadline ? "static" : "composed";
 
@@ -87,17 +84,6 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
           initial={reduceMotion ? false : "hidden"}
           animate={reduceMotion ? false : "visible"}
         >
-          {hasTagline ? (
-            <motion.div
-              className="caretip-hero-message__tagline"
-              variants={reduceMotion ? undefined : landingHeroTextReveal}
-            >
-              <LandingSectionAccent variant="spark" className="max-lg:mx-0 max-lg:justify-start">
-                {heroTagline}
-              </LandingSectionAccent>
-            </motion.div>
-          ) : null}
-
           <motion.h1
             className={cn(landingUi.heroHeadline, "mt-0")}
             data-hero-headline-mode={headlineMode}
