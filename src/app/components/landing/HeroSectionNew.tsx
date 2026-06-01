@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight, Play } from "lucide-react";
+import { Play } from "lucide-react";
 
 export function HeroSectionNew() {
   return (
@@ -93,7 +93,6 @@ export function HeroSectionNew() {
                 className="group flex touch-manipulation items-center gap-2 rounded-xl bg-accent px-6 py-3 font-semibold text-white shadow-[0_8px_22px_rgba(233,120,28,0.28)] transition-[colors,opacity,box-shadow] hover:bg-accent/90 hover:shadow-[0_10px_28px_rgba(233,120,28,0.32)] active:opacity-90 sm:px-8 sm:py-4"
               >
                 Get Started Free
-                <ArrowRight className="h-5 w-5 transition-opacity group-hover:opacity-80" />
               </button>
             </motion.div>
           </motion.div>

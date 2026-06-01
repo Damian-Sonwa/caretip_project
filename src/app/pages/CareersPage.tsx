@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowLeft, MapPin, Clock, Briefcase, Heart, Zap, Users, Globe, ArrowRight } from 'lucide-react';
+import { MapPin, Clock, Briefcase, Heart, Zap, Users, Globe } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
 import AnimatedShaderBackground from '../components/ui/animated-shader-background';
@@ -106,7 +106,6 @@ export function CareersPage() {
               to="/" 
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
-              <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Back to Home</span>
             </Link>
             
@@ -194,9 +193,8 @@ export function CareersPage() {
                             </div>
                           </div>
                         </div>
-                        <button className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-all whitespace-nowrap group-hover:gap-3">
+                        <button className="flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-all whitespace-nowrap">
                           Apply Now
-                          <ArrowRight className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
@@ -237,7 +235,6 @@ export function CareersPage() {
                   className="inline-flex items-center gap-2 px-6 py-3 bg-accent text-white rounded-lg font-semibold hover:bg-accent/90 transition-all"
                 >
                   Get in Touch
-                  <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>

@@ -104,10 +104,7 @@ export function LandingRealLifeSection() {
                   "caretip-real-life-card",
                 )}
                 imageClassName={cn(landingUi.realLifeCardImage, "caretip-real-life-card-image")}
-                titleClassName={cn(
-                  landingUi.realLifeCardTitle,
-                  "max-lg:text-center lg:text-left",
-                )}
+                titleClassName={cn(landingUi.realLifeCardTitle, "text-left")}
               />
             </motion.div>
           ))}

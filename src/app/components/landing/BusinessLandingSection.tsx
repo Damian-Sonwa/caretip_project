@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
@@ -36,7 +35,6 @@ export function BusinessLandingSection() {
       cta={{
         label: t("landing.businessSection.cta"),
         to: "/auth?mode=signup&role=business&from=landing",
-        icon: <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />,
       }}
       visual={
         <LandingShowcaseCoverImage

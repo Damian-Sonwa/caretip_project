@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from "../../lib/api";
@@ -235,7 +235,7 @@ export function TipAmountPage() {
       <div className={cf.stickyHeader}>
         <div className={cf.headerInner}>
           <button type="button" onClick={handleBack} className={cf.backButton}>
-            <ChevronLeft className="h-5 w-5 text-foreground" />
+            {t("tipFlow.common.back")}
           </button>
           {businessBrand ? (
             <BusinessLogoMark

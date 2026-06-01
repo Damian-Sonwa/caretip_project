@@ -16,12 +16,10 @@ import {
   Star,
   Eye,
   QrCode,
-  ArrowUpRight,
   Loader2,
   Sparkles,
   Settings,
   Target,
-  ChevronDown,
 } from "lucide-react";
 import {
   AreaChart,
@@ -807,20 +805,12 @@ export function EmployeeDashboard() {
                         })}
                       </p>
                     </div>
-                    <ChevronDown
-                      className={cn(
-                        "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
-                        recentTipsExpanded && "rotate-180",
-                      )}
-                      aria-hidden
-                    />
                   </button>
                   <Link
                     to="/employee/notifications"
                     className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
                   >
                     {t("dashboard.viewAll")}
-                    <ArrowUpRight className="h-4 w-4" />
                   </Link>
                 </CardHeader>
                 {recentTipsExpanded ? (

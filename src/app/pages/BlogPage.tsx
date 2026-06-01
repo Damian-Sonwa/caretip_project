@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { ArrowLeft, Calendar, Clock, ArrowRight } from 'lucide-react';
+import { Calendar, Clock } from 'lucide-react';
 import { Navigation } from '../components/Navigation';
 import { Footer } from '../components/Footer';
 import AnimatedShaderBackground from '../components/ui/animated-shader-background';
@@ -74,7 +74,6 @@ export function BlogPage() {
               to="/" 
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
-              <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Back to Home</span>
             </Link>
             
@@ -117,9 +116,8 @@ export function BlogPage() {
                           <span>{post.readTime}</span>
                         </div>
                       </div>
-                      <button className="mt-4 inline-flex items-center gap-2 text-accent font-medium text-sm group-hover:gap-3 transition-all">
+                      <button type="button" className="mt-4 inline-flex items-center text-accent font-medium text-sm">
                         Read More
-                        <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
                   ))}

@@ -133,4 +133,74 @@ html:not(.dark) .caretip-landing .caretip-showcase-float-card {
   }
 }
 
+/* Split showcase (employee / business) — premium text-side content panel */
+.caretip-split-showcase-content-panel {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 1.25rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+.caretip-landing [data-landing-tone="muted"] .caretip-split-showcase-content-panel {
+  background: #fafaf9;
+}
+
+.caretip-landing [data-landing-tone="warm"] .caretip-split-showcase-content-panel {
+  background: #ffffff;
+}
+
+.caretip-split-showcase-content-panel--mobile {
+  padding: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-split-showcase-content-panel--mobile {
+    padding: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-split-showcase-content-panel--copy {
+    padding: 2rem;
+    border-radius: 1.5rem;
+  }
+
+  .caretip-split-showcase-content-panel--copy .caretip-split-showcase-content-panel--mobile,
+  .caretip-split-showcase-content-panel--copy.caretip-split-showcase-content-panel--mobile {
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+}
+
+.dark .caretip-split-showcase-content-panel {
+  background: rgb(10 10 10);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.dark .caretip-landing [data-landing-tone="muted"] .caretip-split-showcase-content-panel {
+  background: rgb(15 15 15);
+}
+
+.caretip-split-showcase-content-panel .caretip-hospitality-feature-panel {
+  background: transparent;
+  border-radius: 0;
+  box-shadow: none;
+  --tw-ring-shadow: 0 0 #0000;
+  --tw-ring-offset-shadow: 0 0 #0000;
+}
+
+.caretip-split-showcase-content-panel .caretip-split-showcase-cta {
+  margin-top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-split-showcase-content-panel .caretip-split-showcase-cta {
+    margin-top: 1.5rem;
+  }
+}
+
 /* Social proof — venue strip spacing handled in caretip-landing-trust-metrics-refine.css */

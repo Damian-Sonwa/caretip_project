@@ -184,7 +184,7 @@ export const landingUi = {
   showcaseGrid:
     "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
   showcaseCopy:
-    "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start",
+    "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start lg:caretip-split-showcase-content-panel lg:caretip-split-showcase-content-panel--copy",
   showcaseIntro: `caretip-mobile-stack-intro flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   showcaseHeadline: cnSectionHeadline(
     "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
@@ -194,7 +194,7 @@ export const landingUi = {
     `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   showcaseActionCluster:
-    "mt-8 flex w-full min-w-0 flex-col gap-4 max-lg:items-start sm:mt-10 sm:gap-4 lg:mx-0 lg:max-w-none",
+    "mt-6 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
     "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",

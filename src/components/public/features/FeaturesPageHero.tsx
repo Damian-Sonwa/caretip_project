@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import dashboardImg from "../../../../images/new_dashboard.png";
@@ -13,7 +12,6 @@ export function FeaturesPageHero() {
   return (
     <header className="relative mb-2 sm:mb-4">
       <Link to="/" className={cn(publicPageUi.backLink, "relative z-[2]")}>
-        <ArrowLeft className="h-4 w-4" aria-hidden />
         <span>{t("staticPages.common.backToHome")}</span>
       </Link>
 

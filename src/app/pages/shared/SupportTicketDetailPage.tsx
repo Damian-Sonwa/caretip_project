@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { ArrowLeft, Loader2, Send } from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useLocation, useParams } from "react-router";
 import { toast } from "sonner";
@@ -108,7 +108,6 @@ export function SupportTicketDetailPage() {
     <div className={dashboardSharedUi.pageNarrow}>
       <Button type="button" variant="ghost" size="sm" className="mb-4 -ml-2" asChild>
         <Link to={backHref}>
-          <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden />
           {isAdmin ? t("support.detail.backInbox") : t("support.detail.backSupport")}
         </Link>
       </Button>

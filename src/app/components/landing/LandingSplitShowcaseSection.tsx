@@ -92,7 +92,13 @@ export function LandingSplitShowcaseSection({
             ) : null}
           </div>
 
-          <div className={cn(landingUi.showcaseActionCluster, landingUi.mobileStackAfter)}>
+          <div
+            className={cn(
+              landingUi.showcaseActionCluster,
+              landingUi.mobileStackAfter,
+              "max-lg:caretip-split-showcase-content-panel max-lg:caretip-split-showcase-content-panel--mobile",
+            )}
+          >
             <div
               className={cn(
                 landingUi.showcaseBenefits,
@@ -113,7 +119,7 @@ export function LandingSplitShowcaseSection({
             </div>
 
             {cta ? (
-              <div className="flex w-full max-lg:justify-center">
+              <div className="caretip-split-showcase-cta flex w-full max-lg:justify-center">
                 <Link
                   to={cta.to}
                   className={cn(
@@ -121,7 +127,6 @@ export function LandingSplitShowcaseSection({
                     "gap-2 lg:self-start",
                   )}
                 >
-                  {cta.icon}
                   {cta.label}
                 </Link>
               </div>

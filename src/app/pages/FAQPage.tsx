@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from "react-router";
-import { ArrowRight, Plus, Minus, Search } from "lucide-react";
+import { Plus, Minus, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
@@ -226,7 +226,6 @@ export function FAQPage() {
         <p className="mx-auto mb-6 max-w-lg text-neutral-700 dark:text-neutral-300">{t("staticPages.faq.ctaBody")}</p>
         <Link to="/contact" className={publicPageUi.ctaPrimary}>
           {t("staticPages.faq.ctaButton")}
-          <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
     </PublicPageShell>

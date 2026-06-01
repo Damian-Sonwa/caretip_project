@@ -23,7 +23,7 @@ export const customerFlowUi = {
   subline: "text-xs leading-snug text-muted-foreground",
 
   backButton:
-    "inline-flex min-h-[2.75rem] min-w-[2.75rem] shrink-0 items-center justify-center rounded-xl border border-transparent text-foreground transition-colors hover:bg-muted/70 active:bg-muted disabled:opacity-40",
+    "inline-flex shrink-0 items-center justify-center rounded-xl border border-transparent px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted/70 active:bg-muted disabled:opacity-40",
 
   /** Primary scroll column — balanced readable width */
   main: "caretip-container mx-auto max-w-xl space-y-6 py-8 sm:space-y-7 sm:py-10",

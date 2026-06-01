@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, ChevronDown, Globe } from "lucide-react";
+import { Check, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
 import { patchMyAccountSettings } from "@/app/lib/api";
@@ -68,10 +68,6 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
         >
           <Globe className={cn("h-4 w-4 shrink-0 opacity-90", isInline ? "text-white/90" : "text-neutral-600")} aria-hidden />
           <span className="tabular-nums">{active === "de" ? "DE" : "EN"}</span>
-          <ChevronDown
-            className={cn("h-3.5 w-3.5 shrink-0 opacity-70 transition-transform", open && "-rotate-180")}
-            aria-hidden
-          />
         </button>
       </PopoverTrigger>
       <PopoverContent

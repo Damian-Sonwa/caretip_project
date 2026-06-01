@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { FinalCtaBackdrop } from "@/app/components/landing/FinalCtaBackdrop";
 import { LandingTrustComplianceStrip } from "@/app/components/landing/LandingTrustComplianceStrip";
@@ -54,7 +53,6 @@ export function LandingFinalCtaSection() {
               )}
             >
               {t("landing.finalCta.cta")}
-              <ArrowRight className="h-4 w-4 shrink-0 opacity-90" strokeWidth={2.25} aria-hidden />
             </Link>
           </div>
         </div>

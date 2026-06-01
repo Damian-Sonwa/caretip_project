@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
@@ -354,7 +354,6 @@ export function BusinessOnboardingPage() {
                         ) : (
                           <>
                             {t("business.onboarding.actions.continue")}
-                            <ArrowRight className="h-4 w-4" aria-hidden />
                           </>
                         )}
                       </button>

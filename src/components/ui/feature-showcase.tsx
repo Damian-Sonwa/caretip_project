@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ArrowRight, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -368,10 +368,9 @@ export function FeatureShowcase({
                   <Button asChild variant="outline" className={landingUi.heroCtaSecondary}>
                     <Link
                       to={secondaryCtaTo}
-                      className="inline-flex h-full w-full items-center justify-center gap-1.5 whitespace-nowrap"
+                      className="inline-flex h-full w-full items-center justify-center whitespace-nowrap"
                     >
-                      <span>{secondaryCtaLabel}</span>
-                      <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-55" aria-hidden />
+                      {secondaryCtaLabel}
                     </Link>
                   </Button>
                 </div>

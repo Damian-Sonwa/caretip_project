@@ -11,7 +11,6 @@ import {
   Users,
   QrCode,
   Wallet,
-  ArrowRight,
   type LucideIcon,
 } from "lucide-react";
 import type { TFunction } from "i18next";
@@ -182,7 +181,6 @@ export function HelpPage() {
         <p className="mx-auto mb-6 max-w-lg text-neutral-700 dark:text-neutral-300">{t("staticPages.help.ctaBody")}</p>
         <Link to="/contact" className={publicPageUi.ctaPrimary}>
           {t("staticPages.help.ctaButton")}
-          <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
     </PublicPageShell>

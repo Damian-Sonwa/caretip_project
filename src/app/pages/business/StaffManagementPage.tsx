@@ -6,7 +6,6 @@ import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { toast } from "sonner";
 import {
-  ChevronLeft,
   Search,
   Star,
   Edit,
@@ -593,10 +592,8 @@ export function StaffManagementPage() {
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
       <div className={businessUi.subPageTop}>
         <div className={businessUi.subPageBreadcrumb}>
-          <Button variant="outline" size="icon" asChild aria-label={t("business.staffPage.backAria")}>
-            <Link to="/dashboard">
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
           </Button>
           <span className="text-sm text-muted-foreground">{t("business.staffPage.breadcrumbDashboard")}</span>
         </div>

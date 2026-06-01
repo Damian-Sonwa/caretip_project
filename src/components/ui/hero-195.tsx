@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Link } from "react-router";
-import { Building2, ArrowRight, ShieldCheck, LineChart } from "lucide-react";
+import { Building2, ShieldCheck, LineChart } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
@@ -68,7 +68,6 @@ export function Hero195({ className, headlineStats }: Hero195Props) {
               <Building2 className="h-4 w-4" />
               KYC &amp; verification
             </span>
-            <ArrowRight className="h-4 w-4" />
           </Link>
           <Link
             to="/platform-admin/transactions"
@@ -78,17 +77,13 @@ export function Hero195({ className, headlineStats }: Hero195Props) {
               <LineChart className="h-4 w-4" />
               Global transactions
             </span>
-            <ArrowRight className="h-4 w-4" />
           </Link>
         </>
       }
       actions={
         <>
           <Button asChild>
-            <Link to="/platform-admin/businesses">
-              Review businesses
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Link>
+            <Link to="/platform-admin/businesses">Review businesses</Link>
           </Button>
           <Button variant="outline" asChild>
             <Link to="/platform-admin/transactions">View transactions</Link>

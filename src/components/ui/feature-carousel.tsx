@@ -1,5 +1,4 @@
 import * as React from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -200,22 +199,22 @@ export function FeatureCarousel({
         <Button
           type="button"
           variant="outline"
-          size="icon"
-          className="absolute left-2 top-1/2 z-20 h-10 w-10 -translate-y-1/2 rounded-full border-primary/25 bg-background/60 backdrop-blur-sm hover:bg-muted/80 sm:left-4"
+          size="sm"
+          className="absolute left-2 top-1/2 z-20 -translate-y-1/2 rounded-full border-primary/25 bg-background/60 px-3 backdrop-blur-sm hover:bg-muted/80 sm:left-4"
           onClick={handlePrev}
           aria-label="Previous image"
         >
-          <ChevronLeft className="h-5 w-5" />
+          Prev
         </Button>
         <Button
           type="button"
           variant="outline"
-          size="icon"
-          className="absolute right-2 top-1/2 z-20 h-10 w-10 -translate-y-1/2 rounded-full border-primary/25 bg-background/60 backdrop-blur-sm hover:bg-muted/80 sm:right-4"
+          size="sm"
+          className="absolute right-2 top-1/2 z-20 -translate-y-1/2 rounded-full border-primary/25 bg-background/60 px-3 backdrop-blur-sm hover:bg-muted/80 sm:right-4"
           onClick={handleNext}
           aria-label="Next image"
         >
-          <ChevronRight className="h-5 w-5" />
+          Next
         </Button>
       </div>
     </div>

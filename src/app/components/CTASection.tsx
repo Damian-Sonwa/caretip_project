@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { ArrowRight, Check } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { Link } from 'react-router';
 import { GlowingEffect } from './ui/glowing-effect';
 
@@ -48,7 +48,6 @@ export function CTASection() {
                   <Link to="/auth">
                     <button className="group px-6 sm:px-8 py-3 sm:py-4 bg-white text-primary rounded-xl hover:bg-white/90 transition-all hover:shadow-2xl flex items-center justify-center gap-2 text-sm sm:text-base font-semibold">
                       Get Your Tipping Link
-                      <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </Link>
                   <Link

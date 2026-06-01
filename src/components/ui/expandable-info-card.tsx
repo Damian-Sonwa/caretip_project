@@ -1,6 +1,5 @@
 import { useId, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { ChevronDown } from "lucide-react";
 import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,9 @@ export function ExpandableInfoCard({
 
       <div className="caretip-expandable-info-card__body flex flex-col px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
         {tag ? (
-          <p className="mb-1.5 font-sans text-xs font-semibold uppercase tracking-wide text-primary">{tag}</p>
+          <p className="caretip-expandable-info-card__eyebrow mb-1.5 font-sans text-xs font-semibold uppercase tracking-wide text-primary">
+            {tag}
+          </p>
         ) : null}
         <h3
           className={cn(
@@ -106,17 +107,12 @@ export function ExpandableInfoCard({
           className={cn(
             "caretip-expandable-info-card__cta mt-4 w-full sm:mt-4 sm:w-auto",
             expanded ? caretipBtnSecondary : caretipBtnPrimary,
-            "gap-1.5",
           )}
           aria-expanded={expanded}
           aria-controls={expanded ? detailId : undefined}
           onClick={() => setExpanded((open) => !open)}
         >
           {expanded ? learnLessLabel : learnMoreLabel}
-          <ChevronDown
-            className={cn("h-4 w-4 transition-transform duration-300", expanded && "rotate-180")}
-            aria-hidden
-          />
         </Button>
       </div>
     </article>

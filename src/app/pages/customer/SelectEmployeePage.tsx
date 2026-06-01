@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, Star, Award } from "lucide-react";
+import { Star, Award } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getEmployees } from "../../lib/api";
 import type { EmployeeItem } from "../../lib/api";
@@ -124,7 +124,7 @@ export function SelectEmployeePage() {
             onClick={handleBack}
             className="rounded-lg p-2 hover:bg-muted transition-colors"
           >
-            <ChevronLeft className="h-5 w-5 text-foreground" />
+            {t("tipFlow.common.back")}
           </button>
           <CareTipLogo size="xs" className="shrink-0" />
           <div className="min-w-0">

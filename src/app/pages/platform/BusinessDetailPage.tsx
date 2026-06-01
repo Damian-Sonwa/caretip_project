@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { ArrowLeft, CheckCircle, Shield, XCircle } from "lucide-react";
+import { CheckCircle, Shield, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchPlatformBusiness,
@@ -162,7 +162,6 @@ export function BusinessDetailPage() {
   return (
     <PlatformPage>
       <Link to="/platform-admin/businesses" className={platformUi.backLink}>
-        <ArrowLeft className="h-4 w-4" aria-hidden />
         {t("admin.businessDetailPage.backLink")}
       </Link>
 

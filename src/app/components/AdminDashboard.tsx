@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { CheckCircle, Search, TrendingUp, XCircle, ChevronDown } from "lucide-react";
+import { CheckCircle, Search, TrendingUp, XCircle } from "lucide-react";
 import { CareIcon, createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
@@ -1074,12 +1074,6 @@ export function AdminDashboard() {
                   </span>
                 </h3>
               </div>
-              <ChevronDown
-                className={cn(
-                  "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
-                  businessesExpanded && "rotate-180",
-                )}
-              />
             </button>
 
             <Link

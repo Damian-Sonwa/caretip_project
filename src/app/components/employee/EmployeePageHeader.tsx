@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { ChevronLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { employeeUi } from "./employeeDashboardUi";
 
@@ -29,10 +28,9 @@ export function EmployeePageHeader({
         <div className="flex min-w-0 flex-1 items-start gap-3">
           <Link
             to={backTo}
-            className="mt-0.5 inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border/60 bg-white/80 text-foreground shadow-sm transition-colors hover:bg-muted/50"
-            aria-label={backAriaLabel}
+            className="mt-0.5 inline-flex shrink-0 items-center justify-center rounded-xl border border-border/60 bg-white/80 px-3 py-2 text-sm font-medium text-foreground shadow-sm transition-colors hover:bg-muted/50"
           >
-            <ChevronLeft className="h-5 w-5" aria-hidden />
+            {backAriaLabel}
           </Link>
           {leading ? <div className="shrink-0">{leading}</div> : null}
           <div className="min-w-0 flex-1">

@@ -59,7 +59,6 @@ export function BusinessSettingsShortcutsPanel({ variant }: { variant: "team" | 
                 <span className="block text-sm font-semibold text-foreground">{t(item.titleKey)}</span>
                 <span className={cn("mt-0.5 block text-sm", businessUi.cardDesc)}>{t(item.descKey)}</span>
               </span>
-              <CareIcon name="arrowRight" size="md" className="shrink-0 text-muted-foreground" />
             </Link>
           </li>
         ))}

@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowLeft, Mail, MessageSquare, Phone, MapPin } from "lucide-react";
+import { Mail, MessageSquare, Phone, MapPin } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { PublicPageHeader } from "@/components/public/PublicPageHeader";
@@ -127,9 +127,8 @@ export function ContactPage() {
           <div className={cn(publicPageUi.insetPanel, "border-primary/15 bg-primary/[0.06]")}>
             <h3 className="mb-2 font-semibold text-neutral-950 dark:text-neutral-50">{t("staticPages.contact.faqTeaserTitle")}</h3>
             <p className="mb-4 text-sm text-neutral-700 dark:text-neutral-300">{t("staticPages.contact.faqTeaserBody")}</p>
-            <Link to="/faq" className="inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline">
+            <Link to="/faq" className="inline-flex items-center text-sm font-semibold text-primary hover:underline">
               {t("staticPages.contact.faqTeaserLink")}
-              <ArrowLeft className="h-4 w-4 rotate-180" />
             </Link>
           </div>
         </div>

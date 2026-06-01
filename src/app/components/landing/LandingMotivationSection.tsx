@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Link } from "react-router";
-import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
@@ -81,7 +80,6 @@ export function LandingMotivationSection() {
                 className={cn(landingUi.heroCtaPrimary, "inline-flex gap-2 px-8")}
               >
                 {t("landing.showcase.primaryCta")}
-                <ArrowRight className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
               </Link>
             </div>
           </div>

@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router";
-import { ArrowRight } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { PricingSection } from "../components/PricingSection";
@@ -85,7 +84,6 @@ export function PricingPage() {
           </p>
           <Link to="/contact" className={publicPageUi.ctaPrimary}>
             {t("nav.requestDemo")}
-            <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
         </section>
       </main>

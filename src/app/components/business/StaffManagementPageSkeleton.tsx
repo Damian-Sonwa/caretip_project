@@ -1,4 +1,3 @@
-import { ChevronLeft } from "lucide-react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
@@ -21,10 +20,8 @@ export function StaffManagementPageSkeleton() {
     <div className="min-h-screen overflow-x-hidden bg-background pb-20">
       <div className={businessUi.subPageTop}>
         <div className={businessUi.subPageBreadcrumb}>
-          <Button variant="outline" size="icon" asChild aria-label={t("business.staffPage.backAria")}>
-            <Link to="/dashboard">
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
           </Button>
           <ShimmerBar className="h-4 w-24" />
         </div>

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, Copy, LayoutGrid } from "lucide-react";
+import { Copy, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import {
@@ -135,10 +135,9 @@ export function TablesPage() {
           <div className="flex items-center gap-3 min-w-0">
             <Link
               to="/dashboard"
-              className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground shrink-0"
-              aria-label={t("business.tablesPage.backAria")}
+              className="shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <ChevronLeft className="w-5 h-5" />
+              {t("business.tablesPage.backAria")}
             </Link>
             <div className="min-w-0">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("business.tablesPage.title")}</h1>

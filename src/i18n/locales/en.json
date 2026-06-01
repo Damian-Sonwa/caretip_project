@@ -900,7 +900,8 @@
       "notFound": "Not found",
       "careTipBrand": "CareTip",
       "careTipLimited": "CareTip Limited",
-      "homeAria": "Home"
+      "homeAria": "Home",
+      "back": "Back"
     },
     "errors": {
       "employeeWrongVenue": "This team member does not belong to this venue.",

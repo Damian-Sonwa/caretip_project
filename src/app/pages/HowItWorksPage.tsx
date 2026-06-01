@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { ArrowRight, Shield, Zap } from "lucide-react";
+import { Shield, Zap } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { PublicPageHeader } from "@/components/public/PublicPageHeader";
@@ -80,7 +80,6 @@ export function HowItWorksPage() {
         <p className="mx-auto mb-6 max-w-xl text-neutral-700 dark:text-neutral-300">{t("staticPages.howItWorks.ctaBody")}</p>
         <Link to="/pricing" className={publicPageUi.ctaPrimary}>
           {t("staticPages.howItWorks.ctaPricing")}
-          <ArrowRight className="h-4 w-4" aria-hidden />
         </Link>
       </section>
     </PublicPageShell>

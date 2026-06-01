@@ -1,4 +1,4 @@
-import { ArrowRight, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { onboardingContinueBtn } from "./businessOnboardingUi";
@@ -32,7 +32,6 @@ export function BusinessOnboardingFinishCta({ busy, disabled, onFinish }: Busine
         ) : (
           <>
             {t("business.onboarding.actions.finish")}
-            <ArrowRight className="h-4 w-4" aria-hidden />
           </>
         )}
       </button>

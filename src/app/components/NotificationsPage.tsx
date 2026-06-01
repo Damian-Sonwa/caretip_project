@@ -7,7 +7,6 @@ import {
   Star,
   Sparkles,
   Check,
-  ArrowRight,
   Heart,
 } from "lucide-react";
 import { Link } from "react-router";
@@ -166,9 +165,8 @@ export function NotificationsPage() {
                     </button>
                   )}
                   {n.actionUrl && n.actionLabel && (
-                    <Link to={n.actionUrl} className="inline-flex items-center gap-1 text-xs font-medium text-primary transition-colors hover:text-primary/80">
+                    <Link to={n.actionUrl} className="inline-flex items-center text-xs font-medium text-primary transition-colors hover:text-primary/80">
                       {n.actionLabel}
-                      <ArrowRight className="h-3 w-3" />
                     </Link>
                   )}
                 </div>

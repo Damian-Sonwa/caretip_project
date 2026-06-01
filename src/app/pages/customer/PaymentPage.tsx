@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { ChevronLeft, CreditCard, Smartphone, Lock } from "lucide-react";
+import { CreditCard, Smartphone, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { createTipCheckoutSession, getEmployeeById } from "../../lib/api";
@@ -239,7 +239,7 @@ export function PaymentPage() {
             className={cf.backButton}
             disabled={processing}
           >
-            <ChevronLeft className="h-5 w-5 text-foreground" />
+            {t("tipFlow.common.back")}
           </button>
           {businessBrand ? (
             <BusinessLogoMark

@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { Link } from "react-router";
-import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
@@ -26,7 +25,6 @@ export function PublicPageHeader({
   return (
     <header className={cn(publicPageUi.header, centered && "text-center", className)}>
       <Link to="/" className={publicPageUi.backLink}>
-        <ArrowLeft className="h-4 w-4" aria-hidden />
         <span>{t("staticPages.common.backToHome")}</span>
       </Link>
 

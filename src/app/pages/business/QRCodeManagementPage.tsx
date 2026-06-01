@@ -2,7 +2,6 @@ import { motion } from "motion/react";
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router";
 import {
-  ChevronLeft,
   QrCode,
   Download,
   Copy,
@@ -789,10 +788,7 @@ export function QRCodeManagementPage() {
           <p className="text-sm leading-relaxed text-muted-foreground">{t("business.qrPage.pendingBody")}</p>
           <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
             <Button asChild variant="outline">
-              <Link to="/dashboard">
-                <ChevronLeft className="mr-2 h-4 w-4" />
-                {t("business.qrPage.backDashboard")}
-              </Link>
+              <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
             </Button>
           </div>
         </div>
@@ -811,10 +807,8 @@ export function QRCodeManagementPage() {
     <div className="min-h-screen bg-background pb-20 text-foreground">
       <div className={businessUi.subPageTop}>
         <div className={businessUi.subPageBreadcrumb}>
-          <Button variant="outline" size="icon" asChild aria-label={t("business.qrPage.backDashboard")}>
-            <Link to="/dashboard">
-              <ChevronLeft className="h-5 w-5" />
-            </Link>
+          <Button variant="outline" size="sm" asChild>
+            <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
           </Button>
           <span className="text-sm text-muted-foreground">{t("business.qrPage.dashboardBreadcrumb")}</span>
         </div>

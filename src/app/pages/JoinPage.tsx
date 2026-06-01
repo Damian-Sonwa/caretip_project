@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { ArrowRight, KeyRound, Loader2 } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { validateInviteCode } from "../lib/api";
@@ -88,7 +88,6 @@ export function JoinPage() {
                 ) : (
                   <>
                     {t("join.continue")}
-                    <ArrowRight className="h-4 w-4" />
                   </>
                 )}
               </button>

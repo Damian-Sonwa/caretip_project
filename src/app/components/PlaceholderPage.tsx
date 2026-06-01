@@ -1,5 +1,4 @@
 import { Link } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
 import { Navigation } from './Navigation';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
@@ -22,7 +21,6 @@ export function PlaceholderPage({ title, description }: PlaceholderPageProps) {
               to="/" 
               className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-8"
             >
-              <ArrowLeft className="w-4 h-4" />
               <span className="text-sm">Back to Home</span>
             </Link>
             

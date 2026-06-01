@@ -14,8 +14,6 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   MoreVertical,
-  ChevronLeft,
-  ChevronRight,
 } from 'lucide-react';
 import { formatEur } from '../lib/formatEur';
 
@@ -507,9 +505,9 @@ export function TransactionsPage() {
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                     disabled={currentPage === 1}
-                    className="touch-manipulation rounded-lg border border-border p-2 transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="touch-manipulation rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <ChevronLeft className="w-5 h-5" />
+                    Previous
                   </button>
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                     <button
@@ -529,9 +527,9 @@ export function TransactionsPage() {
                     type="button"
                     onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                     disabled={currentPage === totalPages}
-                    className="touch-manipulation rounded-lg border border-border p-2 transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="touch-manipulation rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted active:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    <ChevronRight className="w-5 h-5" />
+                    Next
                   </button>
                 </div>
               </motion.div>

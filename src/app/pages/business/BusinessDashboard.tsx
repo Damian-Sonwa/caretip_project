@@ -7,11 +7,9 @@ import {
   Users,
   TrendingUp,
   Download,
-  ArrowUpRight,
   MapPin,
   Star,
   Building2,
-  ChevronDown,
   Sparkles,
   HelpCircle,
 } from "lucide-react";
@@ -710,13 +708,6 @@ export function BusinessDashboard() {
                     </div>
                     <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
                   </div>
-                  <ChevronDown
-                    className={cn(
-                      "mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform",
-                      employeeGoalsExpanded && "rotate-180",
-                    )}
-                    aria-hidden
-                  />
                 </button>
                 <CardDescription className={cn(businessUi.cardDesc, "hidden text-pretty lg:block")}>
                   {t("business.dashboard.employeeGoalsDesc")}
@@ -1039,13 +1030,6 @@ export function BusinessDashboard() {
                       aria-expanded={topPerformersExpanded}
                     >
                       <CardTitle className="text-lg">{t("business.dashboard.topPerformers")}</CardTitle>
-                      <ChevronDown
-                        className={cn(
-                          "h-5 w-5 shrink-0 text-muted-foreground transition-transform duration-200",
-                          topPerformersExpanded && "rotate-180",
-                        )}
-                        aria-hidden
-                      />
                     </button>
                     {topPerformersExpanded && topEmployees.length > 0 ? (
                       <CardDescription className={cn(businessUi.cardDesc, "pr-2")}>
@@ -1060,7 +1044,6 @@ export function BusinessDashboard() {
                     className="ml-3 flex shrink-0 items-center gap-1 text-sm font-medium text-foreground transition-colors hover:text-primary hover:underline"
                   >
                     {t("dashboard.viewAll")}
-                    <ArrowUpRight className="h-4 w-4" aria-hidden />
                   </Link>
                 </CardHeader>
                 {topPerformersExpanded ? (
@@ -1177,13 +1160,6 @@ export function BusinessDashboard() {
                       <CardTitle className="text-lg">{t("business.dashboard.quickActions")}</CardTitle>
                       <CardDescription>{t("business.dashboard.quickActionsDesc")}</CardDescription>
                     </div>
-                    <ChevronDown
-                      className={cn(
-                        "mt-1 h-5 w-5 shrink-0 text-muted-foreground transition-transform",
-                        quickActionsExpanded && "rotate-180",
-                      )}
-                      aria-hidden
-                    />
                   </button>
                 </CardHeader>
                 {quickActionsExpanded ? (
