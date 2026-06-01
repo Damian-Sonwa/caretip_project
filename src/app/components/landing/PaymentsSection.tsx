@@ -1,11 +1,14 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { CreditCard, Smartphone, Clock, ShieldCheck } from "lucide-react";
+import { CreditCard as CreditCardIcon, Smartphone, Clock, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { InteractiveCreditCard } from "@/components/ui/credit-card-1";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
+import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
+import { PaymentsStripeBadge } from "./PaymentsStripeBadge";
 
 type PaymentsTrustAccent = "orange" | "gold" | "charcoal";
 
@@ -42,14 +45,40 @@ type PaymentsTrustItem = {
 export function PaymentsSection() {
   const { t } = useTranslation();
   const sectionSubtitle = t("landing.paymentsTrust.subtitle");
+  const [disableCardTilt, setDisableCardTilt] = useState(true);
+
+  useEffect(() => {
+    const coarse = window.matchMedia("(pointer: coarse)");
+    const narrow = window.matchMedia("(max-width: 767px)");
+    const update = () => setDisableCardTilt(coarse.matches || narrow.matches);
+    update();
+    coarse.addEventListener("change", update);
+    narrow.addEventListener("change", update);
+    return () => {
+      coarse.removeEventListener("change", update);
+      narrow.removeEventListener("change", update);
+    };
+  }, []);
 
   const items = useMemo<PaymentsTrustItem[]>(
     () =>
       [
-        { icon: CreditCard, title: t("landing.paymentsTrust.b1Title"), text: t("landing.paymentsTrust.b1Text") },
+        {
+          icon: CreditCardIcon,
+          title: t("landing.paymentsTrust.b1Title"),
+          text: t("landing.paymentsTrust.b1Text"),
+        },
         { icon: Clock, title: t("landing.paymentsTrust.b2Title"), text: t("landing.paymentsTrust.b2Text") },
-        { icon: Smartphone, title: t("landing.paymentsTrust.b3Title"), text: t("landing.paymentsTrust.b3Text") },
-        { icon: ShieldCheck, title: t("landing.paymentsTrust.b4Title"), text: t("landing.paymentsTrust.b4Text") },
+        {
+          icon: Smartphone,
+          title: t("landing.paymentsTrust.b3Title"),
+          text: t("landing.paymentsTrust.b3Text"),
+        },
+        {
+          icon: ShieldCheck,
+          title: t("landing.paymentsTrust.b4Title"),
+          text: t("landing.paymentsTrust.b4Text"),
+        },
       ].map((item, index) => ({ ...item, accent: ACCENT_CYCLE[index]! })),
     [t],
   );
@@ -73,60 +102,109 @@ export function PaymentsSection() {
           transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className={cn(
             landingUi.sectionIntro,
-            "caretip-payments-trust-intro mx-auto mb-10 max-w-3xl text-center sm:mb-12 lg:mb-14",
+            "caretip-payments-trust-intro mx-auto mb-8 max-w-3xl text-center sm:mb-10 lg:mb-12",
           )}
         >
+          {landingCopyVisible(t("landing.paymentsTrust.pill")) ? (
+            <div className={cn(landingUi.sectionAccentRow, "mb-4 justify-center")}>
+              <LandingSectionAccent variant="line" muted>
+                {t("landing.paymentsTrust.pill")}
+              </LandingSectionAccent>
+            </div>
+          ) : null}
           <h2 className={landingUi.sectionTitle}>{t("landing.paymentsTrust.title")}</h2>
           {landingCopyVisible(sectionSubtitle) ? (
             <p className={cn(landingUi.sectionSubtitle, "mx-auto max-w-2xl")}>{sectionSubtitle}</p>
           ) : null}
+          {landingCopyVisible(t("landing.paymentsTrust.roleClarifier")) ? (
+            <p className="caretip-payments-trust-clarifier mx-auto mt-3 max-w-xl text-center text-xs font-medium tracking-wide text-muted-foreground sm:text-[13px]">
+              {t("landing.paymentsTrust.roleClarifier")}
+            </p>
+          ) : null}
         </motion.header>
 
-        <ul
-          className="caretip-payments-trust-grid grid grid-cols-1 gap-9 sm:gap-10 lg:grid-cols-4 lg:gap-8 xl:gap-10"
-          role="list"
-        >
-          {items.map((item, idx) => {
-            const Icon = item.icon;
-            const accent = ACCENT_STYLES[item.accent];
-            return (
-              <motion.li
-                key={item.title}
-                role="listitem"
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: idx * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                className="caretip-payments-trust-item group flex min-w-0 items-start gap-4 lg:flex-col lg:items-center lg:gap-5 lg:text-center"
-              >
-                <div
-                  className={cn(
-                    "caretip-payments-trust-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border sm:h-12 sm:w-12",
-                    "transition-[transform,opacity,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                    "group-hover:-translate-y-0.5 group-hover:opacity-90",
-                    accent.iconWrap,
-                  )}
-                  aria-hidden
+        <div className="caretip-payments-trust-body">
+          <motion.div
+            className="caretip-payments-trust-visual"
+            initial={{ opacity: 0, y: 16 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <PaymentsStripeBadge
+              label={t("landing.paymentsTrust.stripeBadge")}
+              className="caretip-payments-trust-stripe-badge mb-4"
+            />
+            <InteractiveCreditCard
+              variant="caretip"
+              cardHolder={t("landing.paymentsTrust.cardHolder")}
+              cardNumber={t("landing.paymentsTrust.cardNumber")}
+              expiryDate={t("landing.paymentsTrust.cardExpiry")}
+              cvv="•••"
+              backLine1={t("landing.paymentsTrust.cardBackLine1")}
+              backLine2={t("landing.paymentsTrust.cardBackLine2")}
+              className="caretip-payments-trust-card"
+              disableTilt={disableCardTilt}
+            />
+            <p className="caretip-payments-trust-card-hint">
+              {t("landing.paymentsTrust.cardHint")}
+            </p>
+          </motion.div>
+
+          <ul
+            className="caretip-payments-trust-grid grid grid-cols-1 gap-7 sm:grid-cols-2 sm:gap-8 lg:gap-9"
+            role="list"
+          >
+            {items.map((item, idx) => {
+              const Icon = item.icon;
+              const accent = ACCENT_STYLES[item.accent];
+              return (
+                <motion.li
+                  key={item.title}
+                  role="listitem"
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.45, delay: idx * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  className="caretip-payments-trust-item group flex min-w-0 items-start gap-4"
                 >
-                  <Icon className={cn("h-5 w-5 sm:h-[1.35rem] sm:w-[1.35rem]", accent.icon)} strokeWidth={1.75} />
-                </div>
-                <div className="min-w-0 flex-1 space-y-1.5 pt-0.5 lg:flex-none lg:space-y-2">
-                  <h3 className={cn(landingType.featureCopySemibold, "tracking-tight text-neutral-900 dark:text-neutral-50")}>
-                    {item.title}
-                  </h3>
-                  <p
+                  <div
                     className={cn(
-                      landingType.bodyCopyMuted,
-                      "max-w-[28ch] text-[0.8125rem] leading-snug sm:text-sm sm:leading-relaxed lg:mx-auto",
+                      "caretip-payments-trust-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border sm:h-12 sm:w-12",
+                      "transition-[transform,opacity,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "group-hover:-translate-y-0.5 group-hover:opacity-90",
+                      accent.iconWrap,
                     )}
+                    aria-hidden
                   >
-                    {item.text}
-                  </p>
-                </div>
-              </motion.li>
-            );
-          })}
-        </ul>
+                    <Icon
+                      className={cn("h-5 w-5 sm:h-[1.35rem] sm:w-[1.35rem]", accent.icon)}
+                      strokeWidth={1.75}
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
+                    <h3
+                      className={cn(
+                        landingType.featureCopySemibold,
+                        "tracking-tight text-neutral-900 dark:text-neutral-50",
+                      )}
+                    >
+                      {item.title}
+                    </h3>
+                    <p
+                      className={cn(
+                        landingType.bodyCopyMuted,
+                        "text-[0.8125rem] leading-snug sm:text-sm sm:leading-relaxed",
+                      )}
+                    >
+                      {item.text}
+                    </p>
+                  </div>
+                </motion.li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingTrustMetricsRow } from "@/app/components/landing/LandingTrustMetricsRow";
 import { LandingVenueLogoStrip } from "@/app/components/landing/LandingVenueLogoStrip";
-import { LandingTestimonialsShowcase } from "@/app/components/landing/LandingTestimonialsShowcase";
+import { LandingAnimatedTestimonials } from "@/app/components/landing/LandingAnimatedTestimonials";
 import { cn } from "@/lib/utils";
 
 export function LandingSocialProofSection() {
@@ -40,7 +40,7 @@ export function LandingSocialProofSection() {
         </div>
 
         <div className="caretip-testimonials-panel">
-          <LandingTestimonialsShowcase />
+          <LandingAnimatedTestimonials />
         </div>
       </div>
     </section>

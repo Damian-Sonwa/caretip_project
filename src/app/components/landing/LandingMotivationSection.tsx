@@ -8,6 +8,7 @@ import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent"
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingFadeReveal, landingFadeRevealWithDelay } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
+import { LandingMotivationActivityFeedMobile } from "./LandingMotivationActivityFeedMobile";
 import { LandingMotivationActivityStack } from "./LandingMotivationActivityStack";
 
 export function LandingMotivationSection() {
@@ -40,9 +41,20 @@ export function LandingMotivationSection() {
           className={cn(landingUi.copyColumn, "lg:order-1")}
           {...landingFadeReveal}
         >
-          <div className={cn(landingUi.copyStack, landingUi.mobileStackIntro)}>
+          <div
+            className={cn(
+              landingUi.copyStack,
+              landingUi.mobileStackIntro,
+              "caretip-motivation-copy max-md:items-start max-md:text-left",
+            )}
+          >
             {landingCopyVisible(t("landing.motivation.pill")) ? (
-              <div className={landingUi.sectionAccentRow}>
+              <div
+                className={cn(
+                  landingUi.sectionAccentRow,
+                  "caretip-motivation-accent-row max-md:justify-start",
+                )}
+              >
                 <LandingSectionAccent variant="spark">{t("landing.motivation.pill")}</LandingSectionAccent>
               </div>
             ) : null}
@@ -53,13 +65,17 @@ export function LandingMotivationSection() {
               <p className={landingUi.subtitle}>{subtitle}</p>
             ) : null}
 
+            <div className="caretip-motivation-mobile-feed w-full md:hidden">
+              <LandingMotivationActivityFeedMobile />
+            </div>
+
             <LandingBenefitChecklist
               items={points.filter(landingCopyVisible)}
               tone="split"
-              className="caretip-motivation-points max-lg:mx-auto max-lg:max-w-md lg:mx-0"
+              className="caretip-motivation-points max-md:mx-0 max-md:max-w-none lg:mx-0"
             />
 
-            <div className="mt-7 flex w-full max-lg:justify-center lg:mt-8">
+            <div className="caretip-motivation-cta mt-5 flex w-full max-md:justify-start max-lg:justify-center sm:mt-7 lg:mt-8 lg:justify-start">
               <Link
                 to="/auth?mode=signup&role=business&from=landing-recognition"
                 className={cn(landingUi.heroCtaPrimary, "inline-flex gap-2 px-8")}
@@ -72,7 +88,7 @@ export function LandingMotivationSection() {
         </motion.div>
 
         <motion.div
-          className={cn(landingUi.visualColumn, "lg:order-2 lg:justify-end")}
+          className={cn(landingUi.visualColumn, "max-md:hidden lg:order-2 lg:justify-end")}
           {...landingFadeRevealWithDelay(0.08)}
         >
           <LandingMotivationActivityStack />

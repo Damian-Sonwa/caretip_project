@@ -1,5 +1,5 @@
 /**
- * Payments & trust (#payments-trust) — lightweight icon features (presentation only).
+ * Payments & trust (#payments-trust) — card visual + feature grid.
  */
 
 .caretip-landing #payments-trust .caretip-payments-trust-ambient {
@@ -20,8 +20,96 @@ html.dark .caretip-landing #payments-trust .caretip-payments-trust-ambient {
   opacity: 0.55;
 }
 
+.caretip-landing #payments-trust .caretip-payments-trust-clarifier {
+  text-wrap: balance;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-stripe-badge {
+  align-self: center;
+}
+
+.caretip-landing #payments-trust .caretip-stripe-trust-badge {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.6) inset,
+    0 4px 14px -8px rgba(15, 23, 42, 0.12);
+}
+
+html.dark .caretip-landing #payments-trust .caretip-stripe-trust-badge {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 6px 16px -10px rgba(0, 0, 0, 0.35);
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-visual {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 22rem;
+  margin-inline: auto;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-card {
+  width: 100%;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-card-hint {
+  margin: 0.75rem 0 0;
+  text-align: center;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-grid {
+  width: 100%;
+  min-width: 0;
+}
+
 .caretip-landing #payments-trust .caretip-payments-trust-item {
   cursor: default;
+}
+
+@media (min-width: 768px) {
+  .caretip-landing #payments-trust .caretip-payments-trust-body {
+    grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+    gap: 2.5rem 3rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-visual {
+    margin-inline: 0;
+    justify-self: center;
+    max-width: none;
+    padding-inline: 0.5rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-card-hint {
+    font-size: 0.8125rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #payments-trust .caretip-payments-trust-body {
+    grid-template-columns: minmax(280px, 380px) minmax(0, 1fr);
+    gap: 2.75rem 4rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-visual {
+    justify-self: end;
+    padding-inline-end: 0.75rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-grid {
+    align-self: center;
+  }
 }
 
 @media (hover: hover) {

@@ -244,3 +244,210 @@ html.dark .caretip-motivation-activity__live {
     transform: none;
   }
 }
+
+/* —— Mobile compact feed (<768px): single card, ~50% shorter than stacked cards —— */
+
+.caretip-motivation-activity-feed-mobile {
+  width: 100%;
+  max-width: 22rem;
+  margin-inline: auto;
+}
+
+.caretip-motivation-activity-feed-mobile__frame {
+  border-radius: 1rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: linear-gradient(
+    165deg,
+    hsl(var(--background) / 0.96) 0%,
+    hsl(var(--background) / 0.9) 100%
+  );
+  padding: 0.75rem 0.875rem 0.625rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 16px 32px -24px rgba(15, 23, 42, 0.2),
+    0 6px 14px -10px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+html.dark .caretip-motivation-activity-feed-mobile__frame {
+  background: linear-gradient(
+    165deg,
+    hsl(var(--card) / 0.92) 0%,
+    hsl(var(--background) / 0.78) 100%
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 20px 40px -28px rgba(0, 0, 0, 0.5);
+}
+
+.caretip-motivation-activity-feed-mobile__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  padding: 0 0.125rem;
+}
+
+.caretip-motivation-activity-feed-mobile__title {
+  margin: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-motivation-activity-feed-mobile__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-motivation-activity-feed-mobile__row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  gap: 0.5rem 0.625rem;
+  padding: 0.5rem 0;
+}
+
+.caretip-motivation-activity-feed-mobile__row:not(:last-child) {
+  border-bottom: 1px solid hsl(var(--border) / 0.4);
+}
+
+.caretip-motivation-activity-feed-mobile__dot {
+  margin-top: 0.35rem;
+  height: 0.5rem;
+  width: 0.5rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+.caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--tip {
+  color: #c2410c;
+  background: #c2410c;
+}
+
+.caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--review {
+  color: #a16207;
+  background: #a16207;
+}
+
+.caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--dashboard {
+  color: #1d4ed8;
+  background: #1d4ed8;
+}
+
+.caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--goal {
+  color: #047857;
+  background: #047857;
+}
+
+html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--tip {
+  background: #fb923c;
+}
+
+html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--review {
+  background: #facc15;
+}
+
+html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--dashboard {
+  background: #60a5fa;
+}
+
+html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activity__icon--goal {
+  background: #34d399;
+}
+
+.caretip-motivation-activity-feed-mobile__copy {
+  min-width: 0;
+}
+
+.caretip-motivation-activity-feed-mobile__primary {
+  margin: 0;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+
+.caretip-motivation-activity-feed-mobile__secondary {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.35;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (max-width: 767px) {
+  .caretip-landing #recognition {
+    padding-top: 2.5rem !important;
+    padding-bottom: 2.5rem !important;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-points {
+    margin-top: 0.875rem !important;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-mobile-feed {
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-activity-feed-mobile {
+    margin-inline: 0;
+    max-width: none;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-cta {
+    margin-top: 1.25rem !important;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-activity__live {
+    padding: 0.15rem 0.45rem;
+    font-size: 0.5625rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-motivation-activity-feed-mobile {
+    display: none;
+  }
+}
+
+/* Single-column recognition: left-align copy + sit checklist text beside uptrend markers */
+@media (max-width: 1023px) {
+  .caretip-landing #recognition .caretip-motivation-copy {
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-accent-row,
+  .caretip-landing #recognition [data-landing-accent] {
+    margin-inline: 0 !important;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-points {
+    margin-inline: 0 !important;
+    max-width: none !important;
+    width: 100%;
+    align-self: stretch;
+    gap: 0.5rem;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-points > li {
+    gap: 0.625rem;
+    justify-content: flex-start;
+    text-align: left;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-points > li > span:last-child {
+    padding-top: 0.125rem;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-cta {
+    justify-content: flex-start !important;
+  }
+}

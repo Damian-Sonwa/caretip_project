@@ -1,55 +1,9 @@
 import { useMemo } from "react";
-import { BarChart3, Coins, Star, Target, type LucideIcon } from "lucide-react";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { landingSectionViewport } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
-
-type ActivityCardId = "tip" | "review" | "dashboard" | "goal";
-
-type ActivityCardSpec = {
-  id: ActivityCardId;
-  Icon: LucideIcon;
-  badgeKey: string;
-  titleKey: string;
-  metaKey: string;
-  accentClass: string;
-};
-
-const CARD_SPECS: ActivityCardSpec[] = [
-  {
-    id: "tip",
-    Icon: Coins,
-    badgeKey: "landing.motivation.cards.tip.badge",
-    titleKey: "landing.motivation.cards.tip.title",
-    metaKey: "landing.motivation.cards.tip.meta",
-    accentClass: "caretip-motivation-activity__icon--tip",
-  },
-  {
-    id: "review",
-    Icon: Star,
-    badgeKey: "landing.motivation.cards.review.badge",
-    titleKey: "landing.motivation.cards.review.title",
-    metaKey: "landing.motivation.cards.review.meta",
-    accentClass: "caretip-motivation-activity__icon--review",
-  },
-  {
-    id: "dashboard",
-    Icon: BarChart3,
-    badgeKey: "landing.motivation.cards.dashboard.badge",
-    titleKey: "landing.motivation.cards.dashboard.title",
-    metaKey: "landing.motivation.cards.dashboard.meta",
-    accentClass: "caretip-motivation-activity__icon--dashboard",
-  },
-  {
-    id: "goal",
-    Icon: Target,
-    badgeKey: "landing.motivation.cards.goal.badge",
-    titleKey: "landing.motivation.cards.goal.title",
-    metaKey: "landing.motivation.cards.goal.meta",
-    accentClass: "caretip-motivation-activity__icon--goal",
-  },
-];
+import { MOTIVATION_ACTIVITY_CARD_SPECS } from "./landingMotivationActivitySpecs";
 
 const cardMotion = {
   hidden: { opacity: 0, y: 14, scale: 0.98 },
@@ -71,7 +25,7 @@ export function LandingMotivationActivityStack() {
 
   const cards = useMemo(
     () =>
-      CARD_SPECS.map((spec) => ({
+      MOTIVATION_ACTIVITY_CARD_SPECS.map((spec) => ({
         ...spec,
         badge: t(spec.badgeKey),
         title: t(spec.titleKey),
@@ -81,7 +35,7 @@ export function LandingMotivationActivityStack() {
   );
 
   return (
-    <div className="caretip-motivation-activity">
+    <div className="caretip-motivation-activity hidden md:block">
       <div className="caretip-motivation-activity__ambient" aria-hidden />
       <div className="caretip-motivation-activity__frame">
         <p className="caretip-motivation-activity__feed-label">{t("landing.motivation.feedLabel")}</p>
