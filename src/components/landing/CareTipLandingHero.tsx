@@ -1,4 +1,3 @@
-import { ArrowRight } from "lucide-react";
 import { Link } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
@@ -176,8 +175,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
               {t("landing.showcase.primaryCta")}
             </Link>
             <Link to="/join" className={landingUi.heroCtaSecondary}>
-              <span>{t("landing.showcase.secondaryCta")}</span>
-              <ArrowRight className="h-3.5 w-3.5 shrink-0 opacity-55" aria-hidden />
+              {t("landing.showcase.secondaryCta")}
             </Link>
           </motion.div>
         </motion.div>

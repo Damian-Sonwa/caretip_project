@@ -9,8 +9,8 @@
   --caretip-hero-animated-slot: 1.05em;
   --caretip-hero-line-gap: 0.28rem;
   --caretip-hero-rotating-stack-gap: 0.22rem;
-  --caretip-hero-body-size: clamp(1rem, 0.35vw + 0.92rem, 1.0625rem);
-  --caretip-hero-body-lh: 1.66;
+  --caretip-hero-body-size: clamp(0.9375rem, 0.32vw + 0.86rem, 1rem);
+  --caretip-hero-body-lh: 1.58;
 }
 
 .caretip-landing .caretip-hero-headline-anchor {
@@ -129,7 +129,7 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 @media (min-width: 640px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-size: clamp(2.25rem, 6.8vw + 0.4rem, 2.8125rem);
-    --caretip-hero-body-size: clamp(1.03125rem, 0.4vw + 0.94rem, 1.09375rem);
+    --caretip-hero-body-size: clamp(0.96875rem, 0.38vw + 0.88rem, 1.03125rem);
   }
 }
 
@@ -137,8 +137,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-size: clamp(2.375rem, 4.8vw + 0.95rem, 2.9375rem);
     --caretip-hero-gap-headline-body: 1.0625rem;
-    --caretip-hero-body-size: 1.0625rem;
-    --caretip-hero-body-lh: 1.67;
+    --caretip-hero-body-size: 1rem;
+    --caretip-hero-body-lh: 1.6;
   }
 }
 
@@ -148,8 +148,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-headline-lh: 1.01;
     --caretip-hero-headline-track: -0.04em;
     --caretip-hero-animated-slot: 1.08em;
-    --caretip-hero-body-size: clamp(1.0625rem, 0.35cqw + 0.9rem, 1.125rem);
-    --caretip-hero-body-lh: 1.68;
+    --caretip-hero-body-size: clamp(1rem, 0.32cqw + 0.84rem, 1.0625rem);
+    --caretip-hero-body-lh: 1.62;
     --caretip-hero-gap-headline-body: 1.1875rem;
     --caretip-hero-gap-body-cta: 1.0625rem;
   }
@@ -183,8 +183,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-headline-size: clamp(2.625rem, 1.75cqw + 1.65rem, 3.5rem);
     --caretip-hero-headline-lh: 1;
     --caretip-hero-headline-track: -0.042em;
-    --caretip-hero-body-size: clamp(1.09375rem, 0.4cqw + 0.92rem, 1.1875rem);
-    --caretip-hero-body-lh: 1.7;
+    --caretip-hero-body-size: clamp(1.03125rem, 0.38cqw + 0.86rem, 1.125rem);
+    --caretip-hero-body-lh: 1.64;
     --caretip-hero-gap-headline-body: 1.25rem;
     --caretip-hero-gap-body-cta: 1.125rem;
     --caretip-hero-animated-slot: 1.06em;
