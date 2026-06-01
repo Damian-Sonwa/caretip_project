@@ -180,7 +180,7 @@ export function BusinessDetailPage() {
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          className={cn(platformUi.contentCard, "max-w-2xl space-y-6")}
+          className={cn(platformUi.contentCard, "dashboard-page-narrow w-full max-w-2xl space-y-6")}
         >
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="flex items-start gap-3">

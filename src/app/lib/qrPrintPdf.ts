@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+import { createJsPdfDocument, type JsPDFDocument } from "./qrPdfLazy";
 
 const TEXT_RGB: [number, number, number] = [17, 24, 39];
 const MUTED_RGB: [number, number, number] = [75, 85, 99];
@@ -64,11 +64,11 @@ function safeFileBase(raw: string): string {
 
 export type PdfSize = "a4" | "card";
 
-function buildPdf(size: PdfSize) {
+async function buildPdf(size: PdfSize): Promise<JsPDFDocument> {
   if (size === "card") {
-    return new jsPDF({ unit: "mm", format: [105, 148], orientation: "portrait" });
+    return createJsPdfDocument({ unit: "mm", format: [105, 148], orientation: "portrait" });
   }
-  return new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  return createJsPdfDocument({ unit: "mm", format: "a4", orientation: "portrait" });
 }
 
 function clamp(n: number, min: number, max: number) {
@@ -94,7 +94,7 @@ function firstBaselineFromTop(blockTopMm: number, fontSizePt: number) {
  * Helvetica only; user strings sanitized (no emoji).
  */
 function renderStandardQrPdfLayout(params: {
-  pdf: jsPDF;
+  pdf: JsPDFDocument;
   size: PdfSize;
   primaryName: string;
   secondaryLine?: string | null;
@@ -222,15 +222,15 @@ function renderStandardQrPdfLayout(params: {
   pdf.text(footerThanks, cx, thanksBaseline, { align: "center" });
 }
 
-export function createBusinessQrPrintPdf(params: {
+export async function createBusinessQrPrintPdf(params: {
   qrPngDataUrl: string;
   businessName: string;
   subtext?: string | null;
   instruction?: string | null;
   size?: PdfSize;
   businessLogoPngDataUrl?: string | null;
-}): jsPDF {
-  const pdf = buildPdf(params.size ?? "a4");
+}): Promise<JsPDFDocument> {
+  const pdf = await buildPdf(params.size ?? "a4");
   const businessName = sanitizePdfText(String(params.businessName ?? "").trim()) || "Business";
   renderStandardQrPdfLayout({
     pdf,
@@ -253,20 +253,20 @@ export async function downloadBusinessQrPrintPdf(params: {
   size?: PdfSize;
   businessLogoPngDataUrl?: string | null;
 }): Promise<void> {
-  const pdf = createBusinessQrPrintPdf(params);
+  const pdf = await createBusinessQrPrintPdf(params);
   const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${String(params.businessName ?? "").trim() || "Business"}`);
   pdf.save(`${base}.pdf`);
 }
 
-export function createEmployeeQrPrintPdf(params: {
+export async function createEmployeeQrPrintPdf(params: {
   qrPngDataUrl: string;
   employeeName: string;
   businessName: string;
   instruction?: string | null;
   size?: PdfSize;
   businessLogoPngDataUrl?: string | null;
-}): jsPDF {
-  const pdf = buildPdf(params.size ?? "a4");
+}): Promise<JsPDFDocument> {
+  const pdf = await buildPdf(params.size ?? "a4");
   const employeeName = sanitizePdfText(String(params.employeeName ?? "").trim()) || "Team member";
   const businessName = sanitizePdfText(String(params.businessName ?? "").trim()) || "Business";
   renderStandardQrPdfLayout({
@@ -290,7 +290,7 @@ export async function downloadEmployeeQrPrintPdf(params: {
   size?: PdfSize;
   businessLogoPngDataUrl?: string | null;
 }): Promise<void> {
-  const pdf = createEmployeeQrPrintPdf(params);
+  const pdf = await createEmployeeQrPrintPdf(params);
   const base = safeFileBase(params.fileBaseName ?? `CareTip_QR_${String(params.employeeName ?? "").trim() || "Team_member"}`);
   pdf.save(`${base}.pdf`);
 }

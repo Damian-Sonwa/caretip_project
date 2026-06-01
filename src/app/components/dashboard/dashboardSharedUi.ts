@@ -3,6 +3,21 @@
  * Scoped via `.caretip-dashboard-shell` in dashboard-ecosystem-polish.css.
  */
 export const dashboardSharedUi = {
+  /** Full-width dashboard page shell (uses .caretip-container + desktop layout CSS). */
+  page: "dashboard-page w-full min-w-0",
+  pageInner: "dashboard-page-inner caretip-container w-full min-w-0",
+  /** Legacy narrow pages — constrained below xl, full width on desktop. */
+  pageNarrow:
+    "dashboard-page-narrow mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 sm:py-8",
+  pageContained:
+    "dashboard-page-contained mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 sm:py-8 lg:px-8",
+  inboxPage: "dashboard-inbox-page caretip-container w-full min-w-0 max-w-2xl px-4 py-6 sm:px-6 sm:py-8 xl:max-w-none",
+  inboxMasterDetail:
+    "dashboard-inbox-master-detail flex min-h-0 flex-col xl:grid xl:min-h-[calc(100dvh-11rem)] xl:grid-cols-[minmax(280px,24rem)_minmax(0,1fr)] xl:overflow-hidden xl:rounded-2xl xl:border xl:border-border xl:bg-card xl:shadow-sm",
+  inboxListPane:
+    "dashboard-inbox-list flex min-h-0 flex-col xl:w-[min(100%,24rem)] xl:shrink-0 xl:border-r xl:border-border",
+  inboxDetailPane:
+    "dashboard-inbox-detail hidden min-h-0 min-w-0 flex-1 flex-col xl:flex",
   cardDesc: "dashboard-card-desc",
   chartCard: "dashboard-chart-card",
   chartFrame: "dashboard-chart-frame",

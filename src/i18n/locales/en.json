@@ -801,7 +801,11 @@
       "title": "Notifications",
       "markAllRead": "Mark all read",
       "empty": "You're all caught up",
-      "viewAll": "View all notifications"
+      "viewAll": "View all notifications",
+      "close": "Close",
+      "read": "Read",
+      "unreadSummary": "You have {{count}} unread notification",
+      "unreadSummary_plural": "You have {{count}} unread notifications"
     },
     "inbox": {
       "title": "Notifications",
@@ -819,7 +823,10 @@
         "all": "All",
         "support": "Support",
         "other": "Other"
-      }
+      },
+      "selectPrompt": "Select a notification to read the full message.",
+      "openAction": "Open",
+      "unreadBadge": "Unread"
     }
   },
   "support": {
@@ -1620,7 +1627,7 @@
       "s1Tag": "Logistics & Delivery",
       "s1Text": "<bold>Customers scan the QR code on the vehicle, delivery notice, or parcel and tip in seconds. No app downloads, no cash needed.</bold>",
       "s1Detail": "Display your custom QR codes on delivery vans, handheld scanners, missed-delivery cards, or as stickers directly on the packages. The customer opens the tipping screen instantly in their mobile browser, picks an amount, and pays securely using their card or preferred digital wallet. Whether the tip is assigned straight to the individual driver or contributed to a depot-wide pool, your dashboard updates in real time. Operations managers can track performance and boost driver motivation, even during peak delivery seasons.",
-      "s1Alt": "Logistics and delivery tipping with a QR code",
+      "s1Alt": "Logistics and delivery tipping at the doorstep with a QR code",
       "s2Headline": "Right at Reception",
       "s2Tag": "Hotels & Front Desk",
       "s2Text": "<bold>A quick scan at check-in or check-out – the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.</bold>",

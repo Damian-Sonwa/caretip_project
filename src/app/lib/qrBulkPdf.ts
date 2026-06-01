@@ -1,4 +1,4 @@
-import { jsPDF } from "jspdf";
+import { createJsPdfDocument } from "./qrPdfLazy";
 import { renderBrandedQRToDataUrl, renderBrandedQRToDataUrlLegacy } from "./qrBranded";
 
 const TEXT_RGB: [number, number, number] = [17, 24, 39];
@@ -36,7 +36,7 @@ export async function downloadStaffQrPdf(
   const withId = items.filter((i) => i.id?.trim());
   if (withId.length === 0) return;
 
-  const pdf = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const pdf = await createJsPdfDocument({ unit: "mm", format: "a4", orientation: "portrait" });
   const pageW = pdf.internal.pageSize.getWidth();
   const pageH = pdf.internal.pageSize.getHeight();
   const cx = pageW / 2;

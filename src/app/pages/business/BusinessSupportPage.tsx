@@ -25,7 +25,7 @@ import {
 } from "@/app/components/ui/select";
 import { cn } from "@/lib/utils";
 import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
-import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
+import { BusinessSubPageShellSkeleton } from "@/app/components/dashboard/BusinessSubPageShellSkeleton";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 const CATEGORIES: SupportTicketCategory[] = [
@@ -93,13 +93,13 @@ export function BusinessSupportPage() {
     }
   };
 
-  if (!user || user.role !== "business") return <GlobalAppLoadingHold />;
+  if (!user || user.role !== "business") return <BusinessSubPageShellSkeleton narrow />;
 
   const isInitialTicketLoad = loading && tickets.length === 0;
 
   return (
     <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl">
+      <div className="dashboard-page-narrow mx-auto w-full max-w-3xl">
         <header className="mb-8">
           <div className="mb-2 flex items-center gap-2 text-muted-foreground">
             <MessageSquarePlus className="h-5 w-5 shrink-0 text-accent" aria-hidden />

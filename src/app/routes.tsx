@@ -17,7 +17,6 @@ import {
   useMarkAppShellReadyOptional,
 } from "./context/AppLoadingSplashContext";
 import { RouteChunkBoundary } from "./routing/RouteChunkBoundary";
-import { LandingPage } from './pages/LandingPage';
 import { PricingPage } from './pages/PricingPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
@@ -76,6 +75,7 @@ import {
   TipAmountPage,
   TipsActivityPage,
   BusinessDashboard,
+  LandingPage,
   LocationsPage,
 } from './routing/lazyPages';
 import { ProtectedRoute } from './components/ProtectedRoute';
@@ -176,7 +176,11 @@ const routes: RouteObject[] = [
     children: [
   {
     path: '/',
-    Component: LandingPage,
+    element: (
+      <RouteChunkBoundary variant="minimal" registrationKey="landing">
+        <LandingPage />
+      </RouteChunkBoundary>
+    ),
     errorElement: <ErrorBoundary />,
   },
   {

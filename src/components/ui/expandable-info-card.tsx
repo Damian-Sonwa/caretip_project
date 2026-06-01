@@ -1,12 +1,14 @@
 import { useId, useState, type ReactNode } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronDown } from "lucide-react";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
 
 export type ExpandableInfoCardProps = {
   imageSrc: string;
+  imageWebpSrc?: string;
   imageAlt: string;
   title: string;
   summary: ReactNode;
@@ -25,6 +27,7 @@ export type ExpandableInfoCardProps = {
  */
 export function ExpandableInfoCard({
   imageSrc,
+  imageWebpSrc,
   imageAlt,
   title,
   summary,
@@ -53,8 +56,9 @@ export function ExpandableInfoCard({
           imageClassName,
         )}
       >
-        <img
+        <MarketingPicture
           src={imageSrc}
+          webpSrc={imageWebpSrc}
           alt={imageAlt}
           className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.02]"
           loading="lazy"

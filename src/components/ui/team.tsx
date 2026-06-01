@@ -16,7 +16,7 @@ import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
 import healthcareNursingImg from "../../../images/healthcare and nursing.png";
-import logisticsImg from "../../../images/logistics.png";
+import log01Img from "../../../images/Log01.png";
 import hotelsImg from "../../../images/Hotels.png";
 import salonSpaImg from "../../../images/salon and spa.png";
 import tradeAndHomeImg from "../../../images/trade and home services.png";
@@ -38,7 +38,7 @@ const MARQUEE_SPECS: MarqueeSpec[] = [
   },
   {
     id: "delivery",
-    image: logisticsImg,
+    image: log01Img,
     Icon: Truck,
   },
   {

@@ -803,7 +803,11 @@
       "title": "Benachrichtigungen",
       "markAllRead": "Alle als gelesen markieren",
       "empty": "Alles erledigt",
-      "viewAll": "Alle Benachrichtigungen anzeigen"
+      "viewAll": "Alle Benachrichtigungen anzeigen",
+      "close": "Schließen",
+      "read": "Gelesen",
+      "unreadSummary": "Sie haben {{count}} ungelesene Benachrichtigung",
+      "unreadSummary_plural": "Sie haben {{count}} ungelesene Benachrichtigungen"
     },
     "inbox": {
       "title": "Benachrichtigungen",
@@ -821,7 +825,10 @@
         "all": "Alle",
         "support": "Support",
         "other": "Sonstige"
-      }
+      },
+      "selectPrompt": "Wählen Sie eine Benachrichtigung, um die vollständige Nachricht zu lesen.",
+      "openAction": "Öffnen",
+      "unreadBadge": "Ungelesen"
     }
   },
   "support": {
@@ -1624,7 +1631,7 @@
       "s1Tag": "Logistik & Paketdienstleistung",
       "s1Text": "<bold>Kunden scannen den QR-Code auf dem Paket, dem Benachrichtigungsschein oder dem Fahrzeug und geben in Sekundenschnelle Trinkgeld. Ganz ohne App und komplett bargeldlos.</bold>",
       "s1Detail": "Platzieren Sie Ihre individuellen QR-Codes gut sichtbar auf den Zustellfahrzeugen, den Handscannern, auf Benachrichtigungskarten oder direkt als Aufkleber auf den Sendungen. Der Kunde öffnet die Trinkgeldseite einfach im Smartphone-Browser, wählt den Wunschbetrag und zahlt sicher per Karte oder digitaler Wallet (Apple Pay / Google Pay). Egal, ob das Trinkgeld direkt dem jeweiligen Fahrer zugeordnet wird oder in einen gemeinsamen Pool für das gesamte Depot fließt: Ihr Dashboard aktualisiert sich in Echtzeit. So behält die Betriebsleitung auch an Tagen mit extrem hohem Paketaufkommen immer den perfekten Überblick über alle Eingänge und die Motivation im Team.",
-      "s1Alt": "Trinkgeld per QR-Code bei Logistik und Zustellung",
+      "s1Alt": "Trinkgeld per QR-Code bei Logistik und Zustellung an der Haustür",
       "s2Headline": "Direkt am Front Desk",
       "s2Tag": "Hotellerie & Rezeption",
       "s2Text": "<bold>Ein kurzer Scan beim Check-in oder Check-out – die perfekte Lösung für Concierge, Gepäckservice und das gesamte Team. Ganz ohne Bargeld und diskret.</bold>",

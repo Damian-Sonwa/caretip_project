@@ -24,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
+import { dashboardSharedUi } from "@/app/components/dashboard/dashboardSharedUi";
 import { cn } from "@/lib/utils";
 
 const ADMIN_STATUSES: SupportTicketStatus[] = ["OPEN", "PENDING", "RESOLVED", "CLOSED"];
@@ -104,7 +105,7 @@ export function SupportTicketDetailPage() {
   const closed = ticket?.status === "CLOSED";
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-6 sm:px-6 sm:py-8">
+    <div className={dashboardSharedUi.pageNarrow}>
       <Button type="button" variant="ghost" size="sm" className="mb-4 -ml-2" asChild>
         <Link to={backHref}>
           <ArrowLeft className="mr-1.5 h-4 w-4" aria-hidden />

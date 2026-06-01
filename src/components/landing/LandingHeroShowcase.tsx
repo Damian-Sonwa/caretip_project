@@ -1,19 +1,20 @@
-import type { ImgHTMLAttributes } from "react";
 import { motion, useReducedMotion } from "motion/react";
 
 import { landingHeroEaseOut, landingHeroShowcaseEnter } from "@/components/landing/landingHeroMotion";
 import { landingUi } from "@/components/landing/landingUi";
 import { useLargeScreen } from "@/lib/motionPerf";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 
 type LandingHeroShowcaseProps = {
   src: string;
+  webpSrc?: string;
   alt: string;
   className?: string;
 };
 
 /** Hero artwork — wrap (shadow) + clip (radius) + image; decorative layers outside clip. */
-export function LandingHeroShowcase({ src, alt, className }: LandingHeroShowcaseProps) {
+export function LandingHeroShowcase({ src, webpSrc, alt, className }: LandingHeroShowcaseProps) {
   const reduceMotion = useReducedMotion();
   const isLargeScreen = useLargeScreen();
   const useLightEnter = reduceMotion || isLargeScreen;
@@ -48,14 +49,15 @@ export function LandingHeroShowcase({ src, alt, className }: LandingHeroShowcase
         }
       >
         <div className={landingUi.heroMediaClip}>
-          <img
+          <MarketingPicture
             src={src}
+            webpSrc={webpSrc}
             alt={alt}
             className={landingUi.heroShowcaseImg}
             loading="eager"
             decoding="async"
             sizes="(max-width: 1023px) min(90vw, 448px), 672px"
-            {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
+            fetchPriority="high"
           />
         </div>
       </motion.div>

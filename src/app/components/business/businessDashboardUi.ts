@@ -31,7 +31,7 @@ export const businessUi = {
     "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-neutral-200/80 bg-white p-1 shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)] sm:w-fit",
 
   /** Business sub-routes with back link + DashboardHero (QR, staff, etc.). */
-  subPageTop: "dashboard-subpage-top mx-auto max-w-7xl px-4 sm:px-6",
+  subPageTop: "dashboard-subpage-top w-full px-4 sm:px-6",
   subPageBreadcrumb: "dashboard-subpage-breadcrumb flex items-center gap-2",
   subPageHero: "mb-4 max-lg:mb-3",
   heroBadge:
@@ -46,7 +46,7 @@ export const businessUi = {
   atAGlanceLabel: "dashboard-at-a-glance__label mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground",
   atAGlanceStatLabel: "text-[11px] font-medium uppercase text-muted-foreground",
   atAGlanceStatValue: "dashboard-at-a-glance__stat-value font-bold tabular-nums text-foreground",
-  subPageMain: "dashboard-subpage-after-metrics mx-auto max-w-7xl px-4 sm:px-6",
+  subPageMain: "dashboard-subpage-after-metrics w-full px-4 sm:px-6",
 
   ...dashboardSharedUi,
 } as const;

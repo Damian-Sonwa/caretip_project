@@ -6,6 +6,7 @@ import {
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import businessSectionImg from "../../../../images/Mit.png";
+import businessSectionWebp from "../../../../images/Mit.webp";
 
 export function BusinessLandingSection() {
   const { t } = useTranslation();
@@ -40,6 +41,7 @@ export function BusinessLandingSection() {
       visual={
         <LandingShowcaseCoverImage
           src={businessSectionImg}
+          webpSrc={businessSectionWebp}
           alt={t("landing.businessSection.imageAlt")}
           objectPosition="center"
         />

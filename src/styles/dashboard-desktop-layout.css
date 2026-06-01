@@ -1,0 +1,34 @@
+/**
+ * Dashboard desktop workspace (>= 1280px / Tailwind xl).
+ * Full width between sidebar and viewport; comfortable horizontal padding.
+ * Mobile/tablet (< 1280px) unchanged — inherits .caretip-container defaults.
+ */
+
+@media (min-width: 1280px) {
+  .caretip-dashboard-shell .caretip-container {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+    padding-left: 2.5rem; /* 40px */
+    padding-right: 2.5rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-subpage-top,
+  .caretip-dashboard-shell .dashboard-subpage-after-metrics {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .caretip-dashboard-shell .dashboard-page-narrow {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .caretip-dashboard-shell .dashboard-page-contained {
+    max-width: none;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}

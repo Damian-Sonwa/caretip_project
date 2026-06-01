@@ -23,13 +23,21 @@ import { cn } from "@/lib/utils";
 export type CareTipLandingHeroProps = {
   id?: string;
   imageSrc: string;
+  imageWebpSrc?: string;
   imageAlt: string;
   /** Selects hero art asset only (not copy layout). */
   isDe?: boolean;
   className?: string;
 };
 
-export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, className }: CareTipLandingHeroProps) {
+export function CareTipLandingHero({
+  id,
+  imageSrc,
+  imageWebpSrc,
+  imageAlt,
+  isDe = false,
+  className,
+}: CareTipLandingHeroProps) {
   const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
   const isLargeScreen = useLargeScreen();
@@ -210,6 +218,7 @@ export function CareTipLandingHero({ id, imageSrc, imageAlt, isDe = false, class
             />
             <LandingHeroShowcase
               src={imageSrc}
+              webpSrc={imageWebpSrc}
               alt={imageAlt}
               className={cn(
                 "relative z-[1] mx-auto flex w-full justify-center",

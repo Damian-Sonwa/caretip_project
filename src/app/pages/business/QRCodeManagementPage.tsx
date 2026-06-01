@@ -37,7 +37,7 @@ import {
   PAGE_CACHE_TTL_MEDIUM_MS,
 } from "../../lib/pageSessionCache";
 import { DashboardListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
+import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
 import { PageLoader } from "../../components/PageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import {
@@ -416,7 +416,7 @@ export function QRCodeManagementPage() {
             ? String(item.name ?? "").trim() || null
             : null;
       const logoPng = await loadLogoPngForPdf();
-      const pdf = createBusinessQrPrintPdf({
+      const pdf = await createBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
         businessName: displayBusinessName,
         subtext,
@@ -551,7 +551,7 @@ export function QRCodeManagementPage() {
       const displayBusinessName =
         String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || t("business.qrPage.fallbackBusinessName");
       const logoPng = await loadLogoPngForPdf();
-      const pdf = createEmployeeQrPrintPdf({
+      const pdf = await createEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
         employeeName: item.name,
         businessName: displayBusinessName,
@@ -760,7 +760,7 @@ export function QRCodeManagementPage() {
     </motion.div>
   );
 
-  if (!user) return <GlobalAppLoadingHold />;
+  if (!user) return <BusinessSubPageShellSkeleton />;
 
   const canUseQr =
     Boolean(user.impersonation) ||
@@ -876,7 +876,7 @@ export function QRCodeManagementPage() {
       </div>
 
       {qrLocked ? (
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+        <div className="w-full px-4 sm:px-6">
           <div className="rounded-xl border border-amber-500/25 bg-amber-500/5 p-4 text-sm">
             <p className="font-semibold text-foreground">{t("business.qrPage.reviewBody")}</p>
             <p className="mt-1 text-muted-foreground">{t("business.qrPage.qrLockedSub")}</p>
@@ -927,7 +927,7 @@ export function QRCodeManagementPage() {
             </CardContent>
           </Card>
 
-      <div className="max-w-7xl">
+      <div className="w-full min-w-0">
         {activeTab === "employees" && (
           <>
             {loading && employees.length === 0 ? (

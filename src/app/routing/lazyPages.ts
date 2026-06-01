@@ -11,6 +11,9 @@ function lazyDefault(factory: () => Promise<{ default: ComponentType<unknown> }>
   return lazy(factory);
 }
 
+// —— Public marketing ——
+export const LandingPage = lazyNamed(() => import("../pages/LandingPage"), "LandingPage");
+
 // —— Business dashboard ——
 export const BusinessDashboard = lazyNamed(
   () => import("../pages/business/BusinessDashboard"),

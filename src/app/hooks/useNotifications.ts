@@ -157,8 +157,10 @@ export function useNotifications({
       devSetHydrationPhase("notifications", "idle");
       return;
     }
+    // Inbox/list fetch returns unreadCount — skip duplicate unread-only request.
+    if (loadList) return;
     void refreshUnread();
-  }, [active, refreshUnread]);
+  }, [active, loadList, refreshUnread]);
 
   useEffect(() => {
     if (!active || !loadList) return;

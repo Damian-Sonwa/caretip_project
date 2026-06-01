@@ -131,7 +131,7 @@ export function TablesPage() {
   return (
     <div className="min-h-screen bg-background">
       <div className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur-xl bg-card/80">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="dashboard-page-contained mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3 min-w-0">
             <Link
               to="/dashboard"
@@ -156,7 +156,7 @@ export function TablesPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div className="dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
         {loading ? (
           <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
             <TablesListSkeleton />

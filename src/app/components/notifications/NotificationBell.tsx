@@ -1,19 +1,14 @@
-import { useState } from "react";
-import { CheckCheck } from "lucide-react";
-import { NotificationPreviewListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
+import { useMemo, useState } from "react";
 import { CareIcon } from "@/components/icons";
+import {
+  NotificationAlertDialog,
+  type NotificationAlertItem,
+} from "@/components/ui/notification-alert-dialog";
 import { useTranslation } from "react-i18next";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import { useNotifications } from "@/app/hooks/useNotifications";
 import { useAuth } from "@/app/hooks/useAuth";
 import { cn } from "@/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/app/components/ui/dropdown-menu";
 
 function formatGroupTime(iso: string, locale: string): string {
   const d = new Date(iso);
@@ -21,11 +16,11 @@ function formatGroupTime(iso: string, locale: string): string {
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60_000);
   if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m`;
+  if (diffMins < 60) return `${diffMins}m ago`;
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h`;
+  if (diffHours < 24) return `${diffHours}h ago`;
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d`;
+  if (diffDays < 7) return `${diffDays}d ago`;
   return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
@@ -34,6 +29,14 @@ function inboxPathForRole(role: string | undefined): string {
   if (role === "business") return "/dashboard/notifications";
   if (role === "platform_admin") return "/platform-admin/notifications";
   return "/dashboard/notifications";
+}
+
+function unreadSummaryText(count: number, t: (key: string, opts?: object) => string): string {
+  if (count === 0) return t("notifications.bell.empty");
+  return t("notifications.bell.unreadSummary", {
+    count,
+    defaultValue: `You have ${count} unread notifications`,
+  });
 }
 
 type NotificationBellProps = {
@@ -51,29 +54,68 @@ export function NotificationBell({ className }: NotificationBellProps) {
     authStatus === "authenticated" &&
     Boolean(user) &&
     (role === "employee" || role === "business" || role === "platform_admin");
+
   const {
     unreadCount,
     items,
     loading,
-    loadNotifications,
     markRead,
     markAllRead,
   } = useNotifications({ enabled, loadList: open });
 
   const badge = unreadCount > 0;
-  const inboxPath = inboxPathForRole(user?.role);
+  const inboxPath = inboxPathForRole(role);
   const list = items ?? [];
 
+  const alertItems = useMemo((): NotificationAlertItem[] => {
+    return list.map((n) => ({
+      id: n.id,
+      title: n.title,
+      message: n.message,
+      time: formatGroupTime(n.createdAt, i18n.language),
+      read: n.read,
+    }));
+  }, [list, i18n.language]);
+
+  const alertLabels = useMemo(
+    () => ({
+      title: t("notifications.bell.title"),
+      unreadSummary: (count: number) => unreadSummaryText(count, t),
+      markAllRead: t("notifications.bell.markAllRead"),
+      close: t("notifications.bell.close"),
+      viewAll: t("notifications.bell.viewAll"),
+      empty: t("notifications.bell.empty"),
+      readLabel: t("notifications.bell.read"),
+    }),
+    [t],
+  );
+
+  if (!enabled) return null;
+
   return (
-    <DropdownMenu
-      open={open}
+    <NotificationAlertDialog
+      className={className}
+      items={alertItems}
+      unreadCount={unreadCount}
+      loading={loading && list.length === 0}
+      labels={alertLabels}
       onOpenChange={setOpen}
-    >
-      <DropdownMenuTrigger asChild>
+      onViewAll={() => {
+        setOpen(false);
+        navigate(inboxPath);
+      }}
+      onMarkRead={(id) => void markRead(id)}
+      onMarkAllRead={() => void markAllRead()}
+      onItemActivate={(id) => {
+        const n = list.find((item) => item.id === id);
+        if (n?.url) navigate(n.url);
+        setOpen(false);
+      }}
+      trigger={
         <button
           type="button"
           className={cn(
-            "relative inline-flex touch-manipulation items-center justify-center rounded-xl min-h-[44px] min-w-[44px] p-2 transition-colors hover:bg-muted active:opacity-90",
+            "relative inline-flex min-h-[44px] min-w-[44px] touch-manipulation items-center justify-center rounded-xl p-2 transition-colors hover:bg-muted active:opacity-90",
             className,
           )}
           aria-label={
@@ -85,74 +127,14 @@ export function NotificationBell({ className }: NotificationBellProps) {
           <CareIcon name="notifications" size="md" className="text-foreground" />
           {badge ? (
             <span
-              className="absolute top-1 right-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground"
+              className="absolute right-1 top-1 flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-accent px-1 text-[10px] font-semibold leading-none text-accent-foreground"
               aria-hidden
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           ) : null}
         </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[min(100vw-2rem,22rem)] p-0">
-        <div className="flex items-center justify-between border-b border-border px-3 py-2.5">
-          <p className="text-sm font-semibold text-foreground">{t("notifications.bell.title")}</p>
-          {unreadCount > 0 ? (
-            <button
-              type="button"
-              onClick={() => void markAllRead()}
-              className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
-            >
-              <CheckCheck className="h-3.5 w-3.5" aria-hidden />
-              {t("notifications.bell.markAllRead")}
-            </button>
-          ) : null}
-        </div>
-        <div className="max-h-[min(60vh,20rem)] overflow-y-auto">
-          {loading && list.length === 0 ? (
-            <NotificationPreviewListSkeleton />
-          ) : list.length === 0 ? (
-            <p className="px-3 py-8 text-center text-sm text-muted-foreground">
-              {t("notifications.bell.empty")}
-            </p>
-          ) : (
-            <ul className="divide-y divide-border">
-              {list.slice(0, 8).map((n) => (
-                <li key={n.id}>
-                  <button
-                    type="button"
-                    className={cn(
-                      "w-full px-3 py-2.5 text-left transition-colors hover:bg-muted/60",
-                      !n.read && "bg-accent/5",
-                      n.priority === "high" && "border-l-2 border-l-accent pl-[10px]",
-                    )}
-                    onClick={() => {
-                      void markRead(n.id);
-                      if (n.url) navigate(n.url);
-                      setOpen(false);
-                    }}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="text-sm font-medium leading-snug text-foreground">{n.title}</p>
-                      <span className="shrink-0 text-[10px] font-medium text-muted-foreground">
-                        {formatGroupTime(n.createdAt, i18n.language)}
-                      </span>
-                    </div>
-                    <p className="mt-0.5 line-clamp-2 text-xs leading-relaxed text-muted-foreground">
-                      {n.message}
-                    </p>
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        <DropdownMenuSeparator className="m-0" />
-        <DropdownMenuItem asChild className="cursor-pointer justify-center py-2.5 text-sm font-medium">
-          <Link to={inboxPath} onClick={() => setOpen(false)}>
-            {t("notifications.bell.viewAll")}
-          </Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      }
+    />
   );
 }

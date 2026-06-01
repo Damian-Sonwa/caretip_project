@@ -7,6 +7,7 @@ import {
   LandingSectionAccent,
   type LandingAccentVariant,
 } from "@/components/landing/LandingSectionAccent";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 
 export type LandingShowcaseBenefit = {
@@ -150,12 +151,14 @@ export function LandingShowcaseVisualFrame({
 
 export function LandingShowcaseCoverImage({
   src,
+  webpSrc,
   alt,
   objectPosition = "center",
   className,
   floatHint,
 }: {
   src: string;
+  webpSrc?: string;
   alt: string;
   objectPosition?: string;
   className?: string;
@@ -165,8 +168,9 @@ export function LandingShowcaseCoverImage({
   return (
     <LandingShowcaseVisualFrame>
       <div className={landingUi.showcaseVisualFrame}>
-        <img
+        <MarketingPicture
           src={src}
+          webpSrc={webpSrc}
           alt={alt}
           className={cn(landingUi.showcaseVisualImg, className)}
           style={{ objectPosition }}

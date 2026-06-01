@@ -6,14 +6,18 @@ import {
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingUi } from "@/components/landing/landingUi";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import employeeSectionImgDe from "../../../../images/FYP.jpeg";
+import employeeSectionImgDeWebp from "../../../../images/FYP.webp";
 import employeeSectionImgEn from "../../../../images/English-version.png";
+import employeeSectionImgEnWebp from "../../../../images/English-version.webp";
 
 export function EmployeeLandingSection() {
   const { t, i18n } = useTranslation();
   const isDe = i18n.language?.toLowerCase().startsWith("de");
   const employeeSectionImg = isDe ? employeeSectionImgDe : employeeSectionImgEn;
+  const employeeSectionWebp = isDe ? employeeSectionImgDeWebp : employeeSectionImgEnWebp;
 
   const benefits = useMemo(
     () => [
@@ -44,8 +48,9 @@ export function EmployeeLandingSection() {
       visual={
         <LandingShowcaseVisualFrame>
           <div className={cn(landingUi.showcaseVisualFrame, "relative")}>
-            <img
+            <MarketingPicture
               src={employeeSectionImg}
+              webpSrc={employeeSectionWebp}
               alt={t("landing.employeeSection.imageAlt")}
               className={cn(landingUi.showcaseVisualImg, "object-[center_42%]")}
               loading="lazy"

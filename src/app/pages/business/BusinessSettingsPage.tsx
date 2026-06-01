@@ -4,7 +4,7 @@ import { useSearchParams } from "react-router";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
+import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
   BUSINESS_SETTINGS_SECTIONS,
@@ -38,12 +38,12 @@ export function BusinessSettingsPage() {
   };
 
   if (!user || user.role !== "business") {
-    return <GlobalAppLoadingHold />;
+    return <BusinessSubPageShellSkeleton />;
   }
 
   return (
     <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
+      <div className="dashboard-page-contained mx-auto w-full max-w-6xl">
         <header className="mb-8">
           <div className="mb-2 flex items-center gap-2 text-muted-foreground">
             <CareIcon name="settings" size="md" className="shrink-0 text-accent" />

@@ -9,7 +9,7 @@ import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 export const platformUi = {
   btnPrimary: caretipBtnPrimary,
   pageMain: "bg-background",
-  page: "caretip-container max-w-[min(100%,96rem)] pb-16 pt-5 sm:pb-20 sm:pt-7",
+  page: "caretip-container w-full min-w-0 pb-16 pt-5 sm:pb-20 sm:pt-7",
 
   pageHeader: "mb-8 max-lg:mb-10",
   pageTitleRow: "flex items-start gap-3",

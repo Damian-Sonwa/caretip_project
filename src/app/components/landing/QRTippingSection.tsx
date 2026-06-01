@@ -4,6 +4,7 @@ import { Link2, Smartphone, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
 import newly01Img from "../../../../images/newly01.png";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 
 /** Unsplash: people at a table paying with phone / card (original left-panel image) */
@@ -16,7 +17,7 @@ function InstantTipSplitIllustration() {
       role="img"
       aria-label="People at a table completing a mobile payment"
     >
-      <img
+      <MarketingPicture
         src={IMG_PEOPLE_PAYMENT}
         alt="Guests at a table paying with a phone"
         className="absolute inset-0 h-full w-full object-cover object-center"

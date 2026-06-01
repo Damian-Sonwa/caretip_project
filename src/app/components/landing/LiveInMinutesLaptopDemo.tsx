@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useMinWidthMedia } from "@/lib/motionPerf";
 import atmosphereImg from "../../../../images/beauty-r.png";
+import atmosphereWebp from "../../../../images/beauty-r.webp";
+import { MarketingPicture } from "@/lib/marketingPicture";
 import caretipLogo from "@/assets/brand/company_logo.png";
 
 export const LIVE_DEMO_SLIDE_IDS = ["signup", "team", "qr", "dashboard"] as const;
@@ -100,10 +102,10 @@ export function LiveInMinutesLaptopDemo({
           aria-hidden
           className="caretip-live-minutes-journey__bg pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#fff9f2_0%,#fff4e8_42%,#f6efe4_100%)] dark:bg-[linear-gradient(165deg,#1a1714_0%,#14110f_48%,#0f0d0b_100%)]"
         />
-        <img
+        <MarketingPicture
           src={atmosphereImg}
+          webpSrc={atmosphereWebp}
           alt=""
-          aria-hidden
           className="caretip-live-minutes-journey__photo pointer-events-none absolute inset-0 hidden h-full w-full object-cover object-center opacity-0 lg:block lg:opacity-100"
           loading="lazy"
           decoding="async"

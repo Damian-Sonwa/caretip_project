@@ -205,7 +205,7 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
 
   if (loadState === "loading" && !profile) {
     return (
-      <div className="mx-auto flex max-w-3xl flex-col items-center justify-center gap-3 px-4 py-24 sm:px-6">
+      <div className="dashboard-page-narrow mx-auto flex w-full max-w-3xl flex-col items-center justify-center gap-3 px-4 py-24 sm:px-6">
         <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" aria-hidden />
         <p className="text-sm text-muted-foreground">{t("business.profilePage.loading")}</p>
       </div>
@@ -214,7 +214,7 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
 
   if (loadState === "error" && !profile) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <div className="dashboard-page-narrow mx-auto w-full max-w-3xl px-4 py-8 sm:px-6">
         <Card className="border-destructive/40">
           <CardHeader>
             <CardTitle className="text-lg">{t("business.profilePage.loadErrorTitle")}</CardTitle>
@@ -421,7 +421,7 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-8 sm:px-6">
+    <div className="dashboard-page-narrow mx-auto w-full max-w-3xl space-y-8 px-4 py-8 sm:px-6">
       {profileContent}
     </div>
   );
