@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
-import tableQrImg from "../../../../images/table_QR.png";
+import logisticsImg from "../../../../images/logistics.png";
 import atReceptionImg from "../../../../images/At_reception.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
@@ -21,7 +21,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s1Tag"),
           textKey: "landing.realLife.s1Text" as const,
           detail: t("landing.realLife.s1Detail"),
-          img: tableQrImg,
+          img: logisticsImg,
           alt: t("landing.realLife.s1Alt"),
         },
         {

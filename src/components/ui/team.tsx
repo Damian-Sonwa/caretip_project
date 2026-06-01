@@ -16,6 +16,7 @@ import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
 import healthcareNursingImg from "../../../images/healthcare and nursing.png";
+import logisticsImg from "../../../images/logistics.png";
 import hotelsImg from "../../../images/Hotels.png";
 import salonSpaImg from "../../../images/salon and spa.png";
 import tradeAndHomeImg from "../../../images/trade and home services.png";
@@ -37,8 +38,7 @@ const MARQUEE_SPECS: MarqueeSpec[] = [
   },
   {
     id: "delivery",
-    image:
-      "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80",
+    image: logisticsImg,
     Icon: Truck,
   },
   {
