@@ -7,13 +7,15 @@ import { useSocket } from "../../hooks/useSocket";
 import { listEmployeeTips, type TipActivityRow, type TipItem } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { NotificationInboxListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import { resolveEmployeeTipsWithDevPreview } from "../../lib/devAnalyticsMocks";
+import { isWalkthroughDemoEmployee } from "../../lib/walkthroughDemo";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -82,10 +84,14 @@ export function EmployeeNotificationsPage() {
       const data = await listEmployeeTips({ take: 100, range: "month" });
       const apiTips = activityRowsToTipItems(data.items ?? []);
       setTips(apiTips);
-      const resolved = resolveEmployeeTipsWithDevPreview(apiTips, {
-        totalEarningsEur: 0,
-        totalSupporters: data.total ?? apiTips.length,
-      });
+      const resolved = resolveEmployeeTipsWithDevPreview(
+        apiTips,
+        {
+          totalEarningsEur: 0,
+          totalSupporters: data.total ?? apiTips.length,
+        },
+        isWalkthroughDemoEmployee(user),
+      );
       setDisplayTips(resolved);
       if (cacheKey) setPageSessionCache(cacheKey, resolved);
       if (user.employeeId) {
@@ -143,13 +149,25 @@ export function EmployeeNotificationsPage() {
     return (
       <div className={employeeUi.page}>
         <div className={employeeUi.pageInner}>
-          <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
+          <EmployeePageHeader
+            title={t("employee.notifications.title")}
+            description={t("employee.notifications.manageHint")}
+            backAriaLabel={t("employee.notifications.backAria")}
+            leading={
+              <div className={employeeUi.iconTileMuted}>
+                <Bell className="h-5 w-5" aria-hidden />
+              </div>
+            }
+          />
+          <NotificationInboxListSkeleton rows={6} />
         </div>
       </div>
     );
   }
 
-  if (!user || user.role !== "employee") return null;
+  if (!user || user.role !== "employee") {
+    return <GlobalAppLoadingHold />;
+  }
 
   const allSelected = selectedIds.length > 0 && selectedIds.length === allIds.length;
   const hasSelection = selectedIds.length > 0;
@@ -237,7 +255,7 @@ export function EmployeeNotificationsPage() {
         />
 
         {loading && displayTips.length === 0 ? (
-          <CareTipPageLoader variant="section" message={t("employee.notifications.loading")} />
+          <NotificationInboxListSkeleton rows={6} />
         ) : loadError && displayTips.length === 0 ? (
           <div className={employeeUi.cardStatic}>
             <EmployeeEmptyState

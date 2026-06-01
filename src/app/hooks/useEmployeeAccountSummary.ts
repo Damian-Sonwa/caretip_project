@@ -16,6 +16,10 @@ import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 const ACCOUNT_SWR_KEY = "employee:account";
 const accountSwrStore = createDashboardSwrStore<EmployeeAccountSnapshot>();
 
+export function clearEmployeeAccountSwrStore(): void {
+  accountSwrStore.clear();
+}
+
 /** Prime hero balances from summary scope (avoids a separate account round-trip). */
 export function primeEmployeeAccountSnapshot(snapshot: EmployeeAccountSnapshot): void {
   if (typeof snapshot.totalEarningsEur !== "number") return;

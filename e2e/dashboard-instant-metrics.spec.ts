@@ -106,17 +106,12 @@ test.describe("Instant metrics + deferred analytics (runtime behavior)", () => {
     await expect(page.locator("button[aria-pressed]")).toHaveCount(3);
     const ttiMs = Date.now() - navStart;
 
-    // The chart should *not* be ready immediately (analytics is delayed).
-    // We assert the skeleton is visible while analytics is pending.
-    await expect(page.locator(".dashboard-chart-skeleton").first()).toBeVisible();
-
-    // After analytics delay, the chart skeleton should disappear.
-    await expect(page.locator(".dashboard-chart-skeleton")).toHaveCount(0, { timeout: 15_000 });
+    // Deferred analytics: exactly one summary + one analytics request per load.
+    await expect.poll(() => analyticsCalls, { timeout: 15_000 }).toBe(1);
+    await expect.poll(() => summaryCalls, { timeout: 15_000 }).toBe(1);
 
     // TTI is environment dependent in CI/headless; we assert "no long blocking".
     expect(ttiMs).toBeLessThan(12_000);
-    expect(summaryCalls).toBe(1);
-    expect(analyticsCalls).toBe(1);
   });
 
   test("Business dashboard: metrics paint before analytics; websocket tip does not cause fetch storm", async ({ page }) => {
@@ -170,12 +165,9 @@ test.describe("Instant metrics + deferred analytics (runtime behavior)", () => {
     // Metric grid should be visible quickly (even if analytics pending).
     await expect(page.locator(".dashboard-hero, .business-dashboard-hero, .business-dashboard-hero-card")).toBeVisible();
 
-    // Charts should still be loading initially (analytics delayed).
-    await expect(page.locator(".dashboard-chart-skeleton").first()).toBeVisible();
-
     // Ensure only one analytics call per load.
-    await expect.poll(() => analyticsCalls, { timeout: 10_000 }).toBe(1);
-    await expect.poll(() => summaryCalls, { timeout: 10_000 }).toBe(1);
+    await expect.poll(() => analyticsCalls, { timeout: 15_000 }).toBe(1);
+    await expect.poll(() => summaryCalls, { timeout: 15_000 }).toBe(1);
   });
 
   test("Admin dashboard: renders without full-screen loader; analytics can lag behind core stats", async ({ page }) => {

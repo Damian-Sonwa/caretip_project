@@ -38,7 +38,8 @@ import {
 } from "../../lib/api";
 import { formatEur } from "../../lib/formatEur";
 import { downloadBrandedQR, downloadBrandedQRLegacy } from "../../lib/qrBranded";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
+import { StaffManagementPageSkeleton } from "../../components/business/StaffManagementPageSkeleton";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
@@ -564,14 +565,12 @@ export function StaffManagementPage() {
 
   const isInitialStaffLoad = loading && employees.length === 0;
 
-  if ((!authHydrated || !sessionValidated || !user) && isInitialStaffLoad) {
-    return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
+  if (!user) {
+    return <GlobalAppLoadingHold />;
   }
 
-  if (!user) return null;
-
   if (isInitialStaffLoad) {
-    return <CareTipPageLoader message={t("business.staffPage.loadingStaff")} />;
+    return <StaffManagementPageSkeleton />;
   }
 
   if (error) {

@@ -1,0 +1,55 @@
+import type { Request, Response, NextFunction } from "express";
+import { Role } from "@prisma/client";
+import { prisma } from "../prisma.js";
+import { managerHasCompletedOnboarding } from "../services/auth.service.js";
+
+/**
+ * Blocks business managers who have not finished onboarding from dashboard APIs.
+ * Profile/onboarding routes stay open so the wizard can save progress.
+ */
+export async function requireCompletedOnboarding(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  if (req.user?.impersonatedBy) {
+    next();
+    return;
+  }
+
+  const userId = req.user?.userId ?? req.user?.id;
+  if (!userId) {
+    res.status(401).json({ message: "Authentication required" });
+    return;
+  }
+
+  if (req.user?.role !== Role.MANAGER) {
+    next();
+    return;
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      role: true,
+      hasCompletedOnboarding: true,
+      onboardingCompletedAt: true,
+    },
+  });
+
+  if (!user) {
+    res.status(401).json({ message: "Authentication required" });
+    return;
+  }
+
+  if (!managerHasCompletedOnboarding(user)) {
+    res.status(403).json({
+      success: false,
+      code: "ONBOARDING_INCOMPLETE",
+      message: "Complete onboarding before accessing dashboard data.",
+    });
+    return;
+  }
+
+  next();
+}

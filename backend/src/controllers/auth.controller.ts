@@ -2,7 +2,9 @@ import type { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { Prisma } from "@prisma/client";
 import * as authService from "../services/auth.service.js";
+import * as businessService from "../services/business.service.js";
 import * as oauthAuthService from "../services/oauthAuth.service.js";
+import { managerProfileReadyToFinish } from "../services/onboardingProgress.service.js";
 import * as emailVerificationService from "../services/emailVerification.service.js";
 import * as passwordResetService from "../services/passwordReset.service.js";
 import * as employeeActivationService from "../services/employeeActivation.service.js";
@@ -774,9 +776,30 @@ export async function patchMe(req: Request, res: Response) {
       return res.status(400).json({ message: "hasCompletedOnboarding must be a boolean" });
     }
 
+    if (body.hasCompletedOnboarding === true) {
+      const profile = await businessService.getManagerBusinessProfile(userId);
+      const ready = managerProfileReadyToFinish(
+        profile
+          ? {
+              name: profile.name,
+              businessType: profile.type,
+              registeredAddress: profile.registeredAddress,
+            }
+          : null,
+      );
+      if (!ready) {
+        return res.status(400).json({
+          message: "Complete business details and venue address before finishing onboarding.",
+        });
+      }
+    }
+
     await prisma.user.update({
       where: { id: userId },
-      data: { hasCompletedOnboarding: body.hasCompletedOnboarding },
+      data: {
+        hasCompletedOnboarding: body.hasCompletedOnboarding,
+        onboardingCompletedAt: body.hasCompletedOnboarding ? new Date() : null,
+      },
     });
 
     // Re-issue a fresh auth payload so the client immediately routes correctly.

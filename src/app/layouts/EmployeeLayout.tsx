@@ -3,7 +3,6 @@ import { Outlet } from "react-router";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
-import { isProtectedApiReady } from "../lib/authRestore";
 import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 import { EmployeeSidebar } from "../components/employee/EmployeeSidebar";
 import { EmployeeMobileSidebar } from "../components/employee/EmployeeMobileSidebar";
@@ -12,6 +11,7 @@ import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboar
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
+import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 
 type EmployeeBusinessBranding = {
   businessLogo: string | null;
@@ -24,12 +24,11 @@ type EmployeeBusinessBranding = {
 export function EmployeeLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, authStatus } = useAuth();
-  const isAppReady =
-    authStatus === "authenticated" && user?.role === "employee" && isProtectedApiReady();
+  const isAppReady = authStatus === "authenticated" && user?.role === "employee";
   const [branding, setBranding] = useState<EmployeeBusinessBranding | null>(null);
 
   useEffect(() => {
-    if (!isAppReady) return;
+    if (authStatus !== "authenticated" || user?.role !== "employee") return;
     let cancelled = false;
     void (async () => {
       try {
@@ -47,7 +46,9 @@ export function EmployeeLayout() {
     return () => {
       cancelled = true;
     };
-  }, [isAppReady]);
+  }, [authStatus, user?.role]);
+
+  useRegisterPagePaintReady("employee-layout-paint");
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -72,7 +73,7 @@ export function EmployeeLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="flex-1">
-            <RouteChunkBoundary variant="shell">
+            <RouteChunkBoundary variant="shell" registrationKey="employee-outlet">
               <Outlet />
             </RouteChunkBoundary>
           </main>

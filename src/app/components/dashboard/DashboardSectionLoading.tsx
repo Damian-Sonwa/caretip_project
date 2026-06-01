@@ -11,6 +11,10 @@ export {
   LocationCardGridSkeleton,
   TablesListSkeleton,
   GlobalTransactionsTableSkeleton,
+  StaffRosterTableSkeleton,
+  PlatformAdminTableSkeleton,
+  EmployeeGoalListSkeleton,
+  EmployeeSettingsFormSkeleton,
 } from "./DashboardContentSkeletons";
 
 /** Compact spinner for inline labels and section headers. */

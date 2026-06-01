@@ -2,6 +2,7 @@ import { Router } from "express";
 import multer from "multer";
 import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
+import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
 import * as employeeController from "../controllers/employee.controller.js";
 import * as goalController from "../controllers/goal.controller.js";
 import { isAllowedImageMimetype } from "../services/upload.service.js";
@@ -44,11 +45,12 @@ router.get("/", employeeController.getEmployees);
 router.get("/:employeeId", employeeController.getEmployeeById);
 
 // Business only: add employee to their business
-router.post("/", authMiddleware, requireRole(Role.MANAGER), employeeController.createEmployee);
+router.post("/", authMiddleware, requireRole(Role.MANAGER), isApprovedBusiness, employeeController.createEmployee);
 router.post(
   "/:employeeId/regenerate-slug",
   authMiddleware,
   requireRole(Role.MANAGER),
+  isApprovedBusiness,
   employeeController.regenerateEmployeeSlug
 );
 router.patch(
@@ -56,9 +58,10 @@ router.patch(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
+  isApprovedBusiness,
   employeeController.patchEmployeeStatus
 );
-router.patch("/:employeeId", authMiddleware, requireRole(Role.MANAGER), employeeController.updateEmployee);
-router.delete("/:employeeId", authMiddleware, requireRole(Role.MANAGER), employeeController.deleteEmployee);
+router.patch("/:employeeId", authMiddleware, requireRole(Role.MANAGER), isApprovedBusiness, employeeController.updateEmployee);
+router.delete("/:employeeId", authMiddleware, requireRole(Role.MANAGER), isApprovedBusiness, employeeController.deleteEmployee);
 
 export default router;

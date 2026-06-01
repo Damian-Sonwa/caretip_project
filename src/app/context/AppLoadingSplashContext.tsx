@@ -6,8 +6,9 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { CareTipLoadingTitle } from "../components/CareTipPageLoader";
 import { LoadingSpinner } from "../components/ui/loading-spinner";
+import { CareTipLoadingTitle } from "../components/CareTipPageLoader";
+import { LaunchSplashVisibilityProvider } from "./AppLoadingManager";
 
 /**
  * Launch splash (CareTip + spinner): installed PWA / standalone only — first paint & hydration.
@@ -78,28 +79,6 @@ function BrandedLoadingSplashOverlay({
   );
 }
 
-/** Branded CareTip + spinner during SPA route transitions only. */
-function RouteTransitionOverlay() {
-  return (
-    <div
-      className={[
-        "fixed inset-0 z-[9999] flex flex-col items-center justify-center px-6",
-        "bg-background/95 text-foreground backdrop-blur-sm",
-      ].join(" ")}
-      aria-busy="true"
-      aria-live="polite"
-      role="status"
-    >
-      <div className="flex max-w-sm flex-col items-center text-center">
-        <CareTipLoadingTitle />
-        <div className="mt-7 flex justify-center">
-          <LoadingSpinner size="md" />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export function AppLoadingSplashProvider({
   children,
 }: {
@@ -117,14 +96,13 @@ export function AppLoadingSplashProvider({
   const [phase, setPhase] = useState<Phase>(isStandalone ? "on" : "off");
   const [minElapsed, setMinElapsed] = useState(!isStandalone);
   const [shellReady, setShellReady] = useState(!isStandalone);
-  const [routeTransitionPending, setRouteTransitionPending] = useState(false);
 
   const markAppShellReady = useCallback(() => {
     setShellReady(true);
   }, []);
 
-  const setRouteTransitionPendingStable = useCallback((pending: boolean) => {
-    setRouteTransitionPending(pending);
+  const setRouteTransitionPendingStable = useCallback((_pending: boolean) => {
+    // Route transitions use the single global overlay — no second spinner.
   }, []);
 
   useEffect(() => {
@@ -158,15 +136,15 @@ export function AppLoadingSplashProvider({
   );
 
   const launchActive = phase !== "off";
-  const showRouteOverlay = !launchActive && routeTransitionPending;
 
   return (
     <AppLoadingSplashContext.Provider value={value}>
-      {children}
-      {launchActive ? (
-        <BrandedLoadingSplashOverlay phase={phase === "exit" ? "exit" : "on"} />
-      ) : null}
-      {showRouteOverlay ? <RouteTransitionOverlay /> : null}
+      <LaunchSplashVisibilityProvider active={launchActive}>
+        {children}
+        {launchActive ? (
+          <BrandedLoadingSplashOverlay phase={phase === "exit" ? "exit" : "on"} />
+        ) : null}
+      </LaunchSplashVisibilityProvider>
     </AppLoadingSplashContext.Provider>
   );
 }

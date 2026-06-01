@@ -22,7 +22,8 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { EmployeeSettingsFormSkeleton } from "../../components/dashboard/DashboardSectionLoading";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
@@ -220,12 +221,10 @@ export function EmployeeSettingsPage() {
   const checklist = getPasswordChecklist(newPw);
   const strength = getPasswordStrength(newPw);
 
-  if (!user || user.role !== "employee") return null;
-
   const isInitialSettingsLoad = loading && !name && !businessName;
 
-  if (isInitialSettingsLoad) {
-    return <CareTipPageLoader />;
+  if (!user || user.role !== "employee") {
+    return <GlobalAppLoadingHold />;
   }
 
   return (
@@ -242,6 +241,10 @@ export function EmployeeSettingsPage() {
           }
         />
 
+        {isInitialSettingsLoad ? (
+          <EmployeeSettingsFormSkeleton />
+        ) : (
+          <>
         <section className={employeeUi.settingsSection}>
           <h3 className={employeeUi.settingsHeading}>
             {t("employee.settings.photoSection")}
@@ -426,6 +429,8 @@ export function EmployeeSettingsPage() {
             </AlertDialogContent>
           </AlertDialog>
         </section>
+          </>
+        )}
       </div>
     </div>
   );

@@ -82,6 +82,10 @@ test.describe("Auth routing (guards + mocked refresh)", () => {
 
   test("Test 4: check-email page (no token) shows verify copy", async ({ page }) => {
     await page.goto("/verify-email");
-    await expect(page.getByRole("heading", { name: /check your email/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", {
+        name: /Check your email to verify your account|Bitte E-Mail prüfen, um Ihr Konto zu bestätigen/i,
+      }),
+    ).toBeVisible({ timeout: 15_000 });
   });
 });

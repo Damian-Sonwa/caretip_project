@@ -14,6 +14,7 @@ export type EmployeePeriodMetrics = {
   periodAmountEur: number;
   goalPct: number | null;
   rating: number | null;
+  ratingCount: number;
 };
 
 type EmployeeDashboardMetricsGridProps = {
@@ -31,9 +32,12 @@ function EmployeeDashboardMetricsGridInner({
   metrics,
 }: EmployeeDashboardMetricsGridProps) {
   const { t } = useTranslation();
-  const { periodTipCount, periodAmountEur, goalPct, rating } = metrics;
+  const { periodTipCount, periodAmountEur, goalPct, rating, ratingCount } = metrics;
   const showEmptyTipsState =
     metricsSettledForPeriod && !loading && periodTipCount === 0;
+  const cardsSettled = metricsSettledForPeriod && !loading;
+  const showRatingValue = cardsSettled && rating != null;
+  const showGoalValue = cardsSettled && goalPct != null;
 
   return (
     <div
@@ -61,21 +65,23 @@ function EmployeeDashboardMetricsGridInner({
       <EmployeeStatCard
         loading={loading}
         label={
-          rating != null ? t("employee.dashboard.statAvgRating") : t("employee.dashboard.statRatings")
+          showRatingValue
+            ? t("employee.dashboard.statAvgRating")
+            : t("employee.dashboard.statRatings")
         }
         value={
-          loading ? null : rating != null ? (
-            <CountUpMetric value={rating} format={(n) => String(n)} />
-          ) : metricsSettledForPeriod ? (
+          showRatingValue ? (
+            <CountUpMetric value={rating} format={(n) => n.toFixed(1)} />
+          ) : cardsSettled ? (
             t("format.notAvailable")
           ) : null
         }
         change={
           loading
             ? undefined
-            : rating != null
-              ? undefined
-              : metricsSettledForPeriod
+            : showRatingValue
+              ? t("employee.dashboard.statRatingsCount", { count: ratingCount })
+              : cardsSettled
                 ? t("format.metricZeroRatings")
                 : undefined
         }
@@ -85,18 +91,18 @@ function EmployeeDashboardMetricsGridInner({
         loading={loading}
         label={t("employee.dashboard.statMonthlyGoal")}
         value={
-          loading ? null : goalPct != null ? (
+          showGoalValue ? (
             <CountUpMetric value={goalPct} kind="percent" />
-          ) : metricsSettledForPeriod ? (
+          ) : cardsSettled ? (
             t("format.notAvailable")
           ) : null
         }
         change={
           loading
             ? undefined
-            : goalPct != null
+            : showGoalValue
               ? t("employee.dashboard.statGoalProgress")
-              : metricsSettledForPeriod
+              : cardsSettled
                 ? t("employee.dashboard.statGoalSetHint")
                 : undefined
         }

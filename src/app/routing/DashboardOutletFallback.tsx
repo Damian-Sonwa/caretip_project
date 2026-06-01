@@ -1,44 +1,16 @@
-import { DashboardMetricsGridSkeleton } from "../components/dashboard/DashboardSectionLoading";
-
 /**
- * In-layout lazy-route hold — reserves main content height without a second skeleton pass.
- * Dashboard pages own first-load skeletons; avoids Loader → Outlet skeleton → page skeleton.
+ * In-layout lazy-route hold — background only; login/refresh use the global overlay spinner.
  */
 export function DashboardOutletShellHold() {
-  return (
-    <div
-      className="w-full min-h-[min(50vh,420px)]"
-      aria-hidden
-    />
-  );
+  return <div className="min-h-[min(50vh,420px)] w-full bg-background" aria-hidden />;
 }
 
-/** Full skeleton fallback — use only outside dashboard shell (e.g. standalone chunk routes). */
+/** Full-page lazy hold outside dashboard shell. */
 export function DashboardOutletFallback() {
-  return (
-    <div
-      className="flex w-full min-h-[min(50vh,420px)] items-center justify-center px-4 py-10 sm:px-6 lg:px-8"
-      role="status"
-      aria-busy="true"
-      aria-live="polite"
-      aria-label="Loading page"
-    >
-      <DashboardMetricsGridSkeleton />
-    </div>
-  );
+  return <div className="min-h-[min(50vh,420px)] w-full bg-background" aria-hidden />;
 }
 
-/** Top-level public route chunk — skeleton immediately (no blank flash). */
+/** Top-level public route chunk hold. */
 export function MinimalRouteFallback() {
-  return (
-    <div
-      className="flex w-full min-h-[40vh] items-center justify-center px-4 py-8"
-      role="status"
-      aria-busy="true"
-      aria-live="polite"
-      aria-label="Loading page"
-    >
-      <DashboardMetricsGridSkeleton />
-    </div>
-  );
+  return <div className="min-h-[40vh] w-full bg-background" aria-hidden />;
 }

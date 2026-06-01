@@ -1,4 +1,7 @@
 import { cn } from "@/lib/utils";
+import { AppBrandedLoadingScreen } from "./AppBrandedLoadingScreen";
+import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
+import { useGlobalAppLoadingActive } from "../lib/globalAppLoading";
 import { LoadingSpinner } from "./ui/loading-spinner";
 
 /** Text-only “CareTip” mark for loading states (no logo image). */
@@ -47,6 +50,7 @@ export function CareTipPageLoader({
   className,
   variant = "fullscreen",
 }: CareTipPageLoaderProps) {
+  const globalLoadingActive = useGlobalAppLoadingActive();
   const spinnerSize = variant === "compact" ? "md" : "lg";
 
   const variantClass =
@@ -58,20 +62,11 @@ export function CareTipPageLoader({
           ? "flex flex-col items-center justify-center gap-6 py-16 px-4"
           : "flex flex-col items-center justify-center gap-4";
 
-  if (variant === "wait") {
-    return (
-      <div
-        className={cn(variantClass, className)}
-        role="status"
-        aria-busy="true"
-        aria-live="polite"
-      >
-        <LoadingSpinner size="lg" />
-        {message ? (
-          <p className="max-w-sm text-center text-sm text-muted-foreground">{message}</p>
-        ) : null}
-      </div>
-    );
+  if (variant === "wait" || variant === "fullscreen") {
+    if (globalLoadingActive) {
+      return <GlobalAppLoadingHold className={className} />;
+    }
+    return <AppBrandedLoadingScreen className={className} message={message} />;
   }
 
   return (

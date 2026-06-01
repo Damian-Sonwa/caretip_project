@@ -36,7 +36,8 @@ import {
   PAGE_CACHE_TTL_LOW_MS,
   PAGE_CACHE_TTL_MEDIUM_MS,
 } from "../../lib/pageSessionCache";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { DashboardListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { PageLoader } from "../../components/PageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import {
@@ -759,7 +760,7 @@ export function QRCodeManagementPage() {
     </motion.div>
   );
 
-  if (!user) return null;
+  if (!user) return <GlobalAppLoadingHold />;
 
   const canUseQr =
     Boolean(user.impersonation) ||
@@ -930,7 +931,7 @@ export function QRCodeManagementPage() {
         {activeTab === "employees" && (
           <>
             {loading && employees.length === 0 ? (
-              <CareTipPageLoader variant="section" message={t("common.loadingTeamMembers")} />
+              <DashboardListSkeleton rows={5} minHeightClass="min-h-[240px]" />
             ) : (
               <div className="space-y-8">
                 {user?.businessId && (

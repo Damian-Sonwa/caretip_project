@@ -9,6 +9,7 @@ import {
 } from "../utils/httpErrors.js";
 import { STATS_FETCH_ERROR_CODE, StatsFetchError } from "../utils/statsErrors.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
+import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { isStatsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
 import {
   getSubscriptionTierForBusinessId,
@@ -245,6 +246,13 @@ export async function getMyStats(req: Request, res: Response) {
         message: "Business not found",
       });
     }
+    logDashboardTenant("business.getMyStats", {
+      userId,
+      businessId: business.id,
+      role: req.user?.role ?? null,
+      timeframe,
+      scope,
+    });
     if (!subscriptionBypass(req)) {
       const tier = await getSubscriptionTierForBusinessId(business.id);
       if (!isStatsScopeAllowedForTier(tier, scope)) {
@@ -284,35 +292,6 @@ export async function getMyStats(req: Request, res: Response) {
 }
 
 export async function getStats(req: Request, res: Response) {
-  try {
-    const businessId = req.params.businessId ?? req.query.businessId;
-    if (!businessId || typeof businessId !== "string") {
-      return res.status(400).json({ message: "businessId is required" });
-    }
-    const tf = req.query.timeframe;
-    const timeframe =
-      tf === "week" || tf === "month" || tf === "year" || tf === "all"
-        ? tf
-        : "month";
-    const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
-    const scope =
-      scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
-    if (!subscriptionBypass(req)) {
-      const tier = await getSubscriptionTierForBusinessId(businessId);
-      if (!isStatsScopeAllowedForTier(tier, scope)) {
-        return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
-      }
-    }
-    const stats = await logDashboardTiming(
-      `business.stats.${scope}`,
-      { businessId, timeframe, scope },
-      () => businessService.getBusinessStats(businessId, timeframe, scope),
-    );
-    return res.json(stats);
-  } catch (err) {
-    logServerError("business.getStats", err);
-    return res.status(404).json({
-      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
-    });
-  }
+  /** @deprecated Client-supplied businessId is ignored — tenant resolved from JWT. */
+  return getMyStats(req, res);
 }

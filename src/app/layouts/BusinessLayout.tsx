@@ -11,6 +11,7 @@ import { BUSINESS_DASHBOARD_ROOT } from "../components/business/businessDashboar
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
+import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -21,6 +22,8 @@ export function BusinessLayout() {
   const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoManager(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "business";
+
+  useRegisterPagePaintReady("business-layout-paint");
 
   return (
     <div className="relative min-h-screen bg-background">
@@ -45,7 +48,7 @@ export function BusinessLayout() {
         >
           <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
           <main className="flex-1">
-            <RouteChunkBoundary variant="shell">
+            <RouteChunkBoundary variant="shell" registrationKey="business-outlet">
               <Outlet />
             </RouteChunkBoundary>
           </main>

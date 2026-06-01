@@ -4,6 +4,7 @@ import { Toaster } from 'sonner';
 import { router } from './routes';
 import { TipFlowProvider } from './context/TipFlowContext';
 import { AppLoadingSplashProvider } from './context/AppLoadingSplashContext';
+import { AppLoadingManagerProvider } from './context/AppLoadingManager';
 import { PwaInstallPrompt } from './components/PwaInstallPrompt';
 import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider } from "./components/AuthProvider";
@@ -19,9 +20,11 @@ export default function App() {
       <TipFlowProvider>
         <AppLoadingSplashProvider>
           <AuthProvider>
-            <SocketProvider>
-              <RouterProvider router={router} />
-            </SocketProvider>
+            <AppLoadingManagerProvider>
+              <SocketProvider>
+                <RouterProvider router={router} />
+              </SocketProvider>
+            </AppLoadingManagerProvider>
           </AuthProvider>
           <Toaster theme={mode} position="top-center" closeButton />
           <PwaInstallPrompt />

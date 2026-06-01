@@ -16,7 +16,10 @@ import {
 } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  DashboardListSkeleton,
+  PlatformAdminTableSkeleton,
+} from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import { useAuth } from "../../hooks/useAuth";
 import { useSocket } from "../../hooks/useSocket";
@@ -232,7 +235,7 @@ export function BusinessVerificationPage() {
       <PlatformResponsiveData
         mobile={
           isInitialLoad ? (
-            <CareTipPageLoader variant="compact" message={t("admin.businessVerificationPage.loading")} />
+            <DashboardListSkeleton rows={6} minHeightClass="min-h-0" />
           ) : filteredRows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
           ) : (
@@ -263,11 +266,7 @@ export function BusinessVerificationPage() {
             </thead>
             <tbody>
               {isInitialLoad ? (
-                <tr>
-                  <td colSpan={7} className={platformUi.tableTd}>
-                    <CareTipPageLoader variant="compact" message={t("admin.businessVerificationPage.loading")} />
-                  </td>
-                </tr>
+                <PlatformAdminTableSkeleton rows={8} cols={7} />
               ) : filteredRows.length === 0 ? (
                 <tr>
                   <td colSpan={7} className={platformUi.emptyState}>

@@ -22,6 +22,7 @@ import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
 import { useAuth } from "../hooks/useAuth";
+import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { useSocket } from "../hooks/useSocket";
 import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
 import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
@@ -808,8 +809,8 @@ export function AdminDashboard() {
     ],
   );
 
-  if (!user) {
-    return null;
+  if (!authHydrated || !sessionValidated || !user) {
+    return <GlobalAppLoadingHold />;
   }
   if (user.role !== "platform_admin") {
     return <Navigate to="/unauthorized" replace />;

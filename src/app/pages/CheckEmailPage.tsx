@@ -4,98 +4,32 @@ import { Link, useNavigate, useSearchParams, useLocation } from "react-router";
 import { Mail, Copy, Loader2, Eye, EyeOff, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
-import { useAuth, getPostAuthRedirect } from "@/app/hooks/useAuth";
+import {
+  VerifyEmailConfirmedView,
+  VerifyEmailFromToken,
+} from "@/app/components/auth/EmailVerificationFlow";
+import { EmailVerificationSuccessScreen } from "@/app/components/auth/EmailVerificationSuccessScreen";
+import { useAuth } from "@/app/hooks/useAuth";
 import { resolveInboxOpenTarget } from "@/app/lib/inboxDeepLink";
 import {
   resendVerificationEmailAPI,
   resendVerificationEmailSessionAPI,
-  verifyEmailWithToken,
 } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
-import { authDebug } from "@/app/lib/authDebugLog";
 import { caretipBtnPrimaryFull, caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 
 /**
- * One-shot: call the verify-email API for this token, then redirect into the app or show success.
- * Token is stripped from the URL on failure so a refresh does not re-hit a consumed token (HTTP 400).
- */
-function VerifyEmailFromToken({ token }: { token: string }) {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { refreshSession } = useAuth();
-  const [phase, setPhase] = useState<"verifying" | "success">("verifying");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        await verifyEmailWithToken(token);
-        if (cancelled) return;
-        authDebug("email_verify", { phase: "api_ok" });
-        const hasSession =
-          typeof localStorage !== "undefined" && !!localStorage.getItem("caretip_token");
-        if (hasSession) {
-          const refreshed = await refreshSession();
-          if (cancelled) return;
-          if (refreshed) {
-            const target = getPostAuthRedirect(refreshed);
-            authDebug("email_verify", { phase: "redirect_after_session", to: target });
-            navigate(target, { replace: true });
-            return;
-          }
-        }
-        authDebug("email_verify", { phase: "success_no_session" });
-        setPhase("success");
-      } catch (e) {
-        if (cancelled) return;
-        const msg = toUserFriendlyMessage(e);
-        authDebug("email_verify", { phase: "error", message: msg });
-        navigate("/verify-email", { replace: true, state: { verifyError: msg } });
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [token, navigate, refreshSession]);
-
-  if (phase === "success") {
-    return (
-      <AuthRecoveryLayout showFooterLink={false}>
-        <div className="space-y-4 text-center">
-          <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.emailVerifiedTitle")}</h1>
-          <p className="caretip-auth-subtitle !mt-2">{t("auth.checkEmail.emailVerifiedBody")}</p>
-          <Link
-            to="/login"
-            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit no-underline")}
-          >
-            {t("auth.checkEmail.continueToSignIn")}
-          </Link>
-        </div>
-      </AuthRecoveryLayout>
-    );
-  }
-
-  return (
-    <AuthRecoveryLayout showFooterLink={false}>
-      <div className="space-y-3 text-center">
-        <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.verifyingTitle")}</h1>
-        <p className="caretip-auth-subtitle">{t("auth.checkEmail.verifyingBody")}</p>
-      </div>
-    </AuthRecoveryLayout>
-  );
-}
-
-/**
  * Shown after password sign-up (and if an unverified session hits a protected route).
- * With `?token=` from the email link, completes verification once then redirects.
+ * With `?token=` from the email link, completes verification once then shows success.
  */
 export function CheckEmailPage() {
   const { t, i18n } = useTranslation();
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
+  const verifiedFromUrl = searchParams.get("verified") === "1";
   const verifyErrorBanner = (location.state as { verifyError?: string } | null)?.verifyError;
 
   const { user, logout, refreshSession } = useAuth();
@@ -104,6 +38,7 @@ export function CheckEmailPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [showVerificationSuccess, setShowVerificationSuccess] = useState(false);
 
   const inboxTarget = useMemo(() => (user ? resolveInboxOpenTarget(user.email) : null), [user]);
   const hasSessionUser = !!user && !!inboxTarget;
@@ -155,7 +90,7 @@ export function CheckEmailPage() {
       toast.error(t("auth.checkEmail.toastNotVerified"));
       return;
     }
-    navigate(getPostAuthRedirect(refreshed), { replace: true });
+    setShowVerificationSuccess(true);
   }, [logout, navigate, refreshSession, t]);
 
   useEffect(() => {
@@ -164,8 +99,16 @@ export function CheckEmailPage() {
 
   const isWebmail = inboxTarget?.kind === "web";
 
+  if (showVerificationSuccess) {
+    return <EmailVerificationSuccessScreen />;
+  }
+
   if (tokenFromUrl) {
     return <VerifyEmailFromToken token={tokenFromUrl} />;
+  }
+
+  if (verifiedFromUrl) {
+    return <VerifyEmailConfirmedView />;
   }
 
   return (

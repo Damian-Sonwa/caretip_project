@@ -33,6 +33,9 @@ import {
   isSessionBootstrapInProgress,
   whenSessionBootstrapSettled,
 } from "./authSessionBootstrap";
+import { logDashboardTenantRequest } from "./dashboardTenantLog";
+import { clearClientSessionHint } from "./authSessionHint";
+import { notifyAuthStorageSync } from "./authStorageSync";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
 
@@ -255,8 +258,10 @@ export function hasClientAccessToken(): boolean {
 }
 
 function setToken(token: string | null): void {
+  const prev = getToken();
   if (token && token.trim()) localStorage.setItem("caretip_token", token);
   else localStorage.removeItem("caretip_token");
+  if (getToken() !== prev) notifyAuthStorageSync();
 }
 
 /** Clears access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
@@ -269,8 +274,9 @@ export function clearClientAuthStorage(options?: { notifySync?: boolean }): void
     localStorage.removeItem("caretip_user");
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
+    clearClientSessionHint();
     if (options?.notifySync !== false) {
-      window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
+      notifyAuthStorageSync();
     }
   } catch {
     // ignore
@@ -639,6 +645,7 @@ export interface AuthResponse {
     name: string;
     emailVerified?: boolean;
     hasCompletedOnboarding?: boolean;
+    onboardingStep?: number;
     businessId?: string;
     employeeId?: string;
     avatar?: string | null;
@@ -878,6 +885,31 @@ export async function refreshSessionAPI(): Promise<AuthResponse> {
   throw new Error(fallback ?? "Your session has expired. Please sign in again.");
 }
 
+export type BootstrapRefreshResult =
+  | { kind: "authenticated"; data: AuthResponse }
+  | { kind: "unauthenticated" }
+  | { kind: "transient_error" };
+
+/**
+ * App-startup refresh — never throws for missing/expired refresh cookies (401/403).
+ * Anonymous visitors and expired sessions are normal `unauthenticated` outcomes.
+ */
+export async function bootstrapRefreshSession(): Promise<BootstrapRefreshResult> {
+  const r = await ensureRefreshedSession();
+  if (r.ok) return { kind: "authenticated", data: r.data };
+  if (
+    r.status === 0 ||
+    r.status === 503 ||
+    r.status === 502 ||
+    r.status === 504 ||
+    r.status === 429 ||
+    r.status >= 500
+  ) {
+    return { kind: "transient_error" };
+  }
+  return { kind: "unauthenticated" };
+}
+
 // Business
 export async function generateInviteCode(): Promise<{ inviteCode: string; expiresAt: string }> {
   try {
@@ -1065,6 +1097,7 @@ export async function getBusinessStats(
   const statsUrl = apiPath(
     `/api/business/me/stats?${new URLSearchParams({ timeframe: tf, scope }).toString()}`,
   );
+  logDashboardTenantRequest("GET /api/business/me/stats", { timeframe: tf, scope });
   if (inflight) {
     if (opts?.revalidate) {
       businessStatsInflight.delete(cacheKey);
@@ -1155,6 +1188,15 @@ export interface BusinessInfo {
   verificationStatus?: "pending" | "verified" | "rejected";
   /** SaaS tier for entitlement UI; defaults to premium on API when unset. */
   subscriptionTier?: "basic" | "premium" | "enterprise";
+  /** Explicit finish persisted on the user row. */
+  onboardingCompleted?: boolean;
+  /** Resume wizard at 1–3 from saved profile fields. */
+  onboardingStep?: number;
+}
+
+export function invalidateBusinessProfileCache(): void {
+  businessProfileCache = null;
+  businessProfileInflight = null;
 }
 
 export async function getBusinessById(businessId: string): Promise<BusinessInfo | null> {
@@ -1231,12 +1273,14 @@ export async function patchBusinessProfile(body: {
   contactPhone?: string | null;
   website?: string | null;
 }): Promise<BusinessInfo> {
-  return apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
+  const result = await apiRequest<BusinessInfo>(apiPath("/api/business/profile"), {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify(body),
     credentials: "include",
   });
+  invalidateBusinessProfileCache();
+  return result;
 }
 
 /** Same payload as PATCH — PUT for clients that expect REST “replace” semantics. */
@@ -1592,6 +1636,9 @@ export interface EmployeeTipsResponse {
   totalEarningsEur?: number;
   availableBalanceEur?: number;
   totalSupporters?: number;
+  /** Period-scoped guest ratings (summary scope). */
+  averageRating?: number | null;
+  ratingCount?: number;
 }
 
 export type EmployeeGoalStatus = "active" | "archived";
@@ -1715,6 +1762,14 @@ export function mergeEmployeeTipsResponse(
       typeof summary?.periodTipCount === "number"
         ? summary.periodTipCount
         : (analytics?.periodTipCount ?? 0),
+    averageRating:
+      summary?.averageRating !== undefined
+        ? summary.averageRating
+        : (analytics?.averageRating ?? null),
+    ratingCount:
+      typeof summary?.ratingCount === "number"
+        ? summary.ratingCount
+        : (analytics?.ratingCount ?? 0),
     chartSeries: analytics?.chartSeries ?? summary?.chartSeries ?? [],
     totalEarningsEur: summary?.totalEarningsEur ?? analytics?.totalEarningsEur,
     availableBalanceEur: summary?.availableBalanceEur ?? analytics?.availableBalanceEur,
@@ -1768,6 +1823,7 @@ export async function getTipsByEmployee(
   const tipsUrl = apiPath(
     `/api/tips/employee?${new URLSearchParams({ timeframe: tf, scope }).toString()}`,
   );
+  logDashboardTenantRequest("GET /api/tips/employee", { timeframe: tf, scope });
   if (inflight) {
     const target = resolveDashboardApiDebugTarget(tipsUrl);
     if (target) devTrackDeduped(target.group, target.key, { ...target.meta, inflight: true });

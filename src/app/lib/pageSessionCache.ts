@@ -31,3 +31,7 @@ export function invalidatePageSessionCache(key: string): void {
 export function invalidatePageSessionCacheByPrefix(prefix: string): void {
   pageStore.deleteByPrefix(prefix);
 }
+
+export function clearAllPageSessionCache(): void {
+  pageStore.clear();
+}

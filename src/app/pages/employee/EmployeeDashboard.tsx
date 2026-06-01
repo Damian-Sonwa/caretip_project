@@ -5,6 +5,7 @@ import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import i18n from "@/i18n/i18n";
@@ -80,6 +81,7 @@ import {
   devMockEmployeeSummary,
   shouldUseEmployeeDashboardDevDemo,
 } from "../../lib/devAnalyticsMocks";
+import { isWalkthroughDemoEmployee } from "../../lib/walkthroughDemo";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -127,6 +129,7 @@ export function EmployeeDashboard() {
     analyticsTimeframe,
     setAnalyticsTimeframe,
     displayPayload,
+    displayPayloadOrLatest,
     displayMetrics,
     valuesMatchAnalyticsPeriod,
     isMetricsInitialLoad,
@@ -227,19 +230,22 @@ export function EmployeeDashboard() {
     };
   }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t, applyLiveTip]);
 
+  const heroPayload = displayPayloadOrLatest ?? displayPayload;
+
   const heroAccountReady =
-    displayPayload != null &&
-    (typeof displayPayload.totalEarningsEur === "number" ||
-      typeof displayPayload.periodAmountEur === "number");
+    heroPayload != null &&
+    (typeof heroPayload.totalEarningsEur === "number" ||
+      typeof heroPayload.periodAmountEur === "number");
 
   const useDevDemo = shouldUseEmployeeDashboardDevDemo({
     isDev: import.meta.env.DEV,
+    isWalkthroughDemoAccount: isWalkthroughDemoEmployee(user),
     hasError: Boolean(error),
     accountSummaryLoaded: heroAccountReady,
     accountSummaryLoading: isMetricsInitialLoad,
     analyticsLoading: showMetricsLoading,
-    totalEarningsEur: displayPayload?.totalEarningsEur ?? 0,
-    totalSupporters: displayPayload?.totalSupporters ?? 0,
+    totalEarningsEur: heroPayload?.totalEarningsEur ?? 0,
+    totalSupporters: heroPayload?.totalSupporters ?? 0,
   });
 
   const devGoalBundle = useDevDemo ? devMockEmployeeGoalBundle() : null;
@@ -247,11 +253,11 @@ export function EmployeeDashboard() {
 
   const displayAccountSummary = useDevDemo
     ? { ...devMockEmployeeAccountSummary(), loaded: true }
-    : heroAccountReady && displayPayload
+    : heroAccountReady && heroPayload
       ? {
-          totalEarningsEur: displayPayload.totalEarningsEur ?? displayPayload.periodAmountEur ?? 0,
-          availableBalanceEur: displayPayload.availableBalanceEur ?? 0,
-          totalSupporters: displayPayload.totalSupporters ?? 0,
+          totalEarningsEur: heroPayload.totalEarningsEur ?? heroPayload.periodAmountEur ?? 0,
+          availableBalanceEur: heroPayload.availableBalanceEur ?? 0,
+          totalSupporters: heroPayload.totalSupporters ?? 0,
           loaded: true,
         }
       : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
@@ -261,29 +267,44 @@ export function EmployeeDashboard() {
     (!displayAccountSummary.loaded || analyticsPeriodRefreshing) &&
     (showMetricsLoading || isMetricsInitialLoad);
 
-  const displayPeriodTipCount = devPeriodSummary?.tips ?? displayPayload?.periodTipCount ?? 0;
-  const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayPayload?.periodAmountEur ?? 0;
+  const chartPayload = displayPayload ?? displayPayloadOrLatest;
+  const displayPeriodTipCount = devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? 0;
+  const displayPeriodAmountEur = devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? 0;
   const displayChartSeries = useDevDemo
     ? devMockEmployeeChartSeries(analyticsTimeframe)
-    : (displayPayload?.chartSeries ?? []);
-  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : (displayPayload?.tips ?? []);
-  const displayMonthlyGoal = devGoalBundle?.monthlyGoal ?? displayPayload?.monthlyGoal ?? null;
+    : (chartPayload?.chartSeries ?? []);
+  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : (chartPayload?.tips ?? []);
+  const displayMonthlyGoal =
+    devGoalBundle?.monthlyGoal ?? displayPayload?.monthlyGoal ?? displayMetrics?.monthlyGoal ?? null;
   const displayCurrentMonthTotal =
-    devGoalBundle?.currentMonthTotal ?? displayPayload?.currentMonthTotal ?? 0;
-  const displayGoalProgress = devGoalBundle?.goal ?? displayPayload?.goalProgress ?? null;
-  const businessTimezone = displayPayload?.businessTimezone ?? null;
+    devGoalBundle?.currentMonthTotal ??
+    displayPayload?.currentMonthTotal ??
+    displayMetrics?.currentMonthTotal ??
+    0;
+  const displayGoalProgress =
+    devGoalBundle?.goal ?? displayPayload?.goalProgress ?? displayMetrics?.goalProgress ?? null;
+  const businessTimezone = chartPayload?.businessTimezone ?? null;
 
   const periodMetrics = useMemo(() => {
-    const periodTipCount = devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? displayPeriodTipCount;
-    const periodAmountEur = devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? displayPeriodAmountEur;
-    const rating = useDevDemo ? devMockEmployeeRating() : null;
+    const periodTipCount =
+      devPeriodSummary?.tips ?? displayMetrics?.periodTipCount ?? displayPeriodTipCount;
+    const periodAmountEur =
+      devPeriodSummary?.amount ?? displayMetrics?.periodAmountEur ?? displayPeriodAmountEur;
+    const rating = useDevDemo
+      ? devMockEmployeeRating()
+      : (displayPayload?.averageRating ?? displayMetrics?.averageRating ?? null);
+    const ratingCount = useDevDemo
+      ? 12
+      : (displayPayload?.ratingCount ?? displayMetrics?.ratingCount ?? 0);
     const goalPct =
-      displayGoalProgress != null && displayGoalProgress.goalAmount > 0
-        ? displayGoalProgress.percent
+      displayGoalProgress != null
+        ? displayGoalProgress.goalAmount > 0
+          ? displayGoalProgress.percent ?? 0
+          : 0
         : displayMonthlyGoal != null && displayMonthlyGoal > 0
           ? Math.min(100, Math.round((displayCurrentMonthTotal / displayMonthlyGoal) * 100))
           : null;
-    return { periodTipCount, periodAmountEur, goalPct, rating };
+    return { periodTipCount, periodAmountEur, goalPct, rating, ratingCount };
   }, [
     devPeriodSummary,
     displayMetrics,
@@ -293,6 +314,10 @@ export function EmployeeDashboard() {
     displayGoalProgress,
     displayMonthlyGoal,
     displayCurrentMonthTotal,
+    displayPayload?.averageRating,
+    displayPayload?.ratingCount,
+    displayMetrics?.averageRating,
+    displayMetrics?.ratingCount,
   ]);
 
   const chartData = useMemo(() => {
@@ -385,9 +410,11 @@ export function EmployeeDashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- avoid URL-trigger loop
   }, [location.pathname, location.search, navigate, sessionValidated, user?.role, handleQrQuickAction]);
 
-  if (!user) return null;
+  if (!user) {
+    return <GlobalAppLoadingHold />;
+  }
 
-  if (error && !displayPayload && showMetricsLoading) {
+  if (error && !heroPayload && showMetricsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-4">
         <div className="text-center">

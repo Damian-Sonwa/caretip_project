@@ -15,6 +15,7 @@ import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { resolveEmailLocale, resolveUserPreferredLocale } from "../emails/i18nEmail.js";
+import { inferManagerOnboardingStep, type OnboardingStep } from "./onboardingProgress.service.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -26,6 +27,8 @@ export interface AuthUserDto {
   emailVerified: boolean;
   /** Business-only: whether onboarding has been completed. */
   hasCompletedOnboarding?: boolean;
+  /** Business-only: 1–3 wizard step inferred from saved profile (resume). */
+  onboardingStep?: OnboardingStep;
   businessId?: string;
   employeeId?: string;
   avatar?: string | null;
@@ -136,35 +139,11 @@ const businessIncludeForAuth = {
 } as const;
 
 /** True when the manager finished the business onboarding wizard (DB flag). */
-export function managerHasCompletedOnboarding(user: Pick<User, "role" | "hasCompletedOnboarding">): boolean {
+export function managerHasCompletedOnboarding(
+  user: Pick<User, "role" | "hasCompletedOnboarding" | "onboardingCompletedAt">,
+): boolean {
   if (user.role !== "MANAGER") return true;
-  return user.hasCompletedOnboarding === true;
-}
-
-/**
- * If the business profile already has wizard data but the user flag was never set
- * (legacy rows / partial failures), persist completion once and return an updated row.
- */
-export async function syncOnboardingFlagFromBusinessProfile(
-  user: UserForAuthResult,
-): Promise<UserForAuthResult> {
-  if (user.role !== "MANAGER" || managerHasCompletedOnboarding(user)) {
-    return user;
-  }
-  const biz = user.business;
-  if (!biz) return user;
-
-  const profileComplete =
-    biz.name.trim().length > 1 &&
-    Boolean(biz.businessType?.trim()) &&
-    Boolean(biz.registeredAddress?.trim());
-  if (!profileComplete) return user;
-
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { hasCompletedOnboarding: true },
-  });
-  return { ...user, hasCompletedOnboarding: true };
+  return user.hasCompletedOnboarding === true && user.onboardingCompletedAt != null;
 }
 
 function displayNameForUser(user: UserForAuthResult): string {
@@ -196,7 +175,19 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
   };
 
   if (user.role === "MANAGER") {
-    dto.hasCompletedOnboarding = managerHasCompletedOnboarding(user);
+    const completed = managerHasCompletedOnboarding(user);
+    dto.hasCompletedOnboarding = completed;
+    dto.onboardingStep = completed
+      ? 3
+      : inferManagerOnboardingStep(
+          user.business
+            ? {
+                name: user.business.name,
+                businessType: user.business.businessType,
+                registeredAddress: user.business.registeredAddress,
+              }
+            : null,
+        );
     if (user.business) {
       dto.businessId = user.business.id;
       dto.businessVerificationStatus = user.business.verificationStatus;
@@ -211,6 +202,20 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
   return { token: signAuthJwt(tokenPayload), user: dto };
 }
 
+/** Legacy rows: `has_completed_onboarding` was auto-set from profile fields without a finish action. */
+async function reconcileStaleOnboardingCompletion(user: UserForAuthResult): Promise<UserForAuthResult> {
+  if (user.role !== "MANAGER") return user;
+  if (user.hasCompletedOnboarding !== true || user.onboardingCompletedAt != null) {
+    return user;
+  }
+
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { hasCompletedOnboarding: false },
+  });
+  return { ...user, hasCompletedOnboarding: false };
+}
+
 async function loadUserForAuthResult(userId: string): Promise<UserForAuthResult> {
   const row = await prisma.user.findUnique({
     where: { id: userId },
@@ -222,7 +227,7 @@ async function loadUserForAuthResult(userId: string): Promise<UserForAuthResult>
   if (!row) {
     throw new Error("Invalid email or password");
   }
-  return syncOnboardingFlagFromBusinessProfile(row);
+  return reconcileStaleOnboardingCompletion(row);
 }
 
 /** Used by refresh-token flow to re-issue an access token and user payload. */
@@ -463,8 +468,7 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     }
   }
 
-  const prepared = await syncOnboardingFlagFromBusinessProfile(user);
-  return authResultForUserRecord(prepared);
+  return authResultForUserRecord(user);
 }
 
 /**

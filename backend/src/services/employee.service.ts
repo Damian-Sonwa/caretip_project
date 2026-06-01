@@ -6,7 +6,7 @@ import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
 import { invalidateBusinessStatsCache } from "./business.service.js";
 
 function notifyBusinessRosterChanged(businessId: string, reason: string): void {
-  notifyBusinessRosterChanged(businessId, reason);
+  emitBusinessDataChanged(businessId, reason);
   invalidateBusinessStatsCache(businessId);
 }
 import * as employeeActivationService from "./employeeActivation.service.js";
@@ -92,8 +92,6 @@ export interface EmployeeListItem {
   rating: number | null;
   tips: number;
   topRated: boolean;
-  email?: string;
-  phone?: string;
 }
 
 type EmployeeRosterAggRow = {
@@ -103,7 +101,6 @@ type EmployeeRosterAggRow = {
   job_title: string;
   avatar: string | null;
   is_active: boolean;
-  email: string;
   tip_count: number;
 };
 
@@ -117,7 +114,6 @@ export async function getEmployeesByBusinessId(businessId: string): Promise<Empl
       e.job_title,
       e.avatar,
       e.is_active,
-      u.email,
       COUNT(t.id) FILTER (WHERE t.status = 'success')::int AS tip_count
     FROM employees e
     INNER JOIN "User" u ON u.id = e.user_id
@@ -125,7 +121,8 @@ export async function getEmployeesByBusinessId(businessId: string): Promise<Empl
     WHERE e.business_id = ${businessId}
       AND e.is_active = true
       AND e.activation_status = 'active'
-    GROUP BY e.id, e.slug, e.name, e.job_title, e.avatar, e.is_active, u.email
+      AND u.email_verified = true
+    GROUP BY e.id, e.slug, e.name, e.job_title, e.avatar, e.is_active
     ORDER BY e.name ASC
   `);
 
@@ -138,7 +135,6 @@ export async function getEmployeesByBusinessId(businessId: string): Promise<Empl
       role: emp.job_title,
       avatar: absolutizePublicMediaPath(emp.avatar),
       isActive: emp.is_active,
-      email: emp.email ?? "",
       rating: tipCount > 0 ? 4.8 : null,
       tips: tipCount,
       topRated: tipCount > 200,

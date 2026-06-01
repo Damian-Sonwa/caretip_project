@@ -44,6 +44,10 @@ type BusinessSwrEntry = {
 
 const businessSwrStore = createDashboardSwrStore<BusinessSwrEntry>();
 
+export function clearBusinessDashboardSwrStore(): void {
+  businessSwrStore.clear();
+}
+
 function swrKey(tf: AnalyticsTimeframe): string {
   return `business:${tf}`;
 }

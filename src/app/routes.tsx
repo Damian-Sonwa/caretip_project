@@ -11,6 +11,7 @@ import {
   useParams,
 } from "react-router";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { AuthBootstrapLoadingRegistrar } from "./components/AuthBootstrapLoadingRegistrar";
 import {
   useAppLoadingCoordinator,
   useMarkAppShellReadyOptional,
@@ -87,6 +88,7 @@ import { PendingVerificationAllowedGate } from './components/PendingVerification
 import { PendingVerification } from './components/PendingVerification';
 import { logClientError } from './lib/clientLog';
 import { DashboardDevDebugOverlayRoot } from './components/dashboard/DashboardDevDebugOverlayRoot';
+import { LoaderDiagRuntime } from './components/LoaderDiagRuntime';
 
 /** Canonical alias: `/qr/business/:id` → existing `/qr-landing/:id` (no behavior change). */
 function RedirectQrBusiness() {
@@ -155,10 +157,13 @@ function RootLayout() {
 
   return (
     <>
+      {import.meta.env.DEV ? <LoaderDiagRuntime /> : null}
       <ScrollToTop />
-      <RouteChunkBoundary variant="minimal">
-        <Outlet />
-      </RouteChunkBoundary>
+      <AuthBootstrapLoadingRegistrar>
+        <RouteChunkBoundary variant="minimal" registrationKey="root-route">
+          <Outlet />
+        </RouteChunkBoundary>
+      </AuthBootstrapLoadingRegistrar>
       {import.meta.env.DEV ? <DashboardDevDebugOverlayRoot /> : null}
     </>
   );

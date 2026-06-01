@@ -49,9 +49,18 @@
       </script>
     </head>
 
-    <body style="margin: 0">
-      <div id="root" style="min-height: 100vh; min-height: 100dvh"></div>
+    <body style="margin: 0; background-color: #fafaf9">
+      <div id="root" style="min-height: 100vh; min-height: 100dvh; background-color: #fafaf9">
+        <!-- Neutral first paint — React global overlay owns the single spinner -->
+        <div id="app-bootstrap-loader" aria-hidden="true"></div>
+      </div>
+      <style>
+        html.dark body,
+        html.dark #root,
+        html.dark #app-bootstrap-loader {
+          background-color: #0a0a0a;
+        }
+      </style>
       <script type="module" src="/src/main.tsx"></script>
     </body>
   </html>
-  

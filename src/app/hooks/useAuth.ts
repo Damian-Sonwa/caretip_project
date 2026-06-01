@@ -33,6 +33,8 @@ import {
   subscribeAuthUser,
 } from "../lib/authUserStore";
 import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
+import { resetAllClientSessionCaches } from "../lib/resetAllClientSessionCaches";
+import { markClientSessionHint } from "../lib/authSessionHint";
 import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
@@ -41,10 +43,10 @@ import {
   SERVICE_UNAVAILABLE_CLIENT_MESSAGE,
   API_WAKEUP_NETWORK_MESSAGE,
 } from "../lib/errorMessages";
+import { AUTH_STORAGE_SYNC_EVENT, notifyAuthStorageSync } from "../lib/authStorageSync";
 
 export type { AuthSession, AuthStatus } from "../lib/authSession";
 
-const AUTH_STORAGE_SYNC_EVENT = "caretip-auth-storage-sync";
 const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
 const USER_STORAGE_KEY = "caretip_user";
 
@@ -93,19 +95,20 @@ function loadUserFromStorage(): User | null {
   }
 }
 
-function notifyAuthStorageSync() {
-  if (typeof window === "undefined") return;
-  window.dispatchEvent(new CustomEvent(AUTH_STORAGE_SYNC_EVENT));
+function notifyAuthStorageSyncFromHook() {
+  notifyAuthStorageSync();
 }
 
 /** Persist access token + normalized user to localStorage and sync all `useAuth()` instances. */
 function persistAuthResponse(data: AuthResponse): User {
+  resetAllClientSessionCaches();
   clearClientSessionRevoked();
   localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
   const u = parseUser(data.user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u));
+  markClientSessionHint();
   markOnboardingStatusFromServer();
-  notifyAuthStorageSync();
+  notifyAuthStorageSyncFromHook();
   authDebug("auth_session_updated", { ...deriveAuthSession(u), source: "persist" });
   return u;
 }
@@ -130,6 +133,10 @@ export interface User {
   isVerified: boolean;
   /** Used for business users to control whether `/onboarding` should show. */
   hasCompletedOnboarding: boolean;
+  /** Alias: `hasCompletedOnboarding` — true only after explicit wizard finish. */
+  onboardingCompleted: boolean;
+  /** Resume step 1–3 from API (business managers only). */
+  onboardingStep?: 1 | 2 | 3;
   businessId?: string;
   employeeId?: string;
   businessName?: string;
@@ -197,6 +204,14 @@ export function parseUser(data: AuthResponse["user"]): User {
   const isVerified = emailVerified;
   const hasCompletedOnboarding =
     role === "business" ? (typeof ext.hasCompletedOnboarding === "boolean" ? ext.hasCompletedOnboarding : false) : true;
+  const onboardingStepRaw = (ext as { onboardingStep?: unknown }).onboardingStep;
+  const onboardingStep =
+    role === "business" &&
+    typeof onboardingStepRaw === "number" &&
+    onboardingStepRaw >= 1 &&
+    onboardingStepRaw <= 3
+      ? (onboardingStepRaw as 1 | 2 | 3)
+      : undefined;
   const base: User = {
     id: data.id,
     name: data.name,
@@ -205,6 +220,8 @@ export function parseUser(data: AuthResponse["user"]): User {
     emailVerified,
     isVerified,
     hasCompletedOnboarding,
+    onboardingCompleted: hasCompletedOnboarding,
+    onboardingStep,
     businessId: data.businessId,
     employeeId: data.employeeId,
     avatar: data.avatar ?? undefined,
@@ -375,10 +392,11 @@ export function useAuth() {
       clearEmployeeNotifications();
       resetAuthSessionClient();
       commitAuthUser(null);
+      resetAllClientSessionCaches();
       await logoutAPI();
       clearStoredSession();
       markSessionBootstrapSettled();
-      notifyAuthStorageSync();
+      notifyAuthStorageSyncFromHook();
       authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
     } finally {
       clearLogoutPending();
@@ -400,13 +418,14 @@ export function useAuth() {
     const backupToken = sessionStorage.getItem("caretip_admin_token_backup");
     const backupUser = sessionStorage.getItem("caretip_admin_user_backup");
     if (!backupToken || !backupUser) return;
+    resetAllClientSessionCaches();
     localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, backupToken);
     const restored = JSON.parse(backupUser) as User;
     localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
     bumpSessionEpoch();
     commitAuthUser(restored);
     markSessionBootstrapSettled();
-    notifyAuthStorageSync();
+    notifyAuthStorageSyncFromHook();
     sessionStorage.removeItem("caretip_admin_token_backup");
     sessionStorage.removeItem("caretip_admin_user_backup");
     authDebug("auth_session_updated", { ...deriveAuthSession(restored), source: "exit_impersonation" });
@@ -450,7 +469,7 @@ export function useAuth() {
     bumpSessionEpoch();
     commitAuthUser(next);
     markSessionBootstrapSettled();
-    notifyAuthStorageSync();
+    notifyAuthStorageSyncFromHook();
   }, []);
 
   const refreshSession = useCallback(async (): Promise<User | null> => {

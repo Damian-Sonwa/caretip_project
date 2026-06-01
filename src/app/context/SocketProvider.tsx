@@ -10,6 +10,7 @@ import {
 } from "react";
 import { io, type Socket } from "socket.io-client";
 import { resolveApiBaseUrl } from "../lib/apiOrigin";
+import { AUTH_STORAGE_SYNC_EVENT } from "../lib/authStorageSync";
 
 /** Same origin as REST: VITE_API_URL or current origin (Vite proxy for /socket.io in dev). */
 function getSocketUrl(): string {
@@ -60,7 +61,13 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const connect = useCallback(() => {
-    if (socketRef.current) return;
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.close();
+      socketRef.current = null;
+      setSocket(null);
+      setConnected(false);
+    }
 
     const url = getSocketUrl();
     const token = localStorage.getItem("caretip_token");
@@ -118,14 +125,22 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, [connect, disconnect]);
 
   useEffect(() => {
-    const onStorage = (e: StorageEvent) => {
-      if (e.key !== "caretip_token") return;
+    const reconnectWithFreshToken = () => {
       if (interestRef.current <= 0) return;
       disconnect();
       connect();
     };
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== "caretip_token") return;
+      reconnectWithFreshToken();
+    };
+    const onAuthSync = () => reconnectWithFreshToken();
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    window.addEventListener(AUTH_STORAGE_SYNC_EVENT, onAuthSync);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      window.removeEventListener(AUTH_STORAGE_SYNC_EVENT, onAuthSync);
+    };
   }, [connect, disconnect]);
 
   const value = useMemo(

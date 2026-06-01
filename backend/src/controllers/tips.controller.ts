@@ -14,6 +14,7 @@ import {
 } from "../services/employeeTipsDashboard.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
+import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
 import { isEmployeeTipsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
@@ -41,6 +42,14 @@ export async function getByEmployee(req: Request, res: Response) {
     if (!employee) {
       return res.status(403).json({ message: "Insufficient permissions" });
     }
+    logDashboardTenant("tips.getByEmployee", {
+      userId,
+      employeeId: employee.id,
+      businessId: employee.businessId,
+      role: req.user?.role ?? null,
+      scope: typeof req.query.scope === "string" ? req.query.scope : "full",
+      timeframe: typeof req.query.timeframe === "string" ? req.query.timeframe : null,
+    });
     const timeframeRaw = typeof req.query.timeframe === "string" ? req.query.timeframe.trim() : "";
     const timeframe =
       timeframeRaw === "today" || timeframeRaw === "week" || timeframeRaw === "month"
@@ -125,6 +134,8 @@ export async function getByEmployee(req: Request, res: Response) {
         businessTimezone: employee.businessTimezone,
         periodAmountEur: summary.periodAmountEur,
         periodTipCount: summary.periodTipCount,
+        averageRating: summary.averageRating,
+        ratingCount: summary.ratingCount,
         chartSeries: summary.chartSeries,
         goal: summary.goal,
         analyticsBundled: true,
@@ -247,6 +258,11 @@ export async function getByBusiness(req: Request, res: Response) {
     if (!userId) return res.status(401).json({ message: "Authentication required" });
     const b = await businessService.getBusinessByUserId(userId);
     if (!b) return res.status(404).json({ message: "Business not found" });
+    logDashboardTenant("tips.getByBusiness", {
+      userId,
+      businessId: b.id,
+      role: req.user?.role ?? null,
+    });
 
     const { take, skip } = parseTakeSkip(req);
     const status = parseStatus(req.query.status);

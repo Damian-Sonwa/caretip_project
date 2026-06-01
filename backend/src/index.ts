@@ -10,6 +10,7 @@ import { Role } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "./middleware/auth.middleware.js";
 import { isApprovedBusiness } from "./middleware/isApprovedBusiness.middleware.js";
+import { requireCompletedOnboarding } from "./middleware/requireCompletedOnboarding.middleware.js";
 import * as businessController from "./controllers/business.controller.js";
 import authRoutes from "./routes/auth.routes.js";
 import businessRoutes from "./routes/business.routes.js";
@@ -111,6 +112,8 @@ app.get(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
+  isApprovedBusiness,
+  requireCompletedOnboarding,
   businessController.getMyStats
 );
 app.use("/api/business", businessRoutes);

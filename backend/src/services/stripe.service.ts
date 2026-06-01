@@ -44,6 +44,44 @@ function frontendBaseUrl(): string {
   return (process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "");
 }
 
+const AMOUNT_EPSILON_EUR = 0.001;
+
+/** Stripe amounts are integer cents — convert to EUR for ledger storage. */
+export function stripeCentsToEur(cents: number | null | undefined): number | null {
+  if (cents == null || !Number.isFinite(cents) || cents <= 0) return null;
+  return cents / 100;
+}
+
+function amountsMatchEur(a: number, b: number): boolean {
+  return Math.abs(a - b) <= AMOUNT_EPSILON_EUR;
+}
+
+function logStripeAmountMismatch(context: string, details: Record<string, unknown>): void {
+  console.warn(`[stripe.amount_mismatch] ${context}`, details);
+}
+
+/**
+ * Canonical paid EUR from a Checkout Session — never trust client metadata amounts.
+ */
+function confirmedEurFromCheckoutSession(session: Stripe.Checkout.Session): number | null {
+  const fromTotal = stripeCentsToEur(session.amount_total);
+  if (fromTotal != null) return fromTotal;
+
+  const pi = session.payment_intent;
+  if (pi && typeof pi === "object" && "amount_received" in pi) {
+    const received = (pi as Stripe.PaymentIntent).amount_received;
+    const fromPi = stripeCentsToEur(received ?? (pi as Stripe.PaymentIntent).amount);
+    if (fromPi != null) return fromPi;
+  }
+  return null;
+}
+
+async function confirmedEurFromPaymentIntentId(paymentIntentId: string): Promise<number | null> {
+  const stripe = getStripe();
+  const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+  return stripeCentsToEur(pi.amount_received ?? pi.amount);
+}
+
 export type TipCheckoutContext = {
   sessionId: string;
   paymentIntentId: string | null;
@@ -264,14 +302,24 @@ export async function createTipCheckoutSession(
 
   const { employeeId, businessId } = input;
   const total = Number(input.amount);
-  const tipForRecord = input.tipAmount != null ? Number(input.tipAmount) : total;
+  const tipRaw = input.tipAmount != null ? Number(input.tipAmount) : total;
 
   if (!employeeId || !businessId || Number.isNaN(total) || total <= 0) {
     throw new Error("Invalid amount or business context");
   }
-  if (Number.isNaN(tipForRecord) || tipForRecord <= 0) {
+  if (Number.isNaN(tipRaw) || tipRaw <= 0) {
     throw new Error("Invalid tip amount");
   }
+  if (!amountsMatchEur(total, tipRaw)) {
+    logStripeAmountMismatch("createTipCheckoutSession", {
+      employeeId,
+      businessId,
+      amount: total,
+      tipAmount: tipRaw,
+    });
+    throw new Error("Tip amount must match the checkout total");
+  }
+  const tipForRecord = total;
 
   const employee = await prisma.employee.findUnique({
     where: { id: employeeId },
@@ -304,9 +352,6 @@ export async function createTipCheckoutSession(
   const metadata: Record<string, string> = {
     employeeId,
     businessId,
-    amount: String(total),
-    tipAmount: String(tipForRecord),
-    totalAmount: String(total),
     source: "checkout_session",
   };
   if (locId) metadata.locationId = locId;
@@ -354,14 +399,37 @@ export async function createTipCheckoutSession(
 }
 
 export async function handlePaymentSuccess(paymentIntentId: string): Promise<void> {
-  const { count } = await prisma.transaction.updateMany({
-    where: { stripePaymentIntentId: paymentIntentId, status: "pending" },
-    data: { status: "success" },
-  });
+  let confirmedEur: number | null = null;
+  try {
+    confirmedEur = await confirmedEurFromPaymentIntentId(paymentIntentId);
+  } catch (err) {
+    console.error("[stripe.handlePaymentSuccess] retrieve PI", paymentIntentId, err);
+  }
 
-  if (count === 0) {
+  const pending = await prisma.transaction.findFirst({
+    where: { stripePaymentIntentId: paymentIntentId, status: "pending" },
+  });
+  if (!pending) {
     return;
   }
+
+  if (confirmedEur != null && !amountsMatchEur(Number(pending.amount), confirmedEur)) {
+    logStripeAmountMismatch("handlePaymentSuccess", {
+      paymentIntentId,
+      ledgerAmount: Number(pending.amount),
+      stripeAmount: confirmedEur,
+    });
+  }
+
+  const data: { status: "success"; amount?: number } = { status: "success" };
+  if (confirmedEur != null) {
+    data.amount = confirmedEur;
+  }
+
+  await prisma.transaction.update({
+    where: { id: pending.id },
+    data,
+  });
 
   const tip = await prisma.transaction.findFirst({
     where: { stripePaymentIntentId: paymentIntentId },
@@ -387,6 +455,10 @@ export async function handlePaymentFailed(paymentIntentId: string): Promise<void
  * Alias for integrations that prefer an explicit name.
  */
 export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Session): Promise<void> {
+  if (session.payment_status && session.payment_status !== "paid") {
+    return;
+  }
+
   const pi = session.payment_intent;
   const piId = typeof pi === "string" ? pi : pi?.id ?? null;
   if (!piId) {
@@ -400,12 +472,40 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     return;
   }
 
+  let confirmedEur = confirmedEurFromCheckoutSession(session);
+  if (confirmedEur == null) {
+    try {
+      confirmedEur = await confirmedEurFromPaymentIntentId(piId);
+    } catch (err) {
+      console.error("[stripe.handleSuccessfulTipPayment] retrieve PI", piId, err);
+    }
+  }
+  if (confirmedEur == null || confirmedEur <= 0) {
+    console.error("[stripe.handleSuccessfulTipPayment] missing Stripe amount", {
+      sessionId: session.id,
+      paymentIntentId: piId,
+    });
+    return;
+  }
+
   const md = session.metadata ?? {};
   const employeeId = md.employeeId;
   const businessId = md.businessId;
-  const tipAmount = parseFloat(md.tipAmount ?? md.amount ?? "0");
 
-  if (!employeeId || !businessId || Number.isNaN(tipAmount) || tipAmount <= 0) {
+  const metadataTip = md.tipAmount ?? md.amount ?? md.totalAmount;
+  if (metadataTip != null && metadataTip !== "") {
+    const parsedMeta = parseFloat(metadataTip);
+    if (!Number.isNaN(parsedMeta) && !amountsMatchEur(parsedMeta, confirmedEur)) {
+      logStripeAmountMismatch("handleSuccessfulTipPayment", {
+        sessionId: session.id,
+        paymentIntentId: piId,
+        metadataAmount: parsedMeta,
+        stripeAmount: confirmedEur,
+      });
+    }
+  }
+
+  if (!employeeId || !businessId) {
     return;
   }
 
@@ -422,7 +522,7 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
   try {
     const tip = await prisma.transaction.create({
       data: {
-        amount: tipAmount,
+        amount: confirmedEur,
         status: "success",
         stripePaymentIntentId: piId,
         employeeId,

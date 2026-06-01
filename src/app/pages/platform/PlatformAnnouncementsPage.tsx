@@ -11,7 +11,10 @@ import { logClientError } from "@/app/lib/clientLog";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
-import { CareTipPageLoader } from "@/app/components/CareTipPageLoader";
+import {
+  DashboardListSkeleton,
+  PlatformAdminTableSkeleton,
+} from "@/app/components/dashboard/DashboardSectionLoading";
 import { PlatformPage, PlatformPageHeader } from "@/app/components/platform/PlatformPageChrome";
 import { platformUi } from "@/app/components/platform/platformDashboardUi";
 import {
@@ -124,6 +127,8 @@ export function PlatformAnnouncementsPage() {
       setSubmitting(false);
     }
   };
+
+  const isHistoryInitialLoad = historyLoading && history.length === 0;
 
   return (
     <PlatformPage>
@@ -249,9 +254,27 @@ export function PlatformAnnouncementsPage() {
             {t("admin.announcements.historySection")}
           </h2>
           <div className={platformUi.dataPanel}>
-            {historyLoading && history.length === 0 ? (
-              <div className="px-4 py-12">
-                <CareTipPageLoader variant="section" message={t("admin.announcements.historyLoading")} />
+            {isHistoryInitialLoad ? (
+              <div className="px-4 py-6">
+                <div className="hidden md:block">
+                  <table className={platformUi.table}>
+                    <thead>
+                      <tr className={platformUi.tableHeadRow}>
+                        <th className={platformUi.tableTh}>{t("admin.announcements.colSent")}</th>
+                        <th className={platformUi.tableTh}>{t("admin.announcements.colTitle")}</th>
+                        <th className={platformUi.tableTh}>{t("admin.announcements.colAudience")}</th>
+                        <th className={platformUi.tableTh}>{t("admin.announcements.colDelivery")}</th>
+                        <th className={platformUi.tableTh}>{t("admin.announcements.colStatus")}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <PlatformAdminTableSkeleton rows={6} cols={5} />
+                    </tbody>
+                  </table>
+                </div>
+                <div className="md:hidden">
+                  <DashboardListSkeleton rows={5} minHeightClass="min-h-0" />
+                </div>
               </div>
             ) : history.length === 0 ? (
               <p className={platformUi.emptyState}>{t("admin.announcements.historyEmpty")}</p>

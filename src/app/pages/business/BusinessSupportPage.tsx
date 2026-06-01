@@ -24,6 +24,8 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { cn } from "@/lib/utils";
+import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
+import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 const CATEGORIES: SupportTicketCategory[] = [
@@ -91,7 +93,9 @@ export function BusinessSupportPage() {
     }
   };
 
-  if (!user || user.role !== "business") return null;
+  if (!user || user.role !== "business") return <GlobalAppLoadingHold />;
+
+  const isInitialTicketLoad = loading && tickets.length === 0;
 
   return (
     <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
@@ -190,10 +194,8 @@ export function BusinessSupportPage() {
             </div>
           </div>
 
-          {loading ? (
-            <div className="flex justify-center py-12">
-              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
-            </div>
+          {isInitialTicketLoad ? (
+            <DashboardListSkeleton rows={4} minHeightClass="min-h-0 py-4" />
           ) : tickets.length === 0 ? (
             <p className="rounded-xl border border-dashed px-4 py-10 text-center text-sm text-muted-foreground">
               {t("support.business.emptyHistory")}

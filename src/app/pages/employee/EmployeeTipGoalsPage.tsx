@@ -13,7 +13,8 @@ import {
   type GoalPeriod,
 } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { EmployeeGoalListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
@@ -133,9 +134,9 @@ export function EmployeeTipGoalsPage() {
 
   const isInitialGoalsLoad = loading && goals.length === 0;
 
-  if (!authReady && isInitialGoalsLoad) return <CareTipPageLoader />;
-  if (!user || user.role !== "employee") return null;
-  if (isInitialGoalsLoad) return <CareTipPageLoader />;
+  if (!user || user.role !== "employee") {
+    return <GlobalAppLoadingHold />;
+  }
 
   return (
     <div className={employeeUi.page}>
@@ -150,10 +151,14 @@ export function EmployeeTipGoalsPage() {
             </div>
           }
           actions={
-            <Button type="button" onClick={openCreate} className={employeeUi.btnPrimary}>
-              <Plus className="mr-2 h-4 w-4" />
-              {t("employee.tipGoals.newGoal")}
-            </Button>
+            !isInitialGoalsLoad ? (
+              <Button type="button" onClick={openCreate} className={employeeUi.btnPrimary}>
+                <Plus className="mr-2 h-4 w-4" />
+                {t("employee.tipGoals.newGoal")}
+              </Button>
+            ) : (
+              <span className="dashboard-hero-metric-skeleton__bar block h-10 w-32 rounded-xl" aria-hidden />
+            )
           }
         />
 
@@ -163,7 +168,9 @@ export function EmployeeTipGoalsPage() {
             <p className={employeeUi.cardDesc}>{t("employee.tipGoals.manageSubtitle")}</p>
           </div>
 
-          {loadError ? (
+          {isInitialGoalsLoad ? (
+            <EmployeeGoalListSkeleton rows={4} />
+          ) : loadError ? (
             <div className="px-5 py-8 sm:px-6">
               <div className="rounded-2xl border border-neutral-200/80 bg-stone-50/80 p-5">
                 <p className="text-sm font-semibold text-foreground">{t("employee.tipGoals.couldNotLoad")}</p>
@@ -175,9 +182,7 @@ export function EmployeeTipGoalsPage() {
                 </div>
               </div>
             </div>
-          ) : null}
-
-          {empty ? (
+          ) : empty ? (
             <EmployeeEmptyState
               icon={<Target className="h-6 w-6" aria-hidden />}
               title={t("employee.tipGoals.emptyTitle")}

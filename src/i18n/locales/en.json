@@ -31,7 +31,7 @@
     "metricZeroRatings": "0 ratings"
   },
   "common": {
-    "settingUp": "Setting things up for you…",
+    "settingUp": "Setting things up for you.",
     "signingOut": "Signing you out securely...",
     "onlyAMoment": "This will only take a moment.",
     "syncingAccountStatus": "Syncing account status…",
@@ -737,9 +737,9 @@
       "hintWeak": "Use 8+ characters with upper, lower, number, and special (e.g. @#$%)."
     },
     "checkEmail": {
-      "emailVerifiedTitle": "Email verified",
-      "emailVerifiedBody": "Thanks. You can sign in to continue.",
-      "continueToSignIn": "Continue to sign in",
+      "successTitle": "Email verified",
+      "successSubtitle": "Your account has been successfully verified.",
+      "successContinueBody": "Please continue to sign in and access your workspace.",
       "verifyingTitle": "Verifying your email…",
       "verifyingBody": "This will only take a moment.",
       "title": "Check your email to verify your account",
@@ -1384,6 +1384,20 @@
       "visualCaption3": "QR codes ready where guests are",
       "visualCaption4": "Tips flow in, instantly appreciated",
       "visualWhisperLabel": "Today",
+      "progressTitle": "Setup progress",
+      "progressStepOf": "Step {{current}} of {{total}}",
+      "progressAccount": "Account created",
+      "progressBusiness": "Business details added",
+      "progressTeam": "Team added",
+      "progressQr": "QR codes generated",
+      "progressReceiving": "Receiving tips",
+      "progressReadyForTips": "Ready to receive tips",
+      "progressUpNext": "Up next: {{step}}",
+      "badgeAccount": "Account ready",
+      "badgeBusiness": "Business created",
+      "badgeStaff": "3 staff added",
+      "badgeQr": "QR ready",
+      "badgeTips": "Tips live",
       "phoneWelcome": "Welcome",
       "phoneWelcomeSub": "Your venue, ready in minutes",
       "phoneTeam": "Your team",
@@ -1764,6 +1778,7 @@
       "toastMarkedRead": "Marked as read"
     },
     "tipGoals": {
+      "loading": "Loading goals…",
       "loadFailed": "Failed to load goals.",
       "backAria": "Back",
       "title": "Tip goals",
@@ -1908,6 +1923,7 @@
       "statMonthlyGoal": "Monthly goal",
       "statNoRatings": "0 ratings",
       "statGoalProgress": "Progress toward your current target.",
+      "statRatingsCount": "{{count}} ratings in this period",
       "statGoalSetHint": "Set a goal in settings to track progress.",
       "statChangeUpdating": "Updating this period…",
       "statChangeEarned": "{{amount}} earned, {{count}} in this period",
@@ -1999,55 +2015,95 @@
     "onboarding": {
       "toastSessionExpired": "Your session expired. Please sign in again.",
       "toastSavedLoadingDashboard": "Saved. Loading your dashboard…",
-      "eyebrow": "Business onboarding",
-      "headline": "Welcome to CareTip",
-      "description": "Set up your venue profile in a few guided steps. You can update everything later from your dashboard.",
-      "productPitch": "CareTip helps hospitality teams collect digital tips, notify staff instantly, and track performance from one dashboard.",
-      "asideAria": "Onboarding overview",
+      "headline": "Create your venue",
+      "description": "Set up your CareTip workspace in less than 5 minutes.",
       "progressAria": "Onboarding progress",
       "formStepLabel": "Step {{current}} of {{total}}",
-      "stepsRemaining": {
-        "final": "Final step, almost there"
+      "setupTime": "Setup time: {{minutes}} min",
+      "finalStep": {
+        "badge": "Final step",
+        "headline": "Customize your guest experience",
+        "description": "This is the last step before you go live. Add your logo and review how guests will tip your team.",
+        "readyMessage": "You're one step away from accepting digital tips."
       },
-      "stepsRemaining_one": "{{count}} step remaining",
-      "stepsRemaining_other": "{{count}} steps remaining",
+      "upload": {
+        "cta": "Click to upload your logo",
+        "formats": "PNG, JPG, or SVG",
+        "dragHint": "or drag and drop",
+        "remove": "Remove image"
+      },
       "preview": {
-        "step1Aria": "Preview of your venue profile on CareTip",
-        "step1Title": "Your venue profile",
-        "step1Subtitle": "Guests see this when they tip your team",
-        "venueLabel": "Venue",
-        "venueExample": "The Harbor Kitchen",
-        "typeExample": "Restaurant",
-        "step2Aria": "Preview of your venue location on CareTip",
-        "step2Title": "Location on your profile",
-        "step2Subtitle": "Helps guests and staff trust your listing",
-        "addressExample": "12 Market Street, Dublin 2, Ireland",
-        "step3Aria": "Preview of QR tipping on CareTip",
-        "step3Title": "QR tipping ready",
-        "step3Subtitle": "Print codes for tables and share links with staff",
-        "readyHint": "Dashboard unlocks after setup"
+        "panelAria": "Live guest preview (not interactive)",
+        "liveLabel": "Live preview",
+        "previewOnlyBadge": "Preview only",
+        "helperText": "Updates as you fill in your business details below.",
+        "helperTextNamed": "Guests will see {{name}} on your tipping page.",
+        "guestAria": "Non-interactive mockup of the guest tipping page. Controls shown are for preview only.",
+        "guestAriaNamed": "Non-interactive preview of the guest tipping page for {{name}}.",
+        "chromeSubtitleEmpty": "Your guest page",
+        "placeholderVenueName": "Your business name",
+        "placeholderVenueType": "Business type",
+        "placeholderAddress": "Your address",
+        "selectStaffToTip": "Select Staff to Tip",
+        "selectStaffToTipDesc": "Guests choose a team member before tipping",
+        "staffReadyGeneric": "Your team will appear here after setup",
+        "selectAmountTitle": "Choose an amount",
+        "selectAmountDesc": "Quick presets guests can tap",
+        "selectAmountAt": "Tip {{name}}'s team",
+        "tipAmountTile": "Tip amount",
+        "previewPayBar": "Continue to payment",
+        "whoServedYou": "Who served you?",
+        "whoServedYouDesc": "Guests pick a team member to tip",
+        "whoServedYouAt": "Choose who to tip at {{name}}",
+        "tipButtonPreview": "Leave a tip",
+        "tipCta": "Tip Now",
+        "qrReady": "QR codes ready for tables and staff links",
+        "qrPreviewLabel": "Your QR code",
+        "qrPreviewFor": "QR for {{name}}",
+        "staffRoles": {
+          "server": "Server",
+          "host": "Host",
+          "chef": "Chef",
+          "concierge": "Concierge",
+          "housekeeping": "Housekeeping",
+          "bellhop": "Bellhop",
+          "stylist": "Stylist",
+          "colorist": "Colorist",
+          "reception": "Reception",
+          "bartender": "Bartender",
+          "barback": "Barback",
+          "barista": "Barista",
+          "pastry": "Pastry",
+          "teamMember": "Team member"
+        }
       },
       "steps": {
-        "businessDetails": "Business details",
-        "locationDetails": "Location details",
-        "verificationFinish": "Verification & finish"
+        "businessDetails": "Business Details",
+        "teamSetup": "Team Setup",
+        "qrSetup": "QR Setup"
       },
-      "stepDesc": {
-        "businessDetails": "Tell us about your business so guests and staff see the right name and category.",
-        "locationDetails": "Add your registered address and optional contact number for your profile.",
-        "verificationFinish": "Upload your logo and website, then finish to open your dashboard."
+      "stepTitle": {
+        "businessDetails": "Business details",
+        "teamSetup": "Venue & team contact",
+        "qrSetup": "Guest page & QR"
+      },
+      "stepHint": {
+        "businessDetails": "How your venue appears to guests when they tip.",
+        "teamSetup": "Location and phone help staff and guests trust your listing.",
+        "qrSetup": "Add branding for your QR tipping page, then open your dashboard."
       },
       "fields": {
         "legalName": "Legal business name",
-        "legalNamePlaceholder": "e.g. CareTip Hospitality Ltd",
+        "legalNamePlaceholder": "The Harbor Kitchen Ltd",
         "businessType": "Business type",
         "businessTypePlaceholder": "Select a type",
-        "address": "Address",
+        "address": "Registered address",
         "addressPlaceholder": "Street, city, postal code",
-        "phone": "Phone number",
+        "phone": "Team contact phone",
+        "phonePlaceholder": "Optional",
         "website": "Website",
-        "logo": "Logo upload",
-        "logoHint": "Optional. PNG or JPEG works best.",
+        "logo": "Logo",
+        "logoHint": "Optional. PNG or JPEG, square works best.",
         "optional": "Optional"
       },
       "businessTypes": {
@@ -2059,9 +2115,9 @@
         "other": "Other"
       },
       "trust": {
-        "secure": "Secure & encrypted",
-        "fast": "Setup takes less than 5 minutes",
-        "editable": "You can edit everything later"
+        "secure": "Bank-grade security",
+        "fast": "Setup takes under 5 minutes",
+        "editable": "Edit everything later"
       },
       "actions": {
         "back": "Back",

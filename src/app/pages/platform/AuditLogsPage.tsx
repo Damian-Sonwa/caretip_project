@@ -5,7 +5,10 @@ import { toast } from "sonner";
 import { fetchPlatformAuditLogs, type PlatformAuditLogRow } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  DashboardListSkeleton,
+  PlatformAdminTableSkeleton,
+} from "../../components/dashboard/DashboardSectionLoading";
 import {
   PlatformPage,
   PlatformPageHeader,
@@ -110,7 +113,7 @@ export function AuditLogsPage() {
       <PlatformResponsiveData
         mobile={
           isInitialLoad ? (
-            <CareTipPageLoader variant="compact" message={t("admin.auditLogsPage.loading")} />
+            <DashboardListSkeleton rows={6} minHeightClass="min-h-0" />
           ) : rows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
           ) : filteredRows.length === 0 ? (
@@ -133,11 +136,7 @@ export function AuditLogsPage() {
             </thead>
             <tbody>
               {isInitialLoad ? (
-                <tr>
-                  <td colSpan={4} className={platformUi.tableTd}>
-                    <CareTipPageLoader variant="compact" message={t("admin.auditLogsPage.loading")} />
-                  </td>
-                </tr>
+                <PlatformAdminTableSkeleton rows={8} cols={4} />
               ) : rows.length === 0 ? (
                 <tr>
                   <td colSpan={4} className={platformUi.emptyState}>

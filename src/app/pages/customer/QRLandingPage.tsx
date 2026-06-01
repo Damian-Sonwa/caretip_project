@@ -68,7 +68,7 @@ export function QRLandingPage() {
     timestamp: number;
   } | null>(null);
   const [repeatDismissed, setRepeatDismissed] = useState(false);
-  /** Directory flow: single hero `<img>` loads the logo; sticky uses a local icon to avoid duplicate requests (and Firefox NS_BINDING_ABORTED). */
+  /** Directory flow: hero loads the business logo; sticky header uses the CareTip wordmark only. */
   const [heroLogoFailed, setHeroLogoFailed] = useState(false);
 
   useEffect(() => {
@@ -572,19 +572,11 @@ export function QRLandingPage() {
     <div className={cf.page}>
       <div className={cf.stickyHeader}>
         <div className={cf.headerInner}>
-          <div
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-border/70 bg-muted/35"
-            aria-hidden
-          >
-            <Building2 className="h-5 w-5 text-primary" />
-          </div>
+          <CareTipLogo size="xs" className="h-11 max-h-11 min-h-0 w-auto max-w-[5.5rem] shrink-0" />
           <div className="min-w-0 flex-1">
             <h1 className={cf.headline}>{businessData.name}</h1>
             <p className={cf.subline}>{t("tipFlow.qrLanding.selectTeamMember")}</p>
           </div>
-          <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-            {t("tipFlow.common.careTipBrand")}
-          </span>
         </div>
       </div>
 

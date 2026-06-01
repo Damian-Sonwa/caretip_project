@@ -3,7 +3,6 @@ import { prisma } from "../prisma.js";
 import {
   authResultForUserRecord,
   normalizeLoginEmail,
-  syncOnboardingFlagFromBusinessProfile,
   type AuthResult,
   type LoginInput,
 } from "./auth.service.js";
@@ -167,8 +166,7 @@ export async function authenticateWithOAuth(
     if (sessionUser.emailVerified !== true) {
       throw new EmailNotVerifiedLoginError();
     }
-    const prepared = await syncOnboardingFlagFromBusinessProfile(sessionUser);
-    return authResultForUserRecord(prepared);
+    return authResultForUserRecord(sessionUser);
   }
 
   /** Sign up */

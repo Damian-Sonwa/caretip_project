@@ -44,6 +44,15 @@ export function normalizeStoredUser(raw: unknown): User | null {
       ? o.hasCompletedOnboarding === true
       : true;
 
+  const onboardingStepRaw = o.onboardingStep;
+  const onboardingStep =
+    o.role === "business" &&
+    typeof onboardingStepRaw === "number" &&
+    onboardingStepRaw >= 1 &&
+    onboardingStepRaw <= 3
+      ? (onboardingStepRaw as 1 | 2 | 3)
+      : undefined;
+
   return {
     id: o.id,
     name: typeof o.name === "string" ? o.name : o.email,
@@ -52,6 +61,8 @@ export function normalizeStoredUser(raw: unknown): User | null {
     emailVerified,
     isVerified: emailVerified,
     hasCompletedOnboarding,
+    onboardingCompleted: hasCompletedOnboarding,
+    onboardingStep,
     businessId: typeof o.businessId === "string" ? o.businessId : undefined,
     employeeId: typeof o.employeeId === "string" ? o.employeeId : undefined,
     businessName: typeof o.businessName === "string" ? o.businessName : undefined,

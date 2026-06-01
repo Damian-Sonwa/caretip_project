@@ -11,6 +11,7 @@ import { PLATFORM_DASHBOARD_ROOT } from "../components/platform/platformDashboar
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { cn } from "@/lib/utils";
+import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
  * Child routes render page content (no shared "Dashboard" with business).
@@ -20,6 +21,8 @@ export function SuperAdminLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useAuth();
   const showDemoRibbon = isWalkthroughDemoPlatformAdmin(user);
+
+  useRegisterPagePaintReady("platform-admin-layout-paint");
 
   return (
     <div className="relative min-h-screen bg-background">

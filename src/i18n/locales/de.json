@@ -31,7 +31,7 @@
     "metricZeroRatings": "0 Bewertungen"
   },
   "common": {
-    "settingUp": "Wird für Sie eingerichtet…",
+    "settingUp": "Wird für Sie eingerichtet.",
     "signingOut": "Sie werden sicher abgemeldet …",
     "onlyAMoment": "Das dauert nur einen Moment.",
     "syncingAccountStatus": "Kontostatus wird synchronisiert…",
@@ -739,9 +739,9 @@
       "hintWeak": "Mind. 8 Zeichen mit Groß-, Kleinbuchstaben, Zahl und Sonderzeichen (z. B. @#$%)."
     },
     "checkEmail": {
-      "emailVerifiedTitle": "E-Mail bestätigt",
-      "emailVerifiedBody": "Danke. Sie können sich jetzt anmelden.",
-      "continueToSignIn": "Weiter zur Anmeldung",
+      "successTitle": "E-Mail bestätigt",
+      "successSubtitle": "Ihr Konto wurde erfolgreich bestätigt.",
+      "successContinueBody": "Bitte melden Sie sich an, um auf Ihren Arbeitsbereich zuzugreifen.",
       "verifyingTitle": "E-Mail wird bestätigt…",
       "verifyingBody": "Das dauert nur einen Moment.",
       "title": "Bitte E-Mail prüfen, um Ihr Konto zu bestätigen",
@@ -1388,6 +1388,20 @@
       "visualCaption3": "QR-Codes dort, wo Gäste sind",
       "visualCaption4": "Trinkgelder fließen, sofort spürbar",
       "visualWhisperLabel": "Heute",
+      "progressTitle": "Einrichtungsfortschritt",
+      "progressStepOf": "Schritt {{current}} von {{total}}",
+      "progressAccount": "Konto erstellt",
+      "progressBusiness": "Betriebsdaten hinzugefügt",
+      "progressTeam": "Team eingeladen",
+      "progressQr": "QR-Codes erstellt",
+      "progressReceiving": "Trinkgelder empfangen",
+      "progressReadyForTips": "Bereit für Trinkgelder",
+      "progressUpNext": "Als Nächstes: {{step}}",
+      "badgeAccount": "Konto bereit",
+      "badgeBusiness": "Betrieb angelegt",
+      "badgeStaff": "3 Mitarbeitende",
+      "badgeQr": "QR bereit",
+      "badgeTips": "Trinkgelder live",
       "phoneWelcome": "Willkommen",
       "phoneWelcomeSub": "Ihr Betrieb, in Minuten bereit",
       "phoneTeam": "Ihr Team",
@@ -1768,6 +1782,7 @@
       "toastMarkedRead": "Als gelesen markiert"
     },
     "tipGoals": {
+      "loading": "Ziele werden geladen…",
       "loadFailed": "Ziele konnten nicht geladen werden.",
       "backAria": "Zurück",
       "title": "Trinkgeldziele",
@@ -1912,6 +1927,7 @@
       "statMonthlyGoal": "Monatsziel",
       "statNoRatings": "0 Bewertungen",
       "statGoalProgress": "Fortschritt zu Ihrem aktuellen Ziel.",
+      "statRatingsCount": "{{count}} Bewertungen in diesem Zeitraum",
       "statGoalSetHint": "Legen Sie in den Einstellungen ein Ziel fest, um den Fortschritt zu verfolgen.",
       "statChangeUpdating": "Dieser Zeitraum wird aktualisiert…",
       "statChangeEarned": "{{amount}} verdient, {{count}} in diesem Zeitraum",
@@ -2003,55 +2019,95 @@
     "onboarding": {
       "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…",
-      "eyebrow": "Business-Onboarding",
-      "headline": "Willkommen bei CareTip",
-      "description": "Richten Sie Ihr Betriebsprofil in wenigen Schritten ein. Alles lässt sich später im Dashboard anpassen.",
-      "productPitch": "CareTip hilft Gastronomie-Teams, digitale Trinkgelder zu sammeln, Mitarbeitende sofort zu benachrichtigen und Leistung in einem Dashboard zu verfolgen.",
-      "asideAria": "Onboarding-Übersicht",
+      "headline": "Betrieb anlegen",
+      "description": "Richten Sie Ihren CareTip-Workspace in unter 5 Minuten ein.",
       "progressAria": "Onboarding-Fortschritt",
       "formStepLabel": "Schritt {{current}} von {{total}}",
-      "stepsRemaining": {
-        "final": "Letzter Schritt, fast geschafft"
+      "setupTime": "Dauer: {{minutes}} Min.",
+      "finalStep": {
+        "badge": "Letzter Schritt",
+        "headline": "Gasterlebnis anpassen",
+        "description": "Letzter Schritt vor dem Start. Logo hinzufügen und prüfen, wie Gäste Trinkgeld geben.",
+        "readyMessage": "Nur noch ein Schritt bis zu digitalen Trinkgeldern."
       },
-      "stepsRemaining_one": "Noch {{count}} Schritt",
-      "stepsRemaining_other": "Noch {{count}} Schritte",
+      "upload": {
+        "cta": "Logo hochladen",
+        "formats": "PNG, JPG oder SVG",
+        "dragHint": "oder per Drag & Drop",
+        "remove": "Bild entfernen"
+      },
       "preview": {
-        "step1Aria": "Vorschau Ihres Betriebsprofils auf CareTip",
-        "step1Title": "Ihr Betriebsprofil",
-        "step1Subtitle": "Gäste sehen dies beim Trinkgeldgeben",
-        "venueLabel": "Betrieb",
-        "venueExample": "The Harbor Kitchen",
-        "typeExample": "Restaurant",
-        "step2Aria": "Vorschau Ihres Standorts auf CareTip",
-        "step2Title": "Standort im Profil",
-        "step2Subtitle": "Schafft Vertrauen bei Gästen und Team",
-        "addressExample": "Marktstraße 12, 10115 Berlin",
-        "step3Aria": "Vorschau des QR-Trinkgeldens auf CareTip",
-        "step3Title": "QR-Trinkgeld bereit",
-        "step3Subtitle": "Codes für Tische drucken und Links mit dem Team teilen",
-        "readyHint": "Dashboard nach Abschluss freigeschaltet"
+        "panelAria": "Live-Gastvorschau (nicht interaktiv)",
+        "liveLabel": "Live-Vorschau",
+        "previewOnlyBadge": "Nur Vorschau",
+        "helperText": "Aktualisiert sich, während Sie Ihre Betriebsdaten ausfüllen.",
+        "helperTextNamed": "Gäste sehen {{name}} auf Ihrer Trinkgeldseite.",
+        "guestAria": "Nicht interaktives Modell der Gast-Trinkgeldseite. Angezeigte Elemente dienen nur der Vorschau.",
+        "guestAriaNamed": "Nicht interaktive Vorschau der Trinkgeldseite für {{name}}.",
+        "chromeSubtitleEmpty": "Ihre Gastseite",
+        "placeholderVenueName": "Ihr Betriebsname",
+        "placeholderVenueType": "Betriebstyp",
+        "placeholderAddress": "Ihre Adresse",
+        "selectStaffToTip": "Teammitglied für Trinkgeld wählen",
+        "selectStaffToTipDesc": "Gäste wählen zuerst ein Teammitglied",
+        "staffReadyGeneric": "Ihr Team erscheint hier nach der Einrichtung",
+        "selectAmountTitle": "Betrag wählen",
+        "selectAmountDesc": "Schnellauswahl für Gäste",
+        "selectAmountAt": "Trinkgeld für das Team von {{name}}",
+        "tipAmountTile": "Trinkgeldbetrag",
+        "previewPayBar": "Weiter zur Zahlung",
+        "whoServedYou": "Wer hat Sie bedient?",
+        "whoServedYouDesc": "Gäste wählen ein Teammitglied",
+        "whoServedYouAt": "Wen möchten Sie bei {{name}} bedanken?",
+        "tipButtonPreview": "Trinkgeld geben",
+        "tipCta": "Jetzt Trinkgeld geben",
+        "qrReady": "QR-Codes für Tische und Team-Links bereit",
+        "qrPreviewLabel": "Ihr QR-Code",
+        "qrPreviewFor": "QR für {{name}}",
+        "staffRoles": {
+          "server": "Service",
+          "host": "Empfang",
+          "chef": "Küche",
+          "concierge": "Concierge",
+          "housekeeping": "Housekeeping",
+          "bellhop": "Portier",
+          "stylist": "Stylist",
+          "colorist": "Colorist",
+          "reception": "Rezeption",
+          "bartender": "Barkeeper",
+          "barback": "Bar-Team",
+          "barista": "Barista",
+          "pastry": "Patisserie",
+          "teamMember": "Teammitglied"
+        }
       },
       "steps": {
         "businessDetails": "Betriebsdaten",
-        "locationDetails": "Standort",
-        "verificationFinish": "Abschluss & Profil"
+        "teamSetup": "Team einrichten",
+        "qrSetup": "QR einrichten"
       },
-      "stepDesc": {
-        "businessDetails": "Name und Kategorie Ihres Betriebs für Gäste und Team.",
-        "locationDetails": "Registrierte Adresse und optional Telefonnummer für Ihr Profil.",
-        "verificationFinish": "Logo und Website hochladen, dann Dashboard öffnen."
+      "stepTitle": {
+        "businessDetails": "Betriebsdaten",
+        "teamSetup": "Standort & Teamkontakt",
+        "qrSetup": "Gastseite & QR"
+      },
+      "stepHint": {
+        "businessDetails": "So erscheint Ihr Betrieb, wenn Gäste Trinkgeld geben.",
+        "teamSetup": "Adresse und Telefon schaffen Vertrauen bei Gästen und Team.",
+        "qrSetup": "Branding für Ihre QR-Trinkgeldseite, dann Dashboard öffnen."
       },
       "fields": {
         "legalName": "Rechtlicher Betriebsname",
-        "legalNamePlaceholder": "z. B. CareTip Hospitality GmbH",
+        "legalNamePlaceholder": "The Harbor Kitchen GmbH",
         "businessType": "Betriebstyp",
         "businessTypePlaceholder": "Typ wählen",
-        "address": "Adresse",
+        "address": "Registrierte Adresse",
         "addressPlaceholder": "Straße, Ort, PLZ",
-        "phone": "Telefonnummer",
+        "phone": "Team-Telefon",
+        "phonePlaceholder": "Optional",
         "website": "Website",
-        "logo": "Logo hochladen",
-        "logoHint": "Optional. PNG oder JPEG empfohlen.",
+        "logo": "Logo",
+        "logoHint": "Optional. PNG oder JPEG, quadratisch ideal.",
         "optional": "Optional"
       },
       "businessTypes": {
@@ -2063,7 +2119,7 @@
         "other": "Sonstiges"
       },
       "trust": {
-        "secure": "Sicher & verschlüsselt",
+        "secure": "Bank-Level-Sicherheit",
         "fast": "Einrichtung in unter 5 Minuten",
         "editable": "Alles später bearbeitbar"
       },

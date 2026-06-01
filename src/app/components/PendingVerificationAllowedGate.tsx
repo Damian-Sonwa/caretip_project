@@ -4,8 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
-import { PageLoader } from "./PageLoader";
-
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
+import { AppRouteGateShell } from "./AppRouteGateShell";
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined
 ): "PENDING" | "APPROVED" | "REJECTED" | undefined {
@@ -42,12 +45,20 @@ export function PendingVerificationAllowedGate() {
     };
   }, [user?.id, user?.role, user?.impersonation, updateUser]);
 
+  const syncBlocking = user?.role === "business" && !user.impersonation && !ready;
+  useAppLoadingRegistration(
+    "verification-pending-gate",
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    syncBlocking,
+    t("common.syncingAccountStatus"),
+  );
+
   if (user?.impersonation) {
     return <Navigate to="/dashboard" replace />;
   }
 
-  if (user?.role === "business" && !user.impersonation && !ready) {
-    return <PageLoader message={t("common.syncingAccountStatus")} />;
+  if (syncBlocking) {
+    return <AppRouteGateShell />;
   }
 
   if (user?.status === "APPROVED") {

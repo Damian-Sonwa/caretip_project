@@ -493,6 +493,8 @@ export type EmployeeDashboardSqlSummary = {
   periodAmount: number;
   periodCount: number;
   monthAmount: number;
+  periodAvgRating: number | null;
+  periodRatingCount: number;
 };
 
 /** Period + current-month totals for employee metric cards (single tips scan). */
@@ -513,23 +515,36 @@ export async function queryEmployeeDashboardSummaryMetrics(opts: {
       period_amount: number;
       period_count: number;
       month_amount: number;
+      period_avg_rating: number | null;
+      period_rating_count: number;
     }>
   >(Prisma.sql`
     SELECT
-      COALESCE(SUM(amount) FILTER (
-        WHERE created_at >= ${opts.periodStart} AND created_at <= ${opts.periodEnd}
+      COALESCE(SUM(t.amount) FILTER (
+        WHERE t.created_at >= ${opts.periodStart} AND t.created_at <= ${opts.periodEnd}
       ), 0)::float AS period_amount,
       (COUNT(*) FILTER (
-        WHERE created_at >= ${opts.periodStart} AND created_at <= ${opts.periodEnd}
+        WHERE t.created_at >= ${opts.periodStart} AND t.created_at <= ${opts.periodEnd}
       ))::int AS period_count,
-      COALESCE(SUM(amount) FILTER (
-        WHERE created_at >= ${opts.monthStart} AND created_at <= ${opts.monthEnd}
-      ), 0)::float AS month_amount
-    FROM tips
-    WHERE employee_id = ${opts.employeeId}
-      AND status = 'success'
-      AND created_at >= ${opts.scanStart}
-      AND created_at <= ${opts.scanEnd}
+      COALESCE(SUM(t.amount) FILTER (
+        WHERE t.created_at >= ${opts.monthStart} AND t.created_at <= ${opts.monthEnd}
+      ), 0)::float AS month_amount,
+      AVG(tf.rating) FILTER (
+        WHERE t.created_at >= ${opts.periodStart}
+          AND t.created_at <= ${opts.periodEnd}
+          AND tf.rating IS NOT NULL
+      )::float AS period_avg_rating,
+      (COUNT(tf.id) FILTER (
+        WHERE t.created_at >= ${opts.periodStart}
+          AND t.created_at <= ${opts.periodEnd}
+          AND tf.rating IS NOT NULL
+      ))::int AS period_rating_count
+    FROM tips t
+    LEFT JOIN tip_feedback tf ON tf.transaction_id = t.id
+    WHERE t.employee_id = ${opts.employeeId}
+      AND t.status = 'success'
+      AND t.created_at >= ${opts.scanStart}
+      AND t.created_at <= ${opts.scanEnd}
   `);
 
   const tSql = Math.round(performance.now() - t0);
@@ -539,10 +554,16 @@ export async function queryEmployeeDashboardSummaryMetrics(opts: {
     });
   }
 
+  const avgRaw = row?.period_avg_rating;
+  const periodAvgRating =
+    avgRaw != null && Number.isFinite(Number(avgRaw)) ? Math.round(Number(avgRaw) * 10) / 10 : null;
+
   return {
     periodAmount: Number(row?.period_amount ?? 0),
     periodCount: Number(row?.period_count ?? 0),
     monthAmount: Number(row?.month_amount ?? 0),
+    periodAvgRating,
+    periodRatingCount: Number(row?.period_rating_count ?? 0),
   };
 }
 

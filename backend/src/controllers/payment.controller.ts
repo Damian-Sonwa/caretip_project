@@ -33,6 +33,13 @@ export async function createTipSession(req: Request, res: Response) {
     if (Number.isNaN(amount) || amount <= 0) {
       return res.status(400).json({ message: "amount must be a positive number" });
     }
+    if (
+      tipAmount != null &&
+      !Number.isNaN(tipAmount) &&
+      Math.abs(tipAmount - amount) > 0.001
+    ) {
+      return res.status(400).json({ message: "tipAmount must match amount" });
+    }
 
     if (!isStripeConfigured()) {
       return res.status(503).json({

@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
   Users,
@@ -21,6 +21,7 @@ import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -86,6 +87,9 @@ import {
   devMockBusinessTipDistribution,
   shouldUseBusinessDashboardDevDemo,
 } from "../../lib/devAnalyticsMocks";
+import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
+import { isOnboardingCompleted } from "../../lib/onboardingProgress";
+import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import barChartHeroImage from "../../../../images/barchart.png";
 
 // Match Platform Admin dashboard analytics palette (premium, consistent).
@@ -159,7 +163,7 @@ export function BusinessDashboard() {
     retryStats,
     applyLiveTip,
   } = useBusinessDashboardStats(
-    user?.role === "business" && authReady,
+    user?.role === "business" && authReady && user.hasCompletedOnboarding === true,
     sessionValidated,
     advancedAnalyticsEnabled,
   );
@@ -256,6 +260,7 @@ export function BusinessDashboard() {
 
   const useDevDemo = shouldUseBusinessDashboardDevDemo({
     isDev: import.meta.env.DEV,
+    isWalkthroughDemoAccount: isWalkthroughDemoManager(user),
     statsLoading: isMetricsInitialLoad,
     pendingVerification,
     tipCount: displayStats?.tipCount ?? 0,
@@ -375,7 +380,18 @@ export function BusinessDashboard() {
     ],
   );
 
-  if (!user) return null;
+  if (!user) {
+    return <GlobalAppLoadingHold />;
+  }
+
+  const { onboardingStatusFromServer } = getAuthSessionFlags();
+  if (
+    user.role === "business" &&
+    onboardingStatusFromServer &&
+    !isOnboardingCompleted(user)
+  ) {
+    return <Navigate to="/onboarding" replace />;
+  }
 
   return (
     <div className={cn(businessUi.page, "overflow-x-hidden")}>

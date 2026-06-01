@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
+import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
 import { businessUploadLogo } from "../middleware/businessUpload.middleware.js";
 import { requireSubscriptionCapability } from "../middleware/requireSubscriptionCapability.middleware.js";
@@ -62,6 +63,7 @@ router.post(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
+  isApprovedBusiness,
   businessController.generateInvite
 );
 
@@ -71,15 +73,27 @@ router.get(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
+  isApprovedBusiness,
+  requireCompletedOnboarding,
   businessController.getMyStats
 );
-router.get("/stats", authMiddleware, requireVerifiedEmail, isApprovedBusiness, businessController.getStats);
+router.get(
+  "/stats",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  isApprovedBusiness,
+  requireCompletedOnboarding,
+  businessController.getMyStats
+);
 router.get(
   "/stats/:businessId",
   authMiddleware,
   requireVerifiedEmail,
+  requireRole(Role.MANAGER),
   isApprovedBusiness,
-  businessController.getStats
+  requireCompletedOnboarding,
+  businessController.getMyStats,
 );
 
 router.get("/:businessId", businessController.getById);

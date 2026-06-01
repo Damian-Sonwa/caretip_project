@@ -4,7 +4,11 @@ import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Navigation } from './Navigation';
 import { Footer } from './Footer';
-import { AppLoader } from './AppLoader';
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
+import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type UserRole } from '../hooks/useAuth';
@@ -31,7 +35,8 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
-import { commitAuthUser } from '../lib/authUserStore';
+import { commitAuthUser, hasClientStoredSession } from '../lib/authUserStore';
+import { hasClientSessionHint } from '../lib/authSessionHint';
 import { AuthPageAtmosphere } from './auth/AuthPageAtmosphere';
 import {
   isPublicAuthenticationPath,
@@ -370,34 +375,18 @@ export function AuthPage() {
   const redirectingAfterAuth =
     Boolean(user) && sessionValidated && isPublicAuthenticationPath(location.pathname);
 
-  if (authStatus === "initializing" && !isSubmitting) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="caretip-auth-page relative flex min-h-[100dvh] flex-col items-center justify-center"
-      >
-        <AuthPageAtmosphere />
-        <div className="relative z-10">
-          <AppLoader />
-        </div>
-      </motion.div>
-    );
-  }
+  const mayRestoreSessionOnAuthPage =
+    hasClientStoredSession() || hasClientSessionHint() || user != null;
 
-  if (redirectingAfterAuth || isSubmitting) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="caretip-auth-page relative flex min-h-[100dvh] flex-col items-center justify-center"
-      >
-        <AuthPageAtmosphere />
-        <div className="relative z-10">
-          <AppLoader />
-        </div>
-      </motion.div>
-    );
+  const showAuthBlocking =
+    (authStatus === "initializing" && !isSubmitting && mayRestoreSessionOnAuthPage) ||
+    redirectingAfterAuth ||
+    isSubmitting;
+
+  useAppLoadingRegistration("auth-page", APP_LOADING_PRIORITY.AUTH, showAuthBlocking);
+
+  if (showAuthBlocking) {
+    return <GlobalAppLoadingHold />;
   }
 
   const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);

@@ -2,39 +2,65 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Building2,
-  Globe2,
-  ImagePlus,
-  Loader2,
-  MapPin,
-  Phone,
-} from "lucide-react";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
-import { AppLoader } from "../components/AppLoader";
+import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
+import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
 import { toast } from "sonner";
-import { patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
+import { fetchBusinessProfile, patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
+import { isOnboardingCompleted, resolveResumeOnboardingStep } from "../lib/onboardingProgress";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
-import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
-import { BusinessOnboardingAside } from "../components/business/BusinessOnboardingAside";
 import type { OnboardingStep } from "../components/business/BusinessOnboardingProgress";
+import {
+  BusinessOnboardingFootnote,
+  BusinessOnboardingHeader,
+  BusinessOnboardingProgressHeader,
+} from "../components/business/BusinessOnboardingShell";
+import { BusinessOnboardingGuestPreview } from "../components/business/BusinessOnboardingGuestPreview";
+import { BusinessOnboardingLogoUpload } from "../components/business/BusinessOnboardingLogoUpload";
+import { BusinessOnboardingFinishCta } from "../components/business/BusinessOnboardingFinishCta";
+import {
+  BusinessOnboardingSelectField,
+  BusinessOnboardingTextField,
+} from "../components/business/BusinessOnboardingFormField";
+import {
+  onboardingContinueBtn,
+  onboardingDisplayFont,
+  onboardingHeadline,
+  onboardingStepHint,
+  onboardingSubhead,
+} from "../components/business/businessOnboardingUi";
 
-const STEP_DESC_KEYS = [
-  "business.onboarding.stepDesc.businessDetails",
-  "business.onboarding.stepDesc.locationDetails",
-  "business.onboarding.stepDesc.verificationFinish",
+const STEP_TITLE_KEYS = [
+  "business.onboarding.stepTitle.businessDetails",
+  "business.onboarding.stepTitle.teamSetup",
+  "business.onboarding.stepTitle.qrSetup",
+] as const;
+
+const STEP_HINT_KEYS = [
+  "business.onboarding.stepHint.businessDetails",
+  "business.onboarding.stepHint.teamSetup",
+  "business.onboarding.stepHint.qrSetup",
+] as const;
+
+const PAGE_HEADLINE_KEYS = [
+  "business.onboarding.headline",
+  "business.onboarding.headline",
+  "business.onboarding.finalStep.headline",
+] as const;
+
+const PAGE_DESC_KEYS = [
+  "business.onboarding.description",
+  "business.onboarding.description",
+  "business.onboarding.finalStep.description",
 ] as const;
 
 export function BusinessOnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, authStatus, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
+  const { user, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [syncingOnboarding, setSyncingOnboarding] = useState(true);
 
@@ -44,18 +70,36 @@ export function BusinessOnboardingPage() {
   const [contactPhone, setContactPhone] = useState("");
   const [website, setWebsite] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [savedLogoPath, setSavedLogoPath] = useState<string | null>(null);
+  const [employeeCount, setEmployeeCount] = useState(0);
   const [busy, setBusy] = useState(false);
 
-  /** Sync onboarding completion from the API — never rely on stale localStorage alone. */
   useEffect(() => {
     let cancelled = false;
     void (async () => {
       try {
-        const fresh = await refetchUser();
+        const [fresh, profile] = await Promise.all([
+          refetchUser(),
+          fetchBusinessProfile({ silent: true }).catch(() => null),
+        ]);
         if (cancelled) return;
-        if (fresh?.hasCompletedOnboarding) {
+
+        if (fresh && isOnboardingCompleted(fresh)) {
           navigate("/dashboard", { replace: true });
           return;
+        }
+
+        if (profile) {
+          setLegalBusinessName(profile.name ?? "");
+          setBusinessType(profile.type ?? "");
+          setRegisteredAddress(profile.registeredAddress ?? "");
+          setContactPhone(profile.contactPhone ?? "");
+          setWebsite(profile.website ?? "");
+          setSavedLogoPath(profile.logo ?? null);
+          setEmployeeCount(profile.employeeCount ?? 0);
+          setStep(resolveResumeOnboardingStep(profile, profile.onboardingStep ?? fresh?.onboardingStep));
+        } else if (fresh?.onboardingStep) {
+          setStep(fresh.onboardingStep);
         }
       } catch (err) {
         logClientError("BusinessOnboardingPage.syncOnboarding", err);
@@ -74,8 +118,32 @@ export function BusinessOnboardingPage() {
     return true;
   }, [step, legalBusinessName, businessType, registeredAddress]);
 
+  const previewData = useMemo(
+    () => ({
+      legalBusinessName,
+      businessType,
+      registeredAddress,
+      contactPhone,
+      website,
+      logoFile,
+      savedLogoPath,
+      employeeCount,
+      onboardingStep: step,
+    }),
+    [
+      legalBusinessName,
+      businessType,
+      registeredAddress,
+      contactPhone,
+      website,
+      logoFile,
+      savedLogoPath,
+      employeeCount,
+      step,
+    ],
+  );
+
   const saveStep = async (targetStep: OnboardingStep) => {
-    // Save progressively to the Business table. This is the only source of truth.
     if (targetStep === 1) {
       await patchBusinessProfile({
         legalBusinessName: legalBusinessName.trim(),
@@ -94,7 +162,8 @@ export function BusinessOnboardingPage() {
       website: website.trim() || null,
     });
     if (logoFile) {
-      await uploadMyBusinessLogo(logoFile);
+      const uploaded = await uploadMyBusinessLogo(logoFile);
+      setSavedLogoPath(uploaded.path ?? null);
     }
   };
 
@@ -104,236 +173,222 @@ export function BusinessOnboardingPage() {
     navigate("/login", { replace: true });
   };
 
-  if (authStatus === "initializing" || syncingOnboarding || user?.hasCompletedOnboarding) {
-    return <AppLoader />;
+  const goBack = () => {
+    if (busy || step === 1) return;
+    setStep((s) => (s === 2 ? 1 : 2));
+  };
+
+  const goForward = async () => {
+    if (busy || !canContinue) return;
+    setBusy(true);
+    try {
+      if (step !== 3) {
+        await saveStep(step);
+        setStep((s) => (s === 1 ? 2 : 3));
+        return;
+      }
+      await saveStep(3);
+      await setHasCompletedOnboarding(true);
+      const refreshed = await refetchUser();
+      if (!refreshed) {
+        toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
+      }
+      navigate("/dashboard", { replace: true });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {
+        handleAuthFailure();
+        return;
+      }
+      toast.error(toUserFriendlyMessage(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const redirectingToDashboard = Boolean(user && isOnboardingCompleted(user));
+  const pageInitBlocking = syncingOnboarding || redirectingToDashboard;
+
+  useRegisterGlobalAppInit("onboarding-init", pageInitBlocking);
+
+  if (pageInitBlocking) {
+    return <GlobalAppLoadingHold />;
   }
 
+  const isFinalStep = step === 3;
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.45 }}
-      className="business-onboarding-page relative flex min-h-screen flex-col overflow-x-hidden font-sans"
-    >
-      <Navigation />
-      <main className="business-onboarding-main">
-        <div className="business-onboarding-split">
-          <BusinessOnboardingAside step={step} />
+    <div className="business-onboarding-page flex min-h-screen flex-col">
+      <BusinessOnboardingHeader />
 
-          <section
-            className="business-onboarding-form-panel"
-            aria-labelledby="business-onboarding-step-heading"
-          >
-            <div className="business-onboarding-form-card">
-              <div className="mb-6">
-                <p className="business-onboarding-form-panel__step-meta">
-                  {t("business.onboarding.formStepLabel", { current: step, total: 3 })}
-                </p>
-                <p className="business-onboarding-form-panel__steps-remaining lg:hidden">
-                  {3 - step === 0
-                    ? t("business.onboarding.stepsRemaining.final")
-                    : t("business.onboarding.stepsRemaining", { count: 3 - step })}
-                </p>
-                <h2
-                  id="business-onboarding-step-heading"
-                  className="business-onboarding-form-panel__step-title"
-                >
-                  {t(STEP_DESC_KEYS[step - 1])}
-                </h2>
-              </div>
+      <main className="business-onboarding-main flex-1">
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="business-onboarding-shell mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8"
+        >
+          <div className="space-y-8 lg:space-y-10">
+            <BusinessOnboardingProgressHeader step={step} />
 
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={step}
-                  initial={{ opacity: 0, x: 12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -12 }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                >
-                  {step === 1 ? (
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <OnboardingField
-                        icon={<Building2 className="h-4 w-4 text-primary" />}
-                        label={t("business.onboarding.fields.legalName")}
-                        placeholder={t("business.onboarding.fields.legalNamePlaceholder")}
-                        value={legalBusinessName}
-                        onChange={setLegalBusinessName}
-                      />
-                      <label className="block">
-                        <span className="business-onboarding-field-label">
-                          <span className="business-onboarding-field-icon">
-                            <Building2 className="h-4 w-4 text-primary" />
-                          </span>
-                          {t("business.onboarding.fields.businessType")}
-                        </span>
-                        <select
-                          value={businessType}
-                          onChange={(e) => setBusinessType(e.target.value)}
-                          className="business-onboarding-input"
-                        >
-                          <option value="">{t("business.onboarding.fields.businessTypePlaceholder")}</option>
-                          <option value="Restaurant">{t("business.onboarding.businessTypes.restaurant")}</option>
-                          <option value="Hotel">{t("business.onboarding.businessTypes.hotel")}</option>
-                          <option value="Salon">{t("business.onboarding.businessTypes.salon")}</option>
-                          <option value="Bar">{t("business.onboarding.businessTypes.bar")}</option>
-                          <option value="Cafe">{t("business.onboarding.businessTypes.cafe")}</option>
-                          <option value="Other">{t("business.onboarding.businessTypes.other")}</option>
-                        </select>
-                      </label>
-                    </div>
-                  ) : null}
+            <div
+              className={cn(
+                "business-onboarding-split",
+                isFinalStep && "business-onboarding-split--final",
+              )}
+            >
+              <div className="business-onboarding-workspace min-w-0 space-y-8">
+                <header className="space-y-2">
+                  <h1
+                    className={onboardingHeadline}
+                    style={{ fontFamily: onboardingDisplayFont }}
+                  >
+                    {t(PAGE_HEADLINE_KEYS[step - 1])}
+                  </h1>
+                  <p className={onboardingSubhead}>{t(PAGE_DESC_KEYS[step - 1])}</p>
+                </header>
 
-                  {step === 2 ? (
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <OnboardingField
-                        icon={<MapPin className="h-4 w-4 text-primary" />}
-                        label={t("business.onboarding.fields.address")}
-                        placeholder={t("business.onboarding.fields.addressPlaceholder")}
-                        value={registeredAddress}
-                        onChange={setRegisteredAddress}
-                      />
-                      <OnboardingField
-                        icon={<Phone className="h-4 w-4 text-primary" />}
-                        label={t("business.onboarding.fields.phone")}
-                        placeholder={t("business.onboarding.fields.optional")}
-                        value={contactPhone}
-                        onChange={setContactPhone}
-                      />
-                    </div>
-                  ) : null}
+                <section className="space-y-8" aria-labelledby="onboarding-step-title">
+                  <div className="space-y-1 border-b border-zinc-200/80 pb-6 dark:border-zinc-800">
+                    <h2
+                      id="onboarding-step-title"
+                      className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
+                      style={{ fontFamily: onboardingDisplayFont }}
+                    >
+                      {t(STEP_TITLE_KEYS[step - 1])}
+                    </h2>
+                    <p className={onboardingStepHint}>{t(STEP_HINT_KEYS[step - 1])}</p>
+                  </div>
 
-                  {step === 3 ? (
-                    <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                      <label className="block">
-                        <span className="business-onboarding-field-label">
-                          <span className="business-onboarding-field-icon">
-                            <ImagePlus className="h-4 w-4 text-primary" />
-                          </span>
-                          {t("business.onboarding.fields.logo")}
-                        </span>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => setLogoFile(e.target.files?.[0] ?? null)}
-                          className="business-onboarding-input file:mr-3 file:rounded-lg file:border-0 file:bg-primary/10 file:px-3 file:py-1.5 file:text-xs file:font-semibold file:text-primary"
-                        />
-                        <p className="mt-2 text-xs text-neutral-600 dark:text-neutral-400">
-                          {t("business.onboarding.fields.logoHint")}
-                        </p>
-                      </label>
-                      <OnboardingField
-                        icon={<Globe2 className="h-4 w-4 text-primary" />}
-                        label={t("business.onboarding.fields.website")}
-                        placeholder={t("business.onboarding.fields.optional")}
-                        value={website}
-                        onChange={setWebsite}
-                      />
-                    </div>
-                  ) : null}
-                </motion.div>
-              </AnimatePresence>
+                  <AnimatePresence mode="wait">
+                    <motion.div
+                      key={step}
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className={cn("space-y-6", !isFinalStep && "lg:max-w-md")}
+                    >
+                      {step === 1 ? (
+                        <>
+                          <BusinessOnboardingTextField
+                            label={t("business.onboarding.fields.legalName")}
+                            placeholder={t("business.onboarding.fields.legalNamePlaceholder")}
+                            value={legalBusinessName}
+                            onChange={setLegalBusinessName}
+                          />
+                          <BusinessOnboardingSelectField
+                            label={t("business.onboarding.fields.businessType")}
+                            value={businessType}
+                            onChange={setBusinessType}
+                            placeholder={t("business.onboarding.fields.businessTypePlaceholder")}
+                          >
+                            <option value="Restaurant">{t("business.onboarding.businessTypes.restaurant")}</option>
+                            <option value="Hotel">{t("business.onboarding.businessTypes.hotel")}</option>
+                            <option value="Salon">{t("business.onboarding.businessTypes.salon")}</option>
+                            <option value="Bar">{t("business.onboarding.businessTypes.bar")}</option>
+                            <option value="Cafe">{t("business.onboarding.businessTypes.cafe")}</option>
+                            <option value="Other">{t("business.onboarding.businessTypes.other")}</option>
+                          </BusinessOnboardingSelectField>
+                        </>
+                      ) : null}
 
-              <div className="business-onboarding-actions mt-8 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch sm:gap-4">
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (busy) return;
-                    if (step === 1) return;
-                    setStep((s) => (s === 2 ? 1 : 2));
-                  }}
-                  disabled={step === 1}
-                  className={cn(
-                    "business-onboarding-back inline-flex w-full min-w-0 shrink-0 items-center justify-center gap-2 rounded-2xl border border-neutral-200 bg-white px-5 py-3.5 text-sm font-bold text-neutral-900 shadow-none transition hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-6 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-100 dark:hover:bg-neutral-900",
-                  )}
-                >
-                  <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
-                  {t("business.onboarding.actions.back")}
-                </button>
-                <button
-                  type="button"
-                  onClick={async () => {
-                    if (busy) return;
-                    setBusy(true);
-                    try {
-                      if (!canContinue) return;
+                      {step === 2 ? (
+                        <>
+                          <BusinessOnboardingTextField
+                            label={t("business.onboarding.fields.address")}
+                            placeholder={t("business.onboarding.fields.addressPlaceholder")}
+                            value={registeredAddress}
+                            onChange={setRegisteredAddress}
+                          />
+                          <BusinessOnboardingTextField
+                            label={t("business.onboarding.fields.phone")}
+                            placeholder={t("business.onboarding.fields.phonePlaceholder")}
+                            value={contactPhone}
+                            onChange={setContactPhone}
+                          />
+                        </>
+                      ) : null}
 
-                      if (step !== 3) {
-                        await saveStep(step);
-                        setStep((s) => (s === 1 ? 2 : 3));
-                        return;
-                      }
+                      {step === 3 ? (
+                        <div className="space-y-6">
+                          <BusinessOnboardingLogoUpload file={logoFile} onFile={setLogoFile} />
+                          <BusinessOnboardingTextField
+                            label={t("business.onboarding.fields.website")}
+                            placeholder={t("business.onboarding.fields.optional")}
+                            value={website}
+                            onChange={setWebsite}
+                          />
+                        </div>
+                      ) : null}
+                    </motion.div>
+                  </AnimatePresence>
 
-                      await saveStep(3);
-                      await setHasCompletedOnboarding(true);
-                      const refreshed = await refetchUser();
-                      if (!refreshed) {
-                        toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
-                      }
-                      navigate("/dashboard", { replace: true });
-                    } catch (err) {
-                      const msg = err instanceof Error ? err.message : String(err);
-                      if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {
-                        handleAuthFailure();
-                        return;
-                      }
-                      toast.error(toUserFriendlyMessage(err));
-                    } finally {
-                      setBusy(false);
-                    }
-                  }}
-                  disabled={!canContinue || busy}
-                  aria-busy={busy}
-                  className={cn(
-                    caretipBtnPrimary,
-                    "business-onboarding-continue",
-                    "w-full min-w-0 max-w-full shrink px-5",
-                    "sm:ml-auto sm:flex-1 sm:basis-0 sm:px-6",
-                    "disabled:cursor-not-allowed disabled:opacity-60",
-                  )}
-                >
-                  {busy ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      {t("business.onboarding.actions.saving")}
-                    </>
+                  <div className="space-y-4 lg:hidden">
+                    <BusinessOnboardingGuestPreview
+                      {...previewData}
+                      variant={isFinalStep ? "final" : "default"}
+                    />
+                  </div>
+
+                  {isFinalStep ? (
+                    <BusinessOnboardingFinishCta
+                      busy={busy}
+                      disabled={!canContinue}
+                      onFinish={() => void goForward()}
+                    />
                   ) : (
-                    <>
-                      {step === 3
-                        ? t("business.onboarding.actions.finish")
-                        : t("business.onboarding.actions.continue")}
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </>
+                    <div className="space-y-4 pt-2 lg:max-w-md">
+                      <button
+                        type="button"
+                        onClick={() => void goForward()}
+                        disabled={!canContinue || busy}
+                        aria-busy={busy}
+                        className={cn(onboardingContinueBtn, "w-full")}
+                      >
+                        {busy ? (
+                          <>
+                            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                            {t("business.onboarding.actions.saving")}
+                          </>
+                        ) : (
+                          <>
+                            {t("business.onboarding.actions.continue")}
+                            <ArrowRight className="h-4 w-4" aria-hidden />
+                          </>
+                        )}
+                      </button>
+                    </div>
                   )}
-                </button>
-              </div>
-            </div>
-          </section>
-        </div>
-      </main>
-      <Footer variant="minimal" surface="dark" />
-    </motion.div>
-  );
-}
 
-function OnboardingField(props: {
-  icon: React.ReactNode;
-  label: string;
-  placeholder: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <label className="block">
-      <span className="business-onboarding-field-label">
-        <span className="business-onboarding-field-icon">{props.icon}</span>
-        {props.label}
-      </span>
-      <input
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-        placeholder={props.placeholder}
-        className="business-onboarding-input"
-      />
-    </label>
+                  {step > 1 ? (
+                    <button
+                      type="button"
+                      onClick={goBack}
+                      disabled={busy}
+                      className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                    >
+                      {t("business.onboarding.actions.back")}
+                    </button>
+                  ) : null}
+                </section>
+              </div>
+
+              <aside
+                className="business-onboarding-preview-aside hidden min-w-0 lg:block"
+                aria-label={t("business.onboarding.preview.panelAria")}
+              >
+                <BusinessOnboardingGuestPreview
+                  {...previewData}
+                  variant={isFinalStep ? "final" : "default"}
+                />
+              </aside>
+            </div>
+
+            <BusinessOnboardingFootnote />
+          </div>
+        </motion.div>
+      </main>
+    </div>
   );
 }

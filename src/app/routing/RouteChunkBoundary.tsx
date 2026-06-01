@@ -1,4 +1,5 @@
 import { Suspense, type ReactNode } from "react";
+import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import {
   DashboardOutletFallback,
   DashboardOutletShellHold,
@@ -13,16 +14,38 @@ type RouteChunkBoundaryProps = {
    * minimal = public route transition
    */
   variant?: "shell" | "dashboard" | "minimal";
+  /** Dev trace key for lazy chunk loading under the global overlay. */
+  registrationKey?: string;
 };
 
-export function RouteChunkBoundary({ children, variant = "dashboard" }: RouteChunkBoundaryProps) {
-  const fallback =
-    variant === "minimal" ? (
-      <MinimalRouteFallback />
-    ) : variant === "shell" ? (
-      <DashboardOutletShellHold />
-    ) : (
-      <DashboardOutletFallback />
-    );
-  return <Suspense fallback={fallback}>{children}</Suspense>;
+function RouteChunkSuspenseFallback({
+  variant,
+  registrationKey,
+}: {
+  variant: "shell" | "dashboard" | "minimal";
+  registrationKey: string;
+}) {
+  useRegisterGlobalAppInit(`${registrationKey}-chunk`, variant === "dashboard");
+
+  if (variant === "minimal") {
+    return <MinimalRouteFallback />;
+  }
+  if (variant === "shell") {
+    return <DashboardOutletShellHold />;
+  }
+  return <DashboardOutletFallback />;
+}
+
+export function RouteChunkBoundary({
+  children,
+  variant = "dashboard",
+  registrationKey = "route-chunk",
+}: RouteChunkBoundaryProps) {
+  return (
+    <Suspense
+      fallback={<RouteChunkSuspenseFallback variant={variant} registrationKey={registrationKey} />}
+    >
+      {children}
+    </Suspense>
+  );
 }

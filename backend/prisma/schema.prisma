@@ -116,6 +116,8 @@ model User {
    * Controls post-auth routing to `/onboarding`.
    */
   hasCompletedOnboarding Boolean @default(false) @map("has_completed_onboarding")
+  /** Set only when the manager explicitly finishes onboarding (PATCH /api/auth/me). */
+  onboardingCompletedAt DateTime? @map("onboarding_completed_at")
   /**
    * UI + transactional email language: `en` or `de`. Null until user picks a language or registers with a locale hint.
    */

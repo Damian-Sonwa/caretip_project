@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
-import { Navigate, useLocation } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-import { getLoginPathForAllowedRoles, resolveAuthenticatedAppGuard } from "../lib/authSession";
-import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
-import { isAuthRestorePending } from "../lib/authRestore";
-import { hasClientStoredSession } from "../lib/authUserStore";
+import { Navigate } from "react-router";
 import { isClientSessionRevoked } from "../lib/api";
 import { authDebug } from "../lib/authDebugLog";
-import { AppLoader } from "./AppLoader";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
+import { useProtectedRouteGate } from "../hooks/useProtectedRouteGate";
+import { AppRouteGateShell } from "./AppRouteGateShell";
 
 export function ProtectedRoute({
   allowedRoles,
@@ -16,54 +16,55 @@ export function ProtectedRoute({
   allowedRoles: Array<"business" | "employee">;
   children: ReactNode;
 }) {
-  const { user, authStatus } = useAuth();
-  const location = useLocation();
+  const gate = useProtectedRouteGate(allowedRoles);
+  const rolesKey = allowedRoles.join(",");
+  const sessionBlocking = gate.authBlocking || gate.storedSessionSync;
 
-  if (authStatus === "initializing" || isAuthRestorePending()) return <AppLoader />;
+  useAppLoadingRegistration(
+    `protected-route-session:${rolesKey}`,
+    APP_LOADING_PRIORITY.AUTH,
+    sessionBlocking,
+  );
+  useAppLoadingRegistration(
+    `protected-route-guard:${rolesKey}:${gate.pathname}`,
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    gate.guardBlocking,
+  );
 
-  if (!user) {
-    const loginPath = getLoginPathForAllowedRoles(allowedRoles);
-    if (!isClientSessionRevoked() && hasClientStoredSession()) {
+  if (gate.blocking) {
+    if (gate.guardBlocking) {
       authDebug("route_guard", {
         decision: "loading",
-        reason: "stored_session_sync",
-        path: location.pathname,
+        reason: gate.decision?.kind === "wait" ? gate.decision.reason : "pending",
+        path: gate.pathname,
       });
-      return <AppLoader />;
+    }
+    return <AppRouteGateShell />;
+  }
+
+  if (!gate.user) {
+    if (!isClientSessionRevoked() && gate.storedSessionSync) {
+      return <AppRouteGateShell />;
     }
     authDebug("route_guard", {
       decision: "redirect",
-      to: loginPath,
+      to: gate.loginPath,
       reason: "not_authenticated",
-      path: location.pathname,
+      path: gate.pathname,
     });
-    return <Navigate to={loginPath} replace state={{ from: location.pathname }} />;
+    return <Navigate to={gate.loginPath} replace state={{ from: gate.pathname }} />;
   }
 
-  const { onboardingStatusFromServer } = getAuthSessionFlags();
-  const decision = resolveAuthenticatedAppGuard(user, location.pathname, allowedRoles, {
-    onboardingStatusFromServer,
-  });
-
-  if (decision.kind === "wait") {
-    authDebug("route_guard", {
-      decision: "loading",
-      reason: decision.reason,
-      path: location.pathname,
-    });
-    return <AppLoader />;
-  }
-
-  if (decision.kind === "redirect") {
+  if (gate.decision?.kind === "redirect") {
     authDebug("route_guard", {
       decision: "redirect",
-      to: decision.to,
-      reason: decision.reason,
-      path: location.pathname,
+      to: gate.decision.to,
+      reason: gate.decision.reason,
+      path: gate.pathname,
     });
-    return <Navigate to={decision.to} replace state={{ from: location.pathname }} />;
+    return <Navigate to={gate.decision.to} replace state={{ from: gate.pathname }} />;
   }
 
-  authDebug("route_guard", { decision: "allow", path: location.pathname });
+  authDebug("route_guard", { decision: "allow", path: gate.pathname });
   return <>{children}</>;
 }

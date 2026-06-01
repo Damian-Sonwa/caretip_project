@@ -17,7 +17,7 @@ import {
 } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { EmployeeSettingsFormSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { PlatformPage, PlatformPageHeader } from "../../components/platform/PlatformPageChrome";
@@ -157,6 +157,8 @@ export function BusinessDetailPage() {
     );
   };
 
+  const isInitialLoad = loading && !row;
+
   return (
     <PlatformPage>
       <Link to="/platform-admin/businesses" className={platformUi.backLink}>
@@ -170,8 +172,8 @@ export function BusinessDetailPage() {
         subtitle={t("admin.businessDetailPage.subtitle")}
       />
 
-      {loading ? (
-        <CareTipPageLoader variant="section" message={t("admin.businessDetailPage.loading")} />
+      {isInitialLoad ? (
+        <EmployeeSettingsFormSkeleton className="max-w-2xl" />
       ) : !id || !row ? (
         <p className="text-muted-foreground">{t("admin.businessDetailPage.notFound")}</p>
       ) : (

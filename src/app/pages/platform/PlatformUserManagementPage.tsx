@@ -7,7 +7,10 @@ import { fetchPlatformBusinesses, impersonateManagerAPI, type PlatformBusinessRo
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { useAuth, userFromAuthResponse } from "../../hooks/useAuth";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  DashboardListSkeleton,
+  PlatformAdminTableSkeleton,
+} from "../../components/dashboard/DashboardSectionLoading";
 import {
   PlatformPage,
   PlatformPageHeader,
@@ -120,7 +123,7 @@ export function PlatformUserManagementPage() {
       <PlatformResponsiveData
         mobile={
           isInitialLoad ? (
-            <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
+            <DashboardListSkeleton rows={6} minHeightClass="min-h-0" />
           ) : filteredRows.length === 0 ? (
             <p className={platformUi.emptyState}>{emptyMessage}</p>
           ) : (
@@ -146,11 +149,7 @@ export function PlatformUserManagementPage() {
             </thead>
             <tbody>
               {isInitialLoad ? (
-                <tr>
-                  <td colSpan={4} className={platformUi.tableTd}>
-                    <CareTipPageLoader variant="compact" message={t("admin.userManagementPage.loading")} />
-                  </td>
-                </tr>
+                <PlatformAdminTableSkeleton rows={8} cols={4} />
               ) : filteredRows.length === 0 ? (
                 <tr>
                   <td colSpan={4} className={platformUi.emptyState}>

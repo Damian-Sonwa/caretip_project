@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ArrowLeft, Loader2, Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link, useLocation, useParams } from "react-router";
+import { Link, Navigate, useLocation, useParams } from "react-router";
 import { toast } from "sonner";
 import {
   fetchBusinessSupportTicket,
@@ -13,6 +13,7 @@ import {
   type SupportTicketStatus,
 } from "@/app/lib/api";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
+import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
 import { SupportStatusBadge } from "@/app/components/support/supportTicketUi";
 import { Button } from "@/app/components/ui/button";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -31,7 +32,7 @@ export function SupportTicketDetailPage() {
   const { t, i18n } = useTranslation();
   const { ticketId } = useParams<{ ticketId: string }>();
   const location = useLocation();
-  const { user } = useRequireAuth();
+  const { user, authHydrated, sessionValidated } = useRequireAuth();
   const isAdmin = location.pathname.startsWith("/platform-admin/support");
   const [ticket, setTicket] = useState<SupportTicketDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -93,8 +94,12 @@ export function SupportTicketDetailPage() {
     }
   };
 
-  if (!user) return null;
-  if (!isAdmin && user.role !== "business") return null;
+  if (!authHydrated || !sessionValidated || !user) {
+    return <GlobalAppLoadingHold />;
+  }
+  if (!isAdmin && user.role !== "business") {
+    return <Navigate to="/unauthorized" replace />;
+  }
 
   const closed = ticket?.status === "CLOSED";
 

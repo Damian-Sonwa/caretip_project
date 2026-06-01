@@ -6,6 +6,7 @@ import { primeSubscriptionTierFromSession } from "../lib/subscriptionSessionCach
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
+import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined,
@@ -65,7 +66,7 @@ export function ApprovedBusinessGate() {
     return () => window.removeEventListener("focus", refresh);
   }, [canSyncProfile, updateUser]);
 
-  if (!user) return null;
+  if (!user) return <GlobalAppLoadingHold />;
 
   if (user.impersonation) {
     return <Outlet />;

@@ -20,6 +20,7 @@ import {
 } from "../utils/shortLivedCache.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { logDashboardPhase } from "../utils/dashboardTiming.js";
+import { inferManagerOnboardingStep } from "./onboardingProgress.service.js";
 import {
   buildBusinessDailyTipDistribution,
   queryBusinessDashboardSqlBundle,
@@ -855,7 +856,28 @@ export async function getTipsForExport(businessId: string) {
 export async function getManagerBusinessProfile(userId: string) {
   const b = await getBusinessByUserId(userId);
   if (!b) return null;
-  return getBusinessById(b.id);
+  const profile = await getBusinessById(b.id);
+  if (!profile) return null;
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { hasCompletedOnboarding: true, onboardingCompletedAt: true },
+  });
+  const onboardingCompleted =
+    user?.hasCompletedOnboarding === true && user.onboardingCompletedAt != null;
+  const onboardingStep = onboardingCompleted
+    ? 3
+    : inferManagerOnboardingStep({
+        name: profile.name,
+        businessType: profile.type,
+        registeredAddress: profile.registeredAddress,
+      });
+
+  return {
+    ...profile,
+    onboardingCompleted,
+    onboardingStep,
+  };
 }
 
 const MAX_LOCATION_LEN = 2000;

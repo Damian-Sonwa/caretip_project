@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
   BUSINESS_SETTINGS_SECTIONS,
@@ -37,7 +38,7 @@ export function BusinessSettingsPage() {
   };
 
   if (!user || user.role !== "business") {
-    return null;
+    return <GlobalAppLoadingHold />;
   }
 
   return (

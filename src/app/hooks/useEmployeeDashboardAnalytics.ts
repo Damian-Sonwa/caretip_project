@@ -23,6 +23,8 @@ import {
   syncEmployeeNotificationTips,
 } from "../lib/employeeNotificationStore";
 import { resolveEmployeeTipsWithDevPreview } from "../lib/devAnalyticsMocks";
+import { getAuthUser } from "../lib/authUserStore";
+import { isWalkthroughDemoEmployee } from "../lib/walkthroughDemo";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import { primeEmployeeAccountSnapshot } from "./useEmployeeAccountSummary";
 import {
@@ -47,11 +49,32 @@ type AnalyticsPayload = {
   businessTimezone: string | null;
   periodTipCount: number;
   periodAmountEur: number;
+  averageRating: number | null;
+  ratingCount: number;
   chartSeries: Array<{ label: string; amount: number }>;
   totalEarningsEur?: number;
   availableBalanceEur?: number;
   totalSupporters?: number;
 };
+
+function logEmployeePeriodPayload(
+  timeframe: EmployeeAnalyticsTimeframe,
+  payload: AnalyticsPayload,
+  source: "cache" | "network",
+): void {
+  if (!import.meta.env.DEV) return;
+  console.info(`[employee.analytics:${timeframe}]`, source, {
+    periodAmountEur: payload.periodAmountEur,
+    periodTipCount: payload.periodTipCount,
+    averageRating: payload.averageRating,
+    ratingCount: payload.ratingCount,
+    monthlyGoal: payload.monthlyGoal,
+    currentMonthTotal: payload.currentMonthTotal,
+    goalProgress: payload.goalProgress,
+    chartPoints: payload.chartSeries?.length ?? 0,
+    tips: payload.tips?.length ?? 0,
+  });
+}
 
 type EmployeeSwrEntry = {
   summary: Partial<EmployeeTipsResponse>;
@@ -61,6 +84,10 @@ type EmployeeSwrEntry = {
 };
 
 const employeePeriodSwrStore = createDashboardSwrStore<EmployeeSwrEntry>();
+
+export function clearEmployeePeriodSwrStore(): void {
+  employeePeriodSwrStore.clear();
+}
 
 function swrKey(tf: EmployeeAnalyticsTimeframe): string {
   return `employee:period:${tf}`;
@@ -79,6 +106,11 @@ function payloadFromResponse(data: EmployeeTipsResponse): AnalyticsPayload {
     periodTipCount: typeof nCount === "number" ? nCount : tipsArr.length,
     periodAmountEur:
       typeof nAmount === "number" ? nAmount : tipsArr.reduce((s, t) => s + t.amount, 0),
+    averageRating:
+      typeof data.averageRating === "number" && Number.isFinite(data.averageRating)
+        ? data.averageRating
+        : null,
+    ratingCount: typeof data.ratingCount === "number" ? data.ratingCount : 0,
     chartSeries: Array.isArray(data.chartSeries) ? data.chartSeries : [],
     totalEarningsEur:
       typeof data.totalEarningsEur === "number" ? data.totalEarningsEur : undefined,
@@ -109,6 +141,8 @@ export function useEmployeeDashboardAnalytics(
     monthlyGoal: number | null;
     currentMonthTotal: number;
     goalProgress: EmployeeGoalProgress | null;
+    averageRating: number | null;
+    ratingCount: number;
   } | null>(null);
 
   const tfRef = useRef(analyticsTimeframe);
@@ -143,10 +177,14 @@ export function useEmployeeDashboardAnalytics(
   const syncTipsFromResponse = useCallback(
     (data: EmployeeTipsResponse) => {
       if (!employeeId) return;
-      const tips = resolveEmployeeTipsWithDevPreview(data.tips ?? [], {
-        totalEarningsEur: data.totalEarningsEur,
-        totalSupporters: data.totalSupporters,
-      });
+      const tips = resolveEmployeeTipsWithDevPreview(
+        data.tips ?? [],
+        {
+          totalEarningsEur: data.totalEarningsEur,
+          totalSupporters: data.totalSupporters,
+        },
+        isWalkthroughDemoEmployee(getAuthUser()),
+      );
       syncEmployeeNotificationTips(employeeId, tips);
     },
     [employeeId],
@@ -215,7 +253,10 @@ export function useEmployeeDashboardAnalytics(
         monthlyGoal: next.monthlyGoal,
         currentMonthTotal: next.currentMonthTotal,
         goalProgress: next.goalProgress,
+        averageRating: next.averageRating,
+        ratingCount: next.ratingCount,
       });
+      logEmployeePeriodPayload(tf, next, fromNetwork ? "network" : "cache");
     },
     [persistSwr, syncTipsFromResponse],
   );
@@ -664,12 +705,19 @@ export function useEmployeeDashboardAnalytics(
 
   const valuesMatchAnalyticsPeriod = dataTimeframe === analyticsTimeframe;
 
+  /** Period-aligned payload only — avoids binding KPI cards to a prior timeframe. */
   const displayPayload = useMemo(() => {
+    if (!payload || !valuesMatchAnalyticsPeriod) return null;
+    return payload;
+  }, [payload, valuesMatchAnalyticsPeriod]);
+
+  /** Hero + charts may reuse the latest payload while the active period fetch is in flight. */
+  const displayPayloadOrLatest = useMemo(() => {
+    if (displayPayload) return displayPayload;
     if (!payload) return null;
-    if (valuesMatchAnalyticsPeriod) return payload;
     if (hasEmployeePayloadVisibleContent(payload)) return payload;
     return null;
-  }, [dataTimeframe, analyticsTimeframe, payload, valuesMatchAnalyticsPeriod]);
+  }, [displayPayload, payload]);
 
   const displayMetrics = useMemo(() => {
     if (!displayPayload) return null;
@@ -679,6 +727,8 @@ export function useEmployeeDashboardAnalytics(
       monthlyGoal: displayPayload.monthlyGoal,
       currentMonthTotal: displayPayload.currentMonthTotal,
       goalProgress: displayPayload.goalProgress,
+      averageRating: displayPayload.averageRating,
+      ratingCount: displayPayload.ratingCount,
     };
   }, [
     displayPayload?.periodTipCount,
@@ -686,17 +736,17 @@ export function useEmployeeDashboardAnalytics(
     displayPayload?.monthlyGoal,
     displayPayload?.currentMonthTotal,
     displayPayload?.goalProgress,
+    displayPayload?.averageRating,
+    displayPayload?.ratingCount,
   ]);
 
   const displayMetricsStable = useMemo(() => {
     if (displayMetrics) return displayMetrics;
     if (!enabled) return null;
-    // Preserve last known good values during rapid period switches to avoid “zero flashes”.
+    // Preserve tip totals during soft refresh for the same period (avoid zero flashes).
     if (
-      !valuesMatchAnalyticsPeriod ||
-      summaryLoading ||
-      analyticsLoading ||
-      isRevalidating
+      valuesMatchAnalyticsPeriod &&
+      (summaryLoading || analyticsLoading || isRevalidating)
     ) {
       return lastKnownGoodMetrics;
     }
@@ -717,7 +767,7 @@ export function useEmployeeDashboardAnalytics(
     Boolean(lastKnownGoodMetrics);
 
   const hasVisibleSecondaryOnScreen =
-    hasEmployeeChartOrTipsContent(displayPayload) ||
+    hasEmployeeChartOrTipsContent(displayPayloadOrLatest) ||
     hasEmployeeChartOrTipsContent(payload);
 
   const isMetricsInitialLoad =
@@ -729,30 +779,32 @@ export function useEmployeeDashboardAnalytics(
     !hasVisibleSecondaryOnScreen &&
     !isRevalidating;
 
-  /** True when period data is actively loading (not silent background revalidation). */
-  const isBlockingPeriodFetch =
-    isRevalidating && (summaryLoading || analyticsLoading);
+  const isMetricsPeriodLoading =
+    enabled &&
+    !valuesMatchAnalyticsPeriod &&
+    (summaryLoading || analyticsLoading || isRevalidating);
 
   /**
-   * Status strip + subtle revalidate styling — match business: no "Updating" on every toggle
-   * when cached metrics stay visible during a soft refresh.
+   * Status strip + subtle revalidate styling — aligned with business dashboard.
    */
   const isPeriodRefreshing =
     enabled &&
     !isMetricsInitialLoad &&
-    (isBlockingPeriodFetch ||
-      (!valuesMatchAnalyticsPeriod &&
-        (summaryLoading || analyticsLoading || isRevalidating)));
+    (isRevalidating ||
+      !valuesMatchAnalyticsPeriod ||
+      summaryLoading ||
+      analyticsLoading);
 
   const analyticsTimeframeLoading =
-    isBlockingPeriodFetch && !isMetricsInitialLoad ? analyticsTimeframe : null;
+    isPeriodRefreshing && !isMetricsInitialLoad ? analyticsTimeframe : null;
 
-  const showMetricsSkeleton = isMetricsInitialLoad;
+  const showMetricsSkeleton = isMetricsInitialLoad || isMetricsPeriodLoading;
 
   return {
     analyticsTimeframe,
     setAnalyticsTimeframe: setAnalyticsTimeframeControlled,
     displayPayload,
+    displayPayloadOrLatest,
     displayMetrics: displayMetricsStable,
     payload,
     valuesMatchAnalyticsPeriod,

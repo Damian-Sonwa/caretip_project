@@ -189,3 +189,132 @@ export function TablesListSkeleton({
     </div>
   );
 }
+
+/** Staff roster — desktop table + mobile cards. */
+export function StaffRosterTableSkeleton({
+  rows = 6,
+  className,
+}: {
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <div className={className} role="status" aria-busy="true" aria-label="Loading">
+      <div className="hidden lg:block overflow-x-auto rounded-xl border border-border bg-card">
+        <table className="w-full min-w-[72rem]">
+          <thead className="bg-muted/50">
+            <tr>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <th key={i} className="px-6 py-4">
+                  <ShimmerBar className="h-3.5 w-20" />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: rows }).map((_, i) => (
+              <tr key={i} className="border-b border-border/60">
+                <td className="px-6 py-4">
+                  <div className="flex items-center gap-3">
+                    <ShimmerBar className="h-10 w-10 shrink-0 rounded-full" />
+                    <div className="space-y-2">
+                      <ShimmerBar className="h-4 w-28" />
+                      <ShimmerBar className="h-3 w-20" />
+                    </div>
+                  </div>
+                </td>
+                {Array.from({ length: 7 }).map((_, j) => (
+                  <td key={j} className="px-6 py-4">
+                    <ShimmerBar className={cn("h-4 w-16", j === 6 && "ml-auto h-8 w-24")} />
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul className="space-y-4 lg:hidden" aria-hidden>
+        {Array.from({ length: Math.min(rows, 4) }).map((_, i) => (
+          <li key={i} className="rounded-xl border border-border bg-card p-4">
+            <div className="flex items-center gap-3">
+              <ShimmerBar className="h-12 w-12 shrink-0 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <ShimmerBar className="h-4 w-[55%]" />
+                <ShimmerBar className="h-3 w-[40%]" />
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** Platform admin — generic table body rows. */
+export function PlatformAdminTableSkeleton({
+  rows = 8,
+  cols = 4,
+}: {
+  rows?: number;
+  cols?: number;
+}) {
+  return (
+    <>
+      {Array.from({ length: rows }).map((_, i) => (
+        <tr key={i} className="border-b border-border/60">
+          {Array.from({ length: cols }).map((_, j) => (
+            <td key={j} className="px-4 py-3.5">
+              <ShimmerBar
+                className={cn(
+                  "h-4",
+                  j === 0 ? "w-28" : j === cols - 1 ? "w-36 max-w-[12rem]" : "w-24",
+                )}
+              />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </>
+  );
+}
+
+/** Employee tip goals — card list placeholder. */
+export function EmployeeGoalListSkeleton({
+  rows = 4,
+  className,
+}: {
+  rows?: number;
+  className?: string;
+}) {
+  return (
+    <ul className={cn("divide-y divide-border", className)} role="status" aria-busy="true">
+      {Array.from({ length: rows }).map((_, i) => (
+        <li key={i} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4 sm:px-6">
+          <div className="min-w-0 flex-1 space-y-2">
+            <ShimmerBar className="h-4 w-[45%] max-w-[10rem]" />
+            <ShimmerBar className="h-3 w-[62%] max-w-[14rem]" />
+          </div>
+          <ShimmerBar className="h-9 w-20 rounded-xl" />
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/** Employee settings — form section placeholders. */
+export function EmployeeSettingsFormSkeleton({ className }: { className?: string }) {
+  return (
+    <div className={cn("space-y-6", className)} role="status" aria-busy="true">
+      {[1, 2, 3].map((section) => (
+        <section key={section} className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <ShimmerBar className="h-4 w-32" />
+          <div className="space-y-3">
+            <ShimmerBar className="h-10 w-full rounded-lg" />
+            <ShimmerBar className="h-10 w-full rounded-lg" />
+            {section === 1 ? <ShimmerBar className="h-24 w-full rounded-lg" /> : null}
+          </div>
+        </section>
+      ))}
+    </div>
+  );
+}

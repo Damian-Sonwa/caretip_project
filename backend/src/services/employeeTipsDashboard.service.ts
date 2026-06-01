@@ -66,7 +66,7 @@ function emptyEmployeeSqlBundleSlice(
 ): EmployeeSqlBundleSlice {
   const now = new Date();
   return {
-    summary: { periodAmount: 0, periodCount: 0, monthAmount: 0 },
+    summary: { periodAmount: 0, periodCount: 0, monthAmount: 0, periodAvgRating: null, periodRatingCount: 0 },
     analytics: { recentTips: [], dailyByYmd: new Map(), hourlyByHour: new Map() },
     rangeStart: now,
     rangeEnd: now,
@@ -363,6 +363,8 @@ export async function loadEmployeeDashboardSummaryBundle(opts: {
   periodAmountEur: number;
   periodTipCount: number;
   currentMonthTotal: number;
+  averageRating: number | null;
+  ratingCount: number;
   goal: GoalWithProgress | null;
   tips: TipForEmployee[];
   chartSeries: Array<{ label: string; amount: number }>;
@@ -393,7 +395,16 @@ export async function loadEmployeeDashboardSummaryBundle(opts: {
       });
     }
 
-    return { periodAmountEur, periodTipCount, currentMonthTotal, goal, tips, chartSeries };
+    return {
+      periodAmountEur,
+      periodTipCount,
+      currentMonthTotal,
+      averageRating: slice.summary.periodAvgRating,
+      ratingCount: slice.summary.periodRatingCount,
+      goal,
+      tips,
+      chartSeries,
+    };
   });
 }
 

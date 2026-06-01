@@ -11,6 +11,8 @@ export type EmployeeTimeframe = "today" | "week" | "month";
  */
 export function shouldUseEmployeeDashboardDevDemo(opts: {
   isDev: boolean;
+  /** Only seeded walkthrough demo accounts — never real fresh sign-ups. */
+  isWalkthroughDemoAccount: boolean;
   hasError: boolean;
   accountSummaryLoaded: boolean;
   accountSummaryLoading: boolean;
@@ -18,7 +20,7 @@ export function shouldUseEmployeeDashboardDevDemo(opts: {
   totalEarningsEur: number;
   totalSupporters: number;
 }): boolean {
-  if (!opts.isDev || opts.hasError) return false;
+  if (!opts.isDev || !opts.isWalkthroughDemoAccount || opts.hasError) return false;
   if (!opts.accountSummaryLoaded || opts.accountSummaryLoading || opts.analyticsLoading) return false;
   return opts.totalEarningsEur <= 0 && opts.totalSupporters <= 0;
 }
@@ -64,15 +66,17 @@ export function devMockBusinessTipDistribution(
   return points;
 }
 
-/** DEV preview gate for business dashboard — empty venue stats in local dev. */
+/** DEV preview gate — only for seeded walkthrough demo manager, never fresh accounts. */
 export function shouldUseBusinessDashboardDevDemo(opts: {
   isDev: boolean;
+  isWalkthroughDemoAccount: boolean;
   statsLoading: boolean;
   pendingVerification: boolean;
   tipCount: number;
 }): boolean {
   return (
     opts.isDev &&
+    opts.isWalkthroughDemoAccount &&
     !opts.statsLoading &&
     !opts.pendingVerification &&
     opts.tipCount <= 0
@@ -235,9 +239,11 @@ export function devMockEmployeeNotificationTips(): TipItem[] {
 export function resolveEmployeeTipsWithDevPreview(
   apiTips: TipItem[],
   accountSummary: { totalEarningsEur?: number; totalSupporters?: number },
+  isWalkthroughDemoAccount = false,
 ): TipItem[] {
   const usePreview = shouldUseEmployeeDashboardDevDemo({
     isDev: import.meta.env.DEV,
+    isWalkthroughDemoAccount,
     hasError: false,
     accountSummaryLoaded: true,
     accountSummaryLoading: false,

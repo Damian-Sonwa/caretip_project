@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +8,8 @@ type DashboardRefreshIndicatorProps = {
   className?: string;
 };
 
+const MIN_UPDATING_VISIBLE_MS = 750;
+
 /** Subtle “Updating…” / “Updated just now” for dashboard analytics sections. */
 export function DashboardRefreshIndicator({
   isRefreshing,
@@ -16,16 +18,37 @@ export function DashboardRefreshIndicator({
 }: DashboardRefreshIndicatorProps) {
   const { t } = useTranslation();
   const [, tick] = useState(0);
+  const [showUpdating, setShowUpdating] = useState(isRefreshing);
+  const updatingSinceRef = useRef<number | null>(isRefreshing ? Date.now() : null);
 
   useEffect(() => {
-    if (!lastUpdatedAt || isRefreshing) return;
+    if (isRefreshing) {
+      updatingSinceRef.current = Date.now();
+      setShowUpdating(true);
+      return;
+    }
+    if (!updatingSinceRef.current) {
+      setShowUpdating(false);
+      return;
+    }
+    const elapsed = Date.now() - updatingSinceRef.current;
+    const remaining = Math.max(0, MIN_UPDATING_VISIBLE_MS - elapsed);
+    const id = window.setTimeout(() => {
+      updatingSinceRef.current = null;
+      setShowUpdating(false);
+    }, remaining);
+    return () => window.clearTimeout(id);
+  }, [isRefreshing]);
+
+  useEffect(() => {
+    if (!lastUpdatedAt || showUpdating) return;
     const id = window.setInterval(() => tick((n) => n + 1), 30_000);
     return () => window.clearInterval(id);
-  }, [lastUpdatedAt, isRefreshing]);
+  }, [lastUpdatedAt, showUpdating]);
 
-  if (!isRefreshing && !lastUpdatedAt) return null;
+  if (!showUpdating && !lastUpdatedAt) return null;
 
-  const label = isRefreshing
+  const label = showUpdating
     ? t("dashboard.refresh.updating")
     : t("dashboard.refresh.justNow");
 
