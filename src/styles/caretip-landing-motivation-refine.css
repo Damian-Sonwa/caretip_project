@@ -1,0 +1,246 @@
+/**
+ * Recognition / motivation (#recognition) — split layout + live activity stack.
+ */
+
+.caretip-landing-motivation .caretip-motivation-ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 55% at 12% 50%, rgba(233, 120, 28, 0.07), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% 30%, rgba(15, 23, 42, 0.04), transparent 62%);
+}
+
+html.dark .caretip-landing-motivation .caretip-motivation-ambient {
+  background:
+    radial-gradient(ellipse 70% 55% at 12% 50%, rgba(233, 120, 28, 0.12), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 88% 30%, rgba(255, 255, 255, 0.03), transparent 62%);
+  opacity: 0.9;
+}
+
+.caretip-motivation-activity {
+  position: relative;
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+}
+
+@media (min-width: 1024px) {
+  .caretip-motivation-activity {
+    max-width: none;
+    margin-inline: 0;
+  }
+}
+
+.caretip-motivation-activity__ambient {
+  pointer-events: none;
+  position: absolute;
+  inset: -8% -6%;
+  border-radius: 1.75rem;
+  background: radial-gradient(
+    ellipse 85% 70% at 50% 45%,
+    rgba(233, 120, 28, 0.1),
+    transparent 68%
+  );
+  filter: blur(2px);
+}
+
+.caretip-motivation-activity__frame {
+  position: relative;
+  border-radius: 1.25rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  background: linear-gradient(
+    165deg,
+    hsl(var(--background) / 0.96) 0%,
+    hsl(var(--background) / 0.88) 100%
+  );
+  padding: 1rem 1rem 1.125rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 24px 48px -28px rgba(15, 23, 42, 0.22),
+    0 8px 20px -12px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(10px);
+}
+
+html.dark .caretip-motivation-activity__frame {
+  background: linear-gradient(
+    165deg,
+    hsl(var(--card) / 0.92) 0%,
+    hsl(var(--background) / 0.78) 100%
+  );
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 28px 56px -32px rgba(0, 0, 0, 0.55),
+    0 10px 24px -14px rgba(0, 0, 0, 0.35);
+}
+
+.caretip-motivation-activity__feed-label {
+  margin: 0 0 0.75rem;
+  padding: 0 0.25rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-motivation-activity__stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-motivation-activity__card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: 0.75rem;
+  border-radius: 0.875rem;
+  border: 1px solid hsl(var(--border) / 0.5);
+  background: hsl(var(--background));
+  padding: 0.75rem 0.875rem;
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 6px 16px -10px rgba(15, 23, 42, 0.1);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease;
+}
+
+html.dark .caretip-motivation-activity__card {
+  background: hsl(var(--card) / 0.85);
+  border-color: hsl(var(--border) / 0.45);
+}
+
+@media (hover: hover) {
+  .caretip-motivation-activity__card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 2px 4px rgba(15, 23, 42, 0.05),
+      0 12px 28px -14px rgba(15, 23, 42, 0.14);
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-motivation-activity__card--tip {
+    margin-inline-end: 0.75rem;
+  }
+
+  .caretip-motivation-activity__card--review {
+    margin-inline-start: 1.25rem;
+  }
+
+  .caretip-motivation-activity__card--dashboard {
+    margin-inline-end: 0.35rem;
+  }
+
+  .caretip-motivation-activity__card--goal {
+    margin-inline-start: 0.5rem;
+  }
+}
+
+.caretip-motivation-activity__icon {
+  display: flex;
+  height: 2.25rem;
+  width: 2.25rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  flex-shrink: 0;
+}
+
+.caretip-motivation-activity__icon--tip {
+  background: rgba(233, 120, 28, 0.12);
+  color: #c2410c;
+}
+
+.caretip-motivation-activity__icon--review {
+  background: rgba(234, 179, 8, 0.14);
+  color: #a16207;
+}
+
+.caretip-motivation-activity__icon--dashboard {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1d4ed8;
+}
+
+.caretip-motivation-activity__icon--goal {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+html.dark .caretip-motivation-activity__icon--tip {
+  color: #fb923c;
+}
+
+html.dark .caretip-motivation-activity__icon--review {
+  color: #facc15;
+}
+
+html.dark .caretip-motivation-activity__icon--dashboard {
+  color: #60a5fa;
+}
+
+html.dark .caretip-motivation-activity__icon--goal {
+  color: #34d399;
+}
+
+.caretip-motivation-activity__body {
+  min-width: 0;
+}
+
+.caretip-motivation-activity__badge {
+  margin: 0;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-motivation-activity__title {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+}
+
+.caretip-motivation-activity__meta {
+  margin: 0.2rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-motivation-activity__live {
+  align-self: center;
+  border-radius: 9999px;
+  background: rgba(16, 185, 129, 0.12);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #047857;
+  white-space: nowrap;
+}
+
+html.dark .caretip-motivation-activity__live {
+  background: rgba(52, 211, 153, 0.14);
+  color: #6ee7b7;
+}
+
+.caretip-landing-motivation .caretip-motivation-points {
+  margin-top: 1.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-motivation-activity__card:hover {
+    transform: none;
+  }
+}

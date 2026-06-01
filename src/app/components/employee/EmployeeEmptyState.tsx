@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
+import { EmptyState } from "../ui/EmptyState";
 import { cn } from "@/lib/utils";
-import { employeeUi } from "./employeeDashboardUi";
 
 type EmployeeEmptyStateProps = {
   icon?: ReactNode;
@@ -8,21 +8,19 @@ type EmployeeEmptyStateProps = {
   description?: string;
   action?: ReactNode;
   className?: string;
+  compact?: boolean;
 };
 
-export function EmployeeEmptyState({
-  icon,
-  title,
-  description,
-  action,
-  className,
-}: EmployeeEmptyStateProps) {
+/** @deprecated Prefer `EmptyState` — kept for existing dashboard imports. */
+export function EmployeeEmptyState(props: EmployeeEmptyStateProps) {
   return (
-    <div className={cn(employeeUi.emptyWrap, className)}>
-      {icon ? <div className={employeeUi.emptyIcon}>{icon}</div> : null}
-      <p className={employeeUi.emptyTitle}>{title}</p>
-      {description ? <p className={employeeUi.emptyDesc}>{description}</p> : null}
-      {action ? <div className="mt-6">{action}</div> : null}
-    </div>
+    <EmptyState
+      icon={props.icon}
+      title={props.title}
+      description={props.description}
+      action={props.action}
+      compact={props.compact}
+      className={cn(props.className)}
+    />
   );
 }

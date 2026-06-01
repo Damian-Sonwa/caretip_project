@@ -3,6 +3,7 @@ import { Link } from "react-router";
 import { ArrowRight } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { FinalCtaBackdrop } from "@/app/components/landing/FinalCtaBackdrop";
+import { LandingTrustComplianceStrip } from "@/app/components/landing/LandingTrustComplianceStrip";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
@@ -57,6 +58,8 @@ export function LandingFinalCtaSection() {
             </Link>
           </div>
         </div>
+
+        <LandingTrustComplianceStrip />
       </motion.div>
     </section>
   );

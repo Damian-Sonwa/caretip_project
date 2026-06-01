@@ -30,6 +30,28 @@
     "metricZeroGoals": "0 goals",
     "metricZeroRatings": "0 ratings"
   },
+  "emptyState": {
+    "tips": {
+      "title": "Ready to receive your first tip",
+      "description": "Share your QR code with guests and your earnings will appear here."
+    },
+    "ratings": {
+      "title": "No ratings yet",
+      "description": "Guest feedback will automatically appear once reviews are submitted."
+    },
+    "transactions": {
+      "title": "No transactions yet",
+      "description": "Completed tips and payouts will appear here."
+    },
+    "activity": {
+      "title": "No tips in this period yet",
+      "description": "When guests tip via your QR codes, activity updates here in real time."
+    },
+    "chart": {
+      "title": "No activity in this period",
+      "description": "Share your QR code with guests or check back after your next service."
+    }
+  },
   "common": {
     "settingUp": "Setting things up for you.",
     "signingOut": "Signing you out securely...",
@@ -1635,21 +1657,64 @@
       "stat1": "No guest app needed",
       "stat2": "Familiar, secure checkout",
       "stat3": "Live in an afternoon",
+      "testimonialsEyebrow": "Trusted by service teams",
+      "testimonialsTitle": "What teams are saying",
+      "industries": {
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "salon": "Salon",
+        "healthcare": "Healthcare",
+        "delivery": "Delivery"
+      },
       "q1Quote": "We put QR codes on the tables and guests actually use them. We were live before dinner service the same day we signed up.",
       "q1Name": "Marco R.",
       "q1Role": "Restaurant floor manager",
+      "q1Industry": "restaurant",
       "q2Quote": "My team checks tips between clients now. It is a small change, but the mood on the floor is noticeably better.",
       "q2Name": "Elena V.",
       "q2Role": "Salon owner",
+      "q2Industry": "salon",
       "q3Quote": "Closing used to mean chasing cash envelopes. Tips show up where they should, and I can share clear numbers with the team.",
       "q3Name": "James T.",
       "q3Role": "Hotel F&B manager",
-      "testimonialsTitle": "What teams are saying"
+      "q3Industry": "hotel"
     },
     "earningsPulse": {
       "label": "Today's tips",
       "delta": "+3 since your last break",
       "aria": "Live earnings preview"
+    },
+    "industryCards": {
+      "sectionTitle": "Built for service teams everywhere",
+      "sectionSubtitle": "One platform for tipping, recognition, and team visibility across your industry.",
+      "restaurant": {
+        "title": "Restaurants",
+        "benefit": "Reward front-of-house staff instantly."
+      },
+      "hotel": {
+        "title": "Hotels",
+        "benefit": "Transparent tipping across every team."
+      },
+      "healthcare": {
+        "title": "Healthcare",
+        "benefit": "Recognize exceptional care."
+      },
+      "delivery": {
+        "title": "Delivery",
+        "benefit": "Reward drivers and field staff in real time."
+      },
+      "salon": {
+        "title": "Salons",
+        "benefit": "Let clients thank your team between appointments."
+      }
+    },
+    "trustStrip": {
+      "aria": "Security and compliance highlights",
+      "gdpr": "GDPR compliant",
+      "auth": "Secure authentication",
+      "rbac": "Role-based access",
+      "analytics": "Real-time analytics",
+      "payments": "Encrypted payments"
     },
     "finalCta": {
       "eyebrow": "Start tipping in minutes",
@@ -1713,7 +1778,35 @@
     },
     "motivation": {
       "title": "Built for those who work hard every single day.",
-      "subtitle": "For the hospitality, care, and delivery heroes who keep things running but are too often overlooked. CareTip puts your team in the fast lane, ensuring they get the digital recognition, visibility, and tips they truly deserve."
+      "subtitle": "Outstanding work should never go unnoticed. CareTip makes recognition visible in real time, for your team and your leadership.",
+      "pill": "Live recognition",
+      "feedLabel": "Activity in your business",
+      "liveBadge": "Live",
+      "point1": "Tips and feedback land instantly in your team feed",
+      "point2": "Managers see trends and standout shifts at a glance",
+      "point3": "Goals and milestones keep momentum across every roster",
+      "cards": {
+        "tip": {
+          "badge": "Tip received",
+          "title": "€18.00 · Table 12",
+          "meta": "Paid via QR · 2 min ago"
+        },
+        "review": {
+          "badge": "5-star review",
+          "title": "\"Outstanding service tonight\"",
+          "meta": "Guest feedback · Front of house"
+        },
+        "dashboard": {
+          "badge": "Dashboard update",
+          "title": "Today's tips up 24%",
+          "meta": "6 successful payments · Live sync"
+        },
+        "goal": {
+          "badge": "Team goal reached",
+          "title": "March target hit, €2,400",
+          "meta": "12 team members · Shared milestone"
+        }
+      }
     }
   },
   "footer": {
@@ -1723,18 +1816,27 @@
     "linkedin": "LinkedIn",
     "github": "GitHub",
     "colProduct": "Product",
+    "colIndustries": "Industries",
     "colCompany": "Company",
+    "colLegal": "Legal",
     "colResources": "Resources",
+    "linkFeatures": "Features",
+    "linkPricing": "Pricing",
+    "linkHowItWorks": "How It Works",
+    "linkIndustryHospitality": "Hospitality",
+    "linkIndustryHealthcare": "Healthcare",
+    "linkIndustryDelivery": "Delivery",
+    "linkIndustryBeauty": "Beauty",
+    "linkIndustryTrades": "Trades",
+    "linkContact": "Contact",
+    "linkSupport": "Support",
     "linkForBusinesses": "For Businesses",
     "linkForEmployees": "For Employees",
-    "linkFeatures": "Features",
-    "linkHowItWorks": "How It Works",
-    "linkPricing": "Pricing",
     "linkAbout": "About Us",
-    "linkContact": "Contact",
     "linkHelp": "Help Center",
     "linkFaq": "FAQs",
-    "copyright": "© {{year}} Caretip. All rights reserved.",
+    "tagline": "Rewarding great service instantly.",
+    "copyright": "© CareTip {{year}}",
     "version": "Version {{version}}",
     "platformAdmin": "Platform admin",
     "privacy": "Privacy",

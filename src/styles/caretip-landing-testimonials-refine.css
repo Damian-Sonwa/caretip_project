@@ -1,0 +1,308 @@
+/**
+ * Testimonials (#social-proof) — premium cards, grid + mobile swipe.
+ */
+
+.caretip-testimonials-showcase {
+  margin-top: 2.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonials-showcase {
+    margin-top: 3rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-testimonials-showcase {
+    margin-top: 3.5rem;
+  }
+}
+
+.caretip-testimonials-showcase__header {
+  margin-bottom: 1.5rem !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonials-showcase__header {
+    margin-bottom: 1.75rem !important;
+  }
+}
+
+.caretip-testimonials-showcase__title {
+  max-width: 22ch;
+  margin-inline: auto;
+}
+
+/* Mobile: horizontal swipe; sm+: grid */
+.caretip-testimonials-showcase__grid {
+  display: flex;
+  gap: 1rem;
+  margin: 0 -0.25rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-inline: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.caretip-testimonials-showcase__item {
+  flex: 0 0 min(88vw, 21.5rem);
+  scroll-snap-align: start;
+  min-height: 100%;
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonials-showcase__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+  }
+
+  .caretip-testimonials-showcase__item {
+    flex: unset;
+    scroll-snap-align: unset;
+  }
+
+  .caretip-testimonials-showcase__item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+    max-width: 28rem;
+    justify-self: center;
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-testimonials-showcase__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .caretip-testimonials-showcase__item:last-child:nth-child(odd) {
+    grid-column: auto;
+    max-width: none;
+    justify-self: stretch;
+  }
+}
+
+/* —— Card —— */
+.caretip-testimonial-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 17.5rem;
+  height: 100%;
+  margin: 0;
+  border-radius: 1.125rem;
+  border: 1px solid rgba(17, 17, 17, 0.1);
+  background: hsl(var(--background));
+  padding: 1.375rem 1.375rem 1.5rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 14px 36px -18px rgba(15, 23, 42, 0.14);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s ease,
+    border-color 0.28s ease;
+}
+
+html.dark .caretip-testimonial-card {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: hsl(var(--card) / 0.92);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 12px 32px -20px rgba(0, 0, 0, 0.55);
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonial-card {
+    min-height: 19rem;
+    padding: 1.625rem 1.625rem 1.75rem;
+  }
+}
+
+@media (hover: hover) {
+  .caretip-testimonial-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(233, 120, 28, 0.22);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.8) inset,
+      0 4px 12px rgba(15, 23, 42, 0.06),
+      0 22px 48px -22px rgba(15, 23, 42, 0.18);
+  }
+
+  html.dark .caretip-testimonial-card:hover {
+    border-color: rgba(233, 120, 28, 0.28);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.06) inset,
+      0 24px 52px -24px rgba(0, 0, 0, 0.65);
+  }
+}
+
+.caretip-landing #social-proof .caretip-testimonials-panel {
+  margin-top: 0;
+  border-radius: 1.25rem;
+  border: 1px solid rgba(17, 17, 17, 0.06);
+  background: linear-gradient(180deg, rgba(250, 250, 249, 0.9) 0%, rgba(255, 255, 255, 0.55) 100%);
+  padding: 1.25rem 0.75rem 1.5rem;
+}
+
+html.dark .caretip-landing #social-proof .caretip-testimonials-panel {
+  border-color: rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(23, 23, 23, 0.65) 0%, rgba(10, 10, 10, 0.35) 100%);
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #social-proof .caretip-testimonials-panel {
+    padding: 1.5rem 1.25rem 1.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #social-proof .caretip-testimonials-panel {
+    padding: 1.75rem 1.5rem 2rem;
+  }
+}
+
+.caretip-testimonial-card__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.625rem;
+}
+
+.caretip-testimonial-card__quote-mark {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 2.75rem;
+  font-weight: 700;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: rgba(233, 120, 28, 0.42);
+  user-select: none;
+}
+
+html.dark .caretip-testimonial-card__quote-mark {
+  color: rgba(251, 146, 60, 0.5);
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonial-card__quote-mark {
+    font-size: 3.25rem;
+  }
+}
+
+.caretip-testimonial-card__industry {
+  margin-top: 0.35rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  background: rgba(17, 17, 17, 0.03);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  white-space: nowrap;
+}
+
+html.dark .caretip-testimonial-card__industry {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.caretip-testimonial-stars {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  margin-bottom: 0.875rem;
+}
+
+.caretip-testimonial-stars__icon {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+.caretip-testimonial-stars__icon--filled {
+  fill: #e9781c;
+  color: #e9781c;
+}
+
+.caretip-testimonial-stars__icon--empty {
+  fill: transparent;
+  color: rgba(17, 17, 17, 0.15);
+}
+
+html.dark .caretip-testimonial-stars__icon--empty {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.caretip-testimonial-card__quote {
+  flex: 1 1 auto;
+  margin: 0;
+}
+
+.caretip-testimonial-card__quote p {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.62;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground) / 0.92);
+  text-wrap: pretty;
+}
+
+@media (min-width: 640px) {
+  .caretip-testimonial-card__quote p {
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+}
+
+.caretip-testimonial-card__divider {
+  margin: 1.125rem 0 1rem;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    rgba(233, 120, 28, 0.35) 0%,
+    rgba(17, 17, 17, 0.08) 42%,
+    transparent 100%
+  );
+}
+
+html.dark .caretip-testimonial-card__divider {
+  background: linear-gradient(
+    90deg,
+    rgba(233, 120, 28, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 42%,
+    transparent 100%
+  );
+}
+
+.caretip-testimonial-card__author {
+  margin-top: auto;
+}
+
+.caretip-testimonial-card__name {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground)) !important;
+}
+
+.caretip-testimonial-card__role {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-testimonial-card:hover {
+    transform: none;
+  }
+}

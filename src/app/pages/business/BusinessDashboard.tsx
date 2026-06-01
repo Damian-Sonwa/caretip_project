@@ -853,8 +853,8 @@ export function BusinessDashboard() {
                         <EmployeeEmptyState
                           className="relative z-[1] py-10 sm:py-12"
                           icon={<CareIcon name="analytics" size="lg" className="text-muted-foreground" />}
-                          title={t("format.metricNoActivity")}
-                          description={t("business.dashboard.chartEmptyDesc")}
+                          title={t("emptyState.chart.title")}
+                          description={t("emptyState.chart.description")}
                         />
                       </div>
                     ) : (
@@ -949,8 +949,8 @@ export function BusinessDashboard() {
                         <EmployeeEmptyState
                           className="py-10 sm:py-12"
                           icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                          title={t("format.metricNoActivity")}
-                          description={t("business.dashboard.chartEmptyDesc")}
+                          title={t("emptyState.chart.title")}
+                          description={t("emptyState.chart.description")}
                         />
                       </div>
                     ) : employeePerformance.length === 0 ? (
@@ -958,8 +958,8 @@ export function BusinessDashboard() {
                         <EmployeeEmptyState
                           className="py-10 sm:py-12"
                           icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                          title={t("format.metricNoActivity")}
-                          description={t("business.dashboard.chartEmptyDesc")}
+                          title={t("emptyState.chart.title")}
+                          description={t("emptyState.chart.description")}
                         />
                       </div>
                     ) : (

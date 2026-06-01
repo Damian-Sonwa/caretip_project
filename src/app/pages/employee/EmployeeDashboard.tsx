@@ -726,7 +726,8 @@ export function EmployeeDashboard() {
                     <div className={cn(employeeUi.cardPad, employeeUi.chartEmpty)}>
                       <EmployeeEmptyState
                         icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                        title={t("format.metricNoActivity")}
+                        title={t("emptyState.chart.title")}
+                        description={t("emptyState.chart.description")}
                         className="relative z-[1] !py-10"
                       />
                     </div>
@@ -828,7 +829,8 @@ export function EmployeeDashboard() {
                       {recentTips.length === 0 ? (
                         <EmployeeEmptyState
                           icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                          title={t("format.metricNoActivity")}
+                          title={t("emptyState.tips.title")}
+                          description={t("emptyState.tips.description")}
                           className="!py-8"
                         />
                       ) : (

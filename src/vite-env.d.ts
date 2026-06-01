@@ -20,6 +20,8 @@ interface ImportMetaEnv {
   /** @deprecated Prefer `BASE_URL` at build or `NEXT_PUBLIC_BASE_URL`. Legacy SPA origin for QR when others unset. */
   readonly VITE_APP_URL?: string;
   readonly NEXT_PUBLIC_APP_URL?: string;
+  /** Ask CareTip landing assistant. Default off when unset. Set to `true` to show launcher + chat. */
+  readonly VITE_ENABLE_AI_ASSISTANT?: string;
 }
 
 interface ImportMeta {

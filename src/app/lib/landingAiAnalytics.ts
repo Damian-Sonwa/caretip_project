@@ -1,4 +1,5 @@
 import { resolveApiBaseUrl } from "./apiOrigin";
+import { isAiAssistantEnabled } from "./featureFlags";
 
 function landingAiPath(suffix: string): string {
   const base = resolveApiBaseUrl();
@@ -34,6 +35,8 @@ export function trackLandingAiEvent(
   event: LandingAiAnalyticsEvent,
   meta?: Record<string, string | number | boolean>,
 ): void {
+  if (!isAiAssistantEnabled()) return;
+
   const sessionId = getLandingAiSessionId();
   const payload = { event, sessionId, meta, at: Date.now() };
 

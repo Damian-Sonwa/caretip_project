@@ -1,3 +1,5 @@
+import { isAiAssistantEnabled } from "./featureFlags";
+
 /** Intent scoring for the landing onboarding assistant — session-only, no persistence. */
 
 export type LandingIntentEvent =
@@ -35,6 +37,7 @@ export function getLandingIntentScore(): number {
 }
 
 export function isLandingAiUnlocked(): boolean {
+  if (!isAiAssistantEnabled()) return false;
   if (typeof sessionStorage === "undefined") return score >= LANDING_INTENT_THRESHOLD;
   return sessionStorage.getItem(UNLOCK_STORAGE_KEY) === "1";
 }
@@ -52,6 +55,7 @@ export function subscribeLandingIntent(listener: (score: number) => void): () =>
 }
 
 export function recordLandingIntent(event: LandingIntentEvent): void {
+  if (!isAiAssistantEnabled()) return;
   if (fired.has(event)) return;
   fired.add(event);
   score += SCORES[event] ?? 0;
@@ -68,6 +72,7 @@ export function resetLandingIntentForTests(): void {
 export const LANDING_INTENT_EVENT_NAME = "caretip:landing-intent";
 
 export function dispatchLandingIntent(event: LandingIntentEvent): void {
+  if (!isAiAssistantEnabled()) return;
   recordLandingIntent(event);
   if (typeof window !== "undefined") {
     window.dispatchEvent(new CustomEvent(LANDING_INTENT_EVENT_NAME, { detail: { event } }));

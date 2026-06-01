@@ -4,6 +4,7 @@ import { PlatformPage, PlatformPageHeader } from "../../components/platform/Plat
 import { PlatformLandingAiDiagnosticsPanel } from "../../components/platform/PlatformLandingAiDiagnosticsPanel";
 import { PlatformSettingsNotificationsPanel } from "../../components/platform/PlatformSettingsNotificationsPanel";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import { isAiAssistantEnabled } from "../../lib/featureFlags";
 
 export function PlatformSettingsPage() {
   const { t } = useTranslation();
@@ -15,7 +16,7 @@ export function PlatformSettingsPage() {
         subtitle={t("admin.platformSettingsPage.subtitle")}
       />
       <div className="space-y-6">
-        <PlatformLandingAiDiagnosticsPanel />
+        {isAiAssistantEnabled() ? <PlatformLandingAiDiagnosticsPanel /> : null}
         <PlatformSettingsNotificationsPanel />
         <div className={platformUi.contentCard}>
           <p className="text-sm leading-relaxed text-muted-foreground">

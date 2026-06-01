@@ -30,6 +30,28 @@
     "metricZeroGoals": "0 Ziele",
     "metricZeroRatings": "0 Bewertungen"
   },
+  "emptyState": {
+    "tips": {
+      "title": "Bereit für Ihr erstes Trinkgeld",
+      "description": "Teilen Sie Ihren QR-Code mit Gästen. Einnahmen erscheinen hier automatisch."
+    },
+    "ratings": {
+      "title": "Noch keine Bewertungen",
+      "description": "Gästefeedback erscheint automatisch, sobald Bewertungen eingehen."
+    },
+    "transactions": {
+      "title": "Noch keine Transaktionen",
+      "description": "Abgeschlossene Trinkgelder und Auszahlungen werden hier angezeigt."
+    },
+    "activity": {
+      "title": "Noch keine Trinkgelder in diesem Zeitraum",
+      "description": "Sobald Gäste per QR trinkgeldfreundlich zahlen, aktualisiert sich die Aktivität in Echtzeit."
+    },
+    "chart": {
+      "title": "Keine Aktivität in diesem Zeitraum",
+      "description": "QR-Code teilen oder nach der nächsten Schicht erneut prüfen."
+    }
+  },
   "common": {
     "settingUp": "Wird für Sie eingerichtet.",
     "signingOut": "Sie werden sicher abgemeldet …",
@@ -1639,21 +1661,64 @@
       "stat1": "Keine Gäste-App nötig",
       "stat2": "Vertraute, sichere Kasse",
       "stat3": "An einem Nachmittag live",
+      "testimonialsEyebrow": "Vertraut von Service-Teams",
+      "testimonialsTitle": "Das sagen Teams",
+      "industries": {
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "salon": "Salon",
+        "healthcare": "Gesundheit",
+        "delivery": "Lieferdienst"
+      },
       "q1Quote": "QR-Codes auf den Tischen, und Gäste nutzen sie wirklich. Noch am Anmeldetag waren wir vor dem Abendservice live.",
       "q1Name": "Marco R.",
       "q1Role": "Restaurant Floor Manager",
+      "q1Industry": "restaurant",
       "q2Quote": "Das Team schaut zwischen den Kunden auf die Trinkgelder. Klein klingt es, aber die Stimmung im Salon ist spürbar besser.",
       "q2Name": "Elena V.",
       "q2Role": "Saloninhaberin",
+      "q2Industry": "salon",
       "q3Quote": "Früher hieß Abschluss: Bargeld-Umschläge nachjagen. Jetzt landen Trinkgelder dort, wo sie sollen, mit klaren Zahlen fürs Team.",
       "q3Name": "James T.",
       "q3Role": "Hotel F&B Manager",
-      "testimonialsTitle": "Das sagen Teams"
+      "q3Industry": "hotel"
     },
     "earningsPulse": {
       "label": "Trinkgelder heute",
       "delta": "+3 seit der letzten Pause",
       "aria": "Live-Vorschau der Einnahmen"
+    },
+    "industryCards": {
+      "sectionTitle": "Für Service-Teams in jeder Branche",
+      "sectionSubtitle": "Eine Plattform für Trinkgeld, Anerkennung und Transparenz in Ihrem Betrieb.",
+      "restaurant": {
+        "title": "Restaurants",
+        "benefit": "Service-Teams sofort belohnen."
+      },
+      "hotel": {
+        "title": "Hotels",
+        "benefit": "Transparentes Trinkgeld über alle Teams."
+      },
+      "healthcare": {
+        "title": "Gesundheit",
+        "benefit": "Außergewöhnliche Pflege sichtbar machen."
+      },
+      "delivery": {
+        "title": "Lieferdienst",
+        "benefit": "Fahrer und Außendienst in Echtzeit belohnen."
+      },
+      "salon": {
+        "title": "Salons",
+        "benefit": "Kunden danken Ihrem Team zwischen Terminen."
+      }
+    },
+    "trustStrip": {
+      "aria": "Sicherheit und Compliance",
+      "gdpr": "DSGVO-konform",
+      "auth": "Sichere Authentifizierung",
+      "rbac": "Rollenbasierter Zugriff",
+      "analytics": "Echtzeit-Analysen",
+      "payments": "Verschlüsselte Zahlungen"
     },
     "finalCta": {
       "eyebrow": "In wenigen Minuten startklar",
@@ -1703,21 +1768,49 @@
         "role": ""
       },
       "beauty": {
-        "name": "Friseur- & Beautysalons:",
+        "name": "Friseur- & Beautysalons",
         "role": ""
       },
       "craftHome": {
-        "name": "Handwerk & Hausservice:",
+        "name": "Handwerk & Hausservice",
         "role": ""
       },
       "petCare": {
-        "name": "Tierpflege & Services:",
+        "name": "Tierpflege & Services",
         "role": ""
       }
     },
     "motivation": {
       "title": "Endlich die Anerkennung, die Ihr Team verdient.",
-      "subtitle": "Wer täglich vollen Einsatz zeigt, darf nicht unsichtbar bleiben. CareTip bringt Ihren Betrieb technisch auf die Überholspur: Machen Sie erstklassige Leistung sofort sichtbar und belohnen Sie Ihr Team mit unkompliziertem, digitalem Trinkgeld."
+      "subtitle": "Wer täglich vollen Einsatz zeigt, darf nicht unsichtbar bleiben. CareTip macht Leistung sichtbar in Echtzeit, für Ihr Team und Ihre Führung.",
+      "pill": "Live-Anerkennung",
+      "feedLabel": "Aktivität in Ihrem Betrieb",
+      "liveBadge": "Live",
+      "point1": "Trinkgeld und Feedback erscheinen sofort im Team-Feed",
+      "point2": "Manager sehen Trends und Spitzenleistung auf einen Blick",
+      "point3": "Ziele und Meilensteine halten Motivation über jede Schicht",
+      "cards": {
+        "tip": {
+          "badge": "Trinkgeld erhalten",
+          "title": "18,00 € · Tisch 12",
+          "meta": "Per QR bezahlt · vor 2 Min."
+        },
+        "review": {
+          "badge": "5-Sterne-Bewertung",
+          "title": "„Hervorragender Service heute Abend“",
+          "meta": "Gast-Feedback · Service"
+        },
+        "dashboard": {
+          "badge": "Dashboard-Update",
+          "title": "Heutige Trinkgelder +24 %",
+          "meta": "6 erfolgreiche Zahlungen · Live-Sync"
+        },
+        "goal": {
+          "badge": "Teamziel erreicht",
+          "title": "März-Ziel erreicht, 2.400 €",
+          "meta": "12 Teammitglieder · Gemeinsamer Meilenstein"
+        }
+      }
     }
   },
   "footer": {
@@ -1727,18 +1820,27 @@
     "linkedin": "LinkedIn",
     "github": "GitHub",
     "colProduct": "Produkt",
+    "colIndustries": "Branchen",
     "colCompany": "Unternehmen",
+    "colLegal": "Rechtliches",
     "colResources": "Ressourcen",
+    "linkFeatures": "Funktionen",
+    "linkPricing": "Preise",
+    "linkHowItWorks": "Wie es funktioniert",
+    "linkIndustryHospitality": "Gastronomie",
+    "linkIndustryHealthcare": "Gesundheit",
+    "linkIndustryDelivery": "Lieferdienst",
+    "linkIndustryBeauty": "Beauty",
+    "linkIndustryTrades": "Handwerk",
+    "linkContact": "Kontakt",
+    "linkSupport": "Support",
     "linkForBusinesses": "Für Unternehmen",
     "linkForEmployees": "Für Mitarbeitende",
-    "linkFeatures": "Funktionen",
-    "linkHowItWorks": "Wie es funktioniert",
-    "linkPricing": "Preise",
     "linkAbout": "Über uns",
-    "linkContact": "Kontakt",
     "linkHelp": "Hilfezentrum",
     "linkFaq": "FAQ",
-    "copyright": "© {{year}} Caretip. Alle Rechte vorbehalten.",
+    "tagline": "Großartigen Service sofort belohnen.",
+    "copyright": "© CareTip {{year}}",
     "version": "Version {{version}}",
     "platformAdmin": "Plattformadmin",
     "privacy": "Datenschutz",

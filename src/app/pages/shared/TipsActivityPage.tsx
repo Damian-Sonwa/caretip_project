@@ -7,6 +7,7 @@ import { ChevronDown, CreditCard, Download, Search } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/app/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { employeeUi } from "@/app/components/employee/employeeDashboardUi";
@@ -333,9 +334,13 @@ export function TipsActivityPage() {
                 <TipsActivityTableSkeleton />
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-4 py-12 text-center text-muted-foreground">
-                    <CreditCard className="mx-auto mb-4 h-10 w-10 opacity-50" />
-                    {t("business.tipsActivity.empty")}
+                  <td colSpan={5} className="p-0">
+                    <EmptyState
+                      icon={<CreditCard className="h-6 w-6" aria-hidden />}
+                      title={t("emptyState.tips.title")}
+                      description={t("emptyState.tips.description")}
+                      compact
+                    />
                   </td>
                 </tr>
               ) : (

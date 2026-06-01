@@ -133,6 +133,15 @@ html:not(.dark) .caretip-landing #real-life {
   ) !important;
 }
 
+html:not(.dark) .caretip-landing #recognition {
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-soft) 48%,
+    var(--caretip-ivory-base) 100%
+  ) !important;
+}
+
 html:not(.dark) .caretip-landing #social-proof {
   background: linear-gradient(
     180deg,

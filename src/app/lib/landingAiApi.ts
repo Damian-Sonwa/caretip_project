@@ -1,4 +1,5 @@
 import { resolveApiBaseUrl } from "./apiOrigin";
+import { isAiAssistantEnabled } from "./featureFlags";
 
 function landingAiPath(suffix: string): string {
   const base = resolveApiBaseUrl();
@@ -19,6 +20,10 @@ export async function postLandingAiChat(input: {
   fallbackReason?: string | null;
   usingKnowledgeFallback?: boolean;
 }> {
+  if (!isAiAssistantEnabled()) {
+    throw new Error("AI assistant is disabled");
+  }
+
   const res = await fetch(landingAiPath("/chat"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },

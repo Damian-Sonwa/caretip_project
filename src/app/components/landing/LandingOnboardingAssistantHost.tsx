@@ -9,6 +9,7 @@ import {
   type LandingIntentEvent,
 } from "../../lib/landingAiIntent";
 import { trackLandingAiEvent } from "../../lib/landingAiAnalytics";
+import { isAiAssistantEnabled } from "../../lib/featureFlags";
 
 const LandingOnboardingAssistant = lazy(() =>
   import("./LandingOnboardingAssistant").then((m) => ({
@@ -53,6 +54,12 @@ function intentFromTarget(target: HTMLElement | null): LandingIntentEvent | null
 }
 
 export function LandingOnboardingAssistantHost({ rootEl }: LandingOnboardingAssistantHostProps) {
+  if (!isAiAssistantEnabled()) return null;
+
+  return <LandingOnboardingAssistantHostActive rootEl={rootEl} />;
+}
+
+function LandingOnboardingAssistantHostActive({ rootEl }: LandingOnboardingAssistantHostProps) {
   const [launcherVisible, setLauncherVisible] = useState(false);
   const [autoOpenOnce, setAutoOpenOnce] = useState(false);
   const thresholdLoggedRef = useRef(false);

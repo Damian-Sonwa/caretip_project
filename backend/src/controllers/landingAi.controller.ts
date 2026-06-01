@@ -1,10 +1,16 @@
 import type { Request, Response } from "express";
+import { isAiAssistantEnabled } from "../config/featureFlags.js";
 import {
   generateLandingAiReply,
   getLandingAiDiagnostics,
   validateChatBody,
 } from "../services/landingAi.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+
+const AI_ASSISTANT_DISABLED = {
+  message: "AI assistant is disabled.",
+  code: "AI_ASSISTANT_DISABLED",
+} as const;
 
 const ALLOWED_EVENTS = new Set([
   "popup_open",
@@ -20,6 +26,9 @@ const ALLOWED_EVENTS = new Set([
  * POST /api/landing-ai/chat — public onboarding concierge (scoped).
  */
 export async function landingAiChat(req: Request, res: Response) {
+  if (!isAiAssistantEnabled()) {
+    return res.status(503).json(AI_ASSISTANT_DISABLED);
+  }
   try {
     const parsed = validateChatBody(req.body);
     if ("error" in parsed) {
@@ -41,6 +50,9 @@ export async function landingAiChat(req: Request, res: Response) {
  * POST /api/landing-ai/events — lightweight analytics (no auth).
  */
 export async function landingAiTrackEvent(req: Request, res: Response) {
+  if (!isAiAssistantEnabled()) {
+    return res.status(503).json(AI_ASSISTANT_DISABLED);
+  }
   try {
     const body = req.body as Record<string, unknown>;
     const event = typeof body.event === "string" ? body.event.trim() : "";
@@ -71,7 +83,7 @@ export async function landingAiTrackEvent(req: Request, res: Response) {
 export async function landingAiDiagnostics(_req: Request, res: Response) {
   try {
     const diagnostics = await getLandingAiDiagnostics();
-    return res.json(diagnostics);
+    return res.json({ ...diagnostics, assistantEnabled: isAiAssistantEnabled() });
   } catch (err) {
     logServerError("landingAi.diagnostics", err);
     return res.status(500).json({
