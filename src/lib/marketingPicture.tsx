@@ -7,7 +7,9 @@ export type MarketingPictureProps = {
   alt: string;
   className?: string;
   style?: ImgHTMLAttributes<HTMLImageElement>["style"];
-} & Pick<ImgHTMLAttributes<HTMLImageElement>, "loading" | "decoding" | "sizes" | "fetchPriority">;
+  /** Maps to DOM `fetchpriority` (lowercase) for React 18 compatibility. */
+  fetchPriority?: "high" | "low" | "auto";
+} & Pick<ImgHTMLAttributes<HTMLImageElement>, "loading" | "decoding" | "sizes">;
 
 /** PNG/JPEG fallback with optional WebP source for marketing imagery. */
 export function MarketingPicture({
@@ -28,8 +30,10 @@ export function MarketingPicture({
     decoding,
     sizes,
     style,
-    ...(fetchPriority ? { fetchPriority } : {}),
-  } as ImgHTMLAttributes<HTMLImageElement>;
+    ...(fetchPriority
+      ? ({ fetchpriority: fetchPriority } as ImgHTMLAttributes<HTMLImageElement>)
+      : {}),
+  };
 
   if (!webpSrc) {
     return <img src={src} {...imgProps} />;
