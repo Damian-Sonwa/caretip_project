@@ -95,7 +95,7 @@ export function InteractiveCreditCard({
       />
 
       <motion.div
-        className="caretip-interactive-credit-card__stage relative mx-auto aspect-[1.586/1] w-full max-w-[18rem] sm:max-w-[20rem] lg:max-w-[22rem]"
+        className="caretip-interactive-credit-card__stage relative mx-auto aspect-[1.586/1] w-full max-w-[20rem] sm:max-w-[23rem] lg:max-w-[26rem]"
         style={{ perspective: PERSPECTIVE }}
         initial={prefersReducedMotion ? false : { opacity: 0, scale: 0.94 }}
         whileInView={prefersReducedMotion ? undefined : { opacity: 1, scale: 1 }}

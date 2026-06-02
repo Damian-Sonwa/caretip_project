@@ -45,6 +45,13 @@ coverage/
 /blob-report/
 playwright/.cache/
 
+# Postman / Newman local runs (may contain cookies or env snapshots)
+newman-results.json
+postman-cookies.json
+verification-results.json
+*-postman-*.json
+postman-environment.local.json
+
 # Secrets (see also backend/.gitignore)
 firebase-service-account.json
 **/firebase-service-account.json
