@@ -203,14 +203,14 @@ html:not(.dark) .caretip-landing .caretip-showcase-float-card {
   }
 }
 
-/* Employee split section — extra space above CTA below benefit list */
+/* Employee split section — spacing above CTA below benefit list */
 .caretip-landing #for-employees .caretip-split-showcase-cta {
-  margin-top: 2rem;
+  margin-top: 1.5rem;
 }
 
 @media (min-width: 1024px) {
   .caretip-landing #for-employees .caretip-split-showcase-cta {
-    margin-top: 2.25rem;
+    margin-top: 1.75rem;
   }
 }
 
