@@ -6,6 +6,7 @@ import { join } from "path";
 import express from "express";
 import "express-async-errors";
 import cors from "cors";
+import { corsMiddlewareOptions } from "./config/cors.js";
 import { Role } from "@prisma/client";
 import { prisma } from "./prisma.js";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "./middleware/auth.middleware.js";
@@ -77,7 +78,7 @@ async function assertEnvForAuth(): Promise<void> {
 app.use("/api/webhook", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 app.use("/api/webhooks", express.raw({ type: "application/json" }), stripeWebhookRoutes);
 
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors(corsMiddlewareOptions));
 app.use(
   express.json({
     verify(req, _res, buf) {

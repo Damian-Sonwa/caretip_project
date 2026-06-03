@@ -3,6 +3,7 @@ import type { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { socketCorsOptions } from "../config/cors.js";
 
 let io: Server | null = null;
 
@@ -22,7 +23,7 @@ export function getSocketIO(): Server | null {
 
 export function initSocketServer(httpServer: HttpServer): Server {
   io = new Server(httpServer, {
-    cors: { origin: true, credentials: true },
+    cors: socketCorsOptions,
     connectionStateRecovery: {},
     pingInterval: 25000,
     pingTimeout: 20000,
