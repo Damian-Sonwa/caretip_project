@@ -19,7 +19,7 @@ export function HeroSectionSpline() {
         }
         description="Empower your team to receive tips digitally. Increase earnings, delight guests, and modernize your hospitality business with seamless, contactless tipping."
         centerImageUrl="https://images.stockcake.com/public/6/4/3/6437fcad-ae38-4d33-8d99-8dca4be3287d_large/digital-connection-point-stockcake.jpg"
-        centerImageAlt="Digital connection point - QR code and contactless tipping"
+        centerImageAlt="Digital connection point, QR code and contactless tipping"
       >
         <div className="mt-8 flex flex-col gap-4 sm:flex-row">
           <Link to="/auth">

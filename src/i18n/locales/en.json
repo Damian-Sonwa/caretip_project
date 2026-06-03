@@ -193,7 +193,7 @@
     "pricing": {
       "pageTitle": "Simple tipping economics",
       "pageSubtitle": "Guests pay once per tip. CareTip never creates Stripe subscriptions or recurring invoices: only payment intents for each tip.",
-      "sectionTitle": "Turning excellent service into pure appreciation – with CARETIP.",
+      "sectionTitle": "Turning excellent service into pure appreciation, with CARETIP.",
       "sectionSubtitle": "<bold>Caring is Tipping.</bold> True recognition thrives on simplicity. With CareTip, you make your team's outstanding service visible and reward it directly. Delight your guests, boost employee motivation, and foster long-term brand loyalty.",
       "popular": "Popular",
       "ctaTitle": "Questions about your business?",
@@ -612,7 +612,7 @@
         },
         {
           "q": "What does it cost my business?",
-          "aLead": "Total transparency from day one – with absolutely zero hidden fees.",
+          "aLead": "Total transparency from day one, with absolutely zero hidden fees.",
           "aBody": "Pricing depends entirely on the CareTip fee tier you choose. Standard, per-tip processing-style fees apply, which are clearly outlined on our Pricing page or in your specific agreement. There are never any hidden charges beyond what is explicitly disclosed at signup or checkout."
         },
         {
@@ -917,8 +917,8 @@
       "chooseDifferentAmount": "Choose a different amount"
     },
     "docTitle": {
-      "tip": "Tip {{name}} - CareTip Limited",
-      "business": "{{name}} - CareTip Limited",
+      "tip": "Tip {{name}} · CareTip Limited",
+      "business": "{{name}} · CareTip Limited",
       "default": "CareTip Limited"
     },
     "devBypass": {
@@ -1631,17 +1631,17 @@
       "s1Alt": "Logistics and delivery tipping at the doorstep with a QR code",
       "s2Headline": "Right at Reception",
       "s2Tag": "Hotels & Front Desk",
-      "s2Text": "<bold>A quick scan at check-in or check-out – the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.</bold>",
+      "s2Text": "<bold>A quick scan at check-in or check-out, the perfect solution for concierge, bell, and housekeeping teams. Seamless and completely cashless.</bold>",
       "s2Detail": "Display your branded QR codes as countertop displays at the desk, on key card holders, or via a tablet link at reception. Guests can tip porters, the concierge, or housekeeping effortlessly, without hunting for spare cash or dealing with awkward tip envelopes. Finance sees every single transaction tracked in one central hub, making shift handovers and month-end reporting far simpler for hotel management.",
       "s2Alt": "Hotel reception with guest tipping at check-in or check-out",
       "s3Headline": "Right at the Event",
       "s3Tag": "Events & Hostess Services",
-      "s3Text": "<bold>A quick scan at the exhibition booth or guest check-in – the ultimate solution for hostesses, promoters, and event crews. Mobile, professional, and cashless.</bold>",
+      "s3Text": "<bold>A quick scan at the exhibition booth or guest check-in, the ultimate solution for hostesses, promoters, and event crews. Mobile, professional, and cashless.</bold>",
       "s3Detail": "Display your branded QR codes as sleek counter displays, print them onto event badges, or show them directly on a smartphone screen. Clients and event visitors can reward outstanding service, welcoming hospitality, or great support instantly, without needing cash. Agencies and project managers track every tip live in one central dashboard, making post-event accounting completely transparent while giving your crew a powerful motivation boost for every shift.",
       "s3Alt": "Salon after a service",
       "s4Headline": "On the Go, Right at the Door",
       "s4Tag": "Mobile & Home Visits",
-      "s4Text": "<bold>Tip from anywhere via link or QR code – the ultimate solution for field services, home care, and mobile beauty. Seamless, instant, and completely cash-free.</bold>",
+      "s4Text": "<bold>Tip from anywhere via link or QR code, the ultimate solution for field services, home care, and mobile beauty. Seamless, instant, and completely cash-free.</bold>",
       "s4Detail": "Send a personal tipping link via SMS or WhatsApp right after the job, or print a compact QR code on your business cards. Customers can reward great service from the comfort of their couch, even if your business doesn't have a physical storefront. Your field crew stays highly motivated because their appreciation lands in the exact same system as your in-venue staff.",
       "s4Alt": "Home and mobile service tipping moment"
     },

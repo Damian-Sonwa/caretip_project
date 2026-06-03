@@ -191,9 +191,9 @@
       }
     },
     "pricing": {
-      "pageTitle": "Transparente Abrechnung – ohne Abo-Fallen",
+      "pageTitle": "Transparente Abrechnung, ohne Abo-Fallen",
       "pageSubtitle": "Ihre Kunden zahlen nur das, was sie auch wirklich geben möchten. CareTip arbeitet garantiert ohne versteckte Abonnements oder wiederkehrende Rechnungen, jede Trinkgeld-Zahlung ist ein einmaliger, sicherer Vorgang.",
-      "sectionTitle": "Exzellenten Service in pure Wertschätzung verwandeln – mit CARETIP.",
+      "sectionTitle": "Exzellenten Service in pure Wertschätzung verwandeln, mit CARETIP.",
       "sectionSubtitle": "<bold>Caring is Tipping.</bold> Echte Anerkennung lebt von einfachen Wegen. Mit CareTip machen Sie den herausragenden Service Ihres Teams sichtbar und belohnen ihn direkt. Begeistern Sie Ihre Gäste, stärken Sie die Motivation Ihrer Mitarbeiter und binden Sie Kunden langfristig an Ihre Marke.",
       "popular": "Beliebt",
       "ctaTitle": "Haben Sie Fragen zu Ihrem Betrieb?",
@@ -371,9 +371,9 @@
       "s8stat2s": "Transferstatus",
       "s9Title": "Ihr Betrieb wächst durch spürbare Wertschätzung",
       "s9Body": "Höhere Trinkgeldbeteiligung, zufriedenere Teams und eine stärkere Kundenbindung verstärken sich im Laufe der Zeit gegenseitig. CareTip hilft Ihnen dabei, das Engagement zu messen und positive Entwicklungen an jedem einzelnen Standort oder in jedem Team zu feiern.",
-      "s9stat1t": "+18 % – Höheres Trinkgeld-Engagement",
+      "s9stat1t": "+18 %: Höheres Trinkgeld-Engagement",
       "s9stat1s": "",
-      "s9stat2t": "Spürbar gestärkt – Höhere Team-Moral und Mitarbeiterbindung",
+      "s9stat2t": "Spürbar gestärkt: Höhere Team-Moral und Mitarbeiterbindung",
       "s9stat2s": "",
       "trustTitle": "Voller Überblick und schnelle Auszahlungen für jedes Team",
       "trust1Title": "Zahlungen, hinter denen Sie voll und ganz stehen können",
@@ -614,7 +614,7 @@
         },
         {
           "q": "Welche Kosten entstehen für meinen Betrieb?",
-          "aLead": "Volle Transparenz ab Tag eins – garantiert ohne versteckte Gebühren.",
+          "aLead": "Volle Transparenz ab Tag eins, garantiert ohne versteckte Gebühren.",
           "aBody": "Die Kosten richten sich ganz nach dem von Ihnen gewählten CareTip-Tarifmodell. Es fallen lediglich die üblichen, transaktionsbasierten Bearbeitungsgebühren pro Trinkgeld an, die Sie detailliert auf unserer Preisseite oder in Ihrer individuellen Vereinbarung finden. Sie zahlen nur das, was beim Checkout oder der Registrierung offen ausgewiesen wird, keine Überraschungen, kein Risiko."
         },
         {
@@ -919,8 +919,8 @@
       "chooseDifferentAmount": "Anderen Betrag wählen"
     },
     "docTitle": {
-      "tip": "Trinkgeld für {{name}} - CareTip Limited",
-      "business": "{{name}} - CareTip Limited",
+      "tip": "Trinkgeld für {{name}} · CareTip Limited",
+      "business": "{{name}} · CareTip Limited",
       "default": "CareTip Limited"
     },
     "devBypass": {
@@ -1635,17 +1635,17 @@
       "s1Alt": "Trinkgeld per QR-Code bei Logistik und Zustellung an der Haustür",
       "s2Headline": "Direkt am Front Desk",
       "s2Tag": "Hotellerie & Rezeption",
-      "s2Text": "<bold>Ein kurzer Scan beim Check-in oder Check-out – die perfekte Lösung für Concierge, Gepäckservice und das gesamte Team. Ganz ohne Bargeld und diskret.</bold>",
+      "s2Text": "<bold>Ein kurzer Scan beim Check-in oder Check-out, die perfekte Lösung für Concierge, Gepäckservice und das gesamte Team. Ganz ohne Bargeld und diskret.</bold>",
       "s2Detail": "Platzieren Sie Ihre individuellen QR-Codes gut sichtbar als Aufsteller am Empfang, auf Zimmerkarten-Hüllen oder als digitalen Link auf dem Tablet am Desk. Gäste belohnen den Gepäckservice, den Concierge oder das Housekeeping ganz unkompliziert, ohne mühsam nach passendem Bargeld oder Briefumschlägen suchen zu müssen. Ihre Buchhaltung sieht jede Transaktion gesammelt an einem Ort. Das macht Schichtübergaben absolut transparent und vereinfacht den Monatsabschluss im Hotel-Management massiv.",
       "s2Alt": "Hotelrezeption mit Tippen beim Check-in oder Check-out",
       "s3Headline": "Direkt auf dem Event",
       "s3Tag": "Events & Hostess-Services",
-      "s3Text": "<bold>Ein kurzer Scan am Messestand oder beim Einlass – die perfekte Lösung für Hostessen, Promoter und Service-Crews. Mobil, professionell und sekundenschnell.</bold>",
+      "s3Text": "<bold>Ein kurzer Scan am Messestand oder beim Einlass, die perfekte Lösung für Hostessen, Promoter und Service-Crews. Mobil, professionell und sekundenschnell.</bold>",
       "s3Detail": "Nutzen Sie individuelle QR-Codes als stilvolle Aufsteller an Infocountern, auf den Namensschildern (Badges) oder direkt als digitalen Code auf dem Smartphone. Kunden und Messebesucher belohnen erstklassigen Service, freundliche Beratung oder perfekten Support ganz unkompliziert und bargeldlos im Vorbeigehen. Die Agentur oder Projektleitung behält über das Dashboard live den Überblick über alle Einsätze. Das macht die Abrechnung nach dem Event absolut transparent und sorgt für maximal motivierte Teams auf jedem Kombieinsatz.",
       "s3Alt": "Salon nach einer Behandlung",
       "s4Headline": "Direkt beim Kunden vor Ort",
       "s4Tag": "Außendienst & Hausbesuche",
-      "s4Text": "<bold>Trinkgeld von überall per Link oder QR-Code – die perfekte Lösung für Pflegekräfte, Handwerk und mobile Dienstleistungen. Unkompliziert und direkt nach der Arbeit.</bold>",
+      "s4Text": "<bold>Trinkgeld von überall per Link oder QR-Code, die perfekte Lösung für Pflegekräfte, Handwerk und mobile Dienstleistungen. Unkompliziert und direkt nach der Arbeit.</bold>",
       "s4Detail": "Senden Sie nach dem Termin einen persönlichen Link per SMS/WhatsApp oder zeigen Sie einen kompakten QR-Code auf Ihrer Visitenkarte. Kunden belohnen erstklassigen Service ganz bequem auf dem Sofa, selbst wenn sie nie ein physisches Geschäft betreten. Ihr Team im Außendienst bleibt maximal motiviert, weil die Wertschätzung nahtlos im selben System landet wie bei den Kollegen im Betrieb.",
       "s4Alt": "Tippen zu Hause und beim mobilen Service"
     },
