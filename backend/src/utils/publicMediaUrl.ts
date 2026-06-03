@@ -1,6 +1,7 @@
 import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
 import { isLegacyApiDiskMediaPath, isSupabasePublicStorageUrl } from "./mediaPathKind.js";
 import { isSupabaseStorageConfigured } from "../lib/supabaseStorageClient.js";
+import { normalizeSupabasePublicStorageUrl } from "./normalizeSupabaseStorageUrl.js";
 
 /**
  * Stored media is often `/uploads/...` (same origin as the API). Browsers resolve that against the
@@ -14,7 +15,7 @@ export function absolutizePublicMediaPath(path: string | null | undefined): stri
   if (s === "") return null;
 
   if (/^https?:\/\//i.test(s)) {
-    if (isSupabasePublicStorageUrl(s)) return s;
+    if (isSupabasePublicStorageUrl(s)) return normalizeSupabasePublicStorageUrl(s);
     if (
       process.env.NODE_ENV === "production" &&
       isSupabaseStorageConfigured() &&

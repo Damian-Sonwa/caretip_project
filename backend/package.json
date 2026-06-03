@@ -34,7 +34,8 @@
     "admin:verify": "tsx scripts/verify-platform-admin.ts",
     "db:mark-email-verified": "tsx scripts/markAllUsersEmailVerified.ts",
     "db:backfill-pending-employee-users": "tsx scripts/backfillPendingEmployeeUsers.ts",
-    "db:sync-active-employee-email-verified": "tsx scripts/syncActiveEmployeeEmailVerified.ts"
+    "db:sync-active-employee-email-verified": "tsx scripts/syncActiveEmployeeEmailVerified.ts",
+    "db:repair-logo-urls": "dotenv -e ../.env -e .env -- tsx scripts/repairMisconfiguredSupabaseLogoUrls.ts"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",

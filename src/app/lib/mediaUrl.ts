@@ -1,5 +1,6 @@
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { isBrokenLegacyApiDiskMediaUrl } from "./mediaPathKind";
+import { normalizeSupabasePublicStorageUrl } from "./normalizeSupabaseStorageUrl";
 
 /**
  * Turns API-relative media paths (`/uploads/...`) into absolute URLs for `<img src>`.
@@ -23,9 +24,9 @@ export function resolveMediaUrl(url: string | null | undefined): string | undefi
         return `${parsed.pathname}${parsed.search}`;
       }
     } catch {
-      return s;
+      return normalizeSupabasePublicStorageUrl(s);
     }
-    return s;
+    return normalizeSupabasePublicStorageUrl(s);
   }
 
   const base = resolveApiBaseUrl().replace(/\/$/, "");
