@@ -12,6 +12,10 @@ import { useNotifications, type NotificationListFilters } from "@/app/hooks/useN
 import type { InboxNotification } from "@/app/lib/api";
 import { isSupportTicketNotification } from "@/app/lib/api";
 import {
+  inboxNotificationHasOpenAction,
+  resolveInboxNotificationDestination,
+} from "@/app/lib/notificationNavigation";
+import {
   SupportStatusBadge,
   isSupportNotificationType,
 } from "@/app/components/support/supportTicketUi";
@@ -98,18 +102,15 @@ function InboxNotificationRow({
 function InboxNotificationDetail({
   notification,
   onOpen,
+  showOpenAction,
 }: {
   notification: InboxNotification;
   onOpen: () => void;
+  showOpenAction: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const metaStatus = notification.metadata?.status;
   const showTicketBadge = isSupportNotificationType(notification.type);
-  const hasDestination = Boolean(
-    notification.url ||
-      (typeof notification.metadata?.ticketId === "string" &&
-        isSupportTicketNotification(notification.type)),
-  );
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
@@ -138,7 +139,7 @@ function InboxNotificationDetail({
       <div className="min-h-0 flex-1 overflow-y-auto px-6 py-5">
         <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{notification.message}</p>
       </div>
-      {hasDestination ? (
+      {showOpenAction ? (
         <div className="shrink-0 border-t border-border px-6 py-4">
           <Button type="button" className="w-full sm:w-auto" onClick={onOpen}>
             <ExternalLink className="mr-2 h-4 w-4" aria-hidden />
@@ -203,24 +204,25 @@ export function NotificationInboxPage() {
     ? t("notifications.inbox.subtitleAdmin")
     : t("notifications.inbox.subtitle");
 
+  const navRole = user?.role;
   const openNotification = (n: InboxNotification) => {
     void markRead(n.id);
-    if (n.url) {
-      navigate(n.url);
-      return;
-    }
-    const ticketId = n.metadata?.ticketId;
-    if (typeof ticketId === "string" && isSupportTicketNotification(n.type)) {
-      const base = isPlatformAdmin ? "/platform-admin/support" : "/dashboard/support";
-      navigate(`${base}/${ticketId}`);
-    }
+    const dest = resolveInboxNotificationDestination(n, {
+      role: navRole,
+      isPlatformAdmin,
+    });
+    if (dest) navigate(dest);
   };
 
   const handleRowSelect = (n: InboxNotification) => {
     setSelectedId(n.id);
     if (!n.read) void markRead(n.id);
     if (typeof window !== "undefined" && window.matchMedia("(max-width: 1279px)").matches) {
-      openNotification(n);
+      const dest = resolveInboxNotificationDestination(n, {
+        role: navRole,
+        isPlatformAdmin,
+      });
+      if (dest) openNotification(n);
     }
   };
 
@@ -362,6 +364,10 @@ export function NotificationInboxPage() {
           {selected ? (
             <InboxNotificationDetail
               notification={selected}
+              showOpenAction={inboxNotificationHasOpenAction(selected, {
+                role: navRole,
+                isPlatformAdmin,
+              })}
               onOpen={() => openNotification(selected)}
             />
           ) : (

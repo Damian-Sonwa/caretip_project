@@ -48,7 +48,7 @@ export function onTipReceived(payload: NewTipPayload): void {
             name: employee.name,
           },
         },
-        url: "/employee/dashboard",
+        url: "/employee/notifications",
         timestamp: ts,
         metadata: {
           entityId: payload.tip.id,
@@ -211,7 +211,6 @@ export function onEmployeeAccountActivated(userId: string, businessName: string)
           id: "employee_activated",
           params: { businessName },
         },
-        url: "/employee/dashboard",
         timestamp: new Date().toISOString(),
         metadata: { entityId: userId },
       },

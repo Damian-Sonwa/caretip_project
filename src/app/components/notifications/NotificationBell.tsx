@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useNotifications } from "@/app/hooks/useNotifications";
 import { useAuth } from "@/app/hooks/useAuth";
+import { resolveInboxNotificationDestination } from "@/app/lib/notificationNavigation";
 import { cn } from "@/lib/utils";
 
 function formatGroupTime(iso: string, locale: string): string {
@@ -108,7 +109,13 @@ export function NotificationBell({ className }: NotificationBellProps) {
       onMarkAllRead={() => void markAllRead()}
       onItemActivate={(id) => {
         const n = list.find((item) => item.id === id);
-        if (n?.url) navigate(n.url);
+        const dest = n
+          ? resolveInboxNotificationDestination(n, {
+              role,
+              isPlatformAdmin: role === "platform_admin",
+            })
+          : null;
+        if (dest) navigate(dest);
         setOpen(false);
       }}
       trigger={

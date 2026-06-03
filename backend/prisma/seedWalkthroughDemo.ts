@@ -112,7 +112,7 @@ async function seedDemoInboxNotifications(
       title: "Welcome to CareTip",
       message: "Your walkthrough venue is live. Open the dashboard to review tips, staff, and goals.",
       dedupeKey: "walkthrough:manager:welcome",
-      metadata: { url: "/dashboard" },
+      metadata: {},
       channels: ["in_app"],
     },
     {
@@ -121,7 +121,7 @@ async function seedDemoInboxNotifications(
       title: "Tips are flowing in",
       message: "Seeded demo tips are available across week, month, and year views.",
       dedupeKey: "walkthrough:manager:tips",
-      metadata: { url: "/dashboard" },
+      metadata: {},
       channels: ["in_app"],
     },
   ];
@@ -132,7 +132,7 @@ async function seedDemoInboxNotifications(
       title: "Your tip dashboard is ready",
       message: "Track earnings, goals, and recent tips from your employee dashboard.",
       dedupeKey: "walkthrough:employee:welcome",
-      metadata: { url: "/employee/dashboard" },
+      metadata: {},
       channels: ["in_app"],
     });
   }
