@@ -66,8 +66,8 @@ async function ensureActiveEmployeeGoal(
   goal: { goalAmount: number; goalPeriod: "monthly"; startDate: Date },
 ): Promise<void> {
   const existing = await prisma.employeeGoal.findFirst({
-    where: { employeeId, status: "active" },
-    orderBy: { createdAt: "desc" },
+    where: { employeeId },
+    orderBy: { updatedAt: "desc" },
     select: { id: true },
   });
   if (existing) {
@@ -77,6 +77,7 @@ async function ensureActiveEmployeeGoal(
         goalAmount: goal.goalAmount,
         goalPeriod: goal.goalPeriod,
         startDate: goal.startDate,
+        status: "active",
       },
     });
     return;
@@ -217,7 +218,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     update: {
       name: BUSINESS_NAME,
       slug,
-      inviteCode: "DEMO42",
+      inviteCode: "WDEM42",
       verificationStatus: "verified",
       businessType: "Restaurant",
       location: "Berlin-Mitte, Germany",
@@ -228,7 +229,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     create: {
       name: BUSINESS_NAME,
       slug,
-      inviteCode: "DEMO42",
+      inviteCode: "WDEM42",
       userId: manager.id,
       verificationStatus: "verified",
       businessType: "Restaurant",
