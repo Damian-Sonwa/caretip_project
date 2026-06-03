@@ -12,6 +12,7 @@ import { CareTipLogo } from "../../components/CareTipLogo";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { paymentPathFromTipAmount } from "../../lib/tipFlowRoute";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
@@ -27,8 +28,10 @@ export function TipAmountPage() {
   const directFromStaffQr = searchParams.get("direct") === "1";
   const {
     businessId,
+    employeeId: employeeIdCtx,
     employeeName,
     employeeAvatar,
+    amount: amountCtx,
     tableQrSlug,
     setBusinessId,
     setEmployee,
@@ -216,10 +219,29 @@ export function TipAmountPage() {
   };
 
   const handleContinue = () => {
-    if (selectedAmount) {
-      setAmount(selectedAmount);
-      navigate("/payment");
+    const resolvedEmployeeId = employeeId ?? employeeIdCtx;
+    console.log("TIP FLOW TipAmountPage → payment", {
+      selectedAmount,
+      employeeIdUrl: employeeId,
+      employeeIdCtx,
+      businessId,
+      amountCtx,
+      routeSearch: Object.fromEntries(searchParams.entries()),
+    });
+    if (!selectedAmount || !resolvedEmployeeId) return;
+    if (!businessId) {
+      console.log("SKIP PAYMENT NAV: businessId not ready yet");
+      return;
     }
+    setAmount(selectedAmount);
+    navigate(
+      paymentPathFromTipAmount({
+        employeeId: resolvedEmployeeId,
+        returnSlug,
+        returnBusinessSlug,
+        returnEmployeeSlug,
+      }),
+    );
   };
 
   if (!employeeId) {
@@ -395,7 +417,12 @@ export function TipAmountPage() {
       {selectedAmount && (
         <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
           <div className={cf.fixedBottomInner}>
-            <button type="button" onClick={handleContinue} className={cf.btnPrimaryLg}>
+            <button
+              type="button"
+              onClick={handleContinue}
+              disabled={!businessId}
+              className={cf.btnPrimaryLg}
+            >
               {t("tipFlow.tipAmount.continuePayment")}
             </button>
           </div>

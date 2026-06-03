@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CreditCard, Smartphone, Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
-import { createTipCheckoutSession, getEmployeeById } from "../../lib/api";
+import { createTipCheckoutSession, getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { setPendingTipFromCheckout } from "../../lib/repeatTip";
@@ -23,9 +23,13 @@ export function PaymentPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const employeeIdFromUrl = searchParams.get("employeeId");
+  const returnSlugFromUrl = searchParams.get("returnSlug");
+  const returnBusinessSlugFromUrl = searchParams.get("returnBusinessSlug");
+  const returnEmployeeSlugFromUrl = searchParams.get("returnEmployeeSlug");
   const {
     amount: tipAmountCtx,
-    employeeId,
+    employeeId: employeeIdCtx,
     employeeName,
     employeeAvatar,
     staffProfileSlug,
@@ -40,11 +44,31 @@ export function PaymentPage() {
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [guardReady, setGuardReady] = useState(false);
+  const [contextHydrating, setContextHydrating] = useState(false);
   const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(null);
 
+  const resolvedEmployeeId = employeeIdCtx ?? employeeIdFromUrl;
   const tipAmountVal = tipAmountCtx ?? 15.3;
   /** Customer pays the tip only (no separate bill line). */
   const totalAmount = tipAmountVal;
+
+  console.log("TIP FLOW PaymentPage mount", {
+    tipAmountCtx,
+    employeeIdCtx,
+    employeeIdFromUrl,
+    businessId,
+    locationId,
+    tableId,
+    routeParams: Object.fromEntries(searchParams.entries()),
+    tipContext: {
+      amount: tipAmountCtx,
+      employeeId: employeeIdCtx,
+      businessId,
+      employeeName,
+      locationId,
+      tableId,
+    },
+  });
 
   // Guard: don't redirect until we can confirm the context is invalid.
   useEffect(() => {
@@ -54,21 +78,36 @@ export function PaymentPage() {
         if (!cancelled) setGuardReady(true);
         return;
       }
-      if (hasRecentCustomerFlowEntry()) {
-        if (!cancelled) setGuardReady(true);
-        return;
-      }
-      if (!employeeId) {
+      if (!resolvedEmployeeId) {
         navigate("/", { replace: true });
         return;
       }
+      if (hasRecentCustomerFlowEntry() && businessId) {
+        if (!cancelled) setGuardReady(true);
+        return;
+      }
       try {
-        // If the tab refreshed mid-flow, rehydrate minimal context before allowing.
         if (!businessId || !employeeName) {
-          const emp = await getEmployeeById(employeeId);
-          if (cancelled) return;
-          setBusinessId(emp.businessId);
-          setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
+          if (!cancelled) setContextHydrating(true);
+          if (returnBusinessSlugFromUrl && returnEmployeeSlugFromUrl) {
+            const s = await getStaffByBusinessEmployeeSlug(
+              returnBusinessSlugFromUrl,
+              returnEmployeeSlugFromUrl,
+            );
+            if (cancelled) return;
+            setBusinessId(s.businessId);
+            setEmployee(s.id, s.name, s.avatar ?? undefined);
+          } else if (returnSlugFromUrl) {
+            const s = await getStaffBySlug(returnSlugFromUrl);
+            if (cancelled) return;
+            setBusinessId(s.businessId);
+            setEmployee(s.id, s.name, s.avatar ?? undefined);
+          } else {
+            const emp = await getEmployeeById(resolvedEmployeeId);
+            if (cancelled) return;
+            setBusinessId(emp.businessId);
+            setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
+          }
         }
         markCustomerFlowEntered();
         if (!cancelled) setGuardReady(true);
@@ -76,20 +115,33 @@ export function PaymentPage() {
         if (cancelled) return;
         logClientError("PaymentPage.guard", err);
         navigate("/", { replace: true });
+      } finally {
+        if (!cancelled) setContextHydrating(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [businessId, employeeId, employeeName, navigate, setBusinessId, setEmployee, t]);
+  }, [
+    businessId,
+    employeeName,
+    resolvedEmployeeId,
+    navigate,
+    returnBusinessSlugFromUrl,
+    returnEmployeeSlugFromUrl,
+    returnSlugFromUrl,
+    setBusinessId,
+    setEmployee,
+    t,
+  ]);
 
   // DEV-only: allow direct navigation without QR flow by seeding mock context.
   useEffect(() => {
     if (!DEV_BYPASS_ENABLED) return;
-    if (employeeId && businessId) return;
+    if (resolvedEmployeeId && businessId) return;
     setBusinessId(DEV_MOCK.businessId);
     setEmployee(DEV_MOCK.employeeId, DEV_MOCK.employeeName, undefined);
-  }, [businessId, employeeId, setBusinessId, setEmployee]);
+  }, [businessId, resolvedEmployeeId, setBusinessId, setEmployee]);
 
   useEffect(() => {
     if (searchParams.get("canceled") === "1") {
@@ -101,33 +153,63 @@ export function PaymentPage() {
 
   // Hydrate name/avatar if context was partially cleared (same session)
   useEffect(() => {
-    if (!employeeId) return;
+    if (!resolvedEmployeeId) return;
     if (businessId && employeeName) return;
     let cancelled = false;
     (async () => {
+      setContextHydrating(true);
       try {
-        const emp = await getEmployeeById(employeeId);
+        if (returnBusinessSlugFromUrl && returnEmployeeSlugFromUrl) {
+          const s = await getStaffByBusinessEmployeeSlug(
+            returnBusinessSlugFromUrl,
+            returnEmployeeSlugFromUrl,
+          );
+          if (cancelled) return;
+          setBusinessId(s.businessId);
+          setEmployee(s.id, s.name, s.avatar ?? undefined);
+          return;
+        }
+        if (returnSlugFromUrl) {
+          const s = await getStaffBySlug(returnSlugFromUrl);
+          if (cancelled) return;
+          setBusinessId(s.businessId);
+          setEmployee(s.id, s.name, s.avatar ?? undefined);
+          return;
+        }
+        const emp = await getEmployeeById(resolvedEmployeeId);
         if (cancelled) return;
         setBusinessId(emp.businessId);
         setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
       } catch (err) {
         logClientError("PaymentPage.hydrate", err);
+      } finally {
+        if (!cancelled) setContextHydrating(false);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [employeeId, businessId, employeeName, setBusinessId, setEmployee, t]);
+  }, [
+    resolvedEmployeeId,
+    businessId,
+    employeeName,
+    returnBusinessSlugFromUrl,
+    returnEmployeeSlugFromUrl,
+    returnSlugFromUrl,
+    setBusinessId,
+    setEmployee,
+    t,
+  ]);
 
   useEffect(() => {
-    if (!employeeId) {
+    if (!resolvedEmployeeId) {
       setBusinessBrand(null);
       return;
     }
     let cancelled = false;
     (async () => {
       try {
-        const emp = await getEmployeeById(employeeId);
+        const emp = await getEmployeeById(resolvedEmployeeId);
         if (cancelled) return;
         setBusinessBrand({
           logo: emp.businessLogo ?? null,
@@ -140,7 +222,7 @@ export function PaymentPage() {
     return () => {
       cancelled = true;
     };
-  }, [employeeId, t]);
+  }, [resolvedEmployeeId, t]);
 
   const paymentMethods = useMemo(
     () => [
@@ -174,9 +256,10 @@ export function PaymentPage() {
   }
 
   const handleBack = () => {
-    if (employeeId && staffTipReturnBusinessSlug && staffTipReturnEmployeeSlug) {
+    const eid = resolvedEmployeeId;
+    if (eid && staffTipReturnBusinessSlug && staffTipReturnEmployeeSlug) {
       const qs = new URLSearchParams({
-        employeeId,
+        employeeId: eid,
         returnBusinessSlug: staffTipReturnBusinessSlug,
         returnEmployeeSlug: staffTipReturnEmployeeSlug,
         direct: "1",
@@ -184,23 +267,23 @@ export function PaymentPage() {
       navigate(`/tip-amount?${qs.toString()}`);
       return;
     }
-    if (employeeId && staffProfileSlug) {
+    if (eid && staffProfileSlug) {
       navigate(
-        `/tip-amount?employeeId=${encodeURIComponent(employeeId)}&returnSlug=${encodeURIComponent(staffProfileSlug)}&direct=1`,
+        `/tip-amount?employeeId=${encodeURIComponent(eid)}&returnSlug=${encodeURIComponent(staffProfileSlug)}&direct=1`,
       );
       return;
     }
-    navigate(employeeId ? `/tip-amount?employeeId=${employeeId}` : "/");
+    navigate(eid ? `/tip-amount?employeeId=${eid}` : "/");
   };
 
   const handlePayment = async () => {
-    if (!selectedMethod || !employeeId || !businessId) return;
+    if (!selectedMethod || !resolvedEmployeeId || !businessId) return;
 
     setProcessing(true);
     try {
       const { sessionId, url } = await createTipCheckoutSession({
         amount: totalAmount,
-        employeeId,
+        employeeId: resolvedEmployeeId,
         businessId,
         tipAmount: tipAmountVal,
         locationId: locationId ?? null,
@@ -215,7 +298,7 @@ export function PaymentPage() {
       setPendingTipFromCheckout({
         sessionId,
         businessId,
-        employeeId,
+        employeeId: resolvedEmployeeId,
         employeeName: employeeName ?? null,
         amount: tipAmountVal,
       });
@@ -227,7 +310,22 @@ export function PaymentPage() {
     }
   };
 
-  const missingContext = !employeeId || !businessId;
+  const missingContext = !resolvedEmployeeId || !businessId;
+
+  useEffect(() => {
+    if (missingContext) {
+      console.log("SKIP REASON PaymentPage missingContext", {
+        missingEmployeeId: !resolvedEmployeeId,
+        missingBusinessId: !businessId,
+        tipAmountCtx,
+        contextHydrating,
+      });
+    }
+  }, [missingContext, resolvedEmployeeId, businessId, tipAmountCtx, contextHydrating]);
+
+  if (contextHydrating && !businessId) {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
+  }
 
   return (
     <div className={selectedMethod && !missingContext ? cf.pageWithBottomCta : cf.page}>
