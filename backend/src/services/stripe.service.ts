@@ -60,6 +60,12 @@ function logStripeAmountMismatch(context: string, details: Record<string, unknow
   console.warn(`[stripe.amount_mismatch] ${context}`, details);
 }
 
+/** Set STRIPE_WEBHOOK_DEBUG=true to log checkout webhook skip/create details (no secrets). */
+function stripeWebhookDebug(context: string, details: Record<string, unknown>): void {
+  if (process.env.STRIPE_WEBHOOK_DEBUG !== "true") return;
+  console.info(`[stripe.webhook.debug] ${context}`, details);
+}
+
 /**
  * Canonical paid EUR from a Checkout Session — never trust client metadata amounts.
  */
@@ -455,13 +461,33 @@ export async function handlePaymentFailed(paymentIntentId: string): Promise<void
  * Alias for integrations that prefer an explicit name.
  */
 export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Session): Promise<void> {
+  const md = session.metadata ?? {};
+  const employeeIdEarly = md.employeeId ?? null;
+  const businessIdEarly = md.businessId ?? null;
+  const piEarly = session.payment_intent;
+  const paymentIntentIdEarly =
+    typeof piEarly === "string" ? piEarly : piEarly?.id ?? null;
+
+  console.log("WEBHOOK START");
+  console.log({
+    sessionId: session.id,
+    paymentIntentId: paymentIntentIdEarly,
+    employeeId: employeeIdEarly,
+    businessId: businessIdEarly,
+    amount: session.amount_total != null ? session.amount_total / 100 : null,
+    paymentStatus: session.payment_status ?? null,
+    metadata: session.metadata ?? {},
+  });
+
   if (session.payment_status && session.payment_status !== "paid") {
+    console.log("SKIP REASON: payment_status not paid");
     return;
   }
 
   const pi = session.payment_intent;
   const piId = typeof pi === "string" ? pi : pi?.id ?? null;
   if (!piId) {
+    console.log("SKIP REASON: missing paymentIntentId");
     return;
   }
 
@@ -469,6 +495,7 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     where: { stripePaymentIntentId: piId },
   });
   if (dup) {
+    console.log("SKIP REASON: duplicate payment intent", { existingTipId: dup.id, paymentIntentId: piId });
     return;
   }
 
@@ -484,11 +511,13 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     console.error("[stripe.handleSuccessfulTipPayment] missing Stripe amount", {
       sessionId: session.id,
       paymentIntentId: piId,
+      amountTotal: session.amount_total ?? null,
+      confirmedEur,
     });
+    console.log("SKIP REASON: amount missing");
     return;
   }
 
-  const md = session.metadata ?? {};
   const employeeId = md.employeeId;
   const businessId = md.businessId;
 
@@ -505,7 +534,12 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     }
   }
 
-  if (!employeeId || !businessId) {
+  if (!employeeId) {
+    console.log("SKIP REASON: missing employeeId");
+    return;
+  }
+  if (!businessId) {
+    console.log("SKIP REASON: missing businessId");
     return;
   }
 
@@ -516,26 +550,34 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     locId = r.locationId;
     tblId = r.tableId;
   } catch {
-    // ignore invalid venue metadata
+    // invalid locationId/tableId — non-fatal; insert proceeds without venue ids
   }
+
+  const payload = {
+    amount: confirmedEur,
+    status: "success" as const,
+    stripePaymentIntentId: piId,
+    employeeId,
+    businessId,
+    locationId: locId,
+    tableId: tblId,
+  };
+
+  console.log("ATTEMPTING TIP INSERT", payload);
 
   try {
     const tip = await prisma.transaction.create({
-      data: {
-        amount: confirmedEur,
-        status: "success",
-        stripePaymentIntentId: piId,
-        employeeId,
-        businessId,
-        locationId: locId,
-        tableId: tblId,
-      },
+      data: payload,
     });
+
+    console.log("TIP CREATED", tip.id);
 
     await emitTipSocket(tip.id);
   } catch (err) {
     const code = (err as { code?: string })?.code;
+    console.error("TIP INSERT FAILED", err);
     if (code === "P2002") {
+      console.log("SKIP REASON: duplicate payment intent (unique constraint on insert)");
       return;
     }
     throw err;

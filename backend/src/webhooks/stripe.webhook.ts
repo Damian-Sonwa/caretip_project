@@ -33,6 +33,10 @@ router.post("/stripe", async (req: Request, res: Response) => {
   try {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      console.log("stripe.webhook: checkout.session.completed → handleSuccessfulTipPayment", {
+        eventId: event.id,
+        sessionId: session.id,
+      });
       await handleSuccessfulTipPayment(session);
     }
     if (event.type === "payment_intent.succeeded") {
