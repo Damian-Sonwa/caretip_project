@@ -51,24 +51,7 @@ export function PaymentPage() {
   const tipAmountVal = tipAmountCtx ?? 15.3;
   /** Customer pays the tip only (no separate bill line). */
   const totalAmount = tipAmountVal;
-
-  console.log("TIP FLOW PaymentPage mount", {
-    tipAmountCtx,
-    employeeIdCtx,
-    employeeIdFromUrl,
-    businessId,
-    locationId,
-    tableId,
-    routeParams: Object.fromEntries(searchParams.entries()),
-    tipContext: {
-      amount: tipAmountCtx,
-      employeeId: employeeIdCtx,
-      businessId,
-      employeeName,
-      locationId,
-      tableId,
-    },
-  });
+  const missingContext = !resolvedEmployeeId || !businessId;
 
   // Guard: don't redirect until we can confirm the context is invalid.
   useEffect(() => {
@@ -309,19 +292,6 @@ export function PaymentPage() {
       setProcessing(false);
     }
   };
-
-  const missingContext = !resolvedEmployeeId || !businessId;
-
-  useEffect(() => {
-    if (missingContext) {
-      console.log("SKIP REASON PaymentPage missingContext", {
-        missingEmployeeId: !resolvedEmployeeId,
-        missingBusinessId: !businessId,
-        tipAmountCtx,
-        contextHydrating,
-      });
-    }
-  }, [missingContext, resolvedEmployeeId, businessId, tipAmountCtx, contextHydrating]);
 
   if (contextHydrating && !businessId) {
     return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
