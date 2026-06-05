@@ -1575,7 +1575,7 @@
     "featuresPlan": {
       "eyebrow": "Product",
       "title": "See CareTip in action",
-      "subtitle": "Guest scans. Staff get paid. You see everything—one connected flow.",
+      "subtitle": "Guest scans. Staff get paid. You see everything. One connected flow.",
       "story": {
         "aria": "How CareTip works",
         "guest": "Guest",
@@ -1711,7 +1711,7 @@
       "cardBackLine1": "Payments processed by Stripe.",
       "cardBackLine2": "CareTip never stores card numbers or CVV codes.",
       "cardBackBullet1": "Stripe Checkout · Apple Pay · Google Pay",
-      "cardBackBullet2": "CareTip routes tips — never stores card data",
+      "cardBackBullet2": "CareTip routes tips, never stores card data",
       "cardBackDisclaimer": "Not a bank-issued card · payment visualization",
       "cardFooterNote": "Illustration only",
       "b1Title": "Stripe Checkout",

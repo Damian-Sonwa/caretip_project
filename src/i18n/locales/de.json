@@ -1579,7 +1579,7 @@
     "featuresPlan": {
       "eyebrow": "Produkt",
       "title": "CareTip in Aktion",
-      "subtitle": "Gast scannt. Team wird bezahlt. Sie behalten den Überblick—ein verbundener Flow.",
+      "subtitle": "Gast scannt. Team wird bezahlt. Sie behalten den Überblick. Ein verbundener Flow.",
       "story": {
         "aria": "So funktioniert CareTip",
         "guest": "Gast",
@@ -1715,7 +1715,7 @@
       "cardBackLine1": "Zahlungen werden von Stripe verarbeitet.",
       "cardBackLine2": "CareTip speichert keine Kartennummern oder CVV-Codes.",
       "cardBackBullet1": "Stripe Checkout · Apple Pay · Google Pay",
-      "cardBackBullet2": "CareTip leitet Trinkgeld weiter — speichert keine Kartendaten",
+      "cardBackBullet2": "CareTip leitet Trinkgeld weiter, speichert keine Kartendaten",
       "cardBackDisclaimer": "Keine Bankkarte · Zahlungsvisualisierung",
       "cardFooterNote": "Nur Illustration",
       "b1Title": "Stripe Checkout",

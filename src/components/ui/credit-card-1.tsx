@@ -82,7 +82,7 @@ export function InteractiveCreditCard({
   backLine1 = "Payments processed by Stripe.",
   backLine2 = "Card details are never stored by CareTip.",
   backBullet1 = "Stripe Checkout · Apple Pay · Google Pay",
-  backBullet2 = "CareTip routes tips — never stores card data",
+  backBullet2 = "CareTip routes tips, never stores card data",
   backDisclaimer = "Not a bank-issued card · payment visualization",
   footerNote = "Illustration only",
   disableTilt = false,
@@ -287,7 +287,7 @@ export function InteractiveCreditCard({
           }}
           role="button"
           tabIndex={0}
-          aria-label="Secure payment visualization — tap to view processor details"
+          aria-label="Secure payment visualization, tap to view processor details"
         >
           <motion.div
             className={cn(
