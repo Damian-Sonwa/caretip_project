@@ -1,5 +1,14 @@
 import { prisma } from "../prisma.js";
 
+/**
+ * Demo / walkthrough email verification bypass.
+ * Disabled in production unless ENABLE_DEMO_BYPASS=true (explicit opt-in).
+ */
+export function isDemoEmailVerificationBypassEnabled(): boolean {
+  if (process.env.ENABLE_DEMO_BYPASS === "true") return true;
+  return process.env.NODE_ENV !== "production";
+}
+
 /** Case-insensitive first-name allowlist (plus optional env). */
 const HARDCODED_BYPASS_FIRST_NAMES = new Set(["genevive", "genevieve", "bobby"]);
 
@@ -54,6 +63,7 @@ export type UserRowForEmailBypass = {
  * Super-admin accounts are never matched by name allowlist.
  */
 export function qualifiesEmailVerificationBypass(row: UserRowForEmailBypass): boolean {
+  if (!isDemoEmailVerificationBypassEnabled()) return false;
   if (row.role === "SUPER_ADMIN") return false;
   const email = row.email.trim().toLowerCase();
   if (bypassEmails().has(email)) return true;

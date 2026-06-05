@@ -11,6 +11,7 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { onVerifiedTipPaymentSession } from "../../lib/postPaymentSuccess";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
 /** Canonical English values sent to the API; labels are translated in the UI. */
@@ -87,6 +88,7 @@ export function RatingPage() {
         if (ctx.status === "ready") {
           markCustomerFlowEntered();
           setCustomerName(ctx.customerName ?? "");
+          onVerifiedTipPaymentSession(sessionId, ctx);
           return;
         }
         if (tries < 10) {

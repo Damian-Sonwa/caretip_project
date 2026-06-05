@@ -8,7 +8,7 @@ import { useTipFlow } from "../../context/TipFlowContext";
 import { getTipSessionContext } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { promotePendingTipToRepeatTip } from "../../lib/repeatTip";
+import { onVerifiedTipPaymentSession } from "../../lib/postPaymentSuccess";
 import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
@@ -57,11 +57,7 @@ export function SuccessPage() {
         if (ctx.status === "ready") {
           markCustomerFlowEntered();
           // Promote the last checkout into repeat-tip storage (client-side only).
-          promotePendingTipToRepeatTip({
-            sessionId,
-            verifiedBusinessId: ctx.businessId,
-            verifiedEmployee: ctx.employee ? { id: ctx.employee.id, name: ctx.employee.name } : null,
-          });
+          onVerifiedTipPaymentSession(sessionId, ctx);
           setVerified(true);
           return;
         }

@@ -11,8 +11,11 @@ import { caretipType } from "@/lib/typography/caretipType";
 export const BUSINESS_DASHBOARD_ROOT = "business-dashboard";
 
 /** Shared rhythm with employee dashboard; class names scoped via shell root. */
+const { page: _employeePage, pageInner: _employeePageInner, ...employeeUiRest } = employeeUi;
+const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest } = dashboardSharedUi;
+
 export const businessUi = {
-  ...employeeUi,
+  ...employeeUiRest,
   page: "business-page min-h-0 pb-16 sm:pb-20",
   pageInner: "caretip-container business-page__inner pt-4 max-lg:pt-3.5 sm:pt-7",
   /** Overview analytics stack — consistent vertical rhythm below hero. */
@@ -49,5 +52,5 @@ export const businessUi = {
   atAGlanceStatValue: "dashboard-at-a-glance__stat-value font-bold tabular-nums text-foreground",
   subPageMain: "dashboard-subpage-after-metrics w-full px-4 sm:px-6",
 
-  ...dashboardSharedUi,
+  ...dashboardSharedRest,
 } as const;

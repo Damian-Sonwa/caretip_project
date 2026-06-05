@@ -4,6 +4,7 @@ import {
   NotificationAlertDialog,
   type NotificationAlertItem,
 } from "@/components/ui/notification-alert-dialog";
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { useNotifications } from "@/app/hooks/useNotifications";
@@ -32,7 +33,7 @@ function inboxPathForRole(role: string | undefined): string {
   return "/dashboard/notifications";
 }
 
-function unreadSummaryText(count: number, t: (key: string, opts?: object) => string): string {
+function unreadSummaryText(count: number, t: TFunction): string {
   if (count === 0) return t("notifications.bell.empty");
   return t("notifications.bell.unreadSummary", {
     count,

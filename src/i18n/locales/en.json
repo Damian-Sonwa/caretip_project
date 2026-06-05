@@ -80,34 +80,34 @@
       "trustChips": {
         "liveMinutes": "Live in minutes",
         "noApp": "No app download",
-        "instantPayouts": "Instant payouts",
+        "instantPayouts": "Transparent tip tracking",
         "secureOnboarding": "Secure onboarding",
         "worksInstantly": "Works instantly"
       },
       "trustChipsFeatures": {
         "liveMinutes": "Quick Start",
         "noApp": "No app download",
-        "instantPayouts": "Instant payouts",
+        "instantPayouts": "Transparent tip tracking",
         "secureOnboarding": "Secure onboarding",
         "worksInstantly": "Works instantly"
       },
       "trustChipsFaq": {
         "liveMinutes": "Live in minutes",
         "noApp": "No app download",
-        "instantPayouts": "Instant payouts",
+        "instantPayouts": "Transparent tip tracking",
         "secureOnboarding": "Secure onboarding",
         "worksInstantly": "Instant results"
       },
       "trustChipsPricing": {
         "noApp": "No app download required",
-        "instantPayouts": "Fast payouts",
+        "instantPayouts": "Tip records",
         "secureOnboarding": "Secure onboarding",
         "worksInstantly": "Ready for immediate use"
       },
       "trustChipsHowItWorks": {
         "liveMinutes": "Live in minutes",
         "noApp": "No app download required",
-        "instantPayouts": "Instant payouts",
+        "instantPayouts": "Transparent tip tracking",
         "secureOnboarding": "Secure onboarding"
       }
     },
@@ -175,9 +175,9 @@
           "body": "Employees receive real-time tip updates, keep full overview of their earnings, and start every workday highly motivated."
         },
         "payouts": {
-          "title": "Payouts & security",
-          "subtitle": "Secure processing and transparent payout status your team can trust.",
-          "body": "Fully protected processing and traceable payout steps provide maximum security and reliability for your employees."
+          "title": "Tip tracking & security",
+          "subtitle": "Secure processing and transparent tip records your team can trust.",
+          "body": "Fully protected processing and traceable tip records provide maximum security and reliability for your employees."
         },
         "analytics": {
           "title": "Full clarity in analytics",
@@ -326,7 +326,7 @@
         { "icon": "📲", "label": "Digital tips" },
         { "icon": "🔔", "label": "Instant notifications" },
         { "icon": "📊", "label": "Valuable insights" },
-        { "icon": "⚡", "label": "Fast payouts" },
+        { "icon": "⚡", "label": "Tip tracking" },
         { "icon": "📈", "label": "Measurable growth" },
         { "icon": "⏱️", "label": "Live in minutes" },
         { "icon": "🔒", "label": "Secure onboarding" }
@@ -346,8 +346,8 @@
       "s6Body": "Staff get real-time notifications when a tip lands. They see live earnings, activity in their wallet, and confidence that great service was recognized immediately.",
       "s7Title": "Valuable insights",
       "s7Body": "Owners and managers monitor tips by location, shift, and team member. Analytics widgets, top performer cards, and activity feeds keep the floor and back office aligned.",
-      "s8Title": "Fast payouts",
-      "s8Body": "Earnings move through secure processors to your configured payout method. Employees and finance teams see clear transfer states: initiated, processing, and paid.",
+      "s8Title": "Track & manage tips",
+      "s8Body": "Every tip is recorded in CareTip with clear records for managers and staff. Businesses distribute tips on their own schedule; CareTip keeps the audit trail transparent.",
       "s9Title": "Measurable growth",
       "s9Body": "Higher tip participation, happier teams, and stronger guest experiences compound over time. CareTip helps you measure engagement and celebrate momentum across every location.",
       "trustTitle": "Trust and speed for every shift",
@@ -366,7 +366,7 @@
         "customerTip": "Guest payment",
         "employeeTip": "Employee notification",
         "analytics": "Manager dashboard",
-        "payout": "Payouts & withdrawals",
+        "payout": "Tip records",
         "growth": "Business growth"
       },
       "mock": {
@@ -384,11 +384,11 @@
         "earningsToday": "Today's earnings",
         "earningsValue": "€186.50",
         "earningsDelta": "+12% vs yesterday",
-        "payoutSuccess": "Payout initiated",
-        "payoutSub": "Transfer to your bank account",
-        "withdrawLabel": "Available balance",
+        "payoutSuccess": "Tips recorded",
+        "payoutSub": "Ready for daily distribution",
+        "withdrawLabel": "Today's tips",
         "withdrawAmount": "€1,240.00",
-        "withdrawCta": "Withdraw",
+        "withdrawCta": "View records",
         "metricTips": "Tips this week",
         "metricTop": "Top performer",
         "metricTopName": "Mina K. · Front of house",
@@ -472,7 +472,7 @@
       "s1Foot": "This may include your name, email address, phone number, business information, payment information, and tip transaction details.",
       "s2Title": "2. How We Use Your Information",
       "s2Lead": "We use the information we collect to:",
-      "s2Li0": "Process digital tips and facilitate instant payouts to employees",
+      "s2Li0": "Process digital tips and provide transparent tip records for employees",
       "s2Li1": "Provide, maintain, and improve our tipping platform",
       "s2Li2": "Generate QR codes and personalized tipping links",
       "s2Li3": "Send transaction confirmations and payout notifications",
@@ -578,7 +578,7 @@
         {
           "q": "How do employees get paid?",
           "aLead": "Securely, transparently, and directly.",
-          "aBody": "All tips are processed through fully certified, secure payment partners. The exact payout timing and methods depend entirely on your specific business setup and preferences (e.g., direct individual payouts or split team pools). Employees simply need to complete their profile and payout details once within the CareTip app, the system handles the rest automatically."
+          "aBody": "All tips are processed through fully certified, secure payment partners. CareTip records every tip with clear records for managers and staff. Businesses distribute tips on their own schedule; CareTip keeps the audit trail transparent."
         },
         {
           "q": "Is paying through CareTip secure?",
@@ -1211,7 +1211,7 @@
   },
   "sampleDashboard": {
     "welcomeTitle": "Welcome back! 👋",
-    "welcomeSubtitle": "Tips, scans, and payouts for your team. One-time payments only.",
+    "welcomeSubtitle": "Tips, scans, and transparent records for your team. One-time payments only.",
     "metrics": {
       "tipsReceived30d": "Tips received (30d)",
       "vsPriorMonth": "vs prior month",
@@ -1239,7 +1239,7 @@
     "lastTipPrefix": "Last tip",
     "recentActivity": "Recent activity",
     "overviewHeroTitle": "Welcome back",
-    "overviewHeroBody": "CareTip helps guests send tips directly to your team. Share your QR links and keep every payout transparent.",
+    "overviewHeroBody": "CareTip helps guests send tips directly to your team. Share your QR links and keep every tip record transparent.",
     "overviewHeroPill": "One-time tips only, no recurring billing",
     "overviewCtaTips": "View tips & activity",
     "overviewCtaQr": "Manage QR codes",
@@ -1320,10 +1320,10 @@
     "showcase": {
       "tagline": "Earn. Serve. Smile.",
       "title": "Tip in seconds. Reward great service instantly.",
-      "description": "CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan. A quick scan is all it takes while the experience is still fresh. Your team gets fair payouts, live visibility, and the recognition that keeps every shift feeling worthwhile.",
+      "description": "CareTip makes it effortless for customers to tip and for teams to track performance, all with a simple QR scan. A quick scan is all it takes while the experience is still fresh. Your team gets transparent tip records, live visibility, and the recognition that keeps every shift feeling worthwhile.",
       "statLive": "Instant QR tipping",
       "statPos": "No POS setup required",
-      "statSecure": "Secure & fast payouts",
+      "statSecure": "Secure tip records",
       "step1Title": "Guests scan your QR",
       "step1Text": "Table tents, badges, or a shareable link, with no guest app required.",
       "step2Title": "Tips route your way",
@@ -1348,7 +1348,7 @@
       "heroMetric2Value": "30s",
       "heroMetric2Label": "Setup time",
       "heroMetric3Value": "Secure",
-      "heroMetric3Label": "Fast payouts",
+      "heroMetric3Label": "Tip tracking",
       "floatCardValue": "+18%",
       "floatCardLabel": "Team tips today",
       "heroFloatPillTip": "€12 tip received",
@@ -1359,7 +1359,7 @@
       "heroFloatReviewValue": "5★",
       "heroFloatReviewLabel": "Guest review",
       "heroFloatPayoutValue": "Done",
-      "heroFloatPayoutLabel": "Payout completed",
+      "heroFloatPayoutLabel": "Tip recorded",
       "heroFloatStaffValue": "3",
       "heroFloatStaffLabel": "Staff active",
       "heroHeadline": "",
@@ -1595,7 +1595,7 @@
         "earnings": "Employee earnings",
         "analytics": "Business analytics",
         "feedback": "Guest feedback",
-        "payout": "Instant payouts"
+        "payout": "Tip records"
       },
       "scenes": {
         "notif": {
@@ -1637,7 +1637,7 @@
           "r3": "Will definitely come back"
         },
         "payout": {
-          "queue": "Payout queue",
+          "queue": "Tip records",
           "via": "Stripe",
           "r1": "€420.00",
           "r2": "€318.50",
@@ -1663,9 +1663,9 @@
       "i4Title": "Tip history",
       "i4Text": "A clear audit trail when finance needs answers fast.",
       "i4Tag": "Export-ready",
-      "i5Title": "Payout system",
-      "i5Text": "Payouts on your rhythm with less admin back and forth.",
-      "i5Tag": "Live payouts",
+      "i5Title": "Tip tracking",
+      "i5Text": "Track and manage tips with clear records for managers and staff.",
+      "i5Tag": "Transparent records",
       "i6Title": "Feedback & ratings",
       "i6Text": "Guest feedback while the experience is still fresh.",
       "i6Tag": "Guest-rated"
@@ -1716,8 +1716,8 @@
       "cardFooterNote": "Illustration only",
       "b1Title": "Stripe Checkout",
       "b1Text": "Credit card, Apple Pay, and Google Pay via the familiar Stripe guest checkout your customers already know.",
-      "b2Title": "Payouts on your schedule",
-      "b2Text": "CareTip routes tips to your team; Stripe settles funds to your connected account.",
+      "b2Title": "Transparent tip management",
+      "b2Text": "CareTip records every tip for your team; Stripe secures the guest payment.",
       "b3Title": "Tips tied to every payment",
       "b3Text": "Each Stripe payment links to a tip in CareTip, with clear records for managers and staff.",
       "b4Title": "CareTip is not the processor",
@@ -1793,7 +1793,7 @@
     "finalCta": {
       "eyebrow": "Start tipping in minutes",
       "title": "Start rewarding your team today",
-      "subtitle": "Launch QR tipping in an afternoon, with payouts and team visibility built in.",
+      "subtitle": "Launch QR tipping in an afternoon, with tip tracking and team visibility built in.",
       "cta": "Get started",
       "secondary": "See how it works"
     },
@@ -1886,7 +1886,7 @@
   },
   "footer": {
     "brandTitle": "Caretip",
-    "brandBlurb": "The digital tipping system for modern teams. QR codes, automated payouts, and smart team analytics, united on one secure platform.",
+    "brandBlurb": "The digital tipping system for modern teams. QR codes, transparent tip tracking, and smart team analytics, united on one secure platform.",
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "github": "GitHub",

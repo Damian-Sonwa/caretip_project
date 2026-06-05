@@ -18,12 +18,12 @@ BUSINESS WORKFLOWS:
 - Multiple venues/locations supported on higher tiers; staff and QR codes can be scoped per location.
 
 EMPLOYEE WORKFLOWS:
-- Employees activate accounts, complete profile/payout details, receive digital tips via configured payouts (Stripe).
+- Employees activate accounts, complete profile details, and see digital tips recorded in CareTip as guests pay (Stripe).
 - Employee dashboard shows earnings, goals, tip activity, and notifications when tips arrive (timing depends on settings/connectivity).
 
 PAYOUTS & PAYMENTS:
 - Tips are processed by secure payment partners (PCI-compliant); CareTip does not store full card numbers.
-- Payout timing and methods depend on business verification, Stripe/payout settings, and employee profile completion.
+- CareTip records and tracks tips; businesses distribute tips to staff on their own schedule (not instant automated payouts).
 - Never state a specific dollar balance, payout date, or that a payment succeeded for this user.
 
 QR & SETUP:
@@ -85,8 +85,8 @@ export const FAQ_ENTRIES: FaqEntry[] = [
   {
     id: "employee_tips",
     keywords: ["employee", "staff", "receive", "paid", "payout", "earn", "dashboard"],
-    en: "Employees receive tips digitally through CareTip payouts (Stripe). They see earnings and goals in their dashboard; managers track performance without handling cash.",
-    de: "Mitarbeitende erhalten Trinkgelder digital über CareTip-Auszahlungen (Stripe). Das Dashboard zeigt Verdienste und Ziele; Manager behalten den Überblick ohne Bargeld.",
+    en: "Employees see tips recorded in CareTip as guests pay through Stripe. Dashboards show earnings and goals; managers track performance without handling cash. Businesses distribute tips on their own schedule.",
+    de: "Mitarbeitende sehen Trinkgelder in CareTip, sobald Gäste über Stripe zahlen. Dashboards zeigen Verdienste und Ziele; Betriebe verteilen Trinkgelder nach eigenem Rhythmus.",
   },
   {
     id: "multi_venue",
@@ -155,8 +155,8 @@ export const FAQ_ENTRIES: FaqEntry[] = [
   {
     id: "onboard_staff",
     keywords: ["onboard", "invite staff", "train team", "roll out", "launch staff"],
-    en: "Roll out by inviting staff in CareTip, completing payout profiles, assigning employee or table QR codes, and a short team briefing on where guests scan. Most venues finish setup in under 15 minutes before staff training.",
-    de: "Ausrollen: Team einladen, Auszahlungsprofile vervollständigen, Mitarbeiter- oder Tisch-QR zuweisen und kurz zeigen, wo Gäste scannen. Viele Betriebe sind in unter 15 Minuten startklar.",
+    en: "Roll out by inviting staff in CareTip, assigning employee or table QR codes, and a short team briefing on where guests scan. Most venues finish setup in under 15 minutes before staff training.",
+    de: "Ausrollen: Team einladen, Mitarbeiter- oder Tisch-QR zuweisen und kurz zeigen, wo Gäste scannen. Viele Betriebe sind in unter 15 Minuten startklar.",
   },
   {
     id: "vs_cash",

@@ -10,6 +10,8 @@ import { caretipType } from "@/lib/typography/caretipType";
 /** Root wrapper class on `.caretip-dashboard-shell` (see EmployeeLayout). */
 export const EMPLOYEE_DASHBOARD_ROOT = "employee-dashboard";
 
+const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest } = dashboardSharedUi;
+
 export const employeeUi = {
   page: "employee-page min-h-0 pb-16 sm:pb-20",
   pageInner: "caretip-container employee-page__inner pt-5 sm:pt-7",
@@ -71,5 +73,5 @@ export const employeeUi = {
     "employee-settings-section dashboard-settings-panel space-y-4 rounded-2xl border border-neutral-200/80 bg-white p-5 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] sm:p-6",
   settingsHeading: "text-base font-semibold tracking-tight text-foreground",
 
-  ...dashboardSharedUi,
+  ...dashboardSharedRest,
 } as const;

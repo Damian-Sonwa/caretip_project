@@ -395,6 +395,7 @@ export async function listByEmployee(req: Request, res: Response) {
   }
 }
 
+/** Legacy Payment Intent endpoint — QR flow uses POST /api/payments/create-tip-session instead. */
 export async function createIntent(req: Request, res: Response) {
   try {
     const { amount, employeeId, businessId, locationId, tableId } = req.body;
@@ -404,8 +405,11 @@ export async function createIntent(req: Request, res: Response) {
       });
     }
     const numAmount = Number(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
+    if (isNaN(numAmount) || numAmount < 0.5 || numAmount > 500) {
       return res.status(400).json({ message: "Invalid amount" });
+    }
+    if (typeof employeeId !== "string" || typeof businessId !== "string") {
+      return res.status(400).json({ message: "Invalid employee or business id" });
     }
     if (!isStripeConfigured()) {
       return res.status(503).json({
