@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { CreditCard as CreditCardIcon, Smartphone, Clock, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { InteractiveCreditCard } from "@/components/ui/credit-card-1";
+import paymentInfrastructureImg from "../../../../images/payment-infrastructure.png";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingType } from "@/components/landing/landingTypography";
@@ -45,20 +45,8 @@ type PaymentsTrustItem = {
 export function PaymentsSection() {
   const { t } = useTranslation();
   const sectionSubtitle = t("landing.paymentsTrust.subtitle");
-  const [disableCardTilt, setDisableCardTilt] = useState(true);
-
-  useEffect(() => {
-    const coarse = window.matchMedia("(pointer: coarse)");
-    const narrow = window.matchMedia("(max-width: 767px)");
-    const update = () => setDisableCardTilt(coarse.matches || narrow.matches);
-    update();
-    coarse.addEventListener("change", update);
-    narrow.addEventListener("change", update);
-    return () => {
-      coarse.removeEventListener("change", update);
-      narrow.removeEventListener("change", update);
-    };
-  }, []);
+  const principleLabel = t("landing.paymentsTrust.principleLabel");
+  const principle = t("landing.paymentsTrust.principle");
 
   const items = useMemo<PaymentsTrustItem[]>(
     () =>
@@ -116,9 +104,12 @@ export function PaymentsSection() {
           {landingCopyVisible(sectionSubtitle) ? (
             <p className={cn(landingUi.sectionSubtitle, "mx-auto max-w-2xl")}>{sectionSubtitle}</p>
           ) : null}
-          {landingCopyVisible(t("landing.paymentsTrust.roleClarifier")) ? (
-            <p className="caretip-payments-trust-clarifier mx-auto mt-3 max-w-xl text-center text-xs font-medium tracking-wide text-muted-foreground sm:text-[13px]">
-              {t("landing.paymentsTrust.roleClarifier")}
+          {landingCopyVisible(principle) ? (
+            <p className={cn(landingUi.sectionSubtitle, "mx-auto mt-3 max-w-2xl")}>
+              {landingCopyVisible(principleLabel) ? (
+                <strong className="font-semibold text-neutral-900 dark:text-neutral-50">{principleLabel}</strong>
+              ) : null}
+              : {principle}
             </p>
           ) : null}
         </motion.header>
@@ -135,16 +126,12 @@ export function PaymentsSection() {
               label={t("landing.paymentsTrust.stripeBadge")}
               className="caretip-payments-trust-stripe-badge mb-4"
             />
-            <InteractiveCreditCard
-              variant="caretip"
-              cardHolder={t("landing.paymentsTrust.cardHolder")}
-              cardNumber={t("landing.paymentsTrust.cardNumber")}
-              expiryDate={t("landing.paymentsTrust.cardExpiry")}
-              cvv="•••"
-              backLine1={t("landing.paymentsTrust.cardBackLine1")}
-              backLine2={t("landing.paymentsTrust.cardBackLine2")}
-              className="caretip-payments-trust-card"
-              disableTilt={disableCardTilt}
+            <img
+              src={paymentInfrastructureImg}
+              alt={t("landing.paymentsTrust.visualAlt")}
+              className="caretip-payments-trust-visual-image w-full max-w-[26rem] rounded-2xl"
+              loading="lazy"
+              decoding="async"
             />
             <p className="caretip-payments-trust-card-hint">
               {t("landing.paymentsTrust.cardHint")}

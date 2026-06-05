@@ -1,6 +1,6 @@
 {
   "nav": {
-    "howItWorks": "How It Works",
+    "howItWorks": "How CareTip works",
     "features": "Features",
     "pricing": "Pricing",
     "fees": "Pricing",
@@ -99,10 +99,10 @@
         "worksInstantly": "Instant results"
       },
       "trustChipsPricing": {
-        "noApp": "No app download (Works instantly in the mobile browser)",
-        "instantPayouts": "Fast payouts (Direct to employee accounts)",
-        "secureOnboarding": "Secure onboarding (Quick and privacy-compliant setup)",
-        "worksInstantly": "Ready instantly (No lengthy training or IT effort)"
+        "noApp": "No app download required",
+        "instantPayouts": "Fast payouts",
+        "secureOnboarding": "Secure onboarding",
+        "worksInstantly": "Ready for immediate use"
       },
       "trustChipsHowItWorks": {
         "liveMinutes": "Live in minutes",
@@ -142,7 +142,7 @@
     "features": {
       "title": "What CareTip can do for you",
       "subtitleLead": "Caring is Tipping! Because outstanding dedication deserves real recognition.",
-      "subtitleBody": "Discover a platform passionately tailored to the unique needs of hospitality, healthcare, and personal services. CareTip makes it easier, more intuitive, and more inspiring than ever before for your clients, guests, or patients to say a heartfelt thank you, turning digital appreciation directly into a powerful boost for your team. Make exceptional service unforgettable!",
+      "subtitleBody": "A platform tailor-made for hospitality, healthcare, and service industries. With CareTip, your guests, clients, or patients can say a digital thank you more easily and intuitively than ever before. Bring genuine appreciation straight to your team!",
       "f1Title": "QR Code Tipping",
       "f1Desc": "Guests scan and tip in seconds, with no app installs and no friction.",
       "f1Tag": "Guest flow",
@@ -191,13 +191,13 @@
       }
     },
     "pricing": {
-      "pageTitle": "Simple tipping economics",
-      "pageSubtitle": "Guests pay once per tip. CareTip never creates Stripe subscriptions or recurring invoices: only payment intents for each tip.",
-      "sectionTitle": "Turning excellent service into pure appreciation, with CARETIP.",
-      "sectionSubtitle": "<bold>Caring is Tipping.</bold> True recognition thrives on simplicity. With CareTip, you make your team's outstanding service visible and reward it directly. Delight your guests, boost employee motivation, and foster long-term brand loyalty.",
+      "pageTitle": "Fair & Transparent Billing",
+      "pageSubtitle": "Full flexibility for your customers: They only pay what they feel is right.",
+      "sectionTitle": "True recognition is all about simplicity.",
+      "sectionSubtitle": "With CareTip, you can spotlight your team's outstanding service and reward them directly. Delight your guests, boost team morale, and turn customers into loyal brand advocates.",
       "popular": "Popular",
-      "ctaTitle": "Questions about your business?",
-      "ctaBody": "Our team will guide you step by step through setup, branding, and choosing the right fee model for your service, care, or logistics operation.",
+      "ctaTitle": "Do you have questions about CareTip?",
+      "ctaBody": "Our team will guide you step-by-step through the setup, branding, and selection of the right pricing model for your service, care, or logistics sector.",
       "tiers": {
         "starter": {
           "name": "Starter",
@@ -233,8 +233,8 @@
           "button": "Contact sales"
         }
       },
-      "commitmentNotice": "Choose the perfect plan tailored to your business needs.",
-      "commitmentTerms": "All plans feature a 12-month commitment to ensure continuous stability and planning security for your team. The following introductory prices apply:"
+      "commitmentNotice": "Just choose the package that fits your business best.",
+      "commitmentTerms": "All plans come with a 12-month minimum term to ensure reliable planning security for you and your team. The following starting prices apply:"
     },
     "help": {
       "title": "Help Center",
@@ -320,61 +320,36 @@
       }
     },
     "howItWorks": {
-      "title": "How It Works",
-      "subtitle": "The full CareTip journey, from account setup and team onboarding to guest tipping, instant employee notifications, manager insights, payouts, and growth.",
+      "title": "The CareTip Journey",
+      "subtitle": "Set up your account, add your team, and get started right away.",
+      "journeyPillars": [
+        { "icon": "📲", "label": "Digital tips" },
+        { "icon": "🔔", "label": "Instant notifications" },
+        { "icon": "📊", "label": "Valuable insights" },
+        { "icon": "⚡", "label": "Fast payouts" },
+        { "icon": "📈", "label": "Measurable growth" },
+        { "icon": "⏱️", "label": "Live in minutes" },
+        { "icon": "🔒", "label": "Secure onboarding" }
+      ],
       "stepBadge": "STEP {{n}}",
       "s1Title": "Create your account",
       "s1Body": "Register your business workspace in minutes. Add your venue details, verify your account, and get a clean dashboard ready for locations, staff, and payouts.",
-      "s1TipLabel": "Fast start:",
-      "s1TipBody": "Most teams complete setup in one sitting. No heavy IT project required.",
       "s2Title": "Add your team",
       "s2Body": "Invite managers and staff with email or invite codes. Assign roles, organize by location, and keep everyone connected to the right tipping permissions.",
-      "s2chip1t": "Invite modal",
-      "s2chip1s": "Email or code",
-      "s2chip2t": "Roles",
-      "s2chip2s": "Server, bar, pool",
-      "s2chip3t": "Staff cards",
-      "s2chip3s": "Live roster",
       "s3Title": "Generate QR codes",
       "s3Body": "Create branded QR codes for individuals, team pools, or tables. Preview designs, export print ready PDFs, and share dynamic links when you do not need print.",
-      "s3chip1t": "Per person",
-      "s3chip1s": "Direct to staff",
-      "s3chip2t": "Table QR",
-      "s3chip2s": "Print ready",
-      "s3chip3t": "Dynamic link",
-      "s3chip3s": "No print needed",
       "s4Title": "Place QR at tables & service points",
       "s4Body": "Place your QR codes where your customers, patients, or relatives naturally interact: in care units, on flyers, displays, or directly on workwear. CareTip blends subtly and seamlessly into your daily operations and brand identity.",
-      "s5Title": "Guests scan & tip",
+      "s5Title": "Digital tips",
       "s5Body": "Guests scan with their phone camera. No app download. They choose an amount, pay with card or wallet, and land on a clear confirmation in seconds.",
-      "s5GuestLabel": "Guest friendly:",
-      "s5GuestBody": "Works in mobile browsers, on site, at the door, or on the ward without barriers.",
-      "s5ExtrasLabel": "Optional extras:",
-      "s5ExtrasBody": "Receipts and feedback options can be enabled when needed to collect valuable praise for your team.",
-      "s6Title": "Employees receive tips instantly",
+      "s6Title": "Instant notifications",
       "s6Body": "Staff get real-time notifications when a tip lands. They see live earnings, activity in their wallet, and confidence that great service was recognized immediately.",
-      "s6stat1t": "Instant",
-      "s6stat1s": "Tip alerts",
-      "s6stat2t": "Live",
-      "s6stat2s": "Earnings view",
-      "s7Title": "Managers track performance",
+      "s7Title": "Valuable insights",
       "s7Body": "Owners and managers monitor tips by location, shift, and team member. Analytics widgets, top performer cards, and activity feeds keep the floor and back office aligned.",
-      "s7stat1t": "248",
-      "s7stat1s": "Tips this week",
-      "s7stat2t": "Top team",
-      "s7stat2s": "Leaderboard",
-      "s8Title": "Instant payouts & withdrawals",
+      "s8Title": "Fast payouts",
       "s8Body": "Earnings move through secure processors to your configured payout method. Employees and finance teams see clear transfer states: initiated, processing, and paid.",
-      "s8stat1t": "Same day",
-      "s8stat1s": "Payout speed",
-      "s8stat2t": "Clear",
-      "s8stat2s": "Transfer status",
-      "s9Title": "Your business grows with better service",
+      "s9Title": "Measurable growth",
       "s9Body": "Higher tip participation, happier teams, and stronger guest experiences compound over time. CareTip helps you measure engagement and celebrate momentum across every location.",
-      "s9stat1t": "+18%",
-      "s9stat1s": "Tip engagement",
-      "s9stat2t": "Stronger",
-      "s9stat2s": "Team morale",
       "trustTitle": "Trust and speed for every shift",
       "trust1Title": "Payments you can stand behind",
       "trust1Body": "Card data is handled by certified processors; connections use modern encryption so guest payments and business data stay protected end to end.",
@@ -1597,6 +1572,81 @@
       "imageAlt": "CareTip business dashboard on a laptop showing team visibility and analytics",
       "floatHint": "Multi-location live"
     },
+    "featuresPlan": {
+      "eyebrow": "Product",
+      "title": "See CareTip in action",
+      "subtitle": "Guest scans. Staff get paid. You see everything—one connected flow.",
+      "story": {
+        "aria": "How CareTip works",
+        "guest": "Guest",
+        "tip": "Tip",
+        "employee": "Employee",
+        "analytics": "Analytics",
+        "payout": "Payout"
+      },
+      "float": {
+        "secure": "PCI secure",
+        "instant": "Instant tip",
+        "newTip": "New tip incoming"
+      },
+      "labels": {
+        "notif": "Live tip notifications",
+        "qr": "QR tip flow",
+        "earnings": "Employee earnings",
+        "analytics": "Business analytics",
+        "feedback": "Guest feedback",
+        "payout": "Instant payouts"
+      },
+      "scenes": {
+        "notif": {
+          "live": "Live",
+          "time": "Just now",
+          "amount": "+€15 Tip received",
+          "guest": "Guest: Anna M.",
+          "table": "Table 12",
+          "amount2": "+€8 Tip received",
+          "guest2": "Guest: Marco L.",
+          "table2": "Bar 3",
+          "amount3": "+€22 Tip received",
+          "guest3": "Guest: Sofia K.",
+          "table3": "Patio 6"
+        },
+        "qr": {
+          "scan": "Scan to tip",
+          "step1": "QR scan",
+          "step2": "Amount",
+          "step3": "Paid",
+          "paid": "Payment complete",
+          "pickAmount": "Choose amount",
+          "pay": "Pay €{{amount}}"
+        },
+        "earnings": {
+          "label": "This month",
+          "total": "€2,847",
+          "growth": "+12.4%"
+        },
+        "analytics": {
+          "trends": "Tip trends",
+          "branches": "Branches",
+          "performance": "Performance across venues"
+        },
+        "feedback": {
+          "headline": "Excellent service",
+          "r1": "Fast and easy tipping",
+          "r2": "Team was amazing tonight",
+          "r3": "Will definitely come back"
+        },
+        "payout": {
+          "queue": "Payout queue",
+          "via": "Stripe",
+          "r1": "€420.00",
+          "r2": "€318.50",
+          "r3": "€501.50",
+          "complete": "Completed",
+          "processing": "Processing"
+        }
+      }
+    },
     "features": {
       "eyebrow": "Platform ecosystem",
       "title": "One connected tipping platform",
@@ -1647,18 +1697,25 @@
     },
     "paymentsTrust": {
       "pill": "Payments & security",
-      "title": "Built on trusted payment infrastructure",
-      "subtitle": "CareTip runs your tipping platform. Payments are processed securely through Stripe, and card details are never stored by CareTip.",
-      "roleClarifier": "CareTip = tipping · Stripe = payment processor",
+      "title": "Trusted & Secure Payment Infrastructure",
+      "subtitle": "CareTip is your reliable platform for digital tipping. All payments are processed securely via our partner Stripe. CareTip never stores any sensitive card details.",
+      "principleLabel": "How it Works",
+      "principle": "CareTip manages the tips, Stripe secures the payment.",
       "stripeBadge": "Powered by Stripe",
-      "cardHolder": "CARETIP GUEST",
-      "cardNumber": "4532 1234 5678 9010",
-      "cardExpiry": "12/28",
-      "cardHint": "Interactive preview · checkout runs on Stripe",
+      "cardEyebrow": "Secure checkout",
+      "cardTitle": "CareTip",
+      "cardCaption": "Digital tipping · encrypted via Stripe",
+      "visualAlt": "CareTip payment terminal with secure contactless card at checkout",
+      "cardHint": "Secure checkout · powered by Stripe",
+      "cardBackTitle": "Processor-secured",
       "cardBackLine1": "Payments processed by Stripe.",
-      "cardBackLine2": "Card details are never stored by CareTip.",
+      "cardBackLine2": "CareTip never stores card numbers or CVV codes.",
+      "cardBackBullet1": "Stripe Checkout · Apple Pay · Google Pay",
+      "cardBackBullet2": "CareTip routes tips — never stores card data",
+      "cardBackDisclaimer": "Not a bank-issued card · payment visualization",
+      "cardFooterNote": "Illustration only",
       "b1Title": "Stripe Checkout",
-      "b1Text": "Cards, Apple Pay, and Google Pay through Stripe's guest checkout your customers already trust.",
+      "b1Text": "Credit card, Apple Pay, and Google Pay via the familiar Stripe guest checkout your customers already know.",
       "b2Title": "Payouts on your schedule",
       "b2Text": "CareTip routes tips to your team; Stripe settles funds to your connected account.",
       "b3Title": "Tips tied to every payment",

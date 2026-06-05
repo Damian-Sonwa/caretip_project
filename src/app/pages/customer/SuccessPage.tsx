@@ -126,9 +126,9 @@ export function SuccessPage() {
           transition={{ delay: 0.35 }}
           className={`${cf.cardMuted} mb-6 px-5 py-6 sm:px-7`}
         >
-          <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("tipFlow.success.receipt")}
-          </h3>
+          </p>
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between gap-4">
               <span className="text-muted-foreground">{t("tipFlow.success.transactionId")}</span>

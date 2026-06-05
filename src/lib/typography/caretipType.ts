@@ -1,6 +1,11 @@
 /**
- * CareTip typography tokens — Inter only.
- * Sizes live in `src/styles/caretip-typography.css` (`--caretip-*` variables).
+ * CareTip typography tokens.
+ *
+ * Sizes live in `src/styles/caretip-typography.css` (`--caretip-*` and `--type-*` aliases).
+ * Hierarchy: hero → section → app-title → app-subtitle → card-title → body → feature → meta/micro.
+ *
+ * @see TYPOGRAPHY_HIERARCHY.md
+ * @see TYPOGRAPHY_INVENTORY.md
  */
 export const caretipType = {
   sans: "font-sans",
@@ -11,6 +16,10 @@ export const caretipType = {
     "font-hero-display text-hero-title-de font-bold text-balance text-neutral-950 dark:text-neutral-50",
   sectionTitle:
     "font-sans text-section-title font-semibold text-balance text-neutral-950 dark:text-neutral-50",
+  appTitle:
+    "font-sans text-app-title font-bold text-neutral-950 dark:text-neutral-50",
+  appSubtitle:
+    "font-sans text-app-subtitle font-semibold text-neutral-900 dark:text-neutral-50",
   cardTitle:
     "font-sans text-card-title font-semibold text-neutral-900 dark:text-neutral-50",
   bodyCopy:
@@ -26,6 +35,41 @@ export const caretipType = {
     "font-sans text-tagline font-semibold uppercase tracking-widest text-neutral-800 dark:text-neutral-200",
   meta: "font-sans text-meta font-semibold uppercase text-neutral-500 dark:text-neutral-400",
   pill: "font-sans text-meta font-semibold uppercase",
+  micro: "font-sans text-micro font-semibold uppercase",
+  caption: "font-sans text-caption font-normal",
+
+  /** Dashboard KPI label — 11px (`text-kpi-label`), uppercase in layout. */
+  kpiLabel: "font-sans text-kpi-label font-medium uppercase tracking-wide text-muted-foreground",
+  /**
+   * Dashboard KPI value — uses Tailwind theme steps (no custom utility size).
+   * @see src/styles/tailwind.css `--text-lg` / `--text-xl` / `--text-2xl`
+   */
+  kpiValue:
+    "shrink-0 hyphens-auto break-words text-balance text-lg font-bold tabular-nums leading-snug text-foreground sm:text-xl md:text-2xl",
+} as const;
+
+/**
+ * Semantic role aliases — same classes as `caretipType`; use for new code and audits.
+ * Prefer these names when documenting hierarchy (no separate visual scale).
+ */
+export const type = {
+  displayHero: caretipType.heroTitle,
+  displayHeroDe: caretipType.heroTitleDe,
+  section: caretipType.sectionTitle,
+  appTitle: caretipType.appTitle,
+  appSubtitle: caretipType.appSubtitle,
+  cardTitle: caretipType.cardTitle,
+  body: caretipType.bodyCopy,
+  bodyMuted: caretipType.bodyCopyMuted,
+  feature: caretipType.featureCopy,
+  featureSemibold: caretipType.featureCopySemibold,
+  button: caretipType.buttonText,
+  tagline: caretipType.tagline,
+  meta: caretipType.meta,
+  micro: caretipType.micro,
+  caption: caretipType.caption,
+  kpiLabel: caretipType.kpiLabel,
+  kpiValue: caretipType.kpiValue,
 } as const;
 
 /** @deprecated Use `caretipType` — kept for landing imports */

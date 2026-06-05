@@ -34,13 +34,13 @@ export type HowItWorksStepDef = {
 
 /** Full CareTip journey — setup → floor → employee → manager → payout → growth */
 export const HOW_IT_WORKS_STEPS: HowItWorksStepDef[] = [
-  { step: 1, icon: UserPlus, visual: "account", reverse: false, extras: "tip" },
-  { step: 2, icon: Users, visual: "team", reverse: true, extras: "chips3" },
-  { step: 3, icon: QrCode, visual: "qrGenerate", reverse: false, extras: "chips3" },
+  { step: 1, icon: UserPlus, visual: "account", reverse: false, extras: null },
+  { step: 2, icon: Users, visual: "team", reverse: true, extras: null },
+  { step: 3, icon: QrCode, visual: "qrGenerate", reverse: false, extras: null },
   { step: 4, icon: MapPin, visual: "qrPlace", reverse: true, extras: null },
-  { step: 5, icon: Smartphone, visual: "customerTip", reverse: false, extras: "guest" },
-  { step: 6, icon: Wallet, visual: "employeeTip", reverse: true, extras: "employeeStats" },
-  { step: 7, icon: BarChart3, visual: "analytics", reverse: false, extras: "managerStats" },
-  { step: 8, icon: TrendingUp, visual: "payout", reverse: true, extras: "payoutStats" },
-  { step: 9, icon: Sparkles, visual: "growth", reverse: false, extras: "growthStats" },
+  { step: 5, icon: Smartphone, visual: "customerTip", reverse: false, extras: null },
+  { step: 6, icon: Wallet, visual: "employeeTip", reverse: true, extras: null },
+  { step: 7, icon: BarChart3, visual: "analytics", reverse: false, extras: null },
+  { step: 8, icon: TrendingUp, visual: "payout", reverse: true, extras: null },
+  { step: 9, icon: Sparkles, visual: "growth", reverse: false, extras: null },
 ];

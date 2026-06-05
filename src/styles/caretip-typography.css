@@ -21,6 +21,27 @@
   --caretip-button-size: 0.9375rem;
   --caretip-tagline-size: 0.75rem;
   --caretip-meta-size: 0.6875rem;
+  --caretip-micro-size: 0.625rem;
+  --caretip-caption-size: 0.8125rem;
+
+  /*
+   * Semantic aliases (Phase A) — document roles; point at existing scale.
+   * Do not change computed sizes when swapping class names to these tokens.
+   */
+  --type-hero: var(--caretip-hero-size);
+  --type-hero-de: var(--caretip-hero-size-de);
+  --type-section: var(--caretip-section-size);
+  --type-app-title: var(--caretip-app-title-size);
+  --type-app-subtitle: var(--caretip-app-subtitle-size);
+  --type-card-title: var(--caretip-card-title-size);
+  --type-body: var(--caretip-body-size);
+  --type-feature: var(--caretip-feature-size);
+  --type-button: var(--caretip-button-size);
+  --type-tagline: var(--caretip-tagline-size);
+  --type-meta: var(--caretip-meta-size);
+  --type-micro: var(--caretip-micro-size);
+  --type-caption: var(--caretip-caption-size);
+  --type-kpi-label: var(--caretip-meta-size);
 }
 
 @media (min-width: 1024px) {
@@ -123,6 +144,27 @@ html.caretip-font-inter {
   font-size: var(--caretip-meta-size);
   line-height: 1.35;
   letter-spacing: 0.05em;
+}
+
+/** 10px micro UI (badges, chip labels) — maps prior `text-[10px]` usage. */
+@utility text-micro {
+  font-size: var(--caretip-micro-size);
+  line-height: 1.35;
+  letter-spacing: 0.05em;
+}
+
+/** 13px compact copy — maps prior `text-[13px]` / legacy caption usage. */
+@utility text-caption {
+  font-size: var(--caretip-caption-size);
+  line-height: 1.25rem;
+  letter-spacing: -0.006em;
+}
+
+/** KPI / stat labels — same computed size as meta (11px); uppercase applied in TS. */
+@utility text-kpi-label {
+  font-size: var(--type-kpi-label);
+  line-height: 1.35;
+  letter-spacing: 0.06em;
 }
 
 /* Legacy aliases — same scale */

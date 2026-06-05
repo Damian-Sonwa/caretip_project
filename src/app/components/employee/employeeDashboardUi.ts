@@ -5,6 +5,7 @@
 
 import { dashboardSharedUi } from "../dashboard/dashboardSharedUi";
 import { caretipBtnGhost, caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
+import { caretipType } from "@/lib/typography/caretipType";
 
 /** Root wrapper class on `.caretip-dashboard-shell` (see EmployeeLayout). */
 export const EMPLOYEE_DASHBOARD_ROOT = "employee-dashboard";
@@ -57,9 +58,8 @@ export const employeeUi = {
 
   statCard:
     "employee-stat-card flex min-h-[7.25rem] flex-col rounded-2xl border border-neutral-200/80 bg-white p-3.5 text-left shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] sm:min-h-[8.5rem] sm:p-5",
-  statLabel: "text-[11px] font-medium uppercase tracking-wide text-muted-foreground",
-  statValue:
-    "shrink-0 hyphens-auto break-words text-balance text-lg font-bold tabular-nums leading-snug text-foreground sm:text-xl md:text-2xl",
+  statLabel: caretipType.kpiLabel,
+  statValue: caretipType.kpiValue,
   statChange: "line-clamp-2 text-xs leading-snug text-muted-foreground",
 
   emptyWrap: "employee-empty flex flex-col items-center justify-center px-4 py-10 text-center sm:px-6 sm:py-14 md:py-16",

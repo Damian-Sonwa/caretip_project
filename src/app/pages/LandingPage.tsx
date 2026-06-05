@@ -19,6 +19,9 @@ import { LandingMotivationSection } from "../components/landing/LandingMotivatio
 import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
 
+/** Reversible: set true to restore #social-proof (PDF adjustment — hide testimonials & trust stats). */
+const SHOW_LANDING_SOCIAL_PROOF = false;
+
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
@@ -56,7 +59,7 @@ export function LandingPage() {
           <PaymentsSection />
           <LandingRealLifeSection />
           <LandingMotivationSection />
-          <LandingSocialProofSection />
+          {SHOW_LANDING_SOCIAL_PROOF ? <LandingSocialProofSection /> : null}
           <LandingFinalCtaSection />
         </main>
         <Footer className="caretip-landing-footer" />

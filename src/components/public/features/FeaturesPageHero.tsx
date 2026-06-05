@@ -1,8 +1,8 @@
-import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import dashboardImg from "../../../../images/new_dashboard.png";
 import { PublicTrustChips } from "@/components/public/PublicTrustChips";
+import { PublicPageBackLink } from "@/components/public/PublicPageBackLink";
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
 
@@ -10,16 +10,14 @@ export function FeaturesPageHero() {
   const { t } = useTranslation();
 
   return (
-    <header className="relative mb-2 sm:mb-4">
-      <Link to="/" className={cn(publicPageUi.backLink, "relative z-[2]")}>
-        <span>{t("staticPages.common.backToHome")}</span>
-      </Link>
+    <header className={cn(publicPageUi.header, "relative mb-2 sm:mb-4")}>
+      <PublicPageBackLink className="relative z-[2]" />
 
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="relative mt-4 overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70"
+        className="relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70"
       >
         <div
           aria-hidden

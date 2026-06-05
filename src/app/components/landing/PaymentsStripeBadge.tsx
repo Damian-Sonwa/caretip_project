@@ -13,12 +13,12 @@ export function PaymentsStripeBadge({ label, className }: PaymentsStripeBadgePro
   return (
     <div
       className={cn(
-        "caretip-stripe-trust-badge inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1.5 shadow-sm backdrop-blur-sm dark:border-neutral-700/80 dark:bg-neutral-900/70",
+        "caretip-stripe-trust-badge inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-background/80 px-4 py-2 shadow-sm backdrop-blur-sm dark:border-neutral-700/80 dark:bg-neutral-900/70",
         className,
       )}
     >
-      <span className="caretip-stripe-trust-badge__dot h-1.5 w-1.5 shrink-0 rounded-full bg-[#635bff]/80" aria-hidden />
-      <span className="text-[11px] font-medium tracking-wide text-muted-foreground">
+      <span className="caretip-stripe-trust-badge__dot h-2 w-2 shrink-0 rounded-full bg-[#635bff]/80" aria-hidden />
+      <span className="text-sm font-medium tracking-wide text-muted-foreground">
         {hasStripeWord ? (
           <>
             {parts.map((part, index) =>

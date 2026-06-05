@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 import { Link } from "react-router";
-import { Trans, useTranslation } from "react-i18next";
-import { landingBoldComponents } from "@/components/landing/landingRichText";
+import { useTranslation } from "react-i18next";
 import { PricingSection } from "../components/PricingSection";
 import { PRICING_TIERS } from "../data/pricingTiers";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
@@ -46,10 +45,7 @@ export function PricingPage() {
         <section className={cn(publicPageUi.sectionGap, "mx-auto max-w-3xl px-2 text-center")}>
           <h2 className={cn(publicPageUi.sectionTitle, "text-balance")}>{t("staticPages.pricing.sectionTitle")}</h2>
           <p className={cn(publicPageUi.subtitle, "mx-auto mt-4 max-w-2xl text-pretty")}>
-            <Trans
-              i18nKey="staticPages.pricing.sectionSubtitle"
-              components={landingBoldComponents}
-            />
+            {t("staticPages.pricing.sectionSubtitle")}
           </p>
           <p className="mx-auto mt-6 max-w-2xl text-sm font-medium text-neutral-800 dark:text-neutral-200">
             {t("staticPages.pricing.commitmentNotice")}

@@ -10,8 +10,8 @@ export const publicPageUi = {
   main:
     "mx-auto w-full min-w-0 max-w-[100rem] px-4 pb-16 pt-[calc(4.75rem+env(safe-area-inset-top,0px))] sm:px-6 sm:pb-20 lg:px-8 lg:pt-[calc(5.25rem+env(safe-area-inset-top,0px))]",
   backLink:
-    "mb-5 inline-flex items-center gap-2 text-sm font-medium text-neutral-600 transition-colors hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-neutral-100",
-  header: "space-y-3 sm:space-y-3.5",
+    "caretip-public-back-link group inline-flex w-fit cursor-pointer items-center gap-2 rounded-md py-0.5 text-sm font-semibold text-neutral-700 underline-offset-[0.2em] transition-[color,transform] duration-200 ease-out hover:-translate-x-0.5 hover:text-neutral-950 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:text-neutral-300 dark:hover:text-neutral-50 dark:focus-visible:ring-offset-neutral-950",
+  header: "space-y-4 sm:space-y-5",
   title:
     "font-hero-display text-[clamp(2rem,4.8vw,3.25rem)] font-bold leading-[1.06] tracking-[-0.03em] text-neutral-950 dark:text-neutral-50",
   subtitle:
@@ -32,7 +32,7 @@ export const publicPageUi = {
     "rounded-2xl border border-neutral-200/80 bg-white p-6 text-center shadow-[0_8px_32px_-12px_rgba(15,23,42,0.12)] sm:p-8 dark:border-neutral-800 dark:bg-neutral-950/90",
   ctaPrimary: `${caretipBtnPrimary} no-underline`,
   trustChip:
-    "inline-flex items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white/95 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-700 shadow-[0_1px_4px_rgba(15,23,42,0.04)] dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-300 sm:text-[11px]",
+    "inline-flex items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white/95 px-3 py-1.5 text-micro font-semibold uppercase tracking-[0.14em] text-neutral-700 shadow-[0_1px_4px_rgba(15,23,42,0.04)] dark:border-neutral-700 dark:bg-neutral-900/80 dark:text-neutral-300 sm:text-kpi-label",
   trustChipDot: "h-1.5 w-1.5 shrink-0 rounded-full bg-primary/80",
   proseWrap: "mx-auto max-w-4xl",
   wideWrap: "mx-auto max-w-5xl",

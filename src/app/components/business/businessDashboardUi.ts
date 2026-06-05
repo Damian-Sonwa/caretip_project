@@ -5,6 +5,7 @@
 
 import { dashboardSharedUi } from "../dashboard/dashboardSharedUi";
 import { employeeUi } from "../employee/employeeDashboardUi";
+import { caretipType } from "@/lib/typography/caretipType";
 
 /** Root wrapper class on `.caretip-dashboard-shell` (see BusinessLayout). */
 export const BUSINESS_DASHBOARD_ROOT = "business-dashboard";
@@ -44,7 +45,7 @@ export const businessUi = {
     "business-card dashboard-at-a-glance mt-3 w-full rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] max-lg:mt-2.5",
   atAGlanceContent: "dashboard-at-a-glance__content p-0",
   atAGlanceLabel: "dashboard-at-a-glance__label mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground",
-  atAGlanceStatLabel: "text-[11px] font-medium uppercase text-muted-foreground",
+  atAGlanceStatLabel: caretipType.kpiLabel,
   atAGlanceStatValue: "dashboard-at-a-glance__stat-value font-bold tabular-nums text-foreground",
   subPageMain: "dashboard-subpage-after-metrics w-full px-4 sm:px-6",
 

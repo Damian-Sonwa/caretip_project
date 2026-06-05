@@ -20,10 +20,6 @@ html.dark .caretip-landing #payments-trust .caretip-payments-trust-ambient {
   opacity: 0.55;
 }
 
-.caretip-landing #payments-trust .caretip-payments-trust-clarifier {
-  text-wrap: balance;
-}
-
 .caretip-landing #payments-trust .caretip-payments-trust-stripe-badge {
   align-self: center;
 }
@@ -57,8 +53,59 @@ html.dark .caretip-landing #payments-trust .caretip-stripe-trust-badge {
   margin-inline: auto;
 }
 
+.caretip-landing #payments-trust .caretip-payments-trust-visual-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 22px 40px -20px rgba(0, 0, 0, 0.28),
+    0 16px 32px -18px rgba(233, 120, 28, 0.18);
+}
+
+html.dark .caretip-landing #payments-trust .caretip-payments-trust-visual-image {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    0 24px 44px -18px rgba(0, 0, 0, 0.5),
+    0 14px 28px -16px rgba(233, 120, 28, 0.12);
+}
+
 .caretip-landing #payments-trust .caretip-payments-trust-card {
   width: 100%;
+  position: relative;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-card::before {
+  content: "";
+  position: absolute;
+  inset: 8% 0 -6%;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 2rem;
+  background: radial-gradient(
+    ellipse 85% 70% at 50% 55%,
+    rgba(233, 120, 28, 0.28) 0%,
+    rgba(233, 120, 28, 0.1) 42%,
+    transparent 72%
+  );
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-card .caretip-interactive-credit-card {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-card .caretip-interactive-credit-card__stage {
+  filter: drop-shadow(0 26px 44px rgba(0, 0, 0, 0.22)) drop-shadow(0 20px 36px rgba(233, 120, 28, 0.24));
+}
+
+html.dark .caretip-landing #payments-trust .caretip-payments-trust-card .caretip-interactive-credit-card__stage {
+  filter: drop-shadow(0 28px 48px rgba(0, 0, 0, 0.35)) drop-shadow(0 18px 32px rgba(233, 120, 28, 0.18));
+}
+
+.caretip-landing #payments-trust .caretip-interactive-credit-card__grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
 }
 
 .caretip-landing #payments-trust .caretip-payments-trust-card-hint {
