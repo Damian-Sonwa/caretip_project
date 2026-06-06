@@ -925,7 +925,7 @@
       "openFullDirectory": "Open full directory",
       "browseAllTeam": "Browse All Team Members",
       "selectTeamMemberBtn": "Select Team Member",
-      "secureFooter": "Secure payment powered by CareTip Limited",
+      "secureFooter": "Secure payment powered by Stripe",
       "tippingLabel": "Tipping",
       "goalHelp": "Help {{firstName}} reach their monthly goal!",
       "goalProgress": "{{current}} of {{goal}} this month",

@@ -927,7 +927,7 @@
       "openFullDirectory": "Gesamtes Verzeichnis öffnen",
       "browseAllTeam": "Alle Teammitglieder durchsuchen",
       "selectTeamMemberBtn": "Teammitglied wählen",
-      "secureFooter": "Sichere Zahlung über CareTip Limited",
+      "secureFooter": "Sichere Zahlung über Stripe",
       "tippingLabel": "Trinkgeld",
       "goalHelp": "Helfen Sie {{firstName}}, das monatliche Ziel zu erreichen!",
       "goalProgress": "{{current}} von {{goal}} diesen Monat",
