@@ -12,6 +12,7 @@ type HowItWorksTimelineStepProps = {
   icon: LucideIcon;
   visual: HowItWorksVisualVariant;
   reverse?: boolean;
+  isFirst?: boolean;
   isLast?: boolean;
   children: ReactNode;
 };
@@ -23,11 +24,12 @@ export function HowItWorksTimelineStep({
   icon: Icon,
   visual,
   reverse = false,
+  isFirst = false,
   isLast = false,
   children,
 }: HowItWorksTimelineStepProps) {
   return (
-    <article className="relative">
+    <article className={cn("relative", isFirst && "lg:-mt-1")}>
       {!isLast ? (
         <div
           aria-hidden
@@ -37,7 +39,9 @@ export function HowItWorksTimelineStep({
 
       <div
         className={cn(
-          "grid items-start gap-8 lg:grid-cols-2 lg:items-center lg:gap-10 xl:gap-12",
+          "grid items-start gap-6 sm:gap-8 lg:grid-cols-2 lg:gap-8 xl:gap-10",
+          isFirst ? "lg:items-start" : "lg:items-center",
+          isFirst && "lg:gap-7 xl:gap-9",
           reverse && "lg:[&>*:first-child]:lg:order-2 lg:[&>*:last-child]:lg:order-1",
         )}
       >
@@ -67,7 +71,13 @@ export function HowItWorksTimelineStep({
           </div>
         </div>
 
-        <HowItWorksStepVisual variant={visual} className="lg:justify-self-center" />
+        <HowItWorksStepVisual
+          variant={visual}
+          className={cn(
+            "lg:justify-self-center",
+            isFirst && "max-lg:mt-0 lg:-mt-5 xl:-mt-7",
+          )}
+        />
       </div>
     </article>
   );

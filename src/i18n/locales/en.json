@@ -323,13 +323,13 @@
       "title": "The CareTip Journey",
       "subtitle": "Set up your account, add your team, and get started right away.",
       "journeyPillars": [
-        { "icon": "📲", "label": "Digital tips" },
-        { "icon": "🔔", "label": "Instant notifications" },
-        { "icon": "📊", "label": "Valuable insights" },
-        { "icon": "⚡", "label": "Tip tracking" },
-        { "icon": "📈", "label": "Measurable growth" },
-        { "icon": "⏱️", "label": "Live in minutes" },
-        { "icon": "🔒", "label": "Secure onboarding" }
+        { "icon": "tips", "label": "Digital tips" },
+        { "icon": "notifications", "label": "Instant notifications" },
+        { "icon": "analytics", "label": "Valuable insights" },
+        { "icon": "earnings", "label": "Tip tracking" },
+        { "icon": "goals", "label": "Measurable growth" },
+        { "icon": "timer", "label": "Live in minutes" },
+        { "icon": "security", "label": "Secure onboarding" }
       ],
       "stepBadge": "STEP {{n}}",
       "s1Title": "Create your account",

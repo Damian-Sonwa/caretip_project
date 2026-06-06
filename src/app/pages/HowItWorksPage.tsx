@@ -7,6 +7,8 @@ import { PublicPageHeader } from "@/components/public/PublicPageHeader";
 import { HowItWorksStepContent } from "@/components/public/HowItWorksStepContent";
 import { HOW_IT_WORKS_STEPS } from "@/components/public/howItWorksFlow";
 import { HowItWorksTimelineStep } from "@/components/public/HowItWorksTimelineStep";
+import { JourneyPillarIcon } from "@/components/public/JourneyPillarIcon";
+import { howItWorksPageUi } from "@/components/public/howItWorksPageUi";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
 
@@ -33,20 +35,16 @@ export function HowItWorksPage() {
     <PublicPageShell maxWidth="wide">
       <PublicPageHeader
         centered
-        introLayout="stack"
+        introLayout="heroGroup"
+        className={howItWorksPageUi.heroHeader}
         title={t("staticPages.howItWorks.title")}
         subtitle={t("staticPages.howItWorks.subtitle")}
         afterSubtitle={
           journeyPillars.length > 0 ? (
-            <ul className="flex w-full list-none flex-col items-start gap-2 sm:gap-2.5">
+            <ul className={howItWorksPageUi.journeyList}>
               {journeyPillars.map((pillar) => (
-                <li key={pillar.label} className="flex items-center gap-3">
-                  <span
-                    aria-hidden
-                    className="flex h-7 w-7 shrink-0 items-center justify-center text-base leading-none sm:h-8 sm:w-8 sm:text-lg"
-                  >
-                    {pillar.icon}
-                  </span>
+                <li key={`${pillar.icon}-${pillar.label}`} className={howItWorksPageUi.journeyListItem}>
+                  <JourneyPillarIcon iconKey={pillar.icon} />
                   <span className="text-base font-medium leading-snug text-neutral-800 sm:text-lg dark:text-neutral-200">
                     {pillar.label}
                   </span>
@@ -58,7 +56,7 @@ export function HowItWorksPage() {
         showTrustChips={false}
       />
 
-      <div className={cn(publicPageUi.sectionGap, "relative space-y-12 sm:space-y-14 lg:space-y-16")}>
+      <div className={howItWorksPageUi.timeline}>
         {HOW_IT_WORKS_STEPS.map((def, index) => (
           <HowItWorksTimelineStep
             key={def.step}
@@ -68,6 +66,7 @@ export function HowItWorksPage() {
             icon={def.icon}
             visual={def.visual}
             reverse={def.reverse}
+            isFirst={index === 0}
             isLast={index === HOW_IT_WORKS_STEPS.length - 1}
           >
             <HowItWorksStepContent step={def.step} extras={def.extras} />

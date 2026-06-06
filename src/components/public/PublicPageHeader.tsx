@@ -10,8 +10,13 @@ type PublicPageHeaderProps = {
   afterSubtitle?: ReactNode;
   showTrustChips?: boolean;
   centered?: boolean;
-  /** When `centered`, `stack` left-aligns title, subtitle, and `afterSubtitle` in one column. */
-  introLayout?: "center" | "stack";
+  /**
+   * When `centered`:
+   * - `center` — centered title/subtitle; centered `afterSubtitle` wrapper
+   * - `stack` — left-aligned column within the centered max-width
+   * - `heroGroup` — centered title, subtitle, and feature block as one hero unit
+   */
+  introLayout?: "center" | "stack" | "heroGroup";
   className?: string;
 };
 
@@ -30,21 +35,35 @@ export function PublicPageHeader({
 
       <div
         className={cn(
-          "space-y-3 sm:space-y-4",
-          centered && "mx-auto w-full max-w-2xl",
-          centered && introLayout === "center" && "flex flex-col items-center text-center",
+          introLayout === "heroGroup" ? "space-y-2 sm:space-y-2.5" : "space-y-3 sm:space-y-4",
+          centered && "mx-auto w-full",
+          centered && introLayout === "heroGroup" && "max-w-3xl",
+          centered && introLayout !== "heroGroup" && "max-w-2xl",
+          centered &&
+            (introLayout === "center" || introLayout === "heroGroup") &&
+            "flex flex-col items-center text-center",
           centered && introLayout === "stack" && "flex flex-col items-start text-left",
         )}
       >
         <h1 className={cn(publicPageUi.title, centered && "w-full")}>{title}</h1>
         {subtitle ? (
-          <p className={cn(publicPageUi.subtitle, centered && "w-full max-w-none")}>{subtitle}</p>
+          <p
+            className={cn(
+              publicPageUi.subtitle,
+              centered && "w-full max-w-none",
+              centered && (introLayout === "center" || introLayout === "heroGroup") && "mx-auto",
+            )}
+          >
+            {subtitle}
+          </p>
         ) : null}
         {afterSubtitle ? (
           <div
             className={cn(
               "w-full",
-              centered && introLayout === "center" && "flex justify-center",
+              centered &&
+                (introLayout === "center" || introLayout === "heroGroup") &&
+                "flex justify-center pt-0.5 sm:pt-1",
             )}
           >
             {afterSubtitle}

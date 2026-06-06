@@ -323,13 +323,13 @@
       "title": "Die CareTip-Journey",
       "subtitle": "Richten Sie Ihr Konto ein, fügen Sie Ihr Team hinzu und legen Sie direkt los.",
       "journeyPillars": [
-        { "icon": "📲", "label": "Digitales Trinkgeld" },
-        { "icon": "🔔", "label": "Sofort-Benachrichtigungen" },
-        { "icon": "📊", "label": "Wertvolle Insights" },
-        { "icon": "⚡", "label": "Trinkgeld-Tracking" },
-        { "icon": "📈", "label": "Messbares Wachstum" },
-        { "icon": "⏱️", "label": "In wenigen Minuten live" },
-        { "icon": "🔒", "label": "Sicheres Onboarding" }
+        { "icon": "tips", "label": "Digitales Trinkgeld" },
+        { "icon": "notifications", "label": "Sofort-Benachrichtigungen" },
+        { "icon": "analytics", "label": "Wertvolle Insights" },
+        { "icon": "earnings", "label": "Trinkgeld-Tracking" },
+        { "icon": "goals", "label": "Messbares Wachstum" },
+        { "icon": "timer", "label": "In wenigen Minuten live" },
+        { "icon": "security", "label": "Sicheres Onboarding" }
       ],
       "stepBadge": "SCHRITT {{n}}",
       "s1Title": "Erstellen Sie Ihr Konto",
