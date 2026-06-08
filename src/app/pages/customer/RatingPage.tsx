@@ -107,11 +107,27 @@ export function RatingPage() {
     };
   }, [isDevMockSession, sessionId]);
 
-  const leaveFlow = () => {
+  const leaveFlow = (opts?: { feedbackSubmitted?: boolean }) => {
     const biz = tipContext?.status === "ready" ? tipContext.businessId : tipContext?.businessId ?? businessId;
-    const target = biz && !staffProfileSlug ? `/qr-landing/${biz}` : "/";
+    const tippedName =
+      tipContext?.status === "ready"
+        ? tipContext.employee?.name
+        : employeeName ?? undefined;
+    const params = new URLSearchParams();
+    params.set("tipComplete", "1");
+    if (opts?.feedbackSubmitted) params.set("feedbackSubmitted", "1");
+    if (tippedName?.trim()) params.set("tippedName", tippedName.trim());
+
     clearCustomerFlowEntry();
     reset();
+
+    const qs = params.toString();
+    const target =
+      biz && !staffProfileSlug
+        ? `/qr-landing/${encodeURIComponent(biz)}${qs ? `?${qs}` : ""}`
+        : qs
+          ? `/?${qs}`
+          : "/";
     navigate(target, { replace: true });
   };
 
@@ -143,7 +159,7 @@ export function RatingPage() {
         customerName: customerName.trim() ? customerName.trim() : null,
       });
       toast.success(t("tipFlow.rating.thanksFeedback"));
-      leaveFlow();
+      leaveFlow({ feedbackSubmitted: true });
     } catch (err) {
       logClientError("RatingPage.submitTipFeedback", err);
       toast.error(toUserFriendlyMessage(err));
@@ -157,7 +173,7 @@ export function RatingPage() {
         <div className={`${cf.headerInner} relative`}>
           <button
             type="button"
-            onClick={leaveFlow}
+            onClick={() => leaveFlow()}
             className="absolute right-0 top-1/2 flex min-h-[2.5rem] min-w-[2.5rem] -translate-y-1/2 items-center justify-end gap-1.5 pr-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:right-3"
             aria-label={t("tipFlow.rating.leavePageAria")}
           >
@@ -331,7 +347,7 @@ export function RatingPage() {
           </button>
           <button
             type="button"
-            onClick={leaveFlow}
+            onClick={() => leaveFlow()}
             className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
             {t("tipFlow.rating.leavePage")}

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { useNavigate, useParams, useSearchParams } from "react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Building2, MapPin, Users, Euro, Home, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
@@ -24,6 +24,7 @@ import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { formatEur } from "../../lib/formatEur";
+import { TipFlowCompletionCard } from "../../components/customer/TipFlowCompletionCard";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
 const BRAND_ORANGE = "#e9781c";
@@ -33,8 +34,30 @@ export function QRLandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessId, qrSlug } = useParams<{ businessId?: string; qrSlug?: string }>();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const employeeIdParam = searchParams.get("employeeId");
+  const businessSectionRef = useRef<HTMLDivElement>(null);
+  const teamSectionRef = useRef<HTMLDivElement>(null);
+
+  const [completion, setCompletion] = useState<{
+    feedbackSubmitted: boolean;
+    tippedName?: string;
+  } | null>(() => {
+    if (searchParams.get("tipComplete") !== "1") return null;
+    return {
+      feedbackSubmitted: searchParams.get("feedbackSubmitted") === "1",
+      tippedName: searchParams.get("tippedName")?.trim() || undefined,
+    };
+  });
+
+  useEffect(() => {
+    if (searchParams.get("tipComplete") !== "1") return;
+    const next = new URLSearchParams(searchParams);
+    next.delete("tipComplete");
+    next.delete("feedbackSubmitted");
+    next.delete("tippedName");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const {
     setBusinessId,
@@ -254,6 +277,22 @@ export function QRLandingPage() {
 
   const showInlinePool =
     Boolean(businessData?.slug?.trim()) && !poolLoading && (poolEmployees?.length ?? 0) > 0;
+
+  const dismissCompletion = () => setCompletion(null);
+
+  const scrollToVenue = () => {
+    dismissCompletion();
+    businessSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const scrollToTeam = () => {
+    dismissCompletion();
+    if (showInlinePool && teamSectionRef.current) {
+      teamSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return;
+    }
+    goToSelectEmployee();
+  };
 
   const goHome = () => {
     window.location.href = "/";
@@ -535,7 +574,11 @@ export function QRLandingPage() {
           <CareTipLogo size="xs" className="h-11 max-h-11 min-h-0 w-auto max-w-[5.5rem] shrink-0" />
           <div className="min-w-0 flex-1">
             <h1 className={cf.headline}>{businessData.name}</h1>
-            <p className={cf.subline}>{t("tipFlow.qrLanding.selectTeamMember")}</p>
+            <p className={cf.subline}>
+              {completion
+                ? t("tipFlow.qrLanding.completionSubline")
+                : t("tipFlow.qrLanding.selectTeamMember")}
+            </p>
           </div>
         </div>
       </div>
@@ -547,63 +590,22 @@ export function QRLandingPage() {
           </p>
         ) : null}
 
-        {repeatCard ? (
-          <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <Card className={cf.cardShadcn}>
-              <CardContent className="p-5 sm:p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-semibold text-foreground">{t("tipFlow.qrLanding.repeatWelcome")}</p>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      {t("tipFlow.qrLanding.repeatBody", {
-                        name: repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
-                      })}
-                    </p>
-                    <p className="mt-2 text-xs font-semibold text-primary">
-                      {t("tipFlow.qrLanding.repeatLastTip", { amount: formatEur(repeatCard.amount) })}
-                    </p>
-                  </div>
-                  <ProfileAvatar
-                    src={repeatCard.employee.avatar}
-                    displayName={repeatCard.employee.name ?? t("tipFlow.common.teamMember")}
-                    className="h-12 w-12 shrink-0 ring-2 ring-primary/30"
-                  />
-                </div>
-                <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setBusinessId(businessData.id);
-                      setEmployee(
-                        repeatCard.employee.id,
-                        repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
-                        repeatCard.employee.avatar ?? undefined,
-                      );
-                      setAmount(repeatCard.amount);
-                      markCustomerFlowEntered();
-                      navigate("/payment");
-                    }}
-                    className={`${cf.btnPrimaryLg} sm:flex-1 py-3.5 text-sm`}
-                  >
-                    {t("tipFlow.qrLanding.tipAgain")}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setRepeatDismissed(true);
-                      setRepeatCard(null);
-                    }}
-                    className={`${cf.btnSecondaryLg} sm:flex-1 py-3.5 text-sm`}
-                  >
-                    {t("tipFlow.qrLanding.chooseDifferentStaff")}
-                  </button>
-                </div>
-              </CardContent>
-            </Card>
+        {completion ? (
+          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <TipFlowCompletionCard
+              tippedName={completion.tippedName}
+              feedbackSubmitted={completion.feedbackSubmitted}
+              onBackToVenue={scrollToVenue}
+              onTipAnother={scrollToTeam}
+            />
           </motion.div>
         ) : null}
 
-        <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+        <motion.div
+          ref={businessSectionRef}
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+        >
           <div className="relative">
             <Card
               className={`${cf.card} transition-shadow duration-300 hover:shadow-[0_16px_48px_-20px_rgba(15,23,42,0.16)]`}
@@ -662,6 +664,7 @@ export function QRLandingPage() {
 
         {showInlinePool ? (
           <motion.div
+            ref={teamSectionRef}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.05 }}
@@ -769,6 +772,68 @@ export function QRLandingPage() {
             </button>
           </motion.div>
         )}
+
+        {repeatCard && !completion ? (
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.12 }}
+          >
+            <Card className={`${cf.cardMuted} border-dashed border-border/70`}>
+              <CardContent className="space-y-3 p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("tipFlow.qrLanding.repeatOptionalLabel")}
+                </p>
+                <div className="flex items-start gap-3">
+                  <ProfileAvatar
+                    src={repeatCard.employee.avatar}
+                    displayName={repeatCard.employee.name ?? t("tipFlow.common.teamMember")}
+                    className="h-10 w-10 shrink-0"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-sm text-muted-foreground">
+                      {t("tipFlow.qrLanding.repeatBody", {
+                        name: repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
+                      })}
+                    </p>
+                    <p className="mt-1 text-xs text-muted-foreground/80">
+                      {t("tipFlow.qrLanding.repeatLastTip", { amount: formatEur(repeatCard.amount) })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setRepeatDismissed(true);
+                      setRepeatCard(null);
+                    }}
+                    className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    {t("tipFlow.qrLanding.repeatNotNow")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setBusinessId(businessData.id);
+                      setEmployee(
+                        repeatCard.employee.id,
+                        repeatCard.employee.name ?? t("tipFlow.common.teamMember"),
+                        repeatCard.employee.avatar ?? undefined,
+                      );
+                      setAmount(repeatCard.amount);
+                      markCustomerFlowEntered();
+                      navigate("/payment");
+                    }}
+                    className={`${cf.btnSecondaryLg} ml-auto max-w-full py-2.5 px-4 text-sm sm:w-auto`}
+                  >
+                    {t("tipFlow.qrLanding.tipAgain")}
+                  </button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ) : null}
 
         <motion.div
           initial={{ opacity: 0 }}
