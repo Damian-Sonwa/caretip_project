@@ -470,15 +470,15 @@ export function EmployeeDashboard() {
             >
               <motion.div
                 className={cn(
-                  "employee-hero-chart-frame dashboard-hero-media-frame relative mx-auto w-full min-h-0 overflow-hidden max-lg:max-w-none",
+                  "employee-hero-chart-frame employee-hero-chart-frame--photo",
+                  "dashboard-hero-media-frame relative mx-auto w-full max-w-full min-h-0 overflow-hidden",
                   "rounded-[1.75rem]",
-                  "lg:h-[420px] lg:max-w-[560px]",
                 )}
               >
                 <img
                   src={employeeHeroImage}
                   alt=""
-                  className="block h-full w-full object-cover object-center max-lg:absolute max-lg:inset-0 lg:h-full"
+                  className="employee-hero-chart-frame__img block h-auto w-full object-contain object-center"
                   loading="eager"
                   decoding="async"
                   {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}

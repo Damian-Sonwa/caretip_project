@@ -158,7 +158,6 @@ export function RatingPage() {
         tags: selectedTags,
         customerName: customerName.trim() ? customerName.trim() : null,
       });
-      toast.success(t("tipFlow.rating.thanksFeedback"));
       leaveFlow({ feedbackSubmitted: true });
     } catch (err) {
       logClientError("RatingPage.submitTipFeedback", err);

@@ -636,7 +636,7 @@ textarea::placeholder {
 /* Hero chart frame — business + employee (shared mobile/tablet sizing & balanced depth). */
 @media (max-width: 1023px) {
   .business-dashboard-hero .business-hero-chart-frame,
-  .employee-dashboard-hero .employee-hero-chart-frame {
+  .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) {
     position: relative;
     width: 100%;
     height: auto !important;
@@ -652,7 +652,7 @@ textarea::placeholder {
   }
 
   .business-dashboard-hero .business-hero-chart-frame img,
-  .employee-dashboard-hero .employee-hero-chart-frame img {
+  .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -998,7 +998,7 @@ textarea::placeholder {
 }
 
 .business-dashboard-hero .business-hero-chart-frame,
-.employee-dashboard-hero .employee-hero-chart-frame {
+.employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) {
   border: 1px solid rgb(231 229 228 / 0.85); /* stone-200, calm edge */
   background:
     radial-gradient(ellipse 78% 58% at 50% 38%, hsl(43 42% 99%) 0%, transparent 62%),
@@ -1012,7 +1012,7 @@ textarea::placeholder {
 
 @media (min-width: 1024px) {
   .business-dashboard-hero .business-hero-chart-frame,
-  .employee-dashboard-hero .employee-hero-chart-frame {
+  .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) {
     box-shadow:
       0 1px 2px rgb(15 23 42 / 0.03),
       0 10px 26px -8px rgb(15 23 42 / 0.055),
@@ -1022,15 +1022,50 @@ textarea::placeholder {
 }
 
 .business-dashboard-hero .business-hero-chart-frame img,
-.employee-dashboard-hero .employee-hero-chart-frame img {
+.employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
   transform-origin: 50% 48%;
   object-position: 50% 48%;
 }
 
 @media (min-width: 1024px) {
   .business-dashboard-hero .business-hero-chart-frame img,
-  .employee-dashboard-hero .employee-hero-chart-frame img {
+  .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
     transform: scale(1.02);
+  }
+}
+
+/* Employee hero photo asset — frame matches image bounds (no crop, no inner letterbox). */
+.employee-dashboard-hero .employee-hero-chart-frame--photo {
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  max-height: none !important;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.employee-dashboard-hero .employee-hero-chart-frame--photo .employee-hero-chart-frame__img {
+  position: static !important;
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: min(48svh, 360px);
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+  padding: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .employee-dashboard-hero .employee-hero-chart-frame--photo {
+    width: 100%;
+    max-width: 34rem;
+  }
+
+  .employee-dashboard-hero .employee-hero-chart-frame--photo .employee-hero-chart-frame__img {
+    max-height: 28rem;
+    width: 100%;
   }
 }
 

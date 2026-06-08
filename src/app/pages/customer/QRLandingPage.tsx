@@ -574,11 +574,7 @@ export function QRLandingPage() {
           <CareTipLogo size="xs" className="h-11 max-h-11 min-h-0 w-auto max-w-[5.5rem] shrink-0" />
           <div className="min-w-0 flex-1">
             <h1 className={cf.headline}>{businessData.name}</h1>
-            <p className={cf.subline}>
-              {completion
-                ? t("tipFlow.qrLanding.completionSubline")
-                : t("tipFlow.qrLanding.selectTeamMember")}
-            </p>
+            <p className={cf.subline}>{t("tipFlow.qrLanding.selectTeamMember")}</p>
           </div>
         </div>
       </div>
@@ -592,12 +588,7 @@ export function QRLandingPage() {
 
         {completion ? (
           <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <TipFlowCompletionCard
-              tippedName={completion.tippedName}
-              feedbackSubmitted={completion.feedbackSubmitted}
-              onBackToVenue={scrollToVenue}
-              onTipAnother={scrollToTeam}
-            />
+            <TipFlowCompletionCard onBackToVenue={scrollToVenue} onTipAnother={scrollToTeam} />
           </motion.div>
         ) : null}
 
