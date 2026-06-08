@@ -38,8 +38,8 @@ export function renderNotificationTemplate(
     case "tip_received_employee": {
       const amount = formatNotificationAmount(template.params.amount, locale);
       return de
-        ? { title: "Neues Trinkgeld erhalten", body: `${amount} — ${template.params.name}` }
-        : { title: "New tip received", body: `${amount} — ${template.params.name}` };
+        ? { title: "Neues Trinkgeld erhalten", body: `${amount} von ${template.params.name}` }
+        : { title: "New tip received", body: `${amount} from ${template.params.name}` };
     }
     case "tip_received_business": {
       const amount = formatNotificationAmount(template.params.amount, locale);
@@ -69,10 +69,10 @@ export function renderNotificationTemplate(
       return de
         ? {
             title: "Neue Anmeldung",
-            body: "Ihr CareTip-Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort.",
+            body: "Ihr CareTip Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort.",
           }
         : {
-            title: "New sign-in",
+            title: "New sign in",
             body: "Your CareTip account was used to sign in. If this wasn't you, change your password.",
           };
     case "employee_invited_manager":
@@ -98,8 +98,8 @@ export function renderNotificationTemplate(
     case "qr_scan":
       return de
         ? {
-            title: "QR-Code gescannt",
-            body: `Ein Gast hat die Trinkgeld-Seite für ${template.params.place} geöffnet.`,
+            title: "QR Code gescannt",
+            body: `Ein Gast hat die Trinkgeld Seite für ${template.params.place} geöffnet.`,
           }
         : {
             title: "QR code scanned",
@@ -109,7 +109,7 @@ export function renderNotificationTemplate(
       const amount = formatNotificationAmount(template.params.amount, locale);
       return de
         ? {
-            title: "QR-Zahlung erhalten",
+            title: "QR Zahlung erhalten",
             body: `${amount} per QR für ${template.params.employeeName}.`,
           }
         : {
@@ -132,17 +132,17 @@ export function renderNotificationTemplate(
       return de
         ? {
             title: `[TICKET] ${template.params.ticketNumber}`,
-            body: `${template.params.businessName} · ${cat}. Ticket öffnen, um zu antworten.`,
+            body: `${template.params.businessName}, ${cat}. Ticket öffnen, um zu antworten.`,
           }
         : {
             title: `[TICKET] ${template.params.ticketNumber}`,
-            body: `${template.params.businessName} · ${cat}. Open the ticket to reply.`,
+            body: `${template.params.businessName}, ${cat}. Open the ticket to reply.`,
           };
     }
     case "support_created_business":
       return de
         ? {
-            title: `Support-Anfrage erhalten: ${template.params.ticketNumber}`,
+            title: `Support Anfrage erhalten: ${template.params.ticketNumber}`,
             body: `Wir haben Ihre Nachricht zu „${template.params.subject}" erhalten. Unser Team antwortet in Kürze.`,
           }
         : {
@@ -172,8 +172,8 @@ export function renderNotificationTemplate(
     case "support_status_resolved":
       return de
         ? {
-            title: "Support-Anfrage erledigt",
-            body: "Ihre Support-Anfrage wurde als erledigt markiert.",
+            title: "Support Anfrage erledigt",
+            body: "Ihre Support Anfrage wurde als erledigt markiert.",
           }
         : {
             title: "Support request resolved",
@@ -182,8 +182,8 @@ export function renderNotificationTemplate(
     case "support_status_closed":
       return de
         ? {
-            title: "Support-Ticket geschlossen",
-            body: "Dieses Support-Ticket ist jetzt geschlossen.",
+            title: "Support Ticket geschlossen",
+            body: "Dieses Support Ticket ist jetzt geschlossen.",
           }
         : {
             title: "Support ticket closed",
@@ -192,8 +192,8 @@ export function renderNotificationTemplate(
     case "support_status_updated":
       return de
         ? {
-            title: "Ticket-Status aktualisiert",
-            body: `Ticket-Status geändert auf ${template.params.status}.`,
+            title: "Ticketstatus aktualisiert",
+            body: `Ticketstatus geändert auf ${template.params.status}.`,
           }
         : {
             title: "Ticket status updated",

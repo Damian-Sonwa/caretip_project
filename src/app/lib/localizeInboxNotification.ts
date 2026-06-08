@@ -94,7 +94,10 @@ function inferLocaleTemplate(notification: InboxNotification): NotificationLocal
         id: "tip_received_employee",
         params: {
           amount: amount ?? 0,
-          name: employeeName ?? suffixAfter(message, [" — ", " – ", " - "]) ?? "Guest",
+          name:
+            employeeName ??
+            suffixAfter(message, [" from ", " von ", " — ", " – ", " - "]) ??
+            "Guest",
         },
       };
     }

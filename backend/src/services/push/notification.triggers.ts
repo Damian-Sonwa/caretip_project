@@ -161,7 +161,7 @@ export function onLoginSecurityAlert(userId: string): void {
       userId,
       payload: {
         type: NotificationType.LOGIN_SECURITY,
-        title: "New sign-in",
+        title: "New sign in",
         body: "",
         localeTemplate: { id: "login_security" },
         url,

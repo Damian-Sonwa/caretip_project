@@ -87,7 +87,10 @@ export function inferNotificationTemplate(input: InferInput): NotificationTempla
         id: "tip_received_employee",
         params: {
           amount: amount ?? 0,
-          name: employeeName ?? suffixAfter(message, [" — ", " – ", " - "]) ?? "Guest",
+          name:
+            employeeName ??
+            suffixAfter(message, [" from ", " von ", " — ", " – ", " - "]) ??
+            "Guest",
         },
       };
     }

@@ -588,7 +588,12 @@ export function QRLandingPage() {
 
         {completion ? (
           <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <TipFlowCompletionCard onBackToVenue={scrollToVenue} onTipAnother={scrollToTeam} />
+            <TipFlowCompletionCard
+              tippedName={completion.tippedName}
+              feedbackSubmitted={completion.feedbackSubmitted}
+              onBackToVenue={scrollToVenue}
+              onTipAnother={scrollToTeam}
+            />
           </motion.div>
         ) : null}
 

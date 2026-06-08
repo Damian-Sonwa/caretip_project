@@ -853,7 +853,7 @@
     "templates": {
       "tip_received_employee": {
         "title": "New tip received",
-        "body": "{{amount}} — {{name}}"
+        "body": "{{amount}} from {{name}}"
       },
       "tip_received_business": {
         "title": "New tip at your venue",
@@ -864,7 +864,7 @@
         "body": "A payout of {{amount}} was processed."
       },
       "login_security": {
-        "title": "New sign-in",
+        "title": "New sign in",
         "body": "Your CareTip account was used to sign in. If this wasn't you, change your password."
       },
       "employee_invited_manager": {
@@ -889,7 +889,7 @@
       },
       "support_created_admin": {
         "title": "[TICKET] {{ticketNumber}}",
-        "body": "{{businessName}} · {{category}}. Open the ticket to reply."
+        "body": "{{businessName}}, {{category}}. Open the ticket to reply."
       },
       "support_created_business": {
         "title": "Support request received: {{ticketNumber}}",
@@ -1023,11 +1023,11 @@
     "qrLanding": {
       "tipHeading": "Tip {{name}}",
       "selectTeamMember": "Select a team member to tip",
-      "completionTitle": "You're all set",
-      "completionSubline": "Your tip was received — take your time exploring the venue",
-      "completionTipSent": "Your tip was sent successfully. The team has been notified.",
-      "completionTipSentNamed": "Your tip for {{name}} was sent successfully. The team has been notified.",
-      "completionFeedbackSent": "Thanks — your feedback was submitted too.",
+      "completionTitle": "Thank you!",
+      "completionSummary": "Tip sent to the team.",
+      "completionSummaryNamed": "Tip sent to {{name}}.",
+      "completionSummaryFeedback": "Tip sent to the team. Feedback shared with management.",
+      "completionSummaryFeedbackNamed": "Tip sent to {{name}}. Feedback shared with management.",
       "backToVenue": "Back to venue",
       "tipAnotherMember": "Tip another team member",
       "repeatOptionalLabel": "Optional",

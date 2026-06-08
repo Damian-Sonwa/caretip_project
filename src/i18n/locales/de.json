@@ -855,7 +855,7 @@
     "templates": {
       "tip_received_employee": {
         "title": "Neues Trinkgeld erhalten",
-        "body": "{{amount}} — {{name}}"
+        "body": "{{amount}} von {{name}}"
       },
       "tip_received_business": {
         "title": "Neues Trinkgeld in Ihrem Betrieb",
@@ -867,7 +867,7 @@
       },
       "login_security": {
         "title": "Neue Anmeldung",
-        "body": "Ihr CareTip-Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort."
+        "body": "Ihr CareTip Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort."
       },
       "employee_invited_manager": {
         "title": "Teameinladung gesendet",
@@ -878,11 +878,11 @@
         "body": "Ihr Konto für {{businessName}} ist bereit. Sie können sich anmelden und Trinkgelder erhalten."
       },
       "qr_scan": {
-        "title": "QR-Code gescannt",
-        "body": "Ein Gast hat die Trinkgeld-Seite für {{place}} geöffnet."
+        "title": "QR Code gescannt",
+        "body": "Ein Gast hat die Trinkgeld Seite für {{place}} geöffnet."
       },
       "qr_payment_success": {
-        "title": "QR-Zahlung erhalten",
+        "title": "QR Zahlung erhalten",
         "body": "{{amount}} per QR für {{employeeName}}."
       },
       "verification_document_uploaded": {
@@ -891,10 +891,10 @@
       },
       "support_created_admin": {
         "title": "[TICKET] {{ticketNumber}}",
-        "body": "{{businessName}} · {{category}}. Ticket öffnen, um zu antworten."
+        "body": "{{businessName}}, {{category}}. Ticket öffnen, um zu antworten."
       },
       "support_created_business": {
-        "title": "Support-Anfrage erhalten: {{ticketNumber}}",
+        "title": "Support Anfrage erhalten: {{ticketNumber}}",
         "body": "Wir haben Ihre Nachricht zu „{{subject}}“ erhalten. Unser Team antwortet in Kürze."
       },
       "support_reply_admin": {
@@ -905,16 +905,16 @@
         "title": "CareTip hat geantwortet: {{ticketNumber}}"
       },
       "support_status_resolved": {
-        "title": "Support-Anfrage erledigt",
-        "body": "Ihre Support-Anfrage wurde als erledigt markiert."
+        "title": "Support Anfrage erledigt",
+        "body": "Ihre Support Anfrage wurde als erledigt markiert."
       },
       "support_status_closed": {
-        "title": "Support-Ticket geschlossen",
-        "body": "Dieses Support-Ticket ist jetzt geschlossen."
+        "title": "Support Ticket geschlossen",
+        "body": "Dieses Support Ticket ist jetzt geschlossen."
       },
       "support_status_updated": {
-        "title": "Ticket-Status aktualisiert",
-        "body": "Ticket-Status geändert auf {{status}}."
+        "title": "Ticketstatus aktualisiert",
+        "body": "Ticketstatus geändert auf {{status}}."
       },
       "support_inbox_title": {
         "title": "[TICKET] [{{status}}] {{ticketNumber}}: {{subject}}"
@@ -1025,11 +1025,11 @@
     "qrLanding": {
       "tipHeading": "Trinkgeld für {{name}}",
       "selectTeamMember": "Wählen Sie ein Teammitglied für ein Trinkgeld",
-      "completionTitle": "Alles erledigt",
-      "completionSubline": "Ihr Trinkgeld ist eingegangen — schauen Sie sich die Location in Ruhe an",
-      "completionTipSent": "Ihr Trinkgeld wurde erfolgreich gesendet. Das Team wurde benachrichtigt.",
-      "completionTipSentNamed": "Ihr Trinkgeld für {{name}} wurde erfolgreich gesendet. Das Team wurde benachrichtigt.",
-      "completionFeedbackSent": "Danke — Ihr Feedback wurde ebenfalls übermittelt.",
+      "completionTitle": "Danke!",
+      "completionSummary": "Trinkgeld an das Team gesendet.",
+      "completionSummaryNamed": "Trinkgeld an {{name}} gesendet.",
+      "completionSummaryFeedback": "Trinkgeld an das Team gesendet. Feedback an die Leitung weitergeleitet.",
+      "completionSummaryFeedbackNamed": "Trinkgeld an {{name}} gesendet. Feedback an die Leitung weitergeleitet.",
       "backToVenue": "Zurück zur Location",
       "tipAnotherMember": "Anderem Teammitglied Trinkgeld geben",
       "repeatOptionalLabel": "Optional",
