@@ -1025,13 +1025,6 @@
     "qrLanding": {
       "tipHeading": "Trinkgeld für {{name}}",
       "selectTeamMember": "Wählen Sie ein Teammitglied für ein Trinkgeld",
-      "completionTitle": "Danke!",
-      "completionSummary": "Trinkgeld an das Team gesendet.",
-      "completionSummaryNamed": "Trinkgeld an {{name}} gesendet.",
-      "completionSummaryFeedback": "Trinkgeld an das Team gesendet. Feedback an die Leitung weitergeleitet.",
-      "completionSummaryFeedbackNamed": "Trinkgeld an {{name}} gesendet. Feedback an die Leitung weitergeleitet.",
-      "backToVenue": "Zurück zur Location",
-      "tipAnotherMember": "Anderem Teammitglied Trinkgeld geben",
       "repeatOptionalLabel": "Optional",
       "repeatNotNow": "Nicht jetzt",
       "repeatWelcome": "Willkommen zurück",
@@ -1134,6 +1127,12 @@
         "cardDesc": "Visa, Mastercard, Amex"
       }
     },
+    "completion": {
+      "thankYouTipping": "Danke für Ihr Trinkgeld für {{name}}",
+      "feedbackReceived": "Ihr Feedback wurde erhalten und mit dem Team geteilt.",
+      "tipAnotherMember": "Anderem Teammitglied Trinkgeld geben",
+      "exit": "Beenden"
+    },
     "success": {
       "validatingPayment": "Zahlung wird geprüft…",
       "headline": "Trinkgeld erfolgreich gesendet!",
@@ -1156,13 +1155,12 @@
       "devCaptured": "DEV: Feedback lokal erfasst",
       "missingSession": "Zahlungssitzung fehlt. Sie können diese Seite schließen.",
       "optionalTitle": "Feedback ist optional",
-      "optionalDesc": "Tippen Sie auf eine Bewertung oder eine kurze Notiz, oder auf „Seite verlassen“.",
-      "thanksFeedback": "Danke für Ihr Feedback!",
-      "leavePage": "Seite verlassen",
-      "leavePageAria": "Seite verlassen",
-      "thankYouTip": "Danke für Ihr Trinkgeld",
-      "experienceToday": "Wie war Ihre Erfahrung heute?",
-      "youTipped": "Sie haben getippt für",
+      "optionalDesc": "Tippen Sie auf eine Bewertung oder eine kurze Notiz, oder überspringen Sie das Feedback.",
+      "pageTitle": "Feedback teilen",
+      "pageSubtitle": "Wie war Ihre Erfahrung heute?",
+      "feedbackFor": "Feedback für",
+      "skip": "Überspringen",
+      "skipAria": "Feedback überspringen",
       "verifying": "Wird geprüft…",
       "needsSession": "Diese Feedback-Seite benötigt eine Zahlungssitzungs-ID. Sie können die Seite schließen.",
       "tapToRate": "Zum Bewerten tippen",

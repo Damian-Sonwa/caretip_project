@@ -1023,13 +1023,6 @@
     "qrLanding": {
       "tipHeading": "Tip {{name}}",
       "selectTeamMember": "Select a team member to tip",
-      "completionTitle": "Thank you!",
-      "completionSummary": "Tip sent to the team.",
-      "completionSummaryNamed": "Tip sent to {{name}}.",
-      "completionSummaryFeedback": "Tip sent to the team. Feedback shared with management.",
-      "completionSummaryFeedbackNamed": "Tip sent to {{name}}. Feedback shared with management.",
-      "backToVenue": "Back to venue",
-      "tipAnotherMember": "Tip another team member",
       "repeatOptionalLabel": "Optional",
       "repeatNotNow": "Not now",
       "repeatWelcome": "Welcome back",
@@ -1132,6 +1125,12 @@
         "cardDesc": "Visa, Mastercard, Amex"
       }
     },
+    "completion": {
+      "thankYouTipping": "Thank you for tipping {{name}}",
+      "feedbackReceived": "Your feedback has been received and shared with the team.",
+      "tipAnotherMember": "Tip another team member",
+      "exit": "Exit"
+    },
     "success": {
       "validatingPayment": "Validating payment…",
       "headline": "Tip Sent Successfully!",
@@ -1154,13 +1153,12 @@
       "devCaptured": "DEV: feedback captured locally",
       "missingSession": "Missing payment session. You can close this page safely.",
       "optionalTitle": "Feedback is optional",
-      "optionalDesc": "Tap a rating or add a quick note, or press Leave page.",
-      "thanksFeedback": "Thanks for the feedback!",
-      "leavePage": "Leave page",
-      "leavePageAria": "Leave page",
-      "thankYouTip": "Thank you for your tip",
-      "experienceToday": "How was your experience today?",
-      "youTipped": "You tipped",
+      "optionalDesc": "Tap a rating or add a quick note, or skip feedback.",
+      "pageTitle": "Share your feedback",
+      "pageSubtitle": "How was your experience today?",
+      "feedbackFor": "Feedback for",
+      "skip": "Skip",
+      "skipAria": "Skip feedback",
       "verifying": "Verifying…",
       "needsSession": "This feedback page needs a payment session id. You can close this page safely.",
       "tapToRate": "Tap to rate",

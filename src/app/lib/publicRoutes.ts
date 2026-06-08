@@ -35,6 +35,8 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/rate/",
   "/payment/",
   "/success/",
+  "/rating",
+  "/tip-complete",
   "/forgot-password",
   "/reset-password/",
   "/activate",

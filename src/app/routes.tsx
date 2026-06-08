@@ -65,6 +65,7 @@ import {
   QRCodeManagementPage,
   QRLandingPage,
   RatingPage,
+  TipCompletionPage,
   SaasDashboard3DHeroPage,
   StaffLandingPage,
   StaffManagementPage,
@@ -532,6 +533,11 @@ const routes: RouteObject[] = [
   {
     path: '/rating',
     Component: RatingPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/tip-complete',
+    Component: TipCompletionPage,
     errorElement: <ErrorBoundary />,
   },
   // Employee Dashboard Pages (staff only) — shared shell for walkthrough ribbon

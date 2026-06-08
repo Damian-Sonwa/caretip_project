@@ -24,7 +24,6 @@ import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { formatEur } from "../../lib/formatEur";
-import { TipFlowCompletionCard } from "../../components/customer/TipFlowCompletionCard";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
 const BRAND_ORANGE = "#e9781c";
@@ -34,30 +33,22 @@ export function QRLandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { businessId, qrSlug } = useParams<{ businessId?: string; qrSlug?: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const employeeIdParam = searchParams.get("employeeId");
   const businessSectionRef = useRef<HTMLDivElement>(null);
   const teamSectionRef = useRef<HTMLDivElement>(null);
 
-  const [completion, setCompletion] = useState<{
-    feedbackSubmitted: boolean;
-    tippedName?: string;
-  } | null>(() => {
-    if (searchParams.get("tipComplete") !== "1") return null;
-    return {
-      feedbackSubmitted: searchParams.get("feedbackSubmitted") === "1",
-      tippedName: searchParams.get("tippedName")?.trim() || undefined,
-    };
-  });
-
   useEffect(() => {
     if (searchParams.get("tipComplete") !== "1") return;
-    const next = new URLSearchParams(searchParams);
-    next.delete("tipComplete");
-    next.delete("feedbackSubmitted");
-    next.delete("tippedName");
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams]);
+    const params = new URLSearchParams();
+    const tippedName = searchParams.get("tippedName")?.trim();
+    const businessIdParam = searchParams.get("businessId")?.trim() ?? businessId;
+    if (tippedName) params.set("tippedName", tippedName);
+    if (businessIdParam) params.set("businessId", businessIdParam);
+    if (searchParams.get("feedbackSubmitted") === "1") params.set("feedbackSubmitted", "1");
+    const qs = params.toString();
+    navigate(qs ? `/tip-complete?${qs}` : "/tip-complete", { replace: true });
+  }, [businessId, navigate, searchParams]);
 
   const {
     setBusinessId,
@@ -277,22 +268,6 @@ export function QRLandingPage() {
 
   const showInlinePool =
     Boolean(businessData?.slug?.trim()) && !poolLoading && (poolEmployees?.length ?? 0) > 0;
-
-  const dismissCompletion = () => setCompletion(null);
-
-  const scrollToVenue = () => {
-    dismissCompletion();
-    businessSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
-  const scrollToTeam = () => {
-    dismissCompletion();
-    if (showInlinePool && teamSectionRef.current) {
-      teamSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return;
-    }
-    goToSelectEmployee();
-  };
 
   const goHome = () => {
     window.location.href = "/";
@@ -586,17 +561,6 @@ export function QRLandingPage() {
           </p>
         ) : null}
 
-        {completion ? (
-          <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <TipFlowCompletionCard
-              tippedName={completion.tippedName}
-              feedbackSubmitted={completion.feedbackSubmitted}
-              onBackToVenue={scrollToVenue}
-              onTipAnother={scrollToTeam}
-            />
-          </motion.div>
-        ) : null}
-
         <motion.div
           ref={businessSectionRef}
           initial={{ y: 20, opacity: 0 }}
@@ -769,7 +733,7 @@ export function QRLandingPage() {
           </motion.div>
         )}
 
-        {repeatCard && !completion ? (
+        {repeatCard ? (
           <motion.div
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}

@@ -120,6 +120,10 @@ export const TipAmountPage = lazyNamed(() => import("../pages/customer/TipAmount
 export const PaymentPage = lazyNamed(() => import("../pages/customer/PaymentPage"), "PaymentPage");
 export const SuccessPage = lazyNamed(() => import("../pages/customer/SuccessPage"), "SuccessPage");
 export const RatingPage = lazyNamed(() => import("../pages/customer/RatingPage"), "RatingPage");
+export const TipCompletionPage = lazyNamed(
+  () => import("../pages/customer/TipCompletionPage"),
+  "TipCompletionPage",
+);
 export const BusinessStaffDirectoryPage = lazyNamed(
   () => import("../pages/customer/BusinessStaffDirectoryPage"),
   "BusinessStaffDirectoryPage",

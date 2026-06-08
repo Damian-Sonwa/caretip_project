@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { HeartHandshake, MessageSquare, Send, LogOut, Sparkles, Star } from "lucide-react";
+import { MessageSquare, Send, Sparkles, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
@@ -28,7 +28,7 @@ export function RatingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { businessId, employeeName, employeeAvatar, staffProfileSlug, reset } = useTipFlow();
+  const { businessId, employeeName, employeeAvatar, staffTipReturnBusinessSlug, reset } = useTipFlow();
 
   const sessionId = searchParams.get("session_id")?.trim() ?? "";
   const isDevMockSession = DEV_BYPASS_ENABLED && (!sessionId || sessionId === DEV_MOCK.sessionId);
@@ -107,39 +107,35 @@ export function RatingPage() {
     };
   }, [isDevMockSession, sessionId]);
 
-  const leaveFlow = (opts?: { feedbackSubmitted?: boolean }) => {
+  const goToCompletion = (opts?: { feedbackSubmitted?: boolean }) => {
     const biz = tipContext?.status === "ready" ? tipContext.businessId : tipContext?.businessId ?? businessId;
     const tippedName =
       tipContext?.status === "ready"
         ? tipContext.employee?.name
         : employeeName ?? undefined;
     const params = new URLSearchParams();
-    params.set("tipComplete", "1");
-    if (opts?.feedbackSubmitted) params.set("feedbackSubmitted", "1");
     if (tippedName?.trim()) params.set("tippedName", tippedName.trim());
+    if (biz) params.set("businessId", biz);
+    if (staffTipReturnBusinessSlug?.trim()) {
+      params.set("businessSlug", staffTipReturnBusinessSlug.trim());
+    }
+    if (opts?.feedbackSubmitted) params.set("feedbackSubmitted", "1");
 
     clearCustomerFlowEntry();
     reset();
 
     const qs = params.toString();
-    const target =
-      biz && !staffProfileSlug
-        ? `/qr-landing/${encodeURIComponent(biz)}${qs ? `?${qs}` : ""}`
-        : qs
-          ? `/?${qs}`
-          : "/";
-    navigate(target, { replace: true });
+    navigate(qs ? `/tip-complete?${qs}` : "/tip-complete", { replace: true });
   };
 
   const handleSubmit = async () => {
     if (isDevMockSession) {
-      toast.success(t("tipFlow.rating.devCaptured"));
-      leaveFlow();
+      goToCompletion({ feedbackSubmitted: true });
       return;
     }
     if (!sessionId) {
       toast.error(t("tipFlow.rating.missingSession"));
-      leaveFlow();
+      goToCompletion();
       return;
     }
     if (rating <= 0 && comment.trim().length === 0 && selectedTags.length === 0) {
@@ -158,7 +154,7 @@ export function RatingPage() {
         tags: selectedTags,
         customerName: customerName.trim() ? customerName.trim() : null,
       });
-      leaveFlow({ feedbackSubmitted: true });
+      goToCompletion({ feedbackSubmitted: true });
     } catch (err) {
       logClientError("RatingPage.submitTipFeedback", err);
       toast.error(toUserFriendlyMessage(err));
@@ -172,21 +168,20 @@ export function RatingPage() {
         <div className={`${cf.headerInner} relative`}>
           <button
             type="button"
-            onClick={() => leaveFlow()}
+            onClick={() => goToCompletion()}
             className="absolute right-0 top-1/2 flex min-h-[2.5rem] min-w-[2.5rem] -translate-y-1/2 items-center justify-end gap-1.5 pr-1 text-xs font-semibold text-muted-foreground transition-colors hover:text-foreground sm:right-3"
-            aria-label={t("tipFlow.rating.leavePageAria")}
+            aria-label={t("tipFlow.rating.skipAria")}
           >
-            <LogOut className="size-3.5 shrink-0" aria-hidden />
-            <span className="hidden min-[380px]:inline">{t("tipFlow.rating.leavePage")}</span>
+            <span>{t("tipFlow.rating.skip")}</span>
           </button>
 
-          <div className="flex min-w-0 flex-1 items-center gap-3 pr-20 sm:pr-28">
+          <div className="flex min-w-0 flex-1 items-center gap-3 pr-16 sm:pr-20">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary ring-1 ring-primary/18">
-              <HeartHandshake className="size-5" aria-hidden />
+              <MessageSquare className="size-5" aria-hidden />
             </div>
             <div className="min-w-0">
-              <h1 className={cf.headline}>{t("tipFlow.rating.thankYouTip")}</h1>
-              <p className={cf.subline}>{t("tipFlow.rating.experienceToday")}</p>
+              <h1 className={cf.headline}>{t("tipFlow.rating.pageTitle")}</h1>
+              <p className={cf.subline}>{t("tipFlow.rating.pageSubtitle")}</p>
             </div>
           </div>
         </div>
@@ -206,7 +201,7 @@ export function RatingPage() {
               className="h-12 w-12"
             />
             <div className="min-w-0">
-              <p className="text-xs text-muted-foreground">{t("tipFlow.rating.youTipped")}</p>
+              <p className="text-xs text-muted-foreground">{t("tipFlow.rating.feedbackFor")}</p>
               <p className="truncate text-sm font-semibold text-foreground">
                 {tipContext?.employee?.name ?? employeeName ?? t("tipFlow.common.aTeamMember")}
               </p>
@@ -346,10 +341,10 @@ export function RatingPage() {
           </button>
           <button
             type="button"
-            onClick={() => leaveFlow()}
+            onClick={() => goToCompletion()}
             className="flex min-h-[2.75rem] w-full items-center justify-center rounded-xl text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
           >
-            {t("tipFlow.rating.leavePage")}
+            {t("tipFlow.rating.skip")}
           </button>
         </div>
       </motion.div>
