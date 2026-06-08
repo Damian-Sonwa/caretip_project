@@ -19,7 +19,6 @@ import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { CareTipLogo } from "../../components/CareTipLogo";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
-import { resolveMediaUrl } from "../../lib/mediaUrl";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
@@ -68,13 +67,6 @@ export function QRLandingPage() {
     timestamp: number;
   } | null>(null);
   const [repeatDismissed, setRepeatDismissed] = useState(false);
-  /** Directory flow: hero loads the business logo; sticky header uses the CareTip wordmark only. */
-  const [heroLogoFailed, setHeroLogoFailed] = useState(false);
-
-  useEffect(() => {
-    setHeroLogoFailed(false);
-  }, [businessData?.id, businessData?.logo]);
-
   useEffect(() => {
     if (!businessId && !employeeIdParam && !qrSlug) {
       setBusinessId(null);
@@ -378,17 +370,12 @@ export function QRLandingPage() {
   }
 
   if (selectedEmployee) {
-    const monthlyGoal = selectedEmployee.monthlyGoal;
-    const currentTotal = selectedEmployee.currentMonthTotal;
-    const goalProgress =
-      monthlyGoal != null && monthlyGoal > 0 ? Math.min(100, (currentTotal / monthlyGoal) * 100) : 0;
-
     return (
       <div className={selectedAmount ? cf.pageWithBottomCta : cf.page}>
         <div className={cf.stickyHeader}>
           <div className={cf.headerInner}>
             {businessData ? (
-              <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="md" />
+              <BusinessLogoMark logoPathOrUrl={businessData.logo} businessName={businessData.name} size="customer" />
             ) : (
               <CareTipLogo size="xs" className="shrink-0" />
             )}
@@ -432,34 +419,9 @@ export function QRLandingPage() {
           >
             <Card className={cf.cardShadcn}>
               <CardContent className="px-5 py-6 sm:px-7">
-                {monthlyGoal != null && monthlyGoal > 0 ? (
-                  <>
-                    <p className="mb-4 text-sm font-semibold text-foreground/90">
-                      🎯{" "}
-                      {t("tipFlow.qrLanding.goalHelp", {
-                        firstName: displayName.split(" ")[0] || displayName,
-                      })}
-                    </p>
-                    <div className="h-3 overflow-hidden rounded-full bg-muted/60">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${goalProgress}%` }}
-                        transition={{ duration: 0.6 }}
-                        className="h-full rounded-full bg-primary shadow-sm"
-                      />
-                    </div>
-                    <p className="mt-3 text-xs text-muted-foreground/80 font-medium">
-                      {t("tipFlow.qrLanding.goalProgress", {
-                        current: formatEur(currentTotal, { minFrac: 0, maxFrac: 0 }),
-                        goal: formatEur(Number(monthlyGoal), { minFrac: 0, maxFrac: 0 }),
-                      })}
-                    </p>
-                  </>
-                ) : (
-                  <p className="text-sm text-muted-foreground/90">
-                    ✨ {t("tipFlow.qrLanding.tipDirectly", { firstName: displayName.split(" ")[0] || displayName })}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground/90">
+                  {t("tipFlow.qrLanding.tipDirectly", { firstName: displayName.split(" ")[0] || displayName })}
+                </p>
               </CardContent>
             </Card>
           </motion.div>
@@ -566,8 +528,6 @@ export function QRLandingPage() {
     );
   }
 
-  const businessLogoSrc = resolveMediaUrl(businessData.logo);
-
   return (
     <div className={cf.page}>
       <div className={cf.stickyHeader}>
@@ -648,25 +608,12 @@ export function QRLandingPage() {
             <Card
               className={`${cf.card} transition-shadow duration-300 hover:shadow-[0_16px_48px_-20px_rgba(15,23,42,0.16)]`}
             >
-              <div className="relative h-56 bg-gray-50 dark:bg-neutral-900">
-                {businessLogoSrc && !heroLogoFailed ? (
-                  <img
-                    src={businessLogoSrc}
-                    alt=""
-                    className="h-full w-full object-cover"
-                    loading="eager"
-                    decoding="async"
-                    onError={() => setHeroLogoFailed(true)}
-                  />
-                ) : (
-                  <div
-                    className="flex h-full w-full items-center justify-center"
-                    style={{ backgroundColor: BRAND_ORANGE }}
-                  >
-                    <Building2 className="h-20 w-20 text-white/80" />
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+              <div className="flex items-center justify-center px-6 pt-8 pb-2 sm:px-8 sm:pt-10">
+                <BusinessLogoMark
+                  logoPathOrUrl={businessData.logo}
+                  businessName={businessData.name}
+                  size="hero"
+                />
               </div>
               <CardContent className="space-y-5 p-7 md:p-8">
                 <div>

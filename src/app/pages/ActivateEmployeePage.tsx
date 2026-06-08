@@ -110,9 +110,7 @@ export function ActivateEmployeePage() {
           <BusinessLogoMark
             logoPathOrUrl={branding?.businessLogo ?? null}
             businessName={branding?.businessName ?? t("dashboard.venueDashboardFallback")}
-            size="header"
-            rounded="rounded-2xl"
-            className="shadow-none"
+            size="lg"
           />
           <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
             {branding?.businessName ?? t("dashboard.venueDashboardFallback")}

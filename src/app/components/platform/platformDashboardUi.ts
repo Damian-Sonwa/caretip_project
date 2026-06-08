@@ -46,16 +46,7 @@ export const platformUi = {
 
   /** Single column on phone; 2-up from sm; 3-up from lg; 5-up only on very wide viewports. */
   statGrid:
-    "platform-admin-stat-grid relative mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-4 lg:mb-12 lg:grid-cols-3 lg:gap-5 xl:grid-cols-3 xl:gap-6 min-[1536px]:grid-cols-5 min-[1536px]:gap-5",
-
-  statCard:
-    "platform-admin-stat-card @container/stat relative h-full min-h-[8.25rem] min-w-0 overflow-hidden border-2 border-border bg-card shadow-sm transition-shadow hover:shadow-md sm:min-h-[8.75rem]",
-  statCardHeader: "min-w-0 space-y-0 px-4 pb-4 pt-4 sm:px-5 sm:pt-5",
-  statCardLabel:
-    "text-[11px] font-medium uppercase leading-snug tracking-wide text-muted-foreground sm:text-xs",
-  statCardValue:
-    "platform-admin-stat-value mt-2 min-w-0 max-w-full text-balance text-xl font-bold tabular-nums leading-[1.1] tracking-tight text-foreground [overflow-wrap:anywhere] sm:text-2xl",
-  statCardChange: "mt-2 line-clamp-2 text-xs leading-snug text-muted-foreground sm:text-sm",
+    "platform-admin-stat-grid relative mb-10 grid grid-cols-1 items-stretch gap-3 sm:grid-cols-2 sm:gap-4 lg:mb-12 lg:grid-cols-3 lg:gap-5 min-[1536px]:grid-cols-5 min-[1536px]:gap-5",
 
   analyticsSection: "platform-admin-analytics-section mb-12 max-lg:mb-14",
   analyticsHeader: "mb-6 flex flex-col gap-4 max-lg:mb-8 sm:flex-row sm:items-end sm:justify-between sm:gap-5",

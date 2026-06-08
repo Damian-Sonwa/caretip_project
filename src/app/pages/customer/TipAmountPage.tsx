@@ -263,7 +263,7 @@ export function TipAmountPage() {
             <BusinessLogoMark
               logoPathOrUrl={businessBrand.logo}
               businessName={businessBrand.name}
-              size="md"
+              size="customer"
               className="shrink-0"
             />
           ) : (

@@ -729,7 +729,7 @@ export function StaffManagementPage() {
         <div className="min-w-0 space-y-6">
           <Card className={cn(businessUi.cardStatic, "w-full")}>
             <CardHeader className="pb-3">
-              <CardTitle className="text-base">Search</CardTitle>
+              <CardTitle className="text-base">{t("business.staffPage.searchTitle")}</CardTitle>
               <CardDescription className={businessUi.cardDesc}>{t("business.staffPage.filterDesc")}</CardDescription>
             </CardHeader>
             <CardContent>
@@ -751,20 +751,20 @@ export function StaffManagementPage() {
           <table className="w-full min-w-[72rem]">
             <thead className="bg-muted/50">
               <tr>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">Employee</th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">Role</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thEmployee")}</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thRole")}</th>
                 <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="h-3.5 w-3.5" />
-                    QR assignment
+                    {t("business.staffPage.thQrAssignment")}
                   </span>
                 </th>
-                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">Contact</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">Tips (Month)</th>
-                <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">Rating</th>
-                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">Active</th>
+                <th className="text-left px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thContact")}</th>
+                <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thTipsMonth")}</th>
+                <th className="text-right px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thRating")}</th>
+                <th className="text-center px-6 py-4 text-sm font-semibold text-foreground">{t("business.staffPage.thActive")}</th>
                 <th className="whitespace-nowrap px-6 py-4 text-right text-sm font-semibold text-foreground">
-                  Actions
+                  {t("business.staffPage.thActions")}
                 </th>
               </tr>
             </thead>
@@ -970,7 +970,7 @@ export function StaffManagementPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-muted-foreground">Active</span>
+                  <span className="text-xs text-muted-foreground">{t("business.staffPage.thActive")}</span>
                   <button
                     type="button"
                     role="switch"
@@ -1047,7 +1047,7 @@ export function StaffManagementPage() {
                   className="col-span-2 flex items-center justify-center gap-2 rounded-lg border-2 border-destructive px-4 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10 active:opacity-90"
                 >
                   <Trash2 className="h-4 w-4" />
-                  Remove staff
+                  {t("business.staffPage.removeStaffButton")}
                 </button>
               </div>
             </motion.div>

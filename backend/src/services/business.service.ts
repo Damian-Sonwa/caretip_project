@@ -21,6 +21,7 @@ import {
 import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { logDashboardPhase } from "../utils/dashboardTiming.js";
 import { inferManagerOnboardingStep } from "./onboardingProgress.service.js";
+import { queryEmployeeRatingAggregates } from "./feedback.service.js";
 import {
   buildBusinessDailyTipDistribution,
   queryBusinessDashboardSqlBundle,
@@ -687,9 +688,11 @@ async function loadBusinessAnalyticsExtras(
 function mapEmployeesToStats(
   employees: Awaited<ReturnType<typeof loadBusinessAnalyticsEmployees>>,
   tipsByEmployee: Map<string, { total: number; count: number }>,
+  ratingsByEmployee: Map<string, { average: number; count: number }>,
 ) {
   return employees.map((emp) => {
     const agg = tipsByEmployee.get(emp.id) ?? { total: 0, count: 0 };
+    const ratingAgg = ratingsByEmployee.get(emp.id);
     const account = emp.user ?? {
       email: "",
       emailVerified: false,
@@ -719,7 +722,7 @@ function mapEmployeesToStats(
           : [],
       tipsTotal: agg.total,
       tipCount: agg.count,
-      rating: agg.count > 0 ? 4.8 : null,
+      rating: ratingAgg && ratingAgg.count > 0 ? ratingAgg.average : null,
     };
   });
 }
@@ -778,7 +781,8 @@ async function getBusinessStatsAnalyticsImpl(
     () => loadBusinessAnalyticsExtras(businessId, { includeAssignments: timeframe === "all" }),
   );
   const dailyTipDistribution = buildChartFromSqlBundle(timeframe, rangeStart, tz, bundle);
-  const employeeStats = mapEmployeesToStats(employees, bundle.tipsByEmployee);
+  const ratingsByEmployee = await queryEmployeeRatingAggregates(businessId);
+  const employeeStats = mapEmployeesToStats(employees, bundle.tipsByEmployee, ratingsByEmployee);
 
   const goalsTracked = employeeGoals.length;
   const goalsOnTrackOrBetter = employeeGoals.filter(

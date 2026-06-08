@@ -56,7 +56,7 @@ export function PlatformAdminLoginPage() {
     const trimmed = email.trim();
     if (user && !sessionValidated) return;
     if (!trimmed || !password) {
-      setError("Please enter both email and password.");
+      setError(t("admin.loginPage.bothRequired"));
       return;
     }
     if (authInFlightRef.current) return;
@@ -171,7 +171,7 @@ export function PlatformAdminLoginPage() {
                   noValidate
                 >
                   <input
-                    placeholder="Email"
+                    placeholder={t("admin.loginPage.emailPlaceholder")}
                     type="email"
                     id="platform-admin-email"
                     name="email"

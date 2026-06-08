@@ -54,8 +54,7 @@ export function EmployeeSidebar({
           <BusinessLogoMark
             logoPathOrUrl={businessBranding?.businessLogo ?? null}
             businessName={venueName}
-            size="md"
-            rounded="rounded-xl"
+            size="dashboard"
             className="shrink-0"
           />
           <p className="min-w-0 flex-1 truncate text-sm font-semibold text-sidebar-foreground">

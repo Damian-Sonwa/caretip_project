@@ -1,7 +1,7 @@
 import { useNavigate, useParams, Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
-import { Heart, Building2, Sparkles } from "lucide-react";
+import { Heart, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getStaffByBusinessEmployeeSlug, type StaffBySlugResponse } from "../../lib/api";
@@ -131,12 +131,6 @@ export function StaffTipByPublicPathPage() {
     );
   }
 
-  const goal = staff.monthlyGoal;
-  const progress =
-    goal != null && goal > 0
-      ? Math.min(100, (staff.currentMonthTotal / goal) * 100)
-      : null;
-
   return (
     <div className={cf.page}>
       <div
@@ -151,8 +145,7 @@ export function StaffTipByPublicPathPage() {
           <BusinessLogoMark
             logoPathOrUrl={staff.businessLogo ?? null}
             businessName={staff.businessName}
-            size="lg"
-            className="rounded-2xl shadow-[0_12px_32px_-18px_rgba(15,23,42,0.25)] ring-[6px] ring-background"
+            size="hero"
           />
         </div>
         <motion.div
@@ -180,30 +173,6 @@ export function StaffTipByPublicPathPage() {
           </div>
 
           {staff.bio ? <p className="mt-5 text-left text-sm leading-relaxed text-muted-foreground">{staff.bio}</p> : null}
-
-          {goal != null && goal > 0 ? (
-            <div className="mt-7 rounded-2xl border border-border/60 bg-muted/20 px-4 py-4 text-left">
-              <div className="mb-2 flex items-center gap-2">
-                <Sparkles className="size-4 shrink-0" style={{ color: BRAND_ORANGE }} aria-hidden />
-                <span className="text-sm font-semibold text-foreground">{t("tipFlow.staffLanding.monthlyGoalTitle")}</span>
-              </div>
-              <div className="mb-2 flex justify-between text-xs text-muted-foreground">
-                <span>
-                  {formatEur(staff.currentMonthTotal)} / {formatEur(goal)}
-                </span>
-                {progress != null ? <span className="tabular-nums">{Math.round(progress)}%</span> : null}
-              </div>
-              <div className="h-2 overflow-hidden rounded-full bg-muted">
-                <div
-                  className="h-full rounded-full transition-[width]"
-                  style={{
-                    width: `${progress ?? 0}%`,
-                    backgroundColor: BRAND_ORANGE,
-                  }}
-                />
-              </div>
-            </div>
-          ) : null}
 
           {showRepeatPrompt && repeatAmount ? (
             <div className="mt-7 space-y-3">

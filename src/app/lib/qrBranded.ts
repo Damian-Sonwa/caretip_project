@@ -16,7 +16,7 @@ import { publicEmployeeTipUrl, qrEmployeeLegacyUrl } from "./appPublicUrl";
 export const CARETIP_QR_BRAND_HEX = "#e9932f";
 
 const BRAND_TOP_TEXT = "CareTip";
-const BRAND_FOOTER_TEXT = "Powered by CareTip Limited";
+const BRAND_FOOTER_TEXT = "Powered by CareTip";
 const BRAND_ORANGE = CARETIP_QR_BRAND_HEX;
 const QR_MODULE_DARK = "#000000";
 

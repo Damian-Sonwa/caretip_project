@@ -1,8 +1,8 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { CreditCard, Smartphone, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { createTipCheckoutSession, getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from "../../lib/api";
@@ -16,6 +16,7 @@ import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { PaymentMethodsAvailable } from "../../components/payments/PaymentMethodsAvailable";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
@@ -41,7 +42,6 @@ export function PaymentPage() {
     setBusinessId,
     setEmployee,
   } = useTipFlow();
-  const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
   const [processing, setProcessing] = useState(false);
   const [guardReady, setGuardReady] = useState(false);
   const [contextHydrating, setContextHydrating] = useState(false);
@@ -207,33 +207,6 @@ export function PaymentPage() {
     };
   }, [resolvedEmployeeId, t]);
 
-  const paymentMethods = useMemo(
-    () => [
-      {
-        id: "apple-pay",
-        name: t("tipFlow.payment.methods.applePay"),
-        icon: "🍎",
-        description: t("tipFlow.payment.methods.applePayDesc"),
-        available: true,
-      },
-      {
-        id: "google-pay",
-        name: t("tipFlow.payment.methods.googlePay"),
-        icon: "🅖",
-        description: t("tipFlow.payment.methods.googlePayDesc"),
-        available: true,
-      },
-      {
-        id: "card",
-        name: t("tipFlow.payment.methods.card"),
-        icon: <CreditCard className="w-6 h-6 text-accent" />,
-        description: t("tipFlow.payment.methods.cardDesc"),
-        available: true,
-      },
-    ],
-    [t],
-  );
-
   if (!guardReady && !import.meta.env.DEV) {
     return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
   }
@@ -260,7 +233,7 @@ export function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!selectedMethod || !resolvedEmployeeId || !businessId) return;
+    if (!resolvedEmployeeId || !businessId) return;
 
     setProcessing(true);
     try {
@@ -298,7 +271,7 @@ export function PaymentPage() {
   }
 
   return (
-    <div className={selectedMethod && !missingContext ? cf.pageWithBottomCta : cf.page}>
+    <div className={!missingContext ? cf.pageWithBottomCta : cf.page}>
       <div className={cf.stickyHeader}>
         <div className={cf.headerInner}>
           <button
@@ -313,7 +286,7 @@ export function PaymentPage() {
             <BusinessLogoMark
               logoPathOrUrl={businessBrand.logo}
               businessName={businessBrand.name}
-              size="md"
+              size="customer"
               className="shrink-0"
             />
           ) : (
@@ -398,49 +371,16 @@ export function PaymentPage() {
                 <CardTitle className={cf.cardTitle}>{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
                 <CardDescription className={cf.cardDesc}>{t("tipFlow.payment.selectMethodDesc")}</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3 px-5 pb-5 sm:px-6">
-                {paymentMethods.map((method, index) => (
-                  <motion.button
-                    key={method.id}
-                    type="button"
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.05 }}
-                    onClick={() => setSelectedMethod(method.id)}
-                    disabled={!method.available || processing}
-                    className={`${cf.paymentMethodRow} ${selectedMethod === method.id ? cf.paymentMethodOn : cf.paymentMethodOff} ${!method.available ? "cursor-not-allowed opacity-45" : ""}`}
-                  >
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-muted/55 text-2xl">
-                      {typeof method.icon === "string" ? method.icon : method.icon}
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="font-semibold text-foreground">{method.name}</div>
-                      <div className="text-sm text-muted-foreground">{method.description}</div>
-                    </div>
-                    {selectedMethod === method.id && (
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm">
-                        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                        </svg>
-                      </div>
-                    )}
-                  </motion.button>
-                ))}
+              <CardContent className="px-5 pb-5 sm:px-6">
+                <PaymentMethodsAvailable />
               </CardContent>
             </Card>
 
-            {selectedMethod === "card" ? (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-              >
-                <Card className={`${cf.cardShadcn} border-primary/15`}>
-                  <CardContent className="px-5 py-4 text-sm leading-relaxed text-muted-foreground sm:px-6">
-                    {t("tipFlow.payment.stripeCardNote")}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ) : null}
+            <Card className={`${cf.cardShadcn} border-primary/15`}>
+              <CardContent className="px-5 py-4 text-sm leading-relaxed text-muted-foreground sm:px-6">
+                {t("tipFlow.payment.stripeCardNote")}
+              </CardContent>
+            </Card>
 
             <Card className={`${cf.cardMuted} border-border/55`}>
               <CardContent className="flex items-start gap-3 px-5 py-4 sm:px-6">
@@ -453,25 +393,20 @@ export function PaymentPage() {
             </Card>
           </div>
 
-          {selectedMethod ? (
-            <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
-              <div className={cf.fixedBottomInner}>
-                <button type="button" onClick={handlePayment} disabled={processing} className={cf.btnAccentLg}>
-                  {processing ? (
-                    <>
-                      <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                      {t("tipFlow.payment.redirectingCheckout")}
-                    </>
-                  ) : (
-                    <>
-                      <Smartphone className="size-5 shrink-0" />
-                      {t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })}
-                    </>
-                  )}
-                </button>
-              </div>
-            </motion.div>
-          ) : null}
+          <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
+            <div className={cf.fixedBottomInner}>
+              <button type="button" onClick={handlePayment} disabled={processing} className={cf.btnAccentLg}>
+                {processing ? (
+                  <>
+                    <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
+                    {t("tipFlow.payment.redirectingCheckout")}
+                  </>
+                ) : (
+                  t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })
+                )}
+              </button>
+            </div>
+          </motion.div>
         </>
       ) : null}
     </div>

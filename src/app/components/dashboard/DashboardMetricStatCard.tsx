@@ -24,13 +24,14 @@ export type DashboardMetricStatCardProps = {
   className?: string;
   loading?: boolean;
   showSpinner?: boolean;
+  loadingVariant?: "currency" | "count" | "pulse";
 };
 
 const CHANGE_PLACEHOLDER = "\u00a0";
 
 /**
- * Shared KPI card layout for business + employee dashboards.
- * Stable three-row structure: label → value → supporting text.
+ * Shared KPI card layout for business, employee, and platform dashboards.
+ * Three-row grid: label → value → supporting text — aligned across cards in a row.
  */
 export function DashboardMetricStatCard({
   tokens,
@@ -42,6 +43,7 @@ export function DashboardMetricStatCard({
   className,
   loading,
   showSpinner = false,
+  loadingVariant = "currency",
 }: DashboardMetricStatCardProps) {
   const changeVisible =
     !loading && change != null && change !== "" && change !== CHANGE_PLACEHOLDER;
@@ -51,7 +53,7 @@ export function DashboardMetricStatCard({
     <div
       className={cn(
         tokens.statCard,
-        "dashboard-metric-stat-card flex h-full flex-col",
+        "dashboard-metric-stat-card relative h-full overflow-hidden",
         featured && tokens.featuredClass,
         loading && "opacity-[0.72]",
         className,
@@ -61,12 +63,15 @@ export function DashboardMetricStatCard({
       <div
         className={cn(
           tokens.labelRowClass,
-          "flex shrink-0 items-start justify-between gap-2",
+          "dashboard-metric-stat-card__label-row flex items-start justify-between gap-2",
         )}
       >
         <p className={cn(tokens.statLabel, "min-w-0 flex-1")}>{label}</p>
         {icon ? (
-          <div className="shrink-0 text-primary/80" aria-hidden>
+          <div
+            className="dashboard-metric-stat-card__icon flex h-8 w-8 shrink-0 items-center justify-center text-primary/75 sm:h-9 sm:w-9"
+            aria-hidden
+          >
             {icon}
           </div>
         ) : null}
@@ -76,13 +81,13 @@ export function DashboardMetricStatCard({
         className={cn(
           tokens.statValue,
           tokens.valueClass,
-          "dashboard-metric-stat-card__value shrink-0",
+          "dashboard-metric-stat-card__value flex min-h-[2.25rem] items-end sm:min-h-[2.5rem]",
         )}
       >
         {loading ? (
-          <DashboardHeroMetricSkeleton variant="currency" showSpinner={showSpinner} />
+          <DashboardHeroMetricSkeleton variant={loadingVariant} showSpinner={showSpinner} />
         ) : (
-          <span className="dashboard-hero-metric-value--live block">{value}</span>
+          <span className="dashboard-hero-metric-value--live block w-full min-w-0">{value}</span>
         )}
       </div>
 
@@ -90,7 +95,7 @@ export function DashboardMetricStatCard({
         className={cn(
           tokens.statChange,
           tokens.changeClass,
-          "dashboard-metric-stat-card__change shrink-0",
+          "dashboard-metric-stat-card__change",
           loading && "text-muted-foreground/25",
           !changeVisible && !loading && "text-transparent select-none",
         )}

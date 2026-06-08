@@ -8,5 +8,6 @@ router.get("/", authMiddleware, notificationsController.listMine);
 router.get("/unread-count", authMiddleware, notificationsController.unreadCount);
 router.post("/read-all", authMiddleware, notificationsController.markAllRead);
 router.patch("/:id/read", authMiddleware, notificationsController.markRead);
+router.delete("/:id", authMiddleware, notificationsController.deleteOne);
 
 export default router;

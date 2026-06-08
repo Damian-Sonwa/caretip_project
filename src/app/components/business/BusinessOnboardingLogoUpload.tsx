@@ -98,9 +98,7 @@ export function BusinessOnboardingLogoUpload({ file, onFile }: BusinessOnboardin
 
         {previewUrl ? (
           <div className="flex w-full flex-col items-center gap-3">
-            <div className="relative h-20 w-20 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
-              <img src={previewUrl} alt="" className="h-full w-full object-cover" />
-            </div>
+            <img src={previewUrl} alt="" className="max-h-24 max-w-[14rem] object-contain object-center" />
             <p className="max-w-full truncate text-sm font-medium text-zinc-700 dark:text-zinc-200">
               {file?.name}
             </p>

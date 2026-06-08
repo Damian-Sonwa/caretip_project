@@ -782,7 +782,11 @@
       "close": "Schließen",
       "read": "Gelesen",
       "unreadSummary": "Sie haben {{count}} ungelesene Benachrichtigung",
-      "unreadSummary_plural": "Sie haben {{count}} ungelesene Benachrichtigungen"
+      "unreadSummary_plural": "Sie haben {{count}} ungelesene Benachrichtigungen",
+      "justNow": "Gerade eben",
+      "minutesAgo": "vor {{count}} Min.",
+      "hoursAgo": "vor {{count}} Std.",
+      "daysAgo": "vor {{count}} T."
     },
     "inbox": {
       "title": "Benachrichtigungen",
@@ -798,12 +802,123 @@
       "statusFilterAria": "Nach Ticket-Status filtern",
       "filter": {
         "all": "Alle",
+        "unread": "Ungelesen",
         "support": "Support",
         "other": "Sonstige"
       },
+      "dateGroup": {
+        "today": "Heute",
+        "yesterday": "Gestern",
+        "thisWeek": "Diese Woche",
+        "earlier": "Früher"
+      },
+      "statsLine": "{{unread}} ungelesen · {{shown}}{{more}} angezeigt",
       "selectPrompt": "Wählen Sie eine Benachrichtigung, um die vollständige Nachricht zu lesen.",
       "openAction": "Öffnen",
-      "unreadBadge": "Ungelesen"
+      "unreadBadge": "Ungelesen",
+      "detailTitle": "Benachrichtigungsdetails",
+      "emptyBodyPremium": "Sobald Trinkgelder eingehen, Teamänderungen passieren oder Hinweise gesendet werden, erscheinen sie hier im Live-Aktivitätsfeed.",
+      "emptyHint": "Echtzeit-Updates synchronisieren Web und Mobil",
+      "filterEmptyTitle": "Keine Benachrichtigungen für diesen Filter",
+      "filterEmptyBody": "Wählen Sie eine andere Kategorie oder setzen Sie die Filter zurück.",
+      "clearFilters": "Alle Benachrichtigungen anzeigen",
+      "delete": "Löschen",
+      "deleteAria": "Benachrichtigung löschen"
+    },
+    "categories": {
+      "tips": "Trinkgeld",
+      "payouts": "Auszahlungen",
+      "team": "Team",
+      "feedback": "Feedback",
+      "goals": "Ziele",
+      "billing": "Abrechnung",
+      "verification": "Verifizierung",
+      "security": "Sicherheit",
+      "support": "Support",
+      "announcement": "Ankündigung",
+      "system": "System",
+      "activity": "Aktivität"
+    },
+    "actions": {
+      "viewTip": "Trinkgeld ansehen",
+      "viewPayout": "Auszahlung ansehen",
+      "viewTeam": "Team ansehen",
+      "viewFeedback": "Feedback ansehen",
+      "viewBilling": "Abrechnung ansehen",
+      "reviewSecurity": "Sicherheit prüfen",
+      "viewTicket": "Ticket ansehen",
+      "viewDetails": "Details ansehen",
+      "viewQrCodes": "QR-Codes ansehen",
+      "viewDashboard": "Dashboard ansehen",
+      "reviewBusiness": "Betrieb prüfen"
+    },
+    "templates": {
+      "tip_received_employee": {
+        "title": "Neues Trinkgeld erhalten",
+        "body": "{{amount}} — {{name}}"
+      },
+      "tip_received_business": {
+        "title": "Neues Trinkgeld in Ihrem Betrieb",
+        "body": "{{amount}} für {{employeeName}}"
+      },
+      "payout_completed": {
+        "title": "Auszahlung abgeschlossen",
+        "body": "Eine Auszahlung über {{amount}} wurde verarbeitet."
+      },
+      "login_security": {
+        "title": "Neue Anmeldung",
+        "body": "Ihr CareTip-Konto wurde verwendet. Wenn Sie das nicht waren, ändern Sie Ihr Passwort."
+      },
+      "employee_invited_manager": {
+        "title": "Teameinladung gesendet",
+        "body": "{{employeeName}} wurde eingeladen, {{businessName}} beizutreten."
+      },
+      "employee_activated": {
+        "title": "Willkommen bei CareTip",
+        "body": "Ihr Konto für {{businessName}} ist bereit. Sie können sich anmelden und Trinkgelder erhalten."
+      },
+      "qr_scan": {
+        "title": "QR-Code gescannt",
+        "body": "Ein Gast hat die Trinkgeld-Seite für {{place}} geöffnet."
+      },
+      "qr_payment_success": {
+        "title": "QR-Zahlung erhalten",
+        "body": "{{amount}} per QR für {{employeeName}}."
+      },
+      "verification_document_uploaded": {
+        "title": "Verifizierungsdokument hochgeladen",
+        "body": "{{businessName}} hat Dokumente zur Prüfung eingereicht."
+      },
+      "support_created_admin": {
+        "title": "[TICKET] {{ticketNumber}}",
+        "body": "{{businessName}} · {{category}}. Ticket öffnen, um zu antworten."
+      },
+      "support_created_business": {
+        "title": "Support-Anfrage erhalten: {{ticketNumber}}",
+        "body": "Wir haben Ihre Nachricht zu „{{subject}}“ erhalten. Unser Team antwortet in Kürze."
+      },
+      "support_reply_admin": {
+        "title": "[TICKET] Neue Antwort: {{ticketNumber}}",
+        "body": "{{businessName}}: {{preview}}"
+      },
+      "support_reply_business": {
+        "title": "CareTip hat geantwortet: {{ticketNumber}}"
+      },
+      "support_status_resolved": {
+        "title": "Support-Anfrage erledigt",
+        "body": "Ihre Support-Anfrage wurde als erledigt markiert."
+      },
+      "support_status_closed": {
+        "title": "Support-Ticket geschlossen",
+        "body": "Dieses Support-Ticket ist jetzt geschlossen."
+      },
+      "support_status_updated": {
+        "title": "Ticket-Status aktualisiert",
+        "body": "Ticket-Status geändert auf {{status}}."
+      },
+      "support_inbox_title": {
+        "title": "[TICKET] [{{status}}] {{ticketNumber}}: {{subject}}"
+      }
     }
   },
   "support": {
@@ -876,7 +991,7 @@
       "goHomeLink": "Zur Startseite",
       "notFound": "Nicht gefunden",
       "careTipBrand": "CareTip",
-      "careTipLimited": "CareTip Limited",
+      "careTipLimited": "CareTip",
       "homeAria": "Startseite",
       "back": "Zurück"
     },
@@ -894,9 +1009,9 @@
       "chooseDifferentAmount": "Anderen Betrag wählen"
     },
     "docTitle": {
-      "tip": "Trinkgeld für {{name}} · CareTip Limited",
-      "business": "{{name}} · CareTip Limited",
-      "default": "CareTip Limited"
+      "tip": "Trinkgeld für {{name}} · CareTip",
+      "business": "{{name}} · CareTip",
+      "default": "CareTip"
     },
     "devBypass": {
       "title": "Entwickler-Umgehung",
@@ -985,15 +1100,16 @@
     "payment": {
       "preparingCheckout": "Checkout wird vorbereitet…",
       "canceledTitle": "Zahlung abgebrochen",
-      "canceledDesc": "Sie können eine Zahlungsart wählen und es erneut versuchen, wenn Sie möchten.",
+      "canceledDesc": "Sie können zurückkehren und es erneut versuchen, wenn Sie möchten.",
       "title": "Zahlung",
-      "subtitle": "Zahlungsart wählen",
+      "subtitle": "Sicherer Checkout über Stripe",
       "missingContext": "Trinkgeld-Kontext fehlt. Gehen Sie zurück und wählen Sie zuerst einen Betrag.",
       "payingTipTo": "Trinkgeld für",
       "tipFor": "Trinkgeld für {{name}}",
       "amountToPay": "Zu zahlender Betrag",
-      "selectMethodTitle": "Zahlungsart wählen",
-      "selectMethodDesc": "Wählen Sie, wie Sie zahlen möchten",
+      "selectMethodTitle": "Verfügbare Zahlungsarten",
+      "selectMethodDesc": "Weiter zum Stripe-Checkout. Wallets und Karten werden auf der nächsten Seite angeboten, sofern verfügbar.",
+      "methodsAria": "Verfügbare Zahlungsarten",
       "stripeCardNote": "Kartendaten geben Sie auf der sicheren Stripe-Checkout-Seite ein. Wir speichern Ihre Kartennummer nicht.",
       "secureTitle": "Sichere Zahlung",
       "secureBody": "Apple Pay, Google Pay und Karten werden über Stripe abgewickelt. Auf der nächsten Seite bestätigen Sie die Zahlung.",
@@ -1158,6 +1274,7 @@
       "locations": "Standorte",
       "tables": "Tische",
       "tipsActivity": "Trinkgelder & Aktivität",
+      "customerFeedback": "Gästefeedback",
       "notifications": "Benachrichtigungen",
       "support": "CareTip kontaktieren",
       "settings": "Einstellungen"
@@ -1200,7 +1317,10 @@
       "notificationsUnreadAria": "{{count}} ungelesene Benachrichtigungen",
       "menuButtonAria": "Menü öffnen",
       "adminFallback": "Admin",
-      "platformAdminEmail": "Plattformadministration"
+      "platformAdminEmail": "Plattformadministration",
+      "loadingAria": "Wird geladen",
+      "loadingChartAria": "Diagramm wird geladen",
+      "statusAria": "Status"
     },
     "nav": {
       "overview": "Überblick",
@@ -2193,6 +2313,9 @@
       "description": "Öffnen Sie die QR Verwaltung, um neue Links und druckbare Codes zu erzeugen.",
       "action": "QR Links beheben"
     },
+    "shell": {
+      "demoRibbon": "Demo-Tour: Beispielbetrieb, Team, Tische und Trinkgelder dienen nur Produkttouren und betreffen keine anderen Konten."
+    },
     "onboarding": {
       "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…",
@@ -2519,6 +2642,24 @@
       "next": "Weiter",
       "pageOf": "Seite {{page}} von {{pages}}"
     },
+    "customerFeedback": {
+      "recentTitle": "Aktuelles Gästefeedback",
+      "recentDesc": "Gästebewertungen und Kommentare erscheinen hier, sobald Feedback abgegeben wurde.",
+      "recentDescWithStats": "{{count}} Bewertungen · Ø {{average}}",
+      "pageTitle": "Gästefeedback",
+      "pageDesc": "Vollständige Gästebewertungen und Kommentare für Ihr Team.",
+      "pageSummary": "{{count}} Bewertungen gesamt · Ø {{average}} · {{ratings}} mit Sternen",
+      "filterEmployee": "Nach Teammitglied filtern",
+      "allEmployees": "Alle Teammitglieder",
+      "showingCount": "{{shown}} von {{total}} angezeigt",
+      "anonymousGuest": "Gast",
+      "readFullMessage": "Vollständige Nachricht lesen",
+      "showLess": "Weniger anzeigen",
+      "tagsAria": "Feedback-Tags",
+      "loadError": "Gästefeedback konnte nicht geladen werden. Bitte erneut versuchen.",
+      "loadErrorTitle": "Feedback nicht verfügbar",
+      "retry": "Erneut versuchen"
+    },
     "staffPage": {
       "rosterDeactivated": "Deaktiviert",
       "rosterAwaitingEmail": "E-Mail-Verifizierung ausstehend",
@@ -2609,7 +2750,17 @@
       "labelTipsMonth": "Trinkgelder (Monat)",
       "labelRating": "Bewertung",
       "qrButton": "QR",
-      "editButton": "Bearbeiten"
+      "editButton": "Bearbeiten",
+      "searchTitle": "Suche",
+      "thEmployee": "Mitarbeiter",
+      "thRole": "Rolle",
+      "thQrAssignment": "QR-Zuweisung",
+      "thContact": "Kontakt",
+      "thTipsMonth": "Trinkgelder (Monat)",
+      "thRating": "Bewertung",
+      "thActive": "Aktiv",
+      "thActions": "Aktionen",
+      "removeStaffButton": "Mitarbeiter entfernen"
     },
     "qrPage": {
       "toastBusinessRegenerated": "Unternehmens-QR neu erstellt.",
@@ -2640,6 +2791,7 @@
       "tabTables": "Tische",
       "tabLocations": "Standorte",
       "noEmployees": "Noch keine Mitarbeitenden.",
+      "addStaffInManagement": "Mitarbeitende in der Teamverwaltung hinzufügen",
       "noTables": "Keine Tische konfiguriert.",
       "noLocations": "Keine Standorte konfiguriert.",
       "pdfInstruction": "Scannen, um sofort zu tippen",

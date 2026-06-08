@@ -47,6 +47,7 @@ function BusinessDashboardMetricsGridInner({
       <BusinessStatCard
         featured
         loading={loading}
+        loadingVariant="currency"
         label={
           analyticsTimeframe === "week"
             ? t("business.dashboard.statsTotalTipsWeek")

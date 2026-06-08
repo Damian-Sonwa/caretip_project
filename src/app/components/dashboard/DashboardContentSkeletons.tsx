@@ -1,3 +1,4 @@
+import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
 import { cn } from "@/lib/utils";
 
 function ShimmerBar({ className }: { className?: string }) {
@@ -47,18 +48,25 @@ export function NotificationInboxListSkeleton({
   rows?: number;
   className?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
-    <ul className={cn("space-y-2", className)} role="status" aria-busy="true" aria-label="Loading">
+    <ul className={cn("space-y-2", className)} role="status" aria-busy="true" aria-label={aria.loading}>
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}
-          className="rounded-xl border border-border bg-card px-4 py-3 shadow-sm"
+          className="flex gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm sm:p-4"
         >
-          <div className="flex items-start justify-between gap-2">
-            <ShimmerBar className="h-4 w-[58%] max-w-[14rem]" />
-            <ShimmerBar className="h-3 w-10 shrink-0" />
+          <ShimmerBar className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11" />
+          <div className="min-w-0 flex-1 space-y-2">
+            <div className="flex items-start justify-between gap-2">
+              <ShimmerBar className="h-3 w-16 rounded-full" />
+              <ShimmerBar className="h-3 w-10 shrink-0" />
+            </div>
+            <ShimmerBar className="h-4 w-[72%] max-w-[14rem]" />
+            <ShimmerBar className="h-3 w-[90%] max-w-[18rem]" />
+            <ShimmerBar className="mt-1 h-8 w-24 rounded-md" />
           </div>
-          <ShimmerBar className="mt-2 h-3 w-[82%] max-w-[18rem]" />
         </li>
       ))}
     </ul>
@@ -93,12 +101,14 @@ export function LocationCardGridSkeleton({
   cards?: number;
   className?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
     <ul
       className={cn("grid gap-3 sm:grid-cols-2", className)}
       role="status"
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={aria.loading}
     >
       {Array.from({ length: cards }).map((_, i) => (
         <li key={i} className="flex gap-3 rounded-xl border border-border bg-card p-4">
@@ -155,8 +165,10 @@ export function TablesListSkeleton({
   rows?: number;
   className?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
-    <div className={cn("overflow-x-auto", className)} role="status" aria-busy="true" aria-label="Loading">
+    <div className={cn("overflow-x-auto", className)} role="status" aria-busy="true" aria-label={aria.loading}>
       <table className="w-full min-w-[520px] text-sm">
         <thead>
           <tr className="border-b border-border bg-muted/40 text-left">
@@ -198,8 +210,10 @@ export function StaffRosterTableSkeleton({
   rows?: number;
   className?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
-    <div className={className} role="status" aria-busy="true" aria-label="Loading">
+    <div className={className} role="status" aria-busy="true" aria-label={aria.loading}>
       <div className="hidden lg:block overflow-x-auto rounded-xl border border-border bg-card">
         <table className="w-full min-w-[72rem]">
           <thead className="bg-muted/50">

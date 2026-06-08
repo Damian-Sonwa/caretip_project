@@ -3,17 +3,15 @@ import { motion } from "motion/react";
 import { Building2, MapPin, QrCode, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CareTipLogo } from "../CareTipLogo";
+import { BusinessLogoMark } from "./BusinessLogoMark";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { customerFlowUi as cf } from "../../pages/customer/customerFlowUi";
-import { resolveMediaUrl } from "../../lib/mediaUrl";
 import { cn } from "@/lib/utils";
 import { buildPreviewStaffSlots } from "./businessOnboardingGuestPreview.utils";
 import type { GuestPreviewData } from "./BusinessOnboardingGuestPreview.types";
 import type { PreviewStaffSlot } from "./businessOnboardingGuestPreview.utils";
 
 export type { GuestPreviewData } from "./BusinessOnboardingGuestPreview.types";
-
-const BRAND_ORANGE = "#e9781c";
 
 type BusinessOnboardingGuestPreviewProps = GuestPreviewData & {
   variant?: "default" | "final";
@@ -104,7 +102,6 @@ export function BusinessOnboardingGuestPreview({
 }: BusinessOnboardingGuestPreviewProps) {
   const { t } = useTranslation();
   const [uploadLogoUrl, setUploadLogoUrl] = useState<string | null>(null);
-  const [heroLogoFailed, setHeroLogoFailed] = useState(false);
   const isFinal = variant === "final";
 
   useEffect(() => {
@@ -114,13 +111,8 @@ export function BusinessOnboardingGuestPreview({
     }
     const url = URL.createObjectURL(logoFile);
     setUploadLogoUrl(url);
-    setHeroLogoFailed(false);
     return () => URL.revokeObjectURL(url);
   }, [logoFile]);
-
-  useEffect(() => {
-    setHeroLogoFailed(false);
-  }, [savedLogoPath, logoFile]);
 
   const venueNameLine = useMemo(
     () => previewLine(legalBusinessName, "business.onboarding.preview.placeholderVenueName", t),
@@ -149,8 +141,7 @@ export function BusinessOnboardingGuestPreview({
   const hasBusinessName = legalBusinessName.trim().length > 0;
   const displayName = venueNameLine.text;
 
-  const heroLogoSrc = uploadLogoUrl ?? resolveMediaUrl(savedLogoPath ?? undefined) ?? null;
-  const showHeroImage = Boolean(heroLogoSrc) && !heroLogoFailed;
+  const heroLogoSrc = uploadLogoUrl ?? savedLogoPath ?? null;
 
   const previewStaff = useMemo(
     () => buildPreviewStaffSlots(legalBusinessName, businessType),
@@ -224,22 +215,11 @@ export function BusinessOnboardingGuestPreview({
               >
                 <div className={cf.card}>
                   <div className="business-onboarding-guest-preview__hero">
-                    {showHeroImage ? (
-                      <img
-                        src={heroLogoSrc!}
-                        alt=""
-                        className="h-full w-full object-cover"
-                        onError={() => setHeroLogoFailed(true)}
-                      />
-                    ) : (
-                      <div
-                        className="flex h-full w-full items-center justify-center"
-                        style={{ backgroundColor: BRAND_ORANGE }}
-                      >
-                        <Building2 className="h-14 w-14 text-white/85" aria-hidden />
-                      </div>
-                    )}
-                    <div className="business-onboarding-guest-preview__hero-gradient" />
+                    <BusinessLogoMark
+                      logoPathOrUrl={heroLogoSrc}
+                      businessName={displayName}
+                      size="hero"
+                    />
                   </div>
                   <CardContent className="space-y-4 p-5">
                     <div>

@@ -71,8 +71,7 @@ export function EmployeeMobileSidebar({
                 <BusinessLogoMark
                   logoPathOrUrl={businessBranding?.businessLogo ?? null}
                   businessName={venueName}
-                  size="sm"
-                  rounded="rounded-lg"
+                  size="dashboard"
                   className="shrink-0"
                 />
                 <span className="min-w-0 truncate text-xs font-semibold text-sidebar-foreground">{venueName}</span>

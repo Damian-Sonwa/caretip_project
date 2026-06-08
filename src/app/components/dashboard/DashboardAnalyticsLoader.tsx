@@ -1,3 +1,4 @@
+import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
 import { cn } from "@/lib/utils";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 
@@ -76,6 +77,8 @@ export function DashboardHeroMetricSkeleton({
   /** Subtle inline spinner (admin/employee dashboards); default off for unchanged consumers. */
   showSpinner?: boolean;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
     <span
       className={cn(
@@ -88,7 +91,7 @@ export function DashboardHeroMetricSkeleton({
       )}
       role="status"
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={aria.loading}
     >
       {showSpinner ? (
         <LoadingSpinner size="sm" className="dashboard-hero-metric-skeleton__spinner shrink-0" />
@@ -190,6 +193,8 @@ export function DashboardChartSkeleton({
   barHeights?: number[];
   variant?: "bars" | "trend";
 }) {
+  const aria = useDashboardShellAria();
+
   return (
     <div
       className={cn(
@@ -199,7 +204,7 @@ export function DashboardChartSkeleton({
       )}
       role="status"
       aria-busy="true"
-      aria-label="Loading chart"
+      aria-label={aria.loadingChart}
     >
       {variant === "trend" ? (
         <div className="relative h-full min-h-[120px] w-full flex-1">

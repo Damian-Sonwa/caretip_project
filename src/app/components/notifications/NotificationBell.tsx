@@ -12,17 +12,17 @@ import { useAuth } from "@/app/hooks/useAuth";
 import { resolveInboxNotificationDestination } from "@/app/lib/notificationNavigation";
 import { cn } from "@/lib/utils";
 
-function formatGroupTime(iso: string, locale: string): string {
+function formatGroupTime(iso: string, locale: string, t: TFunction): string {
   const d = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMins = Math.floor(diffMs / 60_000);
-  if (diffMins < 1) return "Just now";
-  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffMins < 1) return t("notifications.bell.justNow");
+  if (diffMins < 60) return t("notifications.bell.minutesAgo", { count: diffMins });
   const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffHours < 24) return t("notifications.bell.hoursAgo", { count: diffHours });
   const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 7) return t("notifications.bell.daysAgo", { count: diffDays });
   return d.toLocaleDateString(locale, { month: "short", day: "numeric" });
 }
 
@@ -35,10 +35,7 @@ function inboxPathForRole(role: string | undefined): string {
 
 function unreadSummaryText(count: number, t: TFunction): string {
   if (count === 0) return t("notifications.bell.empty");
-  return t("notifications.bell.unreadSummary", {
-    count,
-    defaultValue: `You have ${count} unread notifications`,
-  });
+  return t("notifications.bell.unreadSummary", { count });
 }
 
 type NotificationBellProps = {
@@ -74,10 +71,10 @@ export function NotificationBell({ className }: NotificationBellProps) {
       id: n.id,
       title: n.title,
       message: n.message,
-      time: formatGroupTime(n.createdAt, i18n.language),
+      time: formatGroupTime(n.createdAt, i18n.language, t),
       read: n.read,
     }));
-  }, [list, i18n.language]);
+  }, [list, i18n.language, t]);
 
   const alertLabels = useMemo(
     () => ({

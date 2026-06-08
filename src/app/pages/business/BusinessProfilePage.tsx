@@ -264,7 +264,7 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
                   key={pendingLogo ? "logo-preview" : `logo-saved-${profile?.logo ?? "none"}`}
                   src={headerImageSrc}
                   alt=""
-                  className="h-28 w-28 rounded-xl border border-border bg-white object-contain p-1 shadow-sm"
+                  className="max-h-32 max-w-[18rem] object-contain"
                   decoding="async"
                   referrerPolicy="no-referrer"
                   onError={() => {
@@ -276,7 +276,6 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
                   logoPathOrUrl={null}
                   businessName={name.trim() || profile?.name || t("business.profilePage.venueFallback")}
                   size="xl"
-                  className="h-28 w-28"
                 />
               )}
             </div>

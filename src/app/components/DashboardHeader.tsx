@@ -9,6 +9,7 @@ import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { ProfileAvatar } from "./ui/profile-avatar";
 import { useBusinessVenueBrand } from "../hooks/useBusinessVenueBrand";
 import { NotificationBell } from "@/app/components/notifications/NotificationBell";
+import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
@@ -101,6 +102,10 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
             <NotificationBell />
           ) : null}
 
+          {user?.role === "employee" || user?.role === "business" || user?.role === "platform_admin" ? (
+            <LanguageSwitcher />
+          ) : null}
+
           {isBusinessManager ? (
             <Link
               to="/dashboard/settings?section=business"
@@ -111,10 +116,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 key={`${businessLogo ?? "no-logo"}-${venueName}`}
                 logoPathOrUrl={businessLogo}
                 businessName={venueName}
-                size="header"
-                rounded="rounded-full"
+                size="dashboard"
                 fallbackTone="muted"
-                className="ring-1 ring-border/60"
               />
             </Link>
           ) : (

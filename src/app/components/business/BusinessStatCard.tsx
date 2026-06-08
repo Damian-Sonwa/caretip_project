@@ -1,20 +1,6 @@
 import type { ReactNode } from "react";
-import {
-  DashboardMetricStatCard,
-  type DashboardMetricStatCardTokens,
-} from "../dashboard/DashboardMetricStatCard";
-import { businessUi } from "./businessDashboardUi";
-
-const businessMetricTokens: DashboardMetricStatCardTokens = {
-  statCard: businessUi.statCard,
-  statLabel: businessUi.statLabel,
-  statValue: businessUi.statValue,
-  statChange: businessUi.statChange,
-  featuredClass: "business-stat-card--featured",
-  labelRowClass: "business-stat-card__label-row",
-  valueClass: "business-stat-card__value",
-  changeClass: "business-stat-card__change",
-};
+import { DashboardMetricStatCard } from "../dashboard/DashboardMetricStatCard";
+import { businessMetricTokens } from "../dashboard/dashboardMetricTokens";
 
 type BusinessStatCardProps = {
   label: string;
@@ -24,6 +10,7 @@ type BusinessStatCardProps = {
   featured?: boolean;
   className?: string;
   loading?: boolean;
+  loadingVariant?: "currency" | "count" | "pulse";
 };
 
 export function BusinessStatCard(props: BusinessStatCardProps) {

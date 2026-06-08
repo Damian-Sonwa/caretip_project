@@ -134,7 +134,7 @@ export function LocationQrLandingPage() {
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
-          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="md" />
+          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="customer" />
           <div className="min-w-0 flex-1">
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3.5 w-3.5 shrink-0" />

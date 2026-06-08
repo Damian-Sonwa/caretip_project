@@ -29,6 +29,10 @@ export const QRCodeManagementPage = lazyNamed(
 );
 export const LocationsPage = lazyNamed(() => import("../pages/business/LocationsPage"), "LocationsPage");
 export const TablesPage = lazyNamed(() => import("../pages/business/TablesPage"), "TablesPage");
+export const CustomerFeedbackPage = lazyNamed(
+  () => import("../pages/business/CustomerFeedbackPage"),
+  "CustomerFeedbackPage",
+);
 export const BusinessSettingsPage = lazyNamed(
   () => import("../pages/business/BusinessSettingsPage"),
   "BusinessSettingsPage",

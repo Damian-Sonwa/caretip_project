@@ -55,6 +55,8 @@ export function onTipReceived(payload: NewTipPayload): void {
           tipId: payload.tip.id,
           employeeId: payload.employeeId,
           businessId: payload.businessId,
+          amount: String(amount),
+          employeeName: employee.name,
         },
       },
       dedupeKey: `tip:${payload.tip.id}:employee:${employee.userId}`,
@@ -78,13 +80,15 @@ export function onTipReceived(payload: NewTipPayload): void {
               employeeName: employee.name,
             },
           },
-          url: "/dashboard",
+          url: "/dashboard/transactions",
           timestamp: ts,
           metadata: {
             entityId: payload.tip.id,
             tipId: payload.tip.id,
             employeeId: payload.employeeId,
             businessId: payload.businessId,
+            amount: String(amount),
+            employeeName: employee.name,
           },
         },
         dedupeKey: `tip:${payload.tip.id}:business:${business.userId}`,
@@ -100,6 +104,13 @@ export function onPayoutCompleted(
   transactionId: string,
 ): void {
   safeTrigger("onPayoutCompleted", async () => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { role: true },
+    });
+    const payoutUrl =
+      user?.role === "MANAGER" ? "/dashboard/transactions" : "/employee/transactions";
+
     await deliverUserNotification({
       userId,
       payload: {
@@ -110,6 +121,7 @@ export function onPayoutCompleted(
           id: "payout_completed",
           params: { amount },
         },
+        url: payoutUrl,
         timestamp: new Date().toISOString(),
         metadata: { entityId: transactionId, transactionId, payoutStatus: "paid" },
       },
@@ -141,7 +153,9 @@ export function onLoginSecurityAlert(userId: string): void {
       select: { role: true },
     });
     const url =
-      user?.role === "MANAGER" ? "/dashboard/settings" : "/employee/settings";
+      user?.role === "MANAGER"
+        ? "/dashboard/settings?section=security"
+        : "/employee/settings";
 
     await deliverUserNotification({
       userId,
@@ -247,7 +261,7 @@ export function onQrScanActivity(params: {
         title: "QR code scanned",
         body: "",
         localeTemplate: { id: "qr_scan", params: { place } },
-        url: "/dashboard",
+        url: "/dashboard/qr-code-management",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: dedupeSlug,
@@ -286,7 +300,7 @@ export function onQrPaymentSuccessful(params: {
             employeeName: params.employeeName,
           },
         },
-        url: "/dashboard",
+        url: "/dashboard/transactions",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: params.transactionId,
@@ -306,6 +320,7 @@ export function onPlatformOperationalAlert(params: {
   url?: string;
   entityId?: string;
   localeTemplate?: import("../../notifications/notificationI18n.js").NotificationTemplate;
+  metadata?: Record<string, string>;
 }): void {
   safeTrigger("onPlatformOperationalAlert", async () => {
     const adminIds = await listPlatformAdminUserIds();
@@ -320,7 +335,7 @@ export function onPlatformOperationalAlert(params: {
         localeTemplate: params.localeTemplate,
         url: params.url ?? "/platform-admin/businesses",
         timestamp: new Date().toISOString(),
-        metadata: { entityId },
+        metadata: { entityId, ...params.metadata },
       },
       { dedupeKeyPrefix: `platform_op:${entityId}` },
     );
@@ -340,7 +355,8 @@ export function onBusinessVerificationDocumentUploaded(
       params: { businessName },
     },
     url: `/platform-admin/businesses/${businessId}`,
-    entityId: `verification_doc:${businessId}`,
+    entityId: businessId,
+    metadata: { businessId },
   });
 }
 

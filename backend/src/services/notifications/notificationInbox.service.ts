@@ -1,4 +1,11 @@
 import type { NotificationPriority, Prisma } from "@prisma/client";
+import type { EmailLocale } from "../../emails/i18nEmail.js";
+import { resolveUserPreferredLocale } from "../../emails/i18nEmail.js";
+import {
+  localizeNotificationPayload,
+  type NotificationTemplate,
+} from "../../notifications/notificationI18n.js";
+import { inferNotificationTemplate } from "../../notifications/notificationTemplateInfer.js";
 import { prisma } from "../../prisma.js";
 
 const DEDUPE_WINDOW_MS = 60_000;
@@ -23,26 +30,88 @@ function metadataUrl(metadata: unknown): string | null {
   return typeof url === "string" && url.trim() ? url.trim() : null;
 }
 
-export function toInboxDto(row: {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  metadata: unknown;
-  priority: NotificationPriority;
-  channels: string[];
-  readAt: Date | null;
-  createdAt: Date;
-}): InboxNotificationDto {
+function parseLocaleTemplate(metadata: unknown): NotificationTemplate | undefined {
+  if (!metadata || typeof metadata !== "object" || Array.isArray(metadata)) return undefined;
+  const raw = (metadata as Record<string, unknown>).localeTemplate;
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const obj = raw as Record<string, unknown>;
+  if (typeof obj.id !== "string" || !obj.id.trim()) return undefined;
+  return raw as NotificationTemplate;
+}
+
+function resolveTemplate(
+  row: { type: string; title: string; message: string; metadata: unknown },
+): NotificationTemplate | undefined {
   const meta =
     row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
       ? (row.metadata as Record<string, unknown>)
       : {};
+  return (
+    parseLocaleTemplate(row.metadata) ??
+    inferNotificationTemplate({
+      type: row.type,
+      title: row.title,
+      message: row.message,
+      metadata: meta,
+      url: metadataUrl(meta),
+    })
+  );
+}
+
+function localizedCopy(
+  row: { type: string; title: string; message: string; metadata: unknown },
+  locale: EmailLocale,
+): { title: string; message: string } {
+  const template = resolveTemplate(row);
+  if (!template) return { title: row.title, message: row.message };
+  const copy = localizeNotificationPayload(locale, {
+    title: row.title,
+    body: row.message,
+    localeTemplate: template,
+  });
+  return {
+    title: copy.title || row.title,
+    message: copy.body || row.message,
+  };
+}
+
+export function resolveNotificationLocale(
+  localeParam: string | undefined,
+  preferredLocale: string | null | undefined,
+): EmailLocale {
+  if (localeParam === "en" || localeParam === "de") return localeParam;
+  return resolveUserPreferredLocale(preferredLocale);
+}
+
+export function toInboxDto(
+  row: {
+    id: string;
+    type: string;
+    title: string;
+    message: string;
+    metadata: unknown;
+    priority: NotificationPriority;
+    channels: string[];
+    readAt: Date | null;
+    createdAt: Date;
+  },
+  locale?: EmailLocale,
+): InboxNotificationDto {
+  const meta =
+    row.metadata && typeof row.metadata === "object" && !Array.isArray(row.metadata)
+      ? (row.metadata as Record<string, unknown>)
+      : {};
+  const localized = locale
+    ? localizedCopy(
+        { type: row.type, title: row.title, message: row.message, metadata: row.metadata },
+        locale,
+      )
+    : { title: row.title, message: row.message };
   return {
     id: row.id,
     type: row.type,
-    title: row.title,
-    message: row.message,
+    title: localized.title,
+    message: localized.message,
     metadata: meta,
     priority: row.priority,
     channels: row.channels,
@@ -125,6 +194,7 @@ export async function listUserNotifications(
     kind?: "support" | "other";
     search?: string;
     supportStatus?: string;
+    locale?: EmailLocale;
   },
 ): Promise<{ items: InboxNotificationDto[]; nextCursor: string | null }> {
   const limit = Math.min(Math.max(options?.limit ?? 30, 1), 100);
@@ -163,7 +233,9 @@ export async function listUserNotifications(
   });
 
   const hasMore = rows.length > limit;
-  const items = (hasMore ? rows.slice(0, limit) : rows).map(toInboxDto);
+  const items = (hasMore ? rows.slice(0, limit) : rows).map((row) =>
+    toInboxDto(row, options?.locale),
+  );
   const nextCursor = hasMore ? items[items.length - 1]?.id ?? null : null;
   return { items, nextCursor };
 }
@@ -175,6 +247,7 @@ export async function getUnreadNotificationCount(userId: string): Promise<number
 export async function markNotificationRead(
   userId: string,
   notificationId: string,
+  locale?: EmailLocale,
 ): Promise<InboxNotificationDto | null> {
   const row = await prisma.notification.updateMany({
     where: { id: notificationId, userId, readAt: null },
@@ -184,10 +257,10 @@ export async function markNotificationRead(
     const existing = await prisma.notification.findFirst({
       where: { id: notificationId, userId },
     });
-    return existing ? toInboxDto(existing) : null;
+    return existing ? toInboxDto(existing, locale) : null;
   }
   const updated = await prisma.notification.findUnique({ where: { id: notificationId } });
-  return updated ? toInboxDto(updated) : null;
+  return updated ? toInboxDto(updated, locale) : null;
 }
 
 export async function markAllNotificationsRead(userId: string): Promise<number> {
@@ -196,4 +269,19 @@ export async function markAllNotificationsRead(userId: string): Promise<number> 
     data: { readAt: new Date() },
   });
   return result.count;
+}
+
+export async function deleteUserNotification(
+  userId: string,
+  notificationId: string,
+): Promise<{ deleted: boolean; unreadCount: number }> {
+  const existing = await prisma.notification.findFirst({
+    where: { id: notificationId, userId },
+    select: { id: true },
+  });
+  if (!existing) {
+    return { deleted: false, unreadCount: await getUnreadNotificationCount(userId) };
+  }
+  await prisma.notification.delete({ where: { id: notificationId } });
+  return { deleted: true, unreadCount: await getUnreadNotificationCount(userId) };
 }

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { CheckCircle, Search, TrendingUp, XCircle } from "lucide-react";
+import { CheckCircle, Search, XCircle } from "lucide-react";
 import { CareIcon, createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
@@ -33,12 +33,11 @@ import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platform/platformDashboardUi";
 import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
-import { CountUpMetric } from "./dashboard/CountUpMetric";
 import {
   DashboardChartSkeleton,
-  DashboardHeroMetricSkeleton,
   DashboardRefreshIndicator,
 } from "./dashboard/DashboardAnalyticsLoader";
+import { PlatformStatCard } from "./platform/PlatformStatCard";
 import {
   DashboardStableChartSlot,
 } from "./dashboard/DashboardSectionLoading";
@@ -79,23 +78,21 @@ import {
   YAxis,
 } from "recharts";
 
-interface StatCardProps {
+interface AdminStatCardProps {
   title: string;
   value: string;
-  /** When set, animates from prior value instead of swapping the static `value` string. */
   numericValue?: number;
   countUpKind?: "eur" | "eur-whole" | "integer" | "decimal" | "percent";
   change?: string;
   icon: React.ElementType;
   delay: number;
-  trend?: "up" | "down";
   beam?: boolean;
   wideOnTablet?: boolean;
   loading?: boolean;
   loadingVariant?: "currency" | "count" | "pulse";
 }
 
-function StatCard({
+function AdminStatCard({
   title,
   value,
   numericValue,
@@ -103,12 +100,11 @@ function StatCard({
   change,
   icon: Icon,
   delay,
-  trend,
   beam,
   wideOnTablet,
   loading,
   loadingVariant = "count",
-}: StatCardProps) {
+}: AdminStatCardProps) {
   const reduceMotion = useReducedMotion();
   return (
     <motion.div
@@ -122,51 +118,26 @@ function StatCard({
         wideOnTablet && "sm:col-span-2 lg:col-span-2 min-[1536px]:col-span-1",
       )}
     >
-      <Card
-        className={cn(platformUi.statCard, loading && "platform-admin-stat-card--loading")}
-        aria-busy={loading || undefined}
-      >
+      <div className="relative h-full overflow-hidden rounded-2xl">
         {beam && !reduceMotion && !loading ? (
           <BorderBeam size={220} duration={20} colorFrom="#e9932f" colorTo="#000000" />
         ) : null}
-        <CardHeader className={platformUi.statCardHeader}>
-          <div className="flex items-start justify-between gap-3">
-            <div className="shrink-0 rounded-lg border border-border bg-muted p-2">
-              <Icon className="h-5 w-5 text-foreground" />
-            </div>
-            {trend && (
-              <div
-                className={`flex shrink-0 items-center gap-1 text-sm ${
-                  trend === "up" ? "text-primary" : "text-red-600"
-                }`}
-              >
-                <TrendingUp className={`h-4 w-4 ${trend === "down" ? "rotate-180" : ""}`} />
-              </div>
-            )}
-          </div>
-          <CardDescription className={platformUi.statCardLabel}>{title}</CardDescription>
-          <CardTitle className={platformUi.statCardValue} title={loading ? undefined : value}>
-            {loading ? (
-              <DashboardHeroMetricSkeleton variant={loadingVariant} />
-            ) : numericValue != null && Number.isFinite(numericValue) ? (
-              <CountUpMetric value={numericValue} kind={countUpKind} className="block" />
-            ) : (
-              value
-            )}
-          </CardTitle>
-          {loading || change ? (
-            <p
-              className={cn(
-                platformUi.statCardChange,
-                loading && "invisible select-none text-muted-foreground/25",
-              )}
-              aria-hidden={loading || undefined}
-            >
-              {loading ? "\u00a0" : change}
-            </p>
-          ) : null}
-        </CardHeader>
-      </Card>
+        <PlatformStatCard
+          label={title}
+          value={value}
+          numericValue={numericValue}
+          countUpKind={countUpKind}
+          change={change}
+          icon={<Icon className="h-5 w-5" aria-hidden />}
+          featured={beam}
+          loading={loading}
+          loadingVariant={loadingVariant}
+          className={cn(
+            "h-full transition-shadow hover:shadow-md",
+            loading && "platform-admin-stat-card--loading",
+          )}
+        />
+      </div>
     </motion.div>
   );
 }
@@ -846,7 +817,7 @@ export function AdminDashboard() {
             )}
             aria-busy={showStatLoading || undefined}
           >
-          <StatCard
+          <AdminStatCard
             title={t("admin.statTips")}
             value={stats ? formatEur(stats.totalVolumeEur) : t("format.notAvailable")}
             numericValue={stats?.totalVolumeEur}
@@ -870,7 +841,7 @@ export function AdminDashboard() {
             beam
             wideOnTablet
           />
-          <StatCard
+          <AdminStatCard
             title={t("admin.statVenues")}
             value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
             numericValue={stats?.businessesCount}
@@ -879,7 +850,7 @@ export function AdminDashboard() {
             icon={createCareStatIcon("hospitalityVenue")}
             delay={0.15}
           />
-          <StatCard
+          <AdminStatCard
             title={t("admin.statLocations")}
             value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
             numericValue={stats?.locationsCount}
@@ -888,7 +859,7 @@ export function AdminDashboard() {
             icon={createCareStatIcon("locations")}
             delay={0.18}
           />
-          <StatCard
+          <AdminStatCard
             title={t("admin.statStaff")}
             value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
             numericValue={stats?.employeesCount}
@@ -897,7 +868,7 @@ export function AdminDashboard() {
             icon={createCareStatIcon("team")}
             delay={0.2}
           />
-          <StatCard
+          <AdminStatCard
             title={t("admin.statActiveUsers")}
             value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
             numericValue={stats?.activeUsersCount}

@@ -4,6 +4,7 @@
  */
 
 import { dashboardSharedUi } from "../dashboard/dashboardSharedUi";
+import { DASHBOARD_METRIC_STAT_CARD_SHELL } from "../dashboard/dashboardMetricTokens";
 import { employeeUi } from "../employee/employeeDashboardUi";
 import { caretipType } from "@/lib/typography/caretipType";
 
@@ -29,8 +30,7 @@ export const businessUi = {
   card: "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] transition-shadow hover:shadow-[0_14px_40px_-16px_rgba(15,23,42,0.14)]",
   cardStatic:
     "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
-  statCard:
-    "business-stat-card flex min-h-[7.25rem] flex-col rounded-2xl border border-neutral-200/80 bg-white p-3.5 text-left shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] sm:min-h-[8.5rem] sm:p-5",
+  statCard: `business-stat-card ${DASHBOARD_METRIC_STAT_CARD_SHELL}`,
   periodToggle:
     "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-neutral-200/80 bg-white p-1 shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)] sm:w-fit",
 

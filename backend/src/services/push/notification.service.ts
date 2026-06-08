@@ -16,15 +16,18 @@ const recentSendKeys = new Map<string, number>();
 function defaultUrlForType(type: NotificationType, role: string | null): string {
   switch (type) {
     case "tip_received":
-    case "payout_paid":
     case "qr_payment_success":
-      return role === "MANAGER" ? "/dashboard" : "/employee/dashboard";
+      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/notifications";
+    case "payout_paid":
+      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/transactions";
     case "new_login":
-      return role === "MANAGER" ? "/dashboard/settings" : "/employee/settings";
+      return role === "MANAGER"
+        ? "/dashboard/settings?section=security"
+        : "/employee/settings";
     case "employee_invited":
       return role === "MANAGER" ? "/dashboard/staff-management" : "/employee/dashboard";
     case "qr_scan":
-      return "/dashboard";
+      return "/dashboard/qr-code-management";
     case "admin_announcement":
     case "system_alert":
     case "support_ticket_created":

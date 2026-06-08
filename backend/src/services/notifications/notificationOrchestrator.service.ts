@@ -69,6 +69,15 @@ export async function deliverUserNotification(
   const metadata: Record<string, unknown> = {
     ...(deliveryPayload.metadata ?? {}),
     ...(deliveryPayload.url ? { url: deliveryPayload.url } : {}),
+    ...(input.payload.localeTemplate
+      ? {
+          localeTemplate: input.payload.localeTemplate,
+          templateId: input.payload.localeTemplate.id,
+          ...("params" in input.payload.localeTemplate && input.payload.localeTemplate.params
+            ? { templateParams: input.payload.localeTemplate.params }
+            : {}),
+        }
+      : {}),
   };
 
   let notification: InboxNotificationDto | null = null;

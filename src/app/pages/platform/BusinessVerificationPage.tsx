@@ -400,7 +400,7 @@ export function BusinessVerificationPage() {
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-muted-foreground">Contact email</span>
+                <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelContactEmail")}</span>
                 <input
                   type="email"
                   className="mt-1 w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
@@ -417,7 +417,7 @@ export function BusinessVerificationPage() {
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-muted-foreground">Registered address</span>
+                <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelRegisteredAddress")}</span>
                 <textarea
                   className="mt-1 min-h-[80px] w-full rounded-lg border border-input bg-background px-3 py-2 text-sm"
                   value={form.registeredAddress}
@@ -440,7 +440,7 @@ export function BusinessVerificationPage() {
                 />
               </label>
               <label className="block text-sm">
-                <span className="text-muted-foreground">Verification document (PDF or image)</span>
+                <span className="text-muted-foreground">{t("admin.businessVerificationPage.labelVerificationDoc")}</span>
                 <input
                   type="file"
                   accept="image/*,.pdf,.doc,.docx,application/pdf"

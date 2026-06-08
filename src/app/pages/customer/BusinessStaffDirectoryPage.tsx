@@ -151,7 +151,7 @@ export function BusinessStaffDirectoryPage() {
           >
             <Home className="h-5 w-5 text-foreground" />
           </button>
-          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="md" />
+          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="customer" />
           <div className="min-w-0 flex-1">
             <h1 className={cf.headline}>{data.business.name}</h1>
             {(data.business.type || data.business.location) ? (

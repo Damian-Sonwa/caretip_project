@@ -147,8 +147,6 @@ export interface EmployeeDetail {
   name: string;
   role: string;
   avatar: string | null;
-  monthlyGoal: number | null;
-  currentMonthTotal: number;
   businessId: string;
   /** Public `Business.slug` for canonical `/{businessSlug}/{employeeSlug}` links. */
   businessSlug: string | null;
@@ -169,7 +167,6 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       jobTitle: true,
       avatar: true,
       slug: true,
-      monthlyGoal: true,
       isActive: true,
       activationStatus: true,
       businessId: true,
@@ -206,24 +203,11 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
   if (emp.business.verificationStatus !== "verified") {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
-  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  const monthEnd = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1);
-  const monthAgg = await prisma.transaction.aggregate({
-    where: {
-      employeeId: emp.id,
-      status: "success",
-      createdAt: { gte: monthStart, lt: monthEnd },
-    },
-    _sum: { amount: true },
-  });
-  const currentMonthTotal = Number(monthAgg._sum.amount ?? 0);
   return {
     id: emp.id,
     name: emp.name,
     role: emp.jobTitle,
     avatar: absolutizePublicMediaPath(emp.avatar),
-    monthlyGoal: emp.monthlyGoal != null ? Number(emp.monthlyGoal) : null,
-    currentMonthTotal,
     businessId: emp.businessId,
     businessSlug: emp.business.slug ?? null,
     businessLogo: absolutizePublicMediaPath(emp.business.logoPath ?? null),

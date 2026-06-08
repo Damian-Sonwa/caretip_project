@@ -238,21 +238,10 @@
 }
 
 .business-onboarding-guest-preview__hero {
-  position: relative;
-  height: 9.5rem;
-  overflow: hidden;
-  background: #f4f4f5;
-}
-
-.dark .business-onboarding-guest-preview__hero {
-  background: #27272a;
-}
-
-.business-onboarding-guest-preview__hero-gradient {
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.42), transparent 55%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1rem 0.5rem;
 }
 
 .business-onboarding-guest-preview__text--placeholder {

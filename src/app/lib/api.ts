@@ -1355,8 +1355,6 @@ export interface EmployeeDetail {
   name: string;
   role: string;
   avatar: string | null;
-  monthlyGoal: number | null;
-  currentMonthTotal: number;
   businessId: string;
   businessSlug: string | null;
   /** API path or URL for venue logo on customer flows. */
@@ -1378,8 +1376,6 @@ export interface StaffBySlugResponse {
   avatar: string | null;
   jobTitle: string;
   bio: string | null;
-  monthlyGoal: number | null;
-  currentMonthTotal: number;
   businessId: string;
   businessName: string;
   businessSlug: string;
@@ -2071,6 +2067,8 @@ export async function fetchMyNotifications(params?: {
   kind?: "support" | "other";
   q?: string;
   supportStatus?: string;
+  /** UI locale for server-side template rendering (`en` | `de`). */
+  locale?: "en" | "de";
 }): Promise<NotificationsListResponse> {
   const q = new URLSearchParams();
   if (params?.limit) q.set("limit", String(params.limit));
@@ -2079,6 +2077,7 @@ export async function fetchMyNotifications(params?: {
   if (params?.kind) q.set("kind", params.kind);
   if (params?.q?.trim()) q.set("q", params.q.trim());
   if (params?.supportStatus?.trim()) q.set("supportStatus", params.supportStatus.trim());
+  if (params?.locale) q.set("locale", params.locale);
   const suffix = q.toString() ? `?${q.toString()}` : "";
   const raw = await apiRequest<
     NotificationsListResponse & { notifications?: InboxNotification[] }
@@ -2110,8 +2109,10 @@ export async function fetchMyUnreadNotificationCount(): Promise<{ unreadCount: n
 
 export async function markNotificationReadApi(
   id: string,
+  locale?: "en" | "de",
 ): Promise<{ notification: InboxNotification; unreadCount: number }> {
-  return apiRequest(apiPath(`/api/me/notifications/${id}/read`), {
+  const suffix = locale ? `?locale=${locale}` : "";
+  return apiRequest(apiPath(`/api/me/notifications/${id}/read${suffix}`), {
     method: "PATCH",
     headers: getHeaders(),
     credentials: "include",
@@ -2121,6 +2122,14 @@ export async function markNotificationReadApi(
 export async function markAllNotificationsReadApi(): Promise<{ updated: number; unreadCount: number }> {
   return apiRequest(apiPath("/api/me/notifications/read-all"), {
     method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function deleteNotificationApi(id: string): Promise<{ success: boolean; unreadCount: number }> {
+  return apiRequest(apiPath(`/api/me/notifications/${encodeURIComponent(id)}`), {
+    method: "DELETE",
     headers: getHeaders(),
     credentials: "include",
   });
@@ -2582,6 +2591,44 @@ export async function submitTipFeedback(payload: {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
+  });
+}
+
+export type CustomerFeedbackRow = {
+  id: string;
+  transactionId: string;
+  employeeId: string;
+  employeeName: string;
+  rating: number | null;
+  comment: string | null;
+  tags: string[];
+  customerName: string | null;
+  createdAt: string;
+};
+
+export type CustomerFeedbackSummary = {
+  averageRating: number | null;
+  ratingCount: number;
+  feedbackCount: number;
+};
+
+export async function listBusinessCustomerFeedback(params: {
+  take?: number;
+  skip?: number;
+  employeeId?: string;
+}): Promise<{
+  total: number;
+  items: CustomerFeedbackRow[];
+  summary: CustomerFeedbackSummary;
+}> {
+  const sp = new URLSearchParams();
+  if (params.take != null) sp.set("take", String(params.take));
+  if (params.skip != null) sp.set("skip", String(params.skip));
+  if (params.employeeId) sp.set("employeeId", params.employeeId);
+  const qs = sp.toString();
+  return apiRequest(apiPath(`/api/feedback/business${qs ? `?${qs}` : ""}`), {
+    headers: getHeaders(),
+    credentials: "include",
   });
 }
 

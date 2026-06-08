@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
 import { cn } from "@/lib/utils";
+import { DASHBOARD_METRIC_STAT_CARD_SHELL } from "./dashboardMetricTokens";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 
 export { DashboardStableChartSlot } from "./DashboardStableChartSlot";
@@ -160,6 +162,8 @@ export function DashboardMetricsGridSkeleton({
   cards?: number;
   className?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
     <div
       className={cn(
@@ -168,16 +172,19 @@ export function DashboardMetricsGridSkeleton({
       )}
       role="status"
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={aria.loading}
     >
       {Array.from({ length: cards }).map((_, i) => (
         <div
           key={i}
-          className="flex flex-col gap-3 rounded-xl border border-border/70 bg-card p-4 shadow-sm"
+          className={cn(
+            "dashboard-metric-stat-card dashboard-metrics-grid-skeleton__card",
+            DASHBOARD_METRIC_STAT_CARD_SHELL,
+          )}
         >
           <span className="dashboard-hero-metric-skeleton__bar h-3 w-[58%] max-w-[9rem]" aria-hidden />
           <span className="dashboard-hero-metric-skeleton__bar h-7 w-[72%] max-w-[11rem]" aria-hidden />
-          <span className="dashboard-hero-metric-skeleton__bar h-2.5 w-[48%] max-w-[7rem]" aria-hidden />
+          <span className="dashboard-hero-metric-skeleton__bar mt-auto h-2.5 w-[48%] max-w-[7rem]" aria-hidden />
         </div>
       ))}
     </div>
@@ -194,12 +201,14 @@ export function DashboardListSkeleton({
   className?: string;
   minHeightClass?: string;
 }) {
+  const aria = useDashboardShellAria();
+
   return (
     <div
       className={cn("space-y-3", minHeightClass, className)}
       role="status"
       aria-busy="true"
-      aria-label="Loading"
+      aria-label={aria.loading}
     >
       {Array.from({ length: rows }).map((_, i) => (
         <div key={i} className="flex items-center gap-3 py-1">

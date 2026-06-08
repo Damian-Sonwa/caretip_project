@@ -1,15 +1,27 @@
 import type { Request, Response } from "express";
+import { prisma } from "../prisma.js";
 import {
+  deleteUserNotification,
   getUnreadNotificationCount,
   listUserNotifications,
   markAllNotificationsRead,
   markNotificationRead,
+  resolveNotificationLocale,
 } from "../services/notifications/notificationInbox.service.js";
 import { emitNotificationUnreadCount } from "../socket/socketEmitters.js";
 import { clientSafeMessage, logServerError } from "../utils/httpErrors.js";
 
 function userIdFromReq(req: Request): string | null {
   return req.user?.userId ?? req.user?.id ?? null;
+}
+
+async function localeForRequest(req: Request, userId: string) {
+  const localeParam = typeof req.query.locale === "string" ? req.query.locale.trim() : undefined;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { preferredLocale: true },
+  });
+  return resolveNotificationLocale(localeParam, user?.preferredLocale);
 }
 
 export async function listMine(req: Request, res: Response) {
@@ -29,6 +41,8 @@ export async function listMine(req: Request, res: Response) {
     const supportStatus =
       typeof req.query.supportStatus === "string" ? req.query.supportStatus : undefined;
 
+    const locale = await localeForRequest(req, userId);
+
     const result = await listUserNotifications(userId, {
       limit: Number.isFinite(limit) ? limit : 30,
       cursor,
@@ -36,6 +50,7 @@ export async function listMine(req: Request, res: Response) {
       kind,
       search,
       supportStatus,
+      locale,
     });
     const unreadCount = await getUnreadNotificationCount(userId);
     return res.json({ ...result, unreadCount });
@@ -68,7 +83,8 @@ export async function markRead(req: Request, res: Response) {
     const id = req.params.id;
     if (!id) return res.status(400).json({ message: "Notification id is required" });
 
-    const notification = await markNotificationRead(userId, id);
+    const locale = await localeForRequest(req, userId);
+    const notification = await markNotificationRead(userId, id, locale);
     if (!notification) return res.status(404).json({ message: "Notification not found" });
 
     const unreadCount = await getUnreadNotificationCount(userId);
@@ -93,6 +109,26 @@ export async function markAllRead(req: Request, res: Response) {
     logServerError("notifications.markAllRead", err);
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't mark notifications as read."),
+    });
+  }
+}
+
+export async function deleteOne(req: Request, res: Response) {
+  try {
+    const userId = userIdFromReq(req);
+    if (!userId) return res.status(401).json({ message: "Authentication required" });
+    const id = req.params.id;
+    if (!id) return res.status(400).json({ message: "Notification id is required" });
+
+    const { deleted, unreadCount } = await deleteUserNotification(userId, id);
+    if (!deleted) return res.status(404).json({ message: "Notification not found" });
+
+    emitNotificationUnreadCount(userId, unreadCount);
+    return res.json({ success: true, unreadCount });
+  } catch (err) {
+    logServerError("notifications.deleteOne", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't delete that notification."),
     });
   }
 }

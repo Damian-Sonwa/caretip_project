@@ -183,7 +183,7 @@ export function BusinessDetailPage() {
         >
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
               <div className="flex items-start gap-3">
-                <BusinessLogoMark logoPathOrUrl={row.logoPath ?? null} businessName={row.name} size="lg" />
+                <BusinessLogoMark logoPathOrUrl={row.logoPath ?? null} businessName={row.name} size="xl" />
                 <div>
                   <h2 className="text-xl font-semibold text-foreground">{row.name}</h2>
                   <p className="text-sm text-muted-foreground font-mono">{row.slug}</p>

@@ -780,7 +780,11 @@
       "close": "Close",
       "read": "Read",
       "unreadSummary": "You have {{count}} unread notification",
-      "unreadSummary_plural": "You have {{count}} unread notifications"
+      "unreadSummary_plural": "You have {{count}} unread notifications",
+      "justNow": "Just now",
+      "minutesAgo": "{{count}}m ago",
+      "hoursAgo": "{{count}}h ago",
+      "daysAgo": "{{count}}d ago"
     },
     "inbox": {
       "title": "Notifications",
@@ -796,12 +800,123 @@
       "statusFilterAria": "Filter by ticket status",
       "filter": {
         "all": "All",
+        "unread": "Unread",
         "support": "Support",
         "other": "Other"
       },
+      "dateGroup": {
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "thisWeek": "This week",
+        "earlier": "Earlier"
+      },
+      "statsLine": "{{unread}} unread · {{shown}}{{more}} shown",
       "selectPrompt": "Select a notification to read the full message.",
       "openAction": "Open",
-      "unreadBadge": "Unread"
+      "unreadBadge": "Unread",
+      "detailTitle": "Notification details",
+      "emptyBodyPremium": "When tips arrive, team changes happen, or alerts are sent, they will appear here in a live activity feed.",
+      "emptyHint": "Real-time updates sync across web and mobile",
+      "filterEmptyTitle": "No notifications match this filter",
+      "filterEmptyBody": "Try another category or clear filters to see all activity.",
+      "clearFilters": "Show all notifications",
+      "delete": "Delete",
+      "deleteAria": "Delete notification"
+    },
+    "categories": {
+      "tips": "Tips",
+      "payouts": "Payouts",
+      "team": "Team",
+      "feedback": "Feedback",
+      "goals": "Goals",
+      "billing": "Billing",
+      "verification": "Verification",
+      "security": "Security",
+      "support": "Support",
+      "announcement": "Announcement",
+      "system": "System",
+      "activity": "Activity"
+    },
+    "actions": {
+      "viewTip": "View tip",
+      "viewPayout": "View payout",
+      "viewTeam": "View team",
+      "viewFeedback": "View feedback",
+      "viewBilling": "View billing",
+      "reviewSecurity": "Review security",
+      "viewTicket": "View ticket",
+      "viewDetails": "View details",
+      "viewQrCodes": "View QR codes",
+      "viewDashboard": "View dashboard",
+      "reviewBusiness": "Review business"
+    },
+    "templates": {
+      "tip_received_employee": {
+        "title": "New tip received",
+        "body": "{{amount}} — {{name}}"
+      },
+      "tip_received_business": {
+        "title": "New tip at your venue",
+        "body": "{{amount}} for {{employeeName}}"
+      },
+      "payout_completed": {
+        "title": "Payout completed",
+        "body": "A payout of {{amount}} was processed."
+      },
+      "login_security": {
+        "title": "New sign-in",
+        "body": "Your CareTip account was used to sign in. If this wasn't you, change your password."
+      },
+      "employee_invited_manager": {
+        "title": "Team invitation sent",
+        "body": "{{employeeName}} was invited to join {{businessName}}."
+      },
+      "employee_activated": {
+        "title": "Welcome to CareTip",
+        "body": "Your account for {{businessName}} is ready. You can sign in and start receiving tips."
+      },
+      "qr_scan": {
+        "title": "QR code scanned",
+        "body": "A guest opened the tipping page for {{place}}."
+      },
+      "qr_payment_success": {
+        "title": "QR payment received",
+        "body": "{{amount}} via QR for {{employeeName}}."
+      },
+      "verification_document_uploaded": {
+        "title": "Verification document uploaded",
+        "body": "{{businessName}} submitted documents for review."
+      },
+      "support_created_admin": {
+        "title": "[TICKET] {{ticketNumber}}",
+        "body": "{{businessName}} · {{category}}. Open the ticket to reply."
+      },
+      "support_created_business": {
+        "title": "Support request received: {{ticketNumber}}",
+        "body": "We received your message about \"{{subject}}\". Our team will respond shortly."
+      },
+      "support_reply_admin": {
+        "title": "[TICKET] New reply: {{ticketNumber}}",
+        "body": "{{businessName}}: {{preview}}"
+      },
+      "support_reply_business": {
+        "title": "CareTip replied: {{ticketNumber}}"
+      },
+      "support_status_resolved": {
+        "title": "Support request resolved",
+        "body": "Your support request has been marked resolved."
+      },
+      "support_status_closed": {
+        "title": "Support ticket closed",
+        "body": "This support ticket is now closed."
+      },
+      "support_status_updated": {
+        "title": "Ticket status updated",
+        "body": "Ticket status updated to {{status}}."
+      },
+      "support_inbox_title": {
+        "title": "[TICKET] [{{status}}] {{ticketNumber}}: {{subject}}"
+      }
     }
   },
   "support": {
@@ -874,7 +989,7 @@
       "goHomeLink": "Go home",
       "notFound": "Not found",
       "careTipBrand": "CareTip",
-      "careTipLimited": "CareTip Limited",
+      "careTipLimited": "CareTip",
       "homeAria": "Home",
       "back": "Back"
     },
@@ -892,9 +1007,9 @@
       "chooseDifferentAmount": "Choose a different amount"
     },
     "docTitle": {
-      "tip": "Tip {{name}} · CareTip Limited",
-      "business": "{{name}} · CareTip Limited",
-      "default": "CareTip Limited"
+      "tip": "Tip {{name}} · CareTip",
+      "business": "{{name}} · CareTip",
+      "default": "CareTip"
     },
     "devBypass": {
       "title": "Development bypass",
@@ -983,15 +1098,16 @@
     "payment": {
       "preparingCheckout": "Preparing checkout…",
       "canceledTitle": "Payment canceled",
-      "canceledDesc": "You can choose a method and try again when you're ready.",
+      "canceledDesc": "You can return and try again when you're ready.",
       "title": "Payment",
-      "subtitle": "Choose payment method",
+      "subtitle": "Secure checkout via Stripe",
       "missingContext": "Missing tip context. Go back and select an amount first.",
       "payingTipTo": "Paying tip to",
       "tipFor": "Tip for {{name}}",
       "amountToPay": "Amount to pay",
-      "selectMethodTitle": "Select payment method",
-      "selectMethodDesc": "Choose how you'd like to pay",
+      "selectMethodTitle": "Available payment methods",
+      "selectMethodDesc": "Continue to Stripe checkout. Wallets and cards are offered where supported on the next screen.",
+      "methodsAria": "Available payment methods",
       "stripeCardNote": "You will enter card details on Stripe's secure checkout page. We never store your card number.",
       "secureTitle": "Secure payment",
       "secureBody": "Apple Pay, Google Pay, and cards are processed by Stripe. You will confirm on the next screen.",
@@ -1156,6 +1272,7 @@
       "locations": "Locations",
       "tables": "Tables",
       "tipsActivity": "Tips & activity",
+      "customerFeedback": "Customer feedback",
       "notifications": "Notifications",
       "support": "Contact CareTip",
       "settings": "Settings"
@@ -1198,7 +1315,10 @@
       "notificationsUnreadAria": "{{count}} unread notifications",
       "menuButtonAria": "Open menu",
       "adminFallback": "Admin",
-      "platformAdminEmail": "Platform admin"
+      "platformAdminEmail": "Platform admin",
+      "loadingAria": "Loading",
+      "loadingChartAria": "Loading chart",
+      "statusAria": "Status"
     },
     "nav": {
       "overview": "Overview",
@@ -2189,6 +2309,9 @@
       "description": "Open QR Management to generate fresh links and printable codes.",
       "action": "Fix QR links"
     },
+    "shell": {
+      "demoRibbon": "Walkthrough demo: sample venue, staff, tables, and tips are for product tours only and do not affect other accounts."
+    },
     "onboarding": {
       "toastSessionExpired": "Your session expired. Please sign in again.",
       "toastSavedLoadingDashboard": "Saved. Loading your dashboard…",
@@ -2515,6 +2638,24 @@
       "next": "Next",
       "pageOf": "Page {{page}} of {{pages}}"
     },
+    "customerFeedback": {
+      "recentTitle": "Recent customer feedback",
+      "recentDesc": "Guest ratings and comments appear here after they leave optional feedback.",
+      "recentDescWithStats": "{{count}} reviews · {{average}} avg rating",
+      "pageTitle": "Customer feedback",
+      "pageDesc": "Full guest ratings and comments for your team.",
+      "pageSummary": "{{count}} total reviews · {{average}} average · {{ratings}} with star ratings",
+      "filterEmployee": "Filter by team member",
+      "allEmployees": "All team members",
+      "showingCount": "Showing {{shown}} of {{total}}",
+      "anonymousGuest": "Guest",
+      "readFullMessage": "Read full message",
+      "showLess": "Show less",
+      "tagsAria": "Feedback tags",
+      "loadError": "Could not load customer feedback. Please try again.",
+      "loadErrorTitle": "Feedback unavailable",
+      "retry": "Try again"
+    },
     "staffPage": {
       "rosterDeactivated": "Deactivated",
       "rosterAwaitingEmail": "Awaiting email verification",
@@ -2605,7 +2746,17 @@
       "labelTipsMonth": "Tips (month)",
       "labelRating": "Rating",
       "qrButton": "QR",
-      "editButton": "Edit"
+      "editButton": "Edit",
+      "searchTitle": "Search",
+      "thEmployee": "Employee",
+      "thRole": "Role",
+      "thQrAssignment": "QR assignment",
+      "thContact": "Contact",
+      "thTipsMonth": "Tips (Month)",
+      "thRating": "Rating",
+      "thActive": "Active",
+      "thActions": "Actions",
+      "removeStaffButton": "Remove staff"
     },
     "qrPage": {
       "toastBusinessRegenerated": "Business QR regenerated.",
@@ -2636,6 +2787,7 @@
       "tabTables": "Tables",
       "tabLocations": "Locations",
       "noEmployees": "No employees yet.",
+      "addStaffInManagement": "Add staff in Staff Management",
       "noTables": "No tables configured.",
       "noLocations": "No locations configured.",
       "pdfInstruction": "Scan to tip instantly",

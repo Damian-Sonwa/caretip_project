@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
 import { cn } from "@/lib/utils";
 import type { DashboardStatusItem } from "@/app/lib/dashboardStatus/types";
 import { DashboardStatusBadge } from "./DashboardStatusBadge";
@@ -15,6 +16,8 @@ export const DashboardStatusStrip = memo(function DashboardStatusStrip({
   className,
   placeholder,
 }: DashboardStatusStripProps) {
+  const aria = useDashboardShellAria();
+
   if (placeholder) {
     return (
       <div
@@ -29,7 +32,7 @@ export const DashboardStatusStrip = memo(function DashboardStatusStrip({
   return (
     <div
       className={cn("flex flex-wrap items-center gap-2", className)}
-      aria-label="Status"
+      aria-label={aria.status}
     >
       {items.map((item) => (
         <DashboardStatusBadge

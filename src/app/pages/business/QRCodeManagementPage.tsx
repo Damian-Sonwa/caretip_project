@@ -981,7 +981,7 @@ export function QRCodeManagementPage() {
                         to="/dashboard/staff-management"
                         className="text-sm font-semibold text-foreground underline underline-offset-2"
                       >
-                        Add staff in Staff Management
+                        {t("business.qrPage.addStaffInManagement")}
                       </Link>
                     </div>
                   ) : (

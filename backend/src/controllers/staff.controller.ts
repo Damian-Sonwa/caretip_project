@@ -79,7 +79,6 @@ type StaffBySlugRow = {
   avatar: string | null;
   jobTitle: string;
   bio?: string | null;
-  monthlyGoal?: unknown;
   businessId: string;
   business: {
     id: string;
@@ -98,7 +97,6 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     avatar: true,
     jobTitle: true,
     bio: true,
-    monthlyGoal: true,
     businessId: true,
     business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
   } as const;
@@ -128,7 +126,6 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
           avatar: true,
           jobTitle: true,
           bio: true,
-          monthlyGoal: true,
           businessId: true,
           business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
         },
@@ -139,22 +136,6 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
 }
 
 async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
-  const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
-  const monthTips = await prisma.transaction.findMany({
-    where: {
-      employeeId: employee.id,
-      status: "success",
-      createdAt: { gte: startOfMonth },
-    },
-    select: { amount: true },
-  });
-  const currentMonthTotal = monthTips.reduce((s, t) => s + Number(t.amount), 0);
-
-  const monthlyGoal =
-    employee.monthlyGoal != null && employee.monthlyGoal !== undefined
-      ? Number(employee.monthlyGoal)
-      : null;
-
   return {
     id: employee.id,
     name: employee.name,
@@ -162,8 +143,6 @@ async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
     avatar: absolutizePublicMediaPath(employee.avatar),
     jobTitle: employee.jobTitle,
     bio: employee.bio ?? null,
-    monthlyGoal,
-    currentMonthTotal,
     businessId: employee.businessId,
     businessName: employee.business.name,
     businessSlug: employee.business.slug,
@@ -200,7 +179,6 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
       avatar: true,
       jobTitle: true,
       bio: true,
-      monthlyGoal: true,
       businessId: true,
       business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
     } as const;

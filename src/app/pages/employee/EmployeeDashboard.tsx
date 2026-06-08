@@ -41,6 +41,7 @@ import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { EmployeeDashboardMetricsGrid } from "../../components/employee/EmployeeDashboardMetricsGrid";
+import { DashboardAnalyticsPeriodToggle } from "../../components/dashboard/DashboardAnalyticsPeriodToggle";
 import { formatEur } from "../../lib/formatEur";
 import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
@@ -50,7 +51,7 @@ import {
   recordNewEmployeeTip,
   syncEmployeeNotificationTips,
 } from "../../lib/employeeNotificationStore";
-import employeeHeroImage from "../../../../images/ICT_employee.png";
+import employeeHeroImage from "../../../../images/foremployee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -619,38 +620,23 @@ export function EmployeeDashboard() {
               items={dashboardStatusItems}
             />
           </div>
-          <div
-            className={employeeUi.periodToggle}
-            role="group"
-            aria-label={t("employee.dashboard.analyticsPeriodAria")}
-          >
-            {(["today", "week", "month"] as const).map((period) => (
-              <button
-                key={period}
-                type="button"
-                onClick={() => {
-                  runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
-                }}
-                aria-pressed={analyticsTimeframe === period}
-                className={cn(
-                  employeeUi.periodBtn,
-                  analyticsTimeframe === period ? employeeUi.periodBtnActive : employeeUi.periodBtnIdle,
-                )}
-              >
-                <span className="shrink-0">
-                  {period === "today" && t("employee.earnings_today")}
-                  {period === "week" && t("employee.earnings_week")}
-                  {period === "month" && t("employee.earnings_month")}
-                </span>
-                {analyticsTimeframeLoading === period ? (
-                  <span
-                    className="ml-2 inline-block h-2 w-2 animate-pulse rounded-full bg-current/70 align-middle"
-                    aria-hidden
-                  />
-                ) : null}
-              </button>
-            ))}
-          </div>
+          <DashboardAnalyticsPeriodToggle
+            ariaLabel={t("employee.dashboard.analyticsPeriodAria")}
+            value={analyticsTimeframe}
+            onChange={(period) => {
+              runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
+            }}
+            options={(["today", "week", "month"] as const).map((period) => ({
+              id: period,
+              label:
+                period === "today"
+                  ? t("employee.earnings_today")
+                  : period === "week"
+                    ? t("employee.earnings_week")
+                    : t("employee.earnings_month"),
+              loading: analyticsTimeframeLoading === period,
+            }))}
+          />
         </section>
 
         <div className={cn(employeeUi.section, "employee-dashboard-section pb-6 pt-1")}>

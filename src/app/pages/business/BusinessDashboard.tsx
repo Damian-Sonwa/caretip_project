@@ -41,6 +41,7 @@ import {
   GoalsTableLoadingShell,
 } from "../../components/dashboard/DashboardSectionLoading";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
+import { DashboardAnalyticsPeriodToggle } from "../../components/dashboard/DashboardAnalyticsPeriodToggle";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import { formatEur } from "../../lib/formatEur";
 import type {
@@ -69,6 +70,7 @@ import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusinessDashboardMetricsGrid } from "../../components/business/BusinessDashboardMetricsGrid";
+import { RecentCustomerFeedbackPanel } from "../../components/business/RecentCustomerFeedbackPanel";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import {
@@ -629,31 +631,18 @@ export function BusinessDashboard() {
                 items={dashboardStatusItems}
               />
             </div>
-            <div
-              className={businessUi.periodToggle}
-              role="group"
-              aria-label={t("business.dashboard.analyticsPeriodAria")}
-            >
-            {(["week", "month", "year"] as const).map((period) => (
-              <button
-                key={period}
-                type="button"
-                onClick={() => {
-                  runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
-                }}
-                aria-pressed={analyticsTimeframe === period}
-                className={cn(
-                  businessUi.periodBtn,
-                  analyticsTimeframe === period ? businessUi.periodBtnActive : businessUi.periodBtnIdle,
-                )}
-              >
-                {analyticsPeriodLabel(period)}
-                {analyticsTimeframeLoading === period ? (
-                  <span className="ml-2 inline-block h-2 w-2 animate-pulse rounded-full bg-current/70 align-middle" aria-hidden />
-                ) : null}
-              </button>
-            ))}
-            </div>
+            <DashboardAnalyticsPeriodToggle
+              ariaLabel={t("business.dashboard.analyticsPeriodAria")}
+              value={analyticsTimeframe}
+              onChange={(period) => {
+                runWithViewportScrollPreserved(() => setAnalyticsTimeframe(period));
+              }}
+              options={(["week", "month", "year"] as const).map((period) => ({
+                id: period,
+                label: analyticsPeriodLabel(period),
+                loading: analyticsTimeframeLoading === period,
+              }))}
+            />
             <DashboardAnalyticsPhaseHintSlot
               className="mt-3"
               show={showChartsLoading && !showMetricsSkeleton}
@@ -1011,6 +1000,11 @@ export function BusinessDashboard() {
               </Card>
             </motion.div>
           </div>
+
+          {/* Recent customer feedback */}
+          <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
+            <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
+          </motion.div>
 
           {/* Top Performers & Quick Actions */}
           <div className={businessUi.bottomGrid}>

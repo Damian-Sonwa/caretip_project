@@ -56,8 +56,7 @@ export function BusinessShellBar({ className }: { className?: string }) {
           <BusinessLogoMark
             logoPathOrUrl={profile?.logo}
             businessName={name}
-            size="header"
-            rounded="rounded-xl"
+            size="dashboard"
           />
           <div className="min-w-0 flex-1 text-left">
             <p className="truncate text-sm font-semibold text-foreground">{name}</p>

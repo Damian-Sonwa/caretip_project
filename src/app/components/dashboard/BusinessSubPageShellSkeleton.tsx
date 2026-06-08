@@ -1,3 +1,4 @@
+import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
 import { cn } from "@/lib/utils";
 
 type BusinessSubPageShellSkeletonProps = {
@@ -7,8 +8,10 @@ type BusinessSubPageShellSkeletonProps = {
 
 /** Page chrome while auth session hydrates inside `BusinessLayout` (no full-screen hold). */
 export function BusinessSubPageShellSkeleton({ narrow = false }: BusinessSubPageShellSkeletonProps) {
+  const aria = useDashboardShellAria();
+
   return (
-    <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8" aria-busy="true" aria-label="Loading">
+    <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8" aria-busy="true" aria-label={aria.loading}>
       <div
         className={cn(
           "mx-auto w-full animate-pulse",

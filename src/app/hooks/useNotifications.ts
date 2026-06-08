@@ -1,11 +1,17 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   fetchMyNotifications,
   fetchMyUnreadNotificationCount,
+  deleteNotificationApi,
   markAllNotificationsReadApi,
   markNotificationReadApi,
   type InboxNotification,
 } from "../lib/api";
+import {
+  localizeInboxNotification,
+  localizeInboxNotifications,
+} from "../lib/localizeInboxNotification";
 import { isProtectedApiReady } from "../lib/authRestore";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
@@ -37,6 +43,8 @@ export function useNotifications({
   loadList = false,
   listFilters,
 }: UseNotificationsOptions) {
+  const { t, i18n } = useTranslation();
+  const uiLocale: "en" | "de" = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
   const apiReady = isProtectedApiReady();
   const active = enabled && apiReady;
   const socketReady = useDeferSocketConnect(active);
@@ -46,6 +54,7 @@ export function useNotifications({
   const [loading, setLoading] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const loadedRef = useRef(false);
+  const prevLocaleRef = useRef(uiLocale);
   const itemsRef = useRef<InboxNotification[] | null>(null);
   itemsRef.current = items;
 
@@ -79,7 +88,7 @@ export function useNotifications({
       const useCachedFirst =
         !opts?.append && !opts?.cursor && cachedInbox !== null && !hasVisible;
       if (useCachedFirst) {
-        setItems(cachedInbox.items);
+        setItems(localizeInboxNotifications(cachedInbox.items, t, i18n.language));
         setUnreadCount(cachedInbox.unreadCount);
         setNextCursor(cachedInbox.nextCursor);
         setLoading(false);
@@ -93,16 +102,17 @@ export function useNotifications({
           kind: listFilters?.kind,
           q: listFilters?.q,
           supportStatus: listFilters?.supportStatus,
+          locale: uiLocale,
         });
         setUnreadCount(res.unreadCount);
         setNextCursor(res.nextCursor);
-        const nextItems = res.items;
+        const nextItems = localizeInboxNotifications(res.items, t, i18n.language);
         setItems((prev) =>
           opts?.append && !opts?.reset ? [...(prev ?? []), ...nextItems] : nextItems,
         );
         if (!opts?.append && !opts?.cursor) {
           setPageSessionCache(inboxCacheKey, {
-            items: nextItems,
+            items: res.items,
             unreadCount: res.unreadCount,
             nextCursor: res.nextCursor,
           });
@@ -116,22 +126,23 @@ export function useNotifications({
         setLoading(false);
       }
     },
-    [active, filterKey, listFilters?.kind, listFilters?.q, listFilters?.supportStatus],
+    [active, filterKey, listFilters?.kind, listFilters?.q, listFilters?.supportStatus, uiLocale, t, i18n.language],
   );
 
   const markRead = useCallback(async (id: string) => {
     try {
-      const res = await markNotificationReadApi(id);
+      const res = await markNotificationReadApi(id, uiLocale);
       setUnreadCount(res.unreadCount);
+      const localized = localizeInboxNotification(res.notification, t, i18n.language);
       setItems((prev) =>
         (prev ?? []).map((n) =>
-          n.id === id ? { ...n, read: true, readAt: res.notification.readAt } : n,
+          n.id === id ? { ...localized, read: true, readAt: res.notification.readAt } : n,
         ),
       );
     } catch (err) {
       logClientError("useNotifications.markRead", err);
     }
-  }, []);
+  }, [uiLocale, t, i18n.language]);
 
   const markAllRead = useCallback(async () => {
     try {
@@ -146,6 +157,16 @@ export function useNotifications({
       );
     } catch (err) {
       logClientError("useNotifications.markAllRead", err);
+    }
+  }, []);
+
+  const deleteNotification = useCallback(async (id: string) => {
+    try {
+      const res = await deleteNotificationApi(id);
+      setUnreadCount(res.unreadCount);
+      setItems((prev) => (prev ?? []).filter((n) => n.id !== id));
+    } catch (err) {
+      logClientError("useNotifications.deleteNotification", err);
     }
   }, []);
 
@@ -171,7 +192,7 @@ export function useNotifications({
       nextCursor: string | null;
     }>(inboxCacheKey, PAGE_CACHE_TTL_HIGH_MS);
     if (cachedInbox) {
-      setItems(cachedInbox.items);
+      setItems(localizeInboxNotifications(cachedInbox.items, t, i18n.language));
       setUnreadCount(cachedInbox.unreadCount);
       setNextCursor(cachedInbox.nextCursor);
       loadedRef.current = true;
@@ -190,10 +211,11 @@ export function useNotifications({
         setUnreadCount(payload.unreadCount);
       }
       if (payload.notification) {
+        const localized = localizeInboxNotification(payload.notification, t, i18n.language);
         setItems((prev) => {
           const list = prev ?? [];
-          if (list.some((n) => n.id === payload.notification!.id)) return list;
-          return [payload.notification!, ...list].slice(0, 50);
+          if (list.some((n) => n.id === localized.id)) return list;
+          return [localized, ...list].slice(0, 50);
         });
       }
     };
@@ -208,7 +230,22 @@ export function useNotifications({
       socket.off("notification_created", onCreated);
       socket.off("notification_unread_count", onUnread);
     };
-  }, [socket, active]);
+  }, [socket, active, t, i18n.language]);
+
+  useEffect(() => {
+    if (!active) return;
+    setItems((prev) => (prev?.length ? localizeInboxNotifications(prev, t, i18n.language) : prev));
+  }, [active, i18n.language, t]);
+
+  useEffect(() => {
+    if (!active || !loadedRef.current) {
+      prevLocaleRef.current = uiLocale;
+      return;
+    }
+    if (prevLocaleRef.current === uiLocale) return;
+    prevLocaleRef.current = uiLocale;
+    void loadNotifications({ reset: true });
+  }, [active, uiLocale, loadNotifications]);
 
   return {
     unreadCount,
@@ -220,5 +257,6 @@ export function useNotifications({
     loadNotifications,
     markRead,
     markAllRead,
+    deleteNotification,
   };
 }
