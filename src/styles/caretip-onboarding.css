@@ -63,11 +63,25 @@
 }
 
 .business-onboarding-preview-aside {
-  position: sticky;
-  top: 5.5rem;
   display: flex;
   justify-content: center;
+  width: 100%;
   padding-inline: 0.5rem;
+}
+
+@media (min-width: 1024px) {
+  .business-onboarding-preview-aside {
+    position: sticky;
+    top: 5.5rem;
+    align-self: start;
+    grid-row: 1 / -1;
+    grid-column: 2;
+  }
+
+  .business-onboarding-finish-slot,
+  .business-onboarding-back-slot {
+    grid-column: 1;
+  }
 }
 
 /* Custom select chevron */

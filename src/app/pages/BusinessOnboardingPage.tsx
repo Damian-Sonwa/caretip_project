@@ -326,24 +326,14 @@ export function BusinessOnboardingPage() {
                       ) : null}
 
                       {step === 3 ? (
-                        <div className="space-y-6">
-                          <BusinessOnboardingReviewSummary
-                            legalBusinessName={legalBusinessName}
-                            businessType={businessType}
-                            registeredAddress={registeredAddress}
-                            contactPhone={contactPhone}
-                            website={website}
-                            logoPreviewUrl={logoPreviewUrl}
-                          />
-                          <div className="lg:hidden">
-                            <BusinessOnboardingGuestPreview {...previewData} variant="final" />
-                          </div>
-                          <BusinessOnboardingFinishCta
-                            busy={busy}
-                            disabled={!canContinue}
-                            onFinish={() => void goForward()}
-                          />
-                        </div>
+                        <BusinessOnboardingReviewSummary
+                          legalBusinessName={legalBusinessName}
+                          businessType={businessType}
+                          registeredAddress={registeredAddress}
+                          contactPhone={contactPhone}
+                          website={website}
+                          logoPreviewUrl={logoPreviewUrl}
+                        />
                       ) : null}
                     </motion.div>
                   </AnimatePresence>
@@ -369,7 +359,7 @@ export function BusinessOnboardingPage() {
                     </div>
                   ) : null}
 
-                  {step > 1 ? (
+                  {step > 1 && !isReviewStep ? (
                     <button
                       type="button"
                       onClick={goBack}
@@ -383,12 +373,29 @@ export function BusinessOnboardingPage() {
               </div>
 
               {isReviewStep ? (
-                <aside
-                  className="business-onboarding-preview-aside hidden min-w-0 lg:block"
-                  aria-label={t("business.onboarding.preview.panelAria")}
-                >
-                  <BusinessOnboardingGuestPreview {...previewData} variant="final" />
-                </aside>
+                <>
+                  <aside
+                    className="business-onboarding-preview-aside min-w-0"
+                    aria-label={t("business.onboarding.preview.panelAria")}
+                  >
+                    <BusinessOnboardingGuestPreview {...previewData} variant="final" />
+                  </aside>
+                  <div className="business-onboarding-finish-slot min-w-0">
+                    <BusinessOnboardingFinishCta
+                      busy={busy}
+                      disabled={!canContinue}
+                      onFinish={() => void goForward()}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={goBack}
+                    disabled={busy}
+                    className="business-onboarding-back-slot text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
+                  >
+                    {t("business.onboarding.actions.back")}
+                  </button>
+                </>
               ) : null}
             </div>
 
