@@ -143,6 +143,10 @@ export function BusinessDashboard() {
     role: user?.role === "business" ? "business" : null,
   });
   const canExportCsv = hasCapability("csvExport");
+  const businessKycApproved = Boolean(user?.impersonation || user?.status === "APPROVED");
+  const businessKycPending = Boolean(
+    isBusiness && !user?.impersonation && user?.status === "PENDING",
+  );
 
   const {
     analyticsTimeframe,
@@ -163,10 +167,14 @@ export function BusinessDashboard() {
     retryStats,
     applyLiveTip,
   } = useBusinessDashboardStats(
-    user?.role === "business" && authReady && user.hasCompletedOnboarding === true,
+    user?.role === "business" &&
+      authReady &&
+      user.hasCompletedOnboarding === true &&
+      businessKycApproved,
     sessionValidated,
     advancedAnalyticsEnabled,
   );
+  const showPendingVerification = businessKycPending || pendingVerification === true;
 
   const [exportLoading, setExportLoading] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
@@ -176,7 +184,9 @@ export function BusinessDashboard() {
   const [employeeGoalsDetailOpen, setEmployeeGoalsDetailOpen] = useState(false);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
   const refreshTimerRef = useRef<number | null>(null);
-  const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
+  const socketReady = useDeferSocketConnect(
+    authReady && user?.role === "business" && businessKycApproved,
+  );
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshStatsQuiet);
@@ -262,7 +272,7 @@ export function BusinessDashboard() {
     isDev: import.meta.env.DEV,
     isWalkthroughDemoAccount: isWalkthroughDemoManager(user),
     statsLoading: isMetricsInitialLoad,
-    pendingVerification,
+    pendingVerification: showPendingVerification,
     tipCount: displayStats?.tipCount ?? 0,
   });
 
@@ -362,7 +372,7 @@ export function BusinessDashboard() {
         {
           isInitialLoading: showMetricsSkeleton,
           isPeriodRefreshing,
-          pendingVerification: pendingVerification === true,
+          pendingVerification: showPendingVerification,
           verificationStatus: displayStats?.verificationStatus,
           statsLoadFailed,
           socketStatus: connectionStatus,
@@ -372,7 +382,7 @@ export function BusinessDashboard() {
     [
       showMetricsSkeleton,
       isPeriodRefreshing,
-      pendingVerification,
+      showPendingVerification,
       displayStats?.verificationStatus,
       statsLoadFailed,
       connectionStatus,
@@ -426,7 +436,7 @@ export function BusinessDashboard() {
       <div className={businessUi.pageInner}>
         <FixPrompt
           id="pendingVerification"
-          issueActive={pendingVerification === true}
+          issueActive={showPendingVerification}
           tone="info"
           title={t("business.dashboard.fixVerificationTitle")}
           description={t("business.dashboard.fixVerificationDesc")}
@@ -1003,7 +1013,9 @@ export function BusinessDashboard() {
 
           {/* Recent customer feedback */}
           <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
-            <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
+            <RecentCustomerFeedbackPanel
+              enabled={isBusiness && sessionValidated && businessKycApproved}
+            />
           </motion.div>
 
           {/* Top Performers & Quick Actions */}

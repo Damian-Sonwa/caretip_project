@@ -30,10 +30,16 @@ export async function isApprovedBusiness(req: Request, res: Response, next: Next
       select: { verificationStatus: true },
     });
     if (!business) {
-      return res.status(403).json({ message: "Account pending verification." });
+      return res.status(403).json({
+        message: "Account pending verification.",
+        code: "PENDING_VERIFICATION",
+      });
     }
     if (business.verificationStatus !== "verified") {
-      return res.status(403).json({ message: "Account pending verification." });
+      return res.status(403).json({
+        message: "Account pending verification.",
+        code: "PENDING_VERIFICATION",
+      });
     }
     return next();
   } catch {

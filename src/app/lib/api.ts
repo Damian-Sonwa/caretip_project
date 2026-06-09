@@ -16,6 +16,7 @@ import {
   ApiRequestError,
   EMAIL_NOT_VERIFIED_CODE,
   GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+  PENDING_VERIFICATION_CODE,
   SUBSCRIPTION_REQUIRED_CODE,
 } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
@@ -390,14 +391,18 @@ async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise
   }
   if (!res.ok) {
     const refreshPath = typeof res.url === "string" && res.url.includes(AUTH_REFRESH_PATHNAME);
-    if (!opts?.silent && !(refreshPath && res.status >= 500)) {
+    const body = data as { message?: string; code?: string; canResend?: boolean };
+    const isExpectedPendingVerification =
+      res.status === 403 &&
+      (body.code === PENDING_VERIFICATION_CODE ||
+        body.message?.toLowerCase().includes("pending verification"));
+    if (!opts?.silent && !(refreshPath && res.status >= 500) && !isExpectedPendingVerification) {
       logClientError("api.handleRes", new Error(`HTTP ${res.status}`), {
         status: res.status,
         url: res.url,
         body: data,
       });
     }
-    const body = data as { message?: string; code?: string; canResend?: boolean };
     const bodyMsg = body.message?.trim();
     const fromStatus = fallbackMessageForHttpStatus(res.status);
     const statusText = res.statusText?.trim();
@@ -413,6 +418,9 @@ async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise
       throw new ApiRequestError(base, res.status, body.code);
     }
     if (body.code === SUBSCRIPTION_REQUIRED_CODE) {
+      throw new ApiRequestError(base, res.status, body.code);
+    }
+    if (body.code === PENDING_VERIFICATION_CODE) {
       throw new ApiRequestError(base, res.status, body.code);
     }
     throw new ApiRequestError(base, res.status, body.code, body.canResend === true);

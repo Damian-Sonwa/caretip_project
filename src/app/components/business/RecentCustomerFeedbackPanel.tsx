@@ -11,6 +11,7 @@ import { CustomerFeedbackListItem } from "@/app/components/business/CustomerFeed
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
+import { isApiPendingVerificationError } from "@/app/lib/apiError";
 
 type RecentCustomerFeedbackPanelProps = {
   enabled?: boolean;
@@ -38,6 +39,12 @@ export function RecentCustomerFeedbackPanel({
       setItems(res.items);
       setSummary(res.summary);
     } catch (err) {
+      if (isApiPendingVerificationError(err)) {
+        setItems([]);
+        setSummary(null);
+        setError(null);
+        return;
+      }
       logClientError("RecentCustomerFeedbackPanel.load", err);
       setError(t("business.customerFeedback.loadError"));
       setItems([]);

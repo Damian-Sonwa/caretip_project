@@ -79,7 +79,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     setConnectionStatus("connecting");
     const s = io(url, {
       auth: { token },
-      transports: ["websocket", "polling"],
+      // Polling first: Render cold starts often reject the initial WebSocket upgrade.
+      transports: ["polling", "websocket"],
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
