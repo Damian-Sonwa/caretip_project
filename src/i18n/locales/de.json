@@ -2333,9 +2333,9 @@
       "setupTime": "Dauer: {{minutes}} Min.",
       "finalStep": {
         "badge": "Letzter Schritt",
-        "headline": "Gasterlebnis anpassen",
-        "description": "Letzter Schritt vor dem Start. Logo hinzufügen und prüfen, wie Gäste Trinkgeld geben.",
-        "readyMessage": "Nur noch ein Schritt bis zu digitalen Trinkgeldern."
+        "headline": "Prüfen & veröffentlichen",
+        "description": "Angaben bestätigen und die mobile Gastvorschau prüfen, bevor Sie live gehen.",
+        "readyMessage": "Alles in Ordnung? Veröffentlichen Sie Ihren Betrieb und öffnen Sie Ihr Dashboard."
       },
       "upload": {
         "cta": "Logo hochladen",
@@ -2344,11 +2344,14 @@
         "remove": "Bild entfernen"
       },
       "preview": {
-        "panelAria": "Live-Gastvorschau (nicht interaktiv)",
+        "panelAria": "Vorschau der Gast-Trinkgeldseite (nicht interaktiv)",
         "liveLabel": "Live-Vorschau",
+        "reviewLabel": "Gastvorschau",
         "previewOnlyBadge": "Nur Vorschau",
         "helperText": "Aktualisiert sich, während Sie Ihre Betriebsdaten ausfüllen.",
         "helperTextNamed": "Gäste sehen {{name}} auf Ihrer Trinkgeldseite.",
+        "helperTextReview": "So sehen Gäste Ihre Trinkgeldseite auf dem Smartphone.",
+        "helperTextReviewNamed": "So sehen Gäste {{name}} auf dem Smartphone.",
         "guestAria": "Nicht interaktives Modell der Gast-Trinkgeldseite. Angezeigte Elemente dienen nur der Vorschau.",
         "guestAriaNamed": "Nicht interaktive Vorschau der Trinkgeldseite für {{name}}.",
         "chromeSubtitleEmpty": "Ihre Gastseite",
@@ -2385,23 +2388,33 @@
           "barback": "Bar-Team",
           "barista": "Barista",
           "pastry": "Patisserie",
-          "teamMember": "Teammitglied"
+          "teamMember": "Teammitglied",
+          "nurse": "Pflegekraft",
+          "doctor": "Arzt",
+          "caregiver": "Pflegehelfer",
+          "therapist": "Therapeut",
+          "orderly": "Klinikhelfer"
         }
       },
       "steps": {
         "businessDetails": "Betriebsdaten",
-        "teamSetup": "Team einrichten",
-        "qrSetup": "QR einrichten"
+        "brandingSetup": "Branding & Einrichtung",
+        "reviewPublish": "Prüfen & Veröffentlichen"
       },
       "stepTitle": {
         "businessDetails": "Betriebsdaten",
-        "teamSetup": "Standort & Teamkontakt",
-        "qrSetup": "Gastseite & QR"
+        "brandingSetup": "Branding & Einrichtung",
+        "reviewPublish": "Prüfen & veröffentlichen"
       },
       "stepHint": {
-        "businessDetails": "So erscheint Ihr Betrieb, wenn Gäste Trinkgeld geben.",
-        "teamSetup": "Adresse und Telefon schaffen Vertrauen bei Gästen und Team.",
-        "qrSetup": "Branding für Ihre QR-Trinkgeldseite, dann Dashboard öffnen."
+        "businessDetails": "Rechtlicher Name und Betriebstyp für Ihren CareTip-Workspace.",
+        "brandingSetup": "Logo, Adresse und Kontaktdaten für Ihre Gast-Trinkgeldseite.",
+        "reviewPublish": "Alles prüfen und veröffentlichen, wenn Sie bereit sind."
+      },
+      "review": {
+        "brandingLabel": "Logo",
+        "logoAdded": "Logo hinzugefügt",
+        "logoSkipped": "Kein Logo — später in den Einstellungen möglich"
       },
       "fields": {
         "legalName": "Rechtlicher Betriebsname",
@@ -2420,6 +2433,7 @@
       "businessTypes": {
         "restaurant": "Restaurant",
         "hotel": "Hotel",
+        "hospital": "Krankenhaus",
         "salon": "Salon",
         "bar": "Bar",
         "cafe": "Café",
@@ -2433,7 +2447,7 @@
       "actions": {
         "back": "Zurück",
         "continue": "Weiter",
-        "finish": "Einrichtung abschließen",
+        "finish": "Veröffentlichen & abschließen",
         "saving": "Speichern…"
       }
     },
@@ -2748,6 +2762,12 @@
       "roleChef": "Küche",
       "roleHost": "Host",
       "roleManager": "Management",
+      "roleNurse": "Pflegekraft",
+      "roleDoctor": "Arzt",
+      "roleCaregiver": "Pflegehelfer",
+      "roleTherapist": "Therapeut",
+      "roleReceptionist": "Rezeption",
+      "roleOrderly": "Klinikhelfer",
       "labelEmail": "E-Mail",
       "monthlyGoalUsd": "Monatsziel ($)",
       "mobileNoTablesShort": "Keine Tische",

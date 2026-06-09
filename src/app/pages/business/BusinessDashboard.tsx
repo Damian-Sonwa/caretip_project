@@ -189,7 +189,10 @@ export function BusinessDashboard() {
   );
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
-  useRealtimeFallback(connected, refreshStatsQuiet);
+  useRealtimeFallback(connected, () => {
+    if (!businessKycApproved) return;
+    refreshStatsQuiet();
+  });
 
   useEffect(() => {
     if (!socket || user?.role !== "business") return;

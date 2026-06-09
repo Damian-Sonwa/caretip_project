@@ -2329,9 +2329,9 @@
       "setupTime": "Setup time: {{minutes}} min",
       "finalStep": {
         "badge": "Final step",
-        "headline": "Customize your guest experience",
-        "description": "This is the last step before you go live. Add your logo and review how guests will tip your team.",
-        "readyMessage": "You're one step away from accepting digital tips."
+        "headline": "Review & publish",
+        "description": "Confirm your details and preview the guest tipping experience before you go live.",
+        "readyMessage": "Everything looks good? Publish your venue and open your dashboard."
       },
       "upload": {
         "cta": "Click to upload your logo",
@@ -2340,11 +2340,14 @@
         "remove": "Remove image"
       },
       "preview": {
-        "panelAria": "Live guest preview (not interactive)",
+        "panelAria": "Guest tipping page preview (not interactive)",
         "liveLabel": "Live preview",
+        "reviewLabel": "Guest preview",
         "previewOnlyBadge": "Preview only",
         "helperText": "Updates as you fill in your business details below.",
         "helperTextNamed": "Guests will see {{name}} on your tipping page.",
+        "helperTextReview": "This is how guests will see your tipping page on mobile.",
+        "helperTextReviewNamed": "This is how guests will see {{name}} on mobile.",
         "guestAria": "Non-interactive mockup of the guest tipping page. Controls shown are for preview only.",
         "guestAriaNamed": "Non-interactive preview of the guest tipping page for {{name}}.",
         "chromeSubtitleEmpty": "Your guest page",
@@ -2381,23 +2384,33 @@
           "barback": "Barback",
           "barista": "Barista",
           "pastry": "Pastry",
-          "teamMember": "Team member"
+          "teamMember": "Team member",
+          "nurse": "Nurse",
+          "doctor": "Doctor",
+          "caregiver": "Caregiver",
+          "therapist": "Therapist",
+          "orderly": "Orderly"
         }
       },
       "steps": {
         "businessDetails": "Business Details",
-        "teamSetup": "Team Setup",
-        "qrSetup": "QR Setup"
+        "brandingSetup": "Branding & Setup",
+        "reviewPublish": "Review & Publish"
       },
       "stepTitle": {
         "businessDetails": "Business details",
-        "teamSetup": "Venue & team contact",
-        "qrSetup": "Guest page & QR"
+        "brandingSetup": "Branding & setup",
+        "reviewPublish": "Review & publish"
       },
       "stepHint": {
-        "businessDetails": "How your venue appears to guests when they tip.",
-        "teamSetup": "Location and phone help staff and guests trust your listing.",
-        "qrSetup": "Add branding for your QR tipping page, then open your dashboard."
+        "businessDetails": "Legal name and business type for your CareTip workspace.",
+        "brandingSetup": "Logo, address, and contact details guests see on your tipping page.",
+        "reviewPublish": "Verify everything below, then publish when you are ready."
+      },
+      "review": {
+        "brandingLabel": "Logo",
+        "logoAdded": "Logo added",
+        "logoSkipped": "No logo — you can add one later in settings"
       },
       "fields": {
         "legalName": "Legal business name",
@@ -2416,6 +2429,7 @@
       "businessTypes": {
         "restaurant": "Restaurant",
         "hotel": "Hotel",
+        "hospital": "Hospital",
         "salon": "Salon",
         "bar": "Bar",
         "cafe": "Cafe",
@@ -2429,7 +2443,7 @@
       "actions": {
         "back": "Back",
         "continue": "Continue",
-        "finish": "Finish setup",
+        "finish": "Publish & finish setup",
         "saving": "Saving…"
       }
     },
@@ -2744,6 +2758,12 @@
       "roleChef": "Chef",
       "roleHost": "Host",
       "roleManager": "Manager",
+      "roleNurse": "Nurse",
+      "roleDoctor": "Doctor",
+      "roleCaregiver": "Caregiver",
+      "roleTherapist": "Therapist",
+      "roleReceptionist": "Receptionist",
+      "roleOrderly": "Orderly",
       "labelEmail": "Email",
       "monthlyGoalUsd": "Monthly goal ($)",
       "mobileNoTablesShort": "No tables",

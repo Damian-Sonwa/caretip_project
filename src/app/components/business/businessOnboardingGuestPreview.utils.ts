@@ -3,6 +3,7 @@ const STAFF_TONES = ["from-orange-400 to-amber-500", "from-rose-400 to-orange-40
 const STAFF_ROLE_KEYS: Record<string, readonly [string, string]> = {
   Restaurant: ["server", "host"],
   Hotel: ["concierge", "housekeeping"],
+  Hospital: ["nurse", "caregiver"],
   Salon: ["stylist", "colorist"],
   Bar: ["bartender", "server"],
   Cafe: ["barista", "server"],

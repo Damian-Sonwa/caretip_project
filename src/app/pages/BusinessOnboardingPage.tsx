@@ -21,6 +21,7 @@ import {
 import { BusinessOnboardingGuestPreview } from "../components/business/BusinessOnboardingGuestPreview";
 import { BusinessOnboardingLogoUpload } from "../components/business/BusinessOnboardingLogoUpload";
 import { BusinessOnboardingFinishCta } from "../components/business/BusinessOnboardingFinishCta";
+import { BusinessOnboardingReviewSummary } from "../components/business/BusinessOnboardingReviewSummary";
 import {
   BusinessOnboardingSelectField,
   BusinessOnboardingTextField,
@@ -32,17 +33,18 @@ import {
   onboardingStepHint,
   onboardingSubhead,
 } from "../components/business/businessOnboardingUi";
+import { BUSINESS_TYPE_OPTIONS } from "../lib/businessVenueOptions";
 
 const STEP_TITLE_KEYS = [
   "business.onboarding.stepTitle.businessDetails",
-  "business.onboarding.stepTitle.teamSetup",
-  "business.onboarding.stepTitle.qrSetup",
+  "business.onboarding.stepTitle.brandingSetup",
+  "business.onboarding.stepTitle.reviewPublish",
 ] as const;
 
 const STEP_HINT_KEYS = [
   "business.onboarding.stepHint.businessDetails",
-  "business.onboarding.stepHint.teamSetup",
-  "business.onboarding.stepHint.qrSetup",
+  "business.onboarding.stepHint.brandingSetup",
+  "business.onboarding.stepHint.reviewPublish",
 ] as const;
 
 const PAGE_HEADLINE_KEYS = [
@@ -73,6 +75,17 @@ export function BusinessOnboardingPage() {
   const [savedLogoPath, setSavedLogoPath] = useState<string | null>(null);
   const [employeeCount, setEmployeeCount] = useState(0);
   const [busy, setBusy] = useState(false);
+  const [logoPreviewUrl, setLogoPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!logoFile) {
+      setLogoPreviewUrl(savedLogoPath);
+      return;
+    }
+    const url = URL.createObjectURL(logoFile);
+    setLogoPreviewUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [logoFile, savedLogoPath]);
 
   useEffect(() => {
     let cancelled = false;
@@ -128,7 +141,7 @@ export function BusinessOnboardingPage() {
       logoFile,
       savedLogoPath,
       employeeCount,
-      onboardingStep: step,
+      onboardingStep: 3 as OnboardingStep,
     }),
     [
       legalBusinessName,
@@ -139,7 +152,6 @@ export function BusinessOnboardingPage() {
       logoFile,
       savedLogoPath,
       employeeCount,
-      step,
     ],
   );
 
@@ -155,15 +167,13 @@ export function BusinessOnboardingPage() {
       await patchBusinessProfile({
         registeredAddress: registeredAddress.trim() || null,
         contactPhone: contactPhone.trim() || null,
+        website: website.trim() || null,
       });
+      if (logoFile) {
+        const uploaded = await uploadMyBusinessLogo(logoFile);
+        setSavedLogoPath(uploaded.path ?? null);
+      }
       return;
-    }
-    await patchBusinessProfile({
-      website: website.trim() || null,
-    });
-    if (logoFile) {
-      const uploaded = await uploadMyBusinessLogo(logoFile);
-      setSavedLogoPath(uploaded.path ?? null);
     }
   };
 
@@ -187,7 +197,6 @@ export function BusinessOnboardingPage() {
         setStep((s) => (s === 1 ? 2 : 3));
         return;
       }
-      await saveStep(3);
       await setHasCompletedOnboarding(true);
       const refreshed = await refetchUser();
       if (!refreshed) {
@@ -215,7 +224,7 @@ export function BusinessOnboardingPage() {
     return <GlobalAppLoadingHold />;
   }
 
-  const isFinalStep = step === 3;
+  const isReviewStep = step === 3;
 
   return (
     <div className="business-onboarding-page flex min-h-screen flex-col">
@@ -234,7 +243,7 @@ export function BusinessOnboardingPage() {
             <div
               className={cn(
                 "business-onboarding-split",
-                isFinalStep && "business-onboarding-split--final",
+                isReviewStep ? "business-onboarding-split--final" : "business-onboarding-split--entry",
               )}
             >
               <div className="business-onboarding-workspace min-w-0 space-y-8">
@@ -267,7 +276,7 @@ export function BusinessOnboardingPage() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
                       transition={{ duration: 0.2 }}
-                      className={cn("space-y-6", !isFinalStep && "lg:max-w-md")}
+                      className="space-y-6"
                     >
                       {step === 1 ? (
                         <>
@@ -283,18 +292,18 @@ export function BusinessOnboardingPage() {
                             onChange={setBusinessType}
                             placeholder={t("business.onboarding.fields.businessTypePlaceholder")}
                           >
-                            <option value="Restaurant">{t("business.onboarding.businessTypes.restaurant")}</option>
-                            <option value="Hotel">{t("business.onboarding.businessTypes.hotel")}</option>
-                            <option value="Salon">{t("business.onboarding.businessTypes.salon")}</option>
-                            <option value="Bar">{t("business.onboarding.businessTypes.bar")}</option>
-                            <option value="Cafe">{t("business.onboarding.businessTypes.cafe")}</option>
-                            <option value="Other">{t("business.onboarding.businessTypes.other")}</option>
+                            {BUSINESS_TYPE_OPTIONS.map((opt) => (
+                              <option key={opt.value} value={opt.value}>
+                                {t(opt.labelKey)}
+                              </option>
+                            ))}
                           </BusinessOnboardingSelectField>
                         </>
                       ) : null}
 
                       {step === 2 ? (
                         <>
+                          <BusinessOnboardingLogoUpload file={logoFile} onFile={setLogoFile} />
                           <BusinessOnboardingTextField
                             label={t("business.onboarding.fields.address")}
                             placeholder={t("business.onboarding.fields.addressPlaceholder")}
@@ -307,44 +316,46 @@ export function BusinessOnboardingPage() {
                             value={contactPhone}
                             onChange={setContactPhone}
                           />
-                        </>
-                      ) : null}
-
-                      {step === 3 ? (
-                        <div className="space-y-6">
-                          <BusinessOnboardingLogoUpload file={logoFile} onFile={setLogoFile} />
                           <BusinessOnboardingTextField
                             label={t("business.onboarding.fields.website")}
                             placeholder={t("business.onboarding.fields.optional")}
                             value={website}
                             onChange={setWebsite}
                           />
+                        </>
+                      ) : null}
+
+                      {step === 3 ? (
+                        <div className="space-y-6">
+                          <BusinessOnboardingReviewSummary
+                            legalBusinessName={legalBusinessName}
+                            businessType={businessType}
+                            registeredAddress={registeredAddress}
+                            contactPhone={contactPhone}
+                            website={website}
+                            logoPreviewUrl={logoPreviewUrl}
+                          />
+                          <div className="lg:hidden">
+                            <BusinessOnboardingGuestPreview {...previewData} variant="final" />
+                          </div>
+                          <BusinessOnboardingFinishCta
+                            busy={busy}
+                            disabled={!canContinue}
+                            onFinish={() => void goForward()}
+                          />
                         </div>
                       ) : null}
                     </motion.div>
                   </AnimatePresence>
 
-                  <div className="space-y-4 lg:hidden">
-                    <BusinessOnboardingGuestPreview
-                      {...previewData}
-                      variant={isFinalStep ? "final" : "default"}
-                    />
-                  </div>
-
-                  {isFinalStep ? (
-                    <BusinessOnboardingFinishCta
-                      busy={busy}
-                      disabled={!canContinue}
-                      onFinish={() => void goForward()}
-                    />
-                  ) : (
-                    <div className="space-y-4 pt-2 lg:max-w-md">
+                  {!isReviewStep ? (
+                    <div className="space-y-4 pt-2">
                       <button
                         type="button"
                         onClick={() => void goForward()}
                         disabled={!canContinue || busy}
                         aria-busy={busy}
-                        className={cn(onboardingContinueBtn, "w-full")}
+                        className={cn(onboardingContinueBtn, "w-full sm:max-w-md")}
                       >
                         {busy ? (
                           <>
@@ -352,13 +363,11 @@ export function BusinessOnboardingPage() {
                             {t("business.onboarding.actions.saving")}
                           </>
                         ) : (
-                          <>
-                            {t("business.onboarding.actions.continue")}
-                          </>
+                          t("business.onboarding.actions.continue")
                         )}
                       </button>
                     </div>
-                  )}
+                  ) : null}
 
                   {step > 1 ? (
                     <button
@@ -373,15 +382,14 @@ export function BusinessOnboardingPage() {
                 </section>
               </div>
 
-              <aside
-                className="business-onboarding-preview-aside hidden min-w-0 lg:block"
-                aria-label={t("business.onboarding.preview.panelAria")}
-              >
-                <BusinessOnboardingGuestPreview
-                  {...previewData}
-                  variant={isFinalStep ? "final" : "default"}
-                />
-              </aside>
+              {isReviewStep ? (
+                <aside
+                  className="business-onboarding-preview-aside hidden min-w-0 lg:block"
+                  aria-label={t("business.onboarding.preview.panelAria")}
+                >
+                  <BusinessOnboardingGuestPreview {...previewData} variant="final" />
+                </aside>
+              ) : null}
             </div>
 
             <BusinessOnboardingFootnote />

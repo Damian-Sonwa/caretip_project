@@ -59,6 +59,7 @@ import {
   DASH_EMPTY_STATE,
 } from "@/components/ui/dashboard-styles";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { STAFF_ROLE_OPTIONS } from "../../lib/businessVenueOptions";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 const TOAST_ERR = { style: { background: "#d4183d", color: "#ffffff" } } as const;
@@ -92,6 +93,15 @@ function HeroPanelButtonIcon({ children }: { children: ReactNode }) {
       {children}
     </span>
   );
+}
+
+function StaffRoleSelectOptions() {
+  const { t } = useTranslation();
+  return STAFF_ROLE_OPTIONS.map((opt) => (
+    <option key={opt.value} value={opt.value}>
+      {t(opt.labelKey)}
+    </option>
+  ));
 }
 
 type StaffRow = {
@@ -1096,11 +1106,7 @@ export function StaffManagementPage() {
                         onChange={(e) => setAddForm((f) => ({ ...f, role: e.target.value }))}
                         className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                       >
-                        <option value="Server">{t("business.staffPage.roleServer")}</option>
-                        <option value="Bartender">{t("business.staffPage.roleBartender")}</option>
-                        <option value="Chef">{t("business.staffPage.roleChef")}</option>
-                        <option value="Host">{t("business.staffPage.roleHost")}</option>
-                        <option value="Manager">{t("business.staffPage.roleManager")}</option>
+                        <StaffRoleSelectOptions />
                       </select>
                     </div>
                   </div>
@@ -1240,11 +1246,7 @@ export function StaffManagementPage() {
                       onChange={(e) => setEditForm((f) => ({ ...f, role: e.target.value }))}
                       className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                     >
-                      <option value="Server">{t("business.staffPage.roleServer")}</option>
-                      <option value="Bartender">{t("business.staffPage.roleBartender")}</option>
-                      <option value="Chef">{t("business.staffPage.roleChef")}</option>
-                      <option value="Host">{t("business.staffPage.roleHost")}</option>
-                      <option value="Manager">{t("business.staffPage.roleManager")}</option>
+                      <StaffRoleSelectOptions />
                     </select>
                   </div>
                 </div>

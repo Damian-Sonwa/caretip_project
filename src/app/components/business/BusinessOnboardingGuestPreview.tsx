@@ -7,6 +7,7 @@ import { BusinessLogoMark } from "./BusinessLogoMark";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { customerFlowUi as cf } from "../../pages/customer/customerFlowUi";
 import { cn } from "@/lib/utils";
+import { BUSINESS_TYPE_I18N } from "../../lib/businessVenueOptions";
 import { buildPreviewStaffSlots } from "./businessOnboardingGuestPreview.utils";
 import type { GuestPreviewData } from "./BusinessOnboardingGuestPreview.types";
 import type { PreviewStaffSlot } from "./businessOnboardingGuestPreview.utils";
@@ -20,15 +21,6 @@ type BusinessOnboardingGuestPreviewProps = GuestPreviewData & {
 type PreviewLine = {
   text: string;
   isPlaceholder: boolean;
-};
-
-const TYPE_I18N: Record<string, string> = {
-  Restaurant: "business.onboarding.businessTypes.restaurant",
-  Hotel: "business.onboarding.businessTypes.hotel",
-  Salon: "business.onboarding.businessTypes.salon",
-  Bar: "business.onboarding.businessTypes.bar",
-  Cafe: "business.onboarding.businessTypes.cafe",
-  Other: "business.onboarding.businessTypes.other",
 };
 
 function previewLine(value: string, placeholderKey: string, t: (key: string) => string): PreviewLine {
@@ -97,7 +89,6 @@ export function BusinessOnboardingGuestPreview({
   logoFile,
   savedLogoPath,
   employeeCount,
-  onboardingStep,
   variant = "default",
 }: BusinessOnboardingGuestPreviewProps) {
   const { t } = useTranslation();
@@ -126,7 +117,7 @@ export function BusinessOnboardingGuestPreview({
         isPlaceholder: true,
       };
     }
-    const key = TYPE_I18N[businessType];
+    const key = BUSINESS_TYPE_I18N[businessType];
     return {
       text: key ? t(key) : businessType,
       isPlaceholder: false,
@@ -150,13 +141,15 @@ export function BusinessOnboardingGuestPreview({
 
   const staffReadyCount = employeeCount > 0 ? employeeCount : 2;
 
-  const showAddressMeta = onboardingStep >= 2 || !addressLine.isPlaceholder;
-
   const chromeSubtitle = t("business.onboarding.preview.selectStaffToTip");
 
-  const helperText = hasBusinessName
-    ? t("business.onboarding.preview.helperTextNamed", { name: displayName })
-    : t("business.onboarding.preview.helperText");
+  const helperText = isFinal
+    ? hasBusinessName
+      ? t("business.onboarding.preview.helperTextReviewNamed", { name: displayName })
+      : t("business.onboarding.preview.helperTextReview")
+    : hasBusinessName
+      ? t("business.onboarding.preview.helperTextNamed", { name: displayName })
+      : t("business.onboarding.preview.helperText");
 
   return (
     <section
@@ -166,7 +159,9 @@ export function BusinessOnboardingGuestPreview({
       <div className="business-onboarding-guest-preview__intro">
         <div className="business-onboarding-guest-preview__heading-row">
           <p className="business-onboarding-guest-preview__label" id="onboarding-guest-preview-label">
-            {t("business.onboarding.preview.liveLabel")}
+            {isFinal
+              ? t("business.onboarding.preview.reviewLabel")
+              : t("business.onboarding.preview.liveLabel")}
           </p>
           <span className="business-onboarding-guest-preview__badge">
             {t("business.onboarding.preview.previewOnlyBadge")}
@@ -218,44 +213,33 @@ export function BusinessOnboardingGuestPreview({
                     <BusinessLogoMark
                       logoPathOrUrl={heroLogoSrc}
                       businessName={displayName}
-                      size="hero"
+                      size="customer"
+                      className="business-onboarding-guest-preview__hero-logo"
                     />
                   </div>
-                  <CardContent className="space-y-4 p-5">
-                    <div>
-                      <h2
-                        className={cn(
-                          "business-onboarding-guest-preview__venue-title",
-                          venueNameLine.isPlaceholder && "business-onboarding-guest-preview__text--placeholder",
-                        )}
-                      >
-                        {displayName}
-                      </h2>
-                      <div className="business-onboarding-guest-preview__meta-row">
-                        {showAddressMeta ? (
-                          <span className="business-onboarding-guest-preview__meta-item">
-                            <MapPin className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                            <span
-                              className={cn(
-                                addressLine.isPlaceholder &&
-                                  "business-onboarding-guest-preview__text--placeholder",
-                              )}
-                            >
-                              {addressLine.text}
-                            </span>
-                          </span>
-                        ) : null}
-                        <span className="business-onboarding-guest-preview__meta-item">
-                          <Building2 className="h-4 w-4 shrink-0 text-primary" aria-hidden />
-                          <span
-                            className={cn(
-                              venueTypeLine.isPlaceholder && "business-onboarding-guest-preview__text--placeholder",
-                            )}
-                          >
-                            {venueTypeLine.text}
-                          </span>
+                  <CardContent className="space-y-4 p-5 pt-3">
+                    <div className="business-onboarding-guest-preview__meta-row">
+                      <span className="business-onboarding-guest-preview__meta-item">
+                        <MapPin className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+                        <span
+                          className={cn(
+                            addressLine.isPlaceholder &&
+                              "business-onboarding-guest-preview__text--placeholder",
+                          )}
+                        >
+                          {addressLine.text}
                         </span>
-                      </div>
+                      </span>
+                      <span className="business-onboarding-guest-preview__meta-item">
+                        <Building2 className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden />
+                        <span
+                          className={cn(
+                            venueTypeLine.isPlaceholder && "business-onboarding-guest-preview__text--placeholder",
+                          )}
+                        >
+                          {venueTypeLine.text}
+                        </span>
+                      </span>
                     </div>
                     <div className="business-onboarding-guest-preview__staff-pill">
                       <Users className="h-5 w-5 shrink-0 text-primary" aria-hidden />

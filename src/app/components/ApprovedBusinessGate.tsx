@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Outlet } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
 import { primeSubscriptionTierFromSession } from "../lib/subscriptionSessionCache";
@@ -7,6 +8,11 @@ import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
+import {
+  APP_LOADING_PRIORITY,
+  useAppLoadingRegistration,
+} from "../context/AppLoadingManager";
+import { AppRouteGateShell } from "./AppRouteGateShell";
 
 function mapDbVerificationToStatus(
   v: "pending" | "verified" | "rejected" | undefined,
@@ -22,7 +28,9 @@ function mapDbVerificationToStatus(
  * Dashboard stays accessible for all managers; QR / public flows gate on `user.status` elsewhere.
  */
 export function ApprovedBusinessGate() {
+  const { t } = useTranslation();
   const { user, updateUser, sessionValidated, authStatus } = useAuth();
+  const [profileSynced, setProfileSynced] = useState(false);
 
   const canSyncProfile =
     sessionValidated &&
@@ -32,8 +40,12 @@ export function ApprovedBusinessGate() {
     !user.impersonation;
 
   useEffect(() => {
-    if (!canSyncProfile) return;
+    if (!canSyncProfile) {
+      setProfileSynced(true);
+      return;
+    }
     let cancelled = false;
+    setProfileSynced(false);
     void fetchBusinessProfile()
       .then((p) => {
         if (cancelled) return;
@@ -45,11 +57,14 @@ export function ApprovedBusinessGate() {
         if (!isApiConnectivityError(err)) {
           logClientError("ApprovedBusinessGate", err);
         }
+      })
+      .finally(() => {
+        if (!cancelled) setProfileSynced(true);
       });
     return () => {
       cancelled = true;
     };
-  }, [canSyncProfile, updateUser]);
+  }, [canSyncProfile, updateUser, user?.id]);
 
   useEffect(() => {
     if (!canSyncProfile) return;
@@ -66,10 +81,22 @@ export function ApprovedBusinessGate() {
     return () => window.removeEventListener("focus", refresh);
   }, [canSyncProfile, updateUser]);
 
+  const syncBlocking = canSyncProfile && !profileSynced;
+  useAppLoadingRegistration(
+    "dashboard-kyc-gate",
+    APP_LOADING_PRIORITY.ROUTE_GUARD,
+    syncBlocking,
+    t("common.syncingAccountStatus"),
+  );
+
   if (!user) return <GlobalAppLoadingHold />;
 
   if (user.impersonation) {
     return <Outlet />;
+  }
+
+  if (syncBlocking) {
+    return <AppRouteGateShell />;
   }
 
   return <Outlet />;
