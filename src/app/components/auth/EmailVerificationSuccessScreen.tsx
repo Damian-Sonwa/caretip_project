@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { useAuth } from "@/app/hooks/useAuth";
+import { getLoginPathForSessionRole } from "@/app/lib/authSession";
 import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 
@@ -11,11 +12,12 @@ import { cn } from "@/lib/utils";
 export function EmailVerificationSuccessScreen() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const handleContinue = () => {
-    logout();
-    navigate("/login", { replace: true });
+    const loginPath = getLoginPathForSessionRole(user?.role ?? "user");
+    void logout();
+    navigate(loginPath, { replace: true });
   };
 
   return (

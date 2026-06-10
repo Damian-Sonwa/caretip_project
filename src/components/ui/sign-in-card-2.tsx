@@ -18,6 +18,8 @@ export interface SignInCard2Props {
   formBusy?: boolean;
   /** When true, hides sign-in/sign-up toggle and role selector (active session flow). */
   sessionActive?: boolean;
+  /** Team invite in URL/form — lock account type to Staff. */
+  roleLocked?: boolean;
 }
 
 /**
@@ -32,6 +34,7 @@ export function SignInCard2({
   className,
   formBusy = false,
   sessionActive = false,
+  roleLocked = false,
 }: SignInCard2Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
@@ -130,31 +133,39 @@ export function SignInCard2({
                 </button>
               </div>
 
-              <div className="mb-4 w-full">
-                <label htmlFor="auth-role-select" className="caretip-auth-label">
-                  {t("auth.signInCard.accountTypeLabel")}
-                </label>
-                <div className="relative">
-                  <select
-                    id="auth-role-select"
-                    disabled={formBusy}
-                    value={role}
-                    onChange={(e) => onRoleChange(e.target.value as AuthRole)}
-                    className={cn(
-                      "caretip-auth-field",
-                      "disabled:cursor-not-allowed disabled:opacity-50",
-                      "[&>option]:bg-white [&>option]:text-neutral-900 dark:[&>option]:bg-neutral-900 dark:[&>option]:text-neutral-100",
-                    )}
-                  >
-                    <option value="business">{t("auth.signInCard.roleBusiness")}</option>
-                    <option value="employee">{t("auth.signInCard.roleStaff")}</option>
-                  </select>
-                  <ChevronDown
-                    className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400"
-                    aria-hidden
-                  />
+              {isLogin ? (
+                <div className="caretip-auth-role-reserve" aria-hidden />
+              ) : roleLocked ? (
+                <p className="caretip-auth-helper mb-4 text-left">
+                  {t("auth.signInCard.roleStaff")} · {t("auth.signInCard.roleLockedInviteHint")}
+                </p>
+              ) : (
+                <div className="mb-4 w-full">
+                  <label htmlFor="auth-role-select" className="caretip-auth-label">
+                    {t("auth.signInCard.accountTypeLabel")}
+                  </label>
+                  <div className="relative">
+                    <select
+                      id="auth-role-select"
+                      disabled={formBusy}
+                      value={role}
+                      onChange={(e) => onRoleChange(e.target.value as AuthRole)}
+                      className={cn(
+                        "caretip-auth-field",
+                        "disabled:cursor-not-allowed disabled:opacity-50",
+                        "[&>option]:bg-white [&>option]:text-neutral-900 dark:[&>option]:bg-neutral-900 dark:[&>option]:text-neutral-100",
+                      )}
+                    >
+                      <option value="business">{t("auth.signInCard.roleBusiness")}</option>
+                      <option value="employee">{t("auth.signInCard.roleStaff")}</option>
+                    </select>
+                    <ChevronDown
+                      className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500 dark:text-neutral-400"
+                      aria-hidden
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </>
           ) : null}
 

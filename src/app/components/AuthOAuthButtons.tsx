@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -30,7 +30,12 @@ export function AuthOAuthButtons({
   const { t } = useTranslation();
   const googleClientId = googleOAuthWebClientId();
   const [gsiOriginError, setGsiOriginError] = useState(false);
+  const [gsiMounted, setGsiMounted] = useState(false);
   const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
+
+  useEffect(() => {
+    setGsiMounted(true);
+  }, []);
 
   const onGoogleError = useCallback(() => {
     setGsiOriginError(true);
@@ -71,19 +76,23 @@ export function AuthOAuthButtons({
       )}
       title={!isLogin && !canOAuthSignUp ? t("auth.oauth.signupBlockedTitle") : undefined}
     >
-      <GoogleLogin
-        onSuccess={(cred) => {
-          setGsiOriginError(false);
-          if (cred.credential) onGoogleCredential(cred.credential);
-        }}
-        onError={onGoogleError}
-        useOneTap={false}
-        theme="outline"
-        size="large"
-        width={320}
-        text={isLogin ? "continue_with" : "signup_with"}
-        shape="rectangular"
-      />
+      {gsiMounted ? (
+        <GoogleLogin
+          onSuccess={(cred) => {
+            setGsiOriginError(false);
+            if (cred.credential) onGoogleCredential(cred.credential);
+          }}
+          onError={onGoogleError}
+          useOneTap={false}
+          theme="outline"
+          size="large"
+          width={320}
+          text={isLogin ? "continue_with" : "signup_with"}
+          shape="rectangular"
+        />
+      ) : (
+        <div className="caretip-auth-oauth-mount" aria-hidden />
+      )}
     </div>
   );
 }

@@ -21,6 +21,11 @@ Desktop.ini
 .restore_*.txt
 *.restore_*_report.txt
 
+# Firebase / cloud credentials (never commit)
+Untitled
+caretip-firebase-sa.txt
+*firebase*sa*.txt
+
 # Cursor IDE (local rules, agents, state)
 .cursor/
 

@@ -331,12 +331,8 @@ export function useAuth() {
     }
   }, [user, authHydrated, sessionValidated]);
 
-  const login = useCallback(async (
-    email: string,
-    password: string,
-    intendedRole: "business" | "employee" | "platform_admin"
-  ): Promise<User> => {
-    const data = await loginAPI(email, password, intendedRole, requestLocale);
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
+    const data = await loginAPI(email, password, requestLocale);
     const u = persistAuthResponse(data);
     bumpSessionEpoch();
     commitAuthUser(u);
@@ -358,7 +354,7 @@ export function useAuth() {
     idToken: string,
     options: {
       isLogin: boolean;
-      intendedRole: "business" | "employee";
+      intendedRole?: "business" | "employee";
       name?: string;
       businessName?: string;
       businessType?: string;
@@ -370,7 +366,7 @@ export function useAuth() {
       provider,
       idToken,
       isLogin: options.isLogin,
-      intendedRole: options.intendedRole,
+      ...(options.intendedRole ? { intendedRole: options.intendedRole } : {}),
       name: options.name,
       businessName: options.businessName,
       businessType: options.businessType,

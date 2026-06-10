@@ -547,13 +547,113 @@ select.caretip-auth-field {
 }
 
 .caretip-auth-oauth {
-  min-height: 2.75rem;
+  min-height: 2.5rem;
 }
 
 .caretip-auth-oauth > div {
   width: 100% !important;
   display: flex !important;
   justify-content: center !important;
+}
+
+.caretip-auth-oauth-mount {
+  width: 100%;
+  max-width: 20rem;
+  min-height: 2.5rem;
+  margin-inline: auto;
+  border-radius: 0.375rem;
+  background: rgba(244, 244, 245, 0.85);
+}
+
+.dark .caretip-auth-oauth-mount {
+  background: rgba(39, 39, 42, 0.55);
+}
+
+.caretip-auth-oauth--busy {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+/* —— Layout stability (CLS) —— */
+.caretip-auth-error-slot {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: flex-start;
+  font-size: 0.875rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgb(220 38 38);
+}
+
+.caretip-auth-field-error-slot {
+  min-height: 1.125rem;
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgb(220 38 38);
+}
+
+.caretip-auth-form-status-slot {
+  min-height: 1rem;
+  margin: 0;
+  text-align: center;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.25;
+  color: rgb(115 115 115);
+}
+
+.dark .caretip-auth-form-status-slot {
+  color: rgb(163 163 163);
+}
+
+.caretip-auth-resend-slot {
+  display: flex;
+  min-height: 2.75rem;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.caretip-auth-role-reserve {
+  min-height: 4.625rem;
+  margin-bottom: 1rem;
+}
+
+.caretip-auth-password-rules-slot {
+  min-height: 6.25rem;
+}
+
+.caretip-auth-submit--stable {
+  position: relative;
+}
+
+.caretip-auth-submit-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.caretip-auth-submit--stable[aria-busy="true"] .caretip-auth-submit-label {
+  visibility: hidden;
+}
+
+.caretip-auth-submit-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  pointer-events: none;
+  color: #fff;
+}
+
+.caretip-auth-submit--secondary .caretip-auth-submit-spinner {
+  color: rgb(64 64 64);
+}
+
+.dark .caretip-auth-submit--secondary .caretip-auth-submit-spinner {
+  color: rgb(212 212 212);
 }
 
 /* —— Session / cross-lane hints —— */

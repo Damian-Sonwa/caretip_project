@@ -3,8 +3,8 @@ import { prisma } from "../prisma.js";
 import {
   authResultForUserRecord,
   normalizeLoginEmail,
+  type AuthIntendedRole,
   type AuthResult,
-  type LoginInput,
 } from "./auth.service.js";
 import * as businessService from "./business.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
@@ -27,12 +27,58 @@ export const GOOGLE_ACCOUNT_NOT_REGISTERED_MESSAGE =
 
 export const GOOGLE_ACCOUNT_NOT_REGISTERED_CODE = "GOOGLE_ACCOUNT_NOT_REGISTERED" as const;
 
+export const GOOGLE_TOKEN_VERIFICATION_FAILED_CODE = "GOOGLE_TOKEN_VERIFICATION_FAILED" as const;
+
+export class GoogleTokenVerificationError extends Error {
+  readonly code = GOOGLE_TOKEN_VERIFICATION_FAILED_CODE;
+
+  constructor(cause?: unknown) {
+    super("Google sign-in could not be verified.");
+    this.name = "GoogleTokenVerificationError";
+    if (cause !== undefined) {
+      (this as Error & { cause?: unknown }).cause = cause;
+    }
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
+
+export function resolveGoogleOAuthClientId(): string | null {
+  const audiences = resolveGoogleOAuthAudiences();
+  return audiences[0] ?? null;
+}
+
+/** All Web client IDs the API will accept (comma-separated `GOOGLE_CLIENT_IDS` or single `GOOGLE_CLIENT_ID`). */
+export function resolveGoogleOAuthAudiences(): string[] {
+  const fromList = process.env.GOOGLE_CLIENT_IDS?.split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (fromList?.length) {
+    return [...new Set(fromList)];
+  }
+  const single =
+    process.env.GOOGLE_CLIENT_ID?.trim() || process.env.VITE_GOOGLE_CLIENT_ID?.trim() || null;
+  return single ? [single] : [];
+}
+
+function peekJwtAudience(idToken: string): string | string[] | undefined {
+  try {
+    const segment = idToken.split(".")[1];
+    if (!segment) return undefined;
+    const json = Buffer.from(segment, "base64url").toString("utf8");
+    const parsed = JSON.parse(json) as { aud?: string | string[] };
+    return parsed.aud;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Social OAuth supported by `/api/auth/oauth` (Google only; Apple removed temporarily). */
 export type OAuthProvider = "google";
 
 export interface OAuthAuthBody {
   idToken: string;
-  intendedRole: LoginInput["intendedRole"];
+  /** Required for sign-up only; login uses DB role. */
+  intendedRole?: AuthIntendedRole;
   isLogin: boolean;
   name?: string;
   businessName?: string;
@@ -48,19 +94,28 @@ async function verifyGoogleIdToken(idToken: string): Promise<{
   sub: string;
   name: string;
 }> {
-  /** Same Web client ID as the SPA; prefer `GOOGLE_CLIENT_ID` on the server, fall back to `VITE_*` when root `.env` only defines the Vite name. */
-  const clientId =
-    process.env.GOOGLE_CLIENT_ID?.trim() || process.env.VITE_GOOGLE_CLIENT_ID?.trim();
-  if (!clientId) {
+  const audiences = resolveGoogleOAuthAudiences();
+  if (audiences.length === 0) {
     throw new Error(
       "Google sign-in is not configured on the server. Set GOOGLE_CLIENT_ID (or VITE_GOOGLE_CLIENT_ID) to your Google Web client ID.",
     );
   }
-  const client = new OAuth2Client(clientId);
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience: clientId,
-  });
+  const client = new OAuth2Client(audiences[0]);
+  let ticket;
+  try {
+    ticket = await client.verifyIdToken({
+      idToken,
+      audience: audiences.length === 1 ? audiences[0]! : audiences,
+    });
+  } catch (err) {
+    const detail = err instanceof Error ? err.message : String(err);
+    const tokenAud = peekJwtAudience(idToken);
+    console.error("[oauth] Google ID token verification failed:", detail, {
+      tokenAudience: tokenAud,
+      expectedAudiences: audiences.map((id) => `…${id.slice(-24)}`),
+    });
+    throw new GoogleTokenVerificationError(err);
+  }
   const p = ticket.getPayload();
   if (!p?.email || !p.sub) {
     throw new Error("Google token did not include email or subject.");
@@ -176,6 +231,46 @@ export async function authenticateWithOAuth(
 
   if (!verified.email) {
     throw new Error("Google did not return an email for this account.");
+  }
+
+  if (!intendedRole) {
+    throw new Error("intendedRole is required for OAuth sign-up.");
+  }
+
+  const inviteCodeTrimmed = inviteCode?.trim() ?? "";
+  if (inviteCodeTrimmed) {
+    const inviteBusiness = await prisma.business.findFirst({
+      where: {
+        inviteCode: inviteCodeTrimmed,
+        inviteCodeExpiresAt: { gt: new Date() },
+      },
+      select: { id: true },
+    });
+    if (!inviteBusiness) {
+      throw new Error("Invalid or expired invite code");
+    }
+    const created = await prisma.user.create({
+      data: {
+        email: verified.email,
+        passwordHash: null,
+        oauthProvider,
+        oauthSubject,
+        role: "EMPLOYEE",
+        isPlatformAdmin: false,
+        emailVerified: true,
+        preferredLocale,
+        employee: {
+          create: {
+            name: displayName,
+            jobTitle: "Staff",
+            businessId: inviteBusiness.id,
+            activationStatus: "active",
+          },
+        },
+      },
+      include: { employee: true },
+    });
+    return authResultForUserRecord(created);
   }
 
   if (intendedRole === "MANAGER") {

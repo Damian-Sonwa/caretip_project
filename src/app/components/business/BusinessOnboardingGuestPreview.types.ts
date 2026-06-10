@@ -11,4 +11,14 @@ export type GuestPreviewData = {
   savedLogoPath: string | null;
   employeeCount: number;
   onboardingStep: OnboardingStep;
+  /** Loads real team photos on review step when available. */
+  businessId?: string;
+};
+
+export type TipPreviewStaffMember = {
+  id: string;
+  displayName: string;
+  photoUrl: string | null;
+  roleLabel: string;
+  isLive: boolean;
 };

@@ -25,7 +25,7 @@ async function main() {
     }
     let auth = "skip";
     try {
-      await login({ email: a.email, password: "Demo1234!", intendedRole: a.role });
+      await login({ email: a.email, password: "Demo1234!" });
       auth = "OK";
     } catch (e) {
       auth = e instanceof Error ? e.message : "fail";

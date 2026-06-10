@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Loader2 } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { AuthErrorSlot, AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
 import { requestPasswordReset } from "@/app/lib/api";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import { logClientError } from "@/app/lib/clientLog";
@@ -82,25 +82,15 @@ export function ForgotPasswordPage() {
               placeholder="you@example.com"
             />
           </div>
-          {error ? (
-            <p className="text-sm font-medium text-red-600" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <button
+          <AuthErrorSlot>{error || null}</AuthErrorSlot>
+          <AuthStableSubmitButton
             type="submit"
-            disabled={submitting}
-            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2 disabled:cursor-not-allowed")}
+            loading={submitting}
+            loadingAriaLabel={t("auth.forgot.sending")}
+            className="disabled:cursor-not-allowed"
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                {t("auth.forgot.sending")}
-              </>
-            ) : (
-              t("auth.forgot.sendResetLink")
-            )}
-          </button>
+            {t("auth.forgot.sendResetLink")}
+          </AuthStableSubmitButton>
         </form>
       </div>
     </AuthRecoveryLayout>

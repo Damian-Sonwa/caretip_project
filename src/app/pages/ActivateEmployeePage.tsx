@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import {
+  AuthErrorSlot,
+  AuthFieldErrorSlot,
+  AuthStableSubmitButton,
+} from "@/app/components/auth/AuthFormStability";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import { BusinessLogoMark } from "@/app/components/business/BusinessLogoMark";
 import { activateEmployeeWithToken, getActivateEmployeeBranding } from "@/app/lib/api";
@@ -76,7 +81,7 @@ export function ActivateEmployeePage() {
       <AuthRecoveryLayout>
         <p className="text-center text-sm text-red-600">This activation link is invalid.</p>
         <Link
-          to="/login"
+          to="/employee/login"
           className="mt-4 block text-center text-sm font-medium text-primary hover:underline"
         >
           Go to login
@@ -93,7 +98,7 @@ export function ActivateEmployeePage() {
           <p className="caretip-auth-subtitle !mt-2">Your password is set. You can sign in now.</p>
           <button
             type="button"
-            onClick={() => navigate("/login", { replace: true })}
+            onClick={() => navigate("/employee/login", { replace: true })}
             className={cn(caretipBtnPrimaryFull, "caretip-auth-submit")}
           >
             Back to login
@@ -166,32 +171,23 @@ export function ActivateEmployeePage() {
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {mismatchHint ? <p className="mt-1 text-xs font-medium text-red-600">{mismatchHint}</p> : null}
+            <AuthFieldErrorSlot>{mismatchHint}</AuthFieldErrorSlot>
           </div>
-          {error ? (
-            <p className="text-sm font-medium text-red-600" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <button
+          <AuthErrorSlot>{error || null}</AuthErrorSlot>
+          <AuthStableSubmitButton
             type="submit"
+            loading={submitting}
+            loadingAriaLabel="Setting password"
             disabled={!canSubmit}
-            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2 disabled:cursor-not-allowed")}
+            className="disabled:cursor-not-allowed"
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                Setting…
-              </>
-            ) : (
-              "Set your password"
-            )}
-          </button>
-          {!strong && newPassword.length > 0 ? (
-            <p className="text-center text-xs text-neutral-600 dark:text-neutral-400">
-              Use 8+ characters with upper, lower, number, and special (e.g. @#$%).
-            </p>
-          ) : null}
+            Set your password
+          </AuthStableSubmitButton>
+          <p className="caretip-auth-form-status-slot text-center">
+            {!strong && newPassword.length > 0
+              ? "Use 8+ characters with upper, lower, number, and special (e.g. @#$%)."
+              : null}
+          </p>
         </form>
       </div>
     </AuthRecoveryLayout>

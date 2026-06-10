@@ -207,12 +207,12 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business/login',
-    Component: AuthPage,
+    element: <Navigate to="/login" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/employee/login',
-    Component: AuthPage,
+    element: <Navigate to="/login" replace />,
     errorElement: <ErrorBoundary />,
   },
   {

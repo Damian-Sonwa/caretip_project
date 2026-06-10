@@ -71,6 +71,27 @@ async function assertEnvForAuth(): Promise<void> {
     );
     process.exit(1);
   }
+  const googleAudiences =
+    process.env.GOOGLE_CLIENT_IDS?.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean) ??
+    [];
+  const googleClientId =
+    googleAudiences[0] ||
+    process.env.GOOGLE_CLIENT_ID?.trim() ||
+    process.env.VITE_GOOGLE_CLIENT_ID?.trim();
+  if (!googleClientId) {
+    console.warn(
+      "[auth] GOOGLE_CLIENT_ID is not set — POST /api/auth/oauth will return 503 for Google sign-in.",
+    );
+  } else {
+    const suffixes = (googleAudiences.length > 0
+      ? googleAudiences
+      : [googleClientId]
+    ).map((id) => `…${id.slice(-24)}`);
+    console.log(`[auth] Google OAuth audience(s): ${suffixes.join(", ")}`);
+  }
+
   // Do not $disconnect — shared prisma singleton is used for the whole process.
 }
 

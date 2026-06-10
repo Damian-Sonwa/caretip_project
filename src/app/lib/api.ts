@@ -702,7 +702,6 @@ function toBackendIntendedRole(
 export async function loginAPI(
   email: string,
   password: string,
-  intendedRole: "business" | "employee" | "platform_admin",
   locale?: "en" | "de"
 ): Promise<AuthResponse> {
   const timeZone = getBrowserTimeZone();
@@ -712,7 +711,6 @@ export async function loginAPI(
     body: toJsonRequestBody({
       email,
       password,
-      intendedRole: toBackendIntendedRole(intendedRole),
       ...(locale ? { locale } : {}),
       ...(timeZone ? { timeZone } : {}),
     }),
@@ -843,7 +841,8 @@ export async function oauthAPI(payload: {
   provider: "google";
   idToken: string;
   isLogin: boolean;
-  intendedRole: "business" | "employee";
+  /** Sign-up only; omitted on login (role from database). */
+  intendedRole?: "business" | "employee";
   name?: string;
   businessName?: string;
   businessType?: string;
@@ -859,7 +858,9 @@ export async function oauthAPI(payload: {
       provider: payload.provider,
       idToken: payload.idToken,
       isLogin: payload.isLogin,
-      intendedRole: toBackendIntendedRole(payload.intendedRole),
+      ...(payload.intendedRole
+        ? { intendedRole: toBackendIntendedRole(payload.intendedRole) }
+        : {}),
       ...(payload.name ? { name: payload.name } : {}),
       ...(payload.businessName ? { businessName: payload.businessName } : {}),
       ...(payload.businessType ? { businessType: payload.businessType } : {}),

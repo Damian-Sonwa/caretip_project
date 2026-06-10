@@ -69,6 +69,7 @@ async function notifyLoginSecurityAlerts(
 const LOGIN_CLIENT_MESSAGES = new Set([
   "Invalid email or password",
   "Login failed",
+  "This account uses Google sign-in.",
   "This account does not have Business permissions.",
   "This account does not have Staff permissions.",
   "Use the Platform Admin sign-in for this account.",
@@ -144,6 +145,35 @@ export async function register(req: Request, res: Response) {
     const locale =
       typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
 
+    const inviteTrimmed =
+      typeof inviteCode === "string" ? inviteCode.trim() : "";
+    if (inviteTrimmed) {
+      const inviteCheck = await businessService.validateInviteCode(inviteTrimmed);
+      if (!inviteCheck.ok) {
+        return res.status(400).json({ message: "Invalid or expired invite code" });
+      }
+      if (!name) {
+        return res.status(400).json({ message: "Name is required" });
+      }
+      const result = await authService.registerEmployee(
+        {
+          email,
+          password,
+          name,
+          inviteCode: inviteTrimmed,
+          locale,
+        },
+        { acceptLanguage },
+      );
+      try {
+        const rt = await issueRefreshToken(result.user.id);
+        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
+      } catch (e) {
+        logServerError("auth.register.issueRefreshToken", e);
+      }
+      return res.status(201).json(result);
+    }
+
     if (role === "business") {
       const result = await authService.registerBusiness(
         {
@@ -205,21 +235,13 @@ export async function login(req: Request, res: Response) {
       typeof body.email === "string" ? body.email : "",
     );
     const password = body.password;
-    const intendedRole = authService.parseLoginIntendedRole(body.intendedRole);
 
     if (!email || typeof password !== "string") {
       return res.status(400).json({ message: "Email and password are required" });
     }
-    if (!intendedRole) {
-      return res.status(400).json({
-        message:
-          "intendedRole is required and must be 'MANAGER', 'EMPLOYEE', or 'SUPER_ADMIN'",
-      });
-    }
     const result = await authService.login({
       email,
       password,
-      intendedRole,
     });
 
     const loginClientLocale =
@@ -500,7 +522,7 @@ export async function oauth(req: Request, res: Response) {
     if (!idToken.trim()) {
       return res.status(400).json({ message: "idToken is required" });
     }
-    if (!intendedRole) {
+    if (!isLogin && !intendedRole) {
       return res.status(400).json({
         message:
           "intendedRole is required and must be 'MANAGER', 'EMPLOYEE', or 'SUPER_ADMIN'",
@@ -513,7 +535,7 @@ export async function oauth(req: Request, res: Response) {
       provider,
       {
         idToken,
-        intendedRole,
+        intendedRole: intendedRole ?? undefined,
         isLogin,
         name,
         businessName,
@@ -555,6 +577,14 @@ export async function oauth(req: Request, res: Response) {
       });
     }
     const message = err instanceof Error ? err.message : "OAuth sign-in failed";
+    if (err instanceof oauthAuthService.GoogleTokenVerificationError) {
+      logServerError("auth.oauth.verifyIdToken", err);
+      return res.status(401).json({
+        message:
+          "Google sign-in could not be verified. The server OAuth client may not match the site — contact support if this continues.",
+        code: oauthAuthService.GOOGLE_TOKEN_VERIFICATION_FAILED_CODE,
+      });
+    }
     if (message.includes("not configured") || message.includes("GOOGLE_CLIENT_ID")) {
       logServerError("auth.oauth", err);
       return res.status(503).json({ message: CLIENT_FALLBACK.loginUnexpected });

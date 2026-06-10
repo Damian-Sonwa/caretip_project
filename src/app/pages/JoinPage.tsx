@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { KeyRound, Loader2 } from "lucide-react";
+import { KeyRound } from "lucide-react";
+import { AuthErrorSlot, AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
 import { Navigation } from "../components/Navigation";
 import { Footer } from "../components/Footer";
 import { validateInviteCode } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
-import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 
 export function JoinPage() {
   const { t } = useTranslation();
@@ -75,27 +75,18 @@ export function JoinPage() {
                 </div>
               </label>
 
-              <button
-                type="submit"
-                disabled={!code.trim() || busy}
-                className={`${caretipBtnPrimaryFull} disabled:cursor-not-allowed disabled:opacity-60`}
-              >
-                {busy ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                    {t("join.checking")}
-                  </>
-                ) : (
-                  <>
-                    {t("join.continue")}
-                  </>
-                )}
-              </button>
-            </form>
+              <AuthErrorSlot>{error || null}</AuthErrorSlot>
 
-            {error ? (
-              <p className="mt-3 text-center text-sm font-medium text-red-600 dark:text-red-400">{error}</p>
-            ) : null}
+              <AuthStableSubmitButton
+                type="submit"
+                loading={busy}
+                loadingAriaLabel={t("join.checking")}
+                disabled={!code.trim()}
+                className="disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {t("join.continue")}
+              </AuthStableSubmitButton>
+            </form>
 
             <div className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
               {t("join.footerPrompt")}{" "}

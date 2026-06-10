@@ -1,8 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import {
+  AuthErrorSlot,
+  AuthFieldErrorSlot,
+  AuthStableSubmitButton,
+} from "@/app/components/auth/AuthFormStability";
 import { resetPasswordWithToken } from "@/app/lib/api";
 import { isPasswordStrong } from "@/app/lib/passwordValidation";
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
@@ -134,34 +139,21 @@ export function ResetPasswordPage() {
                 {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
-            {mismatchHint ? (
-              <p className="mt-1 text-xs font-medium text-red-600">{mismatchHint}</p>
-            ) : null}
+            <AuthFieldErrorSlot>{mismatchHint}</AuthFieldErrorSlot>
           </div>
-          {error ? (
-            <p className="text-sm font-medium text-red-600" role="alert">
-              {error}
-            </p>
-          ) : null}
-          <button
+          <AuthErrorSlot>{error || null}</AuthErrorSlot>
+          <AuthStableSubmitButton
             type="submit"
+            loading={submitting}
+            loadingAriaLabel={t("auth.reset.saving")}
             disabled={!canSubmit}
-            className={cn(caretipBtnPrimaryFull, "caretip-auth-submit gap-2 disabled:cursor-not-allowed")}
+            className="disabled:cursor-not-allowed"
           >
-            {submitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                {t("auth.reset.saving")}
-              </>
-            ) : (
-              t("auth.reset.updatePassword")
-            )}
-          </button>
-          {!strong && newPassword.length > 0 ? (
-            <p className="caretip-auth-helper text-center">
-              {t("auth.reset.hintWeak")}
-            </p>
-          ) : null}
+            {t("auth.reset.updatePassword")}
+          </AuthStableSubmitButton>
+          <p className="caretip-auth-form-status-slot text-center">
+            {!strong && newPassword.length > 0 ? t("auth.reset.hintWeak") : null}
+          </p>
         </form>
       </div>
     </AuthRecoveryLayout>

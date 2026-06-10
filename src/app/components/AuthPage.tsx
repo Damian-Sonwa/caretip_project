@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'motion/react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { Navigation } from './Navigation';
@@ -12,7 +11,7 @@ import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
 import { useAuth, type UserRole } from '../hooks/useAuth';
-import { KeyRound, Eye, EyeOff, Check, Loader2 } from 'lucide-react';
+import { KeyRound, Eye, EyeOff, Check } from 'lucide-react';
 import {
   getPasswordChecklist,
   isPasswordStrong,
@@ -29,8 +28,6 @@ import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
 import {
   caretipBtnPrimaryCompact,
-  caretipBtnPrimaryFull,
-  caretipBtnSecondaryFull,
 } from '@/lib/caretipButtonSystem';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -38,6 +35,11 @@ import { getPostAuthRedirect } from '../hooks/useAuth';
 import { commitAuthUser, hasClientStoredSession } from '../lib/authUserStore';
 import { hasClientSessionHint } from '../lib/authSessionHint';
 import { AuthPageAtmosphere } from './auth/AuthPageAtmosphere';
+import {
+  AuthErrorSlot,
+  AuthFormStatusSlot,
+  AuthStableSubmitButton,
+} from './auth/AuthFormStability';
 import {
   isPublicAuthenticationPath,
   sessionMatchesBusinessStaffAuthTarget,
@@ -141,6 +143,14 @@ export function AuthPage() {
     }
   }, [location.pathname, location.search]);
 
+  const inviteContextActive = inviteCode.trim().length > 0;
+
+  useEffect(() => {
+    if (inviteContextActive && role !== "employee") {
+      setRole("employee");
+    }
+  }, [inviteContextActive, role]);
+
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -167,20 +177,20 @@ export function AuthPage() {
     }
 
     if (!isLogin) {
-      if (role === 'employee' && !name) {
-        setError(t('auth.page.errorFullName'));
+      if ((role === "employee" || inviteContextActive) && !name) {
+        setError(t("auth.page.errorFullName"));
         return;
       }
       if (password !== confirmPassword) {
-        setError(t('auth.page.errorPasswordsMismatch'));
+        setError(t("auth.page.errorPasswordsMismatch"));
         return;
       }
       if (!isPasswordStrong(password)) {
-        setError(t('auth.page.errorPasswordWeak'));
+        setError(t("auth.page.errorPasswordWeak"));
         return;
       }
-      if (role === 'employee' && !inviteCode) {
-        setError(t('auth.page.errorInviteRequired'));
+      if ((role === "employee" || inviteContextActive) && !inviteCode.trim()) {
+        setError(t("auth.page.errorInviteRequired"));
         return;
       }
     }
@@ -191,7 +201,7 @@ export function AuthPage() {
 
     try {
       if (isLogin) {
-        const loggedIn = await login(email, password, role as 'business' | 'employee');
+        const loggedIn = await login(email, password);
         navigate(getPostAuthRedirect(loggedIn), { replace: true });
       } else {
         const payload = {
@@ -199,9 +209,10 @@ export function AuthPage() {
           password,
           name: name.trim() ? name : undefined,
           role: role as 'business' | 'employee',
-          inviteCode: role === 'employee' ? inviteCode : undefined,
+          inviteCode:
+            inviteContextActive || role === "employee" ? inviteCode.trim() : undefined,
         };
-        if (role === "employee") {
+        if (inviteContextActive || role === "employee") {
           await validateInviteCode(inviteCode);
         }
         const created = await register(payload);
@@ -291,10 +302,15 @@ export function AuthPage() {
   };
 
   const toggleRole = (newRole: AuthRole) => {
+    if (inviteContextActive && newRole === "business") {
+      return;
+    }
     setRole(newRole);
-    setError('');
-    setName('');
-    setInviteCode('');
+    setError("");
+    setName("");
+    if (!inviteContextActive) {
+      setInviteCode("");
+    }
     setShowPasswordChecklist(false);
     setUnlockedFields(new Set());
   };
@@ -314,16 +330,14 @@ export function AuthPage() {
       navigate(getPostAuthRedirect(user), { replace: true });
       return;
     }
-    if (!isLogin) {
-      if (role === 'employee') {
-        if (!name.trim()) {
-          setError(t('auth.page.errorFullName'));
-          return;
-        }
-        if (!inviteCode.trim()) {
-          setError(t('auth.page.errorInviteRequired'));
-          return;
-        }
+    if (!isLogin && (role === "employee" || inviteContextActive)) {
+      if (!name.trim()) {
+        setError(t("auth.page.errorFullName"));
+        return;
+      }
+      if (!inviteCode.trim()) {
+        setError(t("auth.page.errorInviteRequired"));
+        return;
       }
     }
     if (authInFlightRef.current) return;
@@ -333,11 +347,16 @@ export function AuthPage() {
     setShowResendVerification(false);
     commitAuthUser(null);
     try {
-      const loggedIn = await loginWithOAuth('google', idToken, {
+      const loggedIn = await loginWithOAuth("google", idToken, {
         isLogin,
-        intendedRole: role,
-        name: name.trim() ? name.trim() : undefined,
-        inviteCode: role === 'employee' ? inviteCode.trim() : undefined,
+        ...(!isLogin
+          ? {
+              intendedRole: inviteContextActive ? "employee" : role,
+              name: name.trim() ? name.trim() : undefined,
+              inviteCode:
+                inviteContextActive || role === "employee" ? inviteCode.trim() : undefined,
+            }
+          : {}),
       });
       navigate(getPostAuthRedirect(loggedIn), { replace: true });
     } catch (err) {
@@ -379,9 +398,8 @@ export function AuthPage() {
     hasClientStoredSession() || hasClientSessionHint() || user != null;
 
   const showAuthBlocking =
-    (authStatus === "initializing" && !isSubmitting && mayRestoreSessionOnAuthPage) ||
-    redirectingAfterAuth ||
-    isSubmitting;
+    (authStatus === "initializing" && mayRestoreSessionOnAuthPage) ||
+    redirectingAfterAuth;
 
   useAppLoadingRegistration("auth-page", APP_LOADING_PRIORITY.AUTH, showAuthBlocking);
 
@@ -389,12 +407,19 @@ export function AuthPage() {
     return <GlobalAppLoadingHold />;
   }
 
-  const sameLaneValidated = user != null && sessionValidated && sessionMatchesBusinessStaffAuthTarget(user.role, role);
+  const sameLaneValidated =
+    user != null &&
+    sessionValidated &&
+    (isLogin || sessionMatchesBusinessStaffAuthTarget(user.role, role));
   const showSignInForm =
     !user ||
-    !sessionMatchesBusinessStaffAuthTarget(user.role, role) ||
-    !sessionValidated;
-  const showCrossSessionHint = user != null && sessionValidated && !sessionMatchesBusinessStaffAuthTarget(user.role, role);
+    !sessionValidated ||
+    (!isLogin && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
+  const showCrossSessionHint =
+    !isLogin &&
+    user != null &&
+    sessionValidated &&
+    !sessionMatchesBusinessStaffAuthTarget(user.role, role);
 
   const sessionRoleLabel =
     user?.role === 'platform_admin' || user?.role === 'admin'
@@ -449,6 +474,7 @@ export function AuthPage() {
           onRoleChange={toggleRole}
           formBusy={isSubmitting}
           sessionActive={sameLaneValidated}
+          roleLocked={inviteContextActive}
           className="flex-1"
         >
           {showSignInForm ? (
@@ -469,10 +495,7 @@ export function AuthPage() {
             />
 
             {!isLogin && role === 'employee' && (
-              <motion.input
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.25 }}
+              <input
                 placeholder={t('auth.page.placeholderFullName')}
                 type="text"
                 id="auth-full-name"
@@ -487,12 +510,7 @@ export function AuthPage() {
             )}
 
             {!isLogin && role === 'employee' && (
-              <motion.div
-                key="employee"
-                initial={{ opacity: 0, x: -12 }}
-                animate={{ opacity: 1, x: 0 }}
-                className="relative"
-              >
+              <div className="relative">
                 <KeyRound className="caretip-auth-field-icon" aria-hidden />
                 <input
                   placeholder={t('auth.page.placeholderInviteCode')}
@@ -505,7 +523,7 @@ export function AuthPage() {
                   onChange={(e) => setInviteCode(e.target.value)}
                   className={FIELD_ICON}
                 />
-              </motion.div>
+              </div>
             )}
 
             <input
@@ -573,8 +591,8 @@ export function AuthPage() {
               )}
             </div>
 
-            {!isLogin && showPasswordChecklist && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+            {!isLogin && (
+              <div className="space-y-2">
                 <div className="relative">
                   <input
                     placeholder={t('auth.page.placeholderConfirmPassword')}
@@ -599,83 +617,54 @@ export function AuthPage() {
                     )}
                   </button>
                 </div>
-                <ul className="caretip-auth-password-rules">
-                  {[
-                    { key: 'minLength', label: t('auth.page.passwordRuleMinLength'), met: getPasswordChecklist(password).minLength },
-                    { key: 'upper', label: t('auth.page.passwordRuleUpper'), met: getPasswordChecklist(password).hasUppercase },
-                    { key: 'lower', label: t('auth.page.passwordRuleLower'), met: getPasswordChecklist(password).hasLowercase },
-                    { key: 'number', label: t('auth.page.passwordRuleNumber'), met: getPasswordChecklist(password).hasNumber },
-                    { key: 'special', label: t('auth.page.passwordRuleSpecial'), met: getPasswordChecklist(password).hasSpecial },
-                  ].map(({ key, label, met }) => (
-                    <li key={key} className={`flex items-center gap-2 ${met ? 'text-primary' : ''}`}>
-                      <span
-                        className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${
-                          met ? 'bg-primary text-white' : 'bg-neutral-200 dark:bg-neutral-800'
-                        }`}
-                      >
-                        {met ? <Check className="h-2 w-2" strokeWidth={3} /> : null}
-                      </span>
-                      {label}
-                    </li>
-                  ))}
-                </ul>
-              </motion.div>
-            )}
-
-            {!isLogin && !showPasswordChecklist && (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
-                <div className="relative">
-                  <input
-                    placeholder={t('auth.page.placeholderConfirmPassword')}
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    id="auth-confirm-password"
-                    name={FIELD.confirmPassword}
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className={FIELD_PASSWORD}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="caretip-auth-field-toggle"
-                    aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
-                  >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
-                  </button>
-                </div>
-              </motion.div>
-            )}
-
-            {error && (
-              <p className="text-sm font-medium text-red-600" role="alert">
-                {error}
-              </p>
-            )}
-
-            {isLogin && showResendVerification && error && (
-              <div className="flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={() => void handleResendVerification()}
-                  disabled={resendBusy || isSubmitting}
-                  className={cn(caretipBtnSecondaryFull, "h-10 min-h-10 text-sm disabled:cursor-not-allowed")}
-                >
-                  {resendBusy ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-                      {t('auth.page.resendSending')}
-                    </>
-                  ) : (
-                    t('auth.page.resendVerificationEmail')
+                <div
+                  className={cn(
+                    'caretip-auth-password-rules-slot',
+                    !showPasswordChecklist && 'invisible',
                   )}
-                </button>
+                  aria-hidden={!showPasswordChecklist}
+                >
+                  <ul className="caretip-auth-password-rules">
+                    {[
+                      { key: 'minLength', label: t('auth.page.passwordRuleMinLength'), met: getPasswordChecklist(password).minLength },
+                      { key: 'upper', label: t('auth.page.passwordRuleUpper'), met: getPasswordChecklist(password).hasUppercase },
+                      { key: 'lower', label: t('auth.page.passwordRuleLower'), met: getPasswordChecklist(password).hasLowercase },
+                      { key: 'number', label: t('auth.page.passwordRuleNumber'), met: getPasswordChecklist(password).hasNumber },
+                      { key: 'special', label: t('auth.page.passwordRuleSpecial'), met: getPasswordChecklist(password).hasSpecial },
+                    ].map(({ key, label, met }) => (
+                      <li key={key} className={`flex items-center gap-2 ${met ? 'text-primary' : ''}`}>
+                        <span
+                          className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${
+                            met ? 'bg-primary text-white' : 'bg-neutral-200 dark:bg-neutral-800'
+                          }`}
+                        >
+                          {met ? <Check className="h-2 w-2" strokeWidth={3} /> : null}
+                        </span>
+                        {label}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             )}
+
+            <AuthErrorSlot>{error || null}</AuthErrorSlot>
+
+            <div className="caretip-auth-resend-slot">
+              {isLogin && showResendVerification && error ? (
+                <AuthStableSubmitButton
+                  type="button"
+                  variant="secondary"
+                  loading={resendBusy}
+                  loadingAriaLabel={t('auth.page.resendSending')}
+                  disabled={isSubmitting}
+                  onClick={() => void handleResendVerification()}
+                  className="h-10 min-h-10 text-sm"
+                >
+                  {t('auth.page.resendVerificationEmail')}
+                </AuthStableSubmitButton>
+              ) : null}
+            </div>
 
             {isLogin && (
               <div className="flex justify-end pt-0.5">
@@ -688,28 +677,23 @@ export function AuthPage() {
               </div>
             )}
 
-            <button
+            <AuthStableSubmitButton
               type="submit"
-              disabled={isSubmitting || resumeSessionPending || (!isLogin && signUpDisabled)}
-              className={cn(caretipBtnPrimaryFull, "caretip-auth-submit relative disabled:cursor-not-allowed")}
+              loading={isSubmitting}
+              loadingAriaLabel={isLogin ? t('auth.page.signingIn') : t('auth.page.creatingAccount')}
+              disabled={resumeSessionPending || (!isLogin && signUpDisabled)}
+              className="disabled:cursor-not-allowed"
             >
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
-                  {isLogin ? t('auth.page.signingIn') : t('auth.page.creatingAccount')}
-                </>
-              ) : isLogin ? (
-                t('auth.page.signIn')
-              ) : (
-                t('auth.page.createAccount')
-              )}
-            </button>
+              {isLogin ? t('auth.page.signIn') : t('auth.page.createAccount')}
+            </AuthStableSubmitButton>
 
-            {isSubmitting && (
-              <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
-                {isLogin ? t('auth.page.pleaseWait') : t('auth.page.creatingAccountWait')}
-              </p>
-            )}
+            <AuthFormStatusSlot>
+              {isSubmitting
+                ? isLogin
+                  ? t('auth.page.pleaseWait')
+                  : t('auth.page.creatingAccountWait')
+                : null}
+            </AuthFormStatusSlot>
 
             <div className="relative my-2 flex items-center gap-3" role="separator" aria-label={t('auth.page.dividerOr')}>
               <div className="caretip-auth-divider-line" aria-hidden />
@@ -719,7 +703,7 @@ export function AuthPage() {
               <div className="caretip-auth-divider-line" aria-hidden />
             </div>
 
-            <div className="caretip-auth-oauth">
+            <div className={cn("caretip-auth-oauth", isSubmitting && "caretip-auth-oauth--busy")}>
             <AuthOAuthButtons
               isLogin={isLogin}
               role={role}

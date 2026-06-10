@@ -63,7 +63,7 @@ export function PlatformAdminLoginPage() {
     authInFlightRef.current = true;
     setSubmitting(true);
     try {
-      await login(trimmed, password, "platform_admin");
+      await login(trimmed, password);
       navigate("/platform-admin/dashboard", { replace: true });
     } catch (err) {
       logClientError("PlatformAdminLoginPage", err);

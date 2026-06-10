@@ -44,19 +44,18 @@ export interface AuthResult {
   user: AuthUserDto;
 }
 
+export type AuthIntendedRole = "MANAGER" | "EMPLOYEE" | "SUPER_ADMIN";
+
 export type LoginInput = {
   email: string;
   password: string;
-  intendedRole: "MANAGER" | "EMPLOYEE" | "SUPER_ADMIN";
 };
 
 export function normalizeLoginEmail(raw: string): string {
   return String(raw ?? "").trim().toLowerCase();
 }
 
-export function parseLoginIntendedRole(
-  raw: unknown
-): LoginInput["intendedRole"] | null {
+export function parseLoginIntendedRole(raw: unknown): AuthIntendedRole | null {
   if (typeof raw !== "string") return null;
   const n = raw.trim().toUpperCase().replace(/-/g, "_");
   if (n === "MANAGER" || n === "BUSINESS") return "MANAGER";
@@ -423,6 +422,9 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     throw new Error("Invalid email or password");
   }
   if (!user.passwordHash) {
+    if (user.oauthProvider) {
+      throw new Error("This account uses Google sign-in.");
+    }
     throw new Error("Invalid email or password");
   }
 
@@ -431,24 +433,8 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     throw new Error("Invalid email or password");
   }
 
-  if (input.intendedRole === "MANAGER" && user.role === "EMPLOYEE") {
-    throw new Error("This account does not have Business permissions.");
-  }
-  if (input.intendedRole === "EMPLOYEE" && user.role === "MANAGER") {
-    throw new Error("This account does not have Staff permissions.");
-  }
-
-  if (user.role === "SUPER_ADMIN") {
-    if (input.intendedRole !== "SUPER_ADMIN") {
-      throw new Error("Use the Platform Admin sign-in for this account.");
-    }
-    if (!user.isPlatformAdmin) {
-      throw new Error("This account does not have Super Admin permissions.");
-    }
-  } else if (input.intendedRole === "SUPER_ADMIN") {
-    throw new Error("Invalid email or password");
-  } else if (user.role !== mapIntendedToRole(input.intendedRole)) {
-    throw new Error("Invalid email or password");
+  if (user.role === "SUPER_ADMIN" && !user.isPlatformAdmin) {
+    throw new Error("This account does not have Super Admin permissions.");
   }
 
   if (user.emailVerified !== true) {
@@ -525,12 +511,6 @@ export async function resendVerificationEmailForSessionUser(
     explicitLocale: opts?.explicitLocale,
     acceptLanguage: opts?.acceptLanguage,
   });
-}
-
-function mapIntendedToRole(intended: LoginInput["intendedRole"]): Role {
-  if (intended === "MANAGER") return "MANAGER";
-  if (intended === "EMPLOYEE") return "EMPLOYEE";
-  return "SUPER_ADMIN";
 }
 
 export async function changePassword(

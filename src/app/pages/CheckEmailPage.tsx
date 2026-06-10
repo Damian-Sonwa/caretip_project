@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router";
-import { Mail, Copy, Loader2, Eye, EyeOff, Lock } from "lucide-react";
+import { Mail, Copy, Eye, EyeOff, Lock } from "lucide-react";
+import { AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
 import { toast } from "sonner";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
 import {
@@ -10,6 +11,7 @@ import {
 } from "@/app/components/auth/EmailVerificationFlow";
 import { EmailVerificationSuccessScreen } from "@/app/components/auth/EmailVerificationSuccessScreen";
 import { useAuth } from "@/app/hooks/useAuth";
+import { getLoginPathForSessionRole } from "@/app/lib/authSession";
 import { resolveInboxOpenTarget } from "@/app/lib/inboxDeepLink";
 import {
   resendVerificationEmailAPI,
@@ -82,8 +84,9 @@ export function CheckEmailPage() {
   const handleContinueAfterVerify = useCallback(async () => {
     const refreshed = await refreshSession();
     if (!refreshed) {
+      const loginPath = getLoginPathForSessionRole(user?.role ?? "user");
       logout();
-      navigate("/login", { replace: true });
+      navigate(loginPath, { replace: true });
       return;
     }
     if (refreshed.isVerified === false) {
@@ -205,21 +208,16 @@ export function CheckEmailPage() {
             </div>
           )}
 
-          <button
+          <AuthStableSubmitButton
             type="button"
+            variant="secondary"
+            loading={resendBusy}
+            loadingAriaLabel={t("auth.checkEmail.resendSending")}
             onClick={() => void handleResendVerification()}
-            disabled={resendBusy}
-            className={cn(caretipBtnSecondaryFull, "text-sm disabled:cursor-not-allowed")}
+            className="text-sm disabled:cursor-not-allowed"
           >
-            {resendBusy ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                {t("auth.checkEmail.resendSending")}
-              </>
-            ) : (
-              t("auth.checkEmail.resendButton")
-            )}
-          </button>
+            {t("auth.checkEmail.resendButton")}
+          </AuthStableSubmitButton>
 
           {!hasSessionUser ? (
             <p className="pt-1 text-[11px] text-neutral-600 dark:text-neutral-400">

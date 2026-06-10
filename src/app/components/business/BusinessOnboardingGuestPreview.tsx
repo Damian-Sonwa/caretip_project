@@ -1,15 +1,19 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
-import { Building2, MapPin, QrCode, Users } from "lucide-react";
+import { Building2, MapPin, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CareTipLogo } from "../CareTipLogo";
 import { BusinessLogoMark } from "./BusinessLogoMark";
+import { ProfileAvatar } from "../ui/profile-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { customerFlowUi as cf } from "../../pages/customer/customerFlowUi";
 import { cn } from "@/lib/utils";
 import { BUSINESS_TYPE_I18N } from "../../lib/businessVenueOptions";
+import { getEmployees } from "../../lib/api";
+import { logClientError } from "../../lib/clientLog";
 import { buildPreviewStaffSlots } from "./businessOnboardingGuestPreview.utils";
-import type { GuestPreviewData } from "./BusinessOnboardingGuestPreview.types";
+import { BusinessOnboardingFinalPhoneScreen } from "./BusinessOnboardingFinalPhoneScreen";
+import type { GuestPreviewData, TipPreviewStaffMember } from "./BusinessOnboardingGuestPreview.types";
 import type { PreviewStaffSlot } from "./businessOnboardingGuestPreview.utils";
 
 export type { GuestPreviewData } from "./BusinessOnboardingGuestPreview.types";
@@ -32,42 +36,68 @@ function previewLine(value: string, placeholderKey: string, t: (key: string) => 
 function PreviewStaffCard({
   staff,
   t,
+  premium = false,
 }: {
   staff: PreviewStaffSlot[];
   t: (key: string, options?: Record<string, string>) => string;
+  premium?: boolean;
 }) {
   return (
-    <Card className={cf.cardShadcn}>
-      <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
-        <CardTitle className={`${cf.cardTitle} text-base`}>
+    <Card
+      className={cn(
+        cf.cardShadcn,
+        premium && "business-onboarding-guest-preview__staff-card--premium border-primary/15 shadow-[0_12px_32px_-18px_rgba(233,120,28,0.35)]",
+      )}
+    >
+      <CardHeader className={cn(cf.cardHeaderPadding, "pb-2", premium && "px-4 pt-4")}>
+        <CardTitle className={cn(cf.cardTitle, premium ? "text-[0.8125rem]" : "text-base")}>
           {t("business.onboarding.preview.selectStaffToTip")}
         </CardTitle>
-        <CardDescription className={cf.cardDesc}>
+        <CardDescription className={cn(cf.cardDesc, premium && "text-[0.625rem] leading-snug")}>
           {t("business.onboarding.preview.selectStaffToTipDesc")}
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-5 pb-5">
-        <ul className="business-onboarding-guest-preview__staff-grid">
+      <CardContent className={cn("px-4 pb-4", !premium && "px-5 pb-5")}>
+        <ul
+          className={cn(
+            "business-onboarding-guest-preview__staff-grid",
+            premium && "business-onboarding-guest-preview__staff-grid--premium",
+          )}
+        >
           {staff.map((member, index) => (
-            <li key={`${member.initials}-${index}`}>
+            <li key={`${member.displayName}-${index}`}>
               <div
                 className={cn(
                   "business-onboarding-guest-preview__staff-tile",
+                  premium && "business-onboarding-guest-preview__staff-tile--premium",
+                  premium && index === 0 && "business-onboarding-guest-preview__staff-tile--selected",
                   member.isPlaceholder && "business-onboarding-guest-preview__staff-tile--placeholder",
                 )}
               >
-                <div
+                <ProfileAvatar
+                  src={member.photoUrl}
+                  displayName={member.displayName}
+                  lightbox={false}
                   className={cn(
-                    "business-onboarding-guest-preview__staff-avatar bg-gradient-to-br",
-                    member.tone,
-                    member.isPlaceholder && "business-onboarding-guest-preview__staff-avatar--placeholder",
+                    "business-onboarding-guest-preview__staff-photo",
+                    premium
+                      ? "h-[3.25rem] w-[3.25rem] ring-2 ring-primary/35"
+                      : "h-12 w-12 ring-2 ring-primary/25",
+                    member.isPlaceholder && "opacity-80 saturate-[0.85]",
                   )}
-                >
-                  {member.initials}
-                </div>
+                />
                 <span
                   className={cn(
                     "business-onboarding-guest-preview__staff-name",
+                    premium && "business-onboarding-guest-preview__staff-name--premium",
+                    member.isPlaceholder && "business-onboarding-guest-preview__text--placeholder",
+                  )}
+                >
+                  {member.displayName}
+                </span>
+                <span
+                  className={cn(
+                    "business-onboarding-guest-preview__staff-role",
                     member.isPlaceholder && "business-onboarding-guest-preview__text--placeholder",
                   )}
                 >
@@ -89,10 +119,12 @@ export function BusinessOnboardingGuestPreview({
   logoFile,
   savedLogoPath,
   employeeCount,
+  businessId,
   variant = "default",
 }: BusinessOnboardingGuestPreviewProps) {
   const { t } = useTranslation();
   const [uploadLogoUrl, setUploadLogoUrl] = useState<string | null>(null);
+  const [liveStaff, setLiveStaff] = useState<TipPreviewStaffMember[] | null>(null);
   const isFinal = variant === "final";
 
   useEffect(() => {
@@ -135,11 +167,50 @@ export function BusinessOnboardingGuestPreview({
   const heroLogoSrc = uploadLogoUrl ?? savedLogoPath ?? null;
 
   const previewStaff = useMemo(
-    () => buildPreviewStaffSlots(legalBusinessName, businessType),
-    [legalBusinessName, businessType],
+    () => buildPreviewStaffSlots(legalBusinessName, businessType, { count: isFinal ? 4 : 2 }),
+    [legalBusinessName, businessType, isFinal],
   );
 
-  const staffReadyCount = employeeCount > 0 ? employeeCount : 2;
+  useEffect(() => {
+    if (!isFinal || !businessId?.trim()) {
+      setLiveStaff(null);
+      return;
+    }
+    let cancelled = false;
+    void getEmployees(businessId)
+      .then((rows) => {
+        if (cancelled) return;
+        const mapped = (rows ?? [])
+          .filter((row) => row.name?.trim())
+          .slice(0, 4)
+          .map((row) => ({
+            id: row.id,
+            displayName: row.name.trim(),
+            photoUrl: row.avatar,
+            roleLabel: row.role?.trim() || t("business.onboarding.preview.staffRoles.teamMember"),
+            isLive: true,
+          }));
+        setLiveStaff(mapped.length > 0 ? mapped : null);
+      })
+      .catch((err) => {
+        logClientError("BusinessOnboardingGuestPreview.getEmployees", err);
+        if (!cancelled) setLiveStaff(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [businessId, isFinal, t]);
+
+  const tipStaff = useMemo((): TipPreviewStaffMember[] => {
+    if (liveStaff && liveStaff.length > 0) return liveStaff;
+    return previewStaff.map((member, index) => ({
+      id: `preview-${index}`,
+      displayName: member.displayName,
+      photoUrl: member.photoUrl,
+      roleLabel: t(`business.onboarding.preview.staffRoles.${member.roleKey}`),
+      isLive: false,
+    }));
+  }, [liveStaff, previewStaff, t]);
 
   const chromeSubtitle = t("business.onboarding.preview.selectStaffToTip");
 
@@ -153,7 +224,10 @@ export function BusinessOnboardingGuestPreview({
 
   return (
     <section
-      className="business-onboarding-guest-preview"
+      className={cn(
+        "business-onboarding-guest-preview",
+        isFinal && "business-onboarding-guest-preview--final",
+      )}
       aria-label={t("business.onboarding.preview.panelAria")}
     >
       <div className="business-onboarding-guest-preview__intro">
@@ -181,9 +255,34 @@ export function BusinessOnboardingGuestPreview({
             : t("business.onboarding.preview.guestAria")}
         </p>
 
-        <div className="business-onboarding-guest-preview__device" aria-hidden="true">
+        <div
+          className={cn(
+            "business-onboarding-guest-preview__device",
+            isFinal && "business-onboarding-guest-preview__device--premium",
+          )}
+          aria-hidden="true"
+        >
           <div className="business-onboarding-guest-preview__device-notch" />
-          <div className="business-onboarding-guest-preview__device-screen customer-flow">
+          {isFinal ? <div className="business-onboarding-guest-preview__device-side-btn" aria-hidden /> : null}
+          <div
+            className={cn(
+              "business-onboarding-guest-preview__device-screen customer-flow",
+              isFinal && "business-onboarding-guest-preview__device-screen--premium business-onboarding-final-phone",
+            )}
+          >
+            {isFinal ? (
+              <BusinessOnboardingFinalPhoneScreen
+                displayName={displayName}
+                venueNameLine={venueNameLine}
+                venueTypeLine={venueTypeLine}
+                addressLine={addressLine}
+                heroLogoSrc={heroLogoSrc}
+                tipStaff={tipStaff}
+                employeeCount={employeeCount}
+                hasBusinessName={hasBusinessName}
+              />
+            ) : (
+              <>
             <div className="business-onboarding-guest-preview__chrome-header">
               <CareTipLogo
                 size="xs"
@@ -244,8 +343,8 @@ export function BusinessOnboardingGuestPreview({
                     <div className="business-onboarding-guest-preview__staff-pill">
                       <Users className="h-5 w-5 shrink-0 text-primary" aria-hidden />
                       <span>
-                        {hasBusinessName
-                          ? t("tipFlow.qrLanding.staffReady", { count: staffReadyCount })
+                        {employeeCount > 0
+                          ? t("tipFlow.qrLanding.staffReady", { count: employeeCount })
                           : t("business.onboarding.preview.staffReadyGeneric")}
                       </span>
                     </div>
@@ -259,31 +358,17 @@ export function BusinessOnboardingGuestPreview({
                 transition={{ duration: 0.35, delay: 0.06, ease: [0.22, 1, 0.36, 1] }}
                 className="business-onboarding-guest-preview__stack-gap"
               >
-                {isFinal ? (
-                  <Card className={cf.cardShadcn}>
-                    <CardContent className="flex flex-col items-center gap-3 py-6">
-                      <div className="business-onboarding-guest-preview__qr-frame">
-                        <QrCode className="h-11 w-11 text-zinc-400" strokeWidth={1.25} aria-hidden />
-                      </div>
-                      <p className="business-onboarding-guest-preview__qr-caption">
-                        {hasBusinessName
-                          ? t("business.onboarding.preview.qrPreviewFor", { name: displayName })
-                          : t("business.onboarding.preview.qrPreviewLabel")}
-                      </p>
-                    </CardContent>
-                  </Card>
-                ) : null}
                 <PreviewStaffCard staff={previewStaff} t={t} />
               </motion.div>
             </div>
 
             <div className="business-onboarding-guest-preview__bottom-bar">
               <div className="business-onboarding-guest-preview__bottom-cta" role="presentation">
-                {isFinal
-                  ? t("business.onboarding.preview.tipButtonPreview")
-                  : t("business.onboarding.preview.previewPayBar")}
+                {t("business.onboarding.preview.previewPayBar")}
               </div>
             </div>
+              </>
+            )}
           </div>
         </div>
 

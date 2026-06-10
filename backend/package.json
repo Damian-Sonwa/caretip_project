@@ -22,6 +22,7 @@
     "db:studio": "dotenv -e ../.env -e .env -- prisma studio --schema=prisma/schema.prisma",
     "db:test": "tsx scripts/test-db.ts",
     "db:signin-smoke": "tsx scripts/signin-smoke.ts",
+    "db:employee-verify-guard": "tsx scripts/employee-verify-guard-runtime.ts",
     "db:backfill-business-slugs": "tsx scripts/backfill-business-slugs.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:platform-analytics-demo": "tsx prisma/seedPlatformAnalyticsDemo.ts",

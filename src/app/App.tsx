@@ -13,34 +13,40 @@ import { googleOAuthWebClientId } from "./lib/googleOAuthWebClientId";
 
 const googleClientId = googleOAuthWebClientId();
 
-export default function App() {
-  const AppTree = () => {
-    const { mode } = useTheme();
-    return (
-      <TipFlowProvider>
-        <AppLoadingSplashProvider>
-          <AuthProvider>
-            <AppLoadingManagerProvider>
-              <SocketProvider>
-                <RouterProvider router={router} />
-              </SocketProvider>
-            </AppLoadingManagerProvider>
-          </AuthProvider>
-          <Toaster theme={mode} position="top-center" closeButton />
-          <PwaInstallPrompt />
-        </AppLoadingSplashProvider>
-      </TipFlowProvider>
-    );
-  };
+function AppTree() {
+  const { mode } = useTheme();
+  return (
+    <TipFlowProvider>
+      <AppLoadingSplashProvider>
+        <AuthProvider>
+          <AppLoadingManagerProvider>
+            <SocketProvider>
+              <RouterProvider router={router} />
+            </SocketProvider>
+          </AppLoadingManagerProvider>
+        </AuthProvider>
+        <Toaster theme={mode} position="top-center" closeButton />
+        <PwaInstallPrompt />
+      </AppLoadingSplashProvider>
+    </TipFlowProvider>
+  );
+}
 
-  const tree = (
+function AppWithTheme() {
+  return (
     <ThemeProvider>
       <AppTree />
     </ThemeProvider>
   );
+}
 
+export default function App() {
   if (googleClientId) {
-    return <GoogleOAuthProvider clientId={googleClientId}>{tree}</GoogleOAuthProvider>;
+    return (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AppWithTheme />
+      </GoogleOAuthProvider>
+    );
   }
-  return tree;
+  return <AppWithTheme />;
 }

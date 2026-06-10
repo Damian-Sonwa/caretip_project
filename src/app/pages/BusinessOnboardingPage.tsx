@@ -142,6 +142,7 @@ export function BusinessOnboardingPage() {
       savedLogoPath,
       employeeCount,
       onboardingStep: 3 as OnboardingStep,
+      businessId: user?.businessId,
     }),
     [
       legalBusinessName,
@@ -152,6 +153,7 @@ export function BusinessOnboardingPage() {
       logoFile,
       savedLogoPath,
       employeeCount,
+      user?.businessId,
     ],
   );
 
