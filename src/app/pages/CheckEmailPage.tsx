@@ -5,6 +5,7 @@ import { Mail, Copy, Eye, EyeOff, Lock } from "lucide-react";
 import { AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
 import { toast } from "sonner";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { AuthTrustStrip } from "@/app/components/auth/AuthTrustStrip";
 import {
   VerifyEmailConfirmedView,
   VerifyEmailFromToken,
@@ -114,9 +115,17 @@ export function CheckEmailPage() {
     return <VerifyEmailConfirmedView />;
   }
 
+  const checkEmailSubtitle = hasSessionUser
+    ? t("auth.checkEmail.introSession", { email: user!.email })
+    : t("auth.checkEmail.introResend");
+
   return (
-    <AuthRecoveryLayout showFooterLink={false}>
-      <div className="space-y-4 text-center">
+    <AuthRecoveryLayout
+      showFooterLink={false}
+      title={t("auth.checkEmail.title")}
+      subtitle={checkEmailSubtitle}
+    >
+      <div className="space-y-4">
         {verifyErrorBanner ? (
           <div
             role="alert"
@@ -125,17 +134,7 @@ export function CheckEmailPage() {
             {verifyErrorBanner}
           </div>
         ) : null}
-        <h1 className="caretip-auth-title !pt-0">{t("auth.checkEmail.title")}</h1>
-        {hasSessionUser ? (
-          <p className="caretip-auth-subtitle !mt-2">
-            {t("auth.checkEmail.introSession", { email: user!.email })}
-          </p>
-        ) : (
-          <p className="caretip-auth-subtitle !mt-2">
-            {t("auth.checkEmail.introResend")}
-          </p>
-        )}
-        <p className="caretip-auth-helper">
+        <p className="caretip-auth-helper text-center">
           {t("auth.checkEmail.dashboardLocked")}
         </p>
 
@@ -251,6 +250,8 @@ export function CheckEmailPage() {
             {t("auth.checkEmail.useDifferentEmail")}
           </button>
         </div>
+
+        <AuthTrustStrip />
       </div>
     </AuthRecoveryLayout>
   );

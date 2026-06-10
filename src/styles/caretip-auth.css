@@ -1,11 +1,11 @@
 /**
- * CareTip auth — premium calm fintech / hospitality SaaS presentation.
+ * CareTip auth — premium SaaS split-screen (Stripe / Linear inspired).
  */
 
 /* —— Page canvas —— */
 .caretip-auth-page,
 .caretip-auth-shell {
-  background-color: #faf9f6;
+  background-color: #f8f8f7;
 }
 
 .dark .caretip-auth-page,
@@ -89,7 +89,340 @@
   background-size: 180px 180px;
 }
 
-/* —— Stage & focal card —— */
+/* —— Curved blob split layout (AuthCurvedBlobShell) —— */
+.caretip-auth-curved-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  background: #f8f8f7;
+  isolation: isolate;
+}
+
+.dark .caretip-auth-curved-container {
+  background: hsl(var(--background));
+}
+
+/* Large circular blob — organic curved divider (CareTip slate + orange) */
+.caretip-auth-curved-blob {
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  top: -10%;
+  right: 48%;
+  height: 2000px;
+  width: 2000px;
+  border-radius: 50%;
+  transform: translateY(-50%);
+  transition: transform 1.8s ease-in-out, right 1.8s ease-in-out;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(233, 120, 28, 0.28) 0%, transparent 42%),
+    radial-gradient(circle at 72% 82%, rgba(233, 120, 28, 0.16) 0%, transparent 48%),
+    linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%);
+}
+
+.caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
+  right: 52%;
+  transform: translate(100%, -50%);
+}
+
+.caretip-auth-curved-brand {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+}
+
+.caretip-auth-split-layout {
+  /* legacy alias — curved container is primary */
+  position: relative;
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.caretip-auth-split-layout--curved {
+  isolation: isolate;
+}
+
+.caretip-auth-split-layout__panel {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 1.25rem 1.75rem;
+  background: transparent;
+}
+
+.caretip-auth-split-layout__panel-inner {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.caretip-auth-split-layout__top-slot {
+  margin-bottom: 0.875rem;
+}
+
+/* —— Brand panel content (over blob only — no flat column fill) —— */
+.caretip-auth-marketing {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  overflow: visible;
+  color: #fafafa;
+}
+
+.caretip-auth-marketing.caretip-auth-marketing--blob-overlay {
+  background: transparent;
+}
+
+.caretip-auth-marketing--blob-overlay .caretip-auth-marketing__glow,
+.caretip-auth-marketing--blob-overlay .caretip-auth-marketing__grain {
+  display: none;
+}
+
+/* Sign-up: blob shifts right — use dark copy on the light page canvas */
+.caretip-auth-curved-container--sign-up .caretip-auth-marketing {
+  color: #0f172a;
+}
+
+.caretip-auth-curved-container--sign-up .caretip-auth-marketing__headline {
+  color: #0f172a;
+}
+
+.caretip-auth-curved-container--sign-up .caretip-auth-marketing__body {
+  color: #475569;
+}
+
+.caretip-auth-curved-container--sign-up .caretip-auth-marketing__benefits li {
+  color: #334155;
+}
+
+.caretip-auth-curved-container--sign-up .caretip-auth-marketing__badge {
+  border-color: rgba(233, 120, 28, 0.35);
+  background: rgba(233, 120, 28, 0.08);
+  color: #c2410c;
+}
+
+.caretip-auth-marketing__glow {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 55% 40% at 100% 50%, rgba(233, 120, 28, 0.11) 0%, transparent 68%),
+    radial-gradient(circle at 78% 22%, rgba(255, 180, 120, 0.06) 0%, transparent 42%);
+}
+
+.caretip-auth-marketing__grain {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.caretip-auth-marketing__inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 2rem 1.5rem 1.5rem;
+}
+
+.caretip-auth-marketing__content {
+  flex: 0 0 auto;
+}
+
+.caretip-auth-marketing__badge {
+  display: inline-flex;
+  margin-top: 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(233, 120, 28, 0.28);
+  background: rgba(233, 120, 28, 0.1);
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: rgba(255, 220, 190, 0.92);
+}
+
+.caretip-auth-marketing__headline {
+  margin: 1.125rem 0 0;
+  font-size: clamp(1.625rem, 4.5vw, 2.125rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
+  transition: color 0.6s ease;
+}
+
+.caretip-auth-marketing__body {
+  margin: 0.75rem 0 0;
+  max-width: 26rem;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1.55;
+  color: rgba(250, 250, 250, 0.72);
+  transition: color 0.6s ease;
+}
+
+.caretip-auth-marketing__benefits {
+  margin: 1.25rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-auth-marketing__benefits li {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgba(250, 250, 250, 0.88);
+  transition: color 0.6s ease;
+}
+
+.caretip-auth-marketing__check {
+  height: 1rem;
+  width: 1rem;
+  flex-shrink: 0;
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+/* Mobile — stacked, blob repositioned to top arc */
+@media (max-width: 767px) {
+  .caretip-auth-curved-blob {
+    top: initial;
+    bottom: 68%;
+    right: initial;
+    left: 30%;
+    height: 1500px;
+    width: 1500px;
+    transform: translateX(-50%);
+    transition: transform 2s ease-in-out, bottom 2s ease-in-out, left 2s ease-in-out;
+  }
+
+  .caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
+    bottom: 32%;
+    left: 30%;
+    transform: translate(-50%, 100%);
+  }
+
+  .caretip-auth-curved-brand {
+    width: 100%;
+  }
+
+  .caretip-auth-marketing {
+    clip-path: none;
+    padding-bottom: 0;
+  }
+
+  .caretip-auth-marketing__inner {
+    max-width: 32.5rem;
+    margin-inline: auto;
+    padding: 1.75rem 1.25rem 1.25rem;
+  }
+
+  .caretip-auth-marketing__headline {
+    font-size: 1.5rem;
+  }
+
+  .caretip-auth-marketing__body {
+    font-size: 0.875rem;
+  }
+
+  .caretip-auth-split-layout__panel {
+    padding: 1rem 1.25rem 1.5rem;
+  }
+}
+
+/* Tablet+ — horizontal split with full-height blob curve */
+@media (min-width: 768px) {
+  .caretip-auth-curved-container {
+    flex-direction: row;
+    align-items: stretch;
+  }
+
+  .caretip-auth-curved-brand {
+    flex: 0 0 44%;
+    max-width: 44%;
+    min-height: 100dvh;
+  }
+
+  .caretip-auth-marketing {
+    min-height: 100%;
+    width: 100%;
+    padding-right: 1.25rem;
+  }
+
+  .caretip-auth-marketing__inner {
+    min-height: 100%;
+    max-width: 26rem;
+    padding: 2rem 1.75rem 1.25rem 2rem;
+  }
+
+  .caretip-auth-split-layout__panel {
+    flex: 1 1 auto;
+    min-height: 100dvh;
+    max-height: 100dvh;
+    padding: 0.75rem 1.5rem;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-auth-curved-container {
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .caretip-auth-curved-brand {
+    flex: 0 0 46%;
+    max-width: 46%;
+  }
+
+  .caretip-auth-marketing {
+    padding-right: 2rem;
+  }
+
+  .caretip-auth-marketing__inner {
+    max-width: 28rem;
+    padding: 2rem 2rem 1.5rem 2.75rem;
+  }
+
+  .caretip-auth-split-layout__panel {
+    flex: 0 0 54%;
+    max-width: 54%;
+    overflow-y: visible;
+    padding: 0.75rem 2rem 0.75rem 1.25rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-auth-marketing__inner {
+    max-width: 30rem;
+    padding-left: 3.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-auth-curved-blob {
+    transition: none;
+  }
+}
+
+/* Legacy stage (platform admin login, etc.) */
 .caretip-auth-stage {
   position: relative;
   display: flex;
@@ -98,56 +431,55 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding: 1.75rem 1rem 2rem;
-  padding-top: 4.75rem;
-}
-
-@media (min-width: 640px) {
-  .caretip-auth-stage {
-    padding: 2.5rem 1.25rem 2.5rem;
-    padding-top: 6rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .caretip-auth-stage {
-    padding-top: 5.5rem;
-    padding-bottom: 3.5rem;
-  }
+  padding: 1.5rem 1.25rem 2rem;
 }
 
 .caretip-auth-card-wrap {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 22.5rem;
-}
-
-@media (min-width: 640px) {
-  .caretip-auth-card-wrap {
-    max-width: 24rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .caretip-auth-card-wrap {
-    max-width: 26rem;
-  }
+  max-width: 28rem;
+  margin-inline: auto;
 }
 
 .caretip-auth-card {
   position: relative;
   overflow: hidden;
-  border-radius: 1.25rem;
-  border: 1px solid rgba(229, 229, 229, 0.72);
-  background: rgba(255, 255, 255, 0.96);
-  padding: 1.375rem 1.25rem 1.5rem;
+  border-radius: 1.375rem;
+  border: 1px solid rgba(228, 228, 231, 0.9);
+  background: #ffffff;
+  padding: 1.125rem 1.125rem 1rem;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.65) inset,
-    0 1px 2px rgba(15, 23, 42, 0.035),
-    0 8px 24px -10px rgba(15, 23, 42, 0.07),
-    0 20px 48px -28px rgba(15, 23, 42, 0.1);
-  backdrop-filter: blur(8px);
+    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
+    0 1px 2px rgba(15, 23, 42, 0.04),
+    0 8px 24px -12px rgba(15, 23, 42, 0.1),
+    0 20px 48px -32px rgba(15, 23, 42, 0.14);
+}
+
+.caretip-auth-card--stable {
+  display: flex;
+  min-height: 27rem;
+  max-height: min(700px, calc(100dvh - 2rem));
+  flex-direction: column;
+}
+
+.caretip-auth-card--signup {
+  min-height: 27rem;
+}
+
+.caretip-auth-card-body {
+  display: flex;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.caretip-auth-card--recovery {
+  min-height: 22rem;
+}
+
+.caretip-auth-card-body--recovery {
+  min-height: 10rem;
 }
 
 .caretip-auth-card::before {
@@ -171,8 +503,7 @@
 
 @media (min-width: 640px) {
   .caretip-auth-card {
-    padding: 1.5rem 1.375rem 1.625rem;
-    border-radius: 1.375rem;
+    padding: 1.375rem 1.375rem 1.25rem;
   }
 }
 
@@ -194,52 +525,41 @@
   );
 }
 
-/* Recovery flows share the same elevated surface */
+/* Recovery flows use split layout */
 .caretip-auth-recovery-stage {
-  position: relative;
-  z-index: 10;
-  display: flex;
   min-height: 100dvh;
-  flex-direction: column;
-  justify-content: center;
-  padding: 3rem 1rem;
 }
 
 .caretip-auth-recovery-inner {
   width: 100%;
-  max-width: 24rem;
+  max-width: 28rem;
   margin-inline: auto;
 }
 
-@media (min-width: 1024px) {
-  .caretip-auth-recovery-inner {
-    max-width: 26rem;
-  }
-}
 
-/* —— Typography rhythm —— */
+/* —— Typography rhythm (compact) —— */
 .caretip-auth-header {
-  margin-bottom: 1.125rem;
-  text-align: center;
+  margin-bottom: 0.5rem;
+  text-align: left;
 }
 
 .caretip-auth-header--session {
-  margin-bottom: 1.375rem;
+  margin-bottom: 0.4375rem;
 }
 
 .caretip-auth-title {
   margin: 0;
-  padding-top: 0.625rem;
-  font-size: 1.375rem;
+  padding-top: 0.25rem;
+  font-size: 1.3125rem;
   font-weight: 700;
-  letter-spacing: -0.028em;
-  line-height: 1.2;
+  letter-spacing: -0.032em;
+  line-height: 1.15;
   color: rgb(10 10 10);
 }
 
 @media (min-width: 640px) {
   .caretip-auth-title {
-    font-size: 1.5rem;
+    font-size: 1.4375rem;
   }
 }
 
@@ -248,10 +568,10 @@
 }
 
 .caretip-auth-subtitle {
-  margin: 0.375rem 0 0;
+  margin: 0.1875rem 0 0;
   font-size: 0.8125rem;
   font-weight: 500;
-  line-height: 1.45;
+  line-height: 1.4;
   color: rgb(115 115 115);
 }
 
@@ -261,9 +581,9 @@
 
 .caretip-auth-label {
   display: block;
-  margin-bottom: 0.4375rem;
+  margin-bottom: 0.25rem;
   text-align: left;
-  font-size: 0.75rem;
+  font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   color: rgb(82 82 82);
@@ -285,7 +605,7 @@
 }
 
 .caretip-auth-footer-link {
-  margin-top: 2rem;
+  margin-top: 1.25rem;
   text-align: center;
   font-size: 0.75rem;
   font-weight: 500;
@@ -305,21 +625,17 @@
 
 /* —— Logo capsule —— */
 .caretip-auth-logo-wrap {
-  margin-inline: auto;
   display: flex;
-  height: 2.75rem;
-  width: 100%;
-  max-width: 14.5rem;
+  height: 2.375rem;
+  width: fit-content;
+  max-width: 11rem;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: visible;
-  border-radius: 0.875rem;
-  border: 1px solid rgba(229, 229, 229, 0.6);
-  background: rgba(255, 255, 255, 0.88);
-  padding: 0.25rem 0.5rem;
-  box-shadow:
-    0 1px 2px rgba(15, 23, 42, 0.03),
-    0 0 0 1px rgba(255, 255, 255, 0.5) inset;
+}
+
+.caretip-auth-logo-wrap--card {
+  margin-inline: 0;
 }
 
 .dark .caretip-auth-logo-wrap {
@@ -330,12 +646,16 @@
 
 /* —— Tabs —— */
 .caretip-auth-tabs {
-  margin-bottom: 1.125rem;
+  margin-bottom: 0.375rem;
   display: flex;
   border-radius: 9999px;
   border: 1px solid rgba(229, 229, 229, 0.75);
   background: rgba(250, 250, 249, 0.92);
-  padding: 0.1875rem;
+  padding: 0.125rem;
+}
+
+.caretip-auth-mode-block {
+  margin-bottom: 0;
 }
 
 .dark .caretip-auth-tabs {
@@ -377,19 +697,26 @@
 .caretip-auth-form {
   display: flex;
   width: 100%;
+  flex: 1 1 auto;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.5rem;
+}
+
+.caretip-auth-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
 }
 
 .caretip-auth-field {
   width: 100%;
-  min-height: 2.75rem;
+  min-height: 3rem;
   border-radius: 0.75rem;
   border: 1px solid rgba(229, 229, 229, 0.88);
   background: rgba(255, 255, 255, 0.98);
-  padding: 0.625rem 0.9375rem;
+  padding: 0.4375rem 0.75rem;
   font-family: inherit;
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   line-height: 1.35;
   color: rgb(23 23 23);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
@@ -476,16 +803,20 @@ select.caretip-auth-field {
 
 /* —— Submit & inline actions —— */
 .caretip-auth-page .caretip-auth-submit.caretip-btn-primary,
-.caretip-auth-recovery-stage .caretip-auth-submit.caretip-btn-primary {
-  margin-top: 0.25rem;
-  min-height: 2.75rem;
+.caretip-auth-recovery-stage .caretip-auth-submit.caretip-btn-primary,
+.caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary {
+  margin-top: 0;
+  min-height: 3rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: 0 8px 20px -12px rgba(233, 120, 28, 0.55);
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
 }
 
-@media (min-width: 1024px) {
-  .caretip-auth-page .caretip-auth-submit.caretip-btn-primary,
-  .caretip-auth-recovery-stage .caretip-auth-submit.caretip-btn-primary {
-    min-height: 3rem;
-  }
+.caretip-auth-page .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled),
+.caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled) {
+  box-shadow: 0 12px 28px -14px rgba(233, 120, 28, 0.62);
 }
 
 .caretip-auth-inline-link {
@@ -547,22 +878,28 @@ select.caretip-auth-field {
 }
 
 .caretip-auth-oauth {
-  min-height: 2.5rem;
+  min-height: 3rem;
+  width: 100%;
 }
 
 .caretip-auth-oauth > div {
   width: 100% !important;
   display: flex !important;
-  justify-content: center !important;
+  justify-content: stretch !important;
+}
+
+.caretip-auth-oauth iframe {
+  width: 100% !important;
+  min-height: 3rem !important;
+  margin: 0 !important;
 }
 
 .caretip-auth-oauth-mount {
   width: 100%;
-  max-width: 20rem;
-  min-height: 2.5rem;
-  margin-inline: auto;
-  border-radius: 0.375rem;
-  background: rgba(244, 244, 245, 0.85);
+  min-height: 3rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(228, 228, 231, 0.95);
+  background: #fafafa;
 }
 
 .dark .caretip-auth-oauth-mount {
@@ -577,7 +914,7 @@ select.caretip-auth-field {
 /* —— Layout stability (CLS) —— */
 .caretip-auth-error-slot {
   display: flex;
-  min-height: 2.75rem;
+  min-height: 2.25rem;
   align-items: flex-start;
   font-size: 0.875rem;
   font-weight: 500;
@@ -595,7 +932,7 @@ select.caretip-auth-field {
 }
 
 .caretip-auth-form-status-slot {
-  min-height: 1rem;
+  min-height: 0.75rem;
   margin: 0;
   text-align: center;
   font-size: 0.6875rem;
@@ -610,19 +947,92 @@ select.caretip-auth-field {
 
 .caretip-auth-resend-slot {
   display: flex;
-  min-height: 2.75rem;
   flex-direction: column;
   justify-content: flex-start;
   gap: 0.5rem;
 }
 
+.caretip-auth-resend-slot:not(:empty) {
+  min-height: 2.5rem;
+}
+
 .caretip-auth-role-reserve {
-  min-height: 4.625rem;
-  margin-bottom: 1rem;
+  display: none;
 }
 
 .caretip-auth-password-rules-slot {
-  min-height: 6.25rem;
+  min-height: 3.25rem;
+  overflow: hidden;
+  transition: min-height 0.2s ease, opacity 0.2s ease;
+}
+
+.caretip-auth-password-rules-slot--idle {
+  min-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.caretip-auth-oauth-divider {
+  margin-top: 0.375rem;
+  margin-bottom: 0.375rem;
+}
+
+.caretip-auth-oauth-divider__label {
+  flex-shrink: 0;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgb(161 161 170);
+}
+
+.caretip-auth-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.625rem;
+  margin: 0.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-auth-trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgb(161 161 170);
+}
+
+.caretip-auth-trust__icon {
+  height: 0.875rem;
+  width: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.caretip-auth-employee-fields {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-auth-employee-fields {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.caretip-auth-signup-password-row {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-auth-signup-password-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .caretip-auth-submit--stable {
@@ -675,32 +1085,24 @@ select.caretip-auth-field {
 }
 
 .caretip-auth-notice-banner {
-  margin-inline: auto;
   width: 100%;
-  max-width: 24rem;
-  padding: 5rem 1rem 0;
-}
-
-@media (min-width: 640px) {
-  .caretip-auth-notice-banner {
-    max-width: 26rem;
-    padding-top: 6rem;
-  }
+  max-width: none;
+  padding: 0;
 }
 
 /* —— Password checklist —— */
 .caretip-auth-password-rules {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.6875rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.1875rem 0.625rem;
+  font-size: 0.625rem;
   font-weight: 500;
   color: rgb(115 115 115);
 }
 
 .caretip-auth-password-meter {
-  margin-top: 0.5rem;
-  height: 0.25rem;
+  margin-top: 0.375rem;
+  height: 0.1875rem;
   overflow: hidden;
   border-radius: 9999px;
   background: rgb(229 229 229);

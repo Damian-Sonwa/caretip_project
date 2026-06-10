@@ -167,10 +167,7 @@ export function BusinessDashboard() {
     retryStats,
     applyLiveTip,
   } = useBusinessDashboardStats(
-    user?.role === "business" &&
-      authReady &&
-      user.hasCompletedOnboarding === true &&
-      businessKycApproved,
+    user?.role === "business" && authReady && user.hasCompletedOnboarding === true,
     sessionValidated,
     advancedAnalyticsEnabled,
   );
@@ -184,13 +181,10 @@ export function BusinessDashboard() {
   const [employeeGoalsDetailOpen, setEmployeeGoalsDetailOpen] = useState(false);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
   const refreshTimerRef = useRef<number | null>(null);
-  const socketReady = useDeferSocketConnect(
-    authReady && user?.role === "business" && businessKycApproved,
-  );
+  const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, () => {
-    if (!businessKycApproved) return;
     refreshStatsQuiet();
   });
 
@@ -1017,7 +1011,7 @@ export function BusinessDashboard() {
           {/* Recent customer feedback */}
           <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
             <RecentCustomerFeedbackPanel
-              enabled={isBusiness && sessionValidated && businessKycApproved}
+              enabled={isBusiness && sessionValidated}
             />
           </motion.div>
 

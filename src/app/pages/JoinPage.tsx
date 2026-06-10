@@ -1,11 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { KeyRound } from "lucide-react";
 import { AuthErrorSlot, AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
-import { Navigation } from "../components/Navigation";
-import { Footer } from "../components/Footer";
+import { AuthFieldGroup } from "@/app/components/auth/AuthFieldGroup";
+import { AuthSplitLayout } from "@/app/components/auth/AuthSplitLayout";
+import { AuthTrustStrip } from "@/app/components/auth/AuthTrustStrip";
 import { validateInviteCode } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
@@ -14,6 +15,7 @@ export function JoinPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const params = useParams();
+  const reduceMotion = useReducedMotion();
   const prefilledCode = useMemo(() => (params.code ? String(params.code) : ""), [params.code]);
   const [code, setCode] = useState(prefilledCode);
   const [busy, setBusy] = useState(false);
@@ -37,68 +39,62 @@ export function JoinPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden bg-white dark:bg-neutral-950">
-      <Navigation />
-      <main className="flex flex-1 items-center justify-center px-4 py-14">
+    <div className="caretip-auth-page min-h-[100dvh] font-sans">
+      <AuthSplitLayout>
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.55 }}
-          className="w-full max-w-lg"
+          transition={{ duration: reduceMotion ? 0 : 0.4 }}
+          className="caretip-auth-card-wrap"
         >
-          <div className="rounded-3xl border border-gray-200 bg-white p-8 shadow-[0_18px_50px_rgba(0,0,0,0.06)] dark:border-neutral-800 dark:bg-neutral-950">
-            <div className="mb-6">
+          <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery">
+            <div className="caretip-auth-header">
               <p className="text-sm font-semibold text-primary">{t("join.eyebrow")}</p>
-              <h1 className="mt-2 text-balance text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl">
-                {t("join.title")}
-              </h1>
-              <p className="mt-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
-                {t("join.subtitle")}
-              </p>
+              <h1 className="caretip-auth-title !pt-2">{t("join.title")}</h1>
+              <p className="caretip-auth-subtitle">{t("join.subtitle")}</p>
             </div>
+            <div className="caretip-auth-card-body caretip-auth-card-body--recovery">
+              <form onSubmit={handleContinue} className="caretip-auth-form">
+                <AuthFieldGroup label={t("join.inviteLabel")} htmlFor="join-invite-code">
+                  <div className="relative">
+                    <KeyRound className="caretip-auth-field-icon" aria-hidden />
+                    <input
+                      id="join-invite-code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      inputMode="numeric"
+                      placeholder={t("join.placeholder")}
+                      className="caretip-auth-field caretip-auth-field--has-icon"
+                      autoComplete="one-time-code"
+                    />
+                  </div>
+                </AuthFieldGroup>
 
-            <form onSubmit={handleContinue} className="space-y-4">
-              <label className="block">
-                <span className="mb-2 block text-sm font-medium text-neutral-700 dark:text-neutral-300">
-                  {t("join.inviteLabel")}
-                </span>
-                <div className="relative">
-                  <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-                  <input
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    inputMode="numeric"
-                    placeholder={t("join.placeholder")}
-                    className="w-full rounded-xl border border-gray-200 bg-white py-3 pl-10 pr-3 text-sm font-semibold tracking-wider text-neutral-900 shadow-none transition focus:border-primary focus:outline-none focus:ring-[3px] focus:ring-primary/25 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100 dark:placeholder:text-neutral-500"
-                    autoComplete="one-time-code"
-                  />
-                </div>
-              </label>
+                <AuthErrorSlot>{error || null}</AuthErrorSlot>
 
-              <AuthErrorSlot>{error || null}</AuthErrorSlot>
+                <AuthStableSubmitButton
+                  type="submit"
+                  loading={busy}
+                  loadingAriaLabel={t("join.checking")}
+                  disabled={!code.trim()}
+                  className="disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {t("join.continue")}
+                </AuthStableSubmitButton>
 
-              <AuthStableSubmitButton
-                type="submit"
-                loading={busy}
-                loadingAriaLabel={t("join.checking")}
-                disabled={!code.trim()}
-                className="disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {t("join.continue")}
-              </AuthStableSubmitButton>
-            </form>
+                <AuthTrustStrip />
+              </form>
 
-            <div className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
-              {t("join.footerPrompt")}{" "}
-              <Link to="/login?role=employee" className="font-semibold text-primary hover:underline">
-                {t("join.signIn")}
-              </Link>
+              <p className="caretip-auth-form-footer mt-4">
+                {t("join.footerPrompt")}{" "}
+                <Link to="/login?role=employee" className="font-semibold text-primary hover:underline">
+                  {t("join.signIn")}
+                </Link>
+              </p>
             </div>
           </div>
         </motion.div>
-      </main>
-      <Footer variant="minimal" surface="dark" />
+      </AuthSplitLayout>
     </div>
   );
 }
-

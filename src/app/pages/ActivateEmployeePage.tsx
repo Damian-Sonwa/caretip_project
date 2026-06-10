@@ -7,6 +7,7 @@ import {
   AuthStableSubmitButton,
 } from "@/app/components/auth/AuthFormStability";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { AuthTrustStrip } from "@/app/components/auth/AuthTrustStrip";
 import { BusinessLogoMark } from "@/app/components/business/BusinessLogoMark";
 import { activateEmployeeWithToken, getActivateEmployeeBranding } from "@/app/lib/api";
 import { isPasswordStrong } from "@/app/lib/passwordValidation";
@@ -109,9 +110,9 @@ export function ActivateEmployeePage() {
   }
 
   return (
-    <AuthRecoveryLayout>
-      <div className="space-y-6">
-        <div className="flex flex-col items-center gap-3 text-center">
+    <AuthRecoveryLayout title="Set your password" subtitle="This link expires in 24 hours.">
+      <div className="space-y-4">
+        <div className="flex flex-col items-center gap-2 text-center">
           <BusinessLogoMark
             logoPathOrUrl={branding?.businessLogo ?? null}
             businessName={branding?.businessName ?? t("dashboard.venueDashboardFallback")}
@@ -120,10 +121,6 @@ export function ActivateEmployeePage() {
           <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
             {branding?.businessName ?? t("dashboard.venueDashboardFallback")}
           </p>
-        </div>
-        <div className="caretip-auth-header !mb-5">
-          <h1 className="caretip-auth-title !pt-0">Set your password</h1>
-          <p className="caretip-auth-subtitle">This link expires in 24 hours.</p>
         </div>
         <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form">
           <div>
@@ -188,6 +185,7 @@ export function ActivateEmployeePage() {
               ? "Use 8+ characters with upper, lower, number, and special (e.g. @#$%)."
               : null}
           </p>
+          <AuthTrustStrip />
         </form>
       </div>
     </AuthRecoveryLayout>

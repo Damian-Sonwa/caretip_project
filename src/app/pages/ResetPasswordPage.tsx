@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useNavigate, useParams } from "react-router";
 import { Eye, EyeOff } from "lucide-react";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { AuthTrustStrip } from "@/app/components/auth/AuthTrustStrip";
 import {
   AuthErrorSlot,
   AuthFieldErrorSlot,
@@ -87,14 +88,9 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthRecoveryLayout>
-      <div className="space-y-6">
-        <div className="caretip-auth-header !mb-5">
-          <h1 className="caretip-auth-title !pt-0">{t("auth.reset.title")}</h1>
-          <p className="caretip-auth-subtitle">{t("auth.reset.subtitle")}</p>
-        </div>
+    <AuthRecoveryLayout title={t("auth.reset.title")} subtitle={t("auth.reset.subtitle")}>
         <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form">
-          <div>
+          <div className="caretip-auth-field-group">
             <label htmlFor="reset-new" className="caretip-auth-label">
               {t("auth.reset.labelNew")}
             </label>
@@ -117,7 +113,7 @@ export function ResetPasswordPage() {
               </button>
             </div>
           </div>
-          <div>
+          <div className="caretip-auth-field-group">
             <label htmlFor="reset-confirm" className="caretip-auth-label">
               {t("auth.reset.labelConfirm")}
             </label>
@@ -154,8 +150,8 @@ export function ResetPasswordPage() {
           <p className="caretip-auth-form-status-slot text-center">
             {!strong && newPassword.length > 0 ? t("auth.reset.hintWeak") : null}
           </p>
+          <AuthTrustStrip />
         </form>
-      </div>
     </AuthRecoveryLayout>
   );
 }

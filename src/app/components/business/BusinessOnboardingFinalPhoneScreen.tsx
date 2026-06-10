@@ -145,14 +145,10 @@ export function BusinessOnboardingFinalPhoneScreen({
       : t("business.onboarding.preview.staffReadyGeneric");
 
   const statusLabel = hasBusinessName
-    ? employeeCount > 0
-      ? t("business.onboarding.preview.statusTeamReady")
-      : t("business.onboarding.preview.statusReadyTips")
+    ? t("business.onboarding.preview.statusReadyTips")
     : t("business.onboarding.preview.statusAlmostReady");
 
-  const qrCaption = hasBusinessName
-    ? t("business.onboarding.preview.qrPreviewFor", { name: displayName })
-    : t("business.onboarding.preview.qrPreviewLabel");
+  const qrCaption = t("business.onboarding.preview.statusPendingSub");
 
   return (
     <>

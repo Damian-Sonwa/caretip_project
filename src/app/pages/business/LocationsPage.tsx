@@ -105,14 +105,14 @@ export function LocationsPage() {
     <div className="min-h-screen bg-background">
       <div className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur-xl bg-card/80">
         <div className="dashboard-page-contained mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="flex min-w-0 flex-col gap-2 sm:gap-3">
             <Link
               to="/dashboard"
-              className="shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="w-fit shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               {t("business.locationsPage.backAria")}
             </Link>
-            <div className="min-w-0">
+            <div className="min-w-0 space-y-1">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("business.locationsPage.title")}</h1>
               <p className="text-sm text-muted-foreground">{t("business.locationsPage.subtitle")}</p>
             </div>

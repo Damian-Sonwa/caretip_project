@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
-import { Navigation } from './Navigation';
-import { Footer } from './Footer';
+import { AuthFieldGroup } from './auth/AuthFieldGroup';
+import { AuthTrustStrip } from './auth/AuthTrustStrip';
 import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
@@ -34,7 +34,6 @@ import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
 import { commitAuthUser, hasClientStoredSession } from '../lib/authUserStore';
 import { hasClientSessionHint } from '../lib/authSessionHint';
-import { AuthPageAtmosphere } from './auth/AuthPageAtmosphere';
 import {
   AuthErrorSlot,
   AuthFormStatusSlot,
@@ -146,10 +145,13 @@ export function AuthPage() {
   const inviteContextActive = inviteCode.trim().length > 0;
 
   useEffect(() => {
-    if (inviteContextActive && role !== "employee") {
-      setRole("employee");
+    if (inviteContextActive) {
+      if (role !== "employee") setRole("employee");
+      return;
     }
-  }, [inviteContextActive, role]);
+    // Business is the default signup path; sign-in keeps URL role for staff lane.
+    if (!isLogin && role !== "business") setRole("business");
+  }, [inviteContextActive, role, isLogin]);
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -301,20 +303,6 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   };
 
-  const toggleRole = (newRole: AuthRole) => {
-    if (inviteContextActive && newRole === "business") {
-      return;
-    }
-    setRole(newRole);
-    setError("");
-    setName("");
-    if (!inviteContextActive) {
-      setInviteCode("");
-    }
-    setShowPasswordChecklist(false);
-    setUnlockedFields(new Set());
-  };
-
   const navigateAfterAuth = (r: UserRole) => {
     if (r === 'business') {
       navigate('/dashboard', { replace: true });
@@ -388,7 +376,7 @@ export function AuthPage() {
       !validateEmail(email) ||
       !isPasswordStrong(password) ||
       password !== confirmPassword ||
-      (role === 'employee' && (!name || !inviteCode)));
+      (inviteContextActive && (!name || !inviteCode)));
 
   const resumeSessionPending = user != null && !sessionValidated;
   const redirectingAfterAuth =
@@ -430,52 +418,47 @@ export function AuthPage() {
           ? t('auth.page.sessionRoleBusiness')
           : user?.role ?? '';
 
-  return (
-    <div className="caretip-auth-page relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
-      <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
-        <Navigation />
-
-        {showCrossSessionHint ? (
-          <div
-            className="caretip-auth-notice-banner"
-            role="region"
-            aria-label={t('auth.page.crossSessionRegionAria')}
+  const crossSessionBanner = showCrossSessionHint ? (
+    <div
+      className="caretip-auth-notice-banner"
+      role="region"
+      aria-label={t('auth.page.crossSessionRegionAria')}
+    >
+      <div className="caretip-auth-notice">
+        <p className="font-medium leading-snug">{t('auth.page.crossSessionBody', { role: sessionRoleLabel })}</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={!user}
+            onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
+            className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
           >
-            <div className="caretip-auth-notice">
-              <p className="font-medium leading-snug">{t('auth.page.crossSessionBody', { role: sessionRoleLabel })}</p>
-              <div className="mt-3 flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  disabled={!user}
-                  onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
-                  className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
-                >
-                  {t('auth.page.crossSessionContinue')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    logout();
-                    setError('');
-                  }}
-                  className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
-                >
-                  {t('auth.page.crossSessionSwitch')}
-                </button>
-              </div>
-            </div>
-          </div>
-        ) : null}
+            {t('auth.page.crossSessionContinue')}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              logout();
+              setError('');
+            }}
+            className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
+          >
+            {t('auth.page.crossSessionSwitch')}
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null;
 
+  return (
+    <div className="caretip-auth-page relative min-h-[100dvh] overflow-x-hidden font-sans">
         <SignInCard2
           isLogin={isLogin}
           onToggleMode={toggleAuthMode}
-          role={role}
-          onRoleChange={toggleRole}
           formBusy={isSubmitting}
           sessionActive={sameLaneValidated}
-          roleLocked={inviteContextActive}
-          className="flex-1"
+          inviteSignup={inviteContextActive && !isLogin}
+          topSlot={crossSessionBanner}
         >
           {showSignInForm ? (
           <form
@@ -494,133 +477,183 @@ export function AuthPage() {
               style={{ display: 'none' }}
             />
 
-            {!isLogin && role === 'employee' && (
-              <input
-                placeholder={t('auth.page.placeholderFullName')}
-                type="text"
-                id="auth-full-name"
-                name={FIELD.name}
-                autoComplete="name"
-                value={name}
-                readOnly={isFieldLocked(FIELD.name)}
-                onFocus={() => unlockField(FIELD.name)}
-                onChange={(e) => setName(e.target.value)}
-                className={FIELD_CLASS}
+            <div className={cn("caretip-auth-oauth", isSubmitting && "caretip-auth-oauth--busy")}>
+              <AuthOAuthButtons
+                isLogin={isLogin}
+                role={role}
+                formBusy={isSubmitting}
+                name={name}
+                inviteCode={inviteCode}
+                onGoogleCredential={(t) => void runGoogleOAuth(t)}
               />
-            )}
-
-            {!isLogin && role === 'employee' && (
-              <div className="relative">
-                <KeyRound className="caretip-auth-field-icon" aria-hidden />
-                <input
-                  placeholder={t('auth.page.placeholderInviteCode')}
-                  type="text"
-                  name={FIELD.inviteCode}
-                  autoComplete="off"
-                  value={inviteCode}
-                  readOnly={isFieldLocked(FIELD.inviteCode)}
-                  onFocus={() => unlockField(FIELD.inviteCode)}
-                  onChange={(e) => setInviteCode(e.target.value)}
-                  className={FIELD_ICON}
-                />
-              </div>
-            )}
-
-            <input
-              placeholder={t('auth.page.placeholderEmail')}
-              type="email"
-              id="auth-email"
-              name={FIELD.email}
-              inputMode="email"
-              autoComplete="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={FIELD_CLASS}
-            />
-
-            <div className="relative">
-              <input
-                placeholder={t('auth.page.placeholderPassword')}
-                type={showPassword ? 'text' : 'password'}
-                id="auth-password"
-                name={FIELD.password}
-                autoComplete={isLogin ? 'current-password' : 'new-password'}
-                value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (!isLogin) {
-                    setShowPasswordChecklist(true);
-                  }
-                }}
-                onFocus={() => {
-                  if (!isLogin) {
-                    setShowPasswordChecklist(true);
-                  }
-                }}
-                onBlur={() => {
-                  if (!isLogin && password.trim() === '') {
-                    setShowPasswordChecklist(false);
-                  }
-                }}
-                className={FIELD_PASSWORD}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="caretip-auth-field-toggle"
-                aria-label={showPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
-              {!isLogin && (
-                <div className="caretip-auth-password-meter">
-                  <div
-                    className="h-full min-w-0 rounded-full transition-all duration-300"
-                    style={{
-                      width: `${getPasswordStrength(password).score}%`,
-                      backgroundColor:
-                        getPasswordStrength(password).strength === 'strong'
-                          ? '#111827'
-                          : getPasswordStrength(password).strength === 'fair'
-                            ? '#e9781c'
-                            : '#6B7280',
-                      opacity: getPasswordStrength(password).strength === 'weak' ? 0.45 : 1,
-                    }}
-                  />
-                </div>
-              )}
             </div>
 
-            {!isLogin && (
-              <div className="space-y-2">
+            <div
+              className="caretip-auth-oauth-divider relative flex items-center gap-3"
+              role="separator"
+              aria-label={t('auth.page.dividerEmail')}
+            >
+              <div className="caretip-auth-divider-line" aria-hidden />
+              <span className="caretip-auth-oauth-divider__label">{t('auth.page.dividerEmail')}</span>
+              <div className="caretip-auth-divider-line" aria-hidden />
+            </div>
+
+            {inviteContextActive && !isLogin ? (
+              <div className="caretip-auth-employee-fields">
+                <AuthFieldGroup label={t('auth.page.labelFullName')} htmlFor="auth-full-name">
+                  <input
+                    placeholder={t('auth.page.placeholderFullName')}
+                    type="text"
+                    id="auth-full-name"
+                    name={FIELD.name}
+                    autoComplete="name"
+                    value={name}
+                    readOnly={isFieldLocked(FIELD.name)}
+                    onFocus={() => unlockField(FIELD.name)}
+                    onChange={(e) => setName(e.target.value)}
+                    className={FIELD_CLASS}
+                  />
+                </AuthFieldGroup>
+
+                <AuthFieldGroup label={t('auth.page.labelInviteCode')} htmlFor="auth-invite-code">
+                  <div className="relative">
+                    <KeyRound className="caretip-auth-field-icon" aria-hidden />
+                    <input
+                      placeholder={t('auth.page.placeholderInviteCode')}
+                      type="text"
+                      id="auth-invite-code"
+                      name={FIELD.inviteCode}
+                      autoComplete="off"
+                      value={inviteCode}
+                      readOnly={isFieldLocked(FIELD.inviteCode)}
+                      onFocus={() => unlockField(FIELD.inviteCode)}
+                      onChange={(e) => setInviteCode(e.target.value)}
+                      className={FIELD_ICON}
+                    />
+                  </div>
+                </AuthFieldGroup>
+              </div>
+            ) : null}
+
+            <AuthFieldGroup label={t('auth.page.labelEmail')} htmlFor="auth-email">
+              <input
+                placeholder={t('auth.page.placeholderEmail')}
+                type="email"
+                id="auth-email"
+                name={FIELD.email}
+                inputMode="email"
+                autoComplete="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={FIELD_CLASS}
+              />
+            </AuthFieldGroup>
+
+            {isLogin ? (
+              <AuthFieldGroup label={t('auth.page.labelPassword')} htmlFor="auth-password">
                 <div className="relative">
                   <input
-                    placeholder={t('auth.page.placeholderConfirmPassword')}
-                    type={showConfirmPassword ? 'text' : 'password'}
-                    id="auth-confirm-password"
-                    name={FIELD.confirmPassword}
-                    autoComplete="new-password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder={t('auth.page.placeholderPassword')}
+                    type={showPassword ? 'text' : 'password'}
+                    id="auth-password"
+                    name={FIELD.password}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className={FIELD_PASSWORD}
                   />
                   <button
                     type="button"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={() => setShowPassword(!showPassword)}
                     className="caretip-auth-field-toggle"
-                    aria-label={showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
+                    aria-label={showPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
                   >
-                    {showConfirmPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
+              </AuthFieldGroup>
+            ) : (
+              <>
+                <div className="caretip-auth-signup-password-row">
+                  <AuthFieldGroup label={t('auth.page.labelPassword')} htmlFor="auth-password">
+                    <div className="relative">
+                      <input
+                        placeholder={t('auth.page.placeholderPassword')}
+                        type={showPassword ? 'text' : 'password'}
+                        id="auth-password"
+                        name={FIELD.password}
+                        autoComplete="new-password"
+                        value={password}
+                        onChange={(e) => {
+                          setPassword(e.target.value);
+                          setShowPasswordChecklist(true);
+                        }}
+                        onFocus={() => setShowPasswordChecklist(true)}
+                        onBlur={() => {
+                          if (password.trim() === '') setShowPasswordChecklist(false);
+                        }}
+                        className={FIELD_PASSWORD}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="caretip-auth-field-toggle"
+                        aria-label={showPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')}
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
+                      <div className="caretip-auth-password-meter">
+                        <div
+                          className="h-full min-w-0 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${getPasswordStrength(password).score}%`,
+                            backgroundColor:
+                              getPasswordStrength(password).strength === 'strong'
+                                ? '#111827'
+                                : getPasswordStrength(password).strength === 'fair'
+                                  ? '#e9781c'
+                                  : '#6B7280',
+                            opacity: getPasswordStrength(password).strength === 'weak' ? 0.45 : 1,
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </AuthFieldGroup>
+
+                  <AuthFieldGroup label={t('auth.page.labelConfirmPassword')} htmlFor="auth-confirm-password">
+                    <div className="relative">
+                      <input
+                        placeholder={t('auth.page.placeholderConfirmPassword')}
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        id="auth-confirm-password"
+                        name={FIELD.confirmPassword}
+                        autoComplete="new-password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                        className={FIELD_PASSWORD}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                        className="caretip-auth-field-toggle"
+                        aria-label={
+                          showConfirmPassword ? t('auth.page.hidePassword') : t('auth.page.showPassword')
+                        }
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                  </AuthFieldGroup>
+                </div>
+
                 <div
                   className={cn(
                     'caretip-auth-password-rules-slot',
-                    !showPasswordChecklist && 'invisible',
+                    !showPasswordChecklist && 'caretip-auth-password-rules-slot--idle',
                   )}
                   aria-hidden={!showPasswordChecklist}
                 >
@@ -632,9 +665,9 @@ export function AuthPage() {
                       { key: 'number', label: t('auth.page.passwordRuleNumber'), met: getPasswordChecklist(password).hasNumber },
                       { key: 'special', label: t('auth.page.passwordRuleSpecial'), met: getPasswordChecklist(password).hasSpecial },
                     ].map(({ key, label, met }) => (
-                      <li key={key} className={`flex items-center gap-2 ${met ? 'text-primary' : ''}`}>
+                      <li key={key} className={`flex items-center gap-1.5 ${met ? 'text-primary' : ''}`}>
                         <span
-                          className={`flex h-3.5 w-3.5 flex-shrink-0 items-center justify-center rounded-full ${
+                          className={`flex h-3 w-3 flex-shrink-0 items-center justify-center rounded-full ${
                             met ? 'bg-primary text-white' : 'bg-neutral-200 dark:bg-neutral-800'
                           }`}
                         >
@@ -645,7 +678,7 @@ export function AuthPage() {
                     ))}
                   </ul>
                 </div>
-              </div>
+              </>
             )}
 
             <AuthErrorSlot>{error || null}</AuthErrorSlot>
@@ -695,24 +728,7 @@ export function AuthPage() {
                 : null}
             </AuthFormStatusSlot>
 
-            <div className="relative my-2 flex items-center gap-3" role="separator" aria-label={t('auth.page.dividerOr')}>
-              <div className="caretip-auth-divider-line" aria-hidden />
-              <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-neutral-400/90">
-                {t('auth.page.dividerOr')}
-              </span>
-              <div className="caretip-auth-divider-line" aria-hidden />
-            </div>
-
-            <div className={cn("caretip-auth-oauth", isSubmitting && "caretip-auth-oauth--busy")}>
-            <AuthOAuthButtons
-              isLogin={isLogin}
-              role={role}
-              formBusy={isSubmitting}
-              name={name}
-              inviteCode={inviteCode}
-              onGoogleCredential={(t) => void runGoogleOAuth(t)}
-            />
-            </div>
+            <AuthTrustStrip />
 
             <p className="caretip-auth-form-footer">
               {isLogin ? t('auth.page.footerNoAccount') : t('auth.page.footerHasAccount')}
@@ -728,9 +744,6 @@ export function AuthPage() {
           </form>
           ) : null}
         </SignInCard2>
-
-        <Footer variant="minimal" surface="light" />
-      </div>
     </div>
   );
 }

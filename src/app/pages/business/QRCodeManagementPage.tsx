@@ -17,6 +17,7 @@ import {
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
 import {
   getEmployees,
   fetchBusinessProfile,
@@ -761,10 +762,10 @@ export function QRCodeManagementPage() {
 
   if (!user) return <BusinessSubPageShellSkeleton />;
 
-  const canUseQr =
-    Boolean(user.impersonation) ||
-    verificationStatus === "verified" ||
-    user.status === "APPROVED";
+  const canUseQr = canUseProductionQr(
+    verificationStatus ?? user.status,
+    Boolean(user.impersonation),
+  );
 
   const qrLocked = !canUseQr;
 

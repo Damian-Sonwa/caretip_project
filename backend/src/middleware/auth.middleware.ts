@@ -26,6 +26,24 @@ declare global {
  * Stateless authentication: validates the access JWT only (no server session store per request).
  * Subscription / KYC gates belong in separate middleware (e.g. `isApprovedBusiness`).
  */
+/** Sets `req.user` when a valid Bearer token is present; does not reject missing/invalid tokens. */
+export function optionalAuthMiddleware(req: Request, res: Response, next: NextFunction) {
+  const authHeader = req.headers.authorization;
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;
+  if (!token) {
+    return next();
+  }
+  try {
+    const secret = process.env.JWT_SECRET;
+    if (!secret) return next();
+    const decoded = jwt.verify(token, secret) as JwtPayload;
+    req.user = decoded;
+  } catch {
+    // ignore invalid optional token
+  }
+  return next();
+}
+
 export function authMiddleware(req: Request, res: Response, next: NextFunction) {
   const authHeader = req.headers.authorization;
   const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null;

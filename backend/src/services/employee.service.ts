@@ -17,7 +17,12 @@ import {
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
-const VERIFICATION_REQUIRED_MSG = "QR code will be available after business verification.";
+import {
+  GO_LIVE_REQUIRED_MESSAGE,
+  hasBusinessVerificationCapability,
+} from "../config/businessVerificationCapabilities.js";
+
+const VERIFICATION_REQUIRED_MSG = GO_LIVE_REQUIRED_MESSAGE;
 
 /** Temporary password for new employees; they should change it on first login. */
 const TEMP_PASSWORD = "Welcome1!";
@@ -200,7 +205,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     });
     return null;
   }
-  if (emp.business.verificationStatus !== "verified") {
+  if (!hasBusinessVerificationCapability(emp.business.verificationStatus, "activateTipping")) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   return {
@@ -432,7 +437,7 @@ export async function regenerateEmployeeSlugForBusiness(businessId: string, empl
   if (!biz) {
     throw new Error("Business not found");
   }
-  if (biz.verificationStatus !== "verified") {
+  if (!hasBusinessVerificationCapability(biz.verificationStatus, "qrCodes")) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   const emp = await prisma.employee.findFirst({
@@ -680,7 +685,7 @@ export async function ensureEmployeeSlugForUser(userId: string): Promise<Employe
   if (!emp) {
     throw new Error("Employee not found");
   }
-  if (emp.business.verificationStatus !== "verified") {
+  if (!hasBusinessVerificationCapability(emp.business.verificationStatus, "qrCodes")) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   if (emp.slug) {

@@ -86,7 +86,7 @@ export function AuthOAuthButtons({
           useOneTap={false}
           theme="outline"
           size="large"
-          width={320}
+          width={400}
           text={isLogin ? "continue_with" : "signup_with"}
           shape="rectangular"
         />

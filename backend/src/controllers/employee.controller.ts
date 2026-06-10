@@ -1,6 +1,13 @@
 import type { Request, Response } from "express";
+import { Role } from "@prisma/client";
 import * as employeeService from "../services/employee.service.js";
 import * as businessService from "../services/business.service.js";
+import { prisma } from "../prisma.js";
+import {
+  GO_LIVE_REQUIRED_CODE,
+  GO_LIVE_REQUIRED_MESSAGE,
+  hasBusinessVerificationCapability,
+} from "../config/businessVerificationCapabilities.js";
 import { uploadEmployeeAvatarImage } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import {
@@ -163,6 +170,33 @@ export async function getEmployees(req: Request, res: Response) {
     if (!businessId || typeof businessId !== "string") {
       return res.status(400).json({ message: "businessId is required" });
     }
+
+    const uid = req.user?.userId ?? req.user?.id;
+    let managerOwnsBusiness = false;
+    if (uid && req.user?.role === Role.MANAGER) {
+      const owned = await prisma.business.findUnique({
+        where: { userId: uid },
+        select: { id: true },
+      });
+      managerOwnsBusiness = owned?.id === businessId;
+    }
+
+    if (!managerOwnsBusiness) {
+      const business = await prisma.business.findUnique({
+        where: { id: businessId },
+        select: { verificationStatus: true },
+      });
+      if (
+        !business ||
+        !hasBusinessVerificationCapability(business.verificationStatus, "activateTipping")
+      ) {
+        return res.status(403).json({
+          message: GO_LIVE_REQUIRED_MESSAGE,
+          code: GO_LIVE_REQUIRED_CODE,
+        });
+      }
+    }
+
     const employees = await employeeService.getEmployeesByBusinessId(businessId);
     return res.json(employees);
   } catch (err) {

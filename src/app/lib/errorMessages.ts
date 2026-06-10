@@ -151,9 +151,9 @@ const ERROR_MAP: Record<string, string> = {
 
   // QR / KYC (business managers — employees see audience-specific copy in {@link toUserFriendlyMessage})
   "QR code will be available after business verification.":
-    "QR codes and public tip links unlock after your venue is verified by CareTip.",
+    "QR code generation and guest tipping activation unlock after your venue is verified by CareTip.",
   "QR code generation will be enabled after admin verification.":
-    "QR codes and public tipping unlock after your venue is verified by CareTip.",
+    "QR code generation and guest tipping activation unlock after your venue is verified by CareTip.",
 
   // Locations / tables
   "Location name is required": "Please enter a location name.",

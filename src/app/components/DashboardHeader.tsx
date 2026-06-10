@@ -109,14 +109,14 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           {isBusinessManager ? (
             <Link
               to="/dashboard/settings?section=business"
-              className="inline-flex touch-manipulation items-center justify-center rounded-xl p-0.5 transition-colors hover:bg-muted active:opacity-90"
+              className="inline-flex max-w-[4.5rem] shrink-0 touch-manipulation items-center justify-center rounded-xl p-0 transition-colors hover:bg-muted active:opacity-90 sm:max-w-none sm:p-0.5"
               aria-label={t("shell.nav.settings")}
             >
               <BusinessLogoMark
                 key={`${businessLogo ?? "no-logo"}-${venueName}`}
                 logoPathOrUrl={businessLogo}
                 businessName={venueName}
-                size="dashboard"
+                size="dashboardHeader"
                 fallbackTone="muted"
               />
             </Link>

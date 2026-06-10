@@ -1,5 +1,6 @@
 import { useEffect, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
@@ -11,6 +12,7 @@ import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
  * Realtime: `verification_updated` from Socket.io; DB poll only when disconnected (fallback).
  */
 export function PendingVerification() {
+  const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
 
@@ -65,26 +67,31 @@ export function PendingVerification() {
     <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="text-center max-w-lg">
         <h1 className="text-2xl font-semibold text-foreground mb-3">
-          {rejected ? "Verification update" : "Verification pending"}
+          {rejected
+            ? t("business.verification.rejectedPageTitle")
+            : t("business.verification.pendingPageTitle")}
         </h1>
         <p className="text-muted-foreground mb-8 leading-relaxed">
-          {rejected ? (
-            <>
-              Your business verification was not approved. Please contact support if you have questions.
-            </>
-          ) : (
-            <>
-              Welcome to CareTip! Our team is currently reviewing your business details to ensure the highest
-              security standards. You will receive an email once your dashboard is activated.
-            </>
-          )}
+          {rejected
+            ? t("business.verification.rejectedPageBody")
+            : t("business.verification.pendingPageBody")}
         </p>
-        <Link
-          to="/"
-          className="inline-flex justify-center px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors"
-        >
-          Home
-        </Link>
+        <div className="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+          {!rejected ? (
+            <Link
+              to="/dashboard"
+              className="inline-flex justify-center px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:opacity-95 transition-opacity"
+            >
+              {t("business.verification.goToDashboard")}
+            </Link>
+          ) : null}
+          <Link
+            to="/"
+            className="inline-flex justify-center px-4 py-2 rounded-lg border border-border text-foreground hover:bg-muted transition-colors"
+          >
+            {t("business.verification.home")}
+          </Link>
+        </div>
       </div>
     </div>
   );

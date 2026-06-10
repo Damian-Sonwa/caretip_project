@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
-import { isApprovedBusiness } from "../middleware/isApprovedBusiness.middleware.js";
 import {
   supportTicketCreateLimiter,
   supportTicketReplyLimiter,
@@ -15,7 +14,6 @@ router.post(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
-  isApprovedBusiness,
   supportTicketCreateLimiter,
   supportTicketController.createBusinessTicket,
 );
@@ -24,7 +22,6 @@ router.get(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
-  isApprovedBusiness,
   supportTicketController.listBusinessTickets,
 );
 router.get(
@@ -32,7 +29,6 @@ router.get(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
-  isApprovedBusiness,
   supportTicketController.getBusinessTicket,
 );
 router.post(
@@ -40,7 +36,6 @@ router.post(
   authMiddleware,
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
-  isApprovedBusiness,
   supportTicketReplyLimiter,
   supportTicketController.replyBusinessTicket,
 );

@@ -2,6 +2,10 @@ import Stripe from "stripe";
 import { emitNewTip } from "../socket/emitTip.js";
 import { prisma } from "../prisma.js";
 import { businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
+import {
+  GO_LIVE_REQUIRED_MESSAGE,
+  hasBusinessVerificationCapability,
+} from "../config/businessVerificationCapabilities.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -249,11 +253,14 @@ export async function createPaymentIntent(
 
   const business = await prisma.business.findUnique({
     where: { id: input.businessId },
-    select: { id: true },
+    select: { id: true, verificationStatus: true },
   });
 
   if (!business) {
     throw new Error("Business not found");
+  }
+  if (!hasBusinessVerificationCapability(business.verificationStatus, "receiveTips")) {
+    throw new Error(GO_LIVE_REQUIRED_MESSAGE);
   }
 
   const { locationId: locId, tableId: tblId } = await resolveLocationTable(
@@ -337,10 +344,13 @@ export async function createTipCheckoutSession(
 
   const business = await prisma.business.findUnique({
     where: { id: businessId },
-    select: { id: true },
+    select: { id: true, verificationStatus: true },
   });
   if (!business) {
     throw new Error("Business not found");
+  }
+  if (!hasBusinessVerificationCapability(business.verificationStatus, "receiveTips")) {
+    throw new Error(GO_LIVE_REQUIRED_MESSAGE);
   }
 
   const { locationId: locId, tableId: tblId } = await resolveLocationTable(

@@ -41,6 +41,7 @@ import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { StaffManagementPageSkeleton } from "../../components/business/StaffManagementPageSkeleton";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
+import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
 import { logClientError } from "../../lib/clientLog";
 import {
   getPageSessionCache,
@@ -206,8 +207,7 @@ export function StaffManagementPage() {
   const [error, setError] = useState<string | null>(null);
   const [businessPublicSlug, setBusinessPublicSlug] = useState<string | null>(null);
 
-  const canUseQr =
-    Boolean(user?.impersonation) || user?.status === "APPROVED";
+  const canUseQr = canUseProductionQr(user?.status, Boolean(user?.impersonation));
 
   const fetchEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
     const quiet = opts?.quiet === true;

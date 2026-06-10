@@ -24,6 +24,12 @@ const LOGO_BOUNDS = {
     frame: "max-h-14 max-w-[9.5rem] min-h-[2.5rem] min-w-[2.5rem] sm:max-h-[3.5rem] sm:max-w-[11rem]",
     fallback: "h-12 w-12 min-h-12 min-w-12 text-sm",
   },
+  /** Business manager header — smaller on phones, unchanged from `dashboard` at sm+. */
+  dashboardHeader: {
+    frame:
+      "max-h-9 max-w-[4.25rem] min-h-[2rem] min-w-[2rem] sm:max-h-14 sm:max-w-[9.5rem] sm:min-h-[2.5rem] sm:min-w-[2.5rem] lg:max-h-[3.5rem] lg:max-w-[11rem]",
+    fallback: "h-9 w-9 min-h-9 min-w-9 text-[10px] sm:h-12 sm:w-12 sm:min-h-12 sm:min-w-12 sm:text-sm",
+  },
   lg: {
     frame: "max-h-16 max-w-[11rem] min-h-[2.75rem] min-w-[2.75rem]",
     fallback: "h-16 w-16 min-h-16 min-w-16 text-sm",
