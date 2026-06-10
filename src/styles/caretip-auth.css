@@ -285,10 +285,11 @@
 
 .caretip-auth-marketing__benefits li {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.625rem;
   font-size: 0.875rem;
   font-weight: 500;
+  line-height: 1.4;
   color: rgba(250, 250, 250, 0.88);
   transition: color 0.6s ease;
 }
@@ -297,30 +298,41 @@
   height: 1rem;
   width: 1rem;
   flex-shrink: 0;
+  margin-top: 0.125rem;
   color: var(--caretip-brand-orange, #e9781c);
 }
 
-/* Mobile — stacked, blob repositioned to top arc */
+/* Mobile — content-driven hero height, curve after feature list */
 @media (max-width: 767px) {
-  .caretip-auth-curved-blob {
-    top: initial;
-    bottom: 68%;
-    right: initial;
-    left: 30%;
-    height: 1500px;
-    width: 1500px;
-    transform: translateX(-50%);
-    transition: transform 2s ease-in-out, bottom 2s ease-in-out, left 2s ease-in-out;
-  }
-
-  .caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
-    bottom: 32%;
-    left: 30%;
-    transform: translate(-50%, 100%);
+  .caretip-auth-curved-container {
+    overflow-x: clip;
   }
 
   .caretip-auth-curved-brand {
+    position: relative;
+    z-index: 2;
     width: 100%;
+    flex: none;
+    background: transparent;
+  }
+
+  .caretip-auth-curved-blob {
+    top: var(--auth-mobile-curve-y, 26rem);
+    bottom: auto;
+    right: auto;
+    left: 50%;
+    height: min(145vmax, 1680px);
+    width: min(145vmax, 1680px);
+    transform: translate(-50%, -42%);
+    transition: transform 1.8s ease-in-out, top 0.35s ease;
+  }
+
+  .caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
+    transform: translate(-50%, 24%);
+  }
+
+  .caretip-auth-curved-container[data-auth-mobile-ready] .caretip-auth-curved-blob {
+    top: var(--auth-mobile-curve-y);
   }
 
   .caretip-auth-marketing {
@@ -331,19 +343,60 @@
   .caretip-auth-marketing__inner {
     max-width: 32.5rem;
     margin-inline: auto;
-    padding: 1.75rem 1.25rem 1.25rem;
+    padding: 1.375rem 1rem 1.25rem;
+  }
+
+  .caretip-auth-marketing__badge {
+    margin-top: 1rem;
   }
 
   .caretip-auth-marketing__headline {
-    font-size: 1.5rem;
+    margin-top: 0.875rem;
+    font-size: clamp(1.375rem, 5.8vw, 1.5rem);
   }
 
   .caretip-auth-marketing__body {
-    font-size: 0.875rem;
+    margin-top: 0.625rem;
+    font-size: 0.8125rem;
+    line-height: 1.5;
+  }
+
+  .caretip-auth-marketing__benefits {
+    margin-top: 0.875rem;
+    gap: 0.4375rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .caretip-auth-marketing__benefits li {
+    font-size: 0.8125rem;
   }
 
   .caretip-auth-split-layout__panel {
-    padding: 1rem 1.25rem 1.5rem;
+    position: relative;
+    z-index: 4;
+    flex: 1 1 auto;
+    margin-top: 1rem;
+    padding: 0.25rem 1rem 1.75rem;
+    align-items: flex-start;
+  }
+
+  .caretip-auth-split-layout__panel-inner {
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .caretip-auth-card-wrap {
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) and (min-width: 390px) {
+  .caretip-auth-marketing__inner {
+    padding-inline: 1.125rem;
+  }
+
+  .caretip-auth-split-layout__panel {
+    padding-inline: 1.125rem;
   }
 }
 
@@ -883,15 +936,14 @@ select.caretip-auth-field {
 }
 
 .caretip-auth-oauth > div {
-  width: 100% !important;
   display: flex !important;
-  justify-content: stretch !important;
+  width: 100% !important;
+  justify-content: center !important;
 }
 
 .caretip-auth-oauth iframe {
-  width: 100% !important;
   min-height: 3rem !important;
-  margin: 0 !important;
+  margin: 0 auto !important;
 }
 
 .caretip-auth-oauth-mount {

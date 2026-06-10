@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { GoogleLogin } from "@react-oauth/google";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -31,10 +31,27 @@ export function AuthOAuthButtons({
   const googleClientId = googleOAuthWebClientId();
   const [gsiOriginError, setGsiOriginError] = useState(false);
   const [gsiMounted, setGsiMounted] = useState(false);
+  const [buttonWidth, setButtonWidth] = useState(320);
+  const containerRef = useRef<HTMLDivElement>(null);
   const siteOrigin = typeof window !== "undefined" ? window.location.origin : "";
 
   useEffect(() => {
     setGsiMounted(true);
+  }, []);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    const syncWidth = () => {
+      const w = el.getBoundingClientRect().width;
+      setButtonWidth(Math.min(400, Math.max(240, Math.floor(w))));
+    };
+
+    const ro = new ResizeObserver(syncWidth);
+    ro.observe(el);
+    syncWidth();
+    return () => ro.disconnect();
   }, []);
 
   const onGoogleError = useCallback(() => {
@@ -69,8 +86,9 @@ export function AuthOAuthButtons({
 
   return (
     <div
+      ref={containerRef}
       className={cn(
-        "caretip-auth-oauth flex w-full justify-center [&>div]:!w-full [&_iframe]:!mx-auto",
+        "caretip-auth-oauth flex w-full justify-center",
         !isLogin && !canOAuthSignUp && "pointer-events-none opacity-40",
         gsiOriginError && "opacity-60",
       )}
@@ -78,6 +96,7 @@ export function AuthOAuthButtons({
     >
       {gsiMounted ? (
         <GoogleLogin
+          key={buttonWidth}
           onSuccess={(cred) => {
             setGsiOriginError(false);
             if (cred.credential) onGoogleCredential(cred.credential);
@@ -86,7 +105,8 @@ export function AuthOAuthButtons({
           useOneTap={false}
           theme="outline"
           size="large"
-          width={400}
+          width={buttonWidth}
+          logo_alignment="left"
           text={isLogin ? "continue_with" : "signup_with"}
           shape="rectangular"
         />
