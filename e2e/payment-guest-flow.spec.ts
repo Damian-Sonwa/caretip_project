@@ -8,7 +8,7 @@ test.describe("Guest payment flow (UI)", () => {
     const employeeId = "e2e-employee-pay";
     const businessId = "e2e-business-pay";
 
-    await page.route("**/api/staff/**", async (route) => {
+    await page.route("**/api/employees/**", async (route) => {
       if (route.request().method() !== "GET") return route.continue();
       await route.fulfill({
         status: 200,
@@ -21,6 +21,7 @@ test.describe("Guest payment flow (UI)", () => {
           businessName: "Harbor Kitchen",
           businessSlug: "harbor-kitchen",
           avatar: null,
+          businessLogo: null,
         }),
       });
     });
@@ -38,7 +39,9 @@ test.describe("Guest payment flow (UI)", () => {
     });
 
     await page.goto(`/payment?employeeId=${employeeId}&amount=5`);
-    await expect(page.getByRole("button", { name: /pay|checkout|continue/i }).first()).toBeVisible({
+    await expect(
+      page.getByRole("button", { name: /pay\s*€|zahlen|checkout|continue/i }).first(),
+    ).toBeVisible({
       timeout: 15_000,
     });
   });

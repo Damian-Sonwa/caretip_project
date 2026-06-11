@@ -12,6 +12,7 @@ export type MockAuthRefreshBody = {
     hasCompletedOnboarding?: boolean;
     businessId?: string;
     employeeId?: string;
+    businessVerificationStatus?: "pending" | "verified" | "rejected";
   };
 };
 

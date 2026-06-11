@@ -142,7 +142,9 @@ export function SuccessPage() {
             </div>
             <div className="flex items-center justify-between gap-4 border-t border-border/55 pt-3">
               <span className="font-semibold text-foreground">{t("tipFlow.success.tipAmount")}</span>
-              <span className="text-lg font-bold tabular-nums text-foreground">{formatEur(tipAmount)}</span>
+              <span className="text-lg font-bold tabular-nums text-foreground">
+                {tipAmount != null ? formatEur(tipAmount) : "—"}
+              </span>
             </div>
           </div>
         </motion.div>

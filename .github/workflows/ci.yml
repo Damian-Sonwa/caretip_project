@@ -7,6 +7,21 @@ on:
     branches: [main, master]
 
 jobs:
+  frontend-quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install frontend deps
+        run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+
   backend-tests:
     runs-on: ubuntu-latest
     services:
@@ -24,6 +39,8 @@ jobs:
           --health-timeout 5s
           --health-retries 10
     env:
+      CI: "true"
+      DATABASE_ALLOW_LOCALHOST: "true"
       DATABASE_URL: postgresql://caretip:caretip@localhost:5432/caretip_test
       JWT_SECRET: ci-test-jwt-secret-min-32-chars-long
       STRIPE_SECRET_KEY: sk_test_ci_placeholder

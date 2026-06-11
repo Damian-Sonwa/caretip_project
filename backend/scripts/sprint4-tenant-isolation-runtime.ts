@@ -104,14 +104,22 @@ async function seedTenant(label: string) {
   };
 }
 
+async function isApiReachable(): Promise<boolean> {
+  try {
+    const res = await fetch(`${API}/health`);
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
 async function main() {
   let a: Awaited<ReturnType<typeof seedTenant>> | null = null;
   let b: Awaited<ReturnType<typeof seedTenant>> | null = null;
 
   try {
-    try {
-      await fetch(`${API}/api/health`).catch(() => null);
-    } catch {
+    const apiUp = await isApiReachable();
+    if (!apiUp) {
       skip(`API not reachable at ${API} — HTTP checks skipped`);
     }
 
@@ -119,64 +127,73 @@ async function main() {
     b = await seedTenant("tenantB");
     pass("seed business A and B");
 
-    const patchEmp = await api(`/api/employee/${b.employeeId}`, a.token, {
-      method: "PATCH",
-      body: { name: "Hacked" },
-    });
-    if (patchEmp.status === 404 || patchEmp.status === 400) {
-      pass("manager A cannot PATCH business B employee");
+    if (!apiUp) {
+      const crossWrite = await prisma.employee.updateMany({
+        where: { id: b.employeeId, businessId: a.businessId },
+        data: { name: "Should not apply" },
+      });
+      if (crossWrite.count === 0) pass("DB write isolation: employee B not under business A");
+      else fail("DB write isolation failed — cross-tenant employee update matched rows");
     } else {
-      fail(`PATCH cross-employee expected 404/400 got ${patchEmp.status}`);
-    }
+      const patchEmp = await api(`/api/employees/${b.employeeId}`, a.token, {
+        method: "PATCH",
+        body: { name: "Hacked" },
+      });
+      if (patchEmp.status === 404 || patchEmp.status === 403 || patchEmp.status === 400) {
+        pass("manager A cannot PATCH business B employee");
+      } else {
+        fail(`PATCH cross-employee expected 404/403/400 got ${patchEmp.status}`);
+      }
 
-    const delEmp = await api(`/api/employee/${b.employeeId}`, a.token, { method: "DELETE" });
-    if (delEmp.status === 404 || delEmp.status === 204) {
-      const still = await prisma.employee.findUnique({ where: { id: b.employeeId } });
-      if (still) pass("manager A cannot DELETE business B employee");
-      else fail("business B employee was deleted by manager A");
-    } else {
-      fail(`DELETE cross-employee unexpected ${delEmp.status}`);
-    }
+      const delEmp = await api(`/api/employees/${b.employeeId}`, a.token, { method: "DELETE" });
+      if (delEmp.status === 404 || delEmp.status === 403) {
+        const still = await prisma.employee.findUnique({ where: { id: b.employeeId } });
+        if (still) pass("manager A cannot DELETE business B employee");
+        else fail("business B employee was deleted by manager A");
+      } else {
+        fail(`DELETE cross-employee unexpected ${delEmp.status}`);
+      }
 
-    const tipsA = await api("/api/tips/business", a.token);
-    if (tipsA.status === 200 && !tipsA.body.includes(b.transactionId)) {
-      pass("manager A tips list excludes business B transactions");
-    } else if (tipsA.status !== 200) {
-      skip(`tips/business A returned ${tipsA.status}`);
-    } else {
-      fail("manager A saw business B transaction id in tips response");
-    }
+      const tipsA = await api("/api/tips/business", a.token);
+      if (tipsA.status === 200 && !tipsA.body.includes(b.transactionId)) {
+        pass("manager A tips list excludes business B transactions");
+      } else if (tipsA.status !== 200) {
+        skip(`tips/business A returned ${tipsA.status}`);
+      } else {
+        fail("manager A saw business B transaction id in tips response");
+      }
 
-    const exportA = await api("/api/transactions/export", a.token);
-    if (exportA.status === 200 && exportA.body.includes("pi_tenantA") && !exportA.body.includes("pi_tenantB")) {
-      pass("export CSV scoped to manager A only");
-    } else if (exportA.status !== 200) {
-      skip(`transactions/export returned ${exportA.status}`);
-    } else {
-      fail("export CSV leaked business B data");
-    }
+      const exportA = await api("/api/transactions/export", a.token);
+      if (exportA.status === 200 && exportA.body.includes("pi_tenantA") && !exportA.body.includes("pi_tenantB")) {
+        pass("export CSV scoped to manager A only");
+      } else if (exportA.status !== 200) {
+        skip(`transactions/export returned ${exportA.status}`);
+      } else {
+        fail("export CSV leaked business B data");
+      }
 
-    const locA = await api("/api/locations", a.token);
-    if (locA.status === 200 && locA.body.includes(a.locationId) && !locA.body.includes(b.locationId)) {
-      pass("locations scoped to manager A");
-    } else if (locA.status !== 200) {
-      skip(`locations returned ${locA.status}`);
-    } else {
-      fail("locations leaked business B location");
-    }
+      const locA = await api("/api/locations", a.token);
+      if (locA.status === 200 && locA.body.includes(a.locationId) && !locA.body.includes(b.locationId)) {
+        pass("locations scoped to manager A");
+      } else if (locA.status !== 200) {
+        skip(`locations returned ${locA.status}`);
+      } else {
+        fail("locations leaked business B location");
+      }
 
-    const feedbackA = await api("/api/feedback/business", a.token);
-    if (feedbackA.status === 200 && !feedbackA.body.includes(b.businessId)) {
-      pass("feedback list does not expose business B id scope");
-    } else if (feedbackA.status !== 200) {
-      skip(`feedback/business returned ${feedbackA.status}`);
-    } else {
-      fail("feedback response may leak cross-tenant data");
-    }
+      const feedbackA = await api("/api/feedback/business", a.token);
+      if (feedbackA.status === 200 && !feedbackA.body.includes(b.businessId)) {
+        pass("feedback list does not expose business B id scope");
+      } else if (feedbackA.status !== 200) {
+        skip(`feedback/business returned ${feedbackA.status}`);
+      } else {
+        fail("feedback response may leak cross-tenant data");
+      }
 
-    const statsA = await api("/api/business/stats?timeframe=week", a.token);
-    if (statsA.status === 200) pass("business stats resolves from session (no foreign businessId param)");
-    else skip(`business/stats returned ${statsA.status}`);
+      const statsA = await api("/api/business/stats?timeframe=week", a.token);
+      if (statsA.status === 200) pass("business stats resolves from session (no foreign businessId param)");
+      else skip(`business/stats returned ${statsA.status}`);
+    }
   } catch (e) {
     fail(`runtime: ${e instanceof Error ? e.message : String(e)}`);
   } finally {

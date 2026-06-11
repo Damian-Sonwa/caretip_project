@@ -38,6 +38,24 @@ function isSupabasePoolerHost(hostname: string): boolean {
   return hostname.includes("pooler.supabase.com");
 }
 
+function isLocalDatabaseUrl(lower: string): boolean {
+  return (
+    /\blocalhost\b/.test(lower) ||
+    /\b127\.0\.0\.1\b/.test(lower) ||
+    lower.includes("[::1]") ||
+    lower.includes("://::1")
+  );
+}
+
+/** CI / local Postgres test jobs use loopback URLs — production deploys must not. */
+function isLocalhostDatabaseAllowed(): boolean {
+  return (
+    process.env.CI === "true" ||
+    process.env.DATABASE_ALLOW_LOCALHOST === "true" ||
+    process.env.NODE_ENV === "test"
+  );
+}
+
 /**
  * Normalize Supabase pooler URLs for Prisma runtime (single connection per process).
  * Rewrites session pooler (5432) → transaction pooler (6543) unless DATABASE_USE_SESSION_POOLER=true.
@@ -51,15 +69,13 @@ export function getDatabaseUrlForPrisma(): string {
   }
 
   const lower = raw.toLowerCase();
-  if (
-    /\blocalhost\b/.test(lower) ||
-    /\b127\.0\.0\.1\b/.test(lower) ||
-    lower.includes("[::1]") ||
-    lower.includes("://::1")
-  ) {
-    throw new Error(
-      "DATABASE_URL must not use localhost or loopback. Use the Supabase pooler hostname from your project settings.",
-    );
+  if (isLocalDatabaseUrl(lower)) {
+    if (!isLocalhostDatabaseAllowed()) {
+      throw new Error(
+        "DATABASE_URL must not use localhost or loopback. Use the Supabase pooler hostname from your project settings.",
+      );
+    }
+    return raw.replace(/\/postgres\?\?/i, "/postgres?");
   }
 
   let url = raw.replace(/\/postgres\?\?/i, "/postgres?");

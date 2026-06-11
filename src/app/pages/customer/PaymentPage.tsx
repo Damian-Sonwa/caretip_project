@@ -25,6 +25,11 @@ export function PaymentPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const employeeIdFromUrl = searchParams.get("employeeId");
+  const amountFromUrlRaw = searchParams.get("amount");
+  const amountFromUrlParsed =
+    amountFromUrlRaw != null && amountFromUrlRaw.trim() !== "" ? Number(amountFromUrlRaw) : NaN;
+  const amountFromUrl =
+    Number.isFinite(amountFromUrlParsed) && amountFromUrlParsed > 0 ? amountFromUrlParsed : null;
   const returnSlugFromUrl = searchParams.get("returnSlug");
   const returnBusinessSlugFromUrl = searchParams.get("returnBusinessSlug");
   const returnEmployeeSlugFromUrl = searchParams.get("returnEmployeeSlug");
@@ -41,6 +46,7 @@ export function PaymentPage() {
     tableId,
     setBusinessId,
     setEmployee,
+    setAmount,
   } = useTipFlow();
   const [processing, setProcessing] = useState(false);
   const [guardReady, setGuardReady] = useState(false);
@@ -51,7 +57,7 @@ export function PaymentPage() {
   const tipAmountVal =
     tipAmountCtx != null && Number.isFinite(tipAmountCtx) && tipAmountCtx > 0
       ? tipAmountCtx
-      : null;
+      : amountFromUrl;
   /** Customer pays the tip only (no separate bill line). */
   const totalAmount = tipAmountVal ?? 0;
   const missingContext =
@@ -126,9 +132,19 @@ export function PaymentPage() {
   useEffect(() => {
     if (!DEV_BYPASS_ENABLED) return;
     if (resolvedEmployeeId && businessId) return;
+    if (resolvedEmployeeId && !businessId) {
+      // Deep-link with employeeId — keep id; API hydration supplies businessId.
+      if (amountFromUrl == null && (tipAmountCtx == null || tipAmountCtx <= 0)) {
+        setAmount(DEV_MOCK.amount);
+      }
+      return;
+    }
     setBusinessId(DEV_MOCK.businessId);
     setEmployee(DEV_MOCK.employeeId, DEV_MOCK.employeeName, undefined);
-  }, [businessId, resolvedEmployeeId, setBusinessId, setEmployee]);
+    if (amountFromUrl == null && (tipAmountCtx == null || tipAmountCtx <= 0)) {
+      setAmount(DEV_MOCK.amount);
+    }
+  }, [amountFromUrl, businessId, resolvedEmployeeId, setAmount, setBusinessId, setEmployee, tipAmountCtx]);
 
   useEffect(() => {
     if (searchParams.get("canceled") === "1") {

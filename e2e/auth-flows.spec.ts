@@ -11,6 +11,7 @@ const baseManager = (overrides: Partial<MockAuthRefreshBody["user"]> = {}): Mock
     emailVerified: true,
     hasCompletedOnboarding: true,
     businessId: "e2e-biz-row",
+    businessVerificationStatus: "verified",
     ...overrides,
   },
 });
