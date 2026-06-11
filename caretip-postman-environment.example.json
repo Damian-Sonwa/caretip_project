@@ -1,5 +1,5 @@
 {
-  "name": "CareTip Local",
+  "name": "CareTip Local (example)",
   "values": [
     {
       "key": "baseUrl",
@@ -13,7 +13,7 @@
     },
     {
       "key": "managerPassword",
-      "value": "Demo1234!",
+      "value": "YOUR_DEMO_PASSWORD",
       "enabled": true
     },
     {
@@ -23,7 +23,7 @@
     },
     {
       "key": "managerBPassword",
-      "value": "password123",
+      "value": "YOUR_DEMO_PASSWORD",
       "enabled": true
     },
     {
@@ -43,7 +43,7 @@
     },
     {
       "key": "employeePassword",
-      "value": "Demo1234!",
+      "value": "YOUR_DEMO_PASSWORD",
       "enabled": true
     },
     {
@@ -53,7 +53,7 @@
     },
     {
       "key": "adminPassword",
-      "value": "Demo1234!",
+      "value": "YOUR_DEMO_PASSWORD",
       "enabled": true
     },
     {
