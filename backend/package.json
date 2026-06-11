@@ -29,6 +29,7 @@
     "test:sprint4-payment-e2e": "dotenv -e ../.env -e .env -- tsx scripts/sprint4-payment-e2e-runtime.ts",
     "test:sprint4-tenant-isolation": "dotenv -e ../.env -e .env -- tsx scripts/sprint4-tenant-isolation-runtime.ts",
     "test:sprint4-employee-lifecycle": "dotenv -e ../.env -e .env -- tsx scripts/sprint4-employee-lifecycle-runtime.ts",
+    "test:sprint4-load-validation": "dotenv -e ../.env -e .env -- tsx scripts/sprint4-load-validation.ts",
     "db:backfill-business-slugs": "tsx scripts/backfill-business-slugs.ts",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:platform-analytics-demo": "tsx prisma/seedPlatformAnalyticsDemo.ts",

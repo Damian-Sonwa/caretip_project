@@ -199,18 +199,47 @@ async function resolveLocationTable(
   return { locationId: resolvedLocationId, tableId: resolvedTableId };
 }
 
-async function emitTipSocket(tipId: string): Promise<void> {
-  const tip = await prisma.transaction.findUnique({
-    where: { id: tipId },
-    include: { employee: true },
+async function loadTipEmitSnapshot(
+  employeeId: string,
+  businessId: string,
+): Promise<{
+  employeeName: string;
+  employeeUserId: string;
+  monthlyGoal: number | null;
+  businessTimezone: string;
+  businessManagerUserId: string;
+} | null> {
+  const row = await prisma.employee.findFirst({
+    where: { id: employeeId, businessId },
+    select: {
+      name: true,
+      monthlyGoal: true,
+      userId: true,
+      business: { select: { timezone: true, userId: true } },
+    },
   });
-  if (!tip?.employee) return;
+  if (!row) return null;
+  return {
+    employeeName: row.name,
+    employeeUserId: row.userId,
+    monthlyGoal: row.monthlyGoal != null ? Number(row.monthlyGoal) : null,
+    businessTimezone: row.business.timezone,
+    businessManagerUserId: row.business.userId,
+  };
+}
 
-  const business = await prisma.business.findUnique({
-    where: { id: tip.businessId },
-    select: { timezone: true },
-  });
-  const tz = sanitizeIanaTimezone(business?.timezone);
+async function emitTipSocketWithSnapshot(
+  tip: {
+    id: string;
+    amount: unknown;
+    status: string;
+    createdAt: Date;
+    employeeId: string;
+    businessId: string;
+  },
+  snapshot: NonNullable<Awaited<ReturnType<typeof loadTipEmitSnapshot>>>,
+): Promise<void> {
+  const tz = sanitizeIanaTimezone(snapshot.businessTimezone);
   const monthRange = businessUtcRangeForTimeframe("month", tz);
   const currentMonthTotalAgg = await prisma.transaction.aggregate({
     where: {
@@ -223,7 +252,6 @@ async function emitTipSocket(tipId: string): Promise<void> {
     _sum: { amount: true },
   });
   const currentMonthTotal = Number(currentMonthTotalAgg._sum.amount ?? 0);
-  const monthlyGoal = tip.employee.monthlyGoal != null ? Number(tip.employee.monthlyGoal) : null;
 
   emitNewTip({
     tip: {
@@ -233,10 +261,12 @@ async function emitTipSocket(tipId: string): Promise<void> {
       createdAt: tip.createdAt.toISOString(),
     },
     employeeId: tip.employeeId,
-    employeeName: tip.employee.name,
+    employeeName: snapshot.employeeName,
+    employeeUserId: snapshot.employeeUserId,
     businessId: tip.businessId,
+    businessManagerUserId: snapshot.businessManagerUserId,
     currentMonthTotal,
-    monthlyGoal,
+    monthlyGoal: snapshot.monthlyGoal,
   });
 }
 
@@ -478,14 +508,29 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
 
   const tip = await prisma.transaction.findFirst({
     where: { stripePaymentIntentId: paymentIntentId },
-    include: { employee: true },
+    select: {
+      id: true,
+      amount: true,
+      status: true,
+      createdAt: true,
+      employeeId: true,
+      businessId: true,
+      employee: { select: { name: true, monthlyGoal: true, userId: true } },
+      business: { select: { timezone: true, userId: true } },
+    },
   });
 
   if (!tip?.employee) {
     return;
   }
 
-  await emitTipSocket(tip.id);
+  await emitTipSocketWithSnapshot(tip, {
+    employeeName: tip.employee.name,
+    employeeUserId: tip.employee.userId,
+    monthlyGoal: tip.employee.monthlyGoal != null ? Number(tip.employee.monthlyGoal) : null,
+    businessTimezone: tip.business.timezone,
+    businessManagerUserId: tip.business.userId,
+  });
 }
 
 export async function handlePaymentFailed(paymentIntentId: string): Promise<void> {
@@ -612,6 +657,8 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     return;
   }
 
+  const emitSnapshot = await loadTipEmitSnapshot(employeeId, businessId);
+
   let locId: string | null = null;
   let tblId: string | null = null;
   try {
@@ -641,7 +688,9 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
 
     console.log("TIP CREATED", tip.id);
 
-    await emitTipSocket(tip.id);
+    if (emitSnapshot) {
+      await emitTipSocketWithSnapshot(tip, emitSnapshot);
+    }
   } catch (err) {
     const code = (err as { code?: string })?.code;
     console.error("TIP INSERT FAILED", err);

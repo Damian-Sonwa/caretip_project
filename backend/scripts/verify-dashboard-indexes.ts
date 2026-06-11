@@ -16,6 +16,8 @@ const REQUIRED_INDEXES: Array<{ table: string; index: string }> = [
   { table: "employees", index: "employees_business_id_missing_qr_idx" },
   { table: "employee_goals", index: "employee_goals_employee_status_updated_idx" },
   { table: "employee_goals", index: "employee_goals_active_updated_idx" },
+  { table: "businesses", index: "businesses_verification_status_idx" },
+  { table: "businesses", index: "businesses_verification_pending_kyc_idx" },
 ];
 
 async function main(): Promise<void> {
@@ -28,7 +30,8 @@ async function main(): Promise<void> {
         'employees',
         'employee_goals',
         'refresh_tokens',
-        'notifications'
+        'notifications',
+        'businesses'
       )
   `;
 

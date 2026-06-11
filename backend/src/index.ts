@@ -2,8 +2,10 @@
 import "dotenv/config";
 import "./loadEnv.js";
 import { initSentry } from "./instrument/sentry.js";
+import { startShortLivedCacheMaintenance } from "./utils/shortLivedCache.js";
 
 initSentry();
+startShortLivedCacheMaintenance();
 
 import { createServer } from "http";
 import { join } from "path";

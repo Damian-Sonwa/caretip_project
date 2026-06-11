@@ -1,13 +1,59 @@
 /**
  * Runtime Postgres URL for PrismaClient (Express): **`DATABASE_URL` only** (Supabase pooler).
- * Transaction pooler uses port **6543** + `pgbouncer=true` + `connection_limit=1`.
- * With one connection, `Promise.all` DB work serializes — dashboard handlers use single-query bundles per scope.
- * Session pooler (5432) is for migrations only — using it at runtime exhausts Supabase session slots.
+ * Transaction pooler uses port **6543** + `pgbouncer=true` + configurable `connection_limit`.
+ *
+ * `DIRECT_URL` / `directUrl` are intentionally unused — direct `db.*.supabase.co` often fails
+ * from deploy environments (P1001). Migrations use session pooler via scripts/sessionDatabaseUrl.mjs.
  *
  * SSL: ensures `sslmode=require` when missing.
  */
 
 let loggedNormalization = false;
+
+const DEFAULT_CONNECTION_LIMIT = 5;
+const MIN_CONNECTION_LIMIT = 1;
+const MAX_CONNECTION_LIMIT = 15;
+
+export type DatabasePoolDiagnostics = {
+  rawUrlHost: string | null;
+  normalizedPort: string | null;
+  pgbouncer: boolean;
+  connectionLimit: number;
+  poolTimeoutSeconds: number | null;
+  usesSessionPoolerAtRuntime: boolean;
+  directUrlConfigured: boolean;
+};
+
+function parseConnectionLimit(raw: string | undefined, fallback: number): number {
+  const n = Number.parseInt(String(raw ?? "").trim(), 10);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.min(MAX_CONNECTION_LIMIT, Math.max(MIN_CONNECTION_LIMIT, n));
+}
+
+/** Resolved Prisma pool size for this process (env override → URL param → default). */
+export function getDatabaseConnectionLimit(): number {
+  if (process.env.DATABASE_CONNECTION_LIMIT?.trim()) {
+    return parseConnectionLimit(process.env.DATABASE_CONNECTION_LIMIT, DEFAULT_CONNECTION_LIMIT);
+  }
+  const raw = process.env.DATABASE_URL?.trim();
+  if (raw) {
+    try {
+      const parsed = new URL(raw.replace(/^postgresql:\/\//i, "http://"));
+      const fromUrl = parsed.searchParams.get("connection_limit");
+      if (fromUrl) {
+        const parsedLimit = parseConnectionLimit(fromUrl, DEFAULT_CONNECTION_LIMIT);
+        // Legacy templates used connection_limit=1; dedicated API servers need more than one slot.
+        if (parsedLimit === 1 && !process.env.DATABASE_CONNECTION_LIMIT?.trim()) {
+          return DEFAULT_CONNECTION_LIMIT;
+        }
+        return parsedLimit;
+      }
+    } catch {
+      /* fall through */
+    }
+  }
+  return DEFAULT_CONNECTION_LIMIT;
+}
 
 /**
  * Merge query params into a postgresql URL without breaking passwords that contain `?` or `&`
@@ -56,8 +102,16 @@ function isLocalhostDatabaseAllowed(): boolean {
   );
 }
 
+function applyPoolParams(url: string, connectionLimit: number): string {
+  return ensureQueryParams(url, {
+    pgbouncer: "true",
+    connection_limit: String(connectionLimit),
+    pool_timeout: "30",
+  });
+}
+
 /**
- * Normalize Supabase pooler URLs for Prisma runtime (single connection per process).
+ * Normalize Supabase pooler URLs for Prisma runtime.
  * Rewrites session pooler (5432) → transaction pooler (6543) unless DATABASE_USE_SESSION_POOLER=true.
  */
 export function getDatabaseUrlForPrisma(): string {
@@ -67,6 +121,8 @@ export function getDatabaseUrlForPrisma(): string {
       "DATABASE_URL is required. Set it in .env to your Supabase pooler URL (see backend/.env.example).",
     );
   }
+
+  const connectionLimit = getDatabaseConnectionLimit();
 
   const lower = raw.toLowerCase();
   if (isLocalDatabaseUrl(lower)) {
@@ -94,7 +150,7 @@ export function getDatabaseUrlForPrisma(): string {
       if ((port === "5432" || port === "") && !forceSession) {
         parsed.port = "6543";
         parsed.searchParams.set("pgbouncer", "true");
-        parsed.searchParams.set("connection_limit", "1");
+        parsed.searchParams.set("connection_limit", String(connectionLimit));
         if (!parsed.searchParams.has("pool_timeout")) {
           parsed.searchParams.set("pool_timeout", "30");
         }
@@ -104,41 +160,25 @@ export function getDatabaseUrlForPrisma(): string {
         if (!parsed.searchParams.has("pgbouncer")) {
           parsed.searchParams.set("pgbouncer", "true");
         }
-        if (!parsed.searchParams.has("connection_limit")) {
-          parsed.searchParams.set("connection_limit", "1");
-        }
+        parsed.searchParams.set("connection_limit", String(connectionLimit));
         if (!parsed.searchParams.has("pool_timeout")) {
           parsed.searchParams.set("pool_timeout", "30");
         }
         url = parsed.toString();
       } else if (port === "5432" && forceSession) {
-        if (!parsed.searchParams.has("connection_limit")) {
-          parsed.searchParams.set("connection_limit", "1");
-        }
+        parsed.searchParams.set("connection_limit", String(connectionLimit));
         url = parsed.toString();
         usedSessionPooler = true;
       }
     } else if (url.includes("pooler.supabase.com:6543")) {
-      url = ensureQueryParams(url, {
-        pgbouncer: "true",
-        connection_limit: "1",
-        pool_timeout: "30",
-      });
+      url = applyPoolParams(url, connectionLimit);
     }
   } catch {
     if (url.includes("pooler.supabase.com:6543")) {
-      url = ensureQueryParams(url, {
-        pgbouncer: "true",
-        connection_limit: "1",
-        pool_timeout: "30",
-      });
+      url = applyPoolParams(url, connectionLimit);
     } else if (url.includes("pooler.supabase.com:5432")) {
       url = url.replace(":5432/", ":6543/");
-      url = ensureQueryParams(url, {
-        pgbouncer: "true",
-        connection_limit: "1",
-        pool_timeout: "30",
-      });
+      url = applyPoolParams(url, connectionLimit);
       usedSessionPooler = true;
     }
   }
@@ -146,9 +186,47 @@ export function getDatabaseUrlForPrisma(): string {
   if (usedSessionPooler && !loggedNormalization) {
     loggedNormalization = true;
     console.warn(
-      "[database] DATABASE_URL used Supabase session pooler (5432). Runtime Prisma uses transaction pooler (6543) with connection_limit=1 to avoid max-clients errors. Set DATABASE_USE_SESSION_POOLER=true only if you intend session mode.",
+      `[database] DATABASE_URL used Supabase session pooler (5432). Runtime Prisma uses transaction pooler (6543) with connection_limit=${connectionLimit}. Set DATABASE_USE_SESSION_POOLER=true only if you intend session mode.`,
     );
   }
 
   return url;
+}
+
+/** Non-secret pool configuration for ops audits and load tests. */
+export function getDatabasePoolDiagnostics(): DatabasePoolDiagnostics {
+  const raw = process.env.DATABASE_URL?.trim() ?? "";
+  let rawUrlHost: string | null = null;
+  let normalizedPort: string | null = null;
+  let pgbouncer = false;
+  let poolTimeoutSeconds: number | null = null;
+
+  if (raw) {
+    try {
+      const parsed = new URL(raw.replace(/^postgresql:\/\//i, "http://"));
+      rawUrlHost = parsed.hostname;
+    } catch {
+      rawUrlHost = null;
+    }
+  }
+
+  try {
+    const normalized = new URL(getDatabaseUrlForPrisma().replace(/^postgresql:\/\//i, "http://"));
+    normalizedPort = normalized.port || "5432";
+    pgbouncer = normalized.searchParams.get("pgbouncer") === "true";
+    const pt = normalized.searchParams.get("pool_timeout");
+    poolTimeoutSeconds = pt ? Number.parseInt(pt, 10) : null;
+  } catch {
+    normalizedPort = null;
+  }
+
+  return {
+    rawUrlHost,
+    normalizedPort,
+    pgbouncer,
+    connectionLimit: getDatabaseConnectionLimit(),
+    poolTimeoutSeconds,
+    usesSessionPoolerAtRuntime: normalizedPort === "6543",
+    directUrlConfigured: Boolean(process.env.DIRECT_URL?.trim()),
+  };
 }

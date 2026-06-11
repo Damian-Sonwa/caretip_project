@@ -288,28 +288,29 @@ async function getAllBusinessActivityImpl() {
 }
 
 export async function getKycQueueMetrics() {
-  const rows = await prisma.business.findMany({
-    select: {
-      verificationStatus: true,
-      kycSubmittedAt: true,
-      kycDocuments: true,
-    },
-  });
-  let pendingReview = 0;
-  let slaBreached = 0;
-  let awaitingUpload = 0;
-  for (const b of rows) {
-    if (b.verificationStatus === "pending" && b.kycSubmittedAt) {
-      pendingReview += 1;
-      if (isKycSlaBreached(b.kycSubmittedAt, b.verificationStatus)) slaBreached += 1;
-    } else if (b.verificationStatus === "pending" && !b.kycSubmittedAt) {
-      awaitingUpload += 1;
-    }
-  }
+  const slaHours = KYC_SLA_HOURS;
+  const rows = await prisma.$queryRaw<
+    Array<{ pending_review: bigint; awaiting_upload: bigint; sla_breached: bigint }>
+  >`
+    SELECT
+      COUNT(*) FILTER (
+        WHERE verification_status = 'pending' AND kyc_submitted_at IS NOT NULL
+      )::bigint AS pending_review,
+      COUNT(*) FILTER (
+        WHERE verification_status = 'pending' AND kyc_submitted_at IS NULL
+      )::bigint AS awaiting_upload,
+      COUNT(*) FILTER (
+        WHERE verification_status = 'pending'
+          AND kyc_submitted_at IS NOT NULL
+          AND kyc_submitted_at < NOW() - (${slaHours}::int * INTERVAL '1 hour')
+      )::bigint AS sla_breached
+    FROM businesses
+  `;
+  const row = rows[0];
   return {
-    pendingReview,
-    slaBreached,
-    awaitingUpload,
+    pendingReview: Number(row?.pending_review ?? 0),
+    awaitingUpload: Number(row?.awaiting_upload ?? 0),
+    slaBreached: Number(row?.sla_breached ?? 0),
     slaHours: KYC_SLA_HOURS,
   };
 }

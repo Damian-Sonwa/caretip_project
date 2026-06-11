@@ -433,6 +433,7 @@ model Business {
   locations      Location[]
   supportTickets SupportTicket[]
 
+  @@index([verificationStatus], map: "businesses_verification_status_idx")
   @@map("businesses")
 }
 

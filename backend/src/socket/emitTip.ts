@@ -9,7 +9,11 @@ export interface NewTipPayload {
   };
   employeeId: string;
   employeeName: string;
+  /** When set, push notifications skip an employee lookup. */
+  employeeUserId?: string;
   businessId: string;
+  /** When set, push notifications skip a business lookup. */
+  businessManagerUserId?: string;
   currentMonthTotal: number;
   monthlyGoal: number | null;
 }

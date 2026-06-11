@@ -26,17 +26,24 @@ export async function listPlatformAdminUserIds(): Promise<string[]> {
 /** 1. New tip received — employee + business manager. */
 export function onTipReceived(payload: NewTipPayload): void {
   safeTrigger("onTipReceived", async () => {
-    const employee = await prisma.employee.findUnique({
-      where: { id: payload.employeeId },
-      select: { userId: true, name: true },
-    });
-    if (!employee) return;
+    let employeeUserId = payload.employeeUserId;
+    let employeeName = payload.employeeName;
+
+    if (!employeeUserId) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: payload.employeeId },
+        select: { userId: true, name: true },
+      });
+      if (!employee) return;
+      employeeUserId = employee.userId;
+      employeeName = employee.name;
+    }
 
     const ts = new Date().toISOString();
     const amount = Number(payload.tip.amount);
 
     await deliverUserNotification({
-      userId: employee.userId,
+      userId: employeeUserId,
       payload: {
         type: NotificationType.TIP_RECEIVED,
         title: "New tip received",
@@ -45,7 +52,7 @@ export function onTipReceived(payload: NewTipPayload): void {
           id: "tip_received_employee",
           params: {
             amount,
-            name: employee.name,
+            name: employeeName,
           },
         },
         url: "/employee/notifications",
@@ -56,19 +63,24 @@ export function onTipReceived(payload: NewTipPayload): void {
           employeeId: payload.employeeId,
           businessId: payload.businessId,
           amount: String(amount),
-          employeeName: employee.name,
+          employeeName,
         },
       },
-      dedupeKey: `tip:${payload.tip.id}:employee:${employee.userId}`,
+      dedupeKey: `tip:${payload.tip.id}:employee:${employeeUserId}`,
     });
 
-    const business = await prisma.business.findUnique({
-      where: { id: payload.businessId },
-      select: { userId: true },
-    });
-    if (business?.userId && business.userId !== employee.userId) {
+    let managerUserId = payload.businessManagerUserId;
+    if (managerUserId === undefined) {
+      const business = await prisma.business.findUnique({
+        where: { id: payload.businessId },
+        select: { userId: true },
+      });
+      managerUserId = business?.userId ?? null;
+    }
+
+    if (managerUserId && managerUserId !== employeeUserId) {
       await deliverUserNotification({
-        userId: business.userId,
+        userId: managerUserId,
         payload: {
           type: NotificationType.TIP_RECEIVED,
           title: "New tip at your venue",
@@ -77,7 +89,7 @@ export function onTipReceived(payload: NewTipPayload): void {
             id: "tip_received_business",
             params: {
               amount,
-              employeeName: employee.name,
+              employeeName,
             },
           },
           url: "/dashboard/transactions",
@@ -88,10 +100,10 @@ export function onTipReceived(payload: NewTipPayload): void {
             employeeId: payload.employeeId,
             businessId: payload.businessId,
             amount: String(amount),
-            employeeName: employee.name,
+            employeeName,
           },
         },
-        dedupeKey: `tip:${payload.tip.id}:business:${business.userId}`,
+        dedupeKey: `tip:${payload.tip.id}:business:${managerUserId}`,
       });
     }
   });
