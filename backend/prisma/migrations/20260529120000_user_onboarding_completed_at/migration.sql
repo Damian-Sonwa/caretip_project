@@ -1,4 +1,5 @@
--- Manager onboarding completion timestamp (explicit finish only).
+-- Manager onboarding completion flag + timestamp (explicit finish only).
+ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "has_completed_onboarding" BOOLEAN NOT NULL DEFAULT false;
 ALTER TABLE "User" ADD COLUMN IF NOT EXISTS "onboarding_completed_at" TIMESTAMP(3);
 
 -- Legacy rows that were auto-marked complete without a finish action.
