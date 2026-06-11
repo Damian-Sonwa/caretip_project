@@ -1,17 +1,12 @@
-import { motion } from "motion/react";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Link } from "react-router";
 import {
   QrCode,
   Download,
-  Copy,
-  Check,
   Users,
   MapPin,
-  Printer,
   Store,
   UserCheck,
-  RefreshCw,
   FileDown,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -39,7 +34,6 @@ import {
 import { DashboardListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
 import { PageLoader } from "../../components/PageLoader";
-import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import {
   renderBrandedQRToDataUrl,
   renderBrandedQRToDataUrlLegacy,
@@ -72,13 +66,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import {
+  QrManagementCard,
+  type QrManagementCardItem,
+} from "@/app/components/business/QrManagementCard";
 import { cn } from "@/lib/utils";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
 export function QRCodeManagementPage() {
   const { t } = useTranslation();
-  const { user, authHydrated, sessionValidated, isBusiness, updateUser } = useRequireAuth();
+  const { user, authHydrated, sessionValidated, isBusiness } = useRequireAuth();
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
   >(null);
@@ -98,6 +96,8 @@ export function QRCodeManagementPage() {
   const [venueQrPreview, setVenueQrPreview] = useState<Record<string, string>>({});
   /** Stored API path for venue logo (PDF + print). */
   const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
+  const employeeQrCacheKeyRef = useRef("");
+  const venueQrCacheKeyRef = useRef("");
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated) return;
@@ -110,12 +110,7 @@ export function QRCodeManagementPage() {
         setBusinessDisplayName(String(p.name ?? "").trim() || null);
         setBusinessLocation(String(p.registeredAddress ?? p.location ?? "").trim() || null);
         setBusinessLogoPath(p.logo?.trim() ? p.logo : null);
-        const v = p.verificationStatus ?? "pending";
-        setVerificationStatus(v);
-        updateUser({
-          status:
-            v === "verified" ? "APPROVED" : v === "rejected" ? "REJECTED" : "PENDING",
-        });
+        setVerificationStatus(p.verificationStatus ?? "pending");
       })
       .catch((err) => {
         logClientError("QRCodeManagementPage", err);
@@ -131,7 +126,7 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.status, updateUser]);
+  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.businessName, user?.status]);
 
   const handleRegenerateBusinessQr = async () => {
     if (!authHydrated || !sessionValidated) return;
@@ -220,10 +215,29 @@ export function QRCodeManagementPage() {
     };
   }, [authHydrated, sessionValidated, user?.businessId, isBusiness]);
 
+  const venueQrFingerprint = useMemo(
+    () =>
+      [
+        ...venueLocations.map((l) => `l:${l.id}`),
+        ...venueTables.map((t) => `t:${t.id}`),
+      ].join("|"),
+    [venueLocations, venueTables],
+  );
+
+  const employeeQrFingerprint = useMemo(
+    () =>
+      employees
+        .map((e) => `${e.id}:${e.slug ?? ""}`)
+        .sort()
+        .join("|"),
+    [employees],
+  );
+
   useEffect(() => {
+    if (!venueQrFingerprint) return;
+    if (venueQrCacheKeyRef.current === venueQrFingerprint) return;
     let cancelled = false;
     (async () => {
-      if (typeof window === "undefined") return;
       const next: Record<string, string> = {};
       for (const loc of venueLocations) {
         const url = qrLocationUrl(loc.id);
@@ -234,30 +248,35 @@ export function QRCodeManagementPage() {
           next[`loc-${loc.id}`] = "";
         }
       }
-      for (const t of venueTables) {
-        const url = qrTableUrl(t.id);
+      for (const tbl of venueTables) {
+        const url = qrTableUrl(tbl.id);
         try {
-          next[`tbl-${t.id}`] = await renderBrandedQrUrlToDataUrl(url);
+          next[`tbl-${tbl.id}`] = await renderBrandedQrUrlToDataUrl(url);
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
-          next[`tbl-${t.id}`] = "";
+          next[`tbl-${tbl.id}`] = "";
         }
       }
-      if (!cancelled) setVenueQrPreview(next);
+      if (!cancelled) {
+        venueQrCacheKeyRef.current = venueQrFingerprint;
+        setVenueQrPreview(next);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [venueLocations, venueTables]);
+  }, [venueQrFingerprint, venueLocations, venueTables]);
 
   useEffect(() => {
+    const businessId = user?.businessId;
+    if (!businessId) return;
+    const cacheKey = `${businessId}|${businessSlug ?? ""}|${employeeQrFingerprint}`;
+    if (employeeQrCacheKeyRef.current === cacheKey) return;
     let cancelled = false;
     (async () => {
-      if (!user?.businessId) return;
-
       const storeUrl = businessSlug
         ? businessDirectoryUrl(businessSlug)
-        : qrLandingUrl(user.businessId);
+        : qrLandingUrl(businessId);
       try {
         const sf = await renderBrandedQrUrlToDataUrl(storeUrl);
         if (!cancelled) setStorefrontQr(sf);
@@ -281,12 +300,15 @@ export function QRCodeManagementPage() {
           next[e.id] = "";
         }
       }
-      if (!cancelled) setQrImages(next);
+      if (!cancelled) {
+        employeeQrCacheKeyRef.current = cacheKey;
+        setQrImages(next);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [employees, user?.businessId, businessSlug]);
+  }, [employees, employeeQrFingerprint, user?.businessId, businessSlug]);
 
   const tables: Array<{ id: string; name: string; location: string; qrUrl: string; scans: number }> =
     venueTables.map((t) => ({
@@ -584,181 +606,10 @@ export function QRCodeManagementPage() {
     }
   };
 
-  const QRCard = ({
-    item,
-    type,
-    previewDataUrl,
-  }: {
-    item: CardItem;
-    type: string;
-    previewDataUrl?: string;
-  }) => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={cn(businessUi.cardStatic, businessUi.cardPad, "text-foreground")}
-    >
-      <div className="flex flex-col gap-6 sm:flex-row">
-        <div className="flex-shrink-0">
-          <div className="flex h-44 w-44 shrink-0 items-center justify-center rounded-lg border border-black/[0.10] bg-white p-1.5">
-            {previewDataUrl ? (
-              <img src={previewDataUrl} alt="" className="h-full w-full object-contain" />
-            ) : (
-              <QrCode className="h-20 w-20 text-foreground" />
-            )}
-          </div>
-        </div>
-
-        <div className="flex-1 space-y-4">
-          <div>
-            {type === "storefront" && (
-              <div className="mb-2">
-                <h3 className="font-semibold text-foreground">{item.name}</h3>
-                <p className="text-sm text-muted-foreground">{t("business.qrPage.teamQrSubtitle")}</p>
-              </div>
-            )}
-            {type === "employee" && (
-              <div className="mb-2 flex items-center gap-3">
-                <ProfileAvatar src={item.avatar} displayName={item.name} className="h-10 w-10" />
-                <div>
-                  <h3 className="font-semibold text-foreground">{item.name}</h3>
-                  <p className="text-sm text-muted-foreground">{item.role}</p>
-                </div>
-              </div>
-            )}
-            {type === "table" && (
-              <div>
-                <h3 className="mb-1 font-semibold text-foreground">{item.name}</h3>
-                <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {item.location}
-                </p>
-              </div>
-            )}
-            {type === "location" && (
-              <div>
-                <h3 className="mb-1 font-semibold text-foreground">{item.name}</h3>
-                <p className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {item.address}
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-lg border border-black/[0.08] bg-muted/30 p-3">
-            <p className="mb-1 text-xs text-muted-foreground">{t("business.qrPage.labelQrUrl")}</p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 truncate font-mono text-xs text-foreground">{item.qrUrl}</code>
-              <button
-                type="button"
-                onClick={() => handleCopy(item.id, item.qrUrl)}
-                className="flex-shrink-0 rounded-lg p-2 transition-colors hover:bg-background"
-                aria-label={t("business.qrPage.copyUrlAria")}
-              >
-                {copiedId === item.id ? (
-                  <Check className="h-4 w-4 text-primary" />
-                ) : (
-                  <Copy className="h-4 w-4 opacity-60" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-muted-foreground">
-              <span>{t("business.qrPage.totalScans")} </span>
-              <span className="font-semibold text-foreground">{item.scans}</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {type === "employee" && (
-                <>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void handleEmployeePrint(item, previewDataUrl)}
-                    disabled={qrLocked}
-                    className={DASH_BTN_SECONDARY}
-                  >
-                    <Printer className="mr-2 h-4 w-4" />
-                    {t("business.qrPage.print")}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => void handleEmployeePrintPdf(item)}
-                    disabled={qrLocked || !previewDataUrl}
-                    className={DASH_BTN_PRIMARY}
-                  >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    {t("business.qrPage.downloadPdfLayout")}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant={item.slug ? "outline" : "default"}
-                    onClick={() => item.employeeRow && handleGenerateNew(item.employeeRow)}
-                    disabled={qrLocked || regeneratingId === item.id}
-                    className={item.slug ? DASH_BTN_SECONDARY : DASH_BTN_PRIMARY}
-                  >
-                    {regeneratingId === item.id ? (
-                      <LoadingSpinner size="sm" />
-                    ) : (
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                    )}
-                    {item.slug ? "Generate new" : "Generate profile link"}
-                  </Button>
-                </>
-              )}
-              {(type === "storefront" || type === "table" || type === "location") && (
-                <>
-                  {type === "storefront" ? (
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant="outline"
-                      onClick={handleRegenerateBusinessQr}
-                      disabled={qrLocked || regeneratingId === "storefront"}
-                      className={DASH_BTN_SECONDARY}
-                    >
-                      {regeneratingId === "storefront" ? (
-                        <LoadingSpinner size="sm" />
-                      ) : (
-                        <RefreshCw className="mr-2 h-4 w-4" />
-                      )}
-                      {t("business.qrPage.regenerateBusinessQr")}
-                    </Button>
-                  ) : null}
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => void handleVenueQrPrint(item, type as "storefront" | "table" | "location", previewDataUrl)}
-                    disabled={qrLocked}
-                    className={DASH_BTN_SECONDARY}
-                  >
-                    <Printer className="mr-2 h-4 w-4" />
-                    {t("business.qrPage.print")}
-                  </Button>
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => void handleVenuePrintPdf(item, type, previewDataUrl)}
-                    disabled={qrLocked || !previewDataUrl}
-                    className={DASH_BTN_PRIMARY}
-                  >
-                    <FileDown className="mr-2 h-4 w-4" />
-                    {t("business.qrPage.downloadPdfLayout")}
-                  </Button>
-                </>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
+  const onEmployeeRegenerateCard = (item: QrManagementCardItem) => {
+    const emp = employees.find((e) => e.id === item.id);
+    if (emp) void handleGenerateNew(emp);
+  };
 
   if (!user) return <BusinessSubPageShellSkeleton />;
 
@@ -949,7 +800,7 @@ export function QRCodeManagementPage() {
                         {businessSlug ? businessDirectoryUrl(businessSlug) : qrBusinessUrl(user.businessId)}
                       </code>
                     </p>
-                    <QRCard
+                    <QrManagementCard
                       item={{
                         id: "storefront",
                         name:
@@ -963,6 +814,17 @@ export function QRCodeManagementPage() {
                       }}
                       type="storefront"
                       previewDataUrl={storefrontQr}
+                      copiedId={copiedId}
+                      qrLocked={qrLocked}
+                      regeneratingId={regeneratingId}
+                      onCopy={handleCopy}
+                      onRegenerateBusinessQr={() => void handleRegenerateBusinessQr()}
+                      onVenuePrint={(item, venueType, url) =>
+                        void handleVenueQrPrint(item as CardItem, venueType, url)
+                      }
+                      onVenuePrintPdf={(item, venueType, url) =>
+                        void handleVenuePrintPdf(item as CardItem, venueType, url)
+                      }
                     />
                   </div>
                 )}
@@ -988,7 +850,7 @@ export function QRCodeManagementPage() {
                   ) : (
                     <div className="space-y-4">
                       {employees.map((employee) => (
-                        <QRCard
+                        <QrManagementCard
                           key={employee.id}
                           item={{
                             id: employee.id,
@@ -1001,10 +863,16 @@ export function QRCodeManagementPage() {
                                 : qrEmployeeLegacyUrl(employee.id),
                             scans: 0,
                             slug: employee.slug,
-                            employeeRow: employee,
                           }}
                           type="employee"
                           previewDataUrl={qrImages[employee.id]}
+                          copiedId={copiedId}
+                          qrLocked={qrLocked}
+                          regeneratingId={regeneratingId}
+                          onCopy={handleCopy}
+                          onEmployeePrint={(item, url) => void handleEmployeePrint(item as CardItem, url)}
+                          onEmployeePrintPdf={(item) => void handleEmployeePrintPdf(item as CardItem)}
+                          onEmployeeRegenerate={onEmployeeRegenerateCard}
                         />
                       ))}
                     </div>
@@ -1029,11 +897,21 @@ export function QRCodeManagementPage() {
               </div>
             ) : (
               tables.map((table) => (
-                <QRCard
+                <QrManagementCard
                   key={table.id}
-                  item={table}
+                  item={{ ...table, role: table.location }}
                   type="table"
                   previewDataUrl={venueQrPreview[`tbl-${table.id}`]}
+                  copiedId={copiedId}
+                  qrLocked={qrLocked}
+                  regeneratingId={regeneratingId}
+                  onCopy={handleCopy}
+                  onVenuePrint={(item, venueType, url) =>
+                    void handleVenueQrPrint(item as CardItem, venueType, url)
+                  }
+                  onVenuePrintPdf={(item, venueType, url) =>
+                    void handleVenuePrintPdf(item as CardItem, venueType, url)
+                  }
                 />
               ))
             )}
@@ -1054,11 +932,21 @@ export function QRCodeManagementPage() {
               </div>
             ) : (
               locations.map((location) => (
-                <QRCard
+                <QrManagementCard
                   key={location.id}
-                  item={location}
+                  item={{ ...location, role: location.address }}
                   type="location"
                   previewDataUrl={venueQrPreview[`loc-${location.id}`]}
+                  copiedId={copiedId}
+                  qrLocked={qrLocked}
+                  regeneratingId={regeneratingId}
+                  onCopy={handleCopy}
+                  onVenuePrint={(item, venueType, url) =>
+                    void handleVenueQrPrint(item as CardItem, venueType, url)
+                  }
+                  onVenuePrintPdf={(item, venueType, url) =>
+                    void handleVenuePrintPdf(item as CardItem, venueType, url)
+                  }
                 />
               ))
             )}

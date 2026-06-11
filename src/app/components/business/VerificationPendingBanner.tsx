@@ -5,8 +5,8 @@ import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
 
 /**
- * Persistent shell banner while venue KYC is pending or rejected.
- * Does not block navigation — QR / guest tipping stay gated on their routes.
+ * Soft banner while platform business verification is pending or rejected.
+ * Does not block navigation — live guest tips stay gated on go-live routes.
  */
 export function VerificationPendingBanner({ className }: { className?: string }) {
   const { t } = useTranslation();
@@ -44,13 +44,13 @@ export function VerificationPendingBanner({ className }: { className?: string })
           <div className="min-w-0">
             <p className="text-sm font-semibold">
               {rejected
-                ? t("business.dashboard.kycBannerRejectedTitle")
-                : t("business.dashboard.kycBannerTitle")}
+                ? t("business.dashboard.verificationBannerRejectedTitle")
+                : t("business.dashboard.verificationBannerTitle")}
             </p>
             <p className="mt-0.5 text-xs leading-relaxed opacity-90 sm:text-sm">
               {rejected
-                ? t("business.dashboard.kycBannerRejectedDesc")
-                : t("business.dashboard.kycBannerDesc")}
+                ? t("business.dashboard.verificationBannerRejectedDesc")
+                : t("business.dashboard.verificationBannerDesc")}
             </p>
           </div>
         </div>
@@ -58,7 +58,7 @@ export function VerificationPendingBanner({ className }: { className?: string })
           to="/verification-pending"
           className="shrink-0 rounded-md bg-background/80 px-3 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-border/60 hover:bg-background sm:text-sm"
         >
-          {t("business.dashboard.kycBannerCta")}
+          {t("business.dashboard.verificationBannerCta")}
         </Link>
       </div>
     </div>

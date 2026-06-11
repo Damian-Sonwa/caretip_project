@@ -439,15 +439,15 @@ export function BusinessDashboard() {
           tone="info"
           title={
             user?.status === "REJECTED"
-              ? t("business.dashboard.kycBannerRejectedTitle")
-              : t("business.dashboard.kycBannerTitle")
+              ? t("business.dashboard.verificationBannerRejectedTitle")
+              : t("business.dashboard.verificationBannerTitle")
           }
           description={
             user?.status === "REJECTED"
-              ? t("business.dashboard.kycBannerRejectedDesc")
-              : t("business.dashboard.kycBannerDesc")
+              ? t("business.dashboard.verificationBannerRejectedDesc")
+              : t("business.dashboard.verificationBannerDesc")
           }
-          actionLabel={t("business.dashboard.kycBannerCta")}
+          actionLabel={t("business.dashboard.verificationBannerCta")}
           actionTo="/verification-pending"
           dismissPersistence="session"
           className="mb-5"

@@ -17,6 +17,7 @@ import {
 import { logClientError } from "../../lib/clientLog";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { cn } from "@/lib/utils";
+import { MVP_KYC_DOCUMENT_UPLOAD_ENABLED } from "../../lib/mvpVerificationPolicy";
 
 const DOC_SLOTS: Array<{ type: KycDocumentType; labelKey: string }> = [
   { type: "registration", labelKey: "business.kyc.docRegistration" },
@@ -129,31 +130,47 @@ export function BusinessKycVerificationPage() {
     kycStatus !== "APPROVED" &&
     kycStatus !== "UNDER_REVIEW" &&
     DOC_SLOTS.every((s) => Boolean(docs[s.type]));
+  const mvpStatusOnly = !MVP_KYC_DOCUMENT_UPLOAD_ENABLED;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 space-y-8">
       <div className="text-center space-y-2">
         <div className="flex justify-center">{statusIcon(kycStatus)}</div>
         <h1 className="text-2xl font-semibold text-foreground">
-          {kycStatus === "REJECTED"
-            ? t("business.kyc.titleRejected")
-            : kycStatus === "UNDER_REVIEW"
-              ? t("business.kyc.titleReview")
-              : t("business.kyc.titleUpload")}
+          {mvpStatusOnly
+            ? kycStatus === "REJECTED"
+              ? t("business.verification.rejectedPageTitle")
+              : t("business.verification.pendingPageTitle")
+            : kycStatus === "REJECTED"
+              ? t("business.kyc.titleRejected")
+              : kycStatus === "UNDER_REVIEW"
+                ? t("business.kyc.titleReview")
+                : t("business.kyc.titleUpload")}
         </h1>
         <p className="text-muted-foreground text-sm leading-relaxed">
-          {kycStatus === "REJECTED"
-            ? t("business.kyc.bodyRejected")
-            : kycStatus === "UNDER_REVIEW"
-              ? t("business.kyc.bodyReview")
-              : t("business.kyc.bodyUpload")}
+          {mvpStatusOnly
+            ? kycStatus === "REJECTED"
+              ? t("business.verification.rejectedPageBody")
+              : t("business.verification.pendingPageBody")
+            : kycStatus === "REJECTED"
+              ? t("business.kyc.bodyRejected")
+              : kycStatus === "UNDER_REVIEW"
+                ? t("business.kyc.bodyReview")
+                : t("business.kyc.bodyUpload")}
         </p>
-        <p className="text-xs font-medium uppercase tracking-wide text-primary">
-          {t(`business.kyc.status.${kycStatus}`)}
-        </p>
+        {mvpStatusOnly ? (
+          <>
+            <p className="text-sm text-muted-foreground">{t("business.verification.mvpLiveGateNote")}</p>
+            <p className="text-sm text-muted-foreground">{t("business.verification.mvpReviewInProgress")}</p>
+          </>
+        ) : (
+          <p className="text-xs font-medium uppercase tracking-wide text-primary">
+            {t(`business.kyc.status.${kycStatus}`)}
+          </p>
+        )}
       </div>
 
-      {kycStatus !== "UNDER_REVIEW" && kycStatus !== "APPROVED" ? (
+      {!mvpStatusOnly && kycStatus !== "UNDER_REVIEW" && kycStatus !== "APPROVED" ? (
         <div className="space-y-4">
           {DOC_SLOTS.map((slot) => {
             const uploaded = Boolean(docs[slot.type]);
@@ -242,6 +259,12 @@ export function BusinessKycVerificationPage() {
       ) : null}
 
       <div className="flex flex-col sm:flex-row gap-2 justify-center">
+        <Link
+          to="/dashboard"
+          className="inline-flex justify-center rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"
+        >
+          {t("business.verification.goToDashboard")}
+        </Link>
         <Link
           to="/dashboard/support"
           className="inline-flex justify-center rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted"

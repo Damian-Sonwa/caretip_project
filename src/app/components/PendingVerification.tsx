@@ -1,7 +1,7 @@
 import { BusinessKycVerificationPage } from "../pages/business/BusinessKycVerificationPage";
 
 /**
- * `/verification-pending` — manager KYC upload + live status (Sprint 3).
+ * `/verification-pending` — business verification status (MVP: admin review; upload UI optional).
  */
 export function PendingVerification() {
   return (
