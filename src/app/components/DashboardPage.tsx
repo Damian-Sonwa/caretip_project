@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useMobileMenuState } from '../hooks/useMobileMenuState';
 import { useTranslation } from 'react-i18next';
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
@@ -88,7 +89,7 @@ const SCAN_SERIES = [142, 156, 138, 167, 178, 185, 192];
 
 export function DashboardPage() {
   const { t, i18n } = useTranslation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user, authHydrated, sessionValidated } = useAuth();
   const isAppReady = authHydrated && sessionValidated && Boolean(user);
 
@@ -155,15 +156,12 @@ export function DashboardPage() {
         {isAppReady ? <DashboardSidebar /> : <SidebarSkeleton />}
 
         {/* Sidebar - Mobile */}
-        <DashboardMobileSidebar 
-          isOpen={mobileMenuOpen && isAppReady} 
-          onClose={() => setMobileMenuOpen(false)} 
-        />
+        <DashboardMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
 
         {/* Main Content */}
         <div className="lg:pl-64">
           {/* Header */}
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
 
           {/* Page Content */}
           <main className="px-4 lg:px-8 py-8 pb-20">

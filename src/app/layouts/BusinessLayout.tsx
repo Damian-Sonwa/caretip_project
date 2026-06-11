@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BusinessSidebar } from "../components/business/BusinessSidebar";
@@ -15,6 +14,7 @@ import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 import { VerificationPendingBanner } from "../components/business/VerificationPendingBanner";
 import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificationRealtime";
+import { useMobileMenuState } from "../hooks/useMobileMenuState";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -22,7 +22,7 @@ import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificatio
  */
 export function BusinessLayout() {
   const { t } = useTranslation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoManager(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "business";
@@ -44,14 +44,14 @@ export function BusinessLayout() {
       <VerificationPendingBanner />
       <div className="relative z-10">
         {isAppReady ? <BusinessSidebar /> : <SidebarSkeleton />}
-        <BusinessMobileSidebar isOpen={mobileMenuOpen && isAppReady} onClose={() => setMobileMenuOpen(false)} />
+        <BusinessMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
             "caretip-dashboard-shell font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
             BUSINESS_DASHBOARD_ROOT,
           )}
         >
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="flex-1">
             <RouteChunkBoundary variant="shell" registrationKey="business-outlet">
               <Outlet />

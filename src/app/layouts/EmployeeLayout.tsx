@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useMobileMenuState } from "../hooks/useMobileMenuState";
 import { Outlet } from "react-router";
 import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
@@ -22,7 +23,7 @@ type EmployeeBusinessBranding = {
  * Staff shell: child routes render each employee page.
  */
 export function EmployeeLayout() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user, authStatus } = useAuth();
   const isAppReady = authStatus === "authenticated" && user?.role === "employee";
   const [branding, setBranding] = useState<EmployeeBusinessBranding | null>(null);
@@ -60,8 +61,8 @@ export function EmployeeLayout() {
           <SidebarSkeleton />
         )}
         <EmployeeMobileSidebar
-          isOpen={mobileMenuOpen && isAppReady}
-          onClose={() => setMobileMenuOpen(false)}
+          isOpen={mobileMenuOpen}
+          onClose={closeMobileMenu}
           businessBranding={branding}
         />
 
@@ -71,7 +72,7 @@ export function EmployeeLayout() {
             EMPLOYEE_DASHBOARD_ROOT,
           )}
         >
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="flex-1">
             <RouteChunkBoundary variant="shell" registrationKey="employee-outlet">
               <Outlet />

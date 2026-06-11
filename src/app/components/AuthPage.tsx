@@ -194,12 +194,15 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  /** Validated session on any auth page → app home (avoids re-sign-in with wrong business/staff lane). */
+  /** Validated session on matching auth lane → app home (no flash / no wrong-lane loops). */
   useEffect(() => {
     if (!user || !sessionValidated || isSubmitting) return;
     if (!isPublicAuthenticationPath(location.pathname)) return;
-    navigate(getPostAuthRedirect(user), { replace: true });
-  }, [navigate, sessionValidated, user, location.pathname, isSubmitting]);
+    if (!sessionMatchesBusinessStaffAuthTarget(user.role, authLane)) return;
+    const target = getPostAuthRedirect(user);
+    if (location.pathname === target) return;
+    navigate(target, { replace: true });
+  }, [authLane, navigate, sessionValidated, user, location.pathname, isSubmitting]);
 
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { AdminSidebar } from "../components/AdminSidebar";
@@ -12,13 +11,14 @@ import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { cn } from "@/lib/utils";
 import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
+import { useMobileMenuState } from "../hooks/useMobileMenuState";
 /**
  * Platform / Super Admin shell only: sidebar, platform header, footer.
  * Child routes render page content (no shared "Dashboard" with business).
  */
 export function SuperAdminLayout() {
   const { t } = useTranslation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user } = useAuth();
   const showDemoRibbon = isWalkthroughDemoPlatformAdmin(user);
 
@@ -37,14 +37,14 @@ export function SuperAdminLayout() {
       ) : null}
       <div className="relative z-10">
         <AdminSidebar />
-        <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
+        <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
             "caretip-dashboard-shell font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
             PLATFORM_DASHBOARD_ROOT,
           )}
         >
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="min-h-0 flex-1">
             <RouteChunkBoundary variant="shell">
               <Outlet />

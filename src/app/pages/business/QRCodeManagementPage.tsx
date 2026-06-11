@@ -126,7 +126,7 @@ export function QRCodeManagementPage() {
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.businessName, user?.status]);
+  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.businessName]);
 
   const handleRegenerateBusinessQr = async () => {
     if (!authHydrated || !sessionValidated) return;

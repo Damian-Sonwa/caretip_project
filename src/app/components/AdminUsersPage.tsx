@@ -15,6 +15,7 @@ import { AdminMobileSidebar } from './AdminMobileSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
+import { useMobileMenuState } from '../hooks/useMobileMenuState';
 
 interface User {
   id: string;
@@ -149,7 +150,7 @@ function EditUserModal({ user, onClose, onSave }: EditUserModalProps) {
 }
 
 export function AdminUsersPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [users, setUsers] = useState<User[]>([]);
@@ -184,13 +185,10 @@ export function AdminUsersPage() {
       
       <div className="relative z-10">
         <AdminSidebar />
-        <AdminMobileSidebar 
-          isOpen={mobileMenuOpen} 
-          onClose={() => setMobileMenuOpen(false)} 
-        />
+        <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
 
         <div className="lg:pl-64">
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
 
           <main className="px-4 lg:px-8 py-8 pb-20">
             {/* Page Header */}

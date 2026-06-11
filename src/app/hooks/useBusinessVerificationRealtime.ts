@@ -65,5 +65,5 @@ export function useBusinessVerificationRealtime(enabled: boolean): void {
     return () => {
       socket.off("verification_updated", onUpdate);
     };
-  }, [enabled, socket, t, updateUser, user]);
+  }, [enabled, socket, t, updateUser, user?.id, user?.impersonation, user?.role]);
 }

@@ -15,12 +15,19 @@ type Role = "business" | "employee";
 export function useSubscriptionEntitlements(opts: {
   enabled: boolean;
   role: Role | null | undefined;
+  /** Skip network on mount — use session cache only (mobile drawer / nav). */
+  cacheOnly?: boolean;
 }) {
   const sessionTier = opts.role === "business" ? getSubscriptionTierFromSession() : null;
   const [tier, setTier] = useState<BusinessSubscriptionTier>(sessionTier ?? "premium");
-  const [ready, setReady] = useState(Boolean(sessionTier));
+  const [ready, setReady] = useState(Boolean(sessionTier) || opts.cacheOnly === true);
 
   useEffect(() => {
+    if (opts.cacheOnly) {
+      setTier(sessionTier ?? "premium");
+      setReady(true);
+      return;
+    }
     if (!opts.enabled || !opts.role) {
       setReady(false);
       return;
@@ -48,7 +55,7 @@ export function useSubscriptionEntitlements(opts: {
     return () => {
       cancelled = true;
     };
-  }, [opts.enabled, opts.role]);
+  }, [opts.cacheOnly, opts.enabled, opts.role, sessionTier]);
 
   const hasCapability = useCallback(
     (capability: SubscriptionCapability) => hasSubscriptionCapability(tier, capability),

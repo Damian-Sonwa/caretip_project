@@ -1,5 +1,5 @@
 import { motion, useReducedMotion } from "motion/react";
-import { dashboardBlockMotion } from "@/lib/motionPerf";
+import { dashboardBlockMotion, useMinWidthMedia } from "@/lib/motionPerf";
 import { Link, useNavigate } from "react-router";
 import { Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -26,10 +26,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
   const reduceMotion = useReducedMotion();
+  const isDesktop = useMinWidthMedia(1024);
+  const headerMotion = isDesktop && !reduceMotion ? dashboardBlockMotion : {};
 
   return (
     <motion.header
-      {...(reduceMotion ? {} : dashboardBlockMotion)}
+      {...headerMotion}
       className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[4px]"
     >
       <div

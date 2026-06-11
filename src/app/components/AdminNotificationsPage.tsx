@@ -13,6 +13,7 @@ import { AdminMobileSidebar } from './AdminMobileSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
+import { useMobileMenuState } from '../hooks/useMobileMenuState';
 
 interface Notification {
   id: string;
@@ -25,7 +26,7 @@ interface Notification {
 
 export function AdminNotificationsPage() {
   const [notifications] = useState<Notification[]>([]);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const [showComposer, setShowComposer] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -53,11 +54,11 @@ export function AdminNotificationsPage() {
         <AdminSidebar />
         <AdminMobileSidebar 
           isOpen={mobileMenuOpen} 
-          onClose={() => setMobileMenuOpen(false)} 
+          onClose={closeMobileMenu} 
         />
 
         <div className="lg:pl-64">
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
 
           <main className="px-4 lg:px-8 py-8 pb-20">
             {/* Page Header */}

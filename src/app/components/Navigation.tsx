@@ -1,6 +1,6 @@
-import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation } from "react-router";
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { useMobileMenuState } from "../hooks/useMobileMenuState";
 import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingUi } from "@/components/landing/landingUi";
@@ -19,7 +19,7 @@ export type NavigationVariant = "default" | "dark";
 
 export function Navigation({ variant = "default" }: { variant?: NavigationVariant }) {
   const { t } = useTranslation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const location = useLocation();
   const { mode } = useTheme();
   const isDark = mode === "dark" || variant === "dark";
@@ -28,10 +28,6 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
     () => NAV_ROUTES.map((r) => ({ ...r, label: t(r.nameKey) })),
     [t],
   );
-
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [location.pathname, location.hash]);
 
   const linkClass = cn(
     "caretip-public-nav-link text-sm font-semibold text-neutral-800 transition-[color,background-color,opacity] duration-200",
@@ -114,7 +110,8 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setMobileMenuOpen((o) => !o);
+                if (mobileMenuOpen) closeMobileMenu();
+                else openMobileMenu();
               }}
               className={cn(
                 "relative z-[100] shrink-0 touch-manipulation rounded-lg p-2.5 transition-colors active:opacity-90",
@@ -130,86 +127,72 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
           </div>
         </div>
 
-        <AnimatePresence>
-          {mobileMenuOpen && (
-            <>
-              <motion.div
-                key="mobile-nav-backdrop"
-                aria-hidden
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
-                className={cn(
-                  "fixed inset-0 z-40 lg:hidden",
-                  "bg-neutral-950/[0.28] backdrop-blur-[3px] dark:bg-black/50",
-                )}
-                onClick={() => setMobileMenuOpen(false)}
-              />
-              <motion.div
-                key="mobile-nav-panel"
-                id="mobile-main-nav"
-                role="dialog"
-                aria-modal="true"
-                aria-label={t("nav.mainNav")}
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
-                className={cn(
-                  "caretip-public-mobile-nav-drawer absolute left-0 right-0 top-full z-[60] border-b lg:hidden",
-                  "border-border/50 bg-background/[0.97] shadow-[0_16px_48px_-12px_rgba(15,23,42,0.14)] backdrop-blur-xl dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)]",
-                )}
-              >
-                <div className="flex flex-col gap-1 px-4 py-3 sm:px-5 sm:py-3.5">
-                  <div className="caretip-public-mobile-nav-links flex flex-col gap-0.5">
-                    {navLinks.map((link) => (
-                      <Link
-                        key={link.to}
-                        to={link.to}
-                        className={cn(
-                          "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-colors active:bg-muted/90",
-                          "text-foreground hover:bg-muted/60",
-                          location.pathname === link.to && "bg-primary/[0.08] text-primary",
-                        )}
-                        onClick={() => setMobileMenuOpen(false)}
-                      >
-                        {link.label}
-                      </Link>
-                    ))}
-                  </div>
-                  <div
+        {mobileMenuOpen ? (
+          <>
+            <button
+              type="button"
+              aria-hidden
+              className="caretip-mobile-drawer-backdrop--open fixed inset-0 z-40 bg-neutral-950/30 lg:hidden dark:bg-black/50"
+              onClick={closeMobileMenu}
+            />
+            <div
+              id="mobile-main-nav"
+              role="dialog"
+              aria-modal="true"
+              aria-label={t("nav.mainNav")}
+              className={cn(
+                "caretip-public-mobile-nav-drawer caretip-mobile-drawer-panel--open-top absolute left-0 right-0 top-full z-[60] border-b lg:hidden",
+                "border-border/50 bg-background shadow-[0_16px_48px_-12px_rgba(15,23,42,0.14)] dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)]",
+              )}
+            >
+              <div className="flex flex-col gap-1 px-4 py-3 sm:px-5 sm:py-3.5">
+                <div className="caretip-public-mobile-nav-links flex flex-col gap-0.5">
+                  {navLinks.map((link) => (
+                    <Link
+                      key={link.to}
+                      to={link.to}
+                      className={cn(
+                        "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-colors active:bg-muted/90",
+                        "text-foreground hover:bg-muted/60",
+                        location.pathname === link.to && "bg-primary/[0.08] text-primary",
+                      )}
+                      onClick={closeMobileMenu}
+                    >
+                      {link.label}
+                    </Link>
+                  ))}
+                </div>
+                <div
+                  className={cn(
+                    "caretip-public-mobile-nav-actions mt-2 flex flex-col gap-2 border-t pt-3",
+                    "border-border/55",
+                  )}
+                >
+                  <Link
+                    to="/contact"
+                    onClick={closeMobileMenu}
                     className={cn(
-                      "caretip-public-mobile-nav-actions mt-2 flex flex-col gap-2 border-t pt-3",
-                      "border-border/55",
+                      landingUi.heroCtaPrimary,
+                      "w-full max-lg:min-w-0 max-lg:max-w-full",
                     )}
                   >
-                    <Link
-                      to="/contact"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        landingUi.heroCtaPrimary,
-                        "w-full max-lg:min-w-0 max-lg:max-w-full",
-                      )}
-                    >
-                      {t("nav.requestDemo")}
-                    </Link>
-                    <Link
-                      to="/login"
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        landingUi.heroCtaSecondary,
-                        "w-full max-lg:min-w-0 max-lg:max-w-full",
-                      )}
-                    >
-                      {t("nav.logIn")}
-                    </Link>
-                  </div>
+                    {t("nav.requestDemo")}
+                  </Link>
+                  <Link
+                    to="/login"
+                    onClick={closeMobileMenu}
+                    className={cn(
+                      landingUi.heroCtaSecondary,
+                      "w-full max-lg:min-w-0 max-lg:max-w-full",
+                    )}
+                  >
+                    {t("nav.logIn")}
+                  </Link>
                 </div>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
+              </div>
+            </div>
+          </>
+        ) : null}
       </nav>
     </header>
   );

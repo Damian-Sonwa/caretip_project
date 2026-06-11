@@ -13,6 +13,7 @@ import { AdminMobileSidebar } from './AdminMobileSidebar';
 import { DashboardHeader } from './DashboardHeader';
 import { Footer } from './Footer';
 import AnimatedShaderBackground from './ui/animated-shader-background';
+import { useMobileMenuState } from '../hooks/useMobileMenuState';
 
 interface ActivityLog {
   id: string;
@@ -24,7 +25,7 @@ interface ActivityLog {
 }
 
 export function AdminActivityPage() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const [filterType, setFilterType] = useState<string>('all');
   const [activities] = useState<ActivityLog[]>([]);
 
@@ -70,11 +71,11 @@ export function AdminActivityPage() {
         <AdminSidebar />
         <AdminMobileSidebar 
           isOpen={mobileMenuOpen} 
-          onClose={() => setMobileMenuOpen(false)} 
+          onClose={closeMobileMenu} 
         />
 
         <div className="lg:pl-64">
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
 
           <main className="px-4 lg:px-8 py-8 pb-20">
             {/* Page Header */}

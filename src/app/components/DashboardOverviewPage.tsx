@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { useMobileMenuState } from "../hooks/useMobileMenuState";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Link } from "react-router";
@@ -34,7 +35,7 @@ const TIPS_OVERVIEW_SERIES = [12400, 15200, 14100, 18900, 20100, 22400, 24800];
 
 export function DashboardOverviewPage() {
   const { t, i18n } = useTranslation();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
   const { user, authHydrated, sessionValidated } = useAuth();
   const isAppReady = authHydrated && sessionValidated && Boolean(user);
 
@@ -53,13 +54,10 @@ export function DashboardOverviewPage() {
 
       <div className="relative z-10">
         {isAppReady ? <DashboardSidebar /> : <SidebarSkeleton />}
-        <DashboardMobileSidebar
-          isOpen={mobileMenuOpen && isAppReady}
-          onClose={() => setMobileMenuOpen(false)}
-        />
+        <DashboardMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
 
         <div className="lg:pl-64">
-          <DashboardHeader onMenuClick={() => setMobileMenuOpen(!mobileMenuOpen)} />
+          <DashboardHeader onMenuClick={openMobileMenu} />
 
           <main className="px-4 lg:px-8 py-8 pb-20">
             <motion.div
