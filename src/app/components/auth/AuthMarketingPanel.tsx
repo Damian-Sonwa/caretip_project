@@ -3,32 +3,25 @@ import { Check } from "lucide-react";
 import { CareTipLogo } from "@/app/components/CareTipLogo";
 import { cn } from "@/lib/utils";
 
-const BUSINESS_BENEFIT_KEYS = [
-  "auth.marketing.benefitTeam",
-  "auth.marketing.benefitQr",
-  "auth.marketing.benefitAnalytics",
-  "auth.marketing.benefitPayments",
-] as const;
-
-const EMPLOYEE_BENEFIT_KEYS = [
-  "auth.employeeMarketing.benefitEarnings",
-  "auth.employeeMarketing.benefitInsights",
-  "auth.employeeMarketing.benefitHistory",
-  "auth.employeeMarketing.benefitSecure",
-] as const;
+const BENEFIT_KEYS = ["benefit1", "benefit2", "benefit3", "benefit4"] as const;
 
 type AuthMarketingPanelProps = {
   lane?: "business" | "employee";
+  signUpMode?: boolean;
   /** Scales down logo and marketing copy (~30% tighter). */
   compact?: boolean;
 };
 
 /** Curved brand panel — trust narrative (business vs staff). */
-export function AuthMarketingPanel({ lane = "business", compact = false }: AuthMarketingPanelProps) {
+export function AuthMarketingPanel({
+  lane = "business",
+  signUpMode = false,
+  compact = false,
+}: AuthMarketingPanelProps) {
   const { t } = useTranslation();
   const isEmployee = lane === "employee";
-  const benefitKeys = isEmployee ? EMPLOYEE_BENEFIT_KEYS : BUSINESS_BENEFIT_KEYS;
-  const prefix = isEmployee ? "auth.employeeMarketing" : "auth.marketing";
+  const mode = signUpMode ? "signUp" : "signIn";
+  const prefix = isEmployee ? `auth.employeeMarketing.${mode}` : `auth.marketing.${mode}`;
 
   return (
     <aside
@@ -51,10 +44,10 @@ export function AuthMarketingPanel({ lane = "business", compact = false }: AuthM
           <p className="caretip-auth-marketing__body">{t(`${prefix}.body`)}</p>
 
           <ul className="caretip-auth-marketing__benefits">
-            {benefitKeys.map((key) => (
+            {BENEFIT_KEYS.map((key) => (
               <li key={key}>
                 <Check className="caretip-auth-marketing__check" aria-hidden />
-                <span>{t(key)}</span>
+                <span>{t(`${prefix}.${key}`)}</span>
               </li>
             ))}
           </ul>

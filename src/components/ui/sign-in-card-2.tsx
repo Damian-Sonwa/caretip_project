@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { CareTipLogo } from "@/app/components/CareTipLogo";
 import { AuthSplitLayout } from "@/app/components/auth/AuthSplitLayout";
 
 export type AuthRole = "business" | "employee";
@@ -44,6 +43,9 @@ export function SignInCard2({
   const isEmployee = authLane === "employee";
   const showModeTabs = !sessionActive && modeScope === "both";
 
+  const isBusinessSignup = !sessionActive && !isLogin && !isEmployee;
+  const showFormHeadline = !isBusinessSignup;
+
   const title = sessionActive
     ? t("auth.signInCard.titleCareTip")
     : isLogin
@@ -61,7 +63,7 @@ export function SignInCard2({
     : isLogin
       ? isEmployee
         ? t("auth.employeeAuth.subtitleSignIn")
-        : t("auth.signInCard.subtitleSignInShort")
+        : null
       : isEmployee
         ? inviteVerified
           ? t("auth.employeeAuth.subtitleInviteVerified")
@@ -94,18 +96,17 @@ export function SignInCard2({
             !isLogin && "caretip-auth-card--signup",
           )}
         >
-          <div
-            className={cn(
-              "caretip-auth-header",
-              sessionActive && "caretip-auth-header--session",
-            )}
-          >
-            <div className="caretip-auth-logo-wrap caretip-auth-logo-wrap--card md:hidden">
-              <CareTipLogo size="auth" align="center" layoutIsolatedDouble visualScale={1.55} />
+          {showFormHeadline ? (
+            <div
+              className={cn(
+                "caretip-auth-header",
+                sessionActive && "caretip-auth-header--session",
+              )}
+            >
+              <h1 className="caretip-auth-title">{title}</h1>
+              {subtitle ? <p className="caretip-auth-subtitle">{subtitle}</p> : null}
             </div>
-            <h1 className="caretip-auth-title">{title}</h1>
-            <p className="caretip-auth-subtitle">{subtitle}</p>
-          </div>
+          ) : null}
 
           {showModeTabs ? (
             <div className="caretip-auth-mode-block">

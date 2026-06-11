@@ -26,7 +26,7 @@ export function AuthSplitLayout({
     <AuthCurvedBlobShell
       signUpMode={signUpMode}
       className="caretip-auth-split-layout--curved font-sans"
-      brandPanel={<AuthMarketingPanel lane={authLane} compact={compactMarketing} />}
+      brandPanel={<AuthMarketingPanel lane={authLane} signUpMode={signUpMode} compact={compactMarketing} />}
 
       authPanel={
 

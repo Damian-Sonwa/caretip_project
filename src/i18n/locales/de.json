@@ -635,24 +635,48 @@
   },
   "auth": {
     "marketing": {
-      "panelAria": "Warum CareTip",
-      "badge": "Vertraut von Hospitality-Teams",
-      "headline": "Verwandeln Sie guten Service in messbare Einnahmen.",
-      "body": "Teams verwalten, Trinkgeld aktivieren, Performance tracken und Umsatz über eine Plattform steigern.",
-      "benefitTeam": "Teamverwaltung",
-      "benefitQr": "QR-Trinkgeld",
-      "benefitAnalytics": "Echtzeit-Analysen",
-      "benefitPayments": "Sichere Zahlungen"
+      "signIn": {
+        "panelAria": "Warum CareTip für Venues",
+        "badge": "Vertraut von Hospitality-Teams",
+        "headline": "Willkommen zurück in Ihrem Venue.",
+        "body": "Personal verwalten, Performance überwachen, QR-Trinkgeld aktivieren und Umsatz über ein Dashboard steigern.",
+        "benefit1": "Teamverwaltung",
+        "benefit2": "QR-Trinkgeld-Aktivierung",
+        "benefit3": "Echtzeit-Analysen",
+        "benefit4": "Sichere Auszahlungen"
+      },
+      "signUp": {
+        "panelAria": "Start mit CareTip",
+        "badge": "Starten Sie Ihre CareTip-Reise",
+        "headline": "Verwandeln Sie guten Service in messbare Einnahmen.",
+        "body": "Erstellen Sie Ihr Venue-Konto, onboarden Sie Ihr Team und bauen Sie ein besseres Trinkgeld-Erlebnis auf.",
+        "benefit1": "Schnelle Venue-Einrichtung",
+        "benefit2": "Team-Onboarding",
+        "benefit3": "QR-Trinkgeld-System",
+        "benefit4": "Umsatz-Insights"
+      }
     },
     "employeeMarketing": {
-      "panelAria": "Warum Teams CareTip nutzen",
-      "badge": "Für Team & Service",
-      "headline": "Trinkgeld im Blick. Fortschritt in der Hand.",
-      "body": "Sehen Sie live, wie Trinkgelder eingehen, verstehen Sie Ihre besten Schichten und bleiben Sie mit Ihrem Venue verbunden.",
-      "benefitEarnings": "Einnahmen in Echtzeit",
-      "benefitInsights": "Performance-Insights",
-      "benefitHistory": "Verlauf & Bewertungen",
-      "benefitSecure": "Sichere Auszahlungen"
+      "signIn": {
+        "panelAria": "Warum CareTip für Teams",
+        "badge": "Für Hospitality-Profis",
+        "headline": "Team beitreten.",
+        "body": "Performance verfolgen, Profil verwalten und mit Ihrem Arbeitsplatz verbunden bleiben.",
+        "benefit1": "Persönliches Dashboard",
+        "benefit2": "Trinkgeld-Tracking",
+        "benefit3": "Performance-Insights",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "signUp": {
+        "panelAria": "Team bei CareTip beitreten",
+        "badge": "Team beitreten",
+        "headline": "Mit Ihrem Team verdienen.",
+        "body": "Einladungscode eingeben, mit Ihrem Arbeitsplatz verbinden und Ihr Mitarbeiter-Dashboard nutzen.",
+        "benefit1": "Schnelles Invite-Onboarding",
+        "benefit2": "Team-Verbindung",
+        "benefit3": "Trinkgeld-Transparenz",
+        "benefit4": "Sichere Anmeldung"
+      }
     },
     "trust": {
       "aria": "Sicherheit und Compliance",
@@ -662,7 +686,7 @@
     },
     "signInCard": {
       "titleCareTip": "CareTip",
-      "titleWelcomeBack": "Willkommen zurück",
+      "titleWelcomeBack": "In Ihren Workspace anmelden",
       "titleGetStarted": "Loslegen",
       "titleCreateVenue": "Venue-Konto erstellen",
       "subtitleSession": "Sitzung verwalten",

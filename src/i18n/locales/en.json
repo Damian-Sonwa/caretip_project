@@ -633,24 +633,48 @@
   },
   "auth": {
     "marketing": {
-      "panelAria": "Why CareTip",
-      "badge": "Trusted by hospitality teams",
-      "headline": "Turn great service into measurable earnings.",
-      "body": "Manage teams, activate tipping, track performance, and grow revenue from a single platform.",
-      "benefitTeam": "Team management",
-      "benefitQr": "QR tipping",
-      "benefitAnalytics": "Real-time analytics",
-      "benefitPayments": "Secure payments"
+      "signIn": {
+        "panelAria": "Why CareTip for venues",
+        "badge": "Trusted by hospitality teams",
+        "headline": "Welcome back to your venue.",
+        "body": "Manage staff, monitor performance, activate QR tipping, and grow revenue from one dashboard.",
+        "benefit1": "Team management",
+        "benefit2": "QR tipping activation",
+        "benefit3": "Real-time analytics",
+        "benefit4": "Secure payouts"
+      },
+      "signUp": {
+        "panelAria": "Start your CareTip journey",
+        "badge": "Start your CareTip journey",
+        "headline": "Turn great service into measurable earnings.",
+        "body": "Create your venue account, onboard your team, and start building a better tipping experience.",
+        "benefit1": "Fast venue setup",
+        "benefit2": "Staff onboarding",
+        "benefit3": "QR tipping system",
+        "benefit4": "Revenue insights"
+      }
     },
     "employeeMarketing": {
-      "panelAria": "Why staff choose CareTip",
-      "badge": "For staff & service teams",
-      "headline": "Track your tips. Own your progress.",
-      "body": "See every tip land live, understand what drives your best shifts, and stay connected to your venue.",
-      "benefitEarnings": "Real-time earnings",
-      "benefitInsights": "Performance insights",
-      "benefitHistory": "Tip history & ratings",
-      "benefitSecure": "Secure payouts"
+      "signIn": {
+        "panelAria": "Why CareTip for staff",
+        "badge": "For hospitality professionals",
+        "headline": "Join your team.",
+        "body": "Track your performance, manage your profile, and stay connected with your workplace.",
+        "benefit1": "Personal dashboard",
+        "benefit2": "Tip tracking",
+        "benefit3": "Performance insights",
+        "benefit4": "Secure account access"
+      },
+      "signUp": {
+        "panelAria": "Join your team on CareTip",
+        "badge": "Join your team",
+        "headline": "Start earning with your team.",
+        "body": "Enter your invite code, connect to your workplace, and access your employee dashboard.",
+        "benefit1": "Quick invite onboarding",
+        "benefit2": "Team connection",
+        "benefit3": "Tip visibility",
+        "benefit4": "Secure sign-in"
+      }
     },
     "trust": {
       "aria": "Security and compliance",
@@ -660,7 +684,7 @@
     },
     "signInCard": {
       "titleCareTip": "CareTip",
-      "titleWelcomeBack": "Welcome back",
+      "titleWelcomeBack": "Sign in to your workspace",
       "titleGetStarted": "Get started",
       "titleCreateVenue": "Create your venue account",
       "subtitleSession": "Manage your session",
