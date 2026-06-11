@@ -5,29 +5,25 @@
  * (e.g. `caretip.de`) returns 422 validation_error.
  */
 
-const DEFAULT_RESEND_FROM = "CareTip <no-reply@mail.caretip.com>";
+import { getResendFromRaw, isValidResendFromFormat } from "../config/emailEnv.js";
 
-/** Plain `user@host.tld` or `Name <user@host.tld>`. */
-function isValidResendFromFormat(value: string): boolean {
-  const v = value.trim();
-  if (!v) return false;
-  const plain = /^[^\s<>]+@[^\s<>]+\.[^\s<>]+$/;
-  if (plain.test(v)) return true;
-  const named = /^(.+?)\s*<([^\s<>]+@[^\s<>]+\.[^\s<>]+)>\s*$/;
-  const m = named.exec(v);
-  return m != null && plain.test(m[2]);
-}
+const DEFAULT_RESEND_FROM = "CareTip <no-reply@mail.caretip.com>";
 
 let warnedInvalidResendFrom = false;
 
 function getResendFromAddress(): string {
-  // Prefer repo-root `.env` key; keep RESEND_FROM as a backward-compatible alias.
-  const raw = (process.env.RESEND_FROM_EMAIL ?? process.env.RESEND_FROM)?.trim();
+  const raw = getResendFromRaw();
   if (!raw) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("RESEND_FROM is not configured");
+    }
     return DEFAULT_RESEND_FROM;
   }
   if (isValidResendFromFormat(raw)) {
     return raw.includes("<") ? raw : `CareTip <${raw}>`;
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(`RESEND_FROM is invalid: ${JSON.stringify(raw)}`);
   }
   if (!warnedInvalidResendFrom) {
     warnedInvalidResendFrom = true;

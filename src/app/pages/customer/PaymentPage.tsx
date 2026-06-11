@@ -48,10 +48,14 @@ export function PaymentPage() {
   const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(null);
 
   const resolvedEmployeeId = employeeIdCtx ?? employeeIdFromUrl;
-  const tipAmountVal = tipAmountCtx ?? 15.3;
+  const tipAmountVal =
+    tipAmountCtx != null && Number.isFinite(tipAmountCtx) && tipAmountCtx > 0
+      ? tipAmountCtx
+      : null;
   /** Customer pays the tip only (no separate bill line). */
-  const totalAmount = tipAmountVal;
-  const missingContext = !resolvedEmployeeId || !businessId;
+  const totalAmount = tipAmountVal ?? 0;
+  const missingContext =
+    !resolvedEmployeeId || !businessId || tipAmountVal == null;
 
   // Guard: don't redirect until we can confirm the context is invalid.
   useEffect(() => {
@@ -233,7 +237,7 @@ export function PaymentPage() {
   };
 
   const handlePayment = async () => {
-    if (!resolvedEmployeeId || !businessId) return;
+    if (!resolvedEmployeeId || !businessId || tipAmountVal == null) return;
 
     setProcessing(true);
     try {

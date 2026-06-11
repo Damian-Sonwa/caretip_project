@@ -15,6 +15,7 @@ import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/c
 import { paymentPathFromTipAmount } from "../../lib/tipFlowRoute";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
+import { isTipAmountInRangeEur, MAX_TIP_AMOUNT_EUR } from "../../lib/tipAmountLimits";
 import { customerFlowUi as cf } from "./customerFlowUi";
 
 export function TipAmountPage() {
@@ -191,7 +192,7 @@ export function TipAmountPage() {
 
   const handleCustomInput = (value: string) => {
     const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue > 0) {
+    if (!isNaN(numValue) && isTipAmountInRangeEur(numValue)) {
       setCustomAmount(value);
       setSelectedAmount(numValue);
     } else {
@@ -229,6 +230,7 @@ export function TipAmountPage() {
       routeSearch: Object.fromEntries(searchParams.entries()),
     });
     if (!selectedAmount || !resolvedEmployeeId) return;
+    if (!isTipAmountInRangeEur(selectedAmount)) return;
     if (!businessId) {
       console.log("SKIP PAYMENT NAV: businessId not ready yet");
       return;

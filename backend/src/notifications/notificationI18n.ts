@@ -20,6 +20,8 @@ export type NotificationTemplate =
   | { id: "qr_scan"; params: { place: string } }
   | { id: "qr_payment_success"; params: { amount: number; employeeName: string } }
   | { id: "verification_document_uploaded"; params: { businessName: string } }
+  | { id: "business_verification_approved"; params: { businessName: string } }
+  | { id: "business_verification_rejected"; params: { businessName: string } }
   | { id: "support_created_admin"; params: { ticketNumber: string; businessName: string; category: SupportTicketCategory } }
   | { id: "support_created_business"; params: { ticketNumber: string; subject: string } }
   | { id: "support_reply_admin"; params: { ticketNumber: string; businessName: string; preview: string } }
@@ -126,6 +128,26 @@ export function renderNotificationTemplate(
         : {
             title: "Verification document uploaded",
             body: `${template.params.businessName} submitted documents for review.`,
+          };
+    case "business_verification_approved":
+      return de
+        ? {
+            title: "Verifizierung freigegeben",
+            body: `${template.params.businessName} ist freigeschaltet. QR-Codes und Gast-Trinkgeld können jetzt aktiviert werden.`,
+          }
+        : {
+            title: "Venue verification approved",
+            body: `${template.params.businessName} is approved. QR code generation and guest tipping are now available.`,
+          };
+    case "business_verification_rejected":
+      return de
+        ? {
+            title: "Verifizierung abgelehnt",
+            body: `Die Verifizierung für ${template.params.businessName} wurde nicht freigegeben. Bitte kontaktieren Sie den Support.`,
+          }
+        : {
+            title: "Verification not approved",
+            body: `Verification for ${template.params.businessName} was not approved. Please contact support.`,
           };
     case "support_created_admin": {
       const cat = categoryLabelLocalized(template.params.category, locale);

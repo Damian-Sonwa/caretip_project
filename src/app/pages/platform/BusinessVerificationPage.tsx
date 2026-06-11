@@ -6,11 +6,13 @@ import { toast } from "sonner";
 import { Link } from "react-router";
 import {
   fetchPlatformBusinesses,
+  fetchKycQueueMetrics,
   updatePlatformBusinessVerificationStatus,
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
   fetchAuthedObjectUrl,
+  type KycQueueMetrics,
   type PlatformBusinessRow,
   type PlatformVerificationAction,
 } from "../../lib/api";
@@ -42,6 +44,7 @@ export function BusinessVerificationPage() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [rows, setRows] = useState<PlatformBusinessRow[]>([]);
+  const [kycMetrics, setKycMetrics] = useState<KycQueueMetrics | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<PlatformBusinessRow | null>(null);
@@ -105,6 +108,9 @@ export function BusinessVerificationPage() {
 
   useEffect(() => {
     void load();
+    void fetchKycQueueMetrics()
+      .then(setKycMetrics)
+      .catch((e) => logClientError("BusinessVerificationPage.kycMetrics", e));
   }, [load]);
 
   const filteredRows = useMemo(() => {
@@ -128,8 +134,12 @@ export function BusinessVerificationPage() {
   }, [rows, searchQuery]);
 
   const handleStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
+    let reviewNote: string | undefined;
+    if (status === "rejected") {
+      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt", "Rejection reason (optional):")) ?? undefined;
+    }
     try {
-      await updatePlatformBusinessVerificationStatus(businessId, status);
+      await updatePlatformBusinessVerificationStatus(businessId, status, reviewNote);
       if (status === "verified") {
         toast.success(t("admin.businessVerificationPage.toastApproved"));
       } else if (status === "rejected") {
@@ -225,6 +235,23 @@ export function BusinessVerificationPage() {
         subtitle={t("admin.businessVerificationPage.subtitle")}
       />
 
+      {kycMetrics ? (
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-lg border bg-card p-3 text-sm">
+            <div className="text-muted-foreground">Pending review</div>
+            <div className="text-2xl font-semibold">{kycMetrics.pendingReview}</div>
+          </div>
+          <div className="rounded-lg border bg-card p-3 text-sm">
+            <div className="text-muted-foreground">Awaiting upload</div>
+            <div className="text-2xl font-semibold">{kycMetrics.awaitingUpload}</div>
+          </div>
+          <div className={`rounded-lg border p-3 text-sm ${kycMetrics.slaBreached > 0 ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "bg-card"}`}>
+            <div className="text-muted-foreground">SLA breach (&gt;{kycMetrics.slaHours}h)</div>
+            <div className="text-2xl font-semibold text-amber-700 dark:text-amber-400">{kycMetrics.slaBreached}</div>
+          </div>
+        </div>
+      ) : null}
+
       <PlatformSearchField
         value={searchQuery}
         onChange={setSearchQuery}
@@ -311,6 +338,11 @@ export function BusinessVerificationPage() {
                       ) : (
                         <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
                           {t("admin.businessVerificationPage.statusPending")}
+                          {b.kycSlaBreached ? (
+                            <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                              SLA
+                            </span>
+                          ) : null}
                         </span>
                       )}
                     </td>
@@ -335,6 +367,26 @@ export function BusinessVerificationPage() {
                           {t("admin.businessVerificationPage.fileKycDoc")}
                         </button>
                       ) : null}
+                      {b.kycDocuments?.registration ? (
+                        <button type="button" onClick={() => void openAuthedFile(b.kycDocuments!.registration!)} className="block text-left text-accent hover:underline">
+                          Registration
+                        </button>
+                      ) : null}
+                      {b.kycDocuments?.address ? (
+                        <button type="button" onClick={() => void openAuthedFile(b.kycDocuments!.address!)} className="block text-left text-accent hover:underline">
+                          Address proof
+                        </button>
+                      ) : null}
+                      {b.kycDocuments?.governmentId ? (
+                        <button type="button" onClick={() => void openAuthedFile(b.kycDocuments!.governmentId!)} className="block text-left text-accent hover:underline">
+                          Government ID
+                        </button>
+                      ) : null}
+                      {(b.kycDocuments?.additional ?? []).map((path, i) => (
+                        <button key={`${path}-${i}`} type="button" onClick={() => void openAuthedFile(path)} className="block text-left text-accent hover:underline">
+                          Additional {i + 1}
+                        </button>
+                      ))}
                     </td>
                     <td className={`${platformUi.tableTd} text-right`}>
                       <div className="flex flex-wrap items-center justify-end gap-2">

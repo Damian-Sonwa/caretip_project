@@ -21,6 +21,7 @@ import {
 } from "./apiError";
 import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
+import { captureClientException } from "./sentry";
 import { validateImageFileForUpload } from "./imageClientUpload";
 import { authDebug } from "./authDebugLog";
 import {
@@ -397,11 +398,19 @@ async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise
       (body.code === PENDING_VERIFICATION_CODE ||
         body.message?.toLowerCase().includes("pending verification"));
     if (!opts?.silent && !(refreshPath && res.status >= 500) && !isExpectedPendingVerification) {
-      logClientError("api.handleRes", new Error(`HTTP ${res.status}`), {
+      const apiErr = new Error(`HTTP ${res.status}`);
+      logClientError("api.handleRes", apiErr, {
         status: res.status,
         url: res.url,
         body: data,
       });
+      if (res.status >= 500) {
+        captureClientException(apiErr, {
+          scope: "api.handleRes",
+          status: res.status,
+          url: res.url,
+        });
+      }
     }
     const bodyMsg = body.message?.trim();
     const fromStatus = fallbackMessageForHttpStatus(res.status);
@@ -644,6 +653,11 @@ export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
 }
 
 // Auth
+export interface RegisterPendingResponse {
+  requiresEmailVerification: true;
+  user: AuthResponse["user"];
+}
+
 export interface AuthResponse {
   token: string;
   user: {
@@ -674,10 +688,10 @@ export async function registerAPI(payload: {
   inviteCode?: string;
   /** Sent as `locale` for email + `users.preferred_locale` on sign-up. */
   locale?: "en" | "de";
-}): Promise<AuthResponse> {
-  return apiRequest<AuthResponse>(apiPath("/api/auth/register"), {
+}): Promise<RegisterPendingResponse> {
+  return apiRequest<RegisterPendingResponse>(apiPath("/api/auth/register"), {
     method: "POST",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
     body: toJsonRequestBody(payload),
     credentials: "include",
   });
@@ -1304,6 +1318,80 @@ export async function patchBusinessProfile(body: {
   return result;
 }
 
+export type KycDocumentType = "registration" | "address" | "governmentId" | "additional";
+export type KycUiStatus = "PENDING_UPLOAD" | "UNDER_REVIEW" | "APPROVED" | "REJECTED";
+
+export type KycStatusResponse = {
+  businessId: string;
+  verificationStatus: "pending" | "verified" | "rejected";
+  kycUiStatus: KycUiStatus;
+  kycDocuments: {
+    registration?: string | null;
+    address?: string | null;
+    governmentId?: string | null;
+    additional?: string[];
+  };
+  kycSubmittedAt: string | null;
+  requiredDocumentTypes: KycDocumentType[];
+  timeline: Array<{ status: string; at: string; label: string }>;
+};
+
+export async function fetchKycStatus(): Promise<KycStatusResponse> {
+  return apiRequest<KycStatusResponse>(apiPath("/api/business/kyc/status"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function uploadKycDocument(
+  documentType: KycDocumentType,
+  file: File,
+): Promise<{
+  success: boolean;
+  path: string;
+  documentType: KycDocumentType;
+  kycUiStatus: KycUiStatus;
+  kycDocuments: KycStatusResponse["kycDocuments"];
+}> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("documentType", documentType);
+  const token = getToken();
+  const headers: Record<string, string> = {};
+  if (token?.trim()) headers.Authorization = `Bearer ${token.trim()}`;
+  const res = await fetch(apiPath("/api/business/kyc/documents"), {
+    method: "POST",
+    headers,
+    body: form,
+    credentials: "include",
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error((err as { message?: string }).message ?? "Upload failed");
+  }
+  return res.json() as Promise<{
+    success: boolean;
+    path: string;
+    documentType: KycDocumentType;
+    kycUiStatus: KycUiStatus;
+    kycDocuments: KycStatusResponse["kycDocuments"];
+  }>;
+}
+
+export async function submitKycForReview(): Promise<KycStatusResponse> {
+  const r = await apiRequest<KycStatusResponse & { success?: boolean }>(
+    apiPath("/api/business/kyc/submit"),
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: EMPTY_JSON_BODY,
+      credentials: "include",
+    },
+  );
+  invalidateBusinessProfileCache();
+  return r;
+}
+
 /** Same payload as PATCH — PUT for clients that expect REST “replace” semantics. */
 export async function putBusinessProfile(body: {
   name?: string;
@@ -1456,17 +1544,16 @@ export async function createEmployee(payload: {
   phone?: string;
   locationId?: string | null;
   tableIds?: string[];
-  /** When true: employee is created pending activation and receives activation email. */
-  useActivationFlow?: boolean;
   /** Invite email language (`en` / `de`). */
   locale?: "en" | "de";
 }): Promise<{
   id: string;
   name: string;
   jobTitle: string;
-  temporaryPassword?: string;
+  email: string;
   locationId?: string | null;
   assignedTableIds?: string[];
+  expiresAt?: string;
 }> {
   return apiRequest(apiPath("/api/employees"), {
     method: "POST",
@@ -2793,6 +2880,43 @@ export interface PlatformBusinessRow {
   logoPath?: string | null;
   verificationDocumentPath?: string | null;
   subscriptionTier?: "basic" | "premium" | "enterprise";
+  kycDocuments?: {
+    registration?: string | null;
+    address?: string | null;
+    governmentId?: string | null;
+    additional?: string[];
+  };
+  kycSubmittedAt?: string | null;
+  kycReviewNotes?: string | null;
+  kycReviewHistory?: Array<{ status: string; at: string; note?: string | null }>;
+  kycHoursPending?: number | null;
+  kycSlaBreached?: boolean;
+}
+
+export type KycQueueMetrics = {
+  pendingReview: number;
+  slaBreached: number;
+  awaitingUpload: number;
+  slaHours: number;
+};
+
+export async function fetchKycQueueMetrics(): Promise<KycQueueMetrics> {
+  return apiRequest<KycQueueMetrics>(apiPath("/api/platform/kyc/metrics"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function updatePlatformBusinessKycReviewNotes(
+  businessId: string,
+  notes: string | null,
+): Promise<{ success: boolean; business: PlatformBusinessRow }> {
+  return apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/kyc-review-notes`), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({ notes }),
+    credentials: "include",
+  });
 }
 
 export async function fetchPlatformBusinesses(): Promise<{ businesses: PlatformBusinessRow[] }> {
@@ -2813,12 +2937,13 @@ export type PlatformVerificationAction = "verified" | "rejected" | "pending";
 
 export async function updatePlatformBusinessVerificationStatus(
   businessId: string,
-  status: PlatformVerificationAction
+  status: PlatformVerificationAction,
+  reviewNote?: string,
 ): Promise<void> {
   await apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/verify`), {
     method: "PATCH",
     headers: getHeaders(),
-    body: JSON.stringify({ status }),
+    body: JSON.stringify({ status, ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}) }),
     credentials: "include",
   });
 }

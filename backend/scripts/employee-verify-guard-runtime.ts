@@ -6,18 +6,24 @@ import "dotenv/config";
 import "../src/loadEnv.js";
 import { prisma } from "../src/prisma.js";
 import * as authService from "../src/services/auth.service.js";
+import { signAuthJwt } from "../src/services/auth.service.js";
 import { EmailNotVerifiedLoginError } from "../src/utils/httpErrors.js";
 
 const TEST_PASSWORD = "TestPass1!";
 
-/** Mirrors `getPostAuthRedirect` in src/app/hooks/useAuth.ts */
+/** Mirrors `src/app/lib/authRedirects.ts` */
 function getPostAuthRedirect(u: {
   isVerified: boolean;
   role: string;
   hasCompletedOnboarding: boolean;
+  status?: "PENDING" | "APPROVED" | "REJECTED";
 }): string {
   if (!u.isVerified) return "/verify-email";
-  if (u.role === "business" && !u.hasCompletedOnboarding) return "/onboarding";
+  if (u.role === "business") {
+    if (!u.hasCompletedOnboarding) return "/onboarding";
+    if (u.status === "PENDING" || u.status === "REJECTED") return "/verification-pending";
+    return "/dashboard";
+  }
   if (u.role === "employee") return "/employee/dashboard";
   return "/dashboard";
 }
@@ -79,6 +85,12 @@ async function main() {
       pass("register auth response emailVerified=false");
     }
 
+    if (registered.requiresEmailVerification !== true) {
+      fail("register must set requiresEmailVerification=true");
+    } else {
+      pass("register requiresEmailVerification=true (no session)");
+    }
+
     const redirect = getPostAuthRedirect({
       role: "employee",
       isVerified: false,
@@ -117,8 +129,16 @@ async function main() {
     }
 
     const apiBase = process.env.RUNTIME_API_BASE?.trim() || "http://localhost:3001";
+    const forgedToken = signAuthJwt({
+      userId: registered.user.id,
+      id: registered.user.id,
+      email,
+      role: "EMPLOYEE",
+      roleLabel: "EMPLOYEE",
+    });
+
     const tipsRes = await fetch(`${apiBase}/api/tips/employee?timeframe=today`, {
-      headers: { Authorization: `Bearer ${registered.token}` },
+      headers: { Authorization: `Bearer ${forgedToken}` },
     }).catch(() => null);
 
     if (!tipsRes) {

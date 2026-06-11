@@ -29,8 +29,9 @@ function statsErrorHttpStatus(err: unknown): number {
   }
   return 500;
 }
-import { uploadManagerBusinessLogoImage } from "../services/upload.service.js";
+import { uploadManagerBusinessLogoImage, uploadManagerVerificationDocument } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
+import * as kycService from "../services/kyc.service.js";
 
 export async function generateInvite(req: Request, res: Response) {
   try {
@@ -160,6 +161,90 @@ export async function regenerateBusinessSlug(req: Request, res: Response) {
     return res.json(r);
   } catch (err) {
     logServerError("business.regenerateBusinessSlug", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function getMyKycStatus(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const status = await kycService.getManagerKycStatus(userId);
+    return res.json(status);
+  } catch (err) {
+    logServerError("business.getMyKycStatus", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function uploadMyKycDocument(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const documentType = kycService.parseKycDocumentType(
+      (req.body as { documentType?: unknown })?.documentType ??
+        (req.query as { documentType?: unknown })?.documentType,
+    );
+    if (!documentType) {
+      return res.status(400).json({
+        message: "documentType must be registration, address, governmentId, or additional",
+      });
+    }
+    const b = await businessService.getBusinessByUserId(userId);
+    if (!b) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    const file = req.file;
+    if (!file?.buffer) {
+      return res.status(400).json({ message: "File is required (multipart field name: file)" });
+    }
+
+    const publicPath = await uploadManagerVerificationDocument(
+      file.buffer,
+      file.mimetype,
+      b.id,
+      file.originalname,
+    );
+
+    try {
+      const result = await kycService.upsertManagerKycDocument(userId, documentType, publicPath);
+      return res.json({
+        success: true,
+        path: publicPath,
+        documentType,
+        kycUiStatus: result.kycUiStatus,
+        kycDocuments: result.kycDocuments,
+      });
+    } catch (dbErr) {
+      await removeUploadedObjectByPublicUrlIfPossible(publicPath);
+      throw dbErr;
+    }
+  } catch (err) {
+    logServerError("business.uploadMyKycDocument", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function submitMyKyc(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const status = await kycService.submitManagerKycForReview(userId);
+    return res.json({ success: true, ...status });
+  } catch (err) {
+    logServerError("business.submitMyKyc", err);
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.business),
     });

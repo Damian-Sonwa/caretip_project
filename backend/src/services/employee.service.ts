@@ -1,4 +1,3 @@
-import bcrypt from "bcrypt";
 import { Prisma } from "@prisma/client";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
@@ -23,9 +22,6 @@ import {
 } from "../config/businessVerificationCapabilities.js";
 
 const VERIFICATION_REQUIRED_MSG = GO_LIVE_REQUIRED_MESSAGE;
-
-/** Temporary password for new employees; they should change it on first login. */
-const TEMP_PASSWORD = "Welcome1!";
 
 /** Validates location/tables belong to the business; infers location from tables when unset. */
 export async function resolveStaffAssignments(
@@ -76,17 +72,6 @@ export async function resolveStaffAssignments(
   return { locationId: locId, tableIds: uniqueTableIds };
 }
 
-export interface CreateEmployeeInput {
-  name: string;
-  jobTitle: string;
-  email: string;
-  phone?: string;
-  businessId: string;
-  /** Optional venue; tables must belong to this location when both are set. */
-  locationId?: string | null;
-  tableIds?: string[];
-}
-
 export interface EmployeeListItem {
   id: string;
   slug: string | null;
@@ -124,6 +109,7 @@ export async function getEmployeesByBusinessId(businessId: string): Promise<Empl
     INNER JOIN "User" u ON u.id = e.user_id
     LEFT JOIN tips t ON t.employee_id = e.id
     WHERE e.business_id = ${businessId}
+      AND e.is_deleted = false
       AND e.is_active = true
       AND e.activation_status = 'active'
       AND u.email_verified = true
@@ -173,6 +159,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       avatar: true,
       slug: true,
       isActive: true,
+      isDeleted: true,
       activationStatus: true,
       businessId: true,
       business: { select: { verificationStatus: true, slug: true, logoPath: true, name: true } },
@@ -181,6 +168,13 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
   });
   if (!emp) {
     console.warn("[employee.getEmployeeById] no row for scanned id", { scannedRouteId: employeeId });
+    return null;
+  }
+  if (emp.isDeleted) {
+    console.warn("[employee.getEmployeeById] employee soft-deleted", {
+      scannedRouteId: employeeId,
+      dbLookupId: emp.id,
+    });
     return null;
   }
   if (!emp.isActive) {
@@ -237,7 +231,7 @@ export async function updateEmployeeForBusiness(
   input: UpdateEmployeeInput
 ) {
   const emp = await prisma.employee.findFirst({
-    where: { id: employeeId, businessId },
+    where: { id: employeeId, businessId, isDeleted: false },
     include: {
       user: true,
       tableAssignments: { select: { table: { select: { id: true } } } },
@@ -475,100 +469,29 @@ export async function regenerateEmployeeSlugForBusiness(businessId: string, empl
 
 export async function deleteEmployeeForBusiness(businessId: string, employeeId: string) {
   const emp = await prisma.employee.findFirst({
-    where: { id: employeeId, businessId },
+    where: { id: employeeId, businessId, isDeleted: false },
     select: { id: true, userId: true },
   });
   if (!emp) {
     throw new Error("Employee not found");
   }
-  // Always delete the linked `User` row; Prisma schema cascades remove `employees` and related rows.
-  await prisma.user.delete({ where: { id: emp.userId } });
+  const now = new Date();
+  await prisma.$transaction([
+    prisma.employee.update({
+      where: { id: emp.id },
+      data: {
+        isDeleted: true,
+        deletedAt: now,
+        isActive: false,
+        activationStatus: "pending_activation",
+      },
+    }),
+    prisma.user.update({
+      where: { id: emp.userId },
+      data: { isActive: false },
+    }),
+  ]);
   notifyBusinessRosterChanged(businessId, "staff_deleted");
-}
-
-export async function createEmployee(input: CreateEmployeeInput) {
-  const { name, jobTitle, email, phone, businessId, locationId: locIn, tableIds: tablesIn } = input;
-  if (!name?.trim() || !email?.trim() || !jobTitle?.trim()) {
-    throw new Error("Name, email, and role are required");
-  }
-  const trimmedEmail = email.trim().toLowerCase();
-  const existing = await prisma.user.findUnique({ where: { email: trimmedEmail } });
-  if (existing) {
-    throw new Error("Email already registered");
-  }
-  const business = await prisma.business.findUnique({ where: { id: businessId } });
-  if (!business) {
-    throw new Error("Business not found");
-  }
-  const resolved = await resolveStaffAssignments(
-    businessId,
-    locIn ?? null,
-    tablesIn ?? []
-  );
-  const passwordHash = await bcrypt.hash(TEMP_PASSWORD, 10);
-
-  // Audit: Add Employee touches `users`, `employees`, and optionally `_EmployeeTableAssignments` (join A/B).
-  console.info(
-    "[createEmployee] Prisma models: User → Employee → EmployeeTableAssignment (table _EmployeeTableAssignments)"
-  );
-
-  const result = await prisma.$transaction(async (tx) => {
-    const user = await tx.user.create({
-      data: {
-        email: trimmedEmail,
-        passwordHash,
-        role: "EMPLOYEE",
-        isPlatformAdmin: false,
-        /** Owner-created accounts: inbox not proven here; staff can still sign in with the issued temp password. */
-        emailVerified: true,
-      },
-    });
-    const slug =
-      business.verificationStatus === "verified"
-        ? await (async () => {
-            const baseSlug = generateSlug(name.trim());
-            return ensureUniqueSlug(baseSlug, async (s) => {
-              const existing = await tx.employee.findUnique({ where: { slug: s } });
-              return !!existing;
-            });
-          })()
-        : null;
-
-    const employee = await tx.employee.create({
-      data: {
-        name: name.trim(),
-        slug,
-        jobTitle: jobTitle.trim(),
-        phone: phone ? phone.trim() : null,
-        businessId,
-        userId: user.id,
-        activationStatus: "active",
-        locationId: resolved.locationId,
-        ...(resolved.tableIds.length > 0
-          ? {
-              tableAssignments: {
-                create: resolved.tableIds.map((tableId) => ({
-                  employeeName: name.trim(),
-                  table: { connect: { id: tableId } },
-                })),
-              },
-            }
-          : {}),
-      },
-      include: { tableAssignments: { select: { table: { select: { id: true } } } } },
-    });
-    return {
-      id: employee.id,
-      name: employee.name,
-      jobTitle: employee.jobTitle,
-      avatar: absolutizePublicMediaPath(employee.avatar),
-      temporaryPassword: TEMP_PASSWORD,
-      locationId: employee.locationId,
-      assignedTableIds: employee.tableAssignments.map((ta) => ta.table.id),
-    };
-  });
-  notifyBusinessRosterChanged(businessId, "staff_created");
-  return result;
 }
 
 export interface EmployeeSelfProfile {

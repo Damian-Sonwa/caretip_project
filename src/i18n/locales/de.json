@@ -1035,6 +1035,14 @@
         "title": "Verifizierungsdokument hochgeladen",
         "body": "{{businessName}} hat Dokumente zur Prüfung eingereicht."
       },
+      "business_verification_approved": {
+        "title": "Verifizierung freigegeben",
+        "body": "{{businessName}} ist freigeschaltet. QR-Codes und Gast-Trinkgeld können jetzt aktiviert werden."
+      },
+      "business_verification_rejected": {
+        "title": "Verifizierung abgelehnt",
+        "body": "Die Verifizierung für {{businessName}} wurde nicht freigegeben. Bitte kontaktieren Sie den Support."
+      },
       "support_created_admin": {
         "title": "[TICKET] {{ticketNumber}}",
         "body": "{{businessName}}, {{category}}. Ticket öffnen, um zu antworten."
@@ -2620,11 +2628,44 @@
     },
     "verification": {
       "pendingPageTitle": "Konto ausstehende Verifizierung",
-      "pendingPageBody": "Ihr Lokal wird geprüft. Sie können Team und Lokal weiter einrichten. QR-Veröffentlichung und Gast-Trinkgeld werden nach Freigabe freigeschaltet.",
+      "pendingPageBody": "Ihr Lokal wird derzeit geprüft. QR-Code-Erstellung und Aktivierung von Gast-Trinkgeld sind nach Freigabe der Verifizierung verfügbar.",
       "rejectedPageTitle": "Verifizierungs-Update",
       "rejectedPageBody": "Ihre Unternehmensverifizierung wurde nicht genehmigt. Bei Fragen wenden Sie sich an den Support.",
       "goToDashboard": "Zum Dashboard",
-      "home": "Startseite"
+      "home": "Startseite",
+      "learnMore": "Mehr erfahren",
+      "qrNavLocked": "Nach Verifizierung freigeschaltet",
+      "approvedToastTitle": "Verifizierung freigegeben",
+      "approvedToastBody": "QR-Code-Erstellung und Gast-Trinkgeld sind jetzt für Ihr Lokal verfügbar.",
+      "rejectedToastTitle": "Verifizierung nicht freigegeben",
+      "rejectedToastBody": "Bitte kontaktieren Sie den Support, wenn Sie Fragen zu Ihrer Bewerbung haben."
+    },
+    "kyc": {
+      "titleUpload": "Verifizierungsdokumente einreichen",
+      "titleReview": "Dokumente werden geprüft",
+      "titleRejected": "Verifizierung erfordert Aufmerksamkeit",
+      "bodyUpload": "Laden Sie Ihre Geschäftsdokumente hoch, damit wir Gast-Trinkgeld für Ihr Lokal freigeben können. Dies dauert in der Regel 1–2 Werktage.",
+      "bodyReview": "Unser Team prüft Ihre Dokumente. Sie werden benachrichtigt, sobald Ihr Lokal freigegeben ist.",
+      "bodyRejected": "Ihre vorherige Einreichung wurde nicht genehmigt. Laden Sie aktualisierte Dokumente hoch und reichen Sie sie erneut ein.",
+      "docRegistration": "Gewerbeanmeldung / Handelsregisterauszug",
+      "docAddress": "Nachweis der Geschäftsadresse",
+      "docGovernmentId": "Amtlicher Lichtbildausweis",
+      "docAdditional": "Zusätzliches Verifizierungsdokument",
+      "optional": "Optional",
+      "tapToUpload": "Tippen zum Hochladen (PDF, Bild oder Word)",
+      "uploaded": "Hochgeladen",
+      "uploadSuccess": "Dokument hochgeladen",
+      "submitForReview": "Zur Prüfung einreichen",
+      "submitting": "Wird eingereicht…",
+      "submitSuccess": "Dokumente zur Prüfung eingereicht",
+      "timelineTitle": "Prüfverlauf",
+      "contactSupport": "Support kontaktieren",
+      "status": {
+        "PENDING_UPLOAD": "Upload ausstehend",
+        "UNDER_REVIEW": "In Prüfung",
+        "APPROVED": "Genehmigt",
+        "REJECTED": "Abgelehnt"
+      }
     },
     "dashboard": {
       "analyticsSectionTitle": "Zeitraum-Analysen",
@@ -2860,6 +2901,7 @@
       "toastCopied": "In die Zwischenablage kopiert!",
       "toastCopyFailed": "Kopieren fehlgeschlagen. Bitte erneut versuchen.",
       "toastOwnerOnlyAdd": "Nur Inhaber können Mitarbeitende hinzufügen.",
+      "toastInviteSent": "{{name}} wurde eingeladen. Eine E-Mail zum Passwort setzen wurde versendet.",
       "toastNameEmailRequired": "Name und E-Mail sind erforderlich.",
       "toastMonthlyGoalInvalid": "Monatsziel muss eine gültige Zahl sein.",
       "toastStaffUpdated": "Mitarbeitende aktualisiert.",

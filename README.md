@@ -190,8 +190,8 @@ The API loads **repo root `.env` first**, then **`backend/.env`** (backend wins 
 
 | Variable | Purpose |
 |----------|---------|
-| `RESEND_API_KEY` | Resend API key (`re_...`). Without it, the API **does not** send mail; in development it may log links to the console instead. |
-| `RESEND_FROM` | **Sender** for all Resend mail. Must be either a plain email **`you@verified-domain.com`** or a display name plus email **`CareTip <you@verified-domain.com>`**. **Invalid:** a bare domain like `caretip.de` (Resend returns **422**). If invalid, the server falls back to `CareTip <onboarding@resend.dev>` and logs a warning. |
+| `RESEND_API_KEY` | Resend API key (`re_...`). **Required in production** (`NODE_ENV=production`); optional in development (links logged to console). |
+| `RESEND_FROM` | **Sender** for all Resend mail. **Required in production.** Must be `you@verified-domain.com` or `CareTip <you@verified-domain.com>`. **Invalid:** a bare domain like `caretip.de` (Resend **422**). `RESEND_FROM_EMAIL` is an alias. In development only, invalid/missing values fall back to a dev sender with a warning. |
 
 Add your domain in the **Resend dashboard → Domains**, complete the DNS records Resend shows for **that account** (records are not portable between Resend accounts), then set `RESEND_FROM` to an address on that domain.
 
@@ -331,7 +331,7 @@ cd backend && npm run db:migrate:deploy
 ### Resend
 
 - Set **`RESEND_API_KEY`** and a valid **`RESEND_FROM`** (see [Environment variables](#environment-variables)).
-- On startup, if `NODE_ENV === "production"` and `RESEND_API_KEY` is missing, the API logs a **warning**.
+- When **`NODE_ENV=production`**, the API **refuses to start** if `RESEND_API_KEY` or `RESEND_FROM` is missing or invalid. Verify with **`GET /health`** (`email.configured` must be `true`).
 
 ### Vercel (Hobby) + private GitHub
 

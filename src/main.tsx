@@ -8,8 +8,10 @@ import App from "./app/App";
 import { GlobalErrorBoundary } from "./app/components/GlobalErrorBoundary";
 import { wakeRemoteApi } from "./app/lib/api";
 import { ensureI18nReady } from "./i18n/i18n";
+import { initSentry } from "./app/lib/sentry";
 import "./styles/index.css";
 
+initSentry();
 wakeRemoteApi();
 
 const updateSW = registerSW({

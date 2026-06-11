@@ -1033,6 +1033,14 @@
         "title": "Verification document uploaded",
         "body": "{{businessName}} submitted documents for review."
       },
+      "business_verification_approved": {
+        "title": "Venue verification approved",
+        "body": "{{businessName}} is approved. QR code generation and guest tipping are now available."
+      },
+      "business_verification_rejected": {
+        "title": "Verification not approved",
+        "body": "Verification for {{businessName}} was not approved. Please contact support."
+      },
       "support_created_admin": {
         "title": "[TICKET] {{ticketNumber}}",
         "body": "{{businessName}}, {{category}}. Open the ticket to reply."
@@ -2616,11 +2624,44 @@
     },
     "verification": {
       "pendingPageTitle": "Account pending verification",
-      "pendingPageBody": "Your venue is being reviewed. You can continue setting up your team and venue while verification is in progress. QR code publishing and guest tipping will be unlocked after approval.",
+      "pendingPageBody": "Your venue is currently under review. QR code generation and guest tipping activation will become available once verification is approved.",
       "rejectedPageTitle": "Verification update",
       "rejectedPageBody": "Your business verification was not approved. Please contact support if you have questions.",
       "goToDashboard": "Go to dashboard",
-      "home": "Home"
+      "home": "Home",
+      "learnMore": "Learn more",
+      "qrNavLocked": "Unlocks after verification",
+      "approvedToastTitle": "Verification approved",
+      "approvedToastBody": "QR code generation and guest tipping are now available for your venue.",
+      "rejectedToastTitle": "Verification not approved",
+      "rejectedToastBody": "Please contact support if you have questions about your application."
+    },
+    "kyc": {
+      "titleUpload": "Submit verification documents",
+      "titleReview": "Documents under review",
+      "titleRejected": "Verification needs attention",
+      "bodyUpload": "Upload your business documents so we can approve guest tipping for your venue. This usually takes 1–2 business days.",
+      "bodyReview": "Our team is reviewing your documents. You will be notified when your venue is approved.",
+      "bodyRejected": "Your previous submission was not approved. Upload updated documents and submit again.",
+      "docRegistration": "Business registration certificate",
+      "docAddress": "Proof of business address",
+      "docGovernmentId": "Government-issued ID",
+      "docAdditional": "Additional verification document",
+      "optional": "Optional",
+      "tapToUpload": "Tap to upload (PDF, image, or Word)",
+      "uploaded": "Uploaded",
+      "uploadSuccess": "Document uploaded",
+      "submitForReview": "Submit for review",
+      "submitting": "Submitting…",
+      "submitSuccess": "Documents submitted for review",
+      "timelineTitle": "Review timeline",
+      "contactSupport": "Contact support",
+      "status": {
+        "PENDING_UPLOAD": "Pending upload",
+        "UNDER_REVIEW": "Under review",
+        "APPROVED": "Approved",
+        "REJECTED": "Rejected"
+      }
     },
     "dashboard": {
       "analyticsSectionTitle": "Period analytics",
@@ -2856,6 +2897,7 @@
       "toastCopied": "Copied to clipboard!",
       "toastCopyFailed": "Unable to copy. Please try again.",
       "toastOwnerOnlyAdd": "Only business owners can add employees.",
+      "toastInviteSent": "{{name}} has been invited. They’ll receive an email to set their password.",
       "toastNameEmailRequired": "Name and email are required.",
       "toastMonthlyGoalInvalid": "Monthly goal must be a valid number.",
       "toastStaffUpdated": "Staff updated successfully.",

@@ -51,6 +51,12 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error("❌ BACKEND ERROR:", context, err);
   if (err instanceof Error && err.stack) console.error(err.stack);
 
+  if (status >= 500) {
+    void import("../instrument/sentry.js").then(({ captureServerException }) => {
+      captureServerException(err, context);
+    });
+  }
+
   // Keep response shape stable: frontend reads `message` (see src/app/lib/api.ts handleRes).
   // For expected client errors (4xx), return allow-listed / Prisma-classified messages.
   // For 5xx and unknown failures, keep a generic client message while logging details above.

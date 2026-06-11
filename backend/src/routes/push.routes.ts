@@ -1,6 +1,6 @@
 import { Router } from "express";
 import rateLimit from "express-rate-limit";
-import { authMiddleware } from "../middleware/auth.middleware.js";
+import { authMiddleware, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import * as pushController from "../controllers/push.controller.js";
 
 const router = Router();
@@ -26,9 +26,9 @@ const pushTestLimiter = rateLimit({
 });
 
 router.get("/config", pushController.getPushConfig);
-router.post("/tokens", authMiddleware, pushTokenLimiter, pushController.registerToken);
-router.delete("/tokens", authMiddleware, pushController.deleteToken);
-router.delete("/tokens/all", authMiddleware, pushController.deleteAllTokens);
-router.post("/test", authMiddleware, pushTestLimiter, pushController.sendTestNotification);
+router.post("/tokens", authMiddleware, requireVerifiedEmail, pushTokenLimiter, pushController.registerToken);
+router.delete("/tokens", authMiddleware, requireVerifiedEmail, pushController.deleteToken);
+router.delete("/tokens/all", authMiddleware, requireVerifiedEmail, pushController.deleteAllTokens);
+router.post("/test", authMiddleware, requireVerifiedEmail, pushTestLimiter, pushController.sendTestNotification);
 
 export default router;

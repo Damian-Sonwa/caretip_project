@@ -1,6 +1,10 @@
 // Load env FIRST so DATABASE_URL exists before any Prisma import (see ./loadEnv.js for merge order).
 import "dotenv/config";
 import "./loadEnv.js";
+import { initSentry } from "./instrument/sentry.js";
+
+initSentry();
+
 import { createServer } from "http";
 import { join } from "path";
 import express from "express";
@@ -37,6 +41,11 @@ import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
 import { getImageUploadStorageDiagnostics } from "./services/upload.service.js";
 import { ensureSupabaseStorageBucketReady, isSupabaseStorageConfigured } from "./lib/supabaseStorageClient.js";
+import {
+  assertProductionEmailEnv,
+  getEmailHealthDiagnostics,
+} from "./config/emailEnv.js";
+import { getObservabilityHealthDiagnostics } from "./config/observabilityEnv.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -91,6 +100,8 @@ async function assertEnvForAuth(): Promise<void> {
     console.log(`[auth] Google OAuth audience(s): ${suffixes.join(", ")}`);
   }
 
+  assertProductionEmailEnv();
+
   // Do not $disconnect — shared prisma singleton is used for the whole process.
 }
 
@@ -123,7 +134,9 @@ app.use(
   }),
 );
 
-app.use("/api/test", testRoutes);
+if (process.env.NODE_ENV !== "production") {
+  app.use("/api/test", testRoutes);
+}
 app.use("/api/auth", authRoutes);
 app.use("/api/me", meRoutes);
 app.use("/api/me/notifications", notificationsRoutes);
@@ -155,9 +168,16 @@ app.use("/api/push", pushRoutes);
 app.use("/api/admin", platformRoutes);
 
 app.get("/health", (_, res) => {
-  res.json({
-    status: "ok",
-    uploads: getImageUploadStorageDiagnostics(),
+  const email = getEmailHealthDiagnostics();
+  const observability = getObservabilityHealthDiagnostics();
+  const uploads = getImageUploadStorageDiagnostics();
+  const ok =
+    process.env.NODE_ENV !== "production" || email.configured;
+  res.status(ok ? 200 : 503).json({
+    status: ok ? "ok" : "degraded",
+    email,
+    observability,
+    uploads,
   });
 });
 
@@ -167,11 +187,6 @@ const httpServer = createServer(app);
 initSocketServer(httpServer);
 
 void assertEnvForAuth().then(() => {
-  if (process.env.NODE_ENV === "production" && !process.env.RESEND_API_KEY?.trim()) {
-    console.warn(
-      "[env] RESEND_API_KEY is not set — email verification, employee activation, and password reset messages will not be delivered via Resend."
-    );
-  }
   httpServer.listen(PORT, () => {
     console.log(`Caretip API running on http://localhost:${PORT}`);
     if (

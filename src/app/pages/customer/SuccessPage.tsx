@@ -23,7 +23,7 @@ export function SuccessPage() {
 
   const sessionId = searchParams.get("session_id")?.trim() ?? "";
 
-  const tipAmount = amount ?? 15.3;
+  const tipAmount = amount != null && Number.isFinite(amount) && amount > 0 ? amount : null;
 
   const goToRating = () => {
     if (!sessionId) {
@@ -106,9 +106,11 @@ export function SuccessPage() {
             {t("tipFlow.success.headline")}
           </h1>
           <p className="mt-3 text-base leading-relaxed text-muted-foreground">{t("tipFlow.success.thankYou")}</p>
-          <p className="mt-5 font-bold tabular-nums text-primary text-4xl tracking-tight sm:text-[2.65rem]">
-            {formatEur(tipAmount)}
-          </p>
+          {tipAmount != null ? (
+            <p className="mt-5 font-bold tabular-nums text-primary text-4xl tracking-tight sm:text-[2.65rem]">
+              {formatEur(tipAmount)}
+            </p>
+          ) : null}
           <p className="mt-2 text-sm text-muted-foreground">
             {t("tipFlow.success.sentTo", {
               name: employeeName ?? t("tipFlow.common.theTeamMember"),

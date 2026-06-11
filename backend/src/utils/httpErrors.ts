@@ -99,6 +99,8 @@ const ALLOWED_CLIENT_MESSAGES = new Set<string>([
   "Email is already verified.",
   "We sent a new verification link to your email.",
   "Account pending verification.",
+  "This staff member is not available for tips right now.",
+  "This feature is available after your venue is approved to go live.",
 ]);
 
 /** Thrown from auth login when credentials are valid but `emailVerified` is false. */
@@ -127,6 +129,9 @@ export function logServerError(
   if (err instanceof Error && err.stack) {
     console.error(err.stack);
   }
+  void import("../instrument/sentry.js").then(({ captureServerException }) => {
+    captureServerException(err, { context, ...meta });
+  });
 }
 
 function prismaClientMessage(err: unknown): string | null {

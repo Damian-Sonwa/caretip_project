@@ -160,6 +160,12 @@ export interface RegisterPayload {
   inviteCode?: string;
 }
 
+export type RegisterResult = {
+  requiresEmailVerification: true;
+  email: string;
+  role: UserRole;
+};
+
 /** Map Prisma / API role strings to UI `UserRole` (business / employee / platform_admin). */
 function mapApiRoleToUserRole(apiRole: string): UserRole {
   switch (apiRole) {
@@ -237,13 +243,7 @@ export function parseUser(data: AuthResponse["user"]): User {
   return base;
 }
 
-export function getPostAuthRedirect(u: User): string {
-  if (!u.isVerified) return "/verify-email";
-  if (u.role === "business" && !u.hasCompletedOnboarding) return "/onboarding";
-  if (u.role === "employee") return "/employee/dashboard";
-  if (u.role === "platform_admin" || u.role === "admin") return "/platform-admin/dashboard";
-  return "/dashboard";
-}
+export { getPostAuthRedirect } from "../lib/authRedirects";
 
 function requestEmailLocale(i18nLang: string | undefined): "en" | "de" {
   return i18nLang?.toLowerCase().startsWith("de") ? "de" : "en";
@@ -340,13 +340,16 @@ export function useAuth() {
     return u;
   }, [requestLocale]);
 
-  const register = useCallback(async (payload: RegisterPayload): Promise<User> => {
+  const register = useCallback(async (payload: RegisterPayload): Promise<RegisterResult> => {
     const data = await registerAPI({ ...payload, locale: requestLocale });
-    const u = persistAuthResponse(data);
-    bumpSessionEpoch();
-    commitAuthUser(u);
+    clearStoredSession();
+    commitAuthUser(null);
     markSessionBootstrapSettled();
-    return u;
+    return {
+      requiresEmailVerification: true,
+      email: data.user.email,
+      role: mapApiRoleToUserRole(data.user.role),
+    };
   }, [requestLocale]);
 
   const loginWithOAuth = useCallback(async (

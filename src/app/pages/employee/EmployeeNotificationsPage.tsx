@@ -6,7 +6,8 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket } from "../../hooks/useSocket";
 import { listEmployeeTips, type TipActivityRow, type TipItem } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
-import { formatTipNaira, formatTipDateTime } from "../../lib/employeeFormat";
+import { formatEur } from "../../lib/formatEur";
+import { formatTipDateTime } from "../../lib/employeeFormat";
 import { NotificationInboxListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Button } from "../../components/ui/button";
@@ -367,7 +368,7 @@ export function EmployeeNotificationsPage() {
                           </p>
                         </div>
                         <p className="mt-1 text-sm text-muted-foreground">
-                          {t("employee.notifications.tipBody", { amount: formatTipNaira(tipRow.amount) })}
+                          {t("employee.notifications.tipBody", { amount: formatEur(tipRow.amount) })}
                         </p>
                       </div>
 

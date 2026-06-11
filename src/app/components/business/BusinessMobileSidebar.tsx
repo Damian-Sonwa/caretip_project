@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
-import { X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
@@ -28,6 +28,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
     role: user?.role === "business" ? "business" : null,
   });
   const navItems = filterBusinessDashboardNavItems(businessDashboardNavItems, tier);
+  const qrLocked = user?.status === "PENDING" || user?.status === "REJECTED";
 
   return (
     <AnimatePresence>
@@ -88,7 +89,15 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
                         )}
                       >
                         <CareIcon name={item.icon} size="nav" />
-                        <span>{t(item.labelKey)}</span>
+                        <span className="flex min-w-0 flex-1 items-center gap-2">
+                          <span className="truncate">{t(item.labelKey)}</span>
+                          {item.href === "/dashboard/qr-code-management" && qrLocked ? (
+                            <Lock
+                              className="h-3.5 w-3.5 shrink-0 opacity-70"
+                              aria-label={t("business.verification.qrNavLocked")}
+                            />
+                          ) : null}
+                        </span>
                       </Link>
                     </li>
                   );

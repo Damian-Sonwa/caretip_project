@@ -1,13 +1,13 @@
 /**
- * One-off / ops: add N employees for a manager's business using the same path as dashboard
- * "add without activation" — email verified, active, temp password (see employee.service TEMP_PASSWORD).
+ * One-off / ops: add N employees for a manager's business via activation-email flow.
  *
  * Usage (from repo root or backend):
  *   npx dotenv -e ../.env -e .env -- npx tsx scripts/addBypassEmployeesForManager.ts
  */
 import "../src/loadEnv.js";
 import { prisma } from "../src/prisma.js";
-import { createEmployee } from "../src/services/employee.service.js";
+import { createEmployeeWithActivation } from "../src/services/employee.service.js";
+import { buildEmployeeActivationUrl } from "../src/services/employeeActivationEmail.service.js";
 
 const MANAGER_EMAIL = "madudamian25@gmail.com".toLowerCase();
 
@@ -29,10 +29,10 @@ async function main() {
     throw new Error(`User ${MANAGER_EMAIL} is not a manager with a business`);
   }
   const businessId = manager.business.id;
-  const out: { email: string; password: string; name: string }[] = [];
+  const out: { email: string; activationUrl: string; name: string; expiresAt: string }[] = [];
   for (const row of STAFF) {
     try {
-      const created = await createEmployee({
+      const created = await createEmployeeWithActivation({
         name: row.name,
         jobTitle: row.jobTitle,
         email: row.email,
@@ -42,8 +42,9 @@ async function main() {
       });
       out.push({
         email: row.email,
-        password: created.temporaryPassword ?? "Welcome1!",
+        activationUrl: buildEmployeeActivationUrl(created.activationToken),
         name: created.name,
+        expiresAt: created.expiresAt.toISOString(),
       });
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);

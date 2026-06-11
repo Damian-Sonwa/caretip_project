@@ -13,6 +13,44 @@ import {
   invalidateCacheKey,
   invalidateCacheKeyPrefix,
 } from "../utils/shortLivedCache.js";
+import { parseKycDocuments, type KycDocuments } from "./kyc.service.js";
+
+const KYC_SLA_HOURS = 48;
+
+export type KycReviewHistoryEntry = {
+  status: "pending" | "verified" | "rejected";
+  at: string;
+  note?: string | null;
+};
+
+function parseKycReviewHistory(raw: unknown): KycReviewHistoryEntry[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .filter((x): x is KycReviewHistoryEntry => {
+      if (!x || typeof x !== "object") return false;
+      const o = x as Record<string, unknown>;
+      return (
+        (o.status === "pending" || o.status === "verified" || o.status === "rejected") &&
+        typeof o.at === "string"
+      );
+    })
+    .map((x) => ({
+      status: x.status,
+      at: x.at,
+      note: typeof x.note === "string" ? x.note : null,
+    }));
+}
+
+export function kycHoursPending(submittedAt: Date | null): number | null {
+  if (!submittedAt) return null;
+  return (Date.now() - submittedAt.getTime()) / (1000 * 60 * 60);
+}
+
+export function isKycSlaBreached(submittedAt: Date | null, verificationStatus: string): boolean {
+  if (verificationStatus !== "pending") return false;
+  const hours = kycHoursPending(submittedAt);
+  return hours != null && hours > KYC_SLA_HOURS;
+}
 
 const PLATFORM_STATS_CACHE_TTL_MS = 45_000;
 const PLATFORM_BUSINESSES_CACHE_TTL_MS = 45_000;
@@ -169,6 +207,10 @@ type PlatformBusinessActivityRow = {
   registered_address: string | null;
   logo_path: string | null;
   verification_document_path: string | null;
+  kyc_documents: unknown;
+  kyc_submitted_at: Date | null;
+  kyc_review_notes: string | null;
+  kyc_review_history: unknown;
   owner_user_id: string;
   owner_email: string;
   staff_count: number;
@@ -194,9 +236,13 @@ async function getAllBusinessActivityImpl() {
       b.registered_address,
       b.logo_path,
       b.verification_document_path,
+      b.kyc_documents,
+      b.kyc_submitted_at,
+      b.kyc_review_notes,
+      b.kyc_review_history,
       u.id AS owner_user_id,
       u.email AS owner_email,
-      (SELECT COUNT(*)::int FROM employees e WHERE e.business_id = b.id) AS staff_count,
+      (SELECT COUNT(*)::int FROM employees e WHERE e.business_id = b.id AND e.is_deleted = false) AS staff_count,
       (SELECT COUNT(*)::int FROM locations l WHERE l.business_id = b.id) AS location_count,
       COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
       COALESCE(ts.success_tip_count, 0)::int AS success_tip_count
@@ -230,9 +276,42 @@ async function getAllBusinessActivityImpl() {
     locationCount: Number(b.location_count ?? 0),
     logoPath: b.logo_path,
     verificationDocumentPath: b.verification_document_path,
+    kycDocuments: parseKycDocuments(b.kyc_documents) as KycDocuments,
+    kycSubmittedAt: b.kyc_submitted_at?.toISOString() ?? null,
+    kycReviewNotes: b.kyc_review_notes,
+    kycReviewHistory: parseKycReviewHistory(b.kyc_review_history),
+    kycHoursPending: kycHoursPending(b.kyc_submitted_at),
+    kycSlaBreached: isKycSlaBreached(b.kyc_submitted_at, b.verification_status),
     totalTipsEur: Number(b.total_tips_eur ?? 0),
     successTipCount: Number(b.success_tip_count ?? 0),
   }));
+}
+
+export async function getKycQueueMetrics() {
+  const rows = await prisma.business.findMany({
+    select: {
+      verificationStatus: true,
+      kycSubmittedAt: true,
+      kycDocuments: true,
+    },
+  });
+  let pendingReview = 0;
+  let slaBreached = 0;
+  let awaitingUpload = 0;
+  for (const b of rows) {
+    if (b.verificationStatus === "pending" && b.kycSubmittedAt) {
+      pendingReview += 1;
+      if (isKycSlaBreached(b.kycSubmittedAt, b.verificationStatus)) slaBreached += 1;
+    } else if (b.verificationStatus === "pending" && !b.kycSubmittedAt) {
+      awaitingUpload += 1;
+    }
+  }
+  return {
+    pendingReview,
+    slaBreached,
+    awaitingUpload,
+    slaHours: KYC_SLA_HOURS,
+  };
 }
 
 export async function getAllBusinessActivity() {
@@ -250,15 +329,52 @@ export async function listBusinessesForAdmin() {
 
 export async function updateBusinessVerificationStatus(
   businessId: string,
-  status: "pending" | "verified" | "rejected"
+  status: "pending" | "verified" | "rejected",
+  opts?: { reviewNote?: string | null; adminUserId?: string },
 ) {
+  const previous = await prisma.business.findUnique({
+    where: { id: businessId },
+    select: { verificationStatus: true, name: true, userId: true, kycReviewHistory: true },
+  });
+  if (!previous) {
+    throw new Error("Business not found");
+  }
+
+  const note = opts?.reviewNote?.trim() || null;
+  const history = parseKycReviewHistory(previous.kycReviewHistory);
+  if (previous.verificationStatus !== status) {
+    history.push({
+      status,
+      at: new Date().toISOString(),
+      note,
+    });
+  }
+
   await prisma.business.update({
     where: { id: businessId },
-    data: { verificationStatus: status },
+    data: {
+      verificationStatus: status,
+      ...(note ? { kycReviewNotes: note } : {}),
+      kycReviewHistory: history,
+    },
   });
   emitVerificationUpdated(businessId, status);
   invalidatePlatformDashboardCache();
   emitPlatformDataUpdated("verification_status");
+
+  if (previous.verificationStatus !== status && previous.userId) {
+    void import("./push/notification.triggers.js").then(
+      ({ onBusinessVerificationStatusChanged }) => {
+        onBusinessVerificationStatusChanged({
+          businessId,
+          businessName: previous.name?.trim() || "Your venue",
+          managerUserId: previous.userId,
+          previousStatus: previous.verificationStatus,
+          nextStatus: status,
+        });
+      },
+    );
+  }
 }
 
 /** @deprecated prefer updateBusinessVerificationStatus */
@@ -298,10 +414,28 @@ export async function getBusinessForAdmin(businessId: string) {
     locationCount: b._count.locations,
     logoPath: b.logoPath,
     verificationDocumentPath: b.verificationDocumentPath,
+    kycDocuments: parseKycDocuments(b.kycDocuments),
+    kycSubmittedAt: b.kycSubmittedAt?.toISOString() ?? null,
+    kycReviewNotes: b.kycReviewNotes,
+    kycReviewHistory: parseKycReviewHistory(b.kycReviewHistory),
+    kycHoursPending: kycHoursPending(b.kycSubmittedAt),
+    kycSlaBreached: isKycSlaBreached(b.kycSubmittedAt, b.verificationStatus),
     totalTipsEur: Number(tipSum._sum.amount ?? 0),
     successTipCount,
     subscriptionTier: b.subscriptionTier,
   };
+}
+
+export async function updateBusinessKycReviewNotes(businessId: string, notes: string | null) {
+  await prisma.business.update({
+    where: { id: businessId },
+    data: { kycReviewNotes: notes?.trim() || null },
+  });
+  invalidatePlatformDashboardCache();
+  emitPlatformDataUpdated("kyc_review_notes");
+  const refreshed = await getBusinessForAdmin(businessId);
+  if (!refreshed) throw new Error("Business not found");
+  return refreshed;
 }
 
 export async function updateBusinessSubscriptionTier(

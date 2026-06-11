@@ -33,7 +33,13 @@ export function CheckEmailPage() {
   const location = useLocation();
   const tokenFromUrl = searchParams.get("token")?.trim() ?? "";
   const verifiedFromUrl = searchParams.get("verified") === "1";
-  const verifyErrorBanner = (location.state as { verifyError?: string } | null)?.verifyError;
+  const locationState = location.state as {
+    verifyError?: string;
+    pendingEmail?: string;
+    pendingRole?: string;
+  } | null;
+  const verifyErrorBanner = locationState?.verifyError;
+  const pendingEmailFromSignup = locationState?.pendingEmail?.trim() ?? "";
 
   const { user, logout, refreshSession } = useAuth();
   const navigate = useNavigate();
@@ -88,8 +94,12 @@ export function CheckEmailPage() {
   }, [logout, navigate, refreshSession, t, user?.role]);
 
   useEffect(() => {
-    if (user?.email) setEmail(user.email);
-  }, [user?.email]);
+    if (user?.email) {
+      setEmail(user.email);
+      return;
+    }
+    if (pendingEmailFromSignup) setEmail(pendingEmailFromSignup);
+  }, [user?.email, pendingEmailFromSignup]);
 
   if (showVerificationSuccess) {
     return <EmailVerificationSuccessScreen />;

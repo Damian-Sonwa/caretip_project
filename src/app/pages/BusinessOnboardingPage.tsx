@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth, getPostAuthRedirect } from "../hooks/useAuth";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
 import { toast } from "sonner";
@@ -98,7 +98,7 @@ export function BusinessOnboardingPage() {
         if (cancelled) return;
 
         if (fresh && isOnboardingCompleted(fresh)) {
-          navigate("/dashboard", { replace: true });
+          navigate(getPostAuthRedirect(fresh), { replace: true });
           return;
         }
 
@@ -199,12 +199,14 @@ export function BusinessOnboardingPage() {
         setStep((s) => (s === 1 ? 2 : 3));
         return;
       }
-      await setHasCompletedOnboarding(true);
-      const refreshed = await refetchUser();
+      const updated = await setHasCompletedOnboarding(true);
+      const refreshed = (await refetchUser()) ?? updated;
       if (!refreshed) {
         toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
+        navigate("/verification-pending", { replace: true });
+        return;
       }
-      navigate("/dashboard", { replace: true });
+      navigate(getPostAuthRedirect(refreshed), { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (msg.includes("Authentication required") || msg.includes("Invalid or expired token")) {

@@ -22,7 +22,6 @@ import {
   revokeAllRefreshTokensForUser,
   setRefreshCookie,
 } from "../services/refreshToken.service.js";
-import { checkAndIncrementEmailLimit } from "../utils/emailRateLimit.js";
 import {
   logServerError,
   clientSafeMessage,
@@ -165,12 +164,7 @@ export async function register(req: Request, res: Response) {
         },
         { acceptLanguage },
       );
-      try {
-        const rt = await issueRefreshToken(result.user.id);
-        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
-      } catch (e) {
-        logServerError("auth.register.issueRefreshToken", e);
-      }
+      clearRefreshCookie(res);
       return res.status(201).json(result);
     }
 
@@ -184,12 +178,7 @@ export async function register(req: Request, res: Response) {
         },
         { acceptLanguage },
       );
-      try {
-        const rt = await issueRefreshToken(result.user.id);
-        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
-      } catch (e) {
-        logServerError("auth.register.issueRefreshToken", e);
-      }
+      clearRefreshCookie(res);
       return res.status(201).json(result);
     }
 
@@ -210,12 +199,7 @@ export async function register(req: Request, res: Response) {
         },
         { acceptLanguage },
       );
-      try {
-        const rt = await issueRefreshToken(result.user.id);
-        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
-      } catch (e) {
-        logServerError("auth.register.issueRefreshToken", e);
-      }
+      clearRefreshCookie(res);
       return res.status(201).json(result);
     }
 
@@ -634,9 +618,21 @@ export async function refresh(req: Request, res: Response) {
     if (rtCookie) {
       const rotated = await rotateRefreshToken(rtCookie);
       if (rotated) {
-        setRefreshCookie(res, rotated.newToken, { maxAgeMs: refreshCookieMaxAgeMs(rotated.newExpiresAt) });
-        const result = await authService.authResultForUserId(rotated.userId);
-        return res.json(result);
+        try {
+          const result = await authService.authResultForUserId(rotated.userId);
+          setRefreshCookie(res, rotated.newToken, { maxAgeMs: refreshCookieMaxAgeMs(rotated.newExpiresAt) });
+          return res.json(result);
+        } catch (inner) {
+          if (inner instanceof EmailNotVerifiedLoginError) {
+            clearRefreshCookie(res);
+            return res.status(403).json({
+              message: inner.message,
+              code: inner.code,
+              canResend: inner.canResend,
+            });
+          }
+          throw inner;
+        }
       }
       clearRefreshCookie(res);
     }
@@ -647,10 +643,22 @@ export async function refresh(req: Request, res: Response) {
       const { userIdFromAccessTokenForRefresh } = await import("../lib/accessTokenRefresh.js");
       const userId = userIdFromAccessTokenForRefresh(bearer);
       if (userId) {
-        const rt = await issueRefreshToken(userId);
-        setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
-        const result = await authService.authResultForUserId(userId);
-        return res.json(result);
+        try {
+          const result = await authService.authResultForUserId(userId);
+          const rt = await issueRefreshToken(userId);
+          setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
+          return res.json(result);
+        } catch (inner) {
+          if (inner instanceof EmailNotVerifiedLoginError) {
+            clearRefreshCookie(res);
+            return res.status(403).json({
+              message: inner.message,
+              code: inner.code,
+              canResend: inner.canResend,
+            });
+          }
+          throw inner;
+        }
       }
     }
 
@@ -658,6 +666,14 @@ export async function refresh(req: Request, res: Response) {
   } catch (err) {
     logServerError("auth.refresh", err);
     const msg = err instanceof Error ? err.message : "";
+    if (err instanceof EmailNotVerifiedLoginError) {
+      clearRefreshCookie(res);
+      return res.status(403).json({
+        message: err.message,
+        code: err.code,
+        canResend: err.canResend,
+      });
+    }
     if (msg === "Authentication required" || msg.toLowerCase().includes("not found")) {
       clearRefreshCookie(res);
       return res.status(401).json({ message: "Authentication required" });
@@ -699,24 +715,8 @@ export async function forgotPassword(req: Request, res: Response) {
   try {
     const body = req.body as Record<string, unknown>;
     const email = typeof body.email === "string" ? body.email : "";
-    const normalized = authService.normalizeLoginEmail(email);
     const localeHint =
       typeof body.locale === "string" && body.locale.trim() ? body.locale.trim() : undefined;
-
-    // Per-email abuse protection (in addition to the IP-based limiter middleware).
-    // Always log attempts before enforcing strict blocking.
-    const lim = checkAndIncrementEmailLimit({
-      key: normalized,
-      maxPerWindow: 3,
-    });
-    console.info("[auth.forgotPassword] email rate", {
-      email: normalized ? `${normalized.slice(0, 2)}***@***` : "",
-      count: lim.count,
-      allowed: lim.allowed,
-    });
-    if (!lim.allowed) {
-      return res.status(429).json({ message: "Too many requests, try again later" });
-    }
 
     await passwordResetService.requestPasswordReset(email, {
       acceptLanguage: req.get("accept-language") ?? undefined,
@@ -780,6 +780,8 @@ export async function changePassword(req: Request, res: Response) {
       return res.status(400).json({ message: "Current and new password are required" });
     }
     await authService.changePassword(userId, currentPassword, newPassword);
+    await revokeAllRefreshTokensForUser(userId);
+    clearRefreshCookie(res);
     return res.json({ success: true });
   } catch (err) {
     logServerError("auth.changePassword", err);

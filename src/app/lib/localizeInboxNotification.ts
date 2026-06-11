@@ -260,6 +260,20 @@ function renderTemplate(
           businessName: String(p.businessName ?? ""),
         }),
       };
+    case "business_verification_approved":
+      return {
+        title: t("notifications.templates.business_verification_approved.title"),
+        message: t("notifications.templates.business_verification_approved.body", {
+          businessName: String(p.businessName ?? ""),
+        }),
+      };
+    case "business_verification_rejected":
+      return {
+        title: t("notifications.templates.business_verification_rejected.title"),
+        message: t("notifications.templates.business_verification_rejected.body", {
+          businessName: String(p.businessName ?? ""),
+        }),
+      };
     case "support_created_admin":
       return {
         title: t("notifications.templates.support_created_admin.title", {

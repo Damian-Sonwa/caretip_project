@@ -1,7 +1,14 @@
 import { cn } from "@/lib/utils";
 import { caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
+import { formatEur } from "@/app/lib/formatEur";
 import { CheckCircle2, QrCode, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
+
+const HERO_PREVIEW_AMOUNTS = {
+  todayTips: 127.5,
+  tipSent: 20,
+  teamDeltas: [12, 8, 6] as const,
+} as const;
 
 type Props = {
   className?: string;
@@ -99,7 +106,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                       <div className="col-span-6 space-y-2">
                         <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
                           <p className="text-[10px] font-semibold text-white/70">{t("business.heroPreview.today")}</p>
-                          <p className="mt-0.5 text-base font-bold text-white">+₦5,000</p>
+                          <p className="mt-0.5 text-base font-bold text-white">+{formatEur(HERO_PREVIEW_AMOUNTS.todayTips)}</p>
                           <p className="text-[10px] text-white/55">{t("business.heroPreview.tipsReceived")}</p>
                         </div>
                         <div className="rounded-xl bg-white/5 ring-1 ring-white/10 p-3">
@@ -141,7 +148,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
               <div className="mt-4 grid grid-cols-2 gap-3">
                 <div className="rounded-xl bg-black/30 ring-1 ring-white/10 p-3">
                   <p className="text-[10px] font-semibold text-white/65">{t("business.heroPreview.amount")}</p>
-                  <p className="mt-1 text-lg font-bold text-white">₦2,000</p>
+                  <p className="mt-1 text-lg font-bold text-white">{formatEur(HERO_PREVIEW_AMOUNTS.tipSent)}</p>
                 </div>
                 <div className="rounded-xl bg-black/30 ring-1 ring-white/10 p-3">
                   <p className="text-[10px] font-semibold text-white/65">{t("business.heroPreview.teamMember")}</p>
@@ -160,9 +167,9 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
               </div>
               <div className="mt-3 flex flex-wrap gap-2">
                 {[
-                  { name: "Sam", delta: "+₦1,200" },
-                  { name: "Jordan", delta: "+₦800" },
-                  { name: "Mina", delta: "+₦600" },
+                  { name: "Sam", delta: HERO_PREVIEW_AMOUNTS.teamDeltas[0] },
+                  { name: "Jordan", delta: HERO_PREVIEW_AMOUNTS.teamDeltas[1] },
+                  { name: "Mina", delta: HERO_PREVIEW_AMOUNTS.teamDeltas[2] },
                 ].map((p) => (
                   <div
                     key={p.name}
@@ -171,7 +178,7 @@ export function BusinessDashboardHeroProductPreview({ className }: Props) {
                     <div className="h-7 w-7 rounded-full bg-primary/20 ring-1 ring-primary/30" aria-hidden />
                     <div className="leading-tight">
                       <p className="text-[11px] font-semibold text-white">{p.name}</p>
-                      <p className="text-[10px] font-semibold text-primary">{p.delta}</p>
+                      <p className="text-[10px] font-semibold text-primary">+{formatEur(p.delta)}</p>
                     </div>
                   </div>
                 ))}

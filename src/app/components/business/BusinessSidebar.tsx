@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { CareIcon } from "@/components/icons";
+import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export function BusinessSidebar() {
     role: user?.role === "business" ? "business" : null,
   });
   const navItems = filterBusinessDashboardNavItems(businessDashboardNavItems, tier);
+  const qrLocked = user?.status === "PENDING" || user?.status === "REJECTED";
 
   return (
     <motion.aside
@@ -50,7 +52,15 @@ export function BusinessSidebar() {
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
-                  <span className="tracking-tight">{t(item.labelKey)}</span>
+                  <span className="flex min-w-0 flex-1 items-center gap-2 tracking-tight">
+                    <span className="truncate">{t(item.labelKey)}</span>
+                    {item.href === "/dashboard/qr-code-management" && qrLocked ? (
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 opacity-70"
+                        aria-label={t("business.verification.qrNavLocked")}
+                      />
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             );

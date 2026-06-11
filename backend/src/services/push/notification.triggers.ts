@@ -342,6 +342,63 @@ export function onPlatformOperationalAlert(params: {
   });
 }
 
+/** Manager notified when platform admin approves or rejects venue verification. */
+export function onBusinessVerificationStatusChanged(params: {
+  businessId: string;
+  businessName: string;
+  managerUserId: string;
+  previousStatus: string;
+  nextStatus: "pending" | "verified" | "rejected";
+}): void {
+  safeTrigger("onBusinessVerificationStatusChanged", async () => {
+    if (params.nextStatus === "verified") {
+      await deliverUserNotification({
+        userId: params.managerUserId,
+        payload: {
+          type: NotificationType.SYSTEM_ALERT,
+          title: "Venue verification approved",
+          body: "",
+          localeTemplate: {
+            id: "business_verification_approved",
+            params: { businessName: params.businessName },
+          },
+          url: "/dashboard/qr-code-management",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            entityId: params.businessId,
+            businessId: params.businessId,
+            verificationStatus: params.nextStatus,
+          },
+        },
+        dedupeKey: `biz_verify:${params.businessId}:approved`,
+      });
+      return;
+    }
+    if (params.nextStatus === "rejected") {
+      await deliverUserNotification({
+        userId: params.managerUserId,
+        payload: {
+          type: NotificationType.SYSTEM_ALERT,
+          title: "Verification update",
+          body: "",
+          localeTemplate: {
+            id: "business_verification_rejected",
+            params: { businessName: params.businessName },
+          },
+          url: "/verification-pending",
+          timestamp: new Date().toISOString(),
+          metadata: {
+            entityId: params.businessId,
+            businessId: params.businessId,
+            verificationStatus: params.nextStatus,
+          },
+        },
+        dedupeKey: `biz_verify:${params.businessId}:rejected`,
+      });
+    }
+  });
+}
+
 /** Manager uploaded or updated KYC verification documents. */
 export function onBusinessVerificationDocumentUploaded(
   businessId: string,

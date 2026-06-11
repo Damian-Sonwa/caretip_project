@@ -37,6 +37,7 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
     const employees = await prisma.employee.findMany({
       where: {
         businessId: business.id,
+        isDeleted: false,
         isActive: true,
         activationStatus: "active",
         user: { is: { emailVerified: true } },
@@ -104,6 +105,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     return prisma.employee.findFirst({
       where: {
         slug: trimmedSlug,
+        isDeleted: false,
         isActive: true,
         activationStatus: "active",
         user: { is: { emailVerified: true } },
@@ -115,6 +117,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
       return prisma.employee.findFirst({
         where: {
           slug: trimmedSlug,
+          isDeleted: false,
           isActive: true,
           activationStatus: "active",
           user: { is: { emailVerified: true } },
@@ -187,6 +190,7 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
       where: {
         businessId: business.id,
         slug: employeeSlug,
+        isDeleted: false,
         isActive: true,
         activationStatus: "active",
         user: { is: { emailVerified: true } },

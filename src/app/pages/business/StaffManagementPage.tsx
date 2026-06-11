@@ -399,7 +399,6 @@ export function StaffManagementPage() {
         phone: addForm.phone.trim() || undefined,
         locationId: addForm.locationId.trim() ? addForm.locationId : null,
         tableIds: addForm.tableIds,
-        useActivationFlow: true,
         locale: inviteLocale,
       });
       setShowAddModal(false);
@@ -412,14 +411,7 @@ export function StaffManagementPage() {
         tableIds: [],
       });
       await fetchEmployees();
-      const tempMsg = created.temporaryPassword
-        ? ` Their temporary password is "${created.temporaryPassword}". Share it securely so they can log in.`
-        : "";
-      toastOk(
-        created.temporaryPassword
-          ? `${created.name} has been added to your team.${tempMsg}`
-          : `${created.name} has been invited. They’ll receive an email to set their password.`
-      );
+      toastOk(t("business.staffPage.toastInviteSent", { name: created.name }));
     } catch (err) {
       logClientError("StaffManagementPage", err);
       toastErr(toUserFriendlyMessage(err));

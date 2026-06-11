@@ -2,10 +2,13 @@ import Stripe from "stripe";
 import { emitNewTip } from "../socket/emitTip.js";
 import { prisma } from "../prisma.js";
 import { businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
+import { assertTipAmountInRangeEur } from "../constants/tipAmountLimits.js";
+import { captureServerException } from "../instrument/sentry.js";
+import { logServerError } from "../utils/httpErrors.js";
 import {
-  GO_LIVE_REQUIRED_MESSAGE,
-  hasBusinessVerificationCapability,
-} from "../config/businessVerificationCapabilities.js";
+  assertEmployeeEligibleForTipPayment,
+  logTipPaymentEligibilityBlocked,
+} from "./tipPaymentEligibility.service.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -242,26 +245,9 @@ export async function createPaymentIntent(
 ): Promise<CreatePaymentIntentResult> {
   const stripe = getStripe();
 
-  const employee = await prisma.employee.findUnique({
-    where: { id: input.employeeId },
-    select: { businessId: true },
-  });
+  assertTipAmountInRangeEur(input.amount);
 
-  if (!employee || employee.businessId !== input.businessId) {
-    throw new Error("Employee not found");
-  }
-
-  const business = await prisma.business.findUnique({
-    where: { id: input.businessId },
-    select: { id: true, verificationStatus: true },
-  });
-
-  if (!business) {
-    throw new Error("Business not found");
-  }
-  if (!hasBusinessVerificationCapability(business.verificationStatus, "receiveTips")) {
-    throw new Error(GO_LIVE_REQUIRED_MESSAGE);
-  }
+  await assertEmployeeEligibleForTipPayment(input.employeeId, input.businessId);
 
   const { locationId: locId, tableId: tblId } = await resolveLocationTable(
     input.businessId,
@@ -334,24 +320,7 @@ export async function createTipCheckoutSession(
   }
   const tipForRecord = total;
 
-  const employee = await prisma.employee.findUnique({
-    where: { id: employeeId },
-    select: { businessId: true },
-  });
-  if (!employee || employee.businessId !== businessId) {
-    throw new Error("Employee not found");
-  }
-
-  const business = await prisma.business.findUnique({
-    where: { id: businessId },
-    select: { id: true, verificationStatus: true },
-  });
-  if (!business) {
-    throw new Error("Business not found");
-  }
-  if (!hasBusinessVerificationCapability(business.verificationStatus, "receiveTips")) {
-    throw new Error(GO_LIVE_REQUIRED_MESSAGE);
-  }
+  await assertEmployeeEligibleForTipPayment(employeeId, businessId);
 
   const { locationId: locId, tableId: tblId } = await resolveLocationTable(
     businessId,
@@ -359,10 +328,9 @@ export async function createTipCheckoutSession(
     input.tableId,
   );
 
+  assertTipAmountInRangeEur(total);
+
   const totalCents = Math.round(total * 100);
-  if (totalCents < 50) {
-    throw new Error("Amount too small");
-  }
 
   const base = frontendBaseUrl();
   const metadata: Record<string, string> = {
@@ -414,6 +382,51 @@ export async function createTipCheckoutSession(
   };
 }
 
+/**
+ * Refund a captured tip when post-payment eligibility checks fail (employee deactivated, venue unverified, etc.).
+ * Best-effort — logs and alerts ops if Stripe refund fails.
+ */
+async function refundTipPaymentForEligibilityFailure(
+  paymentIntentId: string,
+  context: Record<string, unknown>,
+  eligibilityErr: unknown,
+): Promise<void> {
+  const source = typeof context.source === "string" ? context.source : "stripe.eligibility_refund";
+  logTipPaymentEligibilityBlocked(source, { paymentIntentId, ...context }, eligibilityErr);
+
+  try {
+    const stripe = getStripe();
+    const refund = await stripe.refunds.create({
+      payment_intent: paymentIntentId,
+      metadata: {
+        caretip_refund_reason: "eligibility_failure",
+        caretip_context: source,
+      },
+    });
+    console.warn("[stripe.refund.eligibility_failure] refunded", {
+      paymentIntentId,
+      refundId: refund.id,
+      status: refund.status,
+      ...context,
+    });
+    captureServerException(new Error("Tip payment refunded: post-payment eligibility failure"), {
+      paymentIntentId,
+      refundId: refund.id,
+      ...context,
+    });
+  } catch (refundErr) {
+    logServerError("stripe.refund.eligibility_failure", refundErr, {
+      paymentIntentId,
+      ...context,
+    });
+    captureServerException(refundErr, {
+      phase: "eligibility_refund_failed",
+      paymentIntentId,
+      ...context,
+    });
+  }
+}
+
 export async function handlePaymentSuccess(paymentIntentId: string): Promise<void> {
   let confirmedEur: number | null = null;
   try {
@@ -426,6 +439,22 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
     where: { stripePaymentIntentId: paymentIntentId, status: "pending" },
   });
   if (!pending) {
+    return;
+  }
+
+  try {
+    await assertEmployeeEligibleForTipPayment(pending.employeeId, pending.businessId);
+  } catch (err) {
+    await refundTipPaymentForEligibilityFailure(paymentIntentId, {
+      source: "handlePaymentSuccess",
+      employeeId: pending.employeeId,
+      businessId: pending.businessId,
+      transactionId: pending.id,
+    }, err);
+    await prisma.transaction.updateMany({
+      where: { id: pending.id, status: "pending" },
+      data: { status: "failed" },
+    });
     return;
   }
 
@@ -550,6 +579,36 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
   }
   if (!businessId) {
     console.log("SKIP REASON: missing businessId");
+    return;
+  }
+
+  try {
+    await assertEmployeeEligibleForTipPayment(employeeId, businessId);
+  } catch (err) {
+    await refundTipPaymentForEligibilityFailure(piId, {
+      source: "handleSuccessfulTipPayment",
+      sessionId: session.id,
+      employeeId,
+      businessId,
+      amountEur: confirmedEur,
+    }, err);
+    try {
+      await prisma.transaction.create({
+        data: {
+          amount: confirmedEur,
+          status: "failed",
+          stripePaymentIntentId: piId,
+          employeeId,
+          businessId,
+        },
+      });
+    } catch (ledgerErr) {
+      const code = (ledgerErr as { code?: string })?.code;
+      if (code !== "P2002") {
+        console.error("[stripe.handleSuccessfulTipPayment] failed ledger insert", ledgerErr);
+      }
+    }
+    console.log("SKIP REASON: employee or venue not eligible for tips (refund attempted)");
     return;
   }
 

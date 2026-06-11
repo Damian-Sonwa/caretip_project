@@ -35,10 +35,12 @@ router.get("/stats", platformController.getStats);
 router.get("/analytics", platformController.getAnalytics);
 router.get("/transactions", platformController.listTransactions);
 router.get("/audit-logs", platformController.listAuditLogs);
+router.get("/kyc/metrics", platformController.getKycQueueMetrics);
 router.get("/businesses", platformController.listBusinesses);
 router.get("/businesses/:id", platformController.getBusiness);
 router.delete("/businesses/:id", platformController.deleteBusiness);
 router.patch("/businesses/:id/verify", platformController.verifyBusiness);
+router.patch("/businesses/:id/kyc-review-notes", platformController.patchBusinessKycReviewNotes);
 router.patch("/businesses/:id/subscription-tier", platformController.updateBusinessSubscriptionTier);
 router.patch("/businesses/:id", platformController.updateBusiness);
 router.post(

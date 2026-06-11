@@ -44,6 +44,12 @@ export interface AuthResult {
   user: AuthUserDto;
 }
 
+/** Password sign-up before inbox verification — no access JWT or refresh session. */
+export interface RegisterPendingResult {
+  requiresEmailVerification: true;
+  user: AuthUserDto;
+}
+
 export type AuthIntendedRole = "MANAGER" | "EMPLOYEE" | "SUPER_ADMIN";
 
 export type LoginInput = {
@@ -89,7 +95,8 @@ function impersonationJwtExpiresIn(): SignOptions["expiresIn"] {
   return (process.env.JWT_IMPERSONATION_EXPIRES_IN?.trim() || "12h") as SignOptions["expiresIn"];
 }
 
-function signAuthJwt(payload: Record<string, unknown>): string {
+/** Exported for security regression scripts that simulate client JWT misuse. */
+export function signAuthJwt(payload: Record<string, unknown>): string {
   const opts: SignOptions = { expiresIn: jwtExpiresIn() };
   return jwt.sign(payload, getJwtSecret(), opts);
 }
@@ -155,15 +162,7 @@ function displayNameForUser(user: UserForAuthResult): string {
   return user.email.split("@")[0] || "User";
 }
 
-export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
-  const tokenPayload: Record<string, unknown> = {
-    userId: user.id,
-    id: user.id,
-    email: user.email,
-    role: user.role,
-    roleLabel: roleLabel(user.role),
-  };
-
+function buildAuthUserDto(user: UserForAuthResult): AuthUserDto {
   const dto: AuthUserDto = {
     id: user.id,
     email: user.email,
@@ -198,7 +197,32 @@ export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
     dto.avatar = absolutizePublicMediaPath(user.employee.avatar ?? null);
   }
 
-  return { token: signAuthJwt(tokenPayload), user: dto };
+  return dto;
+}
+
+function jwtPayloadForUser(user: UserForAuthResult): Record<string, unknown> {
+  return {
+    userId: user.id,
+    id: user.id,
+    email: user.email,
+    role: user.role,
+    roleLabel: roleLabel(user.role),
+  };
+}
+
+/** Registration response only — never includes a session token. */
+export function pendingVerificationResultForUserRecord(user: UserForAuthResult): RegisterPendingResult {
+  return {
+    requiresEmailVerification: true,
+    user: buildAuthUserDto(user),
+  };
+}
+
+export function authResultForUserRecord(user: UserForAuthResult): AuthResult {
+  return {
+    token: signAuthJwt(jwtPayloadForUser(user)),
+    user: buildAuthUserDto(user),
+  };
 }
 
 /** Legacy rows: `has_completed_onboarding` was auto-set from profile fields without a finish action. */
@@ -234,6 +258,12 @@ export async function authResultForUserId(userId: string): Promise<AuthResult> {
   const user = await loadUserForAuthResult(userId);
   if (!user || user.isActive !== true) {
     throw new Error("Authentication required");
+  }
+  if (
+    (user.role === "MANAGER" || user.role === "EMPLOYEE") &&
+    user.emailVerified !== true
+  ) {
+    throw new EmailNotVerifiedLoginError();
   }
   return authResultForUserRecord(user);
 }
@@ -273,7 +303,7 @@ export async function registerBusiness(
     locale?: string | null;
   },
   opts?: { acceptLanguage?: string | null }
-): Promise<AuthResult> {
+): Promise<RegisterPendingResult> {
   const email = normalizeLoginEmail(input.email);
   const pwCheck = validatePassword(input.password);
   if (!pwCheck.valid) {
@@ -325,7 +355,7 @@ export async function registerBusiness(
     explicitLocale: input.locale,
   });
 
-  return authResultForUserRecord(created);
+  return pendingVerificationResultForUserRecord(created);
 }
 
 export async function registerEmployee(
@@ -337,7 +367,7 @@ export async function registerEmployee(
     locale?: string | null;
   },
   opts?: { acceptLanguage?: string | null }
-): Promise<AuthResult> {
+): Promise<RegisterPendingResult> {
   const email = normalizeLoginEmail(input.email);
   const pwCheck = validatePassword(input.password);
   if (!pwCheck.valid) {
@@ -405,7 +435,7 @@ export async function registerEmployee(
     explicitLocale: input.locale,
   });
 
-  return authResultForUserRecord(created);
+  return pendingVerificationResultForUserRecord(created);
 }
 
 export async function login(input: LoginInput): Promise<AuthResult> {

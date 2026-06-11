@@ -13,6 +13,8 @@ import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
+import { VerificationPendingBanner } from "../components/business/VerificationPendingBanner";
+import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificationRealtime";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -25,6 +27,7 @@ export function BusinessLayout() {
   const showDemoRibbon = isWalkthroughDemoManager(user);
   const isAppReady = authStatus === "authenticated" && user?.role === "business";
 
+  useBusinessVerificationRealtime(isAppReady && !user?.impersonation);
   useRegisterPagePaintReady("business-layout-paint");
 
   return (
@@ -38,6 +41,7 @@ export function BusinessLayout() {
           {t("business.shell.demoRibbon")}
         </div>
       ) : null}
+      <VerificationPendingBanner />
       <div className="relative z-10">
         {isAppReady ? <BusinessSidebar /> : <SidebarSkeleton />}
         <BusinessMobileSidebar isOpen={mobileMenuOpen && isAppReady} onClose={() => setMobileMenuOpen(false)} />

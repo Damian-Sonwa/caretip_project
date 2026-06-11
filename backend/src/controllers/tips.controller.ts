@@ -12,7 +12,9 @@ import {
   loadEmployeePeriodAnalytics,
   loadEmployeeTipsDashboardForTimeframe,
 } from "../services/employeeTipsDashboard.service.js";
+import { MIN_TIP_AMOUNT_EUR, MAX_TIP_AMOUNT_EUR } from "../constants/tipAmountLimits.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { TipPaymentEligibilityError } from "../services/tipPaymentEligibility.service.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
 import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
@@ -405,7 +407,7 @@ export async function createIntent(req: Request, res: Response) {
       });
     }
     const numAmount = Number(amount);
-    if (isNaN(numAmount) || numAmount < 0.5 || numAmount > 500) {
+    if (isNaN(numAmount) || numAmount < MIN_TIP_AMOUNT_EUR || numAmount > MAX_TIP_AMOUNT_EUR) {
       return res.status(400).json({ message: "Invalid amount" });
     }
     if (typeof employeeId !== "string" || typeof businessId !== "string") {
@@ -427,6 +429,12 @@ export async function createIntent(req: Request, res: Response) {
     return res.json(result);
   } catch (err) {
     logServerError("tips.createIntent", err);
+    if (err instanceof TipPaymentEligibilityError) {
+      return res.status(400).json({
+        message: err.message,
+        code: err.code,
+      });
+    }
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.payment),
     });

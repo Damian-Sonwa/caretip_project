@@ -9,7 +9,7 @@ import { writeFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { prisma } from "../src/prisma.js";
-import { createEmployee } from "../src/services/employee.service.js";
+import { createEmployeeWithActivation } from "../src/services/employee.service.js";
 
 const API = (process.env.SMOKE_API_URL ?? "http://localhost:3001").replace(/\/$/, "");
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "../..");
@@ -282,7 +282,7 @@ async function investigateEmployeeCrud(managerToken: string, businessId: string)
   let serviceError: string | null = null;
   let serviceOk = false;
   try {
-    await createEmployee({
+    await createEmployeeWithActivation({
       name: "Service Layer Probe",
       jobTitle: "Server",
       email: `service-layer-${TS}@caretip-test.local`,
@@ -294,7 +294,7 @@ async function investigateEmployeeCrud(managerToken: string, businessId: string)
   }
 
   investigations.push({
-    scenario: "Direct createEmployee() service call",
+    scenario: "Direct createEmployeeWithActivation() service call",
     status: serviceOk ? 201 : 500,
     body: serviceOk ? { ok: true } : { error: serviceError },
     classification: serviceOk ? "PASS" : "FAIL",

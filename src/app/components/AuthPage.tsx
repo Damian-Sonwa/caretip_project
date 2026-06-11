@@ -271,7 +271,10 @@ export function AuthPage() {
         toast.success(t('auth.page.toastAccountCreated'), {
           style: ROLE_MISMATCH_TOAST_STYLE,
         });
-        navigate(getPostAuthRedirect(created), { replace: true });
+        navigate('/verify-email', {
+          replace: true,
+          state: { pendingEmail: created.email, pendingRole: created.role },
+        });
       }
     } catch (err) {
       logClientError('AuthPage', err);

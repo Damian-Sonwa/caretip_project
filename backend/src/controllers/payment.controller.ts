@@ -6,6 +6,7 @@ import {
 } from "../services/stripe.service.js";
 import { prisma } from "../prisma.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { TipPaymentEligibilityError } from "../services/tipPaymentEligibility.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 
 /**
@@ -65,6 +66,12 @@ export async function createTipSession(req: Request, res: Response) {
     });
   } catch (err) {
     logServerError("payment.createTipSession", err);
+    if (err instanceof TipPaymentEligibilityError) {
+      return res.status(400).json({
+        message: err.message,
+        code: err.code,
+      });
+    }
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.payment),
     });

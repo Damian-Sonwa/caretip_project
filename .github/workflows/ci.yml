@@ -1,0 +1,76 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  backend-tests:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: caretip
+          POSTGRES_PASSWORD: caretip
+          POSTGRES_DB: caretip_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U caretip -d caretip_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://caretip:caretip@localhost:5432/caretip_test
+      JWT_SECRET: ci-test-jwt-secret-min-32-chars-long
+      STRIPE_SECRET_KEY: sk_test_ci_placeholder
+      STRIPE_WEBHOOK_SECRET: whsec_ci_test_secret_placeholder
+      RUNTIME_API_BASE: http://localhost:3001
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Migrate database
+        working-directory: backend
+        run: npx prisma migrate deploy --schema=prisma/schema.prisma
+      - name: Sprint 2 security regression
+        working-directory: backend
+        run: npm run test:sprint2-security
+      - name: Sprint 3 guest flow
+        working-directory: backend
+        run: npm run test:sprint3-guest-flow
+      - name: Sprint 4 payment E2E
+        working-directory: backend
+        run: npm run test:sprint4-payment-e2e
+      - name: Sprint 4 tenant isolation
+        working-directory: backend
+        run: npm run test:sprint4-tenant-isolation
+      - name: Sprint 4 employee lifecycle
+        working-directory: backend
+        run: npm run test:sprint4-employee-lifecycle
+
+  frontend-e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - run: npm ci
+      - run: npm run playwright:install
+        env:
+          SKIP_PLAYWRIGHT_INSTALL: "false"
+      - run: npm run test:e2e:with-server
+        env:
+          CI: "true"
+          SKIP_PLAYWRIGHT_INSTALL: "true"

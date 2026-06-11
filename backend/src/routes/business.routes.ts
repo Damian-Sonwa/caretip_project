@@ -4,17 +4,51 @@ import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware
 import { requireBusinessVerificationCapability } from "../middleware/requireBusinessVerificationCapability.middleware.js";
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
-import { businessUploadLogo } from "../middleware/businessUpload.middleware.js";
+import { businessUploadLogo, businessUploadVerification } from "../middleware/businessUpload.middleware.js";
 import { requireSubscriptionCapability } from "../middleware/requireSubscriptionCapability.middleware.js";
 import { clientSafeMessage } from "../utils/httpErrors.js";
+import { validateInviteCodeRateLimit } from "../middleware/authRateLimit.middleware.js";
 
 const router = Router();
 
 /** Public: validate an invite code before sign-up. */
-router.get("/invite/validate", businessController.validateInvite);
+router.get("/invite/validate", validateInviteCodeRateLimit, businessController.validateInvite);
 
-/** Pending managers may read their own profile to poll KYC status; not gated by isApprovedBusiness. */
-router.get("/profile", authMiddleware, requireRole(Role.MANAGER), businessController.getMyProfile);
+/** Manager profile — email must be verified; KYC pending managers use this to poll status. */
+router.get("/profile", authMiddleware, requireVerifiedEmail, requireRole(Role.MANAGER), businessController.getMyProfile);
+router.get(
+  "/kyc/status",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.getMyKycStatus,
+);
+router.post(
+  "/kyc/documents",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  (req, res, next) =>
+    businessUploadVerification(req, res, (err: unknown) => {
+      if (err) {
+        return res.status(400).json({
+          message: clientSafeMessage(
+            err instanceof Error ? err : new Error(String(err)),
+            "We couldn't upload your document. Please try again.",
+          ),
+        });
+      }
+      next();
+    }),
+  businessController.uploadMyKycDocument,
+);
+router.post(
+  "/kyc/submit",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.submitMyKyc,
+);
 router.patch(
   "/profile",
   authMiddleware,

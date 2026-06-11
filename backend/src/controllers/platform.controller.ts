@@ -16,6 +16,37 @@ import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/busine
 import { DateTime } from "luxon";
 import { isPrismaPoolTimeout } from "../utils/prismaErrors.js";
 
+export async function getKycQueueMetrics(_req: Request, res: Response) {
+  try {
+    const metrics = await platformService.getKycQueueMetrics();
+    return res.json(metrics);
+  } catch (err) {
+    logServerError("platform.getKycQueueMetrics", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load KYC queue metrics."),
+    });
+  }
+}
+
+export async function patchBusinessKycReviewNotes(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const notes =
+      typeof req.body?.notes === "string" ? req.body.notes : req.body?.notes === null ? null : undefined;
+    if (notes === undefined) {
+      return res.status(400).json({ message: "notes is required" });
+    }
+    const business = await platformService.updateBusinessKycReviewNotes(id, notes);
+    return res.json({ success: true, business });
+  } catch (err) {
+    logServerError("platform.patchBusinessKycReviewNotes", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't save review notes."),
+    });
+  }
+}
+
 export async function getHealth(_req: Request, res: Response) {
   try {
     const [database, stripe] = await Promise.all([
@@ -202,11 +233,15 @@ export async function verifyBusiness(req: Request, res: Response) {
   try {
     const { id } = req.params;
     if (!id) return res.status(400).json({ message: "id is required" });
-    const body = req.body as { status?: string } | undefined;
+    const body = req.body as { status?: string; reviewNote?: string } | undefined;
     const raw = body?.status;
     const status =
       raw === "rejected" || raw === "pending" || raw === "verified" ? raw : "verified";
-    await platformService.updateBusinessVerificationStatus(id, status);
+    const adminUserId = req.user?.userId ?? req.user?.id;
+    await platformService.updateBusinessVerificationStatus(id, status, {
+      reviewNote: body?.reviewNote,
+      adminUserId,
+    });
     return res.json({ success: true });
   } catch (err) {
     logServerError("platform.verifyBusiness", err);

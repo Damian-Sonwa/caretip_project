@@ -394,40 +394,17 @@ export async function createEmployee(req: Request, res: Response) {
     if (!business) {
       return res.status(403).json({ message: "Only business owners can add employees" });
     }
-    const { name, role, email, phone, useActivationFlow } = req.body;
+    const { name, role, email, phone } = req.body;
     if (req.body.tableIds !== undefined && !Array.isArray(req.body.tableIds)) {
       return res.status(400).json({ message: "tableIds must be an array" });
     }
     const jobTitle = role ?? req.body.jobTitle;
-    
-    // Use new activation flow if explicitly requested
-    if (useActivationFlow === true) {
-      const explicitLocale =
-        typeof req.body.locale === "string" && req.body.locale.trim()
-          ? String(req.body.locale).trim()
-          : undefined;
-      const acceptLanguage = req.get("accept-language") ?? undefined;
-      const employee = await employeeService.createEmployeeWithActivation({
-        name: name ?? "",
-        jobTitle: jobTitle ?? "Staff",
-        email: email ?? "",
-        phone: phone ? String(phone).trim() : undefined,
-        businessId: business.id,
-        locationId: parseLocationIdFromBody(req.body),
-        tableIds:
-          req.body.tableIds === undefined
-            ? undefined
-            : (req.body.tableIds as unknown[])
-                .map((x) => String(x).trim())
-                .filter((id: string) => id.length > 0),
-        explicitLocale,
-        acceptLanguage,
-      });
-      return res.status(201).json(employee);
-    }
-
-    // Legacy flow: create user with temp password
-    const employee = await employeeService.createEmployee({
+    const explicitLocale =
+      typeof req.body.locale === "string" && req.body.locale.trim()
+        ? String(req.body.locale).trim()
+        : undefined;
+    const acceptLanguage = req.get("accept-language") ?? undefined;
+    const employee = await employeeService.createEmployeeWithActivation({
       name: name ?? "",
       jobTitle: jobTitle ?? "Staff",
       email: email ?? "",
@@ -440,8 +417,11 @@ export async function createEmployee(req: Request, res: Response) {
           : (req.body.tableIds as unknown[])
               .map((x) => String(x).trim())
               .filter((id: string) => id.length > 0),
+      explicitLocale,
+      acceptLanguage,
     });
-    return res.status(201).json(employee);
+    const { activationToken: _token, ...safe } = employee;
+    return res.status(201).json(safe);
   } catch (err) {
     logServerError("employee.createEmployee", err);
     return res.status(400).json({

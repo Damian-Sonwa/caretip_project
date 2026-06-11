@@ -1,4 +1,5 @@
 import React, { Component, type ErrorInfo, type ReactNode } from "react";
+import { captureClientException } from "../lib/sentry";
 
 interface Props {
   children: ReactNode;
@@ -21,6 +22,10 @@ export class GlobalErrorBoundary extends Component<Props, State> {
   public componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     console.error("Error in GlobalErrorBoundary (render crash):", error);
     console.error("Component stack:", errorInfo.componentStack);
+    captureClientException(error, {
+      scope: "GlobalErrorBoundary",
+      componentStack: errorInfo.componentStack,
+    });
   }
 
   public render(): ReactNode {

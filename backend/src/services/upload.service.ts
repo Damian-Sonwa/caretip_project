@@ -270,6 +270,16 @@ export async function uploadPlatformBusinessLogoImage(
 
 const VERIFICATION_MAX_BYTES = 10 * 1024 * 1024;
 
+/** Manager self-service KYC — same storage layout as platform verification. */
+export async function uploadManagerVerificationDocument(
+  buffer: Buffer,
+  mimetype: string,
+  businessId: string,
+  originalFilename?: string,
+): Promise<string> {
+  return uploadPlatformVerificationDocument(buffer, mimetype, businessId, originalFilename);
+}
+
 /** Platform admin: verification document (image or PDF/Word). */
 export async function uploadPlatformVerificationDocument(
   buffer: Buffer,
