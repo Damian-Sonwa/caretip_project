@@ -1,14 +1,14 @@
 import type { HowItWorksVisualVariant } from "@/components/public/howItWorksFlow";
 import { ImageMoment } from "@/components/public/HowItWorksProductMoment";
-import hw01 from "../../../images/hw01.png";
-import hw02 from "../../../images/hw02.png";
-import hw03 from "../../../images/hw03.png";
-import hw04 from "../../../images/hw04.png";
-import hw05 from "../../../images/hw05.png";
-import hw06 from "../../../images/hw06.png";
-import hw07 from "../../../images/hw07.png";
-import hw08 from "../../../images/hw08.png";
-import hw09 from "../../../images/hw09.png";
+import hw01 from "../../../images/hw01.webp";
+import hw02 from "../../../images/hw02.webp";
+import hw03 from "../../../images/hw03.webp";
+import hw04 from "../../../images/hw04.webp";
+import hw05 from "../../../images/hw05.webp";
+import hw06 from "../../../images/hw06.webp";
+import hw07 from "../../../images/hw07.webp";
+import hw08 from "../../../images/hw08.webp";
+import hw09 from "../../../images/hw09.webp";
 
 const HW_IMAGES: Record<HowItWorksVisualVariant, string> = {
   account: hw01,

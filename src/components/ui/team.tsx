@@ -15,12 +15,12 @@ import { landingImageFrameClassName } from "@/components/ui/landing-image-frame"
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
-import healthcareNursingImg from "../../../images/healthcare and nursing.png";
-import log01Img from "../../../images/Log01.png";
-import hotelsImg from "../../../images/Hotels.png";
-import salonSpaImg from "../../../images/salon and spa.png";
-import tradeAndHomeImg from "../../../images/trade and home services.png";
-import petCareImg from "../../../images/petcare and services.png";
+import healthcareNursingImg from "../../../images/healthcare and nursing.webp";
+import log01Img from "../../../images/Log01.webp";
+import hotelsImg from "../../../images/Hotels.webp";
+import salonSpaImg from "../../../images/salon and spa.webp";
+import tradeAndHomeImg from "../../../images/trade and home services.webp";
+import petCareImg from "../../../images/petcare and services.webp";
 
 type IndustryId = "care" | "delivery" | "hospitality" | "beauty" | "craftHome" | "petCare";
 

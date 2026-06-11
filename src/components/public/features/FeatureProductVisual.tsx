@@ -1,9 +1,9 @@
-import qrImg from "../../../../images/QR01.png";
-import analyticsImg from "../../../../images/dashboard02.png";
-import employeeImg from "../../../../images/employee03.png";
-import securityImg from "../../../../images/payment02.png";
-import realtimeImg from "../../../../images/live05.png";
-import locationsImg from "../../../../images/location01.png";
+import qrImg from "../../../../images/QR01.webp";
+import analyticsImg from "../../../../images/dashboard02.webp";
+import employeeImg from "../../../../images/employee03.webp";
+import securityImg from "../../../../images/payment02.webp";
+import realtimeImg from "../../../../images/live05.webp";
+import locationsImg from "../../../../images/location01.webp";
 import type { FeatureVisualVariant } from "@/components/public/features/featuresPageConfig";
 import { cn } from "@/lib/utils";
 

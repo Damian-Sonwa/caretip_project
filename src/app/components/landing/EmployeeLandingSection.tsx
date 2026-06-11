@@ -10,14 +10,13 @@ import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import employeeSectionImgDe from "../../../../images/FYP.jpeg";
 import employeeSectionImgDeWebp from "../../../../images/FYP.webp";
-import employeeSectionImgEn from "../../../../images/English-version.png";
-import employeeSectionImgEnWebp from "../../../../images/English-version.webp";
+import employeeSectionImgEn from "../../../../images/English-version.webp";
 
 export function EmployeeLandingSection() {
   const { t, i18n } = useTranslation();
   const isDe = i18n.language?.toLowerCase().startsWith("de");
   const employeeSectionImg = isDe ? employeeSectionImgDe : employeeSectionImgEn;
-  const employeeSectionWebp = isDe ? employeeSectionImgDeWebp : employeeSectionImgEnWebp;
+  const employeeSectionWebp = isDe ? employeeSectionImgDeWebp : undefined;
 
   const benefits = useMemo(
     () => [

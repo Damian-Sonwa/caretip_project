@@ -4,8 +4,7 @@ import { Check, CheckCircle2, QrCode, Sparkles, UserPlus, Users } from "lucide-r
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useMinWidthMedia } from "@/lib/motionPerf";
-import atmosphereImg from "../../../../images/beauty-r.png";
-import atmosphereWebp from "../../../../images/beauty-r.webp";
+import atmosphereImg from "../../../../images/beauty-r.webp";
 import { MarketingPicture } from "@/lib/marketingPicture";
 import caretipLogo from "@/assets/brand/company_logo.png";
 
@@ -104,7 +103,6 @@ export function LiveInMinutesLaptopDemo({
         />
         <MarketingPicture
           src={atmosphereImg}
-          webpSrc={atmosphereWebp}
           alt=""
           className="caretip-live-minutes-journey__photo pointer-events-none absolute inset-0 hidden h-full w-full object-cover object-center opacity-0 lg:block lg:opacity-100"
           loading="lazy"

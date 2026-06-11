@@ -1,10 +1,8 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
-import log01Img from "../../../../images/Log01.png";
-import log01Webp from "../../../../images/Log01.webp";
-import atReceptionImg from "../../../../images/At_reception.png";
-import atReceptionWebp from "../../../../images/At_reception.webp";
+import log01Img from "../../../../images/Log01.webp";
+import atReceptionImg from "../../../../images/At_reception.webp";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
@@ -24,7 +22,6 @@ export function LandingRealLifeSection() {
           textKey: "landing.realLife.s1Text" as const,
           detail: t("landing.realLife.s1Detail"),
           img: log01Img,
-          imgWebp: log01Webp,
           alt: t("landing.realLife.s1Alt"),
         },
         {
@@ -33,7 +30,6 @@ export function LandingRealLifeSection() {
           textKey: "landing.realLife.s2Text" as const,
           detail: t("landing.realLife.s2Detail"),
           img: atReceptionImg,
-          imgWebp: atReceptionWebp,
           alt: t("landing.realLife.s2Alt"),
         },
         {
@@ -88,7 +84,6 @@ export function LandingRealLifeSection() {
             >
               <ExpandableInfoCard
                 imageSrc={item.img}
-                imageWebpSrc={"imgWebp" in item ? item.imgWebp : undefined}
                 imageAlt={item.alt}
                 title={item.headline}
                 tag={landingCopyVisible(item.tag) ? item.tag : undefined}
