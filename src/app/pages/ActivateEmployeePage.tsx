@@ -79,7 +79,7 @@ export function ActivateEmployeePage() {
 
   if (!rawToken) {
     return (
-      <AuthRecoveryLayout>
+      <AuthRecoveryLayout authLane="employee" marketingScene="passwordSetup">
         <p className="text-center text-sm text-red-600">This activation link is invalid.</p>
         <Link
           to="/employee/login"
@@ -93,7 +93,7 @@ export function ActivateEmployeePage() {
 
   if (done) {
     return (
-      <AuthRecoveryLayout showFooterLink={false}>
+      <AuthRecoveryLayout authLane="employee" marketingScene="activation" showFooterLink={false}>
         <div className="space-y-4 text-center">
           <h1 className="caretip-auth-title !pt-0">Account activated</h1>
           <p className="caretip-auth-subtitle !mt-2">Your password is set. You can sign in now.</p>
@@ -110,7 +110,12 @@ export function ActivateEmployeePage() {
   }
 
   return (
-    <AuthRecoveryLayout title="Set your password" subtitle="This link expires in 24 hours.">
+    <AuthRecoveryLayout
+      authLane="employee"
+      marketingScene="passwordSetup"
+      title="Set your password"
+      subtitle="This link expires in 24 hours."
+    >
       <div className="space-y-4">
         <div className="flex flex-col items-center gap-2 text-center">
           <BusinessLogoMark

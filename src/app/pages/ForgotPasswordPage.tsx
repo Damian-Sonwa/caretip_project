@@ -41,7 +41,7 @@ export function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <AuthRecoveryLayout showFooterLink={false}>
+      <AuthRecoveryLayout authLane="business" marketingScene="recovery" showFooterLink={false}>
         <div className="space-y-4 text-center">
           <h1 className="caretip-auth-title !pt-0">{t("auth.forgot.sentTitle")}</h1>
           <p className="caretip-auth-subtitle !mt-2">
@@ -59,7 +59,12 @@ export function ForgotPasswordPage() {
   }
 
   return (
-    <AuthRecoveryLayout title={t("auth.forgot.title")} subtitle={t("auth.forgot.subtitle")}>
+    <AuthRecoveryLayout
+      authLane="business"
+      marketingScene="recovery"
+      title={t("auth.forgot.title")}
+      subtitle={t("auth.forgot.subtitle")}
+    >
       <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form" noValidate>
         <div className="caretip-auth-field-group">
           <label htmlFor="forgot-email" className="caretip-auth-label">

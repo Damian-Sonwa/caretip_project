@@ -3,14 +3,14 @@ import type { ReactNode } from "react";
 import { AuthCurvedBlobShell } from "@/components/ui/auth-switch";
 
 import { AuthMarketingPanel } from "./AuthMarketingPanel";
-
-
+import type { AuthLane, AuthMarketingScene } from "./authMarketingContent";
 
 type AuthSplitLayoutProps = {
   children: ReactNode;
   topSlot?: ReactNode;
   signUpMode?: boolean;
-  authLane?: "business" | "employee";
+  authLane?: AuthLane;
+  marketingScene?: AuthMarketingScene;
   /** Smaller brand panel for verification / recovery flows. */
   compactMarketing?: boolean;
 };
@@ -20,13 +20,21 @@ export function AuthSplitLayout({
   topSlot,
   signUpMode = false,
   authLane = "business",
+  marketingScene,
   compactMarketing = false,
 }: AuthSplitLayoutProps) {
   return (
     <AuthCurvedBlobShell
       signUpMode={signUpMode}
       className="caretip-auth-split-layout--curved font-sans"
-      brandPanel={<AuthMarketingPanel lane={authLane} signUpMode={signUpMode} compact={compactMarketing} />}
+      brandPanel={
+        <AuthMarketingPanel
+          lane={authLane}
+          signUpMode={signUpMode}
+          marketingScene={marketingScene}
+          compact={compactMarketing}
+        />
+      }
 
       authPanel={
 

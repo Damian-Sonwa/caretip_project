@@ -2,6 +2,7 @@ import { CheckCircle2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { resolveVerificationMarketingLane } from "@/app/components/auth/authMarketingContent";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { useAuth } from "@/app/hooks/useAuth";
 import { getLoginPathForSessionRole } from "@/app/lib/authSession";
@@ -14,6 +15,8 @@ export function EmailVerificationSuccessScreen() {
   const navigate = useNavigate();
   const { logout, user } = useAuth();
 
+  const verificationLane = resolveVerificationMarketingLane(user?.role);
+
   const handleContinue = () => {
     const loginPath = getLoginPathForSessionRole(user?.role ?? "user");
     void logout();
@@ -21,7 +24,12 @@ export function EmailVerificationSuccessScreen() {
   };
 
   return (
-    <AuthRecoveryLayout showFooterLink={false} compactMarketing>
+    <AuthRecoveryLayout
+      authLane={verificationLane}
+      marketingScene="verification"
+      showFooterLink={false}
+      compactMarketing
+    >
       <div
         className="flex flex-col items-center gap-5 py-2 text-center"
         role="status"
@@ -52,9 +60,16 @@ export function EmailVerificationSuccessScreen() {
 
 export function EmailVerificationVerifyingScreen() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const verificationLane = resolveVerificationMarketingLane(user?.role);
 
   return (
-    <AuthRecoveryLayout showFooterLink={false} compactMarketing>
+    <AuthRecoveryLayout
+      authLane={verificationLane}
+      marketingScene="verification"
+      showFooterLink={false}
+      compactMarketing
+    >
       <div
         className="flex flex-col items-center gap-5 py-2 text-center"
         role="status"

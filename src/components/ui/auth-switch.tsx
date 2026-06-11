@@ -30,6 +30,7 @@ export function AuthCurvedBlobShell({
       <div className="caretip-auth-curved-brand">
         {brandPanel}
       </div>
+      <div className="caretip-auth-mobile-divider" aria-hidden />
       <section className="caretip-auth-split-layout__panel" aria-label="Authentication">
         {authPanel}
       </section>

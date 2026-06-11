@@ -60,7 +60,7 @@ export function ResetPasswordPage() {
 
   if (!rawToken) {
     return (
-      <AuthRecoveryLayout>
+      <AuthRecoveryLayout authLane="business" marketingScene="recovery">
         <p className="text-center text-sm text-red-600">{t("auth.reset.invalidToken")}</p>
         <Link to="/forgot-password" className="mt-4 block text-center text-sm font-medium text-primary hover:underline">
           {t("auth.reset.requestNewLink")}
@@ -71,7 +71,7 @@ export function ResetPasswordPage() {
 
   if (done) {
     return (
-      <AuthRecoveryLayout showFooterLink={false}>
+      <AuthRecoveryLayout authLane="business" marketingScene="recovery" showFooterLink={false}>
         <div className="space-y-4 text-center">
           <h1 className="caretip-auth-title !pt-0">{t("auth.reset.doneTitle")}</h1>
           <p className="caretip-auth-subtitle !mt-2">{t("auth.reset.doneSubtitle")}</p>
@@ -88,7 +88,12 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <AuthRecoveryLayout title={t("auth.reset.title")} subtitle={t("auth.reset.subtitle")}>
+    <AuthRecoveryLayout
+      authLane="business"
+      marketingScene="recovery"
+      title={t("auth.reset.title")}
+      subtitle={t("auth.reset.subtitle")}
+    >
         <form onSubmit={(e) => void handleSubmit(e)} className="caretip-auth-form">
           <div className="caretip-auth-field-group">
             <label htmlFor="reset-new" className="caretip-auth-label">

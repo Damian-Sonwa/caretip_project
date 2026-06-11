@@ -654,6 +654,26 @@
         "benefit2": "Team-Onboarding",
         "benefit3": "QR-Trinkgeld-System",
         "benefit4": "Umsatz-Insights"
+      },
+      "verification": {
+        "panelAria": "Venue-Konto verifizieren",
+        "badge": "Konto verifizieren",
+        "headline": "Fast geschafft.",
+        "body": "Bestätigen Sie Ihre E-Mail, um Ihr Venue-Dashboard freizuschalten und Ihr Team zu verwalten.",
+        "benefit1": "Venue-Dashboard-Zugang",
+        "benefit2": "Team-Management-Tools",
+        "benefit3": "QR-Trinkgeld-Aktivierung",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "recovery": {
+        "panelAria": "Kontowiederherstellung für Venues",
+        "badge": "Sichere Wiederherstellung",
+        "headline": "Zugang zurücksetzen.",
+        "body": "Wir helfen Ihnen, schnell und sicher wieder in Ihr Venue-Dashboard zu gelangen.",
+        "benefit1": "Sicheres Passwort-Reset",
+        "benefit2": "Geschützter Kontozugang",
+        "benefit3": "Zurück zum Dashboard",
+        "benefit4": "Verschlüsselter Datenschutz"
       }
     },
     "employeeMarketing": {
@@ -676,6 +696,56 @@
         "benefit2": "Team-Verbindung",
         "benefit3": "Trinkgeld-Transparenz",
         "benefit4": "Sichere Anmeldung"
+      },
+      "invite": {
+        "panelAria": "Mit Einladungscode dem Team beitreten",
+        "badge": "Team beitreten",
+        "headline": "Einladungscode eingeben.",
+        "body": "Nutzen Sie den Code Ihres Managers, um sich mit Ihrem Arbeitsplatz zu verbinden.",
+        "benefit1": "Schnelles Team-Onboarding",
+        "benefit2": "Arbeitsplatz-Verbindung",
+        "benefit3": "Trinkgeld-Transparenz",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "passwordSetup": {
+        "panelAria": "Mitarbeiter-Passwort festlegen",
+        "badge": "Konto absichern",
+        "headline": "Passwort festlegen.",
+        "body": "Erstellen Sie ein sicheres Passwort, um Ihr Mitarbeiterkonto zu aktivieren und Ihr Dashboard zu nutzen.",
+        "benefit1": "Trinkgeld verfolgen",
+        "benefit2": "Performance-Insights",
+        "benefit3": "Mit dem Team verbunden bleiben",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "activation": {
+        "panelAria": "Ihr Mitarbeiterkonto ist bereit",
+        "badge": "Willkommen im Team",
+        "headline": "Ihr Konto ist bereit.",
+        "body": "Sie sind jetzt mit Ihrem Arbeitsplatz verbunden und können Ihr Mitarbeiter-Dashboard nutzen.",
+        "benefit1": "Trinkgeld verfolgen",
+        "benefit2": "Performance-Insights",
+        "benefit3": "Mit dem Team verbunden bleiben",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "verification": {
+        "panelAria": "Mitarbeiter-E-Mail verifizieren",
+        "badge": "E-Mail verifizieren",
+        "headline": "Noch ein Schritt.",
+        "body": "Bestätigen Sie Ihre E-Mail, um Ihr Mitarbeiter-Dashboard zu nutzen und Trinkgelder zu verfolgen.",
+        "benefit1": "Mitarbeiter-Dashboard-Zugang",
+        "benefit2": "Trinkgeld-Tracking",
+        "benefit3": "Performance-Insights",
+        "benefit4": "Sicherer Kontozugang"
+      },
+      "recovery": {
+        "panelAria": "Mitarbeiter-Kontowiederherstellung",
+        "badge": "Sichere Wiederherstellung",
+        "headline": "Zugang zurücksetzen.",
+        "body": "Wir helfen Ihnen, schnell und sicher wieder in Ihr Mitarbeiter-Dashboard zu gelangen.",
+        "benefit1": "Sicheres Passwort-Reset",
+        "benefit2": "Geschützter Kontozugang",
+        "benefit3": "Zurück zum Dashboard",
+        "benefit4": "Verschlüsselter Datenschutz"
       }
     },
     "trust": {

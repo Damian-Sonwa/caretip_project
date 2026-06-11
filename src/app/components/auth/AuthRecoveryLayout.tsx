@@ -2,12 +2,15 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { AuthSplitLayout } from "./AuthSplitLayout";
+import type { AuthLane, AuthMarketingScene } from "./authMarketingContent";
 
 type AuthRecoveryLayoutProps = {
   children: React.ReactNode;
   showFooterLink?: boolean;
   title?: string;
   subtitle?: string;
+  authLane?: AuthLane;
+  marketingScene?: AuthMarketingScene;
   /** Smaller left marketing panel — verification & recovery flows. */
   compactMarketing?: boolean;
 };
@@ -20,6 +23,8 @@ export function AuthRecoveryLayout({
   showFooterLink = true,
   title,
   subtitle,
+  authLane = "business",
+  marketingScene,
   compactMarketing = false,
 }: AuthRecoveryLayoutProps) {
   const { t } = useTranslation();
@@ -31,7 +36,11 @@ export function AuthRecoveryLayout({
         compactMarketing && "caretip-auth-recovery-stage--compact-marketing",
       )}
     >
-      <AuthSplitLayout compactMarketing={compactMarketing}>
+      <AuthSplitLayout
+        authLane={authLane}
+        marketingScene={marketingScene}
+        compactMarketing={compactMarketing}
+      >
         <div className="caretip-auth-recovery-inner">
           <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery caretip-auth-card--verify-email">
             {title ? (

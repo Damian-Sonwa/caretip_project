@@ -5,6 +5,7 @@ import { Mail, Eye, EyeOff, Lock } from "lucide-react";
 import { AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
 import { toast } from "sonner";
 import { AuthRecoveryLayout } from "@/app/components/auth/AuthRecoveryLayout";
+import { resolveVerificationMarketingLane } from "@/app/components/auth/authMarketingContent";
 import {
   VerifyEmailConfirmedView,
   VerifyEmailFromToken,
@@ -105,9 +106,12 @@ export function CheckEmailPage() {
   const checkEmailSubtitle = hasSessionUser
     ? t("auth.checkEmail.introSession", { email: user!.email })
     : t("auth.checkEmail.introResend");
+  const verificationLane = resolveVerificationMarketingLane(user?.role);
 
   return (
     <AuthRecoveryLayout
+      authLane={verificationLane}
+      marketingScene="verification"
       compactMarketing
       showFooterLink={false}
       title={t("auth.checkEmail.title")}
