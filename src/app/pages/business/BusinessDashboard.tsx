@@ -144,8 +144,10 @@ export function BusinessDashboard() {
   });
   const canExportCsv = hasCapability("csvExport");
   const businessKycApproved = Boolean(user?.impersonation || user?.status === "APPROVED");
-  const businessKycPending = Boolean(
-    isBusiness && !user?.impersonation && user?.status === "PENDING",
+  const businessKycNeedsVerification = Boolean(
+    isBusiness &&
+      !user?.impersonation &&
+      (user?.status === "PENDING" || user?.status === "REJECTED"),
   );
 
   const {
@@ -171,7 +173,7 @@ export function BusinessDashboard() {
     sessionValidated,
     advancedAnalyticsEnabled,
   );
-  const showPendingVerification = businessKycPending || pendingVerification === true;
+  const showPendingVerification = businessKycNeedsVerification || pendingVerification === true;
 
   const [exportLoading, setExportLoading] = useState(false);
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
@@ -435,8 +437,18 @@ export function BusinessDashboard() {
           id="pendingVerification"
           issueActive={showPendingVerification}
           tone="info"
-          title={t("business.dashboard.fixVerificationTitle")}
-          description={t("business.dashboard.fixVerificationDesc")}
+          title={
+            user?.status === "REJECTED"
+              ? t("business.dashboard.kycBannerRejectedTitle")
+              : t("business.dashboard.kycBannerTitle")
+          }
+          description={
+            user?.status === "REJECTED"
+              ? t("business.dashboard.kycBannerRejectedDesc")
+              : t("business.dashboard.kycBannerDesc")
+          }
+          actionLabel={t("business.dashboard.kycBannerCta")}
+          actionTo="/verification-pending"
           dismissPersistence="session"
           className="mb-5"
         />

@@ -141,7 +141,7 @@ export interface User {
   employeeId?: string;
   businessName?: string;
   avatar?: string;
-  /** Derived from `businessVerificationStatus` for managers; used with `/verification-pending` gate. */
+  /** Derived from `businessVerificationStatus` for managers; drives soft KYC banners and go-live gates. */
   status?: BusinessAccountStatus;
   /** True when platform admin is viewing as a business manager (JWT impersonation). */
   impersonation?: boolean;

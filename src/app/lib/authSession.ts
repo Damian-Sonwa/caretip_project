@@ -11,7 +11,7 @@ export type SessionUserLike = {
   role: SessionUserRole;
   isVerified: boolean;
   hasCompletedOnboarding: boolean;
-  /** Manager KYC gate — mirrors `User.status` from auth payload. */
+  /** Manager KYC status — mirrors auth payload; soft UI + go-live gates only. */
   status?: BusinessKycStatus;
 };
 
@@ -154,7 +154,6 @@ export function resolveAuthenticatedAppGuard(
 
   if (r === "business") {
     const onboardingFromServer = options?.onboardingStatusFromServer === true;
-    const kycStatus = user.status;
     if (!session.hasCompletedOnboarding) {
       if (p === "/onboarding" || isPublicAuthenticationPath(p)) {
         return { kind: "allow" };
@@ -169,21 +168,7 @@ export function resolveAuthenticatedAppGuard(
       if (!onboardingFromServer) {
         return { kind: "wait", reason: "onboarding_status_unconfirmed" };
       }
-      if (kycStatus === "PENDING" || kycStatus === "REJECTED") {
-        return { kind: "redirect", to: "/verification-pending", reason: "onboarding_complete_kyc_pending" };
-      }
       return { kind: "redirect", to: "/dashboard", reason: "onboarding_already_complete" };
-    }
-    if (kycStatus === "PENDING" || kycStatus === "REJECTED") {
-      if (p === "/verification-pending") {
-        return { kind: "allow" };
-      }
-      if (p.startsWith("/dashboard")) {
-        return { kind: "redirect", to: "/verification-pending", reason: "kyc_pending" };
-      }
-    }
-    if (p === "/verification-pending" && kycStatus === "APPROVED") {
-      return { kind: "redirect", to: "/dashboard", reason: "kyc_approved" };
     }
   }
 

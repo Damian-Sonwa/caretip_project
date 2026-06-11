@@ -10,14 +10,13 @@ export type PostAuthRedirectUser = {
 
 /**
  * Canonical post-authentication destination.
- * Order: email verify → onboarding → KYC pending/rejected → role home.
+ * Order: email verify → onboarding → role home (KYC is soft guidance, not a route gate).
  */
 export function getPostAuthRedirect(u: PostAuthRedirectUser): string {
   if (!u.isVerified) return "/verify-email";
 
   if (u.role === "business") {
     if (!u.hasCompletedOnboarding) return "/onboarding";
-    if (u.status === "PENDING" || u.status === "REJECTED") return "/verification-pending";
     return "/dashboard";
   }
 

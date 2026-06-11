@@ -18,7 +18,7 @@ function mapDbVerificationToStatus(
   return undefined;
 }
 
-/** Only pending / rejected managers should stay on `/verification-pending`; approved users go to the dashboard. */
+/** Voluntary KYC page — syncs status; verified managers are nudged back to the dashboard. */
 export function PendingVerificationAllowedGate() {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();

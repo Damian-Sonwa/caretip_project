@@ -203,7 +203,7 @@ export function BusinessOnboardingPage() {
       const refreshed = (await refetchUser()) ?? updated;
       if (!refreshed) {
         toast.success(t("business.onboarding.toastSavedLoadingDashboard"));
-        navigate("/verification-pending", { replace: true });
+        navigate("/dashboard", { replace: true });
         return;
       }
       navigate(getPostAuthRedirect(refreshed), { replace: true });

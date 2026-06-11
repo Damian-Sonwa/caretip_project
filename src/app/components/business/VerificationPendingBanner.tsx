@@ -34,7 +34,7 @@ export function VerificationPendingBanner({ className }: { className?: string })
       role="status"
       aria-live="polite"
     >
-      <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-start sm:gap-4">
+      <div className="mx-auto flex max-w-7xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-2.5">
           {rejected ? (
             <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
@@ -44,24 +44,22 @@ export function VerificationPendingBanner({ className }: { className?: string })
           <div className="min-w-0">
             <p className="text-sm font-semibold">
               {rejected
-                ? t("business.verification.rejectedPageTitle")
-                : t("business.dashboard.fixVerificationTitle")}
+                ? t("business.dashboard.kycBannerRejectedTitle")
+                : t("business.dashboard.kycBannerTitle")}
             </p>
             <p className="mt-0.5 text-xs leading-relaxed opacity-90 sm:text-sm">
               {rejected
-                ? t("business.verification.rejectedPageBody")
-                : t("business.dashboard.fixVerificationDesc")}
+                ? t("business.dashboard.kycBannerRejectedDesc")
+                : t("business.dashboard.kycBannerDesc")}
             </p>
           </div>
         </div>
-        {!rejected ? (
-          <Link
-            to="/verification-pending"
-            className="shrink-0 text-xs font-semibold underline underline-offset-2 sm:text-sm"
-          >
-            {t("business.verification.learnMore")}
-          </Link>
-        ) : null}
+        <Link
+          to="/verification-pending"
+          className="shrink-0 rounded-md bg-background/80 px-3 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-border/60 hover:bg-background sm:text-sm"
+        >
+          {t("business.dashboard.kycBannerCta")}
+        </Link>
       </div>
     </div>
   );

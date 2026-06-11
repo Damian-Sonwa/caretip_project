@@ -23,7 +23,6 @@ function getPostAuthRedirect(u: RedirectUser): string {
   if (!u.isVerified) return "/verify-email";
   if (u.role === "business") {
     if (!u.hasCompletedOnboarding) return "/onboarding";
-    if (u.status === "PENDING" || u.status === "REJECTED") return "/verification-pending";
     return "/dashboard";
   }
   if (u.role === "employee") return "/employee/dashboard";
@@ -50,11 +49,24 @@ async function main() {
       role: "business",
       hasCompletedOnboarding: true,
       status: "PENDING",
-    }) !== "/verification-pending"
+    }) !== "/dashboard"
   ) {
-    fail("verified + KYC pending → /verification-pending");
+    fail("verified + KYC pending → /dashboard (soft guidance only)");
   } else {
-    pass("verified + KYC pending → /verification-pending");
+    pass("verified + KYC pending → /dashboard (no route block)");
+  }
+
+  if (
+    getPostAuthRedirect({
+      isVerified: true,
+      role: "business",
+      hasCompletedOnboarding: true,
+      status: "REJECTED",
+    }) !== "/dashboard"
+  ) {
+    fail("verified + KYC rejected → /dashboard (soft guidance only)");
+  } else {
+    pass("verified + KYC rejected → /dashboard (no route block)");
   }
 
   if (

@@ -21,7 +21,6 @@ function getPostAuthRedirect(u: {
   if (!u.isVerified) return "/verify-email";
   if (u.role === "business") {
     if (!u.hasCompletedOnboarding) return "/onboarding";
-    if (u.status === "PENDING" || u.status === "REJECTED") return "/verification-pending";
     return "/dashboard";
   }
   if (u.role === "employee") return "/employee/dashboard";
