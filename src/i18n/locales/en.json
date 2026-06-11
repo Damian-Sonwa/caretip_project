@@ -14,8 +14,8 @@
     "language": "Language",
     "languageEnglish": "English",
     "languageGerman": "Deutsch",
-    "becomePartner": "Get Started",
-    "staffPortal": "Staff Access"
+    "becomePartner": "Create Account",
+    "staffPortal": "Join Team"
   },
   "dashboardHero": {
     "overview": "Overview",
@@ -1611,8 +1611,10 @@
       "step2Text": "Pool by shift or reward individuals. You stay in control.",
       "step3Title": "Everyone sees clarity",
       "step3Text": "Staff see earnings; you see performance, without the busywork.",
-      "primaryCta": "Get Started",
-      "secondaryCta": "Staff Access",
+      "primaryCta": "Create Account",
+      "primaryCtaHint": "For venue owners and managers",
+      "secondaryCta": "Join Team",
+      "secondaryCtaHint": "For invited staff members",
       "tabQrLabel": "QR scan",
       "tabQrAlt": "Phone showing CareTip QR tipping screen",
       "heroTitlePrefix": "Tip in seconds,",

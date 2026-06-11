@@ -176,15 +176,26 @@ export function CareTipLandingHero({
             className={cn(landingUi.heroCtaRow, "caretip-hero-cta-cluster")}
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
           >
-            <Link
-              to="/signup"
-              className={landingUi.heroCtaPrimary}
-            >
-              {t("landing.showcase.primaryCta")}
-            </Link>
-            <Link to="/join" className={landingUi.heroCtaSecondary}>
-              {t("landing.showcase.secondaryCta")}
-            </Link>
+            <div className={landingUi.heroCtaUnit}>
+              <Link
+                to="/signup"
+                className={landingUi.heroCtaPrimary}
+                aria-label={`${t("landing.showcase.primaryCta")}. ${t("landing.showcase.primaryCtaHint")}`}
+              >
+                {t("landing.showcase.primaryCta")}
+              </Link>
+              <p className={landingUi.heroCtaHint}>{t("landing.showcase.primaryCtaHint")}</p>
+            </div>
+            <div className={landingUi.heroCtaUnit}>
+              <Link
+                to="/join"
+                className={landingUi.heroCtaSecondary}
+                aria-label={`${t("landing.showcase.secondaryCta")}. ${t("landing.showcase.secondaryCtaHint")}`}
+              >
+                {t("landing.showcase.secondaryCta")}
+              </Link>
+              <p className={landingUi.heroCtaHint}>{t("landing.showcase.secondaryCtaHint")}</p>
+            </div>
           </motion.div>
         </motion.div>
 

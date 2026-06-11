@@ -262,13 +262,17 @@ export const landingUi = {
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-center lg:justify-start lg:gap-3",
+    "relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-start lg:justify-start lg:gap-4",
+  heroCtaUnit:
+    "caretip-hero-cta-unit flex w-full flex-col items-center gap-1 max-lg:max-w-[min(100%,280px)] lg:min-w-0 lg:flex-1 lg:items-start lg:gap-1.5 lg:max-w-[15.5rem]",
+  heroCtaHint:
+    "caretip-hero-cta-hint hidden text-pretty text-center text-[11px] font-medium leading-snug tracking-[-0.01em] text-neutral-500 dark:text-neutral-400 lg:block lg:text-left",
   heroCtaPrimary: cnCtaPrimary(
-    `${caretipBtnPrimary} shrink-0 text-center no-underline max-lg:mx-auto max-lg:w-auto ${ctaPrimarySize}`,
+    `${caretipBtnPrimary} shrink-0 text-center no-underline max-lg:mx-auto max-lg:w-auto lg:w-full ${ctaPrimarySize} lg:min-w-[13rem]`,
   ),
   navCtaPrimary: cnCtaPrimary(`${caretipBtnPrimaryCompact} no-underline`),
   heroCtaSecondary: cnCta(
-    `${caretipBtnSecondary} shrink-0 gap-1.5 text-center no-underline max-lg:mx-auto max-lg:w-auto ${ctaSecondarySize}`,
+    `${caretipBtnSecondary} shrink-0 gap-1.5 text-center no-underline max-lg:mx-auto max-lg:w-auto lg:w-full ${ctaSecondarySize} lg:min-w-[13rem]`,
   ),
   heroMediaCol:
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,

@@ -90,7 +90,7 @@ import {
 import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
 import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
-import barChartHeroImage from "../../../../images/barchart.png";
+import businessHeroImage from "../../../../images/bizzy002.png";
 
 // Match Platform Admin dashboard analytics palette (premium, consistent).
 const BUSINESS_CHART_COLORS = [
@@ -496,7 +496,7 @@ export function BusinessDashboard() {
                 )}
               >
                 <img
-                  src={barChartHeroImage}
+                  src={businessHeroImage}
                   alt=""
                   className="block h-full w-full object-cover object-center max-lg:absolute max-lg:inset-0 lg:h-full"
                   loading="eager"

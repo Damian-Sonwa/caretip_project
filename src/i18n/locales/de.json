@@ -14,8 +14,8 @@
     "language": "Sprache",
     "languageEnglish": "English",
     "languageGerman": "Deutsch",
-    "becomePartner": "Jetzt Partner werden",
-    "staffPortal": "Mitarbeiter-Portal"
+    "becomePartner": "Konto erstellen",
+    "staffPortal": "Team beitreten"
   },
   "dashboardHero": {
     "overview": "Überblick",
@@ -1613,8 +1613,10 @@
       "step2Text": "Pro Schicht verteilen oder Einzelpersonen belohnen. Sie behalten die Kontrolle.",
       "step3Title": "Alle sehen klar",
       "step3Text": "Mitarbeitende sehen Einnahmen; Sie sehen Leistung, ohne Extraaufwand.",
-      "primaryCta": "Jetzt Partner werden",
-      "secondaryCta": "Mitarbeiter-Portal",
+      "primaryCta": "Konto erstellen",
+      "primaryCtaHint": "Für Betreiber und Manager",
+      "secondaryCta": "Team beitreten",
+      "secondaryCtaHint": "Für eingeladene Mitarbeitende",
       "tabQrLabel": "QR Scan",
       "tabQrAlt": "Telefon mit CareTip QR Code und Trinkgeldbildschirm",
       "heroTitlePrefix": "",

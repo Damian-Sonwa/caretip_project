@@ -202,15 +202,19 @@ html.dark .caretip-landing .caretip-hero-float-pill svg {
 }
 
 /* Hero CTAs — slightly slimmer vertical presence; tap-friendly min-heights preserved */
-.caretip-landing .caretip-hero-cta-cluster a {
+.caretip-landing .caretip-hero-cta-unit > a {
   height: 2.625rem;
   min-height: 2.625rem;
 }
 
 @media (min-width: 1024px) {
-  .caretip-landing .caretip-hero-cta-cluster a {
+  .caretip-landing .caretip-hero-cta-unit > a {
     height: 2.875rem;
     min-height: 2.875rem;
+  }
+
+  .caretip-landing .caretip-hero-cta-hint {
+    max-width: 13rem;
   }
 }
 
