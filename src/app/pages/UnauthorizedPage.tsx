@@ -5,7 +5,7 @@ import { caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSyste
 export function UnauthorizedPage() {
   const { t } = useTranslation();
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
+    <main className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="text-center max-w-md">
         <h1 className="text-2xl font-semibold text-foreground mb-2">{t("auth.unauthorized.title")}</h1>
         <p className="text-muted-foreground mb-6">{t("auth.unauthorized.body")}</p>
@@ -24,6 +24,6 @@ export function UnauthorizedPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

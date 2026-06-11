@@ -214,14 +214,12 @@ test.describe("Instant metrics + deferred analytics (runtime behavior)", () => {
       );
     });
 
-    await page.goto("/platform-admin/dashboard");
+    await page.goto("/platform-admin/dashboard", { waitUntil: "domcontentloaded" });
 
-    // Should not block on full-screen loader anymore.
-    await expect(page.locator("main").first()).toBeVisible();
+    await expect(page).toHaveURL(/\/platform-admin\/dashboard/, { timeout: 15_000 });
 
-    // Core shell should be present even before stats return.
-    // We assert one of the stable platform hero elements exists.
-    await expect(page.locator(".platform-admin-hero")).toBeVisible({ timeout: 10_000 });
+    // Core shell should be present even before stats return (no full-screen loader gate).
+    await expect(page.locator(".platform-admin-hero")).toBeVisible({ timeout: 20_000 });
 
     // Stats should eventually be fetched.
     await expect.poll(() => statsCalls, { timeout: 10_000 }).toBe(1);

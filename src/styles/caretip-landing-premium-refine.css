@@ -101,6 +101,7 @@ html:not(.dark) .caretip-landing .caretip-landing-ecosystem-dark .caretip-landin
   background: radial-gradient(ellipse 80% 100% at 50% 0%, rgba(15, 23, 42, 0.12), transparent 70%);
   filter: blur(16px);
   pointer-events: none;
+  touch-action: none;
 }
 
 .caretip-landing .caretip-showcase-depth > * {
@@ -200,6 +201,36 @@ html:not(.dark) .caretip-landing .caretip-showcase-float-card {
 @media (min-width: 1024px) {
   .caretip-split-showcase-content-panel .caretip-split-showcase-cta {
     margin-top: 1.5rem;
+  }
+}
+
+/* For staff (#for-employees) — reliable vertical page scroll (touch + overflow) */
+.caretip-landing #for-employees {
+  overflow-x: clip;
+  overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: auto;
+}
+
+.caretip-landing #for-employees .caretip-split-section-grid,
+.caretip-landing #for-employees .caretip-showcase-depth,
+.caretip-landing #for-employees .caretip-showcase-visual-frame,
+.caretip-landing #for-employees .caretip-mobile-stack-visual,
+.caretip-landing #for-employees .caretip-split-showcase-content-panel,
+.caretip-landing #for-employees [data-polish-view] {
+  touch-action: pan-y;
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing #for-employees .caretip-split-section-grid {
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  .caretip-landing #for-employees .caretip-showcase-visual-frame img {
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 }
 

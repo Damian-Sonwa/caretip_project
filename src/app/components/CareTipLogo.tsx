@@ -19,6 +19,9 @@ export type CareTipLogoAlign = "left" | "center";
 export const CARE_TIP_LOGO_SURFACE_CLASS =
   "bg-white border-b border-border/80";
 
+/** Auth logo surface — circular glass on marketing hero; soft capsule on login cards. */
+export const CARE_TIP_LOGO_AUTH_SURFACE_CLASS = "caretip-auth-logo-surface";
+
 const sizeClass: Record<CareTipLogoSize, string> = {
   /** Compact — mobile dashboard bar, tight UI (mobile-first height bumped for small screens) */
   xs: "h-16 max-h-16 min-h-[4rem] w-auto max-w-[min(400px,78vw)] sm:h-[4.25rem] sm:max-h-[4.25rem] sm:min-h-[4.25rem] md:h-[4.5rem] md:max-h-[4.5rem] md:min-h-[4.5rem]",

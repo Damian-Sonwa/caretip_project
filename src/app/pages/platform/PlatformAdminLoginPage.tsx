@@ -4,7 +4,7 @@ import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { Footer } from "../../components/Footer";
-import { CareTipLogo } from "../../components/CareTipLogo";
+import { CareTipLogo, CARE_TIP_LOGO_AUTH_SURFACE_CLASS } from "../../components/CareTipLogo";
 import { useAuth, getPostAuthRedirect } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
@@ -126,9 +126,9 @@ export function PlatformAdminLoginPage() {
                   initial={{ scale: 0.98, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   transition={{ duration: 0.45, ease: "easeOut" }}
-                  className="caretip-auth-logo-wrap max-w-[17.5rem]"
+                  className={cn(CARE_TIP_LOGO_AUTH_SURFACE_CLASS, "caretip-auth-logo-wrap caretip-auth-logo-wrap--card")}
                 >
-                  <CareTipLogo size="auth" align="center" layoutIsolatedDouble />
+                  <CareTipLogo size="auth" align="center" className="caretip-auth-marketing__logo" />
                 </motion.div>
                 <motion.h1
                   initial={{ opacity: 0, y: 6 }}

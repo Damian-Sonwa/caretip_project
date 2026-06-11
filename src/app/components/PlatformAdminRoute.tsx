@@ -8,6 +8,7 @@ import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
+import { isPlatformAdminSessionRole } from "../lib/authSession";
 import { AppRouteGateShell } from "./AppRouteGateShell";
 interface PlatformAdminRouteProps {
   children: ReactNode;
@@ -37,7 +38,7 @@ export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
     return <Navigate to="/platform-admin/login" replace state={{ from: location.pathname }} />;
   }
 
-  if (user.role !== "platform_admin") {
+  if (!isPlatformAdminSessionRole(user.role)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

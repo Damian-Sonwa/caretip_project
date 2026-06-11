@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
 import { CareTipLogo } from "@/app/components/CareTipLogo";
-import { useMediaQuery } from "@/hooks/use-media-query";
 import { cn } from "@/lib/utils";
 import {
   getAuthMarketingContent,
@@ -29,7 +28,6 @@ export function AuthMarketingPanel({
   compact = false,
 }: AuthMarketingPanelProps) {
   const { t } = useTranslation();
-  const isDesktopHero = useMediaQuery("(min-width: 768px)");
   const scene = marketingScene ?? resolveMarketingSceneFromSignUpMode(signUpMode);
   const { i18nPrefix: prefix } = getAuthMarketingContent(lane, scene);
 
@@ -43,15 +41,25 @@ export function AuthMarketingPanel({
     >
       <div className="caretip-auth-marketing__inner">
         <div className="caretip-auth-marketing__content">
-          <CareTipLogo
-            size="auth"
-            align="left"
-            layoutIsolatedDouble={isDesktopHero}
-            visualScale={compact ? 1.05 : 1.72}
-            className="caretip-auth-marketing__logo"
-          />
+          <div
+            className={cn(
+              "caretip-auth-marketing__brand-row",
+              compact && "caretip-auth-marketing__brand-row--compact",
+            )}
+          >
+            <CareTipLogo
+              size="auth"
+              align="left"
+              layoutIsolatedDouble
+              visualScale={2}
+              className={cn(
+                "caretip-auth-marketing__logo",
+                compact && "caretip-auth-marketing__logo--compact",
+              )}
+            />
 
-          <span className="caretip-auth-marketing__badge">{t(`${prefix}.badge`)}</span>
+            <span className="caretip-auth-marketing__badge">{t(`${prefix}.badge`)}</span>
+          </div>
 
           <h2 className="caretip-auth-marketing__headline">{t(`${prefix}.headline`)}</h2>
           <p className="caretip-auth-marketing__body">{t(`${prefix}.body`)}</p>

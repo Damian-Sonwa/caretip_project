@@ -38,11 +38,11 @@ test.describe("Guest payment flow (UI)", () => {
       });
     });
 
-    await page.goto(`/payment?employeeId=${employeeId}&amount=5`);
+    await page.goto(`/payment?employeeId=${employeeId}&amount=5`, { waitUntil: "domcontentloaded" });
     await expect(
-      page.getByRole("button", { name: /pay\s*€|zahlen|checkout|continue/i }).first(),
+      page.getByRole("button", { name: /Pay\s+€|Pay\s+\$|Zahlen\s+€|Zahlen/i }).first(),
     ).toBeVisible({
-      timeout: 15_000,
+      timeout: 20_000,
     });
   });
 

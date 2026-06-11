@@ -178,11 +178,11 @@ export const landingUi = {
   ),
 
   showcaseSection:
-    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20 dark:border-neutral-800/80",
+    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-clip px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20 dark:border-neutral-800/80",
   showcaseSectionToneWarm: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#121110_50%,#0a0a0a_100%)]",
   showcaseSectionToneMuted: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_48%,#0a0a0a_100%)]",
   showcaseGrid:
-    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
+    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-clip max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
   showcaseCopy:
     "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start lg:caretip-split-showcase-content-panel lg:caretip-split-showcase-content-panel--copy",
   showcaseIntro: `caretip-mobile-stack-intro flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
@@ -262,17 +262,17 @@ export const landingUi = {
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5 lg:flex-row lg:items-start lg:justify-start lg:gap-4",
+    "caretip-hero-cta-row relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5",
   heroCtaUnit:
-    "caretip-hero-cta-unit flex w-full flex-col items-center gap-1 max-lg:max-w-[min(100%,280px)] lg:min-w-0 lg:flex-1 lg:items-start lg:gap-1.5 lg:max-w-[15.5rem]",
+    "caretip-hero-cta-unit flex w-full max-w-[min(100%,17.5rem)] flex-col items-center gap-0.5",
   heroCtaHint:
-    "caretip-hero-cta-hint hidden text-pretty text-center text-[11px] font-medium leading-snug tracking-[-0.01em] text-neutral-500 dark:text-neutral-400 lg:block lg:text-left",
+    "caretip-hero-cta-hint hidden text-center text-[11px] font-medium leading-tight tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 md:block",
   heroCtaPrimary: cnCtaPrimary(
-    `${caretipBtnPrimary} shrink-0 text-center no-underline max-lg:mx-auto max-lg:w-auto lg:w-full ${ctaPrimarySize} lg:min-w-[13rem]`,
+    `${caretipBtnPrimary} caretip-hero-cta-button w-full min-w-0 text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
   ),
   navCtaPrimary: cnCtaPrimary(`${caretipBtnPrimaryCompact} no-underline`),
   heroCtaSecondary: cnCta(
-    `${caretipBtnSecondary} shrink-0 gap-1.5 text-center no-underline max-lg:mx-auto max-lg:w-auto lg:w-full ${ctaSecondarySize} lg:min-w-[13rem]`,
+    `${caretipBtnSecondary} caretip-hero-cta-button w-full min-w-0 gap-1.5 text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
   ),
   heroMediaCol:
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,

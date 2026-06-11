@@ -253,9 +253,19 @@
   flex: 0 0 auto;
 }
 
+.caretip-auth-marketing__brand-row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  max-width: 100%;
+}
+
 .caretip-auth-marketing__badge {
   display: inline-flex;
-  margin-top: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 0;
   border-radius: 9999px;
   border: 1px solid rgba(233, 120, 28, 0.28);
   background: rgba(233, 120, 28, 0.1);
@@ -268,7 +278,7 @@
 }
 
 .caretip-auth-marketing__headline {
-  margin: 1.125rem 0 0;
+  margin: 1.375rem 0 0;
   font-size: clamp(1.625rem, 4.5vw, 2.125rem);
   font-weight: 700;
   letter-spacing: -0.03em;
@@ -304,13 +314,96 @@
   color: rgba(250, 250, 250, 0.92);
 }
 
-.caretip-auth-marketing__logo {
-  min-height: 3.5rem;
+/* Auth logo surface — platform admin login card only */
+.caretip-auth-logo-surface {
+  display: inline-flex;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.caretip-auth-logo-surface .caretip-auth-marketing__logo {
+  position: static !important;
+  top: auto !important;
+  left: auto !important;
+  transform: none !important;
+  display: block;
+  min-height: unset !important;
+  object-fit: contain;
+}
+
+/* Marketing hero — standalone wordmark, no container */
+.caretip-auth-marketing__brand-row .caretip-auth-marketing__logo {
+  position: relative;
+  display: block;
+  flex-shrink: 0;
+  min-height: 3.75rem;
+  max-width: min(16.5rem, 64vw);
+  overflow: visible;
+}
+
+.caretip-auth-marketing__brand-row .caretip-auth-marketing__logo--compact {
+  min-height: 3.25rem;
+  max-width: min(14rem, 58vw);
+}
+
+/* Login cards (e.g. platform admin) — soft light capsule */
+.caretip-auth-logo-wrap--card.caretip-auth-logo-surface {
+  width: fit-content;
+  max-width: min(17.5rem, 92vw);
+  height: auto;
+  padding: 0.4375rem 0.875rem;
+  border-radius: 0.875rem;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.08),
+    0 0 0 1px rgba(15, 23, 42, 0.04);
+}
+
+.caretip-auth-logo-wrap--card.caretip-auth-logo-surface .caretip-auth-marketing__logo {
+  height: 3.75rem !important;
+  max-height: 3.75rem !important;
+  max-width: min(18rem, 88vw) !important;
+  object-position: center center;
 }
 
 @media (min-width: 768px) {
-  .caretip-auth-marketing__logo {
-    min-height: 4rem;
+  .caretip-auth-marketing__brand-row {
+    gap: 1.25rem;
+  }
+
+  .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo {
+    min-height: 4.25rem;
+    max-width: min(19rem, 40vw);
+  }
+
+  .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo--compact {
+    min-height: 3.5rem;
+    max-width: min(16rem, 36vw);
+  }
+
+  .caretip-auth-marketing__headline {
+    margin-top: 1.625rem;
+  }
+
+  .caretip-auth-logo-wrap--card.caretip-auth-logo-surface .caretip-auth-marketing__logo {
+    height: 4rem !important;
+    max-height: 4rem !important;
+    max-width: min(20rem, 40vw) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-auth-marketing__brand-row {
+    gap: 1.5rem;
+  }
+
+  .caretip-auth-marketing__brand-row .caretip-auth-marketing__logo {
+    max-width: min(20rem, 34vw);
   }
 }
 
@@ -418,43 +511,17 @@
     padding: max(0.75rem, env(safe-area-inset-top, 0px)) 1.125rem 0.5rem;
   }
 
-  .caretip-auth-marketing .caretip-auth-marketing__logo {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    width: auto !important;
-    min-height: unset !important;
-    max-width: min(10.5rem, 72vw) !important;
-    overflow: hidden;
-    padding: 0.125rem 0.25rem;
-    border-radius: 0.375rem;
-    background: #fff;
-    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.14);
-  }
-
-  .caretip-auth-marketing .caretip-auth-marketing__logo img {
-    position: static !important;
-    top: auto !important;
-    left: auto !important;
-    transform: none !important;
-    display: block;
-    height: 2.75rem !important;
-    max-height: 2.75rem !important;
-    width: auto !important;
-    max-width: 100% !important;
-    object-fit: contain;
-    object-position: left center;
+  .caretip-auth-marketing__brand-row {
+    gap: 1rem;
   }
 
   .caretip-auth-marketing__badge {
-    margin-top: 0.625rem;
     padding: 0.25rem 0.625rem;
     font-size: 0.625rem;
   }
 
   .caretip-auth-marketing__headline {
-    margin-top: 0.5rem;
+    margin-top: 1rem;
     font-size: clamp(1.25rem, 5.5vw, 1.5rem);
     line-height: 1.2;
     letter-spacing: -0.025em;
@@ -1021,8 +1088,11 @@
   padding: 1.125rem 1rem 0.875rem;
 }
 
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__brand-row {
+  gap: 1rem;
+}
+
 .caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__badge {
-  margin-top: 0.75rem;
   padding: 0.25rem 0.625rem;
   font-size: 0.625rem;
 }
@@ -1238,12 +1308,10 @@
   text-decoration: underline;
 }
 
-/* —— Logo capsule —— */
+/* —— Logo capsule (platform admin card — uses caretip-auth-logo-surface) —— */
 .caretip-auth-logo-wrap {
   display: flex;
-  min-height: 3.5rem;
-  height: auto;
-  width: 100%;
+  width: fit-content;
   max-width: 17.5rem;
   align-items: center;
   justify-content: flex-start;
@@ -1256,10 +1324,8 @@
   justify-content: center;
 }
 
-.dark .caretip-auth-logo-wrap {
-  border-color: rgba(64, 64, 64, 0.65);
-  background: rgba(23, 23, 23, 0.75);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+.caretip-auth-logo-wrap .caretip-auth-marketing__logo img {
+  object-position: center center;
 }
 
 /* —— Tabs —— */
