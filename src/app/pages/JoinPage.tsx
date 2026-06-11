@@ -10,6 +10,7 @@ import { AuthTrustStrip } from "@/app/components/auth/AuthTrustStrip";
 import { validateInviteCode } from "../lib/api";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
+import { saveValidatedInviteContext } from "../lib/inviteContextStore";
 
 export function JoinPage() {
   const { t } = useTranslation();
@@ -28,8 +29,15 @@ export function JoinPage() {
     setError("");
     setBusy(true);
     try {
-      await validateInviteCode(cleaned);
-      navigate(`/signup?role=employee&inviteCode=${encodeURIComponent(cleaned)}`, { replace: true });
+      const validated = await validateInviteCode(cleaned);
+      saveValidatedInviteContext({
+        inviteCode: cleaned,
+        businessName: validated.businessName,
+        businessId: validated.businessId,
+        businessSlug: validated.businessSlug,
+        businessLocation: validated.businessLocation,
+      });
+      navigate("/join/signup", { replace: true });
     } catch (err) {
       logClientError("JoinPage.validateInvite", err);
       setError(toUserFriendlyMessage(err) || t("join.invalidCodeFallback"));
@@ -40,7 +48,7 @@ export function JoinPage() {
 
   return (
     <div className="caretip-auth-page min-h-[100dvh] font-sans">
-      <AuthSplitLayout>
+      <AuthSplitLayout authLane="employee">
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -87,7 +95,7 @@ export function JoinPage() {
 
               <p className="caretip-auth-form-footer mt-4">
                 {t("join.footerPrompt")}{" "}
-                <Link to="/login?role=employee" className="font-semibold text-primary hover:underline">
+                <Link to="/employee/login" className="font-semibold text-primary hover:underline">
                   {t("join.signIn")}
                 </Link>
               </p>

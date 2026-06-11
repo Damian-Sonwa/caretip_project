@@ -118,7 +118,7 @@ export function QRTippingSection() {
 
             <div className="pt-4">
               <Link
-                to="/auth?mode=signup&role=business&from=landing"
+                to="/signup"
                 className={caretipBtnPrimary}
               >
                 Create your QR

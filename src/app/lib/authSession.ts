@@ -48,7 +48,8 @@ export function resolveAuthStatus(
 export function isPublicAuthenticationPath(pathname: string): boolean {
   const p = pathname;
   if (p === "/login" || p === "/signup" || p === "/auth" || p === "/forgot-password") return true;
-  if (p === "/business/login" || p === "/employee/login") return true; // legacy; routes redirect to /login
+  if (p === "/join/signup" || p === "/employee/login") return true;
+  if (p === "/business/login") return true; // legacy; route redirects to /login
   if (p.startsWith("/reset-password/")) return true;
   return false;
 }
@@ -69,6 +70,8 @@ export function sessionMatchesBusinessStaffAuthTarget(
 /** Sign-in URL for an existing session role (used when guards redirect unauthenticated users). */
 export function getLoginPathForSessionRole(role: SessionUserRole): string {
   if (role === "platform_admin" || role === "admin") return "/platform-admin/login";
+  if (role === "employee") return "/employee/login";
+  if (role === "business") return "/login";
   return "/login";
 }
 
@@ -85,6 +88,7 @@ export function getLoginPathForAllowedRoles(
 /** Best-effort login URL from the app path the user was trying to open. */
 export function getLoginPathFromAppPath(pathname: string): string {
   if (pathname.startsWith("/platform-admin")) return "/platform-admin/login";
+  if (pathname.startsWith("/employee")) return "/employee/login";
   return "/login";
 }
 

@@ -642,6 +642,16 @@
       "benefitAnalytics": "Real-time analytics",
       "benefitPayments": "Secure payments"
     },
+    "employeeMarketing": {
+      "panelAria": "Why staff choose CareTip",
+      "badge": "For staff & service teams",
+      "headline": "Track your tips. Own your progress.",
+      "body": "See every tip land live, understand what drives your best shifts, and stay connected to your venue.",
+      "benefitEarnings": "Real-time earnings",
+      "benefitInsights": "Performance insights",
+      "benefitHistory": "Tip history & ratings",
+      "benefitSecure": "Secure payouts"
+    },
     "trust": {
       "aria": "Security and compliance",
       "secureAuth": "Secure authentication",
@@ -666,6 +676,20 @@
       "roleStaff": "Staff",
       "roleLockedInviteHint": "Team invite — account type is locked to Staff"
     },
+    "employeeAuth": {
+      "titleSignIn": "Staff sign in",
+      "titleJoinTeam": "Join your team",
+      "titleWelcomeVenue": "Welcome to {{venue}}",
+      "subtitleSignIn": "Sign in to your employee workspace.",
+      "subtitleJoinTeam": "Complete registration to connect with your venue.",
+      "subtitleInviteVerified": "Your invite is verified. Create your staff account below.",
+      "inviteVerified": "Invite verified",
+      "joiningLabel": "You are joining:",
+      "venueFallback": "Your venue",
+      "footerNoAccount": "Need an invite? ",
+      "footerHasAccount": "Already have a staff account? ",
+      "footerJoinTeam": "Join with invite code"
+    },
     "page": {
       "sessionCheckingTitle": "Checking your session...",
       "sessionCheckingBody": "We're confirming your login status.",
@@ -676,6 +700,7 @@
       "errorPasswordsMismatch": "Passwords do not match.",
       "errorPasswordWeak": "Password must have 8+ chars, uppercase, lowercase, number, and special character (e.g. @#$%).",
       "errorInviteRequired": "Please enter your invite code.",
+      "employeeInviteHint": "Staff accounts require a valid invite code from your employer or a join link.",
       "toastAccountCreated": "Account created. Check your email to verify your address.",
       "resendNeedPassword": "Enter your password above, then tap resend. We use it to confirm it's you.",
       "toastResendDefault": "We sent a new verification link. Check your inbox.",
@@ -723,7 +748,7 @@
       "envHintBefore": "Add",
       "envHintOr": "or",
       "envHintAfter": "in your Vercel (or other) project environment, then redeploy. Vite bakes these in at build time. Plain GOOGLE_CLIENT_ID is for the API only, not the browser.",
-      "signupBlockedTitle": "Enter your name and business or invite details first",
+      "signupBlockedTitle": "Complete staff invite details (name and invite code) before signing up with Google",
       "googleOriginError": "Google sign-in is not configured for this site ({{origin}}). In Google Cloud Console → APIs & Services → Credentials → your Web client, add this URL under Authorized JavaScript origins, then save and wait a few minutes.",
       "devOriginHint": "Dev: add {{origin}} to your Web OAuth client → Authorized JavaScript origins (also add http://127.0.0.1:5173 if you use that host)."
     },
@@ -766,8 +791,9 @@
       "verifyingTitle": "Verifying your email…",
       "verifyingBody": "This will only take a moment.",
       "title": "Check your email to verify your account",
-      "introSession": "We sent a verification link to {{email}}. Open it on this device (or copy the link into the browser where you use CareTip).",
+      "introSession": "We've sent a verification link to {{email}}. Open the email and click the verification link to continue.",
       "introResend": "Enter your email and password to resend the verification link.",
+      "statusMessage": "Your account will be activated immediately after verification.",
       "dashboardLocked": "The dashboard stays unavailable until your email is verified.",
       "openMyEmail": "Open my email",
       "srOnlyOpensWebmail": "Opens {{provider}}",
@@ -1695,24 +1721,24 @@
       }
     },
     "employeeSection": {
-      "pill": "For employees",
-      "titleLine1": "Track your success.",
-      "titleLine2": "Every day.",
-      "subtitle": "See every tip land live and understand what drives your best shifts.",
+      "pill": "For staff",
+      "titleLine1": "Join your team",
+      "titleLine2": "",
+      "subtitle": "Enter your invite code and connect to your venue.",
       "b1Title": "Real-time earnings",
       "b1Text": "Watch tips arrive as guests show appreciation.",
       "b2Title": "Performance insights",
       "b2Text": "Spot patterns that help you earn more each week.",
       "b3Title": "Tip history & ratings",
       "b3Text": "Gratitude and guest feedback in one clear trail.",
-      "cta": "View employee dashboard",
+      "cta": "Join as Staff",
       "imageAlt": "CareTip employee dashboard showing daily earnings, ratings, and goals"
     },
     "businessSection": {
-      "pill": "Business dashboard",
-      "titleLine1": "Complete visibility",
-      "titleLine2": "into your team",
-      "subtitle": "Track every location, QR, and payout from one calm control center.",
+      "pill": "For venue owners",
+      "titleLine1": "Start your venue",
+      "titleLine2": "",
+      "subtitle": "Create a venue account, manage staff, activate QR tipping, and grow revenue.",
       "b1Title": "Live team performance",
       "b1Text": "See momentum across shifts, roles, and venues as it happens.",
       "b2Title": "Clear tip distribution",
@@ -1721,7 +1747,7 @@
       "b3Text": "Finance-ready exports for payroll and audits.",
       "b4Title": "Staff & QR control",
       "b4Text": "Roles, access, and QR assignments connected in one place.",
-      "cta": "Get started",
+      "cta": "Create Business Account",
       "imageAlt": "CareTip business dashboard on a laptop showing team visibility and analytics",
       "floatHint": "Multi-location live"
     },

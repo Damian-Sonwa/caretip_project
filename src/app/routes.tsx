@@ -212,7 +212,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/employee/login',
-    element: <Navigate to="/login" replace />,
+    Component: AuthPage,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -226,12 +226,17 @@ const routes: RouteObject[] = [
   },
   {
     path: '/get-started',
-    element: <Navigate to="/auth?mode=signup&role=business&from=landing" replace />,
+    element: <Navigate to="/signup" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/join',
     Component: JoinPage,
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/join/signup',
+    Component: AuthPage,
     errorElement: <ErrorBoundary />,
   },
   {

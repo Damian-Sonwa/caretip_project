@@ -306,6 +306,9 @@
 @media (max-width: 767px) {
   .caretip-auth-curved-container {
     overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .caretip-auth-curved-brand {
@@ -376,7 +379,7 @@
     z-index: 4;
     flex: 1 1 auto;
     margin-top: 1rem;
-    padding: 0.25rem 1rem 1.75rem;
+    padding: 0.25rem 1rem max(2.5rem, calc(1.75rem + env(safe-area-inset-bottom, 0px)));
     align-items: flex-start;
   }
 
@@ -387,6 +390,19 @@
 
   .caretip-auth-card-wrap {
     width: 100%;
+  }
+
+  .caretip-auth-card--stable {
+    max-height: none;
+    min-height: 0;
+  }
+
+  .caretip-auth-card {
+    overflow: visible;
+  }
+
+  .caretip-auth-card-body {
+    overflow: visible;
   }
 }
 
@@ -431,6 +447,8 @@
     max-height: 100dvh;
     padding: 0.75rem 1.5rem;
     overflow-y: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 }
 
@@ -457,7 +475,9 @@
   .caretip-auth-split-layout__panel {
     flex: 0 0 54%;
     max-width: 54%;
-    overflow-y: visible;
+    overflow-y: auto;
+    align-items: flex-start;
+    justify-content: flex-start;
     padding: 0.75rem 2rem 0.75rem 1.25rem;
   }
 }
@@ -516,8 +536,13 @@
   flex-direction: column;
 }
 
+.caretip-auth-card--stable.caretip-auth-card--signup {
+  max-height: none;
+  min-height: 0;
+}
+
 .caretip-auth-card--signup {
-  min-height: 27rem;
+  min-height: 0;
 }
 
 .caretip-auth-card-body {
@@ -589,6 +614,141 @@
   margin-inline: auto;
 }
 
+/* Email verification — smaller hero, card-first hierarchy */
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__inner {
+  padding: 1.125rem 1rem 0.875rem;
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__badge {
+  margin-top: 0.75rem;
+  padding: 0.25rem 0.625rem;
+  font-size: 0.625rem;
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__headline {
+  margin-top: 0.625rem;
+  font-size: clamp(1.25rem, 4vw, 1.75rem);
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__body {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__benefits {
+  margin-top: 0.625rem;
+  gap: 0.375rem;
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__benefits li {
+  font-size: 0.8125rem;
+  gap: 0.5rem;
+}
+
+.caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__check {
+  height: 0.875rem;
+  width: 0.875rem;
+}
+
+.caretip-auth-card--verify-email {
+  min-height: 0;
+}
+
+.caretip-auth-card--verify-email .caretip-auth-card-body--recovery {
+  min-height: 0;
+}
+
+.caretip-auth-header--verify {
+  margin-bottom: 0.375rem;
+}
+
+.caretip-auth-subtitle--verify {
+  margin-top: 0.125rem;
+  line-height: 1.45;
+}
+
+.caretip-auth-verify-status {
+  margin: 0;
+  text-align: left;
+}
+
+.caretip-auth-verify-flow {
+  padding-top: 0;
+}
+
+.caretip-auth-verify-actions .caretip-auth-submit {
+  min-height: 2.625rem;
+}
+
+.caretip-auth-verify-continue {
+  border-color: rgba(16, 185, 129, 0.4);
+  background: rgba(16, 185, 129, 0.06);
+  color: rgb(5 120 85);
+}
+
+.caretip-auth-verify-continue:hover:not(:disabled) {
+  border-color: rgba(16, 185, 129, 0.55);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+.dark .caretip-auth-verify-continue {
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(16, 185, 129, 0.12);
+  color: rgb(110 231 183);
+}
+
+@media (max-width: 767px) {
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__inner {
+    padding: 1rem 1rem 0.75rem;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__headline {
+    font-size: clamp(1.25rem, 5.2vw, 1.375rem);
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__benefits {
+    margin-top: 0.5rem;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-split-layout__panel {
+    padding-top: 0.875rem;
+    padding-bottom: 1.25rem;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-card {
+    padding: 1rem 1rem 0.875rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-curved-brand {
+    flex: 0 0 32%;
+    max-width: 32%;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-marketing--compact .caretip-auth-marketing__inner {
+    max-width: 22rem;
+    padding: 1.5rem 1.25rem 1rem 1.75rem;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-split-layout__panel {
+    flex: 1 1 auto;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-curved-brand {
+    flex: 0 0 34%;
+    max-width: 34%;
+  }
+
+  .caretip-auth-recovery-stage--compact-marketing .caretip-auth-split-layout__panel {
+    flex: 0 0 66%;
+    max-width: 66%;
+  }
+}
 
 /* —— Typography rhythm (compact) —— */
 .caretip-auth-header {
@@ -1010,6 +1170,97 @@ select.caretip-auth-field {
 
 .caretip-auth-role-reserve {
   display: none;
+}
+
+.caretip-auth-account-type {
+  margin-bottom: 0.25rem;
+}
+
+.caretip-auth-field--select {
+  padding-right: 2.5rem;
+  cursor: pointer;
+}
+
+.caretip-auth-account-type-hint {
+  margin: 0.25rem 0 0;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: rgb(115 115 115);
+}
+
+.dark .caretip-auth-account-type-hint {
+  color: rgb(163 163 163);
+}
+
+.caretip-auth-employee-venue {
+  margin-bottom: 0.375rem;
+}
+
+.caretip-auth-employee-venue__verified {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0 0 0.625rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #15803d;
+}
+
+.dark .caretip-auth-employee-venue__verified {
+  color: #4ade80;
+}
+
+.caretip-auth-employee-venue__label {
+  margin: 0 0 0.375rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: rgb(115 115 115);
+}
+
+.dark .caretip-auth-employee-venue__label {
+  color: rgb(163 163 163);
+}
+
+.caretip-auth-employee-venue__card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(233, 120, 28, 0.22);
+  background: rgba(233, 120, 28, 0.06);
+  padding: 0.625rem 0.75rem;
+}
+
+.dark .caretip-auth-employee-venue__card {
+  border-color: rgba(233, 120, 28, 0.28);
+  background: rgba(233, 120, 28, 0.1);
+}
+
+.caretip-auth-employee-venue__name {
+  margin: 0;
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1.35;
+  color: rgb(23 23 23);
+}
+
+.dark .caretip-auth-employee-venue__name {
+  color: rgb(250 250 250);
+}
+
+.caretip-auth-employee-venue__location {
+  margin: 0.125rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: rgb(115 115 115);
+}
+
+.dark .caretip-auth-employee-venue__location {
+  color: rgb(163 163 163);
 }
 
 .caretip-auth-password-rules-slot {

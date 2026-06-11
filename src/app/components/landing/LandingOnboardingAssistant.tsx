@@ -315,7 +315,7 @@ export function LandingOnboardingAssistant({
             {interactedWithAi ? (
               <div className="border-t border-border/50 px-4 pb-3 pt-2">
                 <Link
-                  to="/auth?mode=signup&role=business&from=landing-ai"
+                  to="/signup"
                   className="text-xs font-semibold text-primary hover:underline"
                   onClick={() => trackLandingAiEvent("cta_after_ai")}
                 >

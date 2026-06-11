@@ -644,6 +644,16 @@
       "benefitAnalytics": "Echtzeit-Analysen",
       "benefitPayments": "Sichere Zahlungen"
     },
+    "employeeMarketing": {
+      "panelAria": "Warum Teams CareTip nutzen",
+      "badge": "Für Team & Service",
+      "headline": "Trinkgeld im Blick. Fortschritt in der Hand.",
+      "body": "Sehen Sie live, wie Trinkgelder eingehen, verstehen Sie Ihre besten Schichten und bleiben Sie mit Ihrem Venue verbunden.",
+      "benefitEarnings": "Einnahmen in Echtzeit",
+      "benefitInsights": "Performance-Insights",
+      "benefitHistory": "Verlauf & Bewertungen",
+      "benefitSecure": "Sichere Auszahlungen"
+    },
     "trust": {
       "aria": "Sicherheit und Compliance",
       "secureAuth": "Sichere Authentifizierung",
@@ -668,6 +678,20 @@
       "roleStaff": "Team",
       "roleLockedInviteHint": "Teameinladung — Kontotyp ist auf Team festgelegt"
     },
+    "employeeAuth": {
+      "titleSignIn": "Team-Anmeldung",
+      "titleJoinTeam": "Team beitreten",
+      "titleWelcomeVenue": "Willkommen bei {{venue}}",
+      "subtitleSignIn": "Melden Sie sich in Ihrem Mitarbeiter-Workspace an.",
+      "subtitleJoinTeam": "Schließen Sie die Registrierung ab, um sich mit Ihrem Venue zu verbinden.",
+      "subtitleInviteVerified": "Ihre Einladung ist bestätigt. Erstellen Sie unten Ihr Teamkonto.",
+      "inviteVerified": "Einladung bestätigt",
+      "joiningLabel": "Sie treten bei:",
+      "venueFallback": "Ihr Venue",
+      "footerNoAccount": "Einladung nötig? ",
+      "footerHasAccount": "Bereits ein Teamkonto? ",
+      "footerJoinTeam": "Mit Einladungscode beitreten"
+    },
     "page": {
       "sessionCheckingTitle": "Sitzung wird geprüft…",
       "sessionCheckingBody": "Wir bestätigen Ihren Anmeldestatus.",
@@ -678,6 +702,7 @@
       "errorPasswordsMismatch": "Die Passwörter stimmen nicht überein.",
       "errorPasswordWeak": "Das Passwort braucht mind. 8 Zeichen, Groß- und Kleinbuchstaben, Zahl und Sonderzeichen (z. B. @#$%).",
       "errorInviteRequired": "Bitte geben Sie Ihren Einladungscode ein.",
+      "employeeInviteHint": "Teamkonten benötigen einen gültigen Einladungscode Ihres Arbeitgebers oder einen Join-Link.",
       "toastAccountCreated": "Konto erstellt. Bitte prüfen Sie Ihre E-Mail zur Bestätigung.",
       "resendNeedPassword": "Geben Sie oben Ihr Passwort ein und tippen Sie dann auf Erneut senden, damit wir bestätigen können, dass Sie es sind.",
       "toastResendDefault": "Wir haben einen neuen Bestätigungslink gesendet. Bitte Posteingang prüfen.",
@@ -725,7 +750,7 @@
       "envHintBefore": "Fügen Sie",
       "envHintOr": "oder",
       "envHintAfter": "in den Umgebungsvariablen Ihres Vercel- (oder anderen) Projekts hinzu und deployen Sie neu. Vite übernimmt diese Werte nur beim Build. GOOGLE_CLIENT_ID allein gilt nur für die API, nicht für den Browser.",
-      "signupBlockedTitle": "Zuerst Namen sowie Unternehmens- oder Einladungsdaten eingeben",
+      "signupBlockedTitle": "Bitte Name und Einladungscode eingeben, bevor Sie mit Google registrieren",
       "googleOriginError": "Google-Anmeldung ist für diese Website ({{origin}}) nicht freigeschaltet. In der Google Cloud Console → APIs & Dienste → Anmeldedaten → Ihr Web-Client diese URL unter „Autorisierte JavaScript-Quellen“ eintragen, speichern und einige Minuten warten.",
       "devOriginHint": "Entwicklung: {{origin}} unter „Autorisierte JavaScript-Quellen“ eintragen (ggf. auch http://127.0.0.1:5173)."
     },
@@ -768,8 +793,9 @@
       "verifyingTitle": "E-Mail wird bestätigt…",
       "verifyingBody": "Das dauert nur einen Moment.",
       "title": "Bitte E-Mail prüfen, um Ihr Konto zu bestätigen",
-      "introSession": "Wir haben einen Bestätigungslink an {{email}} gesendet. Öffnen Sie ihn auf diesem Gerät (oder kopieren Sie den Link in den Browser, in dem Sie CareTip nutzen).",
+      "introSession": "Wir haben einen Bestätigungslink an {{email}} gesendet. Öffnen Sie die E-Mail und klicken Sie auf den Bestätigungslink, um fortzufahren.",
       "introResend": "Geben Sie E-Mail und Passwort ein, um den Bestätigungslink erneut zu senden.",
+      "statusMessage": "Ihr Konto wird unmittelbar nach der Bestätigung freigeschaltet.",
       "dashboardLocked": "Das Dashboard bleibt gesperrt, bis Ihre E-Mail bestätigt ist.",
       "openMyEmail": "E-Mail öffnen",
       "srOnlyOpensWebmail": "Öffnet {{provider}}",
@@ -1699,24 +1725,24 @@
       }
     },
     "employeeSection": {
-      "pill": "Für Mitarbeitende",
-      "titleLine1": "Deinen Erfolg im Blick.",
-      "titleLine2": "Jeden Tag.",
-      "subtitle": "Erlebe live, wie jedes Trinkgeld eingeht, und verstehe genau, was deine besten Schichten ausmacht.",
+      "pill": "Für Teammitglieder",
+      "titleLine1": "Team beitreten",
+      "titleLine2": "",
+      "subtitle": "Geben Sie Ihren Einladungscode ein und verbinden Sie sich mit Ihrem Venue.",
       "b1Title": "Einnahmen in Echtzeit",
       "b1Text": "Sieh dabei zu, wie Trinkgelder eingehen, sobald Kunden, Patienten oder Gäste dir ihre Wertschätzung zeigen.",
       "b2Title": "Performance-Insights",
       "b2Text": "Erkenne Muster und Trends, die dir dabei helfen, jede Woche mehr aus deinen Schichten herauszuholen.",
       "b3Title": "Verlauf & Bewertungen",
       "b3Text": "Deine Trinkgelder und das Feedback deiner Gäste gesammelt an einem Ort, als digitaler Beweis für deine starke Arbeit.",
-      "cta": "Mitarbeiterdashboard ansehen",
+      "cta": "Als Team beitreten",
       "imageAlt": "CareTip Mitarbeiterdashboard mit Tageseinnahmen, Bewertungen und Zielen"
     },
     "businessSection": {
-      "pill": "Unternehmensdashboard",
-      "titleLine1": "Volle Transparenz über Ihr gesamtes Team",
+      "pill": "Für Venue-Betreiber",
+      "titleLine1": "Starten Sie Ihr Venue",
       "titleLine2": "",
-      "subtitle": "Steuern Sie jeden Standort, jeden QR-Code und jede Auszahlung über ein einziges, übersichtliches Control Center.",
+      "subtitle": "Erstellen Sie ein Venue-Konto, verwalten Sie Ihr Team, aktivieren Sie QR-Trinkgeld und steigern Sie Ihren Umsatz.",
       "b1Title": "Team-Performance in Echtzeit",
       "b1Text": "Verfolgen Sie die Dynamik über verschiedene Schichten, Rollen und Standorte hinweg, live und im selben Moment.",
       "b2Title": "Klare Trinkgeld-Verteilung",
@@ -1725,7 +1751,7 @@
       "b3Text": "Buchhaltungsfertige Exporte, perfekt vorbereitet für die Lohnabrechnung und Betriebsprüfungen.",
       "b4Title": "Mitarbeiter- & QR-Verwaltung",
       "b4Text": "Rollen, Zugriffsrechte und QR-Code-Zuweisungen nahtlos an einem zentralen Ort gebündelt.",
-      "cta": "Jetzt starten",
+      "cta": "Business-Konto erstellen",
       "imageAlt": "CareTip Unternehmensdashboard auf einem Laptop: Teamtransparenz und Analysen",
       "floatHint": "Multi-Standort live"
     },

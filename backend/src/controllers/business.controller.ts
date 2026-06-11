@@ -92,7 +92,13 @@ export async function validateInvite(req: Request, res: Response) {
     if (!r.ok) {
       return res.status(400).json({ ok: false, message: "Invalid or expired invite code" });
     }
-    return res.json({ ok: true, businessName: r.businessName });
+    return res.json({
+      ok: true,
+      businessName: r.businessName,
+      businessId: r.businessId,
+      businessSlug: r.businessSlug,
+      businessLocation: r.businessLocation ?? null,
+    });
   } catch (err) {
     logServerError("business.validateInvite", err);
     return res.status(400).json({

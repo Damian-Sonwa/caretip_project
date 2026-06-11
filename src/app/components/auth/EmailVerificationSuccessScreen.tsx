@@ -21,7 +21,7 @@ export function EmailVerificationSuccessScreen() {
   };
 
   return (
-    <AuthRecoveryLayout showFooterLink={false}>
+    <AuthRecoveryLayout showFooterLink={false} compactMarketing>
       <div
         className="flex flex-col items-center gap-5 py-2 text-center"
         role="status"
@@ -54,7 +54,7 @@ export function EmailVerificationVerifyingScreen() {
   const { t } = useTranslation();
 
   return (
-    <AuthRecoveryLayout showFooterLink={false}>
+    <AuthRecoveryLayout showFooterLink={false} compactMarketing>
       <div
         className="flex flex-col items-center gap-5 py-2 text-center"
         role="status"

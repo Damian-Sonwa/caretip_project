@@ -76,7 +76,7 @@ export function LandingMotivationSection() {
 
             <div className="caretip-motivation-cta mt-5 flex w-full max-md:justify-start max-lg:justify-center sm:mt-7 lg:mt-8 lg:justify-start">
               <Link
-                to="/auth?mode=signup&role=business&from=landing-recognition"
+                to="/signup"
                 className={cn(landingUi.heroCtaPrimary, "inline-flex gap-2 px-8")}
               >
                 {t("landing.showcase.primaryCta")}

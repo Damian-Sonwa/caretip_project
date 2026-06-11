@@ -1,4 +1,4 @@
-import React from "react";
+import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
@@ -14,8 +14,11 @@ export interface SignInCard2Props {
   className?: string;
   formBusy?: boolean;
   sessionActive?: boolean;
-  /** Employee invite signup — show hint only, no account-type selector. */
-  inviteSignup?: boolean;
+  authLane?: "business" | "employee";
+  modeScope?: "both" | "signup-only" | "login-only";
+  employeeVenueName?: string;
+  inviteVerified?: boolean;
+  onEmployeeSignUpClick?: () => void;
   topSlot?: React.ReactNode;
 }
 
@@ -29,14 +32,56 @@ export function SignInCard2({
   className,
   formBusy = false,
   sessionActive = false,
-  inviteSignup = false,
+  authLane = "business",
+  modeScope = "both",
+  employeeVenueName,
+  inviteVerified = false,
+  onEmployeeSignUpClick,
   topSlot,
 }: SignInCard2Props) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
+  const isEmployee = authLane === "employee";
+  const showModeTabs = !sessionActive && modeScope === "both";
+
+  const title = sessionActive
+    ? t("auth.signInCard.titleCareTip")
+    : isLogin
+      ? isEmployee
+        ? t("auth.employeeAuth.titleSignIn")
+        : t("auth.signInCard.titleWelcomeBack")
+      : isEmployee
+        ? employeeVenueName
+          ? t("auth.employeeAuth.titleWelcomeVenue", { venue: employeeVenueName })
+          : t("auth.employeeAuth.titleJoinTeam")
+        : t("auth.signInCard.titleCreateVenue");
+
+  const subtitle = sessionActive
+    ? t("auth.signInCard.subtitleSession")
+    : isLogin
+      ? isEmployee
+        ? t("auth.employeeAuth.subtitleSignIn")
+        : t("auth.signInCard.subtitleSignInShort")
+      : isEmployee
+        ? inviteVerified
+          ? t("auth.employeeAuth.subtitleInviteVerified")
+          : t("auth.employeeAuth.subtitleJoinTeam")
+        : t("auth.signInCard.subtitleCreateVenue");
+
+  const handleSignUpTab = () => {
+    if (isEmployee && onEmployeeSignUpClick) {
+      onEmployeeSignUpClick();
+      return;
+    }
+    if (isLogin) onToggleMode();
+  };
+
+  const handleSignInTab = () => {
+    if (!isLogin) onToggleMode();
+  };
 
   return (
-    <AuthSplitLayout topSlot={topSlot} signUpMode={!sessionActive && !isLogin}>
+    <AuthSplitLayout topSlot={topSlot} signUpMode={!sessionActive && !isLogin} authLane={authLane}>
       <motion.div
         initial={reduceMotion ? false : { opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -58,27 +103,11 @@ export function SignInCard2({
             <div className="caretip-auth-logo-wrap caretip-auth-logo-wrap--card md:hidden">
               <CareTipLogo size="auth" align="center" layoutIsolatedDouble visualScale={1.18} />
             </div>
-            <h1 className="caretip-auth-title">
-              {sessionActive
-                ? t("auth.signInCard.titleCareTip")
-                : isLogin
-                  ? t("auth.signInCard.titleWelcomeBack")
-                  : inviteSignup
-                    ? t("auth.signInCard.titleGetStarted")
-                    : t("auth.signInCard.titleCreateVenue")}
-            </h1>
-            <p className="caretip-auth-subtitle">
-              {sessionActive
-                ? t("auth.signInCard.subtitleSession")
-                : isLogin
-                  ? t("auth.signInCard.subtitleSignInShort")
-                  : inviteSignup
-                    ? t("auth.signInCard.roleLockedInviteHint")
-                    : t("auth.signInCard.subtitleCreateVenue")}
-            </p>
+            <h1 className="caretip-auth-title">{title}</h1>
+            <p className="caretip-auth-subtitle">{subtitle}</p>
           </div>
 
-          {!sessionActive ? (
+          {showModeTabs ? (
             <div className="caretip-auth-mode-block">
               <div
                 className="caretip-auth-tabs"
@@ -90,9 +119,7 @@ export function SignInCard2({
                   role="tab"
                   aria-selected={isLogin}
                   disabled={formBusy}
-                  onClick={() => {
-                    if (!isLogin) onToggleMode();
-                  }}
+                  onClick={handleSignInTab}
                   className={cn(
                     "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
                     isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",
@@ -106,9 +133,7 @@ export function SignInCard2({
                   role="tab"
                   aria-selected={!isLogin}
                   disabled={formBusy}
-                  onClick={() => {
-                    if (isLogin) onToggleMode();
-                  }}
+                  onClick={handleSignUpTab}
                   className={cn(
                     "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
                     !isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",

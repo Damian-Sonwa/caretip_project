@@ -177,7 +177,7 @@ export function CareTipLandingHero({
             variants={reduceMotion ? undefined : landingHeroCtaReveal}
           >
             <Link
-              to="/auth?mode=signup&role=business&from=landing"
+              to="/signup"
               className={landingUi.heroCtaPrimary}
             >
               {t("landing.showcase.primaryCta")}

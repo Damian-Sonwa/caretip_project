@@ -34,7 +34,7 @@ export function BusinessLandingSection() {
       benefitsVariant="showcase"
       cta={{
         label: t("landing.businessSection.cta"),
-        to: "/auth?mode=signup&role=business&from=landing",
+        to: "/signup",
       }}
       visual={
         <LandingShowcaseCoverImage

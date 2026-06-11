@@ -7,38 +7,26 @@ import { AuthMarketingPanel } from "./AuthMarketingPanel";
 
 
 type AuthSplitLayoutProps = {
-
   children: ReactNode;
-
-  /** Optional banner above the auth card (cross-session notice, etc.). */
-
   topSlot?: ReactNode;
-
-  /** Drives curved blob animation on sign-in ↔ sign-up toggle. */
-
   signUpMode?: boolean;
-
+  authLane?: "business" | "employee";
+  /** Smaller brand panel for verification / recovery flows. */
+  compactMarketing?: boolean;
 };
 
-
-
-/**
-
- * Premium curved split-screen auth shell — animated blob brand panel + stable card.
-
- */
-
-export function AuthSplitLayout({ children, topSlot, signUpMode = false }: AuthSplitLayoutProps) {
-
+export function AuthSplitLayout({
+  children,
+  topSlot,
+  signUpMode = false,
+  authLane = "business",
+  compactMarketing = false,
+}: AuthSplitLayoutProps) {
   return (
-
     <AuthCurvedBlobShell
-
       signUpMode={signUpMode}
-
       className="caretip-auth-split-layout--curved font-sans"
-
-      brandPanel={<AuthMarketingPanel />}
+      brandPanel={<AuthMarketingPanel lane={authLane} compact={compactMarketing} />}
 
       authPanel={
 

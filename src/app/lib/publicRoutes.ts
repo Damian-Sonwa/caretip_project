@@ -21,6 +21,7 @@ const PUBLIC_MARKETING_EXACT = new Set([
   "/how-it-works",
   "/mobile-app",
   "/join",
+  "/join/signup",
   "/get-started",
 ]);
 

@@ -210,15 +210,27 @@ export async function generateInviteCode(userId: string): Promise<{
   };
 }
 
-export async function validateInviteCode(code: string): Promise<{ ok: boolean; businessName?: string }> {
+export async function validateInviteCode(code: string): Promise<{
+  ok: boolean;
+  businessName?: string;
+  businessId?: string;
+  businessSlug?: string;
+  businessLocation?: string | null;
+}> {
   const c = String(code ?? "").trim();
   if (!c) return { ok: false };
   const row = await prisma.business.findFirst({
     where: { inviteCode: c, inviteCodeExpiresAt: { gt: new Date() } },
-    select: { name: true },
+    select: { id: true, name: true, slug: true, location: true },
   });
   if (!row) return { ok: false };
-  return { ok: true, businessName: row.name };
+  return {
+    ok: true,
+    businessName: row.name,
+    businessId: row.id,
+    businessSlug: row.slug,
+    businessLocation: row.location,
+  };
 }
 
 export type BusinessDashboardTimeframe = "week" | "month" | "year" | "all";

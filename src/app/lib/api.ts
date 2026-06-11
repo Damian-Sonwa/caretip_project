@@ -1255,9 +1255,21 @@ export async function regenerateBusinessSlug(): Promise<{ slug: string }> {
   });
 }
 
-export async function validateInviteCode(code: string): Promise<{ ok: true; businessName?: string }> {
+export async function validateInviteCode(code: string): Promise<{
+  ok: true;
+  businessName?: string;
+  businessId?: string;
+  businessSlug?: string;
+  businessLocation?: string | null;
+}> {
   const sp = new URLSearchParams({ code: String(code ?? "").trim() });
-  return apiRequest<{ ok: true; businessName?: string }>(apiPath(`/api/business/invite/validate?${sp.toString()}`), {
+  return apiRequest<{
+    ok: true;
+    businessName?: string;
+    businessId?: string;
+    businessSlug?: string;
+    businessLocation?: string | null;
+  }>(apiPath(`/api/business/invite/validate?${sp.toString()}`), {
     method: "GET",
     headers: { "Content-Type": "application/json" },
     credentials: "include",

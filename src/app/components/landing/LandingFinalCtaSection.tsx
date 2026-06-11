@@ -46,7 +46,7 @@ export function LandingFinalCtaSection() {
           <div className="caretip-final-cta-action relative flex w-full min-w-0 justify-center">
             <div aria-hidden className="caretip-final-cta-button-glow pointer-events-none" />
             <Link
-              to="/auth?mode=signup&role=business&from=landing"
+              to="/signup"
               className={cn(
                 landingUi.heroCtaPrimary,
                 "caretip-final-cta-button relative z-[1] max-w-full gap-2 px-8 max-lg:px-6 lg:min-w-[13.5rem]",

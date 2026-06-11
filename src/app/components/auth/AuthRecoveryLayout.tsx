@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "motion/react";
+import { cn } from "@/lib/utils";
 import { AuthSplitLayout } from "./AuthSplitLayout";
 
 type AuthRecoveryLayoutProps = {
@@ -8,6 +9,8 @@ type AuthRecoveryLayoutProps = {
   showFooterLink?: boolean;
   title?: string;
   subtitle?: string;
+  /** Smaller left marketing panel — verification & recovery flows. */
+  compactMarketing?: boolean;
 };
 
 /**
@@ -18,24 +21,30 @@ export function AuthRecoveryLayout({
   showFooterLink = true,
   title,
   subtitle,
+  compactMarketing = false,
 }: AuthRecoveryLayoutProps) {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
 
   return (
-    <div className="caretip-auth-page caretip-auth-recovery-stage relative min-h-[100dvh] font-sans">
-      <AuthSplitLayout>
+    <div
+      className={cn(
+        "caretip-auth-page caretip-auth-recovery-stage relative min-h-[100dvh] font-sans",
+        compactMarketing && "caretip-auth-recovery-stage--compact-marketing",
+      )}
+    >
+      <AuthSplitLayout compactMarketing={compactMarketing}>
         <motion.div
           initial={reduceMotion ? false : { opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: reduceMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
           className="caretip-auth-recovery-inner"
         >
-          <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery">
+          <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery caretip-auth-card--verify-email">
             {title ? (
-              <div className="caretip-auth-header !mb-4">
+              <div className="caretip-auth-header caretip-auth-header--verify !mb-3">
                 <h1 className="caretip-auth-title !pt-0">{title}</h1>
-                {subtitle ? <p className="caretip-auth-subtitle">{subtitle}</p> : null}
+                {subtitle ? <p className="caretip-auth-subtitle caretip-auth-subtitle--verify">{subtitle}</p> : null}
               </div>
             ) : null}
             <div className="caretip-auth-card-body caretip-auth-card-body--recovery">{children}</div>
