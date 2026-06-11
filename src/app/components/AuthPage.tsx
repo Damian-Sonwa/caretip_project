@@ -511,7 +511,7 @@ export function AuthPage() {
   ) : null;
 
   return (
-    <div className="caretip-auth-page relative min-h-[100dvh] overflow-x-hidden overflow-y-auto font-sans">
+    <div className="caretip-auth-page relative font-sans">
         <SignInCard2
           isLogin={isLogin}
           onToggleMode={toggleAuthMode}

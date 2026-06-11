@@ -45,7 +45,7 @@ export function JoinPage() {
   };
 
   return (
-    <div className="caretip-auth-page min-h-[100dvh] font-sans">
+    <div className="caretip-auth-page font-sans">
       <AuthSplitLayout authLane="employee">
         <div className="caretip-auth-card-wrap">
           <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery">

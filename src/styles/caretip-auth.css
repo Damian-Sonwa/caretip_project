@@ -5,7 +5,12 @@
 /* —— Page canvas —— */
 .caretip-auth-page,
 .caretip-auth-shell {
+  min-height: 100dvh;
+  min-height: 100svh;
+  overflow-x: clip;
+  overflow-y: visible;
   background-color: #f8f8f7;
+  scroll-padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
 }
 
 .dark .caretip-auth-page,
@@ -94,8 +99,10 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  min-height: 100svh;
   width: 100%;
-  overflow: hidden;
+  height: auto;
+  overflow: visible;
   background: #f8f8f7;
   isolation: isolate;
 }
@@ -281,13 +288,15 @@
   color: var(--caretip-brand-orange, #e9781c);
 }
 
-/* Mobile — content-driven hero height, curve after feature list */
+/* Mobile — document scroll; marketing + form stack and grow naturally */
 @media (max-width: 767px) {
   .caretip-auth-curved-container {
     overflow-x: clip;
-    overflow-y: auto;
-    overscroll-behavior-y: contain;
-    -webkit-overflow-scrolling: touch;
+    overflow-y: visible;
+    overscroll-behavior: auto;
+    height: auto;
+    min-height: 100dvh;
+    min-height: 100svh;
   }
 
   .caretip-auth-curved-brand {
@@ -366,19 +375,33 @@
     width: 100%;
   }
 
-  .caretip-auth-card--stable {
-    max-height: min(34rem, calc(100dvh - 7rem));
+  .caretip-auth-card,
+  .caretip-auth-card--stable,
+  .caretip-auth-card--recovery {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .caretip-auth-card--stable .caretip-auth-card-body,
+  .caretip-auth-card-body--recovery {
+    overflow: visible;
+    flex: 0 1 auto;
     min-height: 0;
   }
 
-  .caretip-auth-card--stable .caretip-auth-card-body {
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
+  .caretip-auth-recovery-inner {
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom, 0px));
   }
 
-  .caretip-auth-card {
-    overflow: hidden;
+  .caretip-auth-page :is(input, select, textarea, button[type="submit"]) {
+    scroll-margin-bottom: 5.5rem;
+  }
+
+  .caretip-auth-stage {
+    overflow: visible;
+    min-height: 100dvh;
+    min-height: 100svh;
+    height: auto;
   }
 }
 
@@ -397,6 +420,7 @@
   .caretip-auth-curved-container {
     flex-direction: row;
     align-items: stretch;
+    overflow: hidden;
   }
 
   .caretip-auth-curved-brand {
@@ -565,10 +589,8 @@
 
 .caretip-auth-card--stable {
   display: flex;
-  max-height: min(36rem, calc(100dvh - 2.5rem));
   min-height: 0;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .caretip-auth-card--stable .caretip-auth-header,
@@ -576,24 +598,31 @@
   flex-shrink: 0;
 }
 
-.caretip-auth-card--stable .caretip-auth-card-body {
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+@media (min-width: 768px) {
+  .caretip-auth-card--stable {
+    max-height: min(34rem, calc(100dvh - 3rem));
+    overflow: hidden;
+  }
 
-.caretip-auth-card--stable .caretip-auth-card-body::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
+  .caretip-auth-card--stable .caretip-auth-card-body {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 
-.caretip-auth-card--stable .caretip-auth-card-body::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
+  .caretip-auth-card--stable .caretip-auth-card-body::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .caretip-auth-card--stable .caretip-auth-card-body::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .caretip-auth-card--stable.caretip-auth-card--signup,
@@ -609,14 +638,6 @@
   .caretip-auth-card--signup .caretip-auth-header {
     padding-top: 0.875rem;
   }
-
-  .caretip-auth-card--stable {
-    max-height: min(34rem, calc(100dvh - 3rem));
-  }
-
-  .caretip-auth-card--recovery {
-    max-height: min(30rem, calc(100dvh - 3rem));
-  }
 }
 
 .caretip-auth-card-body {
@@ -628,28 +649,34 @@
 
 .caretip-auth-card--recovery {
   min-height: 0;
-  max-height: min(32rem, calc(100dvh - 2.5rem));
 }
 
-.caretip-auth-card-body--recovery {
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
+@media (min-width: 768px) {
+  .caretip-auth-card--recovery {
+    max-height: min(30rem, calc(100dvh - 3rem));
+    overflow: hidden;
+  }
 
-.caretip-auth-card-body--recovery::-webkit-scrollbar {
-  display: none;
-  width: 0;
-  height: 0;
-}
+  .caretip-auth-card-body--recovery {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
 
-.caretip-auth-card-body--recovery::-webkit-scrollbar-button {
-  display: none;
-  width: 0;
-  height: 0;
+  .caretip-auth-card-body--recovery::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .caretip-auth-card-body--recovery::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .caretip-auth-card::before {

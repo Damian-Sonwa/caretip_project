@@ -27,7 +27,7 @@ export function AuthRecoveryLayout({
   return (
     <div
       className={cn(
-        "caretip-auth-page caretip-auth-recovery-stage relative min-h-[100dvh] font-sans",
+        "caretip-auth-page caretip-auth-recovery-stage relative font-sans",
         compactMarketing && "caretip-auth-recovery-stage--compact-marketing",
       )}
     >
