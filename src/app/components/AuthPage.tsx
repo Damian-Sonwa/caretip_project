@@ -658,9 +658,9 @@ export function AuthPage() {
                       </button>
                       <div className="caretip-auth-password-meter">
                         <div
-                          className="h-full min-w-0 rounded-full transition-all duration-300"
+                          className="caretip-auth-password-meter__fill"
                           style={{
-                            width: `${getPasswordStrength(password).score}%`,
+                            transform: `scaleX(${getPasswordStrength(password).score / 100})`,
                             backgroundColor:
                               getPasswordStrength(password).strength === 'strong'
                                 ? '#111827'

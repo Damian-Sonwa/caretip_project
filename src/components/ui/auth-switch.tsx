@@ -19,7 +19,7 @@ function syncMobileHeroMetrics(container: HTMLElement, brand: HTMLElement) {
 }
 
 export interface AuthCurvedBlobShellProps {
-  /** Animates the curved blob toward the sign-up position when true. */
+  /** Reserved — marketing copy only; curved panel stays static for performance. */
   signUpMode?: boolean;
   brandPanel: ReactNode;
   authPanel: ReactNode;
@@ -27,12 +27,11 @@ export interface AuthCurvedBlobShellProps {
 }
 
 /**
- * Full-height auth layout with an animated circular curved divider.
+ * Full-height auth layout with a static circular curved divider.
  * Visual shell only — pass brand + auth content as children slots.
- * CareTip-branded (slate + orange); adapted from sliding-panel auth pattern.
  */
 export function AuthCurvedBlobShell({
-  signUpMode = false,
+  signUpMode: _signUpMode = false,
   brandPanel,
   authPanel,
   className,
@@ -69,7 +68,6 @@ export function AuthCurvedBlobShell({
       ref={containerRef}
       className={cn(
         "caretip-auth-curved-container",
-        signUpMode && "caretip-auth-curved-container--sign-up",
         className,
       )}
     >

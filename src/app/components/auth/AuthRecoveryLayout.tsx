@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { AuthSplitLayout } from "./AuthSplitLayout";
 
@@ -24,7 +23,6 @@ export function AuthRecoveryLayout({
   compactMarketing = false,
 }: AuthRecoveryLayoutProps) {
   const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
 
   return (
     <div
@@ -34,12 +32,7 @@ export function AuthRecoveryLayout({
       )}
     >
       <AuthSplitLayout compactMarketing={compactMarketing}>
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
-          className="caretip-auth-recovery-inner"
-        >
+        <div className="caretip-auth-recovery-inner">
           <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery caretip-auth-card--verify-email">
             {title ? (
               <div className="caretip-auth-header caretip-auth-header--verify !mb-3">
@@ -54,7 +47,7 @@ export function AuthRecoveryLayout({
               <Link to="/login">{t("auth.recovery.backToSignIn")}</Link>
             </p>
           ) : null}
-        </motion.div>
+        </div>
       </AuthSplitLayout>
     </div>
   );

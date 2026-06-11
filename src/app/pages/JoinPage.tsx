@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router";
-import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { KeyRound } from "lucide-react";
 import { AuthErrorSlot, AuthStableSubmitButton } from "@/app/components/auth/AuthFormStability";
@@ -16,7 +15,6 @@ export function JoinPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const params = useParams();
-  const reduceMotion = useReducedMotion();
   const prefilledCode = useMemo(() => (params.code ? String(params.code) : ""), [params.code]);
   const [code, setCode] = useState(prefilledCode);
   const [busy, setBusy] = useState(false);
@@ -49,12 +47,7 @@ export function JoinPage() {
   return (
     <div className="caretip-auth-page min-h-[100dvh] font-sans">
       <AuthSplitLayout authLane="employee">
-        <motion.div
-          initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: reduceMotion ? 0 : 0.4 }}
-          className="caretip-auth-card-wrap"
-        >
+        <div className="caretip-auth-card-wrap">
           <div className="caretip-auth-card caretip-auth-card--stable caretip-auth-card--recovery">
             <div className="caretip-auth-header">
               <p className="text-sm font-semibold text-primary">{t("join.eyebrow")}</p>
@@ -101,7 +94,7 @@ export function JoinPage() {
               </p>
             </div>
           </div>
-        </motion.div>
+        </div>
       </AuthSplitLayout>
     </div>
   );

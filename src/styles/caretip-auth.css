@@ -48,7 +48,6 @@
     rgba(255, 200, 140, 0.04) 42%,
     transparent 72%
   );
-  filter: blur(2px);
 }
 
 .caretip-auth-atmosphere__warm-bottom {
@@ -116,16 +115,10 @@
   width: 2000px;
   border-radius: 50%;
   transform: translateY(-50%);
-  transition: transform 1.8s ease-in-out, right 1.8s ease-in-out;
   background:
     radial-gradient(circle at 28% 18%, rgba(233, 120, 28, 0.28) 0%, transparent 42%),
     radial-gradient(circle at 72% 82%, rgba(233, 120, 28, 0.16) 0%, transparent 48%),
     linear-gradient(145deg, #0f172a 0%, #111827 48%, #1e293b 100%);
-}
-
-.caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
-  right: 52%;
-  transform: translate(100%, -50%);
 }
 
 .caretip-auth-curved-brand {
@@ -186,28 +179,7 @@
   display: none;
 }
 
-/* Sign-up: blob shifts right — use dark copy on the light page canvas */
-.caretip-auth-curved-container--sign-up .caretip-auth-marketing {
-  color: #0f172a;
-}
-
-.caretip-auth-curved-container--sign-up .caretip-auth-marketing__headline {
-  color: #0f172a;
-}
-
-.caretip-auth-curved-container--sign-up .caretip-auth-marketing__body {
-  color: #334155;
-}
-
-.caretip-auth-curved-container--sign-up .caretip-auth-marketing__benefits li {
-  color: #1e293b;
-}
-
-.caretip-auth-curved-container--sign-up .caretip-auth-marketing__badge {
-  border-color: rgba(233, 120, 28, 0.35);
-  background: rgba(233, 120, 28, 0.08);
-  color: #c2410c;
-}
+/* Sign-up copy swaps instantly; marketing stays on the dark blob (no panel slide). */
 
 .caretip-auth-marketing__glow {
   pointer-events: none;
@@ -261,7 +233,6 @@
   letter-spacing: -0.03em;
   line-height: 1.15;
   color: #fff;
-  transition: color 0.6s ease;
 }
 
 .caretip-auth-marketing__body {
@@ -271,7 +242,6 @@
   font-weight: 500;
   line-height: 1.55;
   color: rgba(250, 250, 250, 0.82);
-  transition: color 0.6s ease;
 }
 
 .caretip-auth-marketing__benefits {
@@ -291,7 +261,6 @@
   font-weight: 500;
   line-height: 1.45;
   color: rgba(250, 250, 250, 0.92);
-  transition: color 0.6s ease;
 }
 
 .caretip-auth-marketing__content > :first-child {
@@ -337,11 +306,6 @@
     height: min(145vmax, 1680px);
     width: min(145vmax, 1680px);
     transform: translate(-50%, -42%);
-    transition: transform 1.8s ease-in-out, top 0.35s ease;
-  }
-
-  .caretip-auth-curved-container--sign-up .caretip-auth-curved-blob {
-    transform: translate(-50%, 24%);
   }
 
   .caretip-auth-curved-container[data-auth-mobile-ready] .caretip-auth-curved-blob {
@@ -513,12 +477,61 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .caretip-auth-curved-blob {
-    transition: none;
+  .caretip-auth-curved-blob,
+  .caretip-auth-marketing__headline,
+  .caretip-auth-marketing__body,
+  .caretip-auth-marketing__benefits li {
+    transition: none !important;
   }
 }
 
-/* Legacy stage (platform admin login, etc.) */
+/* —— Auth performance: static hero, lightweight paints —— */
+.caretip-auth-curved-blob {
+  will-change: auto;
+}
+
+.caretip-auth-marketing__glow,
+.caretip-auth-marketing__grain {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .caretip-auth-atmosphere__warm-top,
+  .caretip-auth-atmosphere__warm-bottom {
+    filter: none;
+  }
+
+  .caretip-auth-atmosphere__grain {
+    display: none;
+  }
+
+  .caretip-auth-card {
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.07);
+  }
+
+  .dark .caretip-auth-card {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+  }
+
+  .caretip-auth-tab-active {
+    box-shadow: none;
+  }
+
+  .caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled) {
+    transform: none;
+    box-shadow: 0 4px 14px -6px rgba(233, 120, 28, 0.32);
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-auth-marketing--blob-overlay .caretip-auth-marketing__glow,
+  .caretip-auth-marketing--blob-overlay .caretip-auth-marketing__grain {
+    display: none;
+  }
+}
+
 .caretip-auth-stage {
   position: relative;
   display: flex;
@@ -546,10 +559,8 @@
   background: #ffffff;
   padding: 1.125rem 1.125rem 1rem;
   box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.8) inset,
-    0 1px 2px rgba(15, 23, 42, 0.04),
-    0 8px 24px -12px rgba(15, 23, 42, 0.1),
-    0 20px 48px -32px rgba(15, 23, 42, 0.14);
+    0 1px 2px rgba(15, 23, 42, 0.05),
+    0 6px 20px -10px rgba(15, 23, 42, 0.1);
 }
 
 .caretip-auth-card--stable {
@@ -668,12 +679,10 @@
 
 .dark .caretip-auth-card {
   border-color: rgba(64, 64, 64, 0.55);
-  background: rgba(23, 23, 23, 0.92);
+  background: rgba(23, 23, 23, 0.96);
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.04) inset,
-    0 1px 2px rgba(0, 0, 0, 0.25),
-    0 16px 40px -20px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(10px);
+    0 1px 3px rgba(0, 0, 0, 0.28);
 }
 
 .dark .caretip-auth-card::before {
@@ -910,7 +919,7 @@
   font-weight: 600;
   color: var(--caretip-brand-orange, #e9781c);
   text-underline-offset: 3px;
-  transition: color 0.2s ease, opacity 0.2s ease;
+  transition: color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .caretip-auth-footer-link a:hover {
@@ -975,7 +984,7 @@
 
 .caretip-auth-tab-idle {
   color: rgb(82 82 82);
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition: background-color 0.2s ease-out, color 0.2s ease-out;
 }
 
 .caretip-auth-tab-idle:hover {
@@ -1017,10 +1026,7 @@
   line-height: 1.35;
   color: rgb(23 23 23);
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
-  transition:
-    border-color 0.2s ease,
-    box-shadow 0.2s ease,
-    background-color 0.2s ease;
+  transition: border-color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .caretip-auth-field::placeholder {
@@ -1087,7 +1093,7 @@ select.caretip-auth-field {
   transform: translateY(-50%);
   padding: 0.25rem;
   color: rgb(115 115 115);
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .caretip-auth-field-toggle:hover {
@@ -1108,19 +1114,19 @@ select.caretip-auth-field {
   font-size: 0.875rem;
   font-weight: 700;
   box-shadow: 0 8px 20px -12px rgba(233, 120, 28, 0.55);
-  transition: box-shadow 0.2s ease, transform 0.2s ease;
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
 }
 
 .caretip-auth-page .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled),
 .caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled) {
-  box-shadow: 0 12px 28px -14px rgba(233, 120, 28, 0.62);
+  transform: translateY(-1px);
 }
 
 .caretip-auth-inline-link {
   font-size: 0.75rem;
   font-weight: 600;
   color: rgb(115 115 115);
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .caretip-auth-inline-link:hover {
@@ -1139,7 +1145,7 @@ select.caretip-auth-field {
   font-weight: 600;
   color: rgb(23 23 23);
   text-underline-offset: 4px;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease-out, opacity 0.2s ease-out;
 }
 
 .caretip-auth-form-footer button:hover {
@@ -1350,7 +1356,7 @@ select.caretip-auth-field {
 .caretip-auth-password-rules-slot {
   min-height: 3.25rem;
   overflow: hidden;
-  transition: min-height 0.2s ease, opacity 0.2s ease;
+  transition: opacity 0.2s ease-out;
 }
 
 .caretip-auth-password-rules-slot--idle {
@@ -1495,6 +1501,14 @@ select.caretip-auth-field {
   background: rgb(229 229 229);
 }
 
+.caretip-auth-password-meter__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  transform-origin: left center;
+  transition: transform 0.2s ease-out, opacity 0.2s ease-out;
+}
+
 .dark .caretip-auth-password-meter {
   background: rgb(64 64 64);
 }
@@ -1542,8 +1556,19 @@ select.caretip-auth-field {
 @media (prefers-reduced-motion: reduce) {
   .caretip-auth-field,
   .caretip-auth-tab-idle,
+  .caretip-auth-tab-active,
   .caretip-auth-inline-link,
-  .caretip-auth-form-footer button {
-    transition-duration: 0.01ms;
+  .caretip-auth-form-footer button,
+  .caretip-auth-field-toggle,
+  .caretip-auth-page .caretip-auth-submit.caretip-btn-primary,
+  .caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary,
+  .caretip-auth-password-rules-slot,
+  .caretip-auth-password-meter__fill {
+    transition: none !important;
+  }
+
+  .caretip-auth-page .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled),
+  .caretip-auth-split-layout .caretip-auth-submit.caretip-btn-primary:hover:not(:disabled) {
+    transform: none;
   }
 }

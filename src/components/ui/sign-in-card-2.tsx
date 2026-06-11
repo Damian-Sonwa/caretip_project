@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
 import { AuthSplitLayout } from "@/app/components/auth/AuthSplitLayout";
 
@@ -39,7 +38,6 @@ export function SignInCard2({
   topSlot,
 }: SignInCard2Props) {
   const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
   const isEmployee = authLane === "employee";
   const showModeTabs = !sessionActive && modeScope === "both";
 
@@ -84,12 +82,7 @@ export function SignInCard2({
 
   return (
     <AuthSplitLayout topSlot={topSlot} signUpMode={!sessionActive && !isLogin} authLane={authLane}>
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: reduceMotion ? 0 : 0.4, ease: [0.22, 1, 0.36, 1] }}
-        className={cn("caretip-auth-card-wrap", className)}
-      >
+      <div className={cn("caretip-auth-card-wrap", className)}>
         <div
           className={cn(
             "caretip-auth-card caretip-auth-card--stable",
@@ -122,7 +115,7 @@ export function SignInCard2({
                   disabled={formBusy}
                   onClick={handleSignInTab}
                   className={cn(
-                    "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
+                    "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,color] duration-150 ease-out",
                     isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",
                     formBusy && "cursor-not-allowed opacity-60",
                   )}
@@ -136,7 +129,7 @@ export function SignInCard2({
                   disabled={formBusy}
                   onClick={handleSignUpTab}
                   className={cn(
-                    "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,box-shadow,color] duration-200",
+                    "flex-1 rounded-full py-1.5 text-sm font-semibold transition-[background-color,color] duration-150 ease-out",
                     !isLogin ? "caretip-auth-tab-active" : "caretip-auth-tab-idle",
                     formBusy && "cursor-not-allowed opacity-60",
                   )}
@@ -149,7 +142,7 @@ export function SignInCard2({
 
           <div className="caretip-auth-card-body">{children}</div>
         </div>
-      </motion.div>
+      </div>
     </AuthSplitLayout>
   );
 }

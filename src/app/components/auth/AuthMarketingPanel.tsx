@@ -31,9 +31,6 @@ export function AuthMarketingPanel({
       )}
       aria-label={t(`${prefix}.panelAria`)}
     >
-      <div className="caretip-auth-marketing__glow" aria-hidden />
-      <div className="caretip-auth-marketing__grain" aria-hidden />
-
       <div className="caretip-auth-marketing__inner">
         <div className="caretip-auth-marketing__content">
           <CareTipLogo size="auth" align="left" layoutIsolatedDouble visualScale={compact ? 1.05 : 1.72} />
