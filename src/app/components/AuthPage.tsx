@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { AuthFieldGroup } from './auth/AuthFieldGroup';
@@ -33,8 +33,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
-import { commitAuthUser, hasClientStoredSession } from '../lib/authUserStore';
-import { hasClientSessionHint } from '../lib/authSessionHint';
+import { commitAuthUser } from '../lib/authUserStore';
 import {
   AuthErrorSlot,
   AuthFormStatusSlot,
@@ -104,8 +103,9 @@ export function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
-  const { login, register, loginWithOAuth, logout, user, sessionValidated, authStatus, isAuthLoading } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, sessionValidated } = useAuth();
   const authInFlightRef = useRef(false);
+  const postAuthRedirectRef = useRef<string | null>(null);
 
   const resolvedInviteCode =
     authLane === 'employee' && !isLogin
@@ -194,13 +194,15 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  /** Validated session on matching auth lane → app home (no flash / no wrong-lane loops). */
-  useEffect(() => {
+  /** Validated session on matching auth lane → app home (layout effect = before paint, no blank hold). */
+  useLayoutEffect(() => {
     if (!user || !sessionValidated || isSubmitting) return;
     if (!isPublicAuthenticationPath(location.pathname)) return;
     if (!sessionMatchesBusinessStaffAuthTarget(user.role, authLane)) return;
     const target = getPostAuthRedirect(user);
     if (location.pathname === target) return;
+    if (postAuthRedirectRef.current === target) return;
+    postAuthRedirectRef.current = target;
     navigate(target, { replace: true });
   }, [authLane, navigate, sessionValidated, user, location.pathname, isSubmitting]);
 
@@ -444,20 +446,12 @@ export function AuthPage() {
   const showEmployeeSignupFields = !isLogin && authLane === 'employee';
 
   const resumeSessionPending = user != null && !sessionValidated;
-  const redirectingAfterAuth =
-    Boolean(user) && sessionValidated && isPublicAuthenticationPath(location.pathname);
+  const inviteGateBlocking = isEmployeeJoinSignup && !inviteGateReady;
 
-  const mayRestoreSessionOnAuthPage =
-    hasClientStoredSession() || hasClientSessionHint() || user != null;
+  /** Only block UI for invite validation — never for redirects or session-hint-only bootstrap. */
+  useAppLoadingRegistration("auth-page", APP_LOADING_PRIORITY.AUTH, inviteGateBlocking);
 
-  const showAuthBlocking =
-    (authStatus === "initializing" && mayRestoreSessionOnAuthPage) ||
-    redirectingAfterAuth ||
-    (isEmployeeJoinSignup && !inviteGateReady);
-
-  useAppLoadingRegistration("auth-page", APP_LOADING_PRIORITY.AUTH, showAuthBlocking);
-
-  if (showAuthBlocking) {
+  if (inviteGateBlocking) {
     return <GlobalAppLoadingHold />;
   }
 

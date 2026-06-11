@@ -252,6 +252,20 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
 
     if (overlayPhase === "hidden") return;
 
+    const publicShellPath = isPublicShellPath(
+      window.location.pathname.split("?")[0]?.split("#")[0] ?? "/",
+    );
+    if (publicShellPath) {
+      if (exitDebounceRef.current !== null) {
+        window.clearTimeout(exitDebounceRef.current);
+        exitDebounceRef.current = null;
+      }
+      overlayDismissedAtRef.current = Date.now();
+      setOverlayPhase("hidden");
+      traceGlobalOverlayDismissed();
+      return;
+    }
+
     if (exitDebounceRef.current !== null) {
       window.clearTimeout(exitDebounceRef.current);
     }

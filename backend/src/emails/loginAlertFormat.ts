@@ -1,6 +1,6 @@
 export type LoginAlertLocale = "en" | "de";
 
-const PRIVATE_IPV4 =
+export const PRIVATE_IPV4 =
   /^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
 
 /** Validates IANA timezone for Intl; falls back to UTC. */

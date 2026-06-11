@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -35,9 +35,12 @@ export function PlatformAdminLoginPage() {
     user && sessionValidated && !isPlatformAdminSessionRole(user.role),
   );
 
-  useEffect(() => {
+  const adminRedirectRef = useRef(false);
+  useLayoutEffect(() => {
     if (!user || !sessionValidated) return;
     if (!isPlatformAdminSessionRole(user.role)) return;
+    if (adminRedirectRef.current) return;
+    adminRedirectRef.current = true;
     navigate("/platform-admin/dashboard", { replace: true });
   }, [user, sessionValidated, navigate]);
 

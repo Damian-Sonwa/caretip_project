@@ -9,6 +9,8 @@ import { inferNotificationTemplate } from "../../notifications/notificationTempl
 import { prisma } from "../../prisma.js";
 
 const DEDUPE_WINDOW_MS = 60_000;
+/** Login alerts — same user + device fingerprint within this window is one event. */
+export const LOGIN_NOTIFICATION_DEDUPE_MS = 5 * 60 * 1000;
 
 export type InboxNotificationDto = {
   id: string;
@@ -125,8 +127,9 @@ export function toInboxDto(
 export async function findRecentDuplicateNotification(
   userId: string,
   dedupeKey: string,
+  windowMs: number = DEDUPE_WINDOW_MS,
 ): Promise<{ id: string } | null> {
-  const since = new Date(Date.now() - DEDUPE_WINDOW_MS);
+  const since = new Date(Date.now() - windowMs);
   return prisma.notification.findFirst({
     where: { userId, dedupeKey, createdAt: { gte: since } },
     select: { id: true },
@@ -148,7 +151,9 @@ export async function createInboxNotification(input: {
   if (!title || !message) return null;
 
   if (input.dedupeKey) {
-    const dup = await findRecentDuplicateNotification(input.userId, input.dedupeKey);
+    const windowMs =
+      input.type === "new_login" ? LOGIN_NOTIFICATION_DEDUPE_MS : DEDUPE_WINDOW_MS;
+    const dup = await findRecentDuplicateNotification(input.userId, input.dedupeKey, windowMs);
     if (dup) return null;
   }
 

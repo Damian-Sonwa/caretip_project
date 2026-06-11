@@ -5,7 +5,6 @@
 import {
   formatLoginAlertDevice,
   formatLoginAlertTimestamp,
-  maskIpForLoginAlert,
   resolveLoginAlertTimeZone,
 } from "./loginAlertFormat.js";
 import {
@@ -514,35 +513,48 @@ export function buildEmployeeActivationContent(input: {
   return { subject: copy.subject, html, text };
 }
 
+export type LoginAlertVariant = "normal" | "suspicious";
+
 export function buildLoginAlertContent(input: {
   locale: EmailLocale;
   when?: Date;
   whenIso?: string;
-  ip?: string | null;
   userAgent?: string | null;
   timeZone?: string | null;
   appBaseUrl?: string | null;
   recipientName?: string | null;
   businessName?: string | null;
+  /** City/country label — never a raw IP. */
+  locationLabel?: string | null;
+  variant?: LoginAlertVariant;
 }): { subject: string; html: string; text: string } {
   const loc = input.locale === "de" ? "de" : "en";
+  const variant = input.variant ?? "normal";
   const b = bundle(loc);
   const when = input.when ?? new Date(input.whenIso ?? Date.now());
   const timeZone = resolveLoginAlertTimeZone(input.timeZone);
   const whenFormatted = formatLoginAlertTimestamp(when, loc, timeZone);
   const device = formatLoginAlertDevice(input.userAgent, loc);
-  const ipMasked = maskIpForLoginAlert(input.ip, loc);
+  const location = input.locationLabel?.trim() || null;
   const appBase = (input.appBaseUrl?.trim() || "https://caretip.de").replace(/\/$/, "");
   const securityUrl = `${appBase}/forgot-password`;
 
   const copy =
     loc === "de"
       ? {
-          subject: "Anmeldung bei Ihrem CareTip-Konto",
-          preheader: "Wir haben eine Anmeldung bei Ihrem Konto festgestellt.",
-          headline: "Anmeldung bestätigen",
+          subject:
+            variant === "suspicious"
+              ? "Anmeldung bei Ihrem CareTip-Konto"
+              : "Neue Anmeldung bei CareTip",
+          preheader:
+            variant === "suspicious"
+              ? "Wir haben eine Anmeldung bei Ihrem Konto festgestellt."
+              : "Es gab eine neue Anmeldung bei Ihrem CareTip-Konto.",
+          headline: variant === "suspicious" ? "Anmeldeaktivität" : "Neue Anmeldung",
           intro:
-            "Es gab eine Anmeldung bei Ihrem CareTip-Konto. Nachfolgend finden Sie die Details:",
+            variant === "suspicious"
+              ? "Es gab eine Anmeldung bei Ihrem CareTip-Konto von einem neuen Gerät oder Standort. Nachfolgend finden Sie die Details:"
+              : "Ihr CareTip-Konto wurde verwendet, um sich anzumelden. Nachfolgend finden Sie die Details:",
           whenLabel: "Zeit",
           deviceLabel: "Gerät",
           locationLabel: "Standort",
@@ -555,10 +567,19 @@ export function buildLoginAlertContent(input: {
           help: "Bei Fragen besuchen Sie unsere Hilfe oder wenden Sie sich an Ihren Administrator.",
         }
       : {
-          subject: "Sign-in to your CareTip account",
-          preheader: "We noticed a sign-in to your account.",
-          headline: "Sign-in activity",
-          intro: "Someone signed in to your CareTip account. Here are the details:",
+          subject:
+            variant === "suspicious"
+              ? "Sign-in to your CareTip account"
+              : "New sign-in to your CareTip account",
+          preheader:
+            variant === "suspicious"
+              ? "We noticed a sign-in to your account."
+              : "Your CareTip account was used to sign in.",
+          headline: variant === "suspicious" ? "Sign-in activity" : "New sign in",
+          intro:
+            variant === "suspicious"
+              ? "Someone signed in to your CareTip account from a new device or location. Here are the details:"
+              : "Your CareTip account was used to sign in. Here are the details:",
           whenLabel: "Time",
           deviceLabel: "Device",
           locationLabel: "Location",
@@ -573,7 +594,7 @@ export function buildLoginAlertContent(input: {
   const metaRows = [
     { label: copy.whenLabel, value: whenFormatted },
     ...(device ? [{ label: copy.deviceLabel, value: device }] : []),
-    ...(ipMasked ? [{ label: copy.locationLabel, value: ipMasked }] : []),
+    ...(location ? [{ label: copy.locationLabel, value: location }] : []),
   ];
 
   const greeting = formatEmailGreeting(loc, {

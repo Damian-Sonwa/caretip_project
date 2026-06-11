@@ -145,8 +145,16 @@ export function onPayoutCompletedForTransaction(transactionId: string): void {
   });
 }
 
-/** 3. Login / security alert. */
-export function onLoginSecurityAlert(userId: string): void {
+/** 3. Login / security alert — in-app + push only (email is sent by loginAlertEmail.service). */
+export function onLoginSecurityAlert(
+  userId: string,
+  opts?: {
+    deviceFingerprint: string;
+    suspicious?: boolean;
+    dedupeKey?: string;
+    locale?: "en" | "de";
+  },
+): void {
   safeTrigger("onLoginSecurityAlert", async () => {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -157,19 +165,28 @@ export function onLoginSecurityAlert(userId: string): void {
         ? "/dashboard/settings?section=security"
         : "/employee/settings";
 
+    const suspicious = opts?.suspicious === true;
+    const dedupeKey = opts?.dedupeKey ?? `login:${userId}:${opts?.deviceFingerprint ?? "unknown"}`;
+
     await deliverUserNotification({
       userId,
       payload: {
         type: NotificationType.LOGIN_SECURITY,
-        title: "New sign in",
-        body: "",
-        localeTemplate: { id: "login_security" },
+        title: suspicious ? "Sign-in activity" : "New sign in",
+        body: suspicious
+          ? "A sign-in from a new device or location was detected."
+          : "Your CareTip account was used to sign in.",
+        localeTemplate: suspicious ? undefined : { id: "login_security" },
         url,
         timestamp: new Date().toISOString(),
-        metadata: { entityId: userId },
+        metadata: {
+          entityId: userId,
+          deviceFingerprint: opts?.deviceFingerprint ?? "",
+          suspicious: suspicious ? "true" : "false",
+        },
       },
-      dedupeKey: `login:${userId}:${new Date().toISOString().slice(0, 13)}`,
-      channels: { in_app: true, push: true, email: true },
+      dedupeKey,
+      channels: { in_app: true, push: true, email: false },
     });
   });
 }

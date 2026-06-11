@@ -74,11 +74,13 @@ const samples = [
     ...buildLoginAlertContent({
       locale: "en",
       when: new Date(),
-      ip: "203.0.113.42",
-      userAgent: "Mozilla/5.0 Chrome",
+      locationLabel: "Abuja, Nigeria",
+      userAgent:
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       recipientName: "Max",
       businessName: "CareTip Hospitality",
       appBaseUrl: base,
+      variant: "normal",
     }),
   },
   {
