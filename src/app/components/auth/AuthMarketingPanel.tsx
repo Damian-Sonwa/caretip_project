@@ -43,7 +43,7 @@ export function AuthMarketingPanel({ lane = "business", compact = false }: AuthM
 
       <div className="caretip-auth-marketing__inner">
         <div className="caretip-auth-marketing__content">
-          <CareTipLogo size="auth" align="start" layoutIsolatedDouble visualScale={compact ? 0.92 : 1.28} />
+          <CareTipLogo size="auth" align="left" layoutIsolatedDouble visualScale={compact ? 1.05 : 1.72} />
 
           <span className="caretip-auth-marketing__badge">{t(`${prefix}.badge`)}</span>
 

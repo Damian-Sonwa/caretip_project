@@ -37,6 +37,12 @@ export default defineConfig(({ mode }) => {
   return {
   /** Required for correct asset URLs on Vercel and other static hosts. */
   base: '/',
+  /** Always resolve from repo root even when `npm run dev` is started from a subfolder. */
+  root: fileURLToPath(new URL('.', import.meta.url)),
+  cacheDir: 'node_modules/.vite',
+  optimizeDeps: {
+    include: ['recharts', 'react', 'react-dom', 'react-router'],
+  },
   /** Expose VITE_* and NEXT_PUBLIC_* from .env to import.meta.env (QR / app URL). */
   envPrefix: ['VITE_', 'NEXT_PUBLIC_'],
   define: {

@@ -101,7 +101,7 @@ export function SignInCard2({
             )}
           >
             <div className="caretip-auth-logo-wrap caretip-auth-logo-wrap--card md:hidden">
-              <CareTipLogo size="auth" align="center" layoutIsolatedDouble visualScale={1.18} />
+              <CareTipLogo size="auth" align="center" layoutIsolatedDouble visualScale={1.55} />
             </div>
             <h1 className="caretip-auth-title">{title}</h1>
             <p className="caretip-auth-subtitle">{subtitle}</p>

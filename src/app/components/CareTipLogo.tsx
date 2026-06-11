@@ -105,10 +105,15 @@ export function CareTipLogo({
   }
 
   if (layoutIsolatedDouble && size === "auth") {
+    const leftAligned = align === "left";
+    const slotHeightRem = 3.5;
     return (
       <span
         className={cn(
-          "relative flex h-11 w-full max-w-[250px] items-center justify-center overflow-hidden",
+          "relative block w-full min-h-[3.5rem] overflow-visible sm:min-h-[4rem]",
+          leftAligned
+            ? "max-w-[min(22rem,94vw)]"
+            : "mx-auto max-w-[min(17.5rem,88vw)]",
           className
         )}
       >
@@ -119,11 +124,13 @@ export function CareTipLogo({
           height={240}
           className={cn(
             imgBase,
-            "pointer-events-none absolute top-1/2 left-1/2 max-h-none w-auto max-w-[min(250px,82vw)] -translate-x-1/2 -translate-y-1/2 object-center drop-shadow-[0_1px_1px_rgba(0,0,0,0.08)]"
+            "pointer-events-none absolute top-1/2 max-h-none w-auto -translate-y-1/2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]",
+            leftAligned
+              ? "left-0 max-w-[min(22rem,94vw)] object-left object-contain"
+              : "left-1/2 max-w-[min(17.5rem,88vw)] -translate-x-1/2 object-center object-contain",
           )}
           style={{
-            height: `${m * 2.75}rem`,
-            maxWidth: "min(250px, 82vw)",
+            height: `${m * slotHeightRem}rem`,
           }}
           loading="lazy"
           decoding="async"
