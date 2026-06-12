@@ -69,13 +69,13 @@ export function onTipReceived(payload: NewTipPayload): void {
       dedupeKey: `tip:${payload.tip.id}:employee:${employeeUserId}`,
     });
 
-    let managerUserId = payload.businessManagerUserId;
+    let managerUserId: string | undefined = payload.businessManagerUserId;
     if (managerUserId === undefined) {
       const business = await prisma.business.findUnique({
         where: { id: payload.businessId },
         select: { userId: true },
       });
-      managerUserId = business?.userId ?? null;
+      managerUserId = business?.userId ?? undefined;
     }
 
     if (managerUserId && managerUserId !== employeeUserId) {

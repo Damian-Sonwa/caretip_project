@@ -95,13 +95,6 @@ export function buildKycTimeline(input: {
       label: "Verification rejected — upload again",
     });
   }
-  if (entries.length === 0) {
-    entries.push({
-      status: "PENDING_UPLOAD",
-      at: new Date().toISOString(),
-      label: "Upload required documents",
-    });
-  }
   return entries;
 }
 
