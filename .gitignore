@@ -58,6 +58,7 @@ Desktop.ini
 *.md
 !/README.md
 !/github-cleanup-audit.md
+!/disabled-workflows-report.md
 
 # --- Local restore / accidental paste dumps ---
 .restore_*.txt
