@@ -39,10 +39,12 @@ if: github.event_name == 'workflow_dispatch'
 
 ## Verification
 
-After disabling, a push to `main` should show the **CI** workflow run with:
+Verified on push commit `61de6a9` ([CI run #15](https://github.com/Caretip/CareTip/actions/runs/27405584539)):
 
-- `frontend-quality` — runs
-- `backend-tests` — skipped
-- `frontend-e2e` — skipped
+| Job | Conclusion |
+|-----|------------|
+| `frontend-quality` | success (ran) |
+| `backend-tests` | **skipped** |
+| `frontend-e2e` | **skipped** |
 
-Skipped jobs do not fail and should not send failure notifications.
+Overall workflow conclusion: **success**. Skipped jobs do not fail and do not send failure notifications.
