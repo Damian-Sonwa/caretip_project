@@ -135,7 +135,7 @@ npm run db:migrate
 | Field | Value |
 |-------|-------|
 | **Venue** | Brasserie Lindenstraße (KYC **verified**, onboarding marked complete) |
-| **Extra staff (optional)** | `anna.staff.demo@caretip.de`, Sam, Jordan — same password |
+| **Extra staff (optional)** | `anna.staff.demo@caretip.de`, Sam, Jordan, Luca, Sofia, Emma, Tom, Lina, Marco — same password |
 
 Amber ribbons on the **business**, **employee**, and **platform admin** shells mark walkthrough accounts. Demo business rows are isolated to that venue; the admin shell still reads the real database (see ribbon copy on `/platform-admin/*`).
 

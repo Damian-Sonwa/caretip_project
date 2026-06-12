@@ -755,7 +755,7 @@ async function getBusinessStatsSummaryImpl(
     ...ctx,
     totalTips,
     tipCount,
-    employeeCount: roster.roster_total,
+    employeeCount: roster.tipping_ready,
   });
 
   return {
@@ -766,7 +766,7 @@ async function getBusinessStatsSummaryImpl(
     timeframe,
     totalTips,
     tipCount,
-    employeeCount: roster.roster_total,
+    employeeCount: roster.tipping_ready,
     operationalPulse: {
       tipsLast60m: { amount: summaryMetrics.last60Amount, count: summaryMetrics.last60Count },
       tipsToday: { amount: summaryMetrics.todayAmount, count: summaryMetrics.todayCount },

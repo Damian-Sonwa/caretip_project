@@ -114,7 +114,9 @@ export function LocationsPage() {
             </Link>
             <div className="min-w-0 space-y-1">
               <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("business.locationsPage.title")}</h1>
-              <p className="text-sm text-muted-foreground">{t("business.locationsPage.subtitle")}</p>
+              {t("business.locationsPage.subtitle").trim() ? (
+                <p className="text-sm text-muted-foreground">{t("business.locationsPage.subtitle")}</p>
+              ) : null}
             </div>
           </div>
           <Button

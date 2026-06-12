@@ -18,11 +18,11 @@ const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest }
 export const businessUi = {
   ...employeeUiRest,
   page: "business-page min-h-0 pb-16 sm:pb-20",
-  pageInner: "caretip-container business-page__inner pt-4 max-lg:pt-3.5 sm:pt-7",
+  pageInner: "caretip-container business-page__inner px-4 pt-4 max-lg:pt-4 sm:px-6 sm:pt-7",
   /** Overview analytics stack — consistent vertical rhythm below hero. */
-  section: "employee-section business-dashboard-section space-y-5 sm:space-y-6 lg:space-y-7",
+  section: "employee-section business-dashboard-section space-y-6 sm:space-y-7 lg:space-y-8",
   statsGrid:
-    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-5",
+    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3.5 sm:gap-4 lg:grid-cols-4 lg:gap-5",
   analyticsChartsGrid:
     "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
   bottomGrid:

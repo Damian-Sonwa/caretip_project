@@ -112,7 +112,9 @@ export function CustomerFeedbackPage() {
             <h1 className="text-2xl font-bold tracking-tight text-foreground">
               {t("business.customerFeedback.pageTitle")}
             </h1>
-            <p className="text-sm text-muted-foreground">{t("business.customerFeedback.pageDesc")}</p>
+            {t("business.customerFeedback.pageDesc").trim() ? (
+              <p className="text-sm text-muted-foreground">{t("business.customerFeedback.pageDesc")}</p>
+            ) : null}
           </div>
         </div>
         {summaryLine ? (

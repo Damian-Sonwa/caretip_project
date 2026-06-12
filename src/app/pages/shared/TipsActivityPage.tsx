@@ -172,7 +172,9 @@ export function TipsActivityPage() {
       <div className={ui.pageInner}>
       <header className="mb-6 sm:mb-8">
         <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{t("business.tipsActivity.title")}</h1>
-        <p className={cn("mt-2", ui.cardDesc)}>{t("business.tipsActivity.subtitle")}</p>
+        {t("business.tipsActivity.subtitle").trim() ? (
+          <p className={cn("mt-2", ui.cardDesc)}>{t("business.tipsActivity.subtitle")}</p>
+        ) : null}
       </header>
 
       <motion.div

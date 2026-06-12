@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useLocation } from 'react-router';
 import { AuthFieldGroup } from './auth/AuthFieldGroup';
@@ -11,7 +11,7 @@ import {
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
-import { useAuth, type UserRole } from '../hooks/useAuth';
+import { useAuth, type User } from '../hooks/useAuth';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import {
   getPasswordChecklist,
@@ -39,10 +39,7 @@ import {
   AuthFormStatusSlot,
   AuthStableSubmitButton,
 } from './auth/AuthFormStability';
-import {
-  isPublicAuthenticationPath,
-  sessionMatchesBusinessStaffAuthTarget,
-} from '../lib/authSession';
+import { sessionMatchesBusinessStaffAuthTarget } from '../lib/authSession';
 import {
   clearValidatedInviteContext,
   readValidatedInviteContext,
@@ -106,6 +103,18 @@ export function AuthPage() {
   const { login, register, loginWithOAuth, logout, user, sessionValidated } = useAuth();
   const authInFlightRef = useRef(false);
   const postAuthRedirectRef = useRef<string | null>(null);
+
+  /** Single post-auth navigation — only after explicit login/OAuth/continue (never on mount/back). */
+  const redirectAfterAuth = useCallback(
+    (sessionUser: User) => {
+      const target = getPostAuthRedirect(sessionUser);
+      if (location.pathname === target) return;
+      if (postAuthRedirectRef.current === target) return;
+      postAuthRedirectRef.current = target;
+      navigate(target, { replace: true });
+    },
+    [location.pathname, navigate],
+  );
 
   const resolvedInviteCode =
     authLane === 'employee' && !isLogin
@@ -194,18 +203,6 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   }, [isLogin, location.pathname]);
 
-  /** Validated session on matching auth lane → app home (layout effect = before paint, no blank hold). */
-  useLayoutEffect(() => {
-    if (!user || !sessionValidated || isSubmitting) return;
-    if (!isPublicAuthenticationPath(location.pathname)) return;
-    if (!sessionMatchesBusinessStaffAuthTarget(user.role, authLane)) return;
-    const target = getPostAuthRedirect(user);
-    if (location.pathname === target) return;
-    if (postAuthRedirectRef.current === target) return;
-    postAuthRedirectRef.current = target;
-    navigate(target, { replace: true });
-  }, [authLane, navigate, sessionValidated, user, location.pathname, isSubmitting]);
-
   const validateEmail = (email: string) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
@@ -217,7 +214,7 @@ export function AuthPage() {
 
     if (user != null && !sessionValidated) return;
     if (user != null && sessionValidated) {
-      navigate(getPostAuthRedirect(user), { replace: true });
+      redirectAfterAuth(user);
       return;
     }
 
@@ -257,7 +254,7 @@ export function AuthPage() {
     try {
       if (isLogin) {
         const loggedIn = await login(email, password);
-        navigate(getPostAuthRedirect(loggedIn), { replace: true });
+        redirectAfterAuth(loggedIn);
       } else {
         const payload = {
           email,
@@ -360,19 +357,9 @@ export function AuthPage() {
     setUnlockedFields(new Set());
   };
 
-  const navigateAfterAuth = (r: UserRole) => {
-    if (r === 'business') {
-      navigate('/dashboard', { replace: true });
-    } else if (r === 'platform_admin' || r === 'admin') {
-      navigate('/platform-admin/dashboard', { replace: true });
-    } else {
-      navigate('/employee/dashboard', { replace: true });
-    }
-  };
-
   const runGoogleOAuth = async (idToken: string) => {
     if (user != null && sessionValidated) {
-      navigate(getPostAuthRedirect(user), { replace: true });
+      redirectAfterAuth(user);
       return;
     }
     if (!isLogin && authLane === 'employee') {
@@ -408,7 +395,7 @@ export function AuthPage() {
       if (!isLogin && authLane === 'employee') {
         clearValidatedInviteContext();
       }
-      navigate(getPostAuthRedirect(loggedIn), { replace: true });
+      redirectAfterAuth(loggedIn);
     } catch (err) {
       logClientError('AuthPage.oauth', err);
       if (isApiRequestError(err) && err.code === GOOGLE_ACCOUNT_NOT_REGISTERED_CODE) {
@@ -458,16 +445,13 @@ export function AuthPage() {
   const sameLaneValidated =
     user != null &&
     sessionValidated &&
-    (isLogin || sessionMatchesBusinessStaffAuthTarget(user.role, role));
+    sessionMatchesBusinessStaffAuthTarget(user.role, authLane);
   const showSignInForm =
     !user ||
     !sessionValidated ||
     (!isLogin && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
-  const showCrossSessionHint =
-    !isLogin &&
-    user != null &&
-    sessionValidated &&
-    !sessionMatchesBusinessStaffAuthTarget(user.role, role);
+  const showAuthenticatedSessionHint =
+    user != null && sessionValidated && !showSignInForm;
 
   const sessionRoleLabel =
     user?.role === 'platform_admin' || user?.role === 'admin'
@@ -478,7 +462,7 @@ export function AuthPage() {
           ? t('auth.page.sessionRoleBusiness')
           : user?.role ?? '';
 
-  const crossSessionBanner = showCrossSessionHint ? (
+  const sessionHintBanner = showAuthenticatedSessionHint ? (
     <div
       className="caretip-auth-notice-banner"
       role="region"
@@ -490,7 +474,7 @@ export function AuthPage() {
           <button
             type="button"
             disabled={!user}
-            onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
+            onClick={() => user && redirectAfterAuth(user)}
             className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
           >
             {t('auth.page.crossSessionContinue')}
@@ -521,8 +505,8 @@ export function AuthPage() {
           modeScope={isEmployeeJoinSignup ? 'signup-only' : 'both'}
           employeeVenueName={inviteContext?.businessName}
           inviteVerified={Boolean(inviteContext?.inviteCode)}
-          onEmployeeSignUpClick={() => navigate('/join')}
-          topSlot={crossSessionBanner}
+          onEmployeeSignUpClick={() => navigate('/join', { replace: true })}
+          topSlot={sessionHintBanner}
         >
           {showSignInForm ? (
           <form

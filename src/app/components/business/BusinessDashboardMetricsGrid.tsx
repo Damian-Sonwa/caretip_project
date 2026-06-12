@@ -58,7 +58,7 @@ function BusinessDashboardMetricsGridInner({
         value={<CountUpMetric value={totalTips} kind="eur" />}
         change={
           hasTipActivityInPeriod
-            ? t("business.dashboard.statsLiveTotals")
+            ? t("business.dashboard.statsLiveTotals", { count: tipCount })
             : t("format.metricZeroTips")
         }
         icon={<CareIcon name="earnings" size="md" />}
@@ -67,20 +67,18 @@ function BusinessDashboardMetricsGridInner({
         loading={loading}
         label={t("business.dashboard.activeEmployees")}
         value={<CountUpMetric value={employeeCount} kind="integer" />}
-        change={t("business.dashboard.activeEmployeesTopHint", {
-          count: topPerformersCount,
-        })}
+        change={
+          topPerformersCount > 0
+            ? t("business.dashboard.activeEmployeesTopHint", { count: topPerformersCount })
+            : undefined
+        }
         icon={<CareIcon name="team" size="md" />}
       />
       <BusinessStatCard
         loading={loading}
         label={t("business.dashboard.tipsCount")}
         value={<CountUpMetric value={tipCount} kind="integer" />}
-        change={
-          hasTipActivityInPeriod
-            ? t("business.dashboard.tipsCountHint")
-            : t("format.metricZeroTips")
-        }
+        change={hasTipActivityInPeriod ? undefined : t("format.metricZeroTips")}
         icon={<CareIcon name="employeePerformance" size="md" />}
       />
       <BusinessStatCard
@@ -92,7 +90,7 @@ function BusinessDashboardMetricsGridInner({
             kind="eur-whole"
           />
         }
-        change={t("business.dashboard.avgTipCoaching")}
+        change={hasTipActivityInPeriod && employeeCount > 0 ? undefined : t("format.metricZeroTips")}
         icon={<CareIcon name="analytics" size="md" />}
       />
     </div>

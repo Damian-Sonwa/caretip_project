@@ -583,9 +583,6 @@ export function EmployeeDashboard() {
                   </dd>
                 </div>
               </dl>
-              <div className="dashboard-hero-context-bridge">
-                <p className="dashboard-hero-context-bridge__text">{t("employee.hero.helperText")}</p>
-              </div>
             </motion.div>
           }
         />
@@ -609,11 +606,6 @@ export function EmployeeDashboard() {
               >
                 {t("employee.dashboard.analyticsSectionTitle")}
               </h2>
-              <p className="text-pretty text-sm leading-snug text-muted-foreground max-lg:line-clamp-2 lg:line-clamp-none">
-                {t("employee.dashboard.analyticsSectionDesc", {
-                  period: analyticsPeriodLabel(analyticsTimeframe),
-                })}
-              </p>
             </div>
             <DashboardStatusStrip
               placeholder={showMetricsLoading}
@@ -679,20 +671,6 @@ export function EmployeeDashboard() {
             <Card className={cn(employeeUi.cardStatic, employeeUi.chartCard, "w-full")}>
               <CardHeader className={employeeUi.cardHeader}>
                 <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.earningsTitle")}</CardTitle>
-                <CardDescription className={cn(employeeUi.cardDesc, "max-lg:line-clamp-3 lg:line-clamp-none")}>
-                  {analyticsTimeframe === "today" &&
-                    t("employee.dashboard.earningsDescToday", {
-                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
-                    })}
-                  {analyticsTimeframe === "week" &&
-                    t("employee.dashboard.earningsDescWeek", {
-                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
-                    })}
-                  {analyticsTimeframe === "month" &&
-                    t("employee.dashboard.earningsDescMonth", {
-                      tz: businessTimezone ? t("employee.dashboard.tzSuffix", { tz: businessTimezone }) : "",
-                    })}
-                </CardDescription>
               </CardHeader>
               <CardContent className="min-w-0 overflow-x-auto overflow-y-visible pb-2">
                 <DashboardStableChartSlot
@@ -785,11 +763,6 @@ export function EmployeeDashboard() {
                   >
                     <div>
                       <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.recentTips")}</CardTitle>
-                      <p className="mt-0.5 text-xs text-muted-foreground">
-                        {t("employee.dashboard.analyticsSectionDesc", {
-                          period: analyticsPeriodLabel(analyticsTimeframe),
-                        })}
-                      </p>
                     </div>
                   </button>
                   <Link
@@ -838,7 +811,6 @@ export function EmployeeDashboard() {
                 <Card className={cn(employeeUi.cardStatic, "w-full")}>
                   <CardHeader className={employeeUi.cardHeader}>
                     <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
-                    <CardDescription className={employeeUi.cardDesc}>{t("employee.dashboard.quickActionsDesc")}</CardDescription>
                   </CardHeader>
                   <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
                     <div className="grid grid-cols-2 gap-3">

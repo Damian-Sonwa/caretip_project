@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { useAuth, getPostAuthRedirect } from "../hooks/useAuth";
+import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
 import { toast } from "sonner";
@@ -62,7 +63,7 @@ const PAGE_DESC_KEYS = [
 export function BusinessOnboardingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
+  const { user, sessionValidated, setHasCompletedOnboarding, refetchUser, logout } = useAuth();
   const [step, setStep] = useState<OnboardingStep>(1);
   const [syncingOnboarding, setSyncingOnboarding] = useState(true);
 
@@ -88,19 +89,27 @@ export function BusinessOnboardingPage() {
   }, [logoFile, savedLogoPath]);
 
   useEffect(() => {
+    if (!sessionValidated || !user) return;
+
+    if (isOnboardingCompleted(user)) {
+      navigate(getPostAuthRedirect(user), { replace: true });
+      return;
+    }
+
     let cancelled = false;
     void (async () => {
       try {
-        const [fresh, profile] = await Promise.all([
-          refetchUser(),
-          fetchBusinessProfile({ silent: true }).catch(() => null),
-        ]);
+        const { onboardingStatusFromServer } = getAuthSessionFlags();
+        const fresh = onboardingStatusFromServer ? user : await refetchUser();
         if (cancelled) return;
 
         if (fresh && isOnboardingCompleted(fresh)) {
           navigate(getPostAuthRedirect(fresh), { replace: true });
           return;
         }
+
+        const profile = await fetchBusinessProfile({ silent: true }).catch(() => null);
+        if (cancelled) return;
 
         if (profile) {
           setLegalBusinessName(profile.name ?? "");
@@ -123,7 +132,7 @@ export function BusinessOnboardingPage() {
     return () => {
       cancelled = true;
     };
-  }, [navigate, refetchUser]);
+  }, [navigate, refetchUser, sessionValidated, user]);
 
   const canContinue = useMemo(() => {
     if (step === 1) return legalBusinessName.trim().length > 1 && businessType.trim().length > 0;

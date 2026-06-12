@@ -152,7 +152,7 @@ export function EmployeeNotificationsPage() {
         <div className={employeeUi.pageInner}>
           <EmployeePageHeader
             title={t("employee.notifications.title")}
-            description={t("employee.notifications.manageHint")}
+            description={t("employee.notifications.manageHint").trim() || undefined}
             backAriaLabel={t("employee.notifications.backAria")}
             leading={
               <div className={employeeUi.iconTileMuted}>
@@ -246,7 +246,7 @@ export function EmployeeNotificationsPage() {
       <div className={employeeUi.pageInner}>
         <EmployeePageHeader
           title={t("employee.notifications.title")}
-          description={t("employee.notifications.manageHint")}
+          description={t("employee.notifications.manageHint").trim() || undefined}
           backAriaLabel={t("employee.notifications.backAria")}
           leading={
             <div className={employeeUi.iconTileMuted}>

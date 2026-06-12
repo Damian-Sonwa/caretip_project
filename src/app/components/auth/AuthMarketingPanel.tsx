@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Check } from "lucide-react";
-import { CareTipLogo } from "@/app/components/CareTipLogo";
+import { CareTipLogo, CARE_TIP_LOGO_AUTH_SURFACE_CLASS } from "@/app/components/CareTipLogo";
 import { cn } from "@/lib/utils";
 import {
   getAuthMarketingContent,
@@ -47,16 +47,22 @@ export function AuthMarketingPanel({
               compact && "caretip-auth-marketing__brand-row--compact",
             )}
           >
-            <CareTipLogo
-              size="auth"
-              align="left"
-              layoutIsolatedDouble
-              visualScale={2}
+            <div
               className={cn(
-                "caretip-auth-marketing__logo",
-                compact && "caretip-auth-marketing__logo--compact",
+                CARE_TIP_LOGO_AUTH_SURFACE_CLASS,
+                "caretip-auth-logo-wrap caretip-auth-logo-wrap--marketing",
+                compact && "caretip-auth-logo-wrap--marketing-compact",
               )}
-            />
+            >
+              <CareTipLogo
+                size="auth"
+                align="center"
+                className={cn(
+                  "caretip-auth-marketing__logo caretip-auth-marketing__logo--on-surface",
+                  compact && "caretip-auth-marketing__logo--compact",
+                )}
+              />
+            </div>
 
             <span className="caretip-auth-marketing__badge">{t(`${prefix}.badge`)}</span>
           </div>

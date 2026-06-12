@@ -54,9 +54,11 @@ export function BusinessSettingsPage() {
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {t("business.settings.title")}
           </h1>
-          <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
-            {t("business.settings.subtitle")}
-          </p>
+          {t("business.settings.subtitle").trim() ? (
+            <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
+              {t("business.settings.subtitle")}
+            </p>
+          ) : null}
         </header>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">

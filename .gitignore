@@ -59,6 +59,13 @@ Desktop.ini
 !/README.md
 !/github-cleanup-audit.md
 !/disabled-workflows-report.md
+!/dashboard-ux-audit.md
+!/mobile-dashboard-audit-v2.md
+!/content-reduction-report.md
+!/auth-root-cause-analysis.md
+!/auth-navigation-audit-v2.md
+!/auth-mobile-consistency-audit.md
+!/auth-performance-report-v2.md
 
 # --- Local restore / accidental paste dumps ---
 .restore_*.txt

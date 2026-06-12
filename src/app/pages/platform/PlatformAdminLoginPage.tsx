@@ -1,4 +1,4 @@
-import { useState, useRef, useLayoutEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -35,14 +35,13 @@ export function PlatformAdminLoginPage() {
     user && sessionValidated && !isPlatformAdminSessionRole(user.role),
   );
 
-  const adminRedirectRef = useRef(false);
-  useLayoutEffect(() => {
-    if (!user || !sessionValidated) return;
-    if (!isPlatformAdminSessionRole(user.role)) return;
-    if (adminRedirectRef.current) return;
-    adminRedirectRef.current = true;
-    navigate("/platform-admin/dashboard", { replace: true });
-  }, [user, sessionValidated, navigate]);
+  const postAuthRedirectRef = useRef<string | null>(null);
+  const redirectAfterAuth = useCallback(() => {
+    const target = "/platform-admin/dashboard";
+    if (postAuthRedirectRef.current === target) return;
+    postAuthRedirectRef.current = target;
+    navigate(target, { replace: true });
+  }, [navigate]);
 
   const sessionRoleLabel =
     user?.role === "business"
@@ -67,7 +66,7 @@ export function PlatformAdminLoginPage() {
     setSubmitting(true);
     try {
       await login(trimmed, password);
-      navigate("/platform-admin/dashboard", { replace: true });
+      redirectAfterAuth();
     } catch (err) {
       logClientError("PlatformAdminLoginPage", err);
       if (isApiRequestError(err) && err.code === EMAIL_NOT_VERIFIED_CODE) {
@@ -86,7 +85,7 @@ export function PlatformAdminLoginPage() {
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <main className="caretip-auth-stage relative flex min-h-0 flex-1 flex-col">
           <AuthPageAtmosphere />
-          {showCrossSessionHint ? (
+          {showCrossSessionHint || sameLaneValidated ? (
             <div className="caretip-auth-notice-banner !pb-0" role="region" aria-label={t("auth.page.crossSessionRegionAria")}>
               <div className="caretip-auth-notice mb-6">
                 <p className="font-medium leading-snug">{t("auth.page.crossSessionBody", { role: sessionRoleLabel })}</p>
@@ -94,7 +93,14 @@ export function PlatformAdminLoginPage() {
                   <button
                     type="button"
                     disabled={!user}
-                    onClick={() => user && navigate(getPostAuthRedirect(user), { replace: true })}
+                    onClick={() => {
+                      if (!user) return;
+                      if (isPlatformAdminSessionRole(user.role)) {
+                        redirectAfterAuth();
+                        return;
+                      }
+                      navigate(getPostAuthRedirect(user), { replace: true });
+                    }}
                     className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
                   >
                     {t("auth.page.crossSessionContinue")}
@@ -159,12 +165,7 @@ export function PlatformAdminLoginPage() {
                 </motion.div>
               </div>
 
-              {sameLaneValidated ? (
-                <div className="flex flex-col items-center py-8 text-center" role="status" aria-live="polite">
-                  <Loader2 className="mb-3 h-8 w-8 animate-spin text-primary" aria-hidden />
-                  <p className="text-sm font-medium text-neutral-700 dark:text-neutral-200">{t("admin.loginPage.redirecting")}</p>
-                </div>
-              ) : (
+              {sameLaneValidated || showCrossSessionHint ? null : (
                 <form
                   onSubmit={(e) => void handleSubmit(e)}
                   aria-busy={submitting || Boolean(user && !sessionValidated)}

@@ -5,6 +5,7 @@
 import "../src/loadEnv.js";
 import { prisma } from "../src/prisma.js";
 import { login } from "../src/services/auth.service.js";
+import { invalidateBusinessStatsCache } from "../src/services/business.service.js";
 import {
   seedWalkthroughDemo,
   WALKTHROUGH_DEMO_ADMIN_EMAIL,
@@ -40,6 +41,14 @@ async function main() {
   console.log("Database target:", JSON.stringify(target, null, 2));
 
   await seedWalkthroughDemo(prisma);
+
+  const managerAfterSeed = await prisma.user.findUnique({
+    where: { email: WALKTHROUGH_DEMO_MANAGER_EMAIL },
+    include: { business: { select: { id: true } } },
+  });
+  if (managerAfterSeed?.business?.id) {
+    invalidateBusinessStatsCache(managerAfterSeed.business.id);
+  }
 
   const [manager, employee, admin] = await Promise.all([
     prisma.user.findUnique({

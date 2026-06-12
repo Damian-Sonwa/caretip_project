@@ -44,6 +44,54 @@ const STAFF = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
     monthlyGoal: 420,
   },
+  {
+    email: "luca.staff.demo@caretip.de",
+    name: "Luca Fischer",
+    jobTitle: "Sous chef",
+    slug: "wd-brasserie-luca",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 480,
+  },
+  {
+    email: "sofia.staff.demo@caretip.de",
+    name: "Sofia Reyes",
+    jobTitle: "Barista",
+    slug: "wd-brasserie-sofia",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 380,
+  },
+  {
+    email: "emma.staff.demo@caretip.de",
+    name: "Emma Chen",
+    jobTitle: "Sommelier",
+    slug: "wd-brasserie-emma",
+    avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 550,
+  },
+  {
+    email: "tom.staff.demo@caretip.de",
+    name: "Tom Berger",
+    jobTitle: "Runner",
+    slug: "wd-brasserie-tom",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 350,
+  },
+  {
+    email: "lina.staff.demo@caretip.de",
+    name: "Lina Hoffmann",
+    jobTitle: "Pastry chef",
+    slug: "wd-brasserie-lina",
+    avatar: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 460,
+  },
+  {
+    email: "marco.staff.demo@caretip.de",
+    name: "Marco Rossi",
+    jobTitle: "Floor manager",
+    slug: "wd-brasserie-marco",
+    avatar: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=150&h=150&fit=crop&crop=face",
+    monthlyGoal: 720,
+  },
 ] as const;
 
 function staggeredTipDate(daysAgo: number): Date {
@@ -285,9 +333,9 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   const tableMain = await prisma.table.findUniqueOrThrow({ where: { qrSlug: TABLE_QR_MAIN } });
   const tableGarden = await prisma.table.findUniqueOrThrow({ where: { qrSlug: TABLE_QR_GARDEN } });
 
-  const employeeRows: { id: string; userId: string }[] = [];
+  const employeeRows: { id: string; userId: string; name: string; monthlyGoal: number }[] = [];
 
-  for (const s of STAFF) {
+  for (const [staffIndex, s] of STAFF.entries()) {
     const eu = await prisma.user.upsert({
       where: { email: s.email },
       update: {
@@ -313,7 +361,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         slug: s.slug,
         avatar: s.avatar,
         businessId: business.id,
-        locationId: locMain.id,
+        locationId: staffIndex % 2 === 0 ? locMain.id : locGarden.id,
         isActive: true,
         activationStatus: "active",
         monthlyGoal: s.monthlyGoal,
@@ -325,13 +373,13 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
         avatar: s.avatar,
         businessId: business.id,
         userId: eu.id,
-        locationId: locMain.id,
+        locationId: staffIndex % 2 === 0 ? locMain.id : locGarden.id,
         isActive: true,
         activationStatus: "active",
         monthlyGoal: s.monthlyGoal,
       },
     });
-    employeeRows.push({ id: emp.id, userId: eu.id });
+    employeeRows.push({ id: emp.id, userId: eu.id, name: s.name, monthlyGoal: s.monthlyGoal });
   }
 
   const demoEmpUser = await prisma.user.upsert({
@@ -384,55 +432,30 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     },
   });
 
-  employeeRows.push({ id: demoPrimaryEmployee.id, userId: demoEmpUser.id });
-
-  const [e0, e1] = employeeRows;
-  if (e0 && e1) {
-    await prisma.employeeTableAssignment.upsert({
-      where: { employeeId_tableId: { employeeId: e0.id, tableId: tableMain.id } },
-      update: { employeeName: STAFF[0].name },
-      create: {
-        employeeId: e0.id,
-        tableId: tableMain.id,
-        employeeName: STAFF[0].name,
-      },
-    });
-    await prisma.employeeTableAssignment.upsert({
-      where: { employeeId_tableId: { employeeId: e1.id, tableId: tableGarden.id } },
-      update: { employeeName: STAFF[1].name },
-      create: {
-        employeeId: e1.id,
-        tableId: tableGarden.id,
-        employeeName: STAFF[1].name,
-      },
-    });
-    const e2 = employeeRows[2];
-    if (e2) {
-      await prisma.employeeTableAssignment.upsert({
-        where: { employeeId_tableId: { employeeId: e2.id, tableId: tableMain.id } },
-        update: { employeeName: STAFF[2].name },
-        create: {
-          employeeId: e2.id,
-          tableId: tableMain.id,
-          employeeName: STAFF[2].name,
-        },
-      });
-    }
-  }
-
-  await prisma.employeeTableAssignment.upsert({
-    where: {
-      employeeId_tableId: { employeeId: demoPrimaryEmployee.id, tableId: tableGarden.id },
-    },
-    update: { employeeName: "Mina Schmidt" },
-    create: {
-      employeeId: demoPrimaryEmployee.id,
-      tableId: tableGarden.id,
-      employeeName: "Mina Schmidt",
-    },
+  employeeRows.push({
+    id: demoPrimaryEmployee.id,
+    userId: demoEmpUser.id,
+    name: "Mina Schmidt",
+    monthlyGoal: 650,
   });
 
-  const tipAmounts = [8.5, 12, 15, 22, 6, 18, 9.5, 25, 11, 14, 7, 20, 16, 13.5, 19, 10, 24, 8, 17, 21, 12.5];
+  for (const [i, row] of employeeRows.entries()) {
+    const table = i % 2 === 0 ? tableMain : tableGarden;
+    await prisma.employeeTableAssignment.upsert({
+      where: { employeeId_tableId: { employeeId: row.id, tableId: table.id } },
+      update: { employeeName: row.name },
+      create: {
+        employeeId: row.id,
+        tableId: table.id,
+        employeeName: row.name,
+      },
+    });
+  }
+
+  const tipAmounts = [
+    8.5, 12, 15, 22, 6, 18, 9.5, 25, 11, 14, 7, 20, 16, 13.5, 19, 10, 24, 8, 17, 21, 12.5,
+    14.5, 9, 23, 11.5, 16, 7.5, 19.5, 13, 27, 8.75, 15.5, 20, 10.5, 18.25,
+  ];
   for (let i = 0; i < tipAmounts.length; i++) {
     const emp = employeeRows[i % employeeRows.length];
     if (!emp) continue;
@@ -496,6 +519,8 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     { id: "wdemotip033", amount: 12, employeeId: demoPrimaryEmployee.id, minutesAgo: 42 },
     { id: "wdemotip034", amount: 18.5, employeeId: employeeRows[0]?.id ?? demoPrimaryEmployee.id, minutesAgo: 18 },
     { id: "wdemotip035", amount: 9, employeeId: employeeRows[1]?.id ?? demoPrimaryEmployee.id, minutesAgo: 5 },
+    { id: "wdemotip036", amount: 14, employeeId: employeeRows[4]?.id ?? demoPrimaryEmployee.id, minutesAgo: 28 },
+    { id: "wdemotip037", amount: 22, employeeId: employeeRows[6]?.id ?? demoPrimaryEmployee.id, minutesAgo: 12 },
   ] as const;
   for (const tip of recentPulseTips) {
     await prisma.transaction.upsert({
@@ -527,23 +552,13 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   const now = new Date();
   const goalMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));
 
-  const goalByStaffIndex = [STAFF[0].monthlyGoal, STAFF[1].monthlyGoal, STAFF[2].monthlyGoal] as const;
-  for (let i = 0; i < employeeRows.length; i++) {
-    const row = employeeRows[i];
-    const amount = goalByStaffIndex[i];
-    if (!row || amount == null) continue;
+  for (const row of employeeRows) {
     await ensureActiveEmployeeGoal(prisma, row.id, {
-      goalAmount: amount,
+      goalAmount: row.monthlyGoal,
       goalPeriod: "monthly",
       startDate: goalMonthStart,
     });
   }
-
-  await ensureActiveEmployeeGoal(prisma, demoPrimaryEmployee.id, {
-    goalAmount: 650,
-    goalPeriod: "monthly",
-    startDate: goalMonthStart,
-  });
 
   const employeeUser = await prisma.user.findFirst({
     where: { email: WALKTHROUGH_DEMO_EMPLOYEE_EMAIL },
@@ -586,7 +601,9 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
   console.log(`  Employee: ${WALKTHROUGH_DEMO_EMPLOYEE_EMAIL} / ${WALKTHROUGH_DEMO_MANAGER_PASSWORD}`);
   console.log(`  Admin:    ${WALKTHROUGH_DEMO_ADMIN_EMAIL} / ${WALKTHROUGH_DEMO_MANAGER_PASSWORD}`);
   console.log(`  Venue:    ${BUSINESS_NAME} (verified) — team QR /${slug}`);
-  console.log(`  Staff:    ${STAFF.map((x) => x.name).join(", ")}, Mina Schmidt (primary demo employee login)`);
+  console.log(
+    `  Staff:    ${STAFF.length} roster (${STAFF.map((x) => x.name).join(", ")}) + Mina Schmidt (employee@ login)`,
+  );
   console.log("  Tables:   Main + Garden (QR slugs seeded)");
   console.log(
     `  Tips:     ${tipAmounts.length + demoEmpExtraAmounts.length + recentPulseTips.length} successful transactions (includes employee@ row + live pulse)`,

@@ -180,7 +180,6 @@ export function BusinessDashboard() {
   const [topPerformersExpanded, setTopPerformersExpanded] = useState(true);
   const [employeeGoalsExpanded, setEmployeeGoalsExpanded] = useState(true);
   /** Mobile-only: expand long “how it works” copy under the employee goals title. */
-  const [employeeGoalsDetailOpen, setEmployeeGoalsDetailOpen] = useState(false);
   const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
   const refreshTimerRef = useRef<number | null>(null);
   const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
@@ -253,6 +252,9 @@ export function BusinessDashboard() {
   };
 
   const rosterEmployees = displayStats?.employees ?? [];
+  const activeRosterCount = rosterEmployees.filter(
+    (e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true,
+  ).length;
   const topEmployees = rosterEmployees
     .filter((e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true)
     .sort((a, b) => b.tipsTotal - a.tipsTotal)
@@ -610,9 +612,6 @@ export function BusinessDashboard() {
                   </dd>
                 </div>
               </dl>
-              <div className="dashboard-hero-context-bridge">
-                <p className="dashboard-hero-context-bridge__text">{t("business.hero.helperText")}</p>
-              </div>
             </motion.div>
           }
         />
@@ -639,11 +638,6 @@ export function BusinessDashboard() {
                 >
                   {t("business.dashboard.analyticsSectionTitle")}
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  {t("business.dashboard.analyticsSectionDesc", {
-                    period: analyticsPeriodLabel(analyticsTimeframe),
-                  })}
-                </p>
               </div>
               <DashboardStatusStrip
                 placeholder={showMetricsSkeleton}
@@ -689,6 +683,14 @@ export function BusinessDashboard() {
                       employeeCount: devPeriod.employeeCount,
                     }
                   : displayMetrics
+                    ? {
+                        ...displayMetrics,
+                        employeeCount:
+                          activeRosterCount > 0
+                            ? activeRosterCount
+                            : (displayMetrics.employeeCount ?? 0),
+                      }
+                    : null
               }
               loading={showMetricsSkeleton}
               isPeriodRefreshing={isPeriodRefreshing}
@@ -717,9 +719,6 @@ export function BusinessDashboard() {
                     <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
                   </div>
                 </button>
-                <CardDescription className={cn(businessUi.cardDesc, "hidden text-pretty lg:block")}>
-                  {t("business.dashboard.employeeGoalsDesc")}
-                </CardDescription>
                 {employeeGoalsSummary ? (
                   <div className="business-dashboard-goals-summary" aria-label={t("business.dashboard.goalsSummaryAria")}>
                     <span className="business-dashboard-goals-pill business-dashboard-goals-pill--accent">
@@ -730,31 +729,6 @@ export function BusinessDashboard() {
                     </span>
                   </div>
                 ) : null}
-                <div className="space-y-2 lg:hidden">
-                  <p className="text-sm leading-snug text-muted-foreground">{t("business.dashboard.employeeGoalsDescShort")}</p>
-                  {employeeGoalsDetailOpen ? (
-                    <>
-                      <p className="text-sm leading-relaxed text-muted-foreground">{t("business.dashboard.employeeGoalsDesc")}</p>
-                      <button
-                        type="button"
-                        className="touch-manipulation text-left text-sm font-medium text-primary underline-offset-4 hover:underline"
-                        onClick={() => setEmployeeGoalsDetailOpen(false)}
-                      >
-                        {t("business.dashboard.employeeGoalsLess")}
-                      </button>
-                    </>
-                  ) : (
-                      <button
-                        type="button"
-                        className="touch-manipulation -mx-1 min-h-[44px] rounded-lg px-1 text-left text-sm font-medium text-primary underline-offset-4 hover:underline"
-                        onClick={() => setEmployeeGoalsDetailOpen(true)}
-                        aria-expanded={employeeGoalsDetailOpen}
-                        aria-label={t("business.dashboard.employeeGoalsMoreAria")}
-                      >
-                      {t("business.dashboard.employeeGoalsMore")}
-                    </button>
-                  )}
-                </div>
               </CardHeader>
               {employeeGoalsExpanded ? (
                 <CardContent
@@ -829,11 +803,6 @@ export function BusinessDashboard() {
               <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
                 <CardHeader className="business-dashboard-panel-card__header">
                   <CardTitle className="text-lg leading-snug">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
-                  <CardDescription className={businessUi.cardDesc}>
-                    {analyticsTimeframe === "week" && t("business.dashboard.dailyTipDistDescWeek")}
-                    {analyticsTimeframe === "month" && t("business.dashboard.dailyTipDistDescMonth")}
-                    {analyticsTimeframe === "year" && t("business.dashboard.dailyTipDistDescYear")}
-                  </CardDescription>
                 </CardHeader>
                 <CardContent
                   className={cn(
@@ -918,9 +887,6 @@ export function BusinessDashboard() {
               <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
                 <CardHeader className="business-dashboard-panel-card__header">
                   <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeePerformanceTitle")}</CardTitle>
-                  <CardDescription className={businessUi.cardDesc}>
-                    {t("business.dashboard.employeePerformanceDesc")}
-                  </CardDescription>
                 </CardHeader>
                 <CardContent
                   className={cn(
@@ -1173,7 +1139,6 @@ export function BusinessDashboard() {
                   >
                     <div className="min-w-0 flex-1">
                       <CardTitle className="text-lg">{t("business.dashboard.quickActions")}</CardTitle>
-                      <CardDescription>{t("business.dashboard.quickActionsDesc")}</CardDescription>
                     </div>
                   </button>
                 </CardHeader>
@@ -1246,9 +1211,6 @@ export function BusinessDashboard() {
                     </div>
                     <div className="business-dashboard-help-copy space-y-1">
                       <CardTitle className="text-base leading-snug">{t("business.dashboard.needHelpTitle")}</CardTitle>
-                      <CardDescription className={cn(businessUi.cardDesc, "text-sm")}>
-                        {t("business.dashboard.needHelpDesc")}
-                      </CardDescription>
                     </div>
                   </div>
                 </CardHeader>

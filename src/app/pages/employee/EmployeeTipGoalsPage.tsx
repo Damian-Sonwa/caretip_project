@@ -143,7 +143,7 @@ export function EmployeeTipGoalsPage() {
       <div className={employeeUi.pageInner}>
         <EmployeePageHeader
           title={t("employee.tipGoals.title")}
-          description={t("employee.tipGoals.subtitle")}
+          description={t("employee.tipGoals.subtitle").trim() || undefined}
           backAriaLabel={t("employee.tipGoals.backAria")}
           leading={
             <div className={employeeUi.iconTile}>

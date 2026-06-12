@@ -143,7 +143,9 @@ export function TablesPage() {
               <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
                 {t("business.tablesPage.title")}
               </h1>
-              <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
+              {t("business.tablesPage.subtitle").trim() ? (
+                <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
+              ) : null}
             </div>
           </div>
           <Button

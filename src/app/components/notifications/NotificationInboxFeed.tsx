@@ -353,7 +353,9 @@ export function NotificationInboxFeed({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
             <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{pageTitle}</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">{pageSubtitle}</p>
+            {pageSubtitle.trim() ? (
+              <p className="mt-0.5 text-sm text-muted-foreground">{pageSubtitle}</p>
+            ) : null}
             <p className="mt-2 text-sm font-medium text-foreground/90">
               {t("notifications.inbox.statsLine", {
                 unread: unreadCount,
