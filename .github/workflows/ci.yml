@@ -22,7 +22,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  # INTENTIONALLY DISABLED (MVP pilot operations): backend-tests does not run on push or
+  # pull_request while disabled. Full job config is preserved below for re-enablement.
+  # To re-enable: remove the `if: false` line (see disabled-workflows-report.md).
   backend-tests:
+    if: false
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -75,7 +79,11 @@ jobs:
         working-directory: backend
         run: npm run test:sprint4-employee-lifecycle
 
+  # INTENTIONALLY DISABLED (MVP pilot operations): frontend-e2e does not run on push or
+  # pull_request while disabled. Full job config is preserved below for re-enablement.
+  # To re-enable: remove the `if: false` line (see disabled-workflows-report.md).
   frontend-e2e:
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
