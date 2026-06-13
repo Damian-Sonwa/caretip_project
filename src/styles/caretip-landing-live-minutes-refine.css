@@ -58,7 +58,41 @@
     drop-shadow(0 8px 16px rgba(30, 24, 16, 0.08));
 }
 
-/* Step cards — separation without bulk */
+/* Numbered process steps (#how-it-works) */
+.caretip-landing #how-it-works .caretip-process-step {
+  transition:
+    border-color 0.28s ease,
+    background-color 0.28s ease,
+    box-shadow 0.28s ease;
+}
+
+.caretip-landing #how-it-works .caretip-process-step--active {
+  border-color: rgba(233, 120, 28, 0.2) !important;
+  background: rgba(255, 253, 250, 0.95);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04);
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step--active {
+  border-color: rgba(233, 120, 28, 0.28) !important;
+  background: rgba(233, 120, 28, 0.06);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active):hover {
+    background: rgba(17, 17, 17, 0.02);
+  }
+
+  html.dark .caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active):hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+.caretip-landing #how-it-works .caretip-process-step-number {
+  min-width: 3.25rem;
+}
+
+/* Legacy step cards — superseded by caretip-process-step */
 .caretip-landing #how-it-works .caretip-live-minutes-step {
   border-color: rgba(229, 229, 229, 0.92);
   background: rgba(255, 255, 255, 0.98);

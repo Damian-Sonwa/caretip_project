@@ -42,14 +42,14 @@ export function LandingFinalCtaSection() {
           </p>
         ) : null}
 
-        <div className="caretip-final-cta-actions mt-8 w-full min-w-0 sm:mt-9">
-          <div className="caretip-final-cta-action relative flex w-full min-w-0 justify-center">
+        <div className="caretip-final-cta-actions mt-6 w-full min-w-0 sm:mt-7">
+          <div className="caretip-final-cta-action caretip-landing-cta-unit relative mx-auto items-center">
             <div aria-hidden className="caretip-final-cta-button-glow pointer-events-none" />
             <Link
               to="/signup"
               className={cn(
                 landingUi.heroCtaPrimary,
-                "caretip-final-cta-button relative z-[1] max-w-full gap-2 px-8 max-lg:px-6 lg:min-w-[13.5rem]",
+                "caretip-final-cta-button relative z-[1] w-full max-w-full gap-2 px-8 max-lg:px-6 sm:w-auto lg:min-w-[13.5rem]",
               )}
             >
               {t("landing.finalCta.cta")}

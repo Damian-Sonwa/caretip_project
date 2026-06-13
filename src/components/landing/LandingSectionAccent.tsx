@@ -40,7 +40,13 @@ export function LandingSectionAccent({
       {muted && variant === "arrow" ? (
         <ArrowUpRight className={landingUi.sectionAccentIconMuted} strokeWidth={2} aria-hidden />
       ) : null}
-      <span className={muted ? landingUi.sectionAccentTextMuted : landingUi.sectionAccentText}>
+      <span
+        className={cn(
+          "caretip-landing-accent-text",
+          muted && "caretip-landing-accent-text--muted",
+          muted ? landingUi.sectionAccentTextMuted : landingUi.sectionAccentText,
+        )}
+      >
         {children}
       </span>
     </span>

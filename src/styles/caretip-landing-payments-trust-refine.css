@@ -161,7 +161,7 @@ html.dark .caretip-landing #payments-trust .caretip-payments-trust-card .caretip
 
 @media (hover: hover) {
   .caretip-landing #payments-trust .caretip-payments-trust-item:hover .caretip-payments-trust-icon {
-    box-shadow: 0 6px 18px -10px rgba(233, 120, 28, 0.18);
+    opacity: 1;
   }
 }
 

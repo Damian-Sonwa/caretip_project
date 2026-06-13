@@ -74,13 +74,15 @@ export function LandingMotivationSection() {
               className="caretip-motivation-points max-md:mx-0 max-md:max-w-none lg:mx-0"
             />
 
-            <div className="caretip-motivation-cta mt-5 flex w-full max-md:justify-start max-lg:justify-center sm:mt-7 lg:mt-8 lg:justify-start">
-              <Link
-                to="/signup"
-                className={cn(landingUi.heroCtaPrimary, "inline-flex gap-2 px-8")}
-              >
-                {t("landing.showcase.primaryCta")}
-              </Link>
+            <div className={cn(landingUi.sectionCtaCluster, "caretip-motivation-cta")}>
+              <div className={landingUi.sectionCtaUnit}>
+                <Link
+                  to="/signup"
+                  className={cn(landingUi.heroCtaPrimary, "inline-flex w-full items-center justify-center px-8 lg:w-auto")}
+                >
+                  {t("landing.showcase.primaryCta")}
+                </Link>
+              </div>
             </div>
           </div>
         </motion.div>

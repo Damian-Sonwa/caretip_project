@@ -8,7 +8,7 @@
   --caretip-hero-gap-tagline: 0.5rem;
   --caretip-hero-tagline-size: var(--caretip-tagline-size);
   --caretip-hero-gap-headline-body: 1rem;
-  --caretip-hero-gap-body-cta: 0.875rem;
+  --caretip-hero-gap-body-cta: 0.75rem;
   --caretip-hero-art-max-w: min(100%, 20rem);
   --caretip-hero-art-max-h: min(34rem, 70vh);
   --caretip-hero-art-aspect-ratio: 1;

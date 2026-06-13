@@ -194,13 +194,15 @@ html:not(.dark) .caretip-landing .caretip-showcase-float-card {
   --tw-ring-offset-shadow: 0 0 #0000;
 }
 
+.caretip-split-showcase-content-panel .caretip-landing-section-cta,
 .caretip-split-showcase-content-panel .caretip-split-showcase-cta {
-  margin-top: 1.25rem;
+  margin-top: 1rem;
 }
 
 @media (min-width: 1024px) {
+  .caretip-split-showcase-content-panel .caretip-landing-section-cta,
   .caretip-split-showcase-content-panel .caretip-split-showcase-cta {
-    margin-top: 1.5rem;
+    margin-top: 1.125rem;
   }
 }
 
@@ -234,25 +236,30 @@ html:not(.dark) .caretip-landing .caretip-showcase-float-card {
   }
 }
 
-/* Employee split section — spacing above CTA below benefit list */
-.caretip-landing #for-employees .caretip-split-showcase-cta {
-  margin-top: 1.5rem;
+/* Employee / business split sections — compact CTA spacing below benefits */
+.caretip-landing #for-employees .caretip-landing-section-cta,
+.caretip-landing #for-employees .caretip-split-showcase-cta,
+.caretip-landing #for-employees .caretip-motivation-cta {
+  margin-top: 1rem !important;
 }
 
 @media (min-width: 1024px) {
-  .caretip-landing #for-employees .caretip-split-showcase-cta {
-    margin-top: 1.75rem;
+  .caretip-landing #for-employees .caretip-landing-section-cta,
+  .caretip-landing #for-employees .caretip-split-showcase-cta,
+  .caretip-landing #for-employees .caretip-motivation-cta {
+    margin-top: 1.125rem !important;
   }
 }
 
-/* Business split section — extra space between benefit copy and CTA */
+.caretip-landing #business-section .caretip-landing-section-cta,
 .caretip-landing #business-section .caretip-split-showcase-cta {
-  margin-top: 1.75rem;
+  margin-top: 1.125rem;
 }
 
 @media (min-width: 1024px) {
+  .caretip-landing #business-section .caretip-landing-section-cta,
   .caretip-landing #business-section .caretip-split-showcase-cta {
-    margin-top: 2.25rem;
+    margin-top: 1.25rem;
   }
 }
 

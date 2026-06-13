@@ -125,16 +125,18 @@ export function LandingSplitShowcaseSection({
             </div>
 
             {cta ? (
-              <div className="caretip-split-showcase-cta flex w-full max-lg:justify-center">
-                <Link
-                  to={cta.to}
-                  className={cn(
-                    cta.to === "/join" ? landingUi.heroCtaSecondary : landingUi.heroCtaPrimary,
-                    "gap-2 lg:self-start",
-                  )}
-                >
-                  {cta.label}
-                </Link>
+              <div className={landingUi.sectionCtaCluster}>
+                <div className={landingUi.sectionCtaUnit}>
+                  <Link
+                    to={cta.to}
+                    className={cn(
+                      cta.to === "/join" ? landingUi.heroCtaSecondary : landingUi.heroCtaPrimary,
+                      "w-full lg:w-auto lg:self-start",
+                    )}
+                  >
+                    {cta.label}
+                  </Link>
+                </div>
               </div>
             ) : null}
           </div>

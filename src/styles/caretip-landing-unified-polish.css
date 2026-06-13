@@ -1,0 +1,125 @@
+/**
+ * Landing section accent badges — compact scale + soft brush underline.
+ */
+
+.caretip-landing [data-landing-accent] .caretip-landing-accent-text {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 0.28em;
+}
+
+.caretip-landing [data-landing-accent] .caretip-landing-accent-text::after {
+  content: "";
+  position: absolute;
+  left: 0.04em;
+  right: -0.06em;
+  bottom: 0.02em;
+  height: 0.24em;
+  border-radius: 999px;
+  background: linear-gradient(
+    104deg,
+    rgba(233, 120, 28, 0.52) 0%,
+    rgba(245, 158, 11, 0.34) 46%,
+    rgba(233, 120, 28, 0.06) 100%
+  );
+  transform: skewX(-7deg) scaleX(0.94);
+  transform-origin: left center;
+  pointer-events: none;
+}
+
+.caretip-landing [data-landing-accent] .caretip-landing-accent-text--muted::after {
+  background: linear-gradient(
+    104deg,
+    rgba(115, 115, 115, 0.34) 0%,
+    rgba(163, 163, 163, 0.2) 50%,
+    transparent 100%
+  );
+}
+
+html.dark .caretip-landing [data-landing-accent] .caretip-landing-accent-text::after {
+  background: linear-gradient(
+    104deg,
+    rgba(251, 191, 36, 0.44) 0%,
+    rgba(233, 120, 28, 0.26) 48%,
+    rgba(233, 120, 28, 0.05) 100%
+  );
+}
+
+html.dark .caretip-landing [data-landing-accent] .caretip-landing-accent-text--muted::after {
+  background: linear-gradient(
+    104deg,
+    rgba(163, 163, 163, 0.28) 0%,
+    rgba(115, 115, 115, 0.14) 55%,
+    transparent 100%
+  );
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .caretip-landing [data-landing-accent] .caretip-landing-accent-text::after {
+    transition: transform 0.25s ease, opacity 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .caretip-landing [data-landing-accent]:hover .caretip-landing-accent-text::after {
+      transform: skewX(-5deg) scaleX(1);
+      opacity: 1;
+    }
+  }
+}
+
+/* CTA groups — button + helper text as one compact unit */
+.caretip-landing .caretip-landing-cta-unit {
+  gap: 0.125rem;
+}
+
+.caretip-landing .caretip-landing-cta-unit > a,
+.caretip-landing .caretip-landing-cta-unit > button {
+  width: 100%;
+}
+
+.caretip-landing .caretip-landing-cta-hint {
+  margin: 0;
+  max-width: 100%;
+  text-wrap: balance;
+  hyphens: auto;
+}
+
+.caretip-landing .caretip-landing-cta-unit--section > a {
+  width: 100%;
+}
+
+.caretip-landing .caretip-landing-section-cta {
+  margin-top: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-landing-section-cta {
+    margin-top: 1.125rem;
+  }
+
+  .caretip-landing .caretip-landing-cta-unit--section {
+    align-items: flex-start;
+  }
+
+  .caretip-landing .caretip-landing-cta-row {
+    align-items: start;
+  }
+}
+
+.caretip-landing .caretip-landing-cta-row .caretip-landing-cta-hint {
+  padding-inline: 0.125rem;
+}
+
+html.dark .caretip-landing .caretip-landing-cta-hint {
+  color: rgb(163 163 163);
+}
+
+.caretip-landing .caretip-final-cta-subtitle + .caretip-final-cta-actions {
+  margin-top: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-final-cta-subtitle + .caretip-final-cta-actions {
+    margin-top: 1.625rem;
+  }
+}

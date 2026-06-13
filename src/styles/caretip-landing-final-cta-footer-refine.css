@@ -130,6 +130,10 @@ html.dark .caretip-landing .caretip-landing-final-cta::after {
 .caretip-landing .caretip-final-cta-action {
   position: relative;
   isolation: isolate;
+  display: flex;
+  width: 100%;
+  max-width: 20rem;
+  justify-content: center;
 }
 
 .caretip-landing .caretip-final-cta-button-glow {
@@ -286,7 +290,7 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
     overflow-x: clip;
     overflow-y: visible;
     min-height: 0;
-    padding-inline: 0.875rem;
+    padding-inline: 1rem;
     padding-top: 2.75rem;
     padding-bottom: 2.75rem;
     box-sizing: border-box;
@@ -390,6 +394,9 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
   }
 
   .caretip-landing .caretip-final-cta-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: auto;
     max-width: 100%;
     min-height: 2.75rem;

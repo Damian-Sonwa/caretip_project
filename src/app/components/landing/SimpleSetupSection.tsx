@@ -9,6 +9,10 @@ import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent"
 import { landingFadeReveal, useMinWidthMedia } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
+function formatStepNumber(index: number): string {
+  return String(index + 1).padStart(2, "0");
+}
+
 export function SimpleSetupSection() {
   const { t } = useTranslation();
   const reduceMotion = useReducedMotion();
@@ -46,11 +50,6 @@ export function SimpleSetupSection() {
         "caretip-live-minutes-section relative overflow-x-clip max-md:overflow-y-visible dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
       )}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-0"
-      />
-
       <motion.div
         className={cn(
           landingUi.splitGrid,
@@ -61,7 +60,7 @@ export function SimpleSetupSection() {
         <div className={cn(landingUi.copyColumn, "lg:order-1 lg:flex lg:flex-col lg:max-w-md xl:max-w-lg")}>
           <motion.div
             {...landingFadeReveal}
-            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-5 max-lg:mb-0 sm:mb-8 lg:mb-7")}
+            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-6 max-lg:mb-0 sm:mb-10 lg:mb-8")}
           >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
               <LandingSectionAccent variant="spark">{t("landing.simpleSetup.pill")}</LandingSectionAccent>
@@ -84,7 +83,7 @@ export function SimpleSetupSection() {
             className={cn("relative w-full", landingUi.mobileStackAfter)}
             {...landingFadeReveal}
           >
-            <div className="caretip-live-minutes-steps space-y-1 sm:space-y-2.5">
+            <div className="caretip-process-steps flex flex-col gap-6 sm:gap-8 lg:gap-9">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (
@@ -98,22 +97,23 @@ export function SimpleSetupSection() {
                     whileTap={reduceMotion || !isLgUp ? undefined : { scale: 0.995 }}
                     transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                     className={cn(
-                      "caretip-live-minutes-step group relative w-full rounded-xl border px-3 py-2.5 text-left sm:rounded-2xl sm:px-4 sm:py-4",
-                      isActive && "caretip-live-minutes-step--active",
+                      "caretip-process-step group relative w-full rounded-2xl border px-4 py-4 text-left sm:px-5 sm:py-5",
+                      isActive ? "caretip-process-step--active" : "border-transparent bg-transparent",
                     )}
                   >
-                    <motion.div className="flex items-start gap-3 sm:gap-3.5">
+                    <div className="flex items-start gap-4 sm:gap-5">
                       <span
                         className={cn(
-                          "relative z-[1] flex h-8 w-8 shrink-0 items-center justify-center rounded-full font-sans text-card-title font-bold tabular-nums transition-[background-color,color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] sm:h-9 sm:w-9",
+                          "caretip-process-step-number shrink-0 font-hero-display text-[2.75rem] font-extrabold leading-none tracking-tight tabular-nums sm:text-[3.25rem]",
                           isActive
-                            ? "bg-primary text-white shadow-[0_4px_12px_rgba(233,120,28,0.28)]"
-                            : "bg-neutral-100/90 text-neutral-600 group-hover:bg-neutral-200/80 dark:bg-neutral-800 dark:text-neutral-300",
+                            ? "text-primary"
+                            : "text-neutral-300 transition-colors duration-200 group-hover:text-neutral-400 dark:text-neutral-600 dark:group-hover:text-neutral-500",
                         )}
+                        aria-hidden
                       >
-                        {idx + 1}
+                        {formatStepNumber(idx)}
                       </span>
-                      <div className="min-w-0 flex-1 space-y-1 pt-0.5">
+                      <div className="min-w-0 flex-1 space-y-1.5 pt-1 sm:space-y-2 sm:pt-1.5">
                         <p
                           className={cn(
                             landingType.cardTitle,
@@ -124,10 +124,12 @@ export function SimpleSetupSection() {
                           {step.title}
                         </p>
                         {landingCopyVisible(step.description) ? (
-                          <p className={cn(landingType.featureBody, "leading-relaxed")}>{step.description}</p>
+                          <p className={cn(landingUi.cardFeatureBody, "max-w-prose")}>
+                            {step.description}
+                          </p>
                         ) : null}
                       </div>
-                    </motion.div>
+                    </div>
                   </motion.button>
                 );
               })}

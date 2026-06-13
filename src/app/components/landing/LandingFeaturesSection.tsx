@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { QrCode, LayoutDashboard, BarChart3, History, Wallet, Star } from "lucide-react";
+import { QrCode, Activity, BarChart3, History, Wallet, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
@@ -17,17 +17,13 @@ const cardClassName = cn(
   "dark:border-neutral-700/85 dark:bg-neutral-900/95",
 );
 
-const iconWrapClassName = cn(
-  "caretip-landing-feature-icon mb-3 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl sm:mb-5 sm:h-[52px] sm:w-[52px]",
-  "bg-primary/[0.14] text-primary ring-1 ring-primary/20",
-  "transition-[background-color,box-shadow,transform] duration-300 ease-out",
-  "group-hover:bg-primary/[0.17] group-hover:ring-primary/30",
+const iconWrapBaseClassName = cn(
+  "caretip-landing-feature-icon mb-3 shrink-0 sm:mb-5",
+  "transition-[background,box-shadow,transform,border-color] duration-300 ease-out",
   "md:group-hover:-translate-y-px",
-  "dark:bg-primary/20 dark:text-[#f0a84d] dark:ring-primary/30",
 );
 
-const iconClassName =
-  "h-4 w-4 stroke-[2.25] text-primary sm:h-[22px] sm:w-[22px] dark:text-[#f0a84d]";
+const iconGlyphClassName = "caretip-landing-feature-icon__glyph--obsidian";
 
 const featureAccentVariants: LandingAccentVariant[] = [
   "spark",
@@ -52,7 +48,7 @@ export function LandingFeaturesSection() {
           tag: t("landing.features.i1Tag"),
         },
         {
-          icon: LayoutDashboard,
+          icon: Activity,
           title: t("landing.features.i2Title"),
           text: t("landing.features.i2Text"),
           tag: t("landing.features.i2Tag"),
@@ -95,6 +91,20 @@ export function LandingFeaturesSection() {
       )}
     >
       <div className="relative mx-auto max-w-7xl">
+        <svg aria-hidden className="pointer-events-none absolute h-0 w-0 overflow-hidden">
+          <defs>
+            <linearGradient id="caretip-features-icon-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FCC842" />
+              <stop offset="42%" stopColor="#EF8728" />
+              <stop offset="100%" stopColor="#171717" />
+            </linearGradient>
+            <linearGradient id="caretip-features-icon-gradient-dark" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#FCD34D" />
+              <stop offset="40%" stopColor="#F6AB2A" />
+              <stop offset="100%" stopColor="#0a0a0a" />
+            </linearGradient>
+          </defs>
+        </svg>
         <div className={landingUi.sectionIntro}>
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
@@ -134,14 +144,25 @@ export function LandingFeaturesSection() {
                     variant={featureAccentVariants[idx % featureAccentVariants.length]}
                     className="caretip-landing-feature-accent mb-2.5 sm:mb-3"
                   >
-                    {item.tag}
-                  </LandingSectionAccent>
-                  <div className={iconWrapClassName}>
-                    <Icon className={iconClassName} aria-hidden />
-                  </div>
-                  <h3 className={cn(landingType.cardTitle, "tracking-tight text-neutral-900 dark:text-neutral-50")}>
                     {item.title}
-                  </h3>
+                  </LandingSectionAccent>
+                  <div
+                    className={cn(
+                      iconWrapBaseClassName,
+                      "caretip-landing-feature-icon--obsidian",
+                    )}
+                  >
+                    <Icon
+                      className={iconGlyphClassName}
+                      strokeWidth={2.25}
+                      aria-hidden
+                    />
+                  </div>
+                  {landingCopyVisible(item.tag) ? (
+                    <h3 className={cn(landingType.cardTitle, "tracking-tight text-neutral-900 dark:text-neutral-50")}>
+                      {item.tag}
+                    </h3>
+                  ) : null}
                   <p className={cn(landingUi.cardFeatureBody, "flex-1 text-neutral-600 dark:text-neutral-400")}>
                     {item.text}
                   </p>

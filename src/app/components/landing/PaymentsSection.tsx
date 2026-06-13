@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
 import { motion } from "motion/react";
-import { CreditCard as CreditCardIcon, Smartphone, Clock, ShieldCheck } from "lucide-react";
+import { CreditCard as CreditCardIcon, Link2, Receipt, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import paymentInfrastructureImg from "../../../../images/payment-infrastructure.png";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
@@ -10,34 +10,8 @@ import { landingType } from "@/components/landing/landingTypography";
 import { cn } from "@/lib/utils";
 import { PaymentsStripeBadge } from "./PaymentsStripeBadge";
 
-type PaymentsTrustAccent = "orange" | "gold" | "charcoal";
-
-const ACCENT_STYLES: Record<
-  PaymentsTrustAccent,
-  { iconWrap: string; icon: string }
-> = {
-  orange: {
-    iconWrap:
-      "border-primary/20 bg-gradient-to-br from-primary/[0.12] to-primary/[0.04] text-primary dark:border-primary/30 dark:from-primary/20 dark:to-primary/[0.06]",
-    icon: "text-primary dark:text-[#f0a84d]",
-  },
-  gold: {
-    iconWrap:
-      "border-[#E8A84A]/25 bg-gradient-to-br from-[#F59E0B]/[0.12] to-[#F59E0B]/[0.03] text-[#C47A12] dark:border-[#F59E0B]/30 dark:from-[#F59E0B]/18 dark:to-transparent dark:text-[#FBBF24]",
-    icon: "text-[#C47A12] dark:text-[#FBBF24]",
-  },
-  charcoal: {
-    iconWrap:
-      "border-neutral-300/80 bg-gradient-to-br from-neutral-100/90 to-neutral-50/40 text-neutral-600 dark:border-neutral-600/70 dark:from-neutral-800/80 dark:to-neutral-900/40 dark:text-neutral-300",
-    icon: "text-neutral-600 dark:text-neutral-300",
-  },
-};
-
-const ACCENT_CYCLE: PaymentsTrustAccent[] = ["orange", "gold", "charcoal", "orange"];
-
 type PaymentsTrustItem = {
   icon: LucideIcon;
-  accent: PaymentsTrustAccent;
   title: string;
   text: string;
 };
@@ -49,25 +23,24 @@ export function PaymentsSection() {
   const principle = t("landing.paymentsTrust.principle");
 
   const items = useMemo<PaymentsTrustItem[]>(
-    () =>
-      [
-        {
-          icon: CreditCardIcon,
-          title: t("landing.paymentsTrust.b1Title"),
-          text: t("landing.paymentsTrust.b1Text"),
-        },
-        { icon: Clock, title: t("landing.paymentsTrust.b2Title"), text: t("landing.paymentsTrust.b2Text") },
-        {
-          icon: Smartphone,
-          title: t("landing.paymentsTrust.b3Title"),
-          text: t("landing.paymentsTrust.b3Text"),
-        },
-        {
-          icon: ShieldCheck,
-          title: t("landing.paymentsTrust.b4Title"),
-          text: t("landing.paymentsTrust.b4Text"),
-        },
-      ].map((item, index) => ({ ...item, accent: ACCENT_CYCLE[index]! })),
+    () => [
+      {
+        icon: CreditCardIcon,
+        title: t("landing.paymentsTrust.b1Title"),
+        text: t("landing.paymentsTrust.b1Text"),
+      },
+      { icon: Receipt, title: t("landing.paymentsTrust.b2Title"), text: t("landing.paymentsTrust.b2Text") },
+      {
+        icon: Link2,
+        title: t("landing.paymentsTrust.b3Title"),
+        text: t("landing.paymentsTrust.b3Text"),
+      },
+      {
+        icon: ShieldCheck,
+        title: t("landing.paymentsTrust.b4Title"),
+        text: t("landing.paymentsTrust.b4Text"),
+      },
+    ],
     [t],
   );
 
@@ -144,7 +117,6 @@ export function PaymentsSection() {
           >
             {items.map((item, idx) => {
               const Icon = item.icon;
-              const accent = ACCENT_STYLES[item.accent];
               return (
                 <motion.li
                   key={item.title}
@@ -157,16 +129,15 @@ export function PaymentsSection() {
                 >
                   <div
                     className={cn(
-                      "caretip-payments-trust-icon flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border sm:h-12 sm:w-12",
-                      "transition-[transform,opacity,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "group-hover:-translate-y-0.5 group-hover:opacity-90",
-                      accent.iconWrap,
+                      "caretip-payments-trust-icon caretip-landing-feature-icon caretip-landing-feature-icon--obsidian",
+                      "transition-[transform,opacity,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
+                      "group-hover:-translate-y-0.5",
                     )}
                     aria-hidden
                   >
                     <Icon
-                      className={cn("h-5 w-5 sm:h-[1.35rem] sm:w-[1.35rem]", accent.icon)}
-                      strokeWidth={1.75}
+                      className="caretip-landing-feature-icon__glyph--obsidian"
+                      strokeWidth={2.25}
                     />
                   </div>
                   <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">

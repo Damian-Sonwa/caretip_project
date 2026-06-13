@@ -132,18 +132,18 @@ export const landingUi = {
 
   /** Row of lightweight section accents (replaces pill chips). */
   sectionAccentRow:
-    "flex w-full flex-wrap items-center justify-center gap-x-5 gap-y-2 max-lg:justify-center lg:justify-start",
+    "flex w-full flex-wrap items-center justify-center gap-x-4 gap-y-2 max-lg:justify-center lg:justify-start",
   sectionAccent: "relative inline-flex w-fit items-center gap-2 max-lg:mx-auto lg:mx-0",
   sectionAccentText:
-    `text-[11px] font-semibold uppercase tracking-[0.18em] ${brandAccentGradient}`,
+    `text-[11px] font-semibold uppercase tracking-[0.17em] ${brandAccentGradient}`,
   sectionAccentTextMuted:
-    "text-[11px] font-medium uppercase tracking-[0.16em] text-neutral-600 dark:text-neutral-400",
+    "text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-600 dark:text-neutral-400",
   sectionAccentIcon:
     "h-3 w-3 shrink-0 text-primary",
   sectionAccentIconMuted:
     "h-3 w-3 shrink-0 text-neutral-500/90 dark:text-neutral-500",
   sectionAccentGlow:
-    "pointer-events-none absolute -inset-x-4 -inset-y-2 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,120,28,0.14),transparent_72%)] opacity-55 blur-md",
+    "pointer-events-none absolute -inset-x-3.5 -inset-y-1.5 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,120,28,0.13),transparent_72%)] opacity-52 blur-md",
   sectionAccentLine:
     "h-px w-6 shrink-0 bg-gradient-to-r from-primary/60 via-primary/35 to-transparent",
   brandAccentIconWrap:
@@ -194,7 +194,7 @@ export const landingUi = {
     `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   showcaseActionCluster:
-    "mt-6 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
+    "mt-5 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
     "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",
@@ -262,17 +262,21 @@ export const landingUi = {
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:
-    "caretip-hero-cta-row relative z-10 flex w-full flex-col gap-3 [&_a]:no-underline max-lg:items-center max-lg:justify-center max-lg:gap-2.5",
+    "caretip-hero-cta-row caretip-landing-cta-row relative z-10 flex w-full flex-col gap-2 [&_a]:no-underline max-lg:items-center max-lg:justify-center lg:items-start",
   heroCtaUnit:
-    "caretip-hero-cta-unit flex w-full max-w-[min(100%,17.5rem)] flex-col items-center gap-0.5",
+    "caretip-hero-cta-unit caretip-landing-cta-unit flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch gap-0.5 max-lg:mx-auto lg:max-w-[15rem]",
   heroCtaHint:
-    "caretip-hero-cta-hint hidden text-center text-[11px] font-medium leading-tight tracking-[-0.01em] text-neutral-600 dark:text-neutral-300 md:block",
+    "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-neutral-500 dark:text-neutral-400 sm:text-[11px] sm:leading-[1.3]",
+  sectionCtaCluster:
+    "caretip-landing-section-cta flex w-full max-lg:justify-center lg:justify-start",
+  sectionCtaUnit:
+    "caretip-landing-cta-unit caretip-landing-cta-unit--section inline-flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch max-lg:mx-auto lg:max-w-none lg:items-start",
   heroCtaPrimary: cnCtaPrimary(
-    `${caretipBtnPrimary} caretip-hero-cta-button w-full min-w-0 text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
+    `${caretipBtnPrimary} caretip-hero-cta-button w-full min-w-0 items-center justify-center text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
   ),
   navCtaPrimary: cnCtaPrimary(`${caretipBtnPrimaryCompact} no-underline`),
   heroCtaSecondary: cnCta(
-    `${caretipBtnSecondary} caretip-hero-cta-button w-full min-w-0 gap-1.5 text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
+    `${caretipBtnSecondary} caretip-hero-cta-button w-full min-w-0 items-center justify-center gap-1.5 text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
   ),
   heroMediaCol:
     `relative z-0 order-2 flex min-h-0 w-full min-w-0 max-w-full items-stretch justify-center px-0 ${heroStackGapMediaMobile} max-md:pt-0 max-md:pb-0 md:mt-0 md:justify-center md:self-center`,

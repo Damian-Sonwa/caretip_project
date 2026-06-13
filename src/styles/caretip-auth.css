@@ -1849,13 +1849,18 @@ select.caretip-auth-field {
 
 .caretip-auth-submit--stable {
   position: relative;
+  justify-content: center;
+  text-align: center;
 }
 
 .caretip-auth-submit-label {
-  display: inline-flex;
+  display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  text-align: center;
+  line-height: 1.15;
 }
 
 .caretip-auth-submit--stable[aria-busy="true"] .caretip-auth-submit-label {
