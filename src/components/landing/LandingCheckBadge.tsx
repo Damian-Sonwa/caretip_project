@@ -14,7 +14,7 @@ type LandingBenefitChecklistProps = {
   className?: string;
 };
 
-/** Hero-style benefit list — Live in Minutes circular uptrend marker. */
+/** Hero-style benefit list — circular list-check marker. */
 export function LandingBenefitChecklist({ items, tone, className }: LandingBenefitChecklistProps) {
   const textClass =
     tone === "default"

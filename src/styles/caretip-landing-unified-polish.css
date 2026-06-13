@@ -123,3 +123,27 @@ html.dark .caretip-landing .caretip-landing-cta-hint {
     margin-top: 1.625rem;
   }
 }
+
+/* Uptrend arrow glyphs — orange→black gradient stroke only (marker/badge backgrounds unchanged) */
+.caretip-landing .caretip-landing-uptrend-icon__glyph:not(.caretip-landing-uptrend-icon__glyph--active) {
+  stroke: url(#caretip-features-icon-gradient);
+  color: transparent;
+}
+
+html.dark
+  .caretip-landing
+  .caretip-landing-uptrend-icon__glyph:not(.caretip-landing-uptrend-icon__glyph--active) {
+  stroke: url(#caretip-features-icon-gradient-dark);
+}
+
+.caretip-landing .caretip-landing-uptrend-icon__glyph--active {
+  stroke: currentColor;
+  color: #fff;
+}
+
+.caretip-landing [data-landing-accent] .caretip-landing-uptrend-icon__glyph {
+  width: 0.75rem;
+  height: 0.75rem;
+  min-width: 0.75rem;
+  min-height: 0.75rem;
+}

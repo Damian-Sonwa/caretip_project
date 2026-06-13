@@ -142,8 +142,8 @@ html.dark .caretip-landing .caretip-landing-feature-panel--neutral {
   height: 1rem;
   min-width: 1rem;
   min-height: 1rem;
-  stroke: url(#caretip-features-icon-gradient);
-  color: transparent;
+  stroke: #ef8728;
+  color: #ef8728;
 }
 
 @media (min-width: 640px) {
@@ -190,7 +190,8 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon--obsidi
 
 html.dark .caretip-landing #features .caretip-landing-feature-icon__glyph--obsidian,
 html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon__glyph--obsidian {
-  stroke: url(#caretip-features-icon-gradient-dark);
+  stroke: #f0a84d;
+  color: #f0a84d;
 }
 
 @media (hover: hover) {

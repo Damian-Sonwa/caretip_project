@@ -35,7 +35,14 @@ export function LandingSectionAccent({
         <span aria-hidden className={landingUi.sectionAccentLine} />
       ) : null}
       {!muted && variant !== "line" ? (
-        <Icon className={landingUi.sectionAccentIcon} strokeWidth={2.25} aria-hidden />
+        <Icon
+          className={cn(
+            landingUi.sectionAccentIcon,
+            variant === "trend" && "caretip-landing-uptrend-icon__glyph",
+          )}
+          strokeWidth={2.25}
+          aria-hidden
+        />
       ) : null}
       {muted && variant === "arrow" ? (
         <ArrowUpRight className={landingUi.sectionAccentIconMuted} strokeWidth={2} aria-hidden />
