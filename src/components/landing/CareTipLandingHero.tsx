@@ -180,21 +180,19 @@ export function CareTipLandingHero({
               <Link
                 to="/signup"
                 className={landingUi.heroCtaPrimary}
-                aria-label={`${t("landing.showcase.primaryCta")}. ${t("landing.showcase.primaryCtaHint")}`}
+                aria-label={t("landing.showcase.primaryCta")}
               >
                 {t("landing.showcase.primaryCta")}
               </Link>
-              <p className={landingUi.heroCtaHint}>{t("landing.showcase.primaryCtaHint")}</p>
             </div>
             <div className={landingUi.heroCtaUnit}>
               <Link
                 to="/join"
                 className={landingUi.heroCtaSecondary}
-                aria-label={`${t("landing.showcase.secondaryCta")}. ${t("landing.showcase.secondaryCtaHint")}`}
+                aria-label={t("landing.showcase.secondaryCta")}
               >
                 {t("landing.showcase.secondaryCta")}
               </Link>
-              <p className={landingUi.heroCtaHint}>{t("landing.showcase.secondaryCtaHint")}</p>
             </div>
           </motion.div>
         </motion.div>
