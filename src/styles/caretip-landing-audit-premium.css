@@ -200,26 +200,24 @@ html:not(.dark) .caretip-landing.caretip-landing--premium #recognition {
   ) !important;
 }
 
-/* —— Typography hierarchy — editorial section markers —— */
+/* —— Typography hierarchy — headings without editorial rules (badges keep brush underlines) —— */
 .caretip-landing.caretip-landing--premium .caretip-section-intro > h2,
 .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title {
   letter-spacing: -0.028em;
 }
 
+.caretip-landing.caretip-landing--premium .caretip-section-intro > h2::before,
 .caretip-landing.caretip-landing--premium .caretip-section-intro > h2::after,
-.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title::after {
-  content: "";
-  display: block;
-  width: 2.75rem;
-  height: 2px;
-  margin: 1.125rem auto 0;
-  border-radius: 999px;
-  background: linear-gradient(
-    90deg,
-    rgba(233, 120, 28, 0.08) 0%,
-    rgba(233, 120, 28, 0.72) 50%,
-    rgba(233, 120, 28, 0.08) 100%
-  );
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title::before,
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title::after,
+.caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::before,
+.caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::after,
+.caretip-landing.caretip-landing--premium .caretip-mobile-section-headline::before,
+.caretip-landing.caretip-landing--premium .caretip-mobile-section-headline::after,
+.caretip-landing.caretip-landing--premium .caretip-real-life-section-title::before,
+.caretip-landing.caretip-landing--premium .caretip-real-life-section-title::after {
+  display: none;
+  content: none;
 }
 
 .caretip-landing.caretip-landing--premium .caretip-section-intro > p,
@@ -245,31 +243,6 @@ html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .care
 
 .caretip-landing.caretip-landing--premium [data-landing-accent] .caretip-landing-accent-text {
   letter-spacing: 0.19em;
-}
-
-/* Split sections — left-aligned editorial rule */
-@media (min-width: 1024px) {
-  .caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::before {
-    content: "";
-    display: block;
-    width: 2rem;
-    height: 2px;
-    margin-bottom: 1rem;
-    border-radius: 999px;
-    background: linear-gradient(90deg, rgba(233, 120, 28, 0.85) 0%, rgba(233, 120, 28, 0.12) 100%);
-  }
-
-  .caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::after {
-    display: none;
-  }
-}
-
-/* Badge sections — pill brush only; no extra rule under the accent */
-.caretip-landing.caretip-landing--premium #how-it-works .caretip-mobile-section-headline::before,
-.caretip-landing.caretip-landing--premium #how-it-works .caretip-mobile-section-headline::after,
-.caretip-landing.caretip-landing--premium #recognition .caretip-mobile-section-headline::before,
-.caretip-landing.caretip-landing--premium #recognition .caretip-mobile-section-headline::after {
-  display: none;
 }
 
 /* —— Hero — tighter CTA cluster after hint removal —— */
