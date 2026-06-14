@@ -4,6 +4,7 @@ import {
   LandingShowcaseCoverImage,
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
+import { landingCopyVisible } from "@/components/landing/landingUi";
 import businessSectionImg from "../../../../images/Mit.webp";
 
 export function BusinessLandingSection() {
@@ -40,6 +41,11 @@ export function BusinessLandingSection() {
           src={businessSectionImg}
           alt={t("landing.businessSection.imageAlt")}
           objectPosition="center"
+          floatHint={
+            landingCopyVisible(t("landing.businessSection.floatHint"))
+              ? t("landing.businessSection.floatHint")
+              : undefined
+          }
         />
       }
     />

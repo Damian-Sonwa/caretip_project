@@ -6,7 +6,12 @@ import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
-import { landingFadeReveal, useMinWidthMedia } from "@/lib/motionPerf";
+import { landingFadeReveal, landingFadeRevealWithDelay, useMinWidthMedia } from "@/lib/motionPerf";
+import {
+  landingRevealTransition,
+  landingScrollRevealProps,
+  landingStaggerDelay,
+} from "@/lib/landingMotion";
 import { cn } from "@/lib/utils";
 
 function formatStepNumber(index: number): string {
@@ -81,7 +86,6 @@ export function SimpleSetupSection() {
             role="list"
             aria-label={t("landing.simpleSetup.stepsAria")}
             className={cn("relative w-full", landingUi.mobileStackAfter)}
-            {...landingFadeReveal}
           >
             <div className="caretip-process-steps flex flex-col gap-6 sm:gap-8 lg:gap-9">
               {steps.map((step, idx) => {
@@ -93,9 +97,10 @@ export function SimpleSetupSection() {
                     role="listitem"
                     aria-current={isActive ? "step" : undefined}
                     onClick={() => setActiveStep(idx)}
-                    whileHover={reduceMotion ? undefined : { y: isActive ? 0 : -1 }}
-                    whileTap={reduceMotion || !isLgUp ? undefined : { scale: 0.995 }}
-                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                    {...landingScrollRevealProps(reduceMotion, {
+                      delay: landingStaggerDelay(idx),
+                      isMobile: !isLgUp,
+                    })}
                     className={cn(
                       "caretip-process-step group relative w-full rounded-2xl border px-4 py-4 text-left sm:px-5 sm:py-5",
                       isActive ? "caretip-process-step--active" : "border-transparent bg-transparent",
@@ -143,8 +148,6 @@ export function SimpleSetupSection() {
             landingUi.visualColumn,
             "caretip-live-minutes-visual-wrap lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
           )}
-          whileHover={reduceMotion || !isLgUp ? undefined : { y: -2 }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
           <LiveInMinutesLaptopDemo
             videoSrc={import.meta.env.VITE_LIVE_IN_MINUTES_DEMO_VIDEO}

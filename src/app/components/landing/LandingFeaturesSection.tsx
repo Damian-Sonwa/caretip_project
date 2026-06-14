@@ -1,7 +1,9 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { QrCode, Activity, BarChart3, History, Wallet, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import {
@@ -19,8 +21,7 @@ const cardClassName = cn(
 
 const iconWrapBaseClassName = cn(
   "caretip-landing-feature-icon mb-3 shrink-0 sm:mb-5",
-  "transition-[background,box-shadow,transform,border-color] duration-300 ease-out",
-  "md:group-hover:-translate-y-px",
+  "transition-[background,box-shadow,border-color] duration-300 ease-out",
 );
 
 const iconGlyphClassName = "caretip-landing-feature-icon__glyph--obsidian";
@@ -36,6 +37,8 @@ const featureAccentVariants: LandingAccentVariant[] = [
 
 export function LandingFeaturesSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const sectionSubtitle = t("landing.features.subtitle");
 
   const items = useMemo(
@@ -107,19 +110,17 @@ export function LandingFeaturesSection() {
         </svg>
         <div className={landingUi.sectionIntro}>
           <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            {...landingScrollRevealProps(reduceMotion, { isMobile: !isLgUp })}
             className={landingUi.sectionTitle}
           >
             {t("landing.features.title")}
           </motion.h2>
           {landingCopyVisible(sectionSubtitle) ? (
             <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.05 }}
+              {...landingScrollRevealProps(reduceMotion, {
+                delay: landingStaggerDelay(1),
+                isMobile: !isLgUp,
+              })}
               className={landingUi.sectionSubtitle}
             >
               {sectionSubtitle}
@@ -133,10 +134,10 @@ export function LandingFeaturesSection() {
             return (
               <motion.li
                 key={item.title}
-                initial={{ opacity: 0, y: 14 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.45, delay: idx * 0.05 }}
+                {...landingScrollRevealProps(reduceMotion, {
+                  delay: landingStaggerDelay(idx, 0.07),
+                  isMobile: !isLgUp,
+                })}
                 className="h-full"
               >
                 <article className={cardClassName}>

@@ -1,0 +1,531 @@
+/**
+ * Landing audit — premium product presentation (presentation only).
+ * No new sections, no layout grid changes. Scoped to `.caretip-landing--premium`.
+ */
+
+/* —— Canvas grain — reduces flat SaaS template feel —— */
+html:not(.dark) .caretip-landing.caretip-landing--premium > .relative.z-10::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+  mix-blend-mode: multiply;
+}
+
+/* —— Vertical rhythm — alternating density down the page —— */
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-section {
+    padding-bottom: 3.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #built-for-hospitality {
+    padding-top: 4.25rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #how-it-works {
+    padding-top: 3.75rem;
+    padding-bottom: 4rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #for-employees,
+  .caretip-landing.caretip-landing--premium #business-section {
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #features.caretip-landing-features-section {
+    padding-top: 5rem;
+    padding-bottom: 5.25rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #payments-trust {
+    padding-top: 4.75rem;
+    padding-bottom: 4.75rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #real-life {
+    padding-top: 4.5rem;
+    padding-bottom: 4.75rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #recognition {
+    padding-top: 4.25rem;
+    padding-bottom: 4.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-section {
+    padding-bottom: 4.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #built-for-hospitality {
+    padding-top: 5.5rem;
+    padding-bottom: 5.25rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #how-it-works {
+    padding-top: 4.75rem;
+    padding-bottom: 5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #for-employees,
+  .caretip-landing.caretip-landing--premium #business-section {
+    padding-top: 5.75rem;
+    padding-bottom: 5.75rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #features.caretip-landing-features-section {
+    padding-top: 6.25rem;
+    padding-bottom: 6.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #payments-trust {
+    padding-top: 5.5rem;
+    padding-bottom: 5.5rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #real-life {
+    padding-top: 5.75rem;
+    padding-bottom: 5.75rem;
+  }
+
+  .caretip-landing.caretip-landing--premium #recognition {
+    padding-top: 5rem;
+    padding-bottom: 5.25rem;
+  }
+}
+
+/* —— Section differentiation — soft hairlines + band tones —— */
+html:not(.dark) .caretip-landing.caretip-landing--premium main > section {
+  position: relative;
+  isolation: isolate;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium main > section + section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 2;
+  width: min(72rem, calc(100% - 3rem));
+  height: 1px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(17, 17, 17, 0.055) 18%,
+    rgba(233, 120, 28, 0.09) 50%,
+    rgba(17, 17, 17, 0.055) 82%,
+    transparent 100%
+  );
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality {
+  background: linear-gradient(
+    180deg,
+    #fbf7f2 0%,
+    #faf8f5 38%,
+    #fffdfb 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #how-it-works {
+  background: linear-gradient(
+    180deg,
+    #faf8f5 0%,
+    #ffffff 44%,
+    #f9f7f4 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #for-employees {
+  background: linear-gradient(
+    180deg,
+    #f9f6f1 0%,
+    #faf9f6 52%,
+    #f7f4ef 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #business-section {
+  background: linear-gradient(
+    180deg,
+    #f7f5f2 0%,
+    #faf8f5 48%,
+    #ffffff 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #features.caretip-landing-features-section {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #faf8f5 36%,
+    #f5f2ed 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #payments-trust {
+  background: linear-gradient(
+    180deg,
+    #f3f1ee 0%,
+    #fafaf9 32%,
+    #ffffff 68%,
+    #f8f6f3 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #real-life {
+  background: linear-gradient(
+    180deg,
+    #f8f6f3 0%,
+    #f5f3f0 50%,
+    #f2f0ec 100%
+  ) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #recognition {
+  background: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #faf8f5 55%,
+    #f7f5f2 100%
+  ) !important;
+}
+
+/* —— Typography hierarchy — editorial section markers —— */
+.caretip-landing.caretip-landing--premium .caretip-section-intro > h2,
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title {
+  letter-spacing: -0.028em;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro > h2::after,
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-title::after {
+  content: "";
+  display: block;
+  width: 2.75rem;
+  height: 2px;
+  margin: 1.125rem auto 0;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(233, 120, 28, 0.08) 0%,
+    rgba(233, 120, 28, 0.72) 50%,
+    rgba(233, 120, 28, 0.08) 100%
+  );
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro > p,
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-subtitle {
+  color: rgba(64, 64, 64, 0.88);
+  max-width: 36rem;
+}
+
+html.dark .caretip-landing.caretip-landing--premium .caretip-section-intro > p,
+html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-subtitle {
+  color: rgba(163, 163, 163, 0.95);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-headline,
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-mobile-section-headline,
+.caretip-landing.caretip-landing--premium #recognition .caretip-mobile-section-headline {
+  letter-spacing: -0.032em;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-headline-accent {
+  font-weight: 800;
+}
+
+.caretip-landing.caretip-landing--premium [data-landing-accent] .caretip-landing-accent-text {
+  letter-spacing: 0.19em;
+}
+
+/* Split sections — left-aligned editorial rule */
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::before {
+    content: "";
+    display: block;
+    width: 2rem;
+    height: 2px;
+    margin-bottom: 1rem;
+    border-radius: 999px;
+    background: linear-gradient(90deg, rgba(233, 120, 28, 0.85) 0%, rgba(233, 120, 28, 0.12) 100%);
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-showcase-intro > h2::after {
+    display: none;
+  }
+}
+
+/* Badge sections — pill brush only; no extra rule under the accent */
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-mobile-section-headline::before,
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-mobile-section-headline::after,
+.caretip-landing.caretip-landing--premium #recognition .caretip-mobile-section-headline::before,
+.caretip-landing.caretip-landing--premium #recognition .caretip-mobile-section-headline::after {
+  display: none;
+}
+
+/* —— Hero — tighter CTA cluster after hint removal —— */
+.caretip-landing.caretip-landing--premium .caretip-hero-cta-cluster {
+  gap: 0.625rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-copy-block {
+    gap: 0;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-cluster {
+    margin-top: 0.125rem;
+  }
+}
+
+/* —— Hospitality — editorial feature list + media stage —— */
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-panel {
+    padding-left: 1.5rem;
+    border-left: 1px solid rgba(17, 17, 17, 0.07);
+  }
+
+  html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-panel {
+    border-left-color: rgba(255, 255, 255, 0.08);
+  }
+}
+
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-heading {
+  color: #171717;
+}
+
+html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-heading {
+  color: #fafafa;
+}
+
+.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-media-card {
+  border-radius: 1.375rem;
+}
+
+/* —— Setup journey — editorial step rail —— */
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step {
+  border-left: 3px solid transparent;
+  border-radius: 0 1rem 1rem 0;
+  padding-left: calc(1rem - 3px);
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step {
+    padding-left: calc(1.25rem - 3px);
+  }
+}
+
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step--active {
+  border-left-color: hsl(var(--primary));
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    4px 0 16px -6px rgba(233, 120, 28, 0.12);
+}
+
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step-number {
+  opacity: 0.92;
+}
+
+/* —— Split showcase — product image presentation —— */
+.caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame {
+  border-radius: 1.375rem;
+  border-color: rgba(255, 255, 255, 0.72);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 2px 4px rgba(30, 24, 16, 0.04),
+    0 28px 64px -24px rgba(30, 24, 16, 0.16),
+    0 12px 28px -16px rgba(233, 120, 28, 0.1);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 248, 240, 0.14) 0%,
+    transparent 28%,
+    transparent 62%,
+    rgba(28, 22, 16, 0.1) 100%
+  );
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame img {
+  transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-showcase-depth:hover .caretip-showcase-visual-frame img {
+    transform: scale(1.025);
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-showcase-depth:hover .caretip-showcase-visual-frame {
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.9) inset,
+      0 4px 8px rgba(30, 24, 16, 0.05),
+      0 32px 72px -22px rgba(30, 24, 16, 0.18),
+      0 16px 32px -14px rgba(233, 120, 28, 0.14);
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-float-card {
+  border-radius: 1rem;
+  border-color: rgba(255, 255, 255, 0.92);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.95) inset,
+    0 16px 40px -14px rgba(30, 24, 16, 0.18);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel--copy {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 12px 36px -16px rgba(30, 24, 16, 0.1);
+}
+
+/* —— Features — editorial stagger, less uniform grid —— */
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-features-grid > li:nth-child(3n + 2) article {
+    margin-top: 0.75rem;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-landing-features-grid > li:nth-child(3n) article {
+    margin-top: 0.375rem;
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card {
+  border-radius: 1.25rem;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-section .caretip-section-intro {
+  margin-bottom: 2.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-features-section .caretip-section-intro {
+    margin-bottom: 3.25rem;
+  }
+}
+
+/* —— Payments — product infrastructure visual —— */
+.caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-visual-image {
+  border-radius: 1.25rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.65) inset,
+    0 28px 56px -24px rgba(15, 23, 42, 0.22),
+    0 14px 32px -18px rgba(233, 120, 28, 0.14);
+  transition:
+    transform 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-visual:hover .caretip-payments-trust-visual-image {
+    transform: translateY(-3px);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.75) inset,
+      0 32px 64px -22px rgba(15, 23, 42, 0.24),
+      0 18px 36px -16px rgba(233, 120, 28, 0.18);
+  }
+}
+
+.caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-item {
+  padding-bottom: 0.25rem;
+}
+
+@media (max-width: 639px) {
+  .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-item {
+    border-bottom: 1px solid rgba(17, 17, 17, 0.05);
+  }
+
+  .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-item:last-child {
+    border-bottom: none;
+  }
+
+  html.dark .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-item {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+  }
+}
+
+/* —— Real life — hospitality scenario gallery —— */
+.caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card {
+  border-radius: 1.25rem;
+  overflow: hidden;
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 252, 248, 0.06) 0%,
+    transparent 40%,
+    rgba(28, 22, 16, 0.22) 100%
+  );
+  transition: opacity 0.35s ease;
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card:hover {
+    transform: translateY(-4px);
+    box-shadow:
+      0 2px 4px rgba(17, 17, 17, 0.04),
+      0 24px 48px -16px rgba(30, 24, 16, 0.14);
+  }
+
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card:hover .caretip-expandable-info-card__media::after {
+    opacity: 0.85;
+  }
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__eyebrow {
+  letter-spacing: 0.14em;
+}
+
+.caretip-landing.caretip-landing--premium #real-life .caretip-real-life-section-intro {
+  margin-bottom: 2.75rem;
+}
+
+/* —— Recognition — live activity product moment —— */
+.caretip-landing.caretip-landing--premium #recognition .caretip-motivation-points > li {
+  padding-block: 0.125rem;
+}
+
+/* —— Final CTA — stronger close against footer —— */
+.caretip-landing.caretip-landing--premium .caretip-landing-final-cta {
+  margin-top: 0.25rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame img,
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card,
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card,
+  .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-visual-image {
+    transition: none;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-showcase-depth:hover .caretip-showcase-visual-frame img,
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card:hover,
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card:hover,
+  .caretip-landing.caretip-landing--premium #payments-trust .caretip-payments-trust-visual:hover .caretip-payments-trust-visual-image {
+    transform: none;
+  }
+}

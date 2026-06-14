@@ -194,7 +194,7 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-phone-slot--float {
-    animation: caretip-live-minutes-float 7s ease-in-out infinite;
+    animation: none;
   }
 }
 

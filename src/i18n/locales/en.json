@@ -1650,7 +1650,7 @@
       "heroTagline": ""
     },
     "simpleSetup": {
-      "pill": "Live in minutes",
+      "pill": "Setup in minutes",
       "pillSub": "",
       "title": "A quick journey from setup to tips",
       "subtitle": "",
@@ -1825,7 +1825,7 @@
       }
     },
     "employeeSection": {
-      "pill": "For employees",
+      "pill": "For frontline staff",
       "titleLine1": "Track your success.",
       "titleLine2": "Every day.",
       "subtitle": "See every tip land live and understand what drives your best shifts.",
@@ -1839,7 +1839,7 @@
       "imageAlt": "CareTip employee dashboard showing daily earnings, ratings, and goals"
     },
     "businessSection": {
-      "pill": "Business dashboard",
+      "pill": "For venue owners",
       "titleLine1": "Complete visibility",
       "titleLine2": "into your team",
       "subtitle": "Track every location, QR, and payout from one calm control center.",
@@ -1979,7 +1979,7 @@
       "s4Alt": "Home and mobile service tipping moment"
     },
     "paymentsTrust": {
-      "pill": "Payments & security",
+      "pill": "Secure payment",
       "title": "Trusted & Secure Payment Infrastructure",
       "subtitle": "CareTip is your reliable platform for digital tipping. All payments are processed securely via our partner Stripe. CareTip never stores any sensitive card details.",
       "principleLabel": "How it Works",

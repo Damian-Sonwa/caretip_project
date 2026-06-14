@@ -1,33 +1,36 @@
 import * as React from "react";
+import {
+  LANDING_REVEAL_DURATION_S,
+  LANDING_REVEAL_Y,
+  LANDING_REVEAL_Y_MOBILE,
+  landingMotionViewport,
+  landingRevealTransition,
+} from "./landingMotion";
 
 /** Shared viewport for landing scroll reveals — once, lightweight. */
-export const landingSectionViewport = {
-  once: true,
-  amount: 0.18,
-  margin: "0px 0px -6% 0px",
-} as const;
+export const landingSectionViewport = landingMotionViewport;
 
 export const landingSectionReveal = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: LANDING_REVEAL_Y_MOBILE },
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] as const },
+    transition: landingRevealTransition(0, LANDING_REVEAL_DURATION_S),
   },
 } as const;
 
-/** Opacity-only scroll reveal — avoids translate jitter on mobile. */
+/** Scroll reveal — fade + subtle rise (mobile uses smaller travel). */
 export const landingFadeReveal = {
-  initial: { opacity: 0 },
-  whileInView: { opacity: 1 },
+  initial: { opacity: 0, y: LANDING_REVEAL_Y },
+  whileInView: { opacity: 1, y: 0 },
   viewport: landingSectionViewport,
-  transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
+  transition: landingRevealTransition(0, LANDING_REVEAL_DURATION_S),
 } as const;
 
 export function landingFadeRevealWithDelay(delay = 0) {
   return {
     ...landingFadeReveal,
-    transition: { ...landingFadeReveal.transition, delay },
+    transition: landingRevealTransition(delay, LANDING_REVEAL_DURATION_S),
   };
 }
 

@@ -1,16 +1,19 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
-import { landingFadeReveal } from "@/lib/motionPerf";
+import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
+import { landingFadeReveal, useMinWidthMedia } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
   const { t, i18n } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
   const features = useMemo(
     () =>
@@ -49,7 +52,13 @@ export function HospitalityTeamsUnifiedSection() {
           ) : null}
         </header>
 
-        <motion.div className={cn(landingUi.hospitalityGrid, "lg:grid")}>
+        <motion.div
+          className={cn(landingUi.hospitalityGrid, "lg:grid")}
+          {...landingScrollRevealProps(reduceMotion, {
+            delay: landingStaggerDelay(1),
+            isMobile: !isLgUp,
+          })}
+        >
           <div className={cn("min-w-0", landingUi.mobileStackAfter, "lg:order-1")}>
             <div className={landingUi.hospitalityFeaturePanel}>
               <HospitalityFeaturePanel features={features} />

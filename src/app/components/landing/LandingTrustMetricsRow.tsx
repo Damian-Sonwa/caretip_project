@@ -1,6 +1,8 @@
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { landingRevealTransition, landingStaggerDelay } from "@/lib/landingMotion";
 import { useInViewActive } from "@/lib/motionPerf";
 import {
   TRUST_METRIC_ANIM_SPECS,
@@ -8,7 +10,6 @@ import {
   useTrustMetricCountUp,
 } from "@/components/landing/landingTrustMetricsMotion";
 
-const STAGGER_S = 0.12;
 const REVEAL_EASE = [0.22, 1, 0.36, 1] as const;
 
 function TrustMetricValue({
@@ -47,6 +48,11 @@ export function LandingTrustMetricsRow({ className }: { className?: string }) {
     rootMargin: "0px 0px -8% 0px",
     threshold: [0, 0.15, 0.35],
   });
+  const [revealed, setRevealed] = useState(false);
+
+  useEffect(() => {
+    if (active) setRevealed(true);
+  }, [active]);
 
   return (
     <div
@@ -58,18 +64,17 @@ export function LandingTrustMetricsRow({ className }: { className?: string }) {
         {TRUST_METRIC_ANIM_SPECS.map((spec, idx) => (
           <motion.li
             key={spec.id}
-            initial={reduceMotion ? false : { opacity: 0 }}
+            initial={reduceMotion ? false : { opacity: 0, y: 8 }}
             animate={
               reduceMotion
                 ? undefined
-                : active
-                  ? { opacity: 1 }
-                  : { opacity: 0 }
+                : revealed
+                  ? { opacity: 1, y: 0 }
+                  : { opacity: 0, y: 8 }
             }
             transition={{
-              duration: 0.55,
+              ...landingRevealTransition(landingStaggerDelay(idx)),
               ease: REVEAL_EASE,
-              delay: active ? idx * STAGGER_S : 0,
             }}
             className="caretip-trust-metric-item relative flex min-w-0 flex-col items-center justify-center text-center"
           >
@@ -78,7 +83,7 @@ export function LandingTrustMetricsRow({ className }: { className?: string }) {
               valueKey={spec.valueKey}
               end={spec.end}
               decimals={spec.decimals}
-              active={active}
+              active={revealed}
               delayMs={idx * 120}
             />
             <p className="caretip-trust-metric-label font-sans">

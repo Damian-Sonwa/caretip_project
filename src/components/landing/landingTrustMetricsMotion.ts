@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 
 export type TrustMetricId = "scans" | "tips" | "staff" | "teams";
@@ -78,14 +78,15 @@ export function useTrustMetricCountUp(
   reduceMotion: boolean | null,
 ) {
   const [value, setValue] = useState(reduceMotion ? end : 0);
+  const hasAnimatedRef = useRef(false);
 
   useEffect(() => {
     if (reduceMotion) {
       setValue(end);
+      hasAnimatedRef.current = true;
       return;
     }
-    if (!active) {
-      setValue(0);
+    if (!active || hasAnimatedRef.current) {
       return;
     }
 
@@ -96,8 +97,13 @@ export function useTrustMetricCountUp(
         if (startTime === null) startTime = now;
         const elapsed = now - startTime;
         const progress = Math.min(elapsed / COUNT_DURATION_MS, 1);
-        setValue(end * EASE_OUT_CUBIC(progress));
-        if (progress < 1) raf = requestAnimationFrame(tick);
+        const next = end * EASE_OUT_CUBIC(progress);
+        setValue(next);
+        if (progress < 1) {
+          raf = requestAnimationFrame(tick);
+        } else {
+          hasAnimatedRef.current = true;
+        }
       };
       raf = requestAnimationFrame(tick);
     }, delayMs);

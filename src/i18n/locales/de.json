@@ -1654,7 +1654,7 @@
       "heroTagline": ""
     },
     "simpleSetup": {
-      "pill": "In wenigen Minuten startklar",
+      "pill": "Einrichtung in Minuten",
       "pillSub": "",
       "title": "In wenigen Minuten startklar",
       "subtitle": "",
@@ -1829,7 +1829,7 @@
       }
     },
     "employeeSection": {
-      "pill": "Für Mitarbeitende",
+      "pill": "Für Service-Teams",
       "titleLine1": "Deinen Erfolg im Blick.",
       "titleLine2": "Jeden Tag.",
       "subtitle": "Erlebe live, wie jedes Trinkgeld eingeht, und verstehe genau, was deine besten Schichten ausmacht.",
@@ -1843,7 +1843,7 @@
       "imageAlt": "CareTip Mitarbeiterdashboard mit Tageseinnahmen, Bewertungen und Zielen"
     },
     "businessSection": {
-      "pill": "Unternehmensdashboard",
+      "pill": "Für Betriebsinhaber",
       "titleLine1": "Volle Transparenz über Ihr gesamtes Team",
       "titleLine2": "",
       "subtitle": "Steuern Sie jeden Standort, jeden QR-Code und jede Auszahlung über ein einziges, übersichtliches Control Center.",
@@ -1983,7 +1983,7 @@
       "s4Alt": "Tippen zu Hause und beim mobilen Service"
     },
     "paymentsTrust": {
-      "pill": "Zahlungen & Sicherheit",
+      "pill": "Sichere Zahlung",
       "title": "Sichere & vertraute Zahlungsinfrastruktur",
       "subtitle": "CareTip ist Ihre zuverlässige Plattform für digitales Trinkgeld. Alle Zahlungen werden absolut sicher über unseren Partner Stripe abgewickelt. CareTip selbst speichert zu keinem Zeitpunkt sensible Kartendaten.",
       "principleLabel": "Das Prinzip",

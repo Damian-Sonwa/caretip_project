@@ -1,0 +1,125 @@
+/**
+ * Landing motion — subtle, premium, performance-conscious.
+ * Complements Framer Motion reveals; respects prefers-reduced-motion.
+ */
+
+/* —— CTA buttons (hero + sections + final) —— */
+.caretip-landing.caretip-landing--premium .caretip-hero-cta-button,
+.caretip-landing.caretip-landing--premium .caretip-final-cta-button,
+.caretip-landing.caretip-landing--premium .caretip-landing-section-cta a,
+.caretip-landing.caretip-landing--premium .caretip-landing-section-cta button {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease !important;
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-final-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-landing-section-cta a:hover {
+    filter: brightness(1.04);
+  }
+}
+
+/* —— Feature cards —— */
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card {
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.22s ease;
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card:hover {
+    transform: translateY(-4px);
+  }
+}
+
+/* —— Industry marquee cards —— */
+.caretip-landing.caretip-landing--premium .caretip-hospitality-marquee-card {
+  transition:
+    transform 0.32s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-marquee-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      0 6px 20px -8px rgba(30, 24, 16, 0.12),
+      0 2px 6px rgba(30, 24, 16, 0.05);
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-hospitality-marquee .animate-marquee {
+  animation-timing-function: linear;
+  will-change: transform;
+}
+
+/* —— Showcase / real-life images — soft entrance hook —— */
+@media (prefers-reduced-motion: no-preference) {
+  .caretip-landing.caretip-landing--premium [data-polish-view] img,
+  .caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame img {
+    transition: transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+/* —— Navigation — smooth active + drawer —— */
+.caretip-landing .caretip-public-nav-link {
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.caretip-landing .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-links a {
+  transition: background-color 0.16s ease, color 0.16s ease;
+}
+
+.caretip-landing .caretip-mobile-drawer-backdrop--open {
+  animation: caretip-drawer-backdrop-in 0.2s ease-out forwards;
+}
+
+.caretip-landing .caretip-mobile-drawer-panel--open-top {
+  animation: caretip-drawer-panel-top-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* —— Mobile: ~35% less motion intensity —— */
+@media (max-width: 1023px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-showcase-depth:hover .caretip-showcase-visual-frame img {
+    transform: scale(1.012);
+  }
+
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card:hover {
+    transform: translateY(-2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-marquee-card,
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button,
+  .caretip-landing.caretip-landing--premium .caretip-final-cta-button,
+  .caretip-landing.caretip-landing--premium [data-polish-view] img,
+  .caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame img {
+    transition: none !important;
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card:hover,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-marquee-card:hover,
+  .caretip-landing.caretip-landing--premium #real-life .caretip-real-life-card:hover {
+    transform: none !important;
+  }
+
+  .caretip-landing .caretip-mobile-drawer-backdrop--open,
+  .caretip-landing .caretip-mobile-drawer-panel--open-top {
+    animation: none !important;
+  }
+}

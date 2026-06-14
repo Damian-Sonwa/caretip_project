@@ -1,10 +1,12 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
-import log01Img from "../../../../images/Log01.webp";
-import atReceptionImg from "../../../../images/At_reception.webp";
+import logyImg from "../../../../images/logy.png";
+import repImg from "../../../../images/rep.png";
 import salonImg from "../../../../images/salon.jpeg";
 import homeImg from "../../../../images/home.jpeg";
+import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { ExpandableInfoCard } from "@/components/ui/expandable-info-card";
@@ -12,6 +14,8 @@ import { cn } from "@/lib/utils";
 
 export function LandingRealLifeSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
 
   const scenarios = useMemo(
     () =>
@@ -21,7 +25,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s1Tag"),
           textKey: "landing.realLife.s1Text" as const,
           detail: t("landing.realLife.s1Detail"),
-          img: log01Img,
+          img: logyImg,
           alt: t("landing.realLife.s1Alt"),
         },
         {
@@ -29,7 +33,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s2Tag"),
           textKey: "landing.realLife.s2Text" as const,
           detail: t("landing.realLife.s2Detail"),
-          img: atReceptionImg,
+          img: repImg,
           alt: t("landing.realLife.s2Alt"),
         },
         {
@@ -60,9 +64,7 @@ export function LandingRealLifeSection() {
       <div className="mx-auto max-w-7xl">
         <div className={cn(landingUi.sectionIntro, "caretip-real-life-section-intro")}>
           <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            {...landingScrollRevealProps(reduceMotion, { isMobile: !isLgUp })}
             className={cn(
               landingUi.sectionTitle,
               "max-lg:caretip-mobile-section-headline caretip-real-life-section-title",
@@ -76,10 +78,10 @@ export function LandingRealLifeSection() {
           {scenarios.map((item, idx) => (
             <motion.div
               key={item.headline}
-              initial={{ opacity: 0, y: 16 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.45, delay: idx * 0.06 }}
+              {...landingScrollRevealProps(reduceMotion, {
+                delay: landingStaggerDelay(idx, 0.07),
+                isMobile: !isLgUp,
+              })}
               className="w-full max-w-md sm:max-w-none"
             >
               <ExpandableInfoCard

@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Link } from "react-router";
+import { LandingParallaxWrap } from "@/components/landing/LandingParallaxWrap";
+import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import {
@@ -51,10 +54,10 @@ export function LandingSplitShowcaseSection({
   const visualLgOrder = visualPosition === "left" ? "lg:order-1" : "lg:order-2";
   const copyLgOrder = visualPosition === "left" ? "lg:order-2" : "lg:order-1";
   const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const isNarrowViewport = useMediaQuery("(max-width: 1023px)");
-  const slideAxis = reduceMotion || isNarrowViewport ? 0 : 12;
-  const visualSlideX = visualPosition === "left" ? -slideAxis : slideAxis;
-  const copySlideX = visualPosition === "left" ? slideAxis : -slideAxis;
+  const visualDelay = landingStaggerDelay(0);
+  const copyDelay = landingStaggerDelay(1);
 
   return (
     <section
@@ -68,21 +71,21 @@ export function LandingSplitShowcaseSection({
       <div className={cn(landingUi.showcaseGrid, landingUi.sectionShell)}>
         <motion.div
           data-polish-view
-          initial={{ opacity: 0, x: visualSlideX }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-8% 0px" }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          {...landingScrollRevealProps(reduceMotion, {
+            delay: visualDelay,
+            isMobile: isNarrowViewport || !isLgUp,
+          })}
           className={cn(landingUi.showcaseVisualCol, landingUi.mobileStackVisual, visualLgOrder)}
         >
-          <div className="relative w-full">{visual}</div>
+          <LandingParallaxWrap className="relative w-full">{visual}</LandingParallaxWrap>
         </motion.div>
 
         <motion.div
           data-polish-view
-          initial={{ opacity: 0, x: copySlideX }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true, margin: "-8% 0px" }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          {...landingScrollRevealProps(reduceMotion, {
+            delay: copyDelay,
+            isMobile: isNarrowViewport || !isLgUp,
+          })}
           className={cn(landingUi.showcaseCopy, "lg:flex lg:flex-col", copyLgOrder)}
         >
           <div className={landingUi.showcaseIntro}>

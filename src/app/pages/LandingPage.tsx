@@ -40,7 +40,7 @@ export function LandingPage() {
         <div className="fixed top-0 left-0 right-0 z-50 w-full max-w-[100vw] overflow-x-clip">
           <Navigation />
         </div>
-        <main className="w-full min-w-0 overflow-x-hidden">
+        <main className="caretip-landing-main w-full min-w-0 overflow-x-hidden">
           <CareTipLandingHero
             id="about-section"
             imageSrc={heroVisual}

@@ -1,9 +1,12 @@
 import { useMemo } from "react";
 import type { LucideIcon } from "lucide-react";
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { CreditCard as CreditCardIcon, Link2, Receipt, ShieldCheck } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import paymentInfrastructureImg from "../../../../images/payment-infrastructure.png";
+import { LandingParallaxWrap } from "@/components/landing/LandingParallaxWrap";
+import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { landingType } from "@/components/landing/landingTypography";
@@ -18,6 +21,8 @@ type PaymentsTrustItem = {
 
 export function PaymentsSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const sectionSubtitle = t("landing.paymentsTrust.subtitle");
   const principleLabel = t("landing.paymentsTrust.principleLabel");
   const principle = t("landing.paymentsTrust.principle");
@@ -57,10 +62,7 @@ export function PaymentsSection() {
 
       <div className="relative mx-auto max-w-7xl">
         <motion.header
-          initial={{ opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          {...landingScrollRevealProps(reduceMotion, { isMobile: !isLgUp })}
           className={cn(
             landingUi.sectionIntro,
             "caretip-payments-trust-intro mx-auto mb-8 max-w-3xl text-center sm:mb-10 lg:mb-12",
@@ -90,22 +92,24 @@ export function PaymentsSection() {
         <div className="caretip-payments-trust-body">
           <motion.div
             className="caretip-payments-trust-visual"
-            initial={{ opacity: 0, y: 16 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+            {...landingScrollRevealProps(reduceMotion, {
+              delay: landingStaggerDelay(1),
+              isMobile: !isLgUp,
+            })}
           >
             <PaymentsStripeBadge
               label={t("landing.paymentsTrust.stripeBadge")}
               className="caretip-payments-trust-stripe-badge mb-4"
             />
-            <img
-              src={paymentInfrastructureImg}
-              alt={t("landing.paymentsTrust.visualAlt")}
-              className="caretip-payments-trust-visual-image w-full max-w-[26rem] rounded-2xl"
-              loading="lazy"
-              decoding="async"
-            />
+            <LandingParallaxWrap>
+              <img
+                src={paymentInfrastructureImg}
+                alt={t("landing.paymentsTrust.visualAlt")}
+                className="caretip-payments-trust-visual-image w-full max-w-[26rem] rounded-2xl"
+                loading="lazy"
+                decoding="async"
+              />
+            </LandingParallaxWrap>
             <p className="caretip-payments-trust-card-hint">
               {t("landing.paymentsTrust.cardHint")}
             </p>
@@ -121,17 +125,16 @@ export function PaymentsSection() {
                 <motion.li
                   key={item.title}
                   role="listitem"
-                  initial={{ opacity: 0, y: 14 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.45, delay: idx * 0.07, ease: [0.22, 1, 0.36, 1] }}
+                  {...landingScrollRevealProps(reduceMotion, {
+                    delay: landingStaggerDelay(idx, 0.07),
+                    isMobile: !isLgUp,
+                  })}
                   className="caretip-payments-trust-item group flex min-w-0 items-start gap-4"
                 >
                   <div
                     className={cn(
                       "caretip-payments-trust-icon caretip-landing-feature-icon caretip-landing-feature-icon--obsidian",
                       "transition-[transform,opacity,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-                      "group-hover:-translate-y-0.5",
                     )}
                     aria-hidden
                   >

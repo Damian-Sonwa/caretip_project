@@ -1,13 +1,17 @@
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { FinalCtaBackdrop } from "@/app/components/landing/FinalCtaBackdrop";
 import { LandingTrustComplianceStrip } from "@/app/components/landing/LandingTrustComplianceStrip";
+import { landingScrollRevealProps } from "@/lib/landingMotion";
+import { useMinWidthMedia } from "@/lib/motionPerf";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
 export function LandingFinalCtaSection() {
   const { t } = useTranslation();
+  const reduceMotion = useReducedMotion();
+  const isLgUp = useMinWidthMedia(1024);
   const sectionSubtitle = t("landing.finalCta.subtitle");
 
   return (
@@ -22,10 +26,7 @@ export function LandingFinalCtaSection() {
 
       <motion.div
         data-polish-view
-        initial={{ opacity: 0, y: 12 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-8% 0px" }}
-        transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+        {...landingScrollRevealProps(reduceMotion, { isMobile: !isLgUp })}
         className="caretip-final-cta-stage relative z-[1] mx-auto w-full min-w-0 max-w-3xl px-0.5 text-center max-lg:max-w-full"
       >
         <p className="caretip-final-cta-eyebrow font-sans text-[11px] font-semibold uppercase tracking-[0.2em] text-primary/90 sm:text-xs">
