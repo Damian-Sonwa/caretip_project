@@ -52,20 +52,20 @@ export function SimpleSetupSection() {
       className={cn(
         landingUi.section,
         landingUi.landingSurface,
-        "caretip-live-minutes-section relative overflow-x-clip max-md:overflow-y-visible dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
+        "caretip-live-minutes-section relative overflow-x-clip dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
       )}
     >
       <motion.div
         className={cn(
           landingUi.splitGrid,
           landingUi.sectionShell,
-          "relative lg:gap-10 xl:gap-14",
+          "caretip-live-minutes-split relative",
         )}
       >
-        <div className={cn(landingUi.copyColumn, "lg:order-1 lg:flex lg:flex-col lg:max-w-md xl:max-w-lg")}>
+        <div className={cn(landingUi.copyColumn, "caretip-live-minutes-copy lg:order-1")}>
           <motion.div
             {...landingFadeReveal}
-            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "mb-6 max-lg:mb-0 sm:mb-10 lg:mb-8")}
+            className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "caretip-live-minutes-intro")}
           >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
               <LandingSectionAccent variant="spark">{t("landing.simpleSetup.pill")}</LandingSectionAccent>
@@ -87,7 +87,7 @@ export function SimpleSetupSection() {
             aria-label={t("landing.simpleSetup.stepsAria")}
             className={cn("relative w-full", landingUi.mobileStackAfter)}
           >
-            <div className="caretip-process-steps flex flex-col gap-6 sm:gap-8 lg:gap-9">
+            <div className="caretip-process-steps relative flex flex-col gap-6 sm:gap-8 lg:gap-9">
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (
@@ -102,34 +102,39 @@ export function SimpleSetupSection() {
                       isMobile: !isLgUp,
                     })}
                     className={cn(
-                      "caretip-process-step group relative w-full rounded-2xl border px-4 py-4 text-left sm:px-5 sm:py-5",
-                      isActive ? "caretip-process-step--active" : "border-transparent bg-transparent",
+                      "caretip-process-step group relative w-full text-left",
+                      isActive && "caretip-process-step--active",
                     )}
                   >
                     <div className="flex items-start gap-4 sm:gap-5">
                       <span
-                        className={cn(
-                          "caretip-process-step-number shrink-0 font-hero-display text-[2.75rem] font-extrabold leading-none tracking-tight tabular-nums sm:text-[3.25rem]",
-                          isActive
-                            ? "text-primary"
-                            : "text-neutral-300 transition-colors duration-200 group-hover:text-neutral-400 dark:text-neutral-600 dark:group-hover:text-neutral-500",
-                        )}
+                        className="caretip-process-step-number shrink-0 font-hero-display text-[2.75rem] font-extrabold leading-none tracking-tight tabular-nums sm:text-[3.25rem]"
                         aria-hidden
                       >
                         {formatStepNumber(idx)}
                       </span>
-                      <div className="min-w-0 flex-1 space-y-1.5 pt-1 sm:space-y-2 sm:pt-1.5">
+                      <div className="caretip-process-step-body min-w-0 flex-1 pt-1 sm:pt-1.5">
                         <p
                           className={cn(
                             landingType.cardTitle,
-                            "tracking-tight",
-                            isActive ? "text-neutral-900 dark:text-neutral-50" : "text-neutral-800 dark:text-neutral-100",
+                            "caretip-process-step-title tracking-tight",
+                            isActive
+                              ? "caretip-process-step-title--active"
+                              : "caretip-process-step-title--inactive",
                           )}
                         >
                           {step.title}
                         </p>
                         {landingCopyVisible(step.description) ? (
-                          <p className={cn(landingUi.cardFeatureBody, "max-w-prose")}>
+                          <p
+                            className={cn(
+                              landingUi.cardFeatureBody,
+                              "caretip-process-step-desc max-w-prose",
+                              isActive
+                                ? "caretip-process-step-desc--active"
+                                : "caretip-process-step-desc--inactive",
+                            )}
+                          >
                             {step.description}
                           </p>
                         ) : null}
@@ -146,7 +151,7 @@ export function SimpleSetupSection() {
           {...landingFadeReveal}
           className={cn(
             landingUi.visualColumn,
-            "caretip-live-minutes-visual-wrap lg:order-2 lg:flex lg:items-center lg:justify-center lg:pl-2 lg:pt-0 xl:pl-6",
+            "caretip-live-minutes-visual-wrap lg:order-2 lg:flex lg:items-center lg:justify-start lg:pt-0",
           )}
         >
           <LiveInMinutesLaptopDemo

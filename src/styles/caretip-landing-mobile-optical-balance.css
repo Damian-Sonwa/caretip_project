@@ -19,15 +19,15 @@
   }
 
   .caretip-landing .caretip-section-intro {
-    margin-bottom: 1.75rem;
+    margin-bottom: 2rem;
   }
 }
 
 @media (max-width: 767px) {
   .caretip-landing #how-it-works,
   .caretip-landing #recognition {
-    padding-top: 3rem !important;
-    padding-bottom: 3rem !important;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
   }
 
   .caretip-landing #final-cta.caretip-landing-final-cta,
@@ -92,17 +92,8 @@
     padding-inline: 0;
   }
 
-  .caretip-landing #recognition .caretip-mobile-section-headline {
-    margin-inline: 0;
-  }
-
   .caretip-landing .caretip-section-intro [data-landing-accent] {
     margin-inline: auto;
-  }
-
-  .caretip-landing #recognition [data-landing-accent],
-  .caretip-landing #recognition .caretip-motivation-accent-row {
-    margin-inline: 0 !important;
   }
 }
 
@@ -301,11 +292,11 @@
 /* —— 7. Section-specific optical tweaks —— */
 @media (max-width: 1023px) {
   .caretip-landing #features .caretip-section-intro {
-    margin-bottom: 1.625rem;
+    margin-bottom: 2rem;
   }
 
   .caretip-landing #payments-trust .caretip-payments-trust-intro {
-    margin-bottom: 1.75rem;
+    margin-bottom: 2rem;
   }
 
   .caretip-landing #recognition .caretip-motivation-mobile-feed {

@@ -196,9 +196,8 @@ export const landingUi = {
   showcaseActionCluster:
     "mt-5 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
-    "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
+    "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full flex flex-col gap-6 sm:gap-8",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",
-  showcaseBenefitRow: "px-3.5 py-2.5 sm:px-4 sm:py-3",
   showcaseCta: cnCtaPrimary(
     `caretip-cta-primary mt-0 inline-flex self-start transition-[transform,box-shadow,background-color] duration-200 active:scale-[0.99] lg:inline-flex ${ctaPrimarySize}`,
   ),
@@ -227,7 +226,7 @@ export const landingUi = {
   hospitalityGrid:
     "caretip-mobile-stack-flatten grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden max-lg:contents max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-start lg:gap-10 xl:gap-11",
   hospitalityFeaturePanel:
-    "caretip-hospitality-feature-panel w-full divide-y divide-neutral-200/80 rounded-xl bg-white ring-1 ring-neutral-900/[0.05] shadow-[0_1px_2px_rgba(17,17,17,0.04),0_8px_24px_-6px_rgba(17,17,17,0.06)] dark:divide-white/[0.07] dark:bg-neutral-900 dark:ring-white/[0.06]",
+    "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full",
   hospitalityMediaStack:
     "flex w-full min-w-0 flex-col gap-3 pt-0.5 max-lg:items-center max-lg:text-center sm:gap-4 lg:items-start lg:text-left",
   hospitalityMediaCard:

@@ -382,11 +382,6 @@ html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activ
 }
 
 @media (max-width: 767px) {
-  .caretip-landing #recognition {
-    padding-top: 2.5rem !important;
-    padding-bottom: 2.5rem !important;
-  }
-
   .caretip-landing #recognition .caretip-motivation-points {
     margin-top: 0.875rem !important;
   }
@@ -417,23 +412,23 @@ html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activ
   }
 }
 
-/* Single-column recognition: left-align copy + sit checklist text beside uptrend markers */
+/* Single-column recognition: centered intro parity with other landing sections */
 @media (max-width: 1023px) {
   .caretip-landing #recognition .caretip-motivation-copy {
-    align-items: flex-start !important;
-    text-align: left !important;
+    align-items: center !important;
+    text-align: center !important;
   }
 
   .caretip-landing #recognition .caretip-motivation-accent-row,
   .caretip-landing #recognition [data-landing-accent] {
-    margin-inline: 0 !important;
+    margin-inline: auto !important;
   }
 
   .caretip-landing #recognition .caretip-motivation-points {
-    margin-inline: 0 !important;
-    max-width: none !important;
+    margin-inline: auto !important;
+    max-width: min(100%, 24rem) !important;
     width: 100%;
-    align-self: stretch;
+    align-self: center;
     gap: 0.5rem;
   }
 
@@ -448,6 +443,6 @@ html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activ
   }
 
   .caretip-landing #recognition .caretip-motivation-cta {
-    justify-content: flex-start !important;
+    justify-content: center !important;
   }
 }

@@ -6,6 +6,16 @@
 .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap {
   position: relative;
   isolation: isolate;
+  border-left: none;
+  border-right: none;
+}
+
+.caretip-landing #how-it-works .caretip-live-minutes-split {
+  overflow-x: clip;
+}
+
+.caretip-landing #how-it-works .caretip-live-minutes-intro {
+  margin-bottom: 2rem;
 }
 
 /* Warm ambient glow behind phone — hospitality lighting */
@@ -25,7 +35,17 @@
     rgba(233, 120, 28, 0.09) 38%,
     transparent 70%
   );
-  opacity: 0.9;
+  opacity: 0.72;
+}
+
+html.dark .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap::before {
+  background: radial-gradient(
+    ellipse 72% 60% at 50% 46%,
+    rgba(233, 120, 28, 0.12) 0%,
+    rgba(233, 120, 28, 0.04) 40%,
+    transparent 72%
+  );
+  opacity: 0.52;
 }
 
 /* Soft ground contact shadow under device */
@@ -54,42 +74,224 @@
 }
 
 .caretip-landing #how-it-works .caretip-live-minutes-device-lift {
-  filter: drop-shadow(0 22px 36px rgba(30, 24, 16, 0.14))
-    drop-shadow(0 8px 16px rgba(30, 24, 16, 0.08));
+  filter: drop-shadow(0 14px 24px rgba(30, 24, 16, 0.09))
+    drop-shadow(0 5px 10px rgba(30, 24, 16, 0.05));
 }
 
-/* Numbered process steps (#how-it-works) */
-.caretip-landing #how-it-works .caretip-process-step {
+/* Desktop — readable copy width, clear column separation, larger phone preview */
+@media (min-width: 1024px) {
+  .caretip-landing #how-it-works .caretip-live-minutes-split {
+    max-width: 72rem;
+    grid-template-columns: minmax(0, 36rem) minmax(0, 1fr);
+    column-gap: 3rem;
+    align-items: stretch;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-split > .caretip-mobile-stack-flatten,
+  .caretip-landing #how-it-works .caretip-live-minutes-copy {
+    min-width: 0;
+    width: 100%;
+    max-width: 36rem;
+    padding-right: 0.75rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 2.75rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-process-steps,
+  .caretip-landing #how-it-works .caretip-live-minutes-copy .caretip-mobile-stack-intro {
+    max-width: 34rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-self: stretch;
+    box-sizing: border-box;
+    min-height: 100%;
+    padding-top: clamp(7.75rem, 11vw, 9.25rem);
+    padding-left: 1.5rem;
+    padding-right: 0;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-stage {
+    margin-inline: 0 auto;
+    max-width: min(100%, 26rem);
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-journey {
+    min-height: 24rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-landing #how-it-works .caretip-live-minutes-split {
+    column-gap: 3.5rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap {
+    padding-left: 2rem;
+    padding-top: clamp(8rem, 10vw, 9.5rem);
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 3rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-stage {
+    max-width: min(100%, 27.5rem);
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-journey {
+    min-height: 25.5rem;
+  }
+}
+
+.caretip-landing #how-it-works .caretip-process-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #how-it-works .caretip-process-step-body {
+    gap: 0.25rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* Numbered process steps — uniform cards, emphasis via state only */
+.caretip-landing #how-it-works .caretip-process-step,
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step {
+  box-sizing: border-box;
+  min-height: 5.625rem;
+  padding: 1rem 1.125rem;
+  border: 1px solid transparent;
+  border-radius: 1rem;
+  background: transparent;
+  box-shadow: none;
   transition:
     border-color 0.28s ease,
     background-color 0.28s ease,
-    box-shadow 0.28s ease;
+    box-shadow 0.28s ease,
+    opacity 0.28s ease;
 }
 
-.caretip-landing #how-it-works .caretip-process-step--active {
-  border-color: rgba(233, 120, 28, 0.2) !important;
-  background: rgba(255, 253, 250, 0.95);
-  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.04);
+@media (min-width: 640px) {
+  .caretip-landing #how-it-works .caretip-process-step,
+  .caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step {
+    min-height: 6rem;
+    padding: 1.125rem 1.25rem;
+  }
 }
 
-html.dark .caretip-landing #how-it-works .caretip-process-step--active {
-  border-color: rgba(233, 120, 28, 0.28) !important;
-  background: rgba(233, 120, 28, 0.06);
-  box-shadow: none;
+.caretip-landing #how-it-works .caretip-process-step-desc {
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active) {
+  opacity: 0.76;
+}
+
+.caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active) .caretip-process-step-number {
+  color: rgb(220 220 220);
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active) .caretip-process-step-number {
+  color: rgb(64 64 64);
+}
+
+.caretip-landing #how-it-works .caretip-process-step--active,
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step--active {
+  opacity: 1;
+  border-color: rgba(233, 120, 28, 0.24) !important;
+  background: rgba(255, 253, 250, 0.96);
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 6px 16px -10px rgba(233, 120, 28, 0.12);
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step--active,
+html.dark .caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step--active {
+  border-color: rgba(233, 120, 28, 0.32) !important;
+  background: rgba(233, 120, 28, 0.07);
+  box-shadow: 0 8px 20px -12px rgba(233, 120, 28, 0.16);
+}
+
+.caretip-landing #how-it-works .caretip-process-step-title--inactive {
+  font-weight: 500;
+  color: rgb(130 130 130);
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step-title--inactive {
+  color: rgb(163 163 163);
+}
+
+.caretip-landing #how-it-works .caretip-process-step-title--active {
+  font-weight: 700;
+  color: rgb(10 10 10);
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step-title--active {
+  color: rgb(250 250 250);
+}
+
+.caretip-landing #how-it-works .caretip-process-step-desc--inactive {
+  color: rgb(130 130 130);
+  opacity: 0.82;
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step-desc--inactive {
+  color: rgb(163 163 163);
+  opacity: 0.9;
+}
+
+.caretip-landing #how-it-works .caretip-process-step-desc--active {
+  color: rgb(82 82 82);
+  opacity: 1;
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step-desc--active {
+  color: rgb(212 212 212);
+}
+
+.caretip-landing #how-it-works .caretip-process-step-number {
+  position: relative;
+  z-index: 1;
+  min-width: 3.25rem;
+  color: rgb(212 212 212);
+  transition: color 0.28s ease;
+}
+
+html.dark .caretip-landing #how-it-works .caretip-process-step-number {
+  color: rgb(82 82 82);
+}
+
+.caretip-landing #how-it-works .caretip-process-step--active .caretip-process-step-number {
+  color: hsl(var(--primary));
+  transform: none;
+  opacity: 1;
+}
+
+.caretip-landing.caretip-landing--premium #how-it-works .caretip-process-step-number {
+  opacity: 1;
 }
 
 @media (hover: hover) {
   .caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active):hover {
-    background: rgba(17, 17, 17, 0.02);
+    opacity: 0.9;
+    background: rgba(17, 17, 17, 0.015);
   }
 
   html.dark .caretip-landing #how-it-works .caretip-process-step:not(.caretip-process-step--active):hover {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 255, 255, 0.025);
   }
-}
-
-.caretip-landing #how-it-works .caretip-process-step-number {
-  min-width: 3.25rem;
 }
 
 /* Legacy step cards — superseded by caretip-process-step */
@@ -129,16 +331,6 @@ html.dark .caretip-landing #how-it-works .caretip-process-step--active {
   transform: scale(0.995);
 }
 
-html.dark .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap::before {
-  background: radial-gradient(
-    ellipse 72% 60% at 50% 46%,
-    rgba(233, 120, 28, 0.12) 0%,
-    rgba(233, 120, 28, 0.04) 40%,
-    transparent 72%
-  );
-  opacity: 0.65;
-}
-
 html.dark .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap::after {
   background: radial-gradient(
     ellipse 85% 100% at 50% 50%,
@@ -171,8 +363,8 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
 /* Setup journey canvas — mobile-first guided composition */
 .caretip-landing #how-it-works .caretip-live-minutes-journey {
   box-shadow:
-    0 16px 40px -24px rgba(30, 24, 16, 0.2),
-    0 4px 12px -6px rgba(30, 24, 16, 0.08);
+    0 10px 28px -22px rgba(30, 24, 16, 0.13),
+    0 2px 8px -6px rgba(30, 24, 16, 0.05);
 }
 
 .caretip-landing #how-it-works .caretip-live-minutes-phone-slot {
@@ -183,7 +375,7 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
 @media (min-width: 1024px) {
   .caretip-landing #how-it-works .caretip-live-minutes-journey {
     aspect-ratio: 3 / 4;
-    min-height: 20rem;
+    min-height: 24rem;
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-phone-slot {
@@ -217,17 +409,13 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
 /* Mobile — journey card, content-forward phone, steps below */
 @media (max-width: 1023px) {
   .caretip-landing #how-it-works {
-    padding-top: 2.5rem;
-    padding-bottom: 2.5rem;
     overflow-x: clip;
     overflow-y: visible;
-    -webkit-overflow-scrolling: touch;
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap {
     margin-top: 0.25rem;
     margin-bottom: 0;
-    touch-action: pan-y;
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap::before {
@@ -247,7 +435,6 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
 
   .caretip-landing #how-it-works .caretip-live-minutes-stage {
     max-width: min(100%, 18rem);
-    touch-action: pan-y;
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-journey {
@@ -277,6 +464,10 @@ html.dark .caretip-landing #how-it-works .caretip-live-minutes-step--active {
 
   .caretip-landing #how-it-works .caretip-mobile-stack-after {
     margin-top: 0.75rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 2.25rem;
   }
 
   .caretip-landing #how-it-works .caretip-live-minutes-step {

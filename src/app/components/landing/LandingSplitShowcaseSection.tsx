@@ -122,7 +122,6 @@ export function LandingSplitShowcaseSection({
                   variant={benefitsVariant}
                   title={item.title}
                   description={item.description}
-                  className={benefitsVariant === "showcase" ? landingUi.showcaseBenefitRow : undefined}
                 />
               ))}
             </div>

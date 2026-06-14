@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
 import logyImg from "../../../../images/logy.png";
 import repImg from "../../../../images/rep.png";
-import salonImg from "../../../../images/salon.jpeg";
+import hospitalImg from "../../../../images/hospital002.png";
 import homeImg from "../../../../images/home.jpeg";
 import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
 import { useMinWidthMedia } from "@/lib/motionPerf";
@@ -41,7 +41,7 @@ export function LandingRealLifeSection() {
           tag: t("landing.realLife.s3Tag"),
           textKey: "landing.realLife.s3Text" as const,
           detail: t("landing.realLife.s3Detail"),
-          img: salonImg,
+          img: hospitalImg,
           alt: t("landing.realLife.s3Alt"),
         },
         {

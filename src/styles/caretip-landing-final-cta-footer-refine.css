@@ -291,8 +291,8 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
     overflow-y: visible;
     min-height: 0;
     padding-inline: 1rem;
-    padding-top: 2.75rem;
-    padding-bottom: 2.75rem;
+    padding-top: 3rem;
+    padding-bottom: 3rem;
     box-sizing: border-box;
   }
 
@@ -416,9 +416,9 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
 @media (min-width: 640px) and (max-width: 1023px) {
   .caretip-landing #final-cta.caretip-landing-final-cta,
   .caretip-landing .caretip-landing-final-cta {
-    padding-inline: 1.25rem;
-    padding-top: 3rem;
-    padding-bottom: 3rem;
+    padding-inline: 1.5rem;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
   }
 
   .caretip-landing .caretip-final-cta-headline {
@@ -429,5 +429,13 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
     font-size: 0.9375rem;
     max-width: 28rem;
     margin-inline: auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #final-cta.caretip-landing-final-cta,
+  .caretip-landing .caretip-landing-final-cta {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
   }
 }

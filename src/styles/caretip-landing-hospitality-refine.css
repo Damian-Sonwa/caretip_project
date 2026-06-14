@@ -41,7 +41,6 @@ html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality::b
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-nav {
-  gap: 0;
   cursor: default;
 }
 
@@ -50,26 +49,12 @@ html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality::b
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item {
-  padding-block: 0.875rem;
+  padding-block: 0;
   cursor: default;
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item:hover {
   cursor: default;
-}
-
-@media (min-width: 640px) {
-  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item {
-    padding-block: 1rem;
-  }
-}
-
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--divided {
-  border-top: 1px solid rgba(17, 17, 17, 0.06);
-}
-
-html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--divided {
-  border-top-color: rgba(255, 255, 255, 0.07);
 }
 
 .caretip-landing #built-for-hospitality .caretip-hospitality-feature-entry {

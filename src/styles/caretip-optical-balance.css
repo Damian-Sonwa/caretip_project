@@ -54,6 +54,10 @@
     .caretip-landing .caretip-split-section-grid {
       align-items: center;
     }
+
+    .caretip-landing .caretip-hero-grid {
+      max-width: 80rem;
+    }
   }
 
   /* Hero split — vertical balance on large screens (see hero-layout.css) */

@@ -84,7 +84,7 @@ export function LiveInMinutesLaptopDemo({
   }
 
   return (
-    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[20rem] lg:max-w-[22rem]">
+    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[20rem] lg:max-w-[26rem] xl:max-w-[27.5rem]">
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-6 w-[68%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.07] blur-lg sm:h-8 sm:w-[72%] sm:blur-xl dark:bg-black/40"
@@ -422,7 +422,7 @@ function PhoneFrame({ children, compact }: { children: React.ReactNode; compact?
     <div
       className={cn(
         "relative z-[1] w-full",
-        compact ? "max-w-[min(100%,12.75rem)]" : "h-full max-w-[10.25rem] sm:max-w-[11.25rem] lg:max-w-[12rem]",
+        compact ? "max-w-[min(100%,12.75rem)]" : "h-full max-w-[10.25rem] sm:max-w-[11.25rem] lg:max-w-[13.5rem] xl:max-w-[14.25rem]",
       )}
     >
       <div

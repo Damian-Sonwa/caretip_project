@@ -25,7 +25,10 @@ export function HospitalityFeaturePanel({ features, className }: HospitalityFeat
 
   return (
     <ul
-      className={cn("caretip-hospitality-feature-nav flex w-full cursor-default flex-col", className)}
+      className={cn(
+        "caretip-hospitality-feature-nav caretip-landing-feature-rhythm flex w-full cursor-default flex-col gap-6 sm:gap-8",
+        className,
+      )}
       role="list"
     >
       {features.map((feature, index) => {
@@ -37,7 +40,6 @@ export function HospitalityFeaturePanel({ features, className }: HospitalityFeat
             onMouseEnter={() => setActiveIndex(index)}
             className={cn(
               "caretip-hospitality-feature-item group min-w-0 cursor-default",
-              index > 0 && "caretip-hospitality-feature-item--divided",
               isActive && "caretip-hospitality-feature-item--active",
             )}
           >
