@@ -1,0 +1,137 @@
+/**
+ * Landing page — page-wide optical balance audit (presentation only).
+ * Spacing, alignment, rhythm, container rails. No layout or component redesign.
+ */
+
+/* —— Container rail — 80rem across hero + split sections —— */
+.caretip-landing .caretip-hero-grid {
+  max-width: 80rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #how-it-works .caretip-live-minutes-split {
+    max-width: 80rem;
+  }
+}
+
+/* —— Intro → content rhythm (2rem / 2.5rem) —— */
+@media (max-width: 1023px) {
+  .caretip-landing #built-for-hospitality .caretip-mobile-stack-intro,
+  .caretip-landing #built-for-hospitality .caretip-hospitality-intro {
+    margin-bottom: 2rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 2rem;
+  }
+
+  .caretip-landing #real-life .caretip-real-life-section-intro {
+    margin-bottom: 2rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-visual-wrap {
+    margin-top: 0.75rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-mobile-stack-after {
+    margin-top: 1.125rem;
+  }
+
+  .caretip-landing #how-it-works .caretip-live-minutes-steps {
+    margin-top: 0;
+  }
+
+  .caretip-landing #for-employees .caretip-showcase-visual-col,
+  .caretip-landing #business-section .caretip-showcase-visual-col,
+  .caretip-landing #payments-trust .caretip-payments-trust-visual {
+    padding-inline: 0;
+  }
+
+  .caretip-landing .caretip-landing-features-grid {
+    gap: 1rem;
+  }
+
+  .caretip-landing #recognition .caretip-motivation-mobile-feed {
+    margin-top: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-landing #built-for-hospitality .caretip-mobile-stack-intro,
+  .caretip-landing #built-for-hospitality .caretip-hospitality-intro,
+  .caretip-landing #how-it-works .caretip-live-minutes-intro,
+  .caretip-landing #real-life .caretip-real-life-section-intro {
+    margin-bottom: 2.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing #how-it-works .caretip-live-minutes-intro {
+    margin-bottom: 2.5rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .caretip-landing #built-for-hospitality,
+  .caretip-landing #for-employees,
+  .caretip-landing #business-section,
+  .caretip-landing #features,
+  .caretip-landing #payments-trust {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+
+  .caretip-landing #real-life .grid {
+    gap: 1rem;
+  }
+
+  .caretip-landing .caretip-split-showcase-content-panel--mobile {
+    padding: 1.25rem 1rem;
+  }
+
+  .caretip-landing #for-employees .caretip-split-showcase-content-panel--mobile .caretip-landing-section-cta,
+  .caretip-landing #business-section .caretip-split-showcase-content-panel--mobile .caretip-landing-section-cta {
+    margin-top: 0.875rem;
+  }
+
+  .caretip-landing .caretip-landing-feature-icon {
+    margin-bottom: 0.75rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-body {
+    gap: 2rem;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-grid {
+    gap: 1.5rem;
+  }
+}
+
+/* —— CTA width parity —— */
+.caretip-landing .caretip-final-cta-action {
+  max-width: min(100%, 17.5rem);
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-final-cta-action {
+    max-width: min(100%, 17.5rem);
+  }
+}
+
+/* —— Payments intro — remove lg outlier —— */
+@media (min-width: 1024px) {
+  .caretip-landing #payments-trust .caretip-payments-trust-intro {
+    margin-bottom: 2.5rem;
+  }
+}
+
+/* —— Recognition rhythm —— */
+@media (max-width: 1023px) {
+  .caretip-landing #recognition .caretip-motivation-points {
+    margin-top: 1.25rem;
+  }
+}
+
+.caretip-landing .caretip-motivation-activity-feed-mobile__frame {
+  padding: 0.75rem 1rem;
+}

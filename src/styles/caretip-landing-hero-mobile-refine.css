@@ -19,7 +19,7 @@
   }
 
   .caretip-landing .caretip-hero-showcase-stage {
-    padding-top: 0 !important;
+    padding-top: 0.25rem !important;
     padding-bottom: 0.25rem !important;
   }
 
@@ -57,5 +57,83 @@
   .caretip-public-nav nav a[href="/"] {
     height: 3.5rem;
     min-height: 3.5rem;
+  }
+}
+
+/* Optical centering — phone hero (320px–480px); presentation only */
+@media (max-width: 480px) {
+  .caretip-landing .caretip-hero-grid__showcase {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+  }
+
+  .caretip-landing .caretip-hero-showcase-stage {
+    margin-inline: auto;
+    padding-inline: 0.5rem !important;
+    padding-top: 0.375rem !important;
+    padding-bottom: 0.375rem !important;
+  }
+
+  .caretip-landing .caretip-hero-showcase-composition,
+  .caretip-landing .caretip-hero-media-shell,
+  .caretip-landing .caretip-hero-media-wrap,
+  .caretip-landing .caretip-hero-media-clip {
+    margin-inline: auto;
+  }
+
+  .caretip-landing .caretip-hero-media-wrap {
+    display: block;
+  }
+
+  .caretip-landing .caretip-hero-warm-ambience {
+    background: radial-gradient(
+      ellipse 72% 62% at 50% 46%,
+      rgba(255, 236, 210, 0.32) 0%,
+      rgba(233, 120, 28, 0.07) 42%,
+      transparent 70%
+    );
+  }
+
+  html.dark .caretip-landing .caretip-hero-warm-ambience {
+    background: radial-gradient(
+      ellipse 72% 62% at 50% 46%,
+      rgba(233, 120, 28, 0.14) 0%,
+      rgba(233, 120, 28, 0.04) 38%,
+      transparent 68%
+    );
+  }
+
+  .caretip-landing .caretip-hero-showcase-ambient {
+    left: 50%;
+    top: 44%;
+  }
+
+  /* Float pills — symmetric top pair + centered bottom anchor (reduces right-side weight) */
+  .caretip-landing .caretip-hero-float-cards {
+    width: min(94%, 19.5rem);
+  }
+
+  .caretip-landing .caretip-hero-float-pill--tip {
+    top: 11%;
+    left: 4%;
+    right: auto;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--rating {
+    top: 11%;
+    right: 4%;
+    left: auto;
+  }
+
+  .caretip-landing .caretip-hero-float-pill--staff {
+    top: auto;
+    bottom: 23%;
+    left: 0;
+    right: 0;
+    margin-inline: auto;
+    width: max-content;
+    max-width: min(calc(100% - 1rem), 10rem);
   }
 }

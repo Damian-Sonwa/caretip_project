@@ -41,7 +41,7 @@
   }
 
   .caretip-landing #real-life .caretip-real-life-section-intro {
-    margin-bottom: 1.625rem;
+    margin-bottom: 2rem;
   }
 
   .caretip-landing #real-life .grid {
@@ -78,13 +78,13 @@
 
   .caretip-landing #payments-trust .caretip-payments-trust-item {
     align-items: flex-start;
-    gap: 0.875rem;
+    gap: 1rem;
   }
 }
 
 @media (max-width: 767px) {
   .caretip-landing .caretip-split-showcase-content-panel--mobile {
-    padding: 1.125rem 1rem;
+    padding: 1.25rem 1rem;
   }
 
   .caretip-landing .caretip-section-intro > h2 {
@@ -201,7 +201,7 @@
   }
 
   .caretip-landing .caretip-landing-features-grid {
-    gap: 0.875rem;
+    gap: 1rem;
   }
 
   .caretip-landing .caretip-landing-feature-card {
@@ -317,9 +317,5 @@
 @media (max-width: 767px) {
   .caretip-landing .caretip-hero-grid {
     padding-inline: 1rem;
-  }
-
-  .caretip-landing .caretip-hero-showcase-stage {
-    padding-inline: 0.125rem;
   }
 }

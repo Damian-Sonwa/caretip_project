@@ -140,8 +140,8 @@
       "faqTeaserLink": "Visit FAQ"
     },
     "features": {
-      "title": "What CareTip can do for you",
-      "subtitleLead": "Caring is Tipping! Because outstanding dedication deserves real recognition.",
+      "title": "Caring is Tipping",
+      "subtitleLead": "Because outstanding dedication deserves real recognition.",
       "subtitleBody": "A platform tailor-made for hospitality, healthcare, and service industries. With CareTip, your guests, clients, or patients can say a digital thank you more easily and intuitively than ever before. Bring genuine appreciation straight to your team!",
       "f1Title": "QR Code Tipping",
       "f1Desc": "Guests scan and tip in seconds, with no app installs and no friction.",
@@ -1756,8 +1756,8 @@
       }
     },
     "hospitality": {
-      "title": "Empowering our everyday heroes",
-      "subtitle": "<bold>Caring is Tipping! Reward outstanding dedication right in the moment.</bold> Make tipping effortlessly simple and fuel every single shift with noticeable motivation, genuine appreciation, and well-deserved smiles. Because the people who keep our world moving deserve nothing less than the best.",
+      "title": "Caring is Tipping",
+      "subtitle": "<bold>Reward outstanding dedication right in the moment.</bold> Make tipping effortlessly simple and fuel every single shift with noticeable motivation, genuine appreciation, and well-deserved smiles. Because the people who keep our world moving deserve nothing less than the best.",
       "pill": "Empowering excellence, wherever people care.",
       "f1Title": "Reward service instantly",
       "f1Text": "Guests tip in seconds with one quick scan.",
@@ -2193,7 +2193,7 @@
     "linkAbout": "About Us",
     "linkHelp": "Help Center",
     "linkFaq": "FAQs",
-    "tagline": "Rewarding great service instantly.",
+    "tagline": "Caring is Tipping",
     "copyright": "© CareTip {{year}}",
     "version": "Version {{version}}",
     "platformAdmin": "Platform admin",

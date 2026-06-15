@@ -62,10 +62,10 @@
 @media (max-width: 639px) {
   .caretip-landing #for-employees .caretip-landing-feature-rhythm,
   .caretip-landing #business-section .caretip-landing-feature-rhythm {
-    gap: 1.625rem;
+    gap: 1.5rem;
   }
 
   .caretip-landing #built-for-hospitality .caretip-hospitality-feature-nav {
-    gap: 1.625rem;
+    gap: 1.5rem;
   }
 }

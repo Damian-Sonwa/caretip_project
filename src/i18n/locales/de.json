@@ -140,8 +140,8 @@
       "faqTeaserLink": "Zu den FAQs"
     },
     "features": {
-      "title": "Das alles kann CareTip für Sie tun",
-      "subtitleLead": "Caring is Tipping! Weil großartiger Einsatz echte Anerkennung verdient.",
+      "title": "Caring is Tipping",
+      "subtitleLead": "Weil großartiger Einsatz echte Anerkennung verdient.",
       "subtitleBody": "Eine Plattform, maßgeschneidert für Service, Pflege und Dienstleistung. Mit CareTip sagen Ihre Gäste, Kunden oder Patienten so einfach und intuitiv wie nie zuvor digital Danke. Bringen Sie echte Wertschätzung direkt in Ihr Team!",
       "f1Title": "Trinkgeld per QR-Code",
       "f1Desc": "Kunden, Gäste, Patienten oder Angehörige scannen den Code und geben in Sekundenschnelle Trinkgeld, komplett ohne App-Installation und absolut barrierefrei.",
@@ -1760,8 +1760,8 @@
       }
     },
     "hospitality": {
-      "title": "Für das Rückgrat unserer Gesellschaft",
-      "subtitle": "<bold>Caring is Tipping! Belohnen Sie herausragenden Einsatz genau dann, wenn er passiert.</bold> Machen Sie das Geben von Trinkgeld spielend leicht und sorgen Sie für spürbar mehr Motivation, echte Anerkennung und ein Lächeln in jeder einzelnen Schicht. Weil die Menschen, die jeden Tag alles für uns geben, nur das Beste verdienen.",
+      "title": "Caring is Tipping",
+      "subtitle": "<bold>Belohnen Sie herausragenden Einsatz genau dann, wenn er passiert.</bold> Machen Sie das Geben von Trinkgeld spielend leicht und sorgen Sie für spürbar mehr Motivation, echte Anerkennung und ein Lächeln in jeder einzelnen Schicht. Weil die Menschen, die jeden Tag alles für uns geben, nur das Beste verdienen.",
       "pill": "Überall dort im Einsatz, wo Menschen Großartiges leisten",
       "f1Title": "QR-Codes, die sich Ihrem Alltag anpassen",
       "f1Text": "Ob am Tisch, auf Station oder direkt auf der Tour: Ausdrucken, aufstellen und sofort die Früchte der Arbeit ernten.",
@@ -2197,7 +2197,7 @@
     "linkAbout": "Über uns",
     "linkHelp": "Hilfezentrum",
     "linkFaq": "FAQ",
-    "tagline": "Großartigen Service sofort belohnen.",
+    "tagline": "Caring is Tipping",
     "copyright": "© CareTip {{year}}",
     "version": "Version {{version}}",
     "platformAdmin": "Plattformadmin",

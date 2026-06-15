@@ -383,7 +383,7 @@ html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activ
 
 @media (max-width: 767px) {
   .caretip-landing #recognition .caretip-motivation-points {
-    margin-top: 0.875rem !important;
+    margin-top: 1.25rem !important;
   }
 
   .caretip-landing #recognition .caretip-motivation-mobile-feed {

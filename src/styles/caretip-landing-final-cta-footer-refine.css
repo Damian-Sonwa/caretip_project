@@ -132,7 +132,7 @@ html.dark .caretip-landing .caretip-landing-final-cta::after {
   isolation: isolate;
   display: flex;
   width: 100%;
-  max-width: 20rem;
+  max-width: min(100%, 17.5rem);
   justify-content: center;
 }
 
@@ -382,7 +382,7 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
 
   .caretip-landing .caretip-final-cta-action {
     width: 100%;
-    max-width: 20rem;
+    max-width: min(100%, 17.5rem);
     margin-inline: auto;
   }
 
