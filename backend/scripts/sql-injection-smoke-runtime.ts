@@ -1,20 +1,12 @@
 /**
  * SQL injection payload smoke tests — service layer + optional HTTP against RUNTIME_API_BASE.
  * Run: npm run test:sql-injection-smoke (from backend/)
+ *
+ * Unit tests (likeSearch) always run. DB/HTTP payloads run only when DATABASE_URL is set
+ * and the database is reachable (CI uses the job Postgres service).
  */
 import "dotenv/config";
 import "../src/loadEnv.js";
-import bcrypt from "bcrypt";
-import { prisma } from "../src/prisma.js";
-import * as authService from "../src/services/auth.service.js";
-import { listGlobalTransactions } from "../src/services/platform.service.js";
-import {
-  listBusinessSupportTickets,
-  listPlatformSupportTickets,
-} from "../src/services/supportTicket.service.js";
-import { listUserNotifications } from "../src/services/notifications/notificationInbox.service.js";
-import { validateInviteCode } from "../src/services/business.service.js";
-import { signAuthJwt } from "../src/services/auth.service.js";
 import {
   escapeLikeContainsPattern,
   sanitizeLikeContainsSearch,
@@ -38,6 +30,56 @@ const pass = (m: string) => results.push(`PASS: ${m}`);
 const fail = (m: string) => results.push(`FAIL: ${m}`);
 const skip = (m: string) => results.push(`SKIP: ${m}`);
 
+type DatabaseDeps = {
+  prisma: {
+    $queryRaw: (query: TemplateStringsArray) => Promise<unknown>;
+    user: {
+      create: (args: unknown) => Promise<{
+        id: string;
+        email: string;
+        business?: { id: string } | null;
+      }>;
+      delete: (args: unknown) => Promise<unknown>;
+    };
+    business: { delete: (args: unknown) => Promise<unknown> };
+  };
+  bcrypt: typeof import("bcrypt");
+  authService: typeof import("../src/services/auth.service.js");
+  signAuthJwt: typeof import("../src/services/auth.service.js").signAuthJwt;
+  listGlobalTransactions: typeof import("../src/services/platform.service.js").listGlobalTransactions;
+  listPlatformSupportTickets: typeof import("../src/services/supportTicket.service.js").listPlatformSupportTickets;
+  listBusinessSupportTickets: typeof import("../src/services/supportTicket.service.js").listBusinessSupportTickets;
+  listUserNotifications: typeof import("../src/services/notifications/notificationInbox.service.js").listUserNotifications;
+  validateInviteCode: typeof import("../src/services/business.service.js").validateInviteCode;
+};
+
+async function loadDatabaseDeps(): Promise<DatabaseDeps> {
+  const bcrypt = (await import("bcrypt")).default;
+  const { prisma } = await import("../src/prisma.js");
+  const authService = await import("../src/services/auth.service.js");
+  const { listGlobalTransactions } = await import("../src/services/platform.service.js");
+  const {
+    listBusinessSupportTickets,
+    listPlatformSupportTickets,
+  } = await import("../src/services/supportTicket.service.js");
+  const { listUserNotifications } = await import(
+    "../src/services/notifications/notificationInbox.service.js"
+  );
+  const { validateInviteCode } = await import("../src/services/business.service.js");
+
+  return {
+    prisma: prisma as DatabaseDeps["prisma"],
+    bcrypt,
+    authService,
+    signAuthJwt: authService.signAuthJwt,
+    listGlobalTransactions,
+    listPlatformSupportTickets,
+    listBusinessSupportTickets,
+    listUserNotifications,
+    validateInviteCode,
+  };
+}
+
 function assertNoDbLeak(context: string, err: unknown): boolean {
   const msg = err instanceof Error ? err.message : String(err);
   if (DB_LEAK_RE.test(msg)) {
@@ -59,9 +101,9 @@ function assertResponseSafe(context: string, status: number, body: string): bool
   return true;
 }
 
-async function isDbReachable(): Promise<boolean> {
+async function isDbReachable(deps: DatabaseDeps): Promise<boolean> {
   try {
-    await prisma.$queryRaw`SELECT 1`;
+    await deps.prisma.$queryRaw`SELECT 1`;
     return true;
   } catch {
     return false;
@@ -77,7 +119,8 @@ async function isApiReachable(): Promise<boolean> {
   }
 }
 
-async function seedManager() {
+async function seedManager(deps: DatabaseDeps) {
+  const { prisma, bcrypt, signAuthJwt } = deps;
   const tag = `sqli-mgr-${Date.now()}`;
   const passwordHash = await bcrypt.hash("TestPass1!", 10);
   const user = await prisma.user.create({
@@ -114,7 +157,8 @@ async function seedManager() {
   };
 }
 
-async function seedPlatformAdmin() {
+async function seedPlatformAdmin(deps: DatabaseDeps) {
+  const { prisma, bcrypt, signAuthJwt } = deps;
   const tag = `sqli-admin-${Date.now()}`;
   const passwordHash = await bcrypt.hash("TestPass1!", 10);
   const user = await prisma.user.create({
@@ -164,10 +208,10 @@ async function testLikeSearchHardening(): Promise<void> {
   }
 }
 
-async function testLoginPayloads(): Promise<void> {
+async function testLoginPayloads(deps: DatabaseDeps): Promise<void> {
   for (const payload of SQLI_PAYLOADS) {
     try {
-      await authService.login({ email: payload, password: payload });
+      await deps.authService.login({ email: payload, password: payload });
       fail(`login payload did not reject: ${payload.slice(0, 20)}`);
     } catch (err) {
       if (!assertNoDbLeak(`login(${payload.slice(0, 12)}...)`, err)) continue;
@@ -181,10 +225,14 @@ async function testLoginPayloads(): Promise<void> {
   }
 }
 
-async function testSearchPayloads(adminUserId: string, managerUserId: string): Promise<void> {
+async function testSearchPayloads(
+  deps: DatabaseDeps,
+  adminUserId: string,
+  managerUserId: string,
+): Promise<void> {
   for (const payload of SQLI_PAYLOADS) {
     try {
-      const tx = await listGlobalTransactions({ q: payload, take: 10, skip: 0 });
+      const tx = await deps.listGlobalTransactions({ q: payload, take: 10, skip: 0 });
       if (!Array.isArray(tx.items)) {
         fail(`platform search invalid shape for payload`);
       } else if (tx.items.length > 100) {
@@ -199,7 +247,7 @@ async function testSearchPayloads(adminUserId: string, managerUserId: string): P
     }
 
     try {
-      const tickets = await listPlatformSupportTickets({ search: payload });
+      const tickets = await deps.listPlatformSupportTickets({ search: payload });
       if (!Array.isArray(tickets) || tickets.length > 200) {
         fail(`platform tickets search suspicious result`);
       } else {
@@ -212,7 +260,7 @@ async function testSearchPayloads(adminUserId: string, managerUserId: string): P
     }
 
     try {
-      const tickets = await listBusinessSupportTickets(managerUserId, { search: payload });
+      const tickets = await deps.listBusinessSupportTickets(managerUserId, { search: payload });
       if (!Array.isArray(tickets) || tickets.length > 200) {
         fail(`business tickets search suspicious result`);
       } else {
@@ -225,7 +273,7 @@ async function testSearchPayloads(adminUserId: string, managerUserId: string): P
     }
 
     try {
-      const inbox = await listUserNotifications(adminUserId, { search: payload, limit: 20 });
+      const inbox = await deps.listUserNotifications(adminUserId, { search: payload, limit: 20 });
       if (!Array.isArray(inbox.items) || inbox.items.length > 100) {
         fail(`notifications search suspicious result`);
       } else {
@@ -239,10 +287,10 @@ async function testSearchPayloads(adminUserId: string, managerUserId: string): P
   }
 }
 
-async function testPublicEndpoints(): Promise<void> {
+async function testPublicEndpoints(deps: DatabaseDeps): Promise<void> {
   for (const payload of SQLI_PAYLOADS) {
     try {
-      const r = await validateInviteCode(payload);
+      const r = await deps.validateInviteCode(payload);
       if (r.ok) {
         fail(`invite validate must not succeed on SQLi payload`);
       } else {
@@ -346,7 +394,16 @@ async function testHttpPayloads(managerToken: string, adminToken: string): Promi
 async function main(): Promise<void> {
   await testLikeSearchHardening();
 
-  if (!(await isDbReachable())) {
+  if (!process.env.DATABASE_URL?.trim()) {
+    skip("Service-layer SQLi payloads — DATABASE_URL not set");
+    skip("HTTP SQLi payloads — requires DATABASE_URL for tokens");
+    printSummary();
+    return;
+  }
+
+  const deps = await loadDatabaseDeps();
+
+  if (!(await isDbReachable(deps))) {
     skip("Service-layer SQLi payloads — database not reachable");
     skip("HTTP SQLi payloads — requires database for tokens");
     printSummary();
@@ -357,16 +414,18 @@ async function main(): Promise<void> {
   let admin: Awaited<ReturnType<typeof seedPlatformAdmin>> | null = null;
 
   try {
-    await testLoginPayloads();
-    await testPublicEndpoints();
+    await testLoginPayloads(deps);
+    await testPublicEndpoints(deps);
 
-    manager = await seedManager();
-    admin = await seedPlatformAdmin();
-    await testSearchPayloads(admin.userId, manager.userId);
+    manager = await seedManager(deps);
+    admin = await seedPlatformAdmin(deps);
+    await testSearchPayloads(deps, admin.userId, manager.userId);
     await testHttpPayloads(manager.token, admin.token);
   } finally {
     await manager?.cleanup();
     await admin?.cleanup();
+    const { prisma } = await import("../src/prisma.js");
+    await prisma.$disconnect().catch(() => undefined);
   }
 
   printSummary();
