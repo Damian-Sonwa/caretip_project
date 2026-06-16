@@ -73,8 +73,7 @@ export function BusinessSidebar() {
           type="button"
           onClick={() => {
             if (user?.impersonation) {
-              exitImpersonation();
-              navigate("/platform-admin/dashboard", { replace: true });
+              void exitImpersonation();
               return;
             }
             logout();

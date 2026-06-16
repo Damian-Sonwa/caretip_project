@@ -40,8 +40,15 @@ export default defineConfig(({ mode }) => {
   /** Always resolve from repo root even when `npm run dev` is started from a subfolder. */
   root: fileURLToPath(new URL('.', import.meta.url)),
   cacheDir: 'node_modules/.vite',
+  /** Applies to dev transforms and optimizeDeps (build.target alone is production-only). */
+  esbuild: {
+    target: 'es2022',
+  },
   optimizeDeps: {
     include: ['recharts', 'react', 'react-dom', 'react-router'],
+    esbuildOptions: {
+      target: 'es2022',
+    },
   },
   /** Expose VITE_* and NEXT_PUBLIC_* from .env to import.meta.env (QR / app URL). */
   envPrefix: ['VITE_', 'NEXT_PUBLIC_'],

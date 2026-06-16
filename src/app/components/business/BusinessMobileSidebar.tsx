@@ -94,9 +94,8 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
           type="button"
           onClick={() => {
             if (user?.impersonation) {
-              exitImpersonation();
+              void exitImpersonation();
               onClose();
-              navigate("/platform-admin/dashboard", { replace: true });
               return;
             }
             logout();

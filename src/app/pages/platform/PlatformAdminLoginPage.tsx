@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
-import { useNavigate, Link } from "react-router";
+import { useNavigate, Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { Footer } from "../../components/Footer";
@@ -39,12 +39,18 @@ export function PlatformAdminLoginPage() {
   const authInFlightRef = useRef(false);
   const { login, user, sessionValidated, logout, completeAuthLogin } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const locationState = location.state as { forceLogin?: boolean; impersonationExitFailed?: boolean } | null;
+  const forceLogin = locationState?.forceLogin === true;
 
   const sameLaneValidated = Boolean(
-    user && sessionValidated && isPlatformAdminSessionRole(user.role),
+    user && sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,
   );
   const showCrossSessionHint = Boolean(
-    user && sessionValidated && !isPlatformAdminSessionRole(user.role),
+    user && sessionValidated && !isPlatformAdminSessionRole(user.role) && !forceLogin,
+  );
+  const loginSubmitBlocked = Boolean(
+    user && !sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,
   );
 
   const postAuthRedirectRef = useRef<string | null>(null);
@@ -74,7 +80,7 @@ export function PlatformAdminLoginPage() {
     e.preventDefault();
     setError("");
     const trimmed = email.trim();
-    if (user && !sessionValidated) return;
+    if (loginSubmitBlocked) return;
     if (!trimmed || !password) {
       setError(t("admin.loginPage.bothRequired"));
       return;
@@ -227,10 +233,22 @@ export function PlatformAdminLoginPage() {
                 </motion.div>
               </div>
 
-              {sameLaneValidated || showCrossSessionHint ? null : mfaStep === "password" ? (
+              {locationState?.impersonationExitFailed ? (
+                <p
+                  className="mb-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-left text-sm text-amber-950 dark:border-amber-400/40 dark:bg-amber-950/30 dark:text-amber-100"
+                  role="status"
+                >
+                  {t("admin.loginPage.impersonationExitFailed", {
+                    defaultValue:
+                      "We could not restore your platform admin session. Sign in again to continue.",
+                  })}
+                </p>
+              ) : null}
+
+              {sameLaneValidated ? null : mfaStep === "password" ? (
                 <form
                   onSubmit={(e) => void handlePasswordSubmit(e)}
-                  aria-busy={submitting || Boolean(user && !sessionValidated)}
+                  aria-busy={submitting || loginSubmitBlocked}
                   className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
                   method="post"
                   action=""
@@ -277,7 +295,7 @@ export function PlatformAdminLoginPage() {
 
                   <button
                     type="submit"
-                    disabled={submitting || Boolean(user && !sessionValidated)}
+                    disabled={submitting || loginSubmitBlocked}
                     className={cn(caretipBtnPrimaryFull, "caretip-auth-submit relative disabled:cursor-not-allowed")}
                   >
                     {submitting ? (

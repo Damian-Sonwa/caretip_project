@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useReducer } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import {
   registerAPI,
@@ -32,7 +33,7 @@ import {
   subscribeAuthSessionFlags,
 } from "../lib/authSessionBootstrap";
 import { normalizeStoredUser } from "../lib/authUserNormalize";
-import { resolveAuthStatus, type AuthStatus } from "../lib/authSession";
+import { resolveAuthStatus, deriveAuthSession, type AuthSession, type AuthStatus, isPlatformAdminSessionRole } from "../lib/authSession";
 import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
 import {
   commitAuthUser,
@@ -44,7 +45,6 @@ import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
 import { resetAllClientSessionCaches } from "../lib/resetAllClientSessionCaches";
 import { markClientSessionHint } from "../lib/authSessionHint";
 import { setMemoryAccessToken } from "../lib/accessTokenStore";
-import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
 import {
@@ -260,8 +260,62 @@ function isTransientRefreshErrorMessage(msg: string): boolean {
   );
 }
 
+export type ExitImpersonationResult = "restored" | "login_required";
+
+/**
+ * Rehydrate the platform-admin session after impersonation.
+ * 1) In-memory / sessionStorage backup from impersonate start
+ * 2) HttpOnly refresh cookie (still belongs to the platform admin during impersonation)
+ */
+export async function restorePlatformAdminSession(): Promise<boolean> {
+  const backup = takeImpersonationAdminBackup();
+  if (backup) {
+    resetAllClientSessionCaches();
+    clearClientSessionRevoked();
+    setMemoryAccessToken(backup.token);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(backup.user));
+    markClientSessionHint();
+    bumpSessionEpoch();
+    commitAuthUser(backup.user);
+    markSessionBootstrapSettled();
+    notifyAuthStorageSync();
+    authDebug("auth_session_updated", {
+      ...deriveAuthSession(backup.user),
+      source: "exit_impersonation_backup",
+    });
+    return isPlatformAdminSessionRole(backup.user.role);
+  }
+
+  try {
+    const data = await refreshSessionAPI();
+    const restored = parseUser(data.user);
+    if (!isPlatformAdminSessionRole(restored.role)) {
+      return false;
+    }
+    resetAllClientSessionCaches();
+    clearClientSessionRevoked();
+    setMemoryAccessToken(data.token);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
+    markClientSessionHint();
+    markOnboardingStatusFromServer();
+    bumpSessionEpoch();
+    commitAuthUser(restored);
+    markSessionBootstrapSettled();
+    notifyAuthStorageSync();
+    authDebug("auth_session_updated", {
+      ...deriveAuthSession(restored),
+      source: "exit_impersonation_refresh",
+    });
+    return true;
+  } catch (err) {
+    logClientError("useAuth.restorePlatformAdminSession", err);
+    return false;
+  }
+}
+
 export function useAuth() {
   const { i18n } = useTranslation();
+  const navigate = useNavigate();
   const requestLocale = requestEmailLocale(i18n.resolvedLanguage);
   const [user, setUserSnapshot] = useState<User | null>(() => getAuthUser());
   const [, syncAuthFlags] = useReducer((n: number) => n + 1, 0);
@@ -424,20 +478,26 @@ export function useAuth() {
   const isEmployee = user?.role === "employee";
   const isPlatformAdmin = user?.role === "platform_admin";
 
-  /** Restore platform admin session after impersonation (in-memory token backup). */
-  const exitImpersonation = useCallback(() => {
-    const backup = takeImpersonationAdminBackup();
-    if (!backup) return;
+  /** Restore platform admin session after impersonation and route to the admin shell. */
+  const exitImpersonation = useCallback(async (): Promise<ExitImpersonationResult> => {
+    const restored = await restorePlatformAdminSession();
+    if (restored) {
+      navigate("/platform-admin", { replace: true });
+      return "restored";
+    }
+
     resetAllClientSessionCaches();
-    setMemoryAccessToken(backup.token);
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(backup.user));
-    bumpSessionEpoch();
-    commitAuthUser(backup.user);
+    clearImpersonationAdminBackup();
+    clearStoredSession();
+    commitAuthUser(null);
     markSessionBootstrapSettled();
     notifyAuthStorageSyncFromHook();
-    authDebug("auth_session_updated", { ...deriveAuthSession(backup.user), source: "exit_impersonation" });
-    window.location.assign("/platform-admin/dashboard");
-  }, []);
+    navigate("/platform-admin/login", {
+      replace: true,
+      state: { forceLogin: true, impersonationExitFailed: true },
+    });
+    return "login_required";
+  }, [navigate]);
 
   const updateUser = useCallback((patch: Partial<User>) => {
     const current = getAuthUser();

@@ -132,7 +132,7 @@ export function BusinessDashboard() {
 
   const handleLogout = () => {
     if (user?.impersonation) {
-      exitImpersonation();
+      void exitImpersonation();
       return;
     }
     logout();
@@ -426,7 +426,7 @@ export function BusinessDashboard() {
           <span>{t("business.dashboard.impersonationBanner")}</span>
           <button
             type="button"
-            onClick={exitImpersonation}
+            onClick={() => void exitImpersonation()}
             className="font-semibold text-foreground underline underline-offset-2"
           >
             {t("business.dashboard.exitImpersonation")}

@@ -154,6 +154,55 @@ export function managerHasCompletedOnboarding(
   return user.hasCompletedOnboarding === true && user.onboardingCompletedAt != null;
 }
 
+type ImpersonatedManagerBusiness = {
+  id: string;
+  name: string;
+  verificationStatus: BusinessVerificationStatus;
+  businessType?: string | null;
+  registeredAddress?: string | null;
+};
+
+/**
+ * Manager auth user payload for platform impersonation — same verification/onboarding
+ * fields as {@link buildAuthUserDto} on a normal login, plus impersonation markers.
+ */
+export function impersonationAuthUserDto(
+  manager: Pick<
+    User,
+    | "id"
+    | "email"
+    | "role"
+    | "emailVerified"
+    | "hasCompletedOnboarding"
+    | "onboardingCompletedAt"
+    | "preferredLocale"
+  >,
+  business: ImpersonatedManagerBusiness,
+  platformAdminUserId: string,
+): AuthUserDto {
+  const completed = managerHasCompletedOnboarding(manager);
+  return {
+    id: manager.id,
+    email: manager.email,
+    role: manager.role,
+    name: business.name,
+    emailVerified: manager.emailVerified === true,
+    preferredLocale: manager.preferredLocale ?? null,
+    hasCompletedOnboarding: completed,
+    onboardingStep: completed
+      ? 3
+      : inferManagerOnboardingStep({
+          name: business.name,
+          businessType: business.businessType,
+          registeredAddress: business.registeredAddress,
+        }),
+    businessId: business.id,
+    businessVerificationStatus: business.verificationStatus,
+    impersonation: true,
+    impersonatedBy: platformAdminUserId,
+  };
+}
+
 function displayNameForUser(user: UserForAuthResult): string {
   if (user.role === "MANAGER" && user.business?.name) {
     return user.business.name;

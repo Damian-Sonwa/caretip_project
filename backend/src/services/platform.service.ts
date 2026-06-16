@@ -7,7 +7,7 @@ import {
   emitVerificationUpdated,
 } from "../socket/socketEmitters.js";
 import { CARETIP_FEE_PERCENT } from "../config/fees.js";
-import { signImpersonationToken } from "./auth.service.js";
+import { impersonationAuthUserDto, signImpersonationToken } from "./auth.service.js";
 import {
   getCachedOrLoad,
   invalidateCacheKey,
@@ -682,14 +682,6 @@ export async function impersonateBusinessManager(
 
   return {
     token,
-    user: {
-      id: business.user.id,
-      email: business.user.email,
-      role: "MANAGER" as const,
-      name: business.name,
-      businessId: business.id,
-      impersonation: true as const,
-      impersonatedBy: platformAdminUserId,
-    },
+    user: impersonationAuthUserDto(business.user, business, platformAdminUserId),
   };
 }
