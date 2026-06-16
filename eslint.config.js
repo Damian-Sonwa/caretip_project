@@ -22,6 +22,7 @@ export default tseslint.config(
       "src/imports/pasted_text/**",
       "public/firebase-messaging-sw.js",
       "public/fcm-sw-handler.js",
+      "public/theme-init.js",
     ],
   },
   eslint.configs.recommended,

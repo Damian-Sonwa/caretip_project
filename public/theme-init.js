@@ -9,7 +9,7 @@
           : "light";
     if (mode === "dark") document.documentElement.classList.add("dark");
     document.documentElement.style.colorScheme = mode;
-  } catch (e) {
+  } catch {
     /* ignore */
   }
 })();
