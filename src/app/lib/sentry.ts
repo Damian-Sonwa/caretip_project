@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/react";
+import { sentryBeforeSend } from "./sentryScrub";
 
 let initialized = false;
 
@@ -15,6 +16,7 @@ export function initSentry(): void {
     release: import.meta.env.VITE_SENTRY_RELEASE?.trim() || undefined,
     sendDefaultPii: false,
     tracesSampleRate: import.meta.env.PROD ? 0.1 : 1,
+    beforeSend: sentryBeforeSend,
   });
   initialized = true;
 }

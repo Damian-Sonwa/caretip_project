@@ -1,23 +1,43 @@
 import * as Sentry from "@sentry/node";
+import { sentryBeforeSend } from "./sentryScrub.js";
 
 let initialized = false;
 
+function resolveSentryDsn(): string {
+  const raw = process.env.SENTRY_DSN?.trim() ?? "";
+  return raw.replace(/^["']|["']$/g, "");
+}
+
+function resolveSentryEnvironment(): string {
+  return process.env.SENTRY_ENVIRONMENT?.trim() || process.env.NODE_ENV || "development";
+}
+
 export function initSentry(): void {
-  const dsn = process.env.SENTRY_DSN?.trim();
-  if (!dsn || initialized) return;
+  if (initialized) return;
+
+  const dsn = resolveSentryDsn();
+  if (!dsn) {
+    console.log("[Sentry] Disabled (no DSN configured)");
+    return;
+  }
+
+  const environment = resolveSentryEnvironment();
 
   Sentry.init({
     dsn,
-    environment: process.env.SENTRY_ENVIRONMENT?.trim() || process.env.NODE_ENV || "development",
+    environment,
     release: process.env.SENTRY_RELEASE?.trim() || undefined,
     sendDefaultPii: false,
     tracesSampleRate: process.env.NODE_ENV === "production" ? 0.1 : 1,
+    beforeSend: sentryBeforeSend,
   });
   initialized = true;
+  console.log("[Sentry] Enabled");
+  console.log(`environment=${environment}`);
 }
 
 export function isSentryConfigured(): boolean {
-  return Boolean(process.env.SENTRY_DSN?.trim());
+  return Boolean(resolveSentryDsn());
 }
 
 export function captureServerException(
