@@ -21,7 +21,7 @@ const upload = multer({
     if (isAllowedImageMimetype(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Unsupported image type. Use JPEG, PNG, GIF, WebP, HEIC, or AVIF."));
+      cb(new Error("Unsupported image type. Use JPEG, PNG, GIF, WebP, HEIC, or AVIF. SVG is not allowed."));
     }
   },
 });
@@ -103,6 +103,7 @@ router.post("/", authMiddleware, requireVerifiedEmail, requireRole(Role.MANAGER)
 router.post(
   "/:employeeId/regenerate-slug",
   authMiddleware,
+  requireVerifiedEmail,
   requireRole(Role.MANAGER),
   requireBusinessVerificationCapability("qrCodes"),
   employeeController.regenerateEmployeeSlug

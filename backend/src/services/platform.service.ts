@@ -14,6 +14,7 @@ import {
   invalidateCacheKeyPrefix,
 } from "../utils/shortLivedCache.js";
 import { parseKycDocuments, type KycDocuments } from "./kyc.service.js";
+import { sanitizeLikeContainsSearch } from "../utils/likeSearch.js";
 
 const KYC_SLA_HOURS = 48;
 
@@ -147,7 +148,7 @@ export async function listGlobalTransactions(params: {
   skip: number;
 }) {
   const where: Prisma.TransactionWhereInput = {};
-  const q = params.q?.trim();
+  const q = sanitizeLikeContainsSearch(params.q);
   if (q) {
     where.OR = [
       { id: { contains: q, mode: "insensitive" } },

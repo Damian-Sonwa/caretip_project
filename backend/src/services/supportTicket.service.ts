@@ -5,6 +5,7 @@ import {
 } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { writeAuditLog } from "./audit.service.js";
+import { sanitizeLikeContainsSearch } from "../utils/likeSearch.js";
 import {
   notifySupportTicketCreated,
   notifySupportTicketReply,
@@ -212,14 +213,15 @@ export async function listBusinessSupportTickets(
   const business = await getBusinessForManager(userId);
   if (!business) return [];
 
+  const search = sanitizeLikeContainsSearch(options?.search);
   const where: Prisma.SupportTicketWhereInput = {
     businessId: business.id,
     ...(options?.status ? { status: options.status } : {}),
-    ...(options?.search?.trim()
+    ...(search
       ? {
           OR: [
-            { subject: { contains: options.search.trim(), mode: "insensitive" } },
-            { ticketNumber: { contains: options.search.trim(), mode: "insensitive" } },
+            { subject: { contains: search, mode: "insensitive" } },
+            { ticketNumber: { contains: search, mode: "insensitive" } },
           ],
         }
       : {}),
@@ -309,15 +311,16 @@ export async function listPlatformSupportTickets(options?: {
   category?: SupportTicketCategory;
   search?: string;
 }): Promise<SupportTicketDto[]> {
+  const search = sanitizeLikeContainsSearch(options?.search);
   const where: Prisma.SupportTicketWhereInput = {
     ...(options?.status ? { status: options.status } : {}),
     ...(options?.category ? { category: options.category } : {}),
-    ...(options?.search?.trim()
+    ...(search
       ? {
           OR: [
-            { subject: { contains: options.search.trim(), mode: "insensitive" } },
-            { ticketNumber: { contains: options.search.trim(), mode: "insensitive" } },
-            { business: { name: { contains: options.search.trim(), mode: "insensitive" } } },
+            { subject: { contains: search, mode: "insensitive" } },
+            { ticketNumber: { contains: search, mode: "insensitive" } },
+            { business: { name: { contains: search, mode: "insensitive" } } },
           ],
         }
       : {}),

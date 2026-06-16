@@ -1,8 +1,9 @@
 import type { LayeredRateLimitResult } from "./layeredRateLimit.js";
-import { checkAndIncrementLimit as memoryCheckAndIncrement } from "./layeredRateLimit.js";
+import { checkAndIncrementLimit as memoryCheckAndIncrement, peekLimit as memoryPeekLimit } from "./layeredRateLimit.js";
 
 type RedisClient = {
   incr(key: string): Promise<number>;
+  get(key: string): Promise<string | null>;
   pexpire(key: string, ms: number): Promise<number>;
   quit(): Promise<string>;
 };
@@ -77,6 +78,39 @@ export async function checkAndIncrementLimitDistributed(params: {
   } catch (err) {
     console.warn("[rateLimit] Redis incr failed — memory fallback", err);
     return memoryCheckAndIncrement(params);
+  }
+}
+
+/** Peek without incrementing — used for MFA lockout checks. */
+export async function peekLimitDistributed(params: {
+  key: string;
+  maxPerWindow: number;
+  windowMs: number;
+  nowMs?: number;
+}): Promise<LayeredRateLimitResult> {
+  const nowMs = params.nowMs ?? Date.now();
+  const k = params.key.trim();
+  if (!k) {
+    return { allowed: true, count: 0, resetAtMs: nowMs + params.windowMs };
+  }
+
+  const redis = await getRedis();
+  if (!redis) {
+    return memoryPeekLimit(params);
+  }
+
+  try {
+    const raw = await redis.get(k);
+    const count = raw ? Number.parseInt(raw, 10) : 0;
+    const resetAtMs = nowMs + params.windowMs;
+    return {
+      allowed: count < params.maxPerWindow,
+      count: Number.isFinite(count) ? count : 0,
+      resetAtMs,
+    };
+  } catch (err) {
+    console.warn("[rateLimit] Redis peek failed — memory fallback", err);
+    return memoryPeekLimit(params);
   }
 }
 

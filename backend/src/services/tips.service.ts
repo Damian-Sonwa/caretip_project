@@ -1,6 +1,6 @@
 import { prisma } from "../prisma.js";
 
-export { createPaymentIntent, handlePaymentSuccess } from "./stripe.service.js";
+export { handlePaymentSuccess } from "./stripe.service.js";
 
 export interface TipForEmployee {
   id: string;

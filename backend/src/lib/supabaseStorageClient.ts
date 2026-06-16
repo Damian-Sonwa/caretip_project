@@ -1,6 +1,7 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
+const VERIFICATION_MAX_BYTES = 10 * 1024 * 1024;
 
 let _client: SupabaseClient | null = null;
 let warnedMissingServiceRole = false;
@@ -96,10 +97,23 @@ export function warnIfSupabaseUrlButNoServiceRole(): void {
   );
 }
 
-/** Default `caretip` — create this bucket in Supabase (public read recommended for logos/avatars). */
+/** Default `caretip` — public read for logos/avatars. */
 export function supabaseStorageBucketName(): string {
   return process.env.SUPABASE_STORAGE_BUCKET?.trim() || "caretip";
 }
+
+/** Private bucket for KYC / verification documents (signed URL access only). */
+export function supabaseKycStorageBucketName(): string {
+  return process.env.SUPABASE_KYC_STORAGE_BUCKET?.trim() || "caretip-kyc";
+}
+
+export function kycSignedUrlTtlSeconds(): number {
+  const raw = Number(process.env.KYC_SIGNED_URL_TTL_SECONDS ?? 300);
+  if (!Number.isFinite(raw) || raw < 60 || raw > 3600) return 300;
+  return Math.floor(raw);
+}
+
+let kycBucketReadyPromise: Promise<void> | null = null;
 
 /**
  * Ensures the configured bucket exists (public read). Safe to call before every upload — runs once per process.
@@ -148,6 +162,47 @@ export async function ensureSupabaseStorageBucketReady(): Promise<void> {
   })();
 
   return bucketReadyPromise;
+}
+
+/** Ensures the private KYC bucket exists (no public read). */
+export async function ensureSupabaseKycBucketReady(): Promise<void> {
+  if (!isSupabaseStorageConfigured()) return;
+  if (kycBucketReadyPromise) return kycBucketReadyPromise;
+
+  kycBucketReadyPromise = (async () => {
+    const supabase = getServiceClient();
+    const bucket = supabaseKycStorageBucketName();
+
+    const { data: buckets, error: listErr } = await supabase.storage.listBuckets();
+    if (listErr) {
+      const detail = describeStorageError(listErr);
+      console.error("[upload] Supabase listBuckets (KYC) failed:", detail);
+      throw new Error("File upload isn't available right now. Please try again later.");
+    }
+
+    if (buckets?.some((b) => b.name === bucket)) {
+      return;
+    }
+
+    console.info(`[upload] Supabase KYC bucket "${bucket}" not found — creating (private).`);
+    const { error: createErr } = await supabase.storage.createBucket(bucket, {
+      public: false,
+      fileSizeLimit: VERIFICATION_MAX_BYTES,
+    });
+
+    if (createErr) {
+      const detail = describeStorageError(createErr);
+      if (/already exists|duplicate/i.test(detail)) {
+        return;
+      }
+      console.error(`[upload] Supabase createBucket KYC("${bucket}") failed:`, detail);
+      throw new Error("File upload isn't available right now. Please try again later.");
+    }
+
+    console.info(`[upload] Supabase KYC bucket "${bucket}" created (private).`);
+  })();
+
+  return kycBucketReadyPromise;
 }
 
 function getServiceClient(): SupabaseClient {
@@ -244,6 +299,72 @@ export async function removeUploadedObjectByPublicUrlIfPossible(publicUrl: strin
   try {
     const supabase = getServiceClient();
     await supabase.storage.from(parsed.bucket).remove([parsed.objectPath]);
+  } catch {
+    /* ignore */
+  }
+}
+
+/** Upload to a private bucket; returns `{ bucket, objectPath }` (no public URL). */
+export async function uploadBufferToSupabasePrivateObject(
+  bucket: string,
+  objectKey: string,
+  buffer: Buffer,
+  contentType: string,
+): Promise<{ bucket: string; objectPath: string }> {
+  await ensureSupabaseKycBucketReady();
+
+  const key = objectKey.replace(/^\/+/, "").replace(/\/+/g, "/");
+  const supabase = getServiceClient();
+  const normalizedType = contentType.trim() || "application/octet-stream";
+
+  const { error } = await supabase.storage.from(bucket).upload(key, buffer, {
+    contentType: normalizedType,
+    upsert: false,
+    cacheControl: "private, max-age=0",
+  });
+  if (error) {
+    const detail = describeStorageError(error);
+    console.error(`[upload] Supabase private upload bucket="${bucket}" key="${key}":`, detail);
+    throw new Error(clientMessageForStorageUploadError(detail));
+  }
+
+  return { bucket, objectPath: key };
+}
+
+export async function assertPrivateObjectExists(bucket: string, objectPath: string): Promise<void> {
+  if (!isSupabaseStorageConfigured()) {
+    throw new Error("File upload isn't available right now. Please try again later.");
+  }
+  const supabase = getServiceClient();
+  const { error } = await supabase.storage.from(bucket).download(objectPath);
+  if (error) {
+    throw new Error("We couldn't confirm the upload. Please try again.");
+  }
+}
+
+export async function createSignedUrlForPrivateObject(
+  bucket: string,
+  objectPath: string,
+  expiresInSeconds = kycSignedUrlTtlSeconds(),
+): Promise<string> {
+  if (!isSupabaseStorageConfigured()) {
+    throw new Error("File access isn't available right now. Please try again later.");
+  }
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.storage.from(bucket).createSignedUrl(objectPath, expiresInSeconds);
+  if (error || !data?.signedUrl) {
+    const detail = error ? describeStorageError(error) : "empty signed URL";
+    console.error(`[upload] Supabase createSignedUrl bucket="${bucket}" key="${objectPath}":`, detail);
+    throw new Error("We couldn't access this document. Please try again.");
+  }
+  return data.signedUrl;
+}
+
+export async function removePrivateStorageObject(bucket: string, objectPath: string): Promise<void> {
+  if (!isSupabaseStorageConfigured()) return;
+  try {
+    const supabase = getServiceClient();
+    await supabase.storage.from(bucket).remove([objectPath]);
   } catch {
     /* ignore */
   }

@@ -52,6 +52,7 @@ function toStoredSessionUser(user: MockAuthRefreshBody["user"]) {
 async function primeE2EStorage(page: Page, body: MockAuthRefreshBody): Promise<void> {
   const storedUser = toStoredSessionUser(body.user);
   await page.addInitScript((payload) => {
+    // Legacy key primed for migrateLegacyAccessTokenFromStorage → in-memory store (not persisted after bootstrap).
     localStorage.setItem("caretip_token", payload.token);
     localStorage.setItem("caretip_user", JSON.stringify(payload.storedUser));
     try {

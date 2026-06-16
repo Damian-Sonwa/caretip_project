@@ -11,7 +11,8 @@ import {
   parseSupportStatus,
   updateSupportTicketStatus,
 } from "../services/supportTicket.service.js";
-import { clientSafeMessage, logServerError } from "../utils/httpErrors.js";
+import { logServerError } from "../utils/httpErrors.js";
+import { supportTicketHttpError } from "../utils/supportTicketErrors.js";
 
 function userIdFromReq(req: Request): string | null {
   return req.user?.userId ?? req.user?.id ?? null;
@@ -32,19 +33,14 @@ export async function createBusinessTicket(req: Request, res: Response) {
     const ticket = await createSupportTicket({ userId, subject, category, message });
     return res.status(201).json({ ticket });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "";
-    if (
-      msg.includes("Subject") ||
-      msg.includes("Message") ||
-      msg.includes("category") ||
-      msg.includes("not found")
-    ) {
-      return res.status(400).json({ message: clientSafeMessage(err, msg) });
+    const mapped = supportTicketHttpError(
+      err,
+      "We couldn't submit your support request. Try again.",
+    );
+    if (mapped.status >= 500) {
+      logServerError("supportTicket.createBusinessTicket", err);
     }
-    logServerError("supportTicket.createBusinessTicket", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't submit your support request. Try again."),
-    });
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -64,9 +60,8 @@ export async function listBusinessTickets(req: Request, res: Response) {
     return res.json({ tickets });
   } catch (err) {
     logServerError("supportTicket.listBusinessTickets", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load your support tickets."),
-    });
+    const mapped = supportTicketHttpError(err, "We couldn't load your support tickets.");
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -79,9 +74,8 @@ export async function getBusinessTicket(req: Request, res: Response) {
     return res.json({ ticket });
   } catch (err) {
     logServerError("supportTicket.getBusinessTicket", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load that ticket."),
-    });
+    const mapped = supportTicketHttpError(err, "We couldn't load that ticket.");
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -93,14 +87,11 @@ export async function replyBusinessTicket(req: Request, res: Response) {
     const ticket = await addBusinessReply({ userId, ticketId: req.params.ticketId, body });
     return res.json({ ticket });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "";
-    if (msg.includes("empty") || msg.includes("closed") || msg.includes("not found")) {
-      return res.status(400).json({ message: clientSafeMessage(err, msg) });
+    const mapped = supportTicketHttpError(err, "We couldn't send your reply.");
+    if (mapped.status >= 500) {
+      logServerError("supportTicket.replyBusinessTicket", err);
     }
-    logServerError("supportTicket.replyBusinessTicket", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't send your reply."),
-    });
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -120,9 +111,8 @@ export async function listPlatformTickets(req: Request, res: Response) {
     return res.json({ tickets });
   } catch (err) {
     logServerError("supportTicket.listPlatformTickets", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load support tickets."),
-    });
+    const mapped = supportTicketHttpError(err, "We couldn't load support tickets.");
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -133,9 +123,8 @@ export async function getPlatformTicket(req: Request, res: Response) {
     return res.json({ ticket });
   } catch (err) {
     logServerError("supportTicket.getPlatformTicket", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't load that ticket."),
-    });
+    const mapped = supportTicketHttpError(err, "We couldn't load that ticket.");
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -151,14 +140,11 @@ export async function replyPlatformTicket(req: Request, res: Response) {
     });
     return res.json({ ticket });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "";
-    if (msg.includes("empty") || msg.includes("closed") || msg.includes("not found")) {
-      return res.status(400).json({ message: clientSafeMessage(err, msg) });
+    const mapped = supportTicketHttpError(err, "We couldn't send your reply.");
+    if (mapped.status >= 500) {
+      logServerError("supportTicket.replyPlatformTicket", err);
     }
-    logServerError("supportTicket.replyPlatformTicket", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't send your reply."),
-    });
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }
 
@@ -178,13 +164,10 @@ export async function patchPlatformTicketStatus(req: Request, res: Response) {
     });
     return res.json({ ticket });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "";
-    if (msg.includes("Cannot change") || msg.includes("not found") || msg.includes("Invalid")) {
-      return res.status(400).json({ message: clientSafeMessage(err, msg) });
+    const mapped = supportTicketHttpError(err, "We couldn't update ticket status.");
+    if (mapped.status >= 500) {
+      logServerError("supportTicket.patchPlatformTicketStatus", err);
     }
-    logServerError("supportTicket.patchPlatformTicketStatus", err);
-    return res.status(500).json({
-      message: clientSafeMessage(err, "We couldn't update ticket status."),
-    });
+    return res.status(mapped.status).json({ message: mapped.message });
   }
 }

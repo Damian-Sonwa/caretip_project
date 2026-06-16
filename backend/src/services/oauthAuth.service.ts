@@ -7,6 +7,7 @@ import {
   type AuthResult,
 } from "./auth.service.js";
 import * as businessService from "./business.service.js";
+import { registerEmployeeWithInvite } from "./employeeInvite.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
@@ -239,38 +240,24 @@ export async function authenticateWithOAuth(
 
   const inviteCodeTrimmed = inviteCode?.trim() ?? "";
   if (inviteCodeTrimmed) {
-    const inviteBusiness = await prisma.business.findFirst({
-      where: {
-        inviteCode: inviteCodeTrimmed,
-        inviteCodeExpiresAt: { gt: new Date() },
-      },
-      select: { id: true },
+    const created = await registerEmployeeWithInvite({
+      inviteCode: inviteCodeTrimmed,
+      email: verified.email,
+      name: displayName,
+      passwordHash: null,
+      emailVerified: true,
+      preferredLocale,
+      oauthProvider,
+      oauthSubject,
+      activationStatus: "active",
+      registrationChannel: "oauth",
     });
-    if (!inviteBusiness) {
-      throw new Error("Invalid or expired invite code");
-    }
-    const created = await prisma.user.create({
-      data: {
-        email: verified.email,
-        passwordHash: null,
-        oauthProvider,
-        oauthSubject,
-        role: "EMPLOYEE",
-        isPlatformAdmin: false,
-        emailVerified: true,
-        preferredLocale,
-        employee: {
-          create: {
-            name: displayName,
-            jobTitle: "Staff",
-            businessId: inviteBusiness.id,
-            activationStatus: "active",
-          },
-        },
-      },
+    const full = await prisma.user.findUnique({
+      where: { id: created.id },
       include: { employee: true },
     });
-    return authResultForUserRecord(created);
+    if (!full) throw new Error("Registration failed");
+    return authResultForUserRecord(full);
   }
 
   if (intendedRole === "MANAGER") {
@@ -301,42 +288,7 @@ export async function authenticateWithOAuth(
   }
 
   if (intendedRole === "EMPLOYEE") {
-    const code = inviteCode?.trim();
-    if (!code) {
-      throw new Error("Invite code is required for staff sign-up.");
-    }
-    const business = await prisma.business.findFirst({
-      where: {
-        inviteCode: code,
-        inviteCodeExpiresAt: { gt: new Date() },
-      },
-      select: { id: true },
-    });
-    if (!business) {
-      throw new Error("Invalid or expired invite code");
-    }
-    const created = await prisma.user.create({
-      data: {
-        email: verified.email,
-        passwordHash: null,
-        oauthProvider,
-        oauthSubject,
-        role: "EMPLOYEE",
-        isPlatformAdmin: false,
-        emailVerified: true,
-        preferredLocale,
-        employee: {
-          create: {
-            name: displayName,
-            jobTitle: "Staff",
-            businessId: business.id,
-            activationStatus: "active",
-          },
-        },
-      },
-      include: { employee: true },
-    });
-    return authResultForUserRecord(created);
+    throw new Error("Invite code is required for staff sign-up.");
   }
 
   throw new Error("Unsupported role for OAuth sign-up.");

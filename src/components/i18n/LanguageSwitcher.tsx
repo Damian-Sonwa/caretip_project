@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Check, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverTrigger } from "@/app/components/ui/popover";
-import { patchMyAccountSettings } from "@/app/lib/api";
+import { patchMyAccountSettings, hasClientAccessToken } from "@/app/lib/api";
 import { changeAppLanguage, type AppLanguage } from "@/i18n/i18n";
 
 type LanguageSwitcherProps = {
@@ -44,7 +44,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
       .then(() => {
         setOpen(false);
         try {
-          if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_token")?.trim()) {
+          if (hasClientAccessToken()) {
             void patchMyAccountSettings({ preferredLocale: lng });
           }
         } catch {

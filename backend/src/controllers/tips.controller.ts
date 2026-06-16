@@ -1,7 +1,6 @@
 import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
-import { createPaymentIntent, isStripeConfigured } from "../services/stripe.service.js";
 import * as goalService from "../services/goal.service.js";
 import * as businessService from "../services/business.service.js";
 import {
@@ -12,9 +11,7 @@ import {
   loadEmployeePeriodAnalytics,
   loadEmployeeTipsDashboardForTimeframe,
 } from "../services/employeeTipsDashboard.service.js";
-import { MIN_TIP_AMOUNT_EUR, MAX_TIP_AMOUNT_EUR } from "../constants/tipAmountLimits.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
-import { TipPaymentEligibilityError } from "../services/tipPaymentEligibility.service.js";
 import { logDashboardTiming } from "../utils/dashboardTiming.js";
 import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
@@ -281,6 +278,36 @@ export async function getByBusiness(req: Request, res: Response) {
     const locationId = typeof req.query.locationId === "string" ? req.query.locationId.trim() : "";
     const tableId = typeof req.query.tableId === "string" ? req.query.tableId.trim() : "";
 
+    if (employeeId) {
+      const ownedEmployee = await prisma.employee.findFirst({
+        where: { id: employeeId, businessId: b.id },
+        select: { id: true },
+      });
+      if (!ownedEmployee) {
+        return res.json({ timezone: sanitizeIanaTimezone((b as any).timezone), total: 0, items: [] });
+      }
+    }
+
+    if (locationId) {
+      const ownedLocation = await prisma.location.findFirst({
+        where: { id: locationId, businessId: b.id },
+        select: { id: true },
+      });
+      if (!ownedLocation) {
+        return res.json({ timezone: sanitizeIanaTimezone((b as any).timezone), total: 0, items: [] });
+      }
+    }
+
+    if (tableId) {
+      const ownedTable = await prisma.table.findFirst({
+        where: { id: tableId, location: { businessId: b.id } },
+        select: { id: true },
+      });
+      if (!ownedTable) {
+        return res.json({ timezone: sanitizeIanaTimezone((b as any).timezone), total: 0, items: [] });
+      }
+    }
+
     const tz = sanitizeIanaTimezone((b as any).timezone);
     const presetRange = range ? businessUtcRangeForTimeframe(range, tz) : null;
     const customRange = rangeRaw === "custom" ? businessUtcRangeForLocalDates(customFrom, customTo, tz) : null;
@@ -394,49 +421,5 @@ export async function listByEmployee(req: Request, res: Response) {
   } catch (err) {
     logServerError("tips.listByEmployee", err);
     return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.employee) });
-  }
-}
-
-/** Legacy Payment Intent endpoint — QR flow uses POST /api/payments/create-tip-session instead. */
-export async function createIntent(req: Request, res: Response) {
-  try {
-    const { amount, employeeId, businessId, locationId, tableId } = req.body;
-    if (!amount || !employeeId || !businessId) {
-      return res.status(400).json({
-        message: "amount, employeeId, and businessId are required",
-      });
-    }
-    const numAmount = Number(amount);
-    if (isNaN(numAmount) || numAmount < MIN_TIP_AMOUNT_EUR || numAmount > MAX_TIP_AMOUNT_EUR) {
-      return res.status(400).json({ message: "Invalid amount" });
-    }
-    if (typeof employeeId !== "string" || typeof businessId !== "string") {
-      return res.status(400).json({ message: "Invalid employee or business id" });
-    }
-    if (!isStripeConfigured()) {
-      return res.status(503).json({
-        message: "Payment processing is not configured yet.",
-        code: "STRIPE_NOT_CONFIGURED",
-      });
-    }
-    const result = await createPaymentIntent({
-      amount: numAmount,
-      employeeId,
-      businessId,
-      locationId: typeof locationId === "string" ? locationId : undefined,
-      tableId: typeof tableId === "string" ? tableId : undefined,
-    });
-    return res.json(result);
-  } catch (err) {
-    logServerError("tips.createIntent", err);
-    if (err instanceof TipPaymentEligibilityError) {
-      return res.status(400).json({
-        message: err.message,
-        code: err.code,
-      });
-    }
-    return res.status(400).json({
-      message: clientSafeMessage(err, CLIENT_FALLBACK.payment),
-    });
   }
 }

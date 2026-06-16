@@ -46,7 +46,7 @@ function renderPasswordReset(
 
 /**
  * Creates a reset token for password-based accounts. OAuth-only users get the same generic success (no enumeration).
- * In development, logs the reset URL when email delivery is not configured.
+ * In development, logs user id only unless PASSWORD_RESET_LOG_DEV_LINK=true (never logs tokens in production).
  */
 export async function requestPasswordReset(
   rawEmail: string,
@@ -95,8 +95,19 @@ export async function requestPasswordReset(
     html,
     text,
   });
-  if (!ok && process.env.NODE_ENV !== "production") {
-    console.info("[password-reset] (dev) Reset link — configure RESEND_API_KEY to send email:", resetUrl);
+  if (process.env.NODE_ENV !== "production") {
+    if (ok) {
+      console.info(`[password-reset] Password reset email queued successfully for user ${user.id}`);
+    } else if (process.env.PASSWORD_RESET_LOG_DEV_LINK === "true") {
+      console.info(
+        "[password-reset] (dev) Reset link — configure RESEND_API_KEY to send email:",
+        resetUrl,
+      );
+    } else {
+      console.info(
+        `[password-reset] Password reset link generated for user ${user.id} (email delivery not configured — set RESEND_API_KEY; use PASSWORD_RESET_LOG_DEV_LINK=true only when you need the full URL in dev logs)`,
+      );
+    }
   }
 }
 

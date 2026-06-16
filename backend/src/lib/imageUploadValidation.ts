@@ -2,10 +2,15 @@
 
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 
-/** Accept common browser + mobile camera MIME types (HEIC from iOS). */
+/** Accept common browser + mobile camera MIME types (HEIC from iOS). SVG is never allowed. */
 export const ALLOWED_IMAGE_MIME_RE = /^image\/(jpeg|jpg|png|gif|webp|heic|heif|avif)$/i;
 
+export function isSvgMimetype(mimetype: string): boolean {
+  return /svg/i.test(mimetype.trim());
+}
+
 export function isAllowedImageMimetype(mimetype: string): boolean {
+  if (isSvgMimetype(mimetype)) return false;
   return ALLOWED_IMAGE_MIME_RE.test(mimetype.trim());
 }
 
@@ -51,6 +56,9 @@ export function validateImageBufferForUpload(buffer: Buffer, claimedMimetype: st
   if (buffer.length < 32) {
     throw new Error("Image file is too small or corrupted.");
   }
+  if (isSvgMimetype(claimedMimetype)) {
+    throw new Error("SVG uploads are not allowed.");
+  }
   const mt = claimedMimetype.trim();
   const kind = sniffImageKind(buffer);
   if (kind === "unknown") {
@@ -63,4 +71,32 @@ export function validateImageBufferForUpload(buffer: Buffer, claimedMimetype: st
   if (!mimeOk) {
     throw new Error("Unsupported image type. Use JPEG, PNG, GIF, WebP, HEIC, or AVIF.");
   }
+}
+
+export function extensionForImageKind(
+  kind: Exclude<ReturnType<typeof sniffImageKind>, "unknown">,
+): string {
+  switch (kind) {
+    case "jpeg":
+      return ".jpg";
+    case "png":
+      return ".png";
+    case "gif":
+      return ".gif";
+    case "webp":
+      return ".webp";
+    case "heic":
+      return ".heic";
+    case "avif":
+      return ".avif";
+  }
+}
+
+/** Derive stored extension from magic bytes (never from original filename). */
+export function extensionForImageBuffer(buffer: Buffer): string {
+  const kind = sniffImageKind(buffer);
+  if (kind === "unknown") {
+    throw new Error("Could not read this image. Try JPEG or PNG.");
+  }
+  return extensionForImageKind(kind);
 }

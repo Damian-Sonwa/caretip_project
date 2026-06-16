@@ -5,6 +5,8 @@ import { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { socketCorsOptions } from "../config/cors.js";
 
+import { businessIdFromPublicSocketRoomToken } from "../services/publicSocketToken.service.js";
+
 let io: Server | null = null;
 
 /** Maps socket.id → userId for observability (optional). */
@@ -32,31 +34,23 @@ export function initSocketServer(httpServer: HttpServer): Server {
   io.use(async (socket, next) => {
     try {
       const token = socket.handshake.auth.token as string | undefined;
-      const publicBusinessId = socket.handshake.auth.businessId as string | undefined;
-      const publicSlug = socket.handshake.auth.businessSlug as string | undefined;
+      const publicRoomToken = socket.handshake.auth.publicRoomToken as string | undefined;
 
       if (!token) {
-        if (publicBusinessId && typeof publicBusinessId === "string") {
-          const b = await prisma.business.findUnique({
-            where: { id: publicBusinessId },
-            select: { id: true },
-          });
-          if (!b) return next(new Error("Invalid business"));
-          socket.data.publicBusinessId = b.id;
-          socket.data.isPublic = true;
-          return next();
+        const businessIdFromToken = businessIdFromPublicSocketRoomToken(
+          typeof publicRoomToken === "string" ? publicRoomToken : "",
+        );
+        if (!businessIdFromToken) {
+          return next(new Error("Unauthorized"));
         }
-        if (publicSlug && typeof publicSlug === "string") {
-          const b = await prisma.business.findFirst({
-            where: { slug: publicSlug },
-            select: { id: true },
-          });
-          if (!b) return next(new Error("Invalid business"));
-          socket.data.publicBusinessId = b.id;
-          socket.data.isPublic = true;
-          return next();
-        }
-        return next(new Error("Unauthorized"));
+        const b = await prisma.business.findUnique({
+          where: { id: businessIdFromToken },
+          select: { id: true },
+        });
+        if (!b) return next(new Error("Invalid business"));
+        socket.data.publicBusinessId = b.id;
+        socket.data.isPublic = true;
+        return next();
       }
 
       const secret = process.env.JWT_SECRET;

@@ -29,7 +29,7 @@ function statsErrorHttpStatus(err: unknown): number {
   }
   return 500;
 }
-import { uploadManagerBusinessLogoImage, uploadManagerVerificationDocument } from "../services/upload.service.js";
+import { uploadManagerBusinessLogoImage, uploadManagerVerificationDocument, removeStoredUploadReferenceIfPossible } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import * as kycService from "../services/kyc.service.js";
 
@@ -63,7 +63,7 @@ export async function getMyProfile(req: Request, res: Response) {
         message: "Business not found",
       });
     }
-    const profile = await businessService.getBusinessById(business.id);
+    const profile = await businessService.getManagerBusinessProfileById(business.id);
     if (!profile) {
       return res.status(404).json({
         success: false,
@@ -89,7 +89,15 @@ export async function getMyProfile(req: Request, res: Response) {
 export async function validateInvite(req: Request, res: Response) {
   try {
     const code = typeof req.query?.code === "string" ? req.query.code : "";
-    const r = await businessService.validateInviteCode(code);
+    const clientKey =
+      (typeof req.ip === "string" && req.ip) ||
+      (typeof req.headers["x-forwarded-for"] === "string"
+        ? req.headers["x-forwarded-for"].split(",")[0]?.trim()
+        : "unknown");
+    const r = await businessService.validateInviteCode(code, {
+      clientKey: `validate:${clientKey}`,
+      ipKey: clientKey,
+    });
     if (!r.ok) {
       return res.status(400).json({ ok: false, message: "Invalid or expired invite code" });
     }
@@ -104,6 +112,23 @@ export async function validateInvite(req: Request, res: Response) {
     logServerError("business.validateInvite", err);
     return res.status(400).json({
       ok: false,
+      message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function listInviteHistory(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const take = Math.min(100, Math.max(1, Number(req.query.take ?? 20) || 20));
+    const history = await businessService.getInviteRedemptionHistory(userId, take);
+    return res.json({ items: history });
+  } catch (err) {
+    logServerError("business.listInviteHistory", err);
+    return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.business),
     });
   }
@@ -207,12 +232,7 @@ export async function uploadMyKycDocument(req: Request, res: Response) {
       return res.status(400).json({ message: "File is required (multipart field name: file)" });
     }
 
-    const publicPath = await uploadManagerVerificationDocument(
-      file.buffer,
-      file.mimetype,
-      b.id,
-      file.originalname,
-    );
+    const publicPath = await uploadManagerVerificationDocument(file.buffer, file.mimetype, b.id);
 
     try {
       const result = await kycService.upsertManagerKycDocument(userId, documentType, publicPath);
@@ -224,7 +244,7 @@ export async function uploadMyKycDocument(req: Request, res: Response) {
         kycDocuments: result.kycDocuments,
       });
     } catch (dbErr) {
-      await removeUploadedObjectByPublicUrlIfPossible(publicPath);
+      await removeStoredUploadReferenceIfPossible(publicPath);
       throw dbErr;
     }
   } catch (err) {
@@ -266,12 +286,7 @@ export async function uploadMyLogo(req: Request, res: Response) {
       return res.status(400).json({ message: "File is required (multipart field name: file)" });
     }
 
-    const logoPathToStore = await uploadManagerBusinessLogoImage(
-      file.buffer,
-      file.mimetype,
-      b.id,
-      file.originalname,
-    );
+    const logoPathToStore = await uploadManagerBusinessLogoImage(file.buffer, file.mimetype, b.id);
 
     try {
       await prisma.business.update({
@@ -297,7 +312,7 @@ export async function getById(req: Request, res: Response) {
     if (!businessId) {
       return res.status(400).json({ message: "businessId is required" });
     }
-    const business = await businessService.getBusinessById(businessId);
+    const business = await businessService.getPublicBusinessById(businessId);
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
     }

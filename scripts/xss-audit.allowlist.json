@@ -1,0 +1,74 @@
+{
+  "$schema": "CareTip XSS audit allowlist — each entry must be documented in frontend/docs/XSS_SECURITY.md",
+  "domSinkAllowlist": [
+    {
+      "file": "src/components/ui/spotlight-card.tsx",
+      "line": 158,
+      "sink": "dangerouslySetInnerHTML",
+      "reason": "Static component CSS only (beforeAfterStyles constant)"
+    },
+    {
+      "file": "src/app/components/ui/chart.tsx",
+      "line": 83,
+      "sink": "dangerouslySetInnerHTML",
+      "reason": "Recharts theme CSS variables from ChartConfig (no user HTML)"
+    },
+    {
+      "file": "src/app/lib/qrBranded.ts",
+      "line": 195,
+      "sink": "document.write",
+      "reason": "QR print popup; heading passed through escapeHtml(); img src is PNG data URL from canvas"
+    },
+    {
+      "file": "src/components/ui/cinematic-landing-hero.tsx",
+      "line": 257,
+      "sink": "innerHTML",
+      "reason": "GSAP counter animation; numeric metricValue only"
+    },
+    {
+      "file": "src/components/ui/cinematic-landing-hero.tsx",
+      "line": 317,
+      "sink": "innerHTML",
+      "reason": "GSAP counter animation; numeric metricValue only"
+    },
+    {
+      "file": "src/components/ui/cinematic-landing-hero.tsx",
+      "line": 318,
+      "sink": "innerHTML",
+      "reason": "GSAP snap config property name, not HTML injection"
+    },
+    {
+      "file": "src/components/ui/cinematic-landing-hero.tsx",
+      "line": 376,
+      "sink": "dangerouslySetInnerHTML",
+      "reason": "Static INJECTED_STYLES constant"
+    }
+  ],
+  "urlSchemeAllowlist": [
+    {
+      "file": "src/app/pages/CheckEmailPage.tsx",
+      "line": 60,
+      "pattern": "window.location.href",
+      "reason": "mailto: inbox deep link built by inboxDeepLink helper"
+    },
+    {
+      "file": "src/app/hooks/useAuth.ts",
+      "line": 439,
+      "pattern": "window.location.assign",
+      "reason": "Literal same-origin path after platform admin login"
+    },
+    {
+      "file": "src/app/pages/customer/PaymentPage.tsx",
+      "line": 281,
+      "pattern": "window.location.href",
+      "reason": "Stripe Checkout redirect URL from trusted API response"
+    },
+    {
+      "file": "src/app/pages/business/BusinessProfilePage.tsx",
+      "line": 392,
+      "pattern": "href=",
+      "reason": "teamUrl is same-origin path from publicBase + server slug"
+    }
+  ],
+  "richTextAllowlist": []
+}

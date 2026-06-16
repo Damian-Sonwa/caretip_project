@@ -20,7 +20,11 @@
     "pretest:e2e": "node scripts/install-playwright.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:with-server": "node scripts/playwright-with-server.mjs"
+    "test:e2e:with-server": "node scripts/playwright-with-server.mjs",
+    "test:xss-audit": "node scripts/xss-audit.mjs",
+    "test:csp": "node scripts/csp-verify.mjs",
+    "test:csrf-audit": "node scripts/csrf-audit.mjs",
+    "test:secret-exposure": "npm --prefix backend run test:secret-exposure"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",
@@ -84,7 +88,7 @@
     "react-i18next": "^17.0.7",
     "react-pageflip": "^2.0.3",
     "react-resizable-panels": "2.1.7",
-    "react-router": "7.13.0",
+    "react-router": "7.17.0",
     "react-use-measure": "^2.1.7",
     "recharts": "2.15.2",
     "remotion": "^4.0.448",
@@ -115,16 +119,20 @@
     "tailwindcss": "4.1.12",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2",
-    "vite": "6.4.2",
+    "vite": "6.4.3",
     "vite-plugin-pwa": "^1.2.0"
   },
   "overrides": {
-    "serialize-javascript": "7.0.5"
+    "serialize-javascript": "7.0.5",
+    "ws": "8.21.0",
+    "esbuild": "0.28.1"
   },
   "pnpm": {
     "overrides": {
-      "vite": "6.4.2",
-      "serialize-javascript": "7.0.5"
+      "vite": "6.4.3",
+      "serialize-javascript": "7.0.5",
+      "ws": "8.21.0",
+      "esbuild": "0.28.1"
     }
   }
 }

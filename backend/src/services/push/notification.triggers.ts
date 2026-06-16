@@ -241,6 +241,47 @@ export function onEmployeeInvited(params: {
   });
 }
 
+/** Manager notified when an employee redeems a shareable invite code. */
+export function onEmployeeInviteRedeemed(params: {
+  businessId: string;
+  employeeName: string;
+  employeeEmail: string;
+  inviteCode: string;
+}): void {
+  safeTrigger("onEmployeeInviteRedeemed", async () => {
+    const business = await prisma.business.findUnique({
+      where: { id: params.businessId },
+      select: { userId: true, name: true },
+    });
+    if (!business?.userId) return;
+
+    await deliverUserNotification({
+      userId: business.userId,
+      payload: {
+        type: NotificationType.EMPLOYEE_INVITED,
+        title: "Invite redeemed",
+        body: "",
+        localeTemplate: {
+          id: "employee_invite_redeemed_manager",
+          params: {
+            employeeName: params.employeeName,
+            businessName: business.name,
+            inviteCode: params.inviteCode,
+          },
+        },
+        url: "/dashboard/staff-management",
+        timestamp: new Date().toISOString(),
+        metadata: {
+          entityId: params.employeeEmail,
+          businessId: params.businessId,
+          inviteCode: params.inviteCode,
+        },
+      },
+      dedupeKey: `invite-redeemed:${params.businessId}:${params.employeeEmail}`,
+    });
+  });
+}
+
 /** 4b. Employee welcomed when activation completes. */
 export function onEmployeeAccountActivated(userId: string, businessName: string): void {
   safeTrigger("onEmployeeAccountActivated", async () => {

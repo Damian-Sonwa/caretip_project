@@ -1,0 +1,5 @@
+{
+  "$schema": "CareTip SQL audit allowlist — exceptions must be documented in backend/docs/SQL_SECURITY.md",
+  "files": [],
+  "violations": []
+}

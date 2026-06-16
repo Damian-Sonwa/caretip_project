@@ -124,6 +124,10 @@ export async function requireVerifiedEmail(req: Request, res: Response, next: Ne
     if (row.emailVerified !== true) {
       return res.status(403).json({ message: "Email verification required" });
     }
+    // Reject stale JWT role claims (e.g. after demotion or role change in DB).
+    if (req.user && req.user.role !== row.role) {
+      return res.status(401).json({ message: "Authentication required", code: "SESSION_STALE" });
+    }
     next();
   } catch {
     return res.status(503).json({ message: "Service temporarily unavailable" });

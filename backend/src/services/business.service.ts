@@ -1,3 +1,8 @@
+import {
+  createEmployeeInviteForManager,
+  validateEmployeeInviteCode,
+  listInviteHistoryForBusiness,
+} from "./employeeInvite.service.js";
 import { Prisma, TipStatus, type EmployeeActivationStatus } from "@prisma/client";
 import { DateTime } from "luxon";
 import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
@@ -5,6 +10,12 @@ import { randomBytes } from "node:crypto";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
 import { emitBusinessDataChanged, emitPlatformDataUpdated } from "../socket/socketEmitters.js";
+import {
+  toManagerBusinessProfileDto,
+  toPublicBusinessProfileDto,
+  type ManagerBusinessProfileDto,
+  type PublicBusinessProfileDto,
+} from "./businessProfile.dto.js";
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
@@ -176,61 +187,31 @@ export async function getBusinessIdForManagerUser(userId: string): Promise<{ id:
 export async function generateInviteCode(userId: string): Promise<{
   inviteCode: string;
   expiresAt: string;
+  inviteId?: string;
 }> {
-  const business = await prisma.business.findUnique({
-    where: { userId },
-  });
-
-  if (!business) {
-    throw new Error("Business not found");
-  }
-
-  let inviteCode = "";
-  let existing = true;
-  while (existing) {
-    inviteCode = String(Math.floor(100000 + Math.random() * 900000));
-    const found = await prisma.business.findUnique({ where: { inviteCode } });
-    existing = !!found;
-  }
-
-  const expiresAt = new Date();
-  expiresAt.setDate(expiresAt.getDate() + 7);
-
-  await prisma.business.update({
-    where: { id: business.id },
-    data: {
-      inviteCode,
-      inviteCodeExpiresAt: expiresAt,
-    },
-  });
-
-  return {
-    inviteCode,
-    expiresAt: expiresAt.toISOString(),
-  };
+  return createEmployeeInviteForManager(userId);
 }
 
-export async function validateInviteCode(code: string): Promise<{
+export async function validateInviteCode(
+  code: string,
+  opts?: { clientKey?: string; ipKey?: string },
+): Promise<{
   ok: boolean;
   businessName?: string;
   businessId?: string;
   businessSlug?: string;
   businessLocation?: string | null;
 }> {
-  const c = String(code ?? "").trim();
-  if (!c) return { ok: false };
-  const row = await prisma.business.findFirst({
-    where: { inviteCode: c, inviteCodeExpiresAt: { gt: new Date() } },
-    select: { id: true, name: true, slug: true, location: true },
+  return validateEmployeeInviteCode(code, opts);
+}
+
+export async function getInviteRedemptionHistory(userId: string, take = 20) {
+  const business = await prisma.business.findUnique({
+    where: { userId },
+    select: { id: true },
   });
-  if (!row) return { ok: false };
-  return {
-    ok: true,
-    businessName: row.name,
-    businessId: row.id,
-    businessSlug: row.slug,
-    businessLocation: row.location,
-  };
+  if (!business) throw new Error("Business not found");
+  return listInviteHistoryForBusiness(business.id, take);
 }
 
 export type BusinessDashboardTimeframe = "week" | "month" | "year" | "all";
@@ -868,11 +849,11 @@ export async function getTipsForExport(businessId: string) {
   });
 }
 
-/** Manager JWT: own venue only (same shape as public getById). */
+/** Manager JWT: own venue only (full profile). */
 export async function getManagerBusinessProfile(userId: string) {
   const b = await getBusinessByUserId(userId);
   if (!b) return null;
-  const profile = await getBusinessById(b.id);
+  const profile = await getManagerBusinessProfileById(b.id);
   if (!profile) return null;
 
   const user = await prisma.user.findUnique({
@@ -894,6 +875,59 @@ export async function getManagerBusinessProfile(userId: string) {
     onboardingCompleted,
     onboardingStep,
   };
+}
+
+const BUSINESS_PROFILE_SELECT = {
+  id: true,
+  name: true,
+  slug: true,
+  businessType: true,
+  location: true,
+  registeredAddress: true,
+  verificationStatus: true,
+  subscriptionTier: true,
+  contactPhone: true,
+  website: true,
+  logoPath: true,
+} as const;
+
+async function countActivePublicEmployees(businessId: string): Promise<number> {
+  return prisma.employee.count({
+    where: {
+      businessId,
+      isActive: true,
+      activationStatus: "active",
+      user: { is: { emailVerified: true } },
+    },
+  });
+}
+
+/** Public tipping / QR — no KYC tier, contact, or staff counts. */
+export async function getPublicBusinessById(id: string): Promise<PublicBusinessProfileDto | null> {
+  const business = await prisma.business.findUnique({
+    where: { id },
+    select: BUSINESS_PROFILE_SELECT,
+  });
+  if (!business) return null;
+  return toPublicBusinessProfileDto(business);
+}
+
+/** Manager profile + authenticated consumers — includes operational fields. */
+export async function getManagerBusinessProfileById(
+  id: string,
+): Promise<ManagerBusinessProfileDto | null> {
+  const business = await prisma.business.findUnique({
+    where: { id },
+    select: BUSINESS_PROFILE_SELECT,
+  });
+  if (!business) return null;
+  const employeeCount = await countActivePublicEmployees(business.id);
+  return toManagerBusinessProfileDto(business, employeeCount);
+}
+
+/** @deprecated Use getPublicBusinessById or getManagerBusinessProfileById. */
+export async function getBusinessById(id: string) {
+  return getManagerBusinessProfileById(id);
 }
 
 const MAX_LOCATION_LEN = 2000;
@@ -958,49 +992,6 @@ export async function updateManagerBusinessProfile(
 
   emitBusinessDataChanged(b.id, "business_profile_updated");
   return { id: b.id };
-}
-
-export async function getBusinessById(id: string) {
-  const business = await prisma.business.findUnique({
-    where: { id },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      businessType: true,
-      location: true,
-      registeredAddress: true,
-      verificationStatus: true,
-      subscriptionTier: true,
-      contactPhone: true,
-      website: true,
-      logoPath: true,
-    },
-  });
-  if (!business) return null;
-  // Public-facing count: match directory/QR filters (active + activated + verified).
-  const employeeCount = await prisma.employee.count({
-    where: {
-      businessId: business.id,
-      isActive: true,
-      activationStatus: "active",
-      user: { is: { emailVerified: true } },
-    },
-  });
-  return {
-    id: business.id,
-    name: business.name,
-    slug: business.slug,
-    logo: absolutizePublicMediaPath(business.logoPath ?? null),
-    location: business.location ?? null,
-    registeredAddress: business.registeredAddress ?? null,
-    type: business.businessType ?? null,
-    contactPhone: business.contactPhone ?? null,
-    website: business.website ?? null,
-    employeeCount,
-    verificationStatus: business.verificationStatus,
-    subscriptionTier: business.subscriptionTier,
-  };
 }
 
 /** Rotate the public business slug so storefront QR becomes a new link. */

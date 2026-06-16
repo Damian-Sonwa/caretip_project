@@ -43,6 +43,29 @@ export function checkAndIncrementLimit(params: {
   return { allowed: cur.count <= params.maxPerWindow, count: cur.count, resetAtMs: cur.resetAtMs };
 }
 
+/** Read current bucket without incrementing (for lockout checks). */
+export function peekLimit(params: {
+  key: string;
+  maxPerWindow: number;
+  windowMs: number;
+  nowMs?: number;
+}): LayeredRateLimitResult {
+  const nowMs = params.nowMs ?? Date.now();
+  const k = params.key.trim();
+  if (!k) {
+    return { allowed: true, count: 0, resetAtMs: nowMs + params.windowMs };
+  }
+  const cur = buckets.get(k);
+  if (!cur || cur.resetAtMs <= nowMs) {
+    return { allowed: true, count: 0, resetAtMs: nowMs + params.windowMs };
+  }
+  return {
+    allowed: cur.count < params.maxPerWindow,
+    count: cur.count,
+    resetAtMs: cur.resetAtMs,
+  };
+}
+
 export type RateLimitLayer = {
   name: string;
   key: string;

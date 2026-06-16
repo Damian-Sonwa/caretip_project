@@ -6,6 +6,7 @@ import * as platformAnalyticsService from "../services/platformAnalytics.service
 import {
   uploadPlatformBusinessLogoImage,
   uploadPlatformVerificationDocument,
+  removeStoredUploadReferenceIfPossible,
 } from "../services/upload.service.js";
 import {
   logServerError,
@@ -185,7 +186,7 @@ export async function uploadBusinessLogo(req: Request, res: Response) {
     if (!existing) {
       return res.status(404).json({ message: "Business not found" });
     }
-    const pathToStore = await uploadPlatformBusinessLogoImage(file.buffer, file.mimetype, id, file.originalname);
+    const pathToStore = await uploadPlatformBusinessLogoImage(file.buffer, file.mimetype, id);
     try {
       await platformService.setBusinessLogoPath(id, pathToStore);
     } catch (dbErr) {
@@ -213,11 +214,11 @@ export async function uploadVerificationDocument(req: Request, res: Response) {
     if (!existing) {
       return res.status(404).json({ message: "Business not found" });
     }
-    const pathToStore = await uploadPlatformVerificationDocument(file.buffer, file.mimetype, id, file.originalname);
+    const pathToStore = await uploadPlatformVerificationDocument(file.buffer, file.mimetype, id);
     try {
       await platformService.setBusinessVerificationDocumentPath(id, pathToStore);
     } catch (dbErr) {
-      await removeUploadedObjectByPublicUrlIfPossible(pathToStore);
+      await removeStoredUploadReferenceIfPossible(pathToStore);
       throw dbErr;
     }
     return res.json({ success: true, path: pathToStore });

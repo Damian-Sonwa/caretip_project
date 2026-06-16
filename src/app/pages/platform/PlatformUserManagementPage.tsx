@@ -4,6 +4,8 @@ import { useNavigate } from "react-router";
 import { Users, UserCog } from "lucide-react";
 import { toast } from "sonner";
 import { fetchPlatformBusinesses, impersonateManagerAPI, type PlatformBusinessRow } from "../../lib/api";
+import { getMemoryAccessToken, setMemoryAccessToken } from "../../lib/accessTokenStore";
+import { saveImpersonationAdminBackup, clearImpersonationAdminBackup } from "../../lib/impersonationSessionBackup";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { useAuth, userFromAuthResponse } from "../../hooks/useAuth";
 import { logClientError } from "../../lib/clientLog";
@@ -79,20 +81,19 @@ export function PlatformUserManagementPage() {
     if (!user || user.role !== "platform_admin") return;
     setBusyId(b.id);
     try {
-      const token = localStorage.getItem("caretip_token");
-      const userJson = localStorage.getItem("caretip_user");
-      if (token) sessionStorage.setItem("caretip_admin_token_backup", token);
-      if (userJson) sessionStorage.setItem("caretip_admin_user_backup", userJson);
+      const token = getMemoryAccessToken();
+      if (token && user) {
+        saveImpersonationAdminBackup(token, user);
+      }
 
       const data = await impersonateManagerAPI(b.id);
-      localStorage.setItem("caretip_token", data.token);
+      setMemoryAccessToken(data.token);
       replaceUser(userFromAuthResponse(data.user));
       toast.message(t("admin.userManagementPage.impersonateToast", { name: b.name }));
       navigate("/dashboard");
     } catch (e) {
       logClientError("PlatformUserManagementPage.impersonate", e);
-      sessionStorage.removeItem("caretip_admin_token_backup");
-      sessionStorage.removeItem("caretip_admin_user_backup");
+      clearImpersonationAdminBackup();
       toast.error(toUserFriendlyMessage(e));
     } finally {
       setBusyId(null);

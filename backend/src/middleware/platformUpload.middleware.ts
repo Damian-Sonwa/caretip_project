@@ -1,23 +1,24 @@
 import multer from "multer";
+import {
+  assertMulterMimetypeAllowedForLogo,
+  assertMulterMimetypeAllowedForVerification,
+} from "../lib/uploadMimeGuard.js";
 
 const logoFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
-  if (/^image\//.test(file.mimetype)) {
+  try {
+    assertMulterMimetypeAllowedForLogo(file.mimetype);
     cb(null, true);
-  } else {
-    cb(new Error("Logo must be an image (e.g. PNG, JPEG, WebP)."));
+  } catch (e) {
+    cb(e instanceof Error ? e : new Error(String(e)));
   }
 };
 
 const verificationFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
-  const ok =
-    /^image\//.test(file.mimetype) ||
-    file.mimetype === "application/pdf" ||
-    file.mimetype === "application/msword" ||
-    file.mimetype === "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
-  if (ok) {
+  try {
+    assertMulterMimetypeAllowedForVerification(file.mimetype);
     cb(null, true);
-  } else {
-    cb(new Error("Allowed: images, PDF, or Word documents."));
+  } catch (e) {
+    cb(e instanceof Error ? e : new Error(String(e)));
   }
 };
 

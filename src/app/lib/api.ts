@@ -38,8 +38,16 @@ import {
 import { logDashboardTenantRequest } from "./dashboardTenantLog";
 import { clearClientSessionHint } from "./authSessionHint";
 import { notifyAuthStorageSync } from "./authStorageSync";
+import {
+  clearMemoryAccessToken,
+  getMemoryAccessToken,
+  migrateLegacyAccessTokenFromStorage,
+  setMemoryAccessToken,
+} from "./accessTokenStore";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
+
+export { migrateLegacyAccessTokenFromStorage } from "./accessTokenStore";
 
 /** Set on explicit logout; blocks silent refresh until the next successful sign-in. */
 export const SESSION_REVOKED_STORAGE_KEY = "caretip_session_revoked";
@@ -157,7 +165,10 @@ async function runRefreshAuthWithRetries(): Promise<RefreshSessionResult> {
 
     let res: Response;
     try {
-      const refreshHeaders: Record<string, string> = { "Content-Type": "application/json" };
+      const refreshHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-CareTip-Client": "1",
+      };
       res = await fetchWithNetworkRetry(apiPath(AUTH_REFRESH_PATHNAME), {
         method: "POST",
         headers: refreshHeaders,
@@ -251,7 +262,7 @@ function apiPath(path: string): string {
 }
 
 function getToken(): string | null {
-  return localStorage.getItem("caretip_token");
+  return getMemoryAccessToken();
 }
 
 export function hasClientAccessToken(): boolean {
@@ -260,22 +271,18 @@ export function hasClientAccessToken(): boolean {
 }
 
 function setToken(token: string | null): void {
-  const prev = getToken();
-  if (token && token.trim()) localStorage.setItem("caretip_token", token);
-  else localStorage.removeItem("caretip_token");
-  if (getToken() !== prev) notifyAuthStorageSync();
+  setMemoryAccessToken(token);
 }
 
-/** Clears access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
+/** Clears in-memory access token + user snapshot (keeps {@link SESSION_REVOKED_STORAGE_KEY} when set). */
 export function clearClientAuthStorage(options?: { notifySync?: boolean }): void {
   cancelPendingSessionRefresh();
   refreshFailureCooldownUntil = 0;
   clearEmployeeProfileClientCache();
   try {
+    clearMemoryAccessToken();
     localStorage.removeItem("caretip_token");
     localStorage.removeItem("caretip_user");
-    sessionStorage.removeItem("caretip_admin_token_backup");
-    sessionStorage.removeItem("caretip_admin_user_backup");
     clearClientSessionHint();
     if (options?.notifySync !== false) {
       notifyAuthStorageSync();
@@ -319,7 +326,7 @@ function attachLatestBearer(init?: RequestInit): RequestInit {
   try {
     if (typeof localStorage !== "undefined" && localStorage.getItem("caretip_auth_debug") === "1") {
       const t = getToken();
-      console.log("Auth token:", t && t.trim() ? "present" : "absent");
+      console.log("Auth token:", t && t.trim() ? "present (memory)" : "absent");
     }
   } catch {
     // ignore
@@ -617,6 +624,17 @@ async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {
 
 /** Fetch a protected file (PDF/image) with Bearer auth and return an object URL. */
 export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
+  const trimmed = inputUrl.trim();
+  if (trimmed.startsWith("kyc-object:") || trimmed.startsWith("kyc-disk:")) {
+    const data = await apiRequest<{ url: string; mode?: string }>(
+      apiPath(`/api/media/secure-access?ref=${encodeURIComponent(trimmed)}`),
+    );
+    if (data.mode === "signed") {
+      return data.url;
+    }
+    return fetchAuthedObjectUrl(data.url);
+  }
+
   const url = apiPath(inputUrl);
   if (requestUsesCaretipProtectedApi(url) && isSessionBootstrapInProgress()) {
     await whenSessionBootstrapSettled();
@@ -680,6 +698,20 @@ export interface AuthResponse {
   };
 }
 
+export interface MfaLoginChallenge {
+  mfaRequired: true;
+  mfaSetupRequired: boolean;
+  pendingMfaToken: string;
+}
+
+export type LoginApiResult = AuthResponse | MfaLoginChallenge;
+
+export function isMfaLoginChallenge(data: unknown): data is MfaLoginChallenge {
+  if (!data || typeof data !== "object") return false;
+  const d = data as Record<string, unknown>;
+  return d.mfaRequired === true && typeof d.pendingMfaToken === "string";
+}
+
 export async function registerAPI(payload: {
   email: string;
   password: string;
@@ -717,11 +749,11 @@ export async function loginAPI(
   email: string,
   password: string,
   locale?: "en" | "de"
-): Promise<AuthResponse> {
+): Promise<LoginApiResult> {
   const timeZone = getBrowserTimeZone();
-  return apiRequest<AuthResponse>(apiPath("/api/auth/signin"), {
+  return apiRequest<LoginApiResult>(apiPath("/api/auth/signin"), {
     method: "POST",
-    headers: getHeaders(),
+    headers: { "Content-Type": "application/json" },
     body: toJsonRequestBody({
       email,
       password,
@@ -732,10 +764,46 @@ export async function loginAPI(
   });
 }
 
+export async function loginMfaSetupAPI(pendingMfaToken: string): Promise<{ otpauthUrl: string; qrDataUrl: string }> {
+  return apiRequest(apiPath("/api/auth/login/mfa/setup"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: toJsonRequestBody({ pendingMfaToken }),
+    credentials: "include",
+  });
+}
+
+export async function loginMfaEnableAPI(
+  pendingMfaToken: string,
+  code: string,
+): Promise<AuthResponse> {
+  return apiRequest<AuthResponse>(apiPath("/api/auth/login/mfa/enable"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: toJsonRequestBody({ pendingMfaToken, code }),
+    credentials: "include",
+  });
+}
+
+export async function loginMfaVerifyAPI(
+  pendingMfaToken: string,
+  code: string,
+): Promise<AuthResponse> {
+  return apiRequest<AuthResponse>(apiPath("/api/auth/login/mfa/verify"), {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: toJsonRequestBody({ pendingMfaToken, code }),
+    credentials: "include",
+  });
+}
+
 export async function logoutAPI(): Promise<void> {
   markClientSessionRevoked();
   cancelPendingSessionRefresh();
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    "X-CareTip-Client": "1",
+  };
   const token = getToken();
   if (token?.trim()) {
     headers.Authorization = `Bearer ${token.trim()}`;
@@ -944,14 +1012,6 @@ export async function generateInviteCode(): Promise<{ inviteCode: string; expire
     });
   } catch (err) {
     logClientError("api.generateInviteCode", err);
-    if (import.meta.env.DEV) {
-      const expires = new Date();
-      expires.setDate(expires.getDate() + 7);
-      return {
-        inviteCode: String(Math.floor(100000 + Math.random() * 900000)),
-        expiresAt: expires.toISOString(),
-      };
-    }
     throw err;
   }
 }
@@ -1207,9 +1267,10 @@ export interface BusinessInfo {
   type?: string | null;
   contactPhone?: string | null;
   website?: string | null;
-  employeeCount: number;
+  /** Present on manager profile only — not returned by public GET /api/business/:id */
+  employeeCount?: number;
   verificationStatus?: "pending" | "verified" | "rejected";
-  /** SaaS tier for entitlement UI; defaults to premium on API when unset. */
+  /** SaaS tier for entitlement UI; manager profile only. */
   subscriptionTier?: "basic" | "premium" | "enterprise";
   /** Explicit finish persisted on the user row. */
   onboardingCompleted?: boolean;
@@ -1224,6 +1285,16 @@ export function invalidateBusinessProfileCache(): void {
 
 export async function getBusinessById(businessId: string): Promise<BusinessInfo | null> {
   return apiRequest(apiPath(`/api/business/${businessId}`), { headers: getHeaders() });
+}
+
+export async function fetchPublicSocketRoomToken(opts: {
+  businessId?: string;
+  businessSlug?: string;
+}): Promise<{ businessId: string; token: string; expiresAt: string }> {
+  const params = new URLSearchParams();
+  if (opts.businessId?.trim()) params.set("businessId", opts.businessId.trim());
+  if (opts.businessSlug?.trim()) params.set("businessSlug", opts.businessSlug.trim());
+  return apiRequest(apiPath(`/api/socket/public-room-token?${params.toString()}`));
 }
 
 /** Authenticated manager: returns only the business tied to the JWT (not arbitrary IDs). */
@@ -2622,20 +2693,6 @@ export async function createTableAPI(payload: {
     headers: getHeaders(),
     body: JSON.stringify(payload),
     credentials: "include",
-  });
-}
-
-export async function createPaymentIntent(params: {
-  amount: number;
-  employeeId: string;
-  businessId: string;
-  locationId?: string | null;
-  tableId?: string | null;
-}): Promise<{ clientSecret: string; paymentIntentId: string }> {
-  return apiRequest(apiPath("/api/tips/create-intent"), {
-    method: "POST",
-    headers: getHeaders(),
-    body: JSON.stringify(params),
   });
 }
 

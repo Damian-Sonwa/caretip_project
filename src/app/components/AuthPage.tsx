@@ -11,7 +11,7 @@ import {
 import { GlobalAppLoadingHold } from "./GlobalAppLoadingHold";
 import { AuthOAuthButtons } from './AuthOAuthButtons';
 import { SignInCard2, type AuthRole } from '@/components/ui/sign-in-card-2';
-import { useAuth, type User } from '../hooks/useAuth';
+import { useAuth, type User, parseUser } from '../hooks/useAuth';
 import { Eye, EyeOff, Check } from 'lucide-react';
 import {
   getPasswordChecklist,
@@ -24,6 +24,7 @@ import {
   isApiRequestError,
   EMAIL_NOT_VERIFIED_CODE,
   GOOGLE_ACCOUNT_NOT_REGISTERED_CODE,
+  isMfaLoginChallenge,
 } from '../lib/api';
 import { validateInviteCode } from "../lib/api";
 import { logClientError } from '../lib/clientLog';
@@ -253,8 +254,12 @@ export function AuthPage() {
 
     try {
       if (isLogin) {
-        const loggedIn = await login(email, password);
-        redirectAfterAuth(loggedIn);
+        const result = await login(email, password);
+        if (isMfaLoginChallenge(result)) {
+          navigate('/platform-admin/login', { replace: true });
+          return;
+        }
+        redirectAfterAuth(parseUser(result.user));
       } else {
         const payload = {
           email,
@@ -284,7 +289,6 @@ export function AuthPage() {
         // Ensure we don't keep a stale session from a previous login when backend rejects unverified access.
         try {
           localStorage.removeItem("caretip_user");
-          localStorage.removeItem("caretip_token");
           window.dispatchEvent(new CustomEvent("caretip-auth-storage-sync"));
         } catch {
           // ignore

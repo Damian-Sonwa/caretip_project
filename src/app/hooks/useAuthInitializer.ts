@@ -33,6 +33,7 @@ import {
 import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
 
 import { setAuthUser } from "../lib/authUserStore";
+import { setMemoryAccessToken } from "../lib/accessTokenStore";
 
 import { authDebug } from "../lib/authDebugLog";
 
@@ -64,8 +65,6 @@ import {
 
 
 
-const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
-
 const USER_STORAGE_KEY = "caretip_user";
 
 const TRANSIENT_BOOTSTRAP_RETRY_MS = 4_000;
@@ -77,24 +76,6 @@ const BOOTSTRAP_REFRESH_TIMEOUT_MS = 12_000;
 /** After transient refresh failure, stop blocking the app. */
 
 const TRANSIENT_SETTLE_MS = 10_000;
-
-
-
-function readStoredAccessToken(): string | null {
-
-  try {
-
-    const t = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-
-    return t?.trim() ? t.trim() : null;
-
-  } catch {
-
-    return null;
-
-  }
-
-}
 
 
 
@@ -132,7 +113,7 @@ function persistAuthResponse(data: AuthResponse): User {
 
   clearClientSessionRevoked();
 
-  localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
+  setMemoryAccessToken(data.token);
 
   const u = parseUser(data.user);
 
@@ -372,9 +353,7 @@ export function useAuthInitializer(): void {
 
 
 
-        const hadLocalSession =
-
-          Boolean(readStoredAccessToken()) || Boolean(loadUserFromStorage());
+        const hadLocalSession = Boolean(loadUserFromStorage());
 
 
 

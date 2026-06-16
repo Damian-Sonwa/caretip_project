@@ -12,6 +12,9 @@ export function validateImageFileForUpload(file: File): { ok: true } | { ok: fal
     return { ok: false, message: "Image is too large (max 5 MB)." };
   }
   const t = file.type?.trim() ?? "";
+  if (/svg/i.test(t)) {
+    return { ok: false, message: "SVG uploads are not allowed." };
+  }
   if (!ALLOWED.test(t)) {
     return {
       ok: false,

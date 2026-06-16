@@ -2,11 +2,12 @@ import { Router } from "express";
 import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
+import { feedbackTipRateLimit } from "../middleware/securityRateLimit.middleware.js";
 import * as feedbackController from "../controllers/feedback.controller.js";
 
 const router = Router();
 
-router.post("/tip", feedbackController.submitTipFeedback);
+router.post("/tip", feedbackTipRateLimit, feedbackController.submitTipFeedback);
 
 router.get(
   "/business",

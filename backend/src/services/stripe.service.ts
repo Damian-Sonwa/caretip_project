@@ -67,6 +67,24 @@ function logStripeAmountMismatch(context: string, details: Record<string, unknow
   console.warn(`[stripe.amount_mismatch] ${context}`, details);
 }
 
+/** Defense-in-depth: reject non-EUR Stripe objects before ledger writes. */
+export function assertStripeCurrencyEur(
+  currency: string | null | undefined,
+  context: Record<string, unknown>,
+): void {
+  const normalized = String(currency ?? "")
+    .trim()
+    .toLowerCase();
+  if (normalized === "eur") return;
+  console.error("[stripe.currency_violation]", { currency, ...context });
+  captureServerException(new Error("Unexpected Stripe currency"), { currency, ...context });
+  throw new Error("Unexpected currency");
+}
+
+function logStripeCurrencyViolationRepeat(context: Record<string, unknown>): void {
+  console.warn("[stripe.currency_violation.repeat]", context);
+}
+
 /** Set STRIPE_WEBHOOK_DEBUG=true to log checkout webhook skip/create details (no secrets). */
 function stripeWebhookDebug(context: string, details: Record<string, unknown>): void {
   if (process.env.STRIPE_WEBHOOK_DEBUG !== "true") return;
@@ -130,19 +148,6 @@ export async function getTipCheckoutContext(
     tableId: typeof md.tableId === "string" ? md.tableId : null,
     customerName: typeof md.customerName === "string" ? md.customerName : null,
   };
-}
-
-export interface CreatePaymentIntentInput {
-  amount: number;
-  employeeId: string;
-  businessId: string;
-  locationId?: string | null;
-  tableId?: string | null;
-}
-
-export interface CreatePaymentIntentResult {
-  clientSecret: string;
-  paymentIntentId: string;
 }
 
 export interface CreateTipCheckoutSessionInput {
@@ -268,56 +273,6 @@ async function emitTipSocketWithSnapshot(
     currentMonthTotal,
     monthlyGoal: snapshot.monthlyGoal,
   });
-}
-
-export async function createPaymentIntent(
-  input: CreatePaymentIntentInput,
-): Promise<CreatePaymentIntentResult> {
-  const stripe = getStripe();
-
-  assertTipAmountInRangeEur(input.amount);
-
-  await assertEmployeeEligibleForTipPayment(input.employeeId, input.businessId);
-
-  const { locationId: locId, tableId: tblId } = await resolveLocationTable(
-    input.businessId,
-    input.locationId,
-    input.tableId,
-  );
-
-  const amountInCents = Math.round(input.amount * 100);
-
-  const metadata: Record<string, string> = {
-    employeeId: input.employeeId,
-    businessId: input.businessId,
-    source: "payment_intent_api",
-  };
-  if (locId) metadata.locationId = locId;
-  if (tblId) metadata.tableId = tblId;
-
-  const paymentIntent = await stripe.paymentIntents.create({
-    amount: amountInCents,
-    currency: "eur",
-    automatic_payment_methods: { enabled: true },
-    metadata,
-  });
-
-  await prisma.transaction.create({
-    data: {
-      amount: input.amount,
-      status: "pending",
-      stripePaymentIntentId: paymentIntent.id,
-      employeeId: input.employeeId,
-      businessId: input.businessId,
-      locationId: locId,
-      tableId: tblId,
-    },
-  });
-
-  return {
-    clientSecret: paymentIntent.client_secret!,
-    paymentIntentId: paymentIntent.id,
-  };
 }
 
 /**
@@ -460,7 +415,22 @@ async function refundTipPaymentForEligibilityFailure(
 export async function handlePaymentSuccess(paymentIntentId: string): Promise<void> {
   let confirmedEur: number | null = null;
   try {
-    confirmedEur = await confirmedEurFromPaymentIntentId(paymentIntentId);
+    const stripe = getStripe();
+    const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
+    try {
+      assertStripeCurrencyEur(pi.currency, {
+        paymentIntentId,
+        phase: "payment_intent.succeeded",
+      });
+    } catch (err) {
+      logStripeCurrencyViolationRepeat({
+        paymentIntentId,
+        currency: pi.currency,
+        message: err instanceof Error ? err.message : String(err),
+      });
+      return;
+    }
+    confirmedEur = stripeCentsToEur(pi.amount_received ?? pi.amount);
   } catch (err) {
     console.error("[stripe.handlePaymentSuccess] retrieve PI", paymentIntentId, err);
   }
@@ -565,6 +535,19 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
 
   if (session.payment_status && session.payment_status !== "paid") {
     console.log("SKIP REASON: payment_status not paid");
+    return;
+  }
+
+  try {
+    assertStripeCurrencyEur(session.currency, {
+      sessionId: session.id,
+      phase: "checkout.session.completed",
+    });
+  } catch (err) {
+    logStripeCurrencyViolationRepeat({
+      sessionId: session.id,
+      message: err instanceof Error ? err.message : String(err),
+    });
     return;
   }
 

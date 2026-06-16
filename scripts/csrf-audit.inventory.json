@@ -1,0 +1,63 @@
+{
+  "routeFile": "backend/src/routes/auth.routes.ts",
+  "middleware": {
+    "origin": "requireTrustedOrigin",
+    "clientHeader": "requireCaretipClientHeader"
+  },
+  "protectedRoutes": [
+    {
+      "method": "POST",
+      "path": "/login",
+      "requiresTrustedOrigin": true,
+      "requiresClientHeader": false
+    },
+    {
+      "method": "POST",
+      "path": "/signin",
+      "requiresTrustedOrigin": true,
+      "requiresClientHeader": false
+    },
+    {
+      "method": "POST",
+      "path": "/refresh",
+      "requiresTrustedOrigin": true,
+      "requiresClientHeader": true
+    },
+    {
+      "method": "POST",
+      "path": "/logout",
+      "requiresTrustedOrigin": true,
+      "requiresClientHeader": true
+    }
+  ],
+  "cookieMutationHandlers": [
+    {
+      "handler": "login",
+      "note": "Sets refresh cookie via respondAfterPasswordLogin; Origin validated on route."
+    },
+    {
+      "handler": "loginMfaVerify",
+      "note": "Sets refresh cookie after MFA; Bearer-less until complete. Accepted risk — one-time token in body."
+    },
+    {
+      "handler": "oauth",
+      "note": "Sets refresh cookie from Google id_token body. Accepted risk — review before adding Origin."
+    },
+    {
+      "handler": "activateEmployee",
+      "note": "Sets refresh cookie from activation token. Accepted risk — single-use token in body."
+    },
+    {
+      "handler": "refresh",
+      "note": "Cookie-authenticated rotation; Origin + X-CareTip-Client required."
+    },
+    {
+      "handler": "logout",
+      "note": "Cookie-authenticated revocation; Origin + X-CareTip-Client required."
+    },
+    {
+      "handler": "patchMe",
+      "note": "Bearer-authenticated; re-issues refresh cookie. CSRF-safe via Authorization header."
+    }
+  ]
+}

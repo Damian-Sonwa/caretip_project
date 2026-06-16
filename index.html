@@ -35,18 +35,7 @@
       <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
       <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
       <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
-      <script>
-        (function () {
-          try {
-            var saved = localStorage.getItem("caretip-theme");
-            var mode = saved === "light" || saved === "dark"
-              ? saved
-              : (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-            if (mode === "dark") document.documentElement.classList.add("dark");
-            document.documentElement.style.colorScheme = mode;
-          } catch (e) {}
-        })();
-      </script>
+      <script src="/theme-init.js"></script>
     </head>
 
     <body style="margin: 0; background-color: #fafaf9">

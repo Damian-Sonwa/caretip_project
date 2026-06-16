@@ -11,10 +11,12 @@ import {
   sendEmailVerificationEmail,
 } from "./emailVerification.service.js";
 import * as employeeActivationService from "./employeeActivation.service.js";
+import { registerEmployeeWithInvite } from "./employeeInvite.service.js";
 import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { resolveEmailLocale, resolveUserPreferredLocale } from "../emails/i18nEmail.js";
+import { assertPlatformAdminMfaSessionAllowed } from "./mfaLogin.service.js";
 import { inferManagerOnboardingStep, type OnboardingStep } from "./onboardingProgress.service.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
@@ -265,6 +267,7 @@ export async function authResultForUserId(userId: string): Promise<AuthResult> {
   ) {
     throw new EmailNotVerifiedLoginError();
   }
+  await assertPlatformAdminMfaSessionAllowed(user);
   return authResultForUserRecord(user);
 }
 
@@ -379,66 +382,41 @@ export async function registerEmployee(
     throw new Error("Email already registered");
   }
 
-  const code = String(input.inviteCode ?? "").trim();
-  const business = await prisma.business.findFirst({
-    where: {
-      inviteCode: code,
-      inviteCodeExpiresAt: { gt: new Date() },
-    },
-    select: { id: true, verificationStatus: true },
-  });
-  if (!business) {
-    throw new Error("Invalid or expired invite code");
-  }
-
   const passwordHash = await bcrypt.hash(input.password, 10);
   const preferredLocale = input.locale?.trim()
     ? resolveUserPreferredLocale(input.locale)
     : null;
 
-  const slug =
-    business.verificationStatus === "verified"
-      ? await (async () => {
-          const baseSlug = generateSlug(input.name.trim());
-          return ensureUniqueSlug(baseSlug, async (s) => {
-            const hit = await prisma.employee.findUnique({ where: { slug: s } });
-            return !!hit;
-          });
-        })()
-      : null;
-
-  const created = await prisma.user.create({
-    data: {
-      email,
-      passwordHash,
-      role: "EMPLOYEE",
-      isPlatformAdmin: false,
-      emailVerified: false,
-      preferredLocale,
-      employee: {
-        create: {
-          name: input.name.trim(),
-          jobTitle: "Staff",
-          businessId: business.id,
-          slug,
-          activationStatus: "pending_verification",
-        },
-      },
-    },
-    include: {
-      business: { select: { id: true, name: true, verificationStatus: true } },
-      employee: { select: { id: true, name: true, avatar: true, businessId: true } },
-    },
+  const created = await registerEmployeeWithInvite({
+    inviteCode: input.inviteCode,
+    email,
+    name: input.name,
+    passwordHash,
+    emailVerified: false,
+    preferredLocale,
+    activationStatus: "pending_verification",
+    registrationChannel: "password",
   });
 
   await sendVerificationEmailBestEffort(created.id, created.email, {
     explicitLocale: input.locale,
   });
 
-  return pendingVerificationResultForUserRecord(created);
+  const withEmployee = await prisma.user.findUnique({
+    where: { id: created.id },
+    include: {
+      business: { select: { id: true, name: true, verificationStatus: true } },
+      employee: { select: { id: true, name: true, avatar: true, businessId: true } },
+    },
+  });
+  if (!withEmployee) {
+    throw new Error("Registration failed");
+  }
+
+  return pendingVerificationResultForUserRecord(withEmployee);
 }
 
-export async function login(input: LoginInput): Promise<AuthResult> {
+export async function validateLoginCredentials(input: LoginInput): Promise<UserForAuthResult> {
   const email = normalizeLoginEmail(input.email);
   let user = await prisma.user.findUnique({
     where: { email },
@@ -484,6 +462,11 @@ export async function login(input: LoginInput): Promise<AuthResult> {
     }
   }
 
+  return user;
+}
+
+export async function login(input: LoginInput): Promise<AuthResult> {
+  const user = await validateLoginCredentials(input);
   return authResultForUserRecord(user);
 }
 

@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { motion } from "motion/react";
 import { useNavigate, Link } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,12 @@ import { CareTipLogo, CARE_TIP_LOGO_AUTH_SURFACE_CLASS } from "../../components/
 import { useAuth, getPostAuthRedirect } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
+import {
+  isMfaLoginChallenge,
+  loginMfaEnableAPI,
+  loginMfaSetupAPI,
+  loginMfaVerifyAPI,
+} from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole } from "../../lib/authSession";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
@@ -17,15 +23,21 @@ import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
 const FIELD_CLASS = "caretip-auth-field";
 const FIELD_PASSWORD = "caretip-auth-field caretip-auth-field--password-toggle";
 
+type MfaStep = "password" | "setup" | "verify";
+
 export function PlatformAdminLoginPage() {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mfaCode, setMfaCode] = useState("");
+  const [mfaStep, setMfaStep] = useState<MfaStep>("password");
+  const [pendingMfaToken, setPendingMfaToken] = useState("");
+  const [qrDataUrl, setQrDataUrl] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const authInFlightRef = useRef(false);
-  const { login, user, sessionValidated, logout } = useAuth();
+  const { login, user, sessionValidated, logout, completeAuthLogin } = useAuth();
   const navigate = useNavigate();
 
   const sameLaneValidated = Boolean(
@@ -52,7 +64,13 @@ export function PlatformAdminLoginPage() {
           ? t("auth.page.sessionRolePlatformAdmin")
           : user?.role ?? "";
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const startMfaSetup = useCallback(async (token: string) => {
+    const setup = await loginMfaSetupAPI(token);
+    setQrDataUrl(setup.qrDataUrl);
+    setMfaStep("setup");
+  }, []);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     const trimmed = email.trim();
@@ -65,7 +83,17 @@ export function PlatformAdminLoginPage() {
     authInFlightRef.current = true;
     setSubmitting(true);
     try {
-      await login(trimmed, password);
+      const result = await login(trimmed, password);
+      if (isMfaLoginChallenge(result)) {
+        setPendingMfaToken(result.pendingMfaToken);
+        if (result.mfaSetupRequired) {
+          await startMfaSetup(result.pendingMfaToken);
+        } else {
+          setMfaStep("verify");
+        }
+        return;
+      }
+      completeAuthLogin(result);
       redirectAfterAuth();
     } catch (err) {
       logClientError("PlatformAdminLoginPage", err);
@@ -79,6 +107,37 @@ export function PlatformAdminLoginPage() {
       setSubmitting(false);
     }
   };
+
+  const handleMfaSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const code = mfaCode.trim();
+    if (!pendingMfaToken || !code) {
+      setError(t("admin.loginPage.mfaCodeRequired", { defaultValue: "Enter the 6-digit code from your authenticator app." }));
+      return;
+    }
+    if (authInFlightRef.current) return;
+    authInFlightRef.current = true;
+    setSubmitting(true);
+    try {
+      const data =
+        mfaStep === "setup"
+          ? await loginMfaEnableAPI(pendingMfaToken, code)
+          : await loginMfaVerifyAPI(pendingMfaToken, code);
+      completeAuthLogin(data);
+      redirectAfterAuth();
+    } catch (err) {
+      logClientError("PlatformAdminLoginPage.mfa", err);
+      setError(toUserFriendlyMessage(err));
+    } finally {
+      authInFlightRef.current = false;
+      setSubmitting(false);
+    }
+  };
+
+  useEffect(() => {
+    if (sameLaneValidated) redirectAfterAuth();
+  }, [sameLaneValidated, redirectAfterAuth]);
 
   return (
     <div className="caretip-auth-page relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
@@ -110,6 +169,7 @@ export function PlatformAdminLoginPage() {
                     onClick={() => {
                       logout();
                       setError("");
+                      setMfaStep("password");
                     }}
                     className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
                   >
@@ -160,14 +220,16 @@ export function PlatformAdminLoginPage() {
                     transition={{ delay: 0.12 }}
                     className="caretip-auth-subtitle w-full"
                   >
-                    {t("admin.loginPage.subtitle")}
+                    {mfaStep === "password"
+                      ? t("admin.loginPage.subtitle")
+                      : t("admin.loginPage.mfaSubtitle", { defaultValue: "Enter the code from your authenticator app to continue." })}
                   </motion.p>
                 </motion.div>
               </div>
 
-              {sameLaneValidated || showCrossSessionHint ? null : (
+              {sameLaneValidated || showCrossSessionHint ? null : mfaStep === "password" ? (
                 <form
-                  onSubmit={(e) => void handleSubmit(e)}
+                  onSubmit={(e) => void handlePasswordSubmit(e)}
                   aria-busy={submitting || Boolean(user && !sessionValidated)}
                   className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
                   method="post"
@@ -213,12 +275,6 @@ export function PlatformAdminLoginPage() {
                     </p>
                   ) : null}
 
-                  {submitting ? (
-                    <p className="text-center text-[11px] font-medium text-neutral-600 dark:text-neutral-400" role="status">
-                      {t("admin.loginPage.signingIn")}
-                    </p>
-                  ) : null}
-
                   <button
                     type="submit"
                     disabled={submitting || Boolean(user && !sessionValidated)}
@@ -232,6 +288,73 @@ export function PlatformAdminLoginPage() {
                     ) : (
                       t("admin.loginPage.signIn")
                     )}
+                  </button>
+                </form>
+              ) : (
+                <form
+                  onSubmit={(e) => void handleMfaSubmit(e)}
+                  className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
+                  noValidate
+                >
+                  {mfaStep === "setup" && qrDataUrl ? (
+                    <div className="mb-4 flex flex-col items-center gap-3">
+                      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+                        {t("admin.loginPage.mfaSetupHint", {
+                          defaultValue: "Scan this QR code with your authenticator app, then enter the 6-digit code.",
+                        })}
+                      </p>
+                      <img
+                        src={qrDataUrl}
+                        alt=""
+                        className="h-40 w-40 rounded-lg border border-neutral-200 bg-white p-2 dark:border-neutral-700"
+                      />
+                    </div>
+                  ) : null}
+
+                  <input
+                    placeholder={t("admin.loginPage.mfaCodePlaceholder", { defaultValue: "6-digit code" })}
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={8}
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value.replace(/\s/g, ""))}
+                    className={FIELD_CLASS}
+                  />
+
+                  {error ? (
+                    <p className="text-sm font-medium text-red-600 dark:text-red-400" role="alert">
+                      {error}
+                    </p>
+                  ) : null}
+
+                  <button
+                    type="submit"
+                    disabled={submitting}
+                    className={cn(caretipBtnPrimaryFull, "caretip-auth-submit relative disabled:cursor-not-allowed")}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin text-white" aria-hidden />
+                        {t("admin.loginPage.mfaVerifying", { defaultValue: "Verifying…" })}
+                      </>
+                    ) : (
+                      t("admin.loginPage.mfaContinue", { defaultValue: "Continue" })
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    className="mt-2 text-center text-sm font-medium text-neutral-600 underline-offset-4 hover:underline dark:text-neutral-400"
+                    onClick={() => {
+                      setMfaStep("password");
+                      setMfaCode("");
+                      setPendingMfaToken("");
+                      setQrDataUrl("");
+                      setError("");
+                    }}
+                  >
+                    {t("admin.loginPage.mfaBack", { defaultValue: "Back to sign in" })}
                   </button>
                 </form>
               )}

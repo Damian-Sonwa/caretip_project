@@ -1,19 +1,18 @@
-import path from "node:path";
+import { randomUUID } from "node:crypto";
 
 /**
- * Unique, URL-safe object key for Supabase Storage: `Date.now()` + sanitized original base name + extension.
- * Avoids overwrites when multiple users upload files with the same name.
+ * Unique object filename using only a content-derived extension (ignores user filenames).
  */
-export function buildUniqueStorageObjectName(originalFilename: string | undefined, extensionFallback = ".bin"): string {
-  const raw = (originalFilename ?? "upload").trim() || "upload";
-  let ext = path.extname(raw);
-  if (!ext) {
-    ext = extensionFallback.startsWith(".") ? extensionFallback : `.${extensionFallback}`;
+export function buildUniqueStorageObjectNameFromExtension(extension: string): string {
+  let ext = extension.trim().toLowerCase();
+  if (!ext.startsWith(".")) ext = `.${ext}`;
+  if (!/^\.[a-z0-9]{1,8}$/.test(ext)) {
+    ext = ".bin";
   }
-  const base =
-    path
-      .basename(raw, ext)
-      .replace(/[^a-zA-Z0-9-_]/g, "")
-      .slice(0, 80) || "file";
-  return `${Date.now()}-${base}${ext.toLowerCase()}`;
+  return `${Date.now()}-${randomUUID().slice(0, 8)}${ext}`;
+}
+
+/** @deprecated Use buildUniqueStorageObjectNameFromExtension — user filenames are not trusted. */
+export function buildUniqueStorageObjectName(originalFilename: string | undefined, extensionFallback = ".bin"): string {
+  return buildUniqueStorageObjectNameFromExtension(extensionFallback);
 }

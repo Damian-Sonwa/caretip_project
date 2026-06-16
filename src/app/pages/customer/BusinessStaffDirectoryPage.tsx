@@ -117,10 +117,8 @@ export function BusinessStaffDirectoryPage() {
     if (!socket || !data) return;
     const r = () => void reloadDirectory();
     socket.on("business_data_updated", r);
-    socket.on("verification_updated", r);
     return () => {
       socket.off("business_data_updated", r);
-      socket.off("verification_updated", r);
     };
   }, [socket, data, reloadDirectory]);
 

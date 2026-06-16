@@ -32,6 +32,7 @@ import platformRoutes from "./routes/platform.routes.js";
 import stripeWebhookRoutes from "./webhooks/stripe.webhook.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import feedbackRoutes from "./routes/feedback.routes.js";
+import mediaRoutes from "./routes/media.routes.js";
 import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
 import pushRoutes from "./routes/push.routes.js";
@@ -42,19 +43,31 @@ import { initSocketServer } from "./socket/socketServer.js";
 import { errorHandler } from "./middleware/errorHandler.middleware.js";
 import { jsonParseErrorHandler } from "./middleware/jsonParseError.middleware.js";
 import { getImageUploadStorageDiagnostics } from "./services/upload.service.js";
-import { ensureSupabaseStorageBucketReady, isSupabaseStorageConfigured } from "./lib/supabaseStorageClient.js";
+import { blockSensitiveStaticUploadPaths } from "./middleware/blockSensitiveStaticUploads.middleware.js";
+import {
+  ensureSupabaseStorageBucketReady,
+  ensureSupabaseKycBucketReady,
+  isSupabaseStorageConfigured,
+} from "./lib/supabaseStorageClient.js";
 import {
   assertProductionEmailEnv,
   getEmailHealthDiagnostics,
 } from "./config/emailEnv.js";
 import { getObservabilityHealthDiagnostics } from "./config/observabilityEnv.js";
+import { securityHeadersMiddleware } from "./middleware/securityHeaders.middleware.js";
+import { authenticatedApiRateLimit } from "./middleware/securityRateLimit.middleware.js";
+import socketRoutes from "./routes/socket.routes.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
 
+app.disable("x-powered-by");
+
 if (process.env.NODE_ENV === "production") {
   app.set("trust proxy", 1);
 }
+
+app.use(securityHeadersMiddleware);
 
 async function assertEnvForAuth(): Promise<void> {
   const jwt = process.env.JWT_SECRET?.trim();
@@ -122,7 +135,9 @@ app.use(
   }),
 );
 app.use(jsonParseErrorHandler);
+app.use("/api", authenticatedApiRateLimit);
 
+app.use(blockSensitiveStaticUploadPaths);
 app.use(
   "/uploads",
   express.static(join(process.cwd(), "uploads"), {
@@ -164,18 +179,29 @@ app.use("/api/tipping-context", tippingContextRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/landing-ai", landingAiRoutes);
+app.use("/api/socket", socketRoutes);
 app.use("/api/platform", platformRoutes);
+app.use("/api/media", mediaRoutes);
 app.use("/api/push", pushRoutes);
 /** Alias for SuperAdmin clients (same handlers as `/api/platform`). */
 app.use("/api/admin", platformRoutes);
 
-app.get("/health", (_, res) => {
+app.get("/health", (req, res) => {
+  const isProd = process.env.NODE_ENV === "production";
+  const secret = process.env.HEALTH_CHECK_SECRET?.trim();
+  const detailed =
+    !isProd ||
+    (Boolean(secret) && req.get("x-health-secret") === secret);
+
+  if (!detailed) {
+    return res.json({ status: "ok" });
+  }
+
   const email = getEmailHealthDiagnostics();
   const observability = getObservabilityHealthDiagnostics();
   const uploads = getImageUploadStorageDiagnostics();
-  const ok =
-    process.env.NODE_ENV !== "production" || email.configured;
-  res.status(ok ? 200 : 503).json({
+  const ok = !isProd || email.configured;
+  return res.status(ok ? 200 : 503).json({
     status: ok ? "ok" : "degraded",
     email,
     observability,
@@ -203,6 +229,9 @@ void assertEnvForAuth().then(() => {
     if (isSupabaseStorageConfigured()) {
       void ensureSupabaseStorageBucketReady().catch((e) => {
         console.error("[upload] Supabase bucket startup check failed:", e instanceof Error ? e.message : e);
+      });
+      void ensureSupabaseKycBucketReady().catch((e) => {
+        console.error("[upload] Supabase KYC bucket startup check failed:", e instanceof Error ? e.message : e);
       });
     }
   });

@@ -6,7 +6,10 @@ export function emitBusinessDataChanged(businessId: string, reason: string): voi
   if (!io) return;
   const payload = { businessId, reason, at: new Date().toISOString() };
   io.to(`business:${businessId}`).emit("business_data_updated", payload);
-  io.to(`public:business:${businessId}`).emit("business_data_updated", { businessId, reason });
+  io.to(`public:business:${businessId}`).emit("business_data_updated", {
+    businessId,
+    at: payload.at,
+  });
 }
 
 export function emitVerificationUpdated(
@@ -17,7 +20,6 @@ export function emitVerificationUpdated(
   if (!io) return;
   const payload = { businessId, verificationStatus, at: new Date().toISOString() };
   io.to(`business:${businessId}`).emit("verification_updated", payload);
-  io.to(`public:business:${businessId}`).emit("verification_updated", { businessId, verificationStatus });
   io.to("platform").emit("platform_verification_updated", payload);
 }
 

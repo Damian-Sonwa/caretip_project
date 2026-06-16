@@ -4,11 +4,20 @@ import type { JwtPayload } from "../middleware/auth.middleware.js";
 /** Grace period after access JWT expiry — allows session recovery when refresh cookie was lost (e.g. dev proxy misconfig). */
 const EXPIRED_ACCESS_GRACE_MS = 14 * 24 * 60 * 60 * 1000;
 
+/** Disabled in production unless ALLOW_EXPIRED_ACCESS_TOKEN_REFRESH=true. */
+export function isExpiredAccessTokenRefreshAllowed(): boolean {
+  const raw = process.env.ALLOW_EXPIRED_ACCESS_TOKEN_REFRESH?.trim().toLowerCase();
+  if (raw === "true" || raw === "1") return true;
+  if (raw === "false" || raw === "0") return false;
+  return process.env.NODE_ENV !== "production";
+}
+
 /**
  * Resolve user id from Bearer access token for POST /api/auth/refresh fallback.
  * Accepts valid tokens and recently expired tokens (within grace).
  */
 export function userIdFromAccessTokenForRefresh(bearer: string): string | null {
+  if (!isExpiredAccessTokenRefreshAllowed()) return null;
   const secret = process.env.JWT_SECRET?.trim();
   if (!secret) return null;
   const token = String(bearer ?? "").trim();

@@ -16,6 +16,7 @@ export type NotificationTemplate =
   | { id: "payout_completed"; params: { amount: number } }
   | { id: "login_security" }
   | { id: "employee_invited_manager"; params: { employeeName: string; businessName: string } }
+  | { id: "employee_invite_redeemed_manager"; params: { employeeName: string; businessName: string; inviteCode: string } }
   | { id: "employee_activated"; params: { businessName: string } }
   | { id: "qr_scan"; params: { place: string } }
   | { id: "qr_payment_success"; params: { amount: number; employeeName: string } }
@@ -86,6 +87,16 @@ export function renderNotificationTemplate(
         : {
             title: "Team invitation sent",
             body: `${template.params.employeeName} was invited to join ${template.params.businessName}.`,
+          };
+    case "employee_invite_redeemed_manager":
+      return de
+        ? {
+            title: "Einladung eingelöst",
+            body: `${template.params.employeeName} ist ${template.params.businessName} mit Code ${template.params.inviteCode} beigetreten.`,
+          }
+        : {
+            title: "Invite redeemed",
+            body: `${template.params.employeeName} joined ${template.params.businessName} using invite code ${template.params.inviteCode}.`,
           };
     case "employee_activated":
       return de

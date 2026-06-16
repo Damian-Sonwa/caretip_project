@@ -50,14 +50,11 @@ export function subscribeAuthUser(listener: Listener): () => void {
   return () => listeners.delete(listener);
 }
 
-const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
-
-/** True when local storage still holds credentials (guard grace while hooks sync). */
+/** True when local storage still holds a user snapshot (guard grace while hooks sync). */
 export function hasClientStoredSession(): boolean {
   try {
-    const token = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
     const user = localStorage.getItem(USER_STORAGE_KEY);
-    return Boolean(token?.trim()) || Boolean(user);
+    return Boolean(user);
   } catch {
     return false;
   }

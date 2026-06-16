@@ -28,10 +28,63 @@ import {
   CLIENT_FALLBACK,
   EmailNotVerifiedLoginError,
 } from "../utils/httpErrors.js";
+import * as auditService from "../services/audit.service.js";
+import * as mfaLoginService from "../services/mfaLogin.service.js";
 import {
   extractLoginRequestContext,
   handlePostLoginNotifications,
 } from "../services/loginNotification.service.js";
+import { SERVICE_UNAVAILABLE_MESSAGE } from "../constants/serviceUnavailable.js";
+import {
+  assertMfaVerifyAllowed,
+  clearMfaVerifyFailures,
+  MfaVerifyLockedError,
+  mfaLockoutMessage,
+  recordMfaVerifyFailure,
+} from "../services/mfaAttemptLimit.service.js";
+
+async function issueRefreshSessionForUser(
+  res: Response,
+  userId: string,
+): Promise<import("../services/auth.service.js").AuthResult> {
+  const result = await authService.authResultForUserId(userId);
+  const rt = await issueRefreshToken(userId);
+  setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
+  return result;
+}
+
+async function respondAfterPasswordLogin(
+  req: Request,
+  res: Response,
+  user: Awaited<ReturnType<typeof authService.validateLoginCredentials>>,
+) {
+  if (mfaLoginService.isPlatformAdminAccount(user)) {
+    const pendingMfaToken = mfaLoginService.signPendingMfaLoginToken(user.id);
+    void auditService.writeAuditLog({
+      userId: user.id,
+      action: "mfa.login.challenge",
+      metadata: JSON.stringify({
+        method: req.method,
+        path: req.originalUrl ?? req.url,
+        mfaSetupRequired: user.twoFactorEnabled !== true,
+      }),
+    });
+    return res.json({
+      mfaRequired: true,
+      mfaSetupRequired: user.twoFactorEnabled !== true,
+      pendingMfaToken,
+    });
+  }
+
+  const result = await authService.authResultForUserRecord(user);
+  try {
+    const rt = await issueRefreshToken(result.user.id);
+    setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
+  } catch (e) {
+    logServerError("auth.login.issueRefreshToken", e);
+  }
+  return res.json(result);
+}
 
 function parseClientTimeZone(body: Record<string, unknown>): string | undefined {
   return typeof body.timeZone === "string" && body.timeZone.trim()
@@ -54,33 +107,34 @@ const LOGIN_FORBIDDEN_MESSAGES = new Set([
   "This account has been disabled.",
 ]);
 
-/** User-safe hint; full error stays in server logs. */
-function prismaFailureClientMessage(
-  err: Prisma.PrismaClientKnownRequestError | Prisma.PrismaClientInitializationError | Prisma.PrismaClientRustPanicError,
-): string {
-  if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    const code = err.code;
-    if (code === "P1001") {
-      return "Cannot connect to PostgreSQL (network / host unreachable). Confirm DATABASE_URL uses your Supabase pooler host, the project is not paused, and try: NODE_OPTIONS=--dns-result-order=ipv4first on Windows if needed.";
-    }
-    if (code === "P1000") {
-      return "Database authentication failed. Check the password and user in DATABASE_URL (Supabase → Connect → Session pooler).";
-    }
-    if (code === "P1017") {
-      return "Database closed the connection. Retry in a moment; if it persists, check Supabase status and connection pool limits.";
-    }
-    if (code === "P2021" || code === "P2010" || code === "P1003") {
-      return "Database schema is missing or out of date. From the backend folder run: npx prisma migrate deploy";
-    }
-    if (code === "P2022") {
-      return "Database is missing columns the app expects (often User.is_active). Run: cd backend && npx prisma migrate deploy — or run backend/prisma/repair/sync_missing_columns.sql in Supabase SQL Editor, then restart the API.";
-    }
-    return `Database error (${code}). See API server logs for details.`;
+function isPrismaInfrastructureError(err: unknown): boolean {
+  return (
+    err instanceof Prisma.PrismaClientKnownRequestError ||
+    err instanceof Prisma.PrismaClientInitializationError ||
+    err instanceof Prisma.PrismaClientRustPanicError
+  );
+}
+
+async function verifyTotpWithLockout(
+  userId: string,
+  verify: () => boolean,
+): Promise<"ok" | "invalid" | "locked"> {
+  try {
+    await assertMfaVerifyAllowed(userId);
+  } catch (e) {
+    if (e instanceof MfaVerifyLockedError) return "locked";
+    throw e;
   }
-  if (err instanceof Prisma.PrismaClientInitializationError) {
-    return "Unable to initialize the database client. Check DATABASE_URL (must use your Supabase pooler URL, not localhost).";
+  if (!verify()) {
+    await recordMfaVerifyFailure(userId);
+    return "invalid";
   }
-  return "Database engine error. Restart the API and check server logs.";
+  await clearMfaVerifyFailures(userId);
+  return "ok";
+}
+
+function mfaLockedResponse(res: Response) {
+  return res.status(429).json({ message: mfaLockoutMessage() });
 }
 
 function isForbiddenSuperAdminRolePayload(body: Record<string, unknown>): boolean {
@@ -198,7 +252,7 @@ export async function login(req: Request, res: Response) {
     if (!email || typeof password !== "string") {
       return res.status(400).json({ message: "Email and password are required" });
     }
-    const result = await authService.login({
+    const user = await authService.validateLoginCredentials({
       email,
       password,
     });
@@ -208,35 +262,31 @@ export async function login(req: Request, res: Response) {
     if (loginClientLocale === "en" || loginClientLocale === "de") {
       void prisma.user
         .update({
-          where: { id: result.user.id },
+          where: { id: user.id },
           data: { preferredLocale: loginClientLocale },
         })
         .catch(() => {});
     }
 
-    // Best-effort login notification (one email + inbox; opt-in via user_settings.notify_new_login).
-    void (async () => {
-      try {
-        const { ip, userAgent } = extractLoginRequestContext(req);
-        await handlePostLoginNotifications({
-          userId: result.user.id,
-          email: result.user.email,
-          ip,
-          userAgent,
-          explicitLocale: loginClientLocale,
-          clientTimeZone: parseClientTimeZone(body),
-        });
-      } catch (e) {
-        logServerError("auth.login.sessionAlertEmail", e);
-      }
-    })();
-    try {
-      const rt = await issueRefreshToken(result.user.id);
-      setRefreshCookie(res, rt.token, { maxAgeMs: refreshCookieMaxAgeMs(rt.expiresAt) });
-    } catch (e) {
-      logServerError("auth.login.issueRefreshToken", e);
+    if (!mfaLoginService.isPlatformAdminAccount(user)) {
+      void (async () => {
+        try {
+          const { ip, userAgent } = extractLoginRequestContext(req);
+          await handlePostLoginNotifications({
+            userId: user.id,
+            email: user.email,
+            ip,
+            userAgent,
+            explicitLocale: loginClientLocale,
+            clientTimeZone: parseClientTimeZone(body),
+          });
+        } catch (e) {
+          logServerError("auth.login.sessionAlertEmail", e);
+        }
+      })();
     }
-    return res.json(result);
+
+    return respondAfterPasswordLogin(req, res, user);
   } catch (err) {
     if (err instanceof EmailNotVerifiedLoginError) {
       return res.status(403).json({
@@ -267,20 +317,186 @@ export async function login(req: Request, res: Response) {
       });
     }
 
-    if (
-      err instanceof Prisma.PrismaClientKnownRequestError ||
-      err instanceof Prisma.PrismaClientInitializationError ||
-      err instanceof Prisma.PrismaClientRustPanicError
-    ) {
+    if (isPrismaInfrastructureError(err)) {
       logServerError("auth.login", err);
-      const msg = prismaFailureClientMessage(err);
-      return res.status(503).json({ message: msg });
+      return res.status(503).json({ message: SERVICE_UNAVAILABLE_MESSAGE });
     }
 
     logServerError("auth.login", err);
     return res.status(503).json({
-      message: CLIENT_FALLBACK.loginUnexpected,
+      message: SERVICE_UNAVAILABLE_MESSAGE,
     });
+  }
+}
+
+export async function loginMfaSetup(req: Request, res: Response) {
+  try {
+    const pendingMfaToken = String((req.body as { pendingMfaToken?: unknown })?.pendingMfaToken ?? "").trim();
+    if (!pendingMfaToken) {
+      return res.status(400).json({ message: "pendingMfaToken is required" });
+    }
+    const userId = mfaLoginService.userIdFromPendingMfaLoginToken(pendingMfaToken);
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const admin = await mfaLoginService.loadPlatformAdminForMfaLogin(userId);
+    if (!admin) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+
+    const secret = speakeasy.generateSecret({
+      name: `CareTip (${admin.email})`,
+      length: 20,
+    });
+
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: { twoFactorTempSecret: secret.base32 },
+    });
+
+    void auditService.writeAuditLog({
+      userId: admin.id,
+      action: "mfa.login.setup_started",
+      metadata: JSON.stringify({ path: req.originalUrl ?? req.url }),
+    });
+
+    const otpauthUrl = secret.otpauth_url ?? "";
+    const qrDataUrl = otpauthUrl ? await qrcode.toDataURL(otpauthUrl) : "";
+    return res.json({ otpauthUrl, qrDataUrl });
+  } catch (err) {
+    logServerError("auth.loginMfaSetup", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
+  }
+}
+
+export async function loginMfaEnable(req: Request, res: Response) {
+  try {
+    const body = req.body as { pendingMfaToken?: unknown; code?: unknown };
+    const pendingMfaToken = String(body.pendingMfaToken ?? "").trim();
+    const code = String(body.code ?? "").trim();
+    if (!pendingMfaToken || !code) {
+      return res.status(400).json({ message: "pendingMfaToken and code are required" });
+    }
+    const userId = mfaLoginService.userIdFromPendingMfaLoginToken(pendingMfaToken);
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const admin = await mfaLoginService.loadPlatformAdminForMfaLogin(userId);
+    if (!admin) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+    const temp = admin.twoFactorTempSecret;
+    if (!temp) {
+      return res.status(400).json({ message: "2FA setup has not been started" });
+    }
+    const outcome = await verifyTotpWithLockout(admin.id, () =>
+      mfaLoginService.verifyTotpCode(temp, code),
+    );
+    if (outcome === "locked") return mfaLockedResponse(res);
+    if (outcome === "invalid") {
+      void auditService.writeAuditLog({
+        userId: admin.id,
+        action: "mfa.login.enable_failed",
+        metadata: JSON.stringify({ reason: "invalid_code" }),
+      });
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    await prisma.user.update({
+      where: { id: admin.id },
+      data: {
+        twoFactorEnabled: true,
+        twoFactorSecret: temp,
+        twoFactorTempSecret: null,
+      },
+    });
+
+    void auditService.writeAuditLog({
+      userId: admin.id,
+      action: "mfa.login.enabled",
+      metadata: JSON.stringify({ path: req.originalUrl ?? req.url }),
+    });
+
+    const result = await issueRefreshSessionForUser(res, admin.id);
+    void (async () => {
+      try {
+        const { ip, userAgent } = extractLoginRequestContext(req);
+        await handlePostLoginNotifications({
+          userId: admin.id,
+          email: admin.email,
+          ip,
+          userAgent,
+        });
+      } catch (e) {
+        logServerError("auth.loginMfaEnable.sessionAlertEmail", e);
+      }
+    })();
+    return res.json(result);
+  } catch (err) {
+    logServerError("auth.loginMfaEnable", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
+  }
+}
+
+export async function loginMfaVerify(req: Request, res: Response) {
+  try {
+    const body = req.body as { pendingMfaToken?: unknown; code?: unknown };
+    const pendingMfaToken = String(body.pendingMfaToken ?? "").trim();
+    const code = String(body.code ?? "").trim();
+    if (!pendingMfaToken || !code) {
+      return res.status(400).json({ message: "pendingMfaToken and code are required" });
+    }
+    const userId = mfaLoginService.userIdFromPendingMfaLoginToken(pendingMfaToken);
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const admin = await mfaLoginService.loadPlatformAdminForMfaLogin(userId);
+    if (!admin) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+    if (!admin.twoFactorEnabled || !admin.twoFactorSecret) {
+      return res.status(403).json({
+        message: "MFA setup is required before signing in.",
+        code: "MFA_SETUP_REQUIRED",
+      });
+    }
+    const outcome = await verifyTotpWithLockout(admin.id, () =>
+      mfaLoginService.verifyTotpCode(admin.twoFactorSecret!, code),
+    );
+    if (outcome === "locked") return mfaLockedResponse(res);
+    if (outcome === "invalid") {
+      void auditService.writeAuditLog({
+        userId: admin.id,
+        action: "mfa.login.verify_failed",
+        metadata: JSON.stringify({ reason: "invalid_code" }),
+      });
+      return res.status(401).json({ message: "Invalid verification code" });
+    }
+
+    void auditService.writeAuditLog({
+      userId: admin.id,
+      action: "mfa.login.success",
+      metadata: JSON.stringify({ path: req.originalUrl ?? req.url }),
+    });
+
+    const result = await issueRefreshSessionForUser(res, admin.id);
+    void (async () => {
+      try {
+        const { ip, userAgent } = extractLoginRequestContext(req);
+        await handlePostLoginNotifications({
+          userId: admin.id,
+          email: admin.email,
+          ip,
+          userAgent,
+        });
+      } catch (e) {
+        logServerError("auth.loginMfaVerify.sessionAlertEmail", e);
+      }
+    })();
+    return res.json(result);
+  } catch (err) {
+    logServerError("auth.loginMfaVerify", err);
+    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.loginUnexpected) });
   }
 }
 
@@ -341,13 +557,18 @@ export async function twoFactorEnable(req: Request, res: Response) {
     const temp = u?.twoFactorTempSecret ?? null;
     if (!temp) return res.status(400).json({ message: "2FA setup has not been started" });
 
-    const ok = speakeasy.totp.verify({
-      secret: temp,
-      encoding: "base32",
-      token: code,
-      window: 1,
-    });
-    if (!ok) return res.status(400).json({ message: "Invalid verification code" });
+    const outcome = await verifyTotpWithLockout(userId, () =>
+      speakeasy.totp.verify({
+        secret: temp,
+        encoding: "base32",
+        token: code,
+        window: 1,
+      }),
+    );
+    if (outcome === "locked") return mfaLockedResponse(res);
+    if (outcome === "invalid") {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
 
     await prisma.user.update({
       where: { id: userId },
@@ -374,19 +595,31 @@ export async function twoFactorDisable(req: Request, res: Response) {
 
     const u = await prisma.user.findUnique({
       where: { id: userId },
-      select: { twoFactorSecret: true, twoFactorEnabled: true },
+      select: { twoFactorSecret: true, twoFactorEnabled: true, role: true, isPlatformAdmin: true },
     });
-    if (!u?.twoFactorEnabled || !u.twoFactorSecret) {
+    if (!u) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    if (mfaLoginService.isPlatformAdminAccount(u)) {
+      return res.status(403).json({ message: "MFA cannot be disabled for platform administrators." });
+    }
+    if (!u.twoFactorEnabled || !u.twoFactorSecret) {
       return res.json({ enabled: false });
     }
 
-    const ok = speakeasy.totp.verify({
-      secret: u.twoFactorSecret,
-      encoding: "base32",
-      token: code,
-      window: 1,
-    });
-    if (!ok) return res.status(400).json({ message: "Invalid verification code" });
+    const secret = u.twoFactorSecret;
+    const outcome = await verifyTotpWithLockout(userId, () =>
+      speakeasy.totp.verify({
+        secret,
+        encoding: "base32",
+        token: code,
+        window: 1,
+      }),
+    );
+    if (outcome === "locked") return mfaLockedResponse(res);
+    if (outcome === "invalid") {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
 
     await prisma.user.update({
       where: { id: userId },

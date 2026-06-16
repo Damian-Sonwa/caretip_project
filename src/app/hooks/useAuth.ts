@@ -13,8 +13,16 @@ import {
   clearLogoutPending,
   isClientSessionRevoked,
   markLogoutPending,
+  isMfaLoginChallenge,
   type AuthResponse,
+  type LoginApiResult,
 } from "../lib/api";
+import { getMemoryAccessToken, subscribeMemoryAccessToken } from "../lib/accessTokenStore";
+import {
+  clearImpersonationAdminBackup,
+  saveImpersonationAdminBackup,
+  takeImpersonationAdminBackup,
+} from "../lib/impersonationSessionBackup";
 import { resetAuthSessionClient } from "../lib/authBootstrap";
 import { hasPendingStoredSessionWithoutUser } from "../lib/authRestore";
 import {
@@ -35,6 +43,7 @@ import {
 import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
 import { resetAllClientSessionCaches } from "../lib/resetAllClientSessionCaches";
 import { markClientSessionHint } from "../lib/authSessionHint";
+import { setMemoryAccessToken } from "../lib/accessTokenStore";
 import { deriveAuthSession, type AuthSession } from "../lib/authSession";
 import { authDebug } from "../lib/authDebugLog";
 import { logClientError } from "../lib/clientLog";
@@ -47,17 +56,7 @@ import { AUTH_STORAGE_SYNC_EVENT, notifyAuthStorageSync } from "../lib/authStora
 
 export type { AuthSession, AuthStatus } from "../lib/authSession";
 
-const ACCESS_TOKEN_STORAGE_KEY = "caretip_token";
 const USER_STORAGE_KEY = "caretip_user";
-
-function readStoredAccessToken(): string | null {
-  try {
-    const t = localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-    return t?.trim() ? t.trim() : null;
-  } catch {
-    return null;
-  }
-}
 
 function decodeJwtPayload(token: string): unknown | null {
   try {
@@ -99,11 +98,11 @@ function notifyAuthStorageSyncFromHook() {
   notifyAuthStorageSync();
 }
 
-/** Persist access token + normalized user to localStorage and sync all `useAuth()` instances. */
+/** Persist in-memory access token + normalized user snapshot; user JSON aids bootstrap UX only. */
 function persistAuthResponse(data: AuthResponse): User {
   resetAllClientSessionCaches();
   clearClientSessionRevoked();
-  localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, data.token);
+  setMemoryAccessToken(data.token);
   const u = parseUser(data.user);
   localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(u));
   markClientSessionHint();
@@ -267,11 +266,12 @@ export function useAuth() {
   const [user, setUserSnapshot] = useState<User | null>(() => getAuthUser());
   const [, syncAuthFlags] = useReducer((n: number) => n + 1, 0);
   const { authHydrated, sessionValidated } = getAuthSessionFlags();
-  /** Re-read access token so proactive refresh + effects track rotation after login/refresh. */
-  const accessTokenSnapshot = readStoredAccessToken();
+  /** Re-read in-memory access token so proactive refresh tracks rotation after login/refresh. */
+  const accessTokenSnapshot = getMemoryAccessToken();
 
   useEffect(() => subscribeAuthUser(() => setUserSnapshot(getAuthUser())), []);
   useEffect(() => subscribeAuthSessionFlags(() => syncAuthFlags()), []);
+  useEffect(() => subscribeMemoryAccessToken(() => syncAuthFlags()), []);
 
   useEffect(() => {
     const onStorageSync = () => {
@@ -323,7 +323,7 @@ export function useAuth() {
       return;
     }
     try {
-      if (localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY) || localStorage.getItem(USER_STORAGE_KEY)) {
+      if (localStorage.getItem(USER_STORAGE_KEY)) {
         clearStoredSession({ notifySync: false });
       }
     } catch {
@@ -331,13 +331,16 @@ export function useAuth() {
     }
   }, [user, authHydrated, sessionValidated]);
 
-  const login = useCallback(async (email: string, password: string): Promise<User> => {
+  const login = useCallback(async (email: string, password: string): Promise<LoginApiResult> => {
     const data = await loginAPI(email, password, requestLocale);
+    if (isMfaLoginChallenge(data)) {
+      return data;
+    }
     const u = persistAuthResponse(data);
     bumpSessionEpoch();
     commitAuthUser(u);
     markSessionBootstrapSettled();
-    return u;
+    return data;
   }, [requestLocale]);
 
   const register = useCallback(async (payload: RegisterPayload): Promise<RegisterResult> => {
@@ -384,12 +387,21 @@ export function useAuth() {
     return u;
   }, [requestLocale]);
 
+  const completeAuthLogin = useCallback((data: AuthResponse): User => {
+    const u = persistAuthResponse(data);
+    bumpSessionEpoch();
+    commitAuthUser(u);
+    markSessionBootstrapSettled();
+    return u;
+  }, []);
+
   const logout = useCallback(async () => {
     markLogoutPending();
     try {
       bumpSessionEpoch();
       clearEmployeeNotifications();
       resetAuthSessionClient();
+      clearImpersonationAdminBackup();
       commitAuthUser(null);
       resetAllClientSessionCaches();
       await logoutAPI();
@@ -412,22 +424,18 @@ export function useAuth() {
   const isEmployee = user?.role === "employee";
   const isPlatformAdmin = user?.role === "platform_admin";
 
-  /** Restore platform admin session after impersonation (tokens stored in sessionStorage). */
+  /** Restore platform admin session after impersonation (in-memory token backup). */
   const exitImpersonation = useCallback(() => {
-    const backupToken = sessionStorage.getItem("caretip_admin_token_backup");
-    const backupUser = sessionStorage.getItem("caretip_admin_user_backup");
-    if (!backupToken || !backupUser) return;
+    const backup = takeImpersonationAdminBackup();
+    if (!backup) return;
     resetAllClientSessionCaches();
-    localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, backupToken);
-    const restored = JSON.parse(backupUser) as User;
-    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(restored));
+    setMemoryAccessToken(backup.token);
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(backup.user));
     bumpSessionEpoch();
-    commitAuthUser(restored);
+    commitAuthUser(backup.user);
     markSessionBootstrapSettled();
     notifyAuthStorageSyncFromHook();
-    sessionStorage.removeItem("caretip_admin_token_backup");
-    sessionStorage.removeItem("caretip_admin_user_backup");
-    authDebug("auth_session_updated", { ...deriveAuthSession(restored), source: "exit_impersonation" });
+    authDebug("auth_session_updated", { ...deriveAuthSession(backup.user), source: "exit_impersonation" });
     window.location.assign("/platform-admin/dashboard");
   }, []);
 
@@ -549,6 +557,7 @@ export function useAuth() {
     updateUser,
     setHasCompletedOnboarding,
     replaceUser,
+    completeAuthLogin,
     exitImpersonation,
   };
 }

@@ -1,0 +1,42 @@
+# CareTip — Gitleaks configuration (CI + local: gitleaks detect --config .gitleaks.toml)
+title = "CareTip gitleaks"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Safe templates, CI placeholders, demo seeds, and approved public Firebase web config"
+paths = [
+  '''(?i)\.env\.example$''',
+  '''(?i)backend/\.env\.example$''',
+  '''(?i)\.github/workflows/ci\.yml$''',
+  '''(?i)caretip-postman-environment\.example\.json$''',
+  '''(?i)backend/prisma/seed\.ts$''',
+  '''(?i)backend/prisma/seedWalkthroughDemo\.ts$''',
+  '''(?i)backend/prisma/seedPlatformAnalyticsDemo\.ts$''',
+  '''(?i)backend/scripts/verifyDemoAccounts\.ts$''',
+  '''(?i)github-cleanup-audit\.md$''',
+  '''(?i)backend/docs/SECRET_ROTATION\.md$''',
+  '''(?i)backend/docs/ENV_HYGIENE\.md$''',
+  '''(?i)backend/scripts/secret-exposure-audit\.ts$''',
+  '''(?i)public/firebase-messaging-sw\.js$''',
+  '''(?i)public/fcm-sw-handler\.js$''',
+]
+
+regexes = [
+  '''sk_test_ci_placeholder''',
+  '''whsec_ci_test_secret_placeholder''',
+  '''ci-test-jwt-secret-min-32-chars-long''',
+  '''sk_test_\.\.\.''',
+  '''whsec_\.\.\.''',
+  '''eyJhbG\.\.\.''',
+  '''re_\.\.\.''',
+  '''sk-\.\.\.''',
+  '''long-random-secret-replace-in-production''',
+  '''long-random-secret-for-admin-creation''',
+  '''YOUR_DEMO_PASSWORD''',
+  '''password123''',
+  '''Demo1234!''',
+  '''PROJECT_REF:PASSWORD''',
+  '''postgres\.PROJECT_REF:PASSWORD''',
+]

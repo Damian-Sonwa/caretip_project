@@ -50,6 +50,8 @@ export default defineConfig(({ mode }) => {
     'import.meta.env.VITE_CARETIP_APP_ORIGIN': JSON.stringify(injectedOrigin),
   },
   build: {
+    /** esbuild 0.28+ no longer downlevels destructuring for legacy targets (see GHSA-gv7w-rqvm-qjhr override). */
+    target: 'es2022',
     outDir: 'dist',
     chunkSizeWarningLimit: 1500,
     rollupOptions: {

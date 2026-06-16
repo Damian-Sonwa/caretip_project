@@ -22,6 +22,212 @@ jobs:
       - name: Lint
         run: npm run lint
 
+  xss-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install frontend deps
+        run: npm ci
+      - name: XSS static audit
+        run: npm run test:xss-audit
+      - name: CSP deployment verification
+        run: npm run test:csp
+
+  csrf-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install frontend deps
+        run: npm ci
+      - name: CSRF static audit
+        run: npm run test:csrf-audit
+
+  file-upload-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: File upload security regression
+        working-directory: backend
+        run: npm run test:file-upload-pentest
+
+  payment-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Payment flow security regression
+        working-directory: backend
+        run: npm run test:payment-pentest
+
+  business-logic-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Business logic security regression
+        working-directory: backend
+        run: npm run test:business-logic-pentest
+
+  supabase-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Supabase security static audit
+        working-directory: backend
+        run: npm run test:supabase-security
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Gitleaks secret scan
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: TruffleHog OSS
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          head: HEAD
+          extra_args: --results=verified,unknown
+
+  secret-exposure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install frontend deps
+        run: npm ci
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Build frontend (artifact scan)
+        run: npm run build
+        env:
+          CI: "true"
+          SKIP_PLAYWRIGHT_INSTALL: "true"
+      - name: Secret exposure audit
+        working-directory: backend
+        run: npm run test:secret-exposure
+        env:
+          CI: "true"
+          SECRET_SCAN_BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || '' }}
+
+  abuse-resilience-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Abuse resilience audit
+        working-directory: backend
+        run: npm run test:abuse-resilience
+        env:
+          CI: "true"
+
+  sql-injection-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: SQL injection static audit
+        working-directory: backend
+        run: npm run test:sql-injection-audit
+      - name: SQL injection payload smoke (unit + optional DB)
+        working-directory: backend
+        run: npm run test:sql-injection-smoke
+        env:
+          CI: "true"
+
+  dependency-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Install frontend deps
+        run: npm ci
+      - name: Frontend dependency audit (high+)
+        run: |
+          echo "=== Frontend npm audit (fail on high/critical) ==="
+          npm audit --audit-level=high
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+      - name: Backend dependency audit (high+)
+        working-directory: backend
+        run: |
+          echo "=== Backend npm audit (fail on high/critical) ==="
+          npm audit --audit-level=high
+
   # INTENTIONALLY DISABLED (MVP pilot operations): backend-tests does not run on push or
   # pull_request while disabled. Full job config is preserved below for re-enablement.
   # To re-enable: remove the `if: false` line (see disabled-workflows-report.md).
@@ -78,6 +284,9 @@ jobs:
       - name: Sprint 4 employee lifecycle
         working-directory: backend
         run: npm run test:sprint4-employee-lifecycle
+      - name: SQL injection regression
+        working-directory: backend
+        run: npm run test:sql-injection
 
   # INTENTIONALLY DISABLED (MVP pilot operations): frontend-e2e does not run on push or
   # pull_request while disabled. Full job config is preserved below for re-enablement.

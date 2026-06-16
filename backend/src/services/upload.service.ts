@@ -1,20 +1,33 @@
-import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import path from "node:path";
 import { randomUUID } from "crypto";
 import { resolvePublicApiBaseUrl } from "../config/publicApiBaseUrl.js";
 import {
   validateImageBufferForUpload,
+  extensionForImageBuffer,
   isAllowedImageMimetype,
 } from "../lib/imageUploadValidation.js";
+import { validateVerificationDocumentBuffer } from "../lib/verificationUploadValidation.js";
+import {
+  buildKycDiskStorageRef,
+  buildKycObjectStorageRef,
+  parseKycStorageReference,
+} from "../lib/kycStorageReference.js";
 import {
   isSupabaseStorageConfigured,
   supabaseStorageBucketName,
-  ensureSupabaseStorageBucketReady,
+  supabaseKycStorageBucketName,
+  ensureSupabaseKycBucketReady,
   uploadBufferToSupabasePublicUrl,
+  uploadBufferToSupabasePrivateObject,
   warnIfSupabaseUrlButNoServiceRole,
   assertUploadedObjectReadableInBucket,
+  assertPrivateObjectExists,
+  removeUploadedObjectByPublicUrlIfPossible,
+  removePrivateStorageObject,
+  parseSupabasePublicStorageUrl,
 } from "../lib/supabaseStorageClient.js";
-import { buildUniqueStorageObjectName } from "../utils/storageObjectName.js";
+import { buildUniqueStorageObjectNameFromExtension } from "../utils/storageObjectName.js";
 
 const UPLOAD_CONFIG_ERROR = "File upload isn't available right now. Please try again later.";
 
@@ -31,22 +44,26 @@ function isLocalhostBase(url: string): boolean {
   }
 }
 
-/** True when the API should upload images to Supabase Storage (recommended for production). */
 export function isSupabaseStorageConfiguredForUpload(): boolean {
   return isSupabaseStorageConfigured();
 }
 
-/** Safe diagnostics for `/health` (no secrets). */
 export function getImageUploadStorageDiagnostics(): {
   employeeAvatarStorage: "supabase" | "disk";
   supabaseStorageConfigured: boolean;
   supabaseStorageBucket?: string;
+  kycStorageBucket?: string;
 } {
   const supabaseStorageConfigured = isSupabaseStorageConfiguredForUpload();
   return {
     employeeAvatarStorage: supabaseStorageConfigured ? "supabase" : "disk",
     supabaseStorageConfigured,
-    ...(supabaseStorageConfigured ? { supabaseStorageBucket: supabaseStorageBucketName() } : {}),
+    ...(supabaseStorageConfigured
+      ? {
+          supabaseStorageBucket: supabaseStorageBucketName(),
+          kycStorageBucket: supabaseKycStorageBucketName(),
+        }
+      : {}),
   };
 }
 
@@ -78,16 +95,6 @@ function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise
   });
 }
 
-function extFromImageMimetype(mimetype: string): string {
-  const mt = mimetype.toLowerCase();
-  if (mt.includes("png")) return ".png";
-  if (mt.includes("webp")) return ".webp";
-  if (mt.includes("gif")) return ".gif";
-  if (mt.includes("heic") || mt.includes("heif")) return ".heic";
-  if (mt.includes("avif")) return ".avif";
-  return ".jpg";
-}
-
 function assertDiskFileExists(absolutePath: string): void {
   if (!existsSync(absolutePath)) {
     throw new Error("Saved file is missing on disk.");
@@ -106,18 +113,14 @@ async function uploadBufferToSupabaseWithTimeout(
   );
 }
 
-/**
- * Uploads an image buffer to Supabase Storage when configured; otherwise saves under /uploads/avatars
- * (needs persistent disk + correct PUBLIC_API_BASE_URL in production).
- */
 export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string): Promise<string> {
   logStorageBackendOnce();
   validateImageBufferForUpload(buffer, mimetype);
+  const ext = extensionForImageBuffer(buffer);
+  const name = buildUniqueStorageObjectNameFromExtension(ext);
 
   if (isSupabaseStorageConfiguredForUpload()) {
     try {
-      const ext = extFromImageMimetype(mimetype);
-      const name = buildUniqueStorageObjectName(`avatar${ext}`, ext);
       const objectKey = `avatars/${name}`;
       const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
       await assertUploadedObjectReadableInBucket(publicUrl);
@@ -134,23 +137,9 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
 
   const base = resolvePublicApiBaseUrl();
   if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
-    console.error(
-      "[upload] Refusing disk upload: PUBLIC_API_BASE_URL (or host auto-detect) resolves to localhost in production. Set SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY or PUBLIC_API_BASE_URL.",
-    );
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
-
-  const mt = mimetype.toLowerCase();
-  const ext = mt.includes("png")
-    ? "png"
-    : mt.includes("webp")
-      ? "webp"
-      : mt.includes("gif")
-        ? "gif"
-        : mt.includes("heic") || mt.includes("heif")
-          ? "heic"
-          : "jpg";
-  const filename = `${randomUUID()}.${ext}`;
+  const filename = `${randomUUID()}${ext}`;
   const dir = path.join(process.cwd(), "uploads", "avatars");
   const fp = path.join(dir, filename);
   try {
@@ -165,24 +154,19 @@ export async function uploadEmployeeAvatarImage(buffer: Buffer, mimetype: string
   return `${baseNorm}/uploads/avatars/${filename}`;
 }
 
-/**
- * Manager business logo: Supabase public URL (verified readable) or absolute API URL for disk mode.
- * Throws on any failure — callers must not update the database unless this resolves.
- */
 export async function uploadManagerBusinessLogoImage(
   buffer: Buffer,
   mimetype: string,
   businessId: string,
-  originalFilename?: string,
 ): Promise<string> {
   logStorageBackendOnce();
   validateImageBufferForUpload(buffer, mimetype);
   const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+  const ext = extensionForImageBuffer(buffer);
+  const name = buildUniqueStorageObjectNameFromExtension(ext);
 
   if (isSupabaseStorageConfiguredForUpload()) {
     try {
-      const ext = extFromImageMimetype(mimetype);
-      const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
       const objectKey = `business-logos/${name}`;
       const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
       await assertUploadedObjectReadableInBucket(publicUrl);
@@ -193,12 +177,6 @@ export async function uploadManagerBusinessLogoImage(
       if (/timed out/i.test(msg)) {
         throw new Error("Logo upload timed out. Try again with a smaller image.");
       }
-      if (/isn't available right now/i.test(msg)) {
-        throw new Error(msg);
-      }
-      if (/too large/i.test(msg)) {
-        throw new Error(msg);
-      }
       throw new Error(msg.includes("logo") ? msg : "We couldn't save your logo. Please try again.");
     }
   }
@@ -207,39 +185,30 @@ export async function uploadManagerBusinessLogoImage(
   if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
-  const ext = extFromImageMimetype(mimetype);
-  const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
   const relDir = path.join("uploads", "businesses", safeBizId);
   const dir = path.join(process.cwd(), relDir);
   const fp = path.join(dir, name);
-  try {
-    mkdirSync(dir, { recursive: true });
-    writeFileSync(fp, buffer);
-    assertDiskFileExists(fp);
-  } catch (e) {
-    console.error("[upload] manager business logo disk write failed:", e);
-    throw new Error(UPLOAD_CONFIG_ERROR);
-  }
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(fp, buffer);
+  assertDiskFileExists(fp);
   const baseNorm = base.replace(/\/$/, "");
   const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
   return `${baseNorm}/${relUrl}`;
 }
 
-/** Platform admin: business logo — same persistence rules as manager upload. */
 export async function uploadPlatformBusinessLogoImage(
   buffer: Buffer,
   mimetype: string,
   businessId: string,
-  originalFilename?: string,
 ): Promise<string> {
   logStorageBackendOnce();
   validateImageBufferForUpload(buffer, mimetype);
   const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+  const ext = extensionForImageBuffer(buffer);
+  const name = buildUniqueStorageObjectNameFromExtension(ext);
 
   if (isSupabaseStorageConfiguredForUpload()) {
     try {
-      const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-      const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
       const objectKey = `platform-logos/${safeBizId}/${name}`;
       const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
       await assertUploadedObjectReadableInBucket(publicUrl);
@@ -255,8 +224,6 @@ export async function uploadPlatformBusinessLogoImage(
   if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
-  const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-  const name = buildUniqueStorageObjectName(originalFilename ?? `logo${ext}`, ext);
   const relDir = path.join("uploads", "platform", "businesses", safeBizId);
   const dir = path.join(process.cwd(), relDir);
   const fp = path.join(dir, name);
@@ -268,81 +235,108 @@ export async function uploadPlatformBusinessLogoImage(
   return `${baseNorm}/${relUrl}`;
 }
 
-const VERIFICATION_MAX_BYTES = 10 * 1024 * 1024;
-
-/** Manager self-service KYC — same storage layout as platform verification. */
+/** Manager self-service KYC — private storage reference (not a public URL). */
 export async function uploadManagerVerificationDocument(
   buffer: Buffer,
-  mimetype: string,
+  _mimetype: string,
   businessId: string,
-  originalFilename?: string,
 ): Promise<string> {
-  return uploadPlatformVerificationDocument(buffer, mimetype, businessId, originalFilename);
+  return uploadPlatformVerificationDocument(buffer, _mimetype, businessId);
 }
 
-/** Platform admin: verification document (image or PDF/Word). */
+/**
+ * Stores KYC / verification documents in private storage.
+ * Returns `kyc-object:{bucket}/{path}` or `kyc-disk:uploads/kyc/...` — never a permanent public URL.
+ */
 export async function uploadPlatformVerificationDocument(
   buffer: Buffer,
-  mimetype: string,
+  _claimedMimetype: string,
   businessId: string,
-  originalFilename?: string,
 ): Promise<string> {
   warnIfSupabaseUrlButNoServiceRole();
-  if (!buffer?.length) {
-    throw new Error("File is empty.");
-  }
-  if (buffer.length > VERIFICATION_MAX_BYTES) {
-    throw new Error("File is too large (max 10 MB).");
-  }
+  const validated = validateVerificationDocumentBuffer(buffer);
   const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+  const name = buildUniqueStorageObjectNameFromExtension(validated.extension);
+  const objectPath = `verification/${safeBizId}/${name}`;
 
   if (isSupabaseStorageConfiguredForUpload()) {
     try {
-      const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-      const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
-      const objectKey = `platform-verification/${safeBizId}/${name}`;
-      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
-      await assertUploadedObjectReadableInBucket(publicUrl);
-      return publicUrl;
+      const bucket = supabaseKycStorageBucketName();
+      await ensureSupabaseKycBucketReady();
+      const uploaded = await withTimeout(
+        uploadBufferToSupabasePrivateObject(bucket, objectPath, buffer, validated.contentType),
+        REMOTE_UPLOAD_TIMEOUT_MS,
+        "Supabase KYC upload",
+      );
+      await assertPrivateObjectExists(uploaded.bucket, uploaded.objectPath);
+      return buildKycObjectStorageRef(uploaded.bucket, uploaded.objectPath);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error("[upload] platform verification (Supabase) failed:", msg);
+      console.error("[upload] platform verification (Supabase private) failed:", msg);
       throw new Error("We couldn't save your verification file. Please try again.");
     }
   }
 
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Verification upload is not available. Configure Supabase Storage (SUPABASE_URL + SUPABASE_SERVICE_ROLE_KEY).",
+    );
+  }
+
   const base = resolvePublicApiBaseUrl();
-  if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
+  if (isLocalhostBase(base)) {
     throw new Error(UPLOAD_CONFIG_ERROR);
   }
-  const ext = pathExtFromMimeOrName(mimetype, originalFilename);
-  const name = buildUniqueStorageObjectName(originalFilename ?? `verification${ext}`, ext);
-  const relDir = path.join("uploads", "platform", "businesses", safeBizId);
+
+  const relDir = path.join("uploads", "kyc", safeBizId);
   const dir = path.join(process.cwd(), relDir);
   const fp = path.join(dir, name);
   mkdirSync(dir, { recursive: true });
   writeFileSync(fp, buffer);
   assertDiskFileExists(fp);
-  const baseNorm = base.replace(/\/$/, "");
-  const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
-  return `${baseNorm}/${relUrl}`;
+  return buildKycDiskStorageRef(`${relDir.replace(/\\/g, "/")}/${name}`);
 }
 
-function pathExtFromMimeOrName(mimetype: string, originalFilename?: string): string {
-  const fromName = originalFilename ? path.extname(originalFilename) : "";
-  if (fromName && /^\.[a-zA-Z0-9]{1,8}$/.test(fromName)) {
-    return fromName.toLowerCase();
+/** Best-effort cleanup for failed DB writes or rollbacks. */
+export async function removeStoredUploadReferenceIfPossible(storedRef: string): Promise<void> {
+  const parsed = parseKycStorageReference(storedRef);
+  if (!parsed) {
+    await removeUploadedObjectByPublicUrlIfPossible(storedRef);
+    return;
   }
-  const mt = mimetype.toLowerCase();
-  if (mt === "application/pdf") return ".pdf";
-  if (mt === "application/msword") return ".doc";
-  if (mt.includes("wordprocessingml")) return ".docx";
-  if (mt.includes("png")) return ".png";
-  if (mt.includes("webp")) return ".webp";
-  if (mt.includes("gif")) return ".gif";
-  if (mt.includes("jpeg") || mt.includes("jpg")) return ".jpg";
-  return ".bin";
+  if (parsed.kind === "kyc-object") {
+    await removePrivateStorageObject(parsed.bucket, parsed.objectPath);
+    return;
+  }
+  if (parsed.kind === "kyc-disk") {
+    try {
+      const fp = path.join(process.cwd(), parsed.relativePath);
+      if (existsSync(fp)) {
+        const { unlinkSync } = await import("fs");
+        unlinkSync(fp);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
-/** Re-export for multer fileFilter (single source of truth). */
+export function readKycDiskFile(relativePath: string): { buffer: Buffer; contentType: string } {
+  const fp = path.join(process.cwd(), relativePath);
+  if (!existsSync(fp)) {
+    throw new Error("Document not found.");
+  }
+  const buffer = readFileSync(fp);
+  const ext = path.extname(fp).toLowerCase();
+  const contentType =
+    ext === ".pdf"
+      ? "application/pdf"
+      : ext === ".png"
+        ? "image/png"
+        : ext === ".webp"
+          ? "image/webp"
+          : "image/jpeg";
+  return { buffer, contentType };
+}
+
 export { isAllowedImageMimetype };

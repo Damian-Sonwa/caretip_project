@@ -101,6 +101,14 @@ router.post(
   businessController.generateInvite
 );
 
+router.get(
+  "/invite/history",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.listInviteHistory,
+);
+
 /** Legacy aliases — primary handler is `GET /api/business/me/stats` on the main app (see index.ts). */
 router.get(
   "/stats/me",

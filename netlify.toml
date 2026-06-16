@@ -1,0 +1,6 @@
+# caretip.de production frontend (Netlify)
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA deep links — public/_redirects also defines /* → /index.html 200

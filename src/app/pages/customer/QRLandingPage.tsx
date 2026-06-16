@@ -597,12 +597,17 @@ export function QRLandingPage() {
                     </div>
                   ) : null}
                 </div>
+                {(businessData.employeeCount != null && businessData.employeeCount > 0) ||
+                (poolEmployees != null && poolEmployees.length > 0) ? (
                 <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4">
                   <Users className="h-6 w-6 shrink-0 text-primary" />
                   <span className="text-sm font-medium text-foreground">
-                    {t("tipFlow.qrLanding.staffReady", { count: businessData.employeeCount })}
+                    {t("tipFlow.qrLanding.staffReady", {
+                      count: poolEmployees?.length ?? businessData.employeeCount ?? 0,
+                    })}
                   </span>
                 </div>
+                ) : null}
               </CardContent>
             </Card>
           </div>

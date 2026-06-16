@@ -7,6 +7,7 @@ import {
 } from "../../notifications/notificationI18n.js";
 import { inferNotificationTemplate } from "../../notifications/notificationTemplateInfer.js";
 import { prisma } from "../../prisma.js";
+import { sanitizeLikeContainsSearch } from "../../utils/likeSearch.js";
 
 const DEDUPE_WINDOW_MS = 60_000;
 /** Login alerts — same user + device fingerprint within this window is one event. */
@@ -203,7 +204,7 @@ export async function listUserNotifications(
   },
 ): Promise<{ items: InboxNotificationDto[]; nextCursor: string | null }> {
   const limit = Math.min(Math.max(options?.limit ?? 30, 1), 100);
-  const search = options?.search?.trim();
+  const search = sanitizeLikeContainsSearch(options?.search);
   const supportStatus = options?.supportStatus?.trim().toUpperCase();
 
   const rows = await prisma.notification.findMany({

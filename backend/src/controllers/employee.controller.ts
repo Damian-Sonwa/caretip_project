@@ -247,6 +247,9 @@ export async function updateEmployee(req: Request, res: Response) {
       return res.status(400).json({ message: "Employee ID is required" });
     }
     const { name, role, jobTitle, monthlyGoal, isActive, email, locationId, tableIds } = req.body;
+    if (isActive !== undefined && typeof isActive !== "boolean") {
+      return res.status(400).json({ message: "isActive must be a boolean" });
+    }
     if (tableIds !== undefined && !Array.isArray(tableIds)) {
       return res.status(400).json({ message: "tableIds must be an array" });
     }
