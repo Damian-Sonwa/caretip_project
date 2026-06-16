@@ -78,34 +78,3 @@ export type SentryBeforeSendEvent = Parameters<
 export function sentryBeforeSend<E extends SentryBeforeSendEvent>(event: E): E {
   return scrubSentryEvent(event as unknown as Record<string, unknown>) as E;
 }
-
-/** Example payload for verification docs/tests — not sent to Sentry. */
-export function sentryScrubVerificationSample(): Record<string, unknown> {
-  const dirty = {
-    message: "POST failed Authorization Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U",
-    request: {
-      headers: {
-        Authorization: "Bearer secret-jwt-token",
-        Cookie: "refresh_token=abc123; session=xyz",
-        "Set-Cookie": "token=super-secret",
-        "Content-Type": "application/json",
-      },
-      data: {
-        password: "hunter2",
-        accessToken: "at_live_123",
-        refresh_token: "rt_live_456",
-        email: "manager@caretip.de",
-      },
-    },
-    extra: {
-      DATABASE_URL: "postgresql://user:pass@host:5432/db",
-      STRIPE_SECRET_KEY: "sk_live_abcd1234",
-      OPENAI_API_KEY: "sk-abcdefghijklmnopqrstuvwxyz123456",
-      RESEND_API_KEY: "re_abcdefghijklmnopqrstuvwxyz",
-      SUPABASE_SERVICE_ROLE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.payload.sig",
-      path: "/api/auth/login",
-      status: 500,
-    },
-  };
-  return scrubSentryEvent(dirty);
-}
