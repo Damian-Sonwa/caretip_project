@@ -662,7 +662,6 @@ export function QRCodeManagementPage() {
           <Button variant="outline" size="sm" asChild>
             <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
           </Button>
-          <span className="text-sm text-muted-foreground">{t("business.qrPage.dashboardBreadcrumb")}</span>
         </div>
 
         <DashboardHero

@@ -597,7 +597,6 @@ export function StaffManagementPage() {
           <Button variant="outline" size="sm" asChild>
             <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
           </Button>
-          <span className="text-sm text-muted-foreground">{t("business.staffPage.breadcrumbDashboard")}</span>
         </div>
 
         <DashboardHero

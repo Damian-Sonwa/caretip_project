@@ -23,7 +23,6 @@ export function StaffManagementPageSkeleton() {
           <Button variant="outline" size="sm" asChild>
             <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
           </Button>
-          <ShimmerBar className="h-4 w-24" />
         </div>
 
         <div className={cn(businessUi.subPageHero, "space-y-4")}>
