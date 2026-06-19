@@ -147,9 +147,14 @@
     align-items: center;
   }
 
-  .caretip-landing .caretip-hero-cta-unit,
-  .caretip-landing .caretip-landing-cta-unit--section {
+  .caretip-landing .caretip-hero-cta-unit {
     max-width: min(100%, 17.5rem);
+    margin-inline: auto;
+  }
+
+  .caretip-landing .caretip-landing-cta-unit--section {
+    width: min(100%, 17.5rem);
+    max-width: min(100%, 18.75rem);
     margin-inline: auto;
   }
 

@@ -110,30 +110,26 @@
     top: 44%;
   }
 
-  /* Float pills — symmetric top pair + centered bottom anchor (reduces right-side weight) */
-  .caretip-landing .caretip-hero-float-cards {
-    width: min(94%, 19.5rem);
-  }
-
+  /* Float pills — corner anchors on art frame; keep clear of faces and QR zone */
   .caretip-landing .caretip-hero-float-pill--tip {
-    top: 11%;
-    left: 4%;
+    top: clamp(0.5rem, 4%, 1rem);
+    left: clamp(0.5rem, 3.25%, 0.875rem);
     right: auto;
   }
 
   .caretip-landing .caretip-hero-float-pill--rating {
-    top: 11%;
-    right: 4%;
+    top: clamp(0.5rem, 4%, 1rem);
+    right: clamp(0.5rem, 3.25%, 0.875rem);
     left: auto;
   }
 
   .caretip-landing .caretip-hero-float-pill--staff {
     top: auto;
-    bottom: 23%;
-    left: 0;
-    right: 0;
-    margin-inline: auto;
-    width: max-content;
-    max-width: min(calc(100% - 1rem), 10rem);
+    bottom: clamp(0.625rem, 5.5%, 1rem);
+    right: clamp(0.5rem, 3.5%, 0.875rem);
+    left: auto;
+    margin-inline: 0;
+    width: auto;
+    max-width: min(calc(100% - 1rem), 10.5rem);
   }
 }

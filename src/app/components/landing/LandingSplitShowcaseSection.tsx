@@ -131,10 +131,9 @@ export function LandingSplitShowcaseSection({
                 <div className={landingUi.sectionCtaUnit}>
                   <Link
                     to={cta.to}
-                    className={cn(
-                      cta.to === "/join" ? landingUi.heroCtaSecondary : landingUi.heroCtaPrimary,
-                      "w-full lg:w-auto lg:self-start",
-                    )}
+                    className={
+                      cta.to === "/join" ? landingUi.sectionCtaSecondary : landingUi.sectionCtaPrimary
+                    }
                   >
                     {cta.label}
                   </Link>

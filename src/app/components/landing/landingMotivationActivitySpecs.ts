@@ -1,6 +1,33 @@
-import { BarChart3, Coins, Star, Target, type LucideIcon } from "lucide-react";
+import {
+  Award,
+  BarChart3,
+  Coins,
+  Star,
+  Target,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 
-export type ActivityCardId = "tip" | "review" | "dashboard" | "goal";
+import type { CountUpMetricKind } from "@/app/components/dashboard/CountUpMetric";
+
+export type ActivityCardId =
+  | "tip"
+  | "review"
+  | "dashboard"
+  | "goal"
+  | "shift"
+  | "recognition";
+
+export type ActivityCardEmphasis = "primary" | "standard" | "compact";
+
+export type ActivityTitleMetric = {
+  value: number;
+  kind: CountUpMetricKind;
+  /** i18n key for text before the animated value */
+  beforeKey?: string;
+  /** i18n key for text after the animated value */
+  afterKey?: string;
+};
 
 export type ActivityCardSpec = {
   id: ActivityCardId;
@@ -8,7 +35,13 @@ export type ActivityCardSpec = {
   badgeKey: string;
   titleKey: string;
   metaKey: string;
+  timeKey: string;
   accentClass: string;
+  emphasis: ActivityCardEmphasis;
+  groupEnd?: boolean;
+  showLive?: boolean;
+  showSyncDot?: boolean;
+  titleMetric?: ActivityTitleMetric;
   mobilePrimary: "badge" | "title";
   mobileSecondary: "title" | "meta";
 };
@@ -20,7 +53,15 @@ export const MOTIVATION_ACTIVITY_CARD_SPECS: ActivityCardSpec[] = [
     badgeKey: "landing.motivation.cards.tip.badge",
     titleKey: "landing.motivation.cards.tip.title",
     metaKey: "landing.motivation.cards.tip.meta",
+    timeKey: "landing.motivation.cards.tip.time",
     accentClass: "caretip-motivation-activity__icon--tip",
+    emphasis: "primary",
+    showLive: true,
+    titleMetric: {
+      value: 18,
+      kind: "eur",
+      afterKey: "landing.motivation.cards.tip.titleAfter",
+    },
     mobilePrimary: "title",
     mobileSecondary: "meta",
   },
@@ -30,9 +71,12 @@ export const MOTIVATION_ACTIVITY_CARD_SPECS: ActivityCardSpec[] = [
     badgeKey: "landing.motivation.cards.review.badge",
     titleKey: "landing.motivation.cards.review.title",
     metaKey: "landing.motivation.cards.review.meta",
+    timeKey: "landing.motivation.cards.review.time",
     accentClass: "caretip-motivation-activity__icon--review",
-    mobilePrimary: "badge",
-    mobileSecondary: "title",
+    emphasis: "standard",
+    groupEnd: true,
+    mobilePrimary: "title",
+    mobileSecondary: "meta",
   },
   {
     id: "dashboard",
@@ -40,9 +84,17 @@ export const MOTIVATION_ACTIVITY_CARD_SPECS: ActivityCardSpec[] = [
     badgeKey: "landing.motivation.cards.dashboard.badge",
     titleKey: "landing.motivation.cards.dashboard.title",
     metaKey: "landing.motivation.cards.dashboard.meta",
+    timeKey: "landing.motivation.cards.dashboard.time",
     accentClass: "caretip-motivation-activity__icon--dashboard",
-    mobilePrimary: "badge",
-    mobileSecondary: "title",
+    emphasis: "standard",
+    showSyncDot: true,
+    titleMetric: {
+      value: 24,
+      kind: "percent",
+      beforeKey: "landing.motivation.cards.dashboard.titleBefore",
+    },
+    mobilePrimary: "title",
+    mobileSecondary: "meta",
   },
   {
     id: "goal",
@@ -50,8 +102,52 @@ export const MOTIVATION_ACTIVITY_CARD_SPECS: ActivityCardSpec[] = [
     badgeKey: "landing.motivation.cards.goal.badge",
     titleKey: "landing.motivation.cards.goal.title",
     metaKey: "landing.motivation.cards.goal.meta",
+    timeKey: "landing.motivation.cards.goal.time",
     accentClass: "caretip-motivation-activity__icon--goal",
-    mobilePrimary: "badge",
-    mobileSecondary: "title",
+    emphasis: "standard",
+    groupEnd: true,
+    titleMetric: {
+      value: 2400,
+      kind: "eur-whole",
+      beforeKey: "landing.motivation.cards.goal.titleBefore",
+    },
+    mobilePrimary: "title",
+    mobileSecondary: "meta",
+  },
+  {
+    id: "shift",
+    Icon: TrendingUp,
+    badgeKey: "landing.motivation.cards.shift.badge",
+    titleKey: "landing.motivation.cards.shift.title",
+    metaKey: "landing.motivation.cards.shift.meta",
+    timeKey: "landing.motivation.cards.shift.time",
+    accentClass: "caretip-motivation-activity__icon--shift",
+    emphasis: "compact",
+    titleMetric: {
+      value: 18,
+      kind: "percent",
+      beforeKey: "landing.motivation.cards.shift.metaBefore",
+      afterKey: "landing.motivation.cards.shift.metaAfter",
+    },
+    mobilePrimary: "title",
+    mobileSecondary: "meta",
+  },
+  {
+    id: "recognition",
+    Icon: Award,
+    badgeKey: "landing.motivation.cards.recognition.badge",
+    titleKey: "landing.motivation.cards.recognition.title",
+    metaKey: "landing.motivation.cards.recognition.meta",
+    timeKey: "landing.motivation.cards.recognition.time",
+    accentClass: "caretip-motivation-activity__icon--recognition",
+    emphasis: "compact",
+    titleMetric: {
+      value: 7,
+      kind: "integer",
+      beforeKey: "landing.motivation.cards.recognition.metaBefore",
+      afterKey: "landing.motivation.cards.recognition.metaAfter",
+    },
+    mobilePrimary: "title",
+    mobileSecondary: "meta",
   },
 ];

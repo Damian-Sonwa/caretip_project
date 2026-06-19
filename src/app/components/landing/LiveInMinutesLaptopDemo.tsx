@@ -1,12 +1,11 @@
 import * as React from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { Check, CheckCircle2, QrCode, Sparkles, UserPlus, Users } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+import { Check, QrCode, Sparkles, UserPlus, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useMinWidthMedia } from "@/lib/motionPerf";
-import atmosphereImg from "../../../../images/beauty-r.webp";
-import { MarketingPicture } from "@/lib/marketingPicture";
 import caretipLogo from "@/assets/brand/company_logo.png";
+import { LiveInMinutesOnboardingPhone } from "@/app/components/landing/LiveInMinutesOnboardingPhone";
 
 export const LIVE_DEMO_SLIDE_IDS = ["signup", "team", "qr", "dashboard"] as const;
 export type LiveDemoSlideId = (typeof LIVE_DEMO_SLIDE_IDS)[number];
@@ -20,8 +19,6 @@ const PROGRESS_ITEM_KEYS = [
   "progressQr",
   "progressReceiving",
 ] as const;
-
-const BADGE_KEYS = ["badgeAccount", "badgeStaff", "badgeQr", "badgeTips"] as const;
 
 const NEXT_STEP_TITLE_KEYS = [
   "step2Title",
@@ -47,10 +44,9 @@ export function LiveInMinutesLaptopDemo({
   videoSrc,
   activeIndex = 0,
 }: LiveInMinutesLaptopDemoProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
   const isLgUp = useMinWidthMedia(1024);
-  const enableFloatMotion = !reduceMotion && isLgUp;
   const index = Math.min(Math.max(0, activeIndex), SETUP_JOURNEY_STEP_COUNT - 1);
 
   const captions = React.useMemo(
@@ -84,69 +80,33 @@ export function LiveInMinutesLaptopDemo({
   }
 
   return (
-    <div className="caretip-live-minutes-stage relative mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[20rem] lg:max-w-[26rem] xl:max-w-[27.5rem]">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -bottom-2 left-1/2 z-0 h-6 w-[68%] -translate-x-1/2 rounded-[100%] bg-neutral-900/[0.07] blur-lg sm:h-8 sm:w-[72%] sm:blur-xl dark:bg-black/40"
-      />
-
-      <motion.div
-        className="caretip-live-minutes-journey caretip-live-minutes-device-lift relative overflow-hidden rounded-[1.25rem] ring-1 ring-neutral-900/[0.06] dark:ring-white/[0.08]"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true, margin: "-6%" }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-      >
-        <div
-          aria-hidden
-          className="caretip-live-minutes-journey__bg pointer-events-none absolute inset-0 bg-[linear-gradient(165deg,#fff9f2_0%,#fff4e8_42%,#f6efe4_100%)] dark:bg-[linear-gradient(165deg,#1a1714_0%,#14110f_48%,#0f0d0b_100%)]"
-        />
-        <MarketingPicture
-          src={atmosphereImg}
-          alt=""
-          className="caretip-live-minutes-journey__photo pointer-events-none absolute inset-0 hidden h-full w-full object-cover object-center opacity-0 lg:block lg:opacity-100"
-          loading="lazy"
-          decoding="async"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(28,22,16,0.08)_0%,rgba(28,22,16,0.22)_100%)] lg:bg-[linear-gradient(180deg,rgba(28,22,16,0.25)_0%,rgba(28,22,16,0.55)_55%,rgba(20,16,12,0.72)_100%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_0%,rgba(233,120,28,0.12),transparent_55%)]"
-        />
-
-        <SetupJourneyBadges activeIndex={index} reduceMotion={reduceMotion} />
-
-        <div
-          className={cn(
-            "caretip-live-minutes-phone-slot relative z-[1] flex items-center justify-center",
-            enableFloatMotion && "caretip-live-minutes-phone-slot--float",
-          )}
+    <div className="caretip-live-minutes-stage caretip-live-minutes-stage--onboarding relative mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[20rem]">
+      <div className="caretip-live-minutes-onboarding-preview">
+        <motion.div
+          className="caretip-live-minutes-onboarding-slot relative flex items-center justify-center"
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true, margin: "-6%" }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         >
-          <PhoneFrame compact={!isLgUp}>
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.div
-                key={index}
-                role="img"
-                aria-label={t("landing.liveDemo.demoAria", { label: captions[index] })}
-                initial={{ opacity: 0, y: reduceMotion ? 0 : 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: reduceMotion ? 0 : -4 }}
-                transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                className="h-full min-h-0"
-              >
+          <LiveInMinutesOnboardingPhone
+            activeIndex={index}
+            language={i18n.language}
+            reduceMotion={reduceMotion}
+            caption={captions[index]}
+            demoAriaLabel={t("landing.liveDemo.demoAria", { label: captions[index] })}
+            fallback={
+              <PhoneFrame compact={!isLgUp}>
                 <PhoneStepScreen activeIndex={index} />
-              </motion.div>
-            </AnimatePresence>
-          </PhoneFrame>
-        </div>
-      </motion.div>
+              </PhoneFrame>
+            }
+          />
+        </motion.div>
 
-      <p className="caretip-live-minutes-caption mt-2.5 text-center font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-4 sm:text-[13px] lg:text-sm">
-        {captions[index]}
-      </p>
+        <p className="caretip-live-minutes-caption mt-1 font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-1.5 sm:text-[13px] lg:text-sm">
+          {captions[index]}
+        </p>
+      </div>
     </div>
   );
 }
@@ -375,45 +335,6 @@ function OnboardingProgressScreen({
 
       <ProgressChecklistFooter activeIndex={activeIndex} allComplete={allComplete} />
     </PhoneStepShell>
-  );
-}
-
-function SetupJourneyBadges({
-  activeIndex,
-  reduceMotion,
-}: {
-  activeIndex: number;
-  reduceMotion: boolean | null;
-}) {
-  const { t } = useTranslation();
-  const badgeKey = BADGE_KEYS[activeIndex] ?? BADGE_KEYS[0];
-
-  const positions = [
-    "right-2 top-2 sm:right-3 sm:top-3",
-    "left-2 top-[28%] sm:left-3",
-    "right-1.5 bottom-[30%] sm:right-2.5",
-    "left-2 bottom-3 sm:left-3 sm:bottom-4",
-  ] as const;
-
-  return (
-    <AnimatePresence mode="wait" initial={false}>
-      <motion.div
-        key={badgeKey}
-        initial={{ opacity: 0, scale: reduceMotion ? 1 : 0.92, y: reduceMotion ? 0 : 4 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.94 }}
-        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-        className={cn(
-          "caretip-live-minutes-float-badge pointer-events-none absolute z-[2] max-w-[7.25rem]",
-          positions[activeIndex],
-        )}
-      >
-        <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-white/95 px-2 py-1 text-[9px] font-semibold leading-tight text-primary shadow-[0_6px_16px_-8px_rgba(233,120,28,0.35)] backdrop-blur-sm dark:border-primary/30 dark:bg-neutral-950/90 sm:px-2.5 sm:py-1 sm:text-[10px]">
-          <CheckCircle2 className="h-2.5 w-2.5 shrink-0 sm:h-3 sm:w-3" aria-hidden />
-          {t(`landing.simpleSetup.${badgeKey}`)}
-        </span>
-      </motion.div>
-    </AnimatePresence>
   );
 }
 

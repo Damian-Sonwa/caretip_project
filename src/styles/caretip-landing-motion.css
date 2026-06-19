@@ -5,6 +5,7 @@
 
 /* —— CTA buttons (hero + sections + final) —— */
 .caretip-landing.caretip-landing--premium .caretip-hero-cta-button,
+.caretip-landing.caretip-landing--premium .caretip-section-cta-button,
 .caretip-landing.caretip-landing--premium .caretip-final-cta-button,
 .caretip-landing.caretip-landing--premium .caretip-landing-section-cta a,
 .caretip-landing.caretip-landing--premium .caretip-landing-section-cta button {
@@ -18,6 +19,7 @@
 
 @media (hover: hover) {
   .caretip-landing.caretip-landing--premium .caretip-hero-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-section-cta-button:hover,
   .caretip-landing.caretip-landing--premium .caretip-final-cta-button:hover,
   .caretip-landing.caretip-landing--premium .caretip-landing-section-cta a:hover {
     filter: brightness(1.04);

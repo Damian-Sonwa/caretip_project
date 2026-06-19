@@ -1,0 +1,19 @@
+/* Hero story frames — crossfade stack (distinct from hospitality marquee below). */
+
+.caretip-landing .caretip-hero-media-clip .caretip-hero-story-frame {
+  position: relative;
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 1.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.caretip-landing .caretip-hero-media-clip .caretip-hero-story-frame--active {
+  z-index: 1;
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing .caretip-hero-media-clip .caretip-hero-story-frame {
+    transition: none !important;
+  }
+}

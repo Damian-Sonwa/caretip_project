@@ -88,17 +88,34 @@ html.dark .caretip-landing [data-landing-accent] .caretip-landing-accent-text--m
   width: 100%;
 }
 
+.caretip-landing .caretip-landing-cta-unit--section {
+  width: min(100%, 17.5rem);
+  max-width: min(100%, 18.75rem);
+  margin-inline: auto;
+  align-items: center;
+}
+
 .caretip-landing .caretip-landing-section-cta {
   margin-top: 1rem;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-landing-cta-unit--section {
+    width: 17.5rem;
+    min-width: 16.25rem;
+    max-width: 18.75rem;
+  }
 }
 
 @media (min-width: 1024px) {
   .caretip-landing .caretip-landing-section-cta {
     margin-top: 1.125rem;
+    justify-content: center;
   }
 
   .caretip-landing .caretip-landing-cta-unit--section {
-    align-items: flex-start;
+    align-items: center;
   }
 
   .caretip-landing .caretip-landing-cta-row {

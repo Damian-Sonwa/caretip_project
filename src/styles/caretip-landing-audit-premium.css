@@ -130,18 +130,17 @@ html:not(.dark) .caretip-landing.caretip-landing--premium main > section + secti
 html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality {
   background: linear-gradient(
     180deg,
-    #fbf7f2 0%,
-    #faf8f5 38%,
-    #fffdfb 100%
+    #ffffff 0%,
+    #fff9f2 100%
   ) !important;
 }
 
 html:not(.dark) .caretip-landing.caretip-landing--premium #how-it-works {
   background: linear-gradient(
     180deg,
-    #faf8f5 0%,
-    #ffffff 44%,
-    #f9f7f4 100%
+    #fffdf9 0%,
+    #fffbf4 48%,
+    #fff7eb 100%
   ) !important;
 }
 
@@ -271,7 +270,7 @@ html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .care
 }
 
 .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-media-card {
-  border-radius: 1.25rem;
+  border-radius: 1.5rem;
 }
 
 /* Setup journey step cards — uniform structure in caretip-landing-live-minutes-refine.css */

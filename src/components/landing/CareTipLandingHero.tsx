@@ -6,8 +6,7 @@ import { useTranslation } from "react-i18next";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingHeroHeadlineWithHighlight } from "@/components/landing/landingHeroHeadline";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
-import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloatingCards";
-import { LandingHeroShowcase } from "@/components/landing/LandingHeroShowcase";
+import { LandingHeroStoryShowcase } from "@/components/landing/LandingHeroStoryShowcase";
 import {
   landingHeroCopyStagger,
   landingHeroCtaReveal,
@@ -15,32 +14,25 @@ import {
   landingHeroHeadlineLineReveal,
   landingHeroHeadlineStagger,
   landingHeroSubtitleReveal,
-  landingHeroTextReveal,
 } from "@/components/landing/landingHeroMotion";
-import { useLargeScreen } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
 export type CareTipLandingHeroProps = {
   id?: string;
-  imageSrc: string;
-  imageWebpSrc?: string;
   imageAlt: string;
-  /** Selects hero art asset only (not copy layout). */
+  /** Locale marker for hero shell styling. */
   isDe?: boolean;
   className?: string;
 };
 
 export function CareTipLandingHero({
   id,
-  imageSrc,
-  imageWebpSrc,
   imageAlt,
   isDe = false,
   className,
 }: CareTipLandingHeroProps) {
   const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
-  const isLargeScreen = useLargeScreen();
 
   const heroRotatingWords = useMemo(() => {
     const raw = t("landing.showcase.heroRotatingWords", { returnObjects: true });
@@ -197,12 +189,11 @@ export function CareTipLandingHero({
           </motion.div>
         </motion.div>
 
-        <motion.div
+        <div
           className={cn(
             "caretip-hero-grid__showcase caretip-hero-showcase-col",
             landingUi.heroShowcaseColDesktop,
           )}
-          variants={landingHeroTextReveal}
         >
           <div
             aria-hidden
@@ -213,21 +204,12 @@ export function CareTipLandingHero({
             )}
           />
 
-          <motion.div
-            className={cn("caretip-hero-showcase-stage", landingUi.heroShowcaseDesktopStage)}
-            initial={
-              reduceMotion ? false : isLargeScreen ? { opacity: 0 } : { opacity: 0, scale: 0.99 }
-            }
-            animate={{ opacity: 1, ...(isLargeScreen ? {} : { scale: 1 }) }}
-            transition={{ duration: 0.45, ease: landingHeroEaseOut, delay: 0.1 }}
-          >
+          <div className={cn("caretip-hero-showcase-stage", landingUi.heroShowcaseDesktopStage)}>
             <div
               aria-hidden
               className="caretip-hero-warm-ambience pointer-events-none absolute inset-0 z-0"
             />
-            <LandingHeroShowcase
-              src={imageSrc}
-              webpSrc={imageWebpSrc}
+            <LandingHeroStoryShowcase
               alt={imageAlt}
               className={cn(
                 "relative z-[1] mx-auto flex w-full justify-center",
@@ -235,11 +217,8 @@ export function CareTipLandingHero({
                 landingUi.heroShowcaseDesktopShell,
               )}
             />
-            <div className={cn(landingUi.heroFloatLayer)}>
-              <LandingHeroFloatingCards />
-            </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </motion.div>
     </section>
   );

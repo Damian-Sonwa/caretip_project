@@ -83,11 +83,14 @@ export default function HospitalityBusinessesMarquee() {
 
       <Marquee className="[--gap:1rem]" pauseOnHover durationSeconds={65} gapPx={16}>
         {businesses.map((b) => (
-          <div className="group flex w-[17.5rem] shrink-0 flex-col sm:w-[19rem]" key={b.id}>
+          <div
+            className="caretip-hospitality-marquee-item group flex w-[17.5rem] shrink-0 flex-col transition-transform duration-300 ease-out sm:w-[19rem]"
+            key={b.id}
+          >
             <div
               className={cn(
                 landingImageFrameClassName,
-                "caretip-hospitality-marquee-card relative aspect-[4/5] w-full bg-neutral-100 shadow-[0_4px_16px_rgba(0,0,0,0.05)] dark:bg-neutral-900 dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)]",
+                "caretip-hospitality-marquee-card relative aspect-[4/5] w-full rounded-[1.125rem] bg-neutral-100 shadow-[0_4px_16px_rgba(0,0,0,0.05)] transition-[transform,box-shadow] duration-300 ease-out dark:bg-neutral-900 dark:shadow-[0_6px_20px_rgba(0,0,0,0.28)]",
               )}
             >
               <img

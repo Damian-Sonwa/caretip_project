@@ -3,6 +3,10 @@ import { dispatchLandingIntent } from "../../lib/landingAiIntent";
 import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { LiveInMinutesLaptopDemo } from "./LiveInMinutesLaptopDemo";
+import {
+  preloadLiveMinutesOnboardingScreens,
+  resolveLiveMinutesOnboardingLocale,
+} from "./liveInMinutesOnboardingScreens";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
@@ -19,11 +23,16 @@ function formatStepNumber(index: number): string {
 }
 
 export function SimpleSetupSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const reduceMotion = useReducedMotion();
   const isLgUp = useMinWidthMedia(1024);
   const [activeStep, setActiveStep] = useState(0);
   const onboardingIntentSent = useRef(false);
+
+  useEffect(() => {
+    const locale = resolveLiveMinutesOnboardingLocale(i18n.language);
+    void preloadLiveMinutesOnboardingScreens([locale, "en", "de"]);
+  }, [i18n.language]);
 
   useEffect(() => {
     if (activeStep > 0 && !onboardingIntentSent.current) {
@@ -52,7 +61,7 @@ export function SimpleSetupSection() {
       className={cn(
         landingUi.section,
         landingUi.landingSurface,
-        "caretip-live-minutes-section relative overflow-x-clip dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141210_48%,#0a0a0a_100%)]",
+        "caretip-live-minutes-section relative overflow-x-clip",
       )}
     >
       <motion.div
@@ -87,7 +96,14 @@ export function SimpleSetupSection() {
             aria-label={t("landing.simpleSetup.stepsAria")}
             className={cn("relative w-full", landingUi.mobileStackAfter)}
           >
-            <div className="caretip-process-steps relative flex flex-col gap-6 sm:gap-8 lg:gap-9">
+            <div
+              className="caretip-process-steps relative flex flex-col gap-7 sm:gap-8 lg:gap-10"
+              style={
+                {
+                  "--caretip-live-minutes-progress": `${((activeStep + 0.5) / steps.length) * 100}%`,
+                } as React.CSSProperties
+              }
+            >
               {steps.map((step, idx) => {
                 const isActive = activeStep === idx;
                 return (

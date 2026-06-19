@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { LandingOnboardingAssistantHost } from "../components/landing/LandingOnboardingAssistantHost";
-import heroVisualDe from "../../../images/cca.webp";
-import heroVisualEn from "../../../images/en-hero.webp";
 import { Navigation } from "../components/Navigation";
 import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
 import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
@@ -25,7 +23,6 @@ export function LandingPage() {
   const { t, i18n } = useTranslation();
   const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
-  const heroVisual = isDe ? heroVisualDe : heroVisualEn;
 
   return (
     <div
@@ -43,7 +40,6 @@ export function LandingPage() {
         <main className="caretip-landing-main w-full min-w-0 overflow-x-hidden">
           <CareTipLandingHero
             id="about-section"
-            imageSrc={heroVisual}
             imageAlt={t("landing.showcase.tabQrAlt")}
             isDe={isDe}
           />

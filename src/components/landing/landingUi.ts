@@ -93,6 +93,12 @@ const ctaPrimarySize =
 const ctaSecondarySize =
   "h-11 min-h-11 lg:h-12 lg:min-h-12 px-6 max-lg:min-w-[11.5rem] max-lg:max-w-[min(100%,260px)] lg:min-w-[10.5rem]";
 
+/** Section CTAs — premium fixed width (260–300px), centered at all breakpoints. */
+const sectionCtaSize =
+  "h-11 min-h-11 lg:h-12 lg:min-h-12 px-7 lg:px-8";
+const sectionCtaWidth =
+  "w-full min-w-0 max-w-full";
+
 export const landingUi = {
   /** Section surface — background from caretip-landing-section-flow.css (light). */
   landingSurface: "caretip-landing-surface relative dark:bg-neutral-950",
@@ -165,9 +171,9 @@ export const landingUi = {
   cardCopyStack: "flex flex-col gap-2.5 text-left sm:gap-3",
 
   benefitList: "w-full space-y-3 max-lg:mt-1 max-lg:space-y-2.5 sm:space-y-3.5",
-  /** Section CTAs — mobile matches `heroCtaPrimary`; prefer hero tokens on landing for parity. */
+  /** Section CTAs — premium centered width on sm+; full width on xs. */
   cta: cnCtaPrimary(
-    `${caretipBtnPrimary} no-underline max-lg:mx-auto max-lg:w-auto sm:w-auto ${ctaPrimarySize}`,
+    `${caretipBtnPrimary} caretip-section-cta-button no-underline ${sectionCtaSize} ${sectionCtaWidth}`,
   ),
 
   sectionTitle: cnSectionHeadline(
@@ -267,9 +273,15 @@ export const landingUi = {
   heroCtaHint:
     "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-neutral-500 dark:text-neutral-400 sm:text-[11px] sm:leading-[1.3]",
   sectionCtaCluster:
-    "caretip-landing-section-cta flex w-full max-lg:justify-center lg:justify-start",
+    "caretip-landing-section-cta flex w-full justify-center",
   sectionCtaUnit:
-    "caretip-landing-cta-unit caretip-landing-cta-unit--section inline-flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch max-lg:mx-auto lg:max-w-none lg:items-start",
+    "caretip-landing-cta-unit caretip-landing-cta-unit--section flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch mx-auto sm:min-w-[16.25rem] sm:max-w-[18.75rem] sm:w-[17.5rem] sm:items-center",
+  sectionCtaPrimary: cnCtaPrimary(
+    `${caretipBtnPrimary} caretip-section-cta-button inline-flex items-center justify-center text-center no-underline ${sectionCtaSize} ${sectionCtaWidth}`,
+  ),
+  sectionCtaSecondary: cnCta(
+    `${caretipBtnSecondary} caretip-section-cta-button inline-flex items-center justify-center gap-1.5 text-center no-underline ${sectionCtaSize} ${sectionCtaWidth}`,
+  ),
   heroCtaPrimary: cnCtaPrimary(
     `${caretipBtnPrimary} caretip-hero-cta-button w-full min-w-0 items-center justify-center text-center no-underline ${ctaPrimarySize} max-lg:mx-auto max-lg:max-w-[min(100%,17.5rem)] lg:max-w-none`,
   ),

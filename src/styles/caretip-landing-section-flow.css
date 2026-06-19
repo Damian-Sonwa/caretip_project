@@ -40,19 +40,17 @@ html:not(.dark) .caretip-landing .caretip-hero-section {
 html:not(.dark) .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
   background: linear-gradient(
     180deg,
-    var(--caretip-ivory-soft) 0%,
-    #fbf7f2 46%,
-    var(--caretip-ivory-base) 100%
+    #ffffff 0%,
+    #fff9f2 100%
   );
 }
 
 html:not(.dark) .caretip-landing #how-it-works {
   background: linear-gradient(
     180deg,
-    var(--caretip-ivory-base) 0%,
-    var(--caretip-ivory-white) 40%,
-    var(--caretip-ivory-white) 60%,
-    var(--caretip-ivory-soft) 100%
+    #fffdf9 0%,
+    #fffbf4 48%,
+    #fff7eb 100%
   );
 }
 

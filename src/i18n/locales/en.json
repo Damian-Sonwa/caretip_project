@@ -1756,6 +1756,7 @@
       }
     },
     "hospitality": {
+      "eyebrow": "WHY CARETIP",
       "title": "Caring is Tipping",
       "subtitle": "<bold>Reward outstanding dedication right in the moment.</bold> Make tipping effortlessly simple and fuel every single shift with noticeable motivation, genuine appreciation, and well-deserved smiles. Because the people who keep our world moving deserve nothing less than the best.",
       "pill": "Empowering excellence, wherever people care.",
@@ -2140,6 +2141,7 @@
       "feedLabel": "Activity in your business",
       "compactFeedTitle": "Live Activity Feed",
       "liveBadge": "Live",
+      "syncLabel": "Synced now",
       "point1": "Guest thanks reach the people who earned them, while the shift is still fresh",
       "point2": "Leaders spot standout effort without end-of-shift spreadsheet hunts",
       "point3": "Visible appreciation keeps teams proud from one shift to the next",
@@ -2147,22 +2149,44 @@
         "tip": {
           "badge": "Tip received",
           "title": "€18.00 · Table 12",
-          "meta": "Paid via QR · 2 min ago"
+          "titleAfter": " · Table 12",
+          "meta": "Paid via QR",
+          "time": "2 min ago"
         },
         "review": {
           "badge": "5-star review",
           "title": "\"Outstanding service tonight\"",
-          "meta": "Guest feedback · Front of house"
+          "meta": "Guest feedback · Front of house",
+          "time": "6 min ago"
         },
         "dashboard": {
           "badge": "Dashboard update",
           "title": "Today's tips up 24%",
-          "meta": "6 successful payments · Live sync"
+          "titleBefore": "Today's tips up ",
+          "meta": "8 successful payments · Live sync",
+          "time": "12 min ago"
         },
         "goal": {
           "badge": "Team goal reached",
-          "title": "March target hit, €2,400",
-          "meta": "12 team members · Shared milestone"
+          "title": "March target hit: €2,400",
+          "titleBefore": "March target hit: ",
+          "meta": "12 team members · Shared milestone",
+          "time": "24 min ago"
+        },
+        "shift": {
+          "badge": "Shift summary",
+          "title": "Dinner service performing above average",
+          "meta": "Revenue +18% compared to last Friday",
+          "metaBefore": "Revenue +",
+          "metaAfter": "% compared to last Friday",
+          "time": "18 min ago"
+        },
+        "recognition": {
+          "badge": "Top performer",
+          "title": "Sarah M.",
+          "meta": "7 guest recognitions today",
+          "metaAfter": " guest recognitions today",
+          "time": "32 min ago"
         }
       }
     }
