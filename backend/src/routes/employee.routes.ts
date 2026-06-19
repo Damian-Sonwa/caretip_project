@@ -11,12 +11,13 @@ import { requireBusinessVerificationCapability } from "../middleware/requireBusi
 import * as employeeController from "../controllers/employee.controller.js";
 import * as goalController from "../controllers/goal.controller.js";
 import { isAllowedImageMimetype } from "../services/upload.service.js";
+import { MULTER_SAFE_LIMITS } from "../lib/multerUploadLimits.js";
 
 const router = Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { ...MULTER_SAFE_LIMITS, fileSize: 5 * 1024 * 1024 },
   fileFilter: (_req, file, cb) => {
     if (isAllowedImageMimetype(file.mimetype)) {
       cb(null, true);

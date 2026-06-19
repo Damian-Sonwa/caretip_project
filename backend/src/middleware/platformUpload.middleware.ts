@@ -1,4 +1,5 @@
 import multer from "multer";
+import { MULTER_SAFE_LIMITS } from "../lib/multerUploadLimits.js";
 import {
   assertMulterMimetypeAllowedForLogo,
   assertMulterMimetypeAllowedForVerification,
@@ -25,13 +26,13 @@ const verificationFilter: multer.Options["fileFilter"] = (_req, file, cb) => {
 /** Field name: `file`. Max 5 MB. */
 export const platformUploadLogo = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { ...MULTER_SAFE_LIMITS, fileSize: 5 * 1024 * 1024 },
   fileFilter: logoFilter,
 }).single("file");
 
 /** Field name: `file`. Max 10 MB. */
 export const platformUploadVerification = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 10 * 1024 * 1024 },
+  limits: { ...MULTER_SAFE_LIMITS, fileSize: 10 * 1024 * 1024 },
   fileFilter: verificationFilter,
 }).single("file");
