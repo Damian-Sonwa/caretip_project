@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { landingSectionViewport } from "@/lib/motionPerf";
+import { LandingReveal } from "@/components/landing/LandingReveal";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { cn } from "@/lib/utils";
 
 import { MOTIVATION_ACTIVITY_CARD_SPECS } from "./landingMotivationActivitySpecs";
@@ -11,8 +11,8 @@ import {
 } from "./MotivationActivityCardContent";
 
 export function LandingMotivationActivityFeedMobile() {
-  const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const { t, i18n } = useTranslation();
+  const reduceMotion = usePrefersReducedMotion();
 
   const rows = useMemo(
     () =>
@@ -23,7 +23,7 @@ export function LandingMotivationActivityFeedMobile() {
         meta: t(spec.metaKey),
         time: t(spec.timeKey),
       })),
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -40,19 +40,17 @@ export function LandingMotivationActivityFeedMobile() {
 
         <ul className="caretip-motivation-activity-feed-mobile__list" role="list">
           {rows.map((row, index) => (
-            <motion.li
+            <LandingReveal
               key={row.id}
+              as="li"
               role="listitem"
+              delay={index * 0.07}
               className={cn(
                 "caretip-motivation-activity-feed-mobile__row",
                 `caretip-motivation-activity-feed-mobile__row--${row.id}`,
                 row.emphasis === "primary" && "caretip-motivation-activity-feed-mobile__row--primary",
                 row.groupEnd && "caretip-motivation-activity-feed-mobile__row--group-end",
               )}
-              initial={reduceMotion ? false : { opacity: 0, x: 12 }}
-              whileInView={reduceMotion ? undefined : { opacity: 1, x: 0 }}
-              viewport={landingSectionViewport}
-              transition={{ duration: 0.4, delay: index * 0.07, ease: [0.22, 1, 0.36, 1] }}
             >
               <span
                 className={cn(
@@ -81,7 +79,7 @@ export function LandingMotivationActivityFeedMobile() {
                   />
                 </p>
               </div>
-            </motion.li>
+            </LandingReveal>
           ))}
         </ul>
       </div>

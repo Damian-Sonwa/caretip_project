@@ -1,30 +1,15 @@
 import { useMemo, type CSSProperties } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { landingSectionViewport } from "@/lib/motionPerf";
+import { LandingReveal } from "@/components/landing/LandingReveal";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { cn } from "@/lib/utils";
 
 import { MOTIVATION_ACTIVITY_CARD_SPECS } from "./landingMotivationActivitySpecs";
 import { MotivationActivityCardContent } from "./MotivationActivityCardContent";
 
-const cardMotion = {
-  hidden: { opacity: 0, x: 18, y: 6, scale: 0.98 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    y: 0,
-    scale: 1,
-    transition: {
-      duration: 0.48,
-      delay: 0.06 + i * 0.09,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
-};
-
 export function LandingMotivationActivityStack() {
-  const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const { t, i18n } = useTranslation();
+  const reduceMotion = usePrefersReducedMotion();
 
   const cards = useMemo(
     () =>
@@ -35,7 +20,7 @@ export function LandingMotivationActivityStack() {
         meta: t(spec.metaKey),
         time: t(spec.timeKey),
       })),
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -53,9 +38,11 @@ export function LandingMotivationActivityStack() {
           {cards.map((card, index) => {
             const Icon = card.Icon;
             return (
-              <motion.li
+              <LandingReveal
                 key={card.id}
+                as="li"
                 role="listitem"
+                delay={0.06 + index * 0.09}
                 className={cn(
                   "caretip-motivation-activity__card",
                   `caretip-motivation-activity__card--${card.id}`,
@@ -63,11 +50,6 @@ export function LandingMotivationActivityStack() {
                   card.groupEnd && "caretip-motivation-activity__card--group-end",
                 )}
                 style={{ "--feed-card-index": index } as CSSProperties}
-                custom={index}
-                variants={reduceMotion ? undefined : cardMotion}
-                initial={reduceMotion ? false : "hidden"}
-                whileInView={reduceMotion ? undefined : "visible"}
-                viewport={landingSectionViewport}
               >
                 <div className={cn("caretip-motivation-activity__icon", card.accentClass)}>
                   <Icon className="h-4 w-4" strokeWidth={2} aria-hidden />
@@ -91,7 +73,7 @@ export function LandingMotivationActivityStack() {
                     <span className="caretip-motivation-activity__sync-dot caretip-motivation-activity__sync-dot--blue" />
                   </span>
                 ) : null}
-              </motion.li>
+              </LandingReveal>
             );
           })}
         </ul>

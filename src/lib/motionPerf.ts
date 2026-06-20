@@ -1,37 +1,17 @@
 import * as React from "react";
-import {
-  LANDING_REVEAL_DURATION_S,
-  LANDING_REVEAL_Y,
-  LANDING_REVEAL_Y_MOBILE,
-  landingMotionViewport,
-  landingRevealTransition,
-} from "./landingMotion";
 
-/** Shared viewport for landing scroll reveals — once, lightweight. */
-export const landingSectionViewport = landingMotionViewport;
+/** @deprecated Use LandingReveal — kept for non-landing dashboard code if referenced. */
+export const landingSectionViewport = { once: true, amount: 0.15, margin: "0px 0px -5% 0px" };
 
-export const landingSectionReveal = {
-  hidden: { opacity: 0, y: LANDING_REVEAL_Y_MOBILE },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: landingRevealTransition(0, LANDING_REVEAL_DURATION_S),
-  },
-} as const;
+/** @deprecated CSS scroll reveal replaces Framer props. */
+export const landingSectionReveal = {} as const;
 
-/** Scroll reveal — fade + subtle rise (mobile uses smaller travel). */
-export const landingFadeReveal = {
-  initial: { opacity: 0, y: LANDING_REVEAL_Y },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: landingSectionViewport,
-  transition: landingRevealTransition(0, LANDING_REVEAL_DURATION_S),
-} as const;
+/** @deprecated CSS scroll reveal replaces Framer props. */
+export const landingFadeReveal = {} as const;
 
-export function landingFadeRevealWithDelay(delay = 0) {
-  return {
-    ...landingFadeReveal,
-    transition: landingRevealTransition(delay, LANDING_REVEAL_DURATION_S),
-  };
+/** @deprecated CSS scroll reveal replaces Framer props. */
+export function landingFadeRevealWithDelay(_delay = 0) {
+  return {} as const;
 }
 
 /** Dashboard block entrance — opacity-first, minimal travel. */

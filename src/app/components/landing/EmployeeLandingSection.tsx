@@ -24,7 +24,7 @@ export function EmployeeLandingSection() {
       { title: t("landing.employeeSection.b2Title"), description: t("landing.employeeSection.b2Text") },
       { title: t("landing.employeeSection.b3Title"), description: t("landing.employeeSection.b3Text") },
     ],
-    [t],
+    [t, i18n.language],
   );
 
   return (

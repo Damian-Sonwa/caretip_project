@@ -1,23 +1,24 @@
+import type { ImgHTMLAttributes } from "react";
 import { useTranslation } from "react-i18next";
-import { motion } from "motion/react";
 import dashboardImg from "../../../../images/new_dashboard.png";
 import { PublicTrustChips } from "@/components/public/PublicTrustChips";
 import { PublicPageBackLink } from "@/components/public/PublicPageBackLink";
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export function FeaturesPageHero() {
+  usePublicMountProbe("FeaturesPageHero");
   const { t } = useTranslation();
 
   return (
     <header className={cn(publicPageUi.header, "relative mb-2 sm:mb-4")}>
       <PublicPageBackLink className="relative z-[2]" />
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70"
+      <div
+        className={cn(
+          "caretip-public-hero-enter relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70",
+        )}
       >
         <div
           aria-hidden
@@ -35,7 +36,9 @@ export function FeaturesPageHero() {
           src={dashboardImg}
           alt=""
           className="pointer-events-none absolute -right-6 top-6 w-[min(55%,320px)] rounded-2xl object-cover opacity-[0.14] blur-[2px] dark:opacity-[0.08]"
-          loading="lazy"
+          loading="eager"
+          {...({ fetchpriority: "low" } as ImgHTMLAttributes<HTMLImageElement>)}
+          decoding="async"
         />
 
         <div className="relative z-[1] flex flex-col items-center px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-10 lg:py-12">
@@ -54,7 +57,7 @@ export function FeaturesPageHero() {
             <PublicTrustChips variant="features" className="justify-center gap-2" />
           </div>
         </div>
-      </motion.div>
+      </div>
     </header>
   );
 }

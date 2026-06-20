@@ -1,5 +1,4 @@
 import { useId, useState, type ReactNode } from "react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { MarketingPicture } from "@/lib/marketingPicture";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -39,7 +38,6 @@ export function ExpandableInfoCard({
   titleClassName,
 }: ExpandableInfoCardProps) {
   const [expanded, setExpanded] = useState(false);
-  const reduceMotion = useReducedMotion();
   const detailId = useId();
 
   return (
@@ -81,25 +79,22 @@ export function ExpandableInfoCard({
         </h3>
         <p className="mt-2 text-sm leading-relaxed text-muted-foreground text-pretty">{summary}</p>
 
-        <AnimatePresence initial={false}>
-          {expanded ? (
-            <motion.div
-              id={detailId}
-              key="detail"
-              role="region"
-              aria-label={title}
-              initial={reduceMotion ? false : { height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={reduceMotion ? undefined : { height: 0, opacity: 0 }}
-              transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className="overflow-hidden"
-            >
-              <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
-                {detail}
-              </p>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
+        <div
+          id={detailId}
+          role="region"
+          aria-label={title}
+          aria-hidden={!expanded}
+          className={cn(
+            "caretip-expandable-info-card__detail",
+            expanded && "caretip-expandable-info-card__detail--open",
+          )}
+        >
+          <div className="caretip-expandable-info-card__detail-inner">
+            <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
+              {detail}
+            </p>
+          </div>
+        </div>
 
         <Button
           type="button"
@@ -109,8 +104,8 @@ export function ExpandableInfoCard({
             expanded ? caretipBtnSecondary : caretipBtnPrimary,
           )}
           aria-expanded={expanded}
-          aria-controls={expanded ? detailId : undefined}
-          onClick={() => setExpanded((open) => !open)}
+          aria-controls={detailId}
+          onClick={() => setExpanded((v) => !v)}
         >
           {expanded ? learnLessLabel : learnMoreLabel}
         </Button>

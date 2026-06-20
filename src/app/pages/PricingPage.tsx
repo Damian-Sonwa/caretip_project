@@ -8,9 +8,12 @@ import { PublicPageHeader } from "@/components/public/PublicPageHeader";
 import { PublicTrustChips } from "@/components/public/PublicTrustChips";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
+import { DeferredBelowFold } from "@/lib/publicRouteDefer";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export function PricingPage() {
-  const { t } = useTranslation();
+  usePublicMountProbe("PricingPage");
+  const { t, i18n } = useTranslation();
   const tiers = useMemo(
     () =>
       PRICING_TIERS.map((tier) => {
@@ -25,7 +28,7 @@ export function PricingPage() {
           buttonText: t(`staticPages.pricing.tiers.${k}.button`),
         };
       }),
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -72,15 +75,19 @@ export function PricingPage() {
         </div>
 
         <section className={cn(publicPageUi.sectionGap, publicPageUi.ctaPanel)}>
-          <h3 className="mb-2 font-hero-display text-2xl font-bold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
-            {t("staticPages.pricing.ctaTitle")}
-          </h3>
-          <p className="mx-auto mb-6 max-w-xl text-neutral-700 dark:text-neutral-300">
-            {t("staticPages.pricing.ctaBody")}
-          </p>
-          <Link to="/contact" className={publicPageUi.ctaPrimary}>
-            {t("nav.requestDemo")}
-          </Link>
+          <DeferredBelowFold minHeight="12rem" rootMargin="200px 0px">
+            <div>
+              <h3 className="mb-2 font-hero-display text-2xl font-bold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
+                {t("staticPages.pricing.ctaTitle")}
+              </h3>
+              <p className="mx-auto mb-6 max-w-xl text-neutral-700 dark:text-neutral-300">
+                {t("staticPages.pricing.ctaBody")}
+              </p>
+              <Link to="/contact" className={publicPageUi.ctaPrimary}>
+                {t("nav.requestDemo")}
+              </Link>
+            </div>
+          </DeferredBelowFold>
         </section>
       </main>
     </PublicPageShell>

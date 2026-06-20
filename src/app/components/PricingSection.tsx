@@ -1,10 +1,12 @@
 import type { ComponentType } from "react";
-import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Check, Star } from "lucide-react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
 import type { PricingTierKey } from "../data/pricingTiers";
+import { scheduleIdleWork } from "@/lib/publicRouteDefer";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export interface TippingTier {
   tierKey?: PricingTierKey;
@@ -22,32 +24,52 @@ interface PricingSectionProps {
   tiers: TippingTier[];
 }
 
+function TierFeatureList({ features }: { features: string[] }) {
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    scheduleIdleWork(() => setReady(true), 900);
+  }, []);
+
+  if (!ready) {
+    return <div className="mb-6 h-28" aria-hidden />;
+  }
+
+  return (
+    <ul className="space-y-3 mb-6">
+      {features.map((feature, idx) => (
+        <li key={idx} className="flex items-start gap-2">
+          <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Check className="w-3 h-3 text-accent" />
+          </div>
+          <span className="text-sm text-foreground">{feature}</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 /**
  * Hospitality tipping platform fees — one-time tips only (Stripe PaymentIntents).
  * No recurring plans or invoice billing.
  */
 export function PricingSection({ tiers }: PricingSectionProps) {
+  usePublicMountProbe("PricingSection");
   const { t } = useTranslation();
   return (
     <div className="space-y-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {tiers.map((tier, index) => {
+        {tiers.map((tier) => {
           const Icon = tier.icon;
 
           return (
-            <motion.div
+            <div
               key={tier.name}
-              initial={{ y: 20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{
-                duration: 0.5,
-                delay: index * 0.1,
-              }}
               className={cn(
-                "relative rounded-2xl p-6 border-2 transition-all",
+                "caretip-pricing-tier-card relative rounded-2xl p-6 border-2 transition-[border-color,box-shadow,transform] duration-200",
                 tier.isPopular
                   ? "border-accent shadow-lg shadow-accent/20 bg-gradient-to-br from-card via-card to-accent/5"
-                  : "border-border bg-card hover:border-accent/30"
+                  : "border-border bg-card hover:border-accent/30",
               )}
             >
               {tier.isPopular && (
@@ -60,13 +82,13 @@ export function PricingSection({ tiers }: PricingSectionProps) {
               <div
                 className={cn(
                   "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
-                  tier.isPopular ? "bg-accent/10" : "bg-muted"
+                  tier.isPopular ? "bg-accent/10" : "bg-muted",
                 )}
               >
                 <Icon
                   className={cn(
                     "w-6 h-6",
-                    tier.isPopular ? "text-accent" : "text-muted-foreground"
+                    tier.isPopular ? "text-accent" : "text-muted-foreground",
                   )}
                 />
               </div>
@@ -80,29 +102,20 @@ export function PricingSection({ tiers }: PricingSectionProps) {
 
               <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
 
-              <ul className="space-y-3 mb-6">
-                {tier.features.map((feature, idx) => (
-                  <li key={idx} className="flex items-start gap-2">
-                    <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <Check className="w-3 h-3 text-accent" />
-                    </div>
-                    <span className="text-sm text-foreground">{feature}</span>
-                  </li>
-                ))}
-              </ul>
+              <TierFeatureList features={tier.features} />
 
               <Link
                 to="/signup"
                 className={cn(
-                  "w-full flex justify-center py-3 rounded-lg font-semibold transition-all text-sm",
+                  "w-full flex justify-center py-3 rounded-lg font-semibold transition-[color,background-color,border-color,box-shadow] duration-200 text-sm",
                   tier.isPopular
                     ? "bg-accent text-white hover:bg-accent/90 shadow-lg shadow-accent/20"
-                    : "bg-background border-2 border-border text-foreground hover:border-accent hover:bg-accent hover:text-white"
+                    : "bg-background border-2 border-border text-foreground hover:border-accent hover:bg-accent hover:text-white",
                 )}
               >
                 {tier.buttonText}
               </Link>
-            </motion.div>
+            </div>
           );
         })}
       </div>

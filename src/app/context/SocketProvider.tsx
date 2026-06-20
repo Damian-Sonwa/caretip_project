@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { io, type Socket } from "socket.io-client";
+import type { Socket } from "socket.io-client";
 import { resolveApiBaseUrl } from "../lib/apiOrigin";
 import { AUTH_STORAGE_SYNC_EVENT } from "../lib/authStorageSync";
 import { getMemoryAccessToken } from "../lib/accessTokenStore";
@@ -61,7 +61,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     setConnectionStatus("idle");
   }, []);
 
-  const connect = useCallback(() => {
+  const connect = useCallback(async () => {
     if (socketRef.current) {
       socketRef.current.removeAllListeners();
       socketRef.current.close();
@@ -78,6 +78,7 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     }
 
     setConnectionStatus("connecting");
+    const { io } = await import("socket.io-client");
     const s = io(url, {
       auth: { token },
       // Polling first: Render cold starts often reject the initial WebSocket upgrade.

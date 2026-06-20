@@ -10,7 +10,7 @@ export function DashboardOutletFallback() {
   return <div className="min-h-[min(50vh,420px)] w-full bg-background" aria-hidden />;
 }
 
-/** Top-level public route chunk hold. */
+/** Top-level public route chunk hold — invisible while static bootstrap overlay is active. */
 export function MinimalRouteFallback() {
-  return <div className="min-h-[40vh] w-full bg-background" aria-hidden />;
+  return null;
 }

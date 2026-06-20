@@ -1,28 +1,25 @@
-import { useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { LandingOnboardingAssistantHost } from "../components/landing/LandingOnboardingAssistantHost";
+import { isAiAssistantEnabled } from "../lib/featureFlags";
 import { Navigation } from "../components/Navigation";
 import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
-import { SimpleSetupSection } from "../components/landing/SimpleSetupSection";
-import { HospitalityTeamsUnifiedSection } from "../components/landing/HospitalityTeamsUnifiedSection";
-import { EmployeeLandingSection } from "../components/landing/EmployeeLandingSection";
-import { BusinessLandingSection } from "../components/landing/BusinessLandingSection";
-import { LandingFeaturesSection } from "../components/landing/LandingFeaturesSection";
-import { PaymentsSection } from "../components/landing/PaymentsSection";
-import { LandingRealLifeSection } from "../components/landing/LandingRealLifeSection";
-import { LandingSocialProofSection } from "../components/landing/LandingSocialProofSection";
-import { LandingMotivationSection } from "../components/landing/LandingMotivationSection";
-import { LandingFinalCtaSection } from "../components/landing/LandingFinalCtaSection";
 import { Footer } from "../components/Footer";
+import { scheduleIdleWork, ViewportDeferred } from "@/lib/publicRouteDefer";
 
-/** Reversible: set true to restore #social-proof (PDF adjustment — hide testimonials & trust stats). */
-const SHOW_LANDING_SOCIAL_PROOF = false;
+const LandingPageBelowFold = lazy(() =>
+  import("./LandingPageBelowFold").then((mod) => ({ default: mod.LandingPageBelowFold })),
+);
 
 /** Landing has no email/password forms; autofill mitigations live on `AuthPage` (login/signup). */
 export function LandingPage() {
   const { t, i18n } = useTranslation();
   const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
+  const [belowFoldReady, setBelowFoldReady] = useState(false);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
+
+  useEffect(() => {
+    scheduleIdleWork(() => setBelowFoldReady(true), 900);
+  }, []);
 
   return (
     <div
@@ -43,20 +40,35 @@ export function LandingPage() {
             imageAlt={t("landing.showcase.tabQrAlt")}
             isDe={isDe}
           />
-          <HospitalityTeamsUnifiedSection />
-          <SimpleSetupSection />
-          <EmployeeLandingSection />
-          <BusinessLandingSection />
-          <LandingFeaturesSection />
-          <PaymentsSection />
-          <LandingRealLifeSection />
-          <LandingMotivationSection />
-          {SHOW_LANDING_SOCIAL_PROOF ? <LandingSocialProofSection /> : null}
-          <LandingFinalCtaSection />
+          {belowFoldReady ? (
+            <Suspense fallback={null}>
+              <LandingPageBelowFold />
+            </Suspense>
+          ) : null}
         </main>
-        <Footer className="caretip-landing-footer" />
+        <ViewportDeferred minHeight="14rem" rootMargin="320px 0px">
+          <Footer className="caretip-landing-footer" />
+        </ViewportDeferred>
       </div>
-      <LandingOnboardingAssistantHost rootEl={landingRoot} />
+      <LandingAiAssistantHost rootEl={landingRoot} />
     </div>
   );
+}
+
+function LandingAiAssistantHost({ rootEl }: { rootEl: HTMLDivElement | null }) {
+  const [Host, setHost] = useState<typeof import("../components/landing/LandingOnboardingAssistantHost").LandingOnboardingAssistantHost | null>(null);
+
+  useEffect(() => {
+    if (!isAiAssistantEnabled()) return;
+    let cancelled = false;
+    void import("../components/landing/LandingOnboardingAssistantHost").then((mod) => {
+      if (!cancelled) setHost(() => mod.LandingOnboardingAssistantHost);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (!Host) return null;
+  return <Host rootEl={rootEl} />;
 }

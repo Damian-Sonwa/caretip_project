@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { useReducedMotion } from "motion/react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { useCountUpNumber } from "../../hooks/useCountUpNumber";
 import { formatEur } from "../../lib/formatEur";
 import { cn } from "@/lib/utils";
@@ -53,7 +53,7 @@ export const CountUpMetric = memo(function CountUpMetric({
   format,
   decimalPlaces = 1,
 }: CountUpMetricProps) {
-  const reduceMotion = useReducedMotion() ?? false;
+  const reduceMotion = usePrefersReducedMotion();
   const safeValue = Number.isFinite(value) ? value : 0;
   const integer = isIntegerKind(kind);
 

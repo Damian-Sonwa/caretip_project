@@ -9,7 +9,6 @@ import React, {
   useState,
 } from "react";
 import { AppBrandedLoadingScreen } from "../components/AppBrandedLoadingScreen";
-import { hideAppBootstrapLoader } from "../lib/appBootstrapLoader";
 import {
   APP_LOADING_PRIORITY,
   GLOBAL_OVERLAY_PRIORITIES,
@@ -196,10 +195,6 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
     });
   }, []);
 
-  useLayoutEffect(() => {
-    hideAppBootstrapLoader();
-  }, []);
-
   useEffect(() => {
     const id = window.setTimeout(() => {
       setRegistrations((prev) => {
@@ -241,7 +236,6 @@ export function AppLoadingManagerProvider({ children }: { children: React.ReactN
         exitDebounceRef.current = null;
       }
       setOverlayPhase("visible");
-      hideAppBootstrapLoader();
       const key = winner?.key ?? null;
       if (import.meta.env.DEV && key && key !== lastWinnerKeyRef.current) {
         console.info(`[GlobalAppLoading] Overlay active — ${key}`);

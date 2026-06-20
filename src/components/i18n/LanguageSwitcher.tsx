@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -12,10 +12,15 @@ type LanguageSwitcherProps = {
   variant?: "header" | "inline";
 };
 
-export function LanguageSwitcher({ className, variant = "header" }: LanguageSwitcherProps) {
+export const LanguageSwitcher = memo(function LanguageSwitcher({
+  className,
+  variant = "header",
+}: LanguageSwitcherProps) {
   const { i18n, t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [pendingLang, setPendingLang] = useState<AppLanguage | null>(null);
   const active = i18n.resolvedLanguage?.toLowerCase().startsWith("de") ? "de" : "en";
+  const displayLang = pendingLang ?? active;
 
   const isInline = variant === "inline";
 
@@ -39,7 +44,8 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
 
   const rowActive = isInline ? "bg-white/12 text-white" : "bg-[#fff6e8] text-neutral-900";
 
-  const setLang = (lng: AppLanguage) => {
+  const setLang = useCallback((lng: AppLanguage) => {
+    setPendingLang(lng);
     void changeAppLanguage(lng)
       .then(() => {
         setOpen(false);
@@ -53,8 +59,9 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
       })
       .catch(() => {
         /* Keep menu open if bundle load fails */
-      });
-  };
+      })
+      .finally(() => setPendingLang(null));
+  }, []);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -67,7 +74,7 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
           aria-haspopup="dialog"
         >
           <Globe className={cn("h-4 w-4 shrink-0 opacity-90", isInline ? "text-white/90" : "text-neutral-600")} aria-hidden />
-          <span className="tabular-nums">{active === "de" ? "DE" : "EN"}</span>
+          <span className="tabular-nums">{displayLang === "de" ? "DE" : "EN"}</span>
         </button>
       </PopoverTrigger>
       <PopoverContent
@@ -80,12 +87,12 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
           <button
             type="button"
             role="option"
-            aria-selected={active === "en"}
-            className={cn(rowBase, active === "en" ? rowActive : rowIdle)}
+            aria-selected={displayLang === "en"}
+            className={cn(rowBase, displayLang === "en" ? rowActive : rowIdle)}
             onClick={() => setLang("en")}
           >
             <span>{t("nav.languageEnglish")}</span>
-            {active === "en" ? (
+            {displayLang === "en" ? (
               <Check
                 className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : "text-[#b45309]")}
                 strokeWidth={2.5}
@@ -96,12 +103,12 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
           <button
             type="button"
             role="option"
-            aria-selected={active === "de"}
-            className={cn(rowBase, active === "de" ? rowActive : rowIdle)}
+            aria-selected={displayLang === "de"}
+            className={cn(rowBase, displayLang === "de" ? rowActive : rowIdle)}
             onClick={() => setLang("de")}
           >
             <span>{t("nav.languageGerman")}</span>
-            {active === "de" ? (
+            {displayLang === "de" ? (
               <Check
                 className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : "text-[#b45309]")}
                 strokeWidth={2.5}
@@ -113,4 +120,4 @@ export function LanguageSwitcher({ className, variant = "header" }: LanguageSwit
       </PopoverContent>
     </Popover>
   );
-}
+});

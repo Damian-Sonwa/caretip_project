@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { useMemo } from "react";
+import { memo, useEffect, useMemo } from "react";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
 import { Menu, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,11 @@ import { cn } from "@/lib/utils";
 import { CareTipLogo } from "./CareTipLogo";
 import { useTheme } from "../context/ThemeContext";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { PrefetchLink } from "./PrefetchLink";
+import { prefetchPrimaryNavRoutes } from "../lib/prefetchPublicRoutes";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
+
+let primaryNavPrefetchScheduled = false;
 
 const NAV_ROUTES = [
   { to: "/how-it-works" as const, nameKey: "nav.howItWorks" },
@@ -17,16 +22,30 @@ const NAV_ROUTES = [
 
 export type NavigationVariant = "default" | "dark";
 
-export function Navigation({ variant = "default" }: { variant?: NavigationVariant }) {
-  const { t } = useTranslation();
-  const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
+export const Navigation = memo(function Navigation({ variant = "default" }: { variant?: NavigationVariant }) {
+  usePublicMountProbe("Navigation");
+  const { t, i18n } = useTranslation();
+  const { mobileMenuOpen, toggleMobileMenu, closeMobileMenu, backdropDismissible } =
+    useMobileMenuState();
   const location = useLocation();
   const { mode } = useTheme();
   const isDark = mode === "dark" || variant === "dark";
 
+  useEffect(() => {
+    if (primaryNavPrefetchScheduled) return;
+    primaryNavPrefetchScheduled = true;
+    const schedule = () => prefetchPrimaryNavRoutes();
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(schedule, { timeout: 5000 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(schedule, 2500);
+    return () => window.clearTimeout(id);
+  }, []);
+
   const navLinks = useMemo(
     () => NAV_ROUTES.map((r) => ({ ...r, label: t(r.nameKey) })),
-    [t],
+    [t, i18n.language],
   );
 
   const linkClass = cn(
@@ -70,7 +89,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
             aria-hidden={false}
           >
             {navLinks.map((link) => (
-              <Link
+              <PrefetchLink
                 key={link.to}
                 to={link.to}
                 className={cn(
@@ -79,28 +98,24 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                 )}
               >
                 {link.label}
-              </Link>
+              </PrefetchLink>
             ))}
           </div>
 
           <div className="relative z-[2] hidden items-center gap-3 lg:flex shrink-0">
             <LanguageSwitcher />
-            <Link to="/login">
-              <button
-                type="button"
-                className={cn(
-                  "rounded-xl border px-4 py-2 text-sm font-semibold transition-[colors,opacity,box-shadow,transform] duration-200 active:opacity-95",
-                  "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(233,120,28,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
-                )}
-              >
-                {t("nav.logIn")}
-              </button>
-            </Link>
-            <Link to="/contact">
-              <button type="button" className={landingUi.navCtaPrimary}>
-                {t("nav.requestDemo")}
-              </button>
-            </Link>
+            <PrefetchLink
+              to="/login"
+              className={cn(
+                "inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold transition-[color,background-color,opacity,box-shadow,transform] duration-200 active:opacity-95 touch-manipulation",
+                "border-neutral-200/90 bg-white/70 text-neutral-900 shadow-none hover:border-primary/35 hover:bg-primary/[0.05] hover:shadow-[0_4px_18px_-12px_rgba(233,120,28,0.22)] dark:border-neutral-700 dark:bg-neutral-900/50 dark:text-neutral-100 dark:hover:border-primary/45 dark:hover:bg-primary/[0.08]",
+              )}
+            >
+              {t("nav.logIn")}
+            </PrefetchLink>
+            <PrefetchLink to="/contact" className={cn(landingUi.navCtaPrimary, "touch-manipulation")}>
+              {t("nav.requestDemo")}
+            </PrefetchLink>
           </div>
 
           <div className="relative z-[2] flex items-center gap-2 lg:hidden">
@@ -110,8 +125,7 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (mobileMenuOpen) closeMobileMenu();
-                else openMobileMenu();
+                toggleMobileMenu();
               }}
               className={cn(
                 "relative z-[100] shrink-0 touch-manipulation rounded-lg p-2.5 transition-colors active:opacity-90",
@@ -132,8 +146,12 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
             <button
               type="button"
               aria-hidden
-              className="caretip-mobile-drawer-backdrop--open fixed inset-0 z-40 bg-neutral-950/30 lg:hidden dark:bg-black/50"
-              onClick={closeMobileMenu}
+              tabIndex={-1}
+              className={cn(
+                "caretip-mobile-drawer-backdrop--open fixed inset-0 z-40 touch-manipulation bg-neutral-950/30 lg:hidden dark:bg-black/50",
+                !backdropDismissible && "pointer-events-none",
+              )}
+              onClick={() => closeMobileMenu("backdrop")}
             />
             <div
               id="mobile-main-nav"
@@ -141,25 +159,26 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
               aria-modal="true"
               aria-label={t("nav.mainNav")}
               className={cn(
-                "caretip-public-mobile-nav-drawer caretip-mobile-drawer-panel--open-top absolute left-0 right-0 top-full z-[60] border-b lg:hidden",
+                "caretip-public-mobile-nav-drawer caretip-mobile-drawer-panel--open-top absolute left-0 right-0 top-full z-[60] touch-manipulation border-b lg:hidden",
                 "border-border/50 bg-background shadow-[0_16px_48px_-12px_rgba(15,23,42,0.14)] dark:shadow-[0_16px_48px_-12px_rgba(0,0,0,0.55)]",
               )}
+              onPointerDown={(e) => e.stopPropagation()}
             >
               <div className="flex flex-col gap-1 px-4 py-3 sm:px-5 sm:py-3.5">
                 <div className="caretip-public-mobile-nav-links flex flex-col gap-0.5">
                   {navLinks.map((link) => (
-                    <Link
+                    <PrefetchLink
                       key={link.to}
                       to={link.to}
                       className={cn(
-                        "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-colors active:bg-muted/90",
+                        "flex min-h-11 w-full items-center rounded-xl px-3 text-[1.0625rem] font-semibold tracking-tight transition-[color,background-color,opacity] active:bg-muted/90 touch-manipulation",
                         "text-foreground hover:bg-muted/60",
                         location.pathname === link.to && "bg-primary/[0.08] text-primary",
                       )}
-                      onClick={closeMobileMenu}
+                      onClick={() => closeMobileMenu("navigate")}
                     >
                       {link.label}
-                    </Link>
+                    </PrefetchLink>
                   ))}
                 </div>
                 <div
@@ -168,26 +187,26 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
                     "border-border/55",
                   )}
                 >
-                  <Link
+                  <PrefetchLink
                     to="/contact"
-                    onClick={closeMobileMenu}
+                    onClick={() => closeMobileMenu("navigate")}
                     className={cn(
                       landingUi.heroCtaPrimary,
-                      "w-full max-lg:min-w-0 max-lg:max-w-full",
+                      "w-full max-lg:min-w-0 max-lg:max-w-full touch-manipulation",
                     )}
                   >
                     {t("nav.requestDemo")}
-                  </Link>
-                  <Link
+                  </PrefetchLink>
+                  <PrefetchLink
                     to="/login"
-                    onClick={closeMobileMenu}
+                    onClick={() => closeMobileMenu("navigate")}
                     className={cn(
                       landingUi.heroCtaSecondary,
-                      "w-full max-lg:min-w-0 max-lg:max-w-full",
+                      "w-full max-lg:min-w-0 max-lg:max-w-full touch-manipulation",
                     )}
                   >
                     {t("nav.logIn")}
-                  </Link>
+                  </PrefetchLink>
                 </div>
               </div>
             </div>
@@ -196,4 +215,4 @@ export function Navigation({ variant = "default" }: { variant?: NavigationVarian
       </nav>
     </header>
   );
-}
+});

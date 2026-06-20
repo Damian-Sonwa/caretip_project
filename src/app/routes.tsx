@@ -17,74 +17,22 @@ import {
   useMarkAppShellReadyOptional,
 } from "./context/AppLoadingSplashContext";
 import { RouteChunkBoundary } from "./routing/RouteChunkBoundary";
-import { PricingPage } from './pages/PricingPage';
-import { PrivacyPage } from './pages/PrivacyPage';
-import { TermsPage } from './pages/TermsPage';
-import { CookiesPage } from './pages/CookiesPage';
-import { ContactPage } from './pages/ContactPage';
-import { CareersPage } from './pages/CareersPage';
-import { BlogPage } from './pages/BlogPage';
-import { HelpPage } from './pages/HelpPage';
-import { FAQPage } from './pages/FAQPage';
-import { MobileAppPage } from './pages/MobileAppPage';
-import { HowItWorksPage } from './pages/HowItWorksPage';
-import { FeaturesPage } from './pages/FeaturesPage';
-import { JoinPage } from './pages/JoinPage';
-import { AuthPage } from './components/AuthPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { ResetPasswordPage } from './pages/ResetPasswordPage';
-import { ActivateEmployeePage } from './pages/ActivateEmployeePage';
-import { VerifyEmailPage } from './pages/VerifyEmailPage';
-import { CheckEmailPage } from './pages/CheckEmailPage';
-import { PlatformAdminRoute } from './components/PlatformAdminRoute';
-import { PlatformAdminLoginPage } from './pages/platform/PlatformAdminLoginPage';
 import {
-  AdminDashboard,
-  AuditLogsPage,
-  BusinessDetailPage,
-  BusinessOnboardingPage,
-  BusinessSettingsPage,
-  BusinessStaffDirectoryPage,
-  BusinessVerificationPage,
-  EmployeeDashboard,
-  EmployeeNotificationsPage,
-  EmployeeQrEntryPage,
-  EmployeeSettingsPage,
-  EmployeeTipGoalsPage,
-  GlobalTransactionsPage,
-  HeroAnimationDemoPage,
-  HeroSectionDemoPage,
-  LocationQrLandingPage,
-  NotificationInboxPage,
-  BusinessSupportPage,
-  SupportTicketDetailPage,
-  PaymentPage,
-  PlatformAnnouncementsPage,
-  PlatformSettingsPage,
-  PlatformUserManagementPage,
-  QRCodeManagementPage,
-  QRLandingPage,
-  RatingPage,
-  TipCompletionPage,
-  SaasDashboard3DHeroPage,
-  StaffLandingPage,
-  StaffManagementPage,
-  StaffTipByPublicPathPage,
-  SuccessPage,
-  TableQrLandingPage,
-  TablesPage,
-  TipAmountPage,
-  TipsActivityPage,
-  CustomerFeedbackPage,
-  BusinessDashboard,
-  LandingPage,
-  LocationsPage,
-} from './routing/lazyPages';
+  routeLazy,
+  routeLazyDefault,
+  businessLayoutLazy,
+  employeeLayoutLazy,
+  authPageLazy,
+  joinPageLazy,
+  forgotPasswordPageLazy,
+  resetPasswordPageLazy,
+  activateEmployeePageLazy,
+  verifyEmailPageLazy,
+  checkEmailPageLazy,
+  platformAdminLoginPageLazy,
+  unauthorizedPageLazy,
+} from './routing/routeLazy';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { SuperAdminLayout } from './layouts/SuperAdminLayout';
-import { BusinessLayout } from './layouts/BusinessLayout';
-import { EmployeeLayout } from './layouts/EmployeeLayout';
-import { UnauthorizedPage } from './pages/UnauthorizedPage';
 import { ApprovedBusinessGate } from './components/ApprovedBusinessGate';
 import { PendingVerificationAllowedGate } from './components/PendingVerificationAllowedGate';
 import { PendingVerification } from './components/PendingVerification';
@@ -178,11 +126,10 @@ const routes: RouteObject[] = [
     children: [
   {
     path: '/',
-    element: (
-      <RouteChunkBoundary variant="minimal" registrationKey="landing">
-        <LandingPage />
-      </RouteChunkBoundary>
-    ),
+    lazy: async () => {
+      const { LandingPage } = await import('./pages/LandingPage');
+      return { Component: LandingPage };
+    },
     errorElement: <ErrorBoundary />,
   },
   {
@@ -197,12 +144,12 @@ const routes: RouteObject[] = [
   },
   {
     path: '/auth',
-    Component: AuthPage,
+    lazy: authPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/login',
-    Component: AuthPage,
+    lazy: authPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -212,16 +159,22 @@ const routes: RouteObject[] = [
   },
   {
     path: '/employee/login',
-    Component: AuthPage,
+    lazy: authPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/onboarding',
-    element: (
-      <ProtectedRoute allowedRoles={['business']}>
-        <BusinessOnboardingPage />
-      </ProtectedRoute>
-    ),
+    lazy: async () => {
+      const { BusinessOnboardingPage } = await import('./pages/BusinessOnboardingPage');
+      function OnboardingRoute() {
+        return (
+          <ProtectedRoute allowedRoles={['business']}>
+            <BusinessOnboardingPage />
+          </ProtectedRoute>
+        );
+      }
+      return { Component: OnboardingRoute };
+    },
     errorElement: <ErrorBoundary />,
   },
   {
@@ -231,42 +184,42 @@ const routes: RouteObject[] = [
   },
   {
     path: '/join',
-    Component: JoinPage,
+    lazy: joinPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/join/signup',
-    Component: AuthPage,
+    lazy: authPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/join/:code',
-    Component: JoinPage,
+    lazy: joinPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/signup',
-    Component: AuthPage,
+    lazy: authPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/forgot-password',
-    Component: ForgotPasswordPage,
+    lazy: forgotPasswordPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/reset-password/:token',
-    Component: ResetPasswordPage,
+    lazy: resetPasswordPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/activate',
-    Component: ActivateEmployeePage,
+    lazy: activateEmployeePageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/verify-email',
-    Component: CheckEmailPage,
+    lazy: checkEmailPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -276,17 +229,17 @@ const routes: RouteObject[] = [
   },
   {
     path: '/verify',
-    Component: VerifyEmailPage,
+    lazy: verifyEmailPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/pricing',
-    Component: PricingPage,
+    lazy: routeLazy(() => import('./pages/PricingPage'), 'PricingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/unauthorized',
-    Component: UnauthorizedPage,
+    lazy: unauthorizedPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -309,21 +262,21 @@ const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
     children: [
       {
-        element: <BusinessLayout />,
+        lazy: businessLayoutLazy,
         children: [
-      { index: true, Component: BusinessDashboard },
-      { path: 'settings', Component: BusinessSettingsPage },
+      { index: true, lazy: routeLazy(() => import('./pages/business/BusinessDashboard'), 'BusinessDashboard') },
+      { path: 'settings', lazy: routeLazy(() => import('./pages/business/BusinessSettingsPage'), 'BusinessSettingsPage') },
       { path: 'profile', element: <Navigate to="/dashboard/settings?section=business" replace /> },
-      { path: 'staff-management', Component: StaffManagementPage },
-      { path: 'qr-code-management', Component: QRCodeManagementPage },
-      { path: 'locations', Component: LocationsPage },
-      { path: 'tables', Component: TablesPage },
-      { path: 'transactions', Component: TipsActivityPage },
-      { path: 'customer-feedback', Component: CustomerFeedbackPage },
+      { path: 'staff-management', lazy: routeLazy(() => import('./pages/business/StaffManagementPage'), 'StaffManagementPage') },
+      { path: 'qr-code-management', lazy: routeLazy(() => import('./pages/business/QRCodeManagementPage'), 'QRCodeManagementPage') },
+      { path: 'locations', lazy: routeLazy(() => import('./pages/business/LocationsPage'), 'LocationsPage') },
+      { path: 'tables', lazy: routeLazy(() => import('./pages/business/TablesPage'), 'TablesPage') },
+      { path: 'transactions', lazy: routeLazy(() => import('./pages/shared/TipsActivityPage'), 'TipsActivityPage') },
+      { path: 'customer-feedback', lazy: routeLazy(() => import('./pages/business/CustomerFeedbackPage'), 'CustomerFeedbackPage') },
       { path: 'profile-settings', element: <Navigate to="/dashboard/settings?section=general" replace /> },
-      { path: 'support', Component: BusinessSupportPage },
-      { path: 'support/:ticketId', Component: SupportTicketDetailPage },
-      { path: 'notifications', Component: NotificationInboxPage },
+      { path: 'support', lazy: routeLazy(() => import('./pages/business/BusinessSupportPage'), 'BusinessSupportPage') },
+      { path: 'support/:ticketId', lazy: routeLazy(() => import('./pages/shared/SupportTicketDetailPage'), 'SupportTicketDetailPage') },
+      { path: 'notifications', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
       { path: 'subscriptions', element: <Navigate to="/dashboard/transactions" replace /> },
       { path: 'customers', element: <Navigate to="/dashboard" replace /> },
       { path: 'analytics', element: <Navigate to="/dashboard" replace /> },
@@ -338,7 +291,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/platform-admin/login',
-    Component: PlatformAdminLoginPage,
+    lazy: platformAdminLoginPageLazy,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -348,23 +301,32 @@ const routes: RouteObject[] = [
   },
   {
     path: '/platform-admin',
-    element: (
-      <PlatformAdminRoute>
-        <SuperAdminLayout />
-      </PlatformAdminRoute>
-    ),
+    lazy: async () => {
+      const [{ PlatformAdminRoute }, { SuperAdminLayout }] = await Promise.all([
+        import('./components/PlatformAdminRoute'),
+        import('./layouts/SuperAdminLayout'),
+      ]);
+      function PlatformAdminShell() {
+        return (
+          <PlatformAdminRoute>
+            <SuperAdminLayout />
+          </PlatformAdminRoute>
+        );
+      }
+      return { Component: PlatformAdminShell };
+    },
     errorElement: <ErrorBoundary />,
     children: [
-      { path: 'dashboard', Component: AdminDashboard },
-      { path: 'businesses', Component: BusinessVerificationPage },
-      { path: 'businesses/:id', Component: BusinessDetailPage },
-      { path: 'transactions', Component: GlobalTransactionsPage },
-      { path: 'logs', Component: AuditLogsPage },
-      { path: 'settings', Component: PlatformSettingsPage },
-      { path: 'users', Component: PlatformUserManagementPage },
-      { path: 'notifications', Component: NotificationInboxPage },
-      { path: 'support/:ticketId', Component: SupportTicketDetailPage },
-      { path: 'announcements', Component: PlatformAnnouncementsPage },
+      { path: 'dashboard', lazy: routeLazy(() => import('./components/AdminDashboard'), 'AdminDashboard') },
+      { path: 'businesses', lazy: routeLazy(() => import('./pages/platform/BusinessVerificationPage'), 'BusinessVerificationPage') },
+      { path: 'businesses/:id', lazy: routeLazy(() => import('./pages/platform/BusinessDetailPage'), 'BusinessDetailPage') },
+      { path: 'transactions', lazy: routeLazy(() => import('./pages/platform/GlobalTransactionsPage'), 'GlobalTransactionsPage') },
+      { path: 'logs', lazy: routeLazy(() => import('./pages/platform/AuditLogsPage'), 'AuditLogsPage') },
+      { path: 'settings', lazy: routeLazy(() => import('./pages/platform/PlatformSettingsPage'), 'PlatformSettingsPage') },
+      { path: 'users', lazy: routeLazy(() => import('./pages/platform/PlatformUserManagementPage'), 'PlatformUserManagementPage') },
+      { path: 'notifications', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
+      { path: 'support/:ticketId', lazy: routeLazy(() => import('./pages/shared/SupportTicketDetailPage'), 'SupportTicketDetailPage') },
+      { path: 'announcements', lazy: routeLazy(() => import('./pages/platform/PlatformAnnouncementsPage'), 'PlatformAnnouncementsPage') },
       { index: true, element: <Navigate to="/platform-admin/dashboard" replace /> },
     ],
   },
@@ -411,78 +373,78 @@ const routes: RouteObject[] = [
   // Legal & Company Pages
   {
     path: '/privacy',
-    Component: PrivacyPage,
+    lazy: routeLazy(() => import('./pages/PrivacyPage'), 'PrivacyPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/terms',
-    Component: TermsPage,
+    lazy: routeLazy(() => import('./pages/TermsPage'), 'TermsPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/cookies',
-    Component: CookiesPage,
+    lazy: routeLazy(() => import('./pages/CookiesPage'), 'CookiesPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/contact',
-    Component: ContactPage,
+    lazy: routeLazy(() => import('./pages/ContactPage'), 'ContactPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/careers',
-    Component: CareersPage,
+    lazy: routeLazy(() => import('./pages/CareersPage'), 'CareersPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/blog',
-    Component: BlogPage,
+    lazy: routeLazy(() => import('./pages/BlogPage'), 'BlogPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/help',
-    Component: HelpPage,
+    lazy: routeLazy(() => import('./pages/HelpPage'), 'HelpPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/faq',
-    Component: FAQPage,
+    lazy: routeLazy(() => import('./pages/FAQPage'), 'FAQPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/mobile-app',
-    Component: MobileAppPage,
+    lazy: routeLazy(() => import('./pages/MobileAppPage'), 'MobileAppPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/features',
-    Component: FeaturesPage,
+    lazy: routeLazy(() => import('./pages/FeaturesPage'), 'FeaturesPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/how-it-works',
-    Component: HowItWorksPage,
+    lazy: routeLazy(() => import('./pages/HowItWorksPage'), 'HowItWorksPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/hero-demo',
-    Component: HeroSectionDemoPage,
+    lazy: routeLazyDefault(() => import('./pages/HeroSectionDemoPage')),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/hero-animation-demo',
-    Component: HeroAnimationDemoPage,
+    lazy: routeLazy(() => import('./pages/HeroAnimationDemoPage'), 'HeroAnimationDemoPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/saas-3d-hero',
-    Component: SaasDashboard3DHeroPage,
+    lazy: routeLazyDefault(() => import('./pages/SaasDashboard3DHeroPage')),
     errorElement: <ErrorBoundary />,
   },
   // Customer Flow Pages
   {
     path: '/staff/:slug',
-    Component: StaffLandingPage,
+    lazy: routeLazy(() => import('./pages/customer/StaffLandingPage'), 'StaffLandingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
@@ -492,27 +454,27 @@ const routes: RouteObject[] = [
   },
   {
     path: '/qr/employee/:employeeId',
-    Component: EmployeeQrEntryPage,
+    lazy: routeLazy(() => import('./pages/customer/EmployeeQrEntryPage'), 'EmployeeQrEntryPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/qr/location/:locationId',
-    Component: LocationQrLandingPage,
+    lazy: routeLazy(() => import('./pages/customer/LocationQrLandingPage'), 'LocationQrLandingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/qr/table/:tableId',
-    Component: TableQrLandingPage,
+    lazy: routeLazy(() => import('./pages/customer/TableQrLandingPage'), 'TableQrLandingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/qr-landing/:businessId?',
-    Component: QRLandingPage,
+    lazy: routeLazy(() => import('./pages/customer/QRLandingPage'), 'QRLandingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/table/:qrSlug',
-    Component: QRLandingPage,
+    lazy: routeLazy(() => import('./pages/customer/QRLandingPage'), 'QRLandingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
@@ -522,27 +484,27 @@ const routes: RouteObject[] = [
   },
   {
     path: '/tip-amount',
-    Component: TipAmountPage,
+    lazy: routeLazy(() => import('./pages/customer/TipAmountPage'), 'TipAmountPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/payment',
-    Component: PaymentPage,
+    lazy: routeLazy(() => import('./pages/customer/PaymentPage'), 'PaymentPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/success',
-    Component: SuccessPage,
+    lazy: routeLazy(() => import('./pages/customer/SuccessPage'), 'SuccessPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/rating',
-    Component: RatingPage,
+    lazy: routeLazy(() => import('./pages/customer/RatingPage'), 'RatingPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/tip-complete',
-    Component: TipCompletionPage,
+    lazy: routeLazy(() => import('./pages/customer/TipCompletionPage'), 'TipCompletionPage'),
     errorElement: <ErrorBoundary />,
   },
   // Employee Dashboard Pages (staff only) — shared shell for walkthrough ribbon
@@ -550,18 +512,23 @@ const routes: RouteObject[] = [
     path: '/employee',
     element: (
       <ProtectedRoute allowedRoles={['employee']}>
-        <EmployeeLayout />
+        <Outlet />
       </ProtectedRoute>
     ),
     errorElement: <ErrorBoundary />,
     children: [
-      { index: true, element: <Navigate to="/employee/dashboard" replace /> },
-      { path: 'dashboard', Component: EmployeeDashboard },
-      { path: 'transactions', Component: TipsActivityPage },
-      { path: 'notifications', Component: EmployeeNotificationsPage },
-      { path: 'inbox', Component: NotificationInboxPage },
-      { path: 'tip-goals', Component: EmployeeTipGoalsPage },
-      { path: 'settings', Component: EmployeeSettingsPage },
+      {
+        lazy: employeeLayoutLazy,
+        children: [
+          { index: true, element: <Navigate to="/employee/dashboard" replace /> },
+          { path: 'dashboard', lazy: routeLazy(() => import('./pages/employee/EmployeeDashboard'), 'EmployeeDashboard') },
+          { path: 'transactions', lazy: routeLazy(() => import('./pages/shared/TipsActivityPage'), 'TipsActivityPage') },
+          { path: 'notifications', lazy: routeLazy(() => import('./pages/employee/EmployeeNotificationsPage'), 'EmployeeNotificationsPage') },
+          { path: 'inbox', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
+          { path: 'tip-goals', lazy: routeLazy(() => import('./pages/employee/EmployeeTipGoalsPage'), 'EmployeeTipGoalsPage') },
+          { path: 'settings', lazy: routeLazy(() => import('./pages/employee/EmployeeSettingsPage'), 'EmployeeSettingsPage') },
+        ],
+      },
     ],
   },
   {
@@ -633,12 +600,12 @@ const routes: RouteObject[] = [
   // Canonical public slug routes (must stay last so static paths win over params)
   {
     path: '/:businessSlug/:employeeSlug',
-    Component: StaffTipByPublicPathPage,
+    lazy: routeLazy(() => import('./pages/customer/StaffTipByPublicPathPage'), 'StaffTipByPublicPathPage'),
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/:businessSlug',
-    Component: BusinessStaffDirectoryPage,
+    lazy: routeLazy(() => import('./pages/customer/BusinessStaffDirectoryPage'), 'BusinessStaffDirectoryPage'),
     errorElement: <ErrorBoundary />,
   },
     ],

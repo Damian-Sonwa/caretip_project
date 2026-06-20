@@ -4,6 +4,8 @@ import { Footer } from "@/app/components/Footer";
 import { AuthLikePageBackground } from "@/app/components/AuthLikePageBackground";
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
+import { ViewportDeferred } from "@/lib/publicRouteDefer";
 
 type PublicPageShellProps = {
   children: ReactNode;
@@ -25,15 +27,18 @@ export function PublicPageShell({
   contentClassName,
   maxWidth = "prose",
 }: PublicPageShellProps) {
+  usePublicMountProbe("PublicPageShell");
   return (
     <div className={publicPageUi.page}>
-      <AuthLikePageBackground />
+      <AuthLikePageBackground animated={false} />
       <div className={publicPageUi.shell}>
         <Navigation />
         <main className={cn(publicPageUi.main, maxWidthClass[maxWidth], className)}>
           <div className={contentClassName}>{children}</div>
         </main>
-        <Footer />
+        <ViewportDeferred minHeight="12rem" rootMargin="280px 0px">
+          <Footer />
+        </ViewportDeferred>
       </div>
     </div>
   );

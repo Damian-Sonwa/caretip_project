@@ -1,16 +1,18 @@
 import { Twitter, Linkedin, Github } from "lucide-react";
 import { Link } from "react-router";
-import { useMemo } from "react";
+import { useMemo, memo } from "react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { PrefetchLink } from "@/app/components/PrefetchLink";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 const APP_VERSION =
   typeof import.meta.env.VITE_APP_VERSION === "string" && import.meta.env.VITE_APP_VERSION.trim() !== ""
     ? import.meta.env.VITE_APP_VERSION.trim()
     : null;
 
-export function Footer({
+export const Footer = memo(function Footer({
   variant = "default",
   surface = "light",
   className,
@@ -20,7 +22,8 @@ export function Footer({
   surface?: "light" | "dark";
   className?: string;
 }) {
-  const { t } = useTranslation();
+  usePublicMountProbe("Footer");
+  const { t, i18n } = useTranslation();
   const year = new Date().getFullYear();
 
   const footerColumns = useMemo(
@@ -47,7 +50,7 @@ export function Footer({
         { name: t("footer.cookies"), to: "/cookies" },
       ],
     }),
-    [t],
+    [t, i18n.language],
   );
 
   if (variant === "minimal") {
@@ -82,15 +85,15 @@ export function Footer({
     >
       <div
         aria-hidden
-        className="caretip-site-footer-bg absolute inset-0 bg-gradient-to-br from-neutral-900 via-zinc-900 to-neutral-950"
+        className="caretip-site-footer-bg pointer-events-none absolute inset-0 bg-gradient-to-br from-neutral-900 via-zinc-900 to-neutral-950"
       />
       <div aria-hidden className="caretip-site-footer-texture pointer-events-none absolute inset-0" />
       <div
-        className="caretip-site-footer-ambient-r absolute right-0 top-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
+        className="caretip-site-footer-ambient-r pointer-events-none absolute right-0 top-0 h-96 w-96 rounded-full bg-accent/10 blur-3xl"
         aria-hidden
       />
       <div
-        className="caretip-site-footer-ambient-l absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
+        className="caretip-site-footer-ambient-l pointer-events-none absolute bottom-0 left-0 h-96 w-96 rounded-full bg-primary/10 blur-3xl"
         aria-hidden
       />
 
@@ -103,21 +106,21 @@ export function Footer({
             <div className="flex items-center gap-4 pt-2">
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
                 aria-label={t("footer.twitter")}
               >
                 <Twitter className="h-5 w-5" />
               </a>
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
                 aria-label={t("footer.linkedin")}
               >
                 <Linkedin className="h-5 w-5" />
               </a>
               <a
                 href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-all hover:bg-white/10 hover:text-white"
+                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
                 aria-label={t("footer.github")}
               >
                 <Github className="h-5 w-5" />
@@ -138,13 +141,13 @@ export function Footer({
               <ul className="space-y-3.5">
                 {col.links.map((link) => (
                   <li key={`${col.key}-${link.to}-${link.name}`}>
-                    <Link
+                    <PrefetchLink
                       to={link.to}
-                      className="caretip-site-footer-link inline-block text-sm text-neutral-400 transition-[color,opacity] duration-300 ease-out hover:text-white/95"
+                      className="caretip-site-footer-link inline-block text-sm text-neutral-400 transition-[color,opacity] duration-300 ease-out hover:text-white/95 touch-manipulation"
                       onClick={link.to.startsWith("/#") ? undefined : handleLinkClick}
                     >
                       {link.name}
-                    </Link>
+                    </PrefetchLink>
                   </li>
                 ))}
               </ul>
@@ -164,4 +167,4 @@ export function Footer({
       </div>
     </footer>
   );
-}
+});

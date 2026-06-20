@@ -1,6 +1,6 @@
+import type { CSSProperties } from "react";
 import { useMemo } from "react";
 import { Coins, Star, Users, type LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 
@@ -22,40 +22,15 @@ const FLOAT_PILL_BASE = cn(
   "lg:z-[31]",
 );
 
-/**
- * Glass metric pills — positions from caretip-landing-hero-visual-refine.css
- * (anchored to the device composition, not the full column).
- */
+/** Glass metric pills — CSS float animation (no Framer Motion). */
 export function LandingHeroFloatingCards() {
   const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
 
   const pills = useMemo<FloatPillSpec[]>(
     () => [
-      {
-        id: "tip",
-        pillKey: "landing.showcase.heroFloatPillTip",
-        Icon: Coins,
-        floatDuration: 20,
-        floatDelay: 0,
-        floatOffset: -0.35,
-      },
-      {
-        id: "rating",
-        pillKey: "landing.showcase.heroFloatPillRating",
-        Icon: Star,
-        floatDuration: 21,
-        floatDelay: 0.8,
-        floatOffset: -0.3,
-      },
-      {
-        id: "staff",
-        pillKey: "landing.showcase.heroFloatPillStaff",
-        Icon: Users,
-        floatDuration: 19,
-        floatDelay: 0.4,
-        floatOffset: -0.35,
-      },
+      { id: "tip", pillKey: "landing.showcase.heroFloatPillTip", Icon: Coins, floatDuration: 20, floatDelay: 0, floatOffset: -0.35 },
+      { id: "rating", pillKey: "landing.showcase.heroFloatPillRating", Icon: Star, floatDuration: 21, floatDelay: 0.8, floatOffset: -0.3 },
+      { id: "staff", pillKey: "landing.showcase.heroFloatPillStaff", Icon: Users, floatDuration: 19, floatDelay: 0.4, floatOffset: -0.35 },
     ],
     [],
   );
@@ -65,30 +40,15 @@ export function LandingHeroFloatingCards() {
       {pills.map((pill) => {
         const Icon = pill.Icon;
         return (
-          <motion.div
+          <div
             key={pill.id}
-            className={cn(FLOAT_PILL_BASE, `caretip-hero-float-pill--${pill.id}`)}
-            initial={reduceMotion ? false : { opacity: 0, y: 4 }}
-            animate={
-              reduceMotion
-                ? { opacity: 1, y: 0 }
-                : {
-                    opacity: 1,
-                    y: [0, pill.floatOffset, 0],
-                  }
-            }
-            transition={
-              reduceMotion
-                ? { duration: 0.5, delay: pill.floatDelay * 0.12 }
-                : {
-                    opacity: { duration: 0.55, delay: pill.floatDelay * 0.12, ease: "easeOut" },
-                    y: {
-                      duration: pill.floatDuration,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: pill.floatDelay,
-                    },
-                  }
+            className={cn(FLOAT_PILL_BASE, `caretip-hero-float-pill--${pill.id}`, "caretip-hero-float-pill--animate")}
+            style={
+              {
+                ["--float-duration" as string]: `${pill.floatDuration}s`,
+                ["--float-delay" as string]: `${pill.floatDelay}s`,
+                ["--float-offset" as string]: `${pill.floatOffset * 16}px`,
+              } as CSSProperties
             }
           >
             <Icon
@@ -97,7 +57,7 @@ export function LandingHeroFloatingCards() {
               aria-hidden
             />
             <span className="min-w-0 truncate whitespace-nowrap">{t(pill.pillKey)}</span>
-          </motion.div>
+          </div>
         );
       })}
     </div>

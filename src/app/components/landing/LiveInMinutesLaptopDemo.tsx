@@ -1,9 +1,10 @@
 import * as React from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { Check, QrCode, Sparkles, UserPlus, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useMinWidthMedia } from "@/lib/motionPerf";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 import caretipLogo from "@/assets/brand/company_logo.png";
 import { LiveInMinutesOnboardingPhone } from "@/app/components/landing/LiveInMinutesOnboardingPhone";
 
@@ -45,7 +46,7 @@ export function LiveInMinutesLaptopDemo({
   activeIndex = 0,
 }: LiveInMinutesLaptopDemoProps) {
   const { t, i18n } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const isLgUp = useMinWidthMedia(1024);
   const index = Math.min(Math.max(0, activeIndex), SETUP_JOURNEY_STEP_COUNT - 1);
 
@@ -56,17 +57,12 @@ export function LiveInMinutesLaptopDemo({
       t("landing.simpleSetup.visualCaption3"),
       t("landing.simpleSetup.visualCaption4"),
     ],
-    [t],
+    [t, i18n.language],
   );
 
   if (videoSrc) {
     return (
-      <motion.div
-        className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,15.75rem)] overflow-hidden rounded-[1.35rem] shadow-[0_20px_40px_-24px_rgba(30,24,16,0.26),0_8px_18px_-10px_rgba(30,24,16,0.12)] ring-1 ring-neutral-900/[0.06] sm:max-w-[20rem] sm:rounded-[1.5rem] lg:max-w-[22rem] dark:ring-white/[0.08]"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      >
+      <LandingReveal className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,15.75rem)] overflow-hidden rounded-[1.35rem] shadow-[0_20px_40px_-24px_rgba(30,24,16,0.26),0_8px_18px_-10px_rgba(30,24,16,0.12)] ring-1 ring-neutral-900/[0.06] sm:max-w-[20rem] sm:rounded-[1.5rem] lg:max-w-[22rem] dark:ring-white/[0.08]">
         <video
           autoPlay
           muted
@@ -75,20 +71,14 @@ export function LiveInMinutesLaptopDemo({
           className="aspect-[6/5] w-full object-cover sm:aspect-[3/4]"
           src={videoSrc}
         />
-      </motion.div>
+      </LandingReveal>
     );
   }
 
   return (
     <div className="caretip-live-minutes-stage caretip-live-minutes-stage--onboarding relative mx-auto w-full max-w-[min(100%,18rem)] sm:max-w-[20rem]">
       <div className="caretip-live-minutes-onboarding-preview">
-        <motion.div
-          className="caretip-live-minutes-onboarding-slot relative flex items-center justify-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true, margin: "-6%" }}
-          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
-        >
+        <LandingReveal className="caretip-live-minutes-onboarding-slot relative flex items-center justify-center">
           <LiveInMinutesOnboardingPhone
             activeIndex={index}
             language={i18n.language}
@@ -101,7 +91,7 @@ export function LiveInMinutesLaptopDemo({
               </PhoneFrame>
             }
           />
-        </motion.div>
+        </LandingReveal>
 
         <p className="caretip-live-minutes-caption mt-1 font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-1.5 sm:text-[13px] lg:text-sm">
           {captions[index]}

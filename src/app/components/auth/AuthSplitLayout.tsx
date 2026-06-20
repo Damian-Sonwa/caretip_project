@@ -13,6 +13,8 @@ type AuthSplitLayoutProps = {
   marketingScene?: AuthMarketingScene;
   /** Smaller brand panel for verification / recovery flows. */
   compactMarketing?: boolean;
+  /** Hide back-to-home row (rare — default shows on all auth flows). */
+  hideBackToHome?: boolean;
 };
 
 export function AuthSplitLayout({
@@ -22,6 +24,7 @@ export function AuthSplitLayout({
   authLane = "business",
   marketingScene,
   compactMarketing = false,
+  hideBackToHome = false,
 }: AuthSplitLayoutProps) {
   return (
     <AuthCurvedBlobShell
@@ -33,24 +36,16 @@ export function AuthSplitLayout({
           signUpMode={signUpMode}
           marketingScene={marketingScene}
           compact={compactMarketing}
+          showBackToHome={!hideBackToHome}
         />
       }
-
       authPanel={
-
         <div className="caretip-auth-split-layout__panel-inner">
-
           {topSlot ? <div className="caretip-auth-split-layout__top-slot">{topSlot}</div> : null}
-
           {children}
-
         </div>
-
       }
-
     />
-
   );
-
 }
 

@@ -5,8 +5,10 @@ import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { PublicPageHeader } from "@/components/public/PublicPageHeader";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
+import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export function ContactPage() {
+  usePublicMountProbe("ContactPage");
   const { t } = useTranslation();
 
   return (
@@ -30,7 +32,7 @@ export function ContactPage() {
               <input
                 type="text"
                 id="name"
-                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-[box-shadow,border-color] focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder={t("staticPages.contact.placeholderName")}
               />
             </div>
@@ -42,7 +44,7 @@ export function ContactPage() {
               <input
                 type="email"
                 id="email"
-                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-[box-shadow,border-color] focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder={t("staticPages.contact.placeholderEmail")}
               />
             </div>
@@ -54,7 +56,7 @@ export function ContactPage() {
               <input
                 type="text"
                 id="subject"
-                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-[box-shadow,border-color] focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder={t("staticPages.contact.placeholderSubject")}
               />
             </div>
@@ -66,7 +68,7 @@ export function ContactPage() {
               <textarea
                 id="message"
                 rows={5}
-                className="w-full resize-none rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+                className="w-full resize-none rounded-xl border border-neutral-200/90 bg-white px-4 py-3 text-neutral-900 placeholder:text-neutral-500 transition-[box-shadow,border-color] focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
                 placeholder={t("staticPages.contact.placeholderMessage")}
               />
             </div>

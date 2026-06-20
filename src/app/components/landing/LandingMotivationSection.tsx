@@ -1,20 +1,19 @@
 import { useMemo } from "react";
-import { motion } from "motion/react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { LandingBenefitChecklist } from "@/components/landing/LandingCheckBadge";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
-import { landingFadeReveal, landingFadeRevealWithDelay } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 import { LandingMotivationActivityStack } from "./LandingMotivationActivityStack";
 
 export function LandingMotivationSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const subtitle = t("landing.motivation.subtitle");
   const points = useMemo(
     () => [t("landing.motivation.point1"), t("landing.motivation.point2"), t("landing.motivation.point3")],
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -35,10 +34,7 @@ export function LandingMotivationSection() {
           "relative",
         )}
       >
-        <motion.div
-          className={cn(landingUi.copyColumn, "lg:order-1")}
-          {...landingFadeReveal}
-        >
+        <LandingReveal className={cn(landingUi.copyColumn, "lg:order-1")}>
           <div
             className={cn(
               landingUi.copyStack,
@@ -82,18 +78,18 @@ export function LandingMotivationSection() {
               </div>
             </div>
           </div>
-        </motion.div>
+        </LandingReveal>
 
-        <motion.div
+        <LandingReveal
+          delay={0.08}
           className={cn(
             landingUi.visualColumn,
             landingUi.mobileStackVisual,
             "caretip-motivation-visual lg:order-2 lg:justify-end",
           )}
-          {...landingFadeRevealWithDelay(0.08)}
         >
           <LandingMotivationActivityStack />
-        </motion.div>
+        </LandingReveal>
       </div>
     </section>
   );

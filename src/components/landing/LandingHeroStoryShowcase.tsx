@@ -1,19 +1,24 @@
-import { useEffect, useState, type ImgHTMLAttributes } from "react";
-import { useReducedMotion } from "motion/react";
+import { useEffect, useState, type CSSProperties, type ImgHTMLAttributes } from "react";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 
 import { LandingHeroFloatingCards } from "@/components/landing/LandingHeroFloatingCards";
 import { landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
-import storyHero01 from "../../../images/story-hero01.png";
-import storyHero02 from "../../../images/story-hero02.png";
+import storyHero01Png from "../../../images/story-hero01.png";
+import storyHero01Webp from "../../../images/story-hero01.webp";
+import storyHero01Avif from "../../../images/story-hero01.avif";
+import storyHero02Png from "../../../images/story-hero02.png";
+import storyHero02Webp from "../../../images/story-hero02.webp";
+import storyHero02Avif from "../../../images/story-hero02.avif";
 
 const STORY_FRAMES = [
-  { src: storyHero01, key: "story-hero01" },
-  { src: storyHero02, key: "story-hero02" },
+  { key: "story-hero01", png: storyHero01Png, webp: storyHero01Webp, avif: storyHero01Avif },
+  { key: "story-hero02", png: storyHero02Png, webp: storyHero02Webp, avif: storyHero02Avif },
 ] as const;
 
 const STORY_CYCLE_MS = 5600;
+const HERO_IMAGE_SIZES = "(max-width: 1023px) min(90vw, 448px), 672px";
 
 type LandingHeroStoryShowcaseProps = {
   alt: string;
@@ -22,10 +27,10 @@ type LandingHeroStoryShowcaseProps = {
 
 /**
  * Hero story frames — slow crossfade (not horizontal marquee).
- * Images are direct children of `.caretip-hero-media-clip` so sizing matches the single-image hero.
+ * Images are direct children of `.caretip-hero-media-clip` (via `display: contents` on picture).
  */
 export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStoryShowcaseProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
@@ -35,6 +40,8 @@ export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStorySho
     }, STORY_CYCLE_MS);
     return () => window.clearInterval(timer);
   }, [reduceMotion]);
+
+  const frames = reduceMotion ? STORY_FRAMES.slice(0, 1) : STORY_FRAMES;
 
   return (
     <div className={cn("caretip-hero-story-showcase-root", className)}>
@@ -46,24 +53,29 @@ export function LandingHeroStoryShowcase({ alt, className }: LandingHeroStorySho
 
         <div className={landingUi.heroMediaWrap}>
           <div className={landingUi.heroMediaClip}>
-            {(reduceMotion ? STORY_FRAMES.slice(0, 1) : STORY_FRAMES).map((frame, index) => {
+            {frames.map((frame, index) => {
               const isActive = index === activeIndex;
               return (
-                <img
-                  key={frame.key}
-                  src={frame.src}
-                  alt={isActive ? alt : ""}
-                  aria-hidden={!isActive}
-                  className={cn(
-                    landingUi.heroShowcaseImg,
-                    "caretip-hero-story-frame",
-                    isActive && "caretip-hero-story-frame--active",
-                  )}
-                  loading="eager"
-                  decoding="async"
-                  sizes="(max-width: 1023px) min(90vw, 448px), 672px"
-                  {...({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)}
-                />
+                <picture key={frame.key} className="contents">
+                  <source type="image/avif" srcSet={frame.avif} />
+                  <source type="image/webp" srcSet={frame.webp} />
+                  <img
+                    src={frame.png}
+                    alt={isActive ? alt : ""}
+                    aria-hidden={!isActive}
+                    className={cn(
+                      landingUi.heroShowcaseImg,
+                      "caretip-hero-story-frame",
+                      isActive && "caretip-hero-story-frame--active",
+                    )}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    sizes={HERO_IMAGE_SIZES}
+                    {...(index === 0
+                      ? ({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>)
+                      : {})}
+                  />
+                </picture>
               );
             })}
           </div>

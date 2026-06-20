@@ -1,10 +1,9 @@
 import type { ReactNode } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { Link } from "react-router";
 import { LandingParallaxWrap } from "@/components/landing/LandingParallaxWrap";
-import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
-import { useMinWidthMedia } from "@/lib/motionPerf";
+import { LandingReveal } from "@/components/landing/LandingReveal";
+import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
 import {
@@ -21,7 +20,6 @@ export type LandingShowcaseBenefit = {
 
 export type LandingSplitShowcaseSectionProps = {
   id: string;
-  /** Visual column on large screens: left or right */
   visualPosition: "left" | "right";
   tone?: "warm" | "muted";
   eyebrow: string;
@@ -53,9 +51,6 @@ export function LandingSplitShowcaseSection({
 }: LandingSplitShowcaseSectionProps) {
   const visualLgOrder = visualPosition === "left" ? "lg:order-1" : "lg:order-2";
   const copyLgOrder = visualPosition === "left" ? "lg:order-2" : "lg:order-1";
-  const reduceMotion = useReducedMotion();
-  const isLgUp = useMinWidthMedia(1024);
-  const isNarrowViewport = useMediaQuery("(max-width: 1023px)");
   const visualDelay = landingStaggerDelay(0);
   const copyDelay = landingStaggerDelay(1);
 
@@ -69,23 +64,17 @@ export function LandingSplitShowcaseSection({
       )}
     >
       <div className={cn(landingUi.showcaseGrid, landingUi.sectionShell)}>
-        <motion.div
+        <LandingReveal
           data-polish-view
-          {...landingScrollRevealProps(reduceMotion, {
-            delay: visualDelay,
-            isMobile: isNarrowViewport || !isLgUp,
-          })}
+          delay={visualDelay}
           className={cn(landingUi.showcaseVisualCol, landingUi.mobileStackVisual, visualLgOrder)}
         >
           <LandingParallaxWrap className="relative w-full">{visual}</LandingParallaxWrap>
-        </motion.div>
+        </LandingReveal>
 
-        <motion.div
+        <LandingReveal
           data-polish-view
-          {...landingScrollRevealProps(reduceMotion, {
-            delay: copyDelay,
-            isMobile: isNarrowViewport || !isLgUp,
-          })}
+          delay={copyDelay}
           className={cn(landingUi.showcaseCopy, "lg:flex lg:flex-col", copyLgOrder)}
         >
           <div className={landingUi.showcaseIntro}>
@@ -141,13 +130,12 @@ export function LandingSplitShowcaseSection({
               </div>
             ) : null}
           </div>
-        </motion.div>
+        </LandingReveal>
       </div>
     </section>
   );
 }
 
-/** Shared image frame + ambient glow for split showcase visuals */
 export function LandingShowcaseVisualFrame({
   children,
   className,
@@ -176,7 +164,6 @@ export function LandingShowcaseCoverImage({
   alt: string;
   objectPosition?: string;
   className?: string;
-  /** Optional floating stat line on desktop (presentation only). */
   floatHint?: string;
 }) {
   return (

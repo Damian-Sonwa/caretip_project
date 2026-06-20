@@ -1,6 +1,11 @@
 import type { ReactNode } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import {
+  MOBILE_MENU_DISMISS_GUARD_MS,
+  canDismissMobileMenuOverlay,
+} from "@/app/lib/mobileMenuDismissGuard";
 
 type MobileDrawerProps = {
   isOpen: boolean;
@@ -24,6 +29,21 @@ export function MobileDrawer({
   ariaLabel,
 }: MobileDrawerProps) {
   const reduceMotion = useReducedMotion();
+  const openedAtRef = useRef(0);
+  const [backdropDismissible, setBackdropDismissible] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) {
+      setBackdropDismissible(false);
+      return;
+    }
+    openedAtRef.current = performance.now();
+    const id = window.setTimeout(
+      () => setBackdropDismissible(true),
+      MOBILE_MENU_DISMISS_GUARD_MS,
+    );
+    return () => window.clearTimeout(id);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -36,23 +56,29 @@ export function MobileDrawer({
         ? "translate-y-0 opacity-100"
         : "caretip-mobile-drawer-panel--open-top";
 
+  const handleBackdropDismiss = () => {
+    if (!backdropDismissible || !canDismissMobileMenuOverlay(openedAtRef.current)) return;
+    onClose();
+  };
+
   return (
     <>
       <button
         type="button"
         aria-label="Close menu"
         className={cn(
-          "fixed inset-0 z-40 bg-black/50 lg:hidden",
+          "fixed inset-0 z-40 touch-manipulation bg-black/50 lg:hidden",
           reduceMotion ? "opacity-100" : "caretip-mobile-drawer-backdrop--open",
+          !backdropDismissible && "pointer-events-none",
         )}
-        onClick={onClose}
+        onClick={handleBackdropDismiss}
       />
       <aside
         role="dialog"
         aria-modal="true"
         aria-label={ariaLabel}
         className={cn(
-          "fixed z-50 flex flex-col lg:hidden",
+          "fixed z-50 flex touch-manipulation flex-col lg:hidden",
           side === "left"
             ? "inset-y-0 left-0 w-[min(100%,18rem)] max-w-[85vw] border-r border-neutral-200/80 shadow-xl"
             : "left-0 right-0 top-full border-b border-border/50 shadow-lg",
@@ -60,6 +86,7 @@ export function MobileDrawer({
           panelMotionClass,
           className,
         )}
+        onPointerDown={(e) => e.stopPropagation()}
       >
         {children}
       </aside>

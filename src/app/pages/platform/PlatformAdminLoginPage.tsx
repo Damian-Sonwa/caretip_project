@@ -19,6 +19,7 @@ import { isPlatformAdminSessionRole } from "../../lib/authSession";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
+import { AuthBackToHomeNav } from "@/app/components/auth/AuthBackToHomeNav";
 
 const FIELD_CLASS = "caretip-auth-field";
 const FIELD_PASSWORD = "caretip-auth-field caretip-auth-field--password-toggle";
@@ -192,6 +193,7 @@ export function PlatformAdminLoginPage() {
             transition={{ duration: 0.6 }}
             className="caretip-auth-card-wrap relative z-10"
           >
+            <AuthBackToHomeNav className="caretip-auth-back-home--standalone" />
             <div className="caretip-auth-card">
               <div className="caretip-auth-header !mb-5">
                 <motion.div

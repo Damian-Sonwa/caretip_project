@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import {
   dispatchLandingIntent,
   isLandingAiUnlocked,
@@ -11,11 +11,11 @@ import {
 import { trackLandingAiEvent } from "../../lib/landingAiAnalytics";
 import { isAiAssistantEnabled } from "../../lib/featureFlags";
 
-const LandingOnboardingAssistant = lazy(() =>
-  import("./LandingOnboardingAssistant").then((m) => ({
-    default: m.LandingOnboardingAssistant,
-  })),
-);
+type AssistantComponent = ComponentType<{
+  launcherVisible: boolean;
+  autoOpenOnce: boolean;
+  onAutoOpenConsumed: () => void;
+}>;
 
 const TIME_ON_PAGE_MS = 45_000;
 const SCROLL_DEPTH_RATIO = 0.42;
@@ -60,9 +60,20 @@ export function LandingOnboardingAssistantHost({ rootEl }: LandingOnboardingAssi
 }
 
 function LandingOnboardingAssistantHostActive({ rootEl }: LandingOnboardingAssistantHostProps) {
+  const [Assistant, setAssistant] = useState<AssistantComponent | null>(null);
   const [launcherVisible, setLauncherVisible] = useState(false);
   const [autoOpenOnce, setAutoOpenOnce] = useState(false);
   const thresholdLoggedRef = useRef(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void import("./LandingOnboardingAssistant").then((mod) => {
+      if (!cancelled) setAssistant(() => mod.LandingOnboardingAssistant);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     if (isLandingAiUnlocked()) setLauncherVisible(true);
@@ -126,11 +137,11 @@ function LandingOnboardingAssistantHostActive({ rootEl }: LandingOnboardingAssis
 
   const onAutoOpenConsumed = useCallback(() => setAutoOpenOnce(false), []);
 
-  if (!launcherVisible) return null;
+  if (!launcherVisible || !Assistant) return null;
 
   return (
     <Suspense fallback={null}>
-      <LandingOnboardingAssistant
+      <Assistant
         launcherVisible={launcherVisible}
         autoOpenOnce={autoOpenOnce}
         onAutoOpenConsumed={onAutoOpenConsumed}

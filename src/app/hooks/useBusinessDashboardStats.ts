@@ -451,6 +451,17 @@ export function useBusinessDashboardStats(
             return;
           }
 
+          /** Start analytics network early; KPI commit still waits for summary (parallel waterfall). */
+          let analyticsEarlyPromise: Promise<BusinessDashboardStats> | null = null;
+          if (!analyticsSettled && advancedAnalyticsEnabledRef.current) {
+            analyticsEarlyPromise = getBusinessStats(tf, {
+              scope: "analytics",
+              silent,
+              signal: controller.signal,
+              revalidate,
+            });
+          }
+
         if (!summarySettled) {
           if (!summaryFromMemory) {
             const summaryData = await getBusinessStats(tf, {
@@ -489,12 +500,14 @@ export function useBusinessDashboardStats(
             const runAnalytics = async () => {
               if (!stillActive() || analyticsSettled) return;
               try {
-                const analyticsData = await getBusinessStats(tf, {
-                  scope: "analytics",
-                  silent,
-                  signal: controller.signal,
-                  revalidate,
-                });
+                const analyticsData = analyticsEarlyPromise
+                  ? await analyticsEarlyPromise
+                  : await getBusinessStats(tf, {
+                      scope: "analytics",
+                      silent,
+                      signal: controller.signal,
+                      revalidate,
+                    });
                 if (!stillActive()) return;
                 analyticsPartialRef.current.set(tf, analyticsData);
                 analyticsSettled = true;
@@ -528,12 +541,14 @@ export function useBusinessDashboardStats(
               }, 0);
             });
           } else {
-            const analyticsData = await getBusinessStats(tf, {
-              scope: "analytics",
-              silent,
-              signal: controller.signal,
-              revalidate,
-            });
+            const analyticsData = analyticsEarlyPromise
+              ? await analyticsEarlyPromise
+              : await getBusinessStats(tf, {
+                  scope: "analytics",
+                  silent,
+                  signal: controller.signal,
+                  revalidate,
+                });
             if (!stillActive()) return;
             analyticsPartialRef.current.set(tf, analyticsData);
             analyticsSettled = true;

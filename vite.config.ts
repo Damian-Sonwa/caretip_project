@@ -61,15 +61,19 @@ export default defineConfig(({ mode }) => {
     target: 'es2022',
     outDir: 'dist',
     chunkSizeWarningLimit: 1500,
+    /** Avoid pulling the modulepreload polyfill (and its chunk deps) into the landing route. */
+    modulePreload: false,
     rollupOptions: {
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) return;
+          if (id.includes('clsx') || id.includes('tailwind-merge') || id.includes('class-variance-authority')) {
+            return 'vendor-utils';
+          }
           if (id.includes('recharts') || id.includes('d3-')) return 'vendor-recharts';
           if (id.includes('socket.io-client') || id.includes('engine.io-client')) return 'vendor-socket';
           if (id.includes('firebase')) return 'vendor-firebase';
           if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';
-          if (id.includes('three') || id.includes('@react-three')) return 'vendor-three';
           if (id.includes('html2canvas')) return 'vendor-html2canvas';
           if (id.includes('@radix-ui')) return 'vendor-radix';
           if (id.includes('react-router') || id.includes('@remix-run/router')) return 'vendor-router';

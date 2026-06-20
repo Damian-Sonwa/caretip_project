@@ -112,7 +112,14 @@ export function isLiveMinutesOnboardingScreenPreloaded(src: string): boolean {
 }
 
 if (typeof window !== "undefined") {
-  void preloadLiveMinutesOnboardingScreens(["en", "de"]);
+  const schedule = () => {
+    void preloadLiveMinutesOnboardingScreens(["en", "de"]);
+  };
+  if ("requestIdleCallback" in window) {
+    requestIdleCallback(schedule, { timeout: 5000 });
+  } else {
+    window.setTimeout(schedule, 2500);
+  }
 }
 
 if (import.meta.env.DEV) {

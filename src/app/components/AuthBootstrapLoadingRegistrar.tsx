@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
-import { useEffect, useLayoutEffect } from "react";
+import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { isAuthRestorePending } from "../lib/authRestore";
-import { hideAppBootstrapLoader } from "../lib/appBootstrapLoader";
 import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
@@ -46,10 +45,9 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
     authBootstrapBlocking,
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!publicShell) return;
     releaseAppBootOverlay();
-    hideAppBootstrapLoader();
   }, [publicShell, releaseAppBootOverlay, pathname]);
 
   useEffect(() => {
@@ -59,7 +57,6 @@ export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNod
       return;
     }
     traceAuthLoadingCompleted(authStatus);
-    hideAppBootstrapLoader();
   }, [authBootstrapBlocking, authStatus, pathname]);
 
   useEffect(() => {

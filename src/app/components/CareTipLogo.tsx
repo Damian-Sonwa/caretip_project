@@ -1,5 +1,8 @@
+import type { CSSProperties, ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
-import companyLogo from "@/assets/brand/company_logo.png";
+import companyLogoPng from "@/assets/brand/company_logo.png";
+import companyLogoWebp from "@/assets/brand/company_logo.webp";
+import companyLogoAvif from "@/assets/brand/company_logo.avif";
 
 export type CareTipLogoSize =
   | "xs"
@@ -50,7 +53,7 @@ export type CareTipLogoProps = {
   alt?: string;
   /**
    * Renders the mark at ~2× visual height inside a fixed layout slot (absolute
-   * centering) so headers and auth cards don’t grow vertically.
+   * centering) so headers and auth cards don't grow vertically.
    */
   layoutIsolatedDouble?: boolean;
   /** Multiplier for isolated visual size (default `2` ≈ double). Ignored unless `layoutIsolatedDouble`. */
@@ -62,8 +65,41 @@ export type CareTipLogoProps = {
 const imgBase =
   "block shrink-0 contrast-[1.06] drop-shadow-[0_1px_2px_rgba(0,0,0,0.14)] object-contain";
 
+type LogoPictureProps = {
+  alt: string;
+  className?: string;
+  style?: CSSProperties;
+  loading?: ImgHTMLAttributes<HTMLImageElement>["loading"];
+};
+
+function CareTipLogoPicture({
+  alt,
+  className,
+  style,
+  loading = "lazy",
+  priority = false,
+}: LogoPictureProps & { priority?: boolean }) {
+  return (
+    <picture className={className}>
+      <source type="image/avif" srcSet={companyLogoAvif} />
+      <source type="image/webp" srcSet={companyLogoWebp} />
+      <img
+        src={companyLogoPng}
+        alt={alt}
+        width={640}
+        height={240}
+        className={cn(imgBase, "h-full w-full")}
+        style={style}
+        loading={priority ? "eager" : loading}
+        decoding="async"
+        {...(priority ? ({ fetchpriority: "high" } as ImgHTMLAttributes<HTMLImageElement>) : {})}
+      />
+    </picture>
+  );
+}
+
 /**
- * Full wordmark from `company_logo.png`. Uses `object-contain` and max-width
+ * Full wordmark from optimized `company_logo` assets. Uses `object-contain` and max-width
  * caps so the asset is never stretched.
  */
 export function CareTipLogo({
@@ -78,30 +114,23 @@ export function CareTipLogo({
   const m = scale ?? visualScale ?? 2;
 
   if (layoutIsolatedDouble && size === "header") {
-    /* Block + w-full: abspos img does not give the slot intrinsic width. Parent flex items with
-       `flex-none` need a non-zero min-width or this span collapses to 0px on desktop. */
     return (
       <span
         className={cn(
           "relative block h-[5rem] min-h-[5rem] w-full min-w-[11rem] max-w-full overflow-hidden sm:h-[4.5rem] sm:min-h-[4.5rem] md:h-[4.75rem] md:min-h-[4.75rem] xl:h-[5.25rem] xl:min-h-[5.25rem]",
-          className
+          className,
         )}
       >
-        <img
-          src={companyLogo}
+        <CareTipLogoPicture
           alt={alt}
-          width={640}
-          height={240}
+          priority
           className={cn(
-            imgBase,
-            "pointer-events-none absolute top-1/2 left-0 max-h-none w-auto max-w-full -translate-y-1/2 object-left object-contain"
+            "pointer-events-none absolute top-1/2 left-0 max-h-none w-auto max-w-full -translate-y-1/2",
           )}
           style={{
             height: `${m * 3.5}rem`,
             maxWidth: "100%",
           }}
-          loading="lazy"
-          decoding="async"
         />
       </span>
     );
@@ -117,46 +146,35 @@ export function CareTipLogo({
           leftAligned
             ? "max-w-[min(22rem,94vw)]"
             : "mx-auto max-w-[min(17.5rem,88vw)]",
-          className
+          className,
         )}
       >
-        <img
-          src={companyLogo}
+        <CareTipLogoPicture
           alt={alt}
-          width={640}
-          height={240}
           className={cn(
-            imgBase,
             "pointer-events-none absolute top-1/2 max-h-none w-auto -translate-y-1/2 drop-shadow-[0_1px_2px_rgba(0,0,0,0.12)]",
             leftAligned
-              ? "left-0 max-w-[min(22rem,94vw)] object-left object-contain"
-              : "left-1/2 max-w-[min(17.5rem,88vw)] -translate-x-1/2 object-center object-contain",
+              ? "left-0 max-w-[min(22rem,94vw)]"
+              : "left-1/2 max-w-[min(17.5rem,88vw)] -translate-x-1/2",
           )}
           style={{
             height: `${m * slotHeightRem}rem`,
           }}
-          loading="lazy"
-          decoding="async"
         />
       </span>
     );
   }
 
   return (
-    <img
-      src={companyLogo}
+    <CareTipLogoPicture
       alt={alt}
-      width={640}
-      height={240}
+      priority={size === "header" || size === "hero"}
       className={cn(
-        imgBase,
         align === "center" && "mx-auto",
         alignClass[align],
         sizeClass[size],
-        className
+        className,
       )}
-      loading="lazy"
-      decoding="async"
     />
   );
 }

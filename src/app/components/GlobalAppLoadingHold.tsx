@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { globalAppLoadingHoldClassName } from "../lib/globalAppLoading";
+import { globalAppLoadingHoldClassName } from "../lib/globalAppLoadingHoldClassName";
 
 /** Placeholder under the global overlay — no spinner, no skeleton. */
 export function GlobalAppLoadingHold({ className }: { className?: string }) {

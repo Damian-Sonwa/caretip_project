@@ -11,7 +11,6 @@
         name="viewport"
         content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5"
       />
-      <!-- First paint matches in-app splash (off-white); avoid orange OS splash before React -->
       <meta name="color-scheme" content="light dark" />
       <meta name="theme-color" content="#FAF9F6" />
       <meta name="theme-color" content="#FAF9F6" media="(prefers-color-scheme: light)" />
@@ -26,7 +25,6 @@
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <meta name="apple-mobile-web-app-title" content="CareTip" />
       <title>CareTip</title>
-      <!-- Self-hosted fonts: preload + faces before JS bundle (reduces FOUT) -->
       <link rel="preload" href="/fonts/inter/inter-latin-400.woff2" as="font" type="font/woff2" crossorigin />
       <link rel="preload" href="/fonts/inter/inter-latin-600.woff2" as="font" type="font/woff2" crossorigin />
       <link rel="preload" href="/fonts/inter/inter-latin-700.woff2" as="font" type="font/woff2" crossorigin />
@@ -38,15 +36,11 @@
       <script src="/theme-init.js"></script>
     </head>
 
-    <body style="margin: 0; background-color: #fafaf9">
-      <div id="root" style="min-height: 100vh; min-height: 100dvh; background-color: #fafaf9">
-        <!-- Neutral first paint — React global overlay owns the single spinner -->
-        <div id="app-bootstrap-loader" aria-hidden="true"></div>
-      </div>
+    <body style="margin: 0; background-color: #faf9f6">
+      <div id="root" style="min-height: 100vh; min-height: 100dvh; background-color: #faf9f6"></div>
       <style>
         html.dark body,
-        html.dark #root,
-        html.dark #app-bootstrap-loader {
+        html.dark #root {
           background-color: #0a0a0a;
         }
       </style>

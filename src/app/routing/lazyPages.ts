@@ -13,6 +13,18 @@ function lazyDefault(factory: () => Promise<{ default: ComponentType<unknown> }>
 
 // —— Public marketing ——
 export const LandingPage = lazyNamed(() => import("../pages/LandingPage"), "LandingPage");
+export const PricingPage = lazyNamed(() => import("../pages/PricingPage"), "PricingPage");
+export const PrivacyPage = lazyNamed(() => import("../pages/PrivacyPage"), "PrivacyPage");
+export const TermsPage = lazyNamed(() => import("../pages/TermsPage"), "TermsPage");
+export const CookiesPage = lazyNamed(() => import("../pages/CookiesPage"), "CookiesPage");
+export const ContactPage = lazyNamed(() => import("../pages/ContactPage"), "ContactPage");
+export const CareersPage = lazyNamed(() => import("../pages/CareersPage"), "CareersPage");
+export const BlogPage = lazyNamed(() => import("../pages/BlogPage"), "BlogPage");
+export const HelpPage = lazyNamed(() => import("../pages/HelpPage"), "HelpPage");
+export const FAQPage = lazyNamed(() => import("../pages/FAQPage"), "FAQPage");
+export const MobileAppPage = lazyNamed(() => import("../pages/MobileAppPage"), "MobileAppPage");
+export const HowItWorksPage = lazyNamed(() => import("../pages/HowItWorksPage"), "HowItWorksPage");
+export const FeaturesPage = lazyNamed(() => import("../pages/FeaturesPage"), "FeaturesPage");
 
 // —— Business dashboard ——
 export const BusinessDashboard = lazyNamed(

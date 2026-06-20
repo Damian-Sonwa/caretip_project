@@ -1,15 +1,14 @@
 import { useMemo } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { QrCode, Activity, BarChart3, History, Wallet, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
-import { useMinWidthMedia } from "@/lib/motionPerf";
+import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingType } from "@/components/landing/landingTypography";
 import {
   LandingSectionAccent,
   type LandingAccentVariant,
 } from "@/components/landing/LandingSectionAccent";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
@@ -36,9 +35,7 @@ const featureAccentVariants: LandingAccentVariant[] = [
 ];
 
 export function LandingFeaturesSection() {
-  const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
-  const isLgUp = useMinWidthMedia(1024);
+  const { t, i18n } = useTranslation();
   const sectionSubtitle = t("landing.features.subtitle");
 
   const items = useMemo(
@@ -81,7 +78,7 @@ export function LandingFeaturesSection() {
           tag: t("landing.features.i6Tag"),
         },
       ],
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -109,22 +106,13 @@ export function LandingFeaturesSection() {
           </defs>
         </svg>
         <div className={landingUi.sectionIntro}>
-          <motion.h2
-            {...landingScrollRevealProps(reduceMotion, { isMobile: !isLgUp })}
-            className={landingUi.sectionTitle}
-          >
+          <LandingReveal as="h2" className={landingUi.sectionTitle}>
             {t("landing.features.title")}
-          </motion.h2>
+          </LandingReveal>
           {landingCopyVisible(sectionSubtitle) ? (
-            <motion.p
-              {...landingScrollRevealProps(reduceMotion, {
-                delay: landingStaggerDelay(1),
-                isMobile: !isLgUp,
-              })}
-              className={landingUi.sectionSubtitle}
-            >
+            <LandingReveal as="p" delay={landingStaggerDelay(1)} className={landingUi.sectionSubtitle}>
               {sectionSubtitle}
-            </motion.p>
+            </LandingReveal>
           ) : null}
         </div>
 
@@ -132,12 +120,10 @@ export function LandingFeaturesSection() {
           {items.map((item, idx) => {
             const Icon = item.icon;
             return (
-              <motion.li
+              <LandingReveal
                 key={item.title}
-                {...landingScrollRevealProps(reduceMotion, {
-                  delay: landingStaggerDelay(idx, 0.07),
-                  isMobile: !isLgUp,
-                })}
+                as="li"
+                delay={landingStaggerDelay(idx, 0.07)}
                 className="h-full"
               >
                 <article className={cardClassName}>
@@ -168,7 +154,7 @@ export function LandingFeaturesSection() {
                     {item.text}
                   </p>
                 </article>
-              </motion.li>
+              </LandingReveal>
             );
           })}
         </ul>

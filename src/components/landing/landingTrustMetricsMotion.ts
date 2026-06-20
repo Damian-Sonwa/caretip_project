@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useReducedMotion } from "motion/react";
 
 export type TrustMetricId = "scans" | "tips" | "staff" | "teams";
 

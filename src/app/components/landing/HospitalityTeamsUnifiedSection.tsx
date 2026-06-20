@@ -1,19 +1,16 @@
 import { useMemo } from "react";
-import { motion, useReducedMotion } from "motion/react";
 import { Trans, useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
+import { LandingReveal } from "@/components/landing/LandingReveal";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
-import { landingScrollRevealProps, landingStaggerDelay } from "@/lib/landingMotion";
-import { landingFadeReveal, useMinWidthMedia } from "@/lib/motionPerf";
+import { landingStaggerDelay } from "@/lib/landingMotion";
 import { cn } from "@/lib/utils";
 
 export function HospitalityTeamsUnifiedSection() {
   const { t, i18n } = useTranslation();
-  const reduceMotion = useReducedMotion();
-  const isLgUp = useMinWidthMedia(1024);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
   const features = useMemo(
     () =>
@@ -24,7 +21,7 @@ export function HospitalityTeamsUnifiedSection() {
         { title: t("landing.hospitality.f4Title"), text: t("landing.hospitality.f4Text") },
         { title: t("landing.hospitality.f5Title"), text: t("landing.hospitality.f5Text") },
       ].filter((f) => landingCopyVisible(f.title) && landingCopyVisible(f.text)),
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -36,10 +33,7 @@ export function HospitalityTeamsUnifiedSection() {
         "caretip-landing-hospitality relative",
       )}
     >
-      <motion.div
-        className={cn("mx-auto w-full max-w-7xl min-w-0", landingUi.mobileStackGrid)}
-        {...landingFadeReveal}
-      >
+      <LandingReveal className={cn("mx-auto w-full max-w-7xl min-w-0", landingUi.mobileStackGrid)}>
         <header
           className={cn(
             landingUi.hospitalityIntro,
@@ -58,15 +52,9 @@ export function HospitalityTeamsUnifiedSection() {
           ) : null}
         </header>
 
-        <motion.div
-          className={cn(
-            landingUi.hospitalityGrid,
-            "caretip-hospitality-split lg:grid",
-          )}
-          {...landingScrollRevealProps(reduceMotion, {
-            delay: landingStaggerDelay(1),
-            isMobile: !isLgUp,
-          })}
+        <LandingReveal
+          delay={landingStaggerDelay(1)}
+          className={cn(landingUi.hospitalityGrid, "caretip-hospitality-split lg:grid")}
         >
           <div className={cn("caretip-hospitality-features-col max-lg:contents lg:order-1")}>
             <div
@@ -111,8 +99,8 @@ export function HospitalityTeamsUnifiedSection() {
               </div>
             </div>
           </div>
-        </motion.div>
-      </motion.div>
+        </LandingReveal>
+      </LandingReveal>
     </section>
   );
 }

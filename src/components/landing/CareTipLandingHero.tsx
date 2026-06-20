@@ -1,5 +1,4 @@
 import { Link } from "react-router";
-import { motion, useReducedMotion } from "motion/react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -7,14 +6,6 @@ import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingHeroHeadlineWithHighlight } from "@/components/landing/landingHeroHeadline";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
 import { LandingHeroStoryShowcase } from "@/components/landing/LandingHeroStoryShowcase";
-import {
-  landingHeroCopyStagger,
-  landingHeroCtaReveal,
-  landingHeroEaseOut,
-  landingHeroHeadlineLineReveal,
-  landingHeroHeadlineStagger,
-  landingHeroSubtitleReveal,
-} from "@/components/landing/landingHeroMotion";
 import { cn } from "@/lib/utils";
 
 export type CareTipLandingHeroProps = {
@@ -25,6 +16,7 @@ export type CareTipLandingHeroProps = {
   className?: string;
 };
 
+/** Hero copy + showcase — plain HTML for instant first paint (no Framer Motion). */
 export function CareTipLandingHero({
   id,
   imageAlt,
@@ -32,7 +24,6 @@ export function CareTipLandingHero({
   className,
 }: CareTipLandingHeroProps) {
   const { t, i18n } = useTranslation();
-  const reduceMotion = useReducedMotion();
 
   const heroRotatingWords = useMemo(() => {
     const raw = t("landing.showcase.heroRotatingWords", { returnObjects: true });
@@ -65,57 +56,41 @@ export function CareTipLandingHero({
         className="pointer-events-none absolute inset-x-0 top-0 h-full min-h-0 bg-[radial-gradient(ellipse_120%_60%_at_50%_-8%,rgba(17,17,17,0.03),transparent_58%)] dark:opacity-40"
       />
 
-      <motion.div
+      <div
         className={cn(
           "caretip-hero-grid caretip-hero-split relative z-[1] mx-auto w-full max-w-[100rem] px-4 sm:px-6 lg:px-8",
           landingUi.heroSplitRowDesktop,
         )}
-        variants={reduceMotion ? undefined : landingHeroCopyStagger}
-        initial={reduceMotion ? false : "hidden"}
-        animate={reduceMotion ? false : "visible"}
       >
-        <motion.div
+        <div
           className={cn(
             "caretip-hero-grid__message caretip-hero-copy caretip-hero-copy-block",
             landingUi.heroCopyDesktop,
           )}
-          variants={reduceMotion ? undefined : { hidden: {}, visible: {} }}
-          initial={reduceMotion ? false : "hidden"}
-          animate={reduceMotion ? false : "visible"}
         >
-          <motion.h1
+          <h1
             className={cn(landingUi.heroHeadline, "mt-0")}
             data-hero-headline-mode={headlineMode}
-            variants={reduceMotion ? undefined : landingHeroHeadlineStagger}
           >
             {useStaticHeadline ? (
-              <motion.span
-                className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--static")}
-                variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
-              >
+              <span className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--static")}>
                 {landingHeroHeadlineWithHighlight(
                   heroHeadline,
                   heroHeadlineHighlight,
                   landingUi.heroHeadlineEmphasis,
                 )}
-              </motion.span>
+              </span>
             ) : (
               <>
-                <motion.span
-                  className={landingUi.heroHeadlineLine}
-                  variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
-                >
+                <span className={landingUi.heroHeadlineLine}>
                   {t("landing.showcase.heroTitlePrefix")}
                   {t("landing.showcase.heroTitleEmphasis") ? (
                     <span className={landingUi.heroHeadlineEmphasis}>{t("landing.showcase.heroTitleEmphasis")}</span>
                   ) : null}
                   {t("landing.showcase.heroTitleSuffix")}
-                </motion.span>
+                </span>
                 {heroRotatingWords.length > 0 || t("landing.showcase.heroTitleLine2Emphasis") ? (
-                  <motion.span
-                    className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--rotating")}
-                    variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
-                  >
+                  <span className={cn(landingUi.heroHeadlineLine, "caretip-hero-headline-line--rotating")}>
                     <span className="caretip-hero-headline-rotating-stack">
                       {t("landing.showcase.heroTitleLine2Prefix") ? (
                         <span className="caretip-hero-headline-rotating-prefix">
@@ -134,40 +109,22 @@ export function CareTipLandingHero({
                         </span>
                       ) : null}
                     </span>
-                  </motion.span>
+                  </span>
                 ) : t("landing.showcase.heroTitleLine2") ? (
-                  <motion.span
-                    className={landingUi.heroHeadlineLine}
-                    variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
-                  >
-                    {t("landing.showcase.heroTitleLine2")}
-                  </motion.span>
+                  <span className={landingUi.heroHeadlineLine}>{t("landing.showcase.heroTitleLine2")}</span>
                 ) : null}
                 {t("landing.showcase.heroTitleLine3") ? (
-                  <motion.span
-                    className={landingUi.heroHeadlineLine}
-                    variants={reduceMotion ? undefined : landingHeroHeadlineLineReveal}
-                  >
-                    {t("landing.showcase.heroTitleLine3")}
-                  </motion.span>
+                  <span className={landingUi.heroHeadlineLine}>{t("landing.showcase.heroTitleLine3")}</span>
                 ) : null}
               </>
             )}
-          </motion.h1>
+          </h1>
 
           {landingCopyVisible(heroDescription) ? (
-            <motion.p
-              className={cn(landingUi.heroSubtitle, "caretip-hero-subtitle")}
-              variants={reduceMotion ? undefined : landingHeroSubtitleReveal}
-            >
-              {heroDescription}
-            </motion.p>
+            <p className={cn(landingUi.heroSubtitle, "caretip-hero-subtitle")}>{heroDescription}</p>
           ) : null}
 
-          <motion.div
-            className={cn(landingUi.heroCtaRow, "caretip-hero-cta-cluster")}
-            variants={reduceMotion ? undefined : landingHeroCtaReveal}
-          >
+          <div className={cn(landingUi.heroCtaRow, "caretip-hero-cta-cluster")}>
             <div className={landingUi.heroCtaUnit}>
               <Link
                 to="/signup"
@@ -186,8 +143,8 @@ export function CareTipLandingHero({
                 {t("landing.showcase.secondaryCta")}
               </Link>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         <div
           className={cn(
@@ -219,7 +176,7 @@ export function CareTipLandingHero({
             />
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }

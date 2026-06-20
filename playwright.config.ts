@@ -49,9 +49,51 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
+      testIgnore: /mobile-menu\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         ...chromiumUse,
+      },
+    },
+    {
+      name: "click-audit-mobile",
+      testMatch: /click-responsiveness\.spec\.ts/,
+      grepInvert: /desktop route transitions/,
+      use: {
+        ...devices["Pixel 5"],
+        ...chromiumUse,
+      },
+    },
+    {
+      name: "click-audit-desktop",
+      testMatch: /click-responsiveness\.spec\.ts/,
+      grep: /desktop route transitions/,
+      use: {
+        ...devices["Desktop Chrome"],
+        ...chromiumUse,
+      },
+    },
+    {
+      name: "iphone-safari",
+      testMatch: /mobile-menu\.spec\.ts/,
+      use: {
+        ...devices["iPhone 13"],
+      },
+    },
+    {
+      name: "chrome-android",
+      testMatch: /mobile-menu\.spec\.ts/,
+      use: {
+        ...devices["Pixel 5"],
+      },
+    },
+    {
+      name: "samsung-internet",
+      testMatch: /mobile-menu\.spec\.ts/,
+      use: {
+        ...devices["Galaxy S9+"],
+        userAgent:
+          "Mozilla/5.0 (Linux; Android 13; SAMSUNG SM-G998B) AppleWebKit/537.36 (KHTML, like Gecko) SamsungBrowser/25.0 Chrome/121.0.0.0 Mobile Safari/537.36",
       },
     },
   ],

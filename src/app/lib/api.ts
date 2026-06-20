@@ -516,15 +516,7 @@ async function fetchWithNetworkRetry(url: string, init?: RequestInit): Promise<R
   }
 }
 
-let remoteApiWakeStarted = false;
-
-/** Fire-and-forget ping so a sleeping Render instance can wake before sign-in. */
-export function wakeRemoteApi(): void {
-  const base = resolveApiBaseUrl();
-  if (!base || remoteApiWakeStarted) return;
-  remoteApiWakeStarted = true;
-  void fetch(`${base}/health`, { method: "GET", mode: "cors", credentials: "omit" }).catch(() => {});
-}
+export { wakeRemoteApi } from "./wakeRemoteApi";
 
 /** Wraps fetch + handleRes and translates network/API errors to user-friendly messages */
 async function apiRequest<T>(url: string, init?: RequestInit): Promise<T> {

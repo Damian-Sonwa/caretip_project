@@ -12,6 +12,7 @@ import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 import { isApiPendingVerificationError } from "@/app/lib/apiError";
+import { scheduleIdleWork } from "@/lib/publicRouteDefer";
 
 type RecentCustomerFeedbackPanelProps = {
   enabled?: boolean;
@@ -55,7 +56,9 @@ export function RecentCustomerFeedbackPanel({
   }, [enabled, t]);
 
   useEffect(() => {
-    void load();
+    scheduleIdleWork(() => {
+      void load();
+    }, 1400);
   }, [load]);
 
   return (

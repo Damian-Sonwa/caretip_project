@@ -203,6 +203,89 @@
   margin-bottom: 0.875rem;
 }
 
+/* —— Back to Home —— */
+.caretip-auth-back-home {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.625rem;
+  align-self: flex-start;
+}
+
+.caretip-auth-back-home__logo {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.5rem;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  transition: opacity 0.2s ease;
+}
+
+.caretip-auth-back-home__logo:hover {
+  opacity: 0.88;
+}
+
+.caretip-auth-back-home__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #3f3f46;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.caretip-auth-back-home__link:hover {
+  color: #18181b;
+}
+
+.caretip-auth-back-home__arrow {
+  font-size: 1rem;
+  line-height: 1;
+  opacity: 0.72;
+}
+
+.dark .caretip-auth-back-home__logo {
+  background: rgba(24, 24, 27, 0.92);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.dark .caretip-auth-back-home__link {
+  color: #d4d4d8;
+}
+
+.dark .caretip-auth-back-home__link:hover {
+  color: #fafafa;
+}
+
+.caretip-auth-back-home--standalone {
+  width: 100%;
+  max-width: 28rem;
+  margin-inline: auto;
+  margin-bottom: 1rem;
+}
+
+.caretip-auth-back-home--marketing {
+  margin-bottom: 1.25rem;
+}
+
+.caretip-auth-back-home--marketing .caretip-auth-back-home__link {
+  color: rgba(250, 250, 250, 0.9);
+}
+
+.caretip-auth-back-home--marketing .caretip-auth-back-home__link:hover {
+  color: #ffffff;
+}
+
 /* —— Brand panel content (over blob only — no flat column fill) —— */
 .caretip-auth-marketing {
   position: relative;

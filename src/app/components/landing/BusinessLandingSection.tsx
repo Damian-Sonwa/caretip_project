@@ -6,9 +6,10 @@ import {
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingCopyVisible } from "@/components/landing/landingUi";
 import businessSectionImg from "../../../../images/Volle.png";
+import businessSectionImgWebp from "../../../../images/Volle.webp";
 
 export function BusinessLandingSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   const benefits = useMemo(
     () => [
@@ -17,7 +18,7 @@ export function BusinessLandingSection() {
       { title: t("landing.businessSection.b3Title"), description: t("landing.businessSection.b3Text") },
       { title: t("landing.businessSection.b4Title"), description: t("landing.businessSection.b4Text") },
     ],
-    [t],
+    [t, i18n.language],
   );
 
   return (
@@ -39,6 +40,7 @@ export function BusinessLandingSection() {
       visual={
         <LandingShowcaseCoverImage
           src={businessSectionImg}
+          webpSrc={businessSectionImgWebp}
           alt={t("landing.businessSection.imageAlt")}
           objectPosition="center"
           floatHint={

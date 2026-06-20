@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { CheckCircle2, Coins, Star, Users, type LucideIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
+import { LandingReveal } from "@/components/landing/LandingReveal";
+import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
 import { cn } from "@/lib/utils";
 
 type ChipSpec = {
@@ -27,7 +28,7 @@ const CHIP_BASE = cn(
 /** Subtle glass chips around the hospitality marquee — presentation only. */
 export function HospitalityMediaFloatChips() {
   const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
 
   const chips = useMemo<ChipSpec[]>(
     () => [
@@ -80,33 +81,23 @@ export function HospitalityMediaFloatChips() {
         const Icon = chip.Icon;
         const hiddenMobile = !visibleOnMobile.has(chip.id);
         return (
-          <motion.div
+          <LandingReveal
             key={chip.id}
+            delay={chip.floatDelay * 0.12}
             className={cn(
               CHIP_BASE,
               chip.position,
               chip.hideBelowLg && "hidden lg:block",
               chip.hideBelowMd && "hidden md:block",
               hiddenMobile && "max-lg:hidden",
+              !reduceMotion && "caretip-hero-float-pill--animate",
             )}
-            initial={reduceMotion ? false : { opacity: 0, y: 6 }}
-            animate={
-              reduceMotion
-                ? { opacity: 1, y: 0 }
-                : { opacity: 1, y: [0, -4, 0] }
-            }
-            transition={
-              reduceMotion
-                ? { duration: 0.4, delay: chip.floatDelay * 0.12 }
-                : {
-                    opacity: { duration: 0.4, delay: chip.floatDelay * 0.12 },
-                    y: {
-                      duration: chip.floatDuration,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      delay: chip.floatDelay,
-                    },
-                  }
+            style={
+              {
+                "--float-duration": `${chip.floatDuration}s`,
+                "--float-delay": `${chip.floatDelay}s`,
+                "--float-offset": "-4px",
+              } as CSSProperties
             }
           >
             <div className="flex items-center gap-1.5 sm:gap-2">
@@ -117,7 +108,7 @@ export function HospitalityMediaFloatChips() {
                 {t(chip.labelKey)}
               </span>
             </div>
-          </motion.div>
+          </LandingReveal>
         );
       })}
     </div>

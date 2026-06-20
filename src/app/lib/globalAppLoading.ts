@@ -5,8 +5,10 @@ import {
   useAppLoadingRegistration,
 } from "../context/AppLoadingManager";
 import { traceLoaderFlag } from "./loaderDiagFlags";
+import { globalAppLoadingHoldClassName } from "./globalAppLoadingHoldClassName";
 
 export { APP_LOADING_PRIORITY, useAppLoadingOverlayActive, useAppLoadingRegistration };
+export { globalAppLoadingHoldClassName };
 
 /** Single source of truth: is the global fullscreen loader visible? */
 export function useGlobalAppLoadingActive(): boolean {
@@ -51,9 +53,4 @@ export function useRegisterPagePaintReady(registrationKey: string, enabled = tru
   }
 
   useRegisterGlobalAppInit(registrationKey, holdForPaint);
-}
-
-/** Background hold while global loader is active — never renders a spinner. */
-export function globalAppLoadingHoldClassName(): string {
-  return "min-h-[100dvh] w-full bg-background";
 }

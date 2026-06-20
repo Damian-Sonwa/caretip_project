@@ -1645,6 +1645,8 @@
       "heroFloatPayoutLabel": "Tip recorded",
       "heroFloatStaffValue": "3",
       "heroFloatStaffLabel": "Staff active",
+      "heroFloatAnalyticsValue": "Live",
+      "heroFloatAnalyticsLabel": "Analytics updated",
       "heroHeadline": "",
       "heroHeadlineHighlight": "",
       "heroTagline": ""

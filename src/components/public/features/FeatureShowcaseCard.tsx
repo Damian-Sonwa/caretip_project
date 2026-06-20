@@ -1,8 +1,8 @@
-import { motion } from "motion/react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { FeatureProductVisual } from "@/components/public/features/FeatureProductVisual";
 import type { FeatureVisualVariant } from "@/components/public/features/featuresPageConfig";
+import { usePublicScrollReveal } from "@/lib/usePublicScrollReveal";
 
 type FeatureShowcaseCardProps = {
   title: string;
@@ -23,18 +23,19 @@ export function FeatureShowcaseCard({
   featured = false,
   index,
 }: FeatureShowcaseCardProps) {
+  const reveal = usePublicScrollReveal(featured ? 0 : index * 0.05);
+
   return (
-    <motion.article
-      initial={{ y: 14, opacity: 0 }}
-      whileInView={{ y: 0, opacity: 1 }}
-      viewport={{ once: true, margin: "-40px" }}
-      transition={{ duration: 0.45, delay: index * 0.06 }}
-      whileHover={{ y: -3 }}
+    <article
+      ref={featured ? undefined : reveal.ref}
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_14px_40px_-18px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color] duration-300",
-        "hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(233,120,28,0.18)] dark:border-neutral-800 dark:bg-neutral-950/90 dark:hover:border-primary/25",
+        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_14px_40px_-18px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color,transform] duration-300",
+        "hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(233,120,28,0.18)] dark:border-neutral-800 dark:bg-neutral-950/90 dark:hover:border-primary/25",
         featured && "lg:min-h-[22rem]",
+        "caretip-feature-showcase-card",
+        !featured && reveal.className,
       )}
+      style={featured ? undefined : reveal.style}
     >
       <div
         aria-hidden
@@ -67,6 +68,6 @@ export function FeatureShowcaseCard({
           {description}
         </p>
       </div>
-    </motion.article>
+    </article>
   );
 }

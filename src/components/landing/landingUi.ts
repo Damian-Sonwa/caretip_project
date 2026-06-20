@@ -26,9 +26,9 @@ const brandAccentGradient =
 /** Hero headline — Manrope extrabold, oversized display scale. */
 const heroHeadlineTone =
   "font-hero-display font-extrabold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
-/** Below lg — size/rhythm from caretip-landing-hero-typography.css */
+/** Below lg — size/rhythm from caretip-landing-hero.css */
 const heroHeadlineMobile = "max-lg:tracking-[inherit]";
-/** Desktop scale — fluid sizes in caretip-landing-hero-typography.css */
+/** Desktop scale — fluid sizes in caretip-landing-hero.css */
 const heroHeadlineDesktop = "caretip-hero-headline-desktop";
 
 function cnHeroHeadline(layout: string) {
