@@ -130,17 +130,17 @@ html:not(.dark) .caretip-landing.caretip-landing--premium main > section + secti
 html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality {
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #fff9f2 100%
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 100%
   ) !important;
 }
 
 html:not(.dark) .caretip-landing.caretip-landing--premium #how-it-works {
   background: linear-gradient(
     180deg,
-    #fffdf9 0%,
-    #fffbf4 48%,
-    #fff7eb 100%
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 48%,
+    var(--caretip-ivory-base) 100%
   ) !important;
 }
 
@@ -433,7 +433,7 @@ html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .care
   }
 }
 
-.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__eyebrow {
+.caretip-landing.caretip-landing--premium #real-life .caretip-expandable-info-card__image-label {
   letter-spacing: 0.14em;
 }
 

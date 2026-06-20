@@ -1,0 +1,174 @@
+/**
+ * Landing content density — whitespace, measure, and scan rhythm only.
+ * No copy changes; pairs with LandingCopySentences for existing i18n strings.
+ */
+
+.caretip-landing-copy-paragraphs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing-copy-paragraphs {
+    gap: 0.875rem;
+  }
+}
+
+.caretip-landing-copy-scan-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-landing-copy-scan-list__item {
+  position: relative;
+  padding-left: 1.125rem;
+  text-wrap: pretty;
+}
+
+.caretip-landing-copy-scan-list__item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: rgb(var(--primary) / 0.72);
+}
+
+.caretip-landing-density-lead {
+  max-width: min(100%, 42ch);
+  margin-inline: auto;
+  line-height: 1.72;
+  text-wrap: pretty;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing-density-lead.lg\:mx-0,
+  .caretip-landing-density-lead.lg\:text-left {
+    margin-inline: 0;
+  }
+}
+
+.caretip-landing .caretip-hero-subtitle.caretip-landing-copy-paragraphs,
+.caretip-landing .caretip-hero-subtitle.caretip-landing-copy-paragraphs > p {
+  max-width: min(100%, 38ch);
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing .caretip-hero-subtitle.caretip-landing-copy-paragraphs,
+  .caretip-landing .caretip-hero-subtitle.caretip-landing-copy-paragraphs > p {
+    max-width: min(100%, 42ch);
+  }
+}
+
+.caretip-landing #built-for-hospitality .caretip-hospitality-subtitle.caretip-landing-density-lead {
+  margin-bottom: 0.25rem;
+}
+
+.caretip-landing .caretip-split-showcase-content-panel .caretip-hospitality-feature-panel {
+  gap: 1.625rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing .caretip-split-showcase-content-panel .caretip-hospitality-feature-panel {
+    gap: 2rem;
+  }
+}
+
+.caretip-landing .caretip-hospitality-feature-desc,
+.caretip-landing .caretip-split-showcase-content-panel [class*="bodyCopyMuted"] {
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+.caretip-landing .caretip-payments-trust-item__body {
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+.caretip-landing .caretip-motivation-copy .caretip-landing-copy-paragraphs {
+  max-width: min(100%, 40ch);
+}
+
+.caretip-landing .caretip-final-cta-subtitle.caretip-landing-copy-paragraphs {
+  max-width: min(100%, 36ch);
+}
+
+.caretip-landing .caretip-site-footer-blurb.caretip-landing-copy-paragraphs {
+  gap: 0.625rem;
+  line-height: 1.65;
+}
+
+.caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs {
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgb(245 245 244 / 0.9);
+}
+
+html.dark .caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs {
+  border-top-color: rgb(38 38 38);
+}
+
+.caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs > p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.65;
+  color: rgb(82 82 82);
+  text-wrap: pretty;
+}
+
+html.dark .caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs > p {
+  color: rgb(163 163 163);
+}
+
+.caretip-expandable-info-card__tag-slot {
+  padding-bottom: 0.625rem;
+}
+
+.caretip-expandable-info-card__image-label {
+  display: inline-block;
+  max-width: 100%;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: #e68a2e;
+  text-wrap: balance;
+}
+
+html.dark .caretip-expandable-info-card__image-label {
+  color: #f59e0b;
+}
+
+.caretip-landing #real-life .caretip-expandable-info-card__tag-slot {
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #real-life .caretip-expandable-info-card__tag-slot {
+    text-align: left;
+  }
+}
+
+
+.caretip-landing .caretip-landing-features-section .caretip-landing-feature-card p {
+  line-height: 1.6;
+  text-wrap: pretty;
+}
+
+@media (max-width: 639px) {
+  .caretip-landing .caretip-mobile-stack-tagline,
+  .caretip-landing .caretip-section-intro > p {
+    max-width: min(100%, 34ch);
+    margin-inline: auto;
+  }
+}

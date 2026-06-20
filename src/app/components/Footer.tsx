@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { PrefetchLink } from "@/app/components/PrefetchLink";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
+import { LandingCopySentences } from "@/components/landing/LandingCopySentences";
 
 const APP_VERSION =
   typeof import.meta.env.VITE_APP_VERSION === "string" && import.meta.env.VITE_APP_VERSION.trim() !== ""
@@ -101,7 +102,12 @@ export const Footer = memo(function Footer({
         <div className="caretip-site-footer-columns mb-12 grid grid-cols-2 gap-9 sm:mb-16 sm:gap-11 md:grid-cols-3 lg:grid-cols-12 lg:gap-8">
           <div className="col-span-2 space-y-6 lg:col-span-4">
             <h3 className="text-xl font-bold text-white">{t("footer.brandTitle")}</h3>
-            <p className="caretip-site-footer-blurb max-w-sm text-neutral-400">{t("footer.brandBlurb")}</p>
+            <LandingCopySentences
+              text={t("footer.brandBlurb")}
+              layout="paragraphs"
+              className="caretip-site-footer-blurb max-w-sm text-neutral-400"
+              sentenceClassName="caretip-site-footer-blurb max-w-sm text-neutral-400 m-0"
+            />
 
             <div className="flex items-center gap-4 pt-2">
               <a

@@ -1,11 +1,16 @@
 /**
  * Live in Minutes (#how-it-works) — presentation polish only.
  * Scoped to this section; does not affect hero or other landing blocks.
- * Light warm band — distinct from final CTA dark gradient.
+ * Light ivory band — distinct from final CTA dark gradient.
  */
 
 html:not(.dark) .caretip-landing #how-it-works.caretip-live-minutes-section {
-  background: linear-gradient(180deg, #fffdf9 0%, #fffbf4 48%, #fff7eb 100%) !important;
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 48%,
+    var(--caretip-ivory-base) 100%
+  ) !important;
 }
 
 html.dark .caretip-landing #how-it-works.caretip-live-minutes-section {

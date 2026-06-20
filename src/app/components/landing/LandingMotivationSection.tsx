@@ -7,6 +7,7 @@ import { LandingReveal } from "@/components/landing/LandingReveal";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 import { LandingMotivationActivityStack } from "./LandingMotivationActivityStack";
+import { LandingCopySentences } from "@/components/landing/LandingCopySentences";
 
 export function LandingMotivationSection() {
   const { t, i18n } = useTranslation();
@@ -56,7 +57,12 @@ export function LandingMotivationSection() {
             <h2 className={landingUi.headline}>{t("landing.motivation.title")}</h2>
 
             {landingCopyVisible(subtitle) ? (
-              <p className={landingUi.subtitle}>{subtitle}</p>
+              <LandingCopySentences
+                text={subtitle}
+                layout="paragraphs"
+                className={landingUi.subtitle}
+                sentenceClassName={cn(landingUi.subtitle, "m-0")}
+              />
             ) : null}
           </div>
 

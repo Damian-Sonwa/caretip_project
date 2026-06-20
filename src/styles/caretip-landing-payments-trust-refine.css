@@ -121,14 +121,50 @@ html.dark .caretip-landing #payments-trust .caretip-payments-trust-card .caretip
   min-width: 0;
 }
 
+.caretip-landing #payments-trust .caretip-payments-trust-list-shell {
+  width: 100%;
+  max-width: 42rem;
+  margin-inline: auto;
+  text-align: left;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-intro-lead {
+  max-width: min(100%, 40rem);
+}
+
 .caretip-landing #payments-trust .caretip-payments-trust-item {
   cursor: default;
+  text-align: left;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-item h3,
+.caretip-landing #payments-trust .caretip-payments-trust-item p,
+.caretip-landing #payments-trust .caretip-payments-trust-item div {
+  text-align: left;
+  text-wrap: pretty;
+}
+
+.caretip-landing #payments-trust .caretip-payments-trust-principle {
+  margin: 2rem auto 0;
+  max-width: min(100%, 40rem);
+  text-align: center;
+  font-family: inherit;
+  font-size: inherit;
+  line-height: 1.65;
+  color: hsl(var(--muted-foreground));
+  text-wrap: pretty;
 }
 
 @media (min-width: 768px) {
   .caretip-landing #payments-trust .caretip-payments-trust-body {
     grid-template-columns: minmax(280px, 400px) minmax(0, 1fr);
     gap: 2.5rem 3rem;
+    align-items: start;
+  }
+
+  .caretip-landing #payments-trust .caretip-payments-trust-list-shell {
+    justify-self: center;
+    width: min(100%, 42rem);
   }
 
   .caretip-landing #payments-trust .caretip-payments-trust-visual {
@@ -155,19 +191,6 @@ html.dark .caretip-landing #payments-trust .caretip-payments-trust-card .caretip
   }
 
   .caretip-landing #payments-trust .caretip-payments-trust-grid {
-    align-self: center;
-  }
-}
-
-@media (hover: hover) {
-  .caretip-landing #payments-trust .caretip-payments-trust-item:hover .caretip-payments-trust-icon {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .caretip-landing #payments-trust .caretip-payments-trust-item:hover .caretip-payments-trust-icon,
-  .caretip-landing #payments-trust .caretip-payments-trust-icon {
-    transform: none !important;
+    align-self: start;
   }
 }

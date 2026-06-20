@@ -24,7 +24,7 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
   return (
     <ul
       className={cn(
-        "mt-5 flex w-full max-w-xl flex-col gap-2.5 sm:mt-7 sm:gap-3.5",
+        "mt-5 flex w-full max-w-xl flex-col gap-3 sm:mt-7 sm:gap-4",
         tone === "cinematic" && "max-md:mt-0 max-md:gap-2.5 max-md:max-w-full",
         className,
       )}

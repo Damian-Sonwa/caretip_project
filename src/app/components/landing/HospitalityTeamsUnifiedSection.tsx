@@ -46,7 +46,7 @@ export function HospitalityTeamsUnifiedSection() {
           ) : null}
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
           {landingCopyVisible(t("landing.hospitality.subtitle")) ? (
-            <p className={landingUi.hospitalitySubtitle}>
+            <p className={cn(landingUi.hospitalitySubtitle, "caretip-landing-density-lead")}>
               <Trans i18nKey="landing.hospitality.subtitle" components={landingBoldComponents} />
             </p>
           ) : null}

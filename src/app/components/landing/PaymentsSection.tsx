@@ -1,9 +1,5 @@
 import { useMemo } from "react";
 
-import type { LucideIcon } from "lucide-react";
-
-import { CreditCard as CreditCardIcon, Link2, Receipt, ShieldCheck } from "lucide-react";
-
 import { useTranslation } from "react-i18next";
 
 import paymentInfrastructureImg from "../../../../images/payment-infrastructure.png";
@@ -16,13 +12,15 @@ import { LandingParallaxWrap } from "@/components/landing/LandingParallaxWrap";
 
 import { landingStaggerDelay } from "@/lib/landingMotion";
 
+import { LandingBenefitBlock } from "@/components/landing/LandingCheckBadge";
+
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 
 import { LandingReveal } from "@/components/landing/LandingReveal";
 
-import { landingType } from "@/components/landing/landingTypography";
+import { LandingCopySentences } from "@/components/landing/LandingCopySentences";
 
 import { cn } from "@/lib/utils";
 
@@ -31,13 +29,8 @@ import { PaymentsStripeBadge } from "./PaymentsStripeBadge";
 
 
 type PaymentsTrustItem = {
-
-  icon: LucideIcon;
-
   title: string;
-
   text: string;
-
 };
 
 
@@ -59,35 +52,17 @@ export function PaymentsSection() {
     () => [
 
       {
-
-        icon: CreditCardIcon,
-
         title: t("landing.paymentsTrust.b1Title"),
-
         text: t("landing.paymentsTrust.b1Text"),
-
       },
-
-      { icon: Receipt, title: t("landing.paymentsTrust.b2Title"), text: t("landing.paymentsTrust.b2Text") },
-
+      { title: t("landing.paymentsTrust.b2Title"), text: t("landing.paymentsTrust.b2Text") },
       {
-
-        icon: Link2,
-
         title: t("landing.paymentsTrust.b3Title"),
-
         text: t("landing.paymentsTrust.b3Text"),
-
       },
-
       {
-
-        icon: ShieldCheck,
-
         title: t("landing.paymentsTrust.b4Title"),
-
         text: t("landing.paymentsTrust.b4Text"),
-
       },
 
     ],
@@ -153,30 +128,14 @@ export function PaymentsSection() {
           <h2 className={landingUi.sectionTitle}>{t("landing.paymentsTrust.title")}</h2>
 
           {landingCopyVisible(sectionSubtitle) ? (
-
-            <p className={cn(landingUi.sectionSubtitle, "mx-auto max-w-2xl")}>{sectionSubtitle}</p>
-
+            <LandingCopySentences
+              text={sectionSubtitle}
+              layout="paragraphs"
+              className={cn(landingUi.sectionSubtitle, "caretip-payments-trust-intro-lead mx-auto")}
+              sentenceClassName={landingUi.sectionSubtitle}
+            />
           ) : null}
-
-          {landingCopyVisible(principle) ? (
-
-            <p className={cn(landingUi.sectionSubtitle, "mx-auto mt-3 max-w-2xl")}>
-
-              {landingCopyVisible(principleLabel) ? (
-
-                <strong className="font-semibold text-neutral-900 dark:text-neutral-50">{principleLabel}</strong>
-
-              ) : null}
-
-              : {principle}
-
-            </p>
-
-          ) : null}
-
         </LandingReveal>
-
-
 
         <div className="caretip-payments-trust-body">
 
@@ -226,102 +185,39 @@ export function PaymentsSection() {
 
 
 
-          <ul
-
-            className="caretip-payments-trust-grid grid grid-cols-1 gap-7 sm:grid-cols-2 sm:gap-8 lg:gap-9"
-
-            role="list"
-
-          >
-
-            {items.map((item, idx) => {
-
-              const Icon = item.icon;
-
-              return (
-
-                <LandingReveal
-
-                  key={item.title}
-
-                  as="li"
-
-                  role="listitem"
-
-                  delay={landingStaggerDelay(idx, 0.07)}
-
-                  className="caretip-payments-trust-item group flex min-w-0 items-start gap-4"
-
-                >
-
-                  <div
-
-                    className={cn(
-
-                      "caretip-payments-trust-icon caretip-landing-feature-icon caretip-landing-feature-icon--obsidian",
-
-                      "transition-[transform,opacity,box-shadow,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]",
-
-                    )}
-
-                    aria-hidden
-
-                  >
-
-                    <Icon
-
-                      className="caretip-landing-feature-icon__glyph--obsidian"
-
-                      strokeWidth={2.25}
-
-                    />
-
-                  </div>
-
-                  <div className="min-w-0 flex-1 space-y-1.5 pt-0.5">
-
-                    <h3
-
-                      className={cn(
-
-                        landingType.featureCopySemibold,
-
-                        "tracking-tight text-neutral-900 dark:text-neutral-50",
-
-                      )}
-
-                    >
-
-                      {item.title}
-
-                    </h3>
-
-                    <p
-
-                      className={cn(
-
-                        landingType.bodyCopyMuted,
-
-                        "text-[0.8125rem] leading-snug sm:text-sm sm:leading-relaxed",
-
-                      )}
-
-                    >
-
-                      {item.text}
-
-                    </p>
-
-                  </div>
-
+          <div className="caretip-payments-trust-list-shell">
+            <div
+              className={cn(
+                landingUi.showcaseBenefits,
+                landingUi.showcaseBenefitsPanel,
+                "caretip-payments-trust-grid",
+              )}
+              role="list"
+            >
+              {items.map((item, idx) => (
+                <LandingReveal key={item.title} delay={landingStaggerDelay(idx, 0.07)}>
+                  <LandingBenefitBlock
+                    variant="showcase"
+                    title={item.title}
+                    description={item.text}
+                    bodyClassName="caretip-payments-trust-item__body text-[0.8125rem] leading-snug sm:text-sm sm:leading-relaxed"
+                    className="caretip-payments-trust-item group min-w-0"
+                  />
                 </LandingReveal>
+              ))}
+            </div>
 
-              );
-
-            })}
-
-          </ul>
-
+            {landingCopyVisible(principle) ? (
+              <p className="caretip-payments-trust-principle">
+                {landingCopyVisible(principleLabel) ? (
+                  <strong className="font-semibold text-neutral-900 dark:text-neutral-50">
+                    {principleLabel}
+                  </strong>
+                ) : null}
+                : {principle}
+              </p>
+            ) : null}
+          </div>
         </div>
 
       </div>

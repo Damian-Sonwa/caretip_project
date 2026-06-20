@@ -202,7 +202,7 @@ export const landingUi = {
   showcaseActionCluster:
     "mt-5 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
-    "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full flex flex-col gap-6 sm:gap-8",
+    "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full flex flex-col gap-7 sm:gap-9",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",
   showcaseCta: cnCtaPrimary(
     `caretip-cta-primary mt-0 inline-flex self-start transition-[transform,box-shadow,background-color] duration-200 active:scale-[0.99] lg:inline-flex ${ctaPrimarySize}`,

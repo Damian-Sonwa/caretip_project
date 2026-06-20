@@ -6,6 +6,7 @@ import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingHeroHeadlineWithHighlight } from "@/components/landing/landingHeroHeadline";
 import { LandingHeroAnimatedWord } from "@/components/landing/LandingHeroAnimatedWord";
 import { LandingHeroStoryShowcase } from "@/components/landing/LandingHeroStoryShowcase";
+import { LandingCopySentences } from "@/components/landing/LandingCopySentences";
 import { cn } from "@/lib/utils";
 
 export type CareTipLandingHeroProps = {
@@ -121,7 +122,12 @@ export function CareTipLandingHero({
           </h1>
 
           {landingCopyVisible(heroDescription) ? (
-            <p className={cn(landingUi.heroSubtitle, "caretip-hero-subtitle")}>{heroDescription}</p>
+            <LandingCopySentences
+              text={heroDescription}
+              layout="paragraphs"
+              className={cn(landingUi.heroSubtitle, "caretip-hero-subtitle")}
+              sentenceClassName={cn(landingUi.heroSubtitle, "caretip-hero-subtitle m-0")}
+            />
           ) : null}
 
           <div className={cn(landingUi.heroCtaRow, "caretip-hero-cta-cluster")}>

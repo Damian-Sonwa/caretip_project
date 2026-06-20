@@ -8,6 +8,7 @@ html:not(.dark) .caretip-landing.caretip-landing--premium {
   --caretip-ivory-soft: #f9f7f4;
   --caretip-ivory-depth: #f8f6f3;
   --caretip-ivory-stone: #f7f5f2;
+  --caretip-ivory-premium: #f8f7f4;
   --caretip-ivory-white: #ffffff;
   --caretip-landing-border: rgba(17, 17, 17, 0.06);
   --caretip-landing-card-bg: rgba(255, 255, 255, 0.94);
@@ -40,17 +41,17 @@ html:not(.dark) .caretip-landing .caretip-hero-section {
 html:not(.dark) .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
   background: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #fff9f2 100%
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 100%
   );
 }
 
 html:not(.dark) .caretip-landing #how-it-works {
   background: linear-gradient(
     180deg,
-    #fffdf9 0%,
-    #fffbf4 48%,
-    #fff7eb 100%
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 48%,
+    var(--caretip-ivory-base) 100%
   );
 }
 

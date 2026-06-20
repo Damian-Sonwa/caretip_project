@@ -1,5 +1,6 @@
 import { useId, useState, type ReactNode } from "react";
 import { MarketingPicture } from "@/lib/marketingPicture";
+import { splitLandingCopySentences } from "@/lib/landingCopyLayout";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
@@ -39,6 +40,7 @@ export function ExpandableInfoCard({
 }: ExpandableInfoCardProps) {
   const [expanded, setExpanded] = useState(false);
   const detailId = useId();
+  const detailSentences = splitLandingCopySentences(detail);
 
   return (
     <article
@@ -47,9 +49,15 @@ export function ExpandableInfoCard({
         className,
       )}
     >
+      {tag ? (
+        <div className="caretip-expandable-info-card__tag-slot px-5 pt-4 sm:px-6 sm:pt-5">
+          <span className="caretip-expandable-info-card__image-label">{tag}</span>
+        </div>
+      ) : null}
       <div
         className={cn(
           "caretip-expandable-info-card__media relative aspect-[16/10] w-full overflow-hidden",
+          tag ? "mt-0" : undefined,
           imageClassName,
         )}
       >
@@ -64,11 +72,6 @@ export function ExpandableInfoCard({
       </div>
 
       <div className="caretip-expandable-info-card__body flex flex-col px-5 pb-5 pt-4 sm:px-6 sm:pb-6 sm:pt-5">
-        {tag ? (
-          <p className="caretip-expandable-info-card__eyebrow mb-1.5 font-sans text-xs font-semibold uppercase tracking-wide text-primary">
-            {tag}
-          </p>
-        ) : null}
         <h3
           className={cn(
             "font-sans text-card-title font-semibold tracking-tight text-foreground",
@@ -89,10 +92,19 @@ export function ExpandableInfoCard({
             expanded && "caretip-expandable-info-card__detail--open",
           )}
         >
-          <div className="caretip-expandable-info-card__detail-inner">
-            <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
-              {detail}
-            </p>
+          <div
+            className={cn(
+              "caretip-expandable-info-card__detail-inner",
+              detailSentences.length > 1 && "caretip-landing-copy-paragraphs",
+            )}
+          >
+            {detailSentences.length > 1 ? (
+              detailSentences.map((sentence, index) => <p key={index}>{sentence}</p>)
+            ) : (
+              <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
+                {detail}
+              </p>
+            )}
           </div>
         </div>
 

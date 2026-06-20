@@ -5,8 +5,8 @@ import {
   LandingSplitShowcaseSection,
 } from "@/app/components/landing/LandingSplitShowcaseSection";
 import { landingCopyVisible } from "@/components/landing/landingUi";
-import businessSectionImg from "../../../../images/Volle.png";
-import businessSectionImgWebp from "../../../../images/Volle.webp";
+import businessSectionImg from "../../../../images/caring002.png";
+import businessSectionImgWebp from "../../../../images/caring002.webp";
 
 export function BusinessLandingSection() {
   const { t, i18n } = useTranslation();

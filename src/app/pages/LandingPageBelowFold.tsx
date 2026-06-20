@@ -18,11 +18,10 @@ export function LandingPageBelowFold() {
     <>
       <DeferredBelowFold minHeight="52rem" rootMargin="320px 0px">
         <HospitalityTeamsUnifiedSection />
-        <SimpleSetupSection />
       </DeferredBelowFold>
       <DeferredBelowFold minHeight="44rem" rootMargin="240px 0px">
-        <EmployeeLandingSection />
         <BusinessLandingSection />
+        <EmployeeLandingSection />
       </DeferredBelowFold>
       <DeferredBelowFold minHeight="36rem" rootMargin="240px 0px">
         <LandingFeaturesSection />
@@ -31,6 +30,9 @@ export function LandingPageBelowFold() {
       <DeferredBelowFold minHeight="40rem" rootMargin="200px 0px">
         <LandingRealLifeSection />
         <LandingMotivationSection />
+      </DeferredBelowFold>
+      <DeferredBelowFold minHeight="28rem" rootMargin="200px 0px">
+        <SimpleSetupSection />
       </DeferredBelowFold>
       {SHOW_LANDING_SOCIAL_PROOF ? (
         <DeferredBelowFold minHeight="24rem" rootMargin="200px 0px">

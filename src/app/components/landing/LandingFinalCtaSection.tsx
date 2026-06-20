@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { FinalCtaBackdrop } from "@/app/components/landing/FinalCtaBackdrop";
 import { LandingTrustComplianceStrip } from "@/app/components/landing/LandingTrustComplianceStrip";
 import { LandingReveal } from "@/components/landing/LandingReveal";
+import { LandingCopySentences } from "@/components/landing/LandingCopySentences";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +34,12 @@ export function LandingFinalCtaSection() {
         </h2>
 
         {landingCopyVisible(sectionSubtitle) ? (
-          <p className="caretip-final-cta-subtitle mx-auto mt-4 max-w-md text-pretty font-sans sm:mt-5">
-            {sectionSubtitle}
-          </p>
+          <LandingCopySentences
+            text={sectionSubtitle}
+            layout="paragraphs"
+            className="caretip-final-cta-subtitle mx-auto mt-4 max-w-md text-pretty font-sans sm:mt-5"
+            sentenceClassName="caretip-final-cta-subtitle mx-auto max-w-md text-pretty font-sans m-0"
+          />
         ) : null}
 
         <div className="caretip-final-cta-actions mt-6 w-full min-w-0 sm:mt-7">

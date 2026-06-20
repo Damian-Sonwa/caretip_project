@@ -3,7 +3,11 @@
  */
 
 html:not(.dark) .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
-  background: linear-gradient(180deg, #ffffff 0%, #fff9f2 100%) !important;
+  background: linear-gradient(
+    180deg,
+    var(--caretip-ivory-white) 0%,
+    var(--caretip-ivory-premium) 100%
+  ) !important;
 }
 
 .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
@@ -227,6 +231,27 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-c
 
 html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-timeline-dot {
   background: rgb(18 18 18);
+}
+
+/* Mobile timeline cleanup — hide rail so cards use full width (<768px); desktop unchanged */
+@media (max-width: 767px) {
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-timeline-line {
+    display: none;
+  }
+
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-timeline {
+    display: none;
+  }
+
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item {
+    gap: 0;
+    width: 100%;
+  }
+
+  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-card {
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 /* —— Premium showcase shell —— */
