@@ -49,17 +49,6 @@ html.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality::b
   text-align: center;
 }
 
-.caretip-landing #built-for-hospitality .caretip-hospitality-eyebrow {
-  margin: 0 0 0.875rem;
-  font-family: var(--font-sans, Inter, system-ui, sans-serif);
-  font-size: 0.6875rem;
-  font-weight: 600;
-  letter-spacing: 0.16em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  color: #eb992c;
-}
-
 .caretip-landing #built-for-hospitality .caretip-hospitality-title {
   margin-top: 0;
   margin-inline: auto;

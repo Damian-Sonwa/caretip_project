@@ -120,10 +120,6 @@
 }
 
 @media (max-width: 767px) {
-  .caretip-landing .caretip-hero-subtitle {
-    max-width: 34ch;
-  }
-
   .caretip-landing #payments-trust .caretip-payments-trust-intro p {
     max-width: 36ch;
     margin-inline: auto;

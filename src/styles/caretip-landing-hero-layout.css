@@ -4,11 +4,11 @@
 
 .caretip-landing .caretip-hero-grid {
   --caretip-hero-headline-measure: min(100%, 21.5rem);
-  --caretip-hero-body-measure: min(100%, 22rem);
+  --caretip-hero-body-measure: min(100%, 32.5rem);
   --caretip-hero-gap-tagline: 0.5rem;
   --caretip-hero-tagline-size: var(--caretip-tagline-size);
-  --caretip-hero-gap-headline-body: 1rem;
-  --caretip-hero-gap-body-cta: 0.75rem;
+  --caretip-hero-gap-headline-body: 1.5rem;
+  --caretip-hero-gap-body-cta: 1.75rem;
   --caretip-hero-art-max-w: min(100%, 20rem);
   --caretip-hero-art-max-h: min(34rem, 70vh);
   --caretip-hero-art-aspect-ratio: 1;
@@ -61,7 +61,9 @@
 @media (min-width: 640px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-measure: min(100%, 23rem);
-    --caretip-hero-body-measure: min(100%, 25rem);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
+    --caretip-hero-gap-headline-body: 1.75rem;
+    --caretip-hero-gap-body-cta: 2rem;
     --caretip-hero-art-max-w: min(100%, 22rem);
     --caretip-hero-art-max-h: min(36rem, 72vh);
   }
@@ -70,7 +72,9 @@
 @media (min-width: 768px) and (max-width: 1023px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-measure: min(100%, 24.5rem);
-    --caretip-hero-body-measure: min(100%, 27rem);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
+    --caretip-hero-gap-headline-body: 1.75rem;
+    --caretip-hero-gap-body-cta: 2rem;
     --caretip-hero-art-max-w: min(100%, 24rem);
     --caretip-hero-art-max-h: min(34rem, 58vh);
   }
@@ -79,7 +83,9 @@
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-measure: min(100%, 30ch);
-    --caretip-hero-body-measure: min(100%, 38ch);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
+    --caretip-hero-gap-headline-body: 1.875rem;
+    --caretip-hero-gap-body-cta: 2rem;
     --caretip-hero-art-max-w: min(100%, 28rem);
     --caretip-hero-art-max-h: min(44rem, 82vh);
     display: grid;
@@ -107,7 +113,9 @@
 @media (min-width: 1280px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-measure: min(100%, 31ch);
-    --caretip-hero-body-measure: min(100%, 40ch);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
+    --caretip-hero-gap-headline-body: 2rem;
+    --caretip-hero-gap-body-cta: 2.125rem;
     --caretip-hero-art-max-w: min(100%, 30rem);
     --caretip-hero-art-max-h: min(46rem, 84vh);
     column-gap: clamp(2rem, 4vw, 3.5rem);

@@ -3,6 +3,7 @@ import { Trans, useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
 import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
+import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
@@ -42,7 +43,9 @@ export function HospitalityTeamsUnifiedSection() {
           )}
         >
           {landingCopyVisible(t("landing.hospitality.eyebrow")) ? (
-            <p className="caretip-hospitality-eyebrow">{t("landing.hospitality.eyebrow")}</p>
+            <div className={cn(landingUi.sectionAccentRow, "mb-4 justify-center")}>
+              <LandingSectionAccent variant="spark">{t("landing.hospitality.eyebrow")}</LandingSectionAccent>
+            </div>
           ) : null}
           <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
           {landingCopyVisible(t("landing.hospitality.subtitle")) ? (

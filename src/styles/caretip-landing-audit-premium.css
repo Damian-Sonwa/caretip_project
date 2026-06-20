@@ -253,10 +253,6 @@ html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .care
   .caretip-landing.caretip-landing--premium .caretip-hero-copy-block {
     gap: 0;
   }
-
-  .caretip-landing.caretip-landing--premium .caretip-hero-cta-cluster {
-    margin-top: 0.125rem;
-  }
 }
 
 /* —— Hospitality — editorial feature list + media stage —— */

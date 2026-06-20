@@ -117,6 +117,11 @@
   text-wrap: pretty;
 }
 
+/* Paragraph group — headline offset on container only; siblings use flex gap */
+.caretip-landing .caretip-hero-subtitle.caretip-landing-copy-paragraphs > p.caretip-hero-subtitle {
+  margin-top: 0 !important;
+}
+
 html.dark .caretip-landing .caretip-hero-subtitle {
   color: rgb(163 163 163);
 }
@@ -136,7 +141,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 @media (min-width: 768px) and (max-width: 1023px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-size: clamp(2.375rem, 4.8vw + 0.95rem, 2.9375rem);
-    --caretip-hero-gap-headline-body: 1.0625rem;
+    --caretip-hero-gap-headline-body: 1.75rem;
+    --caretip-hero-gap-body-cta: 2rem;
     --caretip-hero-body-size: 1rem;
     --caretip-hero-body-lh: 1.6;
   }
@@ -150,8 +156,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-animated-slot: 1.08em;
     --caretip-hero-body-size: clamp(1rem, 0.32cqw + 0.84rem, 1.0625rem);
     --caretip-hero-body-lh: 1.62;
-    --caretip-hero-gap-headline-body: 1.1875rem;
-    --caretip-hero-gap-body-cta: 1.0625rem;
+    --caretip-hero-gap-headline-body: 1.875rem;
+    --caretip-hero-gap-body-cta: 2rem;
   }
 
   .caretip-landing .caretip-hero-headline-desktop {
@@ -185,8 +191,8 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-headline-track: -0.042em;
     --caretip-hero-body-size: clamp(1.03125rem, 0.38cqw + 0.86rem, 1.125rem);
     --caretip-hero-body-lh: 1.64;
-    --caretip-hero-gap-headline-body: 1.25rem;
-    --caretip-hero-gap-body-cta: 1.125rem;
+    --caretip-hero-gap-headline-body: 2rem;
+    --caretip-hero-gap-body-cta: 2.125rem;
     --caretip-hero-animated-slot: 1.06em;
   }
 
@@ -206,7 +212,7 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 @media (max-width: 399px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-measure: min(100%, 19.5rem);
-    --caretip-hero-body-measure: min(100%, 19.75rem);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
     --caretip-hero-line-gap: 0.24rem;
     --caretip-hero-rotating-stack-gap: 0.18rem;
     --caretip-hero-headline-size: clamp(2rem, 8.5vw, 2.375rem);
@@ -232,7 +238,7 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-measure: min(100%, 40ch);
+    --caretip-hero-body-measure: min(100%, 32.5rem);
   }
 
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
