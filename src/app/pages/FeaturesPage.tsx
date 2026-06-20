@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ComponentType } from "react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { FeaturesPageHero } from "@/components/public/features/FeaturesPageHero";
@@ -81,9 +81,9 @@ export function FeaturesPage() {
       </DeferredBelowFold>
 
       <LazyBelowFold
-        load={() =>
+        load={(): Promise<{ default: ComponentType<Record<string, never>> }> =>
           import("@/components/public/features/FeaturesProductMoments").then((m) => ({
-            default: m.FeaturesProductMoments,
+            default: m.FeaturesProductMoments as ComponentType<Record<string, never>>,
           }))
         }
         props={{}}

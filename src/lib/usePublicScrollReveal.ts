@@ -5,12 +5,12 @@ const REVEAL_CLASS = "caretip-public-scroll-reveal";
 const REVEAL_VISIBLE_CLASS = "caretip-public-scroll-reveal--visible";
 
 /** Lightweight IO + CSS reveal for below-the-fold public content (no Framer Motion). */
-export function usePublicScrollReveal(delayS = 0): {
-  ref: RefObject<HTMLElement>;
+export function usePublicScrollReveal<T extends HTMLElement = HTMLElement>(delayS = 0): {
+  ref: RefObject<T>;
   className: string;
   style: CSSProperties | undefined;
 } {
-  const ref = useRef<HTMLElement>(null);
+  const ref = useRef<T>(null);
   const reduceMotion = usePrefersReducedMotion();
 
   useEffect(() => {

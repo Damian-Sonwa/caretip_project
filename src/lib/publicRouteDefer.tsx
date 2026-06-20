@@ -1,4 +1,5 @@
 import {
+  createElement,
   lazy,
   Suspense,
   useEffect,
@@ -160,7 +161,10 @@ export function LazyBelowFold<P extends object>({
   return (
     <DeferredBelowFold minHeight={minHeight} rootMargin={rootMargin} className={className}>
       <Suspense fallback={null}>
-        <LazyComponent {...props} />
+        {createElement(
+          LazyComponent as unknown as ComponentType<P>,
+          props as P & Record<string, unknown>,
+        )}
       </Suspense>
     </DeferredBelowFold>
   );

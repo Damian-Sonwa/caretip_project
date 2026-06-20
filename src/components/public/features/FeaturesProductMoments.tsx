@@ -21,7 +21,7 @@ function FeatureMomentCard({
 }) {
   const { t } = useTranslation();
   const Icon = MOMENT_ICONS[momentKey];
-  const reveal = usePublicScrollReveal(index * 0.05);
+  const reveal = usePublicScrollReveal<HTMLDivElement>(index * 0.05);
 
   return (
     <div

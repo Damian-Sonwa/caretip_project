@@ -115,10 +115,10 @@ if (typeof window !== "undefined") {
   const schedule = () => {
     void preloadLiveMinutesOnboardingScreens(["en", "de"]);
   };
-  if ("requestIdleCallback" in window) {
+  if (typeof requestIdleCallback === "function") {
     requestIdleCallback(schedule, { timeout: 5000 });
   } else {
-    window.setTimeout(schedule, 2500);
+    setTimeout(schedule, 2500);
   }
 }
 

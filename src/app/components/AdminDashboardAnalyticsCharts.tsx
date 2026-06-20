@@ -278,7 +278,7 @@ export type AdminDashboardAnalyticsChartsProps = {
   chartTipStatus: PlatformAnalytics["tipStatus"];
   chartsLookEmpty: boolean;
   analyticsError: string | null;
-  analyticsMeta: { rangeDays: number; timezone: string | null };
+  analyticsMeta: { rangeDays: number; timezone?: string | null };
   analyticsTimezone: string;
   analyticsSyncing: boolean;
   analyticsUpdatedAt: number | null;
