@@ -99,12 +99,12 @@ export function resolveInboxNotificationDestination(
   const role = opts.role;
 
   if (type === "tip_received" || type === "qr_payment_success") {
-    if (role === "employee") return "/employee/notifications";
+    if (role === "employee") return "/employee/tip-history";
     if (role === "business") return "/dashboard/transactions";
   }
 
   if (type === "payout_paid" || type === "payout_completed") {
-    if (role === "employee") return "/employee/transactions";
+    if (role === "employee") return "/employee/tip-history";
     if (role === "business") return "/dashboard/transactions";
   }
 

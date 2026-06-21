@@ -522,8 +522,9 @@ const routes: RouteObject[] = [
         children: [
           { index: true, element: <Navigate to="/employee/dashboard" replace /> },
           { path: 'dashboard', lazy: routeLazy(() => import('./pages/employee/EmployeeDashboard'), 'EmployeeDashboard') },
-          { path: 'transactions', lazy: routeLazy(() => import('./pages/shared/TipsActivityPage'), 'TipsActivityPage') },
-          { path: 'notifications', lazy: routeLazy(() => import('./pages/employee/EmployeeNotificationsPage'), 'EmployeeNotificationsPage') },
+          { path: 'tip-history', lazy: routeLazy(() => import('./pages/employee/EmployeeTipHistoryPage'), 'EmployeeTipHistoryPage') },
+          { path: 'notifications', element: <Navigate to="/employee/tip-history" replace /> },
+          { path: 'transactions', element: <Navigate to="/employee/tip-history" replace /> },
           { path: 'inbox', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
           { path: 'tip-goals', lazy: routeLazy(() => import('./pages/employee/EmployeeTipGoalsPage'), 'EmployeeTipGoalsPage') },
           { path: 'settings', lazy: routeLazy(() => import('./pages/employee/EmployeeSettingsPage'), 'EmployeeSettingsPage') },

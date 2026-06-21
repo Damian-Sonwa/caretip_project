@@ -753,10 +753,6 @@
     margin-bottom: 0.3125rem;
   }
 
-  .caretip-auth-header--session {
-    margin-bottom: 0.25rem;
-  }
-
   .caretip-auth-title {
     padding-top: 0;
     font-size: 1.125rem;
@@ -1352,8 +1348,43 @@
   text-align: left;
 }
 
-.caretip-auth-header--session {
-  margin-bottom: 0.4375rem;
+.caretip-auth-card--session-resume {
+  padding-block: 1.25rem 1.375rem;
+}
+
+.caretip-auth-card--session-resume .caretip-auth-card-body {
+  padding-top: 0;
+}
+
+.caretip-auth-session-resume {
+  width: 100%;
+}
+
+.caretip-auth-notice--session-resume {
+  border-radius: 1.125rem;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  background: #fff;
+  padding: 1.25rem 1.375rem;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: rgb(23 23 23);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+}
+
+.dark .caretip-auth-notice--session-resume {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgb(23 23 23);
+  color: rgb(250 250 250);
+}
+
+@media (min-width: 640px) {
+  .caretip-auth-card--session-resume {
+    padding-block: 1.375rem 1.5rem;
+  }
+
+  .caretip-auth-notice--session-resume {
+    padding: 1.375rem 1.5rem;
+  }
 }
 
 .caretip-auth-title {

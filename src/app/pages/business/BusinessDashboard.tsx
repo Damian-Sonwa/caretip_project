@@ -19,7 +19,6 @@ import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
 import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
@@ -389,8 +388,9 @@ export function BusinessDashboard() {
     ],
   );
 
+  // ProtectedRoute guarantees user; avoid a second full-screen hold under layout chrome.
   if (!user) {
-    return <GlobalAppLoadingHold />;
+    return null;
   }
 
   const { onboardingStatusFromServer } = getAuthSessionFlags();

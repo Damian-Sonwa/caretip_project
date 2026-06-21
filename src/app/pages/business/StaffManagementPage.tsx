@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { useState, useEffect, useCallback, type ComponentProps, type ReactNode } from "react";
+import { useState, useEffect, useCallback, useRef, type ComponentProps, type ReactNode } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -37,8 +37,7 @@ import {
 } from "../../lib/api";
 import { formatEur } from "../../lib/formatEur";
 import { downloadBrandedQR, downloadBrandedQRLegacy } from "../../lib/qrBranded";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
-import { StaffManagementPageSkeleton } from "../../components/business/StaffManagementPageSkeleton";
+import { StaffRosterTableSkeleton, InlineSpinner } from "../../components/dashboard/DashboardSectionLoading";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
@@ -206,6 +205,8 @@ export function StaffManagementPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [businessPublicSlug, setBusinessPublicSlug] = useState<string | null>(null);
+  const employeesRef = useRef(employees);
+  employeesRef.current = employees;
 
   const canUseQr = canUseProductionQr(user?.status, Boolean(user?.impersonation));
 
@@ -232,7 +233,7 @@ export function StaffManagementPage() {
       setEmployees(cached);
       setLoading(false);
       setError(null);
-    } else if (!quiet) {
+    } else if (!quiet && employeesRef.current.length === 0) {
       setLoading(true);
       setError(null);
     }
@@ -565,26 +566,10 @@ export function StaffManagementPage() {
   };
 
   const isInitialStaffLoad = loading && employees.length === 0;
+  const isBackgroundStaffRefresh = loading && employees.length > 0;
 
   if (!user) {
-    return <GlobalAppLoadingHold />;
-  }
-
-  if (isInitialStaffLoad) {
-    return <StaffManagementPageSkeleton />;
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background p-4">
-        <div className="text-center">
-          <p className="mb-2 text-sm font-medium text-destructive">{error}</p>
-          <button onClick={() => window.location.reload()} className="text-primary hover:underline text-sm">
-            {t("business.staffPage.tryAgain")}
-          </button>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   const activeCount = employees.filter(isFullyOnboardedDashboardStaff).length;
@@ -747,6 +732,34 @@ export function StaffManagementPage() {
             </CardContent>
           </Card>
 
+        {error ? (
+          <div className={cn(businessUi.cardStatic, "p-4 text-sm text-destructive")}>
+            <p className="font-medium">{error}</p>
+            <button
+              type="button"
+              onClick={() => void fetchEmployees()}
+              className="mt-2 text-primary hover:underline text-sm font-medium"
+            >
+              {t("business.staffPage.tryAgain")}
+            </button>
+          </div>
+        ) : null}
+
+        {isBackgroundStaffRefresh ? (
+          <div
+            className="flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+            role="status"
+            aria-live="polite"
+          >
+            <InlineSpinner />
+            <span>{t("dashboard.refresh.updating")}</span>
+          </div>
+        ) : null}
+
+        {isInitialStaffLoad ? (
+          <StaffRosterTableSkeleton rows={6} />
+        ) : (
+          <>
         {/* Desktop Table View — horizontal scroll so Actions column stays reachable on narrow viewports */}
         <div className={cn(businessUi.tablePanel, "hidden lg:block")}>
           <table className="w-full min-w-[72rem]">
@@ -1056,6 +1069,8 @@ export function StaffManagementPage() {
             })
           )}
         </div>
+          </>
+        )}
       </div>
       </TracingBeam>
 

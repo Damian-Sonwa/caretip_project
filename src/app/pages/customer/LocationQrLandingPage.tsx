@@ -213,7 +213,7 @@ export function LocationQrLandingPage() {
           </Card>
         </motion.div>
 
-        <Card className={cf.cardShadcn}>
+        <Card className={cf.cardSearchLight}>
           <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
             <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
             <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
@@ -242,7 +242,7 @@ export function LocationQrLandingPage() {
             {filtered.length === 0 ? (
               <p className="py-8 text-center text-sm text-muted-foreground">{t("tipFlow.locationLanding.noMatches")}</p>
             ) : (
-              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
                 {filtered.map((emp, index) => (
                   <motion.li
                     key={emp.id}
@@ -253,12 +253,12 @@ export function LocationQrLandingPage() {
                     <button
                       type="button"
                       onClick={() => pickEmployee(emp)}
-                      className="flex w-full flex-col items-center gap-2 rounded-2xl border border-border/70 bg-card p-3 text-left shadow-[0_6px_22px_-14px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] hover:border-primary/40 hover:shadow-[0_10px_30px_-16px_rgba(15,23,42,0.11)] active:opacity-95"
+                      className={cf.employeeCard}
                     >
                       <ProfileAvatar
                         src={emp.avatar}
                         displayName={emp.name}
-                        className="h-20 w-20 ring-2 ring-primary/30"
+                        className={cf.employeeAvatar}
                       />
                       <span className="line-clamp-2 text-center text-sm font-semibold leading-tight text-foreground">
                         {emp.name}

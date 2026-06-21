@@ -23,8 +23,19 @@ import {
 } from "@/app/components/ui/select";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_HIGH_MS,
+} from "@/app/lib/pageSessionCache";
 
 const PAGE_SIZE = 20;
+
+type FeedbackCache = {
+  items: CustomerFeedbackRow[];
+  total: number;
+  summary: CustomerFeedbackSummary | null;
+};
 
 export function CustomerFeedbackPage() {
   const { t } = useTranslation();
@@ -53,9 +64,20 @@ export function CustomerFeedbackPage() {
       .catch((err) => logClientError("CustomerFeedbackPage.staff", err));
   }, [canLoad]);
 
-  const loadFeedback = useCallback(async () => {
+  const loadFeedback = useCallback(async (opts?: { quiet?: boolean }) => {
     if (!canLoad) return;
-    setLoading(true);
+    const quiet = opts?.quiet === true;
+    const cacheKey = `business:feedback:${user?.id ?? ""}:${page}:${employeeId}`;
+    const cached = getPageSessionCache<FeedbackCache>(cacheKey, PAGE_CACHE_TTL_HIGH_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setItems(cached.items);
+      setTotal(cached.total);
+      setSummary(cached.summary);
+      setLoading(false);
+    } else if (!quiet && items.length === 0) {
+      setLoading(true);
+    }
     setError(null);
     try {
       const skip = (page - 1) * PAGE_SIZE;
@@ -64,18 +86,24 @@ export function CustomerFeedbackPage() {
         skip,
         employeeId: employeeId === "all" ? undefined : employeeId,
       });
-      setItems(res.items);
-      setTotal(res.total);
-      setSummary(res.summary);
+      const nextItems = res.items;
+      const nextTotal = res.total;
+      const nextSummary = res.summary;
+      setItems(nextItems);
+      setTotal(nextTotal);
+      setSummary(nextSummary);
+      setPageSessionCache(cacheKey, { items: nextItems, total: nextTotal, summary: nextSummary });
     } catch (err) {
       logClientError("CustomerFeedbackPage.load", err);
-      setError(t("business.customerFeedback.loadError"));
-      setItems([]);
-      setTotal(0);
+      if (!useCachedFirst) {
+        setError(t("business.customerFeedback.loadError"));
+        setItems([]);
+        setTotal(0);
+      }
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [canLoad, page, employeeId, t]);
+  }, [canLoad, employeeId, items.length, page, t, user?.id]);
 
   useEffect(() => {
     void loadFeedback();

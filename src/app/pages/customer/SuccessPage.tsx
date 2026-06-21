@@ -1,29 +1,54 @@
 import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Check, Star, Home, LogOut } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
-import { getTipSessionContext } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
-import { logClientError } from "../../lib/clientLog";
-import { onVerifiedTipPaymentSession } from "../../lib/postPaymentSuccess";
-import { clearCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
+import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
+import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
 
 export function SuccessPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { amount, employeeName, reset } = useTipFlow();
-  const [verified, setVerified] = useState(false);
 
   const sessionId = searchParams.get("session_id")?.trim() ?? "";
+  const isDevMockSession = DEV_BYPASS_ENABLED && sessionId === DEV_MOCK.sessionId;
+  const effectiveSessionId = isDevMockSession ? DEV_MOCK.sessionId : sessionId;
+
+  const verification = useVerifiedTipSession(effectiveSessionId, {
+    enabled: Boolean(effectiveSessionId.trim()),
+    allowDevMock: isDevMockSession,
+  });
+  const verified = isVerifiedTipSessionReady(verification);
 
   const tipAmount = amount != null && Number.isFinite(amount) && amount > 0 ? amount : null;
+  const displayEmployeeName =
+    verification.phase === "ready"
+      ? verification.context.employee?.name ?? employeeName
+      : employeeName;
+
+  useEffect(() => {
+    if (!sessionId) {
+      navigate("/", { replace: true });
+    }
+  }, [navigate, sessionId]);
+
+  useEffect(() => {
+    if (verification.phase === "expired" || verification.phase === "unpaid" || verification.phase === "error") {
+      toast.message(t("tipFlow.completion.notVerifiedTitle"), {
+        description: toUserFriendlyMessage(verification.phase === "error" ? verification.message : undefined),
+      });
+      navigate("/", { replace: true });
+    }
+  }, [navigate, t, verification]);
 
   const goToRating = () => {
     if (!sessionId) {
@@ -38,41 +63,6 @@ export function SuccessPage() {
     reset();
     navigate("/", { replace: true });
   };
-
-  // Production guard: /success should only render after verified successful payment.
-  useEffect(() => {
-    if (import.meta.env.DEV) {
-      setVerified(true);
-      return;
-    }
-    if (!sessionId) {
-      navigate("/", { replace: true });
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const ctx = await getTipSessionContext(sessionId);
-        if (cancelled) return;
-        if (ctx.status === "ready") {
-          markCustomerFlowEntered();
-          // Promote the last checkout into repeat-tip storage (client-side only).
-          onVerifiedTipPaymentSession(sessionId, ctx);
-          setVerified(true);
-          return;
-        }
-        navigate("/", { replace: true });
-      } catch (err) {
-        if (cancelled) return;
-        logClientError("SuccessPage.verify", err);
-        toast.error(toUserFriendlyMessage(err));
-        navigate("/", { replace: true });
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [navigate, sessionId]);
 
   if (!verified) {
     return <CareTipPageLoader variant="wait" message={t("tipFlow.success.validatingPayment")} />;
@@ -113,7 +103,7 @@ export function SuccessPage() {
           ) : null}
           <p className="mt-2 text-sm text-muted-foreground">
             {t("tipFlow.success.sentTo", {
-              name: employeeName ?? t("tipFlow.common.theTeamMember"),
+              name: displayEmployeeName ?? t("tipFlow.common.theTeamMember"),
             })}
           </p>
         </motion.div>

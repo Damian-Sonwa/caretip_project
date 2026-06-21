@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
-import { Loader2, Send } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Send } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate, useLocation, useParams } from "react-router";
 import { toast } from "sonner";
@@ -13,7 +13,6 @@ import {
   type SupportTicketStatus,
 } from "@/app/lib/api";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
-import { GlobalAppLoadingHold } from "@/app/components/GlobalAppLoadingHold";
 import { SupportStatusBadge } from "@/app/components/support/supportTicketUi";
 import { Button } from "@/app/components/ui/button";
 import { Textarea } from "@/app/components/ui/textarea";
@@ -25,9 +24,32 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { dashboardSharedUi } from "@/app/components/dashboard/dashboardSharedUi";
+import {
+  DashboardListSkeleton,
+  InlineSpinner,
+} from "@/app/components/dashboard/DashboardSectionLoading";
 import { cn } from "@/lib/utils";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "@/app/lib/pageSessionCache";
 
 const ADMIN_STATUSES: SupportTicketStatus[] = ["OPEN", "PENDING", "RESOLVED", "CLOSED"];
+
+function SupportTicketHeaderSkeleton() {
+  return (
+    <header className="mb-6" aria-hidden>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="dashboard-hero-metric-skeleton__bar h-6 w-16 rounded-md" />
+        <span className="dashboard-hero-metric-skeleton__bar h-6 w-20 rounded-full" />
+        <span className="dashboard-hero-metric-skeleton__bar h-4 w-24 rounded-md" />
+      </div>
+      <span className="dashboard-hero-metric-skeleton__bar mt-3 block h-8 w-[min(100%,24rem)] rounded-md" />
+      <span className="dashboard-hero-metric-skeleton__bar mt-2 block h-4 w-40 rounded-md" />
+    </header>
+  );
+}
 
 export function SupportTicketDetailPage() {
   const { t, i18n } = useTranslation();
@@ -40,25 +62,44 @@ export function SupportTicketDetailPage() {
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
   const [statusUpdating, setStatusUpdating] = useState(false);
+  const ticketRef = useRef<SupportTicketDetail | null>(null);
+  ticketRef.current = ticket;
 
   const backHref = isAdmin ? "/platform-admin/notifications" : "/dashboard/support";
   const listHref = isAdmin ? "/platform-admin/notifications" : "/dashboard/support";
 
-  const load = useCallback(async () => {
-    if (!ticketId) return;
-    setLoading(true);
-    try {
-      const res = isAdmin
-        ? await fetchPlatformSupportTicket(ticketId)
-        : await fetchBusinessSupportTicket(ticketId);
-      setTicket(res.ticket);
-    } catch {
-      toast.error(t("support.detail.loadError"));
-      setTicket(null);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAdmin, ticketId, t]);
+  const canLoad = authHydrated && sessionValidated && Boolean(user) && Boolean(ticketId);
+
+  const load = useCallback(
+    async (opts?: { quiet?: boolean }) => {
+      if (!ticketId || !canLoad) return;
+      const quiet = opts?.quiet === true;
+      const cacheKey = `support:ticket:${isAdmin ? "admin" : "business"}:${ticketId}`;
+      const cached = getPageSessionCache<SupportTicketDetail>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+      const useCachedFirst = !quiet && cached !== null;
+      if (useCachedFirst) {
+        setTicket(cached);
+        setLoading(false);
+      } else if (!quiet && !ticketRef.current) {
+        setLoading(true);
+      }
+      try {
+        const res = isAdmin
+          ? await fetchPlatformSupportTicket(ticketId)
+          : await fetchBusinessSupportTicket(ticketId);
+        setTicket(res.ticket);
+        setPageSessionCache(cacheKey, res.ticket);
+      } catch {
+        if (!useCachedFirst && !ticketRef.current) {
+          toast.error(t("support.detail.loadError"));
+          setTicket(null);
+        }
+      } finally {
+        if (!quiet && !useCachedFirst) setLoading(false);
+      }
+    },
+    [canLoad, isAdmin, t, ticketId],
+  );
 
   useEffect(() => {
     void load();
@@ -72,6 +113,8 @@ export function SupportTicketDetailPage() {
         ? await replyPlatformSupportTicket(ticketId, reply.trim())
         : await replyBusinessSupportTicket(ticketId, reply.trim());
       setTicket(res.ticket);
+      const cacheKey = `support:ticket:${isAdmin ? "admin" : "business"}:${ticketId}`;
+      setPageSessionCache(cacheKey, res.ticket);
       setReply("");
       toast.success(t("support.detail.replySent"));
     } catch (err) {
@@ -87,6 +130,8 @@ export function SupportTicketDetailPage() {
     try {
       const res = await updatePlatformSupportTicketStatus(ticketId, status);
       setTicket(res.ticket);
+      const cacheKey = `support:ticket:admin:${ticketId}`;
+      setPageSessionCache(cacheKey, res.ticket);
       toast.success(t("support.detail.statusUpdated"));
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t("support.detail.statusError"));
@@ -96,12 +141,14 @@ export function SupportTicketDetailPage() {
   };
 
   if (!authHydrated || !sessionValidated || !user) {
-    return <GlobalAppLoadingHold />;
+    return null;
   }
   if (!isAdmin && user.role !== "business") {
     return <Navigate to="/unauthorized" replace />;
   }
 
+  const isInitialTicketLoad = loading && !ticket;
+  const isBackgroundTicketRefresh = loading && Boolean(ticket);
   const closed = ticket?.status === "CLOSED";
 
   return (
@@ -112,14 +159,26 @@ export function SupportTicketDetailPage() {
         </Link>
       </Button>
 
-      {loading ? (
-        <div className="flex justify-center py-16">
-          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" aria-hidden />
-        </div>
+      {isInitialTicketLoad ? (
+        <>
+          <SupportTicketHeaderSkeleton />
+          <DashboardListSkeleton rows={4} minHeightClass="min-h-[12rem]" />
+        </>
       ) : !ticket ? (
         <p className="text-sm text-muted-foreground">{t("support.detail.notFound")}</p>
       ) : (
         <>
+          {isBackgroundTicketRefresh ? (
+            <div
+              className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+              role="status"
+              aria-live="polite"
+            >
+              <InlineSpinner />
+              <span>{t("dashboard.refresh.updating")}</span>
+            </div>
+          ) : null}
+
           <header className="mb-6">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-medium text-foreground">
@@ -205,7 +264,7 @@ export function SupportTicketDetailPage() {
               />
               <Button type="button" disabled={sending || !reply.trim()} onClick={() => void onSendReply()}>
                 {sending ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+                  <InlineSpinner className="mr-2" />
                 ) : (
                   <Send className="mr-2 h-4 w-4" aria-hidden />
                 )}

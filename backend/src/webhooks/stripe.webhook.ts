@@ -10,6 +10,7 @@ import {
   isStripeWebhookEventProcessed,
   markStripeWebhookEventProcessed,
 } from "../services/stripeWebhookIdempotency.service.js";
+import { recordCheckoutSessionExpired } from "../services/checkoutFunnelMetrics.service.js";
 import { logServerError } from "../utils/httpErrors.js";
 
 /**
@@ -47,6 +48,15 @@ router.post("/stripe", async (req: Request, res: Response) => {
         sessionId: session.id,
       });
       await handleSuccessfulTipPayment(session);
+    }
+    if (event.type === "checkout.session.expired") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      console.info("[stripe.webhook] checkout.session.expired", {
+        eventId: event.id,
+        sessionId: session.id,
+        paymentStatus: session.payment_status ?? null,
+      });
+      recordCheckoutSessionExpired(session);
     }
     if (event.type === "payment_intent.succeeded") {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;

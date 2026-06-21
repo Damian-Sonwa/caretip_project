@@ -1,13 +1,14 @@
 import { useNavigate, useParams, Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import { Heart, Building2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getStaffByBusinessEmployeeSlug, type StaffBySlugResponse } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { CareTipLogo } from "../../components/CareTipLogo";
+import { prefetchCustomerFlowRoutes } from "../../lib/prefetchCustomerRoutes";
+import { CustomerFlowShell } from "./CustomerFlowShell";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
@@ -36,6 +37,16 @@ export function StaffTipByPublicPathPage() {
   const [staff, setStaff] = useState<StaffBySlugResponse | null>(null);
   const [showRepeatPrompt, setShowRepeatPrompt] = useState(false);
   const [repeatAmount, setRepeatAmount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const schedule = () => prefetchCustomerFlowRoutes();
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(schedule, { timeout: 2500 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(schedule, 400);
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     const b = bizParam?.trim().toLowerCase();
@@ -113,9 +124,24 @@ export function StaffTipByPublicPathPage() {
 
   if (loading) {
     return (
-      <CareTipPageLoader
-        variant="wait"
-        message={previewProfile ? t("tipFlow.staffLanding.loadingProfile") : t("tipFlow.staffLanding.openingTipScreen")}
+      <CustomerFlowShell
+        headerLogo={
+          staff ? (
+            <BusinessLogoMark
+              logoPathOrUrl={staff.businessLogo}
+              businessName={staff.businessName}
+              size="customer"
+              className="shrink-0"
+            />
+          ) : (
+            <CareTipLogo size="xs" className="shrink-0" />
+          )
+        }
+        title={t("tipFlow.staffLanding.leaveTip")}
+        loading
+        loadingMessage={
+          previewProfile ? t("tipFlow.staffLanding.loadingProfile") : t("tipFlow.staffLanding.openingTipScreen")
+        }
       />
     );
   }
@@ -148,11 +174,7 @@ export function StaffTipByPublicPathPage() {
             size="hero"
           />
         </div>
-        <motion.div
-          initial={{ y: 14, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className={`${cf.cardShadcn} border border-border/60 bg-card px-6 py-8 text-center shadow-[0_14px_42px_-22px_rgba(15,23,42,0.2)]`}
-        >
+        <div className={`${cf.card} px-6 py-8 text-center sm:px-8 sm:py-9`}>
           <div
             className="mx-auto mb-5 inline-flex rounded-full"
             style={{ boxShadow: `0 0 0 3px ${BRAND_ORANGE}33` }}
@@ -190,7 +212,7 @@ export function StaffTipByPublicPathPage() {
               {t("tipFlow.qrLanding.leaveTip")}
             </button>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

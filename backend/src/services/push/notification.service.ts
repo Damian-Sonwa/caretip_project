@@ -17,9 +17,9 @@ function defaultUrlForType(type: NotificationType, role: string | null): string 
   switch (type) {
     case "tip_received":
     case "qr_payment_success":
-      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/notifications";
+      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/tip-history";
     case "payout_paid":
-      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/transactions";
+      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/tip-history";
     case "new_login":
       return role === "MANAGER"
         ? "/dashboard/settings?section=security"

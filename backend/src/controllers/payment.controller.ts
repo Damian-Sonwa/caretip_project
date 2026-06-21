@@ -80,7 +80,11 @@ export async function createTipSession(req: Request, res: Response) {
 
 /**
  * GET /api/payments/tip-session/:sessionId
- * Public — resolve Stripe Checkout session into tip context + transaction id (when available).
+ * Public — verified tip context for post-checkout UX only.
+ *
+ * Privacy: employee/business/venue/customer fields are returned only when
+ * a success ledger row exists (`status: "ready"`). Pending/expired/unpaid
+ * responses expose session id + status only.
  */
 export async function getTipSessionContext(req: Request, res: Response) {
   try {
@@ -96,6 +100,14 @@ export async function getTipSessionContext(req: Request, res: Response) {
     }
 
     const ctx = await getTipCheckoutContext(sessionId);
+
+    if (ctx.checkoutStatus === "expired") {
+      return res.status(410).json({
+        status: "expired",
+        sessionId: ctx.sessionId,
+      });
+    }
+
     const piId = ctx.paymentIntentId;
     const tx = piId
       ? await prisma.transaction.findFirst({
@@ -104,45 +116,46 @@ export async function getTipSessionContext(req: Request, res: Response) {
         })
       : null;
 
-    const employee = ctx.employeeId
-      ? await prisma.employee.findUnique({
-          where: { id: ctx.employeeId },
-          select: { id: true, name: true, avatar: true },
-        })
-      : null;
+    if (tx) {
+      const employee = await prisma.employee.findUnique({
+        where: { id: tx.employeeId },
+        select: { id: true, name: true, avatar: true },
+      });
 
-    const employeePayload = employee
-      ? {
-          id: employee.id,
-          name: employee.name,
-          avatar: absolutizePublicMediaPath(employee.avatar),
-        }
-      : null;
-
-    // Webhook may not have persisted the Transaction yet; client can retry briefly.
-    if (!tx) {
-      return res.status(202).json({
-        status: "pending",
+      return res.json({
+        status: "ready",
         sessionId: ctx.sessionId,
         paymentIntentId: ctx.paymentIntentId,
-        employee: employeePayload,
-        businessId: ctx.businessId,
-        locationId: ctx.locationId,
-        tableId: ctx.tableId,
+        transactionId: tx.id,
+        employee: employee
+          ? {
+              id: employee.id,
+              name: employee.name,
+              avatar: absolutizePublicMediaPath(employee.avatar),
+            }
+          : null,
+        businessId: tx.businessId,
+        locationId: tx.locationId,
+        tableId: tx.tableId,
         customerName: ctx.customerName,
       });
     }
 
-    return res.json({
-      status: "ready",
+    if (
+      ctx.checkoutStatus === "complete" &&
+      ctx.paymentStatus &&
+      ctx.paymentStatus !== "paid"
+    ) {
+      return res.status(422).json({
+        status: "unpaid",
+        sessionId: ctx.sessionId,
+      });
+    }
+
+    // Webhook may not have persisted the Transaction yet; client can retry briefly.
+    return res.status(202).json({
+      status: "pending",
       sessionId: ctx.sessionId,
-      paymentIntentId: ctx.paymentIntentId,
-      transactionId: tx.id,
-      employee: employeePayload,
-      businessId: tx.businessId,
-      locationId: tx.locationId,
-      tableId: tx.tableId,
-      customerName: ctx.customerName,
     });
   } catch (err) {
     logServerError("payment.getTipSessionContext", err);

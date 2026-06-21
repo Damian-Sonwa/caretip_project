@@ -63,9 +63,9 @@ export const EmployeeDashboard = lazyNamed(
   () => import("../pages/employee/EmployeeDashboard"),
   "EmployeeDashboard",
 );
-export const EmployeeNotificationsPage = lazyNamed(
-  () => import("../pages/employee/EmployeeNotificationsPage"),
-  "EmployeeNotificationsPage",
+export const EmployeeTipHistoryPage = lazyNamed(
+  () => import("../pages/employee/EmployeeTipHistoryPage"),
+  "EmployeeTipHistoryPage",
 );
 export const EmployeeSettingsPage = lazyNamed(
   () => import("../pages/employee/EmployeeSettingsPage"),

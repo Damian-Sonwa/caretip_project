@@ -105,6 +105,8 @@ export function useBusinessDashboardStats(
   const refreshQuietDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Bumps on effect cleanup so Strict Mode double-mount only runs the latest load. */
   const statsMountGenerationRef = useRef(0);
+  /** Avoid clearing settled UI on bootstrap before first enable (prevents load→content→load flicker). */
+  const wasDashboardEnabledRef = useRef(false);
   const scheduleInactivePrefetchRef = useRef<(activeTf: AnalyticsTimeframe) => void>(() => {});
 
   const persistSwr = useCallback((tf: AnalyticsTimeframe) => {
@@ -792,32 +794,37 @@ export function useBusinessDashboardStats(
   );
 
   useEffect(() => {
-    if (!enabled || !sessionValidated) {
-      cancelDeferredHeroMonth();
-      cancelDeferredAnalytics();
-      abortByTfRef.current.forEach((c) => c.abort());
-      abortByTfRef.current.clear();
-      clearBusinessStatsClientCache();
-      businessSwrStore.clear();
-      hasSettledLiveUiRef.current = false;
-      summaryPartialRef.current.clear();
-      analyticsPartialRef.current.clear();
-      setHeroStats(null);
-      setStats(null);
-      setStatsTimeframe(null);
-      setSummaryLoading(true);
-      setAnalyticsLoading(true);
-      setIsRevalidating(false);
-      setStatsLoadFailed(null);
-      setPendingVerification(false);
-      setLastUpdatedAt(null);
-      setLastKnownGoodMetrics(null);
-      devSetHydrationPhase("hero", "idle");
-      devSetHydrationPhase("metrics", "idle");
-      devSetHydrationPhase("charts", "idle");
-      devSetHydrationPhase("goals", "idle");
-      return;
-    }
+    const isActive = enabled && sessionValidated;
+    const wasActive = wasDashboardEnabledRef.current;
+    wasDashboardEnabledRef.current = isActive;
+
+    if (isActive) return;
+    // Bootstrap: skip destructive reset until we've been enabled at least once.
+    if (!wasActive) return;
+
+    cancelDeferredHeroMonth();
+    cancelDeferredAnalytics();
+    abortByTfRef.current.forEach((c) => c.abort());
+    abortByTfRef.current.clear();
+    clearBusinessStatsClientCache();
+    businessSwrStore.clear();
+    hasSettledLiveUiRef.current = false;
+    summaryPartialRef.current.clear();
+    analyticsPartialRef.current.clear();
+    setHeroStats(null);
+    setStats(null);
+    setStatsTimeframe(null);
+    setSummaryLoading(true);
+    setAnalyticsLoading(true);
+    setIsRevalidating(false);
+    setStatsLoadFailed(null);
+    setPendingVerification(false);
+    setLastUpdatedAt(null);
+    setLastKnownGoodMetrics(null);
+    devSetHydrationPhase("hero", "idle");
+    devSetHydrationPhase("metrics", "idle");
+    devSetHydrationPhase("charts", "idle");
+    devSetHydrationPhase("goals", "idle");
   }, [enabled, sessionValidated, cancelDeferredHeroMonth, cancelDeferredAnalytics]);
 
   useEffect(() => {

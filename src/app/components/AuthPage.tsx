@@ -40,7 +40,9 @@ import {
   AuthFormStatusSlot,
   AuthStableSubmitButton,
 } from './auth/AuthFormStability';
-import { sessionMatchesBusinessStaffAuthTarget } from '../lib/authSession';
+import { sessionMatchesBusinessStaffAuthTarget, shouldShowLoginSessionResumeUi } from '../lib/authSession';
+import { shouldShowAuthBootstrapShell } from '../lib/authBootstrapUi';
+import { AuthBootstrapShell } from './auth/AuthBootstrapShell';
 import {
   clearValidatedInviteContext,
   readValidatedInviteContext,
@@ -101,9 +103,11 @@ export function AuthPage() {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showPasswordChecklist, setShowPasswordChecklist] = useState(false);
   const [unlockedFields, setUnlockedFields] = useState<Set<string>>(() => new Set());
-  const { login, register, loginWithOAuth, logout, user, sessionValidated } = useAuth();
+  const { login, register, loginWithOAuth, logout, user, sessionValidated, authStatus } = useAuth();
   const authInFlightRef = useRef(false);
   const postAuthRedirectRef = useRef<string | null>(null);
+  /** Suppresses session-resume UI during fresh sign-in before navigation completes. */
+  const [authFlowInProgress, setAuthFlowInProgress] = useState(false);
 
   /** Single post-auth navigation — only after explicit login/OAuth/continue (never on mount/back). */
   const redirectAfterAuth = useCallback(
@@ -112,6 +116,7 @@ export function AuthPage() {
       if (location.pathname === target) return;
       if (postAuthRedirectRef.current === target) return;
       postAuthRedirectRef.current = target;
+      setAuthFlowInProgress(true);
       navigate(target, { replace: true });
     },
     [location.pathname, navigate],
@@ -215,6 +220,7 @@ export function AuthPage() {
 
     if (user != null && !sessionValidated) return;
     if (user != null && sessionValidated) {
+      setAuthFlowInProgress(true);
       redirectAfterAuth(user);
       return;
     }
@@ -250,6 +256,7 @@ export function AuthPage() {
 
     if (authInFlightRef.current) return;
     authInFlightRef.current = true;
+    setAuthFlowInProgress(true);
     setIsSubmitting(true);
 
     try {
@@ -312,6 +319,9 @@ export function AuthPage() {
     } finally {
       authInFlightRef.current = false;
       setIsSubmitting(false);
+      if (!postAuthRedirectRef.current) {
+        setAuthFlowInProgress(false);
+      }
     }
   };
 
@@ -363,6 +373,7 @@ export function AuthPage() {
 
   const runGoogleOAuth = async (idToken: string) => {
     if (user != null && sessionValidated) {
+      setAuthFlowInProgress(true);
       redirectAfterAuth(user);
       return;
     }
@@ -378,6 +389,7 @@ export function AuthPage() {
     }
     if (authInFlightRef.current) return;
     authInFlightRef.current = true;
+    setAuthFlowInProgress(true);
     setIsSubmitting(true);
     setError('');
     setShowResendVerification(false);
@@ -420,6 +432,9 @@ export function AuthPage() {
     } finally {
       authInFlightRef.current = false;
       setIsSubmitting(false);
+      if (!postAuthRedirectRef.current) {
+        setAuthFlowInProgress(false);
+      }
     }
   };
 
@@ -446,16 +461,28 @@ export function AuthPage() {
     return <GlobalAppLoadingHold />;
   }
 
-  const sameLaneValidated =
-    user != null &&
-    sessionValidated &&
-    sessionMatchesBusinessStaffAuthTarget(user.role, authLane);
+  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
+  if (
+    shouldShowAuthBootstrapShell({
+      authStatus,
+      authTransitionPending,
+    })
+  ) {
+    return <AuthBootstrapShell />;
+  }
+
   const showSignInForm =
-    !user ||
-    !sessionValidated ||
-    (!isLogin && !sessionMatchesBusinessStaffAuthTarget(user.role, role));
-  const showAuthenticatedSessionHint =
-    user != null && sessionValidated && !showSignInForm;
+    authStatus !== "initializing" &&
+    (!user ||
+      !sessionValidated ||
+      (!isLogin && !sessionMatchesBusinessStaffAuthTarget(user.role, role)));
+  const showAuthenticatedSessionHint = shouldShowLoginSessionResumeUi({
+    authStatus,
+    user,
+    sessionValidated,
+    showSignInForm,
+    authFlowInProgress: authFlowInProgress || isSubmitting,
+  });
 
   const sessionRoleLabel =
     user?.role === 'platform_admin' || user?.role === 'admin'
@@ -468,18 +495,18 @@ export function AuthPage() {
 
   const sessionHintBanner = showAuthenticatedSessionHint ? (
     <div
-      className="caretip-auth-notice-banner"
+      className="caretip-auth-session-resume"
       role="region"
       aria-label={t('auth.page.crossSessionRegionAria')}
     >
-      <div className="caretip-auth-notice">
+      <div className="caretip-auth-notice caretip-auth-notice--session-resume">
         <p className="font-medium leading-snug">{t('auth.page.crossSessionBody', { role: sessionRoleLabel })}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-col gap-2.5 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             disabled={!user}
             onClick={() => user && redirectAfterAuth(user)}
-            className={cn(caretipBtnPrimaryCompact, "h-9 min-h-9 px-3 text-xs disabled:opacity-50")}
+            className={cn(caretipBtnPrimaryCompact, "min-h-10 w-full px-4 text-sm sm:w-auto sm:min-w-[10rem] disabled:opacity-50")}
           >
             {t('auth.page.crossSessionContinue')}
           </button>
@@ -489,7 +516,7 @@ export function AuthPage() {
               logout();
               setError('');
             }}
-            className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-black/[0.08] bg-white px-4 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#fafaf8] sm:w-auto dark:border-white/10 dark:bg-card dark:hover:bg-muted/40"
           >
             {t('auth.page.crossSessionSwitch')}
           </button>
@@ -503,16 +530,17 @@ export function AuthPage() {
         <SignInCard2
           isLogin={isLogin}
           onToggleMode={toggleAuthMode}
-          formBusy={isSubmitting}
-          sessionActive={sameLaneValidated}
+          formBusy={isSubmitting || authFlowInProgress}
+          sessionActive={showAuthenticatedSessionHint}
           authLane={authLane}
           modeScope={isEmployeeJoinSignup ? 'signup-only' : 'both'}
           employeeVenueName={inviteContext?.businessName}
           inviteVerified={Boolean(inviteContext?.inviteCode)}
           onEmployeeSignUpClick={() => navigate('/join', { replace: true })}
-          topSlot={sessionHintBanner}
         >
-          {showSignInForm ? (
+          {showAuthenticatedSessionHint ? (
+            sessionHintBanner
+          ) : showSignInForm ? (
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting || resumeSessionPending}

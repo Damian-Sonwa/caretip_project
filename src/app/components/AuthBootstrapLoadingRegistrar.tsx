@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { isAuthRestorePending } from "../lib/authRestore";
+import { isPublicAuthenticationPath } from "../lib/authSession";
 import {
   APP_LOADING_PRIORITY,
   useAppLoadingRegistration,
@@ -21,16 +22,20 @@ function shouldBlockGlobalAuthLoader(
   pathname: string,
   authStatus: ReturnType<typeof useAuth>["authStatus"],
 ): boolean {
-  if (isPublicShellPath(pathname)) return false;
-
   const restorePending = isAuthRestorePending();
   const initializing = authStatus === "initializing";
+
+  // Auth forms must not paint until bootstrap completes — use global overlay + page shell.
+  if (initializing && isPublicAuthenticationPath(pathname)) return true;
+
+  if (isPublicShellPath(pathname)) return false;
+
   return initializing || restorePending;
 }
 
 /**
  * Registers global auth/session bootstrap with the loading overlay.
- * Public marketing and auth shell routes render immediately — no bootstrap overlay.
+ * Public marketing and guest flows render immediately; auth login routes wait on bootstrap.
  */
 export function AuthBootstrapLoadingRegistrar({ children }: { children: ReactNode }) {
   const { authStatus } = useAuth();

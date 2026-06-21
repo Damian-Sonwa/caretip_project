@@ -15,7 +15,9 @@ import {
   loginMfaVerifyAPI,
 } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
-import { isPlatformAdminSessionRole } from "../../lib/authSession";
+import { isPlatformAdminSessionRole, shouldShowLoginSessionResumeUi } from "../../lib/authSession";
+import { shouldShowAuthBootstrapShell } from "../../lib/authBootstrapUi";
+import { AuthBootstrapShell } from "@/app/components/auth/AuthBootstrapShell";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
@@ -38,27 +40,38 @@ export function PlatformAdminLoginPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const authInFlightRef = useRef(false);
-  const { login, user, sessionValidated, logout, completeAuthLogin } = useAuth();
+  const { login, user, sessionValidated, logout, completeAuthLogin, authStatus } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const locationState = location.state as { forceLogin?: boolean; impersonationExitFailed?: boolean } | null;
   const forceLogin = locationState?.forceLogin === true;
+  const [authFlowInProgress, setAuthFlowInProgress] = useState(false);
+  const postAuthRedirectRef = useRef<string | null>(null);
 
-  const sameLaneValidated = Boolean(
-    user && sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,
-  );
-  const showCrossSessionHint = Boolean(
-    user && sessionValidated && !isPlatformAdminSessionRole(user.role) && !forceLogin,
-  );
+  const showSessionResumeUi =
+    shouldShowLoginSessionResumeUi({
+      authStatus,
+      user,
+      sessionValidated,
+      authFlowInProgress: authFlowInProgress || submitting,
+    }) &&
+    Boolean(
+      user &&
+        sessionValidated &&
+        !forceLogin &&
+        !isPlatformAdminSessionRole(user.role),
+    );
+  const authTransitionPending = authFlowInProgress && Boolean(postAuthRedirectRef.current);
+
   const loginSubmitBlocked = Boolean(
     user && !sessionValidated && isPlatformAdminSessionRole(user.role) && !forceLogin,
   );
 
-  const postAuthRedirectRef = useRef<string | null>(null);
   const redirectAfterAuth = useCallback(() => {
     const target = "/platform-admin/dashboard";
     if (postAuthRedirectRef.current === target) return;
     postAuthRedirectRef.current = target;
+    setAuthFlowInProgress(true);
     navigate(target, { replace: true });
   }, [navigate]);
 
@@ -88,11 +101,13 @@ export function PlatformAdminLoginPage() {
     }
     if (authInFlightRef.current) return;
     authInFlightRef.current = true;
+    setAuthFlowInProgress(true);
     setSubmitting(true);
     try {
       const result = await login(trimmed, password);
       if (isMfaLoginChallenge(result)) {
         setPendingMfaToken(result.pendingMfaToken);
+        setAuthFlowInProgress(false);
         if (result.mfaSetupRequired) {
           await startMfaSetup(result.pendingMfaToken);
         } else {
@@ -112,6 +127,9 @@ export function PlatformAdminLoginPage() {
     } finally {
       authInFlightRef.current = false;
       setSubmitting(false);
+      if (!postAuthRedirectRef.current) {
+        setAuthFlowInProgress(false);
+      }
     }
   };
 
@@ -125,6 +143,7 @@ export function PlatformAdminLoginPage() {
     }
     if (authInFlightRef.current) return;
     authInFlightRef.current = true;
+    setAuthFlowInProgress(true);
     setSubmitting(true);
     try {
       const data =
@@ -139,19 +158,35 @@ export function PlatformAdminLoginPage() {
     } finally {
       authInFlightRef.current = false;
       setSubmitting(false);
+      if (!postAuthRedirectRef.current) {
+        setAuthFlowInProgress(false);
+      }
     }
   };
 
   useEffect(() => {
-    if (sameLaneValidated) redirectAfterAuth();
-  }, [sameLaneValidated, redirectAfterAuth]);
+    if (authStatus !== "authenticated") return;
+    if (authFlowInProgress || submitting) return;
+    if (!user || !sessionValidated || forceLogin) return;
+    if (!isPlatformAdminSessionRole(user.role)) return;
+    redirectAfterAuth();
+  }, [authFlowInProgress, authStatus, forceLogin, redirectAfterAuth, sessionValidated, submitting, user]);
+
+  if (
+    shouldShowAuthBootstrapShell({
+      authStatus,
+      authTransitionPending,
+    })
+  ) {
+    return <AuthBootstrapShell />;
+  }
 
   return (
     <div className="caretip-auth-page relative flex min-h-[100dvh] flex-col overflow-x-hidden font-sans">
       <div className="relative z-10 flex min-h-[100dvh] flex-1 flex-col overflow-x-hidden">
         <main className="caretip-auth-stage relative flex min-h-0 flex-1 flex-col">
           <AuthPageAtmosphere />
-          {showCrossSessionHint || sameLaneValidated ? (
+          {showSessionResumeUi ? (
             <div className="caretip-auth-notice-banner !pb-0" role="region" aria-label={t("auth.page.crossSessionRegionAria")}>
               <div className="caretip-auth-notice mb-6">
                 <p className="font-medium leading-snug">{t("auth.page.crossSessionBody", { role: sessionRoleLabel })}</p>
@@ -247,7 +282,7 @@ export function PlatformAdminLoginPage() {
                 </p>
               ) : null}
 
-              {sameLaneValidated ? null : mfaStep === "password" ? (
+              {mfaStep === "password" ? (
                 <form
                   onSubmit={(e) => void handlePasswordSubmit(e)}
                   aria-busy={submitting || loginSubmitBlocked}

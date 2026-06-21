@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from "../CareTipLogo";
 import {
   businessDashboardNavItems,
   filterBusinessDashboardNavItems,
@@ -32,11 +32,11 @@ export function BusinessSidebar() {
       transition={{ duration: 0.5 }}
       className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
     >
-      <div className={cn("px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
+      <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <CareTipLogo size="sm" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
+      <nav className={DASHBOARD_SIDEBAR_NAV_CLASS}>
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isBusinessDashboardNavActive(item.href, location.pathname);

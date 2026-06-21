@@ -6,14 +6,13 @@ import {
   registerAPI,
   loginAPI,
   oauthAPI,
-  logoutAPI,
+  logoutAPIWithTimeout,
   refreshSessionAPI,
   patchMyOnboardingStatus,
   clearClientSessionRevoked,
   clearClientAuthStorage,
   clearLogoutPending,
   isClientSessionRevoked,
-  markLogoutPending,
   isMfaLoginChallenge,
   type AuthResponse,
   type LoginApiResult,
@@ -24,7 +23,6 @@ import {
   saveImpersonationAdminBackup,
   takeImpersonationAdminBackup,
 } from "../lib/impersonationSessionBackup";
-import { resetAuthSessionClient } from "../lib/authBootstrap";
 import { hasPendingStoredSessionWithoutUser } from "../lib/authRestore";
 import {
   getAuthSessionFlags,
@@ -34,6 +32,7 @@ import {
 } from "../lib/authSessionBootstrap";
 import { normalizeStoredUser } from "../lib/authUserNormalize";
 import { resolveAuthStatus, deriveAuthSession, type AuthSession, type AuthStatus, isPlatformAdminSessionRole } from "../lib/authSession";
+import { isAuthBootstrapComplete } from "../lib/authBootstrapUi";
 import { bumpSessionEpoch, getSessionEpoch } from "../lib/authSessionEpoch";
 import {
   commitAuthUser,
@@ -43,6 +42,7 @@ import {
 } from "../lib/authUserStore";
 import { clearEmployeeNotifications } from "../lib/employeeNotificationStore";
 import { resetAllClientSessionCaches } from "../lib/resetAllClientSessionCaches";
+import { performClientLogoutCleanup } from "../lib/clientLogout";
 import { markClientSessionHint } from "../lib/authSessionHint";
 import { setMemoryAccessToken } from "../lib/accessTokenStore";
 import { authDebug } from "../lib/authDebugLog";
@@ -449,24 +449,24 @@ export function useAuth() {
     return u;
   }, []);
 
-  const logout = useCallback(async () => {
-    markLogoutPending();
-    try {
-      bumpSessionEpoch();
-      clearEmployeeNotifications();
-      resetAuthSessionClient();
-      clearImpersonationAdminBackup();
-      commitAuthUser(null);
-      resetAllClientSessionCaches();
-      await logoutAPI();
-      clearStoredSession();
-      markSessionBootstrapSettled();
-      notifyAuthStorageSyncFromHook();
-      authDebug("auth_session_updated", { ...deriveAuthSession(null), source: "logout" });
-    } finally {
-      clearLogoutPending();
-    }
-  }, []);
+  const logout = useCallback(() => {
+    const clickStartedAt = performance.now();
+    authDebug("logout_click", { t: clickStartedAt });
+
+    const { loginPath, capturedAccessToken, clientCleanupMs } = performClientLogoutCleanup();
+
+    navigate(loginPath, { replace: true });
+    authDebug("logout_navigate", {
+      loginPath,
+      clientCleanupMs: Math.round(clientCleanupMs),
+      msSinceClick: Math.round(performance.now() - clickStartedAt),
+    });
+
+    void logoutAPIWithTimeout({
+      capturedToken: capturedAccessToken,
+      clickStartedAt,
+    });
+  }, [navigate]);
 
   const switchRole = (newRole: UserRole) => {
     if (user) {
@@ -592,6 +592,8 @@ export function useAuth() {
     user,
     /** True when bootstrap finished — safe to run protected API hooks (notifications, stats). */
     authReady,
+    /** True after refresh/bootstrap hydration completes (inverse of authStatus === "initializing"). */
+    authBootstrapComplete: isAuthBootstrapComplete(authStatus),
     /** @deprecated Prefer `authState.isLoading` or `!authReady`. */
     isLoadingUser: authStatus === "initializing",
     /** True while session restoration is in flight; route guards must wait and must not redirect. */

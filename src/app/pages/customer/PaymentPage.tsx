@@ -1,11 +1,10 @@
-import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
-import { createTipCheckoutSession, getEmployeeById, getStaffBySlug, getStaffByBusinessEmployeeSlug } from "../../lib/api";
+import { createTipCheckoutSession } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { setPendingTipFromCheckout } from "../../lib/repeatTip";
@@ -15,10 +14,14 @@ import { CareTipLogo } from "../../components/CareTipLogo";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import {
+  isCustomerEmployeeContextReady,
+  resolveCustomerEmployeeContext,
+} from "../../lib/resolveCustomerEmployeeContext";
 import { PaymentMethodsAvailable } from "../../components/payments/PaymentMethodsAvailable";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerFlowShell } from "./CustomerFlowShell";
 
 export function PaymentPage() {
   const { t } = useTranslation();
@@ -49,77 +52,75 @@ export function PaymentPage() {
     setAmount,
   } = useTipFlow();
   const [processing, setProcessing] = useState(false);
-  const [guardReady, setGuardReady] = useState(false);
-  const [contextHydrating, setContextHydrating] = useState(false);
-  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(null);
+  const [contextReady, setContextReady] = useState(false);
+  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(
+    null,
+  );
 
   const resolvedEmployeeId = employeeIdCtx ?? employeeIdFromUrl;
   const tipAmountVal =
     tipAmountCtx != null && Number.isFinite(tipAmountCtx) && tipAmountCtx > 0
       ? tipAmountCtx
       : amountFromUrl;
-  /** Customer pays the tip only (no separate bill line). */
   const totalAmount = tipAmountVal ?? 0;
-  const missingContext =
-    !resolvedEmployeeId || !businessId || tipAmountVal == null;
+  const missingContext = !resolvedEmployeeId || !businessId || tipAmountVal == null;
 
-  // Guard: don't redirect until we can confirm the context is invalid.
   useEffect(() => {
+    if (!resolvedEmployeeId) {
+      navigate("/", { replace: true });
+      return;
+    }
+
     let cancelled = false;
+
+    if (
+      isCustomerEmployeeContextReady(resolvedEmployeeId, {
+        businessId,
+        employeeId: employeeIdCtx,
+        employeeName,
+      })
+    ) {
+      setContextReady(true);
+      return;
+    }
+
     (async () => {
-      if (import.meta.env.DEV) {
-        if (!cancelled) setGuardReady(true);
+      if (!import.meta.env.DEV && hasRecentCustomerFlowEntry() && businessId && employeeName) {
+        if (!cancelled) setContextReady(true);
         return;
       }
-      if (!resolvedEmployeeId) {
-        navigate("/", { replace: true });
-        return;
-      }
-      if (hasRecentCustomerFlowEntry() && businessId) {
-        if (!cancelled) setGuardReady(true);
-        return;
-      }
+
       try {
-        if (!businessId || !employeeName) {
-          if (!cancelled) setContextHydrating(true);
-          if (returnBusinessSlugFromUrl && returnEmployeeSlugFromUrl) {
-            const s = await getStaffByBusinessEmployeeSlug(
-              returnBusinessSlugFromUrl,
-              returnEmployeeSlugFromUrl,
-            );
-            if (cancelled) return;
-            setBusinessId(s.businessId);
-            setEmployee(s.id, s.name, s.avatar ?? undefined);
-          } else if (returnSlugFromUrl) {
-            const s = await getStaffBySlug(returnSlugFromUrl);
-            if (cancelled) return;
-            setBusinessId(s.businessId);
-            setEmployee(s.id, s.name, s.avatar ?? undefined);
-          } else {
-            const emp = await getEmployeeById(resolvedEmployeeId);
-            if (cancelled) return;
-            setBusinessId(emp.businessId);
-            setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
-          }
-        }
+        const resolved = await resolveCustomerEmployeeContext({
+          employeeId: resolvedEmployeeId,
+          returnSlug: returnSlugFromUrl,
+          returnBusinessSlug: returnBusinessSlugFromUrl,
+          returnEmployeeSlug: returnEmployeeSlugFromUrl,
+          fallbackTeamMemberLabel: t("tipFlow.common.teamMember"),
+          fallbackVenueLabel: t("tipFlow.common.venue"),
+        });
+        if (cancelled) return;
+        setBusinessId(resolved.businessId);
+        setEmployee(resolved.employeeId, resolved.employeeName, resolved.employeeAvatar);
+        setBusinessBrand({ logo: resolved.businessLogo, name: resolved.businessName });
         markCustomerFlowEntered();
-        if (!cancelled) setGuardReady(true);
+        setContextReady(true);
       } catch (err) {
         if (cancelled) return;
-        logClientError("PaymentPage.guard", err);
+        logClientError("PaymentPage.resolve", err);
         navigate("/", { replace: true });
-      } finally {
-        if (!cancelled) setContextHydrating(false);
       }
     })();
+
     return () => {
       cancelled = true;
     };
   }, [
     businessId,
+    employeeIdCtx,
     employeeName,
-    resolvedEmployeeId,
     navigate,
+    resolvedEmployeeId,
     returnBusinessSlugFromUrl,
     returnEmployeeSlugFromUrl,
     returnSlugFromUrl,
@@ -128,12 +129,10 @@ export function PaymentPage() {
     t,
   ]);
 
-  // DEV-only: allow direct navigation without QR flow by seeding mock context.
   useEffect(() => {
     if (!DEV_BYPASS_ENABLED) return;
     if (resolvedEmployeeId && businessId) return;
     if (resolvedEmployeeId && !businessId) {
-      // Deep-link with employeeId — keep id; API hydration supplies businessId.
       if (amountFromUrl == null && (tipAmountCtx == null || tipAmountCtx <= 0)) {
         setAmount(DEV_MOCK.amount);
       }
@@ -153,83 +152,6 @@ export function PaymentPage() {
       });
     }
   }, [searchParams, t]);
-
-  // Hydrate name/avatar if context was partially cleared (same session)
-  useEffect(() => {
-    if (!resolvedEmployeeId) return;
-    if (businessId && employeeName) return;
-    let cancelled = false;
-    (async () => {
-      setContextHydrating(true);
-      try {
-        if (returnBusinessSlugFromUrl && returnEmployeeSlugFromUrl) {
-          const s = await getStaffByBusinessEmployeeSlug(
-            returnBusinessSlugFromUrl,
-            returnEmployeeSlugFromUrl,
-          );
-          if (cancelled) return;
-          setBusinessId(s.businessId);
-          setEmployee(s.id, s.name, s.avatar ?? undefined);
-          return;
-        }
-        if (returnSlugFromUrl) {
-          const s = await getStaffBySlug(returnSlugFromUrl);
-          if (cancelled) return;
-          setBusinessId(s.businessId);
-          setEmployee(s.id, s.name, s.avatar ?? undefined);
-          return;
-        }
-        const emp = await getEmployeeById(resolvedEmployeeId);
-        if (cancelled) return;
-        setBusinessId(emp.businessId);
-        setEmployee(emp.id, emp.name ?? t("tipFlow.common.teamMember"), emp.avatar ?? undefined);
-      } catch (err) {
-        logClientError("PaymentPage.hydrate", err);
-      } finally {
-        if (!cancelled) setContextHydrating(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [
-    resolvedEmployeeId,
-    businessId,
-    employeeName,
-    returnBusinessSlugFromUrl,
-    returnEmployeeSlugFromUrl,
-    returnSlugFromUrl,
-    setBusinessId,
-    setEmployee,
-    t,
-  ]);
-
-  useEffect(() => {
-    if (!resolvedEmployeeId) {
-      setBusinessBrand(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      try {
-        const emp = await getEmployeeById(resolvedEmployeeId);
-        if (cancelled) return;
-        setBusinessBrand({
-          logo: emp.businessLogo ?? null,
-          name: String(emp.businessName ?? "").trim() || t("tipFlow.common.venue"),
-        });
-      } catch {
-        if (!cancelled) setBusinessBrand(null);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [resolvedEmployeeId, t]);
-
-  if (!guardReady && !import.meta.env.DEV) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
-  }
 
   const handleBack = () => {
     const eid = resolvedEmployeeId;
@@ -270,7 +192,6 @@ export function PaymentPage() {
         setProcessing(false);
         return;
       }
-      // Store "pending repeat tip" data now; we only promote it after success verification.
       setPendingTipFromCheckout({
         sessionId,
         businessId,
@@ -286,136 +207,47 @@ export function PaymentPage() {
     }
   };
 
-  if (contextHydrating && !businessId) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.payment.preparingCheckout")} />;
-  }
+  const headerLogo = businessBrand ? (
+    <BusinessLogoMark
+      logoPathOrUrl={businessBrand.logo}
+      businessName={businessBrand.name}
+      size="customer"
+      className="shrink-0"
+    />
+  ) : (
+    <CareTipLogo size="xs" className="shrink-0" />
+  );
+
+  const showCheckout = contextReady && !missingContext;
 
   return (
-    <div className={!missingContext ? cf.pageWithBottomCta : cf.page}>
-      <div className={cf.stickyHeader}>
-        <div className={cf.headerInner}>
-          <button
-            type="button"
-            onClick={handleBack}
-            className={cf.backButton}
-            disabled={processing}
-          >
-            {t("tipFlow.common.back")}
-          </button>
-          {businessBrand ? (
-            <BusinessLogoMark
-              logoPathOrUrl={businessBrand.logo}
-              businessName={businessBrand.name}
-              size="customer"
-              className="shrink-0"
-            />
-          ) : (
-            <CareTipLogo size="xs" className="shrink-0" />
-          )}
-          <div className="min-w-0 flex-1">
-            <h1 className={cf.headline}>{t("tipFlow.payment.title")}</h1>
-            <p className={cf.subline}>{t("tipFlow.payment.subtitle")}</p>
-          </div>
-        </div>
-      </div>
-
-      {missingContext ? (
-        <div className={`${cf.main} text-center`}>
-          <div className={`${cf.cardMuted} mx-auto max-w-md px-5 py-8 sm:px-8`}>
-            <p className="text-sm leading-relaxed text-muted-foreground">{t("tipFlow.payment.missingContext")}</p>
-            <button
-              type="button"
-              onClick={() => navigate("/")}
-              className={`${cf.btnPrimaryLg} mt-6`}
-            >
-              {t("tipFlow.common.goHomeButton")}
-            </button>
-          </div>
-        </div>
-      ) : null}
-
-      {!missingContext ? (
-        <>
-          <div className={cf.main}>
-            <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-              <Card className={cf.cardShadcn}>
-                <CardContent className="flex items-center gap-4 p-5 sm:p-6">
-                  <ProfileAvatar
-                    src={employeeAvatar}
-                    displayName={employeeName ?? t("tipFlow.common.teamMember")}
-                    className="h-16 w-16 shrink-0 ring-4 ring-primary shadow-sm"
-                  />
-                  <div>
-                    <p className="text-sm text-muted-foreground">{t("tipFlow.payment.payingTipTo")}</p>
-                    <p className="font-semibold text-lg text-foreground">
-                      {employeeName ?? t("tipFlow.common.teamMember")}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <motion.div
-              initial={{ y: 16, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.05 }}
-            >
-              <Card className={cf.cardAccentWash}>
-                <CardContent className="px-5 py-6 sm:px-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        {t("tipFlow.payment.tipFor", {
-                          name: employeeName ?? t("tipFlow.common.teamMember"),
-                        })}
-                      </span>
-                      <span className="text-sm font-medium text-foreground">
-                        {formatEur(tipAmountVal)}
-                      </span>
-                    </div>
-                    <div className="border-t border-border/60 pt-3 flex items-center justify-between gap-4">
-                      <span className="text-base font-semibold text-foreground">
-                        {t("tipFlow.payment.amountToPay")}
-                      </span>
-                      <span className="text-3xl font-bold text-foreground tabular-nums">
-                        {formatEur(totalAmount)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-
-            <Card className={cf.cardShadcn}>
-              <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
-                <CardTitle className={cf.cardTitle}>{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
-                <CardDescription className={cf.cardDesc}>{t("tipFlow.payment.selectMethodDesc")}</CardDescription>
-              </CardHeader>
-              <CardContent className="px-5 pb-5 sm:px-6">
-                <PaymentMethodsAvailable />
-              </CardContent>
-            </Card>
-
-            <Card className={`${cf.cardShadcn} border-primary/15`}>
-              <CardContent className="px-5 py-4 text-sm leading-relaxed text-muted-foreground sm:px-6">
-                {t("tipFlow.payment.stripeCardNote")}
-              </CardContent>
-            </Card>
-
-            <Card className={`${cf.cardMuted} border-border/55`}>
-              <CardContent className="flex items-start gap-3 px-5 py-4 sm:px-6">
-                <Lock className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
-                <div className="text-xs text-muted-foreground">
-                  <p className="font-medium text-foreground mb-1">{t("tipFlow.payment.secureTitle")}</p>
-                  <p>{t("tipFlow.payment.secureBody")}</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          <motion.div initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className={cf.fixedBottomBar}>
+    <CustomerFlowShell
+      withBottomCta={showCheckout}
+      headerLeading={
+        <button
+          type="button"
+          onClick={handleBack}
+          className={cf.backButton}
+          disabled={processing}
+        >
+          {t("tipFlow.common.back")}
+        </button>
+      }
+      headerLogo={headerLogo}
+      title={t("tipFlow.payment.title")}
+      subtitle={t("tipFlow.payment.subtitle")}
+      loading={!contextReady}
+      loadingMessage={t("tipFlow.payment.preparingCheckout")}
+      bottomBar={
+        showCheckout ? (
+          <div className={cf.fixedBottomBar}>
             <div className={cf.fixedBottomInner}>
-              <button type="button" onClick={handlePayment} disabled={processing} className={cf.btnAccentLg}>
+              <button
+                type="button"
+                onClick={handlePayment}
+                disabled={processing}
+                className={cf.btnAccentLg}
+              >
                 {processing ? (
                   <>
                     <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
@@ -426,9 +258,84 @@ export function PaymentPage() {
                 )}
               </button>
             </div>
-          </motion.div>
+          </div>
+        ) : undefined
+      }
+    >
+      {contextReady && missingContext ? (
+        <div className="text-center">
+          <div className={`${cf.cardMuted} mx-auto max-w-md px-5 py-8 sm:px-8`}>
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              {t("tipFlow.payment.missingContext")}
+            </p>
+            <button type="button" onClick={() => navigate("/")} className={`${cf.btnPrimaryLg} mt-6`}>
+              {t("tipFlow.common.goHomeButton")}
+            </button>
+          </div>
+        </div>
+      ) : null}
+
+      {showCheckout ? (
+        <>
+          <Card className={cf.paymentSummary}>
+            <CardContent className="p-0">
+              <div className="customer-flow-payment-summary__hero">
+                <ProfileAvatar
+                  src={employeeAvatar}
+                  displayName={employeeName ?? t("tipFlow.common.teamMember")}
+                  className={cf.employeeSummaryAvatar}
+                />
+                <div className="min-w-0">
+                  <p className={cf.paymentAmountLabel}>{t("tipFlow.payment.payingTipTo")}</p>
+                  <p className="truncate text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+                    {employeeName ?? t("tipFlow.common.teamMember")}
+                  </p>
+                </div>
+              </div>
+              <div className="customer-flow-payment-summary__line">
+                <span className="text-muted-foreground">
+                  {t("tipFlow.payment.tipFor", {
+                    name: employeeName ?? t("tipFlow.common.teamMember"),
+                  })}
+                </span>
+                <span className="font-medium tabular-nums text-foreground">{formatEur(tipAmountVal)}</span>
+              </div>
+              <div className="customer-flow-payment-summary__amount">
+                <span className="text-base font-semibold text-foreground sm:text-lg">
+                  {t("tipFlow.payment.amountToPay")}
+                </span>
+                <span className={cf.paymentAmountDisplay}>{formatEur(totalAmount)}</span>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className={cf.cardShadcn}>
+            <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+              <CardTitle className={cf.cardTitle}>{t("tipFlow.payment.selectMethodTitle")}</CardTitle>
+              <CardDescription className={cf.cardDesc}>
+                {t("tipFlow.payment.selectMethodDesc")}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-5 pb-5 sm:px-6">
+              <PaymentMethodsAvailable />
+            </CardContent>
+          </Card>
+
+          <div className={cf.stripeNote}>{t("tipFlow.payment.stripeCardNote")}</div>
+
+          <Card className={cf.trustCard}>
+            <CardContent className="flex items-start gap-3.5 px-5 py-4 pl-6 sm:px-6 sm:pl-7">
+              <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-emerald-600/10 text-emerald-700 dark:text-emerald-400">
+                <Lock className="size-5" aria-hidden />
+              </div>
+              <div className="text-sm leading-relaxed text-muted-foreground">
+                <p className="mb-1 font-semibold text-foreground">{t("tipFlow.payment.secureTitle")}</p>
+                <p>{t("tipFlow.payment.secureBody")}</p>
+              </div>
+            </CardContent>
+          </Card>
         </>
       ) : null}
-    </div>
+    </CustomerFlowShell>
   );
 }

@@ -24,9 +24,14 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { cn } from "@/lib/utils";
-import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
+import { DashboardListSkeleton, InlineSpinner } from "@/app/components/dashboard/DashboardSectionLoading";
 import { BusinessSubPageShellSkeleton } from "@/app/components/dashboard/BusinessSubPageShellSkeleton";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import {
+  getPageSessionCache,
+  setPageSessionCache,
+  PAGE_CACHE_TTL_MEDIUM_MS,
+} from "@/app/lib/pageSessionCache";
 
 const CATEGORIES: SupportTicketCategory[] = [
   "technical",
@@ -54,21 +59,32 @@ export function BusinessSupportPage() {
   const canLoad =
     authReady && authStatus === "authenticated" && user?.role === "business";
 
-  const loadTickets = useCallback(async () => {
-    if (!canLoad) return;
-    setLoading(true);
+  const loadTickets = useCallback(async (opts?: { quiet?: boolean }) => {
+    if (!canLoad || !user?.id) return;
+    const quiet = opts?.quiet === true;
+    const cacheKey = `business:support:${user.id}:${statusFilter}:${search.trim().toLowerCase()}`;
+    const cached = getPageSessionCache<SupportTicketSummary[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
+    const useCachedFirst = !quiet && cached !== null;
+    if (useCachedFirst) {
+      setTickets(cached);
+      setLoading(false);
+    } else if (!quiet) {
+      setLoading(true);
+      setTickets([]);
+    }
     try {
       const res = await fetchBusinessSupportTickets({
         status: statusFilter || undefined,
         search: search || undefined,
       });
       setTickets(res.tickets);
+      setPageSessionCache(cacheKey, res.tickets);
     } catch {
-      toast.error(t("support.business.loadError"));
+      if (!useCachedFirst) toast.error(t("support.business.loadError"));
     } finally {
-      setLoading(false);
+      if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [canLoad, statusFilter, search, t]);
+  }, [canLoad, search, statusFilter, t, user?.id]);
 
   useEffect(() => {
     void loadTickets();
@@ -96,6 +112,7 @@ export function BusinessSupportPage() {
   if (!user || user.role !== "business") return <BusinessSubPageShellSkeleton narrow />;
 
   const isInitialTicketLoad = loading && tickets.length === 0;
+  const isBackgroundTicketRefresh = loading && tickets.length > 0;
 
   return (
     <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
@@ -193,6 +210,17 @@ export function BusinessSupportPage() {
               </Select>
             </div>
           </div>
+
+          {isBackgroundTicketRefresh ? (
+            <div
+              className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
+              role="status"
+              aria-live="polite"
+            >
+              <InlineSpinner />
+              <span>{t("dashboard.refresh.updating")}</span>
+            </div>
+          ) : null}
 
           {isInitialTicketLoad ? (
             <DashboardListSkeleton rows={4} minHeightClass="min-h-0 py-4" />

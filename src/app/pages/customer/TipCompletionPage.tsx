@@ -1,6 +1,5 @@
-import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { CheckCircle2, LogOut, Users } from "lucide-react";
 import { CareTipLogo } from "../../components/CareTipLogo";
@@ -8,48 +7,58 @@ import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { Card, CardContent } from "@/components/ui/card";
+import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
+import { TipPaymentProcessingView } from "./TipPaymentProcessingView";
+import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 
 export function TipCompletionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchParams] = useSearchParams();
   const { reset } = useTipFlow();
 
-  const [completion] = useState(() => ({
-    tippedName: searchParams.get("tippedName")?.trim() || undefined,
-    feedbackSubmitted: searchParams.get("feedbackSubmitted") === "1",
-    businessId: searchParams.get("businessId")?.trim() || undefined,
-    businessSlug: searchParams.get("businessSlug")?.trim() || undefined,
-  }));
+  const sessionId = searchParams.get("session_id")?.trim() ?? "";
+  const feedbackSubmitted = searchParams.get("feedbackSubmitted") === "1";
+
+  const verification = useVerifiedTipSession(sessionId);
 
   useEffect(() => {
-    if (!completion.tippedName && !completion.businessId) {
+    if (!sessionId) {
       navigate("/", { replace: true });
     }
-  }, [completion.businessId, completion.tippedName, navigate]);
+  }, [navigate, sessionId]);
 
   useEffect(() => {
-    const next = new URLSearchParams(searchParams);
-    next.delete("feedbackSubmitted");
-    next.delete("tippedName");
-    next.delete("businessId");
-    next.delete("businessSlug");
-    if ([...next.keys()].length < [...searchParams.keys()].length) {
-      setSearchParams(next, { replace: true });
+    if (verification.phase === "expired" || verification.phase === "unpaid" || verification.phase === "error") {
+      navigate("/", { replace: true });
     }
-  }, [searchParams, setSearchParams]);
+  }, [navigate, verification.phase]);
 
-  const displayName = completion.tippedName ?? t("tipFlow.common.aTeamMember");
+  if (!sessionId) {
+    return null;
+  }
+
+  if (verification.phase === "loading") {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.completion.processingTitle")} />;
+  }
+
+  if (verification.phase === "pending") {
+    return <TipPaymentProcessingView />;
+  }
+
+  if (!isVerifiedTipSessionReady(verification)) {
+    return null;
+  }
+
+  const { context } = verification;
+  const displayName = context.employee?.name ?? t("tipFlow.common.aTeamMember");
+  const businessId = context.businessId;
 
   const tipAnother = () => {
     clearCustomerFlowEntry();
     reset();
-    if (completion.businessId) {
-      navigate(`/qr-landing/${encodeURIComponent(completion.businessId)}`, { replace: true });
-      return;
-    }
-    if (completion.businessSlug) {
-      navigate(`/${encodeURIComponent(completion.businessSlug)}`, { replace: true });
+    if (businessId) {
+      navigate(`/qr-landing/${encodeURIComponent(businessId)}`, { replace: true });
       return;
     }
     navigate("/", { replace: true });
@@ -70,23 +79,17 @@ export function TipCompletionPage() {
       </div>
 
       <div className={`${cf.main} max-w-lg py-10 sm:py-14`}>
-        <motion.div
-          initial={{ scale: 0.94, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{ type: "spring", stiffness: 220, damping: 22 }}
-          className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-primary/10 ring-8 ring-primary/8"
-          aria-hidden
-        >
-          <CheckCircle2 className="size-10 text-primary" />
-        </motion.div>
+        <div className={cf.successIconWrap} aria-hidden>
+          <CheckCircle2 className="size-11 text-primary sm:size-12" strokeWidth={1.75} />
+        </div>
 
-        <Card className={`${cf.cardAccentWash} border-primary/20`}>
-          <CardContent className="space-y-5 p-6 sm:p-8">
-            <div className="space-y-2 text-center">
+        <Card className={cf.completionCard}>
+          <CardContent className="space-y-6 p-6 sm:p-8">
+            <div className="space-y-2.5 text-center">
               <h1 className="text-balance text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                 {t("tipFlow.completion.thankYouTipping", { name: displayName })}
               </h1>
-              {completion.feedbackSubmitted ? (
+              {feedbackSubmitted ? (
                 <p className="text-sm leading-relaxed text-muted-foreground">
                   {t("tipFlow.completion.feedbackReceived")}
                 </p>

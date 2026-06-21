@@ -18,7 +18,8 @@ import { logClientError } from "../../lib/clientLog";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { CareTipLogo } from "../../components/CareTipLogo";
-import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { prefetchCustomerFlowRoutes } from "../../lib/prefetchCustomerRoutes";
+import { CustomerFlowShell } from "./CustomerFlowShell";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
@@ -39,16 +40,26 @@ export function QRLandingPage() {
   const teamSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const schedule = () => prefetchCustomerFlowRoutes();
+    if (typeof requestIdleCallback === "function") {
+      const id = requestIdleCallback(schedule, { timeout: 2500 });
+      return () => cancelIdleCallback(id);
+    }
+    const id = window.setTimeout(schedule, 400);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  useEffect(() => {
     if (searchParams.get("tipComplete") !== "1") return;
-    const params = new URLSearchParams();
-    const tippedName = searchParams.get("tippedName")?.trim();
-    const businessIdParam = searchParams.get("businessId")?.trim() ?? businessId;
-    if (tippedName) params.set("tippedName", tippedName);
-    if (businessIdParam) params.set("businessId", businessIdParam);
+    const sessionId = searchParams.get("session_id")?.trim();
+    if (!sessionId) {
+      navigate("/", { replace: true });
+      return;
+    }
+    const params = new URLSearchParams({ session_id: sessionId });
     if (searchParams.get("feedbackSubmitted") === "1") params.set("feedbackSubmitted", "1");
-    const qs = params.toString();
-    navigate(qs ? `/tip-complete?${qs}` : "/tip-complete", { replace: true });
-  }, [businessId, navigate, searchParams]);
+    navigate(`/tip-complete?${params.toString()}`, { replace: true });
+  }, [navigate, searchParams]);
 
   const {
     setBusinessId,
@@ -138,6 +149,20 @@ export function QRLandingPage() {
             slug: business.slug ?? null,
           });
           markCustomerFlowEntered();
+
+          const slug = business.slug?.trim().toLowerCase();
+          if (slug && !employeeIdParam) {
+            setPoolLoading(true);
+            try {
+              const res = await getBusinessStaffDirectory(slug);
+              setPoolEmployees(res.employees ?? []);
+            } catch (e) {
+              logClientError("QRLandingPage.directory", e);
+              setPoolEmployees([]);
+            } finally {
+              setPoolLoading(false);
+            }
+          }
         }
       } catch (err) {
         logClientError("QRLandingPage", err);
@@ -157,30 +182,6 @@ export function QRLandingPage() {
     setTippingVenue,
     t,
   ]);
-
-  useEffect(() => {
-    const slug = businessData?.slug?.trim().toLowerCase();
-    if (!slug || selectedEmployee) {
-      setPoolEmployees(null);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      setPoolLoading(true);
-      try {
-        const res = await getBusinessStaffDirectory(slug);
-        if (!cancelled) setPoolEmployees(res.employees ?? []);
-      } catch (e) {
-        logClientError("QRLandingPage.directory", e);
-        if (!cancelled) setPoolEmployees([]);
-      } finally {
-        if (!cancelled) setPoolLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [businessData?.slug, selectedEmployee]);
 
   // Repeat tip: check local last-tip data for this business and validate employee still exists.
   useEffect(() => {
@@ -353,7 +354,14 @@ export function QRLandingPage() {
   }
 
   if (loading && !employeeIdParam) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.common.loading")} />;
+    return (
+      <CustomerFlowShell
+        headerLogo={<CareTipLogo size="xs" className="shrink-0" />}
+        title={t("tipFlow.docTitle.default")}
+        loading
+        loadingMessage={t("tipFlow.common.loading")}
+      />
+    );
   }
 
   if (error) {
@@ -380,7 +388,14 @@ export function QRLandingPage() {
       tippingLocationName && tippingTableName
         ? t("tipFlow.venueLoading", { location: tippingLocationName, table: tippingTableName })
         : t("tipFlow.common.loading");
-    return <CareTipPageLoader variant="wait" message={venueMsg} />;
+    return (
+      <CustomerFlowShell
+        headerLogo={<CareTipLogo size="xs" className="shrink-0" />}
+        title={t("tipFlow.qrLanding.tipHeading", { name: t("tipFlow.common.teamMember") })}
+        loading
+        loadingMessage={venueMsg}
+      />
+    );
   }
 
   if (selectedEmployee) {
@@ -407,13 +422,13 @@ export function QRLandingPage() {
             </p>
           ) : null}
 
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-            <Card className={cf.cardShadcn}>
-              <CardContent className="flex items-center gap-5 bg-card p-6 sm:p-7">
+          <motion.div initial={false} animate={{ y: 0, opacity: 1 }}>
+            <Card className={cf.employeeSummaryCard}>
+              <CardContent className="flex items-center gap-4 p-4 sm:gap-5 sm:p-5">
                 <ProfileAvatar
                   src={selectedEmployee.avatar}
                   displayName={displayName}
-                  className="h-24 w-24 shrink-0 ring-2 ring-primary/30 shadow-lg sm:h-28 sm:w-28"
+                  className={`${cf.employeeSummaryAvatar} sm:h-24 sm:w-24`}
                 />
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-muted-foreground/80 mb-1">
@@ -426,11 +441,7 @@ export function QRLandingPage() {
             </Card>
           </motion.div>
 
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.05 }}
-          >
+          <div>
             <Card className={cf.cardShadcn}>
               <CardContent className="px-5 py-6 sm:px-7">
                 <p className="text-sm text-muted-foreground/90">
@@ -438,7 +449,7 @@ export function QRLandingPage() {
                 </p>
               </CardContent>
             </Card>
-          </motion.div>
+          </div>
 
           <Card className={cf.cardShadcn}>
             <CardHeader className={`${cf.cardHeaderPadding} pb-3`}>
@@ -447,21 +458,18 @@ export function QRLandingPage() {
             </CardHeader>
             <CardContent className="px-5 pb-6 sm:px-7">
               <div className="grid grid-cols-2 gap-3">
-                {presetAmounts.map((amount, index) => (
-                  <motion.button
+                {presetAmounts.map((amount) => (
+                  <button
                     key={amount}
                     type="button"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.05 + index * 0.05 }}
                     onClick={() => handleAmountSelect(amount)}
-                    className={`${cf.selectableTile} flex flex-col justify-center font-semibold ${selectedAmount === amount ? cf.selectableOn : cf.selectableIdle}`}
+                    className={`${cf.tipPresetTile} flex flex-col justify-center font-semibold ${selectedAmount === amount ? cf.tipPresetOn : cf.tipPresetIdle}`}
                   >
                     <div className="mb-1 text-3xl font-bold tabular-nums text-foreground">
                       {formatEur(amount, { minFrac: 0, maxFrac: 0 })}
                     </div>
                     <div className="text-xs text-muted-foreground">{t("tipFlow.qrLanding.tipAmountTile")}</div>
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </CardContent>
@@ -599,7 +607,7 @@ export function QRLandingPage() {
                 </div>
                 {(businessData.employeeCount != null && businessData.employeeCount > 0) ||
                 (poolEmployees != null && poolEmployees.length > 0) ? (
-                <div className="flex items-center gap-3 rounded-2xl border border-border/50 bg-muted/20 p-4">
+                <div className="flex items-center gap-3 rounded-[1.125rem] border border-black/[0.06] bg-primary/[0.04] p-4">
                   <Users className="h-6 w-6 shrink-0 text-primary" />
                   <span className="text-sm font-medium text-foreground">
                     {t("tipFlow.qrLanding.staffReady", {
@@ -634,27 +642,27 @@ export function QRLandingPage() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.05 }}
           >
-            <Card className={cf.cardShadcn}>
+            <Card className={cf.cardSearchLight}>
               <CardHeader className={`${cf.cardHeaderPadding}`}>
                 <CardTitle className={`${cf.cardTitle} text-lg`}>{t("tipFlow.qrLanding.whoServedYou")}</CardTitle>
                 <CardDescription className={cf.cardDesc}>{t("tipFlow.qrLanding.whoServedYouDesc")}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-5 px-5 pb-6 sm:px-7">
-                <div className="relative">
+                <div className="relative rounded-[1.125rem] border border-black/[0.04] bg-white p-0.5 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] dark:border-white/10 dark:bg-card">
                   <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground/60" />
                   <input
                     type="search"
                     placeholder={t("tipFlow.qrLanding.searchPlaceholder")}
                     value={poolQuery}
                     onChange={(e) => setPoolQuery(e.target.value)}
-                    className={`${cf.inputField} rounded-2xl py-3.5 pl-11 pr-4 placeholder:text-muted-foreground/65`}
+                    className={`${cf.inputField} border-0 bg-transparent shadow-none focus-visible:ring-0 py-3.5 pl-11 pr-4 placeholder:text-muted-foreground/65`}
                     autoComplete="off"
                   />
                 </div>
                 {filteredPool.length === 0 ? (
                   <p className="py-8 text-center text-sm text-muted-foreground/60">{t("tipFlow.qrLanding.noMatches")}</p>
                 ) : (
-                  <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                  <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5">
                     {filteredPool.map((emp, index) => (
                       <motion.li
                         key={emp.id}
@@ -665,12 +673,12 @@ export function QRLandingPage() {
                         <button
                           type="button"
                           onClick={() => pickEmployeeFromPool(emp)}
-                          className={`flex w-full flex-col items-center gap-3 rounded-2xl p-4 text-center ${cf.selectableIdle}`}
+                          className={cf.employeeCard}
                         >
                           <ProfileAvatar
                             src={emp.avatar}
                             displayName={emp.name}
-                            className="h-24 w-24 ring-2 ring-primary/30"
+                            className={cf.employeeAvatar}
                           />
                           <span className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">
                             {emp.name}

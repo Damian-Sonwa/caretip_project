@@ -4,7 +4,11 @@ import { CareIcon } from '@/components/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from './CareTipLogo';
+import {
+  CareTipLogo,
+  DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS,
+  DASHBOARD_SIDEBAR_NAV_CLASS,
+} from './CareTipLogo';
 import { adminDashboardNavItems, isAdminDashboardNavActive } from './adminDashboardNav';
 import { MobileDrawer } from './ui/MobileDrawer';
 
@@ -22,17 +26,9 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
 
   return (
     <MobileDrawer isOpen={isOpen} onClose={onClose} ariaLabel={t("admin.sidebar.closeMenuAria")}>
-      <div
-        className={cn(
-          'flex items-center justify-between px-6 py-4',
-          CARE_TIP_LOGO_SURFACE_CLASS
-        )}
-      >
-        <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
-          <div className="min-w-0">
-            <CareTipLogo size="sm" />
-          </div>
-          <span className="text-xs font-semibold text-sidebar-foreground">{t("admin.sidebar.productLabel")}</span>
+      <div className={DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS}>
+        <div className="min-w-0 flex-1">
+          <CareTipLogo size="sm" />
         </div>
         <button
           type="button"
@@ -44,7 +40,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
         </button>
       </div>
 
-      <nav className="min-h-0 flex-1 overflow-y-auto px-3 py-5">
+      <nav className={DASHBOARD_SIDEBAR_NAV_CLASS}>
         <ul className="space-y-0.5">
           {adminDashboardNavItems.map((item) => {
             const isActive = isAdminDashboardNavActive(item.href, location.pathname);

@@ -14,7 +14,6 @@ import {
 } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { EmployeeGoalListSkeleton } from "../../components/dashboard/DashboardSectionLoading";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/ui/dialog";
@@ -135,7 +134,7 @@ export function EmployeeTipGoalsPage() {
   const isInitialGoalsLoad = loading && goals.length === 0;
 
   if (!user || user.role !== "employee") {
-    return <GlobalAppLoadingHold />;
+    return null;
   }
 
   return (

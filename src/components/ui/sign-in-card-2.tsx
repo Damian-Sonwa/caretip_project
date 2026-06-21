@@ -42,31 +42,28 @@ export function SignInCard2({
   const showModeTabs = !sessionActive && modeScope === "both";
 
   const isBusinessSignup = !sessionActive && !isLogin && !isEmployee;
-  const showFormHeadline = !isBusinessSignup;
+  /** Session-resume uses the cross-session notice as the card body — no duplicate title block. */
+  const showFormHeadline = !isBusinessSignup && !sessionActive;
 
-  const title = sessionActive
-    ? t("auth.signInCard.titleCareTip")
-    : isLogin
-      ? isEmployee
-        ? t("auth.employeeAuth.titleSignIn")
-        : t("auth.signInCard.titleWelcomeBack")
-      : isEmployee
-        ? employeeVenueName
-          ? t("auth.employeeAuth.titleWelcomeVenue", { venue: employeeVenueName })
-          : t("auth.employeeAuth.titleJoinTeam")
-        : t("auth.signInCard.titleCreateVenue");
+  const title = isLogin
+    ? isEmployee
+      ? t("auth.employeeAuth.titleSignIn")
+      : t("auth.signInCard.titleWelcomeBack")
+    : isEmployee
+      ? employeeVenueName
+        ? t("auth.employeeAuth.titleWelcomeVenue", { venue: employeeVenueName })
+        : t("auth.employeeAuth.titleJoinTeam")
+      : t("auth.signInCard.titleCreateVenue");
 
-  const subtitle = sessionActive
-    ? t("auth.signInCard.subtitleSession")
-    : isLogin
-      ? isEmployee
-        ? t("auth.employeeAuth.subtitleSignIn")
-        : null
-      : isEmployee
-        ? inviteVerified
-          ? t("auth.employeeAuth.subtitleInviteVerified")
-          : t("auth.employeeAuth.subtitleJoinTeam")
-        : t("auth.signInCard.subtitleCreateVenue");
+  const subtitle = isLogin
+    ? isEmployee
+      ? t("auth.employeeAuth.subtitleSignIn")
+      : null
+    : isEmployee
+      ? inviteVerified
+        ? t("auth.employeeAuth.subtitleInviteVerified")
+        : t("auth.employeeAuth.subtitleJoinTeam")
+      : t("auth.signInCard.subtitleCreateVenue");
 
   const handleSignUpTab = () => {
     if (isEmployee && onEmployeeSignUpClick) {
@@ -87,15 +84,11 @@ export function SignInCard2({
           className={cn(
             "caretip-auth-card caretip-auth-card--stable",
             !isLogin && "caretip-auth-card--signup",
+            sessionActive && "caretip-auth-card--session-resume",
           )}
         >
           {showFormHeadline ? (
-            <div
-              className={cn(
-                "caretip-auth-header",
-                sessionActive && "caretip-auth-header--session",
-              )}
-            >
+            <div className="caretip-auth-header">
               <h1 className="caretip-auth-title">{title}</h1>
               {subtitle ? <p className="caretip-auth-subtitle">{subtitle}</p> : null}
             </div>

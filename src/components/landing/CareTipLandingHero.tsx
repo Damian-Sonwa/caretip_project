@@ -125,8 +125,11 @@ export function CareTipLandingHero({
             <LandingCopySentences
               text={heroDescription}
               layout="paragraphs"
-              className={cn(landingUi.heroSubtitle, "caretip-hero-subtitle")}
-              sentenceClassName={cn(landingUi.heroSubtitle, "caretip-hero-subtitle m-0")}
+              className={cn(
+                landingUi.heroSubtitle,
+                "caretip-hero-subtitle caretip-hero-description-block",
+              )}
+              sentenceClassName="caretip-hero-description-line m-0"
             />
           ) : null}
 

@@ -790,28 +790,94 @@ export async function loginMfaVerifyAPI(
 }
 
 export async function logoutAPI(): Promise<void> {
-  markClientSessionRevoked();
+  await logoutAPIWithTimeout();
+}
+
+export type LogoutAPIResult = {
+  ok: boolean;
+  timedOut: boolean;
+  durationMs: number;
+  apiStartMs: number;
+};
+
+const LOGOUT_API_TIMEOUT_MS = 3_000;
+
+/**
+ * POST /api/auth/logout with HttpOnly cookie + optional Bearer token.
+ * Non-blocking for UX — call after local cleanup; times out after 3s and logs failure.
+ * Server-side refresh invalidation / audit still attempted when the request completes in time.
+ */
+export async function logoutAPIWithTimeout(options?: {
+  capturedToken?: string | null;
+  timeoutMs?: number;
+  /** Monotonic time at logout click — used for dev timeline logs only. */
+  clickStartedAt?: number;
+}): Promise<LogoutAPIResult> {
+  const timeoutMs = options?.timeoutMs ?? LOGOUT_API_TIMEOUT_MS;
+  const apiStartMs = performance.now();
   cancelPendingSessionRefresh();
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     "X-CareTip-Client": "1",
   };
-  const token = getToken();
-  if (token?.trim()) {
+  const token = options?.capturedToken?.trim() || getToken()?.trim();
+  if (token) {
     headers.Authorization = `Bearer ${token.trim()}`;
   }
+
+  let timedOut = false;
+  authDebug("logout_api_start", {
+    timeoutMs,
+    hasBearer: Boolean(token),
+    msSinceClick:
+      options?.clickStartedAt != null ? Math.round(apiStartMs - options.clickStartedAt) : undefined,
+  });
+
   try {
-    await fetch(apiPath("/api/auth/logout"), {
-      method: "POST",
-      headers,
-      body: EMPTY_JSON_BODY,
-      credentials: "include",
-    });
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      timedOut = true;
+      controller.abort();
+    }, timeoutMs);
+
+    try {
+      await fetch(apiPath("/api/auth/logout"), {
+        method: "POST",
+        headers,
+        body: EMPTY_JSON_BODY,
+        credentials: "include",
+        signal: controller.signal,
+      });
+    } finally {
+      window.clearTimeout(timeoutId);
+    }
   } catch (err) {
-    logClientError("api.logoutAPI", err);
+    if (timedOut) {
+      logClientError(
+        "api.logoutAPI.timeout",
+        new Error(`logout API exceeded ${timeoutMs}ms — continuing with local session cleared`),
+      );
+    } else {
+      logClientError("api.logoutAPI", err);
+    }
   } finally {
     clearClientAuthStorage();
   }
+
+  const durationMs = performance.now() - apiStartMs;
+  const ok = !timedOut;
+  authDebug("logout_api_complete", {
+    ok,
+    timedOut,
+    durationMs: Math.round(durationMs),
+    msSinceClick:
+      options?.clickStartedAt != null
+        ? Math.round(performance.now() - options.clickStartedAt)
+        : undefined,
+  });
+
+  return { ok, timedOut, durationMs, apiStartMs };
 }
 
 export async function resendVerificationEmailAPI(
@@ -2710,13 +2776,14 @@ export type TipSessionContextResponse =
   | {
       status: "pending";
       sessionId: string;
-      paymentIntentId: string | null;
-      transactionId?: undefined;
-      employee: { id: string; name: string; avatar: string | null } | null;
-      businessId: string | null;
-      locationId: string | null;
-      tableId: string | null;
-      customerName: string | null;
+    }
+  | {
+      status: "expired";
+      sessionId: string;
+    }
+  | {
+      status: "unpaid";
+      sessionId: string;
     }
   | {
       status: "ready";
@@ -2730,11 +2797,44 @@ export type TipSessionContextResponse =
       customerName: string | null;
     };
 
+export type TipSessionReadyContext = Extract<TipSessionContextResponse, { status: "ready" }>;
+
 export async function getTipSessionContext(sessionId: string): Promise<TipSessionContextResponse> {
-  return apiRequest(apiPath(`/api/payments/tip-session/${encodeURIComponent(sessionId)}`), {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-  });
+  const url = apiPath(`/api/payments/tip-session/${encodeURIComponent(sessionId)}`);
+  let res: Response;
+  try {
+    res = await fetchWithNetworkRetry(url, {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (err) {
+    logClientError("api.getTipSessionContext", err, { sessionId });
+    throw err;
+  }
+
+  const ct = res.headers.get("content-type") ?? "";
+  const data = (
+    ct.includes("application/json") ? await res.json().catch(() => ({})) : {}
+  ) as Partial<TipSessionContextResponse> & { message?: string };
+
+  if (res.status === 202 && data.status === "pending" && typeof data.sessionId === "string") {
+    return { status: "pending", sessionId: data.sessionId };
+  }
+  if (res.status === 410 && data.status === "expired" && typeof data.sessionId === "string") {
+    return { status: "expired", sessionId: data.sessionId };
+  }
+  if (res.status === 422 && data.status === "unpaid" && typeof data.sessionId === "string") {
+    return { status: "unpaid", sessionId: data.sessionId };
+  }
+  if (res.ok && data.status === "ready" && typeof data.sessionId === "string") {
+    return data as TipSessionReadyContext;
+  }
+
+  const message =
+    typeof data.message === "string" && data.message.trim()
+      ? data.message.trim()
+      : fallbackMessageForHttpStatus(res.status) || `Request failed (${res.status})`;
+  throw new ApiRequestError(message, res.status);
 }
 
 export async function submitTipFeedback(payload: {

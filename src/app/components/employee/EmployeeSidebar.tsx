@@ -5,7 +5,10 @@ import { useTranslation } from "react-i18next";
 
 import { useAuth } from "../../hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { CARE_TIP_LOGO_SURFACE_CLASS } from "../CareTipLogo";
+import {
+  DASHBOARD_SIDEBAR_BRAND_CLASS,
+  DASHBOARD_SIDEBAR_NAV_CLASS,
+} from "../CareTipLogo";
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import {
   employeeDashboardNavItems,
@@ -46,10 +49,10 @@ export function EmployeeSidebar({
       transition={{ duration: 0.5 }}
       className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
     >
-      <div className={cn("px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
+      <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <Link
           to={EMPLOYEE_DASHBOARD_HOME}
-          className="flex min-w-0 items-center gap-3 rounded-lg outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
           <BusinessLogoMark
             logoPathOrUrl={businessBranding?.businessLogo ?? null}
@@ -63,7 +66,7 @@ export function EmployeeSidebar({
         </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-5">
+      <nav className={DASHBOARD_SIDEBAR_NAV_CLASS}>
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);

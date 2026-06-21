@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import { useNavigate } from "react-router";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
@@ -11,8 +10,9 @@ import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CareTipLogo } from "../../components/CareTipLogo";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
+import { customerFlowUi as cf } from "./customerFlowUi";
 
 export function SelectEmployeePage() {
   const { t } = useTranslation();
@@ -116,52 +116,41 @@ export function SelectEmployeePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-28">
-      <div className="sticky top-0 z-10 border-b border-border bg-background/80 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-2xl items-center gap-3 px-4 py-4">
-          <button
-            type="button"
-            onClick={handleBack}
-            className="rounded-lg p-2 hover:bg-muted transition-colors"
-          >
+    <div className={cf.pageWithBottomCta}>
+      <div className={cf.stickyHeader}>
+        <div className={cf.headerInner}>
+          <button type="button" onClick={handleBack} className={cf.backButton}>
             {t("tipFlow.common.back")}
           </button>
           <CareTipLogo size="xs" className="shrink-0" />
-          <div className="min-w-0">
-            <h1 className="text-lg font-semibold text-foreground">Select Team Member</h1>
-            <p className="text-xs text-muted-foreground">Who provided your service?</p>
+          <div className="min-w-0 flex-1">
+            <h1 className={cf.headline}>Select Team Member</h1>
+            <p className={cf.subline}>Who provided your service?</p>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto max-w-2xl space-y-6 px-4 py-8 lg:px-8">
-        <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <Card className="border-border shadow-sm">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">Choose who you&apos;re tipping</CardTitle>
-              <CardDescription>
-                Preset amounts and payment are on the next steps. Pick the right person first.
-              </CardDescription>
-            </CardHeader>
-          </Card>
-        </motion.div>
+      <div className={cf.main}>
+        <Card className={cf.cardShadcn}>
+          <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
+            <CardTitle className={cf.cardTitle}>Choose who you&apos;re tipping</CardTitle>
+            <CardDescription className={cf.cardDesc}>
+              Preset amounts and payment are on the next steps. Pick the right person first.
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:gap-5">
           {displayEmployees.length === 0 ? (
             <p className="col-span-2 py-12 text-center text-muted-foreground">No team members found.</p>
           ) : (
-            displayEmployees.map((employee, index) => (
-              <motion.button
+            displayEmployees.map((employee) => (
+              <button
                 key={employee.id}
                 type="button"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: index * 0.05 }}
                 onClick={() => setSelectedEmployee(String(employee.id))}
-                className={`relative overflow-hidden rounded-xl border-2 bg-card text-left shadow-sm transition-all ${
-                  selectedEmployee === String(employee.id)
-                    ? "border-accent shadow-lg shadow-accent/20"
-                    : "border-border hover:border-accent/50"
+                className={`${cf.employeeCard} relative overflow-hidden text-left ${
+                  selectedEmployee === String(employee.id) ? cf.employeeCardSelected : ""
                 }`}
               >
                 {employee.topRated ? (
@@ -203,36 +192,28 @@ export function SelectEmployeePage() {
                 </div>
 
                 {selectedEmployee === String(employee.id) ? (
-                  <div className="absolute inset-0 flex items-center justify-center rounded-xl border-2 border-accent bg-accent/10">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent">
-                      <svg className="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="absolute inset-0 flex items-center justify-center rounded-[1.125rem] bg-primary/10">
+                    <div className="flex size-10 items-center justify-center rounded-full bg-primary shadow-[0_6px_18px_rgba(233,120,28,0.28)]">
+                      <svg className="size-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
                   </div>
                 ) : null}
-              </motion.button>
+              </button>
             ))
           )}
         </div>
       </div>
 
       {selectedEmployee ? (
-        <motion.div
-          initial={{ y: 100 }}
-          animate={{ y: 0 }}
-          className="fixed bottom-0 left-0 right-0 border-t border-border bg-background p-4"
-        >
-          <div className="mx-auto max-w-2xl">
-            <button
-              type="button"
-              onClick={handleContinue}
-              className="w-full rounded-xl bg-accent py-4 text-lg font-semibold text-white shadow-lg transition-all hover:bg-accent/90"
-            >
+        <div className={cf.fixedBottomBar}>
+          <div className={cf.fixedBottomInner}>
+            <button type="button" onClick={handleContinue} className={cf.btnPrimaryLg}>
               Continue to tip amount
             </button>
           </div>
-        </motion.div>
+        </div>
       ) : null}
     </div>
   );

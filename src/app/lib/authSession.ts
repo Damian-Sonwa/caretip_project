@@ -45,6 +45,34 @@ export function resolveAuthStatus(
   return user ? "authenticated" : "unauthenticated";
 }
 
+export type LoginSessionResumeUiOptions = {
+  authStatus: AuthStatus;
+  user: SessionUserLike | null;
+  sessionValidated: boolean;
+  /** When true, hide resume UI while the sign-in form is visible (business/staff login paths). */
+  showSignInForm?: boolean;
+  /** True while login/OAuth/MFA is in flight or a post-auth redirect was requested. */
+  authFlowInProgress: boolean;
+};
+
+/**
+ * Whether public login pages may show the cross-session resume card
+ * ("Continue to dashboard" / "Switch account").
+ *
+ * Intentionally hidden while `authStatus === "initializing"` so stale localStorage
+ * hydration and refresh-token verification cannot flash authenticated UI before
+ * bootstrap settles. Also hidden during an active sign-in on this page — a fresh
+ * login is not a "resume session" case and must redirect without the card appearing.
+ */
+export function shouldShowLoginSessionResumeUi(options: LoginSessionResumeUiOptions): boolean {
+  if (options.authStatus === "initializing") return false;
+  if (options.authFlowInProgress) return false;
+  if (options.authStatus !== "authenticated") return false;
+  if (!options.user || !options.sessionValidated) return false;
+  if (options.showSignInForm === true) return false;
+  return true;
+}
+
 /**
  * Auth-related URLs where an existing session must not trigger automatic redirects
  * to onboarding or the app shell (user may intend to sign in as another account).

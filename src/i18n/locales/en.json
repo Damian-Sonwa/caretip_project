@@ -1243,7 +1243,7 @@
       "tipping": "Tipping",
       "quickSelect": "Quick select",
       "quickSelectDesc": "Choose a preset tip amount",
-      "chooseYourAmount": "Choose Your Amount",
+      "chooseYourAmount": "Tip Your Way",
       "customTip": "Custom Tip",
       "customTipDesc": "Enter any amount you prefer",
       "enterCustom": "Enter custom amount",
@@ -1283,7 +1283,11 @@
       "thankYouTipping": "Thank you for tipping {{name}}",
       "feedbackReceived": "Your feedback has been received and shared with the team.",
       "tipAnotherMember": "Tip another team member",
-      "exit": "Exit"
+      "exit": "Exit",
+      "processingTitle": "Confirming your payment…",
+      "processingSubtitle": "This usually takes a few seconds. Please keep this page open.",
+      "notVerifiedTitle": "Payment not confirmed",
+      "notVerifiedDesc": "We could not verify a completed payment for this session."
     },
     "success": {
       "validatingPayment": "Validating payment…",
@@ -1422,7 +1426,7 @@
     "employee": {
       "overview": "Overview",
       "inbox": "Inbox",
-      "notifications": "Tip alerts",
+      "tipHistory": "Tip history",
       "tipGoals": "Tip goals",
       "settings": "Settings"
     },
@@ -2262,6 +2266,32 @@
       "actionCancel": "Cancel",
       "toastDeleted": "Deleted",
       "toastMarkedRead": "Marked as read"
+    },
+    "tipHistory": {
+      "title": "Tip history",
+      "subtitle": "Your earnings ledger — searchable tip records with payment status.",
+      "backAria": "Back",
+      "searchPlaceholder": "Search location, table, or tip ID…",
+      "statusAll": "All status",
+      "statusSuccess": "Paid",
+      "statusPending": "Pending",
+      "statusFailed": "Failed",
+      "rangeToday": "Today",
+      "rangeWeek": "Last 7 days",
+      "rangeMonth": "This month",
+      "rangeCustom": "Custom",
+      "loadFailed": "We couldn't load your tip history. Check your connection and try again.",
+      "thAmount": "Amount",
+      "thDateTime": "Date & time",
+      "thLocationTable": "Location / table",
+      "thStatus": "Payment status",
+      "csvTablePrefix": "Table:",
+      "csvLocationPrefix": "Location:",
+      "noLocationDetail": "—",
+      "pagination": "Showing {{from}} to {{to}} of {{total}}",
+      "prev": "Prev",
+      "next": "Next",
+      "pageOf": "Page {{page}} of {{pages}}"
     },
     "tipGoals": {
       "loading": "Loading goals…",

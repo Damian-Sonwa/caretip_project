@@ -5,7 +5,6 @@ import type { ImgHTMLAttributes } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import i18n from "@/i18n/i18n";
@@ -401,7 +400,7 @@ export function EmployeeDashboard() {
   }, [location.pathname, location.search, navigate, sessionValidated, user?.role, handleQrQuickAction]);
 
   if (!user) {
-    return <GlobalAppLoadingHold />;
+    return null;
   }
 
   if (error && !heroPayload && showMetricsLoading) {
@@ -677,7 +676,7 @@ export function EmployeeDashboard() {
                     </div>
                   </button>
                   <Link
-                    to="/employee/notifications"
+                    to="/employee/tip-history"
                     className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
                   >
                     {t("dashboard.viewAll")}

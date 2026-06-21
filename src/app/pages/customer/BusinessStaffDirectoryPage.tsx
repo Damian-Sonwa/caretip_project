@@ -172,7 +172,7 @@ export function BusinessStaffDirectoryPage() {
           </p>
         </motion.div>
 
-        <Card className={cf.cardShadcn}>
+        <Card className={cf.cardSearchLight}>
           <CardHeader className={`${cf.cardHeaderPadding} pb-3`}>
             <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
             <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.searchDesc")}</CardDescription>
@@ -202,7 +202,7 @@ export function BusinessStaffDirectoryPage() {
               {filtered.length === 0 ? (
                 <p className="py-12 text-center text-sm text-muted-foreground">{t("tipFlow.qrLanding.noMatches")}</p>
               ) : (
-                <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 sm:gap-5">
                   {filtered.map((emp, index) => (
                     <motion.li
                       key={emp.id}
@@ -213,12 +213,12 @@ export function BusinessStaffDirectoryPage() {
                       <button
                         type="button"
                         onClick={() => pickEmployee(emp)}
-                        className="flex w-full flex-col items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 text-left shadow-[0_6px_22px_-14px_rgba(15,23,42,0.08)] transition-[border-color,box-shadow] hover:border-primary/35 hover:shadow-[0_10px_30px_-16px_rgba(15,23,42,0.11)] active:opacity-95"
+                        className={cf.employeeCard}
                       >
                         <ProfileAvatar
                           src={emp.avatar}
                           displayName={emp.name}
-                          className="h-20 w-20 ring-2 ring-primary/22 sm:h-24 sm:w-24"
+                          className={cf.employeeAvatar}
                         />
                         <div className="min-w-0 text-center">
                           <span className="line-clamp-2 text-sm font-semibold leading-tight text-foreground">
@@ -235,9 +235,9 @@ export function BusinessStaffDirectoryPage() {
           </Card>
         </motion.div>
 
-        <Card className={`${cf.cardMuted} border-border/55`}>
+        <Card className={cf.trustCard}>
           <CardContent className="flex items-center justify-center gap-2 px-5 py-4 text-center text-xs font-medium leading-relaxed text-muted-foreground">
-            <Building2 className="size-4 shrink-0 text-primary/75" aria-hidden />
+            <Building2 className="size-4 shrink-0 text-emerald-700/75 dark:text-emerald-400/80" aria-hidden />
             <span>{t("tipFlow.qrLanding.secureFooter")}</span>
           </CardContent>
         </Card>

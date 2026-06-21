@@ -163,6 +163,8 @@ export function useEmployeeDashboardAnalytics(
   const advancedAnalyticsEnabledRef = useRef(advancedAnalyticsEnabled);
   advancedAnalyticsEnabledRef.current = advancedAnalyticsEnabled;
   const mountGenerationRef = useRef(0);
+  /** Avoid clearing settled UI on bootstrap before first enable (prevents load→content→load flicker). */
+  const wasDashboardEnabledRef = useRef(false);
   const prefetchQueueRef = useRef<number | null>(null);
   const scheduleInactivePrefetchRef = useRef<(activeTf: EmployeeAnalyticsTimeframe) => void>(() => {});
 
@@ -575,30 +577,33 @@ export function useEmployeeDashboardAnalytics(
   scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
 
   useEffect(() => {
-    if (!enabled) {
-      if (analyticsDeferTimerRef.current != null) {
-        window.clearTimeout(analyticsDeferTimerRef.current);
-        analyticsDeferTimerRef.current = null;
-      }
-      abortRef.current.forEach((c) => c.abort());
-      abortRef.current.clear();
-      clearEmployeeTipsClientCache();
-      employeePeriodSwrStore.clear();
-      hasSettledLiveUiRef.current = false;
-      summaryPartialRef.current.clear();
-      analyticsPartialRef.current.clear();
-      setPayload(null);
-      setDataTimeframe(null);
-      setLastKnownGoodMetrics(null);
-      setSummaryLoading(true);
-      setAnalyticsLoading(true);
-      setIsRevalidating(false);
-      setError(null);
-      devSetHydrationPhase("metrics", "idle");
-      devSetHydrationPhase("charts", "idle");
-      devSetHydrationPhase("goals", "idle");
-      return;
+    const wasActive = wasDashboardEnabledRef.current;
+    wasDashboardEnabledRef.current = enabled;
+
+    if (enabled) return;
+    if (!wasActive) return;
+
+    if (analyticsDeferTimerRef.current != null) {
+      window.clearTimeout(analyticsDeferTimerRef.current);
+      analyticsDeferTimerRef.current = null;
     }
+    abortRef.current.forEach((c) => c.abort());
+    abortRef.current.clear();
+    clearEmployeeTipsClientCache();
+    employeePeriodSwrStore.clear();
+    hasSettledLiveUiRef.current = false;
+    summaryPartialRef.current.clear();
+    analyticsPartialRef.current.clear();
+    setPayload(null);
+    setDataTimeframe(null);
+    setLastKnownGoodMetrics(null);
+    setSummaryLoading(true);
+    setAnalyticsLoading(true);
+    setIsRevalidating(false);
+    setError(null);
+    devSetHydrationPhase("metrics", "idle");
+    devSetHydrationPhase("charts", "idle");
+    devSetHydrationPhase("goals", "idle");
   }, [enabled]);
 
   useEffect(() => {

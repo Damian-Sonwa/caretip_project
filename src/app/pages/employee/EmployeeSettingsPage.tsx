@@ -23,7 +23,6 @@ import { logClientError } from "../../lib/clientLog";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { EmployeeSettingsFormSkeleton } from "../../components/dashboard/DashboardSectionLoading";
-import { GlobalAppLoadingHold } from "../../components/GlobalAppLoadingHold";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Switch } from "../../components/ui/switch";
@@ -224,7 +223,7 @@ export function EmployeeSettingsPage() {
   const isInitialSettingsLoad = loading && !name && !businessName;
 
   if (!user || user.role !== "employee") {
-    return <GlobalAppLoadingHold />;
+    return null;
   }
 
   return (

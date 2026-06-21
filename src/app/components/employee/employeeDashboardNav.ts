@@ -14,7 +14,7 @@ export type EmployeeDashboardNavItem = {
 export const employeeDashboardNavItems: readonly EmployeeDashboardNavItem[] = [
   { labelKey: "dashboardNav.employee.overview", href: "/employee/dashboard", icon: "overview" },
   { labelKey: "dashboardNav.employee.inbox", href: "/employee/inbox", icon: "inbox" },
-  { labelKey: "dashboardNav.employee.notifications", href: "/employee/notifications", icon: "notifications" },
+  { labelKey: "dashboardNav.employee.tipHistory", href: "/employee/tip-history", icon: "transactions" },
   { labelKey: "dashboardNav.employee.tipGoals", href: "/employee/tip-goals", icon: "tipGoals" },
   { labelKey: "dashboardNav.employee.settings", href: "/employee/settings", icon: "settings" },
 ] as const;

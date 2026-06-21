@@ -1,0 +1,153 @@
+/**
+ * Customer tipping journey — premium UI polish (presentation only).
+ */
+
+.customer-flow {
+  -webkit-font-smoothing: antialiased;
+}
+
+/* —— Section rhythm —— */
+.customer-flow .customer-flow-employee-summary .flex.items-center {
+  padding: 1.125rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .customer-flow .customer-flow-employee-summary .flex.items-center {
+    padding: 1.25rem 1.5rem;
+  }
+}
+
+/* —— Payment summary hero —— */
+.customer-flow-payment-summary .customer-flow-payment-summary__hero {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.customer-flow-payment-summary .customer-flow-payment-summary__amount {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.125rem 1.25rem 1.25rem;
+  background: linear-gradient(180deg, rgba(233, 120, 28, 0.04) 0%, transparent 100%);
+}
+
+@media (min-width: 640px) {
+  .customer-flow-payment-summary .customer-flow-payment-summary__hero,
+  .customer-flow-payment-summary .customer-flow-payment-summary__amount {
+    padding-inline: 1.5rem;
+  }
+}
+
+.customer-flow-payment-summary .customer-flow-payment-summary__line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.625rem 1.25rem 0;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .customer-flow-payment-summary .customer-flow-payment-summary__line {
+    padding-inline: 1.5rem;
+  }
+}
+
+/* —— Pay CTA gradient —— */
+.customer-flow .customer-flow-pay-cta {
+  background: linear-gradient(135deg, #ff9e2d 0%, #e9781c 52%, #d96810 100%);
+  border: none;
+  box-shadow: 0 8px 24px rgba(233, 120, 28, 0.32);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    opacity 0.15s ease;
+}
+
+.customer-flow .customer-flow-pay-cta:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(233, 120, 28, 0.38);
+}
+
+.customer-flow .customer-flow-pay-cta:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* —— Trust block —— */
+.customer-flow-trust {
+  position: relative;
+}
+
+.customer-flow-trust::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: 999px 0 0 999px;
+  background: linear-gradient(180deg, #e9781c 0%, rgba(233, 120, 28, 0.2) 100%);
+}
+
+/* —— Rating stars —— */
+.customer-flow-star:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(233, 120, 28, 0.35);
+}
+
+/* —— Success moment —— */
+@keyframes customer-flow-success-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.customer-flow-success-icon {
+  animation: customer-flow-success-pop 0.35s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .customer-flow-employee-card,
+  .customer-flow-tip-preset,
+  .customer-flow-payment-method,
+  .customer-flow .customer-flow-pay-cta,
+  .customer-flow-star {
+    transition: none;
+  }
+
+  .customer-flow-employee-card:hover,
+  .customer-flow-tip-preset:hover,
+  .customer-flow-payment-method:hover,
+  .customer-flow .customer-flow-pay-cta:hover:not(:disabled),
+  .customer-flow-star:hover {
+    transform: none;
+  }
+
+  .customer-flow-success-icon {
+    animation: none;
+  }
+}
+
+/* —— Mobile touch polish —— */
+@media (max-width: 639px) {
+  .customer-flow .customer-flow-tip-preset {
+    min-height: 5.75rem;
+  }
+
+  .customer-flow-employee-card {
+    padding: 0.875rem;
+  }
+
+  .customer-flow-employee-card .customer-flow-employee-card__avatar,
+  .customer-flow .h-\[5\.5rem\].w-\[5\.5rem\] {
+    height: 5rem;
+    width: 5rem;
+  }
+}

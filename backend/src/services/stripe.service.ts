@@ -9,6 +9,7 @@ import {
   assertEmployeeEligibleForTipPayment,
   logTipPaymentEligibilityBlocked,
 } from "./tipPaymentEligibility.service.js";
+import { recordCheckoutFunnelEvent } from "./checkoutFunnelMetrics.service.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -116,6 +117,8 @@ async function confirmedEurFromPaymentIntentId(paymentIntentId: string): Promise
 export type TipCheckoutContext = {
   sessionId: string;
   paymentIntentId: string | null;
+  checkoutStatus: Stripe.Checkout.Session.Status | null;
+  paymentStatus: Stripe.Checkout.Session.PaymentStatus | null;
   employeeId: string | null;
   businessId: string | null;
   locationId: string | null;
@@ -142,6 +145,8 @@ export async function getTipCheckoutContext(
   return {
     sessionId: s.id,
     paymentIntentId,
+    checkoutStatus: s.status ?? null,
+    paymentStatus: s.payment_status ?? null,
     employeeId: typeof md.employeeId === "string" ? md.employeeId : null,
     businessId: typeof md.businessId === "string" ? md.businessId : null,
     locationId: typeof md.locationId === "string" ? md.locationId : null,
@@ -360,6 +365,12 @@ export async function createTipCheckoutSession(
     }
     throw e;
   }
+
+  recordCheckoutFunnelEvent("started", {
+    sessionId: session.id,
+    employeeId,
+    businessId,
+  });
 
   return {
     sessionId: session.id,
@@ -670,6 +681,15 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     });
 
     console.log("TIP CREATED", tip.id);
+
+    recordCheckoutFunnelEvent("completed", {
+      sessionId: session.id,
+      paymentIntentId: piId,
+      employeeId,
+      businessId,
+      amountEur: confirmedEur,
+      paymentStatus: session.payment_status ?? null,
+    });
 
     if (emitSnapshot) {
       await emitTipSocketWithSnapshot(tip, emitSnapshot);

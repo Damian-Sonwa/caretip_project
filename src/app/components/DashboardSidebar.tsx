@@ -3,7 +3,7 @@ import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
 import { cn } from "@/lib/utils";
-import { CareTipLogo, CARE_TIP_LOGO_SURFACE_CLASS } from "./CareTipLogo";
+import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from "./CareTipLogo";
 import { CareIcon } from "@/components/icons";
 import { dashboardShellNavItems } from "./dashboardShellNav";
 
@@ -27,11 +27,11 @@ export function DashboardSidebar() {
       transition={{ duration: 0.5 }}
       className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 lg:w-64 lg:border-r lg:border-border lg:bg-card/50 lg:backdrop-blur-xl"
     >
-      <div className={cn("flex items-center gap-2 px-6 py-4", CARE_TIP_LOGO_SURFACE_CLASS)}>
+      <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <CareTipLogo size="sm" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
+      <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, "px-4")}>
         <ul className="space-y-1">
           {dashboardShellNavItems.map((item) => {
             const isActive = location.pathname === item.href;

@@ -25,18 +25,20 @@ export function PaymentMethodsAvailable({ className }: PaymentMethodsAvailablePr
 
   return (
     <ul className={cn("space-y-3", className)} aria-label={t("tipFlow.payment.methodsAria")}>
-      {METHOD_IDS.map((id) => (
+      {METHOD_IDS.map((id, index) => (
         <li
           key={id}
           className={cn(
             cf.paymentMethodRow,
-            "pointer-events-none cursor-default border-border/70 bg-card shadow-[0_4px_18px_-12px_rgba(15,23,42,0.06)]",
+            cf.paymentMethodOff,
+            index === 2 && cf.paymentMethodOn,
+            "cursor-default active:scale-[0.99]",
           )}
         >
           <div
             className={cn(
-              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border/50 p-2 sm:h-14 sm:w-14",
-              id === "apple-pay" ? "bg-neutral-950" : "bg-muted/40",
+              "flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-black/[0.06] p-2 shadow-[inset_0_1px_2px_rgba(0,0,0,0.02)] sm:h-14 sm:w-14",
+              id === "apple-pay" ? "bg-neutral-950" : "bg-[#fafaf8] dark:bg-muted/40",
             )}
             aria-hidden
           >

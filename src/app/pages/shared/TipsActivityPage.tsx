@@ -11,6 +11,7 @@ import { EmptyState } from "@/app/components/ui/EmptyState";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { employeeUi } from "@/app/components/employee/employeeDashboardUi";
+import { EmployeePageHeader } from "@/app/components/employee/EmployeePageHeader";
 import {
   InlineSpinner,
   TipsActivityTableSkeleton,
@@ -60,8 +61,16 @@ function downloadCsv(filename: string, csv: string) {
   URL.revokeObjectURL(url);
 }
 
-export function TipsActivityPage() {
+type TipsActivityPageProps = {
+  /** Finance-oriented employee ledger (Tip History). Default is business Tips & Activity. */
+  variant?: "default" | "employee-history";
+};
+
+export function TipsActivityPage({ variant = "default" }: TipsActivityPageProps) {
   const { t, i18n } = useTranslation();
+  const isEmployeeHistory = variant === "employee-history";
+  const copyNs = isEmployeeHistory ? "employee.tipHistory" : "business.tipsActivity";
+  const copy = useCallback((key: string, opts?: Record<string, unknown>) => t(`${copyNs}.${key}`, opts), [copyNs, t]);
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, sessionValidated } = useRequireAuth();
   const { hasCapability } = useSubscriptionEntitlements({
@@ -91,12 +100,12 @@ export function TipsActivityPage() {
 
   const statusLabel = useCallback(
     (s: TipStatus | string) => {
-      if (s === "success") return t("business.tipsActivity.statusSuccess");
-      if (s === "pending") return t("business.tipsActivity.statusPending");
-      if (s === "failed") return t("business.tipsActivity.statusFailed");
+      if (s === "success") return copy("statusSuccess");
+      if (s === "pending") return copy("statusPending");
+      if (s === "failed") return copy("statusFailed");
       return String(s);
     },
-    [t],
+    [copy],
   );
 
   const load = useCallback(async (opts?: { quiet?: boolean }) => {
@@ -105,7 +114,7 @@ export function TipsActivityPage() {
       if (sessionValidated) setLoading(false);
       return;
     }
-    const cacheKey = `tips-activity:${user.id}:${user.role}:${status}:${range}:${skip}:${customFrom}:${customTo}`;
+    const cacheKey = `tips-activity:${variant}:${user.id}:${user.role}:${status}:${range}:${skip}:${customFrom}:${customTo}`;
     const cached = getPageSessionCache<TipsActivityCache>(cacheKey, PAGE_CACHE_TTL_HIGH_MS);
     const useCachedFirst = !quiet && cached !== null;
     if (useCachedFirst) {
@@ -113,7 +122,7 @@ export function TipsActivityPage() {
       setTotal(cached.total);
       setDataTimezone(cached.timezone);
       setLoading(false);
-    } else if (!quiet) {
+    } else if (!quiet && items.length === 0) {
       setLoading(true);
     }
     setError(null);
@@ -126,7 +135,9 @@ export function TipsActivityPage() {
         ...(range === "custom" ? { fromDate: customFrom || undefined, toDate: customTo || undefined } : {}),
       };
       const res =
-        user.role === "business" ? await listBusinessTips(common) : await listEmployeeTips(common);
+        user.role === "business" && !isEmployeeHistory
+          ? await listBusinessTips(common)
+          : await listEmployeeTips(common);
       const nextItems = res.items ?? [];
       const nextTotal = res.total ?? 0;
       const nextTz = (res as { timezone?: string }).timezone ?? null;
@@ -140,12 +151,12 @@ export function TipsActivityPage() {
         setItems([]);
         setTotal(0);
         setDataTimezone(null);
-        setError(e instanceof Error ? e.message : t("business.tipsActivity.loadFailed"));
+        setError(e instanceof Error ? e.message : copy("loadFailed"));
       }
     } finally {
       if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [customFrom, customTo, range, sessionValidated, skip, status, t, user?.id, user?.role]);
+  }, [copy, customFrom, customTo, isEmployeeHistory, range, sessionValidated, skip, status, user?.id, user?.role, variant]);
 
   useEffect(() => {
     void load();
@@ -157,25 +168,40 @@ export function TipsActivityPage() {
     return items.filter((tip) => {
       return (
         tip.id.toLowerCase().includes(s) ||
-        (tip.staffName ?? "").toLowerCase().includes(s) ||
+        (!isEmployeeHistory && (tip.staffName ?? "").toLowerCase().includes(s)) ||
         (tip.locationName ?? "").toLowerCase().includes(s) ||
         (tip.tableName ?? "").toLowerCase().includes(s)
       );
     });
-  }, [items, q]);
+  }, [isEmployeeHistory, items, q]);
 
   const exportDisabled = !canExportCsv || exporting || loading || filtered.length === 0;
-  const ui = user?.role === "employee" ? employeeUi : businessUi;
+  const ui = isEmployeeHistory || user?.role === "employee" ? employeeUi : businessUi;
+  const showStaffColumn = !isEmployeeHistory;
+  const tableColumnCount = showStaffColumn ? 5 : 4;
+  const subtitle = copy("subtitle");
 
   return (
     <main className={cn(ui.page, ui.pageShell, "overflow-x-hidden")}>
       <div className={ui.pageInner}>
-      <header className="mb-6 sm:mb-8">
-        <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{t("business.tipsActivity.title")}</h1>
-        {t("business.tipsActivity.subtitle").trim() ? (
-          <p className={cn("mt-2", ui.cardDesc)}>{t("business.tipsActivity.subtitle")}</p>
-        ) : null}
-      </header>
+      {isEmployeeHistory ? (
+        <EmployeePageHeader
+          title={copy("title")}
+          description={subtitle.trim() || undefined}
+          backAriaLabel={copy("backAria")}
+          leading={
+            <div className={employeeUi.iconTileMuted}>
+              <CreditCard className="h-5 w-5" aria-hidden />
+            </div>
+          }
+          className="mb-6 sm:mb-8"
+        />
+      ) : (
+        <header className="mb-6 sm:mb-8">
+          <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{copy("title")}</h1>
+          {subtitle.trim() ? <p className={cn("mt-2", ui.cardDesc)}>{subtitle}</p> : null}
+        </header>
+      )}
 
       <motion.div
         initial={{ y: 20, opacity: 0 }}
@@ -191,7 +217,7 @@ export function TipsActivityPage() {
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder={t("business.tipsActivity.searchPlaceholder")}
+                placeholder={copy("searchPlaceholder")}
                 className="w-full pl-11 pr-4 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all"
               />
             </div>
@@ -207,10 +233,10 @@ export function TipsActivityPage() {
                 }}
                 className="appearance-none pl-4 pr-10 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all cursor-pointer text-sm"
               >
-                <option value="all">{t("business.tipsActivity.statusAll")}</option>
-                <option value="success">{t("business.tipsActivity.statusSuccess")}</option>
-                <option value="pending">{t("business.tipsActivity.statusPending")}</option>
-                <option value="failed">{t("business.tipsActivity.statusFailed")}</option>
+                <option value="all">{copy("statusAll")}</option>
+                <option value="success">{copy("statusSuccess")}</option>
+                <option value="pending">{copy("statusPending")}</option>
+                <option value="failed">{copy("statusFailed")}</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
@@ -224,10 +250,10 @@ export function TipsActivityPage() {
                 }}
                 className="appearance-none pl-4 pr-10 py-3 bg-input-background border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent transition-all cursor-pointer text-sm"
               >
-                <option value="today">{t("business.tipsActivity.rangeToday")}</option>
-                <option value="week">{t("business.tipsActivity.rangeWeek")}</option>
-                <option value="month">{t("business.tipsActivity.rangeMonth")}</option>
-                <option value="custom">{t("business.tipsActivity.rangeCustom")}</option>
+                <option value="today">{copy("rangeToday")}</option>
+                <option value="week">{copy("rangeWeek")}</option>
+                <option value="month">{copy("rangeMonth")}</option>
+                <option value="custom">{copy("rangeCustom")}</option>
               </select>
               <ChevronDown className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground pointer-events-none" />
             </div>
@@ -324,11 +350,18 @@ export function TipsActivityPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border bg-muted/40 text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">{t("business.tipsActivity.thAmount")}</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">{t("business.tipsActivity.thStaff")}</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">{t("business.tipsActivity.thLocationTable")}</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">{t("business.tipsActivity.thDateTime")}</th>
-                <th className="px-4 py-3 font-medium text-muted-foreground">{t("business.tipsActivity.thStatus")}</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thAmount")}</th>
+                {isEmployeeHistory ? (
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
+                ) : null}
+                {showStaffColumn ? (
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStaff")}</th>
+                ) : null}
+                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thLocationTable")}</th>
+                {!isEmployeeHistory ? (
+                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
+                ) : null}
+                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStatus")}</th>
               </tr>
             </thead>
             <tbody>
@@ -336,7 +369,7 @@ export function TipsActivityPage() {
                 <TipsActivityTableSkeleton />
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-0">
+                  <td colSpan={tableColumnCount} className="p-0">
                     <EmptyState
                       icon={<CreditCard className="h-6 w-6" aria-hidden />}
                       title={t("emptyState.tips.title")}
@@ -348,20 +381,29 @@ export function TipsActivityPage() {
               ) : (
                 filtered.map((tip) => (
                   <tr key={tip.id} className="border-b border-border/60 hover:bg-muted/30">
-                    <td className="px-4 py-3 tabular-nums">{formatEur(tip.amount)}</td>
-                    <td className="px-4 py-3">
-                      {tip.staffName ?? (user?.role === "employee" ? t("business.tipsActivity.you") : t("business.tipsActivity.unknownStaff"))}
-                    </td>
-                    <td className="px-4 py-3">
-                      {tip.tableName
-                        ? `${t("business.tipsActivity.csvTablePrefix")} ${tip.tableName}`
-                        : tip.locationName
-                          ? `${t("business.tipsActivity.csvLocationPrefix")} ${tip.locationName}`
-                          : t("business.tipsActivity.noLocationDetail")}
-                    </td>
+                    <td className="px-4 py-3 tabular-nums font-medium">{formatEur(tip.amount)}</td>
+                    {isEmployeeHistory ? (
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
+                      </td>
+                    ) : null}
+                    {showStaffColumn ? (
+                      <td className="px-4 py-3">
+                        {tip.staffName ?? (user?.role === "employee" ? copy("you") : copy("unknownStaff"))}
+                      </td>
+                    ) : null}
                     <td className="px-4 py-3 text-muted-foreground">
-                      {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
+                      {tip.tableName
+                        ? `${copy("csvTablePrefix")} ${tip.tableName}`
+                        : tip.locationName
+                          ? `${copy("csvLocationPrefix")} ${tip.locationName}`
+                          : copy("noLocationDetail")}
                     </td>
+                    {!isEmployeeHistory ? (
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
+                      </td>
+                    ) : null}
                     <td className="px-4 py-3">
                       <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold">
                         {statusLabel(tip.status)}
@@ -378,7 +420,7 @@ export function TipsActivityPage() {
       {totalPages > 1 ? (
         <div className="mt-6 flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {t("business.tipsActivity.pagination", {
+            {copy("pagination", {
               from: skip + 1,
               to: Math.min(skip + take, total),
               total,
@@ -386,13 +428,13 @@ export function TipsActivityPage() {
           </p>
           <div className="flex items-center gap-2">
             <Button type="button" variant="outline" onClick={() => setPage((p) => Math.max(1, p - 1))} disabled={page === 1}>
-              {t("business.tipsActivity.prev")}
+              {copy("prev")}
             </Button>
             <span className="px-2 text-sm text-foreground">
-              {t("business.tipsActivity.pageOf", { page, pages: totalPages })}
+              {copy("pageOf", { page, pages: totalPages })}
             </span>
             <Button type="button" variant="outline" onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
-              {t("business.tipsActivity.next")}
+              {copy("next")}
             </Button>
           </div>
         </div>

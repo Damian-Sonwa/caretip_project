@@ -30,9 +30,9 @@ export function EmployeeHeader({ user, onLogout }: EmployeeHeaderProps) {
           </div>
           <div className="flex items-center gap-2">
             <Link
-              to="/employee/notifications"
+              to="/employee/inbox"
               className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-              aria-label="Notifications"
+              aria-label="Inbox"
             >
               <Bell className="w-6 h-6" />
             </Link>

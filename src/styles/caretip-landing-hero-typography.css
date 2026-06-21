@@ -10,7 +10,9 @@
   --caretip-hero-line-gap: 0.28rem;
   --caretip-hero-rotating-stack-gap: 0.22rem;
   --caretip-hero-body-size: clamp(0.9375rem, 0.32vw + 0.86rem, 1rem);
-  --caretip-hero-body-lh: 1.58;
+  --caretip-hero-body-lh: 1.65;
+  --caretip-hero-body-color: rgb(45 45 45);
+  --caretip-hero-body-color-secondary: rgb(64 64 64);
 }
 
 .caretip-landing .caretip-hero-headline-anchor {
@@ -104,7 +106,8 @@
   text-wrap: pretty;
 }
 
-.caretip-landing .caretip-hero-subtitle {
+.caretip-landing .caretip-hero-subtitle,
+.caretip-landing .caretip-hero-description-block {
   width: 100%;
   max-width: var(--caretip-hero-body-measure);
   margin-top: var(--caretip-hero-gap-headline-body) !important;
@@ -113,8 +116,43 @@
   font-size: var(--caretip-hero-body-size);
   line-height: var(--caretip-hero-body-lh);
   letter-spacing: -0.012em;
-  color: rgb(64 64 64);
   text-wrap: pretty;
+}
+
+/* Unified description block — tagline + secondary copy read as one unit */
+@media (min-width: 640px) {
+  .caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs {
+    gap: 1rem;
+  }
+}
+
+.caretip-landing .caretip-hero-description-line {
+  max-width: 100%;
+  margin: 0;
+  font-size: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-wrap: pretty;
+}
+
+.caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:first-child {
+  font-weight: 500;
+  color: var(--caretip-hero-body-color);
+}
+
+.caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:nth-child(2) {
+  font-weight: 400;
+  color: var(--caretip-hero-body-color-secondary);
+}
+
+.caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:only-child {
+  font-weight: 500;
+  color: var(--caretip-hero-body-color);
+}
+
+/* Legacy single-class subtitle (non-paragraph layouts) */
+.caretip-landing .caretip-hero-subtitle:not(.caretip-hero-description-block) {
+  color: var(--caretip-hero-body-color);
 }
 
 /* Paragraph group — headline offset on container only; siblings use flex gap */
@@ -122,7 +160,16 @@
   margin-top: 0 !important;
 }
 
-html.dark .caretip-landing .caretip-hero-subtitle {
+html.dark .caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:first-child,
+html.dark .caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:only-child {
+  color: rgb(212 212 212);
+}
+
+html.dark .caretip-landing .caretip-hero-description-block.caretip-landing-copy-paragraphs > .caretip-hero-description-line:nth-child(2) {
+  color: rgb(163 163 163);
+}
+
+html.dark .caretip-landing .caretip-hero-subtitle:not(.caretip-hero-description-block) {
   color: rgb(163 163 163);
 }
 
@@ -141,10 +188,10 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 @media (min-width: 768px) and (max-width: 1023px) {
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-size: clamp(2.375rem, 4.8vw + 0.95rem, 2.9375rem);
-    --caretip-hero-gap-headline-body: 1.75rem;
-    --caretip-hero-gap-body-cta: 2rem;
+    --caretip-hero-gap-headline-body: 1.5rem;
+    --caretip-hero-gap-body-cta: 1.75rem;
     --caretip-hero-body-size: 1rem;
-    --caretip-hero-body-lh: 1.6;
+    --caretip-hero-body-lh: 1.68;
   }
 }
 
@@ -155,9 +202,9 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-headline-track: -0.04em;
     --caretip-hero-animated-slot: 1.08em;
     --caretip-hero-body-size: clamp(1rem, 0.32cqw + 0.84rem, 1.0625rem);
-    --caretip-hero-body-lh: 1.62;
-    --caretip-hero-gap-headline-body: 1.875rem;
-    --caretip-hero-gap-body-cta: 2rem;
+    --caretip-hero-body-lh: 1.7;
+    --caretip-hero-gap-headline-body: 1.5rem;
+    --caretip-hero-gap-body-cta: 1.75rem;
   }
 
   .caretip-landing .caretip-hero-headline-desktop {
@@ -190,9 +237,9 @@ html.dark .caretip-landing .caretip-hero-subtitle {
     --caretip-hero-headline-lh: 1;
     --caretip-hero-headline-track: -0.042em;
     --caretip-hero-body-size: clamp(1.03125rem, 0.38cqw + 0.86rem, 1.125rem);
-    --caretip-hero-body-lh: 1.64;
-    --caretip-hero-gap-headline-body: 2rem;
-    --caretip-hero-gap-body-cta: 2.125rem;
+    --caretip-hero-body-lh: 1.72;
+    --caretip-hero-gap-headline-body: 1.5rem;
+    --caretip-hero-gap-body-cta: 2rem;
     --caretip-hero-animated-slot: 1.06em;
   }
 
@@ -238,7 +285,7 @@ html.dark .caretip-landing .caretip-hero-subtitle {
 
 @media (min-width: 1024px) {
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-grid {
-    --caretip-hero-body-measure: min(100%, 32.5rem);
+    --caretip-hero-body-measure: min(100%, 37.5rem);
   }
 
   .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {

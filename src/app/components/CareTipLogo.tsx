@@ -22,6 +22,25 @@ export type CareTipLogoAlign = "left" | "center";
 export const CARE_TIP_LOGO_SURFACE_CLASS =
   "bg-white border-b border-border/80";
 
+/**
+ * Compact dashboard sidebar branding strip (~35% shorter than legacy px-6 py-4 + nav py-5).
+ * Logo size unchanged; padding and nav offset tightened (Stripe / Linear pattern).
+ */
+export const DASHBOARD_SIDEBAR_BRAND_CLASS = cn(
+  CARE_TIP_LOGO_SURFACE_CLASS,
+  "flex shrink-0 items-center px-4 py-2 lg:px-5 lg:py-2",
+);
+
+/** Shared nav region — sits close to branding without extra top gap. */
+export const DASHBOARD_SIDEBAR_NAV_CLASS =
+  "flex-1 min-h-0 overflow-y-auto px-3 pt-1.5 pb-4";
+
+/** Mobile drawer header row: logo + close control. */
+export const DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS = cn(
+  DASHBOARD_SIDEBAR_BRAND_CLASS,
+  "justify-between gap-2",
+);
+
 /** Auth logo surface — circular glass on marketing hero; soft capsule on login cards. */
 export const CARE_TIP_LOGO_AUTH_SURFACE_CLASS = "caretip-auth-logo-surface";
 

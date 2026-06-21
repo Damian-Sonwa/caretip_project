@@ -1,4 +1,8 @@
 import { cn } from "@/lib/utils";
+import {
+  DASHBOARD_SIDEBAR_BRAND_CLASS,
+  DASHBOARD_SIDEBAR_NAV_CLASS,
+} from "@/app/components/CareTipLogo";
 
 type SidebarSkeletonProps = {
   className?: string;
@@ -14,18 +18,11 @@ export function SidebarSkeleton({ className, variant = "desktop" }: SidebarSkele
 
   return (
     <aside className={cn(shell, className)} aria-label="Loading navigation" aria-busy="true">
-      <div className="px-6 py-4">
-        <div className="h-6 w-28 rounded-md bg-muted animate-pulse" />
-        <div className="mt-4 flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-muted animate-pulse" />
-          <div className="min-w-0 flex-1">
-            <div className="h-3 w-32 rounded bg-muted animate-pulse" />
-            <div className="mt-2 h-2.5 w-20 rounded bg-muted animate-pulse" />
-          </div>
-        </div>
+      <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
+        <div className="h-9 w-28 rounded-md bg-muted animate-pulse" />
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-4 py-6">
+      <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, variant === "desktop" ? "" : "px-4")}>
         <ul className="space-y-2">
           {Array.from({ length: 8 }).map((_, i) => (
             <li key={i} className="flex items-center gap-3 rounded-lg px-3 py-2.5">

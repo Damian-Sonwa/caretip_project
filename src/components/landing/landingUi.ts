@@ -260,7 +260,7 @@ export const landingUi = {
   heroHeadlineLine:
     "caretip-hero-headline-line block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-0 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
   heroSubtitle: cnHeroSubtitle(
-    "caretip-hero-subtitle w-full text-left lg:text-neutral-700 dark:lg:text-neutral-300",
+    "caretip-hero-subtitle w-full text-left",
   ),
   heroActionCluster:
     `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,

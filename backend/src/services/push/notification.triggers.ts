@@ -55,7 +55,7 @@ export function onTipReceived(payload: NewTipPayload): void {
             name: employeeName,
           },
         },
-        url: "/employee/notifications",
+        url: "/employee/tip-history",
         timestamp: ts,
         metadata: {
           entityId: payload.tip.id,

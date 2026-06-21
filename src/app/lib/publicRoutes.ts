@@ -23,21 +23,23 @@ const PUBLIC_MARKETING_EXACT = new Set([
   "/join",
   "/join/signup",
   "/get-started",
+  "/tip-amount",
+  "/payment",
+  "/success",
+  "/rating",
+  "/tip-complete",
+  "/select-employee",
 ]);
 
 const PUBLIC_MARKETING_PREFIXES = [
   "/join/",
   "/qr-landing/",
   "/qr/business/",
-  "/tip/",
+  "/qr/employee/",
+  "/qr/location/",
+  "/qr/table/",
   "/table/",
-  "/location/",
   "/staff/",
-  "/rate/",
-  "/payment/",
-  "/success/",
-  "/rating",
-  "/tip-complete",
   "/forgot-password",
   "/reset-password/",
   "/activate",
@@ -46,11 +48,77 @@ const PUBLIC_MARKETING_PREFIXES = [
   "/check-email",
 ];
 
+/**
+ * Static first-segment paths registered in routes.tsx — must not match `/{businessSlug}`.
+ */
+const RESERVED_TOP_LEVEL_SEGMENTS = new Set([
+  "admin",
+  "auth",
+  "activate",
+  "blog",
+  "business",
+  "business-dashboard",
+  "careers",
+  "check-email",
+  "contact",
+  "cookies",
+  "create-rule",
+  "create-skill",
+  "dashboard",
+  "employee",
+  "employee-dashboard",
+  "faq",
+  "features",
+  "forgot-password",
+  "get-started",
+  "help",
+  "hero-animation-demo",
+  "hero-demo",
+  "how-it-works",
+  "join",
+  "login",
+  "mobile-app",
+  "onboarding",
+  "payment",
+  "platform-admin",
+  "pricing",
+  "privacy",
+  "qr",
+  "qr-landing",
+  "rating",
+  "reset-password",
+  "saas-3d-hero",
+  "select-employee",
+  "signup",
+  "staff",
+  "success",
+  "table",
+  "terms",
+  "tip-amount",
+  "tip-complete",
+  "unauthorized",
+  "verification-pending",
+  "verify",
+  "verify-email",
+]);
+
+/** `/{businessSlug}` and `/{businessSlug}/{employeeSlug}` public team QR paths. */
+function isPublicBusinessSlugPath(pathname: string): boolean {
+  const segments = pathname.split("/").filter(Boolean);
+  if (segments.length !== 1 && segments.length !== 2) return false;
+  const head = segments[0]?.toLowerCase() ?? "";
+  if (!head || RESERVED_TOP_LEVEL_SEGMENTS.has(head)) return false;
+  return segments.every((seg) => seg.length > 0 && !seg.includes("."));
+}
+
 /** Guest tipping / marketing surfaces — no dashboard or onboarding init required. */
 export function isPublicMarketingPath(pathname: string): boolean {
   const p = pathname.split("?")[0]?.split("#")[0] ?? "/";
   if (PUBLIC_MARKETING_EXACT.has(p)) return true;
-  return PUBLIC_MARKETING_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix));
+  if (PUBLIC_MARKETING_PREFIXES.some((prefix) => p === prefix || p.startsWith(prefix))) {
+    return true;
+  }
+  return isPublicBusinessSlugPath(p);
 }
 
 /**

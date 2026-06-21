@@ -101,9 +101,10 @@
 @media (max-width: 1023px) {
   .caretip-landing .caretip-section-intro p,
   .caretip-landing .caretip-mobile-stack-tagline,
-  .caretip-landing .caretip-hero-subtitle {
+  .caretip-landing .caretip-hero-subtitle,
+  .caretip-landing .caretip-hero-description-block {
     text-wrap: pretty;
-    line-height: 1.62;
+    line-height: 1.68;
   }
 
   .caretip-landing .caretip-mobile-section-headline,

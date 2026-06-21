@@ -1285,7 +1285,11 @@
       "thankYouTipping": "Danke für Ihr Trinkgeld für {{name}}",
       "feedbackReceived": "Ihr Feedback wurde erhalten und mit dem Team geteilt.",
       "tipAnotherMember": "Anderem Teammitglied Trinkgeld geben",
-      "exit": "Beenden"
+      "exit": "Beenden",
+      "processingTitle": "Zahlung wird bestätigt…",
+      "processingSubtitle": "Das dauert in der Regel nur wenige Sekunden. Bitte lassen Sie diese Seite geöffnet.",
+      "notVerifiedTitle": "Zahlung nicht bestätigt",
+      "notVerifiedDesc": "Für diese Sitzung konnte keine abgeschlossene Zahlung bestätigt werden."
     },
     "success": {
       "validatingPayment": "Zahlung wird geprüft…",
@@ -1424,7 +1428,7 @@
     "employee": {
       "overview": "Überblick",
       "inbox": "Posteingang",
-      "notifications": "Trinkgeld-Hinweise",
+      "tipHistory": "Trinkgeldverlauf",
       "tipGoals": "Trinkgeldziele",
       "settings": "Einstellungen"
     },
@@ -2264,6 +2268,32 @@
       "actionCancel": "Abbrechen",
       "toastDeleted": "Gelöscht",
       "toastMarkedRead": "Als gelesen markiert"
+    },
+    "tipHistory": {
+      "title": "Trinkgeldverlauf",
+      "subtitle": "Ihr Einnahmenbuch — durchsuchbare Trinkgeld-Einträge mit Zahlungsstatus.",
+      "backAria": "Zurück",
+      "searchPlaceholder": "Standort, Tisch oder Trinkgeld-ID suchen…",
+      "statusAll": "Alle Status",
+      "statusSuccess": "Bezahlt",
+      "statusPending": "Ausstehend",
+      "statusFailed": "Fehlgeschlagen",
+      "rangeToday": "Heute",
+      "rangeWeek": "Letzte 7 Tage",
+      "rangeMonth": "Dieser Monat",
+      "rangeCustom": "Benutzerdefiniert",
+      "loadFailed": "Trinkgeldverlauf konnte nicht geladen werden. Verbindung prüfen und erneut versuchen.",
+      "thAmount": "Betrag",
+      "thDateTime": "Datum & Uhrzeit",
+      "thLocationTable": "Standort / Tisch",
+      "thStatus": "Zahlungsstatus",
+      "csvTablePrefix": "Tisch:",
+      "csvLocationPrefix": "Standort:",
+      "noLocationDetail": "—",
+      "pagination": "{{from}}–{{to}} von {{total}}",
+      "prev": "Zurück",
+      "next": "Weiter",
+      "pageOf": "Seite {{page}} von {{pages}}"
     },
     "tipGoals": {
       "loading": "Ziele werden geladen…",
