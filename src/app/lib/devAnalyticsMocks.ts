@@ -179,12 +179,10 @@ export function devMockEmployeeSummary(timeframe: EmployeeTimeframe): {
 /** Lifetime hero metrics — not period-scoped. */
 export function devMockEmployeeAccountSummary(): {
   totalEarningsEur: number;
-  availableBalanceEur: number;
   totalSupporters: number;
 } {
   return {
     totalEarningsEur: 1_248.5,
-    availableBalanceEur: 892.25,
     totalSupporters: 47,
   };
 }

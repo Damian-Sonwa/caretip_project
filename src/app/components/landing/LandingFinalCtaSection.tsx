@@ -29,7 +29,7 @@ export function LandingFinalCtaSection() {
           {t("landing.finalCta.eyebrow")}
         </p>
 
-        <h2 className="caretip-final-cta-headline mt-4 font-sans text-balance text-neutral-50 sm:mt-5">
+        <h2 className="caretip-final-cta-headline font-sans text-balance text-neutral-50">
           {t("landing.finalCta.title")}
         </h2>
 
@@ -37,12 +37,12 @@ export function LandingFinalCtaSection() {
           <LandingCopySentences
             text={sectionSubtitle}
             layout="paragraphs"
-            className="caretip-final-cta-subtitle mx-auto mt-4 max-w-md text-pretty font-sans sm:mt-5"
+            className="caretip-final-cta-subtitle mx-auto max-w-md text-pretty font-sans"
             sentenceClassName="caretip-final-cta-subtitle mx-auto max-w-md text-pretty font-sans m-0"
           />
         ) : null}
 
-        <div className="caretip-final-cta-actions mt-6 w-full min-w-0 sm:mt-7">
+        <div className="caretip-final-cta-actions w-full min-w-0">
           <div className={cn(landingUi.sectionCtaUnit, "caretip-final-cta-action relative")}>
             <div aria-hidden className="caretip-final-cta-button-glow pointer-events-none" />
             <Link

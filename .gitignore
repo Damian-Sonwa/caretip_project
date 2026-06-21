@@ -61,6 +61,8 @@ Desktop.ini
 !/disabled-workflows-report.md
 !/dashboard-ux-audit.md
 !/mobile-dashboard-audit-v2.md
+!/dashboard-mobile-responsiveness-audit.md
+!/navigation-flash-redirect-audit.md
 !/content-reduction-report.md
 !/auth-root-cause-analysis.md
 !/auth-navigation-audit-v2.md

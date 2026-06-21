@@ -1,10 +1,10 @@
-import { motion, useReducedMotion } from "motion/react";
-import { dashboardBlockMotion, useMinWidthMedia } from "@/lib/motionPerf";
 import { Link, useNavigate } from "react-router";
 import { Search, Menu } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../hooks/useAuth";
-import { CareTipLogo } from "./CareTipLogo";
+import {
+  CareTipLogo,
+} from "./CareTipLogo";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { ProfileAvatar } from "./ui/profile-avatar";
 import { useBusinessVenueBrand } from "../hooks/useBusinessVenueBrand";
@@ -25,49 +25,41 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const { venueName, logo: businessLogo } = useBusinessVenueBrand();
   const displayName = user?.name?.trim() || t("shell.header.adminFallback");
   const displayEmail = user?.email?.trim() || "";
-  const reduceMotion = useReducedMotion();
-  const isDesktop = useMinWidthMedia(1024);
-  const headerMotion = isDesktop && !reduceMotion ? dashboardBlockMotion : {};
 
   return (
-    <motion.header
-      {...headerMotion}
-      className="sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[4px]"
-    >
+    <header className="caretip-dashboard-header-bar sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[4px]">
       <div
         className={cn(
-          "flex min-w-0 items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3.5 lg:px-8",
-          isPlatformAdmin ? "gap-2 max-lg:gap-2.5" : "gap-2",
+          "flex min-w-0 max-w-full items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3.5 lg:px-8",
+          isPlatformAdmin ? "gap-1.5 max-lg:gap-2 sm:gap-3" : "gap-2",
         )}
       >
         <div
           className={cn(
-            "flex min-w-0 flex-1 items-center",
+            "caretip-dashboard-header-leading flex min-w-0 flex-1 items-center",
             isPlatformAdmin ? "gap-1.5 max-lg:gap-2 sm:gap-3" : "gap-2 sm:gap-3",
           )}
         >
           <button
             type="button"
             onClick={onMenuClick}
-            className="touch-manipulation lg:hidden rounded-xl p-2.5 hover:bg-muted active:bg-muted/80 transition-colors min-h-[44px] min-w-[44px] inline-flex items-center justify-center"
+            className="inline-flex min-h-[44px] min-w-[44px] shrink-0 touch-manipulation items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-muted active:bg-muted/80 lg:hidden"
             aria-label={t("shell.header.menuButtonAria")}
           >
-            <Menu className="w-5 h-5 text-foreground" />
+            <Menu className="h-5 w-5 text-foreground" />
           </button>
 
           {!isBusinessManager ? (
-            <div className="shrink-0 lg:hidden">
-              <CareTipLogo size="xs" />
+            <div className="min-w-0 max-w-[min(6.75rem,36vw)] shrink overflow-hidden lg:hidden">
+              <CareTipLogo size="bar" />
             </div>
           ) : null}
 
           {!isBusinessManager ? (
             <form
               className={cn(
-                "relative min-w-0",
-                isPlatformAdmin
-                  ? "w-full max-lg:max-w-[min(11.5rem,calc(100vw-9.5rem))] lg:max-w-md lg:flex-1"
-                  : "w-full max-w-md flex-1",
+                "caretip-dashboard-header-search relative min-w-0",
+                isPlatformAdmin ? "flex-1 lg:max-w-md" : "w-full max-w-md flex-1",
               )}
               role="search"
               onSubmit={(e) => {
@@ -77,7 +69,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 navigate(raw ? `/faq?q=${encodeURIComponent(raw)}` : "/faq");
               }}
             >
-              <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <input
                 name="q"
                 type="search"
@@ -86,7 +78,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 autoComplete="off"
                 aria-label={t("shell.header.searchAria")}
                 className={cn(
-                  "w-full rounded-lg border border-border bg-input-background py-2 pl-10 pr-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent",
+                  "w-full min-w-0 rounded-lg border border-border bg-input-background py-2 pl-10 pr-3 text-sm transition-all focus:border-transparent focus:outline-none focus:ring-2 focus:ring-accent",
                   isPlatformAdmin && "max-lg:py-2 max-lg:pl-9 max-lg:pr-2 max-lg:text-xs placeholder:max-lg:text-xs",
                 )}
               />
@@ -96,7 +88,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
 
         <div
           className={cn(
-            "flex shrink-0 items-center",
+            "caretip-dashboard-header-trailing flex shrink-0 items-center",
             isPlatformAdmin ? "gap-1 max-lg:gap-1.5 sm:gap-3" : "gap-2 sm:gap-3",
           )}
         >
@@ -123,10 +115,10 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
               />
             </Link>
           ) : (
-            <div className="hidden sm:flex items-center gap-3 pl-3 border-l border-border">
+            <div className="hidden items-center gap-3 border-l border-border pl-3 sm:flex">
               <div className="text-right">
                 <p className="text-sm font-medium text-foreground">{displayName}</p>
-                <p className="text-xs text-muted-foreground truncate max-w-[180px]">
+                <p className="max-w-[180px] truncate text-xs text-muted-foreground">
                   {displayEmail || t("shell.header.platformAdminEmail")}
                 </p>
               </div>
@@ -134,13 +126,13 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
                 key={user?.avatar ?? user?.id ?? "header-avatar"}
                 src={user?.avatar}
                 displayName={displayName}
-                className="h-9 w-9 ring-2 ring-accent/30 hover:ring-accent/50 transition-all"
+                className="h-9 w-9 ring-2 ring-accent/30 transition-all hover:ring-accent/50"
                 lightbox={false}
               />
             </div>
           )}
         </div>
       </div>
-    </motion.header>
+    </header>
   );
 }

@@ -1,14 +1,20 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { cn } from "@/lib/utils";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
+import { CustomerJourneyCareTipAttribution } from "./CustomerJourneyCareTipAttribution";
+import type { CustomerJourneyEmployeeIdentity, CustomerJourneyVenueBrand } from "./customerJourneyBrand";
 
 type CustomerFlowShellProps = {
   headerLeading?: ReactNode;
-  headerLogo?: ReactNode;
-  title: string;
-  subtitle?: ReactNode;
   headerTrailing?: ReactNode;
+  venue: CustomerJourneyVenueBrand;
+  employee?: CustomerJourneyEmployeeIdentity;
+  stepTitle?: string;
+  trustMessage?: ReactNode;
+  showCareTipAttribution?: boolean;
   loading?: boolean;
   loadingMessage?: string;
   withBottomCta?: boolean;
@@ -20,13 +26,14 @@ type CustomerFlowShellProps = {
 
 /**
  * Persistent customer journey shell — header stays mounted while body loads.
- * Avoids full-screen loader → content swaps that flash during guard/hydration.
  */
 export function CustomerFlowShell({
   headerLeading,
-  headerLogo,
-  title,
-  subtitle,
+  venue,
+  employee,
+  stepTitle,
+  trustMessage,
+  showCareTipAttribution = true,
   headerTrailing,
   loading = false,
   loadingMessage,
@@ -36,19 +43,18 @@ export function CustomerFlowShell({
   children,
   bottomBar,
 }: CustomerFlowShellProps) {
+  const { t } = useTranslation();
+
   return (
     <div className={cn(withBottomCta ? cf.pageWithBottomCta : cf.page, className)}>
-      <div className={cf.stickyHeader}>
-        <div className={cn(cf.headerInner, headerTrailing ? "relative" : undefined)}>
-          {headerLeading}
-          {headerLogo}
-          <div className="min-w-0 flex-1">
-            <h1 className={cf.headline}>{title}</h1>
-            {subtitle ? <div className={cf.subline}>{subtitle}</div> : null}
-          </div>
-          {headerTrailing}
-        </div>
-      </div>
+      <CustomerJourneyHeader
+        leading={headerLeading}
+        trailing={headerTrailing}
+        venue={venue}
+        employee={employee}
+        stepTitle={stepTitle}
+        trustMessage={trustMessage}
+      />
 
       <div className={cn(cf.main, mainClassName)}>
         {loading ? (
@@ -66,6 +72,12 @@ export function CustomerFlowShell({
         ) : (
           children
         )}
+
+        {!loading && showCareTipAttribution ? (
+          <div className="pt-6 sm:pt-8">
+            <CustomerJourneyCareTipAttribution label={t("tipFlow.common.poweredByCareTip")} />
+          </div>
+        ) : null}
       </div>
 
       {!loading ? bottomBar : null}

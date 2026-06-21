@@ -6,6 +6,7 @@ import { DashboardHeader } from "../components/DashboardHeader";
 import { Footer } from "../components/Footer";
 import { useAuth } from "../hooks/useAuth";
 import { isWalkthroughDemoPlatformAdmin } from "../lib/walkthroughDemo";
+import { SidebarSkeleton } from "../components/ui/sidebar-skeleton";
 import { PLATFORM_DASHBOARD_ROOT } from "../components/platform/platformDashboardUi";
 import { PushNotificationSync } from "../components/PushNotificationSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
@@ -19,8 +20,9 @@ import { useMobileMenuState } from "../hooks/useMobileMenuState";
 export function SuperAdminLayout() {
   const { t } = useTranslation();
   const { mobileMenuOpen, openMobileMenu, closeMobileMenu } = useMobileMenuState();
-  const { user } = useAuth();
+  const { user, authStatus } = useAuth();
   const showDemoRibbon = isWalkthroughDemoPlatformAdmin(user);
+  const isAppReady = authStatus === "authenticated" && user?.role === "platform_admin";
 
   useRegisterPagePaintReady("platform-admin-layout-paint");
 
@@ -36,7 +38,7 @@ export function SuperAdminLayout() {
         </div>
       ) : null}
       <div className="relative z-10">
-        <AdminSidebar />
+        {isAppReady ? <AdminSidebar /> : <SidebarSkeleton />}
         <AdminMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
@@ -45,7 +47,7 @@ export function SuperAdminLayout() {
           )}
         >
           <DashboardHeader onMenuClick={openMobileMenu} />
-          <main className="min-h-0 flex-1">
+          <main className="min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell">
               <Outlet />
             </RouteChunkBoundary>

@@ -39,7 +39,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
     <MobileDrawer isOpen={isOpen} onClose={onClose} ariaLabel={t("shell.header.menuButtonAria")}>
       <div className={DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS}>
         <div className="min-w-0 flex-1">
-          <CareTipLogo size="sm" />
+          <CareTipLogo size="drawer" />
         </div>
         <button
           type="button"

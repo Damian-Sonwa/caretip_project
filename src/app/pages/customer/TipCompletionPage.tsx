@@ -1,8 +1,7 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, LogOut, Users } from "lucide-react";
-import { CareTipLogo } from "../../components/CareTipLogo";
+import { CheckCircle2, Users } from "lucide-react";
 import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { customerFlowUi as cf } from "./customerFlowUi";
@@ -10,17 +9,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
 import { TipPaymentProcessingView } from "./TipPaymentProcessingView";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
+import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
+import { useCustomerVenueBrand } from "./customerJourneyBrand";
+import { headerThankYouFor } from "./customerJourneyHeaderCopy";
 
 export function TipCompletionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { reset } = useTipFlow();
+  const { reset, businessId: tipFlowBusinessId, employeeName: tipFlowEmployeeName } = useTipFlow();
 
   const sessionId = searchParams.get("session_id")?.trim() ?? "";
   const feedbackSubmitted = searchParams.get("feedbackSubmitted") === "1";
 
   const verification = useVerifiedTipSession(sessionId);
+  const businessIdForVenue =
+    verification.phase === "ready" ? verification.context.businessId : tipFlowBusinessId;
+  const venueBrand = useCustomerVenueBrand(businessIdForVenue, t("tipFlow.common.venue"));
 
   useEffect(() => {
     if (!sessionId) {
@@ -39,11 +45,16 @@ export function TipCompletionPage() {
   }
 
   if (verification.phase === "loading") {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.completion.processingTitle")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.finishingUp")} />;
   }
 
   if (verification.phase === "pending") {
-    return <TipPaymentProcessingView />;
+    return (
+      <TipPaymentProcessingView
+        venue={venueBrand}
+        employeeName={tipFlowEmployeeName ?? undefined}
+      />
+    );
   }
 
   if (!isVerifiedTipSessionReady(verification)) {
@@ -70,13 +81,15 @@ export function TipCompletionPage() {
     navigate("/", { replace: true });
   };
 
+  const completionHeader = headerThankYouFor(t, displayName, feedbackSubmitted);
+
   return (
     <div className={cf.page}>
-      <div className={cf.stickyHeader}>
-        <div className={cf.headerInner}>
-          <CareTipLogo size="xs" className="h-11 max-h-11 min-h-0 w-auto max-w-[5.5rem] shrink-0" />
-        </div>
-      </div>
+      <CustomerJourneyHeader
+        venue={venueBrand}
+        stepTitle={completionHeader.stepTitle}
+        trustMessage={completionHeader.trustMessage}
+      />
 
       <div className={`${cf.main} max-w-lg py-10 sm:py-14`}>
         <div className={cf.successIconWrap} aria-hidden>
@@ -84,30 +97,20 @@ export function TipCompletionPage() {
         </div>
 
         <Card className={cf.completionCard}>
-          <CardContent className="space-y-6 p-6 sm:p-8">
-            <div className="space-y-2.5 text-center">
-              <h1 className="text-balance text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                {t("tipFlow.completion.thankYouTipping", { name: displayName })}
-              </h1>
-              {feedbackSubmitted ? (
-                <p className="text-sm leading-relaxed text-muted-foreground">
-                  {t("tipFlow.completion.feedbackReceived")}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex flex-col gap-2.5 pt-1">
-              <button type="button" onClick={tipAnother} className={`${cf.btnPrimaryLg} py-3.5 text-sm`}>
+          <CardContent className="p-6 sm:p-8">
+            <div className={cf.completionActions}>
+              <button type="button" onClick={tipAnother} className={cf.completionPrimaryBtn}>
                 <Users className="size-5 shrink-0" aria-hidden />
                 {t("tipFlow.completion.tipAnotherMember")}
               </button>
-              <button type="button" onClick={exit} className={`${cf.btnSecondaryLg} py-3.5 text-sm`}>
-                <LogOut className="size-5 shrink-0" aria-hidden />
+              <button type="button" onClick={exit} className={cf.completionTextAction}>
                 {t("tipFlow.completion.exit")}
               </button>
             </div>
           </CardContent>
         </Card>
+
+        <CustomerJourneyAttributionFooter label={t("tipFlow.common.poweredByCareTip")} />
       </div>
     </div>
   );

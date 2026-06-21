@@ -28,7 +28,7 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
     <MobileDrawer isOpen={isOpen} onClose={onClose} ariaLabel={t("admin.sidebar.closeMenuAria")}>
       <div className={DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS}>
         <div className="min-w-0 flex-1">
-          <CareTipLogo size="sm" />
+          <CareTipLogo size="drawer" />
         </div>
         <button
           type="button"

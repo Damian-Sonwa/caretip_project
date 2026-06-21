@@ -10,8 +10,6 @@ import { logClientError } from "../../lib/clientLog";
 import { setPendingTipFromCheckout } from "../../lib/repeatTip";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CareTipLogo } from "../../components/CareTipLogo";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import {
@@ -22,6 +20,11 @@ import { PaymentMethodsAvailable } from "../../components/payments/PaymentMethod
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerFlowShell } from "./CustomerFlowShell";
+import {
+  CustomerJourneyBackButton,
+} from "./CustomerJourneyHeader";
+import { venueBrandFromFields, useCustomerVenueBrand } from "./customerJourneyBrand";
+import { headerCompletePaymentFor } from "./customerJourneyHeaderCopy";
 import { redirectToStripeCheckoutUrl } from "../../lib/safeCheckoutRedirect";
 
 export function PaymentPage() {
@@ -54,9 +57,12 @@ export function PaymentPage() {
   } = useTipFlow();
   const [processing, setProcessing] = useState(false);
   const [contextReady, setContextReady] = useState(false);
-  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(
-    null,
-  );
+  const [resolvedVenueSnapshot, setResolvedVenueSnapshot] = useState<{
+    name: string;
+    logo: string | null;
+  } | null>(null);
+  const fallbackVenue = t("tipFlow.common.venue");
+  const fetchedVenue = useCustomerVenueBrand(businessId, fallbackVenue);
 
   const resolvedEmployeeId = employeeIdCtx ?? employeeIdFromUrl;
   const tipAmountVal =
@@ -82,6 +88,20 @@ export function PaymentPage() {
       })
     ) {
       setContextReady(true);
+      if (!resolvedVenueSnapshot && businessId) {
+        void resolveCustomerEmployeeContext({
+          employeeId: resolvedEmployeeId,
+          returnSlug: returnSlugFromUrl,
+          returnBusinessSlug: returnBusinessSlugFromUrl,
+          returnEmployeeSlug: returnEmployeeSlugFromUrl,
+          fallbackTeamMemberLabel: t("tipFlow.common.teamMember"),
+          fallbackVenueLabel: fallbackVenue,
+        })
+          .then((resolved) => {
+            setResolvedVenueSnapshot({ name: resolved.businessName, logo: resolved.businessLogo });
+          })
+          .catch((err) => logClientError("PaymentPage.resolveVenue", err));
+      }
       return;
     }
 
@@ -103,7 +123,7 @@ export function PaymentPage() {
         if (cancelled) return;
         setBusinessId(resolved.businessId);
         setEmployee(resolved.employeeId, resolved.employeeName, resolved.employeeAvatar);
-        setBusinessBrand({ logo: resolved.businessLogo, name: resolved.businessName });
+        setResolvedVenueSnapshot({ name: resolved.businessName, logo: resolved.businessLogo });
         markCustomerFlowEntered();
         setContextReady(true);
       } catch (err) {
@@ -128,6 +148,8 @@ export function PaymentPage() {
     setBusinessId,
     setEmployee,
     t,
+    fallbackVenue,
+    resolvedVenueSnapshot,
   ]);
 
   useEffect(() => {
@@ -208,37 +230,28 @@ export function PaymentPage() {
     }
   };
 
-  const headerLogo = businessBrand ? (
-    <BusinessLogoMark
-      logoPathOrUrl={businessBrand.logo}
-      businessName={businessBrand.name}
-      size="customer"
-      className="shrink-0"
-    />
-  ) : (
-    <CareTipLogo size="xs" className="shrink-0" />
-  );
-
   const showCheckout = contextReady && !missingContext;
+  const employeeDisplayName = employeeName ?? t("tipFlow.common.teamMember");
+  const paymentHeader = headerCompletePaymentFor(t, employeeDisplayName);
+  const resolvedVenue = resolvedVenueSnapshot
+    ? venueBrandFromFields(resolvedVenueSnapshot.name, resolvedVenueSnapshot.logo)
+    : fetchedVenue;
 
   return (
     <CustomerFlowShell
       withBottomCta={showCheckout}
       headerLeading={
-        <button
-          type="button"
+        <CustomerJourneyBackButton
+          label={t("tipFlow.common.back")}
           onClick={handleBack}
-          className={cf.backButton}
           disabled={processing}
-        >
-          {t("tipFlow.common.back")}
-        </button>
+        />
       }
-      headerLogo={headerLogo}
-      title={t("tipFlow.payment.title")}
-      subtitle={t("tipFlow.payment.subtitle")}
+      venue={resolvedVenue}
+      stepTitle={paymentHeader.stepTitle}
+      trustMessage={paymentHeader.trustMessage}
       loading={!contextReady}
-      loadingMessage={t("tipFlow.payment.preparingCheckout")}
+      loadingMessage={t("tipFlow.loading.preparingCheckout")}
       bottomBar={
         showCheckout ? (
           <div className={cf.fixedBottomBar}>
@@ -252,7 +265,7 @@ export function PaymentPage() {
                 {processing ? (
                   <>
                     <span className="inline-block size-5 animate-spin rounded-full border-2 border-white/35 border-t-white" />
-                    {t("tipFlow.payment.redirectingCheckout")}
+                    {t("tipFlow.loading.redirectingCheckout")}
                   </>
                 ) : (
                   t("tipFlow.payment.payAmount", { amount: formatEur(totalAmount) })
@@ -294,11 +307,7 @@ export function PaymentPage() {
                 </div>
               </div>
               <div className="customer-flow-payment-summary__line">
-                <span className="text-muted-foreground">
-                  {t("tipFlow.payment.tipFor", {
-                    name: employeeName ?? t("tipFlow.common.teamMember"),
-                  })}
-                </span>
+                <span className="text-muted-foreground">{t("tipFlow.tipAmount.tipAmountLabel")}</span>
                 <span className="font-medium tabular-nums text-foreground">{formatEur(tipAmountVal)}</span>
               </div>
               <div className="customer-flow-payment-summary__amount">

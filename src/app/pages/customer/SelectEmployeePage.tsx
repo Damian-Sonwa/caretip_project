@@ -9,10 +9,12 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { CareTipLogo } from "../../components/CareTipLogo";
-import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerFlowShell } from "./CustomerFlowShell";
+import { CustomerJourneyBackButton } from "./CustomerJourneyHeader";
+import { useCustomerVenueBrand } from "./customerJourneyBrand";
+import { headerSelectTeamMember } from "./customerJourneyHeaderCopy";
 
 export function SelectEmployeePage() {
   const { t } = useTranslation();
@@ -22,6 +24,8 @@ export function SelectEmployeePage() {
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const venueBrand = useCustomerVenueBrand(businessId, t("tipFlow.common.venue"));
+  const teamHeader = headerSelectTeamMember(t);
 
   // DEV-only: allow opening /select-employee without QR context.
   useEffect(() => {
@@ -81,17 +85,16 @@ export function SelectEmployeePage() {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-background p-6">
         <div className="mx-auto max-w-2xl space-y-4 text-center">
-          <h1 className="text-xl font-semibold text-foreground">Start from a venue QR</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t("tipFlow.selectEmployee.noBusinessContextTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            Scan the CareTip QR at your table or counter so we know which team you are tipping. You can also open the
-            link from your receipt or table card.
+            {t("tipFlow.selectEmployee.noBusinessContextDesc")}
           </p>
           <button
             type="button"
             onClick={() => navigate("/")}
             className="w-full rounded-xl bg-accent px-4 py-3 font-semibold text-white shadow-lg transition-opacity hover:bg-accent/90"
           >
-            Go to home
+            {t("tipFlow.selectEmployee.noBusinessContextCta")}
           </button>
         </div>
       </div>
@@ -99,7 +102,7 @@ export function SelectEmployeePage() {
   }
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("common.loadingTeamMembers")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.teamMembers")} />;
   }
 
   if (error) {
@@ -116,33 +119,29 @@ export function SelectEmployeePage() {
   }
 
   return (
-    <div className={cf.pageWithBottomCta}>
-      <div className={cf.stickyHeader}>
-        <div className={cf.headerInner}>
-          <button type="button" onClick={handleBack} className={cf.backButton}>
-            {t("tipFlow.common.back")}
-          </button>
-          <CareTipLogo size="xs" className="shrink-0" />
-          <div className="min-w-0 flex-1">
-            <h1 className={cf.headline}>Select Team Member</h1>
-            <p className={cf.subline}>Who provided your service?</p>
+    <CustomerFlowShell
+      withBottomCta={Boolean(selectedEmployee)}
+      headerLeading={
+        <CustomerJourneyBackButton label={t("tipFlow.common.back")} onClick={handleBack} />
+      }
+      venue={venueBrand}
+      stepTitle={teamHeader.stepTitle}
+      trustMessage={teamHeader.trustMessage}
+      bottomBar={
+        selectedEmployee ? (
+          <div className={cf.fixedBottomBar}>
+            <div className={cf.fixedBottomInner}>
+              <button type="button" onClick={handleContinue} className={cf.btnPrimaryLg}>
+                {t("tipFlow.tipAmount.continuePayment")}
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
-
-      <div className={cf.main}>
-        <Card className={cf.cardShadcn}>
-          <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
-            <CardTitle className={cf.cardTitle}>Choose who you&apos;re tipping</CardTitle>
-            <CardDescription className={cf.cardDesc}>
-              Preset amounts and payment are on the next steps. Pick the right person first.
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
+        ) : undefined
+      }
+    >
         <div className="grid grid-cols-2 gap-4 sm:gap-5">
           {displayEmployees.length === 0 ? (
-            <p className="col-span-2 py-12 text-center text-muted-foreground">No team members found.</p>
+            <p className="col-span-2 py-12 text-center text-muted-foreground">{t("tipFlow.selectEmployee.emptyTeam")}</p>
           ) : (
             displayEmployees.map((employee) => (
               <button
@@ -156,7 +155,7 @@ export function SelectEmployeePage() {
                 {employee.topRated ? (
                   <div className="absolute right-2 top-2 z-10 flex items-center gap-1 rounded-full bg-accent px-2 py-1 text-xs text-white">
                     <Award className="h-3 w-3" />
-                    <span>Top</span>
+                    <span>{t("tipFlow.selectEmployee.topRatedBadge")}</span>
                   </div>
                 ) : null}
 
@@ -204,17 +203,6 @@ export function SelectEmployeePage() {
             ))
           )}
         </div>
-      </div>
-
-      {selectedEmployee ? (
-        <div className={cf.fixedBottomBar}>
-          <div className={cf.fixedBottomInner}>
-            <button type="button" onClick={handleContinue} className={cf.btnPrimaryLg}>
-              Continue to tip amount
-            </button>
-          </div>
-        </div>
-      ) : null}
-    </div>
+    </CustomerFlowShell>
   );
 }

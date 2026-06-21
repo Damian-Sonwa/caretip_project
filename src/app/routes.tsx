@@ -39,6 +39,7 @@ import { PendingVerification } from './components/PendingVerification';
 import { logClientError } from './lib/clientLog';
 import { DashboardDevDebugOverlayRoot } from './components/dashboard/DashboardDevDebugOverlayRoot';
 import { LoaderDiagRuntime } from './components/LoaderDiagRuntime';
+import { useNavigationFlashProbe } from './hooks/useNavigationFlashProbe';
 
 /** Canonical alias: `/qr/business/:id` → existing `/qr-landing/:id` (no behavior change). */
 function RedirectQrBusiness() {
@@ -93,6 +94,7 @@ function RootLayout() {
   const location = useLocation();
   const { markAppShellReady, setRouteTransitionPending } = useAppLoadingCoordinator();
   const routeSigRef = useRef<string | null>(null);
+  useNavigationFlashProbe();
 
   useLayoutEffect(() => {
     markAppShellReady();

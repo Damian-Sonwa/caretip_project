@@ -15,7 +15,7 @@
   }
 
   .caretip-landing .caretip-mobile-stack-intro .caretip-mobile-stack-tagline {
-    margin-top: 0.625rem;
+    margin-top: var(--caretip-narrative-gap-headline-lead, 0.875rem);
   }
 
   .caretip-landing .caretip-section-intro {
@@ -156,11 +156,11 @@
   }
 
   .caretip-landing .caretip-final-cta-actions {
-    margin-top: 1.375rem;
+    margin-top: var(--caretip-narrative-gap-lead-action, 1.25rem);
   }
 
   .caretip-landing .caretip-final-cta-subtitle + .caretip-final-cta-actions {
-    margin-top: 1.375rem;
+    margin-top: var(--caretip-narrative-gap-lead-action, 1.25rem);
   }
 
   .caretip-landing .caretip-final-cta-action.caretip-landing-cta-unit {

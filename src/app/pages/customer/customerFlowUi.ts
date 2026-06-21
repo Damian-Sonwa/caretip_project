@@ -4,7 +4,12 @@
  */
 
 import { cn } from "@/lib/utils";
-import { caretipBtnPrimaryFull, caretipBtnSecondaryFull } from "@/lib/caretipButtonSystem";
+import {
+  caretipBtnPrimary,
+  caretipBtnPrimaryFull,
+  caretipBtnSecondary,
+  caretipBtnSecondaryFull,
+} from "@/lib/caretipButtonSystem";
 
 /** Shared premium card surface */
 const premiumCard =
@@ -16,17 +21,46 @@ export const customerFlowUi = {
   pageWithBottomCta: "customer-flow min-h-screen bg-[#f7f6f3] pb-28 dark:bg-background sm:pb-32",
 
   stickyHeader:
-    "sticky top-0 z-20 border-b border-black/[0.06] bg-white/88 backdrop-blur-xl supports-[backdrop-filter]:bg-white/82 dark:border-white/10 dark:bg-background/90 shadow-[0_4px_24px_-18px_rgba(15,23,42,0.08)]",
+    "sticky top-0 z-20 border-b border-black/[0.06] bg-white/92 backdrop-blur-xl supports-[backdrop-filter]:bg-white/88 dark:border-white/10 dark:bg-background/92 shadow-[0_4px_24px_-18px_rgba(15,23,42,0.08)]",
 
+  /** @deprecated Prefer CustomerJourneyHeader — kept for gradual migration. */
   headerInner:
     "caretip-container flex min-w-0 items-center gap-3 py-3.5 sm:gap-4 sm:py-4",
+
+  customerJourneyHeader: "caretip-container customer-journey-header pt-6 pb-4 sm:pt-6 sm:pb-4",
+  customerJourneyToolbar:
+    "customer-journey-toolbar mb-4 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-x-2",
+  customerJourneyToolbarSide: "flex min-w-0 items-center",
+  customerJourneyVenueRow: "flex min-w-0 items-center gap-3 sm:gap-3.5",
+  customerJourneyVenueName:
+    "customer-journey-venue-name text-balance text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-[1.375rem]",
+  customerJourneyVenueContext: "mt-1 text-xs leading-snug text-muted-foreground sm:text-[0.8125rem]",
+  customerJourneyStepTitle: "mt-4 text-sm font-medium leading-snug text-foreground/90 sm:text-[0.9375rem]",
+  customerJourneyEmployee: "mt-2 text-sm font-semibold leading-snug text-foreground sm:text-[0.9375rem]",
+  customerJourneyTrustWrap: "mt-2.5 sm:mt-3",
+  customerJourneyTrust:
+    "inline-flex max-w-full items-center gap-1.5 text-xs font-normal leading-snug text-muted-foreground/70",
+
+  customerJourneyAttribution:
+    "flex w-full flex-col items-center justify-center gap-2.5 rounded-[1.125rem] border border-black/[0.06] bg-[#fafaf8]/95 px-5 py-4 text-center shadow-[0_4px_18px_-14px_rgba(15,23,42,0.12)] dark:border-white/10 dark:bg-muted/20 sm:flex-row sm:gap-3.5",
+  customerJourneyAttributionCompact:
+    "inline-flex items-center justify-center gap-2.5 text-center",
+  customerJourneyAttributionLabel: "text-xs font-medium leading-snug text-muted-foreground sm:text-sm",
+  customerJourneyAttributionFooter:
+    "caretip-container mx-auto max-w-xl pb-8 pt-2 sm:pb-10",
+
+  /** @deprecated Legacy title stack — use customerJourneyVenueName + stepTitle. */
+  customerJourneyContent: "min-w-0 pt-4",
+  customerJourneyTitle:
+    "customer-journey-title text-balance text-lg font-semibold leading-tight tracking-tight text-foreground sm:text-xl",
+  customerJourneySubtitle: "mt-4 text-sm leading-snug text-muted-foreground sm:text-[0.9375rem]",
 
   headline:
     "min-w-0 truncate text-base font-semibold tracking-tight text-foreground sm:text-lg",
   subline: "text-xs leading-snug text-muted-foreground sm:text-[0.8125rem]",
 
   backButton:
-    "inline-flex shrink-0 items-center justify-center rounded-xl border border-black/[0.06] bg-white/80 px-3 py-2 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-[transform,background-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:translate-y-0 disabled:opacity-40 dark:border-white/10 dark:bg-card/80",
+    "inline-flex shrink-0 items-center justify-center rounded-xl border border-black/[0.06] bg-white/80 px-2.5 py-2 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-[transform,background-color,box-shadow] duration-150 ease-out hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_4px_14px_rgba(0,0,0,0.06)] active:translate-y-0 disabled:opacity-40 dark:border-white/10 dark:bg-card/80 sm:px-3",
 
   main: "caretip-container mx-auto max-w-xl space-y-5 py-7 sm:space-y-5 sm:py-9",
   mainCompact: "caretip-container mx-auto max-w-xl space-y-4 py-6 sm:space-y-4 sm:py-8",
@@ -132,6 +166,13 @@ export const customerFlowUi = {
 
   skipAction:
     "flex min-h-[2.75rem] w-full items-center justify-center rounded-xl text-sm font-medium text-muted-foreground/90 transition-colors duration-150 hover:text-foreground",
+
+  /** Post-completion actions — narrow, centered (not full-bleed commitment CTAs). */
+  completionActions: "mx-auto flex w-full max-w-md flex-col items-center gap-3",
+  completionPrimaryBtn: cn(caretipBtnPrimary, "w-full max-w-sm"),
+  completionSecondaryBtn: cn(caretipBtnSecondary, "w-full max-w-sm"),
+  completionTextAction:
+    "inline-flex min-h-[2.75rem] items-center justify-center rounded-xl px-4 text-sm font-medium text-muted-foreground/90 transition-colors duration-150 hover:text-foreground",
 
   successIconWrap:
     "customer-flow-success-icon mx-auto mb-6 flex size-[5.25rem] items-center justify-center rounded-full bg-gradient-to-br from-primary/15 via-primary/8 to-transparent ring-[10px] ring-primary/[0.07] sm:size-[5.5rem]",

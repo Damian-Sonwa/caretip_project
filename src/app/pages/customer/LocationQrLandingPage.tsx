@@ -2,7 +2,7 @@ import { useNavigate, useParams, Link } from "react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { Building2, Home, MapPin, Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import {
   getPublicLocationContext,
@@ -13,12 +13,15 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerJourneyHeader, CustomerJourneyHomeButton } from "./CustomerJourneyHeader";
+import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
+import { venueBrandFromBusiness } from "./customerJourneyBrand";
+import { headerSelectTeamMember } from "./customerJourneyHeaderCopy";
 
 /**
  * /qr/location/:locationId — Venue QR: business team list in context of one location.
@@ -108,7 +111,7 @@ export function LocationQrLandingPage() {
   }, [data?.business?.id, data?.employees, repeatDismissed]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.locationLanding.loading")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.locationDetails")} />;
   }
 
   if (error || !data) {
@@ -122,29 +125,26 @@ export function LocationQrLandingPage() {
     );
   }
 
+  const teamHeader = headerSelectTeamMember(t);
+
   return (
     <div className={`${cf.page} pb-8 sm:pb-10`}>
-      <div className={cf.stickyHeader}>
-        <div className={cf.headerInner}>
-          <button
-            type="button"
+      <CustomerJourneyHeader
+        leading={
+          <CustomerJourneyHomeButton
+            ariaLabel={t("tipFlow.common.homeAria")}
             onClick={() => navigate("/")}
-            className={cf.backButton}
-            aria-label={t("tipFlow.common.homeAria")}
-          >
-            <Home className="h-5 w-5 text-foreground" />
-          </button>
-          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="customer" />
-          <div className="min-w-0 flex-1">
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="h-3.5 w-3.5 shrink-0" />
-              {data.location.name}
-            </p>
-            <h1 className={cf.headline}>{data.business.name}</h1>
-          </div>
-          <Building2 className="h-8 w-8 shrink-0 text-muted-foreground/75" aria-hidden />
-        </div>
-      </div>
+          />
+        }
+        venue={venueBrandFromBusiness(data.business, (
+          <span className="inline-flex items-center gap-1">
+            <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {data.location.name}
+          </span>
+        ))}
+        stepTitle={teamHeader.stepTitle}
+        trustMessage={teamHeader.trustMessage}
+      />
 
       <div className={`${cf.main} lg:space-y-7`}>
         {repeatCandidate ? (
@@ -203,15 +203,6 @@ export function LocationQrLandingPage() {
             </Card>
           </motion.div>
         ) : null}
-
-        <motion.div initial={{ y: 12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-          <Card className={cf.cardShadcn}>
-            <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
-              <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.venueTeam")}</CardTitle>
-              <CardDescription className={cf.cardDesc}>{t("tipFlow.locationLanding.venueTeamDesc")}</CardDescription>
-            </CardHeader>
-          </Card>
-        </motion.div>
 
         <Card className={cf.cardSearchLight}>
           <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
@@ -272,6 +263,8 @@ export function LocationQrLandingPage() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerJourneyAttributionFooter label={t("tipFlow.common.poweredByCareTip")} />
     </div>
   );
 }

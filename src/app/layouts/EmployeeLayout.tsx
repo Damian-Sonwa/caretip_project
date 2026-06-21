@@ -73,7 +73,7 @@ export function EmployeeLayout() {
           )}
         >
           <DashboardHeader onMenuClick={openMobileMenu} />
-          <main className="flex-1">
+          <main className="min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell" registrationKey="employee-outlet">
               <Outlet />
             </RouteChunkBoundary>

@@ -30,7 +30,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
     <MobileDrawer isOpen={isOpen} onClose={onClose}>
       <div className={DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS}>
         <div className="min-w-0 flex-1">
-          <CareTipLogo size="sm" />
+          <CareTipLogo size="drawer" />
         </div>
         <button
           type="button"
@@ -58,7 +58,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
                   )}
                 >
                   <CareIcon name={item.icon} size="md" />
-                  <span className="text-sm font-medium">{t(item.labelKey)}</span>
+                  <span className="min-w-0 truncate text-sm font-medium">{t(item.labelKey)}</span>
                 </Link>
               </li>
             );

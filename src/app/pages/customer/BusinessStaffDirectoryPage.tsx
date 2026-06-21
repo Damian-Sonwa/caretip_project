@@ -2,7 +2,7 @@ import { useNavigate, useParams, Link } from "react-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { Building2, Home, Search } from "lucide-react";
+import { Building2, Search } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import {
   getBusinessStaffDirectory,
@@ -13,12 +13,15 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { usePublicSocket } from "../../hooks/usePublicSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { LiveConnectionBadge } from "../../components/LiveConnectionBadge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerJourneyHeader, CustomerJourneyHomeButton } from "./CustomerJourneyHeader";
+import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
+import { venueBrandFromBusiness } from "./customerJourneyBrand";
+import { headerSelectTeamMember } from "./customerJourneyHeaderCopy";
 
 /**
  * Path B: `/{businessSlug}` (legacy redirect from `/business/:businessSlug`) — Business QR (staff directory).
@@ -123,7 +126,7 @@ export function BusinessStaffDirectoryPage() {
   }, [socket, data, reloadDirectory]);
 
   if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("common.loadingTeam")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.teamDirectory")} />;
   }
 
   if (error || !data) {
@@ -137,41 +140,24 @@ export function BusinessStaffDirectoryPage() {
     );
   }
 
+  const teamHeader = headerSelectTeamMember(t);
+
   return (
     <div className={`${cf.page} pb-10 sm:pb-12`}>
-      <div className={cf.stickyHeader}>
-        <div className={cf.headerInner}>
-          <button
-            type="button"
+      <CustomerJourneyHeader
+        leading={
+          <CustomerJourneyHomeButton
+            ariaLabel={t("tipFlow.common.homeAria")}
             onClick={() => navigate("/")}
-            className={cf.backButton}
-            aria-label={t("tipFlow.common.homeAria")}
-          >
-            <Home className="h-5 w-5 text-foreground" />
-          </button>
-          <BusinessLogoMark logoPathOrUrl={data.business.logo} businessName={data.business.name} size="customer" />
-          <div className="min-w-0 flex-1">
-            <h1 className={cf.headline}>{data.business.name}</h1>
-            {(data.business.type || data.business.location) ? (
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                {data.business.type ? <span>{data.business.type}</span> : null}
-                {data.business.type && data.business.location ? <span aria-hidden>•</span> : null}
-                {data.business.location ? <span>{data.business.location}</span> : null}
-              </div>
-            ) : null}
-          </div>
-          <LiveConnectionBadge status={connectionStatus} className="shrink-0" />
-        </div>
-      </div>
+          />
+        }
+        trailing={<LiveConnectionBadge status={connectionStatus} className="shrink-0" />}
+        venue={venueBrandFromBusiness(data.business)}
+        stepTitle={teamHeader.stepTitle}
+        trustMessage={teamHeader.trustMessage}
+      />
 
       <div className={`${cf.main} lg:space-y-8`}>
-        <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="space-y-2">
-          <h2 className={`${cf.headline}`}>{t("tipFlow.qrLanding.whoServedYou")}</h2>
-          <p className={`${cf.subline} text-sm leading-relaxed sm:text-[0.9375rem]`}>
-            {t("tipFlow.qrLanding.whoServedYouDesc")}
-          </p>
-        </motion.div>
-
         <Card className={cf.cardSearchLight}>
           <CardHeader className={`${cf.cardHeaderPadding} pb-3`}>
             <CardTitle className={cf.cardTitle}>{t("tipFlow.locationLanding.searchTitle")}</CardTitle>
@@ -242,6 +228,8 @@ export function BusinessStaffDirectoryPage() {
           </CardContent>
         </Card>
       </div>
+
+      <CustomerJourneyAttributionFooter label={t("tipFlow.common.poweredByCareTip")} />
     </div>
   );
 }

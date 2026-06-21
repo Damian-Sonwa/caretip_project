@@ -343,7 +343,7 @@ export function FeatureShowcase({
                   {description}
                 </motion.p>
               ) : (
-                <p className={cn(landingType.bodyLeadMuted, "mt-5 max-w-xl sm:mt-6")}>{description}</p>
+                <p className={cn(landingType.bodyLeadMuted, "caretip-marketing-lead mt-0 max-w-xl")}>{description}</p>
               )
             ) : null}
 

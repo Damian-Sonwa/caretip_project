@@ -136,7 +136,7 @@ export function BusinessVerificationPage() {
   const handleStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
     let reviewNote: string | undefined;
     if (status === "rejected") {
-      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt", "Rejection reason (optional):")) ?? undefined;
+      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
     }
     try {
       await updatePlatformBusinessVerificationStatus(businessId, status, reviewNote);

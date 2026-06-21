@@ -106,6 +106,7 @@ html.dark .caretip-landing .caretip-landing-final-cta::after {
 }
 
 .caretip-landing .caretip-final-cta-headline {
+  margin-top: var(--caretip-narrative-gap-eyebrow-headline, 0.625rem);
   font-size: clamp(2rem, 5.5vw, 3.25rem);
   font-weight: 700;
   line-height: 1.06;
@@ -114,6 +115,7 @@ html.dark .caretip-landing .caretip-landing-final-cta::after {
 }
 
 .caretip-landing .caretip-final-cta-subtitle {
+  margin-top: var(--caretip-narrative-gap-headline-lead, 0.875rem);
   font-size: clamp(0.9375rem, 1.6vw, 1.0625rem);
   line-height: 1.62;
   font-weight: 400;
@@ -125,6 +127,7 @@ html.dark .caretip-landing .caretip-landing-final-cta::after {
   display: flex;
   flex-direction: column;
   align-items: center;
+  margin-top: var(--caretip-narrative-gap-lead-action, 1.25rem);
 }
 
 .caretip-landing .caretip-final-cta-action {
@@ -376,7 +379,7 @@ html:not(.dark) .caretip-landing .caretip-landing-final-cta h2.caretip-final-cta
   .caretip-landing .caretip-final-cta-actions {
     width: 100%;
     max-width: 100%;
-    margin-top: 1.5rem;
+    margin-top: var(--caretip-narrative-gap-lead-action, 1.25rem);
     padding-inline: 0;
   }
 

@@ -45,6 +45,20 @@ export function MobileDrawer({
     return () => window.clearTimeout(id);
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const panelMotionClass =
@@ -78,7 +92,7 @@ export function MobileDrawer({
         aria-modal="true"
         aria-label={ariaLabel}
         className={cn(
-          "fixed z-50 flex touch-manipulation flex-col lg:hidden",
+          "caretip-mobile-drawer-panel fixed z-50 flex touch-manipulation flex-col overflow-x-clip overscroll-contain lg:hidden",
           side === "left"
             ? "inset-y-0 left-0 w-[min(100%,18rem)] max-w-[85vw] border-r border-neutral-200/80 shadow-xl"
             : "left-0 right-0 top-full border-b border-border/50 shadow-lg",

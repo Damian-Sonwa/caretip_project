@@ -1,0 +1,116 @@
+/**
+ * Dashboard mobile containment (320px–430px) — layout stability only.
+ * Prevents horizontal overflow, logo blowout, and drawer-induced page shift.
+ */
+
+.caretip-dashboard-shell {
+  width: 100%;
+  max-width: 100%;
+}
+
+.caretip-dashboard-shell > main {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell .caretip-container,
+  .caretip-dashboard-shell .business-page,
+  .caretip-dashboard-shell .employee-page,
+  .caretip-dashboard-shell .dashboard-inbox-page {
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .caretip-dashboard-header-bar {
+    overflow-x: clip;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-header-bar .caretip-dashboard-header-leading {
+    min-width: 0;
+    flex: 1 1 0%;
+  }
+
+  .caretip-dashboard-header-bar .caretip-dashboard-header-trailing {
+    flex-shrink: 0;
+  }
+
+  .caretip-dashboard-header-search {
+    min-width: 0;
+    flex: 1 1 0%;
+    max-width: 100%;
+  }
+
+  .caretip-mobile-drawer-panel {
+    overflow-x: clip;
+    overscroll-behavior: contain;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .dashboard-table-panel,
+  .caretip-dashboard-shell .dashboard-subpage-top,
+  .caretip-dashboard-shell .dashboard-hero-actions {
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .overflow-x-auto {
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell table {
+    max-width: none;
+  }
+
+  /* Employee dashboard — mobile hero + metrics (route-specific; shell clip alone is insufficient). */
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero,
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero .dashboard-hero-container,
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero .employee-hero-visual,
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero .employee-hero-chart-frame {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .caretip-dashboard-shell.employee-dashboard
+    .employee-dashboard-hero
+    .dashboard-hero-actions.dashboard-hero-actions--premium-grid
+    > .employee-hero-cta-block {
+    grid-column: 1 / -1;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero .employee-hero-account-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-hero .employee-hero-account-stats > div {
+    min-width: 0;
+  }
+
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-stats-grid,
+  .caretip-dashboard-shell.employee-dashboard .employee-dashboard-stats-grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .caretip-dashboard-header-bar picture,
+  .caretip-dashboard-shell .caretip-dashboard-header-bar picture img {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 430px) {
+  .caretip-dashboard-header-bar {
+    padding-inline: 0.625rem;
+  }
+
+  .caretip-dashboard-shell .caretip-container {
+    padding-inline: 1rem;
+  }
+}

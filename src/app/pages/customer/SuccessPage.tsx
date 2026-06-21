@@ -2,12 +2,13 @@ import { motion } from "motion/react";
 import { useNavigate, useSearchParams } from "react-router";
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { Check, Star, Home, LogOut } from "lucide-react";
+import { Check, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { TipPaymentProcessingView } from "./TipPaymentProcessingView";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
@@ -64,8 +65,24 @@ export function SuccessPage() {
     navigate("/", { replace: true });
   };
 
+  if (verification.phase === "loading") {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.tipDetails")} />;
+  }
+
+  if (verification.phase === "pending") {
+    return <TipPaymentProcessingView employeeName={employeeName ?? undefined} />;
+  }
+
+  if (
+    verification.phase === "expired" ||
+    verification.phase === "unpaid" ||
+    verification.phase === "error"
+  ) {
+    return null;
+  }
+
   if (!verified) {
-    return <CareTipPageLoader variant="wait" message={t("tipFlow.success.validatingPayment")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.verifyingPayment")} />;
   }
 
   return (
@@ -139,37 +156,19 @@ export function SuccessPage() {
           </div>
         </motion.div>
 
-        <motion.div initial={{ y: 14, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.45 }}>
-          <button
-            type="button"
-            onClick={goToRating}
-            className={`${cf.btnSecondaryLg} border-primary/25 bg-primary/[0.06] py-4 text-base text-primary hover:bg-primary/[0.1]`}
-          >
-            <Star className="size-5 shrink-0" aria-hidden />
-            {t("tipFlow.success.leaveFeedback")}
-          </button>
-        </motion.div>
-
         <motion.div
           initial={{ y: 14, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.52 }}
-          className="mt-5 space-y-3"
+          transition={{ delay: 0.45 }}
+          className={cf.completionActions}
         >
-          <button type="button" onClick={leavePage} className={cf.btnPrimaryLg}>
-            <LogOut className="size-5 shrink-0" aria-hidden />
+          <button type="button" onClick={goToRating} className={cf.completionPrimaryBtn}>
+            <Star className="size-5 shrink-0" aria-hidden />
+            {t("tipFlow.success.leaveFeedback")}
+          </button>
+          <button type="button" onClick={leavePage} className={cf.completionTextAction}>
             {t("tipFlow.success.leavePage")}
           </button>
-          <p className="text-center">
-            <button
-              type="button"
-              onClick={leavePage}
-              className="inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-            >
-              <Home className="size-4 shrink-0" aria-hidden />
-              {t("tipFlow.success.backHome")}
-            </button>
-          </p>
         </motion.div>
 
         <motion.p

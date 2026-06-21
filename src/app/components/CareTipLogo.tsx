@@ -11,7 +11,11 @@ export type CareTipLogoSize =
   | "lg"
   | "hero"
   | "header"
-  | "auth";
+  | "auth"
+  | "bar"
+  | "drawer"
+  | "customerHeader"
+  | "customerFooter";
 
 export type CareTipLogoAlign = "left" | "center";
 
@@ -38,25 +42,47 @@ export const DASHBOARD_SIDEBAR_NAV_CLASS =
 /** Mobile drawer header row: logo + close control. */
 export const DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS = cn(
   DASHBOARD_SIDEBAR_BRAND_CLASS,
-  "justify-between gap-2",
+  "justify-between gap-2 min-h-[3.25rem]",
 );
+
+/** Compact wordmark for mobile dashboard top bar — must not exceed viewport at 320px. */
+const dashboardHeaderLogoClass =
+  "h-9 max-h-9 min-h-9 w-auto max-w-[min(6.75rem,36vw)] sm:h-10 sm:max-h-10 sm:min-h-10 sm:max-w-[min(7.5rem,40vw)]";
+
+/** Mobile drawer wordmark — shorter than desktop sidebar `sm`. */
+const dashboardDrawerLogoClass =
+  "h-10 max-h-10 min-h-10 w-auto max-w-[min(7.5rem,calc(100%-3rem))]";
+
+/** Compact wordmark for customer tipping journey headers — brand reassurance, not focal. */
+const customerJourneyHeaderLogoClass =
+  "h-8 max-h-8 min-h-8 w-auto max-w-[4.5rem] sm:h-9 sm:max-h-9 sm:min-h-9 sm:max-w-[5rem]";
+
+/** Tertiary platform mark in customer journey footers. */
+const customerJourneyFooterLogoClass =
+  "h-5 max-h-5 min-h-5 w-auto max-w-[3.25rem] opacity-75 sm:max-w-[3.5rem]";
+
+export const DASHBOARD_HEADER_LOGO_CLASS = dashboardHeaderLogoClass;
+export const CUSTOMER_JOURNEY_HEADER_LOGO_CLASS = customerJourneyHeaderLogoClass;
+export const DASHBOARD_DRAWER_LOGO_CLASS = dashboardDrawerLogoClass;
 
 /** Auth logo surface — circular glass on marketing hero; soft capsule on login cards. */
 export const CARE_TIP_LOGO_AUTH_SURFACE_CLASS = "caretip-auth-logo-surface";
 
 const sizeClass: Record<CareTipLogoSize, string> = {
-  /** Compact — mobile dashboard bar, tight UI (mobile-first height bumped for small screens) */
+  /** Compact — legacy; prefer `bar` in dashboard headers */
   xs: "h-16 max-h-16 min-h-[4rem] w-auto max-w-[min(400px,78vw)] sm:h-[4.25rem] sm:max-h-[4.25rem] sm:min-h-[4.25rem] md:h-[4.5rem] md:max-h-[4.5rem] md:min-h-[4.5rem]",
   sm: "h-[3.75rem] max-h-[3.75rem] min-h-[3.75rem] w-auto max-w-[min(400px,100%)] md:h-14 md:max-h-14 md:min-h-[3.5rem] lg:h-[3.75rem] lg:max-h-[3.75rem] lg:min-h-[3.75rem]",
   md: "h-[4rem] max-h-[4rem] min-h-[4rem] w-auto max-w-[min(420px,92vw)] sm:h-[4.25rem] sm:max-h-[4.25rem] sm:min-h-[4.25rem] lg:h-16 lg:max-h-16 lg:min-h-[4rem]",
   lg: "h-[4.25rem] max-h-[4.25rem] min-h-[4.25rem] w-auto max-w-[min(480px,92vw)] md:h-16 md:max-h-16 md:min-h-[4rem] xl:h-[4.5rem] xl:max-h-[4.5rem] xl:min-h-[4.5rem]",
   hero: "h-[5rem] max-h-[5rem] min-h-[5rem] w-auto max-w-[min(500px,92vw)] sm:h-20 sm:max-h-20 sm:min-h-[5rem]",
-  /** Main marketing nav — bold, high-visibility (SaaS-style wordmark) */
   header:
     "w-auto max-w-[min(640px,96vw)] min-h-[4.5rem] h-[4.5rem] max-h-[4.5rem] sm:min-h-[4.25rem] sm:h-[4.5rem] sm:max-h-[4.5rem] md:h-[4.75rem] md:max-h-[4.75rem] lg:h-[5rem] lg:max-h-[5rem] xl:h-[5.25rem] xl:max-h-[5.25rem]",
-  /** Login / signup — clearly visible, smaller than header */
   auth:
     "w-auto max-w-[min(360px,90vw)] h-14 max-h-14 min-h-[3.5rem] sm:h-16 sm:max-h-16 sm:min-h-[4rem]",
+  bar: dashboardHeaderLogoClass,
+  drawer: dashboardDrawerLogoClass,
+  customerHeader: customerJourneyHeaderLogoClass,
+  customerFooter: customerJourneyFooterLogoClass,
 };
 
 const alignClass: Record<CareTipLogoAlign, string> = {
@@ -99,7 +125,7 @@ function CareTipLogoPicture({
   priority = false,
 }: LogoPictureProps & { priority?: boolean }) {
   return (
-    <picture className={className}>
+    <picture className={cn("block max-w-full", className)}>
       <source type="image/avif" srcSet={companyLogoAvif} />
       <source type="image/webp" srcSet={companyLogoWebp} />
       <img
@@ -107,7 +133,7 @@ function CareTipLogoPicture({
         alt={alt}
         width={640}
         height={240}
-        className={cn(imgBase, "h-full w-full")}
+        className={cn(imgBase, "h-full w-auto max-w-full")}
         style={style}
         loading={priority ? "eager" : loading}
         decoding="async"

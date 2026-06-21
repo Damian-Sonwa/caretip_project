@@ -10,6 +10,7 @@ import {
 } from "../context/AppLoadingManager";
 import { isPlatformAdminSessionRole } from "../lib/authSession";
 import { AppRouteGateShell } from "./AppRouteGateShell";
+import { navFlashLog } from "../lib/navigationFlashAudit";
 interface PlatformAdminRouteProps {
   children: ReactNode;
 }
@@ -31,16 +32,34 @@ export function PlatformAdminRoute({ children }: PlatformAdminRouteProps) {
   );
 
   if (blocking) {
+    navFlashLog("guard_started", {
+      path: location.pathname,
+      guard: "PlatformAdminRoute",
+      reason: authBlocking ? "auth_pending" : "stored_session_sync",
+    });
     return <AppRouteGateShell />;
   }
 
   if (!user) {
+    navFlashLog("redirect_scheduled", {
+      path: location.pathname,
+      to: "/platform-admin/login",
+      guard: "PlatformAdminRoute",
+      reason: "not_authenticated",
+    });
     return <Navigate to="/platform-admin/login" replace state={{ from: location.pathname }} />;
   }
 
   if (!isPlatformAdminSessionRole(user.role)) {
+    navFlashLog("redirect_scheduled", {
+      path: location.pathname,
+      to: "/unauthorized",
+      guard: "PlatformAdminRoute",
+      reason: "wrong_role",
+    });
     return <Navigate to="/unauthorized" replace />;
   }
 
+  navFlashLog("guard_resolved", { path: location.pathname, guard: "PlatformAdminRoute", decision: "allow" });
   return <>{children}</>;
 }

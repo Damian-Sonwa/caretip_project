@@ -6,6 +6,23 @@
   -webkit-font-smoothing: antialiased;
 }
 
+/* —— Customer journey header —— */
+.customer-flow .customer-journey-header {
+  max-width: 100%;
+}
+
+.customer-flow .customer-journey-toolbar {
+  min-height: 2.25rem;
+}
+
+.customer-flow .customer-journey-venue-name {
+  letter-spacing: -0.02em;
+}
+
+.customer-flow .customer-journey-caretip-brand span {
+  transform: translateY(0.5px);
+}
+
 /* —— Section rhythm —— */
 .customer-flow .customer-flow-employee-summary .flex.items-center {
   padding: 1.125rem 1.25rem;

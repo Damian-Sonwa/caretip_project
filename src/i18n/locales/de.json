@@ -1147,7 +1147,26 @@
       "careTipBrand": "CareTip",
       "careTipLimited": "CareTip",
       "homeAria": "Startseite",
-      "back": "Zurück"
+      "back": "Zurück",
+      "confirmingRecipient": "Empfänger wird bestätigt",
+      "poweredByCareTip": "Powered by CareTip"
+    },
+    "header": {
+      "chooseAmountFor": "Trinkgeldbetrag für {{name}} wählen",
+      "chooseAmountHint": "Wählen Sie unten einen Betrag, um fortzufahren.",
+      "confirmRecipientHint": "Bestätigen Sie, wem Sie Trinkgeld geben möchten, und wählen Sie dann einen Betrag.",
+      "completePaymentFor": "Zahlung für {{name}} abschließen",
+      "completePaymentHint": "Sicherer Checkout über Stripe.",
+      "leaveFeedbackFor": "Feedback für {{name}} hinterlassen",
+      "leaveFeedbackHint": "Erzählen Sie uns von Ihrer Erfahrung. Das ist optional.",
+      "selectTeamMember": "Wählen Sie das Teammitglied, dem Sie Trinkgeld geben möchten",
+      "selectTeamMemberHint": "Wählen Sie, wer Sie heute bedient hat.",
+      "thankYouFor": "Danke für Ihre Unterstützung von {{name}}",
+      "thankYouHint": "Ihr Trinkgeld wurde erfolgreich gesendet.",
+      "leaveTipFor": "Trinkgeld für {{name}} hinterlassen",
+      "leaveTipHint": "Zeigen Sie Ihre Wertschätzung für guten Service.",
+      "confirmingTipFor": "Trinkgeld für {{name}} wird bestätigt",
+      "confirmingTipHint": "Das dauert in der Regel nur wenige Sekunden. Bitte lassen Sie diese Seite geöffnet."
     },
     "errors": {
       "employeeWrongVenue": "Dieses Teammitglied gehört nicht zu diesem Lokal.",
@@ -1157,10 +1176,32 @@
     "staffLanding": {
       "loadingProfile": "Profil wird geladen…",
       "openingTipScreen": "Trinkgeld-Ansicht wird geöffnet…",
+      "leaveTip": "Zeigen Sie Ihre Wertschätzung",
+      "leaveTipButton": "Trinkgeld geben",
       "goHome": "Zur Startseite",
       "monthlyGoalTitle": "Monatsziel",
       "tipAgainWithAmount": "Erneut tippen ({{amount}})",
       "chooseDifferentAmount": "Anderen Betrag wählen"
+    },
+    "loading": {
+      "venueDetails": "Lokal wird geladen…",
+      "tipDetails": "Trinkgeld-Details werden geladen…",
+      "teamMembers": "Teammitglieder werden geladen…",
+      "teamDirectory": "Teamverzeichnis wird geladen…",
+      "tableDetails": "Tischdetails werden geladen…",
+      "locationDetails": "Standortdetails werden geladen…",
+      "employeeProfile": "Profil wird geladen…",
+      "openingTipScreen": "Trinkgeld-Ansicht wird geöffnet…",
+      "openingTipFlow": "Trinkgeld-Flow wird geöffnet…",
+      "validatingScan": "Scan wird geprüft…",
+      "redirecting": "Weiterleitung…",
+      "preparingCheckout": "Checkout wird vorbereitet…",
+      "redirectingCheckout": "Weiterleitung zum sicheren Checkout…",
+      "verifyingPayment": "Zahlung wird geprüft…",
+      "confirmingTip": "Trinkgeld wird bestätigt…",
+      "confirmingTipHint": "Das dauert in der Regel nur wenige Sekunden. Bitte lassen Sie diese Seite geöffnet.",
+      "finishingUp": "Wird abgeschlossen…",
+      "submittingFeedback": "Feedback wird gesendet…"
     },
     "docTitle": {
       "tip": "Trinkgeld für {{name}} · CareTip",
@@ -1174,7 +1215,7 @@
       "openPayment": "Zahlung öffnen",
       "openRating": "Bewertung / Feedback öffnen"
     },
-    "venueLoading": "Sie sind bei {{location}}, {{table}}. Wird geladen…",
+    "venueLoading": "Sie sind bei {{location}}, {{table}}. Trinkgeld-Details werden geladen…",
     "atVenue": "Sie sind bei {{location}}, {{table}}.",
     "qrLanding": {
       "tipHeading": "Trinkgeld für {{name}}",
@@ -1212,6 +1253,13 @@
       "amountPlaceholder": "0,00",
       "totalTip": "Trinkgeld gesamt",
       "continuePayment": "Weiter zur Zahlung"
+    },
+    "selectEmployee": {
+      "noBusinessContextTitle": "Über den Lokal-QR starten",
+      "noBusinessContextDesc": "Scannen Sie den CareTip-QR an Ihrem Tisch oder Tresen, damit wir wissen, welches Team Sie bedient hat. Sie können den Link auch von Ihrer Rechnung oder Tischkarte öffnen.",
+      "noBusinessContextCta": "Zur Startseite",
+      "emptyTeam": "Keine Teammitglieder gefunden.",
+      "topRatedBadge": "Top"
     },
     "tableLanding": {
       "loading": "Tisch wird geladen…",
@@ -1283,10 +1331,11 @@
     },
     "completion": {
       "thankYouTipping": "Danke für Ihr Trinkgeld für {{name}}",
+      "stepCompleteTitle": "Alles erledigt",
       "feedbackReceived": "Ihr Feedback wurde erhalten und mit dem Team geteilt.",
       "tipAnotherMember": "Anderem Teammitglied Trinkgeld geben",
       "exit": "Beenden",
-      "processingTitle": "Zahlung wird bestätigt…",
+      "processingTitle": "Trinkgeld wird bestätigt…",
       "processingSubtitle": "Das dauert in der Regel nur wenige Sekunden. Bitte lassen Sie diese Seite geöffnet.",
       "notVerifiedTitle": "Zahlung nicht bestätigt",
       "notVerifiedDesc": "Für diese Sitzung konnte keine abgeschlossene Zahlung bestätigt werden."
@@ -1319,7 +1368,7 @@
       "feedbackFor": "Feedback für",
       "skip": "Überspringen",
       "skipAria": "Feedback überspringen",
-      "verifying": "Wird geprüft…",
+      "verifying": "Zahlung wird geprüft…",
       "needsSession": "Diese Feedback-Seite benötigt eine Zahlungssitzungs-ID. Sie können die Seite schließen.",
       "tapToRate": "Zum Bewerten tippen",
       "optionalForStaff": "Optionales Feedback für das Teammitglied.",
@@ -1337,6 +1386,7 @@
       "namePlaceholder": "z. B. Alex",
       "footerHint": "Ihr Feedback ist optional und hilft dem Team.",
       "submit": "Feedback senden",
+      "submitting": "Feedback wird gesendet…",
       "tags": {
         "excellentService": "Hervorragender Service",
         "veryFriendly": "Sehr freundlich",
@@ -2409,7 +2459,7 @@
       "generating": "Wird erstellt…",
       "setTipGoal": "Trinkgeldziel setzen",
       "statTotalEarnings": "Gesamteinnahmen",
-      "statAvailableBalance": "Verfügbares Guthaben",
+      "statMonthEarnings": "Diesen Monat",
       "statTotalSupporters": "Unterstützer gesamt",
       "accountOverviewLabel": "Kontoübersicht, gesamt"
     },
@@ -3400,7 +3450,15 @@
       "signingIn": "Anmeldung…",
       "bothRequired": "Bitte E-Mail und Passwort eingeben.",
       "businessStaffLink": "Anmeldung für Unternehmen oder Team",
-      "redirecting": "Admin-Dashboard wird geöffnet…"
+      "redirecting": "Admin-Dashboard wird geöffnet…",
+      "mfaSubtitle": "Geben Sie den Code aus Ihrer Authenticator-App ein, um fortzufahren.",
+      "mfaSetupHint": "Scannen Sie diesen QR-Code mit Ihrer Authenticator-App und geben Sie dann den 6-stelligen Code ein.",
+      "mfaCodePlaceholder": "6-stelliger Code",
+      "mfaCodeRequired": "Geben Sie den 6-stelligen Code aus Ihrer Authenticator-App ein.",
+      "mfaContinue": "Weiter",
+      "mfaVerifying": "Wird geprüft…",
+      "mfaBack": "Zurück zur Anmeldung",
+      "impersonationExitFailed": "Ihre Admin-Sitzung konnte nicht wiederhergestellt werden. Bitte melden Sie sich erneut an."
     },
     "announcements": {
       "centerTitle": "Kommunikationszentrale",
@@ -3566,7 +3624,8 @@
       "toastStatusUpdated": "Status aktualisiert.",
       "toastDetailsSaved": "Unternehmensdaten gespeichert.",
       "toastLogoUploaded": "Logo erfolgreich hochgeladen.",
-      "toastDocUploaded": "Verifizierungsdokument erfolgreich hochgeladen."
+      "toastDocUploaded": "Verifizierungsdokument erfolgreich hochgeladen.",
+      "rejectNotePrompt": "Ablehnungsgrund (optional):"
     },
     "businessDetailPage": {
       "backLink": "Zurück zu den Unternehmen",

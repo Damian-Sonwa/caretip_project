@@ -61,7 +61,7 @@ function cnSectionLead(layout: string) {
 const sectionIntroStack =
   "caretip-section-intro flex w-full flex-col items-center space-y-0 px-0.5 text-center";
 const sectionIntroChildRhythm =
-  "[&>h2]:mt-3.5 [&>h2:first-child]:mt-0 [&>div~h2]:mt-4 [&>p]:mt-5 sm:[&>p]:mt-5.5 [&>motion.div]:mt-8 sm:[&>motion.div]:mt-8 [&>motion.div~*]:mt-0 [&>div.flex]:mt-8 sm:[&>div.flex]:mt-8";
+  "[&>h2]:mt-2.5 [&>h2:first-child]:mt-0 [&>div~h2]:mt-3 [&>motion.div]:mt-6 sm:[&>motion.div]:mt-7 [&>motion.div~*]:mt-0 [&>div.flex]:mt-6 sm:[&>div.flex]:mt-7";
 /** Narrower centered body copy — headlines stay wider via section title tokens. */
 const sectionLeadReadable =
   "mx-auto w-full max-w-lg max-lg:leading-[1.65] sm:max-w-xl";
@@ -155,7 +155,7 @@ export const landingUi = {
   brandAccentIconWrap:
     "inline-flex shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-primary/15",
 
-  copyStack: `flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
+  copyStack: `caretip-copy-stack flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   eyebrowSecondary: cnSectionLead(
     `${sectionLeadReadable} text-neutral-600 max-lg:text-center sm:text-left lg:mx-0 lg:max-w-md lg:text-left dark:text-neutral-400`,
   ),
@@ -263,7 +263,7 @@ export const landingUi = {
     "caretip-hero-subtitle w-full text-left",
   ),
   heroActionCluster:
-    `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-5 md:max-w-none md:gap-5`,
+    `relative z-10 flex w-full flex-col items-start ${heroStackGapMobile} max-md:gap-0 max-md:pb-0 md:!mt-4 md:max-w-none md:gap-4`,
   heroBenefits:
     "!mt-0 w-full max-md:gap-2 max-md:[&_li]:!text-feature-copy max-md:[&_li]:!font-medium max-md:[&_li]:leading-snug max-md:[&_li>span:first-child]:!h-7 max-md:[&_li>span:first-child]:!w-7 max-md:[&_li>span:first-child]:!rounded-md max-md:[&_li_svg]:!max-h-3 max-md:[&_li_svg]:!max-w-3 md:max-w-none md:gap-2.5 md:[&_li]:!font-medium md:[&_li]:!gap-x-1.5 md:[&_li]:!text-feature-copy",
   heroCtaRow:

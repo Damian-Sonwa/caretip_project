@@ -1,13 +1,9 @@
 import { useNavigate, useSearchParams } from "react-router";
 import { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { ShieldCheck } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
-import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { logClientError } from "../../lib/clientLog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CareTipLogo } from "../../components/CareTipLogo";
-import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { DEV_BYPASS_ENABLED, DEV_MOCK } from "../../lib/devCustomerBypass";
 import { hasRecentCustomerFlowEntry, markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { paymentPathFromTipAmount } from "../../lib/tipFlowRoute";
@@ -19,6 +15,11 @@ import { formatEur } from "../../lib/formatEur";
 import { isTipAmountInRangeEur } from "../../lib/tipAmountLimits";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerFlowShell } from "./CustomerFlowShell";
+import {
+  CustomerJourneyBackButton,
+} from "./CustomerJourneyHeader";
+import { venueBrandFromFields, useCustomerVenueBrand } from "./customerJourneyBrand";
+import { headerChooseAmountFor } from "./customerJourneyHeaderCopy";
 
 export function TipAmountPage() {
   const { t } = useTranslation();
@@ -35,6 +36,8 @@ export function TipAmountPage() {
     employeeName,
     employeeAvatar,
     tableQrSlug,
+    tippingLocationName,
+    tippingTableName,
     setBusinessId,
     setEmployee,
     setAmount,
@@ -43,9 +46,12 @@ export function TipAmountPage() {
   const [customAmount, setCustomAmount] = useState("");
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [contextReady, setContextReady] = useState(false);
-  const [businessBrand, setBusinessBrand] = useState<{ logo: string | null; name: string } | null>(
-    null,
-  );
+  const [resolvedVenueSnapshot, setResolvedVenueSnapshot] = useState<{
+    name: string;
+    logo: string | null;
+  } | null>(null);
+  const fallbackVenue = t("tipFlow.common.venue");
+  const fetchedVenue = useCustomerVenueBrand(businessId, fallbackVenue);
 
   useEffect(() => {
     if (!employeeId) return;
@@ -59,6 +65,20 @@ export function TipAmountPage() {
       })
     ) {
       setContextReady(true);
+      if (!resolvedVenueSnapshot && businessId) {
+        void resolveCustomerEmployeeContext({
+          employeeId,
+          returnSlug,
+          returnBusinessSlug,
+          returnEmployeeSlug,
+          fallbackTeamMemberLabel: t("tipFlow.common.teamMember"),
+          fallbackVenueLabel: fallbackVenue,
+        })
+          .then((resolved) => {
+            setResolvedVenueSnapshot({ name: resolved.businessName, logo: resolved.businessLogo });
+          })
+          .catch((err) => logClientError("TipAmountPage.resolveVenue", err));
+      }
       return;
     }
 
@@ -80,7 +100,7 @@ export function TipAmountPage() {
         if (cancelled) return;
         setBusinessId(resolved.businessId);
         setEmployee(resolved.employeeId, resolved.employeeName, resolved.employeeAvatar);
-        setBusinessBrand({ logo: resolved.businessLogo, name: resolved.businessName });
+        setResolvedVenueSnapshot({ name: resolved.businessName, logo: resolved.businessLogo });
         markCustomerFlowEntered();
         setContextReady(true);
       } catch (err) {
@@ -105,6 +125,8 @@ export function TipAmountPage() {
     setBusinessId,
     setEmployee,
     t,
+    fallbackVenue,
+    resolvedVenueSnapshot,
   ]);
 
   useEffect(() => {
@@ -176,57 +198,41 @@ export function TipAmountPage() {
     );
   };
 
+  const resolvedVenue = resolvedVenueSnapshot
+    ? venueBrandFromFields(resolvedVenueSnapshot.name, resolvedVenueSnapshot.logo)
+    : fetchedVenue;
+  const employeeDisplayName = employeeName ?? t("tipFlow.common.teamMember");
+  const amountHeader = headerChooseAmountFor(t, employeeDisplayName, { directStaffQr: directFromStaffQr });
+  const venueContext =
+    tippingLocationName && tippingTableName
+      ? t("tipFlow.atVenue", { location: tippingLocationName, table: tippingTableName })
+      : undefined;
+
   if (!employeeId) {
     return (
       <CustomerFlowShell
-        headerLogo={<CareTipLogo size="xs" className="shrink-0" />}
-        title={t("tipFlow.tipAmount.chooseTitle")}
+        venue={{ name: fallbackVenue, logo: null }}
+        stepTitle={t("tipFlow.tipAmount.chooseTitle")}
         loading
-        loadingMessage={t("tipFlow.tipAmount.redirecting")}
+        loadingMessage={t("tipFlow.loading.redirecting")}
       />
     );
   }
-
-  const headerLogo = businessBrand ? (
-    <BusinessLogoMark
-      logoPathOrUrl={businessBrand.logo}
-      businessName={businessBrand.name}
-      size="customer"
-      className="shrink-0"
-    />
-  ) : (
-    <CareTipLogo size="xs" className="shrink-0" />
-  );
-
-  const subtitle = (
-    <>
-      <p>
-        {t("tipFlow.tipAmount.forEmployee", {
-          name: employeeName ?? t("tipFlow.common.teamMember"),
-        })}
-      </p>
-      {directFromStaffQr ? (
-        <p className="mt-1 flex items-center gap-1 text-xs font-medium text-primary">
-          <ShieldCheck className="size-3.5 shrink-0" />
-          {t("tipFlow.tipAmount.confirmStaffQr")}
-        </p>
-      ) : null}
-    </>
-  );
 
   return (
     <CustomerFlowShell
       withBottomCta={Boolean(selectedAmount)}
       headerLeading={
-        <button type="button" onClick={handleBack} className={cf.backButton}>
-          {t("tipFlow.common.back")}
-        </button>
+        <CustomerJourneyBackButton label={t("tipFlow.common.back")} onClick={handleBack} />
       }
-      headerLogo={headerLogo}
-      title={t("tipFlow.tipAmount.chooseTitle")}
-      subtitle={subtitle}
+      venue={{
+        ...resolvedVenue,
+        contextLine: venueContext,
+      }}
+      stepTitle={amountHeader.stepTitle}
+      trustMessage={amountHeader.trustMessage}
       loading={!contextReady}
-      loadingMessage={t("tipFlow.tipAmount.validatingScan")}
+      loadingMessage={t("tipFlow.loading.validatingScan")}
       mainClassName={cf.mainCompact}
       bottomBar={
         selectedAmount ? (
@@ -245,28 +251,6 @@ export function TipAmountPage() {
         ) : undefined
       }
     >
-      <Card
-        className={`${cf.employeeSummaryCard} ${directFromStaffQr ? "ring-2 ring-primary/25 ring-offset-2 ring-offset-[#f7f6f3] dark:ring-offset-background" : ""}`}
-      >
-        <CardContent className="flex items-center gap-4 p-4 sm:gap-5 sm:p-5">
-          <ProfileAvatar
-            src={employeeAvatar}
-            displayName={employeeName ?? t("tipFlow.common.teamMember")}
-            className={`${cf.employeeSummaryAvatar} ${directFromStaffQr ? "sm:h-24 sm:w-24" : ""}`}
-          />
-          <div className="min-w-0">
-            <p className="text-xs font-medium text-muted-foreground sm:text-sm">
-              {directFromStaffQr ? t("tipFlow.tipAmount.youreTipping") : t("tipFlow.tipAmount.tipping")}
-            </p>
-            <p
-              className={`truncate font-semibold tracking-tight text-foreground ${directFromStaffQr ? "text-xl sm:text-2xl" : "text-lg sm:text-xl"}`}
-            >
-              {employeeName ?? t("tipFlow.common.teamMember")}
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-
       <Card className={cf.cardShadcn}>
         <CardHeader className={`${cf.cardHeaderPadding} pb-2`}>
           <CardTitle className={cf.cardTitle}>{t("tipFlow.tipAmount.quickSelect")}</CardTitle>

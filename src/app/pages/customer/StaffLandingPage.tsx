@@ -2,7 +2,7 @@ import { useNavigate, useParams, Link, useSearchParams } from "react-router";
 import { useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { Heart, Building2 } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useTipFlow } from "../../context/TipFlowContext";
 import { getStaffBySlug, type StaffBySlugResponse } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -13,9 +13,18 @@ import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
+import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
+import { headerLeaveTipFor } from "./customerJourneyHeaderCopy";
+import {
+  type CustomerEntryPhase,
+  isCustomerEntryPending,
+  scheduleCustomerRouteRedirect,
+  shouldShowCustomerEntryFailure,
+} from "../../lib/customerRouteTransition";
+import { navFlashLog } from "../../lib/navigationFlashAudit";
 
 const BRAND_ORANGE = "#e9781c";
-const BLACK = "#000000";
 
 /**
  * /staff/:slug — Individual QR (Path A).
@@ -29,7 +38,7 @@ export function StaffLandingPage() {
   const previewProfile = searchParams.get("preview") === "1";
   const { slug: slugParam } = useParams<{ slug: string }>();
   const { setBusinessId, setEmployee, setStaffProfileSlug, setAmount } = useTipFlow();
-  const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<CustomerEntryPhase>("loading");
   const [error, setError] = useState<string | null>(null);
   const [staff, setStaff] = useState<StaffBySlugResponse | null>(null);
   const [showRepeatPrompt, setShowRepeatPrompt] = useState(false);
@@ -38,13 +47,14 @@ export function StaffLandingPage() {
   useEffect(() => {
     if (!slugParam?.trim()) {
       setError(t("tipFlow.errors.invalidLink"));
-      setLoading(false);
+      setPhase("error");
       return;
     }
     const slug = slugParam.trim();
     let cancelled = false;
+    navFlashLog("data_load_started", { path: `/staff/${slug}`, route: "StaffLandingPage" });
     const run = async () => {
-      setLoading(true);
+      setPhase("loading");
       setError(null);
       try {
         const data = await getStaffBySlug(slug);
@@ -52,28 +62,32 @@ export function StaffLandingPage() {
         setBusinessId(data.businessId);
         setEmployee(data.id, data.name, data.avatar ?? undefined);
         setStaffProfileSlug(slug);
+        navFlashLog("data_load_settled", { path: `/staff/${slug}`, preview: previewProfile });
         if (!previewProfile) {
           const d = getRepeatTipDataForBusiness(data.businessId);
           if (d && d.employeeId === data.id) {
             setRepeatAmount(d.lastAmount);
             setShowRepeatPrompt(true);
             setStaff(data);
+            setPhase("ready");
             return;
           }
-          navigate(
+          setPhase("redirecting");
+          scheduleCustomerRouteRedirect(
             `/tip-amount?employeeId=${encodeURIComponent(data.id)}&returnSlug=${encodeURIComponent(slug)}&direct=1`,
-            { replace: true }
+            navigate,
+            { replace: true, from: `/staff/${slug}` },
           );
           return;
         }
         setStaff(data);
+        setPhase("ready");
       } catch (err) {
         logClientError("StaffLandingPage", err);
         if (!cancelled) {
           setError(toUserFriendlyMessage(err));
+          setPhase("error");
         }
-      } finally {
-        if (!cancelled) setLoading(false);
       }
     };
     void run();
@@ -106,16 +120,16 @@ export function StaffLandingPage() {
     navigate("/payment");
   };
 
-  if (loading) {
+  if (isCustomerEntryPending(phase)) {
     return (
       <CareTipPageLoader
         variant="wait"
-        message={previewProfile ? t("tipFlow.staffLanding.loadingProfile") : t("tipFlow.staffLanding.openingTipScreen")}
+        message={previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")}
       />
     );
   }
 
-  if (error || !staff) {
+  if (shouldShowCustomerEntryFailure(phase, { error, hasContent: Boolean(staff) })) {
     return (
       <div className={cf.stateCenter}>
         <p className={cf.stateError}>{error ?? t("tipFlow.common.notFound")}</p>
@@ -126,16 +140,26 @@ export function StaffLandingPage() {
     );
   }
 
+  if (!staff) {
+    return (
+      <CareTipPageLoader
+        variant="wait"
+        message={previewProfile ? t("tipFlow.loading.employeeProfile") : t("tipFlow.loading.openingTipScreen")}
+      />
+    );
+  }
+
+  const profileHeader = staff ? headerLeaveTipFor(t, staff.name) : headerLeaveTipFor(t, t("tipFlow.common.teamMember"));
+
   return (
     <div className={cf.page}>
-      <div
-        className="h-36 w-full shrink-0 rounded-b-[32px] shadow-[0_18px_42px_-26px_rgba(15,23,42,0.45)]"
-        style={{
-          background: `linear-gradient(135deg, ${BRAND_ORANGE} 0%, ${BLACK} 100%)`,
-        }}
-        aria-hidden
+      <CustomerJourneyHeader
+        venue={{ name: staff.businessName, logo: staff.businessLogo ?? null }}
+        stepTitle={profileHeader.stepTitle}
+        trustMessage={profileHeader.trustMessage}
       />
-      <div className="caretip-container mx-auto max-w-xl -mt-14 space-y-0 pb-16 sm:-mt-16 sm:pb-20">
+
+      <div className={`${cf.main} max-w-xl pb-8 sm:pb-10`}>
         <motion.div
           initial={{ y: 14, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -151,14 +175,10 @@ export function StaffLandingPage() {
               className="mx-auto size-[7.25rem] ring-[6px] ring-background"
             />
           </div>
-          <h1 className="text-balance text-2xl font-bold tracking-tight text-foreground">{staff.name}</h1>
+          <h2 className="text-balance text-2xl font-bold tracking-tight text-foreground">{staff.name}</h2>
           <p className="mt-1.5 text-sm font-semibold" style={{ color: BRAND_ORANGE }}>
             {staff.jobTitle}
           </p>
-          <div className="mt-4 flex items-center justify-center gap-1.5 text-sm text-muted-foreground">
-            <Building2 className="size-4 shrink-0" aria-hidden />
-            <span>{staff.businessName}</span>
-          </div>
 
           {staff.bio ? <p className="mt-5 text-left text-sm leading-relaxed text-muted-foreground">{staff.bio}</p> : null}
 
@@ -179,10 +199,12 @@ export function StaffLandingPage() {
           ) : (
             <button type="button" onClick={handleLeaveTip} className={`${cf.btnPrimaryLg} mt-7 py-4 text-[0.9375rem]`}>
               <Heart className="size-5 shrink-0" aria-hidden />
-              {t("tipFlow.qrLanding.leaveTip")}
+              {t("tipFlow.staffLanding.leaveTipButton")}
             </button>
           )}
         </motion.div>
+
+        <CustomerJourneyAttributionFooter label={t("tipFlow.common.poweredByCareTip")} />
       </div>
     </div>
   );

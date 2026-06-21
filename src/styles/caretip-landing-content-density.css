@@ -1,18 +1,33 @@
 /**
  * Landing content density — whitespace, measure, and scan rhythm only.
  * No copy changes; pairs with LandingCopySentences for existing i18n strings.
+ *
+ * Narrative spacing tokens live in caretip-landing-hero-layout.css
+ * (--caretip-narrative-gap-*).
  */
 
 .caretip-landing-copy-paragraphs {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--caretip-narrative-gap-lead-lines, 0.5rem);
 }
 
-@media (min-width: 640px) {
-  .caretip-landing-copy-paragraphs {
-    gap: 0.875rem;
-  }
+/* Section / split intros — headline to lead block */
+.caretip-landing .caretip-section-intro > h2 + *,
+.caretip-landing .caretip-mobile-stack-intro > h2 + *,
+.caretip-landing .caretip-copy-stack > h2 + *,
+.caretip-landing .caretip-motivation-copy > h2 + *,
+.caretip-landing .caretip-showcase-intro > h2 + * {
+  margin-top: var(--caretip-narrative-gap-headline-lead, 0.875rem);
+}
+
+.caretip-marketing-lead {
+  margin-top: var(--caretip-narrative-gap-headline-lead, 0.875rem);
+}
+
+.caretip-public-page .caretip-public-page-hero > h1 + p,
+.caretip-public-page .caretip-public-page-hero > h1 + .caretip-marketing-lead {
+  margin-top: var(--caretip-narrative-gap-headline-lead, 0.875rem);
 }
 
 .caretip-landing-copy-scan-list {

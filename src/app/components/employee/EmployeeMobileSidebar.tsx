@@ -53,15 +53,24 @@ export function EmployeeMobileSidebar({
         <Link
           to={EMPLOYEE_DASHBOARD_HOME}
           onClick={onClose}
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-lg pr-2 outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          className="flex min-h-[2.75rem] min-w-0 flex-1 items-center gap-2 rounded-lg pr-2 outline-none ring-sidebar-ring transition-colors hover:bg-sidebar-accent/60 focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
         >
-          <BusinessLogoMark
-            logoPathOrUrl={businessBranding?.businessLogo ?? null}
-            businessName={venueName}
-            size="dashboard"
-            className="shrink-0"
-          />
-          <span className="min-w-0 truncate text-xs font-semibold text-sidebar-foreground">{venueName}</span>
+          {businessBranding ? (
+            <>
+              <BusinessLogoMark
+                logoPathOrUrl={businessBranding.businessLogo}
+                businessName={venueName}
+                size="dashboard"
+                className="shrink-0"
+              />
+              <span className="min-w-0 truncate text-xs font-semibold text-sidebar-foreground">{venueName}</span>
+            </>
+          ) : (
+            <>
+              <div className="h-9 w-9 shrink-0 rounded-lg bg-muted animate-pulse" />
+              <div className="h-3 min-w-0 flex-1 max-w-[8rem] rounded bg-muted animate-pulse" />
+            </>
+          )}
         </Link>
         <button
           type="button"
@@ -89,7 +98,7 @@ export function EmployeeMobileSidebar({
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
-                  <span className="tracking-tight">{t(item.labelKey)}</span>
+                  <span className="min-w-0 truncate tracking-tight">{t(item.labelKey)}</span>
                 </Link>
               </li>
             );

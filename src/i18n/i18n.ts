@@ -2,6 +2,7 @@ import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 import en from "./locales/en.json";
 import { I18N_STORAGE_KEY } from "./constants";
+import { registerI18nIntegrityDev } from "./i18nIntegrityDev";
 
 export type AppLanguage = "de" | "en";
 
@@ -76,6 +77,8 @@ export function ensureI18nReady(): Promise<typeof i18n> {
         /* ignore */
       }
     });
+
+    registerI18nIntegrityDev(i18n);
 
     return i18n;
   })();

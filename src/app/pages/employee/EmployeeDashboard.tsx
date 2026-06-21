@@ -240,16 +240,21 @@ export function EmployeeDashboard() {
   const devGoalBundle = useDevDemo ? devMockEmployeeGoalBundle() : null;
   const devPeriodSummary = useDevDemo ? devMockEmployeeSummary(analyticsTimeframe) : null;
 
+  const displayCurrentMonthTotal =
+    devGoalBundle?.currentMonthTotal ??
+    displayPayload?.currentMonthTotal ??
+    displayMetrics?.currentMonthTotal ??
+    0;
+
   const displayAccountSummary = useDevDemo
     ? { ...devMockEmployeeAccountSummary(), loaded: true }
     : heroAccountReady && heroPayload
       ? {
           totalEarningsEur: heroPayload.totalEarningsEur ?? heroPayload.periodAmountEur ?? 0,
-          availableBalanceEur: heroPayload.availableBalanceEur ?? 0,
           totalSupporters: heroPayload.totalSupporters ?? 0,
           loaded: true,
         }
-      : { totalEarningsEur: 0, availableBalanceEur: 0, totalSupporters: 0, loaded: false };
+      : { totalEarningsEur: 0, totalSupporters: 0, loaded: false };
 
   const showHeroMetricsLoading =
     !useDevDemo &&
@@ -265,11 +270,6 @@ export function EmployeeDashboard() {
   const displayTips = useDevDemo ? devMockEmployeeRecentTips() : (chartPayload?.tips ?? []);
   const displayMonthlyGoal =
     devGoalBundle?.monthlyGoal ?? displayPayload?.monthlyGoal ?? displayMetrics?.monthlyGoal ?? null;
-  const displayCurrentMonthTotal =
-    devGoalBundle?.currentMonthTotal ??
-    displayPayload?.currentMonthTotal ??
-    displayMetrics?.currentMonthTotal ??
-    0;
   const displayGoalProgress =
     devGoalBundle?.goal ?? displayPayload?.goalProgress ?? displayMetrics?.goalProgress ?? null;
   const businessTimezone = chartPayload?.businessTimezone ?? null;
@@ -468,7 +468,9 @@ export function EmployeeDashboard() {
                 <img
                   src={employeeHeroImage}
                   alt=""
-                  className="employee-hero-chart-frame__img block h-auto w-full object-contain object-center"
+                  width={480}
+                  height={360}
+                  className="employee-hero-chart-frame__img block h-auto max-h-[min(48svh,360px)] w-full max-w-full object-contain object-center"
                   loading="eager"
                   decoding="async"
                   {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
@@ -543,16 +545,13 @@ export function EmployeeDashboard() {
                   </dd>
                 </div>
                 <div>
-                  <dt>{t("employee.hero.statAvailableBalance")}</dt>
+                  <dt>{t("employee.hero.statMonthEarnings")}</dt>
                   <dd>
                     {showHeroMetricsLoading ? (
                       <DashboardHeroMetricSkeleton variant="currency" />
                     ) : (
                       <span className="dashboard-hero-metric-value--live">
-                        <CountUpMetric
-                          value={displayAccountSummary.availableBalanceEur}
-                          kind="eur"
-                        />
+                        <CountUpMetric value={displayCurrentMonthTotal} kind="eur" format={formatEur} />
                       </span>
                     )}
                   </dd>

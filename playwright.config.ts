@@ -74,6 +74,30 @@ export default defineConfig({
       },
     },
     {
+      name: "customer-journey-header",
+      testMatch: /customer-journey-header\.spec\.ts/,
+      use: {
+        ...devices["Pixel 5"],
+        ...chromiumUse,
+      },
+    },
+    {
+      name: "navigation-flash",
+      testMatch: /navigation-flash\.spec\.ts/,
+      use: {
+        ...devices["Pixel 5"],
+        ...chromiumUse,
+      },
+    },
+    {
+      name: "employee-dashboard-mobile",
+      testMatch: /employee-dashboard-mobile-overflow\.spec\.ts/,
+      use: {
+        ...devices["Pixel 5"],
+        ...chromiumUse,
+      },
+    },
+    {
       name: "iphone-safari",
       testMatch: /mobile-menu\.spec\.ts/,
       use: {

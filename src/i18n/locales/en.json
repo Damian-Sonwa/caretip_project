@@ -1145,7 +1145,26 @@
       "careTipBrand": "CareTip",
       "careTipLimited": "CareTip",
       "homeAria": "Home",
-      "back": "Back"
+      "back": "Back",
+      "confirmingRecipient": "Confirming recipient",
+      "poweredByCareTip": "Powered by CareTip"
+    },
+    "header": {
+      "chooseAmountFor": "Choose tip amount for {{name}}",
+      "chooseAmountHint": "Select an amount below to continue.",
+      "confirmRecipientHint": "Confirm this is who you'd like to tip, then choose an amount.",
+      "completePaymentFor": "Complete payment for {{name}}",
+      "completePaymentHint": "Secure checkout powered by Stripe.",
+      "leaveFeedbackFor": "Leave feedback for {{name}}",
+      "leaveFeedbackHint": "Tell us about your experience. It's optional.",
+      "selectTeamMember": "Select the team member you'd like to tip",
+      "selectTeamMemberHint": "Choose who served you today.",
+      "thankYouFor": "Thank you for supporting {{name}}",
+      "thankYouHint": "Your tip was sent successfully.",
+      "leaveTipFor": "Leave a tip for {{name}}",
+      "leaveTipHint": "Show your appreciation for great service.",
+      "confirmingTipFor": "Confirming tip for {{name}}",
+      "confirmingTipHint": "This usually takes a few seconds. Please keep this page open."
     },
     "errors": {
       "employeeWrongVenue": "This team member does not belong to this venue.",
@@ -1155,10 +1174,32 @@
     "staffLanding": {
       "loadingProfile": "Loading profile…",
       "openingTipScreen": "Opening tip screen…",
+      "leaveTip": "Show your appreciation",
+      "leaveTipButton": "Leave a tip",
       "goHome": "Go home",
       "monthlyGoalTitle": "Monthly goal",
       "tipAgainWithAmount": "Tip again ({{amount}})",
       "chooseDifferentAmount": "Choose a different amount"
+    },
+    "loading": {
+      "venueDetails": "Loading venue details…",
+      "tipDetails": "Loading tip details…",
+      "teamMembers": "Loading team members…",
+      "teamDirectory": "Loading team directory…",
+      "tableDetails": "Loading table details…",
+      "locationDetails": "Loading location details…",
+      "employeeProfile": "Loading profile…",
+      "openingTipScreen": "Opening tip screen…",
+      "openingTipFlow": "Opening tip flow…",
+      "validatingScan": "Validating your scan…",
+      "redirecting": "Redirecting…",
+      "preparingCheckout": "Preparing checkout…",
+      "redirectingCheckout": "Redirecting to secure checkout…",
+      "verifyingPayment": "Verifying payment…",
+      "confirmingTip": "Confirming your tip…",
+      "confirmingTipHint": "This usually takes a few seconds. Please keep this page open.",
+      "finishingUp": "Finishing up…",
+      "submittingFeedback": "Submitting feedback…"
     },
     "docTitle": {
       "tip": "Tip {{name}} · CareTip",
@@ -1172,7 +1213,7 @@
       "openPayment": "Open payment",
       "openRating": "Open rating / feedback"
     },
-    "venueLoading": "You are at {{location}}, {{table}}. Loading…",
+    "venueLoading": "You are at {{location}}, {{table}}. Loading tip details…",
     "atVenue": "You are at {{location}}, {{table}}.",
     "qrLanding": {
       "tipHeading": "Tip {{name}}",
@@ -1210,6 +1251,13 @@
       "amountPlaceholder": "0.00",
       "totalTip": "Total Tip",
       "continuePayment": "Continue to Payment"
+    },
+    "selectEmployee": {
+      "noBusinessContextTitle": "Start from a venue QR",
+      "noBusinessContextDesc": "Scan the CareTip QR at your table or counter so we know which team you are tipping. You can also open the link from your receipt or table card.",
+      "noBusinessContextCta": "Go to home",
+      "emptyTeam": "No team members found.",
+      "topRatedBadge": "Top"
     },
     "tableLanding": {
       "loading": "Loading table…",
@@ -1281,10 +1329,11 @@
     },
     "completion": {
       "thankYouTipping": "Thank you for tipping {{name}}",
+      "stepCompleteTitle": "You're all set",
       "feedbackReceived": "Your feedback has been received and shared with the team.",
       "tipAnotherMember": "Tip another team member",
       "exit": "Exit",
-      "processingTitle": "Confirming your payment…",
+      "processingTitle": "Confirming your tip…",
       "processingSubtitle": "This usually takes a few seconds. Please keep this page open.",
       "notVerifiedTitle": "Payment not confirmed",
       "notVerifiedDesc": "We could not verify a completed payment for this session."
@@ -1317,7 +1366,7 @@
       "feedbackFor": "Feedback for",
       "skip": "Skip",
       "skipAria": "Skip feedback",
-      "verifying": "Verifying…",
+      "verifying": "Verifying payment…",
       "needsSession": "This feedback page needs a payment session id. You can close this page safely.",
       "tapToRate": "Tap to rate",
       "optionalForStaff": "Optional feedback for the staff member.",
@@ -1335,6 +1384,7 @@
       "namePlaceholder": "e.g. Alex",
       "footerHint": "Your feedback is optional and helps the team improve.",
       "submit": "Submit feedback",
+      "submitting": "Submitting feedback…",
       "tags": {
         "excellentService": "Excellent service",
         "veryFriendly": "Very friendly",
@@ -2407,7 +2457,7 @@
       "generating": "Generating…",
       "setTipGoal": "Set tip goal",
       "statTotalEarnings": "Total earnings",
-      "statAvailableBalance": "Available balance",
+      "statMonthEarnings": "This month",
       "statTotalSupporters": "Total supporters",
       "accountOverviewLabel": "Account overview, all time"
     },
@@ -3398,7 +3448,15 @@
       "signingIn": "Signing in…",
       "bothRequired": "Please enter both email and password.",
       "businessStaffLink": "Business or staff sign in",
-      "redirecting": "Opening your admin dashboard…"
+      "redirecting": "Opening your admin dashboard…",
+      "mfaSubtitle": "Enter the code from your authenticator app to continue.",
+      "mfaSetupHint": "Scan this QR code with your authenticator app, then enter the 6-digit code.",
+      "mfaCodePlaceholder": "6-digit code",
+      "mfaCodeRequired": "Enter the 6-digit code from your authenticator app.",
+      "mfaContinue": "Continue",
+      "mfaVerifying": "Verifying…",
+      "mfaBack": "Back to sign in",
+      "impersonationExitFailed": "We couldn't restore your admin session. Please sign in again."
     },
     "announcements": {
       "centerTitle": "Communication center",
@@ -3564,7 +3622,8 @@
       "toastStatusUpdated": "Status updated.",
       "toastDetailsSaved": "Business details saved.",
       "toastLogoUploaded": "Logo uploaded successfully.",
-      "toastDocUploaded": "Verification document uploaded successfully."
+      "toastDocUploaded": "Verification document uploaded successfully.",
+      "rejectNotePrompt": "Rejection reason (optional):"
     },
     "businessDetailPage": {
       "backLink": "Back to businesses",

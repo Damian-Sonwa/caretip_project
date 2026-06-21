@@ -13,6 +13,11 @@ import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
+import {
+  type CustomerEntryPhase,
+  scheduleCustomerRouteRedirect,
+} from "../../lib/customerRouteTransition";
+import { navFlashLog } from "../../lib/navigationFlashAudit";
 
 /**
  * /qr/employee/:employeeId — Deep link by employee id (parallel to `/staff/:slug`).
@@ -24,7 +29,7 @@ export function EmployeeQrEntryPage() {
   const { employeeId } = useParams<{ employeeId: string }>();
   const { setBusinessId, setEmployee, setStaffProfileSlug, setAmount } = useTipFlow();
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [phase, setPhase] = useState<CustomerEntryPhase>("loading");
   const [emp, setEmp] = useState<{ id: string; name: string; avatar?: string | null; businessId: string } | null>(
     null
   );
@@ -35,11 +40,13 @@ export function EmployeeQrEntryPage() {
     const raw = employeeId?.trim();
     if (!raw) {
       setError(t("tipFlow.errors.invalidLink"));
-      setLoading(false);
+      setPhase("error");
       return;
     }
     let cancelled = false;
+    navFlashLog("data_load_started", { path: `/qr/employee/${raw}`, route: "EmployeeQrEntryPage" });
     (async () => {
+      setPhase("loading");
       setError(null);
       try {
         const emp = await getEmployeeById(raw);
@@ -48,20 +55,26 @@ export function EmployeeQrEntryPage() {
         setBusinessId(emp.businessId);
         setEmployee(emp.id, emp.name, emp.avatar ?? undefined);
         setStaffProfileSlug(null);
+        navFlashLog("data_load_settled", { path: `/qr/employee/${raw}` });
         const d = getRepeatTipDataForBusiness(emp.businessId);
         if (d && d.employeeId === emp.id && !repeatDismissed) {
           setRepeatAmount(d.lastAmount);
-          setLoading(false);
+          setPhase("ready");
           return;
         }
         const qs = new URLSearchParams({ employeeId: emp.id });
         qs.set("direct", "1");
-        navigate(`/tip-amount?${qs.toString()}`, { replace: true });
+        setPhase("redirecting");
+        scheduleCustomerRouteRedirect(`/tip-amount?${qs.toString()}`, navigate, {
+          replace: true,
+          from: `/qr/employee/${raw}`,
+        });
       } catch (e) {
         logClientError("EmployeeQrEntryPage", e);
-        if (!cancelled) setError(toUserFriendlyMessage(e));
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError(toUserFriendlyMessage(e));
+          setPhase("error");
+        }
       }
     })();
     return () => {
@@ -80,12 +93,16 @@ export function EmployeeQrEntryPage() {
     );
   }
 
-  if (loading) {
-    return <CareTipPageLoader variant="wait" message={t("common.openingTip")} />;
+  if (phase === "loading") {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.tipDetails")} />;
+  }
+
+  if (phase === "redirecting") {
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.openingTipFlow")} />;
   }
 
   if (!emp || repeatAmount == null) {
-    return <CareTipPageLoader variant="wait" message={t("common.openingTip")} />;
+    return <CareTipPageLoader variant="wait" message={t("tipFlow.loading.openingTipFlow")} />;
   }
 
   return (
