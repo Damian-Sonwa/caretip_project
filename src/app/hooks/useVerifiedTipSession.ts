@@ -76,7 +76,7 @@ export function useVerifiedTipSession(
 
     let cancelled = false;
     let tries = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: number | undefined;
 
     const finishReady = (ctx: TipSessionReadyContext) => {
       markCustomerFlowEntered();

@@ -113,9 +113,9 @@ export const SupportTicketDetailPage = lazyNamed(
   () => import("../pages/shared/SupportTicketDetailPage"),
   "SupportTicketDetailPage",
 );
-export const TipsActivityPage = lazyNamed(
-  () => import("../pages/shared/TipsActivityPage"),
-  "TipsActivityPage",
+export const BusinessTipsActivityPage = lazyNamed(
+  () => import("../pages/business/BusinessTipsActivityPage"),
+  "BusinessTipsActivityPage",
 );
 export const TransactionsPage = lazyNamed(
   () => import("../components/TransactionsPage"),

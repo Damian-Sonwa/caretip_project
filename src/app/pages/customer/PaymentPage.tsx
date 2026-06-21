@@ -22,6 +22,7 @@ import { PaymentMethodsAvailable } from "../../components/payments/PaymentMethod
 import { formatEur } from "../../lib/formatEur";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerFlowShell } from "./CustomerFlowShell";
+import { redirectToStripeCheckoutUrl } from "../../lib/safeCheckoutRedirect";
 
 export function PaymentPage() {
   const { t } = useTranslation();
@@ -199,7 +200,7 @@ export function PaymentPage() {
         employeeName: employeeName ?? null,
         amount: tipAmountVal,
       });
-      window.location.href = url;
+      redirectToStripeCheckoutUrl(url);
     } catch (err) {
       logClientError("PaymentPage.checkout", err);
       toast.error(toUserFriendlyMessage(err));

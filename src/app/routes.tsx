@@ -271,7 +271,7 @@ const routes: RouteObject[] = [
       { path: 'qr-code-management', lazy: routeLazy(() => import('./pages/business/QRCodeManagementPage'), 'QRCodeManagementPage') },
       { path: 'locations', lazy: routeLazy(() => import('./pages/business/LocationsPage'), 'LocationsPage') },
       { path: 'tables', lazy: routeLazy(() => import('./pages/business/TablesPage'), 'TablesPage') },
-      { path: 'transactions', lazy: routeLazy(() => import('./pages/shared/TipsActivityPage'), 'TipsActivityPage') },
+      { path: 'transactions', lazy: routeLazy(() => import('./pages/business/BusinessTipsActivityPage'), 'BusinessTipsActivityPage') },
       { path: 'customer-feedback', lazy: routeLazy(() => import('./pages/business/CustomerFeedbackPage'), 'CustomerFeedbackPage') },
       { path: 'profile-settings', element: <Navigate to="/dashboard/settings?section=general" replace /> },
       { path: 'support', lazy: routeLazy(() => import('./pages/business/BusinessSupportPage'), 'BusinessSupportPage') },

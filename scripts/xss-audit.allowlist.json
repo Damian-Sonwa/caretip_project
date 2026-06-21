@@ -58,10 +58,10 @@
       "reason": "Literal same-origin path after platform admin login"
     },
     {
-      "file": "src/app/pages/customer/PaymentPage.tsx",
-      "line": 281,
-      "pattern": "window.location.href",
-      "reason": "Stripe Checkout redirect URL from trusted API response"
+      "file": "src/app/lib/safeCheckoutRedirect.ts",
+      "line": 17,
+      "pattern": "window.location.assign",
+      "reason": "HTTPS checkout.stripe.com only; URL validated before redirect from trusted API response"
     },
     {
       "file": "src/app/pages/business/BusinessProfilePage.tsx",

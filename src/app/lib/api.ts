@@ -817,14 +817,7 @@ export async function logoutAPIWithTimeout(options?: {
   const apiStartMs = performance.now();
   cancelPendingSessionRefresh();
 
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    "X-CareTip-Client": "1",
-  };
   const token = options?.capturedToken?.trim() || getToken()?.trim();
-  if (token) {
-    headers.Authorization = `Bearer ${token.trim()}`;
-  }
 
   let timedOut = false;
   authDebug("logout_api_start", {
@@ -842,9 +835,17 @@ export async function logoutAPIWithTimeout(options?: {
     }, timeoutMs);
 
     try {
+      const logoutHeaders: Record<string, string> = {
+        "Content-Type": "application/json",
+        "X-CareTip-Client": "1",
+      };
+      if (token) {
+        logoutHeaders.Authorization = `Bearer ${token.trim()}`;
+      }
+
       await fetch(apiPath("/api/auth/logout"), {
         method: "POST",
-        headers,
+        headers: logoutHeaders,
         body: EMPTY_JSON_BODY,
         credentials: "include",
         signal: controller.signal,
