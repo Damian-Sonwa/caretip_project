@@ -1,4 +1,5 @@
 import { OAuth2Client } from "google-auth-library";
+import { BusinessSubscriptionTier } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import {
   authResultForUserRecord,
@@ -11,6 +12,7 @@ import { registerEmployeeWithInvite } from "./employeeInvite.service.js";
 import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypass.service.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
+import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
 
 const businessIncludeForOAuth = {
   select: {
@@ -279,6 +281,13 @@ export async function authenticateWithOAuth(
             slug,
             businessType: businessType || null,
             location: location || null,
+            subscriptionTier: BusinessSubscriptionTier.basic,
+            subscription: {
+              create: buildNestedSubscriptionCreateData({
+                subscriptionTier: BusinessSubscriptionTier.basic,
+                source: "oauth_signup",
+              }),
+            },
           },
         },
       },

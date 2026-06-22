@@ -9,6 +9,7 @@ import { HOW_IT_WORKS_STEPS } from "@/components/public/howItWorksFlow";
 import { HowItWorksTimelineStep } from "@/components/public/HowItWorksTimelineStep";
 import { JourneyPillarIcon } from "@/components/public/JourneyPillarIcon";
 import { howItWorksPageUi } from "@/components/public/howItWorksPageUi";
+import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
 
@@ -33,30 +34,39 @@ export function HowItWorksPage() {
 
   return (
     <PublicPageShell maxWidth="wide">
-      <PublicPageHeader
-        centered
-        introLayout="heroGroup"
-        className={howItWorksPageUi.heroHeader}
-        title={t("staticPages.howItWorks.title")}
-        subtitle={t("staticPages.howItWorks.subtitle")}
-        afterSubtitle={
-          journeyPillars.length > 0 ? (
-            <ul className={howItWorksPageUi.journeyList}>
-              {journeyPillars.map((pillar) => (
-                <li key={`${pillar.icon}-${pillar.label}`} className={howItWorksPageUi.journeyListItem}>
-                  <JourneyPillarIcon iconKey={pillar.icon} />
-                  <span className="text-base font-medium leading-snug text-neutral-800 sm:text-lg dark:text-neutral-200">
-                    {pillar.label}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          ) : null
-        }
-        showTrustChips={false}
-      />
+      <main
+        id="how-it-works"
+        className={cn(howItWorksPageUi.page, publicPagesBrandUi.pageAccent)}
+        aria-label={t("nav.howItWorks")}
+      >
+      <div className="caretip-how-marketing-hero caretip-public-marketing-hero text-center">
+        <PublicPageHeader
+          centered
+          introLayout="heroGroup"
+          className={howItWorksPageUi.heroHeader}
+          title={t("staticPages.howItWorks.title")}
+          subtitle={t("staticPages.howItWorks.subtitle")}
+          afterSubtitle={
+            journeyPillars.length > 0 ? (
+              <div className={publicPagesBrandUi.journeyBand}>
+                <ul className={howItWorksPageUi.journeyList}>
+                  {journeyPillars.map((pillar) => (
+                    <li key={`${pillar.icon}-${pillar.label}`} className={howItWorksPageUi.journeyListItem}>
+                      <JourneyPillarIcon iconKey={pillar.icon} variant="obsidian" />
+                      <span className="caretip-how-journey-list__label font-medium leading-snug sm:text-base">
+                        {pillar.label}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null
+          }
+          showTrustChips={false}
+        />
+      </div>
 
-      <div className={howItWorksPageUi.timeline}>
+      <div className={cn(howItWorksPageUi.timeline, "caretip-how-timeline")}>
         {HOW_IT_WORKS_STEPS.map((def, index) => (
           <HowItWorksTimelineStep
             key={def.step}
@@ -74,19 +84,29 @@ export function HowItWorksPage() {
         ))}
       </div>
 
-      <section className={cn(publicPageUi.sectionGap, "border-t border-neutral-200/80 pt-10 sm:pt-12 dark:border-neutral-800")}>
-        <h2 className={cn(publicPageUi.sectionTitle, "mb-6 text-center sm:mb-8")}>
+      <section
+        className={cn(
+          publicPageUi.sectionGap,
+          "caretip-how-trust-section border-t border-neutral-200/80 pt-10 sm:pt-12 dark:border-neutral-800",
+        )}
+      >
+        <h2
+          className={cn(
+            publicPageUi.sectionTitle,
+            "caretip-public-marketing-section-title mb-6 text-center sm:mb-8",
+          )}
+        >
           {t("staticPages.howItWorks.trustTitle")}
         </h2>
         <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-6">
-          <div className={cn(publicPageUi.card, publicPageUi.cardPad)}>
-            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
-              <Shield className="h-5 w-5 text-primary" aria-hidden />
+          <div className={cn(publicPageUi.card, publicPageUi.cardPad, publicPagesBrandUi.warmDarkCard)}>
+            <div className={cn("mb-4", publicPagesBrandUi.warmDarkCardIcon)}>
+              <Shield className="h-5 w-5" aria-hidden />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-neutral-950 dark:text-neutral-50">
+            <h3 className={cn("mb-2 text-lg font-semibold", publicPagesBrandUi.warmDarkCardTitle)}>
               {t("staticPages.howItWorks.trust1Title")}
             </h3>
-            <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
+            <p className={cn("text-sm leading-relaxed", publicPagesBrandUi.warmDarkCardBody)}>
               {t("staticPages.howItWorks.trust1Body")}
             </p>
           </div>
@@ -105,15 +125,21 @@ export function HowItWorksPage() {
         </div>
       </section>
 
-      <section className={cn(publicPageUi.sectionGap, publicPageUi.ctaPanel)}>
-        <h3 className="mb-2 text-2xl font-semibold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
-          {t("staticPages.howItWorks.ctaTitle")}
-        </h3>
-        <p className="mx-auto mb-6 max-w-xl text-neutral-700 dark:text-neutral-300">{t("staticPages.howItWorks.ctaBody")}</p>
-        <Link to="/pricing" className={publicPageUi.ctaPrimary}>
-          {t("staticPages.howItWorks.ctaPricing")}
-        </Link>
+      <section className={cn(publicPageUi.sectionGap, "pb-4 sm:pb-6")}>
+        <div className={publicPagesBrandUi.warmDarkCta}>
+          <h3 className={publicPagesBrandUi.warmDarkCtaTitle}>{t("staticPages.howItWorks.ctaTitle")}</h3>
+          <p className={publicPagesBrandUi.warmDarkCtaBody}>{t("staticPages.howItWorks.ctaBody")}</p>
+          <div className={publicPagesBrandUi.warmDarkCtaActions}>
+            <Link to="/contact?intent=demo" className={publicPagesBrandUi.ctaButtonPrimary}>
+              {t("nav.requestDemo")}
+            </Link>
+            <Link to="/pricing" className={publicPagesBrandUi.ctaButtonSecondary}>
+              {t("staticPages.howItWorks.ctaPricing")}
+            </Link>
+          </div>
+        </div>
       </section>
+      </main>
     </PublicPageShell>
   );
 }

@@ -1,0 +1,349 @@
+/**
+ * CareTip public marketing pages — strategic orange-black brand accents.
+ * Used on How It Works, Features, and reusable warm-dark panels.
+ */
+
+:root {
+  --caretip-warm-dark-bg: linear-gradient(180deg, #161412 0%, #100f0d 42%, #0e0d0b 78%, #0c0b0a 100%);
+  --caretip-warm-dark-border: rgb(233 120 28 / 0.28);
+  --caretip-warm-dark-glow: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgb(233 120 28 / 0.14) 0%,
+    transparent 58%
+  );
+}
+
+/* —— Page atmosphere —— */
+.caretip-public-page-accent {
+  position: relative;
+}
+
+.caretip-public-page-accent::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -1rem;
+  height: 20rem;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    rgb(233 120 28 / 0.06) 0%,
+    transparent 68%
+  );
+  mask-image: linear-gradient(180deg, black 0%, transparent 92%);
+}
+
+.caretip-how-it-works-page > *,
+.caretip-features-page > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— Warm-dark CTA panel —— */
+.caretip-public-warm-dark-cta {
+  position: relative;
+  overflow: hidden;
+  margin-inline: auto;
+  max-width: 40rem;
+  padding: 2.5rem 1.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--caretip-warm-dark-border);
+  background: var(--caretip-warm-dark-bg);
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 20px 48px -20px rgb(14 13 11 / 0.45);
+}
+
+.caretip-public-warm-dark-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-warm-dark-glow);
+}
+
+html.dark .caretip-public-warm-dark-cta {
+  border-color: rgb(233 120 28 / 0.32);
+  background: linear-gradient(180deg, #111010 0%, #0c0c0c 42%, #0a0a0a 78%, #090909 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 20px 48px -20px rgb(0 0 0 / 0.5);
+}
+
+.caretip-public-warm-dark-cta__title {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: rgb(250 250 250);
+}
+
+.caretip-public-warm-dark-cta__body {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.75rem;
+  margin-inline: auto;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgb(163 163 163);
+}
+
+.caretip-public-warm-dark-cta__actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-public-warm-dark-cta__actions {
+    flex-direction: row;
+    gap: 0.875rem;
+  }
+}
+
+/* —— Warm-dark accent card —— */
+.caretip-public-warm-dark-card {
+  position: relative;
+  overflow: hidden;
+  border-color: var(--caretip-warm-dark-border) !important;
+  background: var(--caretip-warm-dark-bg) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 12px 32px -18px rgb(14 13 11 / 0.35) !important;
+}
+
+.caretip-public-warm-dark-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-warm-dark-glow);
+  opacity: 0.85;
+}
+
+.caretip-public-warm-dark-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-public-warm-dark-card__icon {
+  display: flex;
+  height: 2.75rem;
+  width: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(233 120 28 / 0.28);
+  background: linear-gradient(148deg, #141414 0%, #231810 46%, #0c0806 100%);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.18),
+    0 8px 18px -10px rgb(233 120 28 / 0.35),
+    inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+.caretip-public-warm-dark-card__icon svg {
+  color: rgb(251 191 36);
+}
+
+.caretip-public-warm-dark-card__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-public-warm-dark-card__body {
+  color: rgb(163 163 163);
+}
+
+/* —— Trust strip (Features hero) —— */
+.caretip-public-warm-dark-trust-strip {
+  position: relative;
+  overflow: hidden;
+  margin-top: 1.25rem;
+  display: inline-flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 1rem;
+  border: 1px solid var(--caretip-warm-dark-border);
+  background: var(--caretip-warm-dark-bg);
+  padding: 0.75rem 1rem;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 10px 28px -16px rgb(14 13 11 / 0.32);
+}
+
+.caretip-public-warm-dark-trust-strip::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-warm-dark-glow);
+  opacity: 0.75;
+}
+
+.caretip-public-warm-dark-trust-strip ul {
+  position: relative;
+  z-index: 1;
+}
+
+/* Hero pills inside orange-black strip */
+.caretip-public-hero-pills.caretip-public-warm-dark-trust-strip {
+  display: block;
+  width: 100%;
+  max-width: 22rem;
+  margin-inline: auto;
+  padding: 0.75rem 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-public-hero-pills.caretip-public-warm-dark-trust-strip {
+    max-width: 36rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+.caretip-public-warm-dark-trust-strip .caretip-public-hero-pills__list > li > span {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(212 212 212);
+  box-shadow: none;
+  text-transform: none;
+}
+
+.caretip-public-warm-dark-trust-strip .caretip-public-hero-pills__list > li > span > span[aria-hidden] {
+  background: rgb(251 191 36);
+}
+
+html.dark .caretip-public-warm-dark-trust-strip .caretip-public-hero-pills__list > li > span {
+  border-color: rgb(255 255 255 / 0.1);
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(212 212 212);
+}
+
+/* —— How It Works journey band —— */
+.caretip-how-journey-band {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  max-width: 36rem;
+  padding: 1rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid var(--caretip-warm-dark-border);
+  background: var(--caretip-warm-dark-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 10px 28px -16px rgb(14 13 11 / 0.3);
+}
+
+.caretip-how-journey-band::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-warm-dark-glow);
+  opacity: 0.7;
+}
+
+.caretip-how-journey-band .caretip-how-journey-list {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.caretip-how-journey-band .caretip-how-journey-list__label {
+  color: rgb(229 229 229);
+  text-wrap: balance;
+}
+
+/* —— Obsidian icon shell (journey pillars) —— */
+.caretip-public-obsidian-icon {
+  display: flex;
+  height: 2rem;
+  width: 2rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.625rem;
+  border: 1px solid rgb(233 120 28 / 0.28);
+  background: linear-gradient(148deg, #141414 0%, #231810 46%, #0c0806 100%);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.18),
+    0 6px 14px -8px rgb(233 120 28 / 0.3),
+    inset 0 1px 0 rgb(255 255 255 / 0.07);
+}
+
+.caretip-public-obsidian-icon svg,
+.caretip-public-obsidian-icon .caretip-care-icon {
+  color: rgb(239 135 40);
+}
+
+@media (min-width: 640px) {
+  .caretip-public-obsidian-icon {
+    height: 2.25rem;
+    width: 2.25rem;
+  }
+}
+
+/* —— Features showcase brand card —— */
+.caretip-feature-showcase-card--brand {
+  border-color: var(--caretip-warm-dark-border) !important;
+  background: var(--caretip-warm-dark-bg) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 16px 40px -18px rgb(14 13 11 / 0.38) !important;
+}
+
+.caretip-feature-showcase-card--brand::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-warm-dark-glow);
+  opacity: 0.8;
+  z-index: 0;
+}
+
+.caretip-feature-showcase-card--brand > * {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-feature-showcase-card--brand .caretip-feature-showcase-card__tag {
+  border-color: rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(212 212 212);
+}
+
+.caretip-feature-showcase-card--brand .caretip-feature-showcase-card__tag svg {
+  color: rgb(251 191 36);
+}
+
+.caretip-feature-showcase-card--brand .caretip-feature-showcase-card__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-feature-showcase-card--brand .caretip-feature-showcase-card__desc {
+  color: rgb(163 163 163);
+}
+
+.caretip-feature-showcase-card--brand:hover {
+  border-color: rgb(233 120 28 / 0.38) !important;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 20px 48px -16px rgb(233 120 28 / 0.14) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-feature-showcase-card--brand:hover {
+    transform: none;
+  }
+}

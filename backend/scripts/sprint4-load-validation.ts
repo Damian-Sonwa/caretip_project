@@ -80,6 +80,7 @@ async function seedFixtures(tag: string) {
             slug,
             verificationStatus: "verified",
             timezone: "Europe/Berlin",
+            subscriptionTier: "premium",
           },
         },
       },

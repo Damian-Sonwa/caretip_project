@@ -34,8 +34,8 @@ export function BusinessLandingSection() {
       benefits={benefits}
       benefitsVariant="showcase"
       cta={{
-        label: t("landing.businessSection.cta"),
-        to: "/signup",
+        label: t("nav.requestDemo"),
+        to: "/contact?intent=demo",
       }}
       visual={
         <LandingShowcaseCoverImage

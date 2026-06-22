@@ -56,16 +56,16 @@ export function HowItWorksTimelineStep({
           <div className="min-w-0 flex-1 space-y-3">
             <div className="space-y-2">
               <div className="flex flex-wrap items-center gap-2.5">
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary sm:text-[11px]">
+                <span className="caretip-how-step__badge inline-flex items-center gap-1.5 rounded-full border border-primary/15 bg-primary/[0.08] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-primary sm:text-[11px]">
                   <Icon className="h-3 w-3" aria-hidden />
                   {badge}
                 </span>
               </div>
-              <h2 className="text-xl font-semibold tracking-[-0.02em] text-neutral-950 sm:text-2xl dark:text-neutral-50">
+              <h2 className="caretip-how-step__title text-xl font-semibold tracking-[-0.02em] text-neutral-950 sm:text-2xl dark:text-neutral-50">
                 {title}
               </h2>
             </div>
-            <div className="space-y-4 text-[0.9375rem] leading-[1.68] text-neutral-700 dark:text-neutral-300">
+            <div className="caretip-how-step__body space-y-4 text-[0.9375rem] leading-[1.68] text-neutral-700 dark:text-neutral-300">
               {children}
             </div>
           </div>

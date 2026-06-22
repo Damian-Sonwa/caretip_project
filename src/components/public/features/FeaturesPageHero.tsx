@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import dashboardImg from "../../../../images/new_dashboard.png";
 import { PublicTrustChips } from "@/components/public/PublicTrustChips";
 import { PublicPageBackLink } from "@/components/public/PublicPageBackLink";
+import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { cn } from "@/lib/utils";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
@@ -12,12 +13,12 @@ export function FeaturesPageHero() {
   const { t } = useTranslation();
 
   return (
-    <header className={cn(publicPageUi.header, "relative mb-2 sm:mb-4")}>
+    <header className={cn(publicPageUi.header, "caretip-features-hero relative mb-2 sm:mb-4")}>
       <PublicPageBackLink className="relative z-[2]" />
 
       <div
         className={cn(
-          "caretip-public-hero-enter relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70",
+          "caretip-features-hero-card caretip-public-hero-enter relative overflow-hidden rounded-2xl border border-neutral-200/70 bg-white/80 shadow-[0_12px_48px_-24px_rgba(15,23,42,0.14)] sm:rounded-3xl dark:border-neutral-800 dark:bg-neutral-950/70",
         )}
       >
         <div
@@ -41,20 +42,34 @@ export function FeaturesPageHero() {
           decoding="async"
         />
 
-        <div className="relative z-[1] flex flex-col items-center px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-10 lg:py-12">
-          <h1 className={cn(publicPageUi.title, "mx-auto max-w-3xl text-balance")}>
+        <div className="caretip-features-hero-inner relative z-[1] flex flex-col items-center px-5 py-8 text-center sm:px-8 sm:py-10 lg:px-10 lg:py-12">
+          <h1 className={cn(publicPageUi.title, "caretip-features-hero__title mx-auto max-w-3xl text-balance")}>
             {t("staticPages.features.title")}
           </h1>
-          <div className="mx-auto mt-4 flex w-full max-w-2xl flex-col gap-4">
-            <p className={cn(publicPageUi.subtitle, "text-balance font-semibold text-neutral-900 dark:text-neutral-100")}>
+          <div className="caretip-features-hero__copy mx-auto mt-4 flex w-full max-w-2xl flex-col gap-4">
+            <p
+              className={cn(
+                publicPageUi.subtitle,
+                "caretip-features-hero__lead text-balance font-semibold text-neutral-900 dark:text-neutral-100",
+              )}
+            >
               {t("staticPages.features.subtitleLead")}
             </p>
-            <p className={cn(publicPageUi.subtitle, "text-pretty leading-[1.7]")}>
+            <p className={cn(publicPageUi.subtitle, "caretip-features-hero__body text-pretty leading-[1.7]")}>
               {t("staticPages.features.subtitleBody")}
             </p>
           </div>
-          <div className="mx-auto mt-5 inline-flex max-w-full flex-wrap justify-center gap-2 rounded-2xl border border-neutral-200/60 bg-white/70 px-3 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.8)] backdrop-blur-sm dark:border-neutral-700/80 dark:bg-neutral-900/50">
-            <PublicTrustChips variant="features" className="justify-center gap-2" />
+          <div
+            className={cn(
+              "caretip-features-hero-pills caretip-public-hero-pills mx-auto mt-5 max-w-full",
+              publicPagesBrandUi.warmDarkTrustStrip,
+            )}
+          >
+            <PublicTrustChips
+              variant="features"
+              tone="onDark"
+              className="caretip-public-hero-pills__list justify-center gap-2"
+            />
           </div>
         </div>
       </div>

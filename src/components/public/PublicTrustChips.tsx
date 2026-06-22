@@ -15,9 +15,11 @@ const CHIP_KEYS: Record<TrustChipVariant, readonly string[]> = {
 type PublicTrustChipsProps = {
   className?: string;
   variant?: TrustChipVariant;
+  /** Chip surface style — `onDark` for orange-black panels */
+  tone?: "light" | "onDark";
 };
 
-export function PublicTrustChips({ className, variant = "default" }: PublicTrustChipsProps) {
+export function PublicTrustChips({ className, variant = "default", tone = "light" }: PublicTrustChipsProps) {
   const { t } = useTranslation();
   const nsMap = {
     default: "staticPages.common.trustChips",
@@ -37,8 +39,17 @@ export function PublicTrustChips({ className, variant = "default" }: PublicTrust
     >
       {keys.map((key) => (
         <li key={key}>
-          <span className={publicPageUi.trustChip}>
-            <span className={publicPageUi.trustChipDot} aria-hidden />
+          <span
+            className={cn(
+              publicPageUi.trustChip,
+              tone === "onDark" &&
+                "border-white/10 bg-white/[0.06] text-neutral-300 shadow-none dark:border-white/10 dark:bg-white/[0.06] dark:text-neutral-300",
+            )}
+          >
+            <span
+              className={cn(publicPageUi.trustChipDot, tone === "onDark" && "bg-amber-400")}
+              aria-hidden
+            />
             {t(`${ns}.${key}`)}
           </span>
         </li>

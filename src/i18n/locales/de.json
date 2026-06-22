@@ -112,32 +112,124 @@
       }
     },
     "contact": {
-      "title": "Kontakt",
-      "subtitle": "Fragen zu CareTip? Wir helfen Ihnen gerne.",
-      "formTitle": "Nachricht senden",
-      "labelName": "Vollständiger Name",
-      "placeholderName": "Max Mustermann",
-      "labelEmail": "E-Mail-Adresse",
-      "placeholderEmail": "sie@beispiel.de",
-      "labelSubject": "Betreff",
-      "placeholderSubject": "Wobei können wir helfen?",
-      "labelMessage": "Nachricht",
-      "placeholderMessage": "Beschreiben Sie Ihr Anliegen…",
-      "submit": "Nachricht senden",
-      "asideTitle": "So erreichen Sie uns",
-      "emailHeading": "E-Mail",
-      "phoneHeading": "Telefon",
-      "phoneLine1": "+1 (555) TIP-CARE",
-      "phoneLine2": "Support rund um die Uhr",
-      "chatHeading": "Live-Chat",
-      "chatLine": "Rund um die Uhr verfügbar",
-      "chatCta": "Chat starten",
-      "hqHeading": "Hauptsitz",
-      "hqLine1": "100 Hospitality Plaza",
-      "hqLine2": "New York, NY 10013",
-      "faqTeaserTitle": "Schnelle Antworten?",
-      "faqTeaserBody": "In den FAQs finden Sie sofort Antworten auf häufige Fragen.",
-      "faqTeaserLink": "Zu den FAQs"
+      "pageAria": "CareTip kontaktieren",
+      "eyebrow": "Kontakt",
+      "headline": "Wie können wir helfen?",
+      "supportingText": "Wir unterstützen Gastronomie-Teams dabei, das Beste aus CareTip herauszuholen.",
+      "backToChooser": "Zurück zu den Kontaktoptionen",
+      "trust": {
+        "aria": "Vertrauenssignale Kontakt",
+        "response24h": "Antwort innerhalb von 24 Stunden",
+        "gdpr": "DSGVO-konform",
+        "stripe": "Sichere Stripe-Plattform",
+        "trusted": "Vertraut von Gastronomie-Teams"
+      },
+      "socialProof": {
+        "tagline": "Service-Teams erhalten Anerkennung durch sicheres digitales Trinkgeld.",
+        "segmentsAria": "Branchen, die wir bedienen",
+        "segments": "Gastronomie-Teams · Cafés · Restaurants · Hotels · Bars · Hebammen · Service-Betriebe"
+      },
+      "reassurance": {
+        "demo": {
+          "aria": "Vertrieb Kontakt Hilfe",
+          "title": "Noch Fragen vor der Buchung?",
+          "body": "Fragen zu Preisen, Onboarding, Integrationen oder Rollout?",
+          "team": "Unser Team hilft Ihnen gerne weiter.",
+          "email": "sales@caretip.de",
+          "responseTime": "Durchschnittliche Antwortzeit: unter 24 Stunden"
+        },
+        "support": {
+          "aria": "Support Kontakt Hilfe",
+          "title": "Lieber direkt per E-Mail?",
+          "body": "Senden Sie Ihre Frage und unser Support-Team meldet sich mit den nächsten Schritten.",
+          "team": "Wir helfen bei Konto-, Zahlungs- und technischen Fragen.",
+          "email": "support@caretip.de",
+          "responseTime": "Durchschnittliche Antwortzeit: unter 24 Stunden"
+        }
+      },
+      "intent": {
+        "demo": {
+          "title": "Demo anfordern",
+          "description": "Für Restaurants, Hotels, Cafés, Bars, Salons, Hebammen und Service-Teams, die Trinkgelder und Anerkennung im Team stärken möchten."
+        },
+        "support": {
+          "title": "Support kontaktieren",
+          "description": "Hilfe zu Konto, Zahlungen, Onboarding, technischen Fragen oder Produktfeedback."
+        }
+      },
+      "demo": {
+        "title": "Demo anfordern",
+        "bullets": [
+          "CareTip passend zu Ihrem Betrieb erleben",
+          "QR-Trinkgeld in der Praxis verstehen",
+          "Anerkennungs-Workflows für Ihr Team kennenlernen",
+          "Reporting und Analysen erkunden",
+          "Preise und Rollout-Optionen besprechen"
+        ],
+        "altPrompt": "Sie brauchen Hilfe mit einem bestehenden Konto?",
+        "fields": {
+          "fullName": "Vollständiger Name",
+          "workEmail": "Geschäftliche E-Mail",
+          "businessName": "Unternehmensname",
+          "businessType": "Geschäftstyp",
+          "teamSize": "Teamgröße",
+          "message": "Nachricht"
+        },
+        "placeholders": {
+          "fullName": "Ihr Name",
+          "workEmail": "sie@ihrbetrieb.de",
+          "businessName": "Name Ihres Betriebs",
+          "businessType": "Geschäftstyp wählen",
+          "teamSize": "Teamgröße wählen",
+          "message": "Erzählen Sie uns von Betrieb, Teamgröße und Ihren Zielen mit CareTip…"
+        },
+        "teamSizes": {
+          "1-10": "1–10 Personen",
+          "11-50": "11–50 Personen",
+          "51-200": "51–200 Personen",
+          "200plus": "200+ Personen"
+        },
+        "submit": "Demo anfordern"
+      },
+      "support": {
+        "title": "Support kontaktieren",
+        "bullets": [
+          "Produkt- oder Kontofragen stellen",
+          "Probleme oder unerwartetes Verhalten melden",
+          "Feedback geben, um CareTip zu verbessern"
+        ],
+        "altPrompt": "Interesse an Tarifen, Preisen oder einer Demo?",
+        "fields": {
+          "name": "Name",
+          "email": "E-Mail",
+          "category": "Kategorie",
+          "message": "Nachricht"
+        },
+        "placeholders": {
+          "name": "Ihr Name",
+          "email": "sie@beispiel.de",
+          "category": "Kategorie wählen",
+          "message": "Beschreiben Sie Ihr Anliegen. Wir melden uns bei Ihnen…"
+        },
+        "categories": {
+          "account_login": "Konto & Login",
+          "payments_stripe": "Zahlungen & Stripe",
+          "qr_codes": "QR-Codes",
+          "team_setup": "Team-Einrichtung",
+          "technical": "Technisches Problem",
+          "product_feedback": "Produktfeedback",
+          "pricing": "Preisfrage",
+          "other": "Sonstiges"
+        },
+        "submit": "Nachricht senden"
+      },
+      "form": {
+        "submitting": "Wird gesendet…",
+        "successTitle": "Danke — wir haben Ihre Nachricht erhalten",
+        "demoSuccess": "Unser Team meldet sich innerhalb eines Werktags, um Ihre Demo zu planen.",
+        "supportSuccess": "Unser Support-Team meldet sich in Kürze mit den nächsten Schritten.",
+        "validation": "Bitte füllen Sie alle Pflichtfelder aus, bevor Sie absenden."
+      }
     },
     "features": {
       "title": "Caring is Tipping",
@@ -188,49 +280,206 @@
       "mock": {
         "tipAlert": "Neues Trinkgeld",
         "tipAmount": "24,00 €"
-      }
+      },
+      "ctaTitle": "Bereit, CareTip in Ihrem Betrieb zu erleben?",
+      "ctaBody": "Buchen Sie eine Demo mit unserem Team oder entdecken Sie Tarife für Gastronomie-Teams.",
+      "ctaPricing": "Preise ansehen"
     },
     "pricing": {
       "pageTitle": "Faire & transparente Abrechnung",
       "pageSubtitle": "Volle Flexibilität für Ihre Kunden: Bezahlt wird nur, was von Herzen kommt.",
+      "plansAria": "Tarife und Preisoptionen",
+      "plansEyebrow": "Tarife & Preise",
       "sectionTitle": "Echte Anerkennung lebt von einfachen Wegen.",
       "sectionSubtitle": "Mit CareTip machen Sie den herausragenden Service Ihres Teams sichtbar und belohnen ihn direkt. Begeistern Sie Ihre Gäste, stärken Sie die Motivation Ihrer Mitarbeiter und binden Sie Kunden an Ihre Marke.",
-      "popular": "Beliebt",
-      "ctaTitle": "Haben Sie Fragen zu CareTip?",
-      "ctaBody": "Unser Team begleitet Sie Schritt für Schritt bei der Einrichtung, dem Branding und der Auswahl des passenden Tarifmodells für Ihren Service-, Pflege- oder Logistikbereich.",
+      "plansBullet1": "Keine versteckten Gebühren",
+      "plansBullet2": "Transparente Preise pro Trinkgeld",
+      "plansBullet3": "Skalierbar mit Ihrem Wachstum",
+      "popular": "Am beliebtesten",
+      "ctaTitle": "Bereit für digitales Trinkgeld in Ihrem Team?",
+      "ctaBody": "Ob Salon oder Hotelgruppe — unser Team hilft beim Start mit QR-Trinkgeld, beim Onboarding Ihrer Mitarbeitenden und bei der Tarifwahl.",
+      "billing": {
+        "label": "Abrechnungszeitraum",
+        "aria": "Abrechnungszeitraum",
+        "monthly": "Monatlich",
+        "yearly": "Jährlich",
+        "saveBadge": "20 % sparen",
+        "comingSoonBadge": "Bald",
+        "yearlyComingSoon": "Jahrespreise mit 20 % Ersparnis kommen demnächst. Bis dahin gelten die angezeigten Monatspreise."
+      },
+      "industry": {
+        "label": "Geschäftstyp",
+        "selectAria": "Geschäftstyp auswählen",
+        "selectPlaceholder": "Geschäftstyp wählen",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "cafe": "Café",
+        "bar": "Bar",
+        "salon": "Salon",
+        "midwife": "Hebamme",
+        "freelancer": "Freelancer",
+        "logistics": "Logistik",
+        "healthcare_clinic": "Gesundheitsklinik",
+        "wellness_spa": "Wellness & Spa",
+        "other": "Sonstige"
+      },
+      "trust": {
+        "aria": "Vertrauenssignale Preise",
+        "noContracts": "Keine Langzeitverträge",
+        "transparent": "Transparente Preise",
+        "stripe": "Sichere Stripe-Zahlungen",
+        "setup": "Einrichtung in Minuten"
+      },
+      "faq": {
+        "title": "Häufig gestellte Fragen",
+        "subtitle": "Klare Antworten zu Gebühren, Abrechnung und dem Start mit CareTip.",
+        "items": [
+          {
+            "q": "Gibt es monatliche Plattformgebühren?",
+            "a": "Starter hat keine monatliche Plattformgebühr. Sie zahlen nur Stripe-Gebühren auf erfolgreiche Trinkgelder. Business bietet optional 29 €/Monat für erweiterte Funktionen. Enterprise wird an Ihr Volumen angepasst."
+          },
+          {
+            "q": "Was bedeutet Preis pro Trinkgeld?",
+            "a": "CareTip berechnet einen kleinen Prozentsatz plus die feste Stripe-Gebühr pro erfolgreichem Trinkgeld. Fehlgeschlagene Zahlungen werden nie berechnet. Die Sätze hängen vom Tarif ab."
+          },
+          {
+            "q": "Kann ich den Tarif wechseln, wenn mein Team wächst?",
+            "a": "Ja. Upgrades sind jederzeit möglich, wenn Sie Standorte oder Mitarbeitende hinzufügen. Unser Team unterstützt Sie beim Wechsel, damit Auswertungen und Auszahlungen konsistent bleiben."
+          },
+          {
+            "q": "Wie funktioniert die Jahresabrechnung?",
+            "a": "Jahresabrechnung mit 20 % Ersparnis wird demnächst eingeführt. Die angezeigten Preise gelten derzeit monatlich. Wir informieren Sie rechtzeitig vor jeder Änderung."
+          }
+        ]
+      },
       "tiers": {
         "starter": {
           "name": "Starter",
-          "feeNote": "pro erfolgreichem Trinkgeld (Stripe)",
-          "description": "Ideal für kleine Betriebe am Start mit QR-Trinkgeld.",
+          "tagline": "Für unabhängige Betriebe",
+          "feeNote": "pro erfolgreichem Trinkgeld via Stripe",
+          "description": "QR-Trinkgeld für Ihr Service-Team — ohne monatliche Plattformgebühr.",
           "f0": "Bis zu 10 Teammitglieder",
           "f1": "QR-Codes & persönliche Trinkgeld-Links",
           "f2": "Basis-Analysen",
           "f3": "E-Mail-Support",
           "f4": "Keine monatliche Plattformgebühr",
-          "button": "Kostenlos starten"
+          "f5": "Acryl-Ständer-Vorlagen (druckfertig)",
+          "button": "Demo anfragen"
         },
         "business": {
           "name": "Business",
-          "feeNote": "pro erfolgreichem Trinkgeld (Stripe)",
-          "description": "Für wachsende Teams mit mehr Kontrolle und Branding.",
+          "tagline": "Für wachsende Gastronomie-Teams",
+          "feeNote": "pro erfolgreichem Trinkgeld via Stripe",
+          "description": "Gebrandete Trinkgeld-Erlebnisse mit den Tools, die Restaurants und Hotels mit vielen Mitarbeitenden brauchen.",
           "f0": "Unbegrenzt Teammitglieder",
-          "f1": "Gebrandete QR & Exporte",
+          "f1": "Gebrandete QR-Codes & CSV-Export",
           "f2": "Prioritäts-Support",
           "f3": "Mehrere Standorte",
-          "f4": "29 €/Monat Plattformgebühr (optional)",
-          "button": "Loslegen"
+          "f4": "Optionale Plattformgebühr 29 €/Monat",
+          "f5": "Physische Acryl-Ständer (auf Anfrage)",
+          "button": "Demo anfragen"
         },
         "enterprise": {
           "name": "Enterprise",
+          "tagline": "Für Gruppen & Ketten",
           "feeNote": "volumenbasierte Trinkgeld-Abwicklung",
-          "description": "Für Gastronomie-Gruppen mit individuellen Auszahlungs- und Reporting-Anforderungen.",
+          "description": "Individuelle Auszahlungsabläufe, Reporting und Onboarding für Gastronomie-Gruppen im großen Maßstab.",
           "f0": "Alles aus Business",
           "f1": "Dediziertes Onboarding",
           "f2": "API & Integrationen",
           "f3": "Individuelle Gebührenstruktur",
-          "f4": "Account Manager",
+          "f4": "Dedizierter Account Manager",
+          "f5": "Gebrandete Merchandise-Kits",
           "button": "Vertrieb kontaktieren"
+        }
+      },
+      "socialProfessionsNote": "Individuelle Sonderkonditionen für Sozialberufe und Solo-Selbstständige sind auf Anfrage erhältlich.",
+      "audience": {
+        "operations": {
+          "pageTitle": "Preise für Hotels & Logistik",
+          "pageSubtitle": "Trinkgeld über Schichten, Standorte und Außendienst koordinieren — mit transparenten Gebühren pro Trinkgeld.",
+          "sectionTitle": "Für Teams mit mehreren Bereichen.",
+          "sectionSubtitle": "Hotels und Logistikunternehmen nutzen CareTip für Rezeption, Housekeeping, Fahrer und Lager — ohne versteckte Plattformkosten.",
+          "tiers": {
+            "starter": {
+              "description": "QR-Trinkgeld für einen Standort oder Depot — ohne monatliche Plattformgebühr."
+            },
+            "business": {
+              "description": "Gebrandetes Trinkgeld mit Exporten und Mehrstandort-Übersicht für wachsende Hotel- und Logistikbetriebe."
+            },
+            "enterprise": {
+              "description": "Individuelle Auszahlungen, Reporting und Onboarding für Hotelgruppen und Logistiknetzwerke."
+            }
+          }
+        },
+        "solo": {
+          "pageTitle": "Preise für Hebammen & Freelancer",
+          "pageSubtitle": "Freemium im Starter — keine monatliche Plattformgebühr, nur Transaktionsgebühren.",
+          "sectionTitle": "Kostenlos starten. Upgraden, wenn Sie mehr brauchen.",
+          "sectionSubtitle": "Starter kostet nichts außer Gebühren pro Trinkgeld. Business ist optional und bietet Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen.",
+          "tiers": {
+            "starter": {
+              "description": "Keine monatliche Plattformgebühr — Trinkgeld-Seite, QR-Link und transparente Gebühren pro Trinkgeld."
+            },
+            "business": {
+              "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und kommende Premium-Funktionen."
+            },
+            "enterprise": {
+              "description": "Maßgeschneidertes Setup für Praxen und Agenturen mit höherem Volumen oder Compliance-Anforderungen."
+            }
+          }
+        },
+        "general": {
+          "pageTitle": "Faire & transparente Abrechnung",
+          "pageSubtitle": "Volle Flexibilität für Ihre Kunden: Bezahlt wird nur, was von Herzen kommt.",
+          "sectionTitle": "Echte Anerkennung lebt von einfachen Wegen.",
+          "sectionSubtitle": "Mit CareTip machen Sie den herausragenden Service Ihres Teams sichtbar und belohnen ihn direkt. Begeistern Sie Ihre Gäste, stärken Sie die Motivation Ihrer Mitarbeiter und binden Sie Kunden an Ihre Marke."
+        }
+      },
+      "industryCopy": {
+        "hotel": {
+          "pageTitle": "Preise für Hotelteams",
+          "pageSubtitle": "Transparente Gebühren pro Trinkgeld für Rezeption, Housekeeping, F&B und Concierge.",
+          "sectionTitle": "Trinkgeld, das in jedem Hotelteam funktioniert.",
+          "sectionSubtitle": "Hotels nutzen CareTip für Anerkennung über Schichten und Abteilungen — gleiche Tarifstruktur wie Logistik, mit hospitality-spezifischem Rollout-Support.",
+          "tiers": {
+            "starter": { "description": "QR-Trinkgeld für ein einzelnes Haus ohne monatliche Plattformgebühr." },
+            "business": { "description": "Gebrandete QR-Codes, CSV-Export und Mehrstandort-Übersicht für wachsende Hotelgruppen." },
+            "enterprise": { "description": "Individuelle Auszahlungsabläufe und Onboarding für Hotelketten." }
+          }
+        },
+        "logistics": {
+          "pageTitle": "Preise für Logistikteams",
+          "pageSubtitle": "Belohnen Sie Fahrer, Lager und Außendienst mit klaren Gebühren pro Trinkgeld.",
+          "sectionTitle": "Anerkennung für Menschen unterwegs.",
+          "sectionSubtitle": "Logistikunternehmen nutzen CareTip mit derselben Tarifstruktur wie Hotels — für verteilte Teams und Echtzeit-Anerkennung im Außendienst.",
+          "tiers": {
+            "starter": { "description": "QR-Trinkgeld für ein Depot oder Hub ohne monatliche Plattformgebühr." },
+            "business": { "description": "Gebrandetes Trinkgeld, CSV-Export und Mehrstandort-Reporting für wachsende Logistikbetriebe." },
+            "enterprise": { "description": "Individuelle Integrationen und Auszahlungsabläufe für Logistiknetzwerke." }
+          }
+        },
+        "midwife": {
+          "pageTitle": "Preise für Hebammen",
+          "pageSubtitle": "Freemium — keine monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "sectionTitle": "Digitale Wertschätzung für die Einzelpraxis.",
+          "sectionSubtitle": "Starter ist kostenlos bis auf Gebühren pro Trinkgeld. Business bietet optional Branding, CSV-Export, erweiterte Analysen und Premium-Support.",
+          "tiers": {
+            "starter": { "description": "Kostenlos starten — persönliche Trinkgeld-Seite und QR-Link. Sie zahlen nur Transaktionsgebühren bei erfolgreichen Trinkgeldern." },
+            "business": { "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen." },
+            "enterprise": { "description": "Maßgeschneidertes Setup für Hebammenpraxen mit höherem Volumen oder Compliance-Bedarf." }
+          }
+        },
+        "freelancer": {
+          "pageTitle": "Preise für Freelancer",
+          "pageSubtitle": "Freemium — keine monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "sectionTitle": "Ein Trinkgeld-Link, der mit Ihrer Arbeit wächst.",
+          "sectionSubtitle": "Starter ist kostenlos außer Transaktionsgebühren. Business ergänzt Branding, Exporte, Analysen und Premium-Support, wenn Sie bereit sind.",
+          "tiers": {
+            "starter": { "description": "Kostenlos starten — Trinkgeld-Link oder QR teilen. Gebühren nur bei erhaltenen Trinkgeldern." },
+            "business": { "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und kommende Premium-Funktionen." },
+            "enterprise": { "description": "Individuelles Setup für Agenturen und Kollektive mit erweitertem Reporting." }
+          }
         }
       },
       "commitmentNotice": "Wählen Sie einfach das passende Paket für Ihren Betrieb.",
@@ -1894,7 +2143,7 @@
       "b2Text": "Erkenne Muster und Trends, die dir dabei helfen, jede Woche mehr aus deinen Schichten herauszuholen.",
       "b3Title": "Verlauf & Bewertungen",
       "b3Text": "Deine Trinkgelder und das Feedback deiner Gäste gesammelt an einem Ort, als digitaler Beweis für deine starke Arbeit.",
-      "cta": "Mitarbeiterdashboard ansehen",
+      "cta": "Team beitreten",
       "imageAlt": "CareTip Mitarbeiterdashboard mit Tageseinnahmen, Bewertungen und Zielen"
     },
     "businessSection": {
@@ -2111,13 +2360,17 @@
         "title": "Hotels",
         "benefit": "Transparentes Trinkgeld über alle Teams."
       },
-      "healthcare": {
-        "title": "Gesundheit",
-        "benefit": "Außergewöhnliche Pflege sichtbar machen."
-      },
-      "delivery": {
-        "title": "Lieferdienst",
+      "logistics": {
+        "title": "Logistik",
         "benefit": "Fahrer und Außendienst in Echtzeit belohnen."
+      },
+      "midwife": {
+        "title": "Hebammen",
+        "benefit": "Digitale Wertschätzung von Familien annehmen."
+      },
+      "freelancer": {
+        "title": "Freelancer",
+        "benefit": "Ein einfacher Trinkgeld-Link für Selbstständige."
       },
       "salon": {
         "title": "Salons",
@@ -2136,8 +2389,8 @@
       "eyebrow": "In wenigen Minuten startklar",
       "title": "Mehr Trinkgeld. Ab heute.",
       "subtitle": "Bringen Sie Ihr Team noch heute auf die Überholspur. Ihre digitalen QR-Trinkgeldseiten sind im Handumdrehen eingerichtet, mit Trinkgeld-Tracking und voller Transparenz für Ihre Crew.",
-      "cta": "Loslegen",
-      "secondary": "So funktioniert es"
+      "cta": "Demo anfragen",
+      "secondary": "Partner werden"
     },
     "assistant": {
       "title": "CareTip fragen",
@@ -2586,6 +2839,7 @@
     "onboarding": {
       "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
       "toastSavedLoadingDashboard": "Gespeichert. Dashboard wird geladen…",
+      "toastLogoDeferred": "Ihr Logo können Sie später nach einem Plan-Upgrade hinzufügen.",
       "headline": "Betrieb anlegen",
       "description": "Richten Sie Ihren CareTip-Workspace in unter 5 Minuten ein.",
       "progressAria": "Onboarding-Fortschritt",
@@ -2709,11 +2963,16 @@
       "businessTypes": {
         "restaurant": "Restaurant",
         "hotel": "Hotel",
-        "hospital": "Krankenhaus",
+        "logistics": "Logistik",
         "salon": "Salon",
         "bar": "Bar",
         "cafe": "Café",
-        "other": "Sonstiges"
+        "midwife": "Hebamme",
+        "freelancer": "Freelancer",
+        "healthcare_clinic": "Gesundheitsklinik",
+        "wellness_spa": "Wellness & Spa",
+        "other": "Sonstiges",
+        "hospital": "Krankenhaus"
       },
       "trust": {
         "secure": "Bank-Level-Sicherheit",

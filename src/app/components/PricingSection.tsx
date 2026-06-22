@@ -1,16 +1,20 @@
 import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
-import { Check, Star } from "lucide-react";
+import { Check, Sparkles } from "lucide-react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { cn } from "../../lib/utils";
+import type { BillingCycle, Industry } from "../data/pricingTypes";
 import type { PricingTierKey } from "../data/pricingTiers";
+import type { PricingCopyScope } from "../data/pricingCopy";
+import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export interface TippingTier {
   tierKey?: PricingTierKey;
   name: string;
+  tagline?: string;
   feeLine: string;
   feeNote: string;
   features: string[];
@@ -22,6 +26,9 @@ export interface TippingTier {
 
 interface PricingSectionProps {
   tiers: TippingTier[];
+  billingCycle: BillingCycle;
+  industry: Industry;
+  copyScope?: PricingCopyScope;
 }
 
 function TierFeatureList({ features }: { features: string[] }) {
@@ -32,90 +39,109 @@ function TierFeatureList({ features }: { features: string[] }) {
   }, []);
 
   if (!ready) {
-    return <div className="mb-6 h-28" aria-hidden />;
+    return <div className="caretip-pricing-tier-features-skeleton" aria-hidden />;
   }
 
   return (
-    <ul className="space-y-3 mb-6">
+    <ul className="caretip-pricing-tier-features">
       {features.map((feature, idx) => (
-        <li key={idx} className="flex items-start gap-2">
-          <div className="w-5 h-5 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Check className="w-3 h-3 text-accent" />
-          </div>
-          <span className="text-sm text-foreground">{feature}</span>
+        <li key={idx} className="caretip-pricing-tier-features__item">
+          <span className="caretip-pricing-tier-features__check" aria-hidden>
+            <Check className="size-3" strokeWidth={2.75} />
+          </span>
+          <span>{feature}</span>
         </li>
       ))}
     </ul>
   );
 }
 
+function tierCtaHref(tierKey: PricingTierKey | undefined): string {
+  if (tierKey === "enterprise") return "/contact?intent=demo";
+  return "/contact?intent=demo";
+}
+
 /**
  * Hospitality tipping platform fees — one-time tips only (Stripe PaymentIntents).
- * No recurring plans or invoice billing.
+ * `billingCycle` does not change displayed fees until yearly billing ships.
  */
-export function PricingSection({ tiers }: PricingSectionProps) {
+export function PricingSection({
+  tiers,
+  billingCycle,
+  industry,
+  copyScope = "staticPages.pricing.audience.general",
+}: PricingSectionProps) {
   usePublicMountProbe("PricingSection");
   const { t } = useTranslation();
+
   return (
-    <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div
+      id="pricing-plans-panel"
+      role="tabpanel"
+      aria-labelledby={`pricing-billing-${billingCycle}`}
+      className="caretip-pricing-tiers"
+      data-billing-cycle={billingCycle}
+      data-industry={industry}
+      data-copy-scope={copyScope}
+    >
+      <div className="caretip-pricing-tiers__grid">
         {tiers.map((tier) => {
-          const Icon = tier.icon;
+          const isEnterprise = tier.tierKey === "enterprise";
+          const description =
+            tier.tierKey &&
+            t(`${copyScope}.tiers.${tier.tierKey}.description`, {
+              defaultValue: tier.description,
+            });
 
           return (
-            <div
-              key={tier.name}
+            <article
+              key={tier.tierKey ?? tier.name}
               className={cn(
-                "caretip-pricing-tier-card relative rounded-2xl p-6 border-2 transition-[border-color,box-shadow,transform] duration-200",
-                tier.isPopular
-                  ? "border-accent shadow-lg shadow-accent/20 bg-gradient-to-br from-card via-card to-accent/5"
-                  : "border-border bg-card hover:border-accent/30",
+                "caretip-pricing-tier-card",
+                tier.isPopular && "caretip-pricing-tier-card--featured",
+                isEnterprise && "caretip-pricing-tier-card--enterprise",
               )}
             >
-              {tier.isPopular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-accent text-white px-4 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
-                  <Star className="w-3 h-3 fill-current" />
+              {tier.isPopular ? (
+                <div className="caretip-pricing-tier-card__badge">
+                  <Sparkles className="size-3 shrink-0" aria-hidden />
                   {t("staticPages.pricing.popular")}
                 </div>
-              )}
+              ) : null}
 
-              <div
-                className={cn(
-                  "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
-                  tier.isPopular ? "bg-accent/10" : "bg-muted",
-                )}
-              >
-                <Icon
-                  className={cn(
-                    "w-6 h-6",
-                    tier.isPopular ? "text-accent" : "text-muted-foreground",
-                  )}
-                />
+              <div className="caretip-pricing-tier-card__header">
+                <h3 className="caretip-pricing-tier-card__name">{tier.name}</h3>
+                {tier.tagline ? (
+                  <p className="caretip-pricing-tier-card__tagline">{tier.tagline}</p>
+                ) : null}
               </div>
 
-              <h3 className="text-lg font-semibold text-foreground mb-2">{tier.name}</h3>
+              <div className="caretip-pricing-tier-card__divider" aria-hidden />
 
-              <div className="mb-4">
-                <p className="text-3xl font-bold text-foreground">{tier.feeLine}</p>
-                <p className="text-sm text-muted-foreground mt-1">{tier.feeNote}</p>
+              <div className="caretip-pricing-tier-card__price">
+                <p className="caretip-pricing-tier-card__fee">{tier.feeLine}</p>
+                <p className="caretip-pricing-tier-card__fee-note">{tier.feeNote}</p>
               </div>
 
-              <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
+              <div className="caretip-pricing-tier-card__divider" aria-hidden />
+
+              <p className="caretip-pricing-tier-card__desc">{description}</p>
 
               <TierFeatureList features={tier.features} />
 
               <Link
-                to="/signup"
+                to={tierCtaHref(tier.tierKey)}
                 className={cn(
-                  "w-full flex justify-center py-3 rounded-lg font-semibold transition-[color,background-color,border-color,box-shadow] duration-200 text-sm",
-                  tier.isPopular
-                    ? "bg-accent text-white hover:bg-accent/90 shadow-lg shadow-accent/20"
-                    : "bg-background border-2 border-border text-foreground hover:border-accent hover:bg-accent hover:text-white",
+                  isEnterprise
+                    ? pricingPageUi.cardCtaEnterprise
+                    : tier.isPopular
+                      ? pricingPageUi.cardCtaPrimary
+                      : pricingPageUi.cardCtaSecondary,
                 )}
               >
                 {tier.buttonText}
               </Link>
-            </div>
+            </article>
           );
         })}
       </div>

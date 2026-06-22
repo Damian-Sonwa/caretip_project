@@ -1,0 +1,1159 @@
+/**
+ * CareTip pricing page — synthesized from Stripe clarity, Linear spacing, Framer polish.
+ */
+
+.caretip-pricing-page {
+  --caretip-pricing-card-min-h: 26rem;
+  --caretip-pricing-warm-dark-bg: linear-gradient(
+    180deg,
+    #161412 0%,
+    #12100e 38%,
+    #100e0c 72%,
+    #0e0d0b 100%
+  );
+  --caretip-pricing-warm-dark-border: rgb(233 120 28 / 0.28);
+  --caretip-pricing-warm-dark-glow: radial-gradient(
+    ellipse 85% 55% at 50% 0%,
+    rgb(233 120 28 / 0.16) 0%,
+    transparent 58%
+  );
+  position: relative;
+}
+
+.caretip-pricing-page::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  top: -2rem;
+  height: 42rem;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(250 250 249 / 0.9) 0%, transparent 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(229 229 229 / 0.35) 0,
+      rgb(229 229 229 / 0.35) 1px,
+      transparent 1px,
+      transparent calc(100% / 12)
+    );
+  mask-image: linear-gradient(180deg, black 0%, transparent 88%);
+  opacity: 0.55;
+}
+
+html.dark .caretip-pricing-page::before {
+  background:
+    linear-gradient(180deg, rgb(23 23 23 / 0.6) 0%, transparent 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgb(64 64 64 / 0.25) 0,
+      rgb(64 64 64 / 0.25) 1px,
+      transparent 1px,
+      transparent calc(100% / 12)
+    );
+  opacity: 0.4;
+}
+
+.caretip-pricing-plans-section {
+  position: relative;
+  scroll-margin-top: 6rem;
+}
+
+@media (max-width: 639px) {
+  .caretip-pricing-plans-section {
+    margin-top: 0.25rem;
+  }
+}
+
+.caretip-pricing-plans-intro__eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+/* —— Hero —— */
+.caretip-pricing-hero {
+  text-align: center;
+  padding-top: 0.25rem;
+}
+
+.caretip-pricing-plans-intro__title {
+  margin-top: 0.75rem;
+  margin-inline: auto;
+  max-width: 40rem;
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.625rem, 3.6vw, 2.25rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.028em;
+  text-wrap: balance;
+  color: rgb(23 23 23);
+}
+
+@media (max-width: 639px) {
+  .caretip-pricing-plans-intro__title {
+    margin-top: 0;
+    max-width: 12ch;
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.03em;
+  }
+
+  .caretip-pricing-plans-intro__subtitle {
+    max-width: 30ch;
+    margin-top: 0.875rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: rgb(115 115 115);
+  }
+
+  html.dark .caretip-pricing-plans-intro__subtitle {
+    color: rgb(163 163 163);
+  }
+}
+
+html.dark .caretip-pricing-plans-intro__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-plans-intro__subtitle {
+  margin-top: 0.875rem;
+  margin-inline: auto;
+  max-width: 40rem;
+  font-size: clamp(1rem, 1.6vw, 1.0625rem);
+  line-height: 1.65;
+  text-wrap: pretty;
+  color: rgb(64 64 64);
+}
+
+html.dark .caretip-pricing-plans-intro__subtitle {
+  color: rgb(163 163 163);
+}
+
+.caretip-pricing-plans-intro__bullets {
+  margin-top: 1.125rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-pricing-plans-intro__bullets li {
+  position: relative;
+  padding-left: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: rgb(64 64 64);
+}
+
+.caretip-pricing-plans-intro__bullets li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.55em;
+  width: 0.375rem;
+  height: 0.375rem;
+  border-radius: 9999px;
+  background: rgb(233 120 28 / 0.85);
+}
+
+html.dark .caretip-pricing-plans-intro__bullets li {
+  color: rgb(212 212 212);
+}
+
+.caretip-pricing-commitment-notice {
+  margin-top: 1.25rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(38 38 38);
+}
+
+.caretip-pricing-commitment-terms {
+  margin-top: 0.5rem;
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: rgb(115 115 115);
+}
+
+@media (max-width: 639px) {
+  .caretip-pricing-plans-intro {
+    margin-bottom: 0.5rem;
+  }
+
+  .caretip-pricing-trust--in-shell.caretip-pricing-trust {
+    gap: 0.5rem 0.75rem;
+    margin-top: 0.875rem;
+    padding-top: 0.875rem;
+  }
+
+  .caretip-pricing-trust--in-shell .caretip-pricing-trust__item {
+    font-size: 0.6875rem;
+  }
+}
+
+html.dark .caretip-pricing-commitment-notice {
+  color: rgb(212 212 212);
+}
+
+html.dark .caretip-pricing-commitment-terms {
+  color: rgb(163 163 163);
+}
+
+/* —— Controls shell (full width) —— */
+.caretip-pricing-controls-wrap {
+  margin-top: 2rem;
+  width: 100%;
+  padding-inline: 0;
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-controls-wrap {
+    margin-top: 3.25rem;
+    padding-inline: 0.25rem;
+  }
+}
+
+.caretip-pricing-controls-shell {
+  width: 100%;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(229 229 229 / 0.9);
+  background: rgb(250 250 249 / 0.92);
+  backdrop-filter: blur(8px);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.03),
+    0 12px 36px -20px rgb(15 23 42 / 0.1);
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-controls-shell {
+    padding: 1.5rem 1.625rem 1.375rem;
+    border-radius: 1.125rem;
+    background: rgb(255 255 255 / 0.82);
+    box-shadow:
+      0 1px 2px rgb(15 23 42 / 0.04),
+      0 16px 48px -24px rgb(15 23 42 / 0.12);
+  }
+}
+
+html.dark .caretip-pricing-controls-shell {
+  border-color: rgb(64 64 64 / 0.9);
+  background: rgb(23 23 23 / 0.72);
+  box-shadow: 0 20px 48px -24px rgb(0 0 0 / 0.45);
+}
+
+.caretip-pricing-controls {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.125rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-controls {
+    gap: 1.375rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-pricing-controls {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem 2rem;
+    align-items: start;
+  }
+}
+
+.caretip-pricing-controls__field {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  width: 100%;
+}
+
+.caretip-pricing-controls__label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: rgb(64 64 64);
+}
+
+html.dark .caretip-pricing-controls__label {
+  color: rgb(212 212 212);
+}
+
+.caretip-pricing-select-trigger {
+  width: 100%;
+  height: 2.875rem;
+  border-radius: 0.75rem;
+  border-color: rgb(229 229 229 / 0.95);
+  background: white;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: rgb(23 23 23);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.caretip-pricing-select-trigger:hover {
+  border-color: rgb(212 212 212);
+}
+
+.caretip-pricing-select-trigger:focus-visible {
+  border-color: rgb(233 120 28 / 0.45);
+  box-shadow: 0 0 0 3px rgb(233 120 28 / 0.12);
+}
+
+html.dark .caretip-pricing-select-trigger {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-select-content {
+  border-radius: 0.75rem;
+  border-color: rgb(229 229 229 / 0.9);
+  box-shadow: 0 16px 48px -16px rgb(15 23 42 / 0.2);
+}
+
+.caretip-pricing-select-item {
+  font-size: 0.875rem;
+}
+
+/* —— Billing toggle —— */
+.caretip-pricing-billing-toggle {
+  position: relative;
+  display: inline-grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  width: min(100%, 17.5rem);
+  padding: 0.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(229 229 229);
+  background: rgb(255 255 255);
+  box-shadow: inset 0 1px 2px rgb(15 23 42 / 0.03);
+  transition:
+    border-color 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.caretip-pricing-billing-toggle[data-cycle="monthly"] {
+  border-color: rgb(229 229 229);
+  background: rgb(250 250 249);
+}
+
+.caretip-pricing-billing-toggle[data-cycle="yearly"] {
+  border-color: rgb(233 120 28 / 0.38);
+  background: linear-gradient(180deg, rgb(233 120 28 / 0.07), rgb(233 120 28 / 0.03));
+}
+
+.caretip-pricing-billing-toggle--in-panel {
+  width: 100%;
+  max-width: none;
+}
+
+html.dark .caretip-pricing-billing-toggle {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="monthly"] {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="yearly"] {
+  border-color: rgb(233 120 28 / 0.42);
+  background: linear-gradient(180deg, rgb(233 120 28 / 0.14), rgb(233 120 28 / 0.06));
+}
+
+.caretip-pricing-billing-toggle__indicator {
+  position: absolute;
+  top: 0.25rem;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  width: calc(50% - 0.25rem);
+  border-radius: 9999px;
+  background: white;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.06),
+    0 4px 12px -4px rgb(15 23 42 / 0.12);
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    background 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__indicator {
+  transform: translateX(100%);
+  background: linear-gradient(
+    135deg,
+    var(--caretip-brand-orange-light, #ff9e2d) 0%,
+    var(--caretip-brand-orange, #e9781c) 100%
+  );
+  box-shadow: 0 4px 16px -4px rgb(233 120 28 / 0.55);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="monthly"] .caretip-pricing-billing-toggle__indicator {
+  background: rgb(38 38 38);
+  box-shadow: 0 4px 14px -6px rgb(0 0 0 / 0.45);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__indicator {
+  background: linear-gradient(
+    135deg,
+    var(--caretip-brand-orange-light, #ff9e2d) 0%,
+    var(--caretip-brand-orange, #e9781c) 100%
+  );
+  box-shadow: 0 4px 18px -4px rgb(233 120 28 / 0.5);
+}
+
+.caretip-pricing-billing-toggle__option {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  padding: 0.375rem 0.75rem;
+  border: 0;
+  border-radius: 9999px;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(115 115 115);
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+.caretip-pricing-billing-toggle[data-cycle="monthly"] .caretip-pricing-billing-toggle__option--active {
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__option--active {
+  color: white;
+}
+
+.caretip-pricing-billing-toggle__option--yearly {
+  flex-wrap: wrap;
+  padding-inline: 0.5rem;
+}
+
+html.dark .caretip-pricing-billing-toggle__option {
+  color: rgb(163 163 163);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="monthly"] .caretip-pricing-billing-toggle__option--active {
+  color: var(--caretip-brand-orange-hover, #ffb04a);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__option--active {
+  color: white;
+}
+
+.caretip-pricing-save-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: rgb(233 120 28 / 0.14);
+  padding: 0.125rem 0.4375rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: rgb(194 65 12);
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__option--active .caretip-pricing-save-badge {
+  background: rgb(255 255 255 / 0.22);
+  color: white;
+}
+
+html.dark .caretip-pricing-save-badge {
+  background: rgb(233 120 28 / 0.22);
+  color: rgb(251 191 36);
+}
+
+html.dark .caretip-pricing-billing-toggle[data-cycle="yearly"] .caretip-pricing-billing-toggle__option--active .caretip-pricing-save-badge {
+  background: rgb(255 255 255 / 0.18);
+  color: rgb(255 255 255 / 0.95);
+}
+
+.caretip-pricing-save-badge--soon {
+  background: rgb(100 116 139 / 0.14);
+  color: rgb(71 85 105);
+}
+
+html.dark .caretip-pricing-save-badge--soon {
+  background: rgb(148 163 184 / 0.16);
+  color: rgb(203 213 225);
+}
+
+.caretip-pricing-yearly-notice {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  color: rgb(71 85 105);
+  background: rgb(248 250 252);
+  border: 1px solid rgb(226 232 240);
+}
+
+html.dark .caretip-pricing-yearly-notice {
+  color: rgb(203 213 225);
+  background: rgb(30 41 59 / 0.55);
+  border-color: rgb(51 65 85 / 0.8);
+}
+
+.caretip-pricing-social-note {
+  margin-top: 1.25rem;
+  margin-bottom: 0.25rem;
+  padding: 0 1rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+/* —— Trust row —— */
+.caretip-pricing-trust--in-shell {
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgb(229 229 229 / 0.85);
+  width: 100%;
+}
+
+html.dark .caretip-pricing-trust--in-shell {
+  border-top-color: rgb(64 64 64 / 0.9);
+}
+
+.caretip-pricing-trust--in-shell.caretip-pricing-trust {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  justify-content: stretch;
+  gap: 0.875rem 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .caretip-pricing-trust--in-shell.caretip-pricing-trust {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem 1.5rem;
+  }
+}
+
+.caretip-pricing-trust--in-shell .caretip-pricing-trust__item {
+  justify-content: flex-start;
+}
+
+@media (min-width: 768px) {
+  .caretip-pricing-trust--in-shell .caretip-pricing-trust__item {
+    justify-content: center;
+  }
+}
+
+.caretip-pricing-trust {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem 1.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-pricing-trust--subtle .caretip-pricing-trust__item {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgb(115 115 115);
+}
+
+.caretip-pricing-trust--subtle .caretip-pricing-trust__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  background: rgb(233 120 28 / 0.08);
+  color: rgb(194 65 12);
+}
+
+html.dark .caretip-pricing-trust--subtle .caretip-pricing-trust__item {
+  color: rgb(140 140 140);
+}
+
+html.dark .caretip-pricing-trust--subtle .caretip-pricing-trust__icon {
+  background: rgb(233 120 28 / 0.14);
+  color: rgb(251 191 36);
+}
+
+.caretip-pricing-trust__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.caretip-pricing-trust__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+
+/* —— Cards stage —— */
+.caretip-pricing-cards-stage {
+  position: relative;
+  margin-top: 3rem;
+  padding-inline: 0.25rem;
+  overflow: visible;
+}
+
+@media (min-width: 640px) {
+  .caretip-pricing-cards-stage {
+    margin-top: 3.75rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-pricing-cards-stage {
+    margin-top: 4.5rem;
+  }
+}
+
+.caretip-pricing-cards-stage__glow {
+  pointer-events: none;
+  position: absolute;
+  inset-inline: 0;
+  top: -1rem;
+  height: 20rem;
+  background: radial-gradient(ellipse 70% 55% at 50% 0%, rgb(233 120 28 / 0.1), transparent 72%);
+}
+
+/* —— Tier cards (Framer structure + Stripe fee clarity) —— */
+.caretip-pricing-tiers__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+  overflow: visible;
+}
+
+@media (min-width: 768px) {
+  .caretip-pricing-tiers__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.125rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-pricing-tiers__grid {
+    gap: 1.375rem;
+  }
+}
+
+.caretip-pricing-tier-card {
+  position: relative;
+  display: flex;
+  min-height: var(--caretip-pricing-card-min-h);
+  flex-direction: column;
+  border-radius: 1.25rem;
+  border: 1px solid rgb(229 229 229 / 0.95);
+  background: rgb(255 255 255);
+  padding: 1.625rem 1.5rem 1.5rem;
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.03),
+    0 14px 40px -18px rgb(15 23 42 / 0.1);
+  transition:
+    border-color 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 26rem;
+}
+
+.caretip-pricing-tier-card:hover {
+  border-color: rgb(212 212 212);
+  box-shadow:
+    0 2px 4px rgb(15 23 42 / 0.04),
+    0 20px 48px -16px rgb(15 23 42 / 0.14);
+  transform: translateY(-2px);
+}
+
+.caretip-pricing-tier-card--featured {
+  border-color: rgb(233 120 28 / 0.38);
+  background: linear-gradient(180deg, rgb(255 255 255) 0%, rgb(255 252 248) 100%);
+  box-shadow:
+    0 2px 4px rgb(233 120 28 / 0.06),
+    0 24px 56px -20px rgb(233 120 28 / 0.2);
+  padding-top: 2.875rem;
+}
+
+@media (min-width: 768px) {
+  .caretip-pricing-tier-card--featured {
+    transform: translateY(-0.25rem);
+  }
+
+  .caretip-pricing-tier-card--featured:hover {
+    transform: translateY(-0.5rem);
+  }
+}
+
+.caretip-pricing-tier-card--enterprise {
+  overflow: hidden;
+  border-color: var(--caretip-pricing-warm-dark-border);
+  background: var(--caretip-pricing-warm-dark-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 24px 56px -20px rgb(14 13 11 / 0.5);
+}
+
+.caretip-pricing-tier-card--enterprise::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-pricing-warm-dark-glow);
+}
+
+.caretip-pricing-tier-card--enterprise > * {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-pricing-tier-card--enterprise:hover {
+  border-color: rgb(233 120 28 / 0.42);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.05),
+    0 28px 60px -18px rgb(233 120 28 / 0.18);
+}
+
+html.dark .caretip-pricing-tier-card {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+  box-shadow: 0 20px 48px -20px rgb(0 0 0 / 0.5);
+}
+
+html.dark .caretip-pricing-tier-card--featured {
+  border-color: rgb(233 120 28 / 0.45);
+  background: linear-gradient(180deg, rgb(28 24 20) 0%, rgb(23 23 23) 100%);
+}
+
+html.dark .caretip-pricing-tier-card--enterprise {
+  border-color: rgb(233 120 28 / 0.32);
+  background: linear-gradient(180deg, #111010 0%, #0c0c0c 42%, #0a0a0a 78%, #090909 100%);
+}
+
+.caretip-pricing-tiers[data-billing-cycle] .caretip-pricing-tier-card {
+  animation: caretip-pricing-cards-enter 0.42s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.caretip-pricing-tiers[data-billing-cycle] .caretip-pricing-tier-card:nth-child(2) {
+  animation-delay: 0.06s;
+}
+
+.caretip-pricing-tiers[data-billing-cycle] .caretip-pricing-tier-card:nth-child(3) {
+  animation-delay: 0.12s;
+}
+
+@keyframes caretip-pricing-cards-enter {
+  from {
+    opacity: 0.65;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(var(--pricing-card-y, 0));
+  }
+}
+
+.caretip-pricing-tier-card--featured {
+  --pricing-card-y: -0.25rem;
+}
+
+.caretip-pricing-tier-card__badge {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  z-index: 3;
+  display: inline-flex;
+  translate: -50% 0;
+  align-items: center;
+  gap: 0.3125rem;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, rgb(255 158 45), rgb(233 120 28));
+  padding: 0.4375rem 0.9375rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: white;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  box-shadow:
+    0 4px 14px -4px rgb(233 120 28 / 0.55),
+    0 0 0 1px rgb(233 120 28 / 0.15);
+}
+
+.caretip-pricing-tier-card__header {
+  padding-bottom: 0.125rem;
+}
+
+.caretip-pricing-tier-card__name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgb(23 23 23);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__name {
+  color: rgb(250 250 250);
+}
+
+html.dark .caretip-pricing-tier-card__name {
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-tier-card__tagline {
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgb(115 115 115);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__tagline {
+  color: rgb(233 120 28 / 0.88);
+}
+
+html.dark .caretip-pricing-tier-card__tagline {
+  color: rgb(163 163 163);
+}
+
+.caretip-pricing-tier-card__divider {
+  margin-block: 1rem;
+  height: 1px;
+  background: rgb(229 229 229 / 0.9);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__divider {
+  background: rgb(255 255 255 / 0.1);
+}
+
+html.dark .caretip-pricing-tier-card__divider {
+  background: rgb(64 64 64 / 0.9);
+}
+
+.caretip-pricing-tier-card__price {
+  padding-bottom: 0.125rem;
+}
+
+.caretip-pricing-tier-card__fee {
+  font-size: clamp(1.875rem, 3.2vw, 2.25rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+  color: rgb(23 23 23);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__fee {
+  color: rgb(250 250 250);
+}
+
+html.dark .caretip-pricing-tier-card__fee {
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-tier-card__fee-note {
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  color: rgb(115 115 115);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__fee-note {
+  color: rgb(163 163 163);
+}
+
+html.dark .caretip-pricing-tier-card__fee-note {
+  color: rgb(163 163 163);
+}
+
+.caretip-pricing-tier-card__desc {
+  margin-bottom: 1.125rem;
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgb(82 82 82);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-card__desc {
+  color: rgb(212 212 212);
+}
+
+html.dark .caretip-pricing-tier-card__desc {
+  color: rgb(163 163 163);
+}
+
+.caretip-pricing-tier-features {
+  margin: 0 0 1.375rem;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6875rem;
+  flex: 1;
+}
+
+.caretip-pricing-tier-features-skeleton {
+  margin-bottom: 1.375rem;
+  height: 7rem;
+  border-radius: 0.5rem;
+  background: linear-gradient(90deg, rgb(245 245 244), rgb(250 250 249), rgb(245 245 244));
+  background-size: 200% 100%;
+  animation: caretip-pricing-shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes caretip-pricing-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.caretip-pricing-tier-features__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgb(38 38 38);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-features__item {
+  color: rgb(229 229 229);
+}
+
+html.dark .caretip-pricing-tier-features__item {
+  color: rgb(212 212 212);
+}
+
+.caretip-pricing-tier-features__check {
+  display: inline-flex;
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.15rem;
+  border-radius: 9999px;
+  background: rgb(233 120 28 / 0.12);
+  color: rgb(217 119 6);
+}
+
+.caretip-pricing-tier-card--enterprise .caretip-pricing-tier-features__check {
+  background: rgb(233 120 28 / 0.2);
+  color: rgb(251 191 36);
+}
+
+.caretip-pricing-card-cta {
+  margin-top: auto;
+  min-height: 2.875rem;
+  font-size: 0.875rem;
+}
+
+.caretip-pricing-card-cta--enterprise {
+  position: relative;
+  z-index: 1;
+}
+
+/* —— FAQ (Linear minimal) —— */
+.caretip-pricing-faq {
+  padding-inline: 0.5rem;
+}
+
+.caretip-pricing-faq__header {
+  margin-inline: auto;
+  max-width: 36rem;
+  text-align: center;
+}
+
+.caretip-pricing-faq__title {
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.5rem, 3vw, 1.875rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: rgb(23 23 23);
+}
+
+html.dark .caretip-pricing-faq__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-faq__subtitle {
+  margin-top: 0.75rem;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: rgb(115 115 115);
+}
+
+html.dark .caretip-pricing-faq__subtitle {
+  color: rgb(163 163 163);
+}
+
+.caretip-pricing-faq__list {
+  margin-top: 2.5rem;
+  margin-inline: auto;
+  max-width: 40rem;
+  border-top: 1px solid rgb(229 229 229 / 0.9);
+}
+
+html.dark .caretip-pricing-faq__list {
+  border-top-color: rgb(64 64 64);
+}
+
+.caretip-pricing-faq__item {
+  border-bottom: 1px solid rgb(229 229 229 / 0.9);
+}
+
+html.dark .caretip-pricing-faq__item {
+  border-bottom-color: rgb(64 64 64);
+}
+
+.caretip-pricing-faq__trigger {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-block: 1.125rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.caretip-pricing-faq__trigger:hover {
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-pricing-faq__question {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: rgb(23 23 23);
+  transition: color 0.2s ease;
+}
+
+.caretip-pricing-faq__trigger:hover .caretip-pricing-faq__question {
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+html.dark .caretip-pricing-faq__question {
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-faq__chevron {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  color: rgb(163 163 163);
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.caretip-pricing-faq__chevron--open {
+  transform: rotate(180deg);
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-pricing-faq__answer {
+  padding-bottom: 1.125rem;
+}
+
+.caretip-pricing-faq__answer p {
+  font-size: 0.9375rem;
+  line-height: 1.65;
+  color: rgb(82 82 82);
+}
+
+html.dark .caretip-pricing-faq__answer p {
+  color: rgb(163 163 163);
+}
+
+/* —— Final CTA (orange-black, matches landing) —— */
+.caretip-pricing-final-cta {
+  position: relative;
+  overflow: hidden;
+  margin-inline: auto;
+  max-width: 40rem;
+  padding: 2.5rem 1.75rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--caretip-pricing-warm-dark-border);
+  background: var(--caretip-pricing-warm-dark-bg);
+  text-align: center;
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 20px 48px -20px rgb(14 13 11 / 0.45);
+}
+
+.caretip-pricing-final-cta::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-pricing-warm-dark-glow);
+}
+
+html.dark .caretip-pricing-final-cta {
+  border-color: rgb(233 120 28 / 0.32);
+  background: linear-gradient(180deg, #111010 0%, #0c0c0c 42%, #0a0a0a 78%, #090909 100%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 20px 48px -20px rgb(0 0 0 / 0.5);
+}
+
+.caretip-pricing-final-cta__title {
+  position: relative;
+  z-index: 1;
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.5rem, 3.2vw, 2rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: rgb(250 250 250);
+}
+
+.caretip-pricing-final-cta__body {
+  position: relative;
+  z-index: 1;
+  margin-top: 0.75rem;
+  margin-inline: auto;
+  max-width: 32rem;
+  font-size: 1rem;
+  line-height: 1.65;
+  color: rgb(163 163 163);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-pricing-billing-toggle__indicator,
+  .caretip-pricing-tier-card {
+    transition: none;
+  }
+
+  .caretip-pricing-tiers[data-billing-cycle] .caretip-pricing-tier-card {
+    animation: none;
+  }
+
+  .caretip-pricing-tier-card:hover,
+  .caretip-pricing-tier-card--featured:hover {
+    transform: none;
+  }
+
+  .caretip-pricing-tier-features-skeleton {
+    animation: none;
+  }
+}

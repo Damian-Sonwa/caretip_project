@@ -41,6 +41,7 @@ async function main() {
           create: {
             name: `Race Test Venue ${stamp}`,
             slug: `race-venue-${stamp}`,
+            subscriptionTier: "premium",
           },
         },
       },

@@ -1,31 +1,40 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import { Building2, HeartPulse, Scissors, Truck, UtensilsCrossed, type LucideIcon } from "lucide-react";
+import {
+  Building2,
+  HeartPulse,
+  Package,
+  Scissors,
+  Truck,
+  UserRound,
+  UtensilsCrossed,
+  type LucideIcon,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LANDING_INDUSTRY_CARD_IDS } from "@/app/data/caretipIndustries";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingFadeReveal } from "@/lib/motionPerf";
 import { cn } from "@/lib/utils";
 
-type IndustryId = "restaurant" | "hotel" | "healthcare" | "delivery" | "salon";
-
-const INDUSTRY_ICONS: Record<IndustryId, LucideIcon> = {
+const LANDING_INDUSTRY_ICONS: Record<string, LucideIcon> = {
   restaurant: UtensilsCrossed,
   hotel: Building2,
-  healthcare: HeartPulse,
-  delivery: Truck,
+  logistics: Truck,
+  midwife: HeartPulse,
+  freelancer: UserRound,
   salon: Scissors,
+  healthcare: HeartPulse,
+  delivery: Package,
 };
-
-const INDUSTRY_IDS: IndustryId[] = ["restaurant", "hotel", "healthcare", "delivery", "salon"];
 
 export function LandingIndustriesSection() {
   const { t } = useTranslation();
 
   const cards = useMemo(
     () =>
-      INDUSTRY_IDS.map((id) => ({
+      LANDING_INDUSTRY_CARD_IDS.map((id) => ({
         id,
-        Icon: INDUSTRY_ICONS[id],
+        Icon: LANDING_INDUSTRY_ICONS[id] ?? Building2,
         title: t(`landing.industryCards.${id}.title`),
         benefit: t(`landing.industryCards.${id}.benefit`),
       })).filter((c) => landingCopyVisible(c.title) && landingCopyVisible(c.benefit)),

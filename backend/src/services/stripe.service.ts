@@ -19,6 +19,10 @@ export function isStripeConfigured(): boolean {
 }
 
 /** Lazy init — never `new Stripe("")` at module load (crashes on Render if env missing). */
+export function getStripeClient(): Stripe {
+  return getStripe();
+}
+
 function getStripe(): Stripe {
   const key = process.env.STRIPE_SECRET_KEY?.trim();
   if (!key) {

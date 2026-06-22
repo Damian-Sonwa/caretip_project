@@ -13,3 +13,20 @@ function parseEnvFlag(raw: string | undefined): boolean {
 export function isAiAssistantEnabled(): boolean {
   return parseEnvFlag(process.env.ENABLE_AI_ASSISTANT);
 }
+
+/**
+ * Future dual-read path: Subscription.planKey + status instead of Business.subscriptionTier.
+ * Default: false — production entitlements continue to read `subscriptionTier` only (Phase A).
+ * Not wired to any read path yet.
+ */
+export function isSubscriptionV2ReadsEnabled(): boolean {
+  return parseEnvFlag(process.env.SUBSCRIPTION_V2_READS);
+}
+
+/**
+ * Platform SaaS Stripe billing writes (Checkout, billing webhooks, reconciliation).
+ * Default: false — tip payments unaffected; billing handlers no-op when disabled.
+ */
+export function isSubscriptionBillingEnabled(): boolean {
+  return parseEnvFlag(process.env.SUBSCRIPTION_BILLING_ENABLED);
+}

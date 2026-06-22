@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { Link2, Smartphone, Zap, CheckCircle } from "lucide-react";
 import { LandingBorderedCard } from "@/components/ui/landing-bordered-card";
 import { LandingImageFrame } from "@/components/ui/landing-image-frame";
@@ -43,6 +44,8 @@ function InstantTipSplitIllustration() {
 }
 
 export function QRTippingSection() {
+  const { t } = useTranslation();
+
   const features = [
     {
       icon: Link2,
@@ -118,10 +121,10 @@ export function QRTippingSection() {
 
             <div className="pt-4">
               <Link
-                to="/signup"
+                to="/contact?intent=demo"
                 className={caretipBtnPrimary}
               >
-                Create your QR
+                {t("nav.requestDemo")}
               </Link>
             </div>
           </motion.div>

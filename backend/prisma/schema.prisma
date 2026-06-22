@@ -39,6 +39,38 @@ enum BusinessSubscriptionTier {
   enterprise
 }
 
+/// Platform billing plan key — aligns 1:1 with BusinessSubscriptionTier (Phase A).
+enum SubscriptionPlanKey {
+  basic
+  premium
+  enterprise
+}
+
+enum BillingCycle {
+  monthly
+  yearly
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  incomplete
+}
+
+enum TrialSource {
+  internal
+  stripe
+}
+
+enum SubscriptionEventProcessingResult {
+  processed
+  ignored
+  failed
+}
+
 enum PayoutStatus {
   pending
   processing
@@ -431,9 +463,10 @@ model Business {
   kycReviewNotes           String?                    @map("kyc_review_notes") @db.Text
   kycReviewHistory         Json?                      @map("kyc_review_history")
   /**
-   * SaaS packaging tier for entitlement checks. Defaults to premium so existing venues keep full access until billing assigns a plan.
+   * SaaS packaging tier for entitlement checks. New businesses default to basic (explicit in create paths);
+   * schema default is basic — demo seeds and platform admin may assign premium/enterprise.
    */
-  subscriptionTier         BusinessSubscriptionTier   @default(premium) @map("subscription_tier")
+  subscriptionTier         BusinessSubscriptionTier   @default(basic) @map("subscription_tier")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   employees      Employee[]
@@ -441,6 +474,7 @@ model Business {
   locations      Location[]
   supportTickets SupportTicket[]
   employeeInvites EmployeeInvite[]
+  subscription   Subscription?
 
   @@index([verificationStatus], map: "businesses_verification_status_idx")
   @@map("businesses")
@@ -647,4 +681,64 @@ model TipFeedback {
   @@index([employeeId])
   @@index([createdAt])
   @@map("tip_feedback")
+}
+
+/// Platform SaaS subscription mirror (Phase A — table only; reads still use Business.subscriptionTier).
+model Subscription {
+  id                    String               @id @default(cuid())
+  businessId            String               @unique @map("business_id")
+  business              Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  planKey               SubscriptionPlanKey  @map("plan_key")
+  billingCycle          BillingCycle         @default(monthly) @map("billing_cycle")
+  status                SubscriptionStatus   @default(incomplete)
+
+  /// Platform fee in cents (optional premium); null for basic tip-fees-only.
+  platformFeeCents      Int?                 @map("platform_fee_cents")
+
+  trialSource           TrialSource?         @map("trial_source")
+  trialStartedAt        DateTime?            @map("trial_started_at")
+  trialEndsAt           DateTime?            @map("trial_ends_at")
+
+  currentPeriodStart    DateTime?            @map("current_period_start")
+  currentPeriodEnd      DateTime?            @map("current_period_end")
+  renewalDate           DateTime?            @map("renewal_date")
+
+  cancelAtPeriodEnd     Boolean              @default(false) @map("cancel_at_period_end")
+  canceledAt            DateTime?            @map("canceled_at")
+  cancellationEffective DateTime?            @map("cancellation_effective")
+
+  stripeCustomerId      String?              @unique @map("stripe_customer_id")
+  stripeSubscriptionId  String?              @unique @map("stripe_subscription_id")
+  stripePriceId         String?              @map("stripe_price_id")
+
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+
+  events                SubscriptionEvent[]
+
+  @@index([status])
+  @@index([renewalDate])
+  @@map("subscriptions")
+}
+
+/// Subscription lifecycle audit trail and future webhook idempotency (Phase A).
+model SubscriptionEvent {
+  id                String                            @id @default(cuid())
+  subscriptionId    String?                           @map("subscription_id")
+  subscription      Subscription?                     @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  auditType         String                            @map("audit_type")
+  type              String?                           @map("type")
+  stripeEventId     String?                           @unique @map("stripe_event_id")
+
+  processingResult  SubscriptionEventProcessingResult @map("processing_result")
+  processingError   String?                           @map("processing_error")
+  payload           Json?
+  occurredAt        DateTime                          @default(now()) @map("occurred_at")
+  processedAt       DateTime?                         @map("processed_at")
+
+  @@index([subscriptionId, occurredAt])
+  @@index([auditType, occurredAt])
+  @@map("subscription_events")
 }

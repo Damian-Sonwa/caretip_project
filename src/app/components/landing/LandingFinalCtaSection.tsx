@@ -42,17 +42,22 @@ export function LandingFinalCtaSection() {
           />
         ) : null}
 
-        <div className="caretip-final-cta-actions w-full min-w-0">
+        <div className="caretip-final-cta-actions w-full min-w-0 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <div className={cn(landingUi.sectionCtaUnit, "caretip-final-cta-action relative")}>
             <div aria-hidden className="caretip-final-cta-button-glow pointer-events-none" />
             <Link
-              to="/signup"
+              to="/contact?intent=demo"
               className={cn(
                 landingUi.sectionCtaPrimary,
                 "caretip-final-cta-button relative z-[1] gap-2",
               )}
             >
-              {t("landing.finalCta.cta")}
+              {t("nav.requestDemo")}
+            </Link>
+          </div>
+          <div className={landingUi.sectionCtaUnit}>
+            <Link to="/signup" className={landingUi.sectionCtaSecondary}>
+              {t("nav.becomePartner")}
             </Link>
           </div>
         </div>

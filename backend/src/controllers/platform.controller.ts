@@ -315,7 +315,11 @@ export async function updateBusinessSubscriptionTier(req: Request, res: Response
     if (tier !== "basic" && tier !== "premium" && tier !== "enterprise") {
       return res.status(400).json({ message: "subscriptionTier must be basic, premium, or enterprise" });
     }
-    const business = await platformService.updateBusinessSubscriptionTier(id, tier);
+    const actorUserId = req.user?.userId ?? req.user?.id;
+    if (!actorUserId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const business = await platformService.updateBusinessSubscriptionTier(id, tier, actorUserId);
     return res.json({ success: true, business });
   } catch (err) {
     logServerError("platform.updateBusinessSubscriptionTier", err);

@@ -15,6 +15,7 @@ import {
 } from "../utils/shortLivedCache.js";
 import { parseKycDocuments, type KycDocuments } from "./kyc.service.js";
 import { sanitizeLikeContainsSearch } from "../utils/likeSearch.js";
+import { updateSubscriptionMirrorPlanTransactional } from "./subscription.service.js";
 
 const KYC_SLA_HOURS = 48;
 
@@ -443,11 +444,25 @@ export async function updateBusinessKycReviewNotes(businessId: string, notes: st
 export async function updateBusinessSubscriptionTier(
   businessId: string,
   tier: "basic" | "premium" | "enterprise",
+  actorUserId: string,
 ) {
-  await prisma.business.update({
+  const existing = await prisma.business.findUnique({
     where: { id: businessId },
-    data: { subscriptionTier: tier },
+    select: { subscriptionTier: true },
   });
+  if (!existing) {
+    throw new Error("Business not found");
+  }
+
+  if (existing.subscriptionTier !== tier) {
+    await updateSubscriptionMirrorPlanTransactional({
+      businessId,
+      newTier: tier,
+      previousTier: existing.subscriptionTier,
+      actorUserId,
+    });
+  }
+
   const refreshed = await getBusinessForAdmin(businessId);
   if (!refreshed) throw new Error("Business not found");
   emitBusinessDataChanged(businessId, "subscription_tier_updated");

@@ -27,6 +27,7 @@ async function main() {
           name: "Lifecycle Test",
           slug: `life-${tag}`,
           verificationStatus: "verified",
+          subscriptionTier: "premium",
         },
       },
     },

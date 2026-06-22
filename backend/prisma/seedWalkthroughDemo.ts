@@ -285,6 +285,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
       registeredAddress: "Lindenstraße 42, 10969 Berlin",
       contactEmail: WALKTHROUGH_DEMO_MANAGER_EMAIL,
       legalContactName: "Demo Manager",
+      subscriptionTier: "premium",
     },
   });
 

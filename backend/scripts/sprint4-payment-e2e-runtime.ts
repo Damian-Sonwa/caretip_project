@@ -39,6 +39,7 @@ async function seedVerifiedVenue() {
           name: `Sprint4 Pay Venue ${tag}`,
           slug: `sprint4-pay-${tag}`,
           verificationStatus: "verified",
+          subscriptionTier: "premium",
         },
       },
     },

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import { fetchBusinessProfile, patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
 import { isOnboardingCompleted, resolveResumeOnboardingStep } from "../lib/onboardingProgress";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
+import { isApiSubscriptionRequiredError } from "../lib/apiError";
 import { logClientError } from "../lib/clientLog";
 import { cn } from "@/lib/utils";
 import type { OnboardingStep } from "../components/business/BusinessOnboardingProgress";
@@ -181,8 +182,17 @@ export function BusinessOnboardingPage() {
         website: website.trim() || null,
       });
       if (logoFile) {
-        const uploaded = await uploadMyBusinessLogo(logoFile);
-        setSavedLogoPath(uploaded.path ?? null);
+        try {
+          const uploaded = await uploadMyBusinessLogo(logoFile);
+          setSavedLogoPath(uploaded.path ?? null);
+        } catch (err) {
+          setLogoFile(null);
+          if (isApiSubscriptionRequiredError(err)) {
+            toast.info(t("business.onboarding.toastLogoDeferred"));
+          } else {
+            toast.error(toUserFriendlyMessage(err));
+          }
+        }
       }
       return;
     }

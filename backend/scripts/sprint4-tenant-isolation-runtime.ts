@@ -45,6 +45,7 @@ async function seedTenant(label: string) {
           name: `${label} Venue`,
           slug: `${tag}-venue`,
           verificationStatus: "verified",
+          subscriptionTier: "premium",
         },
       },
     },

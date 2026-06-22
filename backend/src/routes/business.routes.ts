@@ -5,7 +5,7 @@ import { requireBusinessVerificationCapability } from "../middleware/requireBusi
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
 import { businessUploadLogo, businessUploadVerification } from "../middleware/businessUpload.middleware.js";
-import { requireSubscriptionCapability } from "../middleware/requireSubscriptionCapability.middleware.js";
+import { requireBusinessLogoUpload } from "../middleware/requireBusinessLogoUpload.middleware.js";
 import { clientSafeMessage } from "../utils/httpErrors.js";
 import { validateInviteCodeRateLimit } from "../middleware/authRateLimit.middleware.js";
 
@@ -80,7 +80,7 @@ router.post(
       }
       next();
     }),
-  requireSubscriptionCapability("brandingCustomization"),
+  requireBusinessLogoUpload,
   businessController.uploadMyLogo
 );
 

@@ -40,7 +40,7 @@ export function EmployeeLandingSection() {
       benefits={benefits}
       benefitsVariant="showcase"
       cta={{
-        label: t("landing.employeeSection.cta"),
+        label: t("nav.staffPortal"),
         to: "/join",
         icon: <LayoutDashboard className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />,
       }}

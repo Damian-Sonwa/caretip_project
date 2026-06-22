@@ -14,22 +14,27 @@ function isCareIconName(value: string): value is CareIconName {
 type JourneyPillarIconProps = {
   iconKey: string;
   className?: string;
+  variant?: "default" | "obsidian";
 };
 
-export function JourneyPillarIcon({ iconKey, className }: JourneyPillarIconProps) {
+export function JourneyPillarIcon({ iconKey, className, variant = "default" }: JourneyPillarIconProps) {
   const shellClass = cn(
-    "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.12] ring-1 ring-primary/15 sm:h-8 sm:w-8",
+    variant === "obsidian"
+      ? "caretip-public-obsidian-icon"
+      : "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/[0.12] ring-1 ring-primary/15 sm:h-8 sm:w-8",
     className,
   );
+
+  const iconClass =
+    variant === "obsidian"
+      ? "h-3.5 w-3.5 sm:h-4 sm:w-4"
+      : "h-4 w-4 text-primary/95 sm:h-[1.125rem] sm:w-[1.125rem]";
 
   const Lucide = JOURNEY_PILLAR_LUCIDE[iconKey];
   if (Lucide) {
     return (
       <span className={shellClass} aria-hidden>
-        <Lucide
-          className="h-4 w-4 text-primary/95 sm:h-[1.125rem] sm:w-[1.125rem]"
-          strokeWidth={1.85}
-        />
+        <Lucide className={iconClass} strokeWidth={1.85} />
       </span>
     );
   }
@@ -37,7 +42,11 @@ export function JourneyPillarIcon({ iconKey, className }: JourneyPillarIconProps
   if (isCareIconName(iconKey)) {
     return (
       <span className={shellClass} aria-hidden>
-        <CareIcon name={iconKey} size="sm" className="text-primary/95" />
+        <CareIcon
+          name={iconKey}
+          size="sm"
+          className={variant === "obsidian" ? undefined : "text-primary/95"}
+        />
       </span>
     );
   }

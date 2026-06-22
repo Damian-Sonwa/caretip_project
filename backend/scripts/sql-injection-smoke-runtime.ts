@@ -135,6 +135,7 @@ async function seedManager(deps: DatabaseDeps) {
           name: `${tag} Venue`,
           slug: `${tag}-venue`,
           verificationStatus: "verified",
+          subscriptionTier: "premium",
         },
       },
     },

@@ -1,9 +1,12 @@
 import { useMemo, type ComponentType } from "react";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
 import { FeaturesPageHero } from "@/components/public/features/FeaturesPageHero";
 import { FeatureShowcaseCard } from "@/components/public/features/FeatureShowcaseCard";
 import { FEATURES_PAGE_ITEMS } from "@/components/public/features/featuresPageConfig";
+import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
+import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
 import { DeferredBelowFold, LazyBelowFold } from "@/lib/publicRouteDefer";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
@@ -16,7 +19,7 @@ function FeaturesStandardGrid({
   return (
     <section
       className={cn(
-        "relative mt-8 rounded-2xl border border-neutral-200/50 bg-[#f3f1ed]/60 px-1 py-6 sm:mt-10 sm:rounded-3xl sm:px-2 sm:py-8",
+        "caretip-features-standard-band relative mt-8 rounded-2xl border border-neutral-200/50 bg-[#f3f1ed]/60 px-1 py-6 sm:mt-10 sm:rounded-3xl sm:px-2 sm:py-8",
         "dark:border-neutral-800/80 dark:bg-neutral-900/40",
       )}
     >
@@ -57,9 +60,14 @@ export function FeaturesPage() {
 
   return (
     <PublicPageShell maxWidth="wide" contentClassName="pb-4">
+      <main
+        id="features"
+        className={cn("caretip-features-page", publicPagesBrandUi.pageAccent)}
+        aria-label={t("nav.features")}
+      >
       <FeaturesPageHero />
 
-      <section className="relative">
+      <section className="caretip-features-featured relative">
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 lg:gap-6">
           {featured.map((f, idx) => (
             <FeatureShowcaseCard
@@ -90,6 +98,22 @@ export function FeaturesPage() {
         minHeight="18rem"
         rootMargin="280px 0px"
       />
+
+      <section className={cn(publicPageUi.sectionGap, "pb-4 sm:pb-6")}>
+        <div className={publicPagesBrandUi.warmDarkCta}>
+          <h3 className={publicPagesBrandUi.warmDarkCtaTitle}>{t("staticPages.features.ctaTitle")}</h3>
+          <p className={publicPagesBrandUi.warmDarkCtaBody}>{t("staticPages.features.ctaBody")}</p>
+          <div className={publicPagesBrandUi.warmDarkCtaActions}>
+            <Link to="/contact?intent=demo" className={publicPagesBrandUi.ctaButtonPrimary}>
+              {t("nav.requestDemo")}
+            </Link>
+            <Link to="/pricing" className={publicPagesBrandUi.ctaButtonSecondary}>
+              {t("staticPages.features.ctaPricing")}
+            </Link>
+          </div>
+        </div>
+      </section>
+      </main>
     </PublicPageShell>
   );
 }

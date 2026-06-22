@@ -76,10 +76,15 @@ export function LandingMotivationSection() {
             <div className={cn(landingUi.sectionCtaCluster, "caretip-motivation-cta")}>
               <div className={landingUi.sectionCtaUnit}>
                 <Link
-                  to="/signup"
+                  to="/contact?intent=demo"
                   className={landingUi.sectionCtaPrimary}
                 >
-                  {t("landing.showcase.primaryCta")}
+                  {t("nav.requestDemo")}
+                </Link>
+              </div>
+              <div className={landingUi.sectionCtaUnit}>
+                <Link to="/signup" className={landingUi.sectionCtaSecondary}>
+                  {t("nav.becomePartner")}
                 </Link>
               </div>
             </div>

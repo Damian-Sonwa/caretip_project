@@ -58,12 +58,20 @@ export function FeaturesProductMoments() {
   const { t } = useTranslation();
 
   return (
-    <section className="mt-10 sm:mt-12">
-      <div className="mb-6 text-center sm:mb-8">
-        <h2 className="text-[clamp(1.35rem,3vw,1.75rem)] font-semibold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50">
+    <section className="caretip-features-moments mt-10 sm:mt-12">
+      <div className="caretip-features-moments__header mb-6 text-center sm:mb-8">
+        <h2
+          className={cn(
+            "caretip-public-marketing-section-title text-[clamp(1.35rem,3vw,1.75rem)] font-semibold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50",
+          )}
+        >
           {t("staticPages.features.momentsTitle")}
         </h2>
-        <p className="mx-auto mt-2 max-w-xl text-sm leading-relaxed text-neutral-700 sm:text-[0.9375rem] dark:text-neutral-300">
+        <p
+          className={cn(
+            "caretip-public-marketing-section-subtitle mx-auto mt-2 max-w-xl text-sm leading-relaxed sm:text-[0.9375rem]",
+          )}
+        >
           {t("staticPages.features.momentsSubtitle")}
         </p>
       </div>

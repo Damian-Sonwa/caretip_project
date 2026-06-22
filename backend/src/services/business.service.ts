@@ -3,7 +3,7 @@ import {
   validateEmployeeInviteCode,
   listInviteHistoryForBusiness,
 } from "./employeeInvite.service.js";
-import { Prisma, TipStatus, type EmployeeActivationStatus } from "@prisma/client";
+import { Prisma, TipStatus, BusinessSubscriptionTier, type EmployeeActivationStatus } from "@prisma/client";
 import { DateTime } from "luxon";
 import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
 import { randomBytes } from "node:crypto";
@@ -19,6 +19,7 @@ import {
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
 import {
   businessDayKey,
   businessUtcRangeForTimeframe,
@@ -111,6 +112,13 @@ export async function getBusinessByUserId(userId: string) {
       slug,
       businessType: null,
       location: null,
+      subscriptionTier: BusinessSubscriptionTier.basic,
+      subscription: {
+        create: buildNestedSubscriptionCreateData({
+          subscriptionTier: BusinessSubscriptionTier.basic,
+          source: "auto_heal",
+        }),
+      },
     },
   });
 }

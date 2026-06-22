@@ -7,6 +7,11 @@ import {
   handlePaymentFailed,
 } from "../services/stripe.service.js";
 import {
+  handleStripeBillingWebhookEvent,
+  isStripeBillingEventType,
+  isSubscriptionCheckoutSession,
+} from "../services/stripeBillingWebhook.service.js";
+import {
   isStripeWebhookEventProcessed,
   markStripeWebhookEventProcessed,
 } from "../services/stripeWebhookIdempotency.service.js";
@@ -18,6 +23,13 @@ import { logServerError } from "../utils/httpErrors.js";
  * Raw body required — registered in index.ts with express.raw({ type: "application/json" }).
  */
 const router = Router();
+
+const TIP_EVENT_TYPES = new Set([
+  "checkout.session.expired",
+  "payment_intent.succeeded",
+  "payment_intent.payment_failed",
+  "payment_intent.canceled",
+]);
 
 router.post("/stripe", async (req: Request, res: Response) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -36,6 +48,19 @@ router.post("/stripe", async (req: Request, res: Response) => {
   }
 
   try {
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      if (isSubscriptionCheckoutSession(session)) {
+        const billingResult = await handleStripeBillingWebhookEvent(event);
+        return res.json(billingResult);
+      }
+    }
+
+    if (isStripeBillingEventType(event.type)) {
+      const billingResult = await handleStripeBillingWebhookEvent(event);
+      return res.json(billingResult);
+    }
+
     if (await isStripeWebhookEventProcessed(event.id)) {
       console.info("[stripe.webhook] duplicate event skipped", { eventId: event.id, type: event.type });
       return res.json({ received: true, duplicate: true });
@@ -46,6 +71,7 @@ router.post("/stripe", async (req: Request, res: Response) => {
       console.log("stripe.webhook: checkout.session.completed → handleSuccessfulTipPayment", {
         eventId: event.id,
         sessionId: session.id,
+        mode: session.mode,
       });
       await handleSuccessfulTipPayment(session);
     }
@@ -70,6 +96,10 @@ router.post("/stripe", async (req: Request, res: Response) => {
       const paymentIntent = event.data.object as Stripe.PaymentIntent;
       await handlePaymentFailed(paymentIntent.id);
     }
+
+    if (TIP_EVENT_TYPES.has(event.type) || event.type === "checkout.session.completed") {
+      await markStripeWebhookEventProcessed(event.id, event.type);
+    }
   } catch (err) {
     logServerError("stripe.webhook.handler", err, {
       phase: "event_handler",
@@ -79,7 +109,6 @@ router.post("/stripe", async (req: Request, res: Response) => {
     return res.status(500).json({ received: false });
   }
 
-  await markStripeWebhookEventProcessed(event.id, event.type);
   res.json({ received: true });
 });
 

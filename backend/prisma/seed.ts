@@ -47,6 +47,7 @@ async function main() {
       inviteCode: "DEMO42",
       verificationStatus: "verified",
       userId: businessUser.id,
+      subscriptionTier: "premium",
     },
   });
 

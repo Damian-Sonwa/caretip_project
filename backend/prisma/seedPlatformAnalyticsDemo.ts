@@ -83,6 +83,7 @@ async function main() {
       location: "Berlin, Germany",
       contactEmail: demoManagerEmail,
       legalContactName: "Demo Manager",
+      subscriptionTier: "premium",
     },
   });
 
@@ -204,6 +205,7 @@ async function main() {
         verificationStatus: "verified",
         userId: owner.id,
         inviteCode: `DEMO${String(i + 1).padStart(2, "0")}`,
+        subscriptionTier: "premium",
       },
     });
 

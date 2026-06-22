@@ -112,32 +112,124 @@
       }
     },
     "contact": {
-      "title": "Contact Us",
-      "subtitle": "Have questions about Caretip? We're here to help.",
-      "formTitle": "Send us a message",
-      "labelName": "Full Name",
-      "placeholderName": "Schmidt Paul",
-      "labelEmail": "Email Address",
-      "placeholderEmail": "john@example.com",
-      "labelSubject": "Subject",
-      "placeholderSubject": "How can we help?",
-      "labelMessage": "Message",
-      "placeholderMessage": "Tell us more about your inquiry...",
-      "submit": "Send Message",
-      "asideTitle": "Get in touch",
-      "emailHeading": "Email",
-      "phoneHeading": "Phone",
-      "phoneLine1": "+1 (555) TIP-CARE",
-      "phoneLine2": "24/7 Support",
-      "chatHeading": "Live Chat",
-      "chatLine": "Available 24/7",
-      "chatCta": "Start a conversation",
-      "hqHeading": "Headquarters",
-      "hqLine1": "100 Hospitality Plaza",
-      "hqLine2": "New York, NY 10013",
-      "faqTeaserTitle": "Looking for quick answers?",
-      "faqTeaserBody": "Check out our FAQ section for instant answers to common questions.",
-      "faqTeaserLink": "Visit FAQ"
+      "pageAria": "Contact CareTip",
+      "eyebrow": "Contact",
+      "headline": "How can we help?",
+      "supportingText": "We're here to help hospitality teams get the most from CareTip.",
+      "backToChooser": "Back to contact options",
+      "trust": {
+        "aria": "Contact trust indicators",
+        "response24h": "Response within 24 hours",
+        "gdpr": "GDPR compliant",
+        "stripe": "Secure Stripe-powered platform",
+        "trusted": "Trusted by hospitality teams"
+      },
+      "socialProof": {
+        "tagline": "Helping service teams receive recognition through secure digital tipping.",
+        "segmentsAria": "Industries we serve",
+        "segments": "Hospitality Teams · Cafés · Restaurants · Hotels · Bars · Midwives · Service Businesses"
+      },
+      "reassurance": {
+        "demo": {
+          "aria": "Sales contact help",
+          "title": "Need help before booking?",
+          "body": "Questions about pricing, onboarding, integrations, or rollout?",
+          "team": "Our team is happy to help.",
+          "email": "sales@caretip.de",
+          "responseTime": "Average response time: under 24 hours"
+        },
+        "support": {
+          "aria": "Support contact help",
+          "title": "Prefer to email directly?",
+          "body": "Share your question and our support team will follow up with clear next steps.",
+          "team": "We're here for account, payment, and technical questions.",
+          "email": "support@caretip.de",
+          "responseTime": "Average response time: under 24 hours"
+        }
+      },
+      "intent": {
+        "demo": {
+          "title": "Request a Demo",
+          "description": "For restaurants, hotels, cafés, bars, salons, midwives and service teams looking to grow tips and team recognition."
+        },
+        "support": {
+          "title": "Contact Support",
+          "description": "Get help with your account, payments, onboarding, technical questions or product feedback."
+        }
+      },
+      "demo": {
+        "title": "Request a demo",
+        "bullets": [
+          "See CareTip tailored to your venue",
+          "Learn how QR tipping works in practice",
+          "Understand team recognition workflows",
+          "Explore reporting and analytics",
+          "Review pricing and rollout options"
+        ],
+        "altPrompt": "Need help with an existing account?",
+        "fields": {
+          "fullName": "Full name",
+          "workEmail": "Work email",
+          "businessName": "Business name",
+          "businessType": "Business type",
+          "teamSize": "Team size",
+          "message": "Message"
+        },
+        "placeholders": {
+          "fullName": "Your name",
+          "workEmail": "you@yourbusiness.com",
+          "businessName": "Your business name",
+          "businessType": "Select business type",
+          "teamSize": "Select team size",
+          "message": "Tell us about your venue, team size, and what you'd like to achieve with CareTip…"
+        },
+        "teamSizes": {
+          "1-10": "1–10 people",
+          "11-50": "11–50 people",
+          "51-200": "51–200 people",
+          "200plus": "200+ people"
+        },
+        "submit": "Request demo"
+      },
+      "support": {
+        "title": "Contact support",
+        "bullets": [
+          "Ask product or account questions",
+          "Report issues or unexpected behaviour",
+          "Share feedback to help us improve CareTip"
+        ],
+        "altPrompt": "Interested in plans, pricing, or a demo?",
+        "fields": {
+          "name": "Name",
+          "email": "Email",
+          "category": "Category",
+          "message": "Message"
+        },
+        "placeholders": {
+          "name": "Your name",
+          "email": "you@example.com",
+          "category": "Select a category",
+          "message": "Describe your question or issue and we'll get back to you…"
+        },
+        "categories": {
+          "account_login": "Account & Login",
+          "payments_stripe": "Payments & Stripe",
+          "qr_codes": "QR Codes",
+          "team_setup": "Team Setup",
+          "technical": "Technical Issue",
+          "product_feedback": "Product Feedback",
+          "pricing": "Pricing Question",
+          "other": "Other"
+        },
+        "submit": "Send message"
+      },
+      "form": {
+        "submitting": "Sending…",
+        "successTitle": "Thank you — we received your message",
+        "demoSuccess": "Our team will reach out within one business day to schedule your demo.",
+        "supportSuccess": "Our support team will follow up shortly with next steps.",
+        "validation": "Please complete all required fields before submitting."
+      }
     },
     "features": {
       "title": "Caring is Tipping",
@@ -188,49 +280,206 @@
       "mock": {
         "tipAlert": "New tip received",
         "tipAmount": "€24.00"
-      }
+      },
+      "ctaTitle": "Ready to see CareTip in your venue?",
+      "ctaBody": "Book a walkthrough with our team or explore plans built for hospitality teams.",
+      "ctaPricing": "View pricing"
     },
     "pricing": {
       "pageTitle": "Fair & Transparent Billing",
       "pageSubtitle": "Full flexibility for your customers: They only pay what they feel is right.",
+      "plansAria": "Pricing plans and controls",
+      "plansEyebrow": "Plans & pricing",
       "sectionTitle": "True recognition is all about simplicity.",
       "sectionSubtitle": "With CareTip, you can spotlight your team's outstanding service and reward them directly. Delight your guests, boost team morale, and turn customers into loyal brand advocates.",
-      "popular": "Popular",
-      "ctaTitle": "Do you have questions about CareTip?",
-      "ctaBody": "Our team will guide you step-by-step through the setup, branding, and selection of the right pricing model for your service, care, or logistics sector.",
+      "plansBullet1": "No hidden fees",
+      "plansBullet2": "Transparent per-tip pricing",
+      "plansBullet3": "Scale as your business grows",
+      "popular": "Most Popular",
+      "ctaTitle": "Ready to bring digital tipping to your team?",
+      "ctaBody": "Whether you run a single salon or a hotel group, our team will help you launch QR tipping, onboard staff, and choose the right plan.",
+      "billing": {
+        "label": "Billing Cycle",
+        "aria": "Billing cycle",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "saveBadge": "Save 20%",
+        "comingSoonBadge": "Soon",
+        "yearlyComingSoon": "Yearly pricing with 20% savings is coming soon. Prices shown are monthly until yearly billing launches."
+      },
+      "industry": {
+        "label": "Business Type",
+        "selectAria": "Select your business type",
+        "selectPlaceholder": "Select business type",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel",
+        "cafe": "Café",
+        "bar": "Bar",
+        "salon": "Salon",
+        "midwife": "Midwife",
+        "freelancer": "Freelancer",
+        "logistics": "Logistics",
+        "healthcare_clinic": "Healthcare Clinic",
+        "wellness_spa": "Wellness & Spa",
+        "other": "Other"
+      },
+      "trust": {
+        "aria": "Pricing trust signals",
+        "noContracts": "No long-term contracts",
+        "transparent": "Transparent pricing",
+        "stripe": "Secure Stripe payments",
+        "setup": "Setup in minutes"
+      },
+      "faq": {
+        "title": "Frequently asked questions",
+        "subtitle": "Clear answers about fees, billing, and what to expect when you get started.",
+        "items": [
+          {
+            "q": "Are there monthly platform fees?",
+            "a": "Starter has no monthly platform fee. You only pay Stripe processing on successful tips. Business includes an optional €29/month platform fee for advanced features. Enterprise is tailored to your volume."
+          },
+          {
+            "q": "What does per-tip pricing mean?",
+            "a": "CareTip charges a small percentage plus Stripe’s fixed fee on each successful tip. Failed or cancelled payments are never charged. Rates depend on your plan."
+          },
+          {
+            "q": "Can I switch plans as my team grows?",
+            "a": "Yes. Upgrade anytime as you add locations or staff. Our team helps you move between plans so reporting and payouts stay consistent."
+          },
+          {
+            "q": "How does yearly billing work?",
+            "a": "Yearly billing with 20% savings is rolling out soon. Prices shown today reflect monthly billing. We'll notify you before any change takes effect."
+          }
+        ]
+      },
       "tiers": {
         "starter": {
           "name": "Starter",
-          "feeNote": "per successful tip (Stripe)",
-          "description": "Best for small venues getting started with QR tipping.",
+          "tagline": "For independent venues",
+          "feeNote": "per successful tip via Stripe",
+          "description": "Launch QR tipping for your front-of-house team without a monthly platform fee.",
           "f0": "Up to 10 team members",
           "f1": "QR codes & staff tip links",
           "f2": "Basic tip analytics",
           "f3": "Email support",
           "f4": "No monthly platform fee",
-          "button": "Start free"
+          "f5": "Acrylic stand templates (print-ready)",
+          "button": "Request demo"
         },
         "business": {
           "name": "Business",
-          "feeNote": "per successful tip (Stripe)",
-          "description": "For growing teams that need more control and branding.",
+          "tagline": "For growing hospitality teams",
+          "feeNote": "per successful tip via Stripe",
+          "description": "Branded tipping experiences with the tools multi-staff restaurants and hotels need.",
           "f0": "Unlimited team members",
-          "f1": "Branded QR & exports",
+          "f1": "Branded QR codes & CSV export",
           "f2": "Priority support",
           "f3": "Multi-location friendly",
-          "f4": "29 €/Monat Plattformgebühr (optional)",
-          "button": "Get started"
+          "f4": "Optional €29/month platform fee",
+          "f5": "Physical acrylic stands (on request)",
+          "button": "Request demo"
         },
         "enterprise": {
           "name": "Enterprise",
+          "tagline": "For groups & chains",
           "feeNote": "volume-based tip processing",
-          "description": "For hospitality groups with custom payout and reporting needs.",
+          "description": "Custom payout flows, reporting, and onboarding for hospitality groups at scale.",
           "f0": "Everything in Business",
           "f1": "Dedicated onboarding",
           "f2": "API & integrations",
           "f3": "Custom fee structure",
-          "f4": "Account manager",
+          "f4": "Dedicated account manager",
+          "f5": "Branded merchandise kits",
           "button": "Contact sales"
+        }
+      },
+      "socialProfessionsNote": "Individual special conditions for social professions and solo entrepreneurs are available upon request.",
+      "audience": {
+        "operations": {
+          "pageTitle": "Pricing for hotels & logistics teams",
+          "pageSubtitle": "Coordinate tipping across shifts, locations, and field staff with transparent per-tip fees.",
+          "sectionTitle": "Built for multi-team operations.",
+          "sectionSubtitle": "Hotels and logistics companies use CareTip to recognize staff across reception, housekeeping, drivers, and warehouse teams — without hidden platform surprises.",
+          "tiers": {
+            "starter": {
+              "description": "Launch QR tipping for a single site or depot without a monthly platform fee."
+            },
+            "business": {
+              "description": "Branded tipping with exports and multi-location visibility for growing hotel and logistics operations."
+            },
+            "enterprise": {
+              "description": "Custom payout flows, reporting, and onboarding for hotel groups and logistics networks."
+            }
+          }
+        },
+        "solo": {
+          "pageTitle": "Pricing for midwives & freelancers",
+          "pageSubtitle": "Freemium on Starter — no monthly platform fee, transaction fees only.",
+          "sectionTitle": "Start free. Upgrade when you need more.",
+          "sectionSubtitle": "Starter costs nothing except per-tip transaction fees. Business is optional and adds branding, CSV exports, advanced analytics, premium support, and future premium capabilities.",
+          "tiers": {
+            "starter": {
+              "description": "No monthly platform fee — just a tip page, QR link, and transparent per-tip fees."
+            },
+            "business": {
+              "description": "Optional monthly platform fee for branding, CSV exports, advanced analytics, premium support, and upcoming premium features."
+            },
+            "enterprise": {
+              "description": "Tailored setup for practices and agencies with higher volume or compliance needs."
+            }
+          }
+        },
+        "general": {
+          "pageTitle": "Fair & Transparent Billing",
+          "pageSubtitle": "Full flexibility for your customers: They only pay what they feel is right.",
+          "sectionTitle": "True recognition is all about simplicity.",
+          "sectionSubtitle": "With CareTip, you can spotlight your team's outstanding service and reward them directly. Delight your guests, boost team morale, and turn customers into loyal brand advocates."
+        }
+      },
+      "industryCopy": {
+        "hotel": {
+          "pageTitle": "Pricing for hotel teams",
+          "pageSubtitle": "Transparent per-tip fees across reception, housekeeping, F&B, and concierge.",
+          "sectionTitle": "Tipping that works across every hotel team.",
+          "sectionSubtitle": "Hotels use CareTip to coordinate recognition across shifts and departments — same tier structure as logistics, with hospitality-specific rollout support.",
+          "tiers": {
+            "starter": { "description": "QR tipping for a single property without a monthly platform fee." },
+            "business": { "description": "Branded QR, CSV exports, and multi-location visibility for growing hotel groups." },
+            "enterprise": { "description": "Custom payout flows and onboarding for hotel chains at scale." }
+          }
+        },
+        "logistics": {
+          "pageTitle": "Pricing for logistics teams",
+          "pageSubtitle": "Reward drivers, warehouse staff, and field teams with clear per-tip fees.",
+          "sectionTitle": "Recognition for people on the move.",
+          "sectionSubtitle": "Logistics companies use CareTip with the same tier structure as hotels — built for distributed teams and real-time field recognition.",
+          "tiers": {
+            "starter": { "description": "QR tipping for a depot or hub without a monthly platform fee." },
+            "business": { "description": "Branded tipping, CSV exports, and multi-site reporting for growing logistics operations." },
+            "enterprise": { "description": "Custom integrations and payout flows for logistics networks." }
+          }
+        },
+        "midwife": {
+          "pageTitle": "Pricing for midwives",
+          "pageSubtitle": "Freemium tipping — no monthly platform fee on Starter, transaction fees only.",
+          "sectionTitle": "Digital appreciation for independent practice.",
+          "sectionSubtitle": "Start free on Starter with per-tip fees only. Upgrade to Business when you want branding, CSV exports, advanced analytics, and premium support.",
+          "tiers": {
+            "starter": { "description": "Free to start — personal tip page and QR link. You only pay transaction fees on successful tips." },
+            "business": { "description": "Optional platform fee unlocks branding, CSV exports, advanced analytics, premium support, and future premium capabilities." },
+            "enterprise": { "description": "Tailored setup for midwife practices with higher volume or compliance needs." }
+          }
+        },
+        "freelancer": {
+          "pageTitle": "Pricing for freelancers",
+          "pageSubtitle": "Freemium tipping — no monthly platform fee on Starter, transaction fees only.",
+          "sectionTitle": "A tip link that grows with your work.",
+          "sectionSubtitle": "Starter is free except per-tip transaction fees. Business adds branding, exports, analytics, and premium support when you're ready to monetize further.",
+          "tiers": {
+            "starter": { "description": "Free to start — share a tip link or QR. Transaction fees apply only when you receive tips." },
+            "business": { "description": "Optional platform fee for branding, CSV exports, advanced analytics, premium support, and upcoming premium features." },
+            "enterprise": { "description": "Custom setup for agencies and collectives with advanced reporting needs." }
+          }
         }
       },
       "commitmentNotice": "Just choose the package that fits your business best.",
@@ -1892,7 +2141,7 @@
       "b2Text": "Spot patterns that help you earn more each week.",
       "b3Title": "Tip history & ratings",
       "b3Text": "Gratitude and guest feedback in one clear trail.",
-      "cta": "View employee dashboard",
+      "cta": "Join Team",
       "imageAlt": "CareTip employee dashboard showing daily earnings, ratings, and goals"
     },
     "businessSection": {
@@ -2109,13 +2358,17 @@
         "title": "Hotels",
         "benefit": "Transparent tipping across every team."
       },
-      "healthcare": {
-        "title": "Healthcare",
-        "benefit": "Recognize exceptional care."
-      },
-      "delivery": {
-        "title": "Delivery",
+      "logistics": {
+        "title": "Logistics",
         "benefit": "Reward drivers and field staff in real time."
+      },
+      "midwife": {
+        "title": "Midwives",
+        "benefit": "Let families show appreciation digitally."
+      },
+      "freelancer": {
+        "title": "Freelancers",
+        "benefit": "A simple tip link for independent work."
       },
       "salon": {
         "title": "Salons",
@@ -2134,8 +2387,8 @@
       "eyebrow": "Start tipping in minutes",
       "title": "Start rewarding your team today",
       "subtitle": "Launch QR tipping in an afternoon, with tip tracking and team visibility built in.",
-      "cta": "Get started",
-      "secondary": "See how it works"
+      "cta": "Request a demo",
+      "secondary": "Become a partner"
     },
     "assistant": {
       "title": "Ask CareTip",
@@ -2584,6 +2837,7 @@
     "onboarding": {
       "toastSessionExpired": "Your session expired. Please sign in again.",
       "toastSavedLoadingDashboard": "Saved. Loading your dashboard…",
+      "toastLogoDeferred": "Your logo can be added later after upgrading your plan.",
       "headline": "Create your venue",
       "description": "Set up your CareTip workspace in less than 5 minutes.",
       "progressAria": "Onboarding progress",
@@ -2707,11 +2961,16 @@
       "businessTypes": {
         "restaurant": "Restaurant",
         "hotel": "Hotel",
-        "hospital": "Hospital",
+        "logistics": "Logistics",
         "salon": "Salon",
         "bar": "Bar",
         "cafe": "Cafe",
-        "other": "Other"
+        "midwife": "Midwife",
+        "freelancer": "Freelancer",
+        "healthcare_clinic": "Healthcare clinic",
+        "wellness_spa": "Wellness & spa",
+        "other": "Other",
+        "hospital": "Hospital"
       },
       "trust": {
         "secure": "Bank-grade security",

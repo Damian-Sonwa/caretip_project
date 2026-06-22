@@ -1,13 +1,12 @@
+import { CARETIP_INDUSTRY_DEFINITIONS } from "../data/caretipIndustries";
+
 /** Canonical business type values (stored on Business.businessType). */
-export const BUSINESS_TYPE_OPTIONS = [
-  { value: "Restaurant", labelKey: "business.onboarding.businessTypes.restaurant" },
-  { value: "Hotel", labelKey: "business.onboarding.businessTypes.hotel" },
-  { value: "Hospital", labelKey: "business.onboarding.businessTypes.hospital" },
-  { value: "Salon", labelKey: "business.onboarding.businessTypes.salon" },
-  { value: "Bar", labelKey: "business.onboarding.businessTypes.bar" },
-  { value: "Cafe", labelKey: "business.onboarding.businessTypes.cafe" },
-  { value: "Other", labelKey: "business.onboarding.businessTypes.other" },
-] as const;
+export const BUSINESS_TYPE_OPTIONS = CARETIP_INDUSTRY_DEFINITIONS.filter((d) => d.showInOnboarding).map(
+  (d) => ({
+    value: d.storageValue,
+    labelKey: d.onboardingLabelKey ?? d.labelKey,
+  }),
+);
 
 export const BUSINESS_TYPE_I18N: Record<string, string> = Object.fromEntries(
   BUSINESS_TYPE_OPTIONS.map((opt) => [opt.value, opt.labelKey]),

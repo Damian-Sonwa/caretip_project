@@ -1,0 +1,678 @@
+/**
+ * CareTip contact page — intent-first, conversion-oriented, hospitality SaaS.
+ */
+
+.caretip-contact-page {
+  --caretip-contact-warm-dark-bg: linear-gradient(
+    180deg,
+    #1a1816 0%,
+    #141210 42%,
+    #100f0d 100%
+  );
+  --caretip-contact-warm-dark-border: rgb(233 120 28 / 0.24);
+  --caretip-contact-warm-dark-glow: radial-gradient(
+    ellipse 80% 50% at 50% 0%,
+    rgb(233 120 28 / 0.12) 0%,
+    transparent 58%
+  );
+  position: relative;
+  padding-bottom: 1.5rem;
+}
+
+.caretip-contact-page::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  top: -1rem;
+  height: 22rem;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    rgb(233 120 28 / 0.07) 0%,
+    transparent 68%
+  );
+  mask-image: linear-gradient(180deg, black 0%, transparent 92%);
+}
+
+.caretip-contact-chooser {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.caretip-contact-layout {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .caretip-contact-layout {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+    gap: 2rem 2.75rem;
+  }
+
+  .caretip-contact-layout--form {
+    grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+    gap: 2rem 2.5rem;
+    align-items: start;
+  }
+}
+
+.caretip-contact-intro {
+  max-width: 26rem;
+}
+
+.caretip-contact-eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-contact-headline {
+  margin-top: 0.625rem;
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.875rem, 4.2vw, 2.75rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: rgb(23 23 23);
+}
+
+html.dark .caretip-contact-headline {
+  color: rgb(250 250 250);
+}
+
+.caretip-contact-subhead {
+  margin-top: 0.75rem;
+  font-size: clamp(1rem, 1.6vw, 1.0625rem);
+  line-height: 1.6;
+  color: rgb(82 82 82);
+  text-wrap: pretty;
+}
+
+html.dark .caretip-contact-subhead {
+  color: rgb(163 163 163);
+}
+
+/* —— Intent cards —— */
+.caretip-contact-intent-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.875rem;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .caretip-contact-intent-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+}
+
+.caretip-contact-intent-card {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  min-height: 11rem;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.125rem;
+  width: 100%;
+  padding: 1.25rem 1.25rem 1.125rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(229 229 229 / 0.95);
+  background: rgb(255 255 255);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.25s ease,
+    box-shadow 0.25s ease,
+    transform 0.25s ease;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+}
+
+.caretip-contact-intent-card:hover {
+  border-color: rgb(233 120 28 / 0.32);
+  box-shadow: 0 12px 32px -18px rgb(15 23 42 / 0.1);
+  transform: translateY(-1px);
+}
+
+.caretip-contact-intent-card:focus-visible {
+  outline: none;
+  border-color: rgb(233 120 28 / 0.42);
+  box-shadow: 0 0 0 3px rgb(233 120 28 / 0.12);
+}
+
+.caretip-contact-intent-card--primary {
+  border-color: var(--caretip-contact-warm-dark-border);
+  background: var(--caretip-contact-warm-dark-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 12px 32px -20px rgb(14 13 11 / 0.35);
+}
+
+.caretip-contact-intent-card--primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-contact-warm-dark-glow);
+  opacity: 0.85;
+}
+
+.caretip-contact-intent-card--primary:hover {
+  border-color: rgb(233 120 28 / 0.38);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.04),
+    0 16px 36px -16px rgb(233 120 28 / 0.16);
+}
+
+.caretip-contact-intent-card--primary .caretip-contact-intent-card__title {
+  position: relative;
+  z-index: 1;
+  color: rgb(250 250 250);
+}
+
+.caretip-contact-intent-card--primary .caretip-contact-intent-card__body {
+  position: relative;
+  z-index: 1;
+  color: rgb(200 200 200);
+}
+
+html.dark .caretip-contact-intent-card {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+.caretip-contact-intent-card__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: rgb(23 23 23);
+}
+
+html.dark .caretip-contact-intent-card__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-contact-intent-card__body {
+  font-size: 0.875rem;
+  line-height: 1.55;
+  color: rgb(115 115 115);
+}
+
+html.dark .caretip-contact-intent-card__body {
+  color: rgb(163 163 163);
+}
+
+/* —— Social proof —— */
+.caretip-contact-social-proof {
+  position: relative;
+  z-index: 1;
+  padding: 1rem 0 0.25rem;
+  text-align: center;
+  border-top: 1px solid rgb(229 229 229 / 0.85);
+}
+
+html.dark .caretip-contact-social-proof {
+  border-top-color: rgb(64 64 64);
+}
+
+.caretip-contact-social-proof__tagline {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(115 115 115);
+}
+
+.caretip-contact-social-proof__segments {
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgb(163 163 163);
+}
+
+html.dark .caretip-contact-social-proof__tagline {
+  color: rgb(163 163 163);
+}
+
+html.dark .caretip-contact-social-proof__segments {
+  color: rgb(115 115 115);
+}
+
+/* —— Dedicated flows —— */
+.caretip-contact-flow {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+.caretip-contact-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: fit-content;
+  border: 0;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: rgb(115 115 115);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.caretip-contact-back:hover {
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-contact-flow__aside {
+  max-width: 24rem;
+  padding: 1.125rem 1.125rem 1rem;
+  border-radius: 1rem;
+}
+
+.caretip-contact-flow__aside--compact {
+  padding: 1rem 1rem 0.875rem;
+}
+
+.caretip-contact-flow__aside--brand {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--caretip-contact-warm-dark-border);
+  background: var(--caretip-contact-warm-dark-bg);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.03),
+    0 10px 28px -18px rgb(14 13 11 / 0.32);
+}
+
+.caretip-contact-flow__aside--brand::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: var(--caretip-contact-warm-dark-glow);
+  opacity: 0.75;
+}
+
+.caretip-contact-flow__aside--brand-muted {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgb(233 120 28 / 0.18);
+  background: linear-gradient(165deg, rgb(26 22 18) 0%, rgb(18 16 14) 55%, rgb(14 13 11) 100%);
+  box-shadow: 0 10px 28px -18px rgb(14 13 11 / 0.28);
+}
+
+.caretip-contact-flow__aside--brand-muted::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 75% 45% at 0% 0%,
+    rgb(233 120 28 / 0.09) 0%,
+    transparent 55%
+  );
+  opacity: 0.9;
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-flow__title,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__title,
+.caretip-contact-flow__aside--brand .caretip-contact-flow__list li,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__list li,
+.caretip-contact-flow__aside--brand .caretip-contact-flow__alt,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__alt {
+  position: relative;
+  z-index: 1;
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-flow__title,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-flow__list li,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__list li {
+  color: rgb(212 212 212);
+  font-size: 0.8125rem;
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-flow__list li svg,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__list li svg {
+  color: rgb(251 191 36);
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-flow__alt,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-flow__alt {
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: rgb(163 163 163);
+}
+
+.caretip-contact-flow__aside--brand .caretip-contact-inline-link,
+.caretip-contact-flow__aside--brand-muted .caretip-contact-inline-link {
+  color: rgb(251 191 36);
+}
+
+.caretip-contact-flow__title {
+  font-family: var(--font-hero-display, inherit);
+  font-size: clamp(1.375rem, 2.8vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.025em;
+  color: rgb(23 23 23);
+}
+
+.caretip-contact-flow__list {
+  margin-top: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-contact-flow__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.45;
+  color: rgb(64 64 64);
+}
+
+.caretip-contact-flow__list li svg {
+  margin-top: 0.125rem;
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-contact-flow__alt {
+  margin-top: 1.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(115 115 115);
+}
+
+.caretip-contact-inline-link {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--caretip-brand-orange, #e9781c);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  cursor: pointer;
+}
+
+.caretip-contact-inline-link:hover {
+  color: var(--caretip-brand-orange-hover, #ffb04a);
+}
+
+/* —— Form stage (primary focus) —— */
+.caretip-contact-form-stage {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  width: 100%;
+  min-width: 0;
+}
+
+.caretip-contact-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.caretip-contact-trust__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3125rem 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid rgb(229 229 229 / 0.9);
+  background: rgb(250 250 249 / 0.9);
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(82 82 82);
+  white-space: nowrap;
+}
+
+html.dark .caretip-contact-trust__item {
+  border-color: rgb(64 64 64);
+  background: rgb(28 28 28);
+  color: rgb(163 163 163);
+}
+
+.caretip-contact-trust__icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  color: var(--caretip-brand-orange, #e9781c);
+}
+
+.caretip-contact-flow__form {
+  width: 100%;
+}
+
+.caretip-contact-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 1rem;
+  border: 1px solid rgb(229 229 229 / 0.95);
+  background: rgb(255 255 255);
+  box-shadow: 0 1px 2px rgb(15 23 42 / 0.03);
+}
+
+.caretip-contact-form--primary {
+  border-color: rgb(229 229 229);
+  box-shadow:
+    0 2px 4px rgb(15 23 42 / 0.04),
+    0 20px 48px -22px rgb(15 23 42 / 0.14);
+}
+
+@media (min-width: 640px) {
+  .caretip-contact-form {
+    padding: 1.375rem 1.5rem;
+  }
+}
+
+html.dark .caretip-contact-form {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+html.dark .caretip-contact-form--primary {
+  box-shadow: 0 20px 48px -22px rgb(0 0 0 / 0.45);
+}
+
+.caretip-contact-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4375rem;
+}
+
+.caretip-contact-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgb(64 64 64);
+}
+
+html.dark .caretip-contact-label {
+  color: rgb(212 212 212);
+}
+
+.caretip-contact-input:focus-visible,
+.caretip-contact-textarea:focus-visible {
+  border-color: rgb(233 120 28 / 0.45);
+  box-shadow: 0 0 0 3px rgb(233 120 28 / 0.12);
+}
+
+.caretip-contact-textarea {
+  min-height: 7.5rem;
+}
+
+.caretip-contact-select-trigger {
+  width: 100%;
+  height: 2.75rem;
+  border-radius: 0.75rem;
+  border-color: rgb(229 229 229 / 0.95);
+  background: white;
+  font-size: 0.9375rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.caretip-contact-select-trigger:focus-visible {
+  border-color: rgb(233 120 28 / 0.45);
+  box-shadow: 0 0 0 3px rgb(233 120 28 / 0.12);
+}
+
+html.dark .caretip-contact-select-trigger {
+  border-color: rgb(64 64 64);
+  background: rgb(23 23 23);
+}
+
+.caretip-contact-submit {
+  margin-top: 0.25rem;
+}
+
+/* —— Reassurance panel —— */
+.caretip-contact-reassurance {
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(233 120 28 / 0.14);
+  background: linear-gradient(180deg, rgb(255 251 247) 0%, rgb(250 250 249) 100%);
+}
+
+html.dark .caretip-contact-reassurance {
+  border-color: rgb(233 120 28 / 0.2);
+  background: linear-gradient(180deg, rgb(28 24 20) 0%, rgb(23 23 23) 100%);
+}
+
+.caretip-contact-reassurance__title {
+  margin: 0;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: rgb(23 23 23);
+}
+
+html.dark .caretip-contact-reassurance__title {
+  color: rgb(250 250 250);
+}
+
+.caretip-contact-reassurance__body,
+.caretip-contact-reassurance__team {
+  margin: 0.375rem 0 0;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: rgb(82 82 82);
+}
+
+html.dark .caretip-contact-reassurance__body,
+html.dark .caretip-contact-reassurance__team {
+  color: rgb(163 163 163);
+}
+
+.caretip-contact-reassurance__email {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.625rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--caretip-brand-orange, #e9781c);
+  text-decoration: none;
+}
+
+.caretip-contact-reassurance__email:hover {
+  color: var(--caretip-brand-orange-hover, #ffb04a);
+  text-decoration: underline;
+}
+
+.caretip-contact-reassurance__sla {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0.5rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgb(115 115 115);
+}
+
+html.dark .caretip-contact-reassurance__sla {
+  color: rgb(140 140 140);
+}
+
+@media (max-width: 374px) {
+  .caretip-contact-trust__item {
+    white-space: normal;
+  }
+
+  .caretip-contact-social-proof__segments {
+    font-size: 0.6875rem;
+    line-height: 1.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-contact-intent-card {
+    transition: none;
+  }
+
+  .caretip-contact-intent-card:hover {
+    transform: none;
+  }
+}
+
+.caretip-contact-form-status {
+  margin: 0;
+  padding: 1rem 1.125rem;
+  border-radius: 0.875rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.caretip-contact-form-status__title {
+  margin: 0 0 0.375rem;
+  font-weight: 600;
+}
+
+.caretip-contact-form-status--success {
+  color: rgb(21 128 61);
+  background: rgb(240 253 244);
+  border: 1px solid rgb(187 247 208);
+}
+
+.caretip-contact-form-status--error {
+  color: rgb(185 28 28);
+  background: rgb(254 242 242);
+  border: 1px solid rgb(254 202 202);
+}
+
+html.dark .caretip-contact-form-status--success {
+  color: rgb(134 239 172);
+  background: rgb(20 83 45 / 0.25);
+  border-color: rgb(34 197 94 / 0.35);
+}
+
+html.dark .caretip-contact-form-status--error {
+  color: rgb(252 165 165);
+  background: rgb(127 29 29 / 0.25);
+  border-color: rgb(248 113 113 / 0.35);
+}
