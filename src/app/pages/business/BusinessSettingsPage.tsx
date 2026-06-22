@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
+import { toast } from "sonner";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
@@ -25,6 +26,20 @@ export function BusinessSettingsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const section = parseBusinessSettingsSection(searchParams.get("section"));
   const settings = useBusinessSettingsData();
+
+  useEffect(() => {
+    const billing = searchParams.get("billing");
+    if (!billing) return;
+    if (billing === "success") {
+      toast.success(t("business.billing.checkoutSuccess"));
+    } else if (billing === "canceled") {
+      toast.message(t("business.billing.checkoutCanceled"));
+    }
+    const next = new URLSearchParams(searchParams);
+    next.delete("billing");
+    next.delete("session_id");
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams, t]);
 
   const activeMeta = BUSINESS_SETTINGS_SECTIONS.find((s) => s.id === section)!;
 

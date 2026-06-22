@@ -7,6 +7,7 @@ import { cn } from "../../lib/utils";
 import type { BillingCycle, Industry } from "../data/pricingTypes";
 import type { PricingTierKey } from "../data/pricingTiers";
 import type { PricingCopyScope } from "../data/pricingCopy";
+import type { TFunction } from "i18next";
 import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
@@ -61,9 +62,30 @@ function tierCtaHref(tierKey: PricingTierKey | undefined): string {
   return "/contact?intent=demo";
 }
 
+function resolveTierPricing(
+  tier: TippingTier,
+  billingCycle: BillingCycle,
+  t: TFunction,
+): { feeLine: string; feeNote: string } {
+  if (!tier.tierKey || tier.tierKey === "enterprise") {
+    return { feeLine: tier.feeLine, feeNote: tier.feeNote };
+  }
+
+  const prefix = `staticPages.pricing.tiers.${tier.tierKey}`;
+  const cycleSuffix = billingCycle === "yearly" ? "Yearly" : "Monthly";
+  const feeLineKey = `${prefix}.fee${cycleSuffix}`;
+  const feeNoteKey = `${prefix}.feeNote${cycleSuffix}`;
+  const feeLine = t(feeLineKey);
+  const feeNote = t(feeNoteKey);
+
+  return {
+    feeLine: feeLine !== feeLineKey ? feeLine : tier.feeLine,
+    feeNote: feeNote !== feeNoteKey ? feeNote : tier.feeNote,
+  };
+}
+
 /**
- * Hospitality tipping platform fees — one-time tips only (Stripe PaymentIntents).
- * `billingCycle` does not change displayed fees until yearly billing ships.
+ * Hospitality SaaS plans — monthly/yearly prices reflect the billing cycle toggle.
  */
 export function PricingSection({
   tiers,
@@ -87,6 +109,7 @@ export function PricingSection({
       <div className="caretip-pricing-tiers__grid">
         {tiers.map((tier) => {
           const isEnterprise = tier.tierKey === "enterprise";
+          const { feeLine, feeNote } = resolveTierPricing(tier, billingCycle, t);
           const description =
             tier.tierKey &&
             t(`${copyScope}.tiers.${tier.tierKey}.description`, {
@@ -119,8 +142,8 @@ export function PricingSection({
               <div className="caretip-pricing-tier-card__divider" aria-hidden />
 
               <div className="caretip-pricing-tier-card__price">
-                <p className="caretip-pricing-tier-card__fee">{tier.feeLine}</p>
-                <p className="caretip-pricing-tier-card__fee-note">{tier.feeNote}</p>
+                <p className="caretip-pricing-tier-card__fee">{feeLine}</p>
+                <p className="caretip-pricing-tier-card__fee-note">{feeNote}</p>
               </div>
 
               <div className="caretip-pricing-tier-card__divider" aria-hidden />

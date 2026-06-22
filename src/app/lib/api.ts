@@ -2278,6 +2278,84 @@ export async function patchMyAccountSettings(
   });
 }
 
+export type SubscriptionPlanKey = "basic" | "premium" | "enterprise";
+export type SubscriptionBillingCycle = "monthly" | "yearly";
+export type SubscriptionStatus =
+  | "trialing"
+  | "active"
+  | "past_due"
+  | "canceled"
+  | "unpaid"
+  | "incomplete";
+
+export type BillingTimelineEvent = {
+  id: string;
+  auditType: string;
+  occurredAt: string;
+  processingResult: string;
+  payload: Record<string, unknown> | null;
+};
+
+export type BillingStatus = {
+  planKey: SubscriptionPlanKey;
+  billingCycle: SubscriptionBillingCycle;
+  status: SubscriptionStatus;
+  trialEndsAt: string | null;
+  currentPeriodEnd: string | null;
+  renewalDate: string | null;
+  cancelAtPeriodEnd: boolean;
+  cancellationEffective: string | null;
+  hasStripeBilling: boolean;
+  stripeCustomerId: string | null;
+  subscriptionCreatedAt: string;
+  syncedAt: string;
+  subscriptionTier: SubscriptionPlanKey;
+  billingEnabled: boolean;
+  stripeConfigured: boolean;
+  events: BillingTimelineEvent[];
+};
+
+export async function fetchBillingStatus(): Promise<BillingStatus> {
+  return apiRequest<BillingStatus>(apiPath("/api/me/billing"), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function createBillingCheckoutSession(params: {
+  planKey: SubscriptionPlanKey;
+  billingCycle?: SubscriptionBillingCycle;
+}): Promise<{ sessionId: string; url: string | null }> {
+  return apiRequest(apiPath("/api/me/billing/checkout"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify(params),
+  });
+}
+
+export async function createBillingPortalSession(): Promise<{ url: string }> {
+  return apiRequest(apiPath("/api/me/billing/portal"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function scheduleBillingCancelAtPeriodEnd(): Promise<{
+  status: string;
+  cancelAtPeriodEnd: boolean;
+  cancellationEffective: string | null;
+}> {
+  return apiRequest(apiPath("/api/me/billing/cancel"), {
+    method: "POST",
+    headers: getHeaders(),
+    credentials: "include",
+    body: JSON.stringify({ atPeriodEnd: true }),
+  });
+}
+
 export type InboxNotification = {
   id: string;
   type: string;

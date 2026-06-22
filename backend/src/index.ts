@@ -35,6 +35,7 @@ import feedbackRoutes from "./routes/feedback.routes.js";
 import mediaRoutes from "./routes/media.routes.js";
 import testRoutes from "./routes/test.routes.js";
 import meRoutes from "./routes/settings.routes.js";
+import billingRoutes from "./routes/billing.routes.js";
 import pushRoutes from "./routes/push.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
 import supportTicketRoutes from "./routes/supportTicket.routes.js";
@@ -157,6 +158,7 @@ if (process.env.NODE_ENV !== "production") {
 }
 app.use("/api/auth", authRoutes);
 app.use("/api/me", meRoutes);
+app.use("/api/me", billingRoutes);
 app.use("/api/me/notifications", notificationsRoutes);
 /** Registered on the app (not the sub-router) so `/me/stats` is never interpreted as `/:businessId`. */
 app.get(

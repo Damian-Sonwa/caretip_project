@@ -1,61 +1,73 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { Check, Euro, Heart, TrendingUp } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
+import { useBillingStatus } from "../../../hooks/useBillingStatus";
+import type { SubscriptionBillingCycle } from "../../../lib/api";
+import { BillingCurrentPlanCard } from "./billing/BillingCurrentPlanCard";
+import { BillingPlanManagement } from "./billing/BillingPlanManagement";
+import { BillingTimeline } from "./billing/BillingTimeline";
 
 export function BusinessSettingsBillingPanel() {
   const { t } = useTranslation();
+  const { data, loading, error, reload } = useBillingStatus();
+  const [billingCycle, setBillingCycle] = useState<SubscriptionBillingCycle>("monthly");
 
   return (
     <BusinessSettingsPanelShell
       title={t("business.settings.panels.billingTitle")}
       description={t("business.settings.panels.billingDesc")}
     >
-      <div className="rounded-xl bg-gradient-to-br from-accent to-primary p-6 text-white shadow-lg sm:p-8">
-        <span className="inline-flex items-center gap-1 rounded-full bg-white/20 px-3 py-1 text-xs font-semibold backdrop-blur-sm">
-          <Check className="h-3 w-3" />
-          {t("business.accountSettings.heroPill")}
-        </span>
-        <h3 className="mt-3 text-xl font-bold">{t("business.accountSettings.heroTitle")}</h3>
-        <p className="mt-2 max-w-xl text-sm text-white/85">{t("business.accountSettings.heroBodyLong")}</p>
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div className="flex items-center gap-3">
-            <Heart className="h-5 w-5 shrink-0 opacity-90" />
-            <div>
-              <p className="text-xs text-white/70">{t("business.accountSettings.statModel")}</p>
-              <p className="text-sm font-semibold">{t("business.accountSettings.statModelValue")}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <Euro className="h-5 w-5 shrink-0 opacity-90" />
-            <div>
-              <p className="text-xs text-white/70">{t("business.accountSettings.statFees")}</p>
-              <p className="text-sm font-semibold">{t("business.accountSettings.statFeesValue")}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <TrendingUp className="h-5 w-5 shrink-0 opacity-90" />
-            <div>
-              <p className="text-xs text-white/70">{t("business.accountSettings.statMember")}</p>
-              <p className="text-sm font-semibold">{t("business.accountSettings.statMemberValue")}</p>
-            </div>
-          </div>
+      {loading ? (
+        <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+          <span className="sr-only">{t("business.billing.loading")}</span>
         </div>
-        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-          <Link
-            to="/dashboard/transactions"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-primary shadow-md"
+      ) : error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => void reload()}
+            className="mt-2 font-semibold underline underline-offset-2"
           >
-            {t("business.accountSettings.linkTipsActivity")}
-          </Link>
-          <Link
-            to="/pricing"
-            className="inline-flex min-h-[44px] items-center justify-center rounded-lg border-2 border-white/35 px-6 py-3 text-sm font-medium text-white backdrop-blur-sm"
-          >
-            {t("business.accountSettings.linkFeeDetails")}
-          </Link>
+            {t("business.billing.retry")}
+          </button>
         </div>
-      </div>
+      ) : data ? (
+        <div className="space-y-8">
+          <BillingCurrentPlanCard billing={data} />
+
+          <section>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-lg font-semibold text-foreground">{t("business.billing.billingCycle")}</h3>
+              <div className="inline-flex rounded-lg border border-border p-1">
+                {(["monthly", "yearly"] as const).map((cycle) => {
+                  const active = billingCycle === cycle;
+                  return (
+                    <button
+                      key={cycle}
+                      type="button"
+                      onClick={() => setBillingCycle(cycle)}
+                      className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                        active ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {t(`business.billing.cycle${cycle === "monthly" ? "Monthly" : "Yearly"}`)}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <BillingPlanManagement billing={data} billingCycle={billingCycle} onChanged={() => void reload()} />
+          </section>
+
+          <section>
+            <h3 className="mb-4 text-lg font-semibold text-foreground">{t("business.billing.timelineTitle")}</h3>
+            <BillingTimeline events={data.events} />
+          </section>
+        </div>
+      ) : null}
     </BusinessSettingsPanelShell>
   );
 }

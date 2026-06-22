@@ -15,13 +15,13 @@ export type PricingTierDefinition = {
 export const PRICING_TIER_DEFINITIONS: readonly PricingTierDefinition[] = [
   {
     tierKey: "starter",
-    feeLine: "2,9 % + 0,30 €",
+    feeLine: "€9/month",
     icon: Store,
     isPopular: false,
   },
   {
     tierKey: "business",
-    feeLine: "2,5 % + 0,30 €",
+    feeLine: "€29/month",
     icon: Building2,
     isPopular: true,
   },
@@ -34,7 +34,7 @@ export const PRICING_TIER_DEFINITIONS: readonly PricingTierDefinition[] = [
 ] as const;
 
 /** Max feature slots per tier in i18n (`f0` … `f{n}`). Empty strings are omitted. */
-export const PRICING_TIER_FEATURE_SLOT_COUNT = 8;
+export const PRICING_TIER_FEATURE_SLOT_COUNT = 12;
 
 export function buildPricingTierFeatures(t: TFunction, tierKey: PricingTierKey): string[] {
   const features: string[] = [];
