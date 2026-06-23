@@ -14,12 +14,6 @@
       "reason": "Recharts theme CSS variables from ChartConfig (no user HTML)"
     },
     {
-      "file": "src/app/lib/qrBranded.ts",
-      "line": 195,
-      "sink": "document.write",
-      "reason": "QR print popup; heading passed through escapeHtml(); img src is PNG data URL from canvas"
-    },
-    {
       "file": "src/components/ui/cinematic-landing-hero.tsx",
       "line": 257,
       "sink": "innerHTML",

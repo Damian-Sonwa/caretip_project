@@ -149,7 +149,7 @@ export function EmployeeTipGoalsPage() {
         <div className={employeeUi.pageInner}>
           <EmployeePageHeader
             title={t("employee.tipGoals.title")}
-            subtitle={t("employee.tipGoals.subtitle")}
+            description={t("employee.tipGoals.subtitle").trim() || undefined}
           />
           <LockedFeatureCard featureKey="employeeGoals" tier={tier} className="mt-6" />
         </div>

@@ -41,7 +41,7 @@ export function BusinessBillingInvoicesPage() {
       const { url } = await createBillingPortalSession();
       window.location.assign(url);
     } catch (err) {
-      toast.error(toUserFriendlyMessage(err, t("business.billing.portalError")));
+      toast.error(toUserFriendlyMessage(err) || t("business.billing.portalError"));
     } finally {
       setBusy(false);
     }

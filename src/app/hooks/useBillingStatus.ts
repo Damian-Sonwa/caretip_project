@@ -19,7 +19,7 @@ export function useBillingStatus() {
       const status = await fetchBillingStatus();
       setData(status);
     } catch (err) {
-      setError(toUserFriendlyMessage(err, t("business.billing.loadError")));
+      setError(toUserFriendlyMessage(err) || t("business.billing.loadError"));
     } finally {
       setLoading(false);
     }

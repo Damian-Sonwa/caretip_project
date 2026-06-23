@@ -7,7 +7,7 @@ import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { businessUi } from "./businessDashboardUi";
 import { cn } from "@/lib/utils";
 import type { useBusinessIntelligenceData } from "../../hooks/useBusinessIntelligenceData";
-import type { ExecutiveOpportunity } from "../../lib/businessIntelligence";
+import type { ExecutiveOpportunity, ExecutiveInsight, ExecutiveSummary } from "../../lib/businessIntelligence";
 
 const ExecutiveHealthTrends = lazy(() =>
   import("./insights/ExecutiveHealthTrends").then((mod) => ({
@@ -45,7 +45,9 @@ function IntelligenceItem({
 function ExecutiveSummaryCard({ data }: { data: BiData }) {
   const { t } = useTranslation();
   const summary = data.bi.executiveSummary;
-  const text = summary.clauses.map((c) => t(c.key, c.params)).join(" ");
+  const text = summary.clauses
+    .map((c: ExecutiveSummary["clauses"][number]) => String(t(c.key, c.params)))
+    .join(" ");
 
   return (
     <Card className={businessUi.cardStatic}>
@@ -115,12 +117,12 @@ function InsightList({ insights }: { insights: BiData["bi"]["executiveInsights"]
         {t("business.team.performance.executive.insightsTitle")}
       </h2>
       <div className="grid gap-3 sm:grid-cols-2">
-        {insights.map((item) => (
+        {insights.map((item: ExecutiveInsight) => (
           <Card key={item.id} className={businessUi.cardStatic}>
             <CardContent className="flex gap-3 p-4">
               <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
               <p className="text-sm leading-relaxed text-foreground">
-                {t(item.messageKey, item.params)}
+                {String(t(item.messageKey, item.params))}
               </p>
             </CardContent>
           </Card>

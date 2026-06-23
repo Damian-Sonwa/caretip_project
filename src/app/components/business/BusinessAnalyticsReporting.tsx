@@ -19,6 +19,7 @@ import { formatEur } from "../../lib/formatEur";
 import { downloadBusinessTransactionsExport } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import type { useBusinessIntelligenceData } from "../../hooks/useBusinessIntelligenceData";
+import type { TopTipSourceRow } from "../../lib/businessIntelligence";
 import type { AnalyticsTimeframe } from "../../hooks/useBusinessDashboardStats";
 import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 
@@ -225,7 +226,7 @@ export function BusinessAnalyticsReporting({
                 {t("business.tips.analytics.topQrEmpty")}
               </p>
             ) : (
-              data.bi.topTipSources.map((row, i) => (
+              data.bi.topTipSources.map((row: TopTipSourceRow, i: number) => (
                 <div key={row.label} className="flex items-center gap-3 px-4 py-3">
                   <span className="w-5 text-xs font-bold text-muted-foreground">{i + 1}</span>
                   <span className="min-w-0 flex-1 truncate text-sm font-medium">{row.label}</span>

@@ -58,7 +58,7 @@ export function UpgradeCta({
       }
       window.location.assign("/dashboard/billing/subscription");
     } catch (err) {
-      toast.error(toUserFriendlyMessage(err, t("business.billing.checkoutError")));
+      toast.error(toUserFriendlyMessage(err) || t("business.billing.checkoutError"));
     } finally {
       setBusy(false);
     }

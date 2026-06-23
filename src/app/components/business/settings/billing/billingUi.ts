@@ -1,4 +1,4 @@
-import type { SubscriptionStatus } from "../../lib/api";
+import type { SubscriptionStatus } from "../../../../lib/api";
 
 const STATUS_STYLES: Record<
   SubscriptionStatus,

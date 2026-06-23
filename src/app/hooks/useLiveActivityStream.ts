@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { TipActivityRow } from "../api";
+import type { TipActivityRow } from "../lib/api";
 import type { LiveNewTipPayload, RealtimeEventEnvelope } from "../lib/realtime/realtimeContracts";
 import { REALTIME_EVENTS } from "../lib/realtime/realtimeContracts";
 import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";

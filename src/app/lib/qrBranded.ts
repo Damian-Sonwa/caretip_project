@@ -621,14 +621,6 @@ export async function downloadBrandedQRLegacy(
   return true;
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
 export function downloadQrDataUrlPng(
   dataUrl: string,
   filename: string,
@@ -655,31 +647,41 @@ export function printQrDataUrl(
 ): boolean {
   if (!dataUrl) return false;
   if (opts?.exportAllowed === false) return false;
+  if (!/^data:image\//i.test(dataUrl)) return false;
+
   const w = window.open("", "_blank");
   if (!w) return false;
-  const h = escapeHtml(heading);
-  w.document.write(`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>CareTip QR</title>
-  <style>
+
+  const doc = w.document;
+  doc.documentElement.lang = "en";
+
+  const meta = doc.createElement("meta");
+  meta.setAttribute("charset", "utf-8");
+  doc.head.appendChild(meta);
+
+  doc.title = "CareTip QR";
+
+  const style = doc.createElement("style");
+  style.textContent = `
     body { font-family: system-ui, sans-serif; text-align: center; padding: 24px; margin: 0; }
     h1 { font-size: 1rem; font-weight: 600; margin: 0 0 16px; color: #111; }
     img { max-width: min(360px, 100%); height: auto; }
     @media print { body { padding: 12px; } }
-  </style>
-</head>
-<body>
-  <h1>${h}</h1>
-  <img src="${dataUrl}" alt="QR code" />
-  <script>
-    window.onload = function () {
-      setTimeout(function () { window.print(); }, 200);
-    };
-  </script>
-</body>
-</html>`);
-  w.document.close();
+  `;
+  doc.head.appendChild(style);
+
+  const h1 = doc.createElement("h1");
+  h1.textContent = heading;
+  doc.body.appendChild(h1);
+
+  const img = doc.createElement("img");
+  img.src = dataUrl;
+  img.alt = "QR code";
+  doc.body.appendChild(img);
+
+  w.addEventListener("load", () => {
+    window.setTimeout(() => w.print(), 200);
+  });
+
   return true;
 }

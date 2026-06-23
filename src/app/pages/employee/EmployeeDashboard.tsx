@@ -35,6 +35,7 @@ import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
+import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { deriveEmployeeDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";

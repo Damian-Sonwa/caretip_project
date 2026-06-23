@@ -1687,6 +1687,7 @@ export interface EmployeeDetail {
   /** API path or URL for venue logo on customer flows. */
   businessLogo?: string | null;
   businessName?: string;
+  branding?: import("./businessBranding").PublicGuestBranding | null;
   slug: string | null;
 }
 

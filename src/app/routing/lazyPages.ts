@@ -36,11 +36,17 @@ export const StaffManagementPage = lazyNamed(
   "StaffManagementPage",
 );
 export const QRCodeManagementPage = lazyNamed(
-  () => import("../pages/business/QRCodeManagementPage"),
+  () =>
+    import("../pages/business/QRCodeManagementPage") as Promise<
+      Record<string, ComponentType<unknown>>
+    >,
   "QRCodeManagementPage",
 );
 export const LocationsPage = lazyNamed(() => import("../pages/business/LocationsPage"), "LocationsPage");
-export const TablesPage = lazyNamed(() => import("../pages/business/TablesPage"), "TablesPage");
+export const TablesPage = lazyNamed(
+  () => import("../pages/business/TablesPage") as Promise<Record<string, ComponentType<unknown>>>,
+  "TablesPage",
+);
 export const CustomerFeedbackPage = lazyNamed(
   () => import("../pages/business/CustomerFeedbackPage"),
   "CustomerFeedbackPage",

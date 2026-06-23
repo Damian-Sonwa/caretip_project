@@ -20,7 +20,7 @@ export type BusinessIntelligenceAggregate = ReturnType<typeof runBusinessIntelli
 /** Sprint 6 — authoritative intelligence entry point. */
 export function runBusinessIntelligenceEngine(
   input: BusinessIntelligenceInput,
-): BusinessIntelligenceAggregate {
+) {
   const base = aggregateBusinessIntelligenceLegacyCompute(input);
   const risks = generateExecutiveRisks(input);
   const opportunities = generateOpportunities(input);

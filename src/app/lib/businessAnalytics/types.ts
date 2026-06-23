@@ -1,5 +1,6 @@
 import type { BusinessDashboardStats, TipActivityRow } from "../api";
 import type { BusinessIntelligenceInput } from "../businessIntelligence";
+import type { BusinessIntelligenceAggregate } from "../businessIntelligenceEngine";
 
 export type { BusinessIntelligenceAggregate } from "../businessIntelligenceEngine";
 /** Shared timeframe for all business analytics surfaces. */

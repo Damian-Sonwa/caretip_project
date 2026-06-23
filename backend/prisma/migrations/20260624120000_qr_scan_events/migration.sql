@@ -38,6 +38,7 @@ CREATE INDEX "qr_scan_events_business_id_scanned_at_idx" ON "qr_scan_events"("bu
 CREATE INDEX "qr_scan_events_employee_id_scanned_at_idx" ON "qr_scan_events"("employee_id", "scanned_at" DESC);
 CREATE INDEX "qr_scan_events_location_id_scanned_at_idx" ON "qr_scan_events"("location_id", "scanned_at" DESC);
 CREATE INDEX "qr_scan_events_table_id_scanned_at_idx" ON "qr_scan_events"("table_id", "scanned_at" DESC);
+CREATE UNIQUE INDEX "qr_scan_events_dedupe_key_key" ON "qr_scan_events"("dedupe_key");
 
 CREATE INDEX "qr_funnel_events_business_id_created_at_idx" ON "qr_funnel_events"("business_id", "created_at" DESC);
 CREATE INDEX "qr_funnel_events_session_id_created_at_idx" ON "qr_funnel_events"("session_id", "created_at" DESC);

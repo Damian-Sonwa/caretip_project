@@ -4,6 +4,7 @@ import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { cn } from "@/lib/utils";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerVenueBanner } from "../../components/customer/CustomerVenueBanner";
+import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyCareTipAttribution } from "./CustomerJourneyCareTipAttribution";
 import type { CustomerJourneyEmployeeIdentity, CustomerJourneyVenueBrand } from "./customerJourneyBrand";
 

@@ -42,7 +42,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       }
       toast.error(t("business.billing.checkoutNoUrl"));
     } catch (err) {
-      toast.error(toUserFriendlyMessage(err, t("business.billing.checkoutError")));
+      toast.error(toUserFriendlyMessage(err) || t("business.billing.checkoutError"));
     } finally {
       setBusyPlan(null);
     }
@@ -54,7 +54,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       const { url } = await createBillingPortalSession();
       window.location.assign(url);
     } catch (err) {
-      toast.error(toUserFriendlyMessage(err, t("business.billing.portalError")));
+      toast.error(toUserFriendlyMessage(err) || t("business.billing.portalError"));
     } finally {
       setBusyPlan(null);
     }
@@ -68,7 +68,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
       toast.success(t("business.billing.cancelScheduled"));
       onChanged();
     } catch (err) {
-      toast.error(toUserFriendlyMessage(err, t("business.billing.cancelError")));
+      toast.error(toUserFriendlyMessage(err) || t("business.billing.cancelError"));
     } finally {
       setBusyPlan(null);
     }
