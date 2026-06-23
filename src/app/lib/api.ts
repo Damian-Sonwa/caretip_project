@@ -44,6 +44,7 @@ import {
   migrateLegacyAccessTokenFromStorage,
   setMemoryAccessToken,
 } from "./accessTokenStore";
+import { guestQrScanHeaders, getOrCreateQrScanSessionId } from "./qrScanSession";
 
 const AUTH_REFRESH_PATHNAME = "/api/auth/refresh";
 
@@ -1209,6 +1210,37 @@ export function invalidateBusinessStatsClientCache(timeframe?: "week" | "month" 
   clearBusinessStatsClientCache(timeframe);
 }
 
+export type BusinessQrAnalyticsTimeframe = "week" | "month" | "year";
+
+export type BusinessQrAnalytics = {
+  timeframe: BusinessQrAnalyticsTimeframe;
+  totalScans: number;
+  uniqueScans: number;
+  repeatScans: number;
+  scansByLocation: Array<{ label: string; id: string; count: number }>;
+  scansByEmployee: Array<{ label: string; id: string; count: number }>;
+  scansByTable: Array<{ label: string; id: string; count: number }>;
+  scansByQrSlug: Array<{ qrSlug: string; count: number }>;
+  scansByDevice: Array<{ deviceType: string; count: number }>;
+  scanTrend: Array<{ label: string; count: number }>;
+  recentScans: Array<{ scannedAt: string; scanType: string; label: string }>;
+};
+
+export async function getBusinessQrAnalytics(
+  timeframe: BusinessQrAnalyticsTimeframe = "month",
+  opts?: { signal?: AbortSignal; silent?: boolean },
+): Promise<BusinessQrAnalytics> {
+  const statsUrl = apiPath(
+    `/api/business/qr-analytics?${new URLSearchParams({ timeframe }).toString()}`,
+  );
+  return apiRequest<BusinessQrAnalytics>(statsUrl, {
+    headers: getHeaders(),
+    credentials: "include",
+    signal: opts?.signal,
+    caretipSilentErrors: opts?.silent === true,
+  } as CaretipRequestInit);
+}
+
 export async function getBusinessStats(
   timeframe?: "week" | "month" | "year" | "all",
   opts?: {
@@ -1313,6 +1345,13 @@ export async function downloadBusinessTransactionsExport(): Promise<void> {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+
+  try {
+    const { recordFeatureUtilizationNow } = await import("./commercial/featureUtilizationTracker");
+    recordFeatureUtilizationNow("csv_export");
+  } catch {
+    // ignore
+  }
 }
 
 export interface BusinessInfo {
@@ -1335,7 +1374,11 @@ export interface BusinessInfo {
   onboardingCompleted?: boolean;
   /** Resume wizard at 1–3 from saved profile fields. */
   onboardingStep?: number;
+  /** Guest-facing branding (tier-resolved on public API). */
+  branding?: import("./businessBranding").PublicGuestBranding;
 }
+
+export type BusinessBrandingSettings = import("./businessBranding").BusinessBrandingSettings;
 
 export function invalidateBusinessProfileCache(): void {
   businessProfileCache = null;
@@ -1343,7 +1386,9 @@ export function invalidateBusinessProfileCache(): void {
 }
 
 export async function getBusinessById(businessId: string): Promise<BusinessInfo | null> {
-  return apiRequest(apiPath(`/api/business/${businessId}`), { headers: getHeaders() });
+  return apiRequest(apiPath(`/api/business/${businessId}`), {
+    headers: { ...getHeaders(), ...guestQrScanHeaders() },
+  });
 }
 
 export async function fetchPublicSocketRoomToken(opts: {
@@ -1554,6 +1599,49 @@ export async function uploadMyBusinessLogo(file: File): Promise<{ success: boole
   });
 }
 
+export async function fetchBusinessBrandingSettings(): Promise<BusinessBrandingSettings> {
+  return apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function patchBusinessBrandingSettings(body: {
+  brandPrimaryColor?: string;
+  brandSecondaryColor?: string;
+  welcomeMessage?: string | null;
+  thankYouMessage?: string | null;
+  brandDisplayName?: string | null;
+  brandTagline?: string | null;
+  qrTemplate?: string;
+  qrBorderStyle?: string;
+  qrShape?: string;
+  qrAccentColor?: string | null;
+  qrBackgroundColor?: string;
+}): Promise<BusinessBrandingSettings> {
+  return apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify(body),
+    credentials: "include",
+  });
+}
+
+export async function uploadMyBusinessBanner(file: File): Promise<{ success: boolean; path: string }> {
+  const check = validateImageFileForUpload(file);
+  if (!check.ok) {
+    throw new Error(toUserFriendlyMessage(new Error(check.message)));
+  }
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest(apiPath("/api/business/profile/banner"), {
+    method: "POST",
+    headers: getAuthHeadersOnly(),
+    body: form,
+    credentials: "include",
+  });
+}
+
 // Employees
 export interface EmployeeItem {
   id: string;
@@ -1604,7 +1692,7 @@ export interface EmployeeDetail {
 
 export async function getEmployeeById(employeeId: string): Promise<EmployeeDetail> {
   return apiRequest(apiPath(`/api/employees/${encodeURIComponent(employeeId)}`), {
-    headers: getHeaders(),
+    headers: { ...getHeaders(), ...guestQrScanHeaders() },
   });
 }
 
@@ -1619,10 +1707,13 @@ export interface StaffBySlugResponse {
   businessName: string;
   businessSlug: string;
   businessLogo?: string | null;
+  branding?: import("./businessBranding").PublicGuestBranding | null;
 }
 
 export async function getStaffBySlug(slug: string): Promise<StaffBySlugResponse> {
-  return apiRequest(apiPath(`/api/staff/${encodeURIComponent(slug)}`), { headers: getHeaders() });
+  return apiRequest(apiPath(`/api/staff/${encodeURIComponent(slug)}`), {
+    headers: { ...getHeaders(), ...guestQrScanHeaders() },
+  });
 }
 
 export async function getStaffByBusinessEmployeeSlug(
@@ -1633,7 +1724,7 @@ export async function getStaffByBusinessEmployeeSlug(
     apiPath(
       `/api/staff/directory/business/${encodeURIComponent(businessSlug)}/employee/${encodeURIComponent(employeeSlug)}`
     ),
-    { headers: getHeaders() }
+    { headers: { ...getHeaders(), ...guestQrScanHeaders() } }
   );
 }
 
@@ -1663,7 +1754,7 @@ export async function getBusinessStaffDirectory(
 ): Promise<BusinessDirectoryResponse> {
   return apiRequest<BusinessDirectoryResponse>(
     apiPath(`/api/staff/directory/business/${encodeURIComponent(businessSlug)}`),
-    { headers: getHeaders() }
+    { headers: { ...getHeaders(), ...guestQrScanHeaders() } }
   );
 }
 
@@ -2736,13 +2827,14 @@ export interface TippingContextResponse {
   tableId: string;
   businessName: string;
   businessLogo?: string | null;
+  branding?: import("./businessBranding").PublicGuestBranding | null;
 }
 
 /** Public: resolve table QR slug to venue + business (guest scan). */
 export async function getTippingContextByQrSlug(qrSlug: string): Promise<TippingContextResponse> {
   return apiRequest<TippingContextResponse>(
     apiPath(`/api/tipping-context/${encodeURIComponent(qrSlug)}`),
-    { method: "GET" }
+    { method: "GET", headers: guestQrScanHeaders() }
   );
 }
 
@@ -2758,7 +2850,7 @@ export async function getPublicLocationContext(
 ): Promise<PublicLocationContextResponse> {
   return apiRequest<PublicLocationContextResponse>(
     apiPath(`/api/tipping-context/location/${encodeURIComponent(locationId)}`),
-    { method: "GET" }
+    { method: "GET", headers: guestQrScanHeaders() }
   );
 }
 
@@ -2775,7 +2867,7 @@ export async function getPublicTableContextById(
 ): Promise<PublicTableContextResponse> {
   return apiRequest<PublicTableContextResponse>(
     apiPath(`/api/tipping-context/table/${encodeURIComponent(tableId)}`),
-    { method: "GET" }
+    { method: "GET", headers: guestQrScanHeaders() }
   );
 }
 
@@ -2846,8 +2938,8 @@ export async function createTipCheckoutSession(params: {
 }): Promise<{ sessionId: string; url: string | null }> {
   return apiRequest(apiPath("/api/payments/create-tip-session"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(params),
+    headers: { "Content-Type": "application/json", ...guestQrScanHeaders() },
+    body: JSON.stringify({ ...params, qrScanSessionId: getOrCreateQrScanSessionId() }),
   });
 }
 
@@ -3108,6 +3200,9 @@ export interface PlatformBusinessRow {
   logoPath?: string | null;
   verificationDocumentPath?: string | null;
   subscriptionTier?: "basic" | "premium" | "enterprise";
+  subscriptionStatus?: string | null;
+  cancelAtPeriodEnd?: boolean;
+  hasCompletedOnboarding?: boolean;
   kycDocuments?: {
     registration?: string | null;
     address?: string | null;
@@ -3321,6 +3416,103 @@ export type LandingAiDiagnosticsResponse = {
 
 export async function fetchLandingAiDiagnostics(): Promise<LandingAiDiagnosticsResponse> {
   return apiRequest<LandingAiDiagnosticsResponse>(apiPath("/api/landing-ai/diagnostics"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+// —— Sprint 7: Commercial maturity ——
+
+export type FeatureUtilizationRow = {
+  featureKey: string;
+  hits30d: number;
+  lastUsedAt: string | null;
+  source: "tracked" | "inferred";
+};
+
+export type UpgradeOpportunity = {
+  id: string;
+  suggestedTier: "premium" | "enterprise";
+  reasonCode: string;
+  evidence: Record<string, string | number>;
+  sourceKpi: string;
+  calculationPath: string;
+};
+
+export type RetentionRiskLevel = "low" | "medium" | "high";
+
+export type RetentionSignal = {
+  id: string;
+  reasonCode: string;
+  evidence: Record<string, string | number>;
+  sourceKpi: string;
+  calculationPath: string;
+  severity: RetentionRiskLevel;
+};
+
+export type ManagerCommercialInsights = {
+  utilization: FeatureUtilizationRow[];
+  upgradeOpportunities: UpgradeOpportunity[];
+  retention: { level: RetentionRiskLevel; signals: RetentionSignal[] };
+  tier: "basic" | "premium" | "enterprise";
+};
+
+export async function fetchManagerCommercialInsights(): Promise<ManagerCommercialInsights> {
+  return apiRequest<ManagerCommercialInsights>(apiPath("/api/business/commercial/insights"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function postCommercialFeatureUtilization(featureKeys: string[]): Promise<void> {
+  await apiRequest(apiPath("/api/business/commercial/feature-utilization"), {
+    method: "POST",
+    headers: getHeaders(),
+    body: JSON.stringify({ featureKeys }),
+    credentials: "include",
+  });
+}
+
+export type SubscriptionIntelligence = {
+  periodDays: number;
+  upgrades: number;
+  downgrades: number;
+  cancellationsScheduled: number;
+  paymentFailures: number;
+  renewalsSucceeded: number;
+  activeSubscriptions: number;
+  cancelAtPeriodEnd: number;
+  trialing: number;
+  pastDue: number;
+  byTier: { basic: number; premium: number; enterprise: number };
+};
+
+export type PlatformCommercialBusinessInsight = {
+  businessId: string;
+  name: string;
+  tier: string;
+  segment: "growth" | "at_risk" | "premium_opportunity" | "enterprise_candidate";
+  reasonCode: string;
+  evidence: Record<string, string | number>;
+};
+
+export type PlatformCommercialIntelligence = {
+  subscription: SubscriptionIntelligence;
+  enterpriseReadiness: {
+    score: number;
+    maxScore: number;
+    checks: Array<{ id: string; passed: boolean; label: string }>;
+  };
+  segments: {
+    growthCandidates: PlatformCommercialBusinessInsight[];
+    atRisk: PlatformCommercialBusinessInsight[];
+    premiumOpportunities: PlatformCommercialBusinessInsight[];
+    enterpriseCandidates: PlatformCommercialBusinessInsight[];
+  };
+};
+
+export async function fetchPlatformCommercialIntelligence(): Promise<PlatformCommercialIntelligence> {
+  return apiRequest<PlatformCommercialIntelligence>(apiPath("/api/platform/commercial-intelligence"), {
     headers: getHeaders(),
     credentials: "include",
   });

@@ -38,6 +38,7 @@ import meRoutes from "./routes/settings.routes.js";
 import billingRoutes from "./routes/billing.routes.js";
 import pushRoutes from "./routes/push.routes.js";
 import notificationsRoutes from "./routes/notifications.routes.js";
+import commercialRoutes from "./routes/commercial.routes.js";
 import supportTicketRoutes from "./routes/supportTicket.routes.js";
 import landingAiRoutes from "./routes/landingAi.routes.js";
 import leadRoutes from "./routes/lead.routes.js";
@@ -169,7 +170,16 @@ app.get(
   requireCompletedOnboarding,
   businessController.getMyStats
 );
+app.get(
+  "/api/business/qr-analytics",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  requireCompletedOnboarding,
+  businessController.getMyQrAnalytics
+);
 app.use("/api/business", businessRoutes);
+app.use("/api/business/commercial", commercialRoutes);
 app.use("/api/business/support", supportTicketRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/goals", goalsRoutes);

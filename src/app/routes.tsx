@@ -269,24 +269,82 @@ const routes: RouteObject[] = [
       { index: true, lazy: routeLazy(() => import('./pages/business/BusinessDashboard'), 'BusinessDashboard') },
       { path: 'settings', lazy: routeLazy(() => import('./pages/business/BusinessSettingsPage'), 'BusinessSettingsPage') },
       { path: 'profile', element: <Navigate to="/dashboard/settings?section=business" replace /> },
-      { path: 'staff-management', lazy: routeLazy(() => import('./pages/business/StaffManagementPage'), 'StaffManagementPage') },
-      { path: 'qr-code-management', lazy: routeLazy(() => import('./pages/business/QRCodeManagementPage'), 'QRCodeManagementPage') },
-      { path: 'locations', lazy: routeLazy(() => import('./pages/business/LocationsPage'), 'LocationsPage') },
-      { path: 'tables', lazy: routeLazy(() => import('./pages/business/TablesPage'), 'TablesPage') },
-      { path: 'transactions', lazy: routeLazy(() => import('./pages/business/BusinessTipsActivityPage'), 'BusinessTipsActivityPage') },
-      { path: 'customer-feedback', lazy: routeLazy(() => import('./pages/business/CustomerFeedbackPage'), 'CustomerFeedbackPage') },
       { path: 'profile-settings', element: <Navigate to="/dashboard/settings?section=general" replace /> },
+      /* —— Tips module —— */
+      {
+        path: 'tips',
+        lazy: routeLazy(() => import('./pages/business/tips/BusinessTipsLayout'), 'BusinessTipsLayout'),
+        children: [
+          { index: true, element: <Navigate to="/dashboard/tips/transactions" replace /> },
+          { path: 'live', lazy: routeLazy(() => import('./pages/business/tips/BusinessTipsLivePage'), 'BusinessTipsLivePage') },
+          { path: 'transactions', lazy: routeLazy(() => import('./pages/business/tips/BusinessTipsTransactionsPage'), 'BusinessTipsTransactionsPage') },
+          { path: 'analytics', lazy: routeLazy(() => import('./pages/business/tips/BusinessTipsAnalyticsPage'), 'BusinessTipsAnalyticsPage') },
+        ],
+      },
+      /* —— Team module —— */
+      {
+        path: 'team',
+        lazy: routeLazy(() => import('./pages/business/team/BusinessTeamLayout'), 'BusinessTeamLayout'),
+        children: [
+          { index: true, element: <Navigate to="/dashboard/team/employees" replace /> },
+          { path: 'employees', lazy: routeLazy(() => import('./pages/business/team/BusinessTeamEmployeesPage'), 'BusinessTeamEmployeesPage') },
+          { path: 'goals', element: <Navigate to="/dashboard/team/employees" replace /> },
+          { path: 'performance', lazy: routeLazy(() => import('./pages/business/team/BusinessTeamPerformancePage'), 'BusinessTeamPerformancePage') },
+          { path: 'top-performers', lazy: routeLazy(() => import('./pages/business/team/BusinessTeamTopPerformersPage'), 'BusinessTeamTopPerformersPage') },
+        ],
+      },
+      /* —— QR Studio module —— */
+      {
+        path: 'qr-studio',
+        lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioLayout'), 'QrStudioLayout'),
+        children: [
+          { index: true, element: <Navigate to="/dashboard/qr-studio/gallery" replace /> },
+          { path: 'gallery', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioGalleryPage'), 'QrStudioGalleryPage') },
+          { path: 'employees', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioEmployeesPage'), 'QrStudioEmployeesPage') },
+          { path: 'locations', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioLocationsPage'), 'QrStudioLocationsPage') },
+          { path: 'templates', element: <Navigate to="/dashboard/qr-studio/branding" replace /> },
+          { path: 'branding', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioBrandingPage'), 'QrStudioBrandingPage') },
+          { path: 'tables', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioTablesPage'), 'QrStudioTablesPage') },
+          { path: 'downloads', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioDownloadsPage'), 'QrStudioDownloadsPage') },
+        ],
+      },
+      /* —— Customers module —— */
+      {
+        path: 'customers',
+        lazy: routeLazy(() => import('./pages/business/customers/BusinessCustomersLayout'), 'BusinessCustomersLayout'),
+        children: [
+          { index: true, element: <Navigate to="/dashboard/customers/feedback" replace /> },
+          { path: 'feedback', lazy: routeLazy(() => import('./pages/business/customers/BusinessCustomersFeedbackPage'), 'BusinessCustomersFeedbackPage') },
+          { path: 'reviews', lazy: routeLazy(() => import('./pages/business/customers/BusinessCustomersReviewsPage'), 'BusinessCustomersReviewsPage') },
+        ],
+      },
+      /* —— Billing module —— */
+      {
+        path: 'billing',
+        lazy: routeLazy(() => import('./pages/business/billing/BusinessBillingLayout'), 'BusinessBillingLayout'),
+        children: [
+          { index: true, element: <Navigate to="/dashboard/billing/subscription" replace /> },
+          { path: 'subscription', lazy: routeLazy(() => import('./pages/business/billing/BusinessBillingSubscriptionPage'), 'BusinessBillingSubscriptionPage') },
+          { path: 'invoices', lazy: routeLazy(() => import('./pages/business/billing/BusinessBillingSubPages'), 'BusinessBillingInvoicesPage') },
+          { path: 'payment-methods', lazy: routeLazy(() => import('./pages/business/billing/BusinessBillingSubPages'), 'BusinessBillingPaymentMethodsPage') },
+          { path: 'history', lazy: routeLazy(() => import('./pages/business/billing/BusinessBillingSubPages'), 'BusinessBillingHistoryPage') },
+        ],
+      },
+      { path: 'locations', lazy: routeLazy(() => import('./pages/business/LocationsPage'), 'LocationsPage') },
+      /* Legacy redirects */
+      { path: 'staff-management', element: <Navigate to="/dashboard/team/employees" replace /> },
+      { path: 'qr-code-management', element: <Navigate to="/dashboard/qr-studio/gallery" replace /> },
+      { path: 'tables', element: <Navigate to="/dashboard/qr-studio/tables" replace /> },
+      { path: 'transactions', element: <Navigate to="/dashboard/tips/transactions" replace /> },
+      { path: 'customer-feedback', element: <Navigate to="/dashboard/customers/feedback" replace /> },
       { path: 'support', lazy: routeLazy(() => import('./pages/business/BusinessSupportPage'), 'BusinessSupportPage') },
       { path: 'support/:ticketId', lazy: routeLazy(() => import('./pages/shared/SupportTicketDetailPage'), 'SupportTicketDetailPage') },
       { path: 'notifications', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
-      { path: 'subscriptions', element: <Navigate to="/dashboard/transactions" replace /> },
-      { path: 'customers', element: <Navigate to="/dashboard" replace /> },
-      { path: 'analytics', element: <Navigate to="/dashboard" replace /> },
+      { path: 'subscriptions', element: <Navigate to="/dashboard/billing/subscription" replace /> },
+      { path: 'analytics', element: <Navigate to="/dashboard/tips/analytics" replace /> },
       { path: 'products', element: <Navigate to="/dashboard" replace /> },
-      { path: 'reports', element: <Navigate to="/dashboard" replace /> },
-      { path: 'billing', element: <Navigate to="/dashboard/transactions" replace /> },
+      { path: 'subscription-billing', element: <Navigate to="/dashboard/billing/subscription" replace /> },
       { path: 'subscription-plans', element: <Navigate to="/pricing" replace /> },
-      { path: 'subscription-billing', element: <Navigate to="/dashboard/transactions" replace /> },
         ],
       },
     ],
@@ -546,12 +604,12 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business/dashboard/staff-management',
-    element: <Navigate to="/dashboard/staff-management" replace />,
+    element: <Navigate to="/dashboard/team/employees" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/business/dashboard/qr-code-management',
-    element: <Navigate to="/dashboard/qr-code-management" replace />,
+    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -561,12 +619,12 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business/dashboard/tables',
-    element: <Navigate to="/dashboard/tables" replace />,
+    element: <Navigate to="/dashboard/qr-studio/tables" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/business/qr-management',
-    element: <Navigate to="/dashboard/qr-code-management" replace />,
+    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -576,12 +634,12 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business-dashboard/staff-management',
-    element: <Navigate to="/dashboard/staff-management" replace />,
+    element: <Navigate to="/dashboard/team/employees" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/business-dashboard/qr-code-management',
-    element: <Navigate to="/dashboard/qr-code-management" replace />,
+    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -591,7 +649,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business-dashboard/tables',
-    element: <Navigate to="/dashboard/tables" replace />,
+    element: <Navigate to="/dashboard/qr-studio/tables" replace />,
     errorElement: <ErrorBoundary />,
   },
   // Public business team QR (Path B) — must stay below /business/dashboard* static routes

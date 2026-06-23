@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
 import { TipPaymentProcessingView } from "./TipPaymentProcessingView";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
+import { CustomerVenueBanner } from "../../components/customer/CustomerVenueBanner";
 import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
 import { useCustomerVenueBrand } from "./customerJourneyBrand";
@@ -82,9 +83,18 @@ export function TipCompletionPage() {
   };
 
   const completionHeader = headerThankYouFor(t, displayName, feedbackSubmitted);
+  const premiumThankYou =
+    venueBrand.branding?.premium && venueBrand.branding.thankYouMessage?.trim()
+      ? venueBrand.branding.thankYouMessage.trim()
+      : null;
 
   return (
     <div className={cf.page}>
+      {venueBrand.branding?.premium ? (
+        <div className="border-b border-black/[0.06]">
+          <CustomerVenueBanner branding={venueBrand.branding} />
+        </div>
+      ) : null}
       <CustomerJourneyHeader
         venue={venueBrand}
         stepTitle={completionHeader.stepTitle}
@@ -95,6 +105,12 @@ export function TipCompletionPage() {
         <div className={cf.successIconWrap} aria-hidden>
           <CheckCircle2 className="size-11 text-primary sm:size-12" strokeWidth={1.75} />
         </div>
+
+        {premiumThankYou ? (
+          <p className="mx-auto mb-6 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
+            {premiumThankYou}
+          </p>
+        ) : null}
 
         <Card className={cf.completionCard}>
           <CardContent className="p-6 sm:p-8">

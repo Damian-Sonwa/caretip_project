@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Role } from "@prisma/client";
 import * as employeeService from "../services/employee.service.js";
+import { QR_SCAN_TYPES, recordQrScanEvent } from "../services/qr/qrScanEvent.service.js";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import {
@@ -8,6 +9,9 @@ import {
   GO_LIVE_REQUIRED_MESSAGE,
   hasBusinessVerificationCapability,
 } from "../config/businessVerificationCapabilities.js";
+import {
+  enforceFeatureForRequest,
+} from "../services/subscriptionEntitlement.service.js";
 import { uploadEmployeeAvatarImage } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import {
@@ -72,10 +76,15 @@ export async function patchMyProfile(req: Request, res: Response) {
       return res.status(401).json({ message: "Authentication required" });
     }
     const { name, bio, monthlyGoal, emailNotifications, pushNotifications, phone } = req.body;
-    if (monthlyGoal !== undefined && monthlyGoal !== null) {
-      const n = Number(monthlyGoal);
-      if (Number.isNaN(n) || n < 0) {
-        return res.status(400).json({ message: "Monthly goal must be a non-negative number" });
+    if (monthlyGoal !== undefined) {
+      if (monthlyGoal !== null) {
+        const n = Number(monthlyGoal);
+        if (Number.isNaN(n) || n < 0) {
+          return res.status(400).json({ message: "Monthly goal must be a non-negative number" });
+        }
+      }
+      if (!(await enforceFeatureForRequest(req, res, "employeeGoals"))) {
+        return;
       }
     }
     const updated = await employeeService.updateEmployeeSelf(userId, {
@@ -219,6 +228,12 @@ export async function getEmployeeById(req: Request, res: Response) {
       console.warn("[employee.getEmployeeById] not resolved", { scannedRouteId: trimmed });
       return res.status(404).json({ message: "Staff member not found" });
     }
+    recordQrScanEvent({
+      businessId: employee.businessId,
+      scanType: QR_SCAN_TYPES.EMPLOYEE_LEGACY_ID,
+      employeeId: employee.id,
+      req,
+    });
     return res.json(employee);
   } catch (err) {
     logServerError("employee.getEmployeeById", err);
@@ -253,6 +268,20 @@ export async function updateEmployee(req: Request, res: Response) {
     if (tableIds !== undefined && !Array.isArray(tableIds)) {
       return res.status(400).json({ message: "tableIds must be an array" });
     }
+    if (monthlyGoal !== undefined) {
+      if (!(await enforceFeatureForRequest(req, res, "employeeGoals"))) {
+        return;
+      }
+    }
+    const tableIdList =
+      tableIds === undefined
+        ? []
+        : (tableIds as unknown[]).map((x) => String(x).trim()).filter((id) => id.length > 0);
+    if (tableIdList.length > 0) {
+      if (!(await enforceFeatureForRequest(req, res, "tableQr"))) {
+        return;
+      }
+    }
     const updated = await employeeService.updateEmployeeForBusiness(business.id, employeeId.trim(), {
       name,
       jobTitle: role ?? jobTitle,
@@ -277,9 +306,7 @@ export async function updateEmployee(req: Request, res: Response) {
         : {}),
       ...(tableIds !== undefined
         ? {
-            tableIds: tableIds
-              .map((x: unknown) => String(x).trim())
-              .filter((id: string) => id.length > 0),
+            tableIds: tableIdList,
           }
         : {}),
     });
@@ -401,6 +428,17 @@ export async function createEmployee(req: Request, res: Response) {
     if (req.body.tableIds !== undefined && !Array.isArray(req.body.tableIds)) {
       return res.status(400).json({ message: "tableIds must be an array" });
     }
+    const tableIdList =
+      req.body.tableIds === undefined
+        ? []
+        : (req.body.tableIds as unknown[])
+            .map((x) => String(x).trim())
+            .filter((id: string) => id.length > 0);
+    if (tableIdList.length > 0) {
+      if (!(await enforceFeatureForRequest(req, res, "tableQr"))) {
+        return;
+      }
+    }
     const jobTitle = role ?? req.body.jobTitle;
     const explicitLocale =
       typeof req.body.locale === "string" && req.body.locale.trim()
@@ -417,9 +455,7 @@ export async function createEmployee(req: Request, res: Response) {
       tableIds:
         req.body.tableIds === undefined
           ? undefined
-          : (req.body.tableIds as unknown[])
-              .map((x) => String(x).trim())
-              .filter((id: string) => id.length > 0),
+          : tableIdList,
       explicitLocale,
       acceptLanguage,
     });

@@ -30,7 +30,7 @@ export function LocationQrLandingPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { locationId } = useParams<{ locationId: string }>();
-  const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath, setAmount } = useTipFlow();
+  const { setBusinessId, setEmployee, setStaffProfileSlug, setStaffTipReturnPath, setTippingVenue, setAmount } = useTipFlow();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<PublicLocationContextResponse | null>(null);
@@ -53,6 +53,10 @@ export function LocationQrLandingPage() {
         if (cancelled) return;
         setData(res);
         setBusinessId(res.business.id);
+        setTippingVenue({
+          locationId: res.location.id,
+          locationName: res.location.name,
+        });
       } catch (e) {
         logClientError("LocationQrLandingPage", e);
         if (!cancelled) {
@@ -66,7 +70,7 @@ export function LocationQrLandingPage() {
     return () => {
       cancelled = true;
     };
-  }, [locationId, setBusinessId, t]);
+  }, [locationId, setBusinessId, setTippingVenue, t]);
 
   const filtered = useMemo(() => {
     const list = data?.employees ?? [];

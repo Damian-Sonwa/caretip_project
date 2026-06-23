@@ -196,6 +196,49 @@ export async function uploadManagerBusinessLogoImage(
   return `${baseNorm}/${relUrl}`;
 }
 
+/** Venue hero banner for premium guest landing — max validated in multer (8 MB). */
+export async function uploadManagerBusinessBannerImage(
+  buffer: Buffer,
+  mimetype: string,
+  businessId: string,
+): Promise<string> {
+  logStorageBackendOnce();
+  validateImageBufferForUpload(buffer, mimetype);
+  const safeBizId = businessId.replace(/[^a-zA-Z0-9-_]/g, "");
+  const ext = extensionForImageBuffer(buffer);
+  const name = buildUniqueStorageObjectNameFromExtension(ext);
+
+  if (isSupabaseStorageConfiguredForUpload()) {
+    try {
+      const objectKey = `business-banners/${name}`;
+      const publicUrl = await uploadBufferToSupabaseWithTimeout(objectKey, buffer, mimetype);
+      await assertUploadedObjectReadableInBucket(publicUrl);
+      return publicUrl;
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[upload] manager business banner (Supabase) failed:", msg);
+      if (/timed out/i.test(msg)) {
+        throw new Error("Banner upload timed out. Try again with a smaller image.");
+      }
+      throw new Error(msg.includes("banner") ? msg : "We couldn't save your banner. Please try again.");
+    }
+  }
+
+  const base = resolvePublicApiBaseUrl();
+  if (process.env.NODE_ENV === "production" && isLocalhostBase(base)) {
+    throw new Error(UPLOAD_CONFIG_ERROR);
+  }
+  const relDir = path.join("uploads", "businesses", safeBizId, "banners");
+  const dir = path.join(process.cwd(), relDir);
+  const fp = path.join(dir, name);
+  mkdirSync(dir, { recursive: true });
+  writeFileSync(fp, buffer);
+  assertDiskFileExists(fp);
+  const baseNorm = base.replace(/\/$/, "");
+  const relUrl = `${relDir.replace(/\\/g, "/")}/${name}`;
+  return `${baseNorm}/${relUrl}`;
+}
+
 export async function uploadPlatformBusinessLogoImage(
   buffer: Buffer,
   mimetype: string,

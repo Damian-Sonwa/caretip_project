@@ -8,6 +8,7 @@ import {
   type GoalCalendarPeriod,
 } from "../utils/businessTime.js";
 import { getCachedOrLoad, invalidateCacheKey, invalidateCacheKeyPrefix } from "../utils/shortLivedCache.js";
+import { emitGoalUpdatedCanonical } from "../socket/realtimeContracts.js";
 
 const BUSINESS_GOALS_CACHE_TTL_MS = 60_000;
 
@@ -357,6 +358,13 @@ export async function upsertMyGoal(
     select: { businessId: true },
   });
   if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
+  if (empBiz?.businessId) {
+    emitGoalUpdatedCanonical(empBiz.businessId, emp.id, row.id, {
+      goalAmount: Number(row.goalAmount),
+      status: row.status,
+      updatedAt: row.updatedAt.toISOString(),
+    });
+  }
   return { ...(p as GoalWithProgress), name: row.name, lifecycleStatus: row.status };
 }
 
@@ -579,6 +587,13 @@ export async function createMyGoal(
     select: { businessId: true },
   });
   if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
+  if (empBiz?.businessId) {
+    emitGoalUpdatedCanonical(empBiz.businessId, emp.id, row.id, {
+      goalAmount: Number(row.goalAmount),
+      status: row.status,
+      updatedAt: row.updatedAt.toISOString(),
+    });
+  }
   return {
     id: row.id,
     name: row.name,
@@ -618,6 +633,13 @@ export async function updateMyGoal(
     select: { businessId: true },
   });
   if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
+  if (empBiz?.businessId) {
+    emitGoalUpdatedCanonical(empBiz.businessId, emp.id, next.id, {
+      goalAmount: Number(next.goalAmount),
+      status: next.status,
+      updatedAt: next.updatedAt.toISOString(),
+    });
+  }
   return {
     id: next.id,
     name: next.name,
@@ -645,6 +667,13 @@ export async function archiveMyGoal(userId: string, goalId: string): Promise<Emp
     select: { businessId: true },
   });
   if (empBiz?.businessId) invalidateBusinessGoalsListCache(empBiz.businessId);
+  if (empBiz?.businessId) {
+    emitGoalUpdatedCanonical(empBiz.businessId, emp.id, next.id, {
+      goalAmount: Number(next.goalAmount),
+      status: next.status,
+      updatedAt: next.updatedAt.toISOString(),
+    });
+  }
   return {
     id: next.id,
     name: next.name,

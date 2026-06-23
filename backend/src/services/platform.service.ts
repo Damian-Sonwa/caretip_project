@@ -219,6 +219,10 @@ type PlatformBusinessActivityRow = {
   location_count: number;
   total_tips_eur: number;
   success_tip_count: number;
+  subscription_tier: string;
+  subscription_status: string | null;
+  cancel_at_period_end: boolean | null;
+  has_completed_onboarding: boolean;
 };
 
 /**
@@ -247,9 +251,14 @@ async function getAllBusinessActivityImpl() {
       (SELECT COUNT(*)::int FROM employees e WHERE e.business_id = b.id AND e.is_deleted = false) AS staff_count,
       (SELECT COUNT(*)::int FROM locations l WHERE l.business_id = b.id) AS location_count,
       COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
-      COALESCE(ts.success_tip_count, 0)::int AS success_tip_count
+      COALESCE(ts.success_tip_count, 0)::int AS success_tip_count,
+      b.subscription_tier,
+      s.status AS subscription_status,
+      s.cancel_at_period_end,
+      u.has_completed_onboarding
     FROM businesses b
     INNER JOIN "User" u ON u.id = b.user_id
+    LEFT JOIN subscriptions s ON s.business_id = b.id
     LEFT JOIN (
       SELECT
         business_id,
@@ -286,6 +295,10 @@ async function getAllBusinessActivityImpl() {
     kycSlaBreached: isKycSlaBreached(b.kyc_submitted_at, b.verification_status),
     totalTipsEur: Number(b.total_tips_eur ?? 0),
     successTipCount: Number(b.success_tip_count ?? 0),
+    subscriptionTier: b.subscription_tier as "basic" | "premium" | "enterprise",
+    subscriptionStatus: b.subscription_status,
+    cancelAtPeriodEnd: Boolean(b.cancel_at_period_end),
+    hasCompletedOnboarding: Boolean(b.has_completed_onboarding),
   }));
 }
 

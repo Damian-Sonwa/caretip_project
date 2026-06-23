@@ -106,6 +106,9 @@ export function SocketProvider({ children }: { children: ReactNode }) {
     const onReconnect = () => {
       setConnected(true);
       setConnectionStatus("connected");
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("caretip:socket-reconnected"));
+      }
     };
 
     s.on("connect", onConnect);

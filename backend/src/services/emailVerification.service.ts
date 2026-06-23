@@ -151,6 +151,34 @@ export async function sendWelcomeEmail(input: {
   }
 }
 
+/** Fire-and-forget welcome mail — logs outcome; never throws to callers (auth-safe). */
+export function scheduleWelcomeEmailBestEffort(input: {
+  userId: string;
+  email: string;
+  explicitLocale?: string | null;
+  storedLocale?: string | null;
+  acceptLanguage?: string | null;
+  logContext?: string;
+}): void {
+  const email = input.email?.trim().toLowerCase();
+  if (!email) return;
+
+  const logContext = input.logContext ?? "signup";
+  void (async () => {
+    try {
+      const locale = resolveEmailLocale({
+        explicitLocale: input.explicitLocale ?? null,
+        storedLocale: input.storedLocale ?? null,
+        acceptLanguage: input.acceptLanguage ?? null,
+      });
+      await sendWelcomeEmail({ to: email, locale, userId: input.userId });
+      console.info("[welcome] sent", { userId: input.userId, context: logContext, locale });
+    } catch (e) {
+      console.error("[welcome] failed", { userId: input.userId, context: logContext }, e);
+    }
+  })();
+}
+
 export async function verifyEmailWithToken(plainToken: string): Promise<void> {
   const token = String(plainToken ?? "").trim();
   if (!token) {
@@ -183,13 +211,11 @@ export async function verifyEmailWithToken(plainToken: string): Promise<void> {
 
   const email = row.user.email?.trim().toLowerCase();
   if (email) {
-    const welcomeLocale = resolveEmailLocale({
-      explicitLocale: null,
+    scheduleWelcomeEmailBestEffort({
+      userId: row.userId,
+      email,
       storedLocale: row.user.preferredLocale,
-      acceptLanguage: null,
-    });
-    void sendWelcomeEmail({ to: email, locale: welcomeLocale, userId: row.userId }).catch((e) => {
-      console.error("[email-verify] welcome email failed", { userId: row.userId }, e);
+      logContext: "email_verify",
     });
   }
 }

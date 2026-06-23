@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useSearchParams } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
@@ -9,23 +9,35 @@ import { BusinessSubPageShellSkeleton } from "../../components/dashboard/Busines
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
   BUSINESS_SETTINGS_SECTIONS,
+  legacySettingsSectionRedirectTarget,
   parseBusinessSettingsSection,
   type BusinessSettingsSectionId,
 } from "../../components/business/settings/businessSettingsSections";
 import { BusinessSettingsGeneralPanel } from "../../components/business/settings/BusinessSettingsGeneralPanel";
 import { BusinessSettingsSecurityPanel } from "../../components/business/settings/BusinessSettingsSecurityPanel";
 import { BusinessSettingsNotificationsPanel } from "../../components/business/settings/BusinessSettingsNotificationsPanel";
-import { BusinessSettingsBillingPanel } from "../../components/business/settings/BusinessSettingsBillingPanel";
-import { BusinessSettingsShortcutsPanel } from "../../components/business/settings/BusinessSettingsShortcutsPanel";
+import { BusinessSettingsIntegrationsPanel } from "../../components/business/settings/BusinessSettingsIntegrationsPanel";
+import { BusinessSettingsLanguagePanel } from "../../components/business/settings/BusinessSettingsLanguagePanel";
 import { useBusinessSettingsData } from "../../components/business/settings/useBusinessSettingsData";
-import { businessUi } from "../../components/business/businessDashboardUi";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function BusinessSettingsPage() {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user } = useRequireAuth();
   const [searchParams, setSearchParams] = useSearchParams();
-  const section = parseBusinessSettingsSection(searchParams.get("section"));
+  const rawSection = searchParams.get("section");
+  const section = parseBusinessSettingsSection(rawSection);
   const settings = useBusinessSettingsData();
+
+  useEffect(() => {
+    const legacy = legacySettingsSectionRedirectTarget(rawSection);
+    if (legacy) {
+      const billing = searchParams.get("billing");
+      const qs = billing ? `?billing=${billing}` : "";
+      navigate(`${legacy}${qs}`, { replace: true });
+    }
+  }, [rawSection, searchParams, navigate]);
 
   useEffect(() => {
     const billing = searchParams.get("billing");
@@ -35,18 +47,16 @@ export function BusinessSettingsPage() {
     } else if (billing === "canceled") {
       toast.message(t("business.billing.checkoutCanceled"));
     }
-    const next = new URLSearchParams(searchParams);
-    next.delete("billing");
-    next.delete("session_id");
-    setSearchParams(next, { replace: true });
-  }, [searchParams, setSearchParams, t]);
+    navigate("/dashboard/billing/subscription", { replace: true });
+  }, [searchParams, navigate, t]);
 
   const activeMeta = BUSINESS_SETTINGS_SECTIONS.find((s) => s.id === section)!;
 
   useEffect(() => {
+    if (legacySettingsSectionRedirectTarget(rawSection)) return;
     if (searchParams.get("section") === section) return;
     setSearchParams({ section }, { replace: true });
-  }, [section, searchParams, setSearchParams]);
+  }, [section, searchParams, setSearchParams, rawSection]);
 
   const setSection = (id: BusinessSettingsSectionId) => {
     setSearchParams({ section: id }, { replace: false });
@@ -77,10 +87,7 @@ export function BusinessSettingsPage() {
         </header>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-          <nav
-            className="lg:w-56 lg:shrink-0"
-            aria-label={t("business.settings.navAria")}
-          >
+          <nav className="lg:w-56 lg:shrink-0" aria-label={t("business.settings.navAria")}>
             <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
               {BUSINESS_SETTINGS_SECTIONS.map((item) => {
                 const active = item.id === section;
@@ -96,12 +103,8 @@ export function BusinessSettingsPage() {
                         : cn(businessUi.cardStatic, "text-muted-foreground hover:border-neutral-200 hover:text-foreground"),
                     )}
                   >
-                    <CareIcon
-                      name={item.icon}
-                      size="sm"
-                      className={cn(active && "text-primary")}
-                    />
-                    <span className="whitespace-nowrap">{t(item.labelKey)}</span>
+                    <CareIcon name={item.icon} size="sm" className={cn(active && "text-primary")} />
+                    <span className="truncate">{t(item.labelKey)}</span>
                   </button>
                 );
               })}
@@ -114,15 +117,12 @@ export function BusinessSettingsPage() {
               <p className="mt-1 text-sm text-muted-foreground">{t(activeMeta.descriptionKey)}</p>
             </div>
 
-            {section === "general" ? (
-              <BusinessSettingsGeneralPanel {...settings} />
-            ) : null}
+            {section === "general" ? <BusinessSettingsGeneralPanel {...settings} /> : null}
             {section === "business" ? <BusinessProfilePage embedded /> : null}
-            {section === "team" ? <BusinessSettingsShortcutsPanel variant="team" /> : null}
             {section === "notifications" ? <BusinessSettingsNotificationsPanel {...settings} /> : null}
             {section === "security" ? <BusinessSettingsSecurityPanel {...settings} /> : null}
-            {section === "billing" ? <BusinessSettingsBillingPanel /> : null}
-            {section === "branding" ? <BusinessSettingsShortcutsPanel variant="branding" /> : null}
+            {section === "integrations" ? <BusinessSettingsIntegrationsPanel /> : null}
+            {section === "language" ? <BusinessSettingsLanguagePanel /> : null}
           </div>
         </div>
       </div>

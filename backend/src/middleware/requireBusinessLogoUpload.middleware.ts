@@ -2,10 +2,9 @@ import type { Request, Response, NextFunction } from "express";
 import { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { managerHasCompletedOnboarding } from "../services/auth.service.js";
-import { subscriptionBypass } from "../services/subscriptionEntitlement.service.js";
-import { requireSubscriptionCapability } from "./requireSubscriptionCapability.middleware.js";
+import { requireFeature, subscriptionBypass } from "../services/subscriptionEntitlement.service.js";
 
-const requireBrandingCustomization = requireSubscriptionCapability("brandingCustomization");
+const requireBrandingCustomization = requireFeature("brandingCustomization");
 
 /**
  * Logo upload during manager onboarding is allowed on any tier.

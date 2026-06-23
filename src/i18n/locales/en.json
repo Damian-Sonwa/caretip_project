@@ -30,6 +30,35 @@
     "metricZeroGoals": "0 goals",
     "metricZeroRatings": "0 ratings"
   },
+  "premium": {
+    "summaryBanner": {
+      "title": "Analytics overview",
+      "revenueTrend": "Revenue trend",
+      "scanTrend": "Scan trend",
+      "conversionTrend": "Conversion trend",
+      "growthValue": "{{percent}}% vs monthly avg",
+      "scanWeekValue": "{{count}} scans this week",
+      "conversionHint": "Scan-to-tip rate"
+    },
+    "health": {
+      "status": "Business status",
+      "keyInsight": "Key insight",
+      "noInsight": "Insights appear as activity grows."
+    },
+    "plan": {
+      "upgrade": "Upgrade plan"
+    },
+    "qrStudio": {
+      "badge": "Premium workspace",
+      "feature": "Branded QR design studio"
+    }
+  },
+  "kpiTrust": {
+    "qrAnalyticsComingSoon": "QR Analytics Coming Soon",
+    "qrAnalyticsComingSoonBody": "Available in a future update once scan tracking is enabled.",
+    "leaderboardComingSoon": "Leaderboard coming soon",
+    "leaderboardComingSoonBody": "Team rankings will appear when the leaderboard service is available."
+  },
   "emptyState": {
     "tips": {
       "title": "Ready to receive your first tip",
@@ -1744,6 +1773,112 @@
     "businessDashboardSubtitle": "Business dashboard",
     "viewAll": "View all"
   },
+  "subscription": {
+    "tiers": {
+      "basic": "Starter",
+      "premium": "Premium",
+      "enterprise": "Enterprise"
+    },
+    "nav": {
+      "lockedAria": "{{feature}} — Premium feature, tap to view upgrade options"
+    },
+    "locked": {
+      "eyebrow": "Premium feature",
+      "includesAria": "Included with upgrade",
+      "currentPlan": "You are on {{plan}}. Upgrade to {{required}} to unlock this."
+    },
+    "upgrade": {
+      "upgradeToPremium": "Upgrade to Premium",
+      "contactSales": "Contact sales"
+    },
+    "features": {
+      "generic": {
+        "title": "Upgrade required",
+        "benefit": "Unlock more tools to grow your venue with CareTip Premium.",
+        "f0": "Advanced operational tools",
+        "f1": "Priority support options"
+      },
+      "advancedAnalytics": {
+        "title": "Advanced analytics",
+        "benefit": "See trends, performance charts, and period comparisons across your team.",
+        "f0": "Interactive charts and trend lines",
+        "f1": "Weekly, monthly, and annual views",
+        "f2": "Top performer insights",
+        "f3": "Operational pulse metrics"
+      },
+      "csvExport": {
+        "title": "CSV export & reporting",
+        "benefit": "Download tip activity for accounting, payroll, and reconciliation.",
+        "f0": "One-click CSV export",
+        "f1": "Filter by date and status",
+        "f2": "Timezone-aware exports"
+      },
+      "multiLocation": {
+        "title": "Multi-location support",
+        "benefit": "Manage tipping across multiple venues from one dashboard.",
+        "f0": "Unlimited locations on Premium",
+        "f1": "Per-location QR codes",
+        "f2": "Location-level reporting"
+      },
+      "tableQr": {
+        "title": "Table QR & advanced QR management",
+        "benefit": "Let guests tip by table and manage advanced QR workflows.",
+        "f0": "Table-level QR codes",
+        "f1": "Print-ready branded QR assets",
+        "f2": "Table assignment for staff",
+        "f3": "Advanced QR hub tools"
+      },
+      "employeeGoals": {
+        "title": "Employee tip goals",
+        "benefit": "Motivate your team with trackable tipping targets and progress.",
+        "f0": "Personal and team goals",
+        "f1": "Progress tracking on dashboards",
+        "f2": "Goal history and achievements"
+      },
+      "brandingCustomization": {
+        "title": "Branding & customization",
+        "benefit": "Customize guest-facing experiences with your venue identity.",
+        "f0": "Venue logo inside QR codes",
+        "f1": "Custom brand colors & banner",
+        "f2": "Welcome & thank-you messaging"
+      },
+      "apiAccess": {
+        "title": "API access",
+        "benefit": "Connect CareTip to your internal systems with enterprise API support.",
+        "f0": "REST API access",
+        "f1": "Integration support",
+        "f2": "Custom automation hooks"
+      },
+      "multiBrand": {
+        "title": "Multi-brand management",
+        "benefit": "Roll out CareTip across brands and regions with centralized control.",
+        "f0": "Multi-brand rollout",
+        "f1": "Centralized governance",
+        "f2": "Brand-level reporting"
+      },
+      "customReporting": {
+        "title": "Custom reporting",
+        "benefit": "Get bespoke reports tailored to your finance and operations teams.",
+        "f0": "Custom report templates",
+        "f1": "Scheduled delivery",
+        "f2": "Finance-ready exports"
+      },
+      "dedicatedOnboarding": {
+        "title": "Dedicated onboarding",
+        "benefit": "Launch faster with a guided onboarding program for your organization.",
+        "f0": "Kickoff workshop",
+        "f1": "Staff rollout playbook",
+        "f2": "Go-live support"
+      },
+      "accountManager": {
+        "title": "Dedicated account manager",
+        "benefit": "Work directly with a CareTip partner for ongoing success.",
+        "f0": "Named account manager",
+        "f1": "Quarterly business reviews",
+        "f2": "Priority escalation path"
+      }
+    }
+  },
   "dashboardNav": {
     "employee": {
       "overview": "Overview",
@@ -1753,15 +1888,13 @@
       "settings": "Settings"
     },
     "business": {
-      "overview": "Overview",
+      "overview": "Dashboard",
+      "tips": "Tips",
       "team": "Team",
-      "qrCodes": "QR codes",
+      "qrStudio": "QR Studio",
       "locations": "Locations",
-      "tables": "Tables",
-      "tipsActivity": "Tips & activity",
-      "customerFeedback": "Customer feedback",
-      "notifications": "Notifications",
-      "support": "Contact CareTip",
+      "customers": "Customers",
+      "billing": "Billing",
       "settings": "Settings"
     }
   },
@@ -2747,7 +2880,22 @@
       "hourAgo": "1 hour ago",
       "hoursAgo": "{{count}} hours ago",
       "dayAgo": "1 day ago",
-      "daysAgo": "{{count}} days ago"
+      "daysAgo": "{{count}} days ago",
+      "justNow": "Just now"
+    },
+    "performance": {
+      "title": "Your performance",
+      "rank": "Team rank",
+      "rankValue": "#{{rank}} of {{total}}",
+      "rankHint": "Based on tips this month",
+      "goal": "Goal progress",
+      "goalTarget": "Target {{amount}}",
+      "goalOpen": "Set a monthly goal to track progress",
+      "streak": "Tip streak",
+      "streakDays": "{{count}} days",
+      "streakHint": "Consecutive days with tips",
+      "trend": "Period earnings",
+      "trendHint": "Tips in the selected period"
     },
     "dashboard": {
       "analyticsSectionTitle": "Period analytics",
@@ -3120,6 +3268,7 @@
       "toastTeamMember": "Team member",
       "exportFailed": "Export failed. Please try again.",
       "topPerformers": "Top performers",
+      "viewLeaderboard": "View full leaderboard",
       "topPerformerBadge": "Top performer",
       "newMember": "New member",
       "quickActions": "Quick actions",
@@ -3128,6 +3277,7 @@
       "actionGenerateQr": "Generate QR codes",
       "actionManageLocations": "Manage locations",
       "actionExportReports": "Export reports",
+      "actionViewAnalytics": "View analytics & exports",
       "needHelpTitle": "Need help?",
       "needHelpDesc": "Learn how to maximize your team's earnings and keep guests tipping smoothly.",
       "viewGuidelines": "View guidelines",
@@ -3412,6 +3562,7 @@
       "toastPdfReady": "PDF ready to print.",
       "toastPdfFail": "Could not build PDF.",
       "teamQrSubtitle": "Team QR, entrance or front counter",
+      "storefrontCardHint": "Venue branding lives inside the QR card — download or print the complete experience.",
       "labelQrUrl": "QR code URL",
       "totalScans": "Total scans:",
       "pendingTitle": "Business verification pending",
@@ -3436,6 +3587,9 @@
       "toastBulkAddStaff": "Add staff first.",
       "fallbackBusinessName": "Business",
       "storefrontQrHeading": "{{name}} QR",
+      "storefrontQrDesc": "Place at the entrance. Guests scan to choose who to tip.",
+      "storefrontQrUrlLabel": "Public page:",
+      "addLocations": "Add locations",
       "checkingVerification": "Checking verification status…",
       "pendingBody": "Your venue is under review. Approval is required before accepting live guest tips.",
       "backDashboard": "Back to dashboard",
@@ -3452,7 +3606,486 @@
       "downloadPdfLayout": "Download PDF layout",
       "regenerateBusinessQr": "Regenerate business QR",
       "staffTagsTitle": "Staff tags",
-      "staffTagsDesc": "Individual QR codes for each team member, with the same branded style as your storefront, table, and location codes."
+      "staffTagsDesc": "Individual QR codes for each team member, with the same branded style as your storefront, table, and location codes.",
+      "designStudio": {
+        "title": "Import QR design",
+        "description": "Load a CareTip QR design file to preview and apply styling. Your saved branding settings are unchanged.",
+        "presetName": "Imported preset",
+        "presetNamePlaceholder": "Import a design file to see its name",
+        "displayName": "Title on QR",
+        "tagline": "Tagline on QR",
+        "templateSection": "Template",
+        "border": "Border",
+        "shape": "QR shape",
+        "accent": "Accent color",
+        "importOnlyHint": "Import a .caretip-qr-design.json file or adjust the loaded design below. Changes apply to this session only — update Settings → Branding to change what guests see live.",
+        "previewCaption": "Live preview (sample storefront QR)",
+        "importDesign": "Import design file",
+        "reset": "Reset to saved branding",
+        "toastImported": "Design imported."
+      }
+    },
+    "moduleNav": {
+      "comingSoon": "Soon"
+    },
+    "qrAnalytics": {
+      "totalScans": "Total scans",
+      "uniqueVisitors": "Unique visitors",
+      "repeatScans": "Return scans",
+      "topQr": "Top QR",
+      "topLocation": "Top location",
+      "topEmployeeQr": "Top employee QR",
+      "scanTrend": "Scan trend",
+      "scanCount": "{{count}} scans",
+      "recentActivity": "Recent scan activity",
+      "emptyTrend": "Scans appear here when guests open your QR codes."
+    },
+    "qrStudio": {
+      "eyebrow": "Product",
+      "title": "QR Studio",
+      "subtitle": "Design branded guest experiences, manage QR codes, and export print-ready hospitality assets.",
+      "navAria": "QR Studio sections",
+      "nav": {
+        "gallery": "QR Gallery",
+        "employees": "Employees",
+        "locations": "Locations",
+        "tables": "Tables",
+        "branding": "Branding",
+        "downloads": "Downloads"
+      },
+      "gallery": {
+        "inventoryTitle": "Your QR library",
+        "inventoryDesc": "Counts across employee, location, and table codes.",
+        "statEmployees": "Staff QRs",
+        "statLocations": "Location QRs",
+        "statTables": "Table QRs",
+        "mainVenueTitle": "Main venue QR",
+        "quickAccessTitle": "Manage by type",
+        "quickAccessDesc": "Open a section to download, print, or share specific QR codes.",
+        "manageEmployees": "Employee QRs",
+        "manageLocations": "Location QRs",
+        "manageTables": "Table QRs"
+      },
+      "employees": {
+        "pageTitle": "Employee QR codes",
+        "pageDesc": "Personal codes for each team member — print tags or share links."
+      },
+      "locations": {
+        "pageTitle": "Location QR codes",
+        "pageDesc": "Codes for each venue area or branch guests can scan to tip."
+      },
+      "branding": {
+        "headerStyleTitle": "Header style",
+        "headerStyleDesc": "Control how your brand appears above guest tipping flows."
+      },
+      "design": {
+        "title": "Brand Experience Designer",
+        "subtitle": "Design a complete branded guest touchpoint — not just a QR code.",
+        "navAria": "QR Studio designer sections",
+        "sections": {
+          "design": "Design",
+          "branding": "Branding",
+          "qr": "QR",
+          "content": "Content",
+          "export": "Export"
+        },
+        "template": "Industry template",
+        "layout": "Layout variant",
+        "accent": "Accent color",
+        "background": "Background",
+        "decorations": "Decorative layers",
+        "decorationsHint": "Premium frames, corners, and accents outside the scan zone.",
+        "brandName": "Brand name",
+        "tagline": "Tagline",
+        "website": "Website",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "headerLogo": "Logo on card",
+        "headerLogoHint": "Show your venue logo at the top of the experience card.",
+        "qrSize": "QR size",
+        "qrSizeHint": "Controlled by layout variant — larger for posters, compact for menus.",
+        "scanSafeHint": "Only scan-safe shapes are shown. Circle shapes are hidden to protect reliability.",
+        "cta": "Call to action",
+        "promo": "Promotional tagline",
+        "exportDesc": "Export your branded experience card. Unsafe designs are blocked automatically.",
+        "canvasTitle": "Live preview",
+        "canvasDesc": "Your branded experience card updates instantly as you edit.",
+        "layouts": {
+          "table_tent": "Table tent",
+          "poster": "Poster",
+          "counter": "Counter display",
+          "window": "Window display",
+          "menu": "Menu insert",
+          "social": "Social media"
+        },
+        "industries": {
+          "classic": "Classic hospitality",
+          "luxury": "Luxury lounge",
+          "modern": "Modern venue",
+          "cafe": "Café & coffeehouse",
+          "corporate": "Corporate",
+          "nightclub": "Nightclub",
+          "fineDining": "Fine dining",
+          "hotel": "Hotel & resort",
+          "beachClub": "Beach club",
+          "spa": "Spa & wellness"
+        }
+      },
+      "analytics": {
+        "title": "QR performance",
+        "description": "How your {{template}} branded experience performs with guests.",
+        "scans": "Total scans",
+        "unique": "Unique scans",
+        "tips": "Tips generated",
+        "conversion": "Conversion rate",
+        "demoHint": "Sample metrics for Premium walkthrough accounts. Live analytics sync with your tip data."
+      },
+      "templates": {
+        "title": "Template marketplace",
+        "description": "Preview premium QR styles. Classic is included on Starter; all templates unlock with Premium.",
+        "basicHint": "Starter includes Classic. Upgrade to unlock Luxury, Modern, and industry templates.",
+        "saveHint": "Apply templates under Branding to update live QR codes and guest pages.",
+        "openBranding": "Open Branding"
+      },
+      "downloads": {
+        "title": "Downloads & print formats",
+        "description": "Generate print-ready assets from your QR Gallery.",
+        "png": "PNG",
+        "pngDesc": "High-resolution QR image",
+        "pdf": "PDF layout",
+        "pdfDesc": "Print-ready sheet with venue name",
+        "poster": "Poster",
+        "posterDesc": "A3/A4 lobby poster layout",
+        "tent": "Table tent",
+        "tentDesc": "Foldable table card format",
+        "sticker": "Window sticker",
+        "stickerDesc": "Square sticker for entrances",
+        "openGallery": "Open QR Gallery",
+        "futureTitle": "Coming next",
+        "futureDesc": "Social media kits and flyer exports.",
+        "social": "Social assets",
+        "flyer": "Flyer export"
+      }
+    },
+    "liveActivity": {
+      "centerTitle": "Live activity",
+      "streamLabel": "Operational",
+      "empty": "Activity appears here as guests tip, scan QR codes, or your team changes.",
+      "qrScanned": "QR code scanned",
+      "goalAchieved": "Goal achieved",
+      "goalUpdated": "Goal updated",
+      "employeeJoined": "Employee joined",
+      "employeeInvited": "Employee invited",
+      "employeeUpdated": "Team updated",
+      "locationCreated": "Location created",
+      "billingUpdated": "Billing updated",
+      "kind": {
+        "tip_received": "Tip received",
+        "qr_scanned": "QR scan",
+        "goal_achieved": "Goal achieved",
+        "goal_updated": "Goal progress",
+        "employee_joined": "Employee joined",
+        "employee_invited": "Invitation sent",
+        "employee_updated": "Team change",
+        "location_created": "New location",
+        "billing_updated": "Billing change"
+      }
+    },
+    "tips": {
+      "eyebrow": "Revenue",
+      "title": "Tips",
+      "subtitle": "Live tipping activity, transactions, and performance insights.",
+      "navAria": "Tips sections",
+      "nav": {
+        "live": "Live Tips",
+        "transactions": "Transactions",
+        "analytics": "Analytics"
+      },
+      "liveDesc": "Operational stream — tips, QR scans, goals, and team events as they happen.",
+      "analyticsDesc": "Deep-dive reporting — revenue, QR, employees, locations, and trends. Filter by period and export data.",
+      "live": {
+        "cards": {
+          "today": "Tips today",
+          "week": "Tips this week",
+          "month": "Tips this month",
+          "average": "Average tip",
+          "tipCount": "{{count}} tips",
+          "averageHint": "Based on this month"
+        },
+        "feedTitle": "Live feed",
+        "feedEmpty": "Tips will appear here as guests pay.",
+        "anonymousGuest": "Guest tip",
+        "venueDefault": "Main venue",
+        "liveBadge": "Live",
+        "timelineTitle": "Activity timeline",
+        "mostRecent": "most recent"
+      },
+      "analytics": {
+        "periodAria": "Analytics period",
+        "cards": {
+          "totalTips": "Total tips",
+          "activeEmployees": "Active employees",
+          "conversion": "Conversion rate",
+          "satisfaction": "Guest satisfaction",
+          "tipCount": "{{count}} tips this month",
+          "satisfactionHint": "From {{count}} ratings"
+        },
+        "sections": {
+          "employees": "Employee analytics",
+          "locations": "Location & table analytics",
+          "topQr": "Top QR codes",
+          "trends": "Trend analysis",
+          "drilldown": "Employee drilldown"
+        },
+        "employeeTipCount": "{{count}} tips",
+        "locationComparison": "Location comparison",
+        "tableComparison": "Table comparison",
+        "locationEmpty": "Location breakdown appears as guests tip by area.",
+        "tableEmpty": "Table breakdown appears when table QRs are used.",
+        "topQrEmpty": "QR performance ranks appear as guests scan codes.",
+        "scans": "scans",
+        "rankingsHint": "Full rankings, awards, and leaderboards live in",
+        "reporting": {
+          "name": "Name",
+          "tips": "Tips",
+          "count": "Count",
+          "share": "Share",
+          "export": "Export transactions",
+          "exportSuccess": "Export started — check your downloads."
+        }
+      }
+    },
+    "team": {
+      "eyebrow": "People",
+      "title": "Team",
+      "subtitle": "Manage staff, goals, and team performance.",
+      "navAria": "Team sections",
+      "nav": {
+        "employees": "Employees",
+        "goals": "Goals",
+        "performance": "Performance",
+        "topPerformers": "Top Performers"
+      },
+      "goalsDesc": "Team tip goals and milestones.",
+      "performanceDesc": "What matters now — health, risks, opportunities, and recommended actions. Full reporting lives in Analytics.",
+      "openAnalytics": "Open full analytics",
+      "topPerformersDesc": "Rankings, awards, and recognition for your hospitality team.",
+      "goals": {
+        "summaryTracked": "Goals tracked",
+        "summaryOnTrack": "On track",
+        "summaryRate": "On-track rate",
+        "tableTitle": "Team goals",
+        "empty": "No active goals yet. Goals appear when staff set monthly targets."
+      },
+      "performance": {
+        "leaderboardTitle": "Team leaderboard",
+        "goalProgress": "{{percent}}% of goal",
+        "rating": "★ {{rating}} avg",
+        "topRatedTitle": "Top rated",
+        "topRatedEmpty": "Ratings appear when guests leave feedback.",
+        "bi": {
+          "revenueTitle": "Revenue analytics",
+          "totalTips": "Total tips",
+          "tipCountHint": "{{count}} tips this month",
+          "tipGrowth": "Tip growth",
+          "tipGrowthHint": "Week vs monthly average",
+          "avgTip": "Average tip value",
+          "weeklyRevenue": "Weekly revenue",
+          "periodRevenueHint": "{{amount}} in selected period",
+          "monthlyRevenueHint": "{{amount}} this month",
+          "qrTitle": "QR analytics",
+          "totalScans": "Total scans",
+          "uniqueScans": "Unique scans",
+          "scanConversion": "Scan-to-tip conversion",
+          "mostScanned": "Most scanned QR",
+          "insightsTitle": "Business insights",
+          "insightsCardTitle": "Operational highlights",
+          "bestDay": "Best performing day",
+          "bestShift": "Best performing shift",
+          "bestLocation": "Best performing location",
+          "bestTable": "Best performing table",
+          "peakPeriod": "Peak tipping period",
+          "shifts": {
+            "morning": "Morning shift",
+            "afternoon": "Afternoon shift",
+            "evening": "Evening shift",
+            "late": "Late night",
+            "—": "—"
+          },
+          "operationalTitle": "Operational metrics",
+          "activeEmployees": "Active employees",
+          "employeesWithTips": "Employees receiving tips",
+          "avgPerEmployee": "Avg tips per employee",
+          "avgPerShift": "Avg tips per shift",
+          "trendsTitle": "Trend analysis",
+          "chartTipsOverTime": "Tips over time",
+          "chartScansOverTime": "Scans over time",
+          "chartConversion": "Conversion rate trend",
+          "chartRevenue": "Revenue trend",
+          "revenueLabel": "Revenue",
+          "scanActivityByHour": "Scan activity by hour"
+        },
+        "executive": {
+          "summaryTitle": "Executive summary",
+          "healthExplain": "Health score is a weighted sum of revenue growth, participation, goals, ratings, and tip activity — each from your live data.",
+          "summary": {
+            "composite": "Period overview",
+            "collectingData": "Collecting enough activity to summarize this period.",
+            "revenueHealthy": "Revenue is up {{percent}}% compared to the period average.",
+            "revenueDeclining": "Revenue declined {{percent}}% compared to the period average.",
+            "revenueStable": "Revenue is stable this period.",
+            "qrGrowing": "QR scan activity grew {{percent}}% in the second half of the period.",
+            "qrDeclining": "QR scan activity declined in the second half of the period.",
+            "participationConcern": "Employee participation decreased from {{from}}% to {{to}}% over the last week.",
+            "participationConcernLow": "Only {{percent}}% of employees received tips this period.",
+            "participationStrong": "Employee participation is strong at {{percent}}%.",
+            "goalsNeedAttention": "Team goal completion is at {{percent}}% — below target."
+          },
+          "healthTitle": "Business health",
+          "healthGrades": {
+            "excellent": "Excellent",
+            "good": "Good",
+            "fair": "Fair",
+            "needs_attention": "Needs attention"
+          },
+          "trendsTitle": "Trends",
+          "healthTrendsTitle": "Business health trends",
+          "chartTipGrowth": "Tip growth trend",
+          "chartScanTrend": "Scan trend",
+          "chartParticipation": "Employee participation trend",
+          "insightsTitle": "Key insights",
+          "insights": {
+            "tipGrowth": "Your tips increased {{percent}}% this week compared to your monthly average.",
+            "peakPeriod": "Peak activity occurs between {{period}}.",
+            "tableLift": "{{table}} generates {{percent}}% more tips than average.",
+            "participationDecline": "Employee participation decreased from {{from}}% to {{to}}% over the last week.",
+            "participationRise": "Employee participation increased from {{from}}% to {{to}}% over the last week.",
+            "qrMomentum": "QR scans increased {{percent}}% in the second half of this period."
+          },
+          "opportunitiesTitle": "Opportunities",
+          "risksTitle": "Risks",
+          "recommendationsTitle": "Recommendations",
+          "risks": {
+            "tipVolumeDecline": "Tip volume declined {{percent}}% this week compared to the period average.",
+            "lowParticipation": "Only {{percent}}% of employees received tips this period.",
+            "participationDecline": "Employee participation decreased from {{from}}% to {{to}}% over the last week.",
+            "goalCompletionLow": "Team goal completion is at {{percent}}% — below target.",
+            "noTipActivity": "No successful tips recorded this period despite active staff.",
+            "qrScanDecline": "QR scans declined {{percent}}% in the second half of this period.",
+            "locationUnderperformance": "{{location}} received only {{count}} scans — well below your location average.",
+            "satisfactionLow": "Average guest rating is {{rating}} — below your target."
+          },
+          "recommendations": {
+            "boostVisibility": "Increase QR visibility at high-traffic touchpoints to recover tip volume.",
+            "promoteTeamQrs": "Review employee engagement and promote individual team QR codes.",
+            "enableGoals": "Enable or review team goals to improve completion rates.",
+            "maintainMomentum": "Tips grew {{percent}}% this week — keep QRs visible to maintain momentum.",
+            "reviewQrPlacement": "Review QR placement at underperforming locations and tables.",
+            "reviewFeedback": "Review recent guest feedback and address recurring themes.",
+            "replicateLocation": "Replicate what works at your top location across other areas.",
+            "recognizePerformer": "Recognize {{name}} — they account for {{share}}% of period tips."
+          },
+          "opportunities": {
+            "lowParticipation": "Only {{percent}}% of employees received tips this period — room to grow team engagement.",
+            "teamGoals": "Consider enabling team goals to boost engagement.",
+            "tipGrowth": "Tips increased {{percent}}% this week — keep momentum with visible QRs.",
+            "qrScanGrowth": "QR scans grew {{percent}}% in the second half of this period.",
+            "topLocation": "{{location}} leads with {{count}} scans — a strong performer.",
+            "topTable": "{{table}} leads table scans with {{count}} scans.",
+            "employeeExcellence": "{{name}} accounts for {{share}}% of period tips.",
+            "topTippingTable": "{{table}} drives {{share}}% of recent tip revenue."
+          },
+          "evidence": {
+            "tipVolumeDecline": "Source: week.totalTips vs period.totalTips/4.33 — growth {{percent}}%.",
+            "lowParticipation": "Source: {{receiving}} of {{active}} active employees received tips ({{percent}}%).",
+            "participationDecline": "Period participation {{from}}% vs week {{to}}% (unique employees in recent tips).",
+            "goalCompletionLow": "Source: average goal completion {{percent}}% from employee goals.",
+            "noTipActivity": "Source: period tip count is 0 with {{active}} active employees.",
+            "qrScanDecline": "Source: scan trend halves — {{percent}}% change, {{totalScans}} total scans.",
+            "locationUnderperformance": "Source: {{location}} at {{count}} scans vs ~{{average}} average per location.",
+            "satisfactionLow": "Source: average rating {{rating}} from {{count}} rated employees.",
+            "lowParticipationOpp": "Participation at {{percent}}% ({{active}} active staff).",
+            "teamGoalsOpp": "Only {{tracked}} goals tracked for {{active}} active employees.",
+            "tipGrowthOpp": "Week-over-period growth {{percent}}%.",
+            "qrScanGrowthOpp": "Scan momentum {{percent}}% ({{totalScans}} total scans).",
+            "topLocationOpp": "{{location}}: {{count}} scans (highest location).",
+            "topTableOpp": "{{table}}: {{count}} scans (highest table).",
+            "employeeExcellenceOpp": "{{name}}: €{{tips}} tips ({{share}}% of period).",
+            "topTippingTableOpp": "{{table}}: {{share}}% of recent tip revenue.",
+            "recBoostVisibility": "Linked to tip volume decline risk.",
+            "recPromoteTeamQrs": "Linked to employee participation risk.",
+            "recEnableGoals": "Linked to goal completion risk.",
+            "recReviewQrPlacement": "Linked to QR scan or location risk.",
+            "recReviewFeedback": "Linked to guest satisfaction risk."
+          },
+          "snapshotTitle": "Performance snapshot",
+          "snapshot": {
+            "health": "Health score",
+            "growth": "Growth rate",
+            "participation": "Employee participation",
+            "goalCompletion": "Goal completion",
+            "qrConversion": "QR conversion",
+            "satisfaction": "Guest satisfaction",
+            "locations": "Active locations"
+          }
+        },
+        "kpi": {
+          "growth": "Tip growth",
+          "growthHint": "{{count}} tips this month",
+          "revenue": "Revenue impact",
+          "revenueHint": "Successful tips this month",
+          "participation": "Employee participation",
+          "participationHint": "{{active}} of {{total}} staff tipping-ready",
+          "engagement": "Guest engagement",
+          "engagementRating": "From {{count}} guest ratings",
+          "engagementGoals": "{{percent}}% goals on track"
+        }
+      },
+      "topPerformers": {
+        "awardsTitle": "Awards",
+        "awards": {
+          "employeeOfMonth": "Employee of the month",
+          "risingStar": "Rising star",
+          "hospitality": "Best hospitality score"
+        },
+        "rankingsTitle": "Employee rankings",
+        "categories": {
+          "topEarners": "Top earners",
+          "fastestGrowing": "Fastest growing",
+          "highestAvg": "Highest average tip"
+        },
+        "empty": "No rankings yet for this period.",
+        "locationLeaderboard": "Location leaderboard",
+        "locationEmpty": "Tips by location appear as guests scan area QRs.",
+        "mainVenue": "Main venue",
+        "tipCount": "{{count}} tips",
+        "recognitionTitle": "Recognition",
+        "badges": {
+          "achievements": "Achievements",
+          "streaks": "Active streaks",
+          "onTrack": "Goals on track"
+        }
+      }
+    },
+    "customers": {
+      "eyebrow": "Guests",
+      "title": "Customers",
+      "subtitle": "Guest feedback and reviews from tipping journeys.",
+      "navAria": "Customers sections",
+      "nav": {
+        "feedback": "Feedback",
+        "reviews": "Reviews"
+      },
+      "reviewsDesc": "Star ratings and guest review summaries.",
+      "reviews": {
+        "avgRating": "Average rating",
+        "ratingCount": "{{count}} ratings",
+        "totalReviews": "Total reviews",
+        "fiveStar": "5-star reviews",
+        "recentTitle": "Recent reviews",
+        "empty": "Reviews appear when guests rate their experience.",
+        "guest": "Guest"
+      }
     },
     "notifications": {
       "title": "Notifications",
@@ -3497,7 +4130,7 @@
     "settings": {
       "eyebrow": "Workspace",
       "title": "Settings",
-      "subtitle": "Manage your account, venue, security, and notifications in one place.",
+      "subtitle": "Account preferences, security, and integrations.",
       "navAria": "Settings sections",
       "loading": "Loading…",
       "sections": {
@@ -3511,10 +4144,18 @@
         "notificationsDesc": "Email and alert preferences",
         "security": "Security",
         "securityDesc": "Password and two-factor authentication",
-        "billing": "Billing & subscription",
-        "billingDesc": "Fees, model, and activity links",
-        "branding": "Branding & QR",
-        "brandingDesc": "QR codes and branded materials"
+        "integrations": "Integrations",
+        "integrationsDesc": "Connect third-party tools and webhooks",
+        "language": "Language",
+        "languageDesc": "Display language for your dashboard"
+      },
+      "integrations": {
+        "comingSoon": "POS, PMS, and webhook integrations are coming soon."
+      },
+      "language": {
+        "label": "Dashboard language",
+        "en": "English",
+        "de": "Deutsch"
       },
       "panels": {
         "generalTitle": "General",
@@ -3525,7 +4166,11 @@
         "notificationsTitle": "Notifications",
         "notificationsDesc": "Choose what we email you about",
         "billingTitle": "Billing & subscription",
-        "billingDesc": "View your plan, manage Stripe billing, and upgrade your venue",
+        "billingDesc": "View your plan, manage payment methods, and download invoices.",
+        "integrationsTitle": "Integrations",
+        "integrationsDesc": "Connect external systems to CareTip",
+        "languageTitle": "Language",
+        "languageDesc": "Choose your preferred dashboard language",
         "twoFactorOn": "Two-factor authentication is enabled.",
         "twoFactorOff": "Two-factor authentication is not enabled.",
         "teamTitle": "Team & roles",
@@ -3538,7 +4183,116 @@
         "brandingCardDesc": "Download, print, and regenerate venue and staff QR codes"
       }
     },
+    "branding": {
+      "title": "Brand Your Guest Experience",
+      "description": "Add your logo, colors, and custom messaging to create a professional guest experience.",
+      "loading": "Loading branding settings…",
+      "logoTitle": "Business logo",
+      "logoDesc": "Shown in QR codes (Premium), guest headers, and print layouts.",
+      "uploadLogo": "Upload logo",
+      "bannerTitle": "Venue banner",
+      "bannerDesc": "Hero image on guest landing pages — hotels, restaurants, and lounges.",
+      "uploadBanner": "Upload banner",
+      "colorsTitle": "Brand colors",
+      "colorsDesc": "Primary color accents QR frames and guest UI; secondary color styles QR modules.",
+      "primaryColor": "Primary color",
+      "secondaryColor": "Secondary color",
+      "messagingTitle": "Guest messaging",
+      "messagingDesc": "Welcome guests on tip pages and personalize the thank-you screen.",
+      "welcomeLabel": "Welcome message",
+      "welcomePlaceholder": "Welcome to {{name}}",
+      "thankYouLabel": "Thank-you message",
+      "thankYouPlaceholder": "Thank you for supporting our team. Your appreciation means a lot to us.",
+      "save": "Save branding",
+      "toastSaved": "Branding settings saved.",
+      "toastSaveError": "Could not save branding settings.",
+      "toastLogoSaved": "Logo updated.",
+      "toastBannerSaved": "Banner uploaded.",
+      "toastImageType": "Please choose an image file.",
+      "toastLogoSize": "Logo must be 5 MB or smaller.",
+      "toastBannerSize": "Banner must be 8 MB or smaller.",
+      "toastInvalidColor": "Enter valid 6-digit HEX colors (e.g. #EB992C).",
+      "toastWelcomeMax": "Welcome message must be 120 characters or fewer.",
+      "toastThankYouMax": "Thank-you message must be 250 characters or fewer.",
+      "identityTitle": "Brand identity",
+      "identityDesc": "How your venue appears on QR codes and guest tipping pages.",
+      "displayNameLabel": "Display name",
+      "taglineLabel": "Tagline",
+      "taglinePlaceholder": "Exceptional service, every visit",
+      "toastDisplayNameMax": "Display name must be 80 characters or fewer.",
+      "toastTaglineMax": "Tagline must be 120 characters or fewer.",
+      "toastInvalidQrColor": "Enter valid 6-digit HEX colors for QR styling.",
+      "qrTemplateTitle": "QR templates",
+      "qrTemplateDesc": "Choose a visual style that matches your venue. Premium templates turn QR codes into branded marketing assets.",
+      "templateUpgrade": "Upgrade to unlock",
+      "qrStyleTitle": "QR styling",
+      "qrStyleDesc": "Fine-tune borders, shape, and colors for your QR cards.",
+      "qrBorderLabel": "Border style",
+      "qrShapeLabel": "QR shape",
+      "qrAccentLabel": "Accent color",
+      "qrBackgroundLabel": "Background color",
+      "templates": {
+        "classic": "Classic",
+        "luxury": "Luxury",
+        "modern": "Modern",
+        "nature": "Nature",
+        "corporate": "Corporate",
+        "nightlife": "Nightlife",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel"
+      },
+      "qrBorders": {
+        "none": "None",
+        "rounded": "Rounded",
+        "double": "Double",
+        "ornate": "Ornate",
+        "minimal": "Minimal"
+      },
+      "qrShapes": {
+        "square": "Square",
+        "rounded": "Rounded",
+        "circle": "Soft circle (scan-safe rounded)"
+      }
+    },
+    "qrReliability": {
+      "title": "QR scan quality",
+      "validating": "Running scan test…",
+      "contrast": "{{ratio}}:1 contrast",
+      "passHint": "This design passed decode validation and is safe to print.",
+      "exportBlocked": "This QR failed the scan test. Adjust colors or shape before saving or exporting.",
+      "exportBlockedShort": "Export blocked — scan test failed",
+      "saveBlocked": "Cannot save — QR design failed the scan reliability test.",
+      "toastUnsafeContrast": "QR module colors need stronger contrast (minimum 3:1).",
+      "grades": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "risky": "Risky",
+        "unscannable": "Unscannable"
+      },
+      "warnings": {
+        "low_contrast": "Module contrast is below the recommended level for outdoor scanning.",
+        "unsafe_colors": "Dark and light module colors are too similar to scan reliably.",
+        "logo_too_large": "Center logo exceeds the 20% safe area.",
+        "circle_shape_sanitized": "Circle style is rendered as a safe rounded square to protect finder patterns.",
+        "decode_failed": "A camera could not decode this QR — it may not scan in production.",
+        "url_mismatch": "Decoded payload did not match the expected tipping URL."
+      }
+    },
     "billing": {
+      "moduleEyebrow": "Subscription",
+      "moduleTitle": "Billing",
+      "moduleSubtitle": "Manage your plan, invoices, and payment methods.",
+      "navAria": "Billing sections",
+      "nav": {
+        "subscription": "Subscription",
+        "invoices": "Invoices",
+        "paymentMethods": "Payment Methods",
+        "history": "Billing History"
+      },
+      "historyDesc": "Subscription events and billing activity.",
+      "invoicesDesc": "Download invoices from your Stripe customer portal.",
+      "invoicesHint": "Invoices and receipts are managed securely through Stripe.",
+      "openStripePortal": "Open billing portal",
       "loadError": "Could not load billing information.",
       "loading": "Loading billing…",
       "retry": "Try again",
@@ -3633,6 +4387,54 @@
           "f6": "API & integration support",
           "f7": "Invoice & procurement billing"
         }
+      }
+    },
+    "commercial": {
+      "title": "Plan fit & usage",
+      "desc": "Evidence-based signals from your last 30 days — no sales pressure.",
+      "loadError": "Could not load commercial insights.",
+      "utilizationTitle": "Feature usage",
+      "hits30d": "{{count}} signals in 30d",
+      "inferred": "from account data",
+      "upgradeTitle": "Upgrade opportunities",
+      "upgradeDisclaimer": "Shown only when your usage exceeds what Starter includes. You can stay on your current plan.",
+      "suggestedTier": "Suggested plan: {{tier}}",
+      "viewPlans": "Compare plans",
+      "retentionTitle": "Account health signals",
+      "retentionLevel": {
+        "low": "No significant risk signals detected.",
+        "medium": "Some activity patterns may need attention.",
+        "high": "Several risk signals detected — review below."
+      },
+      "features": {
+        "qr_studio": "QR Studio",
+        "qr_analytics": "QR analytics",
+        "analytics_page": "Tips analytics",
+        "performance_page": "Team performance",
+        "csv_export": "CSV export",
+        "branding": "Branding",
+        "employee_goals": "Employee goals",
+        "multi_location": "Multi-location",
+        "table_qr": "Table QR"
+      },
+      "opportunities": {
+        "analytics_usage": "You visited analytics pages {{visits}} times — Premium unlocks deeper reporting.",
+        "qr_intelligence": "Heavy QR usage (analytics: {{qrAnalytics}}, studio: {{qrStudio}}) — Premium adds QR intelligence.",
+        "team_scale": "{{staffCount}} active employees — Premium scales better for larger teams.",
+        "multi_location": "{{locationCount}} locations — Premium includes multi-location support.",
+        "table_qr": "{{tableCount}} tables configured — table QR is a Premium feature.",
+        "csv_export": "You exported data {{attempts}} time(s) — CSV export is included in Premium.",
+        "employee_goals": "Employee goals are in use — included in Premium.",
+        "branding": "Custom branding is configured — Premium includes full branding tools.",
+        "enterprise_scale": "Scale ({{locationCount}} locations, {{staffCount}} staff, {{qrScans}} QR scans) may fit Enterprise."
+      },
+      "retentionSignals": {
+        "cancel_at_period_end": "Cancellation scheduled for {{effective}}.",
+        "payment_past_due": "Payment issue: subscription status is {{status}}.",
+        "abandoned_onboarding": "Onboarding incomplete for {{days}} days.",
+        "tips_decline": "Tip volume declined {{percent}}% vs prior 30 days ({{current}} vs {{previous}}).",
+        "qr_scans_decline": "QR scan activity declined {{percent}}% vs prior 30 days ({{current}} vs {{previous}}).",
+        "no_tip_activity": "No tips in 60 days with {{staffCount}} active staff."
       }
     },
     "accountSettings": {
@@ -3740,6 +4542,52 @@
     "statStaffChange": "Employees with CareTip accounts",
     "statActiveUsers": "Active users",
     "statActiveUsersChange": "Accounts with sign-in enabled",
+    "subscriptionBreakdown": {
+      "title": "Subscription mix",
+      "desc": "Active businesses by plan tier",
+      "basic": "Basic",
+      "premium": "Premium",
+      "enterprise": "Enterprise"
+    },
+    "commercial": {
+      "title": "Commercial intelligence",
+      "desc": "Growth, risk, upgrade opportunities, and enterprise readiness from platform data.",
+      "subscriptionTitle": "Subscription intelligence",
+      "subscriptionPeriod": "Last {{days}} days from subscription audit events",
+      "upgrades": "Upgrades",
+      "downgrades": "Downgrades",
+      "cancellationsScheduled": "Cancellations scheduled",
+      "paymentFailures": "Payment failures",
+      "renewals": "Renewals succeeded",
+      "activeSubscriptions": "Active subscriptions",
+      "cancelAtPeriodEnd": "Cancel at period end",
+      "pastDue": "Past due",
+      "growthCandidates": "Growth candidates",
+      "atRisk": "At-risk businesses",
+      "premiumOpportunities": "Premium opportunities",
+      "enterpriseCandidates": "Enterprise candidates",
+      "enterpriseReadiness": "Enterprise readiness (platform)",
+      "enterpriseScore": "Score: {{score}} / {{max}}",
+      "none": "None matching criteria in current sample.",
+      "reasons": {
+        "strong_tip_growth": "Tip volume grew {{growth}}% ({{tips30d}} tips in 30d).",
+        "tips_decline": "Tip volume declined {{percent}}%.",
+        "qr_scans_decline": "QR scans declined {{percent}}%.",
+        "cancel_at_period_end": "Cancellation scheduled.",
+        "payment_past_due": "Payment past due ({{status}}).",
+        "abandoned_onboarding": "Onboarding incomplete ({{days}} days).",
+        "no_tip_activity": "No tip activity with active staff.",
+        "analytics_usage": "Heavy analytics usage ({{visits}} visits).",
+        "qr_intelligence": "Heavy QR usage.",
+        "team_scale": "{{staffCount}} employees on Basic.",
+        "multi_location": "{{locationCount}} locations on Basic.",
+        "table_qr": "Table QR in use on Basic.",
+        "csv_export": "CSV export attempted on Basic.",
+        "employee_goals": "Goals in use on Basic.",
+        "branding": "Branding configured on Basic.",
+        "enterprise_scale": "{{locations}} locations, {{staff}} staff, {{qrScans30d}} QR scans."
+      }
+    },
     "analyticsTitle": "Analytics",
     "analyticsSubtitle": "Last {{days}} days ({{tz}}), live aggregates",
     "timezoneAria": "Analytics timezone",

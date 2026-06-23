@@ -39,6 +39,8 @@ export type BusinessDashboardAnalyticsChartsProps = {
   tipDistributionTotal: number;
   employeePerformance: Array<{ name: string; tips: number; rating: number; color: string }>;
   employeeCount: number;
+  /** Overview shows revenue trend only; full mode includes employee leaderboard chart. */
+  chartMode?: "full" | "revenueOnly";
 };
 
 export function BusinessDashboardAnalyticsCharts({
@@ -49,11 +51,12 @@ export function BusinessDashboardAnalyticsCharts({
   tipDistributionTotal,
   employeePerformance,
   employeeCount,
+  chartMode = "full",
 }: BusinessDashboardAnalyticsChartsProps) {
   const { t } = useTranslation();
 
   return (
-    <div className={businessUi.analyticsChartsGrid}>
+    <div className={cn(businessUi.analyticsChartsGrid, chartMode === "revenueOnly" && "grid-cols-1")}>
       <motion.div
         {...dashboardBlockMotion}
         transition={{ delay: 0.4 }}
@@ -135,6 +138,7 @@ export function BusinessDashboardAnalyticsCharts({
         </Card>
       </motion.div>
 
+      {chartMode === "full" ? (
       <motion.div
         {...dashboardBlockMotion}
         transition={{ delay: 0.5 }}
@@ -238,6 +242,7 @@ export function BusinessDashboardAnalyticsCharts({
           </CardContent>
         </Card>
       </motion.div>
+      ) : null}
     </div>
   );
 }

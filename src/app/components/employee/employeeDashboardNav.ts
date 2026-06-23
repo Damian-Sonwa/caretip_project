@@ -1,37 +1,44 @@
 import type { CareIconName } from "@/components/icons";
 import {
-  hasSubscriptionCapability,
+  hasFeature,
   type BusinessSubscriptionTier,
-  type SubscriptionCapability,
+  type FeatureKey,
 } from "../../lib/subscriptionCapabilities";
 
 export type EmployeeDashboardNavItem = {
   labelKey: string;
   href: string;
   icon: CareIconName;
+  featureKey?: FeatureKey;
 };
 
 export const employeeDashboardNavItems: readonly EmployeeDashboardNavItem[] = [
   { labelKey: "dashboardNav.employee.overview", href: "/employee/dashboard", icon: "overview" },
   { labelKey: "dashboardNav.employee.inbox", href: "/employee/inbox", icon: "inbox" },
   { labelKey: "dashboardNav.employee.tipHistory", href: "/employee/tip-history", icon: "transactions" },
-  { labelKey: "dashboardNav.employee.tipGoals", href: "/employee/tip-goals", icon: "tipGoals" },
+  {
+    labelKey: "dashboardNav.employee.tipGoals",
+    href: "/employee/tip-goals",
+    icon: "tipGoals",
+    featureKey: "employeeGoals",
+  },
   { labelKey: "dashboardNav.employee.settings", href: "/employee/settings", icon: "settings" },
 ] as const;
 
-const EMPLOYEE_NAV_CAPABILITY_BY_HREF: Partial<Record<string, SubscriptionCapability>> = {
-  "/employee/tip-goals": "employeeGoals",
-};
+export function isEmployeeNavItemLocked(
+  item: Pick<EmployeeDashboardNavItem, "featureKey">,
+  tier: BusinessSubscriptionTier | undefined | null,
+): boolean {
+  if (!item.featureKey) return false;
+  return !hasFeature(tier, item.featureKey);
+}
 
+/** @deprecated Use full nav list + isEmployeeNavItemLocked — items are no longer hidden. */
 export function filterEmployeeDashboardNavItems(
   items: readonly EmployeeDashboardNavItem[],
-  tier: BusinessSubscriptionTier | undefined | null,
+  _tier: BusinessSubscriptionTier | undefined | null,
 ): EmployeeDashboardNavItem[] {
-  return items.filter((item) => {
-    const cap = EMPLOYEE_NAV_CAPABILITY_BY_HREF[item.href];
-    if (!cap) return true;
-    return hasSubscriptionCapability(tier, cap);
-  });
+  return [...items];
 }
 
 export function isEmployeeDashboardNavActive(href: string, pathname: string): boolean {

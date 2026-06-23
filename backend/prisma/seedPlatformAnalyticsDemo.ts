@@ -308,26 +308,34 @@ async function main() {
   // Ensure demo@caretip.de / employee@caretip.de dashboards always show tips + goal in the *current month*.
   const now = new Date();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));
-  await prisma.employeeGoal.upsert({
-    where: { id: "seed-demo-employee-goal-monthly" },
-    update: {
-      employeeId: demoEmployee.id,
-      name: "Monthly tip goal",
-      goalAmount: 350,
-      goalPeriod: "monthly",
-      startDate: monthStart,
-      status: "active",
-    },
-    create: {
-      id: "seed-demo-employee-goal-monthly",
-      employeeId: demoEmployee.id,
-      name: "Monthly tip goal",
-      goalAmount: 350,
-      goalPeriod: "monthly",
-      startDate: monthStart,
-      status: "active",
-    },
+  const existingDemoGoal = await prisma.employeeGoal.findFirst({
+    where: { employeeId: demoEmployee.id },
+    orderBy: { updatedAt: "desc" },
+    select: { id: true },
   });
+  if (existingDemoGoal) {
+    await prisma.employeeGoal.update({
+      where: { id: existingDemoGoal.id },
+      data: {
+        name: "Monthly tip goal",
+        goalAmount: 350,
+        goalPeriod: "monthly",
+        startDate: monthStart,
+        status: "active",
+      },
+    });
+  } else {
+    await prisma.employeeGoal.create({
+      data: {
+        employeeId: demoEmployee.id,
+        name: "Monthly tip goal",
+        goalAmount: 350,
+        goalPeriod: "monthly",
+        startDate: monthStart,
+        status: "active",
+      },
+    });
+  }
 
   const demoTips: Array<{
     id: string;

@@ -1,0 +1,273 @@
+import { lazy, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
+import { Download } from "lucide-react";
+import { toast } from "sonner";
+import { RevenueAnalyticsCards } from "./insights/RevenueAnalyticsCards";
+import { QrAnalyticsSection } from "./insights/QrAnalyticsSection";
+import { OperationalMetricsCards } from "./insights/OperationalMetricsCards";
+import { BusinessIntelligenceCharts } from "./insights/BusinessIntelligenceCharts";
+import { DashboardAnalyticsPeriodToggle } from "../dashboard/DashboardAnalyticsPeriodToggle";
+import { DashboardChartsIdleMount } from "../dashboard/DashboardChartsIdleMount";
+import { CountUpMetric } from "../dashboard/CountUpMetric";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PremiumSummaryCard } from "../premium/PremiumSummaryCard";
+import { businessUi } from "./businessDashboardUi";
+import { cn } from "@/lib/utils";
+import { formatEur } from "../../lib/formatEur";
+import { downloadBusinessTransactionsExport } from "../../lib/api";
+import { toUserFriendlyMessage } from "../../lib/errorMessages";
+import type { useBusinessIntelligenceData } from "../../hooks/useBusinessIntelligenceData";
+import type { AnalyticsTimeframe } from "../../hooks/useBusinessDashboardStats";
+import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
+
+const BusinessDashboardAnalyticsCharts = lazy(() =>
+  import("../../pages/business/BusinessDashboardAnalyticsCharts").then((mod) => ({
+    default: mod.BusinessDashboardAnalyticsCharts,
+  })),
+);
+
+type BiData = ReturnType<typeof useBusinessIntelligenceData>;
+
+type BusinessAnalyticsReportingProps = {
+  data: BiData;
+  timeframe: AnalyticsTimeframe;
+  onTimeframeChange: (timeframe: AnalyticsTimeframe) => void;
+};
+
+function ComparisonTable({
+  title,
+  rows,
+  emptyKey,
+}: {
+  title: string;
+  rows: Array<{ label: string; tips: number; count: number; share: number }>;
+  emptyKey: string;
+}) {
+  const { t } = useTranslation();
+  return (
+    <Card className={businessUi.cardStatic}>
+      <CardHeader className="border-b border-neutral-100/90 pb-3">
+        <CardTitle className="text-base">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="p-0">
+        {rows.length === 0 ? (
+          <p className="px-4 py-8 text-center text-sm text-muted-foreground">{t(emptyKey)}</p>
+        ) : (
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
+                <th className="px-4 py-2 font-medium">{t("business.tips.analytics.reporting.name")}</th>
+                <th className="px-4 py-2 font-medium">{t("business.tips.analytics.reporting.tips")}</th>
+                <th className="px-4 py-2 font-medium">{t("business.tips.analytics.reporting.count")}</th>
+                <th className="px-4 py-2 font-medium">{t("business.tips.analytics.reporting.share")}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((row) => (
+                <tr key={row.label} className="border-b border-border/40 last:border-0">
+                  <td className="px-4 py-2.5 font-medium">{row.label}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{formatEur(row.tips)}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{row.count}</td>
+                  <td className="px-4 py-2.5 tabular-nums">{row.share}%</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+/** Sprint 2 — sole reporting surface for business managers. */
+export function BusinessAnalyticsReporting({
+  data,
+  timeframe,
+  onTimeframeChange,
+}: BusinessAnalyticsReportingProps) {
+  const { t } = useTranslation();
+  const [exporting, setExporting] = useState(false);
+
+  const tipDistributionChartData = useMemo(() => {
+    return data.dailyTipDistribution.map((row) => ({
+      ...row,
+      dayLabel:
+        timeframe === "week"
+          ? translateChartWeekdayLabel(row.day, t)
+          : timeframe === "year"
+            ? translateChartMonthLabel(row.day, t)
+            : row.day,
+    }));
+  }, [data.dailyTipDistribution, timeframe, t]);
+
+  const tipDistributionTotal = useMemo(
+    () => data.dailyTipDistribution.reduce((acc, row) => acc + (Number(row.amount) || 0), 0),
+    [data.dailyTipDistribution],
+  );
+
+  const handleExport = async () => {
+    setExporting(true);
+    try {
+      await downloadBusinessTransactionsExport();
+      toast.success(t("business.tips.analytics.reporting.exportSuccess"));
+    } catch (e) {
+      toast.error(toUserFriendlyMessage(e));
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const periodLabel =
+    timeframe === "week"
+      ? t("dashboard.filter_week")
+      : timeframe === "year"
+        ? t("dashboard.filter_year")
+        : t("dashboard.filter_month");
+
+  const revenueGrowth = data.bi.revenue.growthPercent;
+  const periodLoading = data.loading || data.timeframeLoading;
+
+  return (
+    <div className="space-y-8">
+      <PremiumSummaryCard
+        title={t("premium.summaryBanner.title")}
+        periodLabel={periodLabel}
+        metrics={[
+          {
+            label: t("premium.summaryBanner.revenueTrend"),
+            value: <CountUpMetric value={data.period.totalTips} kind="eur" format={formatEur} />,
+            trend: t("premium.summaryBanner.growthValue", { percent: revenueGrowth }),
+            trendDirection: revenueGrowth >= 0 ? "up" : "down",
+          },
+          {
+            label: t("business.tips.analytics.cards.totalTips"),
+            value: <CountUpMetric value={data.period.tipCount} kind="integer" />,
+            trend: t("business.tips.live.cards.tipCount", { count: data.week.tipCount }),
+            trendDirection: "neutral",
+          },
+          {
+            label: t("business.tips.analytics.cards.activeEmployees"),
+            value: <CountUpMetric value={data.bi.operational.activeEmployees} kind="integer" />,
+            trend: t("business.tips.analytics.employeeTipCount", {
+              count: data.bi.operational.employeesReceivingTips,
+            }),
+            trendDirection: "neutral",
+          },
+        ]}
+      />
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <DashboardAnalyticsPeriodToggle
+          ariaLabel={t("business.tips.analytics.periodAria")}
+          value={timeframe}
+          onChange={onTimeframeChange}
+          options={(["week", "month", "year"] as const).map((period) => ({
+            id: period,
+            label:
+              period === "week"
+                ? t("dashboard.filter_week")
+                : period === "year"
+                  ? t("dashboard.filter_year")
+                  : t("dashboard.filter_month"),
+            loading: data.timeframeLoading && timeframe === period,
+          }))}
+        />
+        <Button type="button" variant="outline" size="sm" disabled={exporting} onClick={() => void handleExport()}>
+          <Download className="mr-2 h-4 w-4" aria-hidden />
+          {t("business.tips.analytics.reporting.export")}
+        </Button>
+      </div>
+
+      <RevenueAnalyticsCards data={data.input} loading={periodLoading} />
+      <QrAnalyticsSection timeframe={timeframe} />
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("business.tips.analytics.sections.employees")}
+        </h2>
+        <OperationalMetricsCards data={data.input} loading={periodLoading} />
+        <p className="text-sm text-muted-foreground">
+          {t("business.tips.analytics.rankingsHint")}{" "}
+          <Link to="/dashboard/team/top-performers" className="font-medium text-primary underline-offset-2 hover:underline">
+            {t("business.team.nav.topPerformers")}
+          </Link>
+        </p>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("business.tips.analytics.sections.locations")}
+        </h2>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ComparisonTable
+            title={t("business.tips.analytics.locationComparison")}
+            rows={data.bi.locations}
+            emptyKey="business.tips.analytics.locationEmpty"
+          />
+          <ComparisonTable
+            title={t("business.tips.analytics.tableComparison")}
+            rows={data.bi.tables}
+            emptyKey="business.tips.analytics.tableEmpty"
+          />
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("business.tips.analytics.sections.topQr")}
+        </h2>
+        <Card className={businessUi.cardStatic}>
+          <CardContent className="divide-y divide-border/60 p-0 pt-2">
+            {data.bi.topTipSources.length === 0 ? (
+              <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+                {t("business.tips.analytics.topQrEmpty")}
+              </p>
+            ) : (
+              data.bi.topTipSources.map((row, i) => (
+                <div key={row.label} className="flex items-center gap-3 px-4 py-3">
+                  <span className="w-5 text-xs font-bold text-muted-foreground">{i + 1}</span>
+                  <span className="min-w-0 flex-1 truncate text-sm font-medium">{row.label}</span>
+                  <span className="text-xs tabular-nums text-muted-foreground">
+                    {t("business.tips.analytics.employeeTipCount", { count: row.tipCount })}
+                  </span>
+                  <span className="text-sm font-semibold tabular-nums">{formatEur(row.tips)}</span>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("business.tips.analytics.sections.trends")}
+        </h2>
+        <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+          {t("business.tips.analytics.sections.drilldown")}
+        </h2>
+        <DashboardChartsIdleMount
+          fallback={
+            <div className={cn(businessUi.cardStatic, "h-[280px] animate-pulse bg-muted/30")} />
+          }
+        >
+          <BusinessDashboardAnalyticsCharts
+            showChartsLoading={periodLoading}
+            useDevDemo={false}
+            hasTipActivityInPeriod={data.period.totalTips > 0}
+            tipDistributionChartData={tipDistributionChartData}
+            tipDistributionTotal={tipDistributionTotal}
+            employeePerformance={[]}
+            employeeCount={data.employees.length}
+            chartMode="revenueOnly"
+          />
+        </DashboardChartsIdleMount>
+      </section>
+    </div>
+  );
+}

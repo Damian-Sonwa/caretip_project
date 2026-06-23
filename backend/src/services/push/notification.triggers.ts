@@ -92,7 +92,7 @@ export function onTipReceived(payload: NewTipPayload): void {
               employeeName,
             },
           },
-          url: "/dashboard/transactions",
+          url: "/dashboard/tips/transactions",
           timestamp: ts,
           metadata: {
             entityId: payload.tip.id,
@@ -121,7 +121,7 @@ export function onPayoutCompleted(
       select: { role: true },
     });
     const payoutUrl =
-      user?.role === "MANAGER" ? "/dashboard/transactions" : "/employee/transactions";
+      user?.role === "MANAGER" ? "/dashboard/tips/transactions" : "/employee/transactions";
 
     await deliverUserNotification({
       userId,
@@ -229,7 +229,7 @@ export function onEmployeeInvited(params: {
             businessName: business.name,
           },
         },
-        url: "/dashboard/staff-management",
+        url: "/dashboard/team/employees",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: params.employeeEmail,
@@ -269,7 +269,7 @@ export function onEmployeeInviteRedeemed(params: {
             inviteCode: params.inviteCode,
           },
         },
-        url: "/dashboard/staff-management",
+        url: "/dashboard/team/employees",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: params.employeeEmail,
@@ -331,7 +331,7 @@ export function onQrScanActivity(params: {
         title: "QR code scanned",
         body: "",
         localeTemplate: { id: "qr_scan", params: { place } },
-        url: "/dashboard/qr-code-management",
+        url: "/dashboard/qr-studio/gallery",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: dedupeSlug,
@@ -370,7 +370,7 @@ export function onQrPaymentSuccessful(params: {
             employeeName: params.employeeName,
           },
         },
-        url: "/dashboard/transactions",
+        url: "/dashboard/tips/transactions",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: params.transactionId,
@@ -432,7 +432,7 @@ export function onBusinessVerificationStatusChanged(params: {
             id: "business_verification_approved",
             params: { businessName: params.businessName },
           },
-          url: "/dashboard/qr-code-management",
+          url: "/dashboard/qr-studio/gallery",
           timestamp: new Date().toISOString(),
           metadata: {
             entityId: params.businessId,

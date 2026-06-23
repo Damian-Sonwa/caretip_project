@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from "react-router";
-import { X } from "lucide-react";
+import { Lock, X } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { useTranslation } from "react-i18next";
 
@@ -12,8 +12,8 @@ import {
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import {
   employeeDashboardNavItems,
-  filterEmployeeDashboardNavItems,
   isEmployeeDashboardNavActive,
+  isEmployeeNavItemLocked,
 } from "./employeeDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { MobileDrawer } from "../ui/MobileDrawer";
@@ -43,7 +43,7 @@ export function EmployeeMobileSidebar({
     role: user?.role === "employee" ? "employee" : null,
     cacheOnly: true,
   });
-  const navItems = filterEmployeeDashboardNavItems(employeeDashboardNavItems, tier);
+  const navItems = employeeDashboardNavItems;
 
   const venueName = String(businessBranding?.businessName ?? "").trim() || t("dashboard.venueDashboardFallback");
 
@@ -85,6 +85,7 @@ export function EmployeeMobileSidebar({
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);
+            const subscriptionLocked = isEmployeeNavItemLocked(item, tier);
             return (
               <li key={item.href}>
                 <Link
@@ -98,7 +99,15 @@ export function EmployeeMobileSidebar({
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
-                  <span className="min-w-0 truncate tracking-tight">{t(item.labelKey)}</span>
+                  <span className="flex min-w-0 flex-1 items-center gap-2">
+                    <span className="truncate tracking-tight">{t(item.labelKey)}</span>
+                    {subscriptionLocked ? (
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 opacity-70"
+                        aria-label={t("subscription.nav.lockedAria", { feature: t(item.labelKey) })}
+                      />
+                    ) : null}
+                  </span>
                 </Link>
               </li>
             );

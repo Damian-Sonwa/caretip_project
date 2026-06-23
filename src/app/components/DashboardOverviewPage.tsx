@@ -77,7 +77,7 @@ export function DashboardOverviewPage() {
                 </div>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <Link
-                    to="/dashboard/transactions"
+                    to="/dashboard/tips/transactions"
                     className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-white/90 text-primary rounded-lg font-semibold transition-all shadow-lg"
                   >
                     <Euro className="w-4 h-4" />

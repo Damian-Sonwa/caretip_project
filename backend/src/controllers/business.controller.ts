@@ -16,6 +16,8 @@ import {
   subscriptionBypass,
   subscriptionRequiredPayload,
 } from "../services/subscriptionEntitlement.service.js";
+import { getBusinessQrAnalytics, type QrAnalyticsTimeframe } from "../services/qr/qrAnalytics.service.js";
+import { QR_SCAN_TYPES, recordQrScanEvent } from "../services/qr/qrScanEvent.service.js";
 
 function statsErrorHttpStatus(err: unknown): number {
   if (err instanceof StatsFetchError) {
@@ -29,9 +31,10 @@ function statsErrorHttpStatus(err: unknown): number {
   }
   return 500;
 }
-import { uploadManagerBusinessLogoImage, uploadManagerVerificationDocument, removeStoredUploadReferenceIfPossible } from "../services/upload.service.js";
+import { uploadManagerBusinessLogoImage, uploadManagerVerificationDocument, removeStoredUploadReferenceIfPossible, uploadManagerBusinessBannerImage } from "../services/upload.service.js";
 import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorageClient.js";
 import * as kycService from "../services/kyc.service.js";
+import * as brandingService from "../services/businessBranding.service.js";
 
 export async function generateInvite(req: Request, res: Response) {
   try {
@@ -293,6 +296,7 @@ export async function uploadMyLogo(req: Request, res: Response) {
         where: { id: b.id },
         data: { logoPath: logoPathToStore },
       });
+      brandingService.trackBrandingLogoUploaded(b.id);
     } catch (dbErr) {
       await removeUploadedObjectByPublicUrlIfPossible(logoPathToStore);
       throw dbErr;
@@ -302,6 +306,122 @@ export async function uploadMyLogo(req: Request, res: Response) {
     logServerError("business.uploadMyLogo", err);
     return res.status(400).json({
       message: clientSafeMessage(err, CLIENT_FALLBACK.business),
+    });
+  }
+}
+
+export async function getMyBrandingSettings(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const b = await businessService.getBusinessByUserId(userId);
+    if (!b) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    const settings = await brandingService.getBrandingSettingsForManager(b.id);
+    if (!settings) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    return res.json(settings);
+  } catch (err) {
+    logServerError("business.getMyBrandingSettings", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load branding settings."),
+    });
+  }
+}
+
+export async function patchMyBrandingSettings(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const b = await businessService.getBusinessByUserId(userId);
+    if (!b) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    const body = req.body as Record<string, unknown>;
+    const settings = await brandingService.updateBrandingSettings(b.id, {
+      brandPrimaryColor:
+        typeof body.brandPrimaryColor === "string" ? body.brandPrimaryColor : undefined,
+      brandSecondaryColor:
+        typeof body.brandSecondaryColor === "string" ? body.brandSecondaryColor : undefined,
+      welcomeMessage:
+        body.welcomeMessage === undefined
+          ? undefined
+          : body.welcomeMessage === null
+            ? null
+            : String(body.welcomeMessage),
+      thankYouMessage:
+        body.thankYouMessage === undefined
+          ? undefined
+          : body.thankYouMessage === null
+            ? null
+            : String(body.thankYouMessage),
+      brandDisplayName:
+        body.brandDisplayName === undefined
+          ? undefined
+          : body.brandDisplayName === null
+            ? null
+            : String(body.brandDisplayName),
+      brandTagline:
+        body.brandTagline === undefined
+          ? undefined
+          : body.brandTagline === null
+            ? null
+            : String(body.brandTagline),
+      qrTemplate: typeof body.qrTemplate === "string" ? body.qrTemplate : undefined,
+      qrBorderStyle: typeof body.qrBorderStyle === "string" ? body.qrBorderStyle : undefined,
+      qrShape: typeof body.qrShape === "string" ? body.qrShape : undefined,
+      qrAccentColor:
+        body.qrAccentColor === undefined
+          ? undefined
+          : body.qrAccentColor === null
+            ? ""
+            : String(body.qrAccentColor),
+      qrBackgroundColor:
+        typeof body.qrBackgroundColor === "string" ? body.qrBackgroundColor : undefined,
+    });
+    return res.json(settings);
+  } catch (err) {
+    logServerError("business.patchMyBrandingSettings", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't save branding settings."),
+    });
+  }
+}
+
+export async function uploadMyBanner(req: Request, res: Response) {
+  try {
+    const userId = req.user?.userId ?? req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const b = await businessService.getBusinessByUserId(userId);
+    if (!b) {
+      return res.status(404).json({ message: "Business not found" });
+    }
+    const file = req.file;
+    if (!file?.buffer) {
+      return res.status(400).json({ message: "File is required (multipart field name: file)" });
+    }
+
+    const bannerPathToStore = await uploadManagerBusinessBannerImage(file.buffer, file.mimetype, b.id);
+
+    try {
+      await brandingService.setBusinessBannerPath(b.id, bannerPathToStore);
+    } catch (dbErr) {
+      await removeUploadedObjectByPublicUrlIfPossible(bannerPathToStore);
+      throw dbErr;
+    }
+    return res.json({ success: true, path: bannerPathToStore });
+  } catch (err) {
+    logServerError("business.uploadMyBanner", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't upload your banner. Please try again."),
     });
   }
 }
@@ -316,6 +436,11 @@ export async function getById(req: Request, res: Response) {
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
     }
+    recordQrScanEvent({
+      businessId: business.id,
+      scanType: QR_SCAN_TYPES.BUSINESS_ID,
+      req,
+    });
     return res.json(business);
   } catch (err) {
     logServerError("business.getById", err);
@@ -392,6 +517,45 @@ export async function getMyStats(req: Request, res: Response) {
     return res.status(status).json({
       success: false,
       code: STATS_FETCH_ERROR_CODE,
+      message: clientSafeMessage(err, CLIENT_FALLBACK.businessStats),
+    });
+  }
+}
+
+export async function getMyQrAnalytics(req: Request, res: Response) {
+  const userId = req.user?.userId ?? req.user?.id;
+  const tf = req.query.timeframe;
+  const timeframe: QrAnalyticsTimeframe =
+    tf === "week" || tf === "year" ? tf : "month";
+
+  try {
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        code: "AUTH_REQUIRED",
+        message: "Authentication required",
+      });
+    }
+    const business = await businessService.getBusinessIdForManagerUser(userId);
+    if (!business) {
+      return res.status(404).json({
+        success: false,
+        code: "BUSINESS_NOT_FOUND",
+        message: "Business not found",
+      });
+    }
+    if (!subscriptionBypass(req)) {
+      const tier = await getSubscriptionTierForBusinessId(business.id);
+      if (!isStatsScopeAllowedForTier(tier, "analytics")) {
+        return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+      }
+    }
+    const analytics = await getBusinessQrAnalytics(business.id, timeframe);
+    return res.json(analytics);
+  } catch (err) {
+    logServerError("business.getMyQrAnalytics", err, { userId, timeframe });
+    return res.status(500).json({
+      success: false,
       message: clientSafeMessage(err, CLIENT_FALLBACK.businessStats),
     });
   }

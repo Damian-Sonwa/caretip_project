@@ -10,6 +10,7 @@ import {
   logTipPaymentEligibilityBlocked,
 } from "./tipPaymentEligibility.service.js";
 import { recordCheckoutFunnelEvent } from "./checkoutFunnelMetrics.service.js";
+import { QR_FUNNEL_EVENT_TYPES, recordQrFunnelEvent } from "./qr/qrFunnelEvent.service.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -170,6 +171,8 @@ export interface CreateTipCheckoutSessionInput {
   tableId?: string | null;
   customerName?: string | null;
   feedback?: string | null;
+  /** Guest scan session from QR flow — links funnel to qr_scan_events. */
+  qrScanSessionId?: string | null;
 }
 
 export interface CreateTipCheckoutSessionResult {
@@ -334,6 +337,8 @@ export async function createTipCheckoutSession(
   };
   if (locId) metadata.locationId = locId;
   if (tblId) metadata.tableId = tblId;
+  const scanSession = input.qrScanSessionId?.trim();
+  if (scanSession) metadata.qrScanSessionId = scanSession.slice(0, 64);
   const name = input.customerName?.trim();
   if (name) metadata.customerName = name;
   const fb = input.feedback?.trim();
@@ -694,6 +699,19 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
       amountEur: confirmedEur,
       paymentStatus: session.payment_status ?? null,
     });
+
+    const qrScanSessionId = typeof md.qrScanSessionId === "string" ? md.qrScanSessionId.trim() : "";
+    if (qrScanSessionId) {
+      recordQrFunnelEvent({
+        businessId,
+        sessionId: qrScanSessionId,
+        eventType: QR_FUNNEL_EVENT_TYPES.PAYMENT_COMPLETED,
+        employeeId,
+        locationId: locId,
+        tableId: tblId,
+        transactionId: tip.id,
+      });
+    }
 
     if (emitSnapshot) {
       await emitTipSocketWithSnapshot(tip, emitSnapshot);

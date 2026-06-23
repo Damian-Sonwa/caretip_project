@@ -22,7 +22,7 @@ const DEMO_PRIMARY_EMPLOYEE_SLUG = "wd-brasserie-employee-demo";
 const STAFF = [
   {
     email: "anna.staff.demo@caretip.de",
-    name: "Anna Müller",
+    name: "Maria Schneider",
     jobTitle: "Head server",
     slug: "wd-brasserie-anna",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150&h=150&fit=crop&crop=face",
@@ -139,6 +139,125 @@ async function ensureActiveEmployeeGoal(
       status: "active",
     },
   });
+}
+
+function tipDateForDemoIndex(i: number): Date {
+  const recentMinutes = [42, 18, 5, 28, 12, 2, 8, 35];
+  if (i < recentMinutes.length) return recentTipDate(recentMinutes[i]!);
+  const daysAgo = Math.floor((i - recentMinutes.length) / 6);
+  const hour = 11 + ((i * 3) % 11);
+  const d = new Date();
+  d.setUTCDate(d.getUTCDate() - Math.min(daysAgo, 89));
+  d.setUTCHours(hour, (i * 7) % 60, 0, 0);
+  return d;
+}
+
+async function seedWalkthroughDemoTransactions(
+  prisma: PrismaClient,
+  businessId: string,
+  employeeRows: Array<{ id: string }>,
+  locMain: { id: string },
+  locGarden: { id: string },
+  tableMain: { id: string },
+  tableGarden: { id: string },
+  demoPrimaryEmployeeId: string,
+): Promise<void> {
+  const tipAmountsPool = [
+    5, 6, 7.5, 8, 8.5, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 12.5, 13, 13.5, 14, 14.5, 15, 15.5,
+    16, 17, 18, 18.5, 19, 20, 21, 22, 23, 24, 25, 27,
+  ];
+  const TOTAL_DEMO_TIPS = 520;
+
+  for (let i = 0; i < TOTAL_DEMO_TIPS; i++) {
+    const id = `wdemotip${String(i + 1).padStart(4, "0")}`;
+    const emp =
+      i % 7 === 0
+        ? { id: demoPrimaryEmployeeId }
+        : (employeeRows[i % employeeRows.length] ?? { id: demoPrimaryEmployeeId });
+    const useGarden = i % 3 === 0;
+    const amount = tipAmountsPool[i % tipAmountsPool.length]!;
+    await prisma.transaction.upsert({
+      where: { id },
+      update: {
+        amount,
+        status: "success",
+        payoutStatus: "pending",
+        employeeId: emp.id,
+        businessId,
+        locationId: useGarden ? locGarden.id : locMain.id,
+        tableId: useGarden ? tableGarden.id : tableMain.id,
+        createdAt: tipDateForDemoIndex(i),
+      },
+      create: {
+        id,
+        amount,
+        status: "success",
+        payoutStatus: "pending",
+        employeeId: emp.id,
+        businessId,
+        locationId: useGarden ? locGarden.id : locMain.id,
+        tableId: useGarden ? tableGarden.id : tableMain.id,
+        createdAt: tipDateForDemoIndex(i),
+      },
+    });
+  }
+}
+
+async function seedWalkthroughDemoFeedback(
+  prisma: PrismaClient,
+  businessId: string,
+  employeeRows: Array<{ id: string }>,
+  locMain: { id: string },
+  locGarden: { id: string },
+  tableMain: { id: string },
+  tableGarden: { id: string },
+): Promise<void> {
+  const comments = [
+    "Exceptional service — thank you!",
+    "Made our evening special.",
+    "Friendly and attentive team.",
+    "Quick service on the terrace.",
+    "Would definitely recommend.",
+    "Perfect hospitality.",
+    "Great recommendations from Maria.",
+    "Lovely atmosphere.",
+  ];
+  const tags = ["excellentService", "friendlyStaff", "fastService", "greatAtmosphere"];
+  const names = ["Alex", "Jordan", "Sam", "Taylor", "Chris", "Guest"];
+
+  for (let i = 0; i < 85; i++) {
+    const txId = `wdemotip${String(i * 6 + 3).padStart(4, "0")}`;
+    const emp = employeeRows[i % employeeRows.length];
+    if (!emp) continue;
+    const useGarden = i % 2 === 0;
+    const rating = 4 + (i % 2);
+    await prisma.tipFeedback.upsert({
+      where: { transactionId: txId },
+      update: {
+        businessId,
+        employeeId: emp.id,
+        locationId: useGarden ? locGarden.id : locMain.id,
+        tableId: useGarden ? tableGarden.id : tableMain.id,
+        rating,
+        comment: comments[i % comments.length] ?? null,
+        tags: [tags[i % tags.length]!],
+        customerName: names[i % names.length] ?? null,
+        createdAt: tipDateForDemoIndex(i * 6 + 3),
+      },
+      create: {
+        transactionId: txId,
+        businessId,
+        employeeId: emp.id,
+        locationId: useGarden ? locGarden.id : locMain.id,
+        tableId: useGarden ? tableGarden.id : tableMain.id,
+        rating,
+        comment: comments[i % comments.length] ?? null,
+        tags: [tags[i % tags.length]!],
+        customerName: names[i % names.length] ?? null,
+        createdAt: tipDateForDemoIndex(i * 6 + 3),
+      },
+    });
+  }
 }
 
 async function seedDemoInboxNotifications(
@@ -302,10 +421,10 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
 
   const locGarden = await prisma.location.upsert({
     where: { id: LOCATION_GARDEN_ID },
-    update: { name: "Garden terrace", businessId: business.id },
+    update: { name: "Terrace", businessId: business.id },
     create: {
       id: LOCATION_GARDEN_ID,
-      name: "Garden terrace",
+      name: "Terrace",
       description: "Walkthrough demo — outdoor terrace.",
       businessId: business.id,
     },
@@ -453,102 +572,25 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     });
   }
 
-  const tipAmounts = [
-    8.5, 12, 15, 22, 6, 18, 9.5, 25, 11, 14, 7, 20, 16, 13.5, 19, 10, 24, 8, 17, 21, 12.5,
-    14.5, 9, 23, 11.5, 16, 7.5, 19.5, 13, 27, 8.75, 15.5, 20, 10.5, 18.25,
-  ];
-  for (let i = 0; i < tipAmounts.length; i++) {
-    const emp = employeeRows[i % employeeRows.length];
-    if (!emp) continue;
-    const id = `wdemotip${String(i + 1).padStart(3, "0")}`;
-    await prisma.transaction.upsert({
-      where: { id },
-      update: {
-        amount: tipAmounts[i]!,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: emp.id,
-        businessId: business.id,
-        locationId: locMain.id,
-        tableId: i % 2 === 0 ? tableMain.id : tableGarden.id,
-        createdAt: staggeredTipDate(i % 45),
-      },
-      create: {
-        id,
-        amount: tipAmounts[i]!,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: emp.id,
-        businessId: business.id,
-        locationId: locMain.id,
-        tableId: i % 2 === 0 ? tableMain.id : tableGarden.id,
-        createdAt: staggeredTipDate(i % 45),
-      },
-    });
-  }
-
-  const demoEmpExtraAmounts = [14, 18, 9, 21, 11, 16, 13, 19, 10, 12, 17];
-  for (let j = 0; j < demoEmpExtraAmounts.length; j++) {
-    const id = `wdemotip${String(22 + j).padStart(3, "0")}`;
-    await prisma.transaction.upsert({
-      where: { id },
-      update: {
-        amount: demoEmpExtraAmounts[j]!,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: demoPrimaryEmployee.id,
-        businessId: business.id,
-        locationId: locGarden.id,
-        tableId: tableGarden.id,
-        createdAt: staggeredTipDate((j + 3) % 45),
-      },
-      create: {
-        id,
-        amount: demoEmpExtraAmounts[j]!,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: demoPrimaryEmployee.id,
-        businessId: business.id,
-        locationId: locGarden.id,
-        tableId: tableGarden.id,
-        createdAt: staggeredTipDate((j + 3) % 45),
-      },
-    });
-  }
-
-  const recentPulseTips = [
-    { id: "wdemotip033", amount: 12, employeeId: demoPrimaryEmployee.id, minutesAgo: 42 },
-    { id: "wdemotip034", amount: 18.5, employeeId: employeeRows[0]?.id ?? demoPrimaryEmployee.id, minutesAgo: 18 },
-    { id: "wdemotip035", amount: 9, employeeId: employeeRows[1]?.id ?? demoPrimaryEmployee.id, minutesAgo: 5 },
-    { id: "wdemotip036", amount: 14, employeeId: employeeRows[4]?.id ?? demoPrimaryEmployee.id, minutesAgo: 28 },
-    { id: "wdemotip037", amount: 22, employeeId: employeeRows[6]?.id ?? demoPrimaryEmployee.id, minutesAgo: 12 },
-  ] as const;
-  for (const tip of recentPulseTips) {
-    await prisma.transaction.upsert({
-      where: { id: tip.id },
-      update: {
-        amount: tip.amount,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: tip.employeeId,
-        businessId: business.id,
-        locationId: locMain.id,
-        tableId: tableMain.id,
-        createdAt: recentTipDate(tip.minutesAgo),
-      },
-      create: {
-        id: tip.id,
-        amount: tip.amount,
-        status: "success",
-        payoutStatus: "pending",
-        employeeId: tip.employeeId,
-        businessId: business.id,
-        locationId: locMain.id,
-        tableId: tableMain.id,
-        createdAt: recentTipDate(tip.minutesAgo),
-      },
-    });
-  }
+  await seedWalkthroughDemoTransactions(
+    prisma,
+    business.id,
+    employeeRows,
+    locMain,
+    locGarden,
+    tableMain,
+    tableGarden,
+    demoPrimaryEmployee.id,
+  );
+  await seedWalkthroughDemoFeedback(
+    prisma,
+    business.id,
+    employeeRows,
+    locMain,
+    locGarden,
+    tableMain,
+    tableGarden,
+  );
 
   const now = new Date();
   const goalMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));

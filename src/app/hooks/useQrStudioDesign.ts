@@ -1,0 +1,286 @@
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  fetchBusinessBrandingSettings,
+  patchBusinessBrandingSettings,
+  uploadMyBusinessLogo,
+  type BusinessBrandingSettings,
+} from "../lib/api";
+import {
+  notifyBusinessBrandingChanged,
+  qrOptionsFromBrandingFields,
+  trackBrandingClientEvent,
+  type QrBrandingOptions,
+} from "../lib/businessBranding";
+import {
+  DEFAULT_QR_STUDIO_EXTRAS,
+  loadQrStudioDesignExtras,
+  mergeQrStudioBranding,
+  saveQrStudioDesignExtras,
+  type QrLayoutVariantId,
+  type QrStudioDesignExtras,
+} from "../lib/qrDesignSystem";
+import {
+  DEFAULT_QR_BACKGROUND_COLOR,
+  DEFAULT_QR_BORDER_STYLE,
+  DEFAULT_QR_SHAPE,
+  DEFAULT_QR_TEMPLATE,
+  type QrBorderStyleId,
+  type QrShapeId,
+  type QrTemplateId,
+} from "../lib/qrTemplateStyles";
+import { resolveMediaUrl, withMediaCacheBust } from "../lib/mediaUrl";
+import { logClientError } from "../lib/clientLog";
+
+export const QR_STUDIO_SAMPLE_URL = "https://caretip.app/qr-studio-scan-check";
+
+export type QrStudioDesignState = {
+  loading: boolean;
+  saving: boolean;
+  canEdit: boolean;
+  businessName: string;
+  businessId: string | null;
+  settings: BusinessBrandingSettings | null;
+  extras: QrStudioDesignExtras;
+  previewBranding: QrBrandingOptions;
+  sampleUrl: string;
+  logoBust: number;
+  brandDisplayName: string;
+  brandTagline: string;
+  welcomeMessage: string;
+  thankYouMessage: string;
+  primaryColor: string;
+  secondaryColor: string;
+  qrTemplate: QrTemplateId;
+  qrBorderStyle: QrBorderStyleId;
+  qrShape: QrShapeId;
+  qrAccentColor: string;
+  qrBackgroundColor: string;
+};
+
+export type QrStudioDesignActions = {
+  refresh: () => Promise<void>;
+  save: () => Promise<boolean>;
+  patchExtras: (patch: Partial<QrStudioDesignExtras>) => void;
+  setBrandDisplayName: (v: string) => void;
+  setBrandTagline: (v: string) => void;
+  setWelcomeMessage: (v: string) => void;
+  setThankYouMessage: (v: string) => void;
+  setPrimaryColor: (v: string) => void;
+  setSecondaryColor: (v: string) => void;
+  setQrTemplate: (v: QrTemplateId) => void;
+  setQrBorderStyle: (v: QrBorderStyleId) => void;
+  setQrShape: (v: QrShapeId) => void;
+  setQrAccentColor: (v: string) => void;
+  setQrBackgroundColor: (v: string) => void;
+  setLayoutVariant: (v: QrLayoutVariantId) => void;
+  uploadLogo: (file: File) => Promise<void>;
+};
+
+export function useQrStudioDesign(opts: {
+  businessId: string | null | undefined;
+  businessName: string;
+  canEdit: boolean;
+}): QrStudioDesignState & QrStudioDesignActions {
+  const { businessId, businessName, canEdit } = opts;
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [settings, setSettings] = useState<BusinessBrandingSettings | null>(null);
+  const [extras, setExtras] = useState<QrStudioDesignExtras>(DEFAULT_QR_STUDIO_EXTRAS);
+  const [logoBust, setLogoBust] = useState(0);
+
+  const [brandDisplayName, setBrandDisplayName] = useState("");
+  const [brandTagline, setBrandTagline] = useState("");
+  const [welcomeMessage, setWelcomeMessage] = useState("");
+  const [thankYouMessage, setThankYouMessage] = useState("");
+  const [primaryColor, setPrimaryColor] = useState("#EB992C");
+  const [secondaryColor, setSecondaryColor] = useState("#000000");
+  const [qrTemplate, setQrTemplate] = useState<QrTemplateId>(DEFAULT_QR_TEMPLATE);
+  const [qrBorderStyle, setQrBorderStyle] = useState<QrBorderStyleId>(DEFAULT_QR_BORDER_STYLE);
+  const [qrShape, setQrShape] = useState<QrShapeId>(DEFAULT_QR_SHAPE);
+  const [qrAccentColor, setQrAccentColor] = useState("#EB992C");
+  const [qrBackgroundColor, setQrBackgroundColor] = useState(DEFAULT_QR_BACKGROUND_COLOR);
+
+  const refresh = useCallback(async () => {
+    if (!businessId) {
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    try {
+      const s = await fetchBusinessBrandingSettings();
+      setSettings(s);
+      setBrandDisplayName(s.brandDisplayName ?? "");
+      setBrandTagline(s.brandTagline ?? "");
+      setWelcomeMessage(s.welcomeMessage ?? "");
+      setThankYouMessage(s.thankYouMessage ?? "");
+      setPrimaryColor(s.brandPrimaryColor);
+      setSecondaryColor(s.brandSecondaryColor);
+      setQrTemplate(s.qrTemplate);
+      setQrBorderStyle(s.qrBorderStyle);
+      setQrShape(s.qrShape);
+      setQrAccentColor(s.qrAccentColor);
+      setQrBackgroundColor(s.qrBackgroundColor);
+      setExtras(loadQrStudioDesignExtras(businessId));
+    } catch (e) {
+      logClientError("useQrStudioDesign.refresh", e);
+    } finally {
+      setLoading(false);
+    }
+  }, [businessId]);
+
+  useEffect(() => {
+    void refresh();
+  }, [refresh]);
+
+  const patchExtras = useCallback(
+    (patch: Partial<QrStudioDesignExtras>) => {
+      setExtras((prev) => {
+        const next = { ...prev, ...patch };
+        if (businessId) saveQrStudioDesignExtras(businessId, next);
+        return next;
+      });
+    },
+    [businessId],
+  );
+
+  const previewBranding = useMemo(() => {
+    const base = qrOptionsFromBrandingFields(
+      canEdit,
+      {
+        logoPath: settings?.logoPath ?? null,
+        brandPrimaryColor: primaryColor,
+        brandSecondaryColor: secondaryColor,
+        brandDisplayName: brandDisplayName.trim() || null,
+        brandTagline: brandTagline.trim() || null,
+        welcomeMessage: welcomeMessage.trim() || null,
+        thankYouMessage: thankYouMessage.trim() || null,
+        qrTemplate,
+        qrBorderStyle,
+        qrShape,
+        qrAccentColor,
+        qrBackgroundColor,
+      },
+      brandDisplayName.trim() || businessName,
+    );
+    const merged = mergeQrStudioBranding(base, extras);
+    if (merged.centerLogoUrl && settings?.logoPath) {
+      return {
+        ...merged,
+        centerLogoUrl:
+          withMediaCacheBust(resolveMediaUrl(settings.logoPath) ?? settings.logoPath, logoBust) ?? null,
+      };
+    }
+    return merged;
+  }, [
+    canEdit,
+    settings?.logoPath,
+    primaryColor,
+    secondaryColor,
+    brandDisplayName,
+    brandTagline,
+    welcomeMessage,
+    thankYouMessage,
+    qrTemplate,
+    qrBorderStyle,
+    qrShape,
+    qrAccentColor,
+    qrBackgroundColor,
+    businessName,
+    extras,
+    logoBust,
+  ]);
+
+  const save = useCallback(async (): Promise<boolean> => {
+    if (!canEdit) return false;
+    setSaving(true);
+    try {
+      const updated = await patchBusinessBrandingSettings({
+        brandDisplayName: brandDisplayName.trim() || null,
+        brandTagline: brandTagline.trim() || null,
+        welcomeMessage: welcomeMessage.trim() || null,
+        thankYouMessage: thankYouMessage.trim() || null,
+        brandPrimaryColor: primaryColor,
+        brandSecondaryColor: secondaryColor,
+        qrTemplate,
+        qrBorderStyle,
+        qrShape,
+        qrAccentColor,
+        qrBackgroundColor,
+      });
+      setSettings(updated);
+      if (businessId) saveQrStudioDesignExtras(businessId, extras);
+      notifyBusinessBrandingChanged();
+      trackBrandingClientEvent("branding_qr_v2_updated");
+      return true;
+    } catch (e) {
+      logClientError("useQrStudioDesign.save", e);
+      return false;
+    } finally {
+      setSaving(false);
+    }
+  }, [
+    canEdit,
+    brandDisplayName,
+    brandTagline,
+    welcomeMessage,
+    thankYouMessage,
+    primaryColor,
+    secondaryColor,
+    qrTemplate,
+    qrBorderStyle,
+    qrShape,
+    qrAccentColor,
+    qrBackgroundColor,
+    businessId,
+    extras,
+  ]);
+
+  const uploadLogo = useCallback(async (file: File) => {
+    await uploadMyBusinessLogo(file);
+    await refresh();
+    setLogoBust((n) => n + 1);
+    notifyBusinessBrandingChanged();
+    trackBrandingClientEvent("branding_logo_uploaded");
+  }, [refresh]);
+
+  return {
+    loading,
+    saving,
+    canEdit,
+    businessName,
+    businessId: businessId ?? null,
+    settings,
+    extras,
+    previewBranding,
+    sampleUrl: QR_STUDIO_SAMPLE_URL,
+    logoBust,
+    brandDisplayName,
+    brandTagline,
+    welcomeMessage,
+    thankYouMessage,
+    primaryColor,
+    secondaryColor,
+    qrTemplate,
+    qrBorderStyle,
+    qrShape,
+    qrAccentColor,
+    qrBackgroundColor,
+    refresh,
+    save,
+    patchExtras,
+    setBrandDisplayName,
+    setBrandTagline,
+    setWelcomeMessage,
+    setThankYouMessage,
+    setPrimaryColor,
+    setSecondaryColor,
+    setQrTemplate,
+    setQrBorderStyle,
+    setQrShape,
+    setQrAccentColor,
+    setQrBackgroundColor,
+    setLayoutVariant: (v) => patchExtras({ layoutVariant: v }),
+    uploadLogo,
+  };
+}

@@ -357,10 +357,10 @@ export function buildWelcomeEmailContent(input: {
             "CareTip unterstützt Ihr Hospitality-Team mit QR-Trinkgeld, fairen Auszahlungen und Einblicken in Echtzeit.",
           bulletsHeading: "Sie können jetzt:",
           managerBullets: [
+            "Ihr Unternehmensprofil vervollständigen",
+            "QR-Codes für Gäste erstellen",
             "Mitarbeitende einladen",
-            "QR-Codes für Trinkgeld erstellen",
-            "Trinkgelder in Echtzeit verfolgen",
-            "Standorte und Tische verwalten",
+            "Trinkgelder empfangen",
           ],
           employeeBullets: [
             "Trinkgelder per QR erhalten",
@@ -383,10 +383,10 @@ export function buildWelcomeEmailContent(input: {
             "CareTip helps your hospitality team collect tips by QR, reward staff fairly, and see performance in real time.",
           bulletsHeading: "You can now:",
           managerBullets: [
-            "Invite your team",
-            "Generate QR tipping codes",
-            "Track tips in real time",
-            "Manage locations and tables",
+            "Complete your business profile",
+            "Generate QR codes for guests",
+            "Invite your staff",
+            "Start receiving tips",
           ],
           employeeBullets: [
             "Receive tips via QR",

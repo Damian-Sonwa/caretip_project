@@ -16,9 +16,11 @@ import { logDashboardTiming } from "../utils/dashboardTiming.js";
 import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
-import { isEmployeeTipsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
+import { businessTipsQueryRequiresAdvancedAnalytics, employeeTipsListQueryRequiresAdvancedAnalytics, isEmployeeTipsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
 import {
   getSubscriptionTierForBusinessId,
+  hasFeature,
+  maskEmployeeGoalsInResponse,
   subscriptionBypass,
   subscriptionRequiredPayload,
 } from "../services/subscriptionEntitlement.service.js";
@@ -66,19 +68,25 @@ export async function getByEmployee(req: Request, res: Response) {
         { employeeId: employee.id, scope },
         () => loadEmployeeAccountSummary(employee.id),
       );
-      return res.json({
-        tips: [],
-        monthlyGoal: employee.monthlyGoal,
-        currentMonthTotal: 0,
-        businessTimezone: employee.businessTimezone,
-        periodAmountEur: 0,
-        periodTipCount: 0,
-        chartSeries: [],
-        goal: null,
-        totalEarningsEur: accountSummary.totalEarningsEur,
-        availableBalanceEur: accountSummary.availableBalanceEur,
-        totalSupporters: accountSummary.totalSupporters,
-      });
+      const goalsEnabled = subscriptionBypass(req) || (await hasFeature(employee.businessId, "employeeGoals"));
+      return res.json(
+        maskEmployeeGoalsInResponse(
+          {
+            tips: [],
+            monthlyGoal: employee.monthlyGoal,
+            currentMonthTotal: 0,
+            businessTimezone: employee.businessTimezone,
+            periodAmountEur: 0,
+            periodTipCount: 0,
+            chartSeries: [],
+            goal: null,
+            totalEarningsEur: accountSummary.totalEarningsEur,
+            availableBalanceEur: accountSummary.availableBalanceEur,
+            totalSupporters: accountSummary.totalSupporters,
+          },
+          goalsEnabled,
+        ),
+      );
     }
 
     if (!subscriptionBypass(req)) {
@@ -89,24 +97,30 @@ export async function getByEmployee(req: Request, res: Response) {
     }
 
     if (timeframe == null) {
+      const goalsEnabled = subscriptionBypass(req) || (await hasFeature(employee.businessId, "employeeGoals"));
       const [accountSummary, currentMonthTotal, goal] = await Promise.all([
         loadEmployeeAccountSummary(employee.id),
         loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
-        goalService.getMyGoalWithProgress(userId).catch(() => null),
+        goalsEnabled ? goalService.getMyGoalWithProgress(userId).catch(() => null) : Promise.resolve(null),
       ]);
-      return res.json({
-        tips: [],
-        monthlyGoal: employee.monthlyGoal,
-        currentMonthTotal,
-        businessTimezone: employee.businessTimezone,
-        periodAmountEur: 0,
-        periodTipCount: 0,
-        chartSeries: [],
-        goal,
-        totalEarningsEur: accountSummary.totalEarningsEur,
-        availableBalanceEur: accountSummary.availableBalanceEur,
-        totalSupporters: accountSummary.totalSupporters,
-      });
+      return res.json(
+        maskEmployeeGoalsInResponse(
+          {
+            tips: [],
+            monthlyGoal: employee.monthlyGoal,
+            currentMonthTotal,
+            businessTimezone: employee.businessTimezone,
+            periodAmountEur: 0,
+            periodTipCount: 0,
+            chartSeries: [],
+            goal,
+            totalEarningsEur: accountSummary.totalEarningsEur,
+            availableBalanceEur: accountSummary.availableBalanceEur,
+            totalSupporters: accountSummary.totalSupporters,
+          },
+          goalsEnabled,
+        ),
+      );
     }
 
     if (scope === "summary") {
@@ -126,22 +140,28 @@ export async function getByEmployee(req: Request, res: Response) {
             return { summary: summaryResult, accountSummary: accountResult };
           }),
       );
-      return res.json({
-        tips: summary.tips,
-        monthlyGoal: employee.monthlyGoal,
-        currentMonthTotal: summary.currentMonthTotal,
-        businessTimezone: employee.businessTimezone,
-        periodAmountEur: summary.periodAmountEur,
-        periodTipCount: summary.periodTipCount,
-        averageRating: summary.averageRating,
-        ratingCount: summary.ratingCount,
-        chartSeries: summary.chartSeries,
-        goal: summary.goal,
-        analyticsBundled: true,
-        totalEarningsEur: accountSummary.totalEarningsEur,
-        availableBalanceEur: accountSummary.availableBalanceEur,
-        totalSupporters: accountSummary.totalSupporters,
-      });
+      const goalsEnabled = subscriptionBypass(req) || (await hasFeature(employee.businessId, "employeeGoals"));
+      return res.json(
+        maskEmployeeGoalsInResponse(
+          {
+            tips: summary.tips,
+            monthlyGoal: employee.monthlyGoal,
+            currentMonthTotal: summary.currentMonthTotal,
+            businessTimezone: employee.businessTimezone,
+            periodAmountEur: summary.periodAmountEur,
+            periodTipCount: summary.periodTipCount,
+            averageRating: summary.averageRating,
+            ratingCount: summary.ratingCount,
+            chartSeries: summary.chartSeries,
+            goal: summary.goal,
+            analyticsBundled: true,
+            totalEarningsEur: accountSummary.totalEarningsEur,
+            availableBalanceEur: accountSummary.availableBalanceEur,
+            totalSupporters: accountSummary.totalSupporters,
+          },
+          goalsEnabled,
+        ),
+      );
     }
 
     if (scope === "analytics") {
@@ -173,25 +193,31 @@ export async function getByEmployee(req: Request, res: Response) {
         timeframe,
       }),
     );
+    const goalsEnabled = subscriptionBypass(req) || (await hasFeature(employee.businessId, "employeeGoals"));
     const [accountSummary, currentMonthTotal, goal] = await Promise.all([
       loadEmployeeAccountSummary(employee.id),
       loadEmployeeCurrentMonthTotal(employee.id, employee.businessTimezone),
-      goalService.getMyGoalWithProgress(userId).catch(() => null),
+      goalsEnabled ? goalService.getMyGoalWithProgress(userId).catch(() => null) : Promise.resolve(null),
     ]);
 
-    return res.json({
-      monthlyGoal: employee.monthlyGoal,
-      currentMonthTotal,
-      businessTimezone: employee.businessTimezone,
-      goal,
-      totalEarningsEur: accountSummary.totalEarningsEur,
-      availableBalanceEur: accountSummary.availableBalanceEur,
-      totalSupporters: accountSummary.totalSupporters,
-      tips: dash.tips,
-      periodAmountEur: dash.periodAmountEur,
-      periodTipCount: dash.periodTipCount,
-      chartSeries: dash.chartSeries,
-    });
+    return res.json(
+      maskEmployeeGoalsInResponse(
+        {
+          monthlyGoal: employee.monthlyGoal,
+          currentMonthTotal,
+          businessTimezone: employee.businessTimezone,
+          goal,
+          totalEarningsEur: accountSummary.totalEarningsEur,
+          availableBalanceEur: accountSummary.availableBalanceEur,
+          totalSupporters: accountSummary.totalSupporters,
+          tips: dash.tips,
+          periodAmountEur: dash.periodAmountEur,
+          periodTipCount: dash.periodTipCount,
+          chartSeries: dash.chartSeries,
+        },
+        goalsEnabled,
+      ),
+    );
   } catch (err) {
     logServerError("tips.getByEmployee", err);
     return res.status(tipsErrorHttpStatus(err)).json({
@@ -263,6 +289,7 @@ export async function getByBusiness(req: Request, res: Response) {
       role: req.user?.role ?? null,
     });
 
+    const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
     const { take, skip } = parseTakeSkip(req);
     const status = parseStatus(req.query.status);
     const rangeRaw = typeof req.query.range === "string" ? req.query.range.trim() : "";
@@ -277,6 +304,22 @@ export async function getByBusiness(req: Request, res: Response) {
     const employeeId = typeof req.query.employeeId === "string" ? req.query.employeeId.trim() : "";
     const locationId = typeof req.query.locationId === "string" ? req.query.locationId.trim() : "";
     const tableId = typeof req.query.tableId === "string" ? req.query.tableId.trim() : "";
+
+    if (
+      !subscriptionBypass(req) &&
+      businessTipsQueryRequiresAdvancedAnalytics({
+        scope: scopeRaw || undefined,
+        employeeId: employeeId || undefined,
+        locationId: locationId || undefined,
+        tableId: tableId || undefined,
+        range: rangeRaw || undefined,
+        from,
+        to,
+      }) &&
+      !(await hasFeature(b.id, "advancedAnalytics"))
+    ) {
+      return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+    }
 
     if (employeeId) {
       const ownedEmployee = await prisma.employee.findFirst({
@@ -376,6 +419,18 @@ export async function listByEmployee(req: Request, res: Response) {
     const customTo = typeof req.query.toDate === "string" ? req.query.toDate.trim() : undefined;
     const from = parseDate(req.query.from); // legacy
     const to = parseDate(req.query.to); // legacy
+
+    if (
+      !subscriptionBypass(req) &&
+      employeeTipsListQueryRequiresAdvancedAnalytics({
+        range: rangeRaw || undefined,
+        from,
+        to,
+      }) &&
+      !(await hasFeature(employee.businessId, "advancedAnalytics"))
+    ) {
+      return res.status(403).json(subscriptionRequiredPayload("advancedAnalytics"));
+    }
 
     const tz = employee.businessTimezone;
     const presetRange = range ? businessUtcRangeForTimeframe(range, tz) : null;

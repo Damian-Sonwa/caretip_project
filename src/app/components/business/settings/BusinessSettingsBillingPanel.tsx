@@ -7,6 +7,7 @@ import type { SubscriptionBillingCycle } from "../../../lib/api";
 import { BillingCurrentPlanCard } from "./billing/BillingCurrentPlanCard";
 import { BillingPlanManagement } from "./billing/BillingPlanManagement";
 import { BillingTimeline } from "./billing/BillingTimeline";
+import { CommercialInsightsPanel } from "./CommercialInsightsPanel";
 
 export function BusinessSettingsBillingPanel() {
   const { t } = useTranslation();
@@ -38,7 +39,7 @@ export function BusinessSettingsBillingPanel() {
         <div className="space-y-8">
           <BillingCurrentPlanCard billing={data} />
 
-          <section>
+          <section id="billing-plans">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-lg font-semibold text-foreground">{t("business.billing.billingCycle")}</h3>
               <div className="inline-flex rounded-lg border border-border p-1">
@@ -66,6 +67,8 @@ export function BusinessSettingsBillingPanel() {
             <h3 className="mb-4 text-lg font-semibold text-foreground">{t("business.billing.timelineTitle")}</h3>
             <BillingTimeline events={data.events} />
           </section>
+
+          <CommercialInsightsPanel />
         </div>
       ) : null}
     </BusinessSettingsPanelShell>

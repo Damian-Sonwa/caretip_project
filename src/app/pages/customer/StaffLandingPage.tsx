@@ -16,6 +16,7 @@ import { customerFlowUi as cf } from "./customerFlowUi";
 import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
 import { headerLeaveTipFor } from "./customerJourneyHeaderCopy";
+import { venueBrandFromResolved } from "./customerJourneyBrand";
 import {
   type CustomerEntryPhase,
   isCustomerEntryPending,
@@ -154,7 +155,11 @@ export function StaffLandingPage() {
   return (
     <div className={cf.page}>
       <CustomerJourneyHeader
-        venue={{ name: staff.businessName, logo: staff.businessLogo ?? null }}
+        venue={venueBrandFromResolved({
+          businessName: staff.businessName,
+          businessLogo: staff.businessLogo ?? null,
+          branding: staff.branding ?? null,
+        })}
         stepTitle={profileHeader.stepTitle}
         trustMessage={profileHeader.trustMessage}
       />

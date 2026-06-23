@@ -1,8 +1,11 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { fetchBusinessProfile, getEmployeeProfile } from "../lib/api";
 import {
+  hasFeature as hasFeatureForTier,
   hasSubscriptionCapability,
+  resolveSubscriptionTier,
   type BusinessSubscriptionTier,
+  type FeatureKey,
   type SubscriptionCapability,
 } from "../lib/subscriptionCapabilities";
 import {
@@ -19,12 +22,14 @@ export function useSubscriptionEntitlements(opts: {
   cacheOnly?: boolean;
 }) {
   const sessionTier = opts.role === "business" ? getSubscriptionTierFromSession() : null;
-  const [tier, setTier] = useState<BusinessSubscriptionTier>(sessionTier ?? "premium");
+  const [tier, setTier] = useState<BusinessSubscriptionTier>(
+    resolveSubscriptionTier(sessionTier ?? undefined),
+  );
   const [ready, setReady] = useState(Boolean(sessionTier) || opts.cacheOnly === true);
 
   useEffect(() => {
     if (opts.cacheOnly) {
-      setTier(sessionTier ?? "premium");
+      setTier(resolveSubscriptionTier(sessionTier ?? undefined));
       setReady(true);
       return;
     }
@@ -38,16 +43,16 @@ export function useSubscriptionEntitlements(opts: {
         if (opts.role === "business") {
           const profile = await fetchBusinessProfile({ silent: true });
           if (!cancelled) {
-            const next = profile.subscriptionTier ?? "premium";
+            const next = resolveSubscriptionTier(profile.subscriptionTier);
             primeSubscriptionTierFromSession(next);
             setTier(next);
           }
         } else {
           const profile = await getEmployeeProfile({ silent: true });
-          if (!cancelled) setTier(profile.subscriptionTier ?? "premium");
+          if (!cancelled) setTier(resolveSubscriptionTier(profile.subscriptionTier));
         }
       } catch {
-        if (!cancelled) setTier(sessionTier ?? "premium");
+        if (!cancelled) setTier(resolveSubscriptionTier(sessionTier ?? undefined));
       } finally {
         if (!cancelled) setReady(true);
       }
@@ -57,12 +62,33 @@ export function useSubscriptionEntitlements(opts: {
     };
   }, [opts.cacheOnly, opts.enabled, opts.role, sessionTier]);
 
+  const hasFeature = useCallback(
+    (featureKey: FeatureKey) => hasFeatureForTier(tier, featureKey),
+    [tier],
+  );
+
   const hasCapability = useCallback(
     (capability: SubscriptionCapability) => hasSubscriptionCapability(tier, capability),
     [tier],
   );
 
+  const tierFlags = useMemo(
+    () => ({
+      isBasic: tier === "basic",
+      isPremium: tier === "premium",
+      isEnterprise: tier === "enterprise",
+    }),
+    [tier],
+  );
+
   const advancedAnalyticsEnabled = hasCapability("advancedAnalytics");
 
-  return { tier, ready, hasCapability, advancedAnalyticsEnabled };
+  return {
+    tier,
+    ready,
+    ...tierFlags,
+    hasFeature,
+    hasCapability,
+    advancedAnalyticsEnabled,
+  };
 }

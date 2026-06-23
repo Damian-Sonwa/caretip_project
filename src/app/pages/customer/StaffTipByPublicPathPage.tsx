@@ -12,6 +12,7 @@ import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
 import { headerLeaveTipFor } from "./customerJourneyHeaderCopy";
+import { venueBrandFromResolved } from "./customerJourneyBrand";
 import { getRepeatTipDataForBusiness } from "../../lib/repeatTip";
 import { markCustomerFlowEntered } from "../../lib/customerFlowGuard";
 import { formatEur } from "../../lib/formatEur";
@@ -146,7 +147,11 @@ export function StaffTipByPublicPathPage() {
       <CustomerFlowShell
         venue={
           staff
-            ? { name: staff.businessName, logo: staff.businessLogo ?? null }
+            ? venueBrandFromResolved({
+                businessName: staff.businessName,
+                businessLogo: staff.businessLogo ?? null,
+                branding: staff.branding ?? null,
+              })
             : { name: t("tipFlow.common.venue"), logo: null }
         }
         stepTitle={pendingHeader.stepTitle}
@@ -190,7 +195,11 @@ export function StaffTipByPublicPathPage() {
   return (
     <div className={cf.page}>
       <CustomerJourneyHeader
-        venue={{ name: staff.businessName, logo: staff.businessLogo ?? null }}
+        venue={venueBrandFromResolved({
+          businessName: staff.businessName,
+          businessLogo: staff.businessLogo ?? null,
+          branding: staff.branding ?? null,
+        })}
         stepTitle={profileHeader.stepTitle}
         trustMessage={profileHeader.trustMessage}
       />

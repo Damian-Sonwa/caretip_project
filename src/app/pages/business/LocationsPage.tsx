@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { LockedFeatureCard } from "../../components/subscription/LockedFeatureCard";
 import { createLocationAPI, fetchLocations, type LocationDTO } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
@@ -32,6 +34,11 @@ const ACTION_TEAL = "#e9781c";
 export function LocationsPage() {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
+  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+    enabled: isBusiness,
+    role: "business",
+  });
+  const multiLocationEnabled = hasFeature("multiLocation");
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
@@ -73,6 +80,8 @@ export function LocationsPage() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  const atSingleLocationCap = ready && !multiLocationEnabled && locations.length >= 1;
 
   const handleSave = async () => {
     const trimmed = name.trim();
@@ -122,7 +131,7 @@ export function LocationsPage() {
           <Button
             type="button"
             onClick={() => setModalOpen(true)}
-            disabled={!isBusiness}
+            disabled={!isBusiness || atSingleLocationCap}
             className="shrink-0 w-full sm:w-auto"
             style={{ backgroundColor: ACTION_TEAL }}
           >
@@ -162,6 +171,11 @@ export function LocationsPage() {
             ))}
           </ul>
         )}
+        {atSingleLocationCap ? (
+          <div className="mt-8">
+            <LockedFeatureCard featureKey="multiLocation" tier={tier} />
+          </div>
+        ) : null}
       </div>
 
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>

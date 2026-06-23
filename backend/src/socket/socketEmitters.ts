@@ -1,4 +1,8 @@
 import { getSocketIO } from "./socketServer.js";
+import {
+  emitCanonicalFromBusinessDataReason,
+  emitNotificationCreatedCanonical,
+} from "./realtimeContracts.js";
 
 /** Staff, locations, tables, or assignments changed — refresh dashboards & public tipping UIs. */
 export function emitBusinessDataChanged(businessId: string, reason: string): void {
@@ -10,6 +14,7 @@ export function emitBusinessDataChanged(businessId: string, reason: string): voi
     businessId,
     at: payload.at,
   });
+  emitCanonicalFromBusinessDataReason(businessId, reason);
 }
 
 export function emitVerificationUpdated(
@@ -40,13 +45,16 @@ export function emitPlatformMetricsUpdated(reason: string): void {
 export function emitNotificationCreated(
   userId: string,
   payload: { notification: unknown; unreadCount: number },
+  businessId?: string | null,
 ): void {
   const io = getSocketIO();
   if (!io) return;
-  io.to(`user:${userId}`).emit("notification_created", {
+  const legacy = {
     ...payload,
     at: new Date().toISOString(),
-  });
+  };
+  io.to(`user:${userId}`).emit("notification_created", legacy);
+  emitNotificationCreatedCanonical(userId, businessId ?? null, legacy);
 }
 
 export function emitNotificationUnreadCount(userId: string, unreadCount: number): void {

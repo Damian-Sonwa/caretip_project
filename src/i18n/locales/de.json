@@ -30,6 +30,35 @@
     "metricZeroGoals": "0 Ziele",
     "metricZeroRatings": "0 Bewertungen"
   },
+  "premium": {
+    "summaryBanner": {
+      "title": "Analytics-Überblick",
+      "revenueTrend": "Umsatztrend",
+      "scanTrend": "Scan-Trend",
+      "conversionTrend": "Conversion-Trend",
+      "growthValue": "{{percent}} % vs. Monatsdurchschnitt",
+      "scanWeekValue": "{{count}} Scans diese Woche",
+      "conversionHint": "Scan-zu-Tip-Rate"
+    },
+    "health": {
+      "status": "Geschäftsstatus",
+      "keyInsight": "Wichtige Erkenntnis",
+      "noInsight": "Erkenntnisse erscheinen mit wachsender Aktivität."
+    },
+    "plan": {
+      "upgrade": "Plan upgraden"
+    },
+    "qrStudio": {
+      "badge": "Premium-Arbeitsbereich",
+      "feature": "Marken-QR-Design-Studio"
+    }
+  },
+  "kpiTrust": {
+    "qrAnalyticsComingSoon": "QR-Analytics demnächst",
+    "qrAnalyticsComingSoonBody": "Verfügbar in einem zukünftigen Update, sobald Scan-Tracking aktiviert ist.",
+    "leaderboardComingSoon": "Bestenliste demnächst",
+    "leaderboardComingSoonBody": "Team-Rankings erscheinen, sobald der Bestenlisten-Service verfügbar ist."
+  },
   "emptyState": {
     "tips": {
       "title": "Bereit für Ihr erstes Trinkgeld",
@@ -1723,6 +1752,112 @@
     "businessDashboardSubtitle": "Unternehmensdashboard",
     "viewAll": "Alle anzeigen"
   },
+  "subscription": {
+    "tiers": {
+      "basic": "Starter",
+      "premium": "Premium",
+      "enterprise": "Enterprise"
+    },
+    "nav": {
+      "lockedAria": "{{feature}} — Premium-Funktion, tippen für Upgrade-Optionen"
+    },
+    "locked": {
+      "eyebrow": "Premium-Funktion",
+      "includesAria": "Im Upgrade enthalten",
+      "currentPlan": "Sie nutzen {{plan}}. Upgrade auf {{required}}, um dies freizuschalten."
+    },
+    "upgrade": {
+      "upgradeToPremium": "Auf Premium upgraden",
+      "contactSales": "Vertrieb kontaktieren"
+    },
+    "features": {
+      "generic": {
+        "title": "Upgrade erforderlich",
+        "benefit": "Schalten Sie mit CareTip Premium mehr Werkzeuge für Ihr Lokal frei.",
+        "f0": "Erweiterte Betriebstools",
+        "f1": "Prioritäts-Support-Optionen"
+      },
+      "advancedAnalytics": {
+        "title": "Erweiterte Analysen",
+        "benefit": "Trends, Leistungsdiagramme und Periodenvergleiche für Ihr Team.",
+        "f0": "Interaktive Charts und Trendlinien",
+        "f1": "Wochen-, Monats- und Jahresansichten",
+        "f2": "Top-Performer-Einblicke",
+        "f3": "Operative Pulse-Metriken"
+      },
+      "csvExport": {
+        "title": "CSV-Export & Berichte",
+        "benefit": "Trinkgeldaktivität für Buchhaltung und Abrechnung herunterladen.",
+        "f0": "CSV-Export mit einem Klick",
+        "f1": "Nach Datum und Status filtern",
+        "f2": "Zeitzonenbewusste Exporte"
+      },
+      "multiLocation": {
+        "title": "Multi-Standort-Unterstützung",
+        "benefit": "Trinkgeld an mehreren Standorten aus einem Dashboard verwalten.",
+        "f0": "Unbegrenzte Standorte mit Premium",
+        "f1": "QR-Codes pro Standort",
+        "f2": "Berichte pro Standort"
+      },
+      "tableQr": {
+        "title": "Tisch-QR & erweiterte QR-Verwaltung",
+        "benefit": "Gäste tippen am Tisch — mit erweiterten QR-Workflows.",
+        "f0": "QR-Codes pro Tisch",
+        "f1": "Druckfertige Marken-QR-Assets",
+        "f2": "Tischzuweisung für Mitarbeitende",
+        "f3": "Erweiterte QR-Hub-Tools"
+      },
+      "employeeGoals": {
+        "title": "Trinkgeldziele für Mitarbeitende",
+        "benefit": "Motivieren Sie Ihr Team mit messbaren Trinkgeldzielen.",
+        "f0": "Persönliche und Teamziele",
+        "f1": "Fortschritt auf Dashboards",
+        "f2": "Zielverlauf und Erfolge"
+      },
+      "brandingCustomization": {
+        "title": "Branding & Anpassung",
+        "benefit": "Gästeerlebnisse mit Ihrer Unternehmensidentität gestalten.",
+        "f0": "Firmenlogo hochladen",
+        "f1": "Marken-QR-Erlebnisse",
+        "f2": "Einheitlicher Auftritt für Gäste"
+      },
+      "apiAccess": {
+        "title": "API-Zugang",
+        "benefit": "CareTip mit Ihren internen Systemen per Enterprise-API verbinden.",
+        "f0": "REST-API-Zugang",
+        "f1": "Integrations-Support",
+        "f2": "Individuelle Automatisierung"
+      },
+      "multiBrand": {
+        "title": "Multi-Marken-Verwaltung",
+        "benefit": "CareTip über Marken und Regionen zentral ausrollen.",
+        "f0": "Multi-Marken-Rollout",
+        "f1": "Zentrale Steuerung",
+        "f2": "Berichte pro Marke"
+      },
+      "customReporting": {
+        "title": "Individuelle Berichte",
+        "benefit": "Maßgeschneiderte Berichte für Finanz- und Betriebsteams.",
+        "f0": "Eigene Report-Vorlagen",
+        "f1": "Geplante Zustellung",
+        "f2": "Finanztaugliche Exporte"
+      },
+      "dedicatedOnboarding": {
+        "title": "Dediziertes Onboarding",
+        "benefit": "Schneller live mit geführtem Onboarding für Ihre Organisation.",
+        "f0": "Kick-off-Workshop",
+        "f1": "Rollout-Playbook für Teams",
+        "f2": "Go-live-Begleitung"
+      },
+      "accountManager": {
+        "title": "Dedizierter Account Manager",
+        "benefit": "Direkter CareTip-Ansprechpartner für Ihren Erfolg.",
+        "f0": "Persönlicher Account Manager",
+        "f1": "Vierteljährliche Business Reviews",
+        "f2": "Priorisierter Eskalationsweg"
+      }
+    }
+  },
   "dashboardNav": {
     "employee": {
       "overview": "Überblick",
@@ -1732,15 +1867,13 @@
       "settings": "Einstellungen"
     },
     "business": {
-      "overview": "Überblick",
+      "overview": "Dashboard",
+      "tips": "Trinkgelder",
       "team": "Team",
-      "qrCodes": "QR Codes",
+      "qrStudio": "QR Studio",
       "locations": "Standorte",
-      "tables": "Tische",
-      "tipsActivity": "Trinkgelder & Aktivität",
-      "customerFeedback": "Gästefeedback",
-      "notifications": "Benachrichtigungen",
-      "support": "CareTip kontaktieren",
+      "customers": "Gäste",
+      "billing": "Abrechnung",
       "settings": "Einstellungen"
     }
   },
@@ -2726,7 +2859,22 @@
       "hourAgo": "vor 1 Std.",
       "hoursAgo": "vor {{count}} Std.",
       "dayAgo": "vor 1 Tag",
-      "daysAgo": "vor {{count}} Tagen"
+      "daysAgo": "vor {{count}} Tagen",
+      "justNow": "Gerade eben"
+    },
+    "performance": {
+      "title": "Deine Leistung",
+      "rank": "Team-Rang",
+      "rankValue": "#{{rank}} von {{total}}",
+      "rankHint": "Basierend auf Trinkgeldern diesen Monat",
+      "goal": "Ziel-Fortschritt",
+      "goalTarget": "Ziel {{amount}}",
+      "goalOpen": "Monatsziel setzen, um Fortschritt zu verfolgen",
+      "streak": "Trinkgeld-Serie",
+      "streakDays": "{{count}} Tage",
+      "streakHint": "Aufeinanderfolgende Tage mit Trinkgeldern",
+      "trend": "Verdienst im Zeitraum",
+      "trendHint": "Trinkgelder im gewählten Zeitraum"
     },
     "dashboard": {
       "analyticsSectionTitle": "Zeitraum-Analysen",
@@ -3099,6 +3247,7 @@
       "toastTeamMember": "Teammitglied",
       "exportFailed": "Export fehlgeschlagen. Bitte erneut versuchen.",
       "topPerformers": "Top-Performer",
+      "viewLeaderboard": "Vollständige Rangliste anzeigen",
       "topPerformerBadge": "Top-Performer",
       "newMember": "Neu im Team",
       "quickActions": "Schnellaktionen",
@@ -3107,6 +3256,7 @@
       "actionGenerateQr": "QR Codes erzeugen",
       "actionManageLocations": "Standorte verwalten",
       "actionExportReports": "Berichte exportieren",
+      "actionViewAnalytics": "Analysen & Exporte",
       "needHelpTitle": "Brauchen Sie Hilfe?",
       "needHelpDesc": "So steigern Sie die Einnahmen Ihres Teams und halten das Tippen für Gäste einfach.",
       "viewGuidelines": "Richtlinien ansehen",
@@ -3391,6 +3541,7 @@
       "toastPdfReady": "PDF zum Drucken bereit.",
       "toastPdfFail": "PDF konnte nicht erstellt werden.",
       "teamQrSubtitle": "Team-QR, Eingang oder Theke",
+      "storefrontCardHint": "Marken-Branding steckt in der QR-Karte — laden Sie das vollständige Erlebnis herunter oder drucken Sie es.",
       "labelQrUrl": "QR-Code-URL",
       "totalScans": "Scans gesamt:",
       "pendingTitle": "Geschäftsverifizierung ausstehend",
@@ -3415,6 +3566,9 @@
       "toastBulkAddStaff": "Zuerst Team anlegen.",
       "fallbackBusinessName": "Unternehmen",
       "storefrontQrHeading": "{{name}} QR",
+      "storefrontQrDesc": "Am Eingang platzieren. Gäste scannen und wählen, wem sie Trinkgeld geben.",
+      "storefrontQrUrlLabel": "Öffentliche Seite:",
+      "addLocations": "Standorte hinzufügen",
       "checkingVerification": "Verifizierungsstatus wird geprüft…",
       "pendingBody": "Ihr Lokal wird geprüft. Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann.",
       "backDashboard": "Zurück zum Dashboard",
@@ -3431,7 +3585,24 @@
       "downloadPdfLayout": "PDF-Layout herunterladen",
       "regenerateBusinessQr": "Unternehmens-QR neu erzeugen",
       "staffTagsTitle": "Team-QR-Codes",
-      "staffTagsDesc": "Individuelle QR-Codes pro Teammitglied, im gleichen Markenstil wie Schaufenster-, Tisch- und Standortcodes."
+      "staffTagsDesc": "Individuelle QR-Codes pro Teammitglied, im gleichen Markenstil wie Schaufenster-, Tisch- und Standortcodes.",
+      "designStudio": {
+        "title": "QR-Design importieren",
+        "description": "CareTip-Design-Datei laden, um Styling zu prüfen und anzuwenden. Gespeicherte Branding-Einstellungen bleiben unverändert.",
+        "presetName": "Importierte Vorlage",
+        "presetNamePlaceholder": "Design-Datei importieren, um den Namen zu sehen",
+        "displayName": "Titel auf dem QR",
+        "tagline": "Tagline auf dem QR",
+        "templateSection": "Vorlage",
+        "border": "Rahmen",
+        "shape": "QR-Form",
+        "accent": "Akzentfarbe",
+        "importOnlyHint": "Importieren Sie eine .caretip-qr-design.json oder passen Sie das geladene Design an. Änderungen gelten nur in dieser Sitzung.",
+        "previewCaption": "Live-Vorschau (Schaufenster-QR)",
+        "importDesign": "Design-Datei importieren",
+        "reset": "Auf gespeichertes Branding zurücksetzen",
+        "toastImported": "Design importiert."
+      }
     },
     "notifications": {
       "title": "Benachrichtigungen",
@@ -3473,10 +3644,472 @@
         }
       }
     },
+    "moduleNav": {
+      "comingSoon": "Bald"
+    },
+    "qrAnalytics": {
+      "totalScans": "Scans gesamt",
+      "uniqueVisitors": "Eindeutige Besucher",
+      "repeatScans": "Wiederholte Scans",
+      "topQr": "Top-QR",
+      "topLocation": "Top-Standort",
+      "topEmployeeQr": "Top-Mitarbeiter-QR",
+      "scanTrend": "Scan-Trend",
+      "scanCount": "{{count}} Scans",
+      "recentActivity": "Letzte Scan-Aktivität",
+      "emptyTrend": "Scans erscheinen hier, sobald Gäste Ihre QR-Codes öffnen."
+    },
+    "qrStudio": {
+      "eyebrow": "Produkt",
+      "title": "QR Studio",
+      "subtitle": "Markenerlebnisse gestalten, QR-Codes verwalten und druckfertige Hospitality-Assets exportieren.",
+      "navAria": "QR-Studio-Bereiche",
+      "nav": {
+        "gallery": "QR-Galerie",
+        "employees": "Mitarbeiter",
+        "locations": "Standorte",
+        "tables": "Tische",
+        "branding": "Branding",
+        "downloads": "Downloads"
+      },
+      "gallery": {
+        "inventoryTitle": "Ihre QR-Bibliothek",
+        "inventoryDesc": "Übersicht über Mitarbeiter-, Standort- und Tisch-QR-Codes.",
+        "statEmployees": "Mitarbeiter-QRs",
+        "statLocations": "Standort-QRs",
+        "statTables": "Tisch-QRs",
+        "mainVenueTitle": "Haupt-Lokal-QR",
+        "quickAccessTitle": "Nach Typ verwalten",
+        "quickAccessDesc": "Bereich öffnen zum Herunterladen, Drucken oder Teilen bestimmter QR-Codes.",
+        "manageEmployees": "Mitarbeiter-QRs",
+        "manageLocations": "Standort-QRs",
+        "manageTables": "Tisch-QRs"
+      },
+      "employees": {
+        "pageTitle": "Mitarbeiter-QR-Codes",
+        "pageDesc": "Persönliche Codes pro Teammitglied — Tags drucken oder Links teilen."
+      },
+      "locations": {
+        "pageTitle": "Standort-QR-Codes",
+        "pageDesc": "Codes pro Bereich oder Filiale, die Gäste zum Tippen scannen können."
+      },
+      "branding": {
+        "headerStyleTitle": "Header-Stil",
+        "headerStyleDesc": "Steuern Sie, wie Ihre Marke über Gäste-Trinkgeld-Flows erscheint."
+      },
+      "design": {
+        "title": "Marken-Erlebnis-Designer",
+        "subtitle": "Gestalten Sie ein vollständiges Markenerlebnis — nicht nur einen QR-Code.",
+        "navAria": "QR-Studio-Designer-Bereiche",
+        "sections": {
+          "design": "Design",
+          "branding": "Branding",
+          "qr": "QR",
+          "content": "Inhalt",
+          "export": "Export"
+        },
+        "template": "Branchenvorlage",
+        "layout": "Layout-Variante",
+        "accent": "Akzentfarbe",
+        "background": "Hintergrund",
+        "decorations": "Dekorative Ebenen",
+        "decorationsHint": "Premium-Rahmen, Ecken und Akzente außerhalb der Scan-Zone.",
+        "brandName": "Markenname",
+        "tagline": "Tagline",
+        "website": "Website",
+        "instagram": "Instagram",
+        "facebook": "Facebook",
+        "headerLogo": "Logo auf Karte",
+        "headerLogoHint": "Venue-Logo oben auf der Erlebniskarte anzeigen.",
+        "qrSize": "QR-Größe",
+        "qrSizeHint": "Über Layout-Variante — größer für Poster, kompakt für Speisekarten.",
+        "scanSafeHint": "Nur scan-sichere Formen. Kreisformen sind ausgeblendet.",
+        "cta": "Handlungsaufforderung",
+        "promo": "Werbe-Tagline",
+        "exportDesc": "Markenerlebnis exportieren. Unsichere Designs werden blockiert.",
+        "canvasTitle": "Live-Vorschau",
+        "canvasDesc": "Ihre Markenkarte aktualisiert sich sofort beim Bearbeiten.",
+        "layouts": {
+          "table_tent": "Tischaufsteller",
+          "poster": "Poster",
+          "counter": "Theken-Display",
+          "window": "Schaufenster",
+          "menu": "Speisekarten-Einlage",
+          "social": "Social Media"
+        },
+        "industries": {
+          "classic": "Klassische Gastronomie",
+          "luxury": "Luxus-Lounge",
+          "modern": "Modernes Lokal",
+          "cafe": "Café & Kaffeehaus",
+          "corporate": "Corporate",
+          "nightclub": "Nachtclub",
+          "fineDining": "Fine Dining",
+          "hotel": "Hotel & Resort",
+          "beachClub": "Beach Club",
+          "spa": "Spa & Wellness"
+        }
+      },
+      "analytics": {
+        "title": "QR-Performance",
+        "description": "So performt Ihr {{template}} Markenerlebnis bei Gästen.",
+        "scans": "Scans gesamt",
+        "unique": "Eindeutige Scans",
+        "tips": "Generierte Trinkgelder",
+        "conversion": "Conversion-Rate",
+        "demoHint": "Beispielmetriken für Premium-Walkthrough-Konten. Live-Analysen synchronisieren mit Ihren Trinkgelddaten."
+      },
+      "templates": {
+        "title": "Vorlagen-Marktplatz",
+        "description": "Premium-QR-Stile in der Vorschau. Classic ist im Starter enthalten; alle Vorlagen mit Premium.",
+        "basicHint": "Starter enthält Classic. Upgraden Sie für Luxury, Modern und Branchenvorlagen.",
+        "saveHint": "Vorlagen unter Branding anwenden, um Live-QR-Codes und Gästeseiten zu aktualisieren.",
+        "openBranding": "Branding öffnen"
+      },
+      "downloads": {
+        "title": "Downloads & Druckformate",
+        "description": "Druckfertige Assets aus Ihrer QR-Galerie erstellen.",
+        "png": "PNG",
+        "pngDesc": "Hochauflösendes QR-Bild",
+        "pdf": "PDF-Layout",
+        "pdfDesc": "Druckfertiges Blatt mit Lokalname",
+        "poster": "Poster",
+        "posterDesc": "Lobby-Poster A3/A4",
+        "tent": "Tischaufsteller",
+        "tentDesc": "Faltbare Tischkarte",
+        "sticker": "Fensteraufkleber",
+        "stickerDesc": "Quadratischer Aufkleber für Eingänge",
+        "openGallery": "QR-Galerie öffnen",
+        "futureTitle": "Demnächst",
+        "futureDesc": "Social-Media-Kits und Flyer-Exporte.",
+        "social": "Social Assets",
+        "flyer": "Flyer-Export"
+      }
+    },
+    "liveActivity": {
+      "centerTitle": "Live-Aktivität",
+      "streamLabel": "Operativ",
+      "empty": "Aktivität erscheint hier bei Trinkgeldern, QR-Scans oder Team-Änderungen.",
+      "qrScanned": "QR-Code gescannt",
+      "goalAchieved": "Ziel erreicht",
+      "goalUpdated": "Ziel aktualisiert",
+      "employeeJoined": "Mitarbeiter beigetreten",
+      "employeeInvited": "Mitarbeiter eingeladen",
+      "employeeUpdated": "Team aktualisiert",
+      "locationCreated": "Standort erstellt",
+      "billingUpdated": "Abrechnung aktualisiert",
+      "kind": {
+        "tip_received": "Trinkgeld erhalten",
+        "qr_scanned": "QR-Scan",
+        "goal_achieved": "Ziel erreicht",
+        "goal_updated": "Zielfortschritt",
+        "employee_joined": "Beitritt",
+        "employee_invited": "Einladung gesendet",
+        "employee_updated": "Team-Änderung",
+        "location_created": "Neuer Standort",
+        "billing_updated": "Abrechnungsänderung"
+      }
+    },
+    "tips": {
+      "eyebrow": "Umsatz",
+      "title": "Trinkgelder",
+      "subtitle": "Live-Trinkgeldaktivität, Transaktionen und Performance-Einblicke.",
+      "navAria": "Trinkgeld-Bereiche",
+      "nav": {
+        "live": "Live-Trinkgelder",
+        "transactions": "Transaktionen",
+        "analytics": "Analysen"
+      },
+      "liveDesc": "Operativer Stream — Trinkgelder, QR-Scans, Ziele und Team-Ereignisse in Echtzeit.",
+      "analyticsDesc": "Tiefenanalyse — Umsatz, QR, Mitarbeiter, Standorte und Trends. Nach Zeitraum filtern und exportieren.",
+      "live": {
+        "cards": {
+          "today": "Trinkgeld heute",
+          "week": "Trinkgeld diese Woche",
+          "month": "Trinkgeld diesen Monat",
+          "average": "Durchschnittliches Trinkgeld",
+          "tipCount": "{{count}} Trinkgelder",
+          "averageHint": "Basierend auf diesem Monat"
+        },
+        "feedTitle": "Live-Feed",
+        "feedEmpty": "Trinkgelder erscheinen hier, sobald Gäste zahlen.",
+        "anonymousGuest": "Gast-Trinkgeld",
+        "venueDefault": "Hauptbereich",
+        "liveBadge": "Live",
+        "timelineTitle": "Aktivitäts-Timeline",
+        "mostRecent": "zuletzt"
+      },
+      "analytics": {
+        "periodAria": "Analysezeitraum",
+        "cards": {
+          "totalTips": "Trinkgeld gesamt",
+          "activeEmployees": "Aktive Mitarbeitende",
+          "conversion": "Conversion-Rate",
+          "satisfaction": "Gästezufriedenheit",
+          "tipCount": "{{count}} Trinkgelder diesen Monat",
+          "satisfactionHint": "Aus {{count}} Bewertungen"
+        },
+        "sections": {
+          "employees": "Mitarbeiter-Analysen",
+          "locations": "Standort- & Tisch-Analysen",
+          "topQr": "Top-QR-Codes",
+          "trends": "Trendanalyse",
+          "drilldown": "Mitarbeiter-Drilldown"
+        },
+        "employeeTipCount": "{{count}} Trinkgelder",
+        "locationComparison": "Standortvergleich",
+        "tableComparison": "Tischvergleich",
+        "locationEmpty": "Standortaufteilung erscheint bei Trinkgeldern nach Bereich.",
+        "tableEmpty": "Tischaufteilung erscheint bei Tisch-QR-Nutzung.",
+        "topQrEmpty": "QR-Rankings erscheinen bei Gäste-Scans.",
+        "scans": "Scans",
+        "rankingsHint": "Vollständige Rankings, Auszeichnungen und Bestenlisten finden Sie unter",
+        "reporting": {
+          "name": "Name",
+          "tips": "Trinkgelder",
+          "count": "Anzahl",
+          "share": "Anteil",
+          "export": "Transaktionen exportieren",
+          "exportSuccess": "Export gestartet — prüfen Sie Ihre Downloads."
+        }
+      }
+    },
+    "team": {
+      "eyebrow": "Personal",
+      "title": "Team",
+      "subtitle": "Mitarbeiter, Ziele und Team-Performance verwalten.",
+      "navAria": "Team-Bereiche",
+      "nav": {
+        "employees": "Mitarbeiter",
+        "goals": "Ziele",
+        "performance": "Performance",
+        "topPerformers": "Top Performer"
+      },
+      "goalsDesc": "Team-Trinkgeldziele und Meilensteine.",
+      "performanceDesc": "Was jetzt zählt — Gesundheit, Risiken, Chancen und empfohlene Maßnahmen. Vollständige Berichte unter Analysen.",
+      "openAnalytics": "Vollständige Analysen öffnen",
+      "topPerformersDesc": "Ranglisten, Auszeichnungen und Anerkennung für Ihr Team.",
+      "goals": {
+        "summaryTracked": "Verfolgte Ziele",
+        "summaryOnTrack": "Im Plan",
+        "summaryRate": "Im-Plan-Quote",
+        "tableTitle": "Teamziele",
+        "empty": "Noch keine aktiven Ziele. Ziele erscheinen, wenn das Team Monatsziele setzt."
+      },
+      "performance": {
+        "leaderboardTitle": "Team-Rangliste",
+        "goalProgress": "{{percent}} % des Ziels",
+        "rating": "★ {{rating}} Ø",
+        "topRatedTitle": "Bestbewertet",
+        "topRatedEmpty": "Bewertungen erscheinen, wenn Gäste Feedback hinterlassen.",
+        "bi": {
+          "revenueTitle": "Umsatzanalysen",
+          "totalTips": "Trinkgelder gesamt",
+          "tipCountHint": "{{count}} Trinkgelder diesen Monat",
+          "tipGrowth": "Trinkgeld-Wachstum",
+          "tipGrowthHint": "Woche vs. Monatsdurchschnitt",
+          "avgTip": "Durchschnittliches Trinkgeld",
+          "weeklyRevenue": "Wochenumsatz",
+          "periodRevenueHint": "{{amount}} im gewählten Zeitraum",
+          "monthlyRevenueHint": "{{amount}} diesen Monat",
+          "qrTitle": "QR-Analysen",
+          "totalScans": "Scans gesamt",
+          "uniqueScans": "Eindeutige Scans",
+          "scanConversion": "Scan-zu-Trinkgeld-Conversion",
+          "mostScanned": "Meist gescannter QR",
+          "insightsTitle": "Business-Insights",
+          "insightsCardTitle": "Operative Highlights",
+          "bestDay": "Bester Tag",
+          "bestShift": "Beste Schicht",
+          "bestLocation": "Bester Standort",
+          "bestTable": "Bester Tisch",
+          "peakPeriod": "Spitzen-Trinkgeldzeit",
+          "shifts": {
+            "morning": "Frühschicht",
+            "afternoon": "Nachmittagsschicht",
+            "evening": "Abendschicht",
+            "late": "Nachtschicht",
+            "—": "—"
+          },
+          "operationalTitle": "Operative Kennzahlen",
+          "activeEmployees": "Aktive Mitarbeiter",
+          "employeesWithTips": "Mitarbeiter mit Trinkgeldern",
+          "avgPerEmployee": "Ø Trinkgeld pro Mitarbeiter",
+          "avgPerShift": "Ø Trinkgeld pro Schicht",
+          "trendsTitle": "Trendanalyse",
+          "chartTipsOverTime": "Trinkgelder im Zeitverlauf",
+          "chartScansOverTime": "Scans im Zeitverlauf",
+          "chartConversion": "Conversion-Trend",
+          "chartRevenue": "Umsatztrend",
+          "revenueLabel": "Umsatz",
+          "scanActivityByHour": "Scan-Aktivität nach Stunde"
+        },
+        "executive": {
+          "summaryTitle": "Executive Summary",
+          "healthExplain": "Der Gesundheitswert setzt sich aus Wachstum, Beteiligung, Zielen, Bewertungen und Trinkgeldaktivität zusammen — jeweils aus Live-Daten.",
+          "summary": {
+            "composite": "Periodenüberblick",
+            "collectingData": "Es werden noch ausreichend Daten für eine Zusammenfassung gesammelt.",
+            "revenueHealthy": "Umsatz stieg um {{percent}} % gegenüber dem Periodendurchschnitt.",
+            "revenueDeclining": "Umsatz sank um {{percent}} % gegenüber dem Periodendurchschnitt.",
+            "revenueStable": "Umsatz ist in diesem Zeitraum stabil.",
+            "qrGrowing": "QR-Scans stiegen in der zweiten Periodenhälfte um {{percent}} %.",
+            "qrDeclining": "QR-Scans sanken in der zweiten Periodenhälfte.",
+            "participationConcern": "Mitarbeiterbeteiligung sank von {{from}} % auf {{to}} % in der letzten Woche.",
+            "participationConcernLow": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder in diesem Zeitraum.",
+            "participationStrong": "Mitarbeiterbeteiligung ist stark bei {{percent}} %.",
+            "goalsNeedAttention": "Teamziel-Erfüllung liegt bei {{percent}} % — unter dem Ziel."
+          },
+          "healthTitle": "Geschäftsgesundheit",
+          "healthGrades": {
+            "excellent": "Ausgezeichnet",
+            "good": "Gut",
+            "fair": "Befriedigend",
+            "needs_attention": "Handlungsbedarf"
+          },
+          "trendsTitle": "Trends",
+          "healthTrendsTitle": "Geschäftsgesundheit im Trend",
+          "chartTipGrowth": "Trinkgeld-Wachstum",
+          "chartScanTrend": "Scan-Trend",
+          "chartParticipation": "Mitarbeiterbeteiligung",
+          "insightsTitle": "Wichtige Erkenntnisse",
+          "insights": {
+            "tipGrowth": "Ihre Trinkgelder stiegen diese Woche um {{percent}} % gegenüber dem Monatsdurchschnitt.",
+            "peakPeriod": "Spitzenaktivität zwischen {{period}}.",
+            "tableLift": "{{table}} generiert {{percent}} % mehr Trinkgelder als der Durchschnitt.",
+            "participationDecline": "Mitarbeiterbeteiligung sank von {{from}} % auf {{to}} % in der letzten Woche.",
+            "participationRise": "Mitarbeiterbeteiligung stieg von {{from}} % auf {{to}} % in der letzten Woche.",
+            "qrMomentum": "QR-Scans stiegen in der zweiten Periodenhälfte um {{percent}} %."
+          },
+          "opportunitiesTitle": "Chancen",
+          "risksTitle": "Risiken",
+          "recommendationsTitle": "Empfehlungen",
+          "risks": {
+            "tipVolumeDecline": "Trinkgeldvolumen sank um {{percent}} % gegenüber dem Periodendurchschnitt.",
+            "lowParticipation": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder in diesem Zeitraum.",
+            "participationDecline": "Mitarbeiterbeteiligung sank von {{from}} % auf {{to}} % in der letzten Woche.",
+            "goalCompletionLow": "Teamziel-Erfüllung liegt bei {{percent}} % — unter dem Ziel.",
+            "noTipActivity": "Keine erfolgreichen Trinkgelder trotz aktivem Personal.",
+            "qrScanDecline": "QR-Scans sanken um {{percent}} % in der zweiten Periodenhälfte.",
+            "locationUnderperformance": "{{location}}: nur {{count}} Scans — deutlich unter dem Standort-Durchschnitt.",
+            "satisfactionLow": "Durchschnittliche Gästebewertung: {{rating}} — unter dem Ziel."
+          },
+          "recommendations": {
+            "boostVisibility": "QR-Sichtbarkeit an frequentierten Punkten erhöhen.",
+            "promoteTeamQrs": "Mitarbeiterengagement prüfen und Team-QR-Codes bewerben.",
+            "enableGoals": "Teamziele aktivieren oder prüfen.",
+            "maintainMomentum": "Trinkgelder stiegen um {{percent}} % — QRs sichtbar halten.",
+            "reviewQrPlacement": "QR-Platzierung an schwachen Standorten prüfen.",
+            "reviewFeedback": "Gästefeedback prüfen und wiederkehrende Themen adressieren.",
+            "replicateLocation": "Erfolg des Top-Standorts auf andere Bereiche übertragen.",
+            "recognizePerformer": "{{name}} anerkennen — {{share}} % der Perioden-Trinkgelder."
+          },
+          "opportunities": {
+            "lowParticipation": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder — Potenzial für mehr Engagement.",
+            "teamGoals": "Teamziele zur Steigerung des Engagements erwägen.",
+            "tipGrowth": "Trinkgelder stiegen um {{percent}} % — Momentum beibehalten.",
+            "qrScanGrowth": "QR-Scans stiegen um {{percent}} % in der zweiten Periodenhälfte.",
+            "topLocation": "{{location}} führt mit {{count}} Scans.",
+            "topTable": "{{table}} führt Tisch-Scans mit {{count}}.",
+            "employeeExcellence": "{{name}}: {{share}} % der Perioden-Trinkgelder.",
+            "topTippingTable": "{{table}}: {{share}} % des jüngsten Trinkgeld-Umsatzes."
+          },
+          "evidence": {
+            "tipVolumeDecline": "Quelle: week.totalTips vs period.totalTips/4.33 — Wachstum {{percent}} %.",
+            "lowParticipation": "Quelle: {{receiving}} von {{active}} aktiven Mitarbeitenden ({{percent}} %).",
+            "participationDecline": "Periode {{from}} % vs Woche {{to}} % (eindeutige Mitarbeitende in recentTips).",
+            "goalCompletionLow": "Quelle: durchschnittliche Zielerfüllung {{percent}} %.",
+            "noTipActivity": "Quelle: 0 Trinkgelder bei {{active}} aktiven Mitarbeitenden.",
+            "qrScanDecline": "Quelle: Scan-Trend-Hälften — {{percent}} % Änderung, {{totalScans}} Scans gesamt.",
+            "locationUnderperformance": "Quelle: {{location}} mit {{count}} vs ~{{average}} Standort-Durchschnitt.",
+            "satisfactionLow": "Quelle: Ø-Bewertung {{rating}} aus {{count}} Bewertungen.",
+            "lowParticipationOpp": "Beteiligung {{percent}} % ({{active}} aktiv).",
+            "teamGoalsOpp": "Nur {{tracked}} Ziele für {{active}} aktive Mitarbeitende.",
+            "tipGrowthOpp": "Wochenwachstum {{percent}} %.",
+            "qrScanGrowthOpp": "Scan-Momentum {{percent}} % ({{totalScans}} Scans).",
+            "topLocationOpp": "{{location}}: {{count}} Scans (Top-Standort).",
+            "topTableOpp": "{{table}}: {{count}} Scans (Top-Tisch).",
+            "employeeExcellenceOpp": "{{name}}: €{{tips}} ({{share}} % der Periode).",
+            "topTippingTableOpp": "{{table}}: {{share}} % des jüngsten Umsatzes.",
+            "recBoostVisibility": "Verknüpft mit Risiko sinkendes Trinkgeldvolumen.",
+            "recPromoteTeamQrs": "Verknüpft mit Beteiligungsrisiko.",
+            "recEnableGoals": "Verknüpft mit Ziel-Erfüllungsrisiko.",
+            "recReviewQrPlacement": "Verknüpft mit QR- oder Standortrisiko.",
+            "recReviewFeedback": "Verknüpft mit Gästezufriedenheitsrisiko."
+          },
+          "snapshotTitle": "Performance-Snapshot",
+          "snapshot": {
+            "health": "Gesundheitswert",
+            "growth": "Wachstumsrate",
+            "participation": "Mitarbeiterbeteiligung",
+            "goalCompletion": "Zielerreichung",
+            "qrConversion": "QR-Conversion",
+            "satisfaction": "Gästezufriedenheit",
+            "locations": "Aktive Standorte"
+          }
+        },
+        "kpi": {
+          "growth": "Trinkgeld-Wachstum",
+          "growthHint": "{{count}} Trinkgelder diesen Monat",
+          "revenue": "Umsatzwirkung",
+          "revenueHint": "Erfolgreiche Trinkgelder diesen Monat",
+          "participation": "Mitarbeiterbeteiligung",
+          "participationHint": "{{active}} von {{total}} trinkgeld-bereit",
+          "engagement": "Gäste-Engagement",
+          "engagementRating": "Aus {{count}} Gästebewertungen",
+          "engagementGoals": "{{percent}} % Ziele im Plan"
+        }
+      },
+      "topPerformers": {
+        "awardsTitle": "Auszeichnungen",
+        "awards": {
+          "employeeOfMonth": "Mitarbeiter des Monats",
+          "risingStar": "Aufsteiger",
+          "hospitality": "Beste Gastfreundschaft"
+        },
+        "rankingsTitle": "Mitarbeiter-Ranglisten",
+        "categories": {
+          "topEarners": "Top-Verdiener",
+          "fastestGrowing": "Schnellstes Wachstum",
+          "highestAvg": "Höchstes Ø-Trinkgeld"
+        },
+        "empty": "Noch keine Ranglisten für diesen Zeitraum.",
+        "locationLeaderboard": "Standort-Rangliste",
+        "locationEmpty": "Trinkgelder nach Standort erscheinen bei Bereichs-QR-Scans.",
+        "mainVenue": "Hauptlokal",
+        "tipCount": "{{count}} Trinkgelder",
+        "recognitionTitle": "Anerkennung",
+        "badges": {
+          "achievements": "Erfolge",
+          "streaks": "Aktive Serien",
+          "onTrack": "Ziele im Plan"
+        }
+      }
+    },
+    "customers": {
+      "eyebrow": "Gäste",
+      "title": "Gäste",
+      "subtitle": "Gästefeedback und Bewertungen aus Trinkgeld-Journeys.",
+      "navAria": "Gäste-Bereiche",
+      "nav": {
+        "feedback": "Feedback",
+        "reviews": "Bewertungen"
+      },
+      "reviewsDesc": "Sternebewertungen und Gästebewertungs-Zusammenfassungen.",
+      "reviews": {
+        "avgRating": "Durchschnittsbewertung",
+        "ratingCount": "{{count}} Bewertungen",
+        "totalReviews": "Bewertungen gesamt",
+        "fiveStar": "5-Sterne-Bewertungen",
+        "recentTitle": "Aktuelle Bewertungen",
+        "empty": "Bewertungen erscheinen, wenn Gäste ihre Erfahrung bewerten.",
+        "guest": "Gast"
+      }
+    },
     "settings": {
       "eyebrow": "Arbeitsbereich",
       "title": "Einstellungen",
-      "subtitle": "Konto, Betrieb, Sicherheit und Benachrichtigungen an einem Ort verwalten.",
+      "subtitle": "Kontoeinstellungen, Sicherheit und Integrationen.",
       "navAria": "Einstellungsbereiche",
       "loading": "Wird geladen…",
       "sections": {
@@ -3490,10 +4123,18 @@
         "notificationsDesc": "E-Mail- und Alert-Einstellungen",
         "security": "Sicherheit",
         "securityDesc": "Passwort und Zwei-Faktor-Authentifizierung",
-        "billing": "Abrechnung & Abo",
-        "billingDesc": "Gebühren, Modell und Aktivitätslinks",
-        "branding": "Branding & QR",
-        "brandingDesc": "QR-Codes und Markenmaterial"
+        "integrations": "Integrationen",
+        "integrationsDesc": "Drittanbieter-Tools und Webhooks verbinden",
+        "language": "Sprache",
+        "languageDesc": "Anzeigesprache für Ihr Dashboard"
+      },
+      "integrations": {
+        "comingSoon": "POS-, PMS- und Webhook-Integrationen kommen demnächst."
+      },
+      "language": {
+        "label": "Dashboard-Sprache",
+        "en": "English",
+        "de": "Deutsch"
       },
       "panels": {
         "generalTitle": "Allgemein",
@@ -3504,20 +4145,125 @@
         "notificationsTitle": "Benachrichtigungen",
         "notificationsDesc": "Wählen Sie, worüber wir Sie per E-Mail informieren",
         "billingTitle": "Abrechnung & Abo",
-        "billingDesc": "Plan anzeigen, Stripe-Abrechnung verwalten und upgraden",
+        "billingDesc": "Plan anzeigen, Zahlungsmethoden verwalten und Rechnungen herunterladen.",
+        "integrationsTitle": "Integrationen",
+        "integrationsDesc": "Externe Systeme mit CareTip verbinden",
+        "languageTitle": "Sprache",
+        "languageDesc": "Sprache der Dashboard-Oberfläche",
         "twoFactorOn": "Zwei-Faktor-Authentifizierung ist aktiviert.",
-        "twoFactorOff": "Zwei-Faktor-Authentifizierung ist nicht aktiviert.",
-        "teamTitle": "Team & Rollen",
-        "teamDesc": "Team im Dashboard verwalten",
-        "teamCardTitle": "Mitarbeiterverwaltung",
-        "teamCardDesc": "Mitarbeiter, Rollen, Einladungscodes und Tischzuweisungen",
-        "brandingTitle": "Branding & QR",
-        "brandingDesc": "Gastseitige QR-Erlebnisse anpassen",
-        "brandingCardTitle": "QR-Code-Verwaltung",
-        "brandingCardDesc": "Lokal- und Team-QR herunterladen, drucken und neu erzeugen"
+        "twoFactorOff": "Zwei-Faktor-Authentifizierung ist nicht aktiviert."
+      }
+    },
+    "branding": {
+      "title": "Gästeerlebnis branden",
+      "description": "Logo, Farben und individuelle Texte für ein professionelles Gästeerlebnis.",
+      "loading": "Branding-Einstellungen werden geladen…",
+      "logoTitle": "Unternehmenslogo",
+      "logoDesc": "In QR-Codes (Premium), Gäste-Headern und Drucklayouts.",
+      "uploadLogo": "Logo hochladen",
+      "bannerTitle": "Lokal-Banner",
+      "bannerDesc": "Hero-Bild auf Gäste-Landingpages — Hotels, Restaurants und Lounges.",
+      "uploadBanner": "Banner hochladen",
+      "colorsTitle": "Markenfarben",
+      "colorsDesc": "Primärfarbe für QR-Rahmen und Gäste-UI; Sekundärfarbe für QR-Module.",
+      "primaryColor": "Primärfarbe",
+      "secondaryColor": "Sekundärfarbe",
+      "messagingTitle": "Gästetexte",
+      "messagingDesc": "Begrüßung auf Trinkgeldseiten und personalisierte Dankesnachricht.",
+      "welcomeLabel": "Willkommensnachricht",
+      "welcomePlaceholder": "Willkommen bei {{name}}",
+      "thankYouLabel": "Dankesnachricht",
+      "thankYouPlaceholder": "Vielen Dank für Ihre Unterstützung. Ihre Wertschätzung bedeutet uns viel.",
+      "save": "Branding speichern",
+      "toastSaved": "Branding-Einstellungen gespeichert.",
+      "toastSaveError": "Branding-Einstellungen konnten nicht gespeichert werden.",
+      "toastLogoSaved": "Logo aktualisiert.",
+      "toastBannerSaved": "Banner hochgeladen.",
+      "toastImageType": "Bitte wählen Sie eine Bilddatei.",
+      "toastLogoSize": "Logo darf maximal 5 MB groß sein.",
+      "toastBannerSize": "Banner darf maximal 8 MB groß sein.",
+      "toastInvalidColor": "Gültige 6-stellige HEX-Farben eingeben (z. B. #EB992C).",
+      "toastWelcomeMax": "Willkommensnachricht max. 120 Zeichen.",
+      "toastThankYouMax": "Dankesnachricht max. 250 Zeichen.",
+      "identityTitle": "Markenidentität",
+      "identityDesc": "So erscheint Ihr Betrieb auf QR-Codes und Gäste-Trinkgeldseiten.",
+      "displayNameLabel": "Anzeigename",
+      "taglineLabel": "Tagline",
+      "taglinePlaceholder": "Außergewöhnlicher Service bei jedem Besuch",
+      "toastDisplayNameMax": "Anzeigename max. 80 Zeichen.",
+      "toastTaglineMax": "Tagline max. 120 Zeichen.",
+      "toastInvalidQrColor": "Gültige 6-stellige HEX-Farben für QR-Styling eingeben.",
+      "qrTemplateTitle": "QR-Vorlagen",
+      "qrTemplateDesc": "Wählen Sie einen Stil passend zu Ihrem Betrieb. Premium-Vorlagen machen QR-Codes zu Markenassets.",
+      "templateUpgrade": "Upgrade zum Freischalten",
+      "qrStyleTitle": "QR-Gestaltung",
+      "qrStyleDesc": "Rahmen, Form und Farben der QR-Karten fein abstimmen.",
+      "qrBorderLabel": "Rahmenstil",
+      "qrShapeLabel": "QR-Form",
+      "qrAccentLabel": "Akzentfarbe",
+      "qrBackgroundLabel": "Hintergrundfarbe",
+      "templates": {
+        "classic": "Klassisch",
+        "luxury": "Luxus",
+        "modern": "Modern",
+        "nature": "Natur",
+        "corporate": "Corporate",
+        "nightlife": "Nightlife",
+        "restaurant": "Restaurant",
+        "hotel": "Hotel"
+      },
+      "qrBorders": {
+        "none": "Keiner",
+        "rounded": "Abgerundet",
+        "double": "Doppelt",
+        "ornate": "Verziert",
+        "minimal": "Minimal"
+      },
+      "qrShapes": {
+        "square": "Quadrat",
+        "rounded": "Abgerundet",
+        "circle": "Weicher Kreis (scan-sicher abgerundet)"
+      }
+    },
+    "qrReliability": {
+      "title": "QR-Scan-Qualität",
+      "validating": "Scan-Test läuft…",
+      "contrast": "{{ratio}}:1 Kontrast",
+      "passHint": "Dieses Design hat den Decode-Test bestanden und ist druckbereit.",
+      "exportBlocked": "Dieser QR hat den Scan-Test nicht bestanden. Farben oder Form anpassen, bevor Sie speichern oder exportieren.",
+      "exportBlockedShort": "Export blockiert — Scan-Test fehlgeschlagen",
+      "saveBlocked": "Speichern nicht möglich — QR-Design hat den Scan-Zuverlässigkeitstest nicht bestanden.",
+      "toastUnsafeContrast": "QR-Modulfarben brauchen stärkeren Kontrast (mindestens 3:1).",
+      "grades": {
+        "excellent": "Ausgezeichnet",
+        "good": "Gut",
+        "risky": "Riskant",
+        "unscannable": "Nicht scannbar"
+      },
+      "warnings": {
+        "low_contrast": "Modulkontrast liegt unter dem empfohlenen Niveau für Außenscans.",
+        "unsafe_colors": "Dunkle und helle Module sind zu ähnlich für zuverlässiges Scannen.",
+        "logo_too_large": "Center-Logo überschreitet die sichere 20%-Fläche.",
+        "circle_shape_sanitized": "Kreis-Stil wird als sicheres abgerundetes Quadrat gerendert, um Finder-Muster zu schützen.",
+        "decode_failed": "Eine Kamera konnte diesen QR nicht decodieren — er scannt in Produktion möglicherweise nicht.",
+        "url_mismatch": "Decodierter Inhalt stimmt nicht mit der erwarteten Tipp-URL überein."
       }
     },
     "billing": {
+      "moduleEyebrow": "Abonnement",
+      "moduleTitle": "Abrechnung",
+      "moduleSubtitle": "Plan, Rechnungen und Zahlungsmethoden verwalten.",
+      "navAria": "Abrechnungsbereiche",
+      "nav": {
+        "subscription": "Abonnement",
+        "invoices": "Rechnungen",
+        "paymentMethods": "Zahlungsmethoden",
+        "history": "Abrechnungsverlauf"
+      },
+      "historyDesc": "Abo-Ereignisse und Abrechnungsaktivität.",
+      "invoicesDesc": "Rechnungen im Stripe-Kundenportal herunterladen.",
+      "invoicesHint": "Rechnungen und Belege werden sicher über Stripe verwaltet.",
+      "openStripePortal": "Abrechnungsportal öffnen",
       "loadError": "Abrechnungsdaten konnten nicht geladen werden.",
       "loading": "Abrechnung wird geladen…",
       "retry": "Erneut versuchen",
@@ -3612,6 +4358,54 @@
           "f6": "API- & Integrations-Support",
           "f7": "Rechnungs- & Einkaufsabrechnung"
         }
+      }
+    },
+    "commercial": {
+      "title": "Plan-Fit & Nutzung",
+      "desc": "Evidenzbasierte Signale der letzten 30 Tage — ohne Verkaufsdruck.",
+      "loadError": "Kommerzielle Einblicke konnten nicht geladen werden.",
+      "utilizationTitle": "Feature-Nutzung",
+      "hits30d": "{{count}} Signale in 30 Tagen",
+      "inferred": "aus Kontodaten",
+      "upgradeTitle": "Upgrade-Möglichkeiten",
+      "upgradeDisclaimer": "Nur sichtbar, wenn Ihre Nutzung Starter übersteigt. Sie können Ihren aktuellen Plan behalten.",
+      "suggestedTier": "Vorgeschlagener Plan: {{tier}}",
+      "viewPlans": "Pläne vergleichen",
+      "retentionTitle": "Kontogesundheit",
+      "retentionLevel": {
+        "low": "Keine signifikanten Risikosignale.",
+        "medium": "Einige Aktivitätsmuster verdienen Aufmerksamkeit.",
+        "high": "Mehrere Risikosignale — bitte prüfen."
+      },
+      "features": {
+        "qr_studio": "QR Studio",
+        "qr_analytics": "QR-Analysen",
+        "analytics_page": "Trinkgeld-Analysen",
+        "performance_page": "Team-Performance",
+        "csv_export": "CSV-Export",
+        "branding": "Branding",
+        "employee_goals": "Mitarbeiterziele",
+        "multi_location": "Multi-Standort",
+        "table_qr": "Tisch-QR"
+      },
+      "opportunities": {
+        "analytics_usage": "Sie besuchten Analyse-Seiten {{visits}} Mal — Premium bietet tiefere Berichte.",
+        "qr_intelligence": "Intensive QR-Nutzung (Analysen: {{qrAnalytics}}, Studio: {{qrStudio}}) — Premium ergänzt QR Intelligence.",
+        "team_scale": "{{staffCount}} aktive Mitarbeitende — Premium skaliert besser für größere Teams.",
+        "multi_location": "{{locationCount}} Standorte — Premium enthält Multi-Standort.",
+        "table_qr": "{{tableCount}} Tische konfiguriert — Tisch-QR ist Premium.",
+        "csv_export": "Sie exportierten Daten {{attempts}} Mal — CSV-Export ist in Premium enthalten.",
+        "employee_goals": "Mitarbeiterziele werden genutzt — in Premium enthalten.",
+        "branding": "Individuelles Branding ist konfiguriert — Premium bietet volle Branding-Tools.",
+        "enterprise_scale": "Skalierung ({{locationCount}} Standorte, {{staffCount}} Personal, {{qrScans}} QR-Scans) passt möglicherweise zu Enterprise."
+      },
+      "retentionSignals": {
+        "cancel_at_period_end": "Kündigung geplant für {{effective}}.",
+        "payment_past_due": "Zahlungsproblem: Abo-Status ist {{status}}.",
+        "abandoned_onboarding": "Onboarding unvollständig seit {{days}} Tagen.",
+        "tips_decline": "Trinkgeldvolumen sank {{percent}}% vs. vorherige 30 Tage ({{current}} vs. {{previous}}).",
+        "qr_scans_decline": "QR-Scan-Aktivität sank {{percent}}% vs. vorherige 30 Tage ({{current}} vs. {{previous}}).",
+        "no_tip_activity": "Keine Trinkgelder in 60 Tagen bei {{staffCount}} aktiven Mitarbeitenden."
       }
     },
     "accountSettings": {
@@ -3719,6 +4513,52 @@
     "statStaffChange": "Mitarbeitende mit CareTip Konten",
     "statActiveUsers": "Aktive Nutzer",
     "statActiveUsersChange": "Konten mit aktivierter Anmeldung",
+    "subscriptionBreakdown": {
+      "title": "Abo-Mix",
+      "desc": "Aktive Betriebe nach Plan",
+      "basic": "Basic",
+      "premium": "Premium",
+      "enterprise": "Enterprise"
+    },
+    "commercial": {
+      "title": "Kommerzielle Intelligence",
+      "desc": "Wachstum, Risiko, Upgrade-Chancen und Enterprise-Bereitschaft aus Plattformdaten.",
+      "subscriptionTitle": "Abo-Intelligence",
+      "subscriptionPeriod": "Letzte {{days}} Tage aus Abo-Audit-Ereignissen",
+      "upgrades": "Upgrades",
+      "downgrades": "Downgrades",
+      "cancellationsScheduled": "Geplante Kündigungen",
+      "paymentFailures": "Zahlungsfehler",
+      "renewals": "Erfolgreiche Verlängerungen",
+      "activeSubscriptions": "Aktive Abos",
+      "cancelAtPeriodEnd": "Kündigung zum Periodenende",
+      "pastDue": "Überfällig",
+      "growthCandidates": "Wachstumskandidaten",
+      "atRisk": "Risikobetriebe",
+      "premiumOpportunities": "Premium-Chancen",
+      "enterpriseCandidates": "Enterprise-Kandidaten",
+      "enterpriseReadiness": "Enterprise-Bereitschaft (Plattform)",
+      "enterpriseScore": "Score: {{score}} / {{max}}",
+      "none": "Keine Treffer in der aktuellen Stichprobe.",
+      "reasons": {
+        "strong_tip_growth": "Trinkgeldvolumen wuchs {{growth}}% ({{tips30d}} Trinkgelder in 30 Tagen).",
+        "tips_decline": "Trinkgeldvolumen sank {{percent}}%.",
+        "qr_scans_decline": "QR-Scans sanken {{percent}}%.",
+        "cancel_at_period_end": "Kündigung geplant.",
+        "payment_past_due": "Zahlung überfällig ({{status}}).",
+        "abandoned_onboarding": "Onboarding unvollständig ({{days}} Tage).",
+        "no_tip_activity": "Keine Trinkgeldaktivität bei aktivem Personal.",
+        "analytics_usage": "Intensive Analyse-Nutzung ({{visits}} Besuche).",
+        "qr_intelligence": "Intensive QR-Nutzung.",
+        "team_scale": "{{staffCount}} Mitarbeitende auf Basic.",
+        "multi_location": "{{locationCount}} Standorte auf Basic.",
+        "table_qr": "Tisch-QR auf Basic in Nutzung.",
+        "csv_export": "CSV-Export auf Basic versucht.",
+        "employee_goals": "Ziele auf Basic in Nutzung.",
+        "branding": "Branding auf Basic konfiguriert.",
+        "enterprise_scale": "{{locations}} Standorte, {{staff}} Personal, {{qrScans30d}} QR-Scans."
+      }
+    },
     "analyticsTitle": "Analysen",
     "analyticsSubtitle": "Letzte {{days}} Tage ({{tz}}), Kennzahlen in Echtzeit",
     "timezoneAria": "Zeitzone für Analysen",

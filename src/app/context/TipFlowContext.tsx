@@ -29,10 +29,10 @@ export interface TipFlowState {
 
 export interface TippingVenuePayload {
   locationId: string;
-  tableId: string;
   locationName: string;
-  tableName: string;
-  qrSlug: string;
+  tableId?: string | null;
+  tableName?: string | null;
+  qrSlug?: string | null;
 }
 
 interface TipFlowContextValue extends TipFlowState {
@@ -108,10 +108,10 @@ export function TipFlowProvider({ children }: { children: ReactNode }) {
         ? {
             ...prev,
             locationId: venue.locationId,
-            tableId: venue.tableId,
+            tableId: venue.tableId ?? null,
             tippingLocationName: venue.locationName,
-            tippingTableName: venue.tableName,
-            tableQrSlug: venue.qrSlug,
+            tippingTableName: venue.tableName ?? null,
+            tableQrSlug: venue.qrSlug ?? null,
           }
         : {
             ...prev,

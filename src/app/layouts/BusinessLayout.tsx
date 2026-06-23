@@ -15,6 +15,7 @@ import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 import { VerificationPendingBanner } from "../components/business/VerificationPendingBanner";
 import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificationRealtime";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
+import { useCommercialPageTracking } from "../hooks/useCommercialPageTracking";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -29,6 +30,7 @@ export function BusinessLayout() {
 
   useBusinessVerificationRealtime(isAppReady && !user?.impersonation);
   useRegisterPagePaintReady("business-layout-paint");
+  useCommercialPageTracking(isAppReady && !user?.impersonation);
 
   return (
     <div className="relative min-h-screen bg-background">

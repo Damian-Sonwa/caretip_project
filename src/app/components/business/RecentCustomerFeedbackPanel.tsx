@@ -77,7 +77,7 @@ export function RecentCustomerFeedbackPanel({
           </CardDescription>
         </div>
         <Button variant="ghost" size="sm" className="shrink-0" asChild>
-          <Link to="/dashboard/customer-feedback">{t("dashboard.viewAll")}</Link>
+          <Link to="/dashboard/customers/feedback">{t("dashboard.viewAll")}</Link>
         </Button>
       </CardHeader>
       <CardContent>

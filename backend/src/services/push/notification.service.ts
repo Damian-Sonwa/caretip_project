@@ -17,17 +17,17 @@ function defaultUrlForType(type: NotificationType, role: string | null): string 
   switch (type) {
     case "tip_received":
     case "qr_payment_success":
-      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/tip-history";
+      return role === "MANAGER" ? "/dashboard/tips/transactions" : "/employee/tip-history";
     case "payout_paid":
-      return role === "MANAGER" ? "/dashboard/transactions" : "/employee/tip-history";
+      return role === "MANAGER" ? "/dashboard/tips/transactions" : "/employee/tip-history";
     case "new_login":
       return role === "MANAGER"
         ? "/dashboard/settings?section=security"
         : "/employee/settings";
     case "employee_invited":
-      return role === "MANAGER" ? "/dashboard/staff-management" : "/employee/dashboard";
+      return role === "MANAGER" ? "/dashboard/team/employees" : "/employee/dashboard";
     case "qr_scan":
-      return "/dashboard/qr-code-management";
+      return "/dashboard/qr-studio/gallery";
     case "admin_announcement":
     case "system_alert":
     case "support_ticket_created":

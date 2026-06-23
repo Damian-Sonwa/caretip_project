@@ -3,6 +3,8 @@ import { Check, Pencil, Plus, Target, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { LockedFeatureCard } from "../../components/subscription/LockedFeatureCard";
 import {
   archiveMyGoal,
   createMyGoal,
@@ -44,6 +46,10 @@ const iconBtn =
 export function EmployeeTipGoalsPage() {
   const { t } = useTranslation();
   const { user, authReady, sessionValidated } = useRequireAuth();
+  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+    enabled: authReady && user?.role === "employee",
+    role: user?.role === "employee" ? "employee" : null,
+  });
   const [loading, setLoading] = useState(true);
   const [goals, setGoals] = useState<EmployeeGoalRow[]>([]);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -135,6 +141,20 @@ export function EmployeeTipGoalsPage() {
 
   if (!user || user.role !== "employee") {
     return null;
+  }
+
+  if (ready && !hasFeature("employeeGoals")) {
+    return (
+      <div className={employeeUi.page}>
+        <div className={employeeUi.pageInner}>
+          <EmployeePageHeader
+            title={t("employee.tipGoals.title")}
+            subtitle={t("employee.tipGoals.subtitle")}
+          />
+          <LockedFeatureCard featureKey="employeeGoals" tier={tier} className="mt-6" />
+        </div>
+      </div>
+    );
   }
 
   return (

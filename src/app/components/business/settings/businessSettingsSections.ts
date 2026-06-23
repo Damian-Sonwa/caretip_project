@@ -3,11 +3,10 @@ import type { CareIconName } from "@/components/icons";
 export type BusinessSettingsSectionId =
   | "general"
   | "business"
-  | "team"
   | "notifications"
   | "security"
-  | "billing"
-  | "branding";
+  | "integrations"
+  | "language";
 
 export type BusinessSettingsSection = {
   id: BusinessSettingsSectionId;
@@ -30,12 +29,6 @@ export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
     icon: "hospitalityVenue",
   },
   {
-    id: "team",
-    labelKey: "business.settings.sections.team",
-    descriptionKey: "business.settings.sections.teamDesc",
-    icon: "team",
-  },
-  {
     id: "notifications",
     labelKey: "business.settings.sections.notifications",
     descriptionKey: "business.settings.sections.notificationsDesc",
@@ -48,25 +41,45 @@ export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
     icon: "security",
   },
   {
-    id: "billing",
-    labelKey: "business.settings.sections.billing",
-    descriptionKey: "business.settings.sections.billingDesc",
-    icon: "billing",
+    id: "integrations",
+    labelKey: "business.settings.sections.integrations",
+    descriptionKey: "business.settings.sections.integrationsDesc",
+    icon: "support",
   },
   {
-    id: "branding",
-    labelKey: "business.settings.sections.branding",
-    descriptionKey: "business.settings.sections.brandingDesc",
-    icon: "branding",
+    id: "language",
+    labelKey: "business.settings.sections.language",
+    descriptionKey: "business.settings.sections.languageDesc",
+    icon: "general",
   },
 ] as const;
 
 export const BUSINESS_SETTINGS_DEFAULT_SECTION: BusinessSettingsSectionId = "general";
 
+const LEGACY_SECTION_REDIRECTS: Record<string, BusinessSettingsSectionId | "external"> = {
+  profile: "business",
+  account: "general",
+  "profile-settings": "general",
+  team: "external",
+  billing: "external",
+  branding: "external",
+};
+
 export function parseBusinessSettingsSection(raw: string | null): BusinessSettingsSectionId {
-  if (raw === "profile" || raw === "business") return "business";
-  if (raw === "account" || raw === "profile-settings") return "general";
+  if (!raw) return BUSINESS_SETTINGS_DEFAULT_SECTION;
+  const mapped = LEGACY_SECTION_REDIRECTS[raw];
+  if (mapped === "external") return BUSINESS_SETTINGS_DEFAULT_SECTION;
+  if (mapped) return mapped;
   const valid = BUSINESS_SETTINGS_SECTIONS.some((s) => s.id === raw);
-  if (raw && valid) return raw as BusinessSettingsSectionId;
+  if (valid) return raw as BusinessSettingsSectionId;
   return BUSINESS_SETTINGS_DEFAULT_SECTION;
+}
+
+export function legacySettingsSectionRedirectTarget(
+  raw: string | null,
+): "/dashboard/billing/subscription" | "/dashboard/qr-studio/branding" | "/dashboard/team/employees" | null {
+  if (raw === "billing") return "/dashboard/billing/subscription";
+  if (raw === "branding") return "/dashboard/qr-studio/branding";
+  if (raw === "team") return "/dashboard/team/employees";
+  return null;
 }

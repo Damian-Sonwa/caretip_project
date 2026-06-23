@@ -9,6 +9,9 @@ export type SubscriptionCapability =
   | "employeeGoals"
   | "brandingCustomization";
 
+/** Phase B.2 — canonical feature key (1:1 with SubscriptionCapability today). */
+export type FeatureKey = SubscriptionCapability;
+
 const PREMIUM_CAPABILITIES: SubscriptionCapability[] = [
   "advancedAnalytics",
   "csvExport",
@@ -58,3 +61,31 @@ export function isEmployeeTipsScopeAllowedForTier(
 }
 
 export const BASIC_MAX_LOCATIONS = 1;
+
+/** Manager tips ledger: advanced filters / full scope require Premium+. */
+export function businessTipsQueryRequiresAdvancedAnalytics(query: {
+  scope?: string;
+  employeeId?: string;
+  locationId?: string;
+  tableId?: string;
+  range?: string;
+  from?: Date | null;
+  to?: Date | null;
+}): boolean {
+  if (query.scope === "full" || query.scope === "analytics") return true;
+  if (query.employeeId || query.locationId || query.tableId) return true;
+  if (query.range === "custom") return true;
+  if (query.from || query.to) return true;
+  return false;
+}
+
+/** Employee tip history: custom date ranges require Premium+. */
+export function employeeTipsListQueryRequiresAdvancedAnalytics(query: {
+  range?: string;
+  from?: Date | null;
+  to?: Date | null;
+}): boolean {
+  if (query.range === "custom") return true;
+  if (query.from || query.to) return true;
+  return false;
+}

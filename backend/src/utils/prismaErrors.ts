@@ -4,3 +4,8 @@ import { Prisma } from "@prisma/client";
 export function isPrismaPoolTimeout(err: unknown): boolean {
   return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2024";
 }
+
+/** Prisma P2002 — unique constraint violation (used for atomic QR scan dedupe). */
+export function isPrismaUniqueViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002";
+}

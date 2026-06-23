@@ -325,7 +325,7 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-foreground">{t("sampleDashboard.teamTitle")}</h3>
                   <Link
-                    to="/dashboard/transactions"
+                    to="/dashboard/tips/transactions"
                     className="text-sm text-accent hover:text-accent/80 transition-colors"
                   >
                     {t("sampleDashboard.tipsActivityLink")}
@@ -376,7 +376,7 @@ export function DashboardPage() {
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-foreground">{t("sampleDashboard.recentActivity")}</h3>
                   <Link
-                    to="/dashboard/transactions"
+                    to="/dashboard/tips/transactions"
                     className="text-sm text-accent hover:text-accent/80 transition-colors"
                   >
                     {t("sampleDashboard.viewAll")}

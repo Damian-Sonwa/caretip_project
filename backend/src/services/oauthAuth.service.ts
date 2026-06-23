@@ -13,6 +13,7 @@ import { applyEmailVerificationBypassIfEligible } from "./emailVerificationBypas
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
+import { scheduleWelcomeEmailBestEffort } from "./emailVerification.service.js";
 
 const businessIncludeForOAuth = {
   select: {
@@ -292,6 +293,14 @@ export async function authenticateWithOAuth(
         },
       },
       include: { business: true },
+    });
+    scheduleWelcomeEmailBestEffort({
+      userId: created.id,
+      email: created.email,
+      explicitLocale: body.locale ?? null,
+      storedLocale: created.preferredLocale,
+      acceptLanguage: opts?.acceptLanguage ?? null,
+      logContext: "oauth_manager_signup",
     });
     return authResultForUserRecord(created);
   }

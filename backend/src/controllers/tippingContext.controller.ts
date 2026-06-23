@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import * as tablesService from "../services/tables.service.js";
 import * as tippingContextService from "../services/tippingContext.service.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
+import { QR_SCAN_TYPES, recordQrScanEvent } from "../services/qr/qrScanEvent.service.js";
 
 const VERIFICATION_REQUIRED_MSG = "QR code generation will be enabled after admin verification.";
 
@@ -19,6 +20,12 @@ export async function getLocationById(req: Request, res: Response) {
     if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    recordQrScanEvent({
+      businessId: ctx.business.id,
+      scanType: QR_SCAN_TYPES.LOCATION,
+      locationId: ctx.location.id,
+      req,
+    });
     void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
       notifyQrScanForBusiness({
         businessId: ctx.business.id,
@@ -48,6 +55,14 @@ export async function getTableById(req: Request, res: Response) {
     if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    recordQrScanEvent({
+      businessId: ctx.business.id,
+      scanType: QR_SCAN_TYPES.TABLE_ID,
+      locationId: ctx.location.id,
+      tableId: ctx.table.id,
+      qrSlug: ctx.table.qrSlug,
+      req,
+    });
     void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
       notifyQrScanForBusiness({
         businessId: ctx.business.id,
@@ -78,6 +93,14 @@ export async function getByQrSlug(req: Request, res: Response) {
     if ("locked" in ctx) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    recordQrScanEvent({
+      businessId: ctx.businessId,
+      scanType: QR_SCAN_TYPES.TABLE_SLUG,
+      locationId: ctx.locationId,
+      tableId: ctx.tableId,
+      qrSlug,
+      req,
+    });
     void import("../services/push/notificationContext.js").then(({ notifyQrScanForBusiness }) => {
       notifyQrScanForBusiness({
         businessId: ctx.businessId,

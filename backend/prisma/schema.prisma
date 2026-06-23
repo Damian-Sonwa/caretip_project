@@ -451,6 +451,29 @@ model Business {
    * Public URL path served under /uploads (e.g. /uploads/platform/businesses/{id}/logo-….png).
    */
   logoPath                 String?                    @map("logo_path")
+  /** Premium branding — hero banner on guest landing (public URL). */
+  bannerImagePath          String?                    @map("banner_image_path")
+  /** Premium branding — QR frame / guest accent (HEX). */
+  brandPrimaryColor        String?                    @default("#EB992C") @map("brand_primary_color") @db.VarChar(7)
+  brandSecondaryColor      String?                    @default("#000000") @map("brand_secondary_color") @db.VarChar(7)
+  /** Premium — guest header welcome line (max 120 chars). */
+  welcomeMessage           String?                    @map("welcome_message") @db.VarChar(120)
+  /** Premium — post-tip thank-you copy (max 250 chars). */
+  thankYouMessage          String?                    @map("thank_you_message") @db.VarChar(250)
+  /** Premium v2 — guest-facing display name (QR + tipping); falls back to `name`. */
+  brandDisplayName         String?                    @map("brand_display_name") @db.VarChar(80)
+  /** Premium v2 — short tagline under display name on QR and guest pages. */
+  brandTagline             String?                    @map("brand_tagline") @db.VarChar(120)
+  /** Premium v2 — QR visual template preset. */
+  qrTemplate               String                     @default("classic") @map("qr_template") @db.VarChar(32)
+  /** Premium v2 — QR card border style. */
+  qrBorderStyle            String                     @default("rounded") @map("qr_border_style") @db.VarChar(32)
+  /** Premium v2 — QR module container shape. */
+  qrShape                  String                     @default("square") @map("qr_shape") @db.VarChar(32)
+  /** Premium v2 — QR frame/accent (falls back to brandPrimaryColor). */
+  qrAccentColor            String?                    @map("qr_accent_color") @db.VarChar(7)
+  /** Premium v2 — QR card background. */
+  qrBackgroundColor        String?                    @default("#FFFFFF") @map("qr_background_color") @db.VarChar(7)
   /**
    * KYC / verification document path under /uploads.
    */
@@ -475,6 +498,9 @@ model Business {
   supportTickets SupportTicket[]
   employeeInvites EmployeeInvite[]
   subscription   Subscription?
+  qrScanEvents   QrScanEvent[]
+  qrFunnelEvents QrFunnelEvent[]
+  featureUtilizationDaily FeatureUtilizationDaily[]
 
   @@index([verificationStatus], map: "businesses_verification_status_idx")
   @@map("businesses")
@@ -528,6 +554,7 @@ model Location {
   tables       Table[]
   transactions Transaction[]
   employees    Employee[]
+  qrScanEvents QrScanEvent[]
 
   @@index([businessId])
   @@map("locations")
@@ -544,6 +571,7 @@ model Table {
   location                 Location                  @relation(fields: [locationId], references: [id], onDelete: Cascade)
   transactions             Transaction[]
   employeeTableAssignments EmployeeTableAssignment[]
+  qrScanEvents             QrScanEvent[]
 
   @@map("venue_tables")
 }
@@ -603,6 +631,7 @@ model Employee {
   employeeGoals    EmployeeGoal[]
   activationTokens EmployeeActivationToken[]
   inviteRedemptions EmployeeInviteRedemption[]
+  qrScanEvents      QrScanEvent[]
 
   @@index([businessId, locationId])
   @@index([businessId, isActive, name])
@@ -741,4 +770,68 @@ model SubscriptionEvent {
   @@index([subscriptionId, occurredAt])
   @@index([auditType, occurredAt])
   @@map("subscription_events")
+}
+
+/// Sprint 4 — durable QR scan analytics (one row per attributed scan).
+model QrScanEvent {
+  id         String   @id @default(cuid())
+  businessId String   @map("business_id")
+  employeeId String?  @map("employee_id")
+  locationId String?  @map("location_id")
+  tableId    String?  @map("table_id")
+  qrSlug     String?  @map("qr_slug") @db.VarChar(128)
+  scanType   String   @map("scan_type") @db.VarChar(32)
+  entryPath  String   @map("entry_path") @db.VarChar(512)
+  userAgent  String?  @map("user_agent") @db.VarChar(512)
+  deviceType String   @map("device_type") @db.VarChar(32)
+  country    String?  @db.VarChar(64)
+  city       String?  @db.VarChar(128)
+  scannedAt  DateTime @default(now()) @map("scanned_at")
+  sessionId  String   @map("session_id") @db.VarChar(64)
+  dedupeKey  String   @unique @map("dedupe_key") @db.VarChar(191)
+
+  business Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  employee Employee? @relation(fields: [employeeId], references: [id], onDelete: SetNull)
+  location Location? @relation(fields: [locationId], references: [id], onDelete: SetNull)
+  table    Table?    @relation(fields: [tableId], references: [id], onDelete: SetNull)
+
+  @@index([businessId, scannedAt(sort: Desc)])
+  @@index([employeeId, scannedAt(sort: Desc)])
+  @@index([locationId, scannedAt(sort: Desc)])
+  @@index([tableId, scannedAt(sort: Desc)])
+  @@map("qr_scan_events")
+}
+
+/// Sprint 4F — conversion funnel foundation (tip_started, payment_completed). Not exposed in UI yet.
+model QrFunnelEvent {
+  id            String   @id @default(cuid())
+  businessId    String   @map("business_id")
+  sessionId     String   @map("session_id") @db.VarChar(64)
+  eventType     String   @map("event_type") @db.VarChar(32)
+  employeeId    String?  @map("employee_id")
+  locationId    String?  @map("location_id")
+  tableId       String?  @map("table_id")
+  transactionId String?  @map("transaction_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId, createdAt(sort: Desc)])
+  @@index([sessionId, createdAt(sort: Desc)])
+  @@map("qr_funnel_events")
+}
+
+/// Sprint 7B — daily feature utilization rollups per business.
+model FeatureUtilizationDaily {
+  id         String   @id @default(cuid())
+  businessId String   @map("business_id")
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  featureKey String   @map("feature_key") @db.VarChar(48)
+  day        DateTime @db.Date
+  hitCount   Int      @default(1) @map("hit_count")
+  lastUsedAt DateTime @default(now()) @map("last_used_at")
+
+  @@unique([businessId, featureKey, day])
+  @@index([businessId, day])
+  @@map("feature_utilization_daily")
 }

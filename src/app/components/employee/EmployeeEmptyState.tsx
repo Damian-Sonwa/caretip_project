@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { EmptyState } from "../ui/EmptyState";
+import { PremiumEmptyState } from "../premium/PremiumEmptyState";
 import { cn } from "@/lib/utils";
 
 type EmployeeEmptyStateProps = {
@@ -11,10 +11,10 @@ type EmployeeEmptyStateProps = {
   compact?: boolean;
 };
 
-/** @deprecated Prefer `EmptyState` — kept for existing dashboard imports. */
+/** @deprecated Prefer `PremiumEmptyState` — kept for existing dashboard imports. */
 export function EmployeeEmptyState(props: EmployeeEmptyStateProps) {
   return (
-    <EmptyState
+    <PremiumEmptyState
       icon={props.icon}
       title={props.title}
       description={props.description}

@@ -1,4 +1,5 @@
 import { getSocketIO } from "./socketServer.js";
+import { emitTipReceivedCanonical } from "./realtimeContracts.js";
 
 export interface NewTipPayload {
   tip: {
@@ -28,6 +29,7 @@ export function emitNewTip(payload: NewTipPayload): void {
     io.to(`business:${payload.businessId}`).emit("new_tip", payload);
     io.to(`employee:${payload.employeeId}`).emit("tip_received", payload);
     io.to(`business:${payload.businessId}`).emit("tip_received", payload);
+    emitTipReceivedCanonical(payload.businessId, payload.employeeId, payload);
   }
 
   void import("../services/push/notification.triggers.js").then(({ onTipReceived }) => {

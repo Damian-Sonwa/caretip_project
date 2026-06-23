@@ -4,8 +4,11 @@ import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware
 import { requireBusinessVerificationCapability } from "../middleware/requireBusinessVerificationCapability.middleware.js";
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import * as businessController from "../controllers/business.controller.js";
-import { businessUploadLogo, businessUploadVerification } from "../middleware/businessUpload.middleware.js";
+import { businessUploadLogo, businessUploadVerification, businessUploadBanner } from "../middleware/businessUpload.middleware.js";
 import { requireBusinessLogoUpload } from "../middleware/requireBusinessLogoUpload.middleware.js";
+import { requireFeature } from "../services/subscriptionEntitlement.service.js";
+
+const requireBrandingCustomization = requireFeature("brandingCustomization");
 import { clientSafeMessage } from "../utils/httpErrors.js";
 import { validateInviteCodeRateLimit } from "../middleware/authRateLimit.middleware.js";
 
@@ -82,6 +85,42 @@ router.post(
     }),
   requireBusinessLogoUpload,
   businessController.uploadMyLogo
+);
+
+router.get(
+  "/profile/branding",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  businessController.getMyBrandingSettings,
+);
+router.patch(
+  "/profile/branding",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  requireBrandingCustomization,
+  businessController.patchMyBrandingSettings,
+);
+router.post(
+  "/profile/banner",
+  authMiddleware,
+  requireVerifiedEmail,
+  requireRole(Role.MANAGER),
+  (req, res, next) =>
+    businessUploadBanner(req, res, (err: unknown) => {
+      if (err) {
+        return res.status(400).json({
+          message: clientSafeMessage(
+            err instanceof Error ? err : new Error(String(err)),
+            "We couldn't upload your banner. Please try again.",
+          ),
+        });
+      }
+      next();
+    }),
+  requireBrandingCustomization,
+  businessController.uploadMyBanner,
 );
 
 router.post(

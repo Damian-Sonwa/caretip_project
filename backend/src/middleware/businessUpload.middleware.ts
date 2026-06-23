@@ -30,6 +30,13 @@ export const businessUploadLogo = multer({
   fileFilter: logoFilter,
 }).single("file");
 
+/** Premium venue banner — field `file`, max 8 MB. */
+export const businessUploadBanner = multer({
+  storage: multer.memoryStorage(),
+  limits: { ...MULTER_SAFE_LIMITS, fileSize: 8 * 1024 * 1024 },
+  fileFilter: logoFilter,
+}).single("file");
+
 /** Manager KYC document — field `file`, max 10 MB. */
 export const businessUploadVerification = multer({
   storage: multer.memoryStorage(),

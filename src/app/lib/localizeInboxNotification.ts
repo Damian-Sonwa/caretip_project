@@ -76,7 +76,7 @@ function inferLocaleTemplate(notification: InboxNotification): NotificationLocal
       const employeeName = metaString(meta, "employeeName");
       const isBusiness =
         url === "/dashboard" ||
-        url === "/dashboard/transactions" ||
+        url === "/dashboard/tips/transactions" ||
         /venue|betrieb/i.test(title) ||
         /\bfor\b/i.test(message) ||
         /\bfür\b/i.test(message);

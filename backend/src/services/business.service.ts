@@ -897,6 +897,18 @@ const BUSINESS_PROFILE_SELECT = {
   contactPhone: true,
   website: true,
   logoPath: true,
+  bannerImagePath: true,
+  brandPrimaryColor: true,
+  brandSecondaryColor: true,
+  welcomeMessage: true,
+  thankYouMessage: true,
+  brandDisplayName: true,
+  brandTagline: true,
+  qrTemplate: true,
+  qrBorderStyle: true,
+  qrShape: true,
+  qrAccentColor: true,
+  qrBackgroundColor: true,
 } as const;
 
 async function countActivePublicEmployees(businessId: string): Promise<number> {

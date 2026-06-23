@@ -3,6 +3,8 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { toPublicGuestBrandingDto, BUSINESS_BRANDING_SELECT, type PublicGuestBrandingDto } from "../services/businessBranding.dto.js";
+import { QR_SCAN_TYPES, recordQrScanEvent } from "../services/qr/qrScanEvent.service.js";
 
 const VERIFICATION_REQUIRED_MSG = "QR code generation will be enabled after admin verification.";
 
@@ -19,11 +21,9 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
     const business = await prisma.business.findFirst({
       where: { slug: raw },
       select: {
-        id: true,
-        name: true,
+        ...BUSINESS_BRANDING_SELECT,
         slug: true,
         verificationStatus: true,
-        logoPath: true,
         businessType: true,
         location: true,
       },
@@ -34,6 +34,11 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
     if (business.verificationStatus !== "verified") {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+    recordQrScanEvent({
+      businessId: business.id,
+      scanType: QR_SCAN_TYPES.BUSINESS_DIRECTORY,
+      req,
+    });
     const employees = await prisma.employee.findMany({
       where: {
         businessId: business.id,
@@ -59,6 +64,7 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
         logo: absolutizePublicMediaPath(business.logoPath ?? null),
         type: business.businessType ?? null,
         location: business.location ?? null,
+        branding: toPublicGuestBrandingDto(business),
       },
       employees: employees.map((e) => ({
         ...e,
@@ -87,6 +93,19 @@ type StaffBySlugRow = {
     slug: string;
     verificationStatus?: "pending" | "verified" | "rejected";
     logoPath: string | null;
+    bannerImagePath: string | null;
+    brandPrimaryColor: string | null;
+    brandSecondaryColor: string | null;
+    welcomeMessage: string | null;
+    thankYouMessage: string | null;
+    brandDisplayName: string | null;
+    brandTagline: string | null;
+    qrTemplate: string;
+    qrBorderStyle: string;
+    qrShape: string;
+    qrAccentColor: string | null;
+    qrBackgroundColor: string | null;
+    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier;
   };
 };
 
@@ -99,7 +118,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     jobTitle: true,
     bio: true,
     businessId: true,
-    business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
+    business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
   } as const;
   try {
     return prisma.employee.findFirst({
@@ -130,7 +149,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
           jobTitle: true,
           bio: true,
           businessId: true,
-          business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
+          business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
         },
       });
     }
@@ -139,6 +158,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
 }
 
 async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
+  const branding = toPublicGuestBrandingDto(employee.business);
   return {
     id: employee.id,
     name: employee.name,
@@ -149,7 +169,8 @@ async function buildPublicStaffTipResponse(employee: StaffBySlugRow) {
     businessId: employee.businessId,
     businessName: employee.business.name,
     businessSlug: employee.business.slug,
-    businessLogo: absolutizePublicMediaPath(employee.business.logoPath ?? null),
+    businessLogo: branding.logoPath,
+    branding,
   };
 }
 
@@ -183,7 +204,7 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
       jobTitle: true,
       bio: true,
       businessId: true,
-      business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
+      business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
     } as const;
 
     const employee = await prisma.employee.findFirst({
@@ -200,6 +221,13 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
     if (!employee) {
       return res.status(404).json({ message: "Staff member not found" });
     }
+
+    recordQrScanEvent({
+      businessId: business.id,
+      scanType: QR_SCAN_TYPES.EMPLOYEE,
+      employeeId: employee.id,
+      req,
+    });
 
     return res.json(await buildPublicStaffTipResponse(employee));
   } catch (err) {
@@ -227,6 +255,13 @@ export async function getStaffBySlug(req: Request, res: Response) {
     if (employee.business.verificationStatus && employee.business.verificationStatus !== "verified") {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
+
+    recordQrScanEvent({
+      businessId: employee.businessId,
+      scanType: QR_SCAN_TYPES.EMPLOYEE_LEGACY_SLUG,
+      employeeId: employee.id,
+      req,
+    });
 
     return res.json(await buildPublicStaffTipResponse(employee));
   } catch (err) {

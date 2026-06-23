@@ -96,7 +96,15 @@ export async function deliverUserNotification(
     if (!notification) return { notification: null, skipped: true };
 
     const unread = await getUnreadNotificationCount(input.userId);
-    emitNotificationCreated(input.userId, { notification, unreadCount: unread });
+    const businessId =
+      metadata && typeof metadata === "object" && "businessId" in metadata
+        ? String((metadata as { businessId?: unknown }).businessId ?? "")
+        : null;
+    emitNotificationCreated(
+      input.userId,
+      { notification, unreadCount: unread },
+      businessId && businessId.trim() ? businessId : null,
+    );
     emitNotificationUnreadCount(input.userId, unread);
   }
 

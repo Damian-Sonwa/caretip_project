@@ -1,0 +1,245 @@
+/** Mirrors backend `PublicGuestBrandingDto` / manager branding settings. */
+
+import type { QrLayoutVariantId } from "./qrDesignSystem";
+import {
+  DEFAULT_QR_BACKGROUND_COLOR,
+  DEFAULT_QR_BORDER_STYLE,
+  DEFAULT_QR_SHAPE,
+  DEFAULT_QR_TEMPLATE,
+  normalizeQrBorderStyleId,
+  normalizeQrShapeId,
+  normalizeQrTemplateId,
+  type QrBorderStyleId,
+  type QrShapeId,
+  type QrTemplateId,
+} from "./qrTemplateStyles";
+
+export const DEFAULT_BRAND_PRIMARY_COLOR = "#EB992C";
+export const DEFAULT_BRAND_SECONDARY_COLOR = "#000000";
+export const CARETIP_QR_BRAND_HEX = "#EB992C";
+
+export type PublicGuestBranding = {
+  premium: boolean;
+  businessName: string;
+  brandDisplayName: string | null;
+  brandTagline: string | null;
+  logoPath: string | null;
+  bannerImagePath: string | null;
+  brandPrimaryColor: string;
+  brandSecondaryColor: string;
+  welcomeMessage: string | null;
+  thankYouMessage: string | null;
+  qrTemplate: QrTemplateId;
+  qrBorderStyle: QrBorderStyleId;
+  qrShape: QrShapeId;
+  qrAccentColor: string;
+  qrBackgroundColor: string;
+};
+
+export type BusinessBrandingSettings = {
+  logoPath: string | null;
+  bannerImagePath: string | null;
+  brandPrimaryColor: string;
+  brandSecondaryColor: string;
+  welcomeMessage: string | null;
+  thankYouMessage: string | null;
+  brandDisplayName: string | null;
+  brandTagline: string | null;
+  qrTemplate: QrTemplateId;
+  qrBorderStyle: QrBorderStyleId;
+  qrShape: QrShapeId;
+  qrAccentColor: string;
+  qrBackgroundColor: string;
+  canEdit: boolean;
+};
+
+export type QrBrandingOptions = {
+  premium: boolean;
+  primaryColor: string;
+  secondaryColor: string;
+  centerLogoUrl: string | null;
+  businessName: string;
+  brandTagline?: string | null;
+  welcomeMessage?: string | null;
+  thankYouMessage?: string | null;
+  ctaText?: string | null;
+  qrTemplate?: QrTemplateId;
+  qrBorderStyle?: QrBorderStyleId;
+  qrShape?: QrShapeId;
+  qrAccentColor?: string;
+  qrBackgroundColor?: string;
+  layoutVariant?: QrLayoutVariantId;
+  decorationsEnabled?: boolean;
+  showVenueLogoHeader?: boolean;
+};
+
+const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
+
+export function isValidBrandHex(value: string): boolean {
+  return HEX_RE.test(value.trim());
+}
+
+export function resolveGuestDisplayName(branding: Pick<PublicGuestBranding, "businessName" | "brandDisplayName">): string {
+  const custom = branding.brandDisplayName?.trim();
+  return custom || branding.businessName;
+}
+
+export function brandingFromSettings(
+  settings: BusinessBrandingSettings,
+  businessName: string,
+  tierPremium: boolean,
+): PublicGuestBranding {
+  if (!tierPremium) {
+    return {
+      premium: false,
+      businessName,
+      brandDisplayName: null,
+      brandTagline: null,
+      logoPath: settings.logoPath,
+      bannerImagePath: null,
+      brandPrimaryColor: DEFAULT_BRAND_PRIMARY_COLOR,
+      brandSecondaryColor: DEFAULT_BRAND_SECONDARY_COLOR,
+      welcomeMessage: null,
+      thankYouMessage: null,
+      qrTemplate: DEFAULT_QR_TEMPLATE,
+      qrBorderStyle: DEFAULT_QR_BORDER_STYLE,
+      qrShape: DEFAULT_QR_SHAPE,
+      qrAccentColor: DEFAULT_BRAND_PRIMARY_COLOR,
+      qrBackgroundColor: DEFAULT_QR_BACKGROUND_COLOR,
+    };
+  }
+  return {
+    premium: true,
+    businessName,
+    brandDisplayName: settings.brandDisplayName,
+    brandTagline: settings.brandTagline,
+    logoPath: settings.logoPath,
+    bannerImagePath: settings.bannerImagePath,
+    brandPrimaryColor: settings.brandPrimaryColor || DEFAULT_BRAND_PRIMARY_COLOR,
+    brandSecondaryColor: settings.brandSecondaryColor || DEFAULT_BRAND_SECONDARY_COLOR,
+    welcomeMessage: settings.welcomeMessage,
+    thankYouMessage: settings.thankYouMessage,
+    qrTemplate: settings.qrTemplate,
+    qrBorderStyle: settings.qrBorderStyle,
+    qrShape: settings.qrShape,
+    qrAccentColor: settings.qrAccentColor,
+    qrBackgroundColor: settings.qrBackgroundColor,
+  };
+}
+
+export function qrOptionsFromBrandingFields(
+  premium: boolean,
+  fields: {
+    logoPath: string | null;
+    brandPrimaryColor: string;
+    brandSecondaryColor: string;
+    brandDisplayName?: string | null;
+    brandTagline?: string | null;
+    welcomeMessage?: string | null;
+    thankYouMessage?: string | null;
+    qrTemplate?: string | null;
+    qrBorderStyle?: string | null;
+    qrShape?: string | null;
+    qrAccentColor?: string | null;
+    qrBackgroundColor?: string | null;
+  },
+  businessName: string,
+): QrBrandingOptions {
+  const displayName =
+    premium && fields.brandDisplayName?.trim() ? fields.brandDisplayName.trim() : businessName;
+  return {
+    premium,
+    primaryColor: premium
+      ? fields.brandPrimaryColor || DEFAULT_BRAND_PRIMARY_COLOR
+      : CARETIP_QR_BRAND_HEX,
+    secondaryColor: premium
+      ? fields.brandSecondaryColor || DEFAULT_BRAND_SECONDARY_COLOR
+      : DEFAULT_BRAND_SECONDARY_COLOR,
+    centerLogoUrl: premium && fields.logoPath ? fields.logoPath : null,
+    businessName: displayName,
+    brandTagline: premium ? fields.brandTagline?.trim() || null : null,
+    welcomeMessage: premium ? fields.welcomeMessage?.trim() || null : null,
+    thankYouMessage: premium ? fields.thankYouMessage?.trim() || null : null,
+    qrTemplate: premium ? normalizeQrTemplateId(fields.qrTemplate) : DEFAULT_QR_TEMPLATE,
+    qrBorderStyle: premium ? normalizeQrBorderStyleId(fields.qrBorderStyle) : DEFAULT_QR_BORDER_STYLE,
+    qrShape: premium ? normalizeQrShapeId(fields.qrShape) : DEFAULT_QR_SHAPE,
+    qrAccentColor: premium ? fields.qrAccentColor?.trim() || undefined : undefined,
+    qrBackgroundColor: premium
+      ? fields.qrBackgroundColor?.trim() || DEFAULT_QR_BACKGROUND_COLOR
+      : undefined,
+  };
+}
+
+export function qrBrandingFromGuestBranding(branding: PublicGuestBranding): QrBrandingOptions {
+  return qrOptionsFromBrandingFields(branding.premium, branding, resolveGuestDisplayName(branding));
+}
+
+export function qrBrandingForManager(
+  tier: "basic" | "premium" | "enterprise",
+  settings: Pick<
+    BusinessBrandingSettings,
+    | "logoPath"
+    | "brandPrimaryColor"
+    | "brandSecondaryColor"
+    | "brandDisplayName"
+    | "brandTagline"
+    | "welcomeMessage"
+    | "thankYouMessage"
+    | "qrTemplate"
+    | "qrBorderStyle"
+    | "qrShape"
+    | "qrAccentColor"
+    | "qrBackgroundColor"
+  >,
+  businessName: string,
+): QrBrandingOptions {
+  const premium = tier === "premium" || tier === "enterprise";
+  return qrOptionsFromBrandingFields(premium, settings, businessName);
+}
+
+/** Stable key for QR preview caches — bust when branding fields change. */
+export function qrBrandingFingerprint(opts: QrBrandingOptions | null | undefined): string {
+  if (!opts) return "";
+  return JSON.stringify({
+    premium: opts.premium,
+    primaryColor: opts.primaryColor,
+    secondaryColor: opts.secondaryColor,
+    centerLogoUrl: opts.centerLogoUrl,
+    businessName: opts.businessName,
+    brandTagline: opts.brandTagline ?? null,
+    welcomeMessage: opts.welcomeMessage ?? null,
+    thankYouMessage: opts.thankYouMessage ?? null,
+    ctaText: opts.ctaText ?? null,
+    qrTemplate: opts.qrTemplate ?? DEFAULT_QR_TEMPLATE,
+    qrBorderStyle: opts.qrBorderStyle ?? DEFAULT_QR_BORDER_STYLE,
+    qrShape: opts.qrShape ?? DEFAULT_QR_SHAPE,
+    qrAccentColor: opts.qrAccentColor ?? null,
+    qrBackgroundColor: opts.qrBackgroundColor ?? null,
+    layoutVariant: opts.layoutVariant ?? null,
+    decorationsEnabled: opts.decorationsEnabled ?? null,
+    showVenueLogoHeader: opts.showVenueLogoHeader ?? null,
+  });
+}
+
+export const BUSINESS_BRANDING_CHANGED_EVENT = "caretip-business-branding-changed";
+
+export function notifyBusinessBrandingChanged(): void {
+  if (typeof window !== "undefined") {
+    window.dispatchEvent(new Event(BUSINESS_BRANDING_CHANGED_EVENT));
+  }
+}
+
+export function trackBrandingClientEvent(
+  event:
+    | "branding_logo_uploaded"
+    | "branding_banner_uploaded"
+    | "branding_colors_changed"
+    | "branding_welcome_updated"
+    | "branding_thankyou_updated"
+    | "branding_qr_v2_updated",
+  props?: Record<string, unknown>,
+): void {
+  if (import.meta.env.DEV) {
+    console.info("[product_event]", event, props ?? {});
+  }
+}

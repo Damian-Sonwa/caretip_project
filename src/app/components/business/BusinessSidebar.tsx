@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from "../CareTipLogo";
 import {
   businessDashboardNavItems,
-  filterBusinessDashboardNavItems,
   isBusinessDashboardNavActive,
+  isBusinessNavItemLocked,
 } from "./businessDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 
@@ -22,7 +22,7 @@ export function BusinessSidebar() {
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
-  const navItems = filterBusinessDashboardNavItems(businessDashboardNavItems, tier);
+  const navItems = businessDashboardNavItems;
   const qrLocked = user?.status === "PENDING" || user?.status === "REJECTED";
 
   return (
@@ -40,6 +40,7 @@ export function BusinessSidebar() {
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isBusinessDashboardNavActive(item.href, location.pathname);
+            const subscriptionLocked = isBusinessNavItemLocked(item, tier);
             return (
               <li key={item.href}>
                 <Link
@@ -54,10 +55,16 @@ export function BusinessSidebar() {
                   <CareIcon name={item.icon} size="nav" />
                   <span className="flex min-w-0 flex-1 items-center gap-2 tracking-tight">
                     <span className="truncate">{t(item.labelKey)}</span>
-                    {item.href === "/dashboard/qr-code-management" && qrLocked ? (
+                    {item.href === "/dashboard/qr-studio" && qrLocked ? (
                       <Lock
                         className="h-3.5 w-3.5 shrink-0 opacity-70"
                         aria-label={t("business.verification.qrNavLocked")}
+                      />
+                    ) : null}
+                    {subscriptionLocked ? (
+                      <Lock
+                        className="h-3.5 w-3.5 shrink-0 opacity-70"
+                        aria-label={t("subscription.nav.lockedAria", { feature: t(item.labelKey) })}
                       />
                     ) : null}
                   </span>

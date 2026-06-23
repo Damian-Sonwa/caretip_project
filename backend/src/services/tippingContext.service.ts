@@ -1,5 +1,69 @@
 import { prisma } from "../prisma.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import {
+  toPublicGuestBrandingDto,
+  type PublicGuestBrandingDto,
+} from "./businessBranding.dto.js";
+
+export type PublicTippingBusiness = {
+  id: string;
+  name: string;
+  slug: string | null;
+  logo: string | null;
+  branding: PublicGuestBrandingDto;
+};
+
+function mapPublicTippingBusiness(
+  row: {
+    id: string;
+    name: string;
+    slug: string;
+    logoPath: string | null;
+    bannerImagePath: string | null;
+    brandPrimaryColor: string | null;
+    brandSecondaryColor: string | null;
+    welcomeMessage: string | null;
+    thankYouMessage: string | null;
+    brandDisplayName: string | null;
+    brandTagline: string | null;
+    qrTemplate: string;
+    qrBorderStyle: string;
+    qrShape: string;
+    qrAccentColor: string | null;
+    qrBackgroundColor: string | null;
+    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier;
+  },
+): PublicTippingBusiness {
+  const branding = toPublicGuestBrandingDto(row);
+  return {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    logo: branding.logoPath,
+    branding,
+  };
+}
+
+const tippingBusinessSelect = {
+  id: true,
+  name: true,
+  slug: true,
+  logoPath: true,
+  bannerImagePath: true,
+  brandPrimaryColor: true,
+  brandSecondaryColor: true,
+  welcomeMessage: true,
+  thankYouMessage: true,
+  brandDisplayName: true,
+  brandTagline: true,
+  qrTemplate: true,
+  qrBorderStyle: true,
+  qrShape: true,
+  qrAccentColor: true,
+  qrBackgroundColor: true,
+  subscriptionTier: true,
+  verificationStatus: true,
+} as const;
 
 export interface PublicTippingEmployee {
   id: string;
@@ -10,13 +74,13 @@ export interface PublicTippingEmployee {
 }
 
 export interface PublicLocationContext {
-  business: { id: string; name: string; slug: string | null; logo: string | null };
+  business: PublicTippingBusiness;
   location: { id: string; name: string; description: string | null };
   employees: PublicTippingEmployee[];
 }
 
 export interface PublicTableContext {
-  business: { id: string; name: string; slug: string | null; logo: string | null };
+  business: PublicTippingBusiness;
   location: { id: string; name: string };
   table: { id: string; name: string; qrSlug: string };
   employees: PublicTippingEmployee[];
@@ -113,7 +177,7 @@ export async function getPublicLocationContext(
       name: true,
       description: true,
       businessId: true,
-      business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
+      business: { select: tippingBusinessSelect },
     },
   });
   if (!loc) return null;
@@ -121,12 +185,7 @@ export async function getPublicLocationContext(
 
   const employees = await employeesForLocationQr(loc.businessId, loc.id);
   return {
-    business: {
-      id: loc.business.id,
-      name: loc.business.name,
-      slug: loc.business.slug,
-      logo: absolutizePublicMediaPath(loc.business.logoPath ?? null),
-    },
+    business: mapPublicTippingBusiness(loc.business),
     location: { id: loc.id, name: loc.name, description: loc.description },
     employees: employees.map((e) => ({
       ...e,
@@ -151,7 +210,7 @@ export async function getPublicTableContextById(
           id: true,
           name: true,
           businessId: true,
-          business: { select: { id: true, name: true, slug: true, verificationStatus: true, logoPath: true } },
+          business: { select: tippingBusinessSelect },
         },
       },
     },
@@ -161,12 +220,7 @@ export async function getPublicTableContextById(
 
   const employees = await employeesForTableQr(table.location.businessId, table.id);
   return {
-    business: {
-      id: table.location.business.id,
-      name: table.location.business.name,
-      slug: table.location.business.slug,
-      logo: absolutizePublicMediaPath(table.location.business.logoPath ?? null),
-    },
+    business: mapPublicTippingBusiness(table.location.business),
     location: { id: table.location.id, name: table.location.name },
     table: { id: table.id, name: table.name, qrSlug: table.qrSlug },
     employees: employees.map((e) => ({

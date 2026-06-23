@@ -7,6 +7,8 @@ import type { PlatformHealthResponse } from "../lib/api";
 
 export type NetworkOverviewHeroProps = {
   health: PlatformHealthResponse | null;
+  /** When true, sits inside PremiumPageHero — drops outer frame styles. */
+  embedded?: boolean;
 };
 
 function LivePulse({ className }: { className?: string }) {
@@ -192,7 +194,7 @@ function iconTint(state: "checking" | "online" | "offline"): string {
   return "text-red-400";
 }
 
-export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
+export function NetworkOverviewHero({ health, embedded = false }: NetworkOverviewHeroProps) {
   const { t } = useTranslation();
 
   const pg = useMemo(() => {
@@ -214,7 +216,13 @@ export function NetworkOverviewHero({ health }: NetworkOverviewHeroProps) {
   }, [health, t]);
 
   return (
-    <section className="platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12">
+    <section
+      className={
+        embedded
+          ? "platform-admin-hero relative overflow-hidden rounded-[calc(1.75rem-3px)] bg-zinc-950"
+          : "platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12"
+      }
+    >
       <MapGraphic3D />
 
       <div className="relative z-10 flex min-h-[min(380px,68svh)] flex-col gap-8 px-5 py-8 max-lg:gap-7 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">

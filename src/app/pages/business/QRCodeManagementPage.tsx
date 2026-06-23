@@ -1,21 +1,23 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import {
   QrCode,
   Download,
+  FileDown,
   Users,
   MapPin,
-  Store,
-  UserCheck,
-  FileDown,
+  LayoutGrid,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
 import {
   getEmployees,
   fetchBusinessProfile,
+  fetchBusinessBrandingSettings,
   regenerateBusinessSlug,
   regenerateEmployeeSlug,
   fetchLocations,
@@ -38,9 +40,21 @@ import {
   renderBrandedQRToDataUrl,
   renderBrandedQRToDataUrlLegacy,
   renderBrandedQrUrlToDataUrl,
+  validateBrandedQrReliability,
   downloadQrDataUrlPng,
   printQrDataUrl,
+  isQrExportAllowed,
 } from "../../lib/qrBranded";
+import type { QrQualityGrade } from "../../lib/qrReliability";
+import { qrBrandingForManager, BUSINESS_BRANDING_CHANGED_EVENT, qrBrandingFingerprint } from "../../lib/businessBranding";
+import { loadQrStudioDesignExtras, mergeQrStudioBranding } from "../../lib/qrDesignSystem";
+import {
+  DEFAULT_QR_BACKGROUND_COLOR,
+  DEFAULT_QR_BORDER_STYLE,
+  DEFAULT_QR_SHAPE,
+  DEFAULT_QR_TEMPLATE,
+} from "../../lib/qrTemplateStyles";
+import type { QrBrandingOptions } from "../../lib/businessBranding";
 import {
   createBusinessQrPrintPdf,
   createEmployeeQrPrintPdf,
@@ -63,7 +77,7 @@ import { logClientError } from "../../lib/clientLog";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-styles";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import {
@@ -74,18 +88,44 @@ import { cn } from "@/lib/utils";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
-export function QRCodeManagementPage() {
+type QrStudioViewMode = "gallery" | "employees" | "locations";
+
+function resolveEmbeddedQrMode(pathname: string): QrStudioViewMode {
+  if (pathname.includes("/qr-studio/employees")) return "employees";
+  if (pathname.includes("/qr-studio/locations")) return "locations";
+  return "gallery";
+}
+
+type QRCodeManagementPageProps = {
+  /** When true, parent QR Studio shell provides page chrome. */
+  embedded?: boolean;
+  /** Which QR collection to show when embedded in QR Studio. */
+  mode?: "gallery" | "employees" | "locations";
+};
+
+export function QRCodeManagementPage({
+  embedded = false,
+  mode = "gallery",
+}: QRCodeManagementPageProps = {}) {
   const { t } = useTranslation();
+  const { pathname } = useLocation();
+  const viewMode: QrStudioViewMode = embedded ? resolveEmbeddedQrMode(pathname) : mode;
   const { user, authHydrated, sessionValidated, isBusiness } = useRequireAuth();
+  const { tier } = useSubscriptionEntitlements({
+    enabled: isBusiness,
+    role: "business",
+  });
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
   >(null);
-  const [activeTab, setActiveTab] = useState<"employees" | "tables" | "locations">("employees");
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [qrImages, setQrImages] = useState<Record<string, string>>({});
   const [storefrontQr, setStorefrontQr] = useState<string>("");
+  const [qrScanMeta, setQrScanMeta] = useState<
+    Record<string, { grade: QrQualityGrade; exportAllowed: boolean }>
+  >({});
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
   const [bulkPdfLoading, setBulkPdfLoading] = useState(false);
   const [businessSlug, setBusinessSlug] = useState<string | null>(null);
@@ -96,8 +136,47 @@ export function QRCodeManagementPage() {
   const [venueQrPreview, setVenueQrPreview] = useState<Record<string, string>>({});
   /** Stored API path for venue logo (PDF + print). */
   const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
+  const [qrBrandingOpts, setQrBrandingOpts] = useState<QrBrandingOptions | null>(null);
   const employeeQrCacheKeyRef = useRef("");
   const venueQrCacheKeyRef = useRef("");
+
+  const brandingFingerprint = useMemo(() => qrBrandingFingerprint(qrBrandingOpts), [qrBrandingOpts]);
+
+  const loadQrBranding = useCallback(async () => {
+    if (!user?.businessId || user.role !== "business") return;
+    try {
+      const s = await fetchBusinessBrandingSettings();
+      const name =
+        String(businessDisplayName ?? "").trim() ||
+        String(user?.businessName ?? "").trim() ||
+        t("business.qrPage.fallbackBusinessName");
+      const base = qrBrandingForManager(tier, s, name);
+      const extras = loadQrStudioDesignExtras(user.businessId);
+      setQrBrandingOpts(mergeQrStudioBranding(base, extras));
+    } catch (err) {
+      logClientError("QRCodeManagementPage.branding", err);
+      setQrBrandingOpts(
+        qrBrandingForManager(
+          tier,
+          {
+            logoPath: businessLogoPath,
+            brandPrimaryColor: "#EB992C",
+            brandSecondaryColor: "#000000",
+            brandDisplayName: null,
+            brandTagline: null,
+            welcomeMessage: null,
+            thankYouMessage: null,
+            qrTemplate: DEFAULT_QR_TEMPLATE,
+            qrBorderStyle: DEFAULT_QR_BORDER_STYLE,
+            qrShape: DEFAULT_QR_SHAPE,
+            qrAccentColor: "#EB992C",
+            qrBackgroundColor: DEFAULT_QR_BACKGROUND_COLOR,
+          },
+          String(businessDisplayName ?? user?.businessName ?? "").trim() || "Business",
+        ),
+      );
+    }
+  }, [user?.businessId, user?.role, user?.businessName, tier, businessDisplayName, businessLogoPath, t]);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated) return;
@@ -127,6 +206,22 @@ export function QRCodeManagementPage() {
       cancelled = true;
     };
   }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.businessName]);
+
+  useEffect(() => {
+    void loadQrBranding();
+  }, [loadQrBranding]);
+
+  useEffect(() => {
+    const onBrandingChanged = () => {
+      employeeQrCacheKeyRef.current = "";
+      venueQrCacheKeyRef.current = "";
+      void loadQrBranding();
+    };
+    window.addEventListener(BUSINESS_BRANDING_CHANGED_EVENT, onBrandingChanged);
+    return () => window.removeEventListener(BUSINESS_BRANDING_CHANGED_EVENT, onBrandingChanged);
+  }, [loadQrBranding]);
+
+  const qrBrand = qrBrandingOpts ?? undefined;
 
   const handleRegenerateBusinessQr = async () => {
     if (!authHydrated || !sessionValidated) return;
@@ -234,15 +329,21 @@ export function QRCodeManagementPage() {
   );
 
   useEffect(() => {
-    if (!venueQrFingerprint) return;
-    if (venueQrCacheKeyRef.current === venueQrFingerprint) return;
+    if (!venueQrFingerprint || !brandingFingerprint) return;
+    const cacheKey = `${venueQrFingerprint}|${brandingFingerprint}`;
+    if (venueQrCacheKeyRef.current === cacheKey) return;
     let cancelled = false;
     (async () => {
       const next: Record<string, string> = {};
+      const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
       for (const loc of venueLocations) {
         const url = qrLocationUrl(loc.id);
         try {
-          next[`loc-${loc.id}`] = await renderBrandedQrUrlToDataUrl(url);
+          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
+          next[`loc-${loc.id}`] = canvas?.toDataURL("image/png") ?? "";
+          if (report) {
+            meta[`loc-${loc.id}`] = { grade: report.grade, exportAllowed: report.exportAllowed };
+          }
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[`loc-${loc.id}`] = "";
@@ -251,26 +352,31 @@ export function QRCodeManagementPage() {
       for (const tbl of venueTables) {
         const url = qrTableUrl(tbl.id);
         try {
-          next[`tbl-${tbl.id}`] = await renderBrandedQrUrlToDataUrl(url);
+          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
+          next[`tbl-${tbl.id}`] = canvas?.toDataURL("image/png") ?? "";
+          if (report) {
+            meta[`tbl-${tbl.id}`] = { grade: report.grade, exportAllowed: report.exportAllowed };
+          }
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[`tbl-${tbl.id}`] = "";
         }
       }
       if (!cancelled) {
-        venueQrCacheKeyRef.current = venueQrFingerprint;
+        venueQrCacheKeyRef.current = cacheKey;
         setVenueQrPreview(next);
+        setQrScanMeta((prev) => ({ ...prev, ...meta }));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [venueQrFingerprint, venueLocations, venueTables]);
+  }, [venueQrFingerprint, venueLocations, venueTables, qrBrand, brandingFingerprint]);
 
   useEffect(() => {
     const businessId = user?.businessId;
-    if (!businessId) return;
-    const cacheKey = `${businessId}|${businessSlug ?? ""}|${employeeQrFingerprint}`;
+    if (!businessId || !brandingFingerprint) return;
+    const cacheKey = `${businessId}|${businessSlug ?? ""}|${employeeQrFingerprint}|${brandingFingerprint}`;
     if (employeeQrCacheKeyRef.current === cacheKey) return;
     let cancelled = false;
     (async () => {
@@ -278,23 +384,37 @@ export function QRCodeManagementPage() {
         ? businessDirectoryUrl(businessSlug)
         : qrLandingUrl(businessId);
       try {
-        const sf = await renderBrandedQrUrlToDataUrl(storeUrl);
-        if (!cancelled) setStorefrontQr(sf);
+        const { canvas, report } = await validateBrandedQrReliability(storeUrl, qrBrand);
+        if (!cancelled) {
+          setStorefrontQr(canvas?.toDataURL("image/png") ?? "");
+          if (report) {
+            setQrScanMeta((prev) => ({
+              ...prev,
+              storefront: { grade: report.grade, exportAllowed: report.exportAllowed },
+            }));
+          }
+        }
       } catch (err) {
         logClientError("QRCodeManagementPage", err);
         if (!cancelled) setStorefrontQr("");
       }
 
       const next: Record<string, string> = {};
+      const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
       for (const e of employees) {
         if (!e.slug) {
           next[e.id] = "";
           continue;
         }
         try {
-          next[e.id] = businessSlug
-            ? await renderBrandedQRToDataUrl(businessSlug, e.slug)
-            : await renderBrandedQRToDataUrlLegacy(e.id);
+          const url = businessSlug
+            ? publicEmployeeTipUrl(businessSlug, e.slug)
+            : qrEmployeeLegacyUrl(e.id);
+          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
+          next[e.id] = canvas?.toDataURL("image/png") ?? "";
+          if (report) {
+            meta[e.id] = { grade: report.grade, exportAllowed: report.exportAllowed };
+          }
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
           next[e.id] = "";
@@ -303,28 +423,20 @@ export function QRCodeManagementPage() {
       if (!cancelled) {
         employeeQrCacheKeyRef.current = cacheKey;
         setQrImages(next);
+        setQrScanMeta((prev) => ({ ...prev, ...meta }));
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [employees, employeeQrFingerprint, user?.businessId, businessSlug]);
+  }, [employees, employeeQrFingerprint, user?.businessId, businessSlug, qrBrand, brandingFingerprint]);
 
-  const tables: Array<{ id: string; name: string; location: string; qrUrl: string; scans: number }> =
-    venueTables.map((t) => ({
-      id: t.id,
-      name: t.name,
-      location: t.location?.name ?? "N/A",
-      qrUrl: qrTableUrl(t.id),
-      scans: 0,
-    }));
-  const locations: Array<{ id: string; name: string; address: string; qrUrl: string; scans: number }> =
+  const locations: Array<{ id: string; name: string; address: string; qrUrl: string }> =
     venueLocations.map((loc) => ({
       id: loc.id,
       name: loc.name,
       address: loc.description?.trim() || "N/A",
       qrUrl: qrLocationUrl(loc.id),
-      scans: 0,
     }));
 
   const handleCopy = (id: string, url: string) => {
@@ -333,13 +445,15 @@ export function QRCodeManagementPage() {
     setTimeout(() => setCopiedId(null), 2000);
   };
 
+  const scanMetaForKey = (key: string) => qrScanMeta[key];
+  const isQrExportBlocked = (key: string) => scanMetaForKey(key)?.exportAllowed === false;
+
   type CardItem = {
     id: string;
     name: string;
     role?: string;
     avatar?: string | null;
     qrUrl: string;
-    scans: number;
     slug?: string | null;
     employeeRow?: EmployeeItem;
     location?: string;
@@ -361,8 +475,8 @@ export function QRCodeManagementPage() {
       );
       if (updated.slug) {
         const dataUrl = businessSlug
-          ? await renderBrandedQRToDataUrl(businessSlug, updated.slug)
-          : await renderBrandedQRToDataUrlLegacy(updated.id);
+          ? await renderBrandedQRToDataUrl(businessSlug, updated.slug, qrBrand)
+          : await renderBrandedQRToDataUrlLegacy(updated.id, qrBrand);
         setQrImages((prev) => ({ ...prev, [employee.id]: dataUrl }));
       }
       toast.success(t("business.qrPage.toastQrReady"), TOAST_OK);
@@ -387,7 +501,7 @@ export function QRCodeManagementPage() {
     if (previewDataUrl) return previewDataUrl;
     if (!item.qrUrl) return null;
     try {
-      return await renderBrandedQrUrlToDataUrl(item.qrUrl);
+      return await renderBrandedQrUrlToDataUrl(item.qrUrl, qrBrand);
     } catch (err) {
       logClientError("QRCodeManagementPage.buildVenueQr", err);
       return null;
@@ -399,6 +513,12 @@ export function QRCodeManagementPage() {
     type: "storefront" | "table" | "location",
     previewDataUrl?: string
   ) => {
+    const metaKey =
+      type === "storefront" ? "storefront" : type === "location" ? `loc-${item.id}` : `tbl-${item.id}`;
+    if (isQrExportBlocked(metaKey)) {
+      toast.error(t("business.qrReliability.exportBlocked"));
+      return;
+    }
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
       toast.error(t("business.qrPage.toastQrNotReady"));
@@ -411,7 +531,7 @@ export function QRCodeManagementPage() {
         : type === "table"
           ? `caretip-table-${safe}-${item.id.slice(0, 8)}`
           : `caretip-location-${safe}-${item.id.slice(0, 8)}`;
-    downloadQrDataUrlPng(dataUrl, `${prefix}.png`);
+    if (!downloadQrDataUrlPng(dataUrl, `${prefix}.png`, { exportAllowed: true })) return;
     toast.success(t("business.qrPage.toastQrDownloaded"), TOAST_OK);
   };
 
@@ -633,16 +753,23 @@ export function QRCodeManagementPage() {
 
   if (qrLocked) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-background px-6 pb-20 text-foreground">
+      <div
+        className={cn(
+          "flex flex-col items-center justify-center text-foreground",
+          embedded ? "py-12" : "min-h-screen bg-background px-6 pb-20",
+        )}
+      >
         <div className="max-w-lg space-y-4 text-center">
           <QrCode className="mx-auto h-14 w-14 opacity-40" />
           <h1 className="text-2xl font-bold">{t("business.qrPage.pendingTitle")}</h1>
           <p className="text-sm leading-relaxed text-muted-foreground">{t("business.qrPage.pendingBody")}</p>
-          <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
-            <Button asChild variant="outline">
-              <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
-            </Button>
-          </div>
+          {!embedded ? (
+            <div className="flex flex-col items-center justify-center gap-2 sm:flex-row">
+              <Button asChild variant="outline">
+                <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
+              </Button>
+            </div>
+          ) : null}
         </div>
       </div>
     );
@@ -655,69 +782,122 @@ export function QRCodeManagementPage() {
         ? t("admin.verification.rejected")
         : t("admin.verification.pending");
 
-  return (
-    <div className="min-h-screen bg-background pb-20 text-foreground">
-      <div className={businessUi.subPageTop}>
-        <div className={businessUi.subPageBreadcrumb}>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
-          </Button>
+  const atAGlanceCard = !embedded ? (
+    <Card className={businessUi.atAGlanceCard}>
+      <CardContent className={businessUi.atAGlanceContent}>
+        <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
+        <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStaff")}</p>
+            <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
+          </div>
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStatus")}</p>
+            <p className={businessUi.atAGlanceStatValue}>{statusLabel}</p>
+          </div>
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statSlug")}</p>
+            <p className={businessUi.atAGlanceStatValue}>
+              {businessSlug ? t("business.qrPage.slugLive") : t("business.qrPage.slugNa")}
+            </p>
+          </div>
         </div>
+      </CardContent>
+    </Card>
+  ) : null;
 
-        <DashboardHero
-          stackHeroOnMobile
-          hideTabs
-          hideImage
-          className={businessUi.subPageHero}
-          badgeClassName={businessUi.heroBadge}
-          badge={
-            <>
-              <QrCode className="h-3.5 w-3.5 text-foreground" />
-              {qrLocked ? t("business.qrPage.badgePending") : t("business.qrPage.badgePrintable")}
-            </>
-          }
-          title={t("business.qrPage.heroTitle")}
-          description={businessSlug ? t("business.qrPage.heroDescWithSlug") : t("business.qrPage.heroDescNoSlug")}
-          actions={
-            <div className="dashboard-hero-actions dashboard-hero-actions--uniform">
-            <Button
-              type="button"
-              className={cn(businessUi.btnPrimary, businessUi.heroActionBtn)}
-              onClick={handleGenerateAllPdf}
-              disabled={qrLocked || bulkPdfLoading || employees.length === 0}
-            >
-              {bulkPdfLoading ? (
-                <LoadingSpinner size="sm" className="mr-2 shrink-0" />
-              ) : (
-                <FileDown className="mr-2 h-4 w-4 shrink-0" />
-              )}
-              {t("business.qrPage.allPdfs")}
-            </Button>
-            </div>
-          }
-        />
+  const galleryInventoryCard = embedded && viewMode === "gallery" ? (
+    <Card className={businessUi.atAGlanceCard}>
+      <CardContent className={businessUi.atAGlanceContent}>
+        <p className={businessUi.atAGlanceLabel}>{t("business.qrStudio.gallery.inventoryTitle")}</p>
+        <p className="mb-3 text-xs text-muted-foreground">{t("business.qrStudio.gallery.inventoryDesc")}</p>
+        <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statEmployees")}</p>
+            <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
+          </div>
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statLocations")}</p>
+            <p className={businessUi.atAGlanceStatValue}>{venueLocations.length}</p>
+          </div>
+          <div>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statTables")}</p>
+            <p className={businessUi.atAGlanceStatValue}>{venueTables.length}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  ) : null;
 
-        <Card className={businessUi.atAGlanceCard}>
-          <CardContent className={businessUi.atAGlanceContent}>
-            <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
-            <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
-              <div>
-                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStaff")}</p>
-                <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
-              </div>
-              <div>
-                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStatus")}</p>
-                <p className={businessUi.atAGlanceStatValue}>{statusLabel}</p>
-              </div>
-              <div>
-                <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statSlug")}</p>
-                <p className={businessUi.atAGlanceStatValue}>
-                  {businessSlug ? t("business.qrPage.slugLive") : t("business.qrPage.slugNa")}
-                </p>
-              </div>
+  const quickAccessLinks = [
+    {
+      href: "/dashboard/qr-studio/employees",
+      labelKey: "business.qrStudio.gallery.manageEmployees",
+      icon: Users,
+      count: employees.length,
+    },
+    {
+      href: "/dashboard/qr-studio/locations",
+      labelKey: "business.qrStudio.gallery.manageLocations",
+      icon: MapPin,
+      count: venueLocations.length,
+    },
+    {
+      href: "/dashboard/qr-studio/tables",
+      labelKey: "business.qrStudio.gallery.manageTables",
+      icon: LayoutGrid,
+      count: venueTables.length,
+    },
+  ] as const;
+
+  return (
+    <div className={cn(embedded ? "text-foreground" : "min-h-screen bg-background pb-20 text-foreground")}>
+      <div className={embedded ? "space-y-6" : businessUi.subPageTop}>
+        {!embedded ? (
+          <>
+            <div className={businessUi.subPageBreadcrumb}>
+              <Button variant="outline" size="sm" asChild>
+                <Link to="/dashboard">{t("business.qrPage.backDashboard")}</Link>
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+
+            <DashboardHero
+              stackHeroOnMobile
+              hideTabs
+              hideImage
+              className={businessUi.subPageHero}
+              badgeClassName={businessUi.heroBadge}
+              badge={
+                <>
+                  <QrCode className="h-3.5 w-3.5 text-foreground" />
+                  {qrLocked ? t("business.qrPage.badgePending") : t("business.qrPage.badgePrintable")}
+                </>
+              }
+              title={t("business.qrPage.heroTitle")}
+              description={businessSlug ? t("business.qrPage.heroDescWithSlug") : t("business.qrPage.heroDescNoSlug")}
+              actions={
+                <div className="dashboard-hero-actions dashboard-hero-actions--uniform">
+                  <Button
+                    type="button"
+                    className={cn(businessUi.btnPrimary, businessUi.heroActionBtn)}
+                    onClick={handleGenerateAllPdf}
+                    disabled={qrLocked || bulkPdfLoading || employees.length === 0}
+                  >
+                    {bulkPdfLoading ? (
+                      <LoadingSpinner size="sm" className="mr-2 shrink-0" />
+                    ) : (
+                      <FileDown className="mr-2 h-4 w-4 shrink-0" />
+                    )}
+                    {t("business.qrPage.allPdfs")}
+                  </Button>
+                </div>
+              }
+            />
+          </>
+        ) : null}
+
+        {atAGlanceCard}
+        {galleryInventoryCard}
       </div>
 
       {qrLocked ? (
@@ -729,118 +909,124 @@ export function QRCodeManagementPage() {
         </div>
       ) : null}
 
-      <TracingBeam className={cn(businessUi.subPageMain, "pb-4")}>
+      <TracingBeam className={cn(embedded ? "mt-6" : businessUi.subPageMain, "pb-4")}>
         <div className="space-y-6">
-          <Card className={cn(businessUi.cardStatic, "w-full")}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t("business.qrPage.sectionsTitle")}</CardTitle>
-              <CardDescription className={businessUi.cardDesc}>{t("business.qrPage.sectionsDesc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2 rounded-lg border border-border bg-muted/50 p-1">
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("employees")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all sm:flex-initial ${
-                    activeTab === "employees" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <Users className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("business.qrPage.tabEmployees")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("tables")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all sm:flex-initial ${
-                    activeTab === "tables" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <QrCode className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("business.qrPage.tabTables")}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveTab("locations")}
-                  className={`flex flex-1 items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-semibold transition-all sm:flex-initial ${
-                    activeTab === "locations" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  <MapPin className="h-4 w-4" />
-                  <span className="hidden sm:inline">{t("business.qrPage.tabLocations")}</span>
-                </button>
-              </div>
-            </CardContent>
-          </Card>
-
-      <div className="w-full min-w-0">
-        {activeTab === "employees" && (
-          <>
-            {loading && employees.length === 0 ? (
-              <DashboardListSkeleton rows={5} minHeightClass="min-h-[240px]" />
-            ) : (
-              <div className="space-y-8">
-                {user?.businessId && (
-                  <div>
-                    <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-                      <Store className="h-4 w-4 text-primary" />
-                      {t("business.qrPage.storefrontQrHeading", {
-                        name:
-                          String(businessDisplayName ?? "").trim() ||
-                          user?.businessName ||
-                          t("business.qrPage.fallbackBusinessName"),
-                      })}
-                    </h2>
-                    <p className="mb-3 text-xs text-muted-foreground">
-                      Place at the entrance. Customers scan to choose who to tip.
-                    </p>
-                    <p className="mb-3 text-xs text-muted-foreground">
-                      Same page:{" "}
-                      <code className="break-all font-mono text-[11px] text-foreground/90">
-                        {businessSlug ? businessDirectoryUrl(businessSlug) : qrBusinessUrl(user.businessId)}
-                      </code>
-                    </p>
-                    <QrManagementCard
-                      item={{
-                        id: "storefront",
-                        name:
-                          String(businessDisplayName ?? "").trim() ||
-                          user?.businessName ||
-                          t("business.qrPage.fallbackBusinessName"),
-                        qrUrl: businessSlug
-                          ? businessDirectoryUrl(businessSlug)
-                          : qrLandingUrl(user.businessId),
-                        scans: 0,
-                      }}
-                      type="storefront"
-                      previewDataUrl={storefrontQr}
-                      copiedId={copiedId}
-                      qrLocked={qrLocked}
-                      regeneratingId={regeneratingId}
-                      onCopy={handleCopy}
-                      onRegenerateBusinessQr={() => void handleRegenerateBusinessQr()}
-                      onVenuePrint={(item, venueType, url) =>
-                        void handleVenueQrPrint(item as CardItem, venueType, url)
-                      }
-                      onVenuePrintPdf={(item, venueType, url) =>
-                        void handleVenuePrintPdf(item as CardItem, venueType, url)
-                      }
-                    />
-                  </div>
-                )}
-
+          <div className="w-full min-w-0">
+            {viewMode === "gallery" && user?.businessId ? (
+              <div className="space-y-6">
                 <div>
-                  <h2 className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-                    <UserCheck className="h-4 w-4 text-primary" />
-                    {t("business.qrPage.staffTagsTitle")}
+                  <h2 className="mb-1 text-base font-semibold text-foreground">
+                    {t("business.qrStudio.gallery.mainVenueTitle")}
                   </h2>
+                  <p className="mb-3 text-sm text-muted-foreground">{t("business.qrPage.storefrontQrDesc")}</p>
                   <p className="mb-3 text-xs text-muted-foreground">
-                    {t("business.qrPage.staffTagsDesc")}
+                    {t("business.qrPage.storefrontQrUrlLabel")}{" "}
+                    <code className="break-all font-mono text-[11px] text-foreground/90">
+                      {businessSlug ? businessDirectoryUrl(businessSlug) : qrBusinessUrl(user.businessId)}
+                    </code>
                   </p>
+                  <QrManagementCard
+                    item={{
+                      id: "storefront",
+                      name:
+                        String(businessDisplayName ?? "").trim() ||
+                        user?.businessName ||
+                        t("business.qrPage.fallbackBusinessName"),
+                      qrUrl: businessSlug
+                        ? businessDirectoryUrl(businessSlug)
+                        : qrLandingUrl(user.businessId),
+                    }}
+                    type="storefront"
+                    previewDataUrl={storefrontQr}
+                    copiedId={copiedId}
+                    qrLocked={qrLocked}
+                    regeneratingId={regeneratingId}
+                    onCopy={handleCopy}
+                    onRegenerateBusinessQr={() => void handleRegenerateBusinessQr()}
+                    onVenuePrint={(item, venueType, url) =>
+                      void handleVenueQrPrint(item as CardItem, venueType, url)
+                    }
+                    onVenuePrintPdf={(item, venueType, url) =>
+                      void handleVenuePrintPdf(item as CardItem, venueType, url)
+                    }
+                    exportBlocked={isQrExportBlocked("storefront")}
+                  />
+                </div>
+
+                <Card className={businessUi.cardStatic}>
+                  <CardContent className="space-y-3 pt-6">
+                    <div>
+                      <h3 className="text-sm font-semibold text-foreground">
+                        {t("business.qrStudio.gallery.quickAccessTitle")}
+                      </h3>
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("business.qrStudio.gallery.quickAccessDesc")}
+                      </p>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-3">
+                      {quickAccessLinks.map((link) => {
+                        const Icon = link.icon;
+                        return (
+                          <Link
+                            key={link.href}
+                            to={link.href}
+                            className={cn(
+                              businessUi.cardStatic,
+                              "flex items-center justify-between gap-2 rounded-xl border px-3.5 py-3 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/[0.04]",
+                            )}
+                          >
+                            <span className="flex min-w-0 items-center gap-2">
+                              <Icon className="h-4 w-4 shrink-0 text-primary" aria-hidden />
+                              <span className="truncate">{t(link.labelKey)}</span>
+                            </span>
+                            <span className="flex shrink-0 items-center gap-1 text-muted-foreground">
+                              <span className="text-xs tabular-nums">{link.count}</span>
+                              <ChevronRight className="h-4 w-4" aria-hidden />
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            ) : null}
+
+            {viewMode === "employees" ? (
+              loading && employees.length === 0 ? (
+                <DashboardListSkeleton rows={5} minHeightClass="min-h-[240px]" />
+              ) : (
+                <div>
+                  <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div>
+                      <h2 className="text-base font-semibold text-foreground">
+                        {t("business.qrStudio.employees.pageTitle")}
+                      </h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        {t("business.qrStudio.employees.pageDesc")}
+                      </p>
+                    </div>
+                    {embedded ? (
+                      <Button
+                        type="button"
+                        className={cn(businessUi.btnPrimary, "shrink-0")}
+                        onClick={handleGenerateAllPdf}
+                        disabled={qrLocked || bulkPdfLoading || employees.length === 0}
+                      >
+                        {bulkPdfLoading ? (
+                          <LoadingSpinner size="sm" className="mr-2 shrink-0" />
+                        ) : (
+                          <FileDown className="mr-2 h-4 w-4 shrink-0" />
+                        )}
+                        {t("business.qrPage.allPdfs")}
+                      </Button>
+                    ) : null}
+                  </div>
                   {employees.length === 0 ? (
                     <div className={cn(businessUi.cardStatic, businessUi.chartEmpty, "py-12 text-center")}>
                       <p className="mb-2 text-muted-foreground">{t("business.qrPage.noEmployees")}</p>
                       <Link
-                        to="/dashboard/staff-management"
+                        to="/dashboard/team/employees"
                         className="text-sm font-semibold text-foreground underline underline-offset-2"
                       >
                         {t("business.qrPage.addStaffInManagement")}
@@ -860,7 +1046,6 @@ export function QRCodeManagementPage() {
                               businessSlug && employee.slug
                                 ? publicEmployeeTipUrl(businessSlug, employee.slug)
                                 : qrEmployeeLegacyUrl(employee.id),
-                            scans: 0,
                             slug: employee.slug,
                           }}
                           type="employee"
@@ -872,86 +1057,59 @@ export function QRCodeManagementPage() {
                           onEmployeePrint={(item, url) => void handleEmployeePrint(item as CardItem, url)}
                           onEmployeePrintPdf={(item) => void handleEmployeePrintPdf(item as CardItem)}
                           onEmployeeRegenerate={onEmployeeRegenerateCard}
+                          exportBlocked={isQrExportBlocked(employee.id)}
                         />
                       ))}
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-          </>
-        )}
+              )
+            ) : null}
 
-        {activeTab === "tables" && (
-          <div className="space-y-4">
-            {tables.length === 0 ? (
-              <div className="py-16 text-center text-muted-foreground">
-                <p className="mb-6">{t("business.qrPage.noTables")}</p>
-                <Link
-                  to="/dashboard/tables"
-                  className="text-sm font-semibold text-foreground underline underline-offset-2"
-                >
-                  Add tables
-                </Link>
+            {viewMode === "locations" ? (
+              <div className="space-y-4">
+                <div>
+                  <h2 className="text-base font-semibold text-foreground">
+                    {t("business.qrStudio.locations.pageTitle")}
+                  </h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {t("business.qrStudio.locations.pageDesc")}
+                  </p>
+                </div>
+                {locations.length === 0 ? (
+                  <div className="py-16 text-center text-muted-foreground">
+                    <p className="mb-6">{t("business.qrPage.noLocations")}</p>
+                    <Link
+                      to="/dashboard/locations"
+                      className="text-sm font-semibold text-foreground underline underline-offset-2"
+                    >
+                      {t("business.qrPage.addLocations")}
+                    </Link>
+                  </div>
+                ) : (
+                  locations.map((location) => (
+                    <QrManagementCard
+                      key={location.id}
+                      item={{ ...location, role: location.address }}
+                      type="location"
+                      previewDataUrl={venueQrPreview[`loc-${location.id}`]}
+                      copiedId={copiedId}
+                      qrLocked={qrLocked}
+                      regeneratingId={regeneratingId}
+                      onCopy={handleCopy}
+                      onVenuePrint={(item, venueType, url) =>
+                        void handleVenueQrPrint(item as CardItem, venueType, url)
+                      }
+                      onVenuePrintPdf={(item, venueType, url) =>
+                        void handleVenuePrintPdf(item as CardItem, venueType, url)
+                      }
+                      exportBlocked={isQrExportBlocked(`loc-${location.id}`)}
+                    />
+                  ))
+                )}
               </div>
-            ) : (
-              tables.map((table) => (
-                <QrManagementCard
-                  key={table.id}
-                  item={{ ...table, role: table.location }}
-                  type="table"
-                  previewDataUrl={venueQrPreview[`tbl-${table.id}`]}
-                  copiedId={copiedId}
-                  qrLocked={qrLocked}
-                  regeneratingId={regeneratingId}
-                  onCopy={handleCopy}
-                  onVenuePrint={(item, venueType, url) =>
-                    void handleVenueQrPrint(item as CardItem, venueType, url)
-                  }
-                  onVenuePrintPdf={(item, venueType, url) =>
-                    void handleVenuePrintPdf(item as CardItem, venueType, url)
-                  }
-                />
-              ))
-            )}
+            ) : null}
           </div>
-        )}
-
-        {activeTab === "locations" && (
-          <div className="space-y-4">
-            {locations.length === 0 ? (
-              <div className="py-16 text-center text-muted-foreground">
-                <p className="mb-6">{t("business.qrPage.noLocations")}</p>
-                <Link
-                  to="/dashboard/locations"
-                  className="text-sm font-semibold text-foreground underline underline-offset-2"
-                >
-                  Add locations
-                </Link>
-              </div>
-            ) : (
-              locations.map((location) => (
-                <QrManagementCard
-                  key={location.id}
-                  item={{ ...location, role: location.address }}
-                  type="location"
-                  previewDataUrl={venueQrPreview[`loc-${location.id}`]}
-                  copiedId={copiedId}
-                  qrLocked={qrLocked}
-                  regeneratingId={regeneratingId}
-                  onCopy={handleCopy}
-                  onVenuePrint={(item, venueType, url) =>
-                    void handleVenueQrPrint(item as CardItem, venueType, url)
-                  }
-                  onVenuePrintPdf={(item, venueType, url) =>
-                    void handleVenuePrintPdf(item as CardItem, venueType, url)
-                  }
-                />
-              ))
-            )}
-          </div>
-        )}
-      </div>
         </div>
       </TracingBeam>
     </div>

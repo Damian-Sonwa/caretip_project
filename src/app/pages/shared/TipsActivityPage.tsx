@@ -21,6 +21,7 @@ import { logClientError } from "@/app/lib/clientLog";
 import { formatEur } from "@/app/lib/formatEur";
 import { listBusinessTips, listEmployeeTips, type TipActivityRow, type TipStatus } from "@/app/lib/api";
 import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
+import { LockedFeatureCard } from "@/app/components/subscription/LockedFeatureCard";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -64,20 +65,22 @@ function downloadCsv(filename: string, csv: string) {
 type TipsActivityPageProps = {
   /** Finance-oriented employee ledger (Tip History). Default is business Tips & Activity. */
   variant?: "default" | "employee-history";
+  /** When true, omit page title — parent module shell provides chrome. */
+  embedded?: boolean;
 };
 
-export function TipsActivityPage({ variant = "default" }: TipsActivityPageProps) {
+export function TipsActivityPage({ variant = "default", embedded = false }: TipsActivityPageProps) {
   const { t, i18n } = useTranslation();
   const isEmployeeHistory = variant === "employee-history";
   const copyNs = isEmployeeHistory ? "employee.tipHistory" : "business.tipsActivity";
   const copy = useCallback((key: string, opts?: Record<string, unknown>) => t(`${copyNs}.${key}`, opts), [copyNs, t]);
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, sessionValidated } = useRequireAuth();
-  const { hasCapability } = useSubscriptionEntitlements({
+  const { hasFeature, tier } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
-  const canExportCsv = user?.role === "business" && hasCapability("csvExport");
+  const canExportCsv = user?.role === "business" && hasFeature("csvExport");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | TipStatus>("all");
   const [range, setRange] = useState<"today" | "week" | "month" | "custom">("month");
@@ -182,9 +185,9 @@ export function TipsActivityPage({ variant = "default" }: TipsActivityPageProps)
   const subtitle = copy("subtitle");
 
   return (
-    <main className={cn(ui.page, ui.pageShell, "overflow-x-hidden")}>
-      <div className={ui.pageInner}>
-      {isEmployeeHistory ? (
+    <main className={cn(ui.page, !embedded && ui.pageShell, "overflow-x-hidden")}>
+      <div className={embedded ? "w-full" : ui.pageInner}>
+      {!embedded && isEmployeeHistory ? (
         <EmployeePageHeader
           title={copy("title")}
           description={subtitle.trim() || undefined}
@@ -196,12 +199,12 @@ export function TipsActivityPage({ variant = "default" }: TipsActivityPageProps)
           }
           className="mb-6 sm:mb-8"
         />
-      ) : (
+      ) : !embedded ? (
         <header className="mb-6 sm:mb-8">
           <h1 className="text-2xl font-semibold text-foreground sm:text-3xl">{copy("title")}</h1>
           {subtitle.trim() ? <p className={cn("mt-2", ui.cardDesc)}>{subtitle}</p> : null}
         </header>
-      )}
+      ) : null}
 
       <motion.div
         initial={{ y: 20, opacity: 0 }}
@@ -322,6 +325,9 @@ export function TipsActivityPage({ variant = "default" }: TipsActivityPageProps)
             </Button>
             ) : null}
           </div>
+          {user?.role === "business" && !canExportCsv ? (
+            <LockedFeatureCard featureKey="csvExport" tier={tier} compact className="mt-4" />
+          ) : null}
         </div>
       </motion.div>
 

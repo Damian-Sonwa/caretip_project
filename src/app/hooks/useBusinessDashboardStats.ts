@@ -24,16 +24,22 @@ import {
   hasBusinessKpiValues,
   hasBusinessSecondaryContent,
 } from "../lib/dashboardVisibleContent";
+import {
+  getBusinessAnalyticsBundle,
+  invalidateBusinessAnalytics,
+  subscribeBusinessAnalyticsRefresh,
+  upsertBusinessAnalyticsStatsBundle,
+  clearBusinessAnalyticsStore,
+  type AnalyticsTimeframe,
+} from "../lib/businessAnalytics";
+import {
+  patchLiveTipAcrossTimeframes,
+  subscribeAnalyticsPatch,
+} from "../lib/realtime/patchAnalyticsLive";
+import { trackSocketPatchApplied } from "../lib/realtime/realtimeMetrics";
+import type { LiveNewTipPayload } from "../lib/realtime/realtimeContracts";
 
-export type AnalyticsTimeframe = "week" | "month" | "year";
-
-type LiveBusinessTipPayload = {
-  tip: { id: string; amount: number; status: string; createdAt: string };
-  employeeId: string;
-  businessId: string;
-  currentMonthTotal: number;
-  monthlyGoal: number | null;
-};
+export type { AnalyticsTimeframe };
 
 type BusinessSwrEntry = {
   summary: Partial<BusinessDashboardStats>;
@@ -46,6 +52,7 @@ const businessSwrStore = createDashboardSwrStore<BusinessSwrEntry>();
 
 export function clearBusinessDashboardSwrStore(): void {
   businessSwrStore.clear();
+  clearBusinessAnalyticsStore();
 }
 
 function swrKey(tf: AnalyticsTimeframe): string {
@@ -103,6 +110,7 @@ export function useBusinessDashboardStats(
   const quietRefreshInFlightRef = useRef<Promise<void> | null>(null);
   const statsLoadInflightByTfRef = useRef(new Map<AnalyticsTimeframe, Promise<void>>());
   const refreshQuietDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const tipReconcileTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   /** Bumps on effect cleanup so Strict Mode double-mount only runs the latest load. */
   const statsMountGenerationRef = useRef(0);
   /** Avoid clearing settled UI on bootstrap before first enable (prevents load→content→load flicker). */
@@ -160,6 +168,7 @@ export function useBusinessDashboardStats(
     persistSwr(tf);
     setStats(merged);
     setStatsTimeframe(tf);
+    upsertBusinessAnalyticsStatsBundle(tf, merged);
     setPendingVerification(false);
     setStatsLoadFailed(null);
     setLastUpdatedAt(Date.now());
@@ -256,6 +265,12 @@ export function useBusinessDashboardStats(
       };
 
       hydratePeriodSessionCache(tf);
+
+      const sharedBundle = getBusinessAnalyticsBundle(tf);
+      if (sharedBundle?.periodStats && !revalidate) {
+        summaryPartialRef.current.set(tf, sharedBundle.periodStats);
+        analyticsPartialRef.current.set(tf, sharedBundle.periodStats);
+      }
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       if (affectsUi) {
@@ -848,8 +863,34 @@ export function useBusinessDashboardStats(
     };
   }, [enabled, sessionValidated, refetchTick]);
 
+  useEffect(() => {
+    if (!enabled || !sessionValidated) return;
+    return subscribeBusinessAnalyticsRefresh(() => {
+      void loadStatsForRef.current(tfRef.current, {
+        affectsUi: true,
+        soft: true,
+        silent: true,
+      });
+    });
+  }, [enabled, sessionValidated]);
+
+  useEffect(() => {
+    if (!enabled || !sessionValidated) return;
+    return subscribeAnalyticsPatch((patched) => {
+      const tf = patched.timeframe;
+      const stats = patched.stats;
+      if (!stats) return;
+      summaryPartialRef.current.set(tf, stats);
+      analyticsPartialRef.current.set(tf, analyticsPartialRef.current.get(tf) ?? stats);
+      if (tf === tfRef.current) {
+        commitUiStats(tf, uiRequestSeqRef.current, false);
+      }
+      if (tf === "month") applyHeroFromMonth("month");
+    });
+  }, [enabled, sessionValidated, commitUiStats, applyHeroFromMonth]);
+
   const refetchLive = useCallback(() => {
-    clearBusinessStatsClientCache(tfRef.current);
+    invalidateBusinessAnalytics(tfRef.current);
     void loadStatsFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
   }, [loadStatsFor]);
 
@@ -865,7 +906,7 @@ export function useBusinessDashboardStats(
       if (!sessionValidated || !enabled) return;
       if (quietRefreshInFlightRef.current) return;
 
-      clearBusinessStatsClientCache(tfRef.current);
+      invalidateBusinessAnalytics(tfRef.current);
       const run = loadStatsFor(tfRef.current, {
         affectsUi: true,
         soft: true,
@@ -878,37 +919,50 @@ export function useBusinessDashboardStats(
     }, 400);
   }, [enabled, sessionValidated, loadStatsFor]);
 
+  const scheduleTipReconcile = useCallback(() => {
+    if (tipReconcileTimerRef.current != null) {
+      clearTimeout(tipReconcileTimerRef.current);
+    }
+    tipReconcileTimerRef.current = setTimeout(() => {
+      tipReconcileTimerRef.current = null;
+      invalidateBusinessAnalytics(tfRef.current);
+      void loadStatsFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
+    }, 2_500);
+  }, [loadStatsFor]);
+
+  const syncPartialsFromAnalyticsBundles = useCallback(() => {
+    for (const tf of ["week", "month", "year"] as AnalyticsTimeframe[]) {
+      const bundle = getBusinessAnalyticsBundle(tf);
+      if (!bundle?.periodStats) continue;
+      summaryPartialRef.current.set(tf, bundle.periodStats);
+      upsertBusinessAnalyticsStatsBundle(tf, bundle.periodStats);
+    }
+  }, []);
+
   const applyLiveTip = useCallback(
-    (p: LiveBusinessTipPayload) => {
+    (p: LiveNewTipPayload) => {
       if (!enabled || !sessionValidated) return;
+      patchLiveTipAcrossTimeframes(p, p.employeeName);
+      trackSocketPatchApplied();
+      syncPartialsFromAnalyticsBundles();
       const tf = tfRef.current;
-
-      const prevMerged = mergeBusinessDashboardStats(
-        summaryPartialRef.current.get(tf),
-        analyticsPartialRef.current.get(tf),
-      );
-      if (!prevMerged) return;
-
-      const prevTotalTips = typeof prevMerged.totalTips === "number" ? prevMerged.totalTips : 0;
-      const prevTipCount = typeof prevMerged.tipCount === "number" ? prevMerged.tipCount : 0;
-
-      const nextSummary: Partial<BusinessDashboardStats> = {
-        ...summaryPartialRef.current.get(tf),
-        totalTips: prevTotalTips + Number(p.tip.amount || 0),
-        tipCount: prevTipCount + 1,
-      };
-
-      summaryPartialRef.current.set(tf, nextSummary);
-      // Keep session UI responsive; authoritative refresh will reconcile final state.
       commitUiStats(tf, uiRequestSeqRef.current, false);
       applyHeroFromMonth(tf);
+      scheduleTipReconcile();
     },
-    [enabled, sessionValidated, commitUiStats, applyHeroFromMonth],
+    [
+      enabled,
+      sessionValidated,
+      commitUiStats,
+      applyHeroFromMonth,
+      scheduleTipReconcile,
+      syncPartialsFromAnalyticsBundles,
+    ],
   );
 
   const retryStats = useCallback(() => {
     setStatsLoadFailed(null);
-    clearBusinessStatsClientCache(tfRef.current);
+    invalidateBusinessAnalytics(tfRef.current);
     businessSwrStore.delete(swrKey(tfRef.current));
     summaryPartialRef.current.delete(tfRef.current);
     analyticsPartialRef.current.delete(tfRef.current);

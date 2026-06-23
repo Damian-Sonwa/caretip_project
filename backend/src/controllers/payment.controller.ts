@@ -8,6 +8,8 @@ import { prisma } from "../prisma.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { TipPaymentEligibilityError } from "../services/tipPaymentEligibility.service.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { resolveScanSessionId } from "../services/qr/qrScanRequestContext.js";
+import { QR_FUNNEL_EVENT_TYPES, recordQrFunnelEvent } from "../services/qr/qrFunnelEvent.service.js";
 
 /**
  * POST /api/payments/create-tip-session
@@ -27,6 +29,10 @@ export async function createTipSession(req: Request, res: Response) {
     const customerName =
       typeof body.customerName === "string" ? body.customerName : undefined;
     const feedback = typeof body.feedback === "string" ? body.feedback : undefined;
+    const qrScanSessionId =
+      typeof body.qrScanSessionId === "string" && body.qrScanSessionId.trim()
+        ? body.qrScanSessionId.trim().slice(0, 64)
+        : resolveScanSessionId(req);
 
     if (!employeeId || !businessId) {
       return res.status(400).json({ message: "employeeId and businessId are required" });
@@ -58,6 +64,16 @@ export async function createTipSession(req: Request, res: Response) {
       tableId: tableId ?? null,
       customerName: customerName ?? null,
       feedback: feedback ?? null,
+      qrScanSessionId,
+    });
+
+    recordQrFunnelEvent({
+      businessId,
+      sessionId: qrScanSessionId,
+      eventType: QR_FUNNEL_EVENT_TYPES.TIP_STARTED,
+      employeeId,
+      locationId: locationId ?? null,
+      tableId: tableId ?? null,
     });
 
     return res.json({

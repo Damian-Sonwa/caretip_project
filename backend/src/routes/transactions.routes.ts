@@ -3,7 +3,7 @@ import { Role } from "@prisma/client";
 import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware/auth.middleware.js";
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import * as transactionsController from "../controllers/transactions.controller.js";
-import { requireSubscriptionCapability } from "../middleware/requireSubscriptionCapability.middleware.js";
+import { requireFeature } from "../services/subscriptionEntitlement.service.js";
 
 const router = Router();
 
@@ -13,7 +13,7 @@ router.get(
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
   requireCompletedOnboarding,
-  requireSubscriptionCapability("csvExport"),
+  requireFeature("csvExport"),
   transactionsController.exportTransactions
 );
 

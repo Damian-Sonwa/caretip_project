@@ -11,6 +11,7 @@ export type ResolvedCustomerEmployee = {
   employeeAvatar?: string;
   businessName: string;
   businessLogo: string | null;
+  branding?: import("./businessBranding").PublicGuestBranding | null;
 };
 
 type ResolveOpts = {
@@ -47,6 +48,7 @@ export async function resolveCustomerEmployeeContext(
       employeeAvatar: s.avatar ?? undefined,
       businessName: s.businessName,
       businessLogo: s.businessLogo ?? null,
+      branding: s.branding ?? null,
     };
   }
 
@@ -59,6 +61,7 @@ export async function resolveCustomerEmployeeContext(
       employeeAvatar: s.avatar ?? undefined,
       businessName: s.businessName,
       businessLogo: s.businessLogo ?? null,
+      branding: s.branding ?? null,
     };
   }
 
@@ -70,6 +73,7 @@ export async function resolveCustomerEmployeeContext(
     employeeAvatar: emp.avatar ?? undefined,
     businessName: String(emp.businessName ?? "").trim() || fallbackVenueLabel,
     businessLogo: emp.businessLogo ?? null,
+    branding: emp.branding ?? null,
   };
 }
 

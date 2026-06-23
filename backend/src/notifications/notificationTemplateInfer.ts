@@ -70,6 +70,7 @@ export function inferNotificationTemplate(input: InferInput): NotificationTempla
       const isBusiness =
         url === "/dashboard" ||
         url === "/dashboard/transactions" ||
+        url === "/dashboard/tips/transactions" ||
         /venue|betrieb/i.test(title) ||
         /\bfor\b/i.test(message) ||
         /\bfür\b/i.test(message);

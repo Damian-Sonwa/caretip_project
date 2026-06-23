@@ -14,7 +14,6 @@ export type QrManagementCardItem = {
   role?: string;
   avatar?: string | null;
   qrUrl: string;
-  scans: number;
   slug?: string | null;
 };
 
@@ -40,6 +39,7 @@ type QrManagementCardProps = {
     previewDataUrl?: string,
   ) => void;
   onRegenerateBusinessQr?: () => void;
+  exportBlocked?: boolean;
 };
 
 function QrPreviewImage({ dataUrl }: { dataUrl?: string }) {
@@ -68,6 +68,7 @@ export const QrManagementCard = memo(function QrManagementCard({
   onVenuePrint,
   onVenuePrintPdf,
   onRegenerateBusinessQr,
+  exportBlocked = false,
 }: QrManagementCardProps) {
   const { t } = useTranslation();
 
@@ -76,14 +77,21 @@ export const QrManagementCard = memo(function QrManagementCard({
       <div className="flex flex-col gap-6 sm:flex-row">
         <div className="flex-shrink-0">
           <QrPreviewImage dataUrl={previewDataUrl} />
+          {exportBlocked ? (
+            <p className="mt-2 text-center text-[10px] font-medium text-destructive">
+              {t("business.qrReliability.exportBlockedShort")}
+            </p>
+          ) : null}
         </div>
 
         <div className="flex-1 space-y-4">
           <div>
             {type === "storefront" && (
               <div className="mb-2">
-                <h3 className="font-semibold text-foreground">{item.name}</h3>
-                <p className="text-sm text-muted-foreground">{t("business.qrPage.teamQrSubtitle")}</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  {t("business.qrStudio.gallery.mainVenueTitle")}
+                </p>
+                <p className="text-sm text-muted-foreground">{t("business.qrPage.storefrontCardHint")}</p>
               </div>
             )}
             {type === "employee" && (
@@ -134,11 +142,7 @@ export const QrManagementCard = memo(function QrManagementCard({
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div className="text-sm text-muted-foreground">
-              <span>{t("business.qrPage.totalScans")} </span>
-              <span className="font-semibold text-foreground">{item.scans}</span>
-            </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <div className="flex flex-wrap gap-2">
               {type === "employee" && (
                 <>
@@ -147,7 +151,7 @@ export const QrManagementCard = memo(function QrManagementCard({
                     size="sm"
                     variant="outline"
                     onClick={() => onEmployeePrint?.(item, previewDataUrl)}
-                    disabled={qrLocked}
+                    disabled={qrLocked || exportBlocked}
                     className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
@@ -157,7 +161,7 @@ export const QrManagementCard = memo(function QrManagementCard({
                     type="button"
                     size="sm"
                     onClick={() => onEmployeePrintPdf?.(item)}
-                    disabled={qrLocked || !previewDataUrl}
+                    disabled={qrLocked || !previewDataUrl || exportBlocked}
                     className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />
@@ -204,7 +208,7 @@ export const QrManagementCard = memo(function QrManagementCard({
                     size="sm"
                     variant="outline"
                     onClick={() => onVenuePrint?.(item, type, previewDataUrl)}
-                    disabled={qrLocked}
+                    disabled={qrLocked || exportBlocked}
                     className={DASH_BTN_SECONDARY}
                   >
                     <Printer className="mr-2 h-4 w-4" />
@@ -214,7 +218,7 @@ export const QrManagementCard = memo(function QrManagementCard({
                     type="button"
                     size="sm"
                     onClick={() => onVenuePrintPdf?.(item, type, previewDataUrl)}
-                    disabled={qrLocked || !previewDataUrl}
+                    disabled={qrLocked || !previewDataUrl || exportBlocked}
                     className={DASH_BTN_PRIMARY}
                   >
                     <FileDown className="mr-2 h-4 w-4" />

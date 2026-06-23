@@ -27,6 +27,7 @@ import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
 import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
 import { derivePlatformAdminDashboardStatus } from "../lib/dashboardStatus/deriveDashboardStatus";
 import { NetworkOverviewHero } from "./NetworkOverviewHero";
+import { PremiumPageHero } from "./premium/PremiumPageHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
@@ -46,6 +47,7 @@ import {
 } from "@/components/ui/card";
 import { DashboardChartsIdleMount } from "./dashboard/DashboardChartsIdleMount";
 import { AdminDashboardAnalyticsChartsFallback } from "./AdminDashboardAnalyticsChartsFallback";
+import { PlatformCommercialIntelligenceSection } from "./platform/PlatformCommercialIntelligenceSection";
 
 const AdminDashboardAnalyticsCharts = lazy(() =>
   import("./AdminDashboardAnalyticsCharts").then((mod) => ({
@@ -466,6 +468,17 @@ export function AdminDashboard() {
   const hasPlatformCharts = Boolean(chartAnalytics);
   const showStatLoading = !hasPlatformStats && initialDashLoading;
   const showChartSkeletons = !hasPlatformCharts && initialDashLoading;
+  const subscriptionMix = useMemo(() => {
+    const mix = { basic: 0, premium: 0, enterprise: 0 };
+    for (const b of businesses) {
+      const tier = b.subscriptionTier ?? "basic";
+      if (tier === "enterprise") mix.enterprise += 1;
+      else if (tier === "premium") mix.premium += 1;
+      else mix.basic += 1;
+    }
+    return mix;
+  }, [businesses]);
+  const subscriptionTotal = subscriptionMix.basic + subscriptionMix.premium + subscriptionMix.enterprise;
   const analyticsMeta = chartAnalytics ?? emptyAnalytics;
   const chartTipStatus = useMemo(
     () =>
@@ -527,7 +540,9 @@ export function AdminDashboard() {
             className="justify-end"
           />
         </div>
-        <NetworkOverviewHero health={health} />
+        <PremiumPageHero className="mb-10 max-lg:mb-12" autoHeight>
+          <NetworkOverviewHero health={health} embedded />
+        </PremiumPageHero>
 
         <TracingBeam>
           <FixPrompt
@@ -608,6 +623,37 @@ export function AdminDashboard() {
             delay={0.25}
           />
         </div>
+
+        {subscriptionTotal > 0 ? (
+          <Card className={cn(platformUi.contentCard, "mb-6")}>
+            <CardHeader>
+              <CardTitle className="text-base">{t("admin.subscriptionBreakdown.title")}</CardTitle>
+              <CardDescription>{t("admin.subscriptionBreakdown.desc")}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid gap-4 sm:grid-cols-3">
+                {(["basic", "premium", "enterprise"] as const).map((tier) => {
+                  const count = subscriptionMix[tier];
+                  const pct = subscriptionTotal > 0 ? Math.round((count / subscriptionTotal) * 100) : 0;
+                  return (
+                    <div key={tier} className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                        {t(`admin.subscriptionBreakdown.${tier}`)}
+                      </p>
+                      <p className="mt-1 text-2xl font-semibold tabular-nums">{count}</p>
+                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
+                      </div>
+                      <p className="mt-1 text-xs text-muted-foreground">{pct}%</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        ) : null}
+
+        <PlatformCommercialIntelligenceSection />
 
         {/* Analytics charts — Recharts lazy-loaded after stat cards paint */}
         <DashboardChartsIdleMount fallback={<AdminDashboardAnalyticsChartsFallback />}>

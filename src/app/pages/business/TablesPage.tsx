@@ -4,6 +4,8 @@ import { useTranslation } from "react-i18next";
 import { Copy, LayoutGrid } from "lucide-react";
 import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { LockedFeatureCard } from "../../components/subscription/LockedFeatureCard";
 import {
   createTableAPI,
   fetchLocations,
@@ -38,9 +40,14 @@ type TablesPageCache = { locations: LocationDTO[]; tables: TableDTO[] };
 
 const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const;
 
-export function TablesPage() {
+export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
+  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+    enabled: isBusiness,
+    role: "business",
+  });
+  const tableQrEnabled = hasFeature("tableQr");
   const [tables, setTables] = useState<TableDTO[]>([]);
   const [locations, setLocations] = useState<LocationDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,38 +136,60 @@ export function TablesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur-xl bg-card/80">
-        <div className="dashboard-page-contained mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="flex min-w-0 flex-col gap-2 sm:gap-3">
-            <Link
-              to="/dashboard"
-              className="w-fit shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              {t("business.tablesPage.backAria")}
-            </Link>
-            <div className="min-w-0 space-y-1">
-              <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
-                {t("business.tablesPage.title")}
-              </h1>
-              {t("business.tablesPage.subtitle").trim() ? (
-                <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
-              ) : null}
+    <div className={cn(embedded ? "text-foreground" : "min-h-screen bg-background")}>
+      {!embedded ? (
+        <div className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur-xl bg-card/80">
+          <div className="dashboard-page-contained mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+            <div className="flex min-w-0 flex-col gap-2 sm:gap-3">
+              <Link
+                to="/dashboard"
+                className="w-fit shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+              >
+                {t("business.tablesPage.backAria")}
+              </Link>
+              <div className="min-w-0 space-y-1">
+                <h1 className="truncate text-xl font-bold text-foreground sm:text-2xl">
+                  {t("business.tablesPage.title")}
+                </h1>
+                {t("business.tablesPage.subtitle").trim() ? (
+                  <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
+                ) : null}
+              </div>
             </div>
+            <Button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              disabled={!isBusiness || (ready && !tableQrEnabled)}
+              className="w-full shrink-0 sm:w-auto"
+            >
+              {t("business.tablesPage.create")}
+            </Button>
           </div>
+        </div>
+      ) : (
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">{t("business.tablesPage.subtitle")}</p>
           <Button
             type="button"
             onClick={() => setModalOpen(true)}
-            disabled={!isBusiness}
+            disabled={!isBusiness || (ready && !tableQrEnabled)}
             className="w-full shrink-0 sm:w-auto"
           >
             {t("business.tablesPage.create")}
           </Button>
         </div>
-      </div>
+      )}
 
-      <div className="dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
-        {loading ? (
+      <div
+        className={cn(
+          embedded
+            ? "w-full"
+            : "dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6",
+        )}
+      >
+        {ready && !tableQrEnabled ? (
+          <LockedFeatureCard featureKey="tableQr" tier={tier} />
+        ) : loading ? (
           <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
             <TablesListSkeleton />
           </div>

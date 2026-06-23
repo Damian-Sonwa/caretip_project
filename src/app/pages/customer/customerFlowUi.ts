@@ -34,6 +34,8 @@ export const customerFlowUi = {
   customerJourneyVenueRow: "flex min-w-0 items-center gap-3 sm:gap-3.5",
   customerJourneyVenueName:
     "customer-journey-venue-name text-balance text-xl font-semibold leading-tight tracking-tight text-foreground sm:text-[1.375rem]",
+  customerJourneyVenueTagline:
+    "mt-0.5 text-xs font-medium leading-snug text-muted-foreground/85 sm:text-[0.8125rem]",
   customerJourneyVenueContext: "mt-1 text-xs leading-snug text-muted-foreground sm:text-[0.8125rem]",
   customerJourneyStepTitle: "mt-4 text-sm font-medium leading-snug text-foreground/90 sm:text-[0.9375rem]",
   customerJourneyEmployee: "mt-2 text-sm font-semibold leading-snug text-foreground sm:text-[0.9375rem]",

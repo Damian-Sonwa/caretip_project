@@ -16,6 +16,11 @@ import { isProtectedApiReady } from "../lib/authRestore";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
+import { useRealtimeFallback } from "./useRealtimeFallback";
+import { useRealtimeReconnect } from "../lib/realtime/useRealtimeReconnect";
+import { trackNotificationRefetch } from "../lib/realtime/realtimeMetrics";
+import { REALTIME_EVENTS } from "../lib/realtime/realtimeContracts";
+import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import {
   getPageSessionCache,
@@ -62,6 +67,7 @@ export function useNotifications({
     if (!active) return;
     devSetHydrationPhase("notifications", "loading");
     try {
+      trackNotificationRefetch();
       const { unreadCount: count } = await fetchMyUnreadNotificationCount();
       setUnreadCount(count);
       devSetHydrationPhase("notifications", "ready");
@@ -128,6 +134,17 @@ export function useNotifications({
     },
     [active, filterKey, listFilters?.kind, listFilters?.q, listFilters?.supportStatus, uiLocale, t, i18n.language],
   );
+
+  const loadNotificationsRef = useRef(loadNotifications);
+  loadNotificationsRef.current = loadNotifications;
+
+  useRealtimeFallback(connected, refreshUnread, 60_000);
+  useRealtimeReconnect(() => {
+    void refreshUnread();
+    if (loadList && loadedRef.current) {
+      void loadNotificationsRef.current({ reset: true });
+    }
+  }, active);
 
   const markRead = useCallback(async (id: string) => {
     try {
@@ -206,7 +223,12 @@ export function useNotifications({
   useEffect(() => {
     if (!socket || !active) return;
 
-    const onCreated = (payload: { notification?: InboxNotification; unreadCount?: number }) => {
+    const onCreated = (payload: {
+      notification?: InboxNotification;
+      unreadCount?: number;
+      eventId?: string;
+    }) => {
+      if (!shouldProcessRealtimeEvent(payload.eventId ?? payload.notification?.id)) return;
       if (typeof payload.unreadCount === "number") {
         setUnreadCount(payload.unreadCount);
       }
@@ -225,12 +247,14 @@ export function useNotifications({
     };
 
     socket.on("notification_created", onCreated);
+    socket.on(REALTIME_EVENTS.NOTIFICATION_CREATED, onCreated);
     socket.on("notification_unread_count", onUnread);
     return () => {
       socket.off("notification_created", onCreated);
+      socket.off(REALTIME_EVENTS.NOTIFICATION_CREATED, onCreated);
       socket.off("notification_unread_count", onUnread);
     };
-  }, [socket, active, t, i18n.language]);
+  }, [socket, active, t, i18n.language, loadList, loadNotifications]);
 
   useEffect(() => {
     if (!active) return;

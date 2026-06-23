@@ -100,12 +100,12 @@ export function resolveInboxNotificationDestination(
 
   if (type === "tip_received" || type === "qr_payment_success") {
     if (role === "employee") return "/employee/tip-history";
-    if (role === "business") return "/dashboard/transactions";
+    if (role === "business") return "/dashboard/tips/transactions";
   }
 
   if (type === "payout_paid" || type === "payout_completed") {
     if (role === "employee") return "/employee/tip-history";
-    if (role === "business") return "/dashboard/transactions";
+    if (role === "business") return "/dashboard/tips/transactions";
   }
 
   if (type === "employee_invited") {
@@ -113,11 +113,11 @@ export function resolveInboxNotificationDestination(
       if (role === "employee") return null;
       return null;
     }
-    if (role === "business") return "/dashboard/staff-management";
+    if (role === "business") return "/dashboard/team/employees";
   }
 
   if (type === "qr_scan" && role === "business") {
-    return "/dashboard/qr-code-management";
+    return "/dashboard/qr-studio/gallery";
   }
 
   if (type === "new_login") {

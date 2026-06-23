@@ -118,7 +118,14 @@ export function CustomerJourneyHeader({
     : null;
 
   return (
-    <div className={cf.stickyHeader}>
+    <div
+      className={cf.stickyHeader}
+      style={
+        venue.branding?.premium
+          ? { borderBottomColor: `${venue.branding.brandPrimaryColor}33` }
+          : undefined
+      }
+    >
       <div className={cn(cf.customerJourneyHeader, className)}>
         {(leading || trailing) && (
           <div className={cf.customerJourneyToolbar}>
@@ -136,6 +143,18 @@ export function CustomerJourneyHeader({
           />
           <div className="min-w-0 flex-1">
             <h1 className={cf.customerJourneyVenueName}>{venue.name}</h1>
+            {venue.tagline ? (
+              <p
+                className={cf.customerJourneyVenueTagline}
+                style={
+                  venue.branding?.premium
+                    ? { color: `${venue.branding.brandPrimaryColor}CC` }
+                    : undefined
+                }
+              >
+                {venue.tagline}
+              </p>
+            ) : null}
             {venue.contextLine ? (
               <div className={cf.customerJourneyVenueContext}>{venue.contextLine}</div>
             ) : null}

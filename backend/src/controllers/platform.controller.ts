@@ -444,3 +444,18 @@ export async function impersonate(req: Request, res: Response) {
     });
   }
 }
+
+export async function getCommercialIntelligence(_req: Request, res: Response) {
+  try {
+    const { getPlatformCommercialIntelligence } = await import(
+      "../services/commercial/platformCommercialIntelligence.service.js"
+    );
+    const data = await getPlatformCommercialIntelligence();
+    return res.json(data);
+  } catch (err) {
+    logServerError("platform.getCommercialIntelligence", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load commercial intelligence."),
+    });
+  }
+}

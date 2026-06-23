@@ -19,6 +19,7 @@ import {
   Sparkles,
   Settings,
   Target,
+  Lock,
 } from "lucide-react";
 import { DashboardChartsIdleMount } from "../../components/dashboard/DashboardChartsIdleMount";
 import { EmployeeDashboardEarningsChartFallback } from "./EmployeeDashboardEarningsChartFallback";
@@ -38,6 +39,7 @@ import { deriveEmployeeDashboardStatus } from "../../lib/dashboardStatus/deriveD
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { FeatureGate } from "../../components/subscription/FeatureGate";
 import { EmployeeDashboardMetricsGrid } from "../../components/employee/EmployeeDashboardMetricsGrid";
 import { DashboardAnalyticsPeriodToggle } from "../../components/dashboard/DashboardAnalyticsPeriodToggle";
 import { formatEur } from "../../lib/formatEur";
@@ -52,6 +54,7 @@ import {
 import employeeHeroImage from "../../../../images/foremployee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
+import { PremiumPageHero } from "../../components/premium/PremiumPageHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -59,7 +62,7 @@ import {
   DashboardHeroMetricSkeleton,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
-import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
+import { EmployeePerformanceInsights } from "../../components/employee/EmployeePerformanceInsights";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import {
   devMockEmployeeAccountSummary,
@@ -109,7 +112,7 @@ export function EmployeeDashboard() {
 
   const dashboardEnabled = isProtectedApiReady() && user?.role === "employee";
 
-  const { advancedAnalyticsEnabled } = useSubscriptionEntitlements({
+  const { advancedAnalyticsEnabled, hasFeature } = useSubscriptionEntitlements({
     enabled: dashboardEnabled,
     role: user?.role === "employee" ? "employee" : null,
   });
@@ -422,13 +425,14 @@ export function EmployeeDashboard() {
   return (
     <div className={cn(employeeUi.page, "overflow-x-hidden")}>
       <div className={employeeUi.pageInner}>
+        <PremiumPageHero className="employee-dashboard-hero mb-7 sm:mb-8 lg:mb-7">
         <DashboardHero
           stackHeroOnMobile
           hideTabs
           actionsPlacement="belowText"
           mobileAlign="left"
-          className="employee-dashboard-hero mb-7 sm:mb-8 lg:mb-7"
-          cardClassName="lg:border-neutral-200/90 lg:bg-gradient-to-br lg:from-white lg:to-stone-50/90 lg:shadow-[0_12px_44px_-20px_rgba(15,23,42,0.16)]"
+          className="!mb-0"
+          cardClassName="border-0 bg-card shadow-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:rounded-[calc(1.75rem-3px)] lg:border-0 lg:bg-card lg:shadow-none"
           badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
           titleClassName="max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:mx-0 max-lg:max-w-[20ch] max-lg:text-left lg:max-w-[13ch] lg:text-left xl:text-[2.35rem]"
           descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:mx-0 max-lg:text-left lg:max-w-sm"
@@ -514,6 +518,9 @@ export function EmployeeDashboard() {
                   <Link to="/employee/tip-goals" className={employeeUi.heroCtaLink}>
                     <Target className="h-4 w-4 shrink-0" />
                     {t("employee.hero.setTipGoal")}
+                    {!hasFeature("employeeGoals") ? (
+                      <Lock className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
+                    ) : null}
                   </Link>
                 </Button>
               </div>
@@ -575,6 +582,7 @@ export function EmployeeDashboard() {
             </motion.div>
           }
         />
+        </PremiumPageHero>
       </div>
 
       <TracingBeam className={cn(employeeUi.pageInner, "employee-dashboard-body !pt-2 sm:!pt-3")}>
@@ -649,6 +657,15 @@ export function EmployeeDashboard() {
             />
           </motion.div>
 
+          <EmployeePerformanceInsights
+            tips={displayPayload?.tips ?? []}
+            goalProgress={displayPayload?.goalProgress ?? null}
+            periodAmountEur={displayPeriodAmountEur}
+            monthlyGoal={displayPayload?.monthlyGoal ?? null}
+            loading={showMetricsLoading}
+          />
+
+          <FeatureGate featureKey="advancedAnalytics" role="employee" enabled={dashboardEnabled}>
           <DashboardChartsIdleMount fallback={<EmployeeDashboardEarningsChartFallback />}>
             <EmployeeDashboardEarningsChart
               showChartLoading={showChartLoading}
@@ -656,6 +673,7 @@ export function EmployeeDashboard() {
               analyticsPeriodRefreshing={analyticsPeriodRefreshing}
             />
           </DashboardChartsIdleMount>
+          </FeatureGate>
 
           <div className="w-full grid gap-6 lg:grid-cols-2">
             <motion.div

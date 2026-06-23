@@ -1,5 +1,9 @@
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import type { BusinessSubscriptionTier, BusinessVerificationStatus } from "@prisma/client";
+import {
+  toPublicGuestBrandingDto,
+  type PublicGuestBrandingDto,
+} from "./businessBranding.dto.js";
 
 /** Fields safe for unauthenticated tipping / QR landing consumers. */
 export type PublicBusinessProfileDto = {
@@ -15,6 +19,8 @@ export type PublicBusinessProfileDto = {
   name: string;
   location: string | null;
   type: string | null;
+  /** Guest-facing premium branding (tier-resolved server-side). */
+  branding: PublicGuestBrandingDto;
 };
 
 /** Manager-authenticated profile (includes operational / KYC fields). */
@@ -39,6 +45,18 @@ type BusinessRow = {
   contactPhone: string | null;
   website: string | null;
   logoPath: string | null;
+  bannerImagePath: string | null;
+  brandPrimaryColor: string | null;
+  brandSecondaryColor: string | null;
+  welcomeMessage: string | null;
+  thankYouMessage: string | null;
+  brandDisplayName: string | null;
+  brandTagline: string | null;
+  qrTemplate: string;
+  qrBorderStyle: string;
+  qrShape: string;
+  qrAccentColor: string | null;
+  qrBackgroundColor: string | null;
 };
 
 export function toPublicBusinessProfileDto(
@@ -48,18 +66,20 @@ export function toPublicBusinessProfileDto(
   void opts;
   const logo = absolutizePublicMediaPath(business.logoPath ?? null);
   const publicLocation = business.location ?? null;
+  const branding = toPublicGuestBrandingDto(business);
   return {
     businessId: business.id,
     businessName: business.name,
     slug: business.slug,
     logo,
-    coverImage: null,
+    coverImage: branding.bannerImagePath,
     publicLocation,
     description: business.businessType ?? null,
     id: business.id,
     name: business.name,
     location: publicLocation,
     type: business.businessType ?? null,
+    branding,
   };
 }
 
