@@ -17,8 +17,8 @@ export { PRICING_INDUSTRIES, type PricingAudienceSegment, resolvePricingAudience
 
 export const BILLING_CYCLES: readonly BillingCycle[] = ["monthly", "yearly"] as const;
 
-/** Yearly billing is not wired — UI shows monthly prices with a coming-soon notice. */
-export const YEARLY_BILLING_ENABLED = false;
+/** Yearly billing toggle shows annual prices and the save badge on the pricing page. */
+export const YEARLY_BILLING_ENABLED = true;
 
 export type PricingPageUiState = {
   billingCycle: BillingCycle;
