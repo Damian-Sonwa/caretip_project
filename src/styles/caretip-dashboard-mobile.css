@@ -114,3 +114,58 @@
     padding-inline: 1rem;
   }
 }
+
+/* Sprint 8 — mobile-first polish (320–768px) */
+
+@media (max-width: 767px) {
+  .caretip-dashboard-shell .dashboard-filter-panel {
+    padding: 1rem;
+  }
+
+  .caretip-dashboard-shell .business-mobile-list {
+    padding-inline: 0;
+    padding-top: 0;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-chart-card.business-dashboard-panel-card {
+    min-height: 18rem;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-chart-card .business-dashboard-chart-frame {
+    min-height: 13rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-at-a-glance__grid > div {
+    min-width: 0;
+    padding-inline: 0.125rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__stat-label,
+  .caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__label {
+    font-size: 0.625rem;
+    line-height: 1.25;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card,
+  .caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card {
+    min-height: 6.75rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-metric-stat-card__value {
+    font-size: clamp(1.125rem, 5vw, 1.5rem);
+  }
+
+  .caretip-dashboard-shell .premium-workspace-header__inner {
+    padding: 1rem 1.125rem;
+  }
+}
+
+@media (max-width: 374px) {
+  .caretip-dashboard-shell .dashboard-at-a-glance__grid {
+    gap: 0.25rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__stat-value {
+    font-size: 0.9375rem;
+  }
+}

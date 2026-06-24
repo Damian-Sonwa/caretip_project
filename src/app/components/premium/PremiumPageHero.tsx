@@ -10,7 +10,7 @@ export type PremiumPageHeroProps = {
 };
 
 /**
- * Branded gradient frame for dashboard heroes — wraps existing hero content without changing layout.
+ * Dashboard hero frame — wraps existing hero content without gradient accents.
  */
 export function PremiumPageHero({ children, className, autoHeight = false }: PremiumPageHeroProps) {
   return (
@@ -21,7 +21,6 @@ export function PremiumPageHero({ children, className, autoHeight = false }: Pre
         className,
       )}
     >
-      <div className="premium-page-hero__glow" aria-hidden />
       <div className={premiumVisualClasses.heroContent}>{children}</div>
     </div>
   );

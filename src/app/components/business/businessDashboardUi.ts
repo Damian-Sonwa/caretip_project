@@ -22,7 +22,15 @@ export const businessUi = {
   /** Overview analytics stack — consistent vertical rhythm below hero. */
   section: "employee-section business-dashboard-section space-y-6 sm:space-y-7 lg:space-y-8",
   statsGrid:
-    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3.5 sm:gap-4 lg:grid-cols-4 lg:gap-5",
+    "business-dashboard-stats-grid grid grid-cols-1 items-stretch gap-3 min-[375px]:grid-cols-2 min-[375px]:gap-3.5 sm:gap-4 lg:grid-cols-4 lg:gap-5",
+  /** At-a-glance mini-stats — readable at 320px without cramped 3-up columns. */
+  atAGlanceGrid:
+    "dashboard-at-a-glance__grid grid grid-cols-3 gap-1 text-center min-[375px]:gap-2 sm:gap-3",
+  /** Mobile list/card pattern (mirrors platform admin responsive data). */
+  mobileList: "business-mobile-list space-y-3 p-4 max-lg:p-4 lg:hidden",
+  mobileCard:
+    "business-mobile-card block rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-[0_6px_24px_-12px_rgba(15,23,42,0.08)] transition-colors active:bg-muted/30",
+  tableWrap: "hidden overflow-x-auto lg:block",
   analyticsChartsGrid:
     "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
   bottomGrid:

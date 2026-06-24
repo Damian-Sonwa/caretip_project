@@ -22,6 +22,8 @@ import { formatEur } from "@/app/lib/formatEur";
 import { listBusinessTips, listEmployeeTips, type TipActivityRow, type TipStatus } from "@/app/lib/api";
 import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
 import { LockedFeatureCard } from "@/app/components/subscription/LockedFeatureCard";
+import { BusinessResponsiveData } from "@/app/components/business/BusinessResponsiveData";
+import { TipActivityMobileCard } from "@/app/components/business/businessDashboardMobileCards";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -181,7 +183,6 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
   const exportDisabled = !canExportCsv || exporting || loading || filtered.length === 0;
   const ui = isEmployeeHistory || user?.role === "employee" ? employeeUi : businessUi;
   const showStaffColumn = !isEmployeeHistory;
-  const tableColumnCount = showStaffColumn ? 5 : 4;
   const subtitle = copy("subtitle");
 
   return (
@@ -210,7 +211,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className={cn(ui.filterPanel, "mb-6 p-6")}
+        className={cn(ui.filterPanel, "mb-6 p-4 sm:p-6")}
       >
         <div className="flex flex-col gap-4 lg:flex-row">
           <div className="flex-1">
@@ -350,81 +351,99 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
         initial={{ y: 20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className={cn(ui.tablePanel, "overflow-hidden")}
       >
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/40 text-left">
-                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thAmount")}</th>
-                {isEmployeeHistory ? (
-                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
-                ) : null}
-                {showStaffColumn ? (
-                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStaff")}</th>
-                ) : null}
-                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thLocationTable")}</th>
-                {!isEmployeeHistory ? (
-                  <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
-                ) : null}
-                <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStatus")}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isInitialTableLoad ? (
-                <TipsActivityTableSkeleton />
-              ) : filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={tableColumnCount} className="p-0">
-                    <EmptyState
-                      icon={<CreditCard className="h-6 w-6" aria-hidden />}
-                      title={t("emptyState.tips.title")}
-                      description={t("emptyState.tips.description")}
-                      compact
-                    />
-                  </td>
-                </tr>
-              ) : (
-                filtered.map((tip) => (
-                  <tr key={tip.id} className="border-b border-border/60 hover:bg-muted/30">
-                    <td className="px-4 py-3 tabular-nums font-medium">{formatEur(tip.amount)}</td>
+        {isInitialTableLoad ? (
+          <div className={cn(ui.tablePanel, "overflow-hidden")}>
+            <TipsActivityTableSkeleton />
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className={cn(ui.tablePanel, "overflow-hidden")}>
+            <EmptyState
+              icon={<CreditCard className="h-6 w-6" aria-hidden />}
+              title={t("emptyState.tips.title")}
+              description={t("emptyState.tips.description")}
+              compact
+            />
+          </div>
+        ) : (
+          <BusinessResponsiveData
+            mobile={
+              <>
+                {filtered.map((tip) => (
+                  <TipActivityMobileCard
+                    key={tip.id}
+                    tip={tip}
+                    showStaffColumn={showStaffColumn}
+                    statusLabel={statusLabel}
+                    dateLocale={dateLocale}
+                    dataTimezone={dataTimezone}
+                    unknownStaffLabel={copy("unknownStaff")}
+                    youLabel={copy("you")}
+                    userRole={user?.role}
+                  />
+                ))}
+              </>
+            }
+            desktop={
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40 text-left">
+                    <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thAmount")}</th>
                     {isEmployeeHistory ? (
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
-                      </td>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
                     ) : null}
                     {showStaffColumn ? (
-                      <td className="px-4 py-3">
-                        {tip.staffName ?? (user?.role === "employee" ? copy("you") : copy("unknownStaff"))}
-                      </td>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStaff")}</th>
                     ) : null}
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {tip.tableName
-                        ? `${copy("csvTablePrefix")} ${tip.tableName}`
-                        : tip.locationName
-                          ? `${copy("csvLocationPrefix")} ${tip.locationName}`
-                          : copy("noLocationDetail")}
-                    </td>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thLocationTable")}</th>
                     {!isEmployeeHistory ? (
-                      <td className="px-4 py-3 text-muted-foreground">
-                        {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
-                      </td>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thDateTime")}</th>
                     ) : null}
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold">
-                        {statusLabel(tip.status)}
-                      </span>
-                    </td>
+                    <th className="px-4 py-3 font-medium text-muted-foreground">{copy("thStatus")}</th>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {filtered.map((tip) => (
+                    <tr key={tip.id} className="border-b border-border/60 hover:bg-muted/30">
+                      <td className="px-4 py-3 tabular-nums font-medium">{formatEur(tip.amount)}</td>
+                      {isEmployeeHistory ? (
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
+                        </td>
+                      ) : null}
+                      {showStaffColumn ? (
+                        <td className="px-4 py-3">
+                          {tip.staffName ?? (user?.role === "employee" ? copy("you") : copy("unknownStaff"))}
+                        </td>
+                      ) : null}
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {tip.tableName
+                          ? `${copy("csvTablePrefix")} ${tip.tableName}`
+                          : tip.locationName
+                            ? `${copy("csvLocationPrefix")} ${tip.locationName}`
+                            : copy("noLocationDetail")}
+                      </td>
+                      {!isEmployeeHistory ? (
+                        <td className="px-4 py-3 text-muted-foreground">
+                          {formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined)}
+                        </td>
+                      ) : null}
+                      <td className="px-4 py-3">
+                        <span className="inline-flex items-center gap-2 rounded-full border border-border bg-muted/40 px-2.5 py-1 text-xs font-semibold">
+                          {statusLabel(tip.status)}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
+        )}
       </motion.div>
 
       {totalPages > 1 ? (
-        <div className="mt-6 flex items-center justify-between">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             {copy("pagination", {
               from: skip + 1,

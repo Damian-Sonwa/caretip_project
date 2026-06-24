@@ -141,9 +141,9 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
           <h2 className="text-lg font-semibold text-foreground">{t("business.qrStudio.design.title")}</h2>
           <p className="text-sm text-muted-foreground">{t("business.qrStudio.design.subtitle")}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {!canEdit ? <UpgradeCta featureKey="brandingCustomization" /> : null}
-          <Button type="button" onClick={() => void handleSave()} disabled={!canEdit || studio.saving}>
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
+          {!canEdit ? <UpgradeCta featureKey="brandingCustomization" className="w-full sm:w-auto" /> : null}
+          <Button type="button" className="w-full sm:w-auto" onClick={() => void handleSave()} disabled={!canEdit || studio.saving}>
             {studio.saving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
             ) : (
@@ -156,14 +156,17 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
 
       <div className="grid gap-6 xl:grid-cols-[minmax(280px,320px)_minmax(0,1fr)]">
         <aside className="space-y-4">
-          <nav className="flex flex-wrap gap-1.5 xl:flex-col" aria-label={t("business.qrStudio.design.navAria")}>
+          <nav
+            className="-mx-1 flex gap-1.5 overflow-x-auto pb-1 xl:mx-0 xl:flex-col xl:overflow-visible xl:pb-0"
+            aria-label={t("business.qrStudio.design.navAria")}
+          >
             {SECTIONS.map(({ id, icon: Icon, labelKey }) => (
               <button
                 key={id}
                 type="button"
                 onClick={() => setSection(id)}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors",
+                  "flex min-h-[44px] shrink-0 touch-manipulation items-center gap-2 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors xl:shrink xl:min-h-0",
                   section === id
                     ? "border-primary/40 bg-primary/[0.06] text-foreground"
                     : "border-transparent bg-muted/40 text-muted-foreground hover:bg-muted/70 hover:text-foreground",

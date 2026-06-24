@@ -40,43 +40,30 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* Dashboard hero — premium frame around existing hero content */
+/* Dashboard hero — clean card frame (no orange/black gradient border). */
 .premium-page-hero {
   position: relative;
   border-radius: 1.75rem;
-  padding: 3px;
-  background: var(--premium-gradient);
-  box-shadow: var(--premium-glow-soft);
+  padding: 0;
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border) / 0.9);
+  box-shadow: 0 10px 36px -14px rgba(15, 23, 42, 0.1);
   min-height: clamp(180px, 22vw, 260px);
 }
 
 .premium-page-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background-image: var(--premium-noise);
-  background-size: 180px 180px;
-  opacity: 0.55;
-  pointer-events: none;
+  display: none;
 }
 
 .premium-page-hero__glow {
-  position: absolute;
-  right: -8%;
-  top: -30%;
-  width: 42%;
-  height: 90%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(235, 153, 44, 0.28) 0%, transparent 68%);
-  pointer-events: none;
+  display: none;
 }
 
 .premium-page-hero__content {
   position: relative;
   z-index: 1;
   min-height: inherit;
-  border-radius: calc(1.75rem - 3px);
+  border-radius: 1.75rem;
   overflow: hidden;
 }
 

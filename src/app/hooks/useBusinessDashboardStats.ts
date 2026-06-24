@@ -23,6 +23,8 @@ import {
   hasBusinessDashboardVisibleContent,
   hasBusinessKpiValues,
   hasBusinessSecondaryContent,
+  hasBusinessAnalyticsPayload,
+  isBusinessGoalsPayloadSettled,
 } from "../lib/dashboardVisibleContent";
 import {
   getBusinessAnalyticsBundle,
@@ -197,10 +199,11 @@ export function useBusinessDashboardStats(
       setStatsTimeframe(tf);
       setPendingVerification(false);
       setSummaryLoading(false);
+      const analyticsSlice = analyticsPartialRef.current.get(tf);
       const chartsReady =
         !advancedAnalyticsEnabledRef.current ||
-        Boolean(merged.dailyTipDistribution?.length) ||
-        Boolean((merged.employeeGoals?.length ?? 0) > 0);
+        hasBusinessAnalyticsPayload(merged) ||
+        hasBusinessAnalyticsPayload(analyticsSlice);
       setAnalyticsLoading(!chartsReady);
     },
     [],
@@ -778,9 +781,10 @@ export function useBusinessDashboardStats(
           const seq = uiRequestSeqRef.current;
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
+          const analyticsSlice = analyticsPartialRef.current.get(tf);
           const chartsReady =
             !advancedAnalyticsEnabledRef.current ||
-            Boolean(analyticsPartialRef.current.get(tf));
+            hasBusinessAnalyticsPayload(analyticsSlice);
           setAnalyticsLoading(!chartsReady);
           if (chartsReady) {
             devSetHydrationPhase("charts", "ready");
@@ -1052,8 +1056,10 @@ export function useBusinessDashboardStats(
     enabled &&
     sessionValidated &&
     !pendingVerification &&
+    advancedAnalyticsEnabled &&
     analyticsLoading &&
-    (displayStats?.employeeGoals?.length ?? 0) === 0;
+    !isRevalidating &&
+    !isBusinessGoalsPayloadSettled(displayStats);
 
   return {
     analyticsTimeframe,

@@ -67,106 +67,13 @@ function GlassStatCard({
   );
 }
 
-/** Abstract wide-angle “3D map” with glowing orange nodes — no external map assets. */
+/** Abstract map backdrop — flat surface (no gradient mesh). */
 function MapGraphic3D() {
-  const nodes = [
-    { x: "18%", y: "38%", r: 5, delay: 0 },
-    { x: "28%", y: "52%", r: 4, delay: 0.2 },
-    { x: "42%", y: "35%", r: 6, delay: 0.1 },
-    { x: "55%", y: "48%", r: 5, delay: 0.35 },
-    { x: "68%", y: "32%", r: 4, delay: 0.15 },
-    { x: "78%", y: "55%", r: 5, delay: 0.25 },
-    { x: "88%", y: "40%", r: 3, delay: 0.4 },
-    { x: "35%", y: "68%", r: 4, delay: 0.3 },
-    { x: "62%", y: "62%", r: 4, delay: 0.2 },
-  ];
-
   return (
     <div
-      className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
+      className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] bg-zinc-900"
       aria-hidden
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-zinc-950 via-[#0a0c10] to-black" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_90%_60%_at_50%_100%,hsl(33_82%_45%_/_0.12),transparent_65%)]" />
-
-      <div
-        className="absolute left-1/2 top-[42%] h-[130%] w-[125%] -translate-x-1/2 -translate-y-1/2"
-        style={{
-          perspective: "900px",
-          transform: "rotateX(54deg) rotateZ(-8deg) scale(1.04)",
-          transformStyle: "preserve-3d",
-        }}
-      >
-        <div className="absolute inset-0 rounded-[40%] border border-white/[0.06] bg-gradient-to-b from-white/[0.04] to-transparent" />
-        <svg
-          className="absolute inset-0 h-full w-full opacity-[0.35]"
-          preserveAspectRatio="none"
-          viewBox="0 0 100 100"
-        >
-          <defs>
-            <pattern id="net-grid" width="8" height="8" patternUnits="userSpaceOnUse">
-              <path
-                d="M 8 0 L 0 0 0 8"
-                fill="none"
-                stroke="rgba(255,255,255,0.12)"
-                strokeWidth="0.15"
-              />
-            </pattern>
-            <linearGradient id="net-fade" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.2)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-            </linearGradient>
-          </defs>
-          <rect width="100" height="100" fill="url(#net-grid)" />
-          <rect width="100" height="50" y="0" fill="url(#net-fade)" />
-        </svg>
-        <svg
-          className="absolute inset-0 h-full w-full"
-          viewBox="0 0 100 100"
-          preserveAspectRatio="none"
-        >
-          <defs>
-          </defs>
-          <path
-            d="M 22 42 Q 50 28 78 38"
-            fill="none"
-            stroke="hsl(33 82% 55% / 0.35)"
-            strokeWidth="0.15"
-          />
-          <path
-            d="M 35 68 Q 48 52 62 62"
-            fill="none"
-            stroke="hsl(33 82% 55% / 0.25)"
-            strokeWidth="0.12"
-          />
-          <path
-            d="M 42 35 L 68 32"
-            fill="none"
-            stroke="hsl(33 82% 55% / 0.2)"
-            strokeWidth="0.1"
-          />
-        </svg>
-      </div>
-
-      <svg className="absolute inset-0 h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {nodes.map((n, i) => (
-          <g key={i}>
-            <circle
-              cx={n.x}
-              cy={n.y}
-              r={n.r * 1.5}
-              fill="hsl(33 90% 55% / 0.12)"
-              className="max-md:opacity-80 md:animate-pulse"
-              style={{ animationDelay: `${n.delay}s`, animationDuration: "3.2s" }}
-            />
-            <circle cx={n.x} cy={n.y} r={n.r * 0.45} fill="hsl(33 95% 62%)" />
-            <circle cx={n.x} cy={n.y} r={n.r * 0.2} fill="white" opacity="0.85" />
-          </g>
-        ))}
-      </svg>
-
-      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-black/40" />
-    </div>
+    />
   );
 }
 
@@ -219,7 +126,7 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
     <section
       className={
         embedded
-          ? "platform-admin-hero relative overflow-hidden rounded-[calc(1.75rem-3px)] bg-zinc-950"
+          ? "platform-admin-hero relative overflow-hidden rounded-[1.75rem] bg-zinc-950"
           : "platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12"
       }
     >
@@ -227,10 +134,6 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
 
       <div className="relative z-10 flex min-h-[min(380px,68svh)] flex-col gap-8 px-5 py-8 max-lg:gap-7 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">
         <div className="relative max-w-xl lg:max-w-[28rem]">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-x-6 -inset-y-4 rounded-3xl bg-gradient-to-br from-black/70 via-black/45 to-transparent"
-          />
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

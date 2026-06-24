@@ -26,6 +26,21 @@ export function hasBusinessSecondaryContent(
   );
 }
 
+/** Analytics scope has returned (empty arrays still count as settled). */
+export function hasBusinessAnalyticsPayload(
+  data: Partial<BusinessDashboardStats> | null | undefined,
+): boolean {
+  if (!data) return false;
+  return data.dailyTipDistribution !== undefined || data.employeeGoals !== undefined;
+}
+
+/** Employee goals slice fetched — distinct from "has goals rows". */
+export function isBusinessGoalsPayloadSettled(
+  data: BusinessDashboardStats | null | undefined,
+): boolean {
+  return data?.employeeGoals !== undefined;
+}
+
 /** Any content suitable to keep on screen during refresh/revalidation. */
 export function hasBusinessDashboardVisibleContent(
   data: BusinessDashboardStats | null | undefined,

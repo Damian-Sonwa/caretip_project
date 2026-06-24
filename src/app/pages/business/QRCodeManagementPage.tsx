@@ -250,7 +250,7 @@ export function QRCodeManagementPage({
     }
     const cacheKey = `business:qr-employees:${user.businessId}`;
     const cached = getPageSessionCache<EmployeeItem[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
-    const useCachedFirst = !quiet && cached !== null;
+    const useCachedFirst = !quiet && Array.isArray(cached);
     if (useCachedFirst) {
       setEmployees(cached);
       setLoading(false);
@@ -259,8 +259,9 @@ export function QRCodeManagementPage({
     }
     try {
       const list = await getEmployees(user.businessId);
-      setEmployees(list);
-      setPageSessionCache(cacheKey, list);
+      const normalized = Array.isArray(list) ? list : [];
+      setEmployees(normalized);
+      setPageSessionCache(cacheKey, normalized);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
       if (!useCachedFirst) {
@@ -286,23 +287,33 @@ export function QRCodeManagementPage({
       PAGE_CACHE_TTL_LOW_MS,
     );
     if (venueCached) {
-      setVenueLocations(venueCached.locations);
-      setVenueTables(venueCached.tables);
+      setVenueLocations(Array.isArray(venueCached.locations) ? venueCached.locations : []);
+      setVenueTables(Array.isArray(venueCached.tables) ? venueCached.tables : []);
     }
     void (async () => {
-      try {
-        const [locList, tblList] = await Promise.all([fetchLocations(), fetchTables()]);
-        if (!cancelled) {
-          setVenueLocations(locList);
-          setVenueTables(tblList);
-          setPageSessionCache(venueCacheKey, { locations: locList, tables: tblList });
-        }
-      } catch (err) {
-        logClientError("QRCodeManagementPage.venues", err);
-        if (!cancelled && !venueCached) {
-          setVenueLocations([]);
-          setVenueTables([]);
-        }
+      const [locsResult, tbsResult] = await Promise.allSettled([fetchLocations(), fetchTables()]);
+      if (cancelled) return;
+
+      const locList =
+        locsResult.status === "fulfilled" && Array.isArray(locsResult.value) ? locsResult.value : null;
+      const tblList =
+        tbsResult.status === "fulfilled" && Array.isArray(tbsResult.value) ? tbsResult.value : null;
+
+      if (locsResult.status === "rejected") {
+        logClientError("QRCodeManagementPage.venues.locations", locsResult.reason);
+      }
+      if (tbsResult.status === "rejected") {
+        logClientError("QRCodeManagementPage.venues.tables", tbsResult.reason);
+      }
+
+      if (locList) setVenueLocations(locList);
+      else if (!venueCached) setVenueLocations([]);
+
+      if (tblList) setVenueTables(tblList);
+      else if (!venueCached) setVenueTables([]);
+
+      if (locList && tblList) {
+        setPageSessionCache(venueCacheKey, { locations: locList, tables: tblList });
       }
     })();
     return () => {
@@ -310,22 +321,26 @@ export function QRCodeManagementPage({
     };
   }, [authHydrated, sessionValidated, user?.businessId, isBusiness]);
 
+  const safeEmployees = Array.isArray(employees) ? employees : [];
+  const safeVenueLocations = Array.isArray(venueLocations) ? venueLocations : [];
+  const safeVenueTables = Array.isArray(venueTables) ? venueTables : [];
+
   const venueQrFingerprint = useMemo(
     () =>
       [
-        ...venueLocations.map((l) => `l:${l.id}`),
-        ...venueTables.map((t) => `t:${t.id}`),
+        ...safeVenueLocations.map((l) => `l:${l.id}`),
+        ...safeVenueTables.map((t) => `t:${t.id}`),
       ].join("|"),
-    [venueLocations, venueTables],
+    [safeVenueLocations, safeVenueTables],
   );
 
   const employeeQrFingerprint = useMemo(
     () =>
-      employees
+      safeEmployees
         .map((e) => `${e.id}:${e.slug ?? ""}`)
         .sort()
         .join("|"),
-    [employees],
+    [safeEmployees],
   );
 
   useEffect(() => {
@@ -336,7 +351,7 @@ export function QRCodeManagementPage({
     (async () => {
       const next: Record<string, string> = {};
       const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
-      for (const loc of venueLocations) {
+      for (const loc of safeVenueLocations) {
         const url = qrLocationUrl(loc.id);
         try {
           const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
@@ -349,7 +364,7 @@ export function QRCodeManagementPage({
           next[`loc-${loc.id}`] = "";
         }
       }
-      for (const tbl of venueTables) {
+      for (const tbl of safeVenueTables) {
         const url = qrTableUrl(tbl.id);
         try {
           const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
@@ -371,7 +386,7 @@ export function QRCodeManagementPage({
     return () => {
       cancelled = true;
     };
-  }, [venueQrFingerprint, venueLocations, venueTables, qrBrand, brandingFingerprint]);
+  }, [venueQrFingerprint, safeVenueLocations, safeVenueTables, qrBrand, brandingFingerprint]);
 
   useEffect(() => {
     const businessId = user?.businessId;
@@ -401,7 +416,7 @@ export function QRCodeManagementPage({
 
       const next: Record<string, string> = {};
       const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
-      for (const e of employees) {
+      for (const e of safeEmployees) {
         if (!e.slug) {
           next[e.id] = "";
           continue;
@@ -429,10 +444,10 @@ export function QRCodeManagementPage({
     return () => {
       cancelled = true;
     };
-  }, [employees, employeeQrFingerprint, user?.businessId, businessSlug, qrBrand, brandingFingerprint]);
+  }, [safeEmployees, employeeQrFingerprint, user?.businessId, businessSlug, qrBrand, brandingFingerprint]);
 
   const locations: Array<{ id: string; name: string; address: string; qrUrl: string }> =
-    venueLocations.map((loc) => ({
+    safeVenueLocations.map((loc) => ({
       id: loc.id,
       name: loc.name,
       address: loc.description?.trim() || "N/A",
@@ -467,7 +482,7 @@ export function QRCodeManagementPage({
     try {
       const updated = await regenerateEmployeeSlug(employee.id);
       setEmployees((prev) =>
-        prev.map((p) =>
+        (Array.isArray(prev) ? prev : []).map((p) =>
           p.id === updated.id
             ? { ...p, slug: updated.slug, name: updated.name, role: updated.jobTitle }
             : p
@@ -596,7 +611,7 @@ export function QRCodeManagementPage({
     if (!authHydrated || !sessionValidated) return;
     const bs = businessSlug?.trim();
     const staff = bs
-      ? employees
+      ? safeEmployees
           .filter((e) => e.slug?.trim())
           .map((e) => ({ id: e.id, name: e.name, businessSlug: bs, employeeSlug: e.slug!.trim() }))
       : [];
@@ -727,7 +742,7 @@ export function QRCodeManagementPage({
   };
 
   const onEmployeeRegenerateCard = (item: QrManagementCardItem) => {
-    const emp = employees.find((e) => e.id === item.id);
+    const emp = safeEmployees.find((e) => e.id === item.id);
     if (emp) void handleGenerateNew(emp);
   };
 
@@ -786,10 +801,10 @@ export function QRCodeManagementPage({
     <Card className={businessUi.atAGlanceCard}>
       <CardContent className={businessUi.atAGlanceContent}>
         <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
-        <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
+            <div className={businessUi.atAGlanceGrid}>
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStaff")}</p>
-            <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
+            <p className={businessUi.atAGlanceStatValue}>{safeEmployees.length}</p>
           </div>
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStatus")}</p>
@@ -811,18 +826,18 @@ export function QRCodeManagementPage({
       <CardContent className={businessUi.atAGlanceContent}>
         <p className={businessUi.atAGlanceLabel}>{t("business.qrStudio.gallery.inventoryTitle")}</p>
         <p className="mb-3 text-xs text-muted-foreground">{t("business.qrStudio.gallery.inventoryDesc")}</p>
-        <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
+            <div className={businessUi.atAGlanceGrid}>
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statEmployees")}</p>
-            <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
+            <p className={businessUi.atAGlanceStatValue}>{safeEmployees.length}</p>
           </div>
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statLocations")}</p>
-            <p className={businessUi.atAGlanceStatValue}>{venueLocations.length}</p>
+            <p className={businessUi.atAGlanceStatValue}>{safeVenueLocations.length}</p>
           </div>
           <div>
             <p className={businessUi.atAGlanceStatLabel}>{t("business.qrStudio.gallery.statTables")}</p>
-            <p className={businessUi.atAGlanceStatValue}>{venueTables.length}</p>
+            <p className={businessUi.atAGlanceStatValue}>{safeVenueTables.length}</p>
           </div>
         </div>
       </CardContent>
@@ -834,19 +849,19 @@ export function QRCodeManagementPage({
       href: "/dashboard/qr-studio/employees",
       labelKey: "business.qrStudio.gallery.manageEmployees",
       icon: Users,
-      count: employees.length,
+      count: safeEmployees.length,
     },
     {
       href: "/dashboard/qr-studio/locations",
       labelKey: "business.qrStudio.gallery.manageLocations",
       icon: MapPin,
-      count: venueLocations.length,
+      count: safeVenueLocations.length,
     },
     {
       href: "/dashboard/qr-studio/tables",
       labelKey: "business.qrStudio.gallery.manageTables",
       icon: LayoutGrid,
-      count: venueTables.length,
+      count: safeVenueTables.length,
     },
   ] as const;
 
@@ -881,7 +896,7 @@ export function QRCodeManagementPage({
                     type="button"
                     className={cn(businessUi.btnPrimary, businessUi.heroActionBtn)}
                     onClick={handleGenerateAllPdf}
-                    disabled={qrLocked || bulkPdfLoading || employees.length === 0}
+                    disabled={qrLocked || bulkPdfLoading || safeEmployees.length === 0}
                   >
                     {bulkPdfLoading ? (
                       <LoadingSpinner size="sm" className="mr-2 shrink-0" />
@@ -993,7 +1008,7 @@ export function QRCodeManagementPage({
             ) : null}
 
             {viewMode === "employees" ? (
-              loading && employees.length === 0 ? (
+              loading && safeEmployees.length === 0 ? (
                 <DashboardListSkeleton rows={5} minHeightClass="min-h-[240px]" />
               ) : (
                 <div>
@@ -1011,7 +1026,7 @@ export function QRCodeManagementPage({
                         type="button"
                         className={cn(businessUi.btnPrimary, "shrink-0")}
                         onClick={handleGenerateAllPdf}
-                        disabled={qrLocked || bulkPdfLoading || employees.length === 0}
+                        disabled={qrLocked || bulkPdfLoading || safeEmployees.length === 0}
                       >
                         {bulkPdfLoading ? (
                           <LoadingSpinner size="sm" className="mr-2 shrink-0" />
@@ -1022,7 +1037,7 @@ export function QRCodeManagementPage({
                       </Button>
                     ) : null}
                   </div>
-                  {employees.length === 0 ? (
+                  {safeEmployees.length === 0 ? (
                     <div className={cn(businessUi.cardStatic, businessUi.chartEmpty, "py-12 text-center")}>
                       <p className="mb-2 text-muted-foreground">{t("business.qrPage.noEmployees")}</p>
                       <Link
@@ -1034,7 +1049,7 @@ export function QRCodeManagementPage({
                     </div>
                   ) : (
                     <div className="space-y-4">
-                      {employees.map((employee) => (
+                      {safeEmployees.map((employee) => (
                         <QrManagementCard
                           key={employee.id}
                           item={{

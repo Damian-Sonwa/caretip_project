@@ -22,7 +22,7 @@ export function BusinessModuleSubNav({ items, ariaLabelKey, className }: Busines
 
   return (
     <nav className={cn("mb-6", className)} aria-label={t(ariaLabelKey)}>
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory scroll-px-1 [-webkit-overflow-scrolling:touch]">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (
@@ -30,7 +30,7 @@ export function BusinessModuleSubNav({ items, ariaLabelKey, className }: Busines
               key={item.href}
               to={item.href}
               className={cn(
-                "inline-flex min-h-[40px] shrink-0 items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors",
+                "inline-flex min-h-[44px] shrink-0 snap-start touch-manipulation items-center gap-2 rounded-lg border px-3.5 py-2 text-sm font-medium transition-colors",
                 active
                   ? "border-primary/30 bg-primary/[0.06] text-foreground"
                   : cn(businessUi.cardStatic, "text-muted-foreground hover:text-foreground"),

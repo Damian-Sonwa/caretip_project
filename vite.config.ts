@@ -45,7 +45,15 @@ export default defineConfig(({ mode }) => {
     target: 'es2022',
   },
   optimizeDeps: {
-    include: ['recharts', 'react', 'react-dom', 'react-router'],
+    include: [
+      'recharts',
+      'react',
+      'react-dom',
+      'react-router',
+      /** Pre-bundle subscription gating — avoids flaky lazy-route fetch of raw .ts in dev. */
+      'src/app/lib/subscriptionCapabilities.ts',
+      'src/app/lib/subscriptionFeatureCatalog.ts',
+    ],
     esbuildOptions: {
       target: 'es2022',
     },

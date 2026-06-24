@@ -1642,6 +1642,19 @@ export async function uploadMyBusinessBanner(file: File): Promise<{ success: boo
   });
 }
 
+/** Coerce list endpoints that may return a bare array or `{ items | data | … }`. */
+function normalizeApiList<T>(raw: unknown, nestedKeys: string[]): T[] {
+  if (Array.isArray(raw)) return raw as T[];
+  if (raw && typeof raw === "object") {
+    const record = raw as Record<string, unknown>;
+    for (const key of nestedKeys) {
+      const nested = record[key];
+      if (Array.isArray(nested)) return nested as T[];
+    }
+  }
+  return [];
+}
+
 // Employees
 export interface EmployeeItem {
   id: string;
@@ -1655,10 +1668,11 @@ export interface EmployeeItem {
 }
 
 export async function getEmployees(businessId: string): Promise<EmployeeItem[]> {
-  return apiRequest(
+  const raw = await apiRequest<unknown>(
     apiPath(`/api/employees?businessId=${encodeURIComponent(businessId)}`),
-    { headers: getHeaders() }
+    { headers: getHeaders() },
   );
+  return normalizeApiList<EmployeeItem>(raw, ["employees", "items", "data"]);
 }
 
 export async function regenerateEmployeeSlug(employeeId: string): Promise<{
@@ -2880,10 +2894,11 @@ export interface LocationDTO {
 }
 
 export async function fetchLocations(): Promise<LocationDTO[]> {
-  return apiRequest<LocationDTO[]>(apiPath("/api/locations"), {
+  const raw = await apiRequest<unknown>(apiPath("/api/locations"), {
     headers: getHeaders(),
     credentials: "include",
   });
+  return normalizeApiList<LocationDTO>(raw, ["locations", "items", "data"]);
 }
 
 export async function createLocationAPI(payload: {
@@ -2907,10 +2922,11 @@ export interface TableDTO {
 }
 
 export async function fetchTables(): Promise<TableDTO[]> {
-  return apiRequest<TableDTO[]>(apiPath("/api/tables"), {
+  const raw = await apiRequest<unknown>(apiPath("/api/tables"), {
     headers: getHeaders(),
     credentials: "include",
   });
+  return normalizeApiList<TableDTO>(raw, ["tables", "items", "data"]);
 }
 
 export async function createTableAPI(payload: {

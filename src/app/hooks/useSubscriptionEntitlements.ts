@@ -7,7 +7,7 @@ import {
   type BusinessSubscriptionTier,
   type FeatureKey,
   type SubscriptionCapability,
-} from "../lib/subscriptionCapabilities";
+} from "@/app/lib/subscriptionCapabilities";
 import {
   getSubscriptionTierFromSession,
   primeSubscriptionTierFromSession,

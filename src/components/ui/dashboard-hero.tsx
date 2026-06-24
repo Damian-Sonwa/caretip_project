@@ -1,9 +1,7 @@
 import * as React from "react";
-import { useReducedMotion } from "motion/react";
 import { useTranslation } from "react-i18next";
 
 import { cn } from "@/lib/utils";
-import { BorderBeam } from "@/components/ui/border-beam";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -23,7 +21,7 @@ export type DashboardHeroProps = {
   shortcuts?: React.ReactNode;
   /** Primary hero CTAs; omit when navigation lives elsewhere (e.g. sidebar). */
   actions?: React.ReactNode;
-  /** Larger beam for main marketing hero */
+  /** @deprecated Border beam removed — kept for API compatibility. */
   beamSize?: number;
   /** When true, omit the right-hand image column (single-column hero). */
   hideImage?: boolean;
@@ -72,9 +70,8 @@ export function DashboardHero({
   overview = null,
   shortcuts = null,
   actions,
-  beamSize = 260,
   hideImage = false,
-  imageOverlay = true,
+  imageOverlay = false,
   hideTabs = false,
   actionsPlacement = "belowTabs",
   stackHeroOnMobile = false,
@@ -86,7 +83,6 @@ export function DashboardHero({
   textColumnClassName,
 }: DashboardHeroProps) {
   const { t } = useTranslation();
-  const reduceMotion = useReducedMotion();
   const hasCustomMedia = Boolean(image);
   const hasPhoto = Boolean(imageSrc) && !hasCustomMedia;
   const tagline = description?.trim() ?? "";
@@ -307,7 +303,7 @@ export function DashboardHero({
                 decoding="async"
               />
               {imageOverlay ? (
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background/90 via-background/25 to-transparent max-lg:hidden" />
+                <div className="pointer-events-none absolute inset-0 bg-background/10 max-lg:hidden" />
               ) : null}
             </div>
             {caption ? (
@@ -343,15 +339,6 @@ export function DashboardHero({
             cardClassName,
           )}
         >
-          {!reduceMotion ? (
-            <BorderBeam
-              size={beamSize}
-              duration={18}
-              colorFrom="#e9932f"
-              colorTo="#000000"
-              className={stackHeroOnMobile ? "max-lg:hidden" : undefined}
-            />
-          ) : null}
         {stackHeroOnMobile ? (
           <>
             {/*

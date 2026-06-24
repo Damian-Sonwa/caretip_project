@@ -3,7 +3,7 @@ import {
   hasFeature,
   type BusinessSubscriptionTier,
   type FeatureKey,
-} from "../../lib/subscriptionCapabilities";
+} from "@/app/lib/subscriptionCapabilities";
 
 export const BUSINESS_DASHBOARD_HOME_HREF = "/dashboard" as const;
 

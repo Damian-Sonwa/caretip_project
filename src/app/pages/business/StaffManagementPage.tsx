@@ -320,12 +320,18 @@ export function StaffManagementPage() {
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !isBusiness) return;
     void (async () => {
-      try {
-        const [locs, tbs] = await Promise.all([fetchLocations(), fetchTables()]);
-        setVenueOptions(locs);
-        setTableOptions(tbs);
-      } catch (err) {
-        logClientError("StaffManagementPage.venues", err);
+      const [locsResult, tbsResult] = await Promise.allSettled([fetchLocations(), fetchTables()]);
+      if (locsResult.status === "fulfilled") {
+        setVenueOptions(Array.isArray(locsResult.value) ? locsResult.value : []);
+      } else {
+        logClientError("StaffManagementPage.venues.locations", locsResult.reason);
+        setVenueOptions([]);
+      }
+      if (tbsResult.status === "fulfilled") {
+        setTableOptions(Array.isArray(tbsResult.value) ? tbsResult.value : []);
+      } else {
+        logClientError("StaffManagementPage.venues.tables", tbsResult.reason);
+        setTableOptions([]);
       }
     })();
   }, [authHydrated, sessionValidated, isBusiness]);
@@ -337,10 +343,11 @@ export function StaffManagementPage() {
       String(emp.email).toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const tablesForAddPicker = tableOptions.filter(
+  const safeTableOptions = Array.isArray(tableOptions) ? tableOptions : [];
+  const tablesForAddPicker = safeTableOptions.filter(
     (t) => !addForm.locationId || t.locationId === addForm.locationId
   );
-  const tablesForEditPicker = tableOptions.filter(
+  const tablesForEditPicker = safeTableOptions.filter(
     (t) => !editForm.locationId || t.locationId === editForm.locationId
   );
 
@@ -693,7 +700,7 @@ export function StaffManagementPage() {
         <Card className={businessUi.atAGlanceCard}>
           <CardContent className={businessUi.atAGlanceContent}>
             <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
-            <div className="dashboard-at-a-glance__grid grid grid-cols-3 text-center">
+            <div className={businessUi.atAGlanceGrid}>
               <div>
                 <p className={businessUi.atAGlanceStatLabel}>{t("business.staffPage.glanceTeam")}</p>
                 <p className={businessUi.atAGlanceStatValue}>{employees.length}</p>
@@ -1149,7 +1156,7 @@ export function StaffManagementPage() {
                           ...f,
                           locationId: next,
                           tableIds: f.tableIds.filter((tid) => {
-                            const row = tableOptions.find((x) => x.id === tid);
+                            const row = safeTableOptions.find((x) => x.id === tid);
                             return !next || (row && row.locationId === next);
                           }),
                         }));
@@ -1288,7 +1295,7 @@ export function StaffManagementPage() {
                         ...f,
                         locationId: next,
                         tableIds: f.tableIds.filter((tid) => {
-                          const row = tableOptions.find((x) => x.id === tid);
+                          const row = safeTableOptions.find((x) => x.id === tid);
                           return !next || (row && row.locationId === next);
                         }),
                       }));

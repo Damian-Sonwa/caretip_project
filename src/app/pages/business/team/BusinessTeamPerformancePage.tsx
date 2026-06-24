@@ -23,9 +23,9 @@ export function BusinessTeamPerformancePage() {
 
   return (
     <div className="space-y-6 pt-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
         <p className="max-w-2xl text-sm text-muted-foreground">{t("business.team.performanceDesc")}</p>
-        <Button type="button" variant="outline" size="sm" asChild>
+        <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" asChild>
           <Link to="/dashboard/tips/analytics">
             <BarChart3 className="mr-2 h-4 w-4" aria-hidden />
             {t("business.team.performance.openAnalytics")}

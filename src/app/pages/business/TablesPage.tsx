@@ -30,6 +30,8 @@ import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { BusinessResponsiveData } from "@/app/components/business/BusinessResponsiveData";
+import { TableItemMobileCard } from "@/app/components/business/businessDashboardMobileCards";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -210,39 +212,56 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
             <p>{t("business.tablesPage.emptyNoTables")}</p>
           </div>
         ) : (
-          <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
-            <table className="w-full min-w-[520px] text-sm">
-              <thead>
-                <tr className="border-b border-border bg-muted/40 text-left">
-                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thTable")}</th>
-                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thLocation")}</th>
-                  <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thGuestLink")}</th>
-                  <th className="px-4 py-3 w-24" />
-                </tr>
-              </thead>
-              <tbody>
+          <BusinessResponsiveData
+            panelClassName="-mx-4 px-0 sm:mx-0"
+            mobile={
+              <>
                 {tables.map((row) => (
-                  <tr key={row.id} className="border-b border-border last:border-0">
-                    <td className="px-4 py-3 font-medium text-foreground">{row.name}</td>
-                    <td className="px-4 py-3 text-muted-foreground">{row.location.name}</td>
-                    <td className="px-4 py-3">
-                      <code className="text-xs break-all text-muted-foreground">{tableUrl(row.id)}</code>
-                    </td>
-                    <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => copyLink(row.id)}
-                        className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md border border-border hover:bg-muted"
-                      >
-                        <Copy className="w-3.5 h-3.5" />
-                        {t("business.tablesPage.copy")}
-                      </button>
-                    </td>
-                  </tr>
+                  <TableItemMobileCard
+                    key={row.id}
+                    name={row.name}
+                    locationName={row.location.name}
+                    guestUrl={tableUrl(row.id)}
+                    onCopy={() => copyLink(row.id)}
+                    copyLabel={t("business.tablesPage.copy")}
+                  />
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </>
+            }
+            desktop={
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border bg-muted/40 text-left">
+                    <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thTable")}</th>
+                    <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thLocation")}</th>
+                    <th className="px-4 py-3 font-medium text-foreground">{t("business.tablesPage.thGuestLink")}</th>
+                    <th className="px-4 py-3 w-24" />
+                  </tr>
+                </thead>
+                <tbody>
+                  {tables.map((row) => (
+                    <tr key={row.id} className="border-b border-border last:border-0">
+                      <td className="px-4 py-3 font-medium text-foreground">{row.name}</td>
+                      <td className="px-4 py-3 text-muted-foreground">{row.location.name}</td>
+                      <td className="px-4 py-3">
+                        <code className="text-xs break-all text-muted-foreground">{tableUrl(row.id)}</code>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button
+                          type="button"
+                          onClick={() => copyLink(row.id)}
+                          className="inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-md border border-border hover:bg-muted"
+                        >
+                          <Copy className="w-3.5 h-3.5" />
+                          {t("business.tablesPage.copy")}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            }
+          />
         )}
       </div>
 

@@ -38,7 +38,6 @@ import {
 import {
   DashboardAnalyticsPhaseHintSlot,
   DashboardStableChartSlot,
-  DeferredContentFade,
   GoalsTableLoadingShell,
 } from "../../components/dashboard/DashboardSectionLoading";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
@@ -63,6 +62,8 @@ import { RecentCustomerFeedbackPanel } from "../../components/business/RecentCus
 import { TopPerformersTeaser } from "../../components/business/insights/TopPerformersTeaser";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
+import { BusinessResponsiveData } from "../../components/business/BusinessResponsiveData";
+import { EmployeeGoalMobileCard } from "../../components/business/businessDashboardMobileCards";
 
 import {
   devMockBusinessOperationalPulse,
@@ -643,7 +644,7 @@ export function BusinessDashboard() {
               {employeeGoalsExpanded ? (
                 <CardContent
                   className={cn(
-                    "min-w-0 overflow-x-auto transition-opacity duration-300",
+                    "min-w-0 transition-opacity duration-300",
                   )}
                 >
                   <DashboardStableChartSlot
@@ -656,7 +657,7 @@ export function BusinessDashboard() {
                       />
                     }
                   >
-                    {employeeGoalsList.length === 0 ? (
+                    {showGoalsLoading && !useDevDemo ? null : employeeGoalsList.length === 0 ? (
                       <div className={cn(businessUi.cardPad)}>
                         <EmployeeEmptyState
                           className="py-10 sm:py-12"
@@ -666,35 +667,51 @@ export function BusinessDashboard() {
                         />
                       </div>
                     ) : (
-                      <DeferredContentFade show={!showGoalsLoading || useDevDemo}>
-                        <table className="w-full min-w-[640px] border-collapse text-sm">
-                          <thead>
-                            <tr className="border-b border-border text-left text-muted-foreground">
-                              {goalsTableColumns.map((col) => (
-                                <th key={col} className="pb-2 pr-3 font-medium last:pr-0">
-                                  {col}
-                                </th>
+                      <BusinessResponsiveData
+                          panelClassName="border-0 bg-transparent shadow-none lg:border lg:border-neutral-200/80 lg:bg-white lg:shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]"
+                          mobile={
+                            <>
+                              {employeeGoalsList.map((g) => (
+                                <EmployeeGoalMobileCard
+                                  key={g.employeeId}
+                                  goal={g}
+                                  periodLabel={goalPeriodLabels[g.goalPeriod]}
+                                  statusLabel={t(`business.goalStatus.${g.status}`)}
+                                  statusClassName={goalStatusClass(g.status)}
+                                />
                               ))}
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {employeeGoalsList.map((g) => (
-                              <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
-                                <td className="py-3 pr-3 font-medium text-foreground">{g.name}</td>
-                                <td className="py-3 pr-3 text-muted-foreground">
-                                  {goalPeriodLabels[g.goalPeriod]}
-                                </td>
-                                <td className="py-3 pr-3 tabular-nums">{formatEur(g.goalAmount)}</td>
-                                <td className="py-3 pr-3 tabular-nums">{formatEur(g.currentAmount)}</td>
-                                <td className="py-3 pr-3 tabular-nums font-medium">{g.percent}%</td>
-                                <td className={`py-3 font-medium ${goalStatusClass(g.status)}`}>
-                                  {t(`business.goalStatus.${g.status}`)}
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </DeferredContentFade>
+                            </>
+                          }
+                          desktop={
+                            <table className="w-full border-collapse text-sm">
+                              <thead>
+                                <tr className="border-b border-border text-left text-muted-foreground">
+                                  {goalsTableColumns.map((col) => (
+                                    <th key={col} className="px-4 py-3 font-medium last:pr-0">
+                                      {col}
+                                    </th>
+                                  ))}
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {employeeGoalsList.map((g) => (
+                                  <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
+                                    <td className="px-4 py-3 font-medium text-foreground">{g.name}</td>
+                                    <td className="px-4 py-3 text-muted-foreground">
+                                      {goalPeriodLabels[g.goalPeriod]}
+                                    </td>
+                                    <td className="px-4 py-3 tabular-nums">{formatEur(g.goalAmount)}</td>
+                                    <td className="px-4 py-3 tabular-nums">{formatEur(g.currentAmount)}</td>
+                                    <td className="px-4 py-3 tabular-nums font-medium">{g.percent}%</td>
+                                    <td className={`px-4 py-3 font-medium ${goalStatusClass(g.status)}`}>
+                                      {t(`business.goalStatus.${g.status}`)}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          }
+                        />
                     )}
                   </DashboardStableChartSlot>
                 </CardContent>

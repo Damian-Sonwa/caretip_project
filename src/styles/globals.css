@@ -605,21 +605,10 @@ textarea::placeholder {
   isolation: isolate;
 }
 
-/* Symmetric gloss — matches business hero polish (no left→right weight bias). */
-.employee-dashboard-hero .employee-hero-visual::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 85% 70% at 50% 42%, rgb(255 255 255 / 0.12) 0%, transparent 58%),
-    linear-gradient(
-      180deg,
-      rgb(255 255 255 / 0.08) 0%,
-      transparent 42%,
-      rgb(250 249 247 / 0.14) 100%
-    );
+/* Symmetric gloss removed — flat hero media. */
+.employee-dashboard-hero .employee-hero-visual::before,
+.business-dashboard-hero .business-hero-visual::before {
+  display: none;
 }
 
 @media (max-width: 768px) {
@@ -967,12 +956,7 @@ textarea::placeholder {
 }
 
 .caretip-dashboard-shell.business-dashboard .business-page-header {
-  background-image: linear-gradient(
-    135deg,
-    hsl(var(--background)) 0%,
-    hsl(var(--background)) 42%,
-    hsl(30 6% 97%) 100%
-  );
+  background: hsl(var(--background));
 }
 
 .business-dashboard-hero .business-hero-visual {
@@ -980,34 +964,12 @@ textarea::placeholder {
   isolation: isolate;
 }
 
-/* Soft, symmetric atmosphere over the hero media (avoid left→right glare that biases weight). */
-.business-dashboard-hero .business-hero-visual::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background:
-    radial-gradient(ellipse 85% 70% at 50% 42%, rgb(255 255 255 / 0.12) 0%, transparent 58%),
-    linear-gradient(
-      180deg,
-      rgb(255 255 255 / 0.08) 0%,
-      transparent 42%,
-      rgb(250 249 247 / 0.14) 100%
-    );
-}
+/* Soft atmosphere removed — covered above with employee rule. */
 
 .business-dashboard-hero .business-hero-chart-frame,
 .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) {
   border: 1px solid rgb(231 229 228 / 0.85); /* stone-200, calm edge */
-  background:
-    radial-gradient(ellipse 78% 58% at 50% 38%, hsl(43 42% 99%) 0%, transparent 62%),
-    linear-gradient(
-      180deg,
-      hsl(43 26% 98.5%) 0%,
-      hsl(37 14% 97%) 42%,
-      hsl(33 14% 95.5%) 100%
-    );
+  background: hsl(var(--muted) / 0.35);
 }
 
 @media (min-width: 1024px) {

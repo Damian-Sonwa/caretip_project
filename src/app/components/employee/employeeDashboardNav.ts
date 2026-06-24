@@ -3,7 +3,7 @@ import {
   hasFeature,
   type BusinessSubscriptionTier,
   type FeatureKey,
-} from "../../lib/subscriptionCapabilities";
+} from "@/app/lib/subscriptionCapabilities";
 
 export type EmployeeDashboardNavItem = {
   labelKey: string;
