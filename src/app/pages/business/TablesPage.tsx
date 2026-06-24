@@ -6,10 +6,9 @@ import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { LockedFeatureCard } from "../../components/subscription/LockedFeatureCard";
+import { fetchVenueCatalog, invalidateVenueCatalog } from "../../lib/businessVenueCatalog";
 import {
   createTableAPI,
-  fetchLocations,
-  fetchTables,
   type LocationDTO,
   type TableDTO,
 } from "../../lib/api";
@@ -81,7 +80,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
       setLoading(true);
     }
     try {
-      const [locList, tblList] = await Promise.all([fetchLocations(), fetchTables()]);
+      const { locations: locList, tables: tblList } = await fetchVenueCatalog({ revalidate: quiet });
       setLocations(locList);
       setTables(tblList);
       setPageSessionCache(cacheKey, { locations: locList, tables: tblList });
@@ -128,6 +127,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
       toast.success(t("business.tablesPage.toastCreated"), TOAST_OK);
       setModalOpen(false);
       setTableName("");
+      invalidateVenueCatalog();
       await loadAll();
     } catch (e) {
       logClientError("TablesPage", e);

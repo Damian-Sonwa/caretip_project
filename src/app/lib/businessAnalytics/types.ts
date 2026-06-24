@@ -49,4 +49,8 @@ export type FetchBusinessAnalyticsOptions = {
   revalidate?: boolean;
   /** When false, skips tips feed fetch (Overview KPI-only refresh). */
   includeTipsFeed?: boolean;
+  /** When false, skips week comparison stats fetch. */
+  includeWeekStats?: boolean;
+  /** When false, skips QR analytics fetch. */
+  includeQrAnalytics?: boolean;
 };

@@ -149,6 +149,35 @@
     min-width: 0;
   }
 
+  .caretip-dashboard-shell .qr-studio-preview-frame {
+    max-width: min(100%, 10rem);
+    margin-inline: auto;
+  }
+
+  .caretip-dashboard-shell .qr-studio-preview-frame img {
+    max-height: min(38vh, 220px);
+  }
+
+  @media (min-width: 640px) {
+    .caretip-dashboard-shell .qr-studio-preview-frame {
+      max-width: min(100%, 13rem);
+    }
+
+    .caretip-dashboard-shell .qr-studio-preview-frame img {
+      max-height: min(48vh, 320px);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .caretip-dashboard-shell .qr-studio-preview-frame {
+      max-width: 100%;
+    }
+
+    .caretip-dashboard-shell .qr-studio-preview-frame img {
+      max-height: min(70vh, 520px);
+    }
+  }
+
   .caretip-dashboard-shell .qr-studio-canvas-frame img {
     display: block;
     width: 100%;
@@ -212,5 +241,97 @@
 
   .caretip-dashboard-shell .dashboard-at-a-glance .dashboard-at-a-glance__stat-value {
     font-size: 0.9375rem;
+  }
+}
+
+/* —— Product Polish: mobile-native module layouts (320–768px) —— */
+
+@media (max-width: 767px) {
+  .caretip-dashboard-shell .caretip-mobile-analytics-report,
+  .caretip-dashboard-shell .caretip-mobile-performance-report {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .premium-summary-card__inner {
+    padding: 1rem 1.125rem 1.125rem;
+  }
+
+  .caretip-dashboard-shell .premium-summary-card .grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.625rem;
+  }
+
+  .caretip-dashboard-shell .premium-summary-card__metric {
+    min-width: 0;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .caretip-dashboard-shell .premium-summary-card__metric-value {
+    font-size: clamp(1.25rem, 6vw, 1.625rem);
+    line-height: 1.15;
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-table-scroll {
+    -webkit-overflow-scrolling: touch;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-notifications-inbox .premium-workspace-header__actions .btn,
+  .caretip-dashboard-shell .caretip-mobile-notifications-inbox .premium-workspace-header__actions button {
+    width: 100%;
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-notifications-inbox form {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-notifications-inbox form button[type="submit"] {
+    width: 100%;
+    min-height: 2.75rem;
+  }
+
+  .caretip-dashboard-shell .business-module-sub-nav > div {
+    margin-inline: -0.125rem;
+    padding-inline: 0.125rem;
+  }
+
+  .caretip-dashboard-shell .dashboard-page-contained {
+    padding-inline: 0;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-hero .dashboard-hero-container {
+    padding-inline: 0;
+  }
+
+  .caretip-dashboard-shell .qr-studio-employee-grid,
+  .caretip-dashboard-shell .qr-studio-employee-grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .platform-admin-stat-grid,
+  .caretip-dashboard-shell .platform-admin-stat-grid > * {
+    min-width: 0;
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-performance-report .premium-summary-card .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 374px) {
+  .caretip-dashboard-shell .premium-workspace-header__feature,
+  .caretip-dashboard-shell .premium-workspace-header__meta-pill {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .caretip-dashboard-shell .business-module-sub-nav a {
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
   }
 }

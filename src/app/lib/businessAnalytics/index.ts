@@ -29,6 +29,7 @@ export {
   buildBusinessAnalyticsDTO,
   fetchBusinessAnalyticsBundle,
   fetchBusinessAnalyticsDTO,
+  fetchBusinessPeriodStats,
 } from "./businessAnalyticsService";
 
 export {

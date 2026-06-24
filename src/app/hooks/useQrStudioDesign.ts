@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   fetchBusinessBrandingSettings,
+  fetchBusinessProfile,
   patchBusinessBrandingSettings,
+  patchBusinessProfile,
   uploadMyBusinessLogo,
   type BusinessBrandingSettings,
 } from "../lib/api";
@@ -28,6 +30,7 @@ import {
   type QrShapeId,
   type QrTemplateId,
 } from "../lib/qrTemplateStyles";
+import type { QrTemplateFieldId } from "../lib/qrTemplateEngine/types";
 import { resolveMediaUrl, withMediaCacheBust } from "../lib/mediaUrl";
 import { logClientError } from "../lib/clientLog";
 
@@ -46,6 +49,7 @@ export type QrStudioDesignState = {
   logoBust: number;
   brandDisplayName: string;
   brandTagline: string;
+  registeredAddress: string;
   welcomeMessage: string;
   thankYouMessage: string;
   primaryColor: string;
@@ -63,6 +67,7 @@ export type QrStudioDesignActions = {
   patchExtras: (patch: Partial<QrStudioDesignExtras>) => void;
   setBrandDisplayName: (v: string) => void;
   setBrandTagline: (v: string) => void;
+  setRegisteredAddress: (v: string) => void;
   setWelcomeMessage: (v: string) => void;
   setThankYouMessage: (v: string) => void;
   setPrimaryColor: (v: string) => void;
@@ -73,6 +78,7 @@ export type QrStudioDesignActions = {
   setQrAccentColor: (v: string) => void;
   setQrBackgroundColor: (v: string) => void;
   setLayoutVariant: (v: QrLayoutVariantId) => void;
+  setTemplateFieldVisible: (field: QrTemplateFieldId, visible: boolean) => void;
   uploadLogo: (file: File) => Promise<void>;
 };
 
@@ -88,9 +94,13 @@ export function useQrStudioDesign(opts: {
   const [settings, setSettings] = useState<BusinessBrandingSettings | null>(null);
   const [extras, setExtras] = useState<QrStudioDesignExtras>(DEFAULT_QR_STUDIO_EXTRAS);
   const [logoBust, setLogoBust] = useState(0);
+  const [templateProfile, setTemplateProfile] = useState<
+    import("../lib/businessBranding").QrBrandingOptions["templateProfile"]
+  >(null);
 
   const [brandDisplayName, setBrandDisplayName] = useState("");
   const [brandTagline, setBrandTagline] = useState("");
+  const [registeredAddress, setRegisteredAddress] = useState("");
   const [welcomeMessage, setWelcomeMessage] = useState("");
   const [thankYouMessage, setThankYouMessage] = useState("");
   const [primaryColor, setPrimaryColor] = useState("#EB992C");
@@ -108,8 +118,15 @@ export function useQrStudioDesign(opts: {
     }
     setLoading(true);
     try {
-      const s = await fetchBusinessBrandingSettings();
+      const [s, profile] = await Promise.all([fetchBusinessBrandingSettings(), fetchBusinessProfile()]);
       setSettings(s);
+      setTemplateProfile({
+        registeredAddress: profile.registeredAddress ?? null,
+        location: profile.location ?? null,
+        contactPhone: profile.contactPhone ?? null,
+        website: profile.website ?? null,
+      });
+      setRegisteredAddress((profile.registeredAddress ?? profile.location ?? "").trim());
       setBrandDisplayName(s.brandDisplayName ?? "");
       setBrandTagline(s.brandTagline ?? "");
       setWelcomeMessage(s.welcomeMessage ?? "");
@@ -144,6 +161,20 @@ export function useQrStudioDesign(opts: {
     [businessId],
   );
 
+  const setTemplateFieldVisible = useCallback(
+    (field: QrTemplateFieldId, visible: boolean) => {
+      setExtras((prev) => {
+        const next = {
+          ...prev,
+          templateFieldVisibility: { ...prev.templateFieldVisibility, [field]: visible },
+        };
+        if (businessId) saveQrStudioDesignExtras(businessId, next);
+        return next;
+      });
+    },
+    [businessId],
+  );
+
   const previewBranding = useMemo(() => {
     const base = qrOptionsFromBrandingFields(
       canEdit,
@@ -164,14 +195,24 @@ export function useQrStudioDesign(opts: {
       brandDisplayName.trim() || businessName,
     );
     const merged = mergeQrStudioBranding(base, extras);
-    if (merged.centerLogoUrl && settings?.logoPath) {
+    const withProfile = {
+      ...merged,
+      templateProfile: {
+        ...templateProfile,
+        registeredAddress: registeredAddress.trim() || templateProfile?.registeredAddress || null,
+        location: templateProfile?.location ?? null,
+        contactPhone: templateProfile?.contactPhone ?? null,
+        website: templateProfile?.website ?? null,
+      },
+    };
+    if (withProfile.centerLogoUrl && settings?.logoPath) {
       return {
-        ...merged,
+        ...withProfile,
         centerLogoUrl:
           withMediaCacheBust(resolveMediaUrl(settings.logoPath) ?? settings.logoPath, logoBust) ?? null,
       };
     }
-    return merged;
+    return withProfile;
   }, [
     canEdit,
     settings?.logoPath,
@@ -189,6 +230,8 @@ export function useQrStudioDesign(opts: {
     businessName,
     extras,
     logoBust,
+    templateProfile,
+    registeredAddress,
   ]);
 
   const save = useCallback(async (): Promise<boolean> => {
@@ -208,6 +251,13 @@ export function useQrStudioDesign(opts: {
         qrAccentColor,
         qrBackgroundColor,
       });
+      await patchBusinessProfile({
+        registeredAddress: registeredAddress.trim() || null,
+      });
+      setTemplateProfile((prev) => ({
+        ...prev,
+        registeredAddress: registeredAddress.trim() || null,
+      }));
       setSettings(updated);
       if (businessId) saveQrStudioDesignExtras(businessId, extras);
       notifyBusinessBrandingChanged();
@@ -223,6 +273,7 @@ export function useQrStudioDesign(opts: {
     canEdit,
     brandDisplayName,
     brandTagline,
+    registeredAddress,
     welcomeMessage,
     thankYouMessage,
     primaryColor,
@@ -257,6 +308,7 @@ export function useQrStudioDesign(opts: {
     logoBust,
     brandDisplayName,
     brandTagline,
+    registeredAddress,
     welcomeMessage,
     thankYouMessage,
     primaryColor,
@@ -271,6 +323,7 @@ export function useQrStudioDesign(opts: {
     patchExtras,
     setBrandDisplayName,
     setBrandTagline,
+    setRegisteredAddress,
     setWelcomeMessage,
     setThankYouMessage,
     setPrimaryColor,
@@ -281,6 +334,7 @@ export function useQrStudioDesign(opts: {
     setQrAccentColor,
     setQrBackgroundColor,
     setLayoutVariant: (v) => patchExtras({ layoutVariant: v }),
+    setTemplateFieldVisible,
     uploadLogo,
   };
 }

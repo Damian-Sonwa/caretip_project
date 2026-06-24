@@ -61,7 +61,8 @@ function ComparisonTable({
         {rows.length === 0 ? (
           <p className="px-4 py-8 text-center text-sm text-muted-foreground">{t(emptyKey)}</p>
         ) : (
-          <table className="w-full text-sm">
+          <div className="caretip-mobile-table-scroll overflow-x-auto">
+            <table className="w-full min-w-[20rem] text-sm">
             <thead>
               <tr className="border-b border-border/60 text-left text-xs text-muted-foreground">
                 <th className="px-4 py-2 font-medium">{t("business.tips.analytics.reporting.name")}</th>
@@ -81,6 +82,7 @@ function ComparisonTable({
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </CardContent>
     </Card>
@@ -136,7 +138,7 @@ export function BusinessAnalyticsReporting({
   const periodLoading = data.loading || data.timeframeLoading;
 
   return (
-    <div className="space-y-8">
+    <div className="caretip-mobile-analytics-report space-y-6 md:space-y-8">
       <PremiumSummaryCard
         personality="analytics"
         title={t("premium.summaryBanner.title")}
@@ -252,6 +254,7 @@ export function BusinessAnalyticsReporting({
           {t("business.tips.analytics.sections.trends")}
         </h2>
         <DashboardChartsIdleMount
+          whenVisible
           fallback={
             <div className={cn(businessUi.cardStatic, "h-[320px] animate-pulse bg-muted/30")} />
           }
@@ -265,6 +268,7 @@ export function BusinessAnalyticsReporting({
           {t("business.tips.analytics.sections.drilldown")}
         </h2>
         <DashboardChartsIdleMount
+          whenVisible
           fallback={
             <div className={cn(businessUi.cardStatic, "h-[280px] animate-pulse bg-muted/30")} />
           }

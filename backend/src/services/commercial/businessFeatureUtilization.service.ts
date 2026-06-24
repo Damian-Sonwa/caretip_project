@@ -134,7 +134,7 @@ async function inferUtilizationFromData(businessId: string): Promise<Map<Commerc
     Boolean(business?.brandTagline) ||
     Boolean(business?.welcomeMessage) ||
     Boolean(business?.thankYouMessage) ||
-    (business?.qrTemplate && business.qrTemplate !== "classic");
+    (business?.qrTemplate && business.qrTemplate !== "industry");
 
   if (hasBranding) {
     map.set("branding", {

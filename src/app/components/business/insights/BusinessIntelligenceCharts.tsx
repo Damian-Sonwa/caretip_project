@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Area,
@@ -56,7 +56,10 @@ function ChartShell({
   );
 }
 
-export function BusinessIntelligenceCharts({ data, loading }: BusinessIntelligenceChartsProps) {
+export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceCharts({
+  data,
+  loading,
+}: BusinessIntelligenceChartsProps) {
   const { t } = useTranslation();
   const series = useMemo(() => buildTrendChartSeries(data), [data]);
 
@@ -124,4 +127,4 @@ export function BusinessIntelligenceCharts({ data, loading }: BusinessIntelligen
       </div>
     </section>
   );
-}
+});

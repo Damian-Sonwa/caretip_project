@@ -25,11 +25,10 @@ export interface NewTipPayload {
 export function emitNewTip(payload: NewTipPayload): void {
   const io = getSocketIO();
   if (io) {
-    io.to(`employee:${payload.employeeId}`).emit("new_tip", payload);
-    io.to(`business:${payload.businessId}`).emit("new_tip", payload);
+    emitTipReceivedCanonical(payload.businessId, payload.employeeId, payload);
+    /** Legacy alias — single emit per room (Sprint 8.1; replaces new_tip + duplicate tip_received). */
     io.to(`employee:${payload.employeeId}`).emit("tip_received", payload);
     io.to(`business:${payload.businessId}`).emit("tip_received", payload);
-    emitTipReceivedCanonical(payload.businessId, payload.employeeId, payload);
   }
 
   void import("../services/push/notification.triggers.js").then(({ onTipReceived }) => {

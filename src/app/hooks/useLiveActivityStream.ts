@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import type { TipActivityRow } from "../lib/api";
 import type { LiveNewTipPayload, RealtimeEventEnvelope } from "../lib/realtime/realtimeContracts";
 import { REALTIME_EVENTS } from "../lib/realtime/realtimeContracts";
+import { subscribeTipReceived } from "../lib/realtime/subscribeTipReceived";
 import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
 
@@ -101,14 +102,6 @@ export function useLiveActivityStream({
   useEffect(() => {
     if (!socket || !enabled) return;
 
-    const handleTip = (raw: LiveNewTipPayload | RealtimeEventEnvelope<LiveNewTipPayload>) => {
-      const payload =
-        "payload" in raw && raw.payload ? (raw.payload as LiveNewTipPayload) : (raw as LiveNewTipPayload);
-      const eventId = "eventId" in raw ? raw.eventId : payload.tip?.id;
-      if (!shouldProcessRealtimeEvent(eventId)) return;
-      onTip(payload);
-    };
-
     const handleQr = (raw: RealtimeEventEnvelope<{ scanType: string; scannedAt: string }>) => {
       if (!shouldProcessRealtimeEvent(raw.eventId)) return;
       if (businessId && raw.businessId && raw.businessId !== businessId) return;
@@ -121,6 +114,13 @@ export function useLiveActivityStream({
         live: true,
       });
     };
+
+    const unsubTip = subscribeTipReceived(socket, (payload, eventId) => {
+      if (!shouldProcessRealtimeEvent(eventId)) return;
+      onTip(payload);
+    });
+
+    socket.on(REALTIME_EVENTS.QR_SCANNED, handleQr);
 
     const handleBusinessData = (payload: { businessId: string; reason: string; at: string }) => {
       if (businessId && payload.businessId !== businessId) return;
@@ -170,18 +170,12 @@ export function useLiveActivityStream({
       });
     };
 
-    socket.on("new_tip", handleTip);
-    socket.on("tip_received", handleTip);
-    socket.on(REALTIME_EVENTS.TIP_RECEIVED, handleTip);
-    socket.on(REALTIME_EVENTS.QR_SCANNED, handleQr);
     socket.on("business_data_updated", handleBusinessData);
     socket.on(REALTIME_EVENTS.GOAL_UPDATED, handleGoal);
     socket.on(REALTIME_EVENTS.EMPLOYEE_UPDATED, onEmployeeUpdated);
 
     return () => {
-      socket.off("new_tip", handleTip);
-      socket.off("tip_received", handleTip);
-      socket.off(REALTIME_EVENTS.TIP_RECEIVED, handleTip);
+      unsubTip();
       socket.off(REALTIME_EVENTS.QR_SCANNED, handleQr);
       socket.off("business_data_updated", handleBusinessData);
       socket.off(REALTIME_EVENTS.GOAL_UPDATED, handleGoal);

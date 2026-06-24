@@ -67,11 +67,11 @@ function GlassStatCard({
   );
 }
 
-/** Abstract map backdrop — flat surface (no gradient mesh). */
+/** Abstract map backdrop — warm premium gradient with orange atmosphere. */
 function MapGraphic3D() {
   return (
     <div
-      className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit] bg-zinc-900"
+      className="platform-admin-hero__atmosphere pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
       aria-hidden
     />
   );
@@ -126,8 +126,8 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
     <section
       className={
         embedded
-          ? "platform-admin-hero relative overflow-hidden rounded-[1.75rem] bg-zinc-950"
-          : "platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 bg-zinc-950 shadow-[0_22px_50px_-24px_rgba(0,0,0,0.55),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12"
+          ? "platform-admin-hero relative overflow-hidden rounded-[1.75rem]"
+          : "platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 shadow-[0_22px_50px_-24px_rgba(233,120,28,0.38),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12"
       }
     >
       <MapGraphic3D />

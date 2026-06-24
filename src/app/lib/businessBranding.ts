@@ -1,6 +1,7 @@
 /** Mirrors backend `PublicGuestBrandingDto` / manager branding settings. */
 
 import type { QrLayoutVariantId } from "./qrDesignSystem";
+import type { QrTemplateFieldId } from "./qrTemplateEngine/types";
 import {
   DEFAULT_QR_BACKGROUND_COLOR,
   DEFAULT_QR_BORDER_STYLE,
@@ -71,6 +72,18 @@ export type QrBrandingOptions = {
   layoutVariant?: QrLayoutVariantId;
   decorationsEnabled?: boolean;
   showVenueLogoHeader?: boolean;
+  /** Engine templates — profile contact slice (from business profile API). */
+  templateProfile?: {
+    registeredAddress?: string | null;
+    location?: string | null;
+    contactPhone?: string | null;
+    contactEmail?: string | null;
+    website?: string | null;
+  } | null;
+  websiteUrl?: string | null;
+  socialInstagram?: string | null;
+  socialFacebook?: string | null;
+  templateFieldVisibility?: Partial<Record<QrTemplateFieldId, boolean>>;
 };
 
 const HEX_RE = /^#[0-9A-Fa-f]{6}$/;
@@ -218,6 +231,8 @@ export function qrBrandingFingerprint(opts: QrBrandingOptions | null | undefined
     layoutVariant: opts.layoutVariant ?? null,
     decorationsEnabled: opts.decorationsEnabled ?? null,
     showVenueLogoHeader: opts.showVenueLogoHeader ?? null,
+    registeredAddress: opts.templateProfile?.registeredAddress ?? null,
+    templateFieldVisibility: opts.templateFieldVisibility ?? null,
   });
 }
 

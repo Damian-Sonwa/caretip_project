@@ -1,6 +1,55 @@
-/** Shared QR template presets for canvas rendering and settings UI previews. */
+/** QR template IDs, border/shape presets, and visual-style helpers for the Template Engine. */
 
+import {
+  ART_DECO_NOIR_TEMPLATE_ID,
+  CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+  CHAMPAGNE_SALON_TEMPLATE_ID,
+  GALLERY_PAVILION_TEMPLATE_ID,
+  GRAND_ATELIER_NOIR_TEMPLATE_ID,
+  GRAND_ATELIER_TEMPLATE_ID,
+  INDUSTRY_TEMPLATE_ID,
+  POC_LUXURY_SHELL_TEMPLATE_ID,
+  ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
+  ROYAL_SUITE_TEMPLATE_ID,
+  SERENITY_SPA_TEMPLATE_ID,
+  VELVET_LOUNGE_NOIR_TEMPLATE_ID,
+  VELVET_LOUNGE_TEMPLATE_ID,
+} from "./qrTemplateEngine/registry";
+
+export const QR_ENGINE_TEMPLATE_IDS = [
+  INDUSTRY_TEMPLATE_ID,
+  VELVET_LOUNGE_TEMPLATE_ID,
+  GRAND_ATELIER_TEMPLATE_ID,
+  ROYAL_SUITE_TEMPLATE_ID,
+  CHAMPAGNE_SALON_TEMPLATE_ID,
+  SERENITY_SPA_TEMPLATE_ID,
+  ART_DECO_NOIR_TEMPLATE_ID,
+  GALLERY_PAVILION_TEMPLATE_ID,
+  VELVET_LOUNGE_NOIR_TEMPLATE_ID,
+  GRAND_ATELIER_NOIR_TEMPLATE_ID,
+  ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
+  CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+  POC_LUXURY_SHELL_TEMPLATE_ID,
+] as const;
+
+/** Gallery-visible template IDs — mirrors `listGalleryTemplates()` in registry. */
 export const QR_TEMPLATE_IDS = [
+  INDUSTRY_TEMPLATE_ID,
+  VELVET_LOUNGE_TEMPLATE_ID,
+  GRAND_ATELIER_TEMPLATE_ID,
+  ROYAL_SUITE_TEMPLATE_ID,
+  CHAMPAGNE_SALON_TEMPLATE_ID,
+  SERENITY_SPA_TEMPLATE_ID,
+  ART_DECO_NOIR_TEMPLATE_ID,
+  GALLERY_PAVILION_TEMPLATE_ID,
+  VELVET_LOUNGE_NOIR_TEMPLATE_ID,
+  GRAND_ATELIER_NOIR_TEMPLATE_ID,
+  ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
+  CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+] as const;
+
+/** @deprecated Legacy color-variation layouts removed — normalized to `industry`. */
+export const LEGACY_QR_TEMPLATE_IDS = [
   "classic",
   "luxury",
   "modern",
@@ -11,15 +60,18 @@ export const QR_TEMPLATE_IDS = [
   "hotel",
 ] as const;
 
+export type LegacyQrTemplateId = (typeof LEGACY_QR_TEMPLATE_IDS)[number];
+export type QrEngineTemplateId = (typeof QR_ENGINE_TEMPLATE_IDS)[number];
+export type QrTemplateId = QrEngineTemplateId;
+
 export const QR_BORDER_STYLE_IDS = ["none", "rounded", "double", "ornate", "minimal"] as const;
 
 export const QR_SHAPE_IDS = ["square", "rounded", "circle"] as const;
 
-export type QrTemplateId = (typeof QR_TEMPLATE_IDS)[number];
 export type QrBorderStyleId = (typeof QR_BORDER_STYLE_IDS)[number];
 export type QrShapeId = (typeof QR_SHAPE_IDS)[number];
 
-export const DEFAULT_QR_TEMPLATE: QrTemplateId = "classic";
+export const DEFAULT_QR_TEMPLATE: QrTemplateId = INDUSTRY_TEMPLATE_ID;
 export const DEFAULT_QR_BORDER_STYLE: QrBorderStyleId = "rounded";
 export const DEFAULT_QR_SHAPE: QrShapeId = "square";
 export const DEFAULT_QR_BACKGROUND_COLOR = "#FFFFFF";
@@ -30,126 +82,112 @@ export type QrTemplatePreset = {
   defaultBg: string;
   defaultAccentFrom: "primary" | "secondary" | "accent";
   lightText: boolean;
-  topBand: boolean;
-  topBandOpacity: number;
-  cardRadius: number;
-  titleWeight: string;
-  titleSize: number;
-  taglineSize: number;
   moduleLight: string;
 };
 
 export const QR_TEMPLATE_PRESETS: Record<QrTemplateId, QrTemplatePreset> = {
-  classic: {
-    id: "classic",
-    labelKey: "business.branding.templates.classic",
-    defaultBg: "#FFFFFF",
+  [INDUSTRY_TEMPLATE_ID]: {
+    id: INDUSTRY_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.luxuryGold",
+    defaultBg: "#1A1A1A",
     defaultAccentFrom: "primary",
-    lightText: false,
-    topBand: true,
-    topBandOpacity: 0.08,
-    cardRadius: 8,
-    titleWeight: "bold",
-    titleSize: 14,
-    taglineSize: 11,
+    lightText: true,
     moduleLight: "#FFFFFF",
   },
-  luxury: {
-    id: "luxury",
-    labelKey: "business.branding.templates.luxury",
+  [VELVET_LOUNGE_TEMPLATE_ID]: {
+    id: VELVET_LOUNGE_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.velvetLounge",
+    defaultBg: "#0a0a0a",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [GRAND_ATELIER_TEMPLATE_ID]: {
+    id: GRAND_ATELIER_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.grandAtelier",
+    defaultBg: "#1a1410",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [ROYAL_SUITE_TEMPLATE_ID]: {
+    id: ROYAL_SUITE_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.royalSuite",
+    defaultBg: "#0c2848",
+    defaultAccentFrom: "accent",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [CHAMPAGNE_SALON_TEMPLATE_ID]: {
+    id: CHAMPAGNE_SALON_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.champagneSalon",
+    defaultBg: "#f5f0e8",
+    defaultAccentFrom: "primary",
+    lightText: false,
+    moduleLight: "#FFFFFF",
+  },
+  [SERENITY_SPA_TEMPLATE_ID]: {
+    id: SERENITY_SPA_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.serenitySpa",
+    defaultBg: "#ebe4d8",
+    defaultAccentFrom: "primary",
+    lightText: false,
+    moduleLight: "#FFFFFF",
+  },
+  [ART_DECO_NOIR_TEMPLATE_ID]: {
+    id: ART_DECO_NOIR_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.artDecoNoir",
     defaultBg: "#141414",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [GALLERY_PAVILION_TEMPLATE_ID]: {
+    id: GALLERY_PAVILION_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.galleryPavilion",
+    defaultBg: "#f8f8f8",
+    defaultAccentFrom: "primary",
+    lightText: false,
+    moduleLight: "#FFFFFF",
+  },
+  [VELVET_LOUNGE_NOIR_TEMPLATE_ID]: {
+    id: VELVET_LOUNGE_NOIR_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.velvetLoungeNoir",
+    defaultBg: "#1a0a10",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [GRAND_ATELIER_NOIR_TEMPLATE_ID]: {
+    id: GRAND_ATELIER_NOIR_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.grandAtelierNoir",
+    defaultBg: "#0c0c0c",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [ROYAL_SUITE_PLATINUM_TEMPLATE_ID]: {
+    id: ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.royalSuitePlatinum",
+    defaultBg: "#0a1424",
     defaultAccentFrom: "accent",
     lightText: true,
-    topBand: true,
-    topBandOpacity: 0.2,
-    cardRadius: 12,
-    titleWeight: "600",
-    titleSize: 15,
-    taglineSize: 11,
     moduleLight: "#FFFFFF",
   },
-  modern: {
-    id: "modern",
-    labelKey: "business.branding.templates.modern",
-    defaultBg: "#F8FAFC",
+  [CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID]: {
+    id: CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.champagneSalonClassic",
+    defaultBg: "#faf6ef",
     defaultAccentFrom: "primary",
     lightText: false,
-    topBand: false,
-    topBandOpacity: 0,
-    cardRadius: 16,
-    titleWeight: "600",
-    titleSize: 14,
-    taglineSize: 11,
-    moduleLight: "#F8FAFC",
+    moduleLight: "#FFFFFF",
   },
-  nature: {
-    id: "nature",
-    labelKey: "business.branding.templates.nature",
-    defaultBg: "#F4F7F0",
+  [POC_LUXURY_SHELL_TEMPLATE_ID]: {
+    id: POC_LUXURY_SHELL_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.pocLuxury",
+    defaultBg: "#0A0A0A",
     defaultAccentFrom: "primary",
-    lightText: false,
-    topBand: true,
-    topBandOpacity: 0.12,
-    cardRadius: 10,
-    titleWeight: "600",
-    titleSize: 14,
-    taglineSize: 11,
-    moduleLight: "#FFFFFF",
-  },
-  corporate: {
-    id: "corporate",
-    labelKey: "business.branding.templates.corporate",
-    defaultBg: "#FFFFFF",
-    defaultAccentFrom: "secondary",
-    lightText: false,
-    topBand: true,
-    topBandOpacity: 0.06,
-    cardRadius: 6,
-    titleWeight: "bold",
-    titleSize: 13,
-    taglineSize: 10,
-    moduleLight: "#FFFFFF",
-  },
-  nightlife: {
-    id: "nightlife",
-    labelKey: "business.branding.templates.nightlife",
-    defaultBg: "#0F0F14",
-    defaultAccentFrom: "accent",
     lightText: true,
-    topBand: true,
-    topBandOpacity: 0.25,
-    cardRadius: 14,
-    titleWeight: "bold",
-    titleSize: 15,
-    taglineSize: 11,
-    moduleLight: "#FFFFFF",
-  },
-  restaurant: {
-    id: "restaurant",
-    labelKey: "business.branding.templates.restaurant",
-    defaultBg: "#FFF8F0",
-    defaultAccentFrom: "primary",
-    lightText: false,
-    topBand: true,
-    topBandOpacity: 0.1,
-    cardRadius: 10,
-    titleWeight: "600",
-    titleSize: 14,
-    taglineSize: 11,
-    moduleLight: "#FFFFFF",
-  },
-  hotel: {
-    id: "hotel",
-    labelKey: "business.branding.templates.hotel",
-    defaultBg: "#FAFAF8",
-    defaultAccentFrom: "primary",
-    lightText: false,
-    topBand: true,
-    topBandOpacity: 0.08,
-    cardRadius: 12,
-    titleWeight: "500",
-    titleSize: 14,
-    taglineSize: 11,
     moduleLight: "#FFFFFF",
   },
 };
@@ -163,17 +201,20 @@ export type ResolvedQrVisualStyle = {
   moduleDark: string;
   moduleLight: string;
   lightText: boolean;
-  topBand: boolean;
-  topBandOpacity: number;
-  cardRadius: number;
-  titleWeight: string;
-  titleSize: number;
-  taglineSize: number;
 };
+
+const LEGACY_SET = new Set<string>(LEGACY_QR_TEMPLATE_IDS);
+const ENGINE_SET = new Set<string>(QR_ENGINE_TEMPLATE_IDS);
+
+export function isLegacyQrTemplateId(value: string | null | undefined): boolean {
+  return LEGACY_SET.has(String(value ?? "").trim().toLowerCase());
+}
 
 export function normalizeQrTemplateId(value: string | null | undefined): QrTemplateId {
   const raw = String(value ?? "").trim().toLowerCase();
-  return (QR_TEMPLATE_IDS as readonly string[]).includes(raw) ? (raw as QrTemplateId) : DEFAULT_QR_TEMPLATE;
+  if (isLegacyQrTemplateId(raw)) return DEFAULT_QR_TEMPLATE;
+  if (ENGINE_SET.has(raw)) return raw as QrTemplateId;
+  return DEFAULT_QR_TEMPLATE;
 }
 
 export function normalizeQrBorderStyleId(value: string | null | undefined): QrBorderStyleId {
@@ -198,38 +239,14 @@ export function resolveQrVisualStyle(opts: {
   qrAccentColor?: string | null;
   qrBackgroundColor?: string | null;
 }): ResolvedQrVisualStyle {
-  if (!opts.premium) {
-    const preset = QR_TEMPLATE_PRESETS.classic;
-    return {
-      templateId: "classic",
-      borderStyle: "rounded",
-      shape: "square",
-      backgroundColor: "#FFFFFF",
-      accentColor: opts.primaryColor,
-      moduleDark: "#000000",
-      moduleLight: preset.moduleLight,
-      lightText: false,
-      topBand: true,
-      topBandOpacity: preset.topBandOpacity,
-      cardRadius: preset.cardRadius,
-      titleWeight: preset.titleWeight,
-      titleSize: preset.titleSize,
-      taglineSize: preset.taglineSize,
-    };
-  }
-
   const templateId = normalizeQrTemplateId(opts.qrTemplate);
+  const preset = QR_TEMPLATE_PRESETS[templateId];
   const borderStyle = normalizeQrBorderStyleId(opts.qrBorderStyle);
   const shape = normalizeQrShapeId(opts.qrShape);
-  const preset = QR_TEMPLATE_PRESETS[templateId];
 
   const accentColor =
     opts.qrAccentColor?.trim() ||
-    (preset.defaultAccentFrom === "secondary"
-      ? opts.secondaryColor
-      : preset.defaultAccentFrom === "accent"
-        ? opts.qrAccentColor?.trim() || opts.primaryColor
-        : opts.primaryColor);
+    (preset.defaultAccentFrom === "secondary" ? opts.secondaryColor : opts.primaryColor);
 
   const backgroundColor = opts.qrBackgroundColor?.trim() || preset.defaultBg;
 
@@ -239,15 +256,9 @@ export function resolveQrVisualStyle(opts: {
     shape,
     backgroundColor,
     accentColor,
-    moduleDark: opts.secondaryColor,
+    moduleDark: opts.premium ? opts.secondaryColor : "#000000",
     moduleLight: preset.moduleLight,
     lightText: preset.lightText,
-    topBand: preset.topBand,
-    topBandOpacity: preset.topBandOpacity,
-    cardRadius: preset.cardRadius,
-    titleWeight: preset.titleWeight,
-    titleSize: preset.titleSize,
-    taglineSize: preset.taglineSize,
   };
 }
 
@@ -267,6 +278,6 @@ export function previewStyleForTemplate(
     bg: backgroundColor || preset.defaultBg,
     accent: accentColor,
     lightText: preset.lightText,
-    radius: `${preset.cardRadius}px`,
+    radius: "0px",
   };
 }

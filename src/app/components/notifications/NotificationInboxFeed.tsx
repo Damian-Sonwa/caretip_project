@@ -348,7 +348,7 @@ export function NotificationInboxFeed({
   };
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-3xl space-y-4 pb-8 sm:space-y-5">
+    <div className="mx-auto w-full min-w-0 max-w-3xl space-y-4 pb-8 sm:space-y-5 caretip-mobile-notifications-inbox">
       {/* Header */}
       <BusinessModuleWorkspaceHeader
         personality="notifications"

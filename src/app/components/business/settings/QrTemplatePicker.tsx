@@ -2,11 +2,11 @@ import { useTranslation } from "react-i18next";
 import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  QR_TEMPLATE_IDS,
-  QR_TEMPLATE_PRESETS,
-  previewStyleForTemplate,
+  DEFAULT_QR_TEMPLATE,
   type QrTemplateId,
 } from "../../../lib/qrTemplateStyles";
+import { listGalleryTemplates } from "../../../lib/qrTemplateEngine";
+import type { QrTemplateDefinition } from "../../../lib/qrTemplateEngine/types";
 
 type QrTemplatePickerProps = {
   value: QrTemplateId;
@@ -18,84 +18,71 @@ type QrTemplatePickerProps = {
   tagline?: string | null;
 };
 
-function MiniQrPreview({
-  templateId,
-  accentColor,
-  backgroundColor,
-  displayName,
-  tagline,
+function proceduralPreviewGradient(template: QrTemplateDefinition): string {
+  const variant = template.background.kind === "procedural" ? template.background.variant : null;
+  switch (variant) {
+    case "velvet-lounge":
+      return "linear-gradient(180deg, #14060c 0%, #2a1018 50%, #0a0408 100%)";
+    case "grand-atelier":
+      return "linear-gradient(135deg, #0c0c0c 0%, #161616 50%, #080808 100%)";
+    case "royal-suite":
+      return "linear-gradient(180deg, #0a1424 0%, #122038 50%, #060c18 100%)";
+    case "champagne-salon":
+      return "linear-gradient(180deg, #faf6ef 0%, #f0e8da 55%, #e6dcc8 100%)";
+    default:
+      return "linear-gradient(180deg, #0A0A0A 0%, #111111 55%, #F4F2EE 72%, #0A0A0A 100%)";
+  }
+}
+
+function EngineTemplatePreview({
+  template,
   selected,
+  accentColor,
 }: {
-  templateId: QrTemplateId;
-  accentColor: string;
-  backgroundColor: string;
-  displayName: string;
-  tagline?: string | null;
+  template: QrTemplateDefinition;
   selected: boolean;
+  accentColor: string;
 }) {
-  const preview = previewStyleForTemplate(templateId, accentColor, backgroundColor);
-  const preset = QR_TEMPLATE_PRESETS[templateId];
-  const title = displayName.trim() || "Your Brand";
-  const sub = tagline?.trim() || preset.labelKey.split(".").pop() || "";
+  const bgSrc = template.background.kind === "image" ? template.background.src : null;
 
   return (
     <div
-      className="relative flex min-h-[9rem] flex-col overflow-hidden border-2 border-transparent"
-      style={{
-        backgroundColor: preview.bg,
-        borderRadius: preview.radius,
-        borderColor: selected ? accentColor : `${accentColor}44`,
-      }}
+      className={cn(
+        "relative flex min-h-[10rem] flex-col overflow-hidden rounded-lg border-2 bg-neutral-950",
+        selected ? "border-primary" : "border-border",
+      )}
+      style={!bgSrc ? { borderColor: selected ? accentColor : undefined } : undefined}
     >
-      {preset.topBand ? (
-        <div
-          className="h-5 shrink-0"
-          style={{ backgroundColor: `${preview.accent}${preset.topBandOpacity > 0.15 ? "33" : "22"}` }}
+      {bgSrc ? (
+        <img
+          src={bgSrc}
+          alt=""
+          className="h-full w-full object-cover object-top"
+          draggable={false}
         />
-      ) : null}
-      <div className="flex flex-1 flex-col items-center gap-1 px-2 pb-2 pt-1.5">
-        <span
-          className="max-w-full shrink-0 truncate text-center text-[10px] font-semibold leading-tight"
-          style={{ color: preview.lightText ? "#F5F5F5" : preview.accent }}
-        >
-          {title.length > 18 ? `${title.slice(0, 17)}…` : title}
-        </span>
-        {sub ? (
-          <span
-            className="max-w-full shrink-0 truncate text-center text-[8px] leading-tight opacity-75"
-            style={{ color: preview.lightText ? "#E5E5E5" : preview.accent }}
-          >
-            {sub.length > 22 ? `${sub.slice(0, 21)}…` : sub}
-          </span>
-        ) : null}
+      ) : (
         <div
-          className="mt-auto grid shrink-0 grid-cols-5 gap-px p-1"
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: templateId === "modern" ? "8px" : templateId === "nightlife" ? "50%" : "4px",
-            width: "3.25rem",
-            height: "3.25rem",
-          }}
-          aria-hidden
+          className="flex h-full min-h-[10rem] flex-1 items-center justify-center"
+          style={{ background: proceduralPreviewGradient(template) }}
         >
-          {Array.from({ length: 25 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-square"
-              style={{
-                backgroundColor: (i + templateId.length) % 3 === 0 ? preview.accent : "transparent",
-                opacity: (i + templateId.length) % 3 === 0 ? 0.85 : 0,
-              }}
-            />
-          ))}
+          <div
+            className="grid grid-cols-5 gap-px rounded bg-white p-1 shadow-sm"
+            style={{ width: "3.5rem", height: "3.5rem" }}
+            aria-hidden
+          >
+            {Array.from({ length: 25 }).map((_, i) => (
+              <div
+                key={i}
+                className="aspect-square"
+                style={{
+                  backgroundColor: i % 3 === 0 ? accentColor : "transparent",
+                  opacity: i % 3 === 0 ? 0.9 : 0,
+                }}
+              />
+            ))}
+          </div>
         </div>
-        <span
-          className="shrink-0 text-[7px] font-medium opacity-70"
-          style={{ color: preview.lightText ? "#D4D4D4" : preview.accent }}
-        >
-          Powered by CareTip
-        </span>
-      </div>
+      )}
     </div>
   );
 }
@@ -105,22 +92,31 @@ export function QrTemplatePicker({
   onChange,
   canEdit,
   accentColor,
-  backgroundColor,
-  displayName,
-  tagline,
+  backgroundColor: _backgroundColor,
+  displayName: _displayName,
+  tagline: _tagline,
 }: QrTemplatePickerProps) {
   const { t } = useTranslation();
+  const templates = listGalleryTemplates();
+  const activeValue = templates.some((tpl) => tpl.id === value)
+    ? value
+    : ((templates[0]?.id as QrTemplateId) ?? DEFAULT_QR_TEMPLATE);
+
+  const gridCols =
+    templates.length <= 2
+      ? "grid-cols-2 max-w-2xl"
+      : "grid-cols-2 sm:grid-cols-3 lg:grid-cols-4";
 
   return (
-    <div className="grid min-w-0 grid-cols-2 gap-x-2 gap-y-4 min-[375px]:gap-x-3 min-[375px]:gap-y-5 sm:grid-cols-4">
-      {QR_TEMPLATE_IDS.map((templateId) => {
-        const locked = !canEdit && templateId !== "classic";
-        const selected = value === templateId;
-        const preset = QR_TEMPLATE_PRESETS[templateId];
+    <div className={cn("grid min-w-0 gap-x-3 gap-y-5", gridCols)}>
+      {templates.map((template) => {
+        const templateId = template.id as QrTemplateId;
+        const locked = !canEdit && templateId !== DEFAULT_QR_TEMPLATE;
+        const selected = activeValue === templateId;
 
         return (
           <button
-            key={templateId}
+            key={template.id}
             type="button"
             disabled={locked}
             onClick={() => {
@@ -131,7 +127,7 @@ export function QrTemplatePicker({
               locked ? "cursor-not-allowed" : "cursor-pointer",
             )}
             aria-pressed={selected}
-            aria-label={t(preset.labelKey)}
+            aria-label={t(template.labelKey)}
           >
             <div
               className={cn(
@@ -139,14 +135,7 @@ export function QrTemplatePicker({
                 selected && !locked && "ring-2 ring-primary",
               )}
             >
-              <MiniQrPreview
-                templateId={templateId}
-                accentColor={accentColor}
-                backgroundColor={backgroundColor}
-                displayName={displayName}
-                tagline={tagline}
-                selected={selected}
-              />
+              <EngineTemplatePreview template={template} selected={selected} accentColor={accentColor} />
               {locked ? (
                 <div className="pointer-events-none absolute inset-0 flex items-end justify-center bg-background/50 pb-6 opacity-0 transition-opacity group-hover:opacity-100">
                   <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground shadow">
@@ -155,9 +144,12 @@ export function QrTemplatePicker({
                 </div>
               ) : null}
             </div>
-            <div className="mt-1.5 flex items-center justify-between gap-1 px-0.5">
-              <span className="truncate text-xs font-medium text-foreground">{t(preset.labelKey)}</span>
-              {locked ? <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden /> : null}
+            <div className="mt-2 space-y-0.5 px-0.5">
+              <div className="flex items-center justify-between gap-1">
+                <span className="truncate text-sm font-semibold text-foreground">{t(template.labelKey)}</span>
+                {locked ? <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden /> : null}
+              </div>
+              <p className="line-clamp-2 text-xs text-muted-foreground">{t(template.descriptionKey)}</p>
             </div>
           </button>
         );

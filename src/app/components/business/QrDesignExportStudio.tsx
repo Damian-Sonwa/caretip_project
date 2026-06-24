@@ -13,8 +13,10 @@ import {
 } from "../../lib/qrDesignExport";
 import { renderBrandedQrUrlToDataUrl } from "../../lib/qrBranded";
 import {
+  DEFAULT_QR_TEMPLATE,
   QR_BORDER_STYLE_IDS,
   QR_SHAPE_IDS,
+  normalizeQrTemplateId,
   type QrBorderStyleId,
   type QrShapeId,
   type QrTemplateId,
@@ -182,7 +184,7 @@ export function QrDesignExportStudio({
                 {t("business.qrPage.designStudio.templateSection")}
               </p>
               <QrTemplatePicker
-                value={(customization.qrTemplate ?? "classic") as QrTemplateId}
+                value={normalizeQrTemplateId(customization.qrTemplate) as QrTemplateId}
                 onChange={(template) => patch({ qrTemplate: template })}
                 canEdit={canCustomize}
                 accentColor={accent}

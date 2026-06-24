@@ -6,7 +6,8 @@ import { toast } from "sonner";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { LockedFeatureCard } from "../../components/subscription/LockedFeatureCard";
-import { createLocationAPI, fetchLocations, type LocationDTO } from "../../lib/api";
+import { fetchLocationsCached, invalidateVenueCatalog } from "../../lib/businessVenueCatalog";
+import { createLocationAPI, type LocationDTO } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { LoadingSpinner } from "../../components/ui/loading-spinner";
@@ -64,7 +65,7 @@ export function LocationsPage() {
       setLoading(true);
     }
     try {
-      const list = await fetchLocations();
+      const list = await fetchLocationsCached({ revalidate: quiet });
       setLocations(list);
       setPageSessionCache(cacheKey, list);
     } catch (e) {
@@ -102,6 +103,7 @@ export function LocationsPage() {
       setModalOpen(false);
       setName("");
       setDescription("");
+      invalidateVenueCatalog();
       await load();
     } catch (e) {
       logClientError("LocationsPage", e);

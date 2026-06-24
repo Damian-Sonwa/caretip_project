@@ -21,6 +21,7 @@ import {
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
+import { fetchVenueCatalog, invalidateVenueCatalog } from "../../lib/businessVenueCatalog";
 import {
   generateInviteCode,
   getBusinessStats,
@@ -29,8 +30,6 @@ import {
   updateEmployee,
   updateEmployeeStatus,
   deleteEmployee,
-  fetchLocations,
-  fetchTables,
   type LocationDTO,
   type TableDTO,
 } from "../../lib/api";
@@ -69,12 +68,18 @@ function toastErr(message: string) {
   toast.error(message, TOAST_ERR);
 }
 
-/** Centers icon + label as one unit inside full-width hero panel CTAs (mobile-safe). */
-function HeroPanelButton({ className, children, ...props }: ComponentProps<typeof Button>) {
+/** Centers icon + label as one unit; full width on mobile, content-sized from sm+. */
+function HeroPanelButton({
+  className,
+  children,
+  contentSized = false,
+  ...props
+}: ComponentProps<typeof Button> & { contentSized?: boolean }) {
   return (
     <Button
       className={cn(
-        "flex h-11 min-h-11 w-full max-w-full items-center justify-center gap-0 px-4 text-sm font-semibold leading-none whitespace-normal sm:px-5",
+        "flex h-11 min-h-11 items-center justify-center gap-0 px-4 text-sm font-semibold leading-none whitespace-normal sm:px-5",
+        contentSized ? "w-full max-w-full sm:w-auto sm:max-w-sm" : "w-full max-w-full",
         className,
       )}
       {...props}
@@ -317,17 +322,13 @@ export function StaffManagementPage() {
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !isBusiness) return;
     void (async () => {
-      const [locsResult, tbsResult] = await Promise.allSettled([fetchLocations(), fetchTables()]);
-      if (locsResult.status === "fulfilled") {
-        setVenueOptions(Array.isArray(locsResult.value) ? locsResult.value : []);
-      } else {
-        logClientError("StaffManagementPage.venues.locations", locsResult.reason);
+      try {
+        const { locations, tables } = await fetchVenueCatalog();
+        setVenueOptions(Array.isArray(locations) ? locations : []);
+        setTableOptions(Array.isArray(tables) ? tables : []);
+      } catch (err) {
+        logClientError("StaffManagementPage.venues", err);
         setVenueOptions([]);
-      }
-      if (tbsResult.status === "fulfilled") {
-        setTableOptions(Array.isArray(tbsResult.value) ? tbsResult.value : []);
-      } else {
-        logClientError("StaffManagementPage.venues.tables", tbsResult.reason);
         setTableOptions([]);
       }
     })();
@@ -607,9 +608,9 @@ export function StaffManagementPage() {
             </div>
           </div>
 
-          <div className="mt-3.5 flex w-full flex-col gap-2 max-lg:mt-3">
+          <div className="mt-3.5 flex w-full flex-col items-stretch gap-2 sm:items-center max-lg:mt-3">
             {inviteCode ? (
-              <div className="grid w-full grid-cols-2 gap-2">
+              <div className="grid w-full grid-cols-2 gap-2 sm:max-w-md">
                 <HeroPanelButton
                   type="button"
                   variant="outline"
@@ -636,6 +637,7 @@ export function StaffManagementPage() {
             ) : (
               <HeroPanelButton
                 type="button"
+                contentSized
                 className={businessUi.btnPrimary}
                 onClick={handleGenerateInvite}
                 disabled={!isBusiness || isGenerating}

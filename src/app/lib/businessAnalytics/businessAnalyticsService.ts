@@ -3,6 +3,7 @@ import { runBusinessIntelligenceEngine } from "../businessIntelligenceEngine";im
 import {
   getBusinessAnalyticsBundle,
   setBusinessAnalyticsBundle,
+  upsertBusinessAnalyticsStatsBundle,
 } from "./businessAnalyticsStore";
 import { snapshotFromStats, todaySnapshotFromPulse } from "./snapshot";
 import type {
@@ -11,6 +12,38 @@ import type {
   BusinessAnalyticsDTO,
   FetchBusinessAnalyticsOptions,
 } from "./types";
+import type { BusinessDashboardStats } from "../api";
+import { trackAnalyticsCacheHit, trackAnalyticsCacheMiss, trackAnalyticsRefetch } from "../realtime/realtimeMetrics";
+
+/**
+ * Sprint 8.1 — single authoritative period stats fetch (scope=full).
+ * Used by dashboard overview to avoid summary + analytics duplicate calls.
+ */
+export async function fetchBusinessPeriodStats(
+  timeframe: AnalyticsTimeframe,
+  opts?: FetchBusinessAnalyticsOptions,
+): Promise<BusinessDashboardStats> {
+  if (!opts?.revalidate) {
+    const cached = getBusinessAnalyticsBundle(timeframe);
+    if (cached?.periodStats) {
+      trackAnalyticsCacheHit();
+      return cached.periodStats;
+    }
+  }
+
+  trackAnalyticsCacheMiss();
+  trackAnalyticsRefetch();
+
+  const periodStats = await getBusinessStats(timeframe, {
+    scope: "full",
+    signal: opts?.signal,
+    silent: opts?.silent,
+    revalidate: opts?.revalidate,
+  });
+
+  upsertBusinessAnalyticsStatsBundle(timeframe, periodStats);
+  return periodStats;
+}
 
 /**
  * Sprint 3B — unified fetch for business analytics.
@@ -22,10 +55,18 @@ export async function fetchBusinessAnalyticsBundle(
 ): Promise<BusinessAnalyticsBundle> {
   if (!opts?.revalidate) {
     const cached = getBusinessAnalyticsBundle(timeframe);
-    if (cached) return cached;
+    if (cached) {
+      trackAnalyticsCacheHit();
+      return cached;
+    }
   }
 
+  trackAnalyticsCacheMiss();
+  trackAnalyticsRefetch();
+
   const includeTipsFeed = opts?.includeTipsFeed !== false;
+  const includeWeekStats = opts?.includeWeekStats !== false;
+  const includeQrAnalytics = opts?.includeQrAnalytics !== false;
   const feedParams = tipsFeedParamsForTimeframe(timeframe);
 
   const [periodStats, weekStats, feed, qrAnalytics] = await Promise.all([
@@ -35,12 +76,14 @@ export async function fetchBusinessAnalyticsBundle(
       silent: opts?.silent,
       revalidate: opts?.revalidate,
     }),
-    getBusinessStats("week", {
-      scope: "summary",
-      signal: opts?.signal,
-      silent: opts?.silent,
-      revalidate: opts?.revalidate,
-    }),
+    includeWeekStats
+      ? getBusinessStats("week", {
+          scope: "summary",
+          signal: opts?.signal,
+          silent: opts?.silent,
+          revalidate: opts?.revalidate,
+        })
+      : Promise.resolve(null as BusinessDashboardStats | null),
     includeTipsFeed
       ? listBusinessTips({
           ...feedParams,
@@ -48,15 +91,17 @@ export async function fetchBusinessAnalyticsBundle(
           status: "success",
         })
       : Promise.resolve({ items: [] as BusinessAnalyticsBundle["recentTips"] }),
-    getBusinessQrAnalytics(timeframe, { signal: opts?.signal, silent: opts?.silent }).catch(
-      () => null,
-    ),
+    includeQrAnalytics
+      ? getBusinessQrAnalytics(timeframe, { signal: opts?.signal, silent: opts?.silent }).catch(
+          () => null,
+        )
+      : Promise.resolve(null),
   ]);
 
   const bundle: BusinessAnalyticsBundle = {
     timeframe,
     periodStats,
-    weekStats,
+    weekStats: weekStats ?? periodStats,
     recentTips: feed.items,
     qrAnalytics,
     fetchedAt: Date.now(),

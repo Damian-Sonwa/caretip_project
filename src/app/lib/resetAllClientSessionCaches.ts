@@ -9,6 +9,7 @@ import { clearSubscriptionTierSession } from "./subscriptionSessionCache";
 import { clearBusinessDashboardSwrStore } from "../hooks/useBusinessDashboardStats";
 import { clearEmployeePeriodSwrStore } from "../hooks/useEmployeeDashboardAnalytics";
 import { clearEmployeeAccountSwrStore } from "../hooks/useEmployeeAccountSummary";
+import { clearVenueCatalogStore } from "./businessVenueCatalog";
 
 /**
  * Wipe in-memory session caches on logout and account switch.
@@ -24,4 +25,5 @@ export function resetAllClientSessionCaches(): void {
   clearBusinessDashboardSwrStore();
   clearEmployeePeriodSwrStore();
   clearEmployeeAccountSwrStore();
+  clearVenueCatalogStore();
 }

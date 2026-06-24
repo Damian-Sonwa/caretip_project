@@ -465,7 +465,7 @@ model Business {
   /** Premium v2 — short tagline under display name on QR and guest pages. */
   brandTagline             String?                    @map("brand_tagline") @db.VarChar(120)
   /** Premium v2 — QR visual template preset. */
-  qrTemplate               String                     @default("classic") @map("qr_template") @db.VarChar(32)
+  qrTemplate               String                     @default("industry") @map("qr_template") @db.VarChar(32)
   /** Premium v2 — QR card border style. */
   qrBorderStyle            String                     @default("rounded") @map("qr_border_style") @db.VarChar(32)
   /** Premium v2 — QR module container shape. */

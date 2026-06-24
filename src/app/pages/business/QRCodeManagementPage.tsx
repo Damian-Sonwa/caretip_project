@@ -14,14 +14,13 @@ import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
+import { fetchVenueCatalog } from "../../lib/businessVenueCatalog";
 import {
   getEmployees,
   fetchBusinessProfile,
   fetchBusinessBrandingSettings,
   regenerateBusinessSlug,
   regenerateEmployeeSlug,
-  fetchLocations,
-  fetchTables,
   type EmployeeItem,
   type LocationDTO,
   type TableDTO,
@@ -53,8 +52,10 @@ import {
   DEFAULT_QR_BORDER_STYLE,
   DEFAULT_QR_SHAPE,
   DEFAULT_QR_TEMPLATE,
+  normalizeQrTemplateId,
   QR_TEMPLATE_PRESETS,
 } from "../../lib/qrTemplateStyles";
+import { getEngineTemplate } from "../../lib/qrTemplateEngine";
 import type { QrBrandingOptions } from "../../lib/businessBranding";
 import {
   createBusinessQrPrintPdf,
@@ -149,14 +150,25 @@ export function QRCodeManagementPage({
   const loadQrBranding = useCallback(async () => {
     if (!user?.businessId || user.role !== "business") return;
     try {
-      const s = await fetchBusinessBrandingSettings();
+      const [s, profile] = await Promise.all([
+        fetchBusinessBrandingSettings(),
+        fetchBusinessProfile(),
+      ]);
       const name =
         String(businessDisplayName ?? "").trim() ||
         String(user?.businessName ?? "").trim() ||
         t("business.qrPage.fallbackBusinessName");
       const base = qrBrandingForManager(tier, s, name);
       const extras = loadQrStudioDesignExtras(user.businessId);
-      setQrBrandingOpts(mergeQrStudioBranding(base, extras));
+      setQrBrandingOpts({
+        ...mergeQrStudioBranding(base, extras),
+        templateProfile: {
+          registeredAddress: profile.registeredAddress ?? null,
+          location: profile.location ?? null,
+          contactPhone: profile.contactPhone ?? null,
+          website: profile.website ?? null,
+        },
+      });
     } catch (err) {
       logClientError("QRCodeManagementPage.branding", err);
       setQrBrandingOpts(
@@ -295,29 +307,21 @@ export function QRCodeManagementPage({
       setVenueTables(Array.isArray(venueCached.tables) ? venueCached.tables : []);
     }
     void (async () => {
-      const [locsResult, tbsResult] = await Promise.allSettled([fetchLocations(), fetchTables()]);
-      if (cancelled) return;
-
-      const locList =
-        locsResult.status === "fulfilled" && Array.isArray(locsResult.value) ? locsResult.value : null;
-      const tblList =
-        tbsResult.status === "fulfilled" && Array.isArray(tbsResult.value) ? tbsResult.value : null;
-
-      if (locsResult.status === "rejected") {
-        logClientError("QRCodeManagementPage.venues.locations", locsResult.reason);
-      }
-      if (tbsResult.status === "rejected") {
-        logClientError("QRCodeManagementPage.venues.tables", tbsResult.reason);
-      }
-
-      if (locList) setVenueLocations(locList);
-      else if (!venueCached) setVenueLocations([]);
-
-      if (tblList) setVenueTables(tblList);
-      else if (!venueCached) setVenueTables([]);
-
-      if (locList && tblList) {
-        setPageSessionCache(venueCacheKey, { locations: locList, tables: tblList });
+      try {
+        const { locations, tables } = await fetchVenueCatalog({
+          revalidate: Boolean(venueCached),
+        });
+        if (cancelled) return;
+        setVenueLocations(Array.isArray(locations) ? locations : []);
+        setVenueTables(Array.isArray(tables) ? tables : []);
+        setPageSessionCache(venueCacheKey, { locations, tables });
+      } catch (err) {
+        if (cancelled) return;
+        logClientError("QRCodeManagementPage.venues", err);
+        if (!venueCached) {
+          setVenueLocations([]);
+          setVenueTables([]);
+        }
       }
     })();
     return () => {
@@ -472,9 +476,11 @@ export function QRCodeManagementPage({
   const galleryAssets = useMemo((): GalleryAssetEntry[] => {
     if (!user?.businessId) return [];
 
-    const templateId = qrBrandingOpts?.qrTemplate ?? DEFAULT_QR_TEMPLATE;
-    const preset = QR_TEMPLATE_PRESETS[templateId] ?? QR_TEMPLATE_PRESETS[DEFAULT_QR_TEMPLATE];
-    const templateLabel = t(preset.labelKey);
+    const templateId = normalizeQrTemplateId(qrBrandingOpts?.qrTemplate);
+    const engineTpl = getEngineTemplate(templateId);
+    const templateLabel = engineTpl
+      ? t(engineTpl.labelKey)
+      : t(QR_TEMPLATE_PRESETS[templateId].labelKey);
     const lastUpdatedLabel = formatQrAssetUpdatedAt(assetsSyncedAt, i18n.language);
     const venueName =
       String(businessDisplayName ?? "").trim() ||
@@ -1084,7 +1090,7 @@ export function QRCodeManagementPage({
                     <p className="text-muted-foreground">{t("business.qrStudio.gallery.libraryEmpty")}</p>
                   </div>
                 ) : (
-                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                  <div className="qr-studio-employee-grid grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                     {galleryAssets.map((asset) => (
                       <QrManagementCard
                         key={asset.key}

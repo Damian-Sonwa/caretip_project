@@ -40,14 +40,19 @@ export function assertQrModuleContrast(moduleDark: string, moduleLight: string):
 
 /** Light module color per template — mirrors frontend presets. */
 const TEMPLATE_MODULE_LIGHT: Record<string, string> = {
-  classic: "#FFFFFF",
-  luxury: "#FFFFFF",
-  modern: "#F8FAFC",
-  nature: "#FFFFFF",
-  corporate: "#FFFFFF",
-  nightlife: "#FFFFFF",
-  restaurant: "#FFFFFF",
-  hotel: "#FFFFFF",
+  industry: "#FFFFFF",
+  "velvet-lounge": "#FFFFFF",
+  "grand-atelier": "#FFFFFF",
+  "royal-suite": "#FFFFFF",
+  "champagne-salon": "#FFFFFF",
+  "serenity-spa": "#FFFFFF",
+  "art-deco-noir": "#FFFFFF",
+  "gallery-pavilion": "#FFFFFF",
+  "velvet-lounge-noir": "#FFFFFF",
+  "grand-atelier-noir": "#FFFFFF",
+  "royal-suite-platinum": "#FFFFFF",
+  "champagne-salon-classic": "#FFFFFF",
+  "poc-luxury-shell": "#FFFFFF",
 };
 
 export function moduleLightForTemplate(templateId: string): string {

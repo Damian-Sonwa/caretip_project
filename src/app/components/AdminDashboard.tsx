@@ -540,7 +540,7 @@ export function AdminDashboard() {
             className="justify-end"
           />
         </div>
-        <PremiumPageHero className="mb-10 max-lg:mb-12" autoHeight>
+        <PremiumPageHero personality="overview" className="mb-10 max-lg:mb-8" autoHeight>
           <NetworkOverviewHero health={health} embedded />
         </PremiumPageHero>
 

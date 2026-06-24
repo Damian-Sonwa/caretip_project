@@ -36,7 +36,8 @@ import {
 
 } from "../lib/realtime/patchAnalyticsLive";
 
-import { REALTIME_EVENTS, type LiveNewTipPayload } from "../lib/realtime/realtimeContracts";
+import { subscribeTipReceived } from "../lib/realtime/subscribeTipReceived";
+import type { LiveNewTipPayload } from "../lib/realtime/realtimeContracts";
 
 import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";
 
@@ -57,6 +58,10 @@ export type UseBusinessAnalyticsOptions = {
   includeIntelligence?: boolean;
 
   includeTipsFeed?: boolean;
+
+  includeWeekStats?: boolean;
+
+  includeQrAnalytics?: boolean;
 
 };
 
@@ -251,6 +256,10 @@ export function useBusinessAnalytics(
 
     includeTipsFeed = true,
 
+    includeWeekStats = true,
+
+    includeQrAnalytics = true,
+
   } = options;
 
 
@@ -343,6 +352,10 @@ export function useBusinessAnalytics(
 
           includeTipsFeed: includeTipsFeed && advancedAnalytics,
 
+          includeWeekStats,
+
+          includeQrAnalytics,
+
         });
 
         if (tf !== timeframeRef.current) return;
@@ -367,7 +380,7 @@ export function useBusinessAnalytics(
 
     },
 
-    [enabled, advancedAnalytics, includeTipsFeed, applyBundle],
+    [enabled, advancedAnalytics, includeTipsFeed, includeWeekStats, includeQrAnalytics, applyBundle],
 
   );
 
@@ -461,11 +474,7 @@ export function useBusinessAnalytics(
 
 
 
-    const onTip = (raw: LiveNewTipPayload | { eventId?: string; payload?: LiveNewTipPayload }) => {
-
-      const payload = "payload" in raw && raw.payload ? raw.payload : (raw as LiveNewTipPayload);
-
-      const eventId = "eventId" in raw ? raw.eventId : payload.tip?.id;
+    const onTip = (payload: LiveNewTipPayload, eventId?: string) => {
 
       if (!shouldProcessRealtimeEvent(eventId)) return;
 
@@ -491,11 +500,7 @@ export function useBusinessAnalytics(
 
 
 
-    socket.on("new_tip", onTip);
-
-    socket.on("tip_received", onTip);
-
-    socket.on(REALTIME_EVENTS.TIP_RECEIVED, onTip);
+    const unsubTip = subscribeTipReceived(socket, onTip);
 
     socket.on("business_data_updated", onBusinessData);
 
@@ -503,11 +508,7 @@ export function useBusinessAnalytics(
 
     return () => {
 
-      socket.off("new_tip", onTip);
-
-      socket.off("tip_received", onTip);
-
-      socket.off(REALTIME_EVENTS.TIP_RECEIVED, onTip);
+      unsubTip();
 
       socket.off("business_data_updated", onBusinessData);
 

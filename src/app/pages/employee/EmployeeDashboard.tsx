@@ -33,6 +33,7 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { isProtectedApiReady } from "../../lib/authRestore";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
+import { subscribeTipReceived } from "../../lib/realtime/subscribeTipReceived";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
@@ -193,7 +194,7 @@ export function EmployeeDashboard() {
     const employeeId = user?.role === "employee" ? user.employeeId : undefined;
     if (!socket || !employeeId) return;
 
-    const onNewTip = (payload: NewTipPayload) => {
+    return subscribeTipReceived(socket, (payload) => {
       if (payload.employeeId !== employeeId) return;
 
       recordNewEmployeeTip(employeeId, payload.tip);
@@ -201,12 +202,10 @@ export function EmployeeDashboard() {
       applyLiveTip({
         tip: payload.tip,
         employeeId: payload.employeeId,
-        currentMonthTotal: payload.currentMonthTotal,
-        monthlyGoal: payload.monthlyGoal,
+        currentMonthTotal: payload.currentMonthTotal ?? 0,
+        monthlyGoal: payload.monthlyGoal ?? null,
       });
 
-      // Avoid websocket-triggered request storms: reconcile instantly from the event,
-      // then verify authoritatively with a single debounced refresh.
       if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = window.setTimeout(() => {
         refreshTimerRef.current = null;
@@ -215,12 +214,7 @@ export function EmployeeDashboard() {
 
       playChaChingSound();
       toast.success(t("employee.dashboard.toastNewTip"), TOAST_OK);
-    };
-
-    socket.on("new_tip", onNewTip);
-    return () => {
-      socket.off("new_tip", onNewTip);
-    };
+    });
   }, [socket, user?.role, user?.employeeId, refreshDashboardQuiet, t, applyLiveTip]);
 
   const heroPayload = displayPayloadOrLatest ?? displayPayload;
@@ -667,7 +661,7 @@ export function EmployeeDashboard() {
           />
 
           <FeatureGate featureKey="advancedAnalytics" role="employee" enabled={dashboardEnabled}>
-          <DashboardChartsIdleMount fallback={<EmployeeDashboardEarningsChartFallback />}>
+          <DashboardChartsIdleMount whenVisible fallback={<EmployeeDashboardEarningsChartFallback />}>
             <EmployeeDashboardEarningsChart
               showChartLoading={showChartLoading}
               chartData={chartData}

@@ -221,7 +221,7 @@ export function BusinessExecutivePerformance({ data }: BusinessExecutivePerforma
   );
 
   return (
-    <div className="space-y-4 sm:space-y-5">
+    <div className="caretip-mobile-performance-report space-y-4 sm:space-y-5">
       <ExecutiveSummaryCard data={data} />
       <BusinessHealthCard data={data} />
 

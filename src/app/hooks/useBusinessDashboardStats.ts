@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { BusinessDashboardStats } from "../lib/api";
 import {
   clearBusinessStatsClientCache,
-  getBusinessStats,
   mergeBusinessDashboardStats,
 } from "../lib/api";
 import { createDashboardSwrStore, DASHBOARD_SWR_METRICS_TTL_MS } from "../lib/dashboardSwrCache";
@@ -32,6 +31,7 @@ import {
   subscribeBusinessAnalyticsRefresh,
   upsertBusinessAnalyticsStatsBundle,
   clearBusinessAnalyticsStore,
+  fetchBusinessPeriodStats,
   type AnalyticsTimeframe,
 } from "../lib/businessAnalytics";
 import {
@@ -471,110 +471,73 @@ export function useBusinessDashboardStats(
             return;
           }
 
-          /** Start analytics network early; KPI commit still waits for summary (parallel waterfall). */
-          let analyticsEarlyPromise: Promise<BusinessDashboardStats> | null = null;
-          if (!analyticsSettled && advancedAnalyticsEnabledRef.current) {
-            analyticsEarlyPromise = getBusinessStats(tf, {
-              scope: "analytics",
-              silent,
-              signal: controller.signal,
-              revalidate,
-            });
-          }
+          /** Sprint 8.1 — single scope=full fetch via unified analytics pipeline. */
+          const needsPeriodNetwork = !summarySettled || (!analyticsSettled && advancedAnalyticsEnabledRef.current);
 
-        if (!summarySettled) {
-          if (!summaryFromMemory) {
-            const summaryData = await getBusinessStats(tf, {
-              scope: "summary",
+          if (needsPeriodNetwork && (!summaryFromMemory || (!analyticsInMemory && advancedAnalyticsEnabledRef.current))) {
+            const periodStats = await fetchBusinessPeriodStats(tf, {
               silent,
               signal: controller.signal,
               revalidate,
             });
             if (!stillActive()) return;
-            summaryPartialRef.current.set(tf, summaryData);
+            summaryPartialRef.current.set(tf, periodStats);
+            summarySettled = true;
+            if (advancedAnalyticsEnabledRef.current) {
+              analyticsPartialRef.current.set(tf, periodStats);
+              analyticsSettled = true;
+            }
+          }
+
+          if (!summarySettled && summaryFromMemory) {
             summarySettled = true;
           }
-          if (affectsUi) {
+
+          if (affectsUi && summarySettled) {
             setSummaryLoading(false);
             devSetHydrationPhase("metrics", "ready");
-            if (!analyticsSettled) setAnalyticsLoadingUi(true);
+            if (!analyticsSettled && advancedAnalyticsEnabledRef.current) {
+              setAnalyticsLoadingUi(true);
+            }
             commitUiStats(tf, seq, true);
           }
           applyHeroFromMonth(tf);
           if (tf === "month") devSetHydrationPhase("hero", "ready");
-        }
 
-        if (!stillActive()) return;
+          if (!stillActive()) return;
 
-        if (!analyticsSettled) {
-          if (!advancedAnalyticsEnabledRef.current) {
-            analyticsSettled = true;
-            if (affectsUi && stillActive()) {
-              setAnalyticsLoading(false);
-              devSetHydrationPhase("charts", "ready");
-              devSetHydrationPhase("goals", "ready");
-              commitUiStats(tf, seq, true);
-            }
-          } else if (affectsUi) {
-            analyticsDeferred = true;
-            const runAnalytics = async () => {
-              if (!stillActive() || analyticsSettled) return;
-              try {
-                const analyticsData = analyticsEarlyPromise
-                  ? await analyticsEarlyPromise
-                  : await getBusinessStats(tf, {
-                      scope: "analytics",
-                      silent,
-                      signal: controller.signal,
-                      revalidate,
-                    });
-                if (!stillActive()) return;
-                analyticsPartialRef.current.set(tf, analyticsData);
-                analyticsSettled = true;
+          if (!analyticsSettled) {
+            if (!advancedAnalyticsEnabledRef.current) {
+              analyticsSettled = true;
+              if (affectsUi && stillActive()) {
                 setAnalyticsLoading(false);
                 devSetHydrationPhase("charts", "ready");
                 devSetHydrationPhase("goals", "ready");
                 commitUiStats(tf, seq, true);
-                applyHeroFromMonth(tf);
-              } catch (err) {
-                if (isAbortError(err) || controller.signal.aborted) return;
-                if (stillActive()) {
-                  setAnalyticsLoading(false);
-                  devSetHydrationPhase("charts", "error");
-                  devSetHydrationPhase("goals", "error");
-                  if (!hasMetricValues(statsRef.current)) {
-                    setStatsLoadFailed(toUserFriendlyMessage(err));
-                  }
-                }
-              } finally {
-                if (stillActive() && uiRequestSeqRef.current === seq) {
-                  setIsRevalidating(false);
-                }
               }
-            };
-
-            // Post-first-paint scheduling: next paint tick + micro-delay.
-            requestAnimationFrame(() => {
-              analyticsDeferTimerRef.current = window.setTimeout(() => {
-                analyticsDeferTimerRef.current = null;
-                void runAnalytics();
-              }, 0);
-            });
-          } else {
-            const analyticsData = analyticsEarlyPromise
-              ? await analyticsEarlyPromise
-              : await getBusinessStats(tf, {
-                  scope: "analytics",
-                  silent,
-                  signal: controller.signal,
-                  revalidate,
-                });
-            if (!stillActive()) return;
-            analyticsPartialRef.current.set(tf, analyticsData);
-            analyticsSettled = true;
-            applyHeroFromMonth(tf);
+            } else if (affectsUi) {
+              analyticsDeferred = true;
+              requestAnimationFrame(() => {
+                analyticsDeferTimerRef.current = window.setTimeout(() => {
+                  analyticsDeferTimerRef.current = null;
+                  if (!stillActive() || analyticsSettled) return;
+                  setAnalyticsLoading(false);
+                  devSetHydrationPhase("charts", "ready");
+                  devSetHydrationPhase("goals", "ready");
+                  commitUiStats(tf, seq, true);
+                  applyHeroFromMonth(tf);
+                  if (stillActive() && uiRequestSeqRef.current === seq) {
+                    setIsRevalidating(false);
+                  }
+                }, 0);
+              });
+            }
+          } else if (affectsUi && advancedAnalyticsEnabledRef.current) {
+            setAnalyticsLoading(false);
+            devSetHydrationPhase("charts", "ready");
+            devSetHydrationPhase("goals", "ready");
+            commitUiStats(tf, seq, true);
           }
-        }
 
         if (stillActive()) {
           if (!affectsUi && summarySettled && analyticsSettled) {
@@ -695,8 +658,7 @@ export function useBusinessDashboardStats(
 
     devSetHydrationPhase("hero", "loading");
     try {
-      const summaryData = await getBusinessStats("month", {
-        scope: "summary",
+      const summaryData = await fetchBusinessPeriodStats("month", {
         silent: true,
         signal: controller.signal,
       });

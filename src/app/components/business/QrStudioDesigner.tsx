@@ -29,8 +29,10 @@ import {
   type QrLayoutVariantId,
 } from "../../lib/qrDesignSystem";
 import {
+  DEFAULT_QR_TEMPLATE,
   QR_BORDER_STYLE_IDS,
   QR_SHAPE_IDS,
+  normalizeQrTemplateId,
   type QrBorderStyleId,
   type QrShapeId,
   type QrTemplateId,
@@ -204,7 +206,7 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
                   <div>
                     <p className="mb-2 text-sm font-medium">{t("business.qrStudio.design.template")}</p>
                     <QrTemplatePicker
-                      value={(studio.qrTemplate ?? "classic") as QrTemplateId}
+                      value={normalizeQrTemplateId(studio.qrTemplate) as QrTemplateId}
                       onChange={studio.setQrTemplate}
                       canEdit={canEdit}
                       accentColor={studio.qrAccentColor}
@@ -302,6 +304,29 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
                       onChange={(e) => studio.setBrandDisplayName(e.target.value)}
                       placeholder={businessName}
                       maxLength={80}
+                      disabled={!canEdit}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="brand-address">{t("business.qrStudio.design.address")}</Label>
+                    <Input
+                      id="brand-address"
+                      value={studio.registeredAddress}
+                      onChange={(e) => studio.setRegisteredAddress(e.target.value)}
+                      placeholder={t("business.qrStudio.design.addressPlaceholder")}
+                      maxLength={200}
+                      disabled={!canEdit}
+                    />
+                    <p className="text-xs text-muted-foreground">{t("business.qrStudio.design.addressHint")}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 rounded-lg border border-border/80 px-3 py-2.5">
+                    <div>
+                      <p className="text-sm font-medium">{t("business.qrStudio.design.showAddress")}</p>
+                      <p className="text-xs text-muted-foreground">{t("business.qrStudio.design.showAddressHint")}</p>
+                    </div>
+                    <Switch
+                      checked={studio.extras.templateFieldVisibility.address !== false}
+                      onCheckedChange={(v: boolean) => studio.setTemplateFieldVisible("address", v)}
                       disabled={!canEdit}
                     />
                   </div>
@@ -572,7 +597,7 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
 
       <QrStudioPerformancePanel
         canView={canEdit}
-        templateLabel={studio.previewBranding.qrTemplate ?? "classic"}
+        templateLabel={studio.previewBranding.qrTemplate ?? DEFAULT_QR_TEMPLATE}
       />
     </div>
   );

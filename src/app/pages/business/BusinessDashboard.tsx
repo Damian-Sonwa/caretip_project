@@ -21,11 +21,7 @@ import { de, enUS } from "date-fns/locale";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSocket, useDeferSocketConnect } from "../../hooks/useSocket";
 import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
-import {
-  REALTIME_EVENTS,
-  type LiveNewTipPayload,
-  type RealtimeEventEnvelope,
-} from "../../lib/realtime/realtimeContracts";
+import { subscribeTipReceived } from "../../lib/realtime/subscribeTipReceived";
 import { shouldProcessRealtimeEvent } from "../../lib/realtime/realtimeEventDedupe";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
 import { deriveBusinessDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
@@ -166,10 +162,7 @@ export function BusinessDashboard() {
   useEffect(() => {
     if (!socket || user?.role !== "business" || !user?.businessId) return;
 
-    const onNewTip = (raw: LiveNewTipPayload | RealtimeEventEnvelope<LiveNewTipPayload>) => {
-      const payload =
-        "payload" in raw && raw.payload ? (raw.payload as LiveNewTipPayload) : (raw as LiveNewTipPayload);
-      const eventId = "eventId" in raw ? raw.eventId : payload.tip?.id;
+    return subscribeTipReceived(socket, (payload, eventId) => {
       if (!shouldProcessRealtimeEvent(eventId)) return;
       if (payload.businessId !== user.businessId) return;
       const who = payload.employeeName?.trim() || t("business.dashboard.toastTeamMember");
@@ -183,16 +176,7 @@ export function BusinessDashboard() {
         TOAST_OK,
       );
       applyLiveTip(payload);
-    };
-
-    socket.on("new_tip", onNewTip);
-    socket.on("tip_received", onNewTip);
-    socket.on(REALTIME_EVENTS.TIP_RECEIVED, onNewTip);
-    return () => {
-      socket.off("new_tip", onNewTip);
-      socket.off("tip_received", onNewTip);
-      socket.off(REALTIME_EVENTS.TIP_RECEIVED, onNewTip);
-    };
+    });
   }, [socket, user?.role, user?.businessId, t, timeLocale, applyLiveTip]);
 
   const employees = displayStats?.employees;

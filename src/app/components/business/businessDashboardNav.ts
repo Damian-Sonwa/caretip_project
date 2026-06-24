@@ -1,4 +1,5 @@
 import type { CareIconName } from "@/components/icons";
+import { Users, TrendingUp, Trophy } from "lucide-react";
 import {
   hasFeature,
   type BusinessSubscriptionTier,
@@ -39,6 +40,7 @@ export const qrStudioSubNavItems = [
   { labelKey: "business.qrStudio.nav.employees", href: `${QR_STUDIO_BASE}/employees` },
   { labelKey: "business.qrStudio.nav.locations", href: `${QR_STUDIO_BASE}/locations` },
   { labelKey: "business.qrStudio.nav.tables", href: `${QR_STUDIO_BASE}/tables`, featureKey: "tableQr" as FeatureKey },
+  { labelKey: "business.qrStudio.nav.templates", href: `${QR_STUDIO_BASE}/templates` },
   { labelKey: "business.qrStudio.nav.branding", href: `${QR_STUDIO_BASE}/branding`, featureKey: "brandingCustomization" as FeatureKey },
 ] as const;
 
@@ -51,9 +53,14 @@ export const tipsSubNavItems = [
 
 export const TEAM_BASE = "/dashboard/team" as const;
 export const teamSubNavItems = [
-  { labelKey: "business.team.nav.employees", href: `${TEAM_BASE}/employees` },
-  { labelKey: "business.team.nav.performance", href: `${TEAM_BASE}/performance` },
-  { labelKey: "business.team.nav.topPerformers", href: `${TEAM_BASE}/top-performers`, featureKey: "advancedAnalytics" as FeatureKey },
+  { labelKey: "business.team.nav.employees", href: `${TEAM_BASE}/employees`, icon: Users },
+  { labelKey: "business.team.nav.performance", href: `${TEAM_BASE}/performance`, icon: TrendingUp },
+  {
+    labelKey: "business.team.nav.topPerformers",
+    href: `${TEAM_BASE}/top-performers`,
+    icon: Trophy,
+    featureKey: "advancedAnalytics" as FeatureKey,
+  },
 ] as const;
 
 export const CUSTOMERS_BASE = "/dashboard/customers" as const;
