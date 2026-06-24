@@ -114,7 +114,7 @@ export function EmployeeDashboard() {
 
   const dashboardEnabled = isProtectedApiReady() && user?.role === "employee";
 
-  const { advancedAnalyticsEnabled, hasFeature } = useSubscriptionEntitlements({
+  const { advancedAnalyticsEnabled, hasFeature, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: dashboardEnabled,
     role: user?.role === "employee" ? "employee" : null,
   });
@@ -513,7 +513,7 @@ export function EmployeeDashboard() {
                   <Link to="/employee/tip-goals" className={employeeUi.heroCtaLink}>
                     <Target className="h-4 w-4 shrink-0" />
                     {t("employee.hero.setTipGoal")}
-                    {!hasFeature("employeeGoals") ? (
+                    {entitlementsReady && !hasFeature("employeeGoals") ? (
                       <Lock className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
                     ) : null}
                   </Link>

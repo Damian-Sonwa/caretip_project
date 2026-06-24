@@ -23,6 +23,8 @@ import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { captureClientException } from "./sentry";
 import { validateImageFileForUpload } from "./imageClientUpload";
+import { primeSubscriptionTierFromSession } from "./subscriptionSessionCache";
+import { resolveSubscriptionTier } from "./subscriptionCapabilities";
 import { authDebug } from "./authDebugLog";
 import {
   devTrackDeduped,
@@ -1411,9 +1413,14 @@ export function clearBusinessProfileClientCache(): void {
   businessProfileInflight = null;
 }
 
+function primeBusinessSubscriptionTier(profile: BusinessInfo): void {
+  primeSubscriptionTierFromSession(resolveSubscriptionTier(profile.subscriptionTier));
+}
+
 export async function fetchBusinessProfile(opts?: { silent?: boolean }): Promise<BusinessInfo> {
   const now = Date.now();
   if (businessProfileCache && now - businessProfileCache.at < BUSINESS_PROFILE_CLIENT_TTL_MS) {
+    primeBusinessSubscriptionTier(businessProfileCache.data);
     return businessProfileCache.data;
   }
   if (businessProfileInflight) return businessProfileInflight;
@@ -1425,6 +1432,7 @@ export async function fetchBusinessProfile(opts?: { silent?: boolean }): Promise
   } as CaretipRequestInit)
     .then((data) => {
       businessProfileCache = { at: Date.now(), data };
+      primeBusinessSubscriptionTier(data);
       return data;
     })
     .finally(() => {
@@ -2223,11 +2231,16 @@ export function clearEmployeeProfileClientCache(): void {
   employeeProfileInflight = null;
 }
 
+function primeEmployeeSubscriptionTier(profile: EmployeeSelfProfile): void {
+  primeSubscriptionTierFromSession(resolveSubscriptionTier(profile.subscriptionTier));
+}
+
 export async function getEmployeeProfile(
   init?: CaretipRequestInit & { silent?: boolean },
 ): Promise<EmployeeSelfProfile> {
   const now = Date.now();
   if (employeeProfileCache && now - employeeProfileCache.at < EMPLOYEE_PROFILE_CACHE_TTL_MS) {
+    primeEmployeeSubscriptionTier(employeeProfileCache.data);
     return employeeProfileCache.data;
   }
   if (employeeProfileInflight && !init?.signal) return employeeProfileInflight;
@@ -2240,6 +2253,7 @@ export async function getEmployeeProfile(
   };
   const promise = apiRequest<EmployeeSelfProfile>(apiPath("/api/employees/me"), requestInit).then((data) => {
     employeeProfileCache = { data, at: Date.now() };
+    primeEmployeeSubscriptionTier(data);
     return data;
   });
 

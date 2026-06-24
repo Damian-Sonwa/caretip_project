@@ -191,7 +191,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
       >
         {ready && !tableQrEnabled ? (
           <LockedFeatureCard featureKey="tableQr" tier={tier} />
-        ) : loading ? (
+        ) : !ready || loading ? (
           <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
             <TablesListSkeleton />
           </div>

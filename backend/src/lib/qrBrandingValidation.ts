@@ -11,6 +11,10 @@ export const QR_TEMPLATES = [
   "grand-atelier-noir",
   "royal-suite-platinum",
   "champagne-salon-classic",
+  "emerald-sanctuary",
+  "sapphire-pavilion",
+  "copper-hearth",
+  "rose-gold-salon",
   "poc-luxury-shell",
 ] as const;
 
@@ -32,7 +36,7 @@ export type QrShape = (typeof QR_SHAPES)[number];
 
 
 
-export const DEFAULT_QR_TEMPLATE: QrTemplate = "industry";
+export const DEFAULT_QR_TEMPLATE: QrTemplate = "velvet-lounge-noir";
 
 export const DEFAULT_QR_BORDER_STYLE: QrBorderStyle = "rounded";
 

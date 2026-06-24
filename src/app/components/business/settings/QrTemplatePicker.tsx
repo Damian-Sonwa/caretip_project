@@ -29,6 +29,14 @@ function proceduralPreviewGradient(template: QrTemplateDefinition): string {
       return "linear-gradient(180deg, #0a1424 0%, #122038 50%, #060c18 100%)";
     case "champagne-salon":
       return "linear-gradient(180deg, #faf6ef 0%, #f0e8da 55%, #e6dcc8 100%)";
+    case "emerald-sanctuary":
+      return "linear-gradient(180deg, #061410 0%, #0f2a22 50%, #040c0a 100%)";
+    case "sapphire-pavilion":
+      return "linear-gradient(180deg, #081428 0%, #0f2848 50%, #050c18 100%)";
+    case "copper-hearth":
+      return "linear-gradient(180deg, #1a100c 0%, #2a1810 50%, #100804 100%)";
+    case "rose-gold-salon":
+      return "linear-gradient(180deg, #fdf6f4 0%, #f5ebe8 55%, #ead8d2 100%)";
     default:
       return "linear-gradient(180deg, #0A0A0A 0%, #111111 55%, #F4F2EE 72%, #0A0A0A 100%)";
   }

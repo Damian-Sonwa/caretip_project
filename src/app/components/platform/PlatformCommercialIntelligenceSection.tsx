@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Loader2 } from "lucide-react";
@@ -16,6 +16,23 @@ import {
 } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platformDashboardUi";
+
+const COMMERCIAL_FETCH_TIMEOUT_MS = 20_000;
+
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("timeout")), ms);
+    promise
+      .then((value) => {
+        window.clearTimeout(timer);
+        resolve(value);
+      })
+      .catch((err: unknown) => {
+        window.clearTimeout(timer);
+        reject(err);
+      });
+  });
+}
 
 function SegmentList({
   title,
@@ -72,29 +89,56 @@ export function PlatformCommercialIntelligenceSection() {
   const { t } = useTranslation();
   const [data, setData] = useState<PlatformCommercialIntelligence | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const d = await withTimeout(fetchPlatformCommercialIntelligence(), COMMERCIAL_FETCH_TIMEOUT_MS);
+      setData(d);
+    } catch {
+      setData(null);
+      setLoadError(t("admin.commercial.loadFailed"));
+    } finally {
+      setLoading(false);
+    }
+  }, [t]);
 
   useEffect(() => {
-    let cancelled = false;
-    void fetchPlatformCommercialIntelligence()
-      .then((d) => {
-        if (!cancelled) setData(d);
-      })
-      .catch(() => {
-        if (!cancelled) setData(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    void load();
+  }, [load]);
 
   if (loading) {
     return (
       <Card className={cn(platformUi.contentCard, "mb-6")}>
-        <CardContent className="flex min-h-[120px] items-center justify-center py-8">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{t("admin.commercial.title")}</CardTitle>
+          <CardDescription>{t("admin.commercial.desc")}</CardDescription>
+        </CardHeader>
+        <CardContent className="flex min-h-[88px] items-center justify-center py-6">
           <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
+          <span className="sr-only">{t("admin.networkHero.checking")}</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card className={cn(platformUi.contentCard, "mb-6")}>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">{t("admin.commercial.title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-start gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            {t("admin.retry")}
+          </button>
         </CardContent>
       </Card>
     );

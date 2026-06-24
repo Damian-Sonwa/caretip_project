@@ -43,6 +43,8 @@ import {
   downloadQrDataUrlPng,
   printQrDataUrl,
   isQrExportAllowed,
+  logQrScanDiagnostics,
+  type BrandedQrLayoutMetrics,
 } from "../../lib/qrBranded";
 import type { QrQualityGrade } from "../../lib/qrReliability";
 import { qrBrandingForManager, BUSINESS_BRANDING_CHANGED_EVENT, qrBrandingFingerprint } from "../../lib/businessBranding";
@@ -58,8 +60,6 @@ import {
 import { getEngineTemplate } from "../../lib/qrTemplateEngine";
 import type { QrBrandingOptions } from "../../lib/businessBranding";
 import {
-  createBusinessQrPrintPdf,
-  createEmployeeQrPrintPdf,
   downloadBusinessQrPrintPdf,
   downloadEmployeeQrPrintPdf,
 } from "../../lib/qrPrintPdf";
@@ -73,8 +73,6 @@ import {
   qrTableUrl,
 } from "../../lib/appPublicUrl";
 import { downloadStaffQrPdf } from "../../lib/qrBulkPdf";
-import { resolveMediaUrl } from "../../lib/mediaUrl";
-import { fetchImageUrlAsSquarePngDataUrl } from "../../lib/imageDataUrl";
 import { logClientError } from "../../lib/clientLog";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
@@ -425,6 +423,7 @@ export function QRCodeManagementPage({
 
       const next: Record<string, string> = {};
       const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
+      let referenceLayout: BrandedQrLayoutMetrics | null = null;
       for (const e of safeEmployees) {
         if (!e.slug) {
           next[e.id] = "";
@@ -434,7 +433,17 @@ export function QRCodeManagementPage({
           const url = businessSlug
             ? publicEmployeeTipUrl(businessSlug, e.slug)
             : qrEmployeeLegacyUrl(e.id);
-          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
+          const { canvas, report, diagnostics } = await validateBrandedQrReliability(url, qrBrand, {
+            employeeId: e.id,
+            employeeSlug: e.slug,
+            referenceLayout,
+          });
+          if (!referenceLayout && diagnostics) {
+            referenceLayout = diagnostics.layout;
+          }
+          if (import.meta.env.DEV && diagnostics) {
+            logQrScanDiagnostics(e.name, diagnostics);
+          }
           next[e.id] = canvas?.toDataURL("image/png") ?? "";
           if (report) {
             meta[e.id] = { grade: report.grade, exportAllowed: report.exportAllowed };
@@ -650,12 +659,6 @@ export function QRCodeManagementPage({
     }
   };
 
-  const loadLogoPngForPdf = async (): Promise<string | null> => {
-    const u = resolveMediaUrl(businessLogoPath ?? undefined);
-    if (!u) return null;
-    return fetchImageUrlAsSquarePngDataUrl(u);
-  };
-
   const buildVenueQrDataUrl = async (
     item: CardItem,
     previewDataUrl: string | undefined
@@ -702,55 +705,23 @@ export function QRCodeManagementPage({
     type: "storefront" | "table" | "location",
     previewDataUrl?: string
   ) => {
+    const metaKey =
+      type === "storefront" ? "storefront" : type === "location" ? `loc-${item.id}` : `tbl-${item.id}`;
+    if (isQrExportBlocked(metaKey)) {
+      toast.error(t("business.qrReliability.exportBlocked"));
+      return;
+    }
     const dataUrl = await buildVenueQrDataUrl(item, previewDataUrl);
     if (!dataUrl) {
       toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
-    try {
-      const displayBusinessName =
-        String(businessDisplayName ?? "").trim() ||
-        (type === "storefront" ? String(item.name ?? "").trim() : "") ||
-        String(user?.businessName ?? "").trim() ||
-        t("business.qrPage.fallbackBusinessName");
-      const subtext =
-        type === "storefront"
-          ? String(businessLocation ?? "").trim() || null
-          : type === "table" || type === "location"
-            ? String(item.name ?? "").trim() || null
-            : null;
-      const logoPng = await loadLogoPngForPdf();
-      const pdf = await createBusinessQrPrintPdf({
-        qrPngDataUrl: dataUrl,
-        businessName: displayBusinessName,
-        subtext,
-        instruction: t("business.qrPage.pdfInstruction"),
-        businessLogoPngDataUrl: logoPng,
-      });
-      const blob = pdf.output("blob") as Blob;
-      const url = URL.createObjectURL(blob);
-      const w = window.open(url);
-      if (!w) {
-        URL.revokeObjectURL(url);
-        toast.error(t("business.qrPage.toastPopupsPdf"));
-        return;
-      }
-      const timer = window.setInterval(() => {
-        try {
-          if (w.document?.readyState === "complete") {
-            window.clearInterval(timer);
-            w.focus();
-            w.print();
-            window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
-          }
-        } catch {
-          window.clearInterval(timer);
-          window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
-        }
-      }, 300);
-    } catch (err) {
-      logClientError("QRCodeManagementPage.print", err);
-      toast.error(t("business.qrPage.toastPrintFail"));
+    const heading =
+      String(businessDisplayName ?? "").trim() ||
+      String(item.name ?? "").trim() ||
+      t("business.qrPage.fallbackBusinessName");
+    if (!printQrDataUrl(dataUrl, heading, { exportAllowed: true })) {
+      toast.error(t("business.qrPage.toastPopupsPdf"));
     }
   };
 
@@ -769,8 +740,10 @@ export function QRCodeManagementPage({
     setBulkPdfLoading(true);
     try {
       const dateStr = new Date().toISOString().slice(0, 10);
-      const logoPng = await loadLogoPngForPdf();
-      await downloadStaffQrPdf(staff, `CareTip_QR_All_${dateStr}`, { businessLogoPngDataUrl: logoPng });
+      await downloadStaffQrPdf(staff, `CareTip_QR_All_${dateStr}`, {
+        branding: qrBrand,
+        resolveCardDataUrl: (id) => qrImages[id] ?? null,
+      });
       toast.success(t("business.qrPage.toastPdfReady"), TOAST_OK);
     } catch (err) {
       logClientError("QRCodeManagementPage", err);
@@ -796,19 +769,8 @@ export function QRCodeManagementPage({
         (type === "storefront" ? String(item.name ?? "").trim() : "") ||
         String(user?.businessName ?? "").trim() ||
         t("business.qrPage.fallbackBusinessName");
-      const subtext =
-        type === "storefront"
-          ? String(businessLocation ?? "").trim() || null
-          : type === "table" || type === "location"
-            ? String(item.name ?? "").trim() || null
-            : null;
-      const logoPng = await loadLogoPngForPdf();
       await downloadBusinessQrPrintPdf({
         qrPngDataUrl: dataUrl,
-        businessName: displayBusinessName,
-        subtext,
-        instruction: t("business.qrPage.pdfInstruction"),
-        businessLogoPngDataUrl: logoPng,
         fileBaseName:
           type === "storefront"
             ? `CareTip_QR_${displayBusinessName}`
@@ -829,14 +791,8 @@ export function QRCodeManagementPage({
       return;
     }
     try {
-      const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || t("business.qrPage.fallbackBusinessName");
-      const logoPng = await loadLogoPngForPdf();
       await downloadEmployeeQrPrintPdf({
         qrPngDataUrl: dataUrl,
-        employeeName: item.name,
-        businessName: displayBusinessName,
-        businessLogoPngDataUrl: logoPng,
         fileBaseName: `CareTip_QR_${item.name}`,
       });
     } catch (err) {
@@ -846,45 +802,17 @@ export function QRCodeManagementPage({
   };
 
   const handleEmployeePrint = async (item: CardItem, previewDataUrl?: string) => {
+    if (isQrExportBlocked(item.id)) {
+      toast.error(t("business.qrReliability.exportBlocked"));
+      return;
+    }
     const dataUrl = previewDataUrl || qrImages[item.id];
     if (!dataUrl) {
       toast.error(t("business.qrPage.toastQrNotReady"));
       return;
     }
-    try {
-      const displayBusinessName =
-        String(businessDisplayName ?? "").trim() || String(user?.businessName ?? "").trim() || t("business.qrPage.fallbackBusinessName");
-      const logoPng = await loadLogoPngForPdf();
-      const pdf = await createEmployeeQrPrintPdf({
-        qrPngDataUrl: dataUrl,
-        employeeName: item.name,
-        businessName: displayBusinessName,
-        businessLogoPngDataUrl: logoPng,
-      });
-      const blob = pdf.output("blob") as Blob;
-      const url = URL.createObjectURL(blob);
-      const w = window.open(url);
-      if (!w) {
-        URL.revokeObjectURL(url);
-        toast.error(t("business.qrPage.toastPopupsPdf"));
-        return;
-      }
-      const timer = window.setInterval(() => {
-        try {
-          if (w.document?.readyState === "complete") {
-            window.clearInterval(timer);
-            w.focus();
-            w.print();
-            window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
-          }
-        } catch {
-          window.clearInterval(timer);
-          window.setTimeout(() => URL.revokeObjectURL(url), 30_000);
-        }
-      }, 300);
-    } catch (err) {
-      logClientError("QRCodeManagementPage.employeePrint", err);
-      toast.error(t("business.qrPage.toastPrintFail"));
+    if (!printQrDataUrl(dataUrl, item.name, { exportAllowed: true })) {
+      toast.error(t("business.qrPage.toastPopupsPdf"));
     }
   };
 

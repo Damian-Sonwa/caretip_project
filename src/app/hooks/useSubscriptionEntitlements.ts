@@ -18,19 +18,22 @@ type Role = "business" | "employee";
 export function useSubscriptionEntitlements(opts: {
   enabled: boolean;
   role: Role | null | undefined;
-  /** Skip network on mount — use session cache only (mobile drawer / nav). */
+  /** Skip network — use session cache only (mobile drawer). Ready only when cache is primed. */
   cacheOnly?: boolean;
 }) {
-  const sessionTier = opts.role === "business" ? getSubscriptionTierFromSession() : null;
-  const [tier, setTier] = useState<BusinessSubscriptionTier>(
+  const sessionTier = getSubscriptionTierFromSession();
+  const [tier, setTier] = useState<BusinessSubscriptionTier>(() =>
     resolveSubscriptionTier(sessionTier ?? undefined),
   );
-  const [ready, setReady] = useState(Boolean(sessionTier) || opts.cacheOnly === true);
+  const [ready, setReady] = useState(() => Boolean(sessionTier));
 
   useEffect(() => {
     if (opts.cacheOnly) {
-      setTier(resolveSubscriptionTier(sessionTier ?? undefined));
-      setReady(true);
+      const cached = getSubscriptionTierFromSession();
+      if (cached) {
+        setTier(resolveSubscriptionTier(cached));
+        setReady(true);
+      }
       return;
     }
     if (!opts.enabled || !opts.role) {
@@ -49,10 +52,17 @@ export function useSubscriptionEntitlements(opts: {
           }
         } else {
           const profile = await getEmployeeProfile({ silent: true });
-          if (!cancelled) setTier(resolveSubscriptionTier(profile.subscriptionTier));
+          if (!cancelled) {
+            const next = resolveSubscriptionTier(profile.subscriptionTier);
+            primeSubscriptionTierFromSession(next);
+            setTier(next);
+          }
         }
       } catch {
-        if (!cancelled) setTier(resolveSubscriptionTier(sessionTier ?? undefined));
+        if (!cancelled) {
+          const fallback = resolveSubscriptionTier(getSubscriptionTierFromSession() ?? undefined);
+          setTier(fallback);
+        }
       } finally {
         if (!cancelled) setReady(true);
       }
@@ -60,7 +70,7 @@ export function useSubscriptionEntitlements(opts: {
     return () => {
       cancelled = true;
     };
-  }, [opts.cacheOnly, opts.enabled, opts.role, sessionTier]);
+  }, [opts.cacheOnly, opts.enabled, opts.role]);
 
   const hasFeature = useCallback(
     (featureKey: FeatureKey) => hasFeatureForTier(tier, featureKey),
@@ -90,5 +100,27 @@ export function useSubscriptionEntitlements(opts: {
     hasFeature,
     hasCapability,
     advancedAnalyticsEnabled,
+  };
+}
+
+/** Business dashboard entitlement hook with explicit loading/ready flags. */
+export function useBusinessEntitlements(opts: { enabled: boolean }) {
+  const result = useSubscriptionEntitlements({
+    enabled: opts.enabled,
+    role: opts.enabled ? "business" : null,
+  });
+  return {
+    ...result,
+    entitlements: {
+      tier: result.tier,
+      hasFeature: result.hasFeature,
+      hasCapability: result.hasCapability,
+      advancedAnalyticsEnabled: result.advancedAnalyticsEnabled,
+      isBasic: result.isBasic,
+      isPremium: result.isPremium,
+      isEnterprise: result.isEnterprise,
+    },
+    isLoading: opts.enabled && !result.ready,
+    isReady: result.ready,
   };
 }

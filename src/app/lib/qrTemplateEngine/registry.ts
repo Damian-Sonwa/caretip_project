@@ -43,13 +43,20 @@ export const VELVET_LOUNGE_NOIR_TEMPLATE_ID = "velvet-lounge-noir";
 export const GRAND_ATELIER_NOIR_TEMPLATE_ID = "grand-atelier-noir";
 export const ROYAL_SUITE_PLATINUM_TEMPLATE_ID = "royal-suite-platinum";
 export const CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID = "champagne-salon-classic";
+export const EMERALD_SANCTUARY_TEMPLATE_ID = "emerald-sanctuary";
+export const SAPPHIRE_PAVILION_TEMPLATE_ID = "sapphire-pavilion";
+export const COPPER_HEARTH_TEMPLATE_ID = "copper-hearth";
+export const ROSE_GOLD_SALON_TEMPLATE_ID = "rose-gold-salon";
+
+/** First-generation image shells — archived from gallery; engine + export still supported. */
+const ARCHIVED_IMAGE_GALLERY = false as const;
 
 export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
   luxuryShellBase({
     id: INDUSTRY_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.luxuryGold",
     descriptionKey: "business.qrStudio.templateEngine.luxuryGoldDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: industryCaretipBg },
     zones: LUXURY_GOLD_IMAGE_ZONES,
     positions: darkLuxuryPositions(),
@@ -58,7 +65,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: VELVET_LOUNGE_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.velvetLounge",
     descriptionKey: "business.qrStudio.templateEngine.velvetLoungeDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: vipLoungeBg },
     zones: VIP_LOUNGE_IMAGE_ZONES,
     positions: darkLuxuryPositions(),
@@ -67,7 +74,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: GRAND_ATELIER_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.grandAtelier",
     descriptionKey: "business.qrStudio.templateEngine.grandAtelierDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: cityCafeBg },
     zones: CITY_CAFE_IMAGE_ZONES,
     positions: darkLuxuryPositions(),
@@ -76,7 +83,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: ROYAL_SUITE_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.royalSuite",
     descriptionKey: "business.qrStudio.templateEngine.royalSuiteDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: beachResortBg },
     zones: BEACH_RESORT_IMAGE_ZONES,
     positions: darkLuxuryPositions(),
@@ -85,7 +92,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: CHAMPAGNE_SALON_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.champagneSalon",
     descriptionKey: "business.qrStudio.templateEngine.champagneSalonDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: scandinavianBg },
     zones: SCANDINAVIAN_IMAGE_ZONES,
     positions: champagneSalonPositions(),
@@ -94,7 +101,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: SERENITY_SPA_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.serenitySpa",
     descriptionKey: "business.qrStudio.templateEngine.serenitySpaDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: spaRetreatBg },
     zones: SPA_RETREAT_IMAGE_ZONES,
     positions: champagneSalonPositions(),
@@ -103,7 +110,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: ART_DECO_NOIR_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.artDecoNoir",
     descriptionKey: "business.qrStudio.templateEngine.artDecoNoirDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: artDecoNoirBg },
     zones: ART_DECO_NOIR_IMAGE_ZONES,
     positions: darkLuxuryPositions(),
@@ -112,7 +119,7 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     id: GALLERY_PAVILION_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.galleryPavilion",
     descriptionKey: "business.qrStudio.templateEngine.galleryPavilionDesc",
-    gallery: true,
+    gallery: ARCHIVED_IMAGE_GALLERY,
     background: { kind: "image", src: galleryPavilionBg },
     zones: GALLERY_PAVILION_IMAGE_ZONES,
     positions: champagneSalonPositions(),
@@ -154,6 +161,42 @@ export const QR_TEMPLATE_ENGINE_REGISTRY: readonly QrTemplateDefinition[] = [
     positions: champagneSalonPositions(),
   }),
   luxuryShellBase({
+    id: EMERALD_SANCTUARY_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.emeraldSanctuary",
+    descriptionKey: "business.qrStudio.templateEngine.emeraldSanctuaryDesc",
+    gallery: true,
+    background: { kind: "procedural", variant: "emerald-sanctuary" },
+    zones: PROCEDURAL_HOSPITALITY_ZONES,
+    positions: darkLuxuryPositions(),
+  }),
+  luxuryShellBase({
+    id: SAPPHIRE_PAVILION_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.sapphirePavilion",
+    descriptionKey: "business.qrStudio.templateEngine.sapphirePavilionDesc",
+    gallery: true,
+    background: { kind: "procedural", variant: "sapphire-pavilion" },
+    zones: PROCEDURAL_HOSPITALITY_ZONES,
+    positions: darkLuxuryPositions(),
+  }),
+  luxuryShellBase({
+    id: COPPER_HEARTH_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.copperHearth",
+    descriptionKey: "business.qrStudio.templateEngine.copperHearthDesc",
+    gallery: true,
+    background: { kind: "procedural", variant: "copper-hearth" },
+    zones: PROCEDURAL_HOSPITALITY_ZONES,
+    positions: darkLuxuryPositions(),
+  }),
+  luxuryShellBase({
+    id: ROSE_GOLD_SALON_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.roseGoldSalon",
+    descriptionKey: "business.qrStudio.templateEngine.roseGoldSalonDesc",
+    gallery: true,
+    background: { kind: "procedural", variant: "rose-gold-salon" },
+    zones: PROCEDURAL_HOSPITALITY_ZONES,
+    positions: champagneSalonPositions(),
+  }),
+  luxuryShellBase({
     id: POC_LUXURY_SHELL_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.pocLuxury",
     descriptionKey: "business.qrStudio.templateEngine.pocLuxuryDesc",
@@ -182,3 +225,18 @@ export function listEngineTemplates(): readonly QrTemplateDefinition[] {
 export function listGalleryTemplates(): readonly QrTemplateDefinition[] {
   return QR_TEMPLATE_ENGINE_REGISTRY.filter((t) => t.gallery !== false);
 }
+
+/** Generation-2 scan-first default for new businesses and Starter tier. */
+export const GALLERY_DEFAULT_TEMPLATE_ID = VELVET_LOUNGE_NOIR_TEMPLATE_ID;
+
+/** Archived from gallery — still render for businesses that selected them previously. */
+export const ARCHIVED_GALLERY_TEMPLATE_IDS = [
+  INDUSTRY_TEMPLATE_ID,
+  VELVET_LOUNGE_TEMPLATE_ID,
+  GRAND_ATELIER_TEMPLATE_ID,
+  ROYAL_SUITE_TEMPLATE_ID,
+  CHAMPAGNE_SALON_TEMPLATE_ID,
+  SERENITY_SPA_TEMPLATE_ID,
+  ART_DECO_NOIR_TEMPLATE_ID,
+  GALLERY_PAVILION_TEMPLATE_ID,
+] as const;

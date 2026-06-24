@@ -3827,8 +3827,8 @@
       },
       "templates": {
         "title": "Premium-Vorlagen",
-        "description": "Wählen Sie ein Premium-QR-Kartendesign. Ihr Branding wird live in jede Vorlage eingefügt.",
-        "basicHint": "Starter enthält die Luxury-Gold-Vorlage. Mit Premium schalten Sie weitere Premium-Designs frei.",
+        "description": "Scan-optimierte Hospitality-Karten. Großer QR, klares Branding und starker Kontrast für jeden Betrieb.",
+        "basicHint": "Starter enthält Velvet Lounge Noir. Mit Premium schalten Sie alle 7 Premium-Farbvorlagen frei.",
         "saveHint": "Vorlagen unter Branding anwenden, um Live-QR-Codes und Gästeseiten zu aktualisieren.",
         "openBranding": "Branding öffnen"
       },
@@ -3860,7 +3860,15 @@
         "royalSuitePlatinum": "Royal Suite Platinum",
         "royalSuitePlatinumDesc": "Navy- und Platin-Suite-Stil, Hotels, Resorts und Private Clubs.",
         "champagneSalonClassic": "Champagne Salon Classic",
-        "champagneSalonClassicDesc": "Warme Champagner-Editorial-Palette, Salons, Patisserien und Boutique-Hotels."
+        "champagneSalonClassicDesc": "Warme Champagner-Editorial-Palette, Salons, Patisserien und Boutique-Hotels.",
+        "emeraldSanctuary": "Emerald Sanctuary",
+        "emeraldSanctuaryDesc": "Tiefes Smaragdgrün, Spas, Retreats und Gartenlocations.",
+        "sapphirePavilion": "Sapphire Pavilion",
+        "sapphirePavilionDesc": "Saphirblaue Juwelentöne, Beach Clubs, Rooftop-Bars und Abendlounges.",
+        "copperHearth": "Copper Hearth",
+        "copperHearthDesc": "Warme Kupfer- und Kaminatmosphäre, Bistros, Brasserien und Kaminrestaurants.",
+        "roseGoldSalon": "Rose Gold Salon",
+        "roseGoldSalonDesc": "Weiches Roségold-Licht, Patisserien, Salons und Boutique-Tagesvenues."
       },
       "downloads": {
         "title": "Downloads & Druckformate",
@@ -4354,7 +4362,8 @@
         "logo_too_large": "Center-Logo überschreitet die sichere 20%-Fläche.",
         "circle_shape_sanitized": "Kreis-Stil wird als sicheres abgerundetes Quadrat gerendert, um Finder-Muster zu schützen.",
         "decode_failed": "Eine Kamera konnte diesen QR nicht decodieren. Er scannt in Produktion möglicherweise nicht.",
-        "url_mismatch": "Decodierter Inhalt stimmt nicht mit der erwarteten Tipp-URL überein."
+        "url_mismatch": "Decodierter Inhalt stimmt nicht mit der erwarteten Tipp-URL überein.",
+        "composite_decode_fallback": "Karten-Extrakt fehlgeschlagen — Matrix-Fallback bestätigte die QR-Nutzlast; Compositing ist scan-sicher."
       }
     },
     "billing": {
@@ -4648,6 +4657,7 @@
       "enterpriseReadiness": "Enterprise-Bereitschaft (Plattform)",
       "enterpriseScore": "Score: {{score}} / {{max}}",
       "none": "Keine Treffer in der aktuellen Stichprobe.",
+      "loadFailed": "Commercial Intelligence konnte nicht geladen werden.",
       "reasons": {
         "strong_tip_growth": "Trinkgeldvolumen wuchs {{growth}}% ({{tips30d}} Trinkgelder in 30 Tagen).",
         "tips_decline": "Trinkgeldvolumen sank {{percent}}%.",
@@ -4698,6 +4708,12 @@
     "businessesTitle": "Alle Unternehmen",
     "businessesSubtitle": "(KYC & Verifizierung)",
     "businessesOpen": "Öffnen",
+    "verificationTeaser": {
+      "title": "Unternehmensverifizierung",
+      "subtitle": "Bis zu {{limit}} Betriebe — ausstehende Prüfungen zuerst",
+      "pendingCount": "{{count}} warten auf Verifizierung",
+      "viewAll": "Alle anzeigen"
+    },
     "searchBusinessesPlaceholder": "Nach Name, Slug oder E-Mail des Inhabers suchen…",
     "searchBusinessesAria": "Unternehmen filtern",
     "noBusinesses": "Noch keine Unternehmen.",

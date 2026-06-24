@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { QrCode, Sparkles } from "lucide-react";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
-import { qrStudioSubNavItems, isBusinessNavItemLocked } from "../../../components/business/businessDashboardNav";
+import { qrStudioSubNavItems, showBusinessNavSubscriptionLock } from "../../../components/business/businessDashboardNav";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
 import { cn } from "@/lib/utils";
@@ -12,14 +12,17 @@ export function QrStudioLayout() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const { user } = useRequireAuth();
-  const { tier } = useSubscriptionEntitlements({
+  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
 
   const subItems = qrStudioSubNavItems.map((item) => ({
     ...item,
-    locked: "featureKey" in item && item.featureKey ? isBusinessNavItemLocked(item, tier) : false,
+    locked:
+      "featureKey" in item && item.featureKey
+        ? showBusinessNavSubscriptionLock(entitlementsReady, item, tier)
+        : false,
   }));
 
   const isBrandingStudio = pathname.includes("/qr-studio/branding");

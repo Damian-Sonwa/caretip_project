@@ -30,6 +30,10 @@ export {
   GRAND_ATELIER_NOIR_TEMPLATE_ID,
   ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
   CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+  EMERALD_SANCTUARY_TEMPLATE_ID,
+  SAPPHIRE_PAVILION_TEMPLATE_ID,
+  COPPER_HEARTH_TEMPLATE_ID,
+  ROSE_GOLD_SALON_TEMPLATE_ID,
   QR_TEMPLATE_ENGINE_REGISTRY,
 } from "./registry";
 export { engineTemplateLayoutMetrics, renderQrTemplateCard, resolveQrFieldBounds, resolveQrZoneMatrixBounds } from "./renderer";
@@ -52,6 +56,7 @@ export function buildEngineRenderInput(opts: {
     "ctaText" | "websiteUrl" | "socialInstagram" | "socialFacebook" | "templateFieldVisibility"
   > | null;
   scale?: QrTemplateRenderInput["scale"];
+  smoothScale?: QrTemplateRenderInput["smoothScale"];
 }): QrTemplateRenderInput | null {
   const def = getEngineTemplate(opts.templateId);
   if (!def) return null;
@@ -66,6 +71,7 @@ export function buildEngineRenderInput(opts: {
     templateId: def.id,
     payload,
     scale: opts.scale,
+    smoothScale: opts.smoothScale,
   };
 }
 
@@ -79,6 +85,7 @@ export async function renderEngineTemplateFromBranding(
       "ctaText" | "websiteUrl" | "socialInstagram" | "socialFacebook" | "templateFieldVisibility"
     > | null;
     scale?: QrTemplateRenderInput["scale"];
+    smoothScale?: QrTemplateRenderInput["smoothScale"];
   },
 ): Promise<HTMLCanvasElement | null> {
   const templateId = branding.qrTemplate;
@@ -90,6 +97,7 @@ export async function renderEngineTemplateFromBranding(
     profile: opts?.profile,
     extras: opts?.extras,
     scale: opts?.scale,
+    smoothScale: opts?.smoothScale,
   });
   if (!input) return null;
   return renderQrTemplateCard(input);

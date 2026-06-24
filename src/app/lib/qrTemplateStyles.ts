@@ -4,13 +4,17 @@ import {
   ART_DECO_NOIR_TEMPLATE_ID,
   CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
   CHAMPAGNE_SALON_TEMPLATE_ID,
+  COPPER_HEARTH_TEMPLATE_ID,
+  EMERALD_SANCTUARY_TEMPLATE_ID,
   GALLERY_PAVILION_TEMPLATE_ID,
   GRAND_ATELIER_NOIR_TEMPLATE_ID,
   GRAND_ATELIER_TEMPLATE_ID,
   INDUSTRY_TEMPLATE_ID,
   POC_LUXURY_SHELL_TEMPLATE_ID,
+  ROSE_GOLD_SALON_TEMPLATE_ID,
   ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
   ROYAL_SUITE_TEMPLATE_ID,
+  SAPPHIRE_PAVILION_TEMPLATE_ID,
   SERENITY_SPA_TEMPLATE_ID,
   VELVET_LOUNGE_NOIR_TEMPLATE_ID,
   VELVET_LOUNGE_TEMPLATE_ID,
@@ -29,23 +33,23 @@ export const QR_ENGINE_TEMPLATE_IDS = [
   GRAND_ATELIER_NOIR_TEMPLATE_ID,
   ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
   CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+  EMERALD_SANCTUARY_TEMPLATE_ID,
+  SAPPHIRE_PAVILION_TEMPLATE_ID,
+  COPPER_HEARTH_TEMPLATE_ID,
+  ROSE_GOLD_SALON_TEMPLATE_ID,
   POC_LUXURY_SHELL_TEMPLATE_ID,
 ] as const;
 
 /** Gallery-visible template IDs — mirrors `listGalleryTemplates()` in registry. */
 export const QR_TEMPLATE_IDS = [
-  INDUSTRY_TEMPLATE_ID,
-  VELVET_LOUNGE_TEMPLATE_ID,
-  GRAND_ATELIER_TEMPLATE_ID,
-  ROYAL_SUITE_TEMPLATE_ID,
-  CHAMPAGNE_SALON_TEMPLATE_ID,
-  SERENITY_SPA_TEMPLATE_ID,
-  ART_DECO_NOIR_TEMPLATE_ID,
-  GALLERY_PAVILION_TEMPLATE_ID,
   VELVET_LOUNGE_NOIR_TEMPLATE_ID,
   GRAND_ATELIER_NOIR_TEMPLATE_ID,
   ROYAL_SUITE_PLATINUM_TEMPLATE_ID,
   CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
+  EMERALD_SANCTUARY_TEMPLATE_ID,
+  SAPPHIRE_PAVILION_TEMPLATE_ID,
+  COPPER_HEARTH_TEMPLATE_ID,
+  ROSE_GOLD_SALON_TEMPLATE_ID,
 ] as const;
 
 /** @deprecated Legacy color-variation layouts removed — normalized to `industry`. */
@@ -71,7 +75,7 @@ export const QR_SHAPE_IDS = ["square", "rounded", "circle"] as const;
 export type QrBorderStyleId = (typeof QR_BORDER_STYLE_IDS)[number];
 export type QrShapeId = (typeof QR_SHAPE_IDS)[number];
 
-export const DEFAULT_QR_TEMPLATE: QrTemplateId = INDUSTRY_TEMPLATE_ID;
+export const DEFAULT_QR_TEMPLATE: QrTemplateId = VELVET_LOUNGE_NOIR_TEMPLATE_ID;
 export const DEFAULT_QR_BORDER_STYLE: QrBorderStyleId = "rounded";
 export const DEFAULT_QR_SHAPE: QrShapeId = "square";
 export const DEFAULT_QR_BACKGROUND_COLOR = "#FFFFFF";
@@ -178,6 +182,38 @@ export const QR_TEMPLATE_PRESETS: Record<QrTemplateId, QrTemplatePreset> = {
     id: CHAMPAGNE_SALON_CLASSIC_TEMPLATE_ID,
     labelKey: "business.qrStudio.templateEngine.champagneSalonClassic",
     defaultBg: "#faf6ef",
+    defaultAccentFrom: "primary",
+    lightText: false,
+    moduleLight: "#FFFFFF",
+  },
+  [EMERALD_SANCTUARY_TEMPLATE_ID]: {
+    id: EMERALD_SANCTUARY_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.emeraldSanctuary",
+    defaultBg: "#0f2a22",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [SAPPHIRE_PAVILION_TEMPLATE_ID]: {
+    id: SAPPHIRE_PAVILION_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.sapphirePavilion",
+    defaultBg: "#0f2848",
+    defaultAccentFrom: "accent",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [COPPER_HEARTH_TEMPLATE_ID]: {
+    id: COPPER_HEARTH_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.copperHearth",
+    defaultBg: "#2a1810",
+    defaultAccentFrom: "primary",
+    lightText: true,
+    moduleLight: "#FFFFFF",
+  },
+  [ROSE_GOLD_SALON_TEMPLATE_ID]: {
+    id: ROSE_GOLD_SALON_TEMPLATE_ID,
+    labelKey: "business.qrStudio.templateEngine.roseGoldSalon",
+    defaultBg: "#fdf6f4",
     defaultAccentFrom: "primary",
     lightText: false,
     moduleLight: "#FFFFFF",

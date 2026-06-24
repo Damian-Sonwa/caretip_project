@@ -33,6 +33,16 @@ export function isEmployeeNavItemLocked(
   return !hasFeature(tier, item.featureKey);
 }
 
+/** Never show nav lock icons until entitlements are resolved (prevents hydration flash). */
+export function showEmployeeNavSubscriptionLock(
+  entitlementsReady: boolean,
+  item: Pick<EmployeeDashboardNavItem, "featureKey">,
+  tier: BusinessSubscriptionTier | undefined | null,
+): boolean {
+  if (!entitlementsReady) return false;
+  return isEmployeeNavItemLocked(item, tier);
+}
+
 /** @deprecated Use full nav list + isEmployeeNavItemLocked — items are no longer hidden. */
 export function filterEmployeeDashboardNavItems(
   items: readonly EmployeeDashboardNavItem[],

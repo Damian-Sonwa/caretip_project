@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
-import { isBusinessNavItemLocked, teamSubNavItems } from "../../../components/business/businessDashboardNav";
+import { showBusinessNavSubscriptionLock, teamSubNavItems } from "../../../components/business/businessDashboardNav";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
 import { Button } from "@/components/ui/button";
@@ -16,14 +16,17 @@ export function BusinessTeamLayout() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const { user } = useRequireAuth();
-  const { tier } = useSubscriptionEntitlements({
+  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
 
   const subItems = teamSubNavItems.map((item) => ({
     ...item,
-    locked: "featureKey" in item && item.featureKey ? isBusinessNavItemLocked(item, tier) : false,
+    locked:
+      "featureKey" in item && item.featureKey
+        ? showBusinessNavSubscriptionLock(entitlementsReady, item, tier)
+        : false,
   }));
 
   const header = useMemo(() => {

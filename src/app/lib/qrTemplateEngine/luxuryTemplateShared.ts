@@ -8,12 +8,12 @@ export const LUXURY_GOLD_IMAGE_ZONES: QrTemplateZones = {
   footerZone: { x: 0.5, y: 0.725, w: 0.86, h: 0.17, align: "center", valign: "top" },
 };
 
-/** Vertical procedural hospitality card — branding → QR → CTA → footer. */
+/** Vertical procedural hospitality card — scan-first layout (generation 2). */
 export const PROCEDURAL_HOSPITALITY_ZONES: QrTemplateZones = {
-  brandingZone: { x: 0.5, y: 0, w: 0.88, h: 0.34, align: "center", valign: "top" },
-  qrZone: { x: 0.5, y: 0.35, w: 0.48, h: 0.3, align: "center", valign: "top" },
-  ctaZone: { x: 0.5, y: 0.66, w: 0.52, h: 0.08, align: "center", valign: "top" },
-  footerZone: { x: 0.5, y: 0.75, w: 0.9, h: 0.22, align: "center", valign: "top" },
+  brandingZone: { x: 0.5, y: 0, w: 0.9, h: 0.3, align: "center", valign: "top" },
+  qrZone: { x: 0.5, y: 0.31, w: 0.62, h: 0.4, align: "center", valign: "top" },
+  ctaZone: { x: 0.5, y: 0.72, w: 0.56, h: 0.07, align: "center", valign: "top" },
+  footerZone: { x: 0.5, y: 0.79, w: 0.92, h: 0.19, align: "center", valign: "top" },
 };
 
 /** template/vip-lounge.jpg — spotlight nightlife shell. */
@@ -103,25 +103,25 @@ const LUXURY_DEFAULT_VISIBILITY = {
 } as const;
 
 const LUXURY_FIELD_POSITIONS: QrTemplateDefinition["positions"] = {
-  logo: { x: 0, y: 0, w: 0.24, h: 0.4, align: "center", valign: "top" },
+  logo: { x: 0, y: 0, w: 0.34, h: 0.5, align: "center", valign: "top" },
   businessName: {
     x: 0,
     y: 0,
     w: 1,
     align: "center",
     valign: "top",
-    maxFontSize: 15,
+    maxFontSize: 19,
     fontWeight: "700",
     uppercase: true,
     color: "accent",
   },
-  tagline: { x: 0, y: 0, w: 0.95, align: "center", maxFontSize: 9, color: "onDark" },
+  tagline: { x: 0, y: 0, w: 0.95, align: "center", maxFontSize: 11, color: "onDark" },
   welcomeMessage: {
     x: 0,
     y: 0,
     w: 0.95,
     align: "center",
-    maxFontSize: 8,
+    maxFontSize: 10,
     fontWeight: "600",
     uppercase: true,
     color: "accent",
@@ -134,7 +134,7 @@ const LUXURY_FIELD_POSITIONS: QrTemplateDefinition["positions"] = {
     h: 0.55,
     align: "center",
     valign: "middle",
-    maxFontSize: 9,
+    maxFontSize: 11,
     fontWeight: "700",
     uppercase: true,
     color: "onLight",
@@ -144,7 +144,7 @@ const LUXURY_FIELD_POSITIONS: QrTemplateDefinition["positions"] = {
     y: 0,
     w: 1,
     align: "center",
-    maxFontSize: 8,
+    maxFontSize: 10,
     fontWeight: "600",
     uppercase: true,
     color: "onDark",
@@ -155,20 +155,20 @@ const LUXURY_FIELD_POSITIONS: QrTemplateDefinition["positions"] = {
     w: 0.92,
     align: "center",
     valign: "top",
-    maxFontSize: 8,
-    fontWeight: "400",
+    maxFontSize: 10,
+    fontWeight: "500",
     uppercase: false,
     color: "onDark",
   },
-  phone: { x: 0, y: 0, w: 0.33, align: "center", maxFontSize: 6.5, color: "onDark" },
-  website: { x: 0, y: 0, w: 0.33, align: "center", maxFontSize: 6.5, color: "onDark" },
-  socialInstagram: { x: 0, y: 0, w: 1, align: "center", maxFontSize: 6, color: "onDark" },
-  attribution: { x: 0, y: 0, w: 1, align: "center", maxFontSize: 5.5, color: "onDark" },
+  phone: { x: 0, y: 0, w: 0.33, align: "center", maxFontSize: 8, color: "onDark" },
+  website: { x: 0, y: 0, w: 0.33, align: "center", maxFontSize: 8, color: "onDark" },
+  socialInstagram: { x: 0, y: 0, w: 1, align: "center", maxFontSize: 7.5, color: "onDark" },
+  attribution: { x: 0, y: 0, w: 1, align: "center", maxFontSize: 6.5, color: "onDark" },
 };
 
 const CHAMPAGNE_FIELD_POSITIONS: QrTemplateDefinition["positions"] = {
   ...LUXURY_FIELD_POSITIONS,
-  businessName: { ...LUXURY_FIELD_POSITIONS.businessName!, color: "secondary", maxFontSize: 14 },
+  businessName: { ...LUXURY_FIELD_POSITIONS.businessName!, color: "secondary", maxFontSize: 18 },
   tagline: { ...LUXURY_FIELD_POSITIONS.tagline!, color: "onLight" },
   welcomeMessage: { ...LUXURY_FIELD_POSITIONS.welcomeMessage!, color: "secondary" },
   thankYouMessage: { ...LUXURY_FIELD_POSITIONS.thankYouMessage!, color: "onLight" },
@@ -190,7 +190,7 @@ export function luxuryShellBase(
   return {
     canvasWidth: 360,
     canvasHeight: partial.background.kind === "image" ? 480 : 640,
-    qrSafeZone: { padding: 0.04 },
+    qrSafeZone: { padding: 0.05 },
     qrPresentation: "panel",
     requiredFields: ["logo", "businessName", "qr"],
     supportedFields: [...LUXURY_SUPPORTED_FIELDS],

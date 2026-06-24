@@ -78,11 +78,11 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
   const copy = useCallback((key: string, opts?: Record<string, unknown>) => t(`${copyNs}.${key}`, opts), [copyNs, t]);
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, sessionValidated } = useRequireAuth();
-  const { hasFeature, tier } = useSubscriptionEntitlements({
+  const { hasFeature, tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
-  const canExportCsv = user?.role === "business" && hasFeature("csvExport");
+  const canExportCsv = user?.role === "business" && entitlementsReady && hasFeature("csvExport");
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<"all" | TipStatus>("all");
   const [range, setRange] = useState<"today" | "week" | "month" | "custom">("month");
@@ -326,7 +326,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
             </Button>
             ) : null}
           </div>
-          {user?.role === "business" && !canExportCsv ? (
+          {user?.role === "business" && entitlementsReady && !hasFeature("csvExport") ? (
             <LockedFeatureCard featureKey="csvExport" tier={tier} compact className="mt-4" />
           ) : null}
         </div>

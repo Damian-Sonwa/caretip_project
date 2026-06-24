@@ -14,11 +14,17 @@ import {
 import {
   maxSafeLogoWidth,
   assessBrandingReliability,
-  decodeQrFromCanvas,
-  extractCanvasRegion,
+  decodeQrFromCanvasRobust,
   isQrExportAllowed,
+  qrPayloadUrlsMatch,
   type QrReliabilityReport,
 } from "./qrReliability";
+import {
+  collectQrScanDiagnostics,
+  decodeIsolatedQrMatrix,
+  extractQrMatrixRegion,
+  type QrScanDiagnostics,
+} from "./qrScanDiagnostics";
 import {
   engineTemplateLayoutMetrics,
   renderEngineTemplateFromBranding,
@@ -28,6 +34,11 @@ import { DEFAULT_QR_TEMPLATE, normalizeQrTemplateId } from "./qrTemplateStyles";
 import type { QrExportScale } from "./qrDesignExport";
 
 export type { QrReliabilityReport } from "./qrReliability";
+export type { QrScanDiagnostics } from "./qrScanDiagnostics";
+export {
+  logQrScanDiagnostics,
+  layoutMetricsFingerprint,
+} from "./qrScanDiagnostics";
 export {
   QR_QUIET_ZONE_MODULES,
   QR_ERROR_CORRECTION_LEVEL,
@@ -75,7 +86,7 @@ export function computeBrandedQrLayoutMetrics(
     qrDrawX: engine.qrDrawX,
     qrDrawY: engine.qrDrawY,
     qrMargin: engine.qrMargin,
-    centerLogoMaxW: maxSafeLogoWidth(engine.qrSize, Boolean(brand.centerLogoUrl)),
+    centerLogoMaxW: maxSafeLogoWidth(Math.round(engine.qrSize), Boolean(brand.centerLogoUrl)),
     totalWidth: engine.totalWidth,
     totalHeight: engine.totalHeight,
     qrSafeBottom: engine.qrDrawY + engine.qrSize,
@@ -135,6 +146,8 @@ export function getEmployeeQrLegacyShareUrl(employeeId: string): string {
 export type QrRenderOptions = {
   /** Output scale multiplier for high-res export (1–4). */
   scale?: QrExportScale;
+  /** When false, nearest-neighbor upscale preserves QR module edges (scan validation). */
+  smoothScale?: boolean;
 };
 
 export async function renderBrandedQrUrlToCanvas(
@@ -156,6 +169,7 @@ export async function renderBrandedQrUrlToCanvas(
       templateFieldVisibility: brand.templateFieldVisibility ?? {},
     },
     scale: renderOptions?.scale,
+    smoothScale: renderOptions?.smoothScale,
   });
 }
 
@@ -163,36 +177,68 @@ export async function renderBrandedQrUrlToCanvas(
 export async function validateBrandedQrReliability(
   url: string,
   branding?: Partial<QrBrandingOptions>,
-): Promise<{ canvas: HTMLCanvasElement | null; report: QrReliabilityReport | null }> {
+  opts?: {
+    employeeId?: string | null;
+    employeeSlug?: string | null;
+    referenceLayout?: BrandedQrLayoutMetrics | null;
+  },
+): Promise<{
+  canvas: HTMLCanvasElement | null;
+  report: QrReliabilityReport | null;
+  diagnostics: QrScanDiagnostics | null;
+}> {
   const encoded = String(url ?? "").trim();
   if (!encoded || typeof document === "undefined") {
-    return { canvas: null, report: null };
+    return { canvas: null, report: null, diagnostics: null };
   }
 
   const brand = resolveQrBranding(branding);
   const exportScale = QR_RELIABILITY_VALIDATION_SCALE;
-  const canvas = await renderBrandedQrUrlToCanvas(url, branding, { scale: exportScale });
-  if (!canvas) return { canvas: null, report: null };
 
-  const renderedHeight = Math.round(canvas.height / exportScale);
-  const layout = computeBrandedQrLayoutMetrics(brand, { renderedCanvasHeight: renderedHeight });
-  const region = extractCanvasRegion(
-    canvas,
-    Math.round(layout.qrDrawX * exportScale),
-    Math.round(layout.qrDrawY * exportScale),
-    Math.round(layout.qrSize * exportScale),
-  );
-  const decodedText = region ? await decodeQrFromCanvas(region) : null;
+  const [canvas, decodeCanvas] = await Promise.all([
+    renderBrandedQrUrlToCanvas(url, branding, { scale: exportScale, smoothScale: false }),
+    renderBrandedQrUrlToCanvas(url, branding, { scale: 1 }),
+  ]);
+  if (!canvas || !decodeCanvas) return { canvas: null, report: null, diagnostics: null };
+
+  const layout = computeBrandedQrLayoutMetrics(brand);
+  const region = extractQrMatrixRegion(decodeCanvas, layout, 1);
+  const compositeDecoded = region ? await decodeQrFromCanvasRobust(region) : null;
+
+  const moduleDark = brand.premium ? brand.secondaryColor : "#000000";
+  let decodedText = compositeDecoded;
+  let compositeDecodeFallback = false;
+  if (!qrPayloadUrlsMatch(encoded, compositeDecoded)) {
+    const isolatedDecoded = await decodeIsolatedQrMatrix(encoded, Math.round(layout.qrSize), moduleDark);
+    if (qrPayloadUrlsMatch(encoded, isolatedDecoded)) {
+      decodedText = isolatedDecoded;
+      compositeDecodeFallback = true;
+    }
+  }
 
   const report = assessBrandingReliability(
     branding ?? {},
     decodedText,
     encoded,
     layout.centerLogoMaxW,
-    layout.qrSize,
+    Math.round(layout.qrSize),
+    compositeDecodeFallback,
   );
 
-  return { canvas, report };
+  const diagnostics = await collectQrScanDiagnostics({
+    url: encoded,
+    branding: branding ?? {},
+    canvas,
+    decodeCanvas,
+    exportScale,
+    report,
+    layout,
+    employeeId: opts?.employeeId,
+    employeeSlug: opts?.employeeSlug,
+    referenceLayout: opts?.referenceLayout,
+  });
+
+  return { canvas, report, diagnostics };
 }
 
 export async function renderBrandedQrUrlToDataUrl(

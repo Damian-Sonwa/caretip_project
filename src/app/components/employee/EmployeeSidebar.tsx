@@ -14,7 +14,7 @@ import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import {
   employeeDashboardNavItems,
   isEmployeeDashboardNavActive,
-  isEmployeeNavItemLocked,
+  showEmployeeNavSubscriptionLock,
 } from "./employeeDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 
@@ -34,7 +34,7 @@ export function EmployeeSidebar({
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, user } = useAuth();
-  const { tier } = useSubscriptionEntitlements({
+  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "employee",
     role: user?.role === "employee" ? "employee" : null,
   });
@@ -71,7 +71,7 @@ export function EmployeeSidebar({
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isEmployeeDashboardNavActive(item.href, location.pathname);
-            const subscriptionLocked = isEmployeeNavItemLocked(item, tier);
+            const subscriptionLocked = showEmployeeNavSubscriptionLock(entitlementsReady, item, tier);
             return (
               <li key={item.href}>
                 <Link

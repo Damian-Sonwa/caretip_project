@@ -143,7 +143,21 @@ export function EmployeeTipGoalsPage() {
     return null;
   }
 
-  if (ready && !hasFeature("employeeGoals")) {
+  if (!ready) {
+    return (
+      <div className={employeeUi.page}>
+        <div className={employeeUi.pageInner}>
+          <EmployeePageHeader
+            title={t("employee.tipGoals.title")}
+            description={t("employee.tipGoals.subtitle").trim() || undefined}
+          />
+          <EmployeeGoalListSkeleton rows={4} className="mt-6" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!hasFeature("employeeGoals")) {
     return (
       <div className={employeeUi.page}>
         <div className={employeeUi.pageInner}>

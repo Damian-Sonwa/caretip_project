@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { CheckCircle, Search, XCircle } from "lucide-react";
+import { CheckCircle, XCircle } from "lucide-react";
 import { CareIcon, createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
@@ -121,6 +121,7 @@ function AdminStatCard({
 
 const ADMIN_ANALYTICS_TZ_KEY = "caretip_platform_admin_timezone";
 const ADMIN_ANALYTICS_TZ_DEFAULT = "Europe/Berlin";
+const VERIFICATION_TEASER_LIMIT = 10;
 const ADMIN_ANALYTICS_TZ_OPTIONS = [
   "Europe/Berlin",
   "Europe/London",
@@ -145,6 +146,12 @@ type AdminSessionSnapshot = {
 };
 
 let adminSessionSnapshot: AdminSessionSnapshot | null = null;
+
+function verificationTeaserPriority(status: PlatformBusinessRow["verificationStatus"]): number {
+  if (status === "pending") return 0;
+  if (status === "rejected") return 1;
+  return 2;
+}
 
 function analyticsHasVisibleData(a: PlatformAnalytics): boolean {
   const tipVol = a.tipVolume.reduce((s, r) => s + (r.tipsEur ?? 0), 0);
@@ -196,8 +203,8 @@ export function AdminDashboard() {
     }
   });
   const [serviceIssue, setServiceIssue] = useState<string | null>(null);
-  const [businessSearchQuery, setBusinessSearchQuery] = useState("");
-  const [businessesExpanded, setBusinessesExpanded] = useState(true);
+  /** First businesses list fetch only — teaser panel skeleton. */
+  const [businessesInitialLoading, setBusinessesInitialLoading] = useState(true);
   /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
   const [initialDashLoading, setInitialDashLoading] = useState(true);
   const dashboardLoadGenRef = useRef(0);
@@ -246,16 +253,22 @@ export function AdminDashboard() {
     };
   }, []);
 
-  const filteredBusinesses = useMemo(() => {
-    const q = businessSearchQuery.trim().toLowerCase();
-    if (!q) return businesses;
-    return businesses.filter(
-      (b) =>
-        b.name.toLowerCase().includes(q) ||
-        b.slug.toLowerCase().includes(q) ||
-        b.ownerEmail.toLowerCase().includes(q)
-    );
-  }, [businesses, businessSearchQuery]);
+  const verificationTeaserBusinesses = useMemo(() => {
+    return [...businesses]
+      .sort((a, b) => {
+        const priority =
+          verificationTeaserPriority(a.verificationStatus) -
+          verificationTeaserPriority(b.verificationStatus);
+        if (priority !== 0) return priority;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+      })
+      .slice(0, VERIFICATION_TEASER_LIMIT);
+  }, [businesses]);
+
+  const pendingVerificationCount = useMemo(
+    () => businesses.filter((b) => b.verificationStatus === "pending").length,
+    [businesses],
+  );
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
@@ -336,10 +349,17 @@ export function AdminDashboard() {
 
   const refreshBusinesses = useCallback(
     async (loadGen: number) => {
-      const b = await fetchPlatformBusinesses();
-      if (loadGen !== dashboardLoadGenRef.current) return;
-      setBusinesses(b.businesses);
-      persistSessionSnapshot({ businesses: b.businesses });
+      try {
+        const b = await fetchPlatformBusinesses();
+        if (loadGen !== dashboardLoadGenRef.current) return;
+        setBusinesses(b.businesses);
+        persistSessionSnapshot({ businesses: b.businesses });
+      } catch (err: unknown) {
+        if (loadGen !== dashboardLoadGenRef.current) return;
+        logClientError("AdminDashboard.refreshBusinesses", err);
+      } finally {
+        if (loadGen === dashboardLoadGenRef.current) setBusinessesInitialLoading(false);
+      }
     },
     [persistSessionSnapshot],
   );
@@ -378,15 +398,16 @@ export function AdminDashboard() {
     setAnalyticsError(null);
 
     void refreshStats(loadGen)
-      .then(() => {
-        if (loadGen === dashboardLoadGenRef.current) setInitialDashLoading(false);
-      })
       .catch((err: unknown) => {
         if (loadGen !== dashboardLoadGenRef.current) return;
         logClientError("AdminDashboard.refreshStats", err);
+        setServiceIssue(toUserFriendlyMessage(err) || t("admin.serviceGenericError"));
       })
       .finally(() => {
-        if (loadGen === dashboardLoadGenRef.current) setIsSyncing(false);
+        if (loadGen === dashboardLoadGenRef.current) {
+          setInitialDashLoading(false);
+          setIsSyncing(false);
+        }
       });
 
     void loadAnalytics(analyticsGen, { bustCache: false });
@@ -411,6 +432,7 @@ export function AdminDashboard() {
       if (adminSessionSnapshot.analytics) setAnalyticsUpdatedAt(adminSessionSnapshot.at);
       setHealth(adminSessionSnapshot.health);
       setInitialDashLoading(false);
+      if (adminSessionSnapshot.businesses.length > 0) setBusinessesInitialLoading(false);
     }
     void loadDashboardData();
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per auth session
@@ -493,11 +515,6 @@ export function AdminDashboard() {
           tipStatus: chartTipStatus,
         })
       : false);
-
-  const pendingVerificationCount = useMemo(
-    () => businesses.filter((b) => b.verificationStatus === "pending").length,
-    [businesses],
-  );
 
   const adminStatusItems = useMemo(
     () =>
@@ -653,7 +670,9 @@ export function AdminDashboard() {
           </Card>
         ) : null}
 
-        <PlatformCommercialIntelligenceSection />
+        <DashboardChartsIdleMount fallback={null}>
+          <PlatformCommercialIntelligenceSection />
+        </DashboardChartsIdleMount>
 
         {/* Analytics charts — Recharts lazy-loaded after stat cards paint */}
         <DashboardChartsIdleMount fallback={<AdminDashboardAnalyticsChartsFallback />}>
@@ -693,131 +712,115 @@ export function AdminDashboard() {
           className={platformUi.businessesPanel}
         >
           <div className={platformUi.businessesPanelHeader}>
-            <button
-              type="button"
-              onClick={() => setBusinessesExpanded((v) => !v)}
-              className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
-              aria-expanded={businessesExpanded}
-            >
-              <div className="flex min-w-0 items-center gap-2">
-                <CareIcon name="hospitalityVenue" size="md" className="text-foreground" />
-                <h3 className="min-w-0 text-base font-semibold leading-snug text-foreground sm:text-lg">
-                  <span className="block sm:inline">{t("admin.businessesTitle")}</span>
-                  <span className="mt-0.5 block text-xs font-medium text-muted-foreground sm:ml-2 sm:mt-0 sm:inline">
-                    {t("admin.businessesSubtitle")}
-                  </span>
+            <div className="flex min-w-0 flex-1 items-center gap-2">
+              <CareIcon name="hospitalityVenue" size="md" className="text-foreground" />
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
+                  {t("admin.verificationTeaser.title")}
                 </h3>
+                <p className="mt-0.5 text-xs font-medium text-muted-foreground">
+                  {t("admin.verificationTeaser.subtitle", { limit: VERIFICATION_TEASER_LIMIT })}
+                </p>
+                {pendingVerificationCount > 0 ? (
+                  <p className="mt-1 text-xs font-medium text-amber-700">
+                    {t("admin.verificationTeaser.pendingCount", { count: pendingVerificationCount })}
+                  </p>
+                ) : null}
               </div>
-            </button>
+            </div>
 
             <Link
               to="/platform-admin/businesses"
               className="shrink-0 text-xs font-medium text-foreground underline-offset-4 hover:underline sm:text-sm"
             >
-              {t("admin.businessesOpen")}
+              {t("admin.verificationTeaser.viewAll")}
             </Link>
           </div>
 
-          {businessesExpanded ? (
+          {businessesInitialLoading ? (
+            <div className="space-y-3 py-4" aria-busy="true">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
+              ))}
+            </div>
+          ) : businesses.length === 0 ? (
+            <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
+          ) : (
             <>
-              {businesses.length > 0 && (
-                <div className={platformUi.businessesSearchWrap}>
-                  <div className="relative w-full max-w-md">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <input
-                      type="search"
-                      value={businessSearchQuery}
-                      onChange={(e) => setBusinessSearchQuery(e.target.value)}
-                      placeholder={t("admin.searchBusinessesPlaceholder")}
-                      autoComplete="off"
-                      aria-label={t("admin.searchBusinessesAria")}
-                      className="w-full rounded-lg border border-border bg-background py-2 pl-9 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-accent/40"
-                    />
-                  </div>
-                </div>
-              )}
-              {businesses.length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
-              ) : filteredBusinesses.length === 0 ? (
-                <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noSearchMatches")}</p>
-              ) : (
-                <>
-                  <div className={platformUi.businessesMobileList}>
-                    {filteredBusinesses.map((b) => (
-                      <PlatformBusinessMobileCard key={b.id} business={b} />
-                    ))}
-                  </div>
-                  <div className={platformUi.businessesTableWrap}>
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-muted text-left">
-                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colBusiness")}</th>
-                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colOwner")}</th>
-                        <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colStatus")}</th>
-                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          {t("admin.colTipsEur")}
-                        </th>
-                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          {t("admin.colStaffLoc")}
-                        </th>
-                        <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                          {t("admin.colActions")}
-                        </th>
+              <div className={platformUi.businessesMobileList}>
+                {verificationTeaserBusinesses.map((b) => (
+                  <PlatformBusinessMobileCard key={b.id} business={b} />
+                ))}
+              </div>
+              <div className={platformUi.businessesTableWrap}>
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-border bg-muted text-left">
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colBusiness")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colOwner")}</th>
+                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colStatus")}</th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                        {t("admin.colTipsEur")}
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                        {t("admin.colStaffLoc")}
+                      </th>
+                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
+                        {t("admin.colActions")}
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {verificationTeaserBusinesses.map((b) => (
+                      <tr key={b.id} className="border-b border-border hover:bg-muted/50">
+                        <td className="px-2 py-3 align-middle">
+                          <BusinessLogoMark
+                            logoPathOrUrl={b.logoPath ?? null}
+                            businessName={b.name}
+                            size="sm"
+                          />
+                        </td>
+                        <td className="px-4 py-3">
+                          <div className="font-medium text-foreground">{b.name}</div>
+                          <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
+                        </td>
+                        <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
+                        <td className="px-4 py-3">
+                          {b.verificationStatus === "verified" ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+                              <CheckCircle className="h-3.5 w-3.5" /> {t("admin.verification.verified")}
+                            </span>
+                          ) : b.verificationStatus === "rejected" ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
+                              <XCircle className="h-3.5 w-3.5" /> {t("admin.verification.rejected")}
+                            </span>
+                          ) : (
+                            <span className="text-xs font-medium text-amber-700">
+                              {t("admin.verification.pending")}
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right tabular-nums">
+                          {formatEur(b.totalTipsEur ?? 0)}
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs text-muted-foreground">
+                          {b.staffCount ?? 0} / {b.locationCount ?? 0}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Link
+                            to={`/platform-admin/businesses/${b.id}`}
+                            className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
+                          >
+                            {t("admin.view")}
+                          </Link>
+                        </td>
                       </tr>
-                    </thead>
-                    <tbody>
-                      {filteredBusinesses.map((b) => (
-                        <tr key={b.id} className="border-b border-border hover:bg-muted/50">
-                          <td className="px-2 py-3 align-middle">
-                            <BusinessLogoMark
-                              logoPathOrUrl={b.logoPath ?? null}
-                              businessName={b.name}
-                              size="sm"
-                            />
-                          </td>
-                          <td className="px-4 py-3">
-                            <div className="font-medium text-foreground">{b.name}</div>
-                            <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
-                          </td>
-                          <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
-                          <td className="px-4 py-3">
-                            {b.verificationStatus === "verified" ? (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                                <CheckCircle className="h-3.5 w-3.5" /> {t("admin.verification.verified")}
-                              </span>
-                            ) : b.verificationStatus === "rejected" ? (
-                              <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
-                                <XCircle className="h-3.5 w-3.5" /> {t("admin.verification.rejected")}
-                              </span>
-                            ) : (
-                              <span className="text-xs font-medium text-amber-700">
-                                {t("admin.verification.pending")}
-                              </span>
-                            )}
-                          </td>
-                          <td className="px-4 py-3 text-right tabular-nums">
-                            {formatEur(b.totalTipsEur ?? 0)}
-                          </td>
-                          <td className="px-4 py-3 text-right text-xs text-muted-foreground">
-                            {b.staffCount ?? 0} / {b.locationCount ?? 0}
-                          </td>
-                          <td className="px-4 py-3 text-right">
-                            <Link
-                              to={`/platform-admin/businesses/${b.id}`}
-                              className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
-                            >
-                              {t("admin.view")}
-                            </Link>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  </div>
-                </>
-              )}
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </>
-          ) : null}
+          )}
         </motion.div>
         </TracingBeam>
       </div>

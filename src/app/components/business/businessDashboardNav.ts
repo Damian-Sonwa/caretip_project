@@ -85,6 +85,16 @@ export function isBusinessNavItemLocked(
   return !hasFeature(tier, item.featureKey);
 }
 
+/** Never show nav lock icons until entitlements are resolved (prevents hydration flash). */
+export function showBusinessNavSubscriptionLock(
+  entitlementsReady: boolean,
+  item: Pick<BusinessDashboardNavItem, "featureKey">,
+  tier: BusinessSubscriptionTier | undefined | null,
+): boolean {
+  if (!entitlementsReady) return false;
+  return isBusinessNavItemLocked(item, tier);
+}
+
 /** @deprecated Use full nav list + isBusinessNavItemLocked — items are no longer hidden. */
 export function filterBusinessDashboardNavItems(
   items: readonly BusinessDashboardNavItem[],

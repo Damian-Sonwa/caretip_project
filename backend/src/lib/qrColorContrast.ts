@@ -52,6 +52,10 @@ const TEMPLATE_MODULE_LIGHT: Record<string, string> = {
   "grand-atelier-noir": "#FFFFFF",
   "royal-suite-platinum": "#FFFFFF",
   "champagne-salon-classic": "#FFFFFF",
+  "emerald-sanctuary": "#FFFFFF",
+  "sapphire-pavilion": "#FFFFFF",
+  "copper-hearth": "#FFFFFF",
+  "rose-gold-salon": "#FFFFFF",
   "poc-luxury-shell": "#FFFFFF",
 };
 

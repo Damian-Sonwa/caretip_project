@@ -12,7 +12,7 @@ import {
 import {
   businessDashboardNavItems,
   isBusinessDashboardNavActive,
-  isBusinessNavItemLocked,
+  showBusinessNavSubscriptionLock,
 } from "./businessDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { MobileDrawer } from "../ui/MobileDrawer";
@@ -27,10 +27,9 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout, exitImpersonation } = useAuth();
-  const { tier } = useSubscriptionEntitlements({
+  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
-    cacheOnly: true,
   });
   const navItems = businessDashboardNavItems;
   const qrLocked = user?.status === "PENDING" || user?.status === "REJECTED";
@@ -54,7 +53,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
         <ul className="space-y-0.5">
           {navItems.map((item) => {
             const isActive = isBusinessDashboardNavActive(item.href, location.pathname);
-            const subscriptionLocked = isBusinessNavItemLocked(item, tier);
+            const subscriptionLocked = showBusinessNavSubscriptionLock(entitlementsReady, item, tier);
             return (
               <li key={item.href}>
                 <Link

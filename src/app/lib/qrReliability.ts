@@ -37,7 +37,8 @@ export type QrReliabilityWarningCode =
   | "logo_too_large"
   | "circle_shape_sanitized"
   | "decode_failed"
-  | "url_mismatch";
+  | "url_mismatch"
+  | "composite_decode_fallback";
 
 export type QrReliabilityReport = {
   grade: QrQualityGrade;
@@ -120,11 +121,35 @@ export function maxSafeLogoWidth(qrSize: number, hasCustomLogo: boolean): number
 function normalizeUrlForCompare(url: string): string {
   try {
     const u = new URL(url.trim());
-    const path = u.pathname.replace(/\/+$/, "") || "/";
-    return `${u.origin}${path}${u.search}`;
+    const rawPath = u.pathname.replace(/\/+$/, "") || "/";
+    let path = rawPath;
+    try {
+      path = decodeURIComponent(rawPath);
+    } catch {
+      path = rawPath;
+    }
+    return `${u.origin}${path || "/"}${u.search}`;
   } catch {
     return url.trim().replace(/\/+$/, "");
   }
+}
+
+/** Compare expected vs decoded QR payload URLs (handles encoding differences). */
+export function qrPayloadUrlsMatch(expected: string, decoded: string | null): boolean {
+  if (!decoded) return false;
+  return normalizeUrlForCompare(expected) === normalizeUrlForCompare(decoded);
+}
+
+function upscaleCanvasNearest(source: HTMLCanvasElement, factor: number): HTMLCanvasElement {
+  if (factor <= 1) return source;
+  const scaled = document.createElement("canvas");
+  scaled.width = source.width * factor;
+  scaled.height = source.height * factor;
+  const ctx = scaled.getContext("2d");
+  if (!ctx) return source;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(source, 0, 0, scaled.width, scaled.height);
+  return scaled;
 }
 
 async function decodeQrImageData(imageData: ImageData): Promise<string | null> {
@@ -162,6 +187,17 @@ export async function decodeQrFromCanvas(canvas: HTMLCanvasElement): Promise<str
   return decodeQrImageData(imageData);
 }
 
+/** Multi-scale nearest-neighbor decode — denser QRs (longer URLs) need more pixels per module. */
+export async function decodeQrFromCanvasRobust(canvas: HTMLCanvasElement): Promise<string | null> {
+  const upscaleFactors = [1, 2, 3, 4] as const;
+  for (const factor of upscaleFactors) {
+    const target = factor === 1 ? canvas : upscaleCanvasNearest(canvas, factor);
+    const decoded = await decodeQrFromCanvas(target);
+    if (decoded) return decoded;
+  }
+  return null;
+}
+
 export function buildReliabilityReport(opts: {
   expectedUrl: string;
   decodedText: string | null;
@@ -170,6 +206,7 @@ export function buildReliabilityReport(opts: {
   logoAreaRatio: number;
   requestedShape: QrShapeId;
   shapeSanitized: boolean;
+  compositeDecodeFallback?: boolean;
 }): QrReliabilityReport {
   const warnings: QrReliabilityWarningCode[] = [];
   const contrastRatio = qrModuleContrastRatio(opts.moduleDark, opts.moduleLight);
@@ -191,9 +228,13 @@ export function buildReliabilityReport(opts: {
     warnings.push("circle_shape_sanitized");
   }
 
+  if (opts.compositeDecodeFallback) {
+    warnings.push("composite_decode_fallback");
+  }
+
   const decodeSuccess =
     Boolean(opts.decodedText) &&
-    normalizeUrlForCompare(opts.decodedText!) === normalizeUrlForCompare(opts.expectedUrl);
+    qrPayloadUrlsMatch(opts.expectedUrl, opts.decodedText);
 
   if (!opts.decodedText) {
     warnings.push("decode_failed");
@@ -243,6 +284,7 @@ export function assessBrandingReliability(
   expectedUrl: string,
   logoWidthPx: number,
   qrSizePx: number,
+  compositeDecodeFallback = false,
 ): QrReliabilityReport {
   const premium = branding.premium === true;
   const visual = resolveQrVisualStyle({
@@ -270,6 +312,7 @@ export function assessBrandingReliability(
     logoAreaRatio: hasCustomLogo ? logoAreaRatio : logoAreaRatio * 0.5,
     requestedShape,
     shapeSanitized,
+    compositeDecodeFallback,
   });
 }
 

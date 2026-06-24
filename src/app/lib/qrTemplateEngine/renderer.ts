@@ -329,6 +329,78 @@ function drawProceduralLuxuryShell(
       }
       break;
     }
+    case "emerald-sanctuary": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#061410");
+      grad.addColorStop(0.48, "#0f2a22");
+      grad.addColorStop(1, "#040c0a");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      const emerald = "#5ecf9a";
+      ctx.strokeStyle = "rgba(94, 207, 154, 0.45)";
+      ctx.lineWidth = 1.25;
+      roundRect(ctx, 12, 12, w - 24, h - 24, 8);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(94, 207, 154, 0.05)";
+      for (let i = 0; i < 36; i++) {
+        ctx.fillRect((i * 47) % w, (i * 29) % h, 2, 2);
+      }
+      drawLuxuryCornerOrnaments(ctx, w, h, emerald, 16, 28);
+      break;
+    }
+    case "sapphire-pavilion": {
+      const grad = ctx.createLinearGradient(0, 0, w * 0.2, h);
+      grad.addColorStop(0, "#081428");
+      grad.addColorStop(0.5, "#0f2848");
+      grad.addColorStop(1, "#050c18");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      const sapphire = "#7eb8ff";
+      ctx.strokeStyle = "rgba(126, 184, 255, 0.4)";
+      ctx.lineWidth = 1.25;
+      roundRect(ctx, 12, 12, w - 24, h - 24, 8);
+      ctx.stroke();
+      drawLuxuryCornerOrnaments(ctx, w, h, sapphire, 16, 26);
+      break;
+    }
+    case "copper-hearth": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#1a100c");
+      grad.addColorStop(0.5, "#2a1810");
+      grad.addColorStop(1, "#100804");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      const copper = "#d4895c";
+      ctx.strokeStyle = copper;
+      ctx.lineWidth = 1.5;
+      const inset = 10;
+      roundRect(ctx, inset, inset, w - inset * 2, h - inset * 2, 6);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(212, 137, 92, 0.06)";
+      for (let i = 0; i < 40; i++) {
+        ctx.fillRect((i * 43) % w, (i * 27) % h, 2, 2);
+      }
+      drawLuxuryCornerOrnaments(ctx, w, h, copper, 18, 30);
+      break;
+    }
+    case "rose-gold-salon": {
+      const grad = ctx.createLinearGradient(0, 0, 0, h);
+      grad.addColorStop(0, "#fdf6f4");
+      grad.addColorStop(0.55, "#f5ebe8");
+      grad.addColorStop(1, "#ead8d2");
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, w, h);
+      const roseGold = "#c17f89";
+      ctx.strokeStyle = roseGold;
+      ctx.lineWidth = 1.5;
+      roundRect(ctx, 12, 12, w - 24, h - 24, 10);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(193, 127, 137, 0.06)";
+      for (let i = 0; i < 28; i++) {
+        ctx.fillRect((i * 51) % w, (i * 33) % h, 3, 1);
+      }
+      break;
+    }
     case "poc-luxury-shell":
     default:
       drawPocLuxuryShell(ctx, w, h, accent);
@@ -419,7 +491,7 @@ function drawTextField(
   ctx.font = `${weight} ${maxSize}px ${FONT_STACK}`;
   const lines = wrapText(ctx, content, w);
   let cy = y;
-  const lh = maxSize * 1.25;
+  const lh = maxSize * 1.35;
   for (const line of lines) {
     const tx = pos.align === "left" ? x : pos.align === "right" ? x + w : x + w / 2;
     ctx.fillText(line, tx, cy);
@@ -554,7 +626,7 @@ function drawTextInRect(
   ctx.textBaseline = "top";
   ctx.font = `${weight} ${maxSize}px ${FONT_STACK}`;
   const lines = wrapText(ctx, content, rect.w);
-  const lh = maxSize * 1.22;
+  const lh = maxSize * 1.35;
   const blockH = lines.length * lh;
   let cy = rect.y + Math.max(0, (rect.h - blockH) / 2);
   for (const line of lines) {
@@ -582,7 +654,7 @@ function drawTextFieldAt(
   ctx.textBaseline = "top";
   ctx.font = `${weight} ${maxSize}px ${FONT_STACK}`;
   const lines = wrapText(ctx, content, rect.w);
-  const lh = maxSize * 1.22;
+  const lh = maxSize * 1.35;
   let cy = rect.y;
   for (const line of lines) {
     const tx = align === "left" ? rect.x : align === "right" ? rect.x + rect.w : rect.x + rect.w / 2;
@@ -663,10 +735,10 @@ async function renderBrandingZone(
   }
 
   const stack: Array<{ field: QrTemplateFieldId; weight: number }> = [
-    { field: "businessName", weight: 0.26 },
-    { field: "address", weight: 0.14 },
-    { field: "tagline", weight: 0.14 },
-    { field: "welcomeMessage", weight: 0.12 },
+    { field: "businessName", weight: 0.32 },
+    { field: "address", weight: 0.16 },
+    { field: "tagline", weight: 0.12 },
+    { field: "welcomeMessage", weight: 0.1 },
   ];
 
   const remaining = rect.y + rect.h - gap - cursorY;
@@ -812,15 +884,20 @@ function drawCtaPill(
   drawTextField(ctx, text, { ...pos, color: "onLight", valign: "middle" }, payload, canvasW, canvasH);
 }
 
-function scaleCanvas(source: HTMLCanvasElement, scale: number): HTMLCanvasElement {
+function scaleCanvas(
+  source: HTMLCanvasElement,
+  scale: number,
+  opts?: { smooth?: boolean },
+): HTMLCanvasElement {
   if (scale <= 1) return source;
   const scaled = document.createElement("canvas");
   scaled.width = Math.round(source.width * scale);
   scaled.height = Math.round(source.height * scale);
   const ctx = scaled.getContext("2d");
   if (!ctx) return source;
-  ctx.imageSmoothingEnabled = true;
-  ctx.imageSmoothingQuality = "high";
+  const smooth = opts?.smooth !== false;
+  ctx.imageSmoothingEnabled = smooth;
+  if (smooth) ctx.imageSmoothingQuality = "high";
   ctx.drawImage(source, 0, 0, scaled.width, scaled.height);
   return scaled;
 }
@@ -848,12 +925,12 @@ export function engineTemplateLayoutMetrics(
   return {
     totalWidth: W,
     totalHeight: H,
-    qrSize: Math.round(bounds.size),
-    qrDrawX: Math.round(bounds.x),
-    qrDrawY: Math.round(bounds.y),
+    qrSize: bounds.size,
+    qrDrawX: bounds.x,
+    qrDrawY: bounds.y,
     qrMargin: QR_QUIET_ZONE_MODULES,
     safeZonePaddingPx: panel
-      ? Math.round(def.qrSafeZone.padding * Math.min(panel.w, panel.h))
+      ? def.qrSafeZone.padding * Math.min(panel.w, panel.h)
       : 0,
   };
 }
@@ -862,7 +939,7 @@ export async function renderQrTemplateCard(input: QrTemplateRenderInput): Promis
   const def = getEngineTemplate(input.templateId);
   if (!def || typeof document === "undefined") return null;
 
-  let W = def.canvasWidth;
+  const W = def.canvasWidth;
   let H = def.canvasHeight;
   if (def.background.kind === "image") {
     const bgProbe = await loadImage(def.background.src);
@@ -882,7 +959,7 @@ export async function renderQrTemplateCard(input: QrTemplateRenderInput): Promis
   if (def.zones) {
     await renderZoneBasedCard(ctx, def, input, W, H);
     const scale = Math.min(4, Math.max(1, input.scale ?? 1));
-    return scaleCanvas(canvas, scale);
+    return scaleCanvas(canvas, scale, { smooth: input.smoothScale });
   }
 
   const qrPresentation = def.qrPresentation ?? "framed";
@@ -938,5 +1015,5 @@ export async function renderQrTemplateCard(input: QrTemplateRenderInput): Promis
   }
 
   const scale = Math.min(4, Math.max(1, input.scale ?? 1));
-  return scaleCanvas(canvas, scale);
+  return scaleCanvas(canvas, scale, { smooth: input.smoothScale });
 }

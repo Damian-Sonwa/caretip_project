@@ -3785,8 +3785,8 @@
       },
       "templates": {
         "title": "Premium templates",
-        "description": "Choose a premium QR card design. Your branding is injected live into each template shell.",
-        "basicHint": "Starter includes Luxury Gold. Upgrade to unlock Velvet Lounge, Grand Atelier, Royal Suite, and Champagne Salon.",
+        "description": "Scan-first hospitality cards. Large QR, clear branding, and strong contrast for every venue.",
+        "basicHint": "Starter includes Velvet Lounge Noir. Upgrade to unlock all 7 premium color templates.",
         "saveHint": "Apply templates under Branding to update live QR codes and guest pages.",
         "openBranding": "Open Branding"
       },
@@ -3818,7 +3818,15 @@
         "royalSuitePlatinum": "Royal Suite Platinum",
         "royalSuitePlatinumDesc": "Navy and platinum suite styling, hotels, resorts, and private members' clubs.",
         "champagneSalonClassic": "Champagne Salon Classic",
-        "champagneSalonClassicDesc": "Warm champagne editorial palette, daytime salons, patisseries, and boutique hotels."
+        "champagneSalonClassicDesc": "Warm champagne editorial palette, daytime salons, patisseries, and boutique hotels.",
+        "emeraldSanctuary": "Emerald Sanctuary",
+        "emeraldSanctuaryDesc": "Deep emerald wellness atmosphere, spas, retreats, and garden venues.",
+        "sapphirePavilion": "Sapphire Pavilion",
+        "sapphirePavilionDesc": "Jewel-toned sapphire shell, coastal clubs, rooftop bars, and evening lounges.",
+        "copperHearth": "Copper Hearth",
+        "copperHearthDesc": "Warm copper and hearth tones, bistros, brasseries, and fireside dining rooms.",
+        "roseGoldSalon": "Rose Gold Salon",
+        "roseGoldSalonDesc": "Soft rose-gold editorial light, patisseries, salons, and boutique daytime venues."
       },
       "downloads": {
         "title": "Downloads & print formats",
@@ -4352,7 +4360,8 @@
         "logo_too_large": "Center logo exceeds the 20% safe area.",
         "circle_shape_sanitized": "Circle style is rendered as a safe rounded square to protect finder patterns.",
         "decode_failed": "A camera could not decode this QR. It may not scan in production.",
-        "url_mismatch": "Decoded payload did not match the expected tipping URL."
+        "url_mismatch": "Decoded payload did not match the expected tipping URL.",
+        "composite_decode_fallback": "Card extract decode used matrix fallback — QR payload verified; compositing is scan-safe."
       }
     },
     "billing": {
@@ -4646,6 +4655,7 @@
       "enterpriseReadiness": "Enterprise readiness (platform)",
       "enterpriseScore": "Score: {{score}} / {{max}}",
       "none": "None matching criteria in current sample.",
+      "loadFailed": "Could not load commercial intelligence.",
       "reasons": {
         "strong_tip_growth": "Tip volume grew {{growth}}% ({{tips30d}} tips in 30d).",
         "tips_decline": "Tip volume declined {{percent}}%.",
@@ -4696,6 +4706,12 @@
     "businessesTitle": "All businesses",
     "businessesSubtitle": "(Open KYC & verification)",
     "businessesOpen": "Open",
+    "verificationTeaser": {
+      "title": "Business verification",
+      "subtitle": "Up to {{limit}} venues — pending reviews shown first",
+      "pendingCount": "{{count}} awaiting verification",
+      "viewAll": "View all"
+    },
     "searchBusinessesPlaceholder": "Search by business name, slug, or owner email…",
     "searchBusinessesAria": "Filter businesses",
     "noBusinesses": "No businesses yet.",

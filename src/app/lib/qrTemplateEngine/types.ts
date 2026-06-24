@@ -78,7 +78,11 @@ export type QrProceduralShellVariant =
   | "velvet-lounge"
   | "grand-atelier"
   | "royal-suite"
-  | "champagne-salon";
+  | "champagne-salon"
+  | "emerald-sanctuary"
+  | "sapphire-pavilion"
+  | "copper-hearth"
+  | "rose-gold-salon";
 
 export type QrTemplateBackground =
   | { kind: "image"; src: string }
@@ -141,4 +145,6 @@ export type QrTemplateRenderInput = {
   templateId: string;
   payload: QrTemplateBrandingPayload;
   scale?: 1 | 2 | 3 | 4;
+  /** When false, nearest-neighbor upscale keeps QR modules sharp (scan validation). */
+  smoothScale?: boolean;
 };
