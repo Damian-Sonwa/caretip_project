@@ -120,7 +120,7 @@ export function maxSafeLogoWidth(qrSize: number, hasCustomLogo: boolean): number
 function normalizeUrlForCompare(url: string): string {
   try {
     const u = new URL(url.trim());
-    let path = u.pathname.replace(/\/+$/, "") || "/";
+    const path = u.pathname.replace(/\/+$/, "") || "/";
     return `${u.origin}${path}${u.search}`;
   } catch {
     return url.trim().replace(/\/+$/, "");
