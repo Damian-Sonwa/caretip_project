@@ -1,0 +1,344 @@
+/**
+ * CareTip Hero Personality System
+ * Section-specific atmosphere on top of --caretip-premium-gradient foundation.
+ * @see docs/HERO_PERSONALITY_SYSTEM.md
+ */
+
+:root {
+  /* Premium surface system */
+  --caretip-premium-border-subtle: rgba(255, 184, 74, 0.08);
+  --caretip-premium-border-soft: rgba(255, 184, 74, 0.12);
+  --caretip-premium-border-defined: rgba(255, 184, 74, 0.16);
+
+  --caretip-premium-elevation-depth: 0 18px 52px -22px rgba(0, 0, 0, 0.48);
+  --caretip-premium-elevation-glow: 0 10px 36px -14px rgba(233, 120, 28, 0.24);
+  --caretip-premium-elevation-inner: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+
+  --caretip-premium-glass-bg: rgba(255, 255, 255, 0.055);
+  --caretip-premium-glass-bg-strong: rgba(255, 255, 255, 0.09);
+  --caretip-premium-glass-border: rgba(255, 184, 74, 0.1);
+  --caretip-premium-glass-blur: 14px;
+}
+
+/* —— Layered elevation (replaces generic shadows on premium heroes) —— */
+.premium-workspace-header,
+.premium-summary-card,
+.premium-plan-card,
+.premium-page-hero[data-hero-personality] {
+  box-shadow:
+    var(--caretip-premium-elevation-depth),
+    var(--caretip-premium-elevation-glow),
+    var(--caretip-premium-elevation-inner);
+  border: 1px solid var(--caretip-premium-border-subtle);
+}
+
+.premium-workspace-header[data-hero-personality="qrStudio"] {
+  border-color: var(--caretip-premium-border-soft);
+  box-shadow:
+    var(--caretip-premium-elevation-depth),
+    0 14px 44px -12px rgba(255, 158, 45, 0.32),
+    0 0 0 1px rgba(255, 184, 74, 0.06),
+    var(--caretip-premium-elevation-inner);
+}
+
+/* —— Hero content hierarchy —— */
+.premium-workspace-header__inner {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__inner {
+    gap: 1.5rem;
+  }
+}
+
+.premium-workspace-header__identity {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__identity {
+    gap: 1.125rem;
+  }
+}
+
+.premium-workspace-header__label-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.625rem;
+}
+
+.premium-workspace-header__section-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.2;
+}
+
+.premium-workspace-header__title {
+  font-size: clamp(1.625rem, 4.8vw, 1.875rem);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+  color: #fff;
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__title {
+    font-size: clamp(1.75rem, 2.8vw, 2rem);
+  }
+}
+
+.premium-workspace-header__purpose {
+  margin-top: 0.75rem;
+  max-width: 36rem;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__purpose {
+    margin-top: 0.875rem;
+    font-size: 0.9375rem;
+  }
+}
+
+.premium-workspace-header__icon {
+  display: flex;
+  height: 2.625rem;
+  width: 2.625rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 0.875rem;
+  border: 1px solid var(--caretip-premium-border-soft);
+  background: var(--caretip-premium-glass-bg);
+  box-shadow: var(--caretip-premium-elevation-inner);
+  backdrop-filter: blur(8px);
+}
+
+.premium-workspace-header__title-row {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.premium-workspace-header__head {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__head {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1.25rem;
+  }
+}
+
+.premium-workspace-header__feature,
+.premium-workspace-header__meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 9999px;
+  border: 1px solid var(--caretip-premium-border-subtle);
+  background: var(--caretip-premium-glass-bg);
+  padding: 0.2rem 0.55rem;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(6px);
+}
+
+.premium-workspace-header__actions {
+  display: flex;
+  width: 100%;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .premium-workspace-header__actions {
+    width: auto;
+  }
+}
+
+/* —— Overview dashboard hero (light surface, warm defined edge) —— */
+.premium-page-hero[data-hero-personality="overview"] {
+  border: 1px solid var(--caretip-premium-border-subtle);
+  box-shadow:
+    0 14px 40px -18px rgba(15, 23, 42, 0.12),
+    0 0 0 1px rgba(255, 184, 74, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.85);
+}
+
+/* —— Glass surfaces (intentional — analytics, executive, billing) —— */
+.premium-glass-surface {
+  border-radius: 1rem;
+  border: 1px solid var(--caretip-premium-glass-border);
+  background: var(--caretip-premium-glass-bg);
+  box-shadow: var(--caretip-premium-elevation-inner);
+  backdrop-filter: blur(var(--caretip-premium-glass-blur));
+}
+
+.caretip-dashboard-shell .premium-glass-surface--on-light {
+  border-color: rgba(255, 184, 74, 0.12);
+  background: rgba(255, 248, 240, 0.65);
+  backdrop-filter: blur(10px);
+}
+
+.premium-summary-card__metric {
+  border-color: var(--caretip-premium-border-subtle);
+  background: var(--caretip-premium-glass-bg);
+  backdrop-filter: blur(8px);
+}
+
+.premium-summary-card[data-hero-personality="analytics"] .premium-summary-card__metric,
+.premium-summary-card[data-hero-personality="performance"] .premium-summary-card__metric {
+  border-color: var(--caretip-premium-border-soft);
+  background: var(--caretip-premium-glass-bg-strong);
+}
+
+/* —— Module sub-nav breathing room —— */
+.business-module-sub-nav {
+  margin-bottom: 1.75rem;
+}
+
+@media (max-width: 639px) {
+  .business-module-sub-nav {
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* —— Personality atmosphere overlays —— */
+.caretip-premium-backdrop__atmosphere--team {
+  background:
+    radial-gradient(ellipse 72% 50% at 18% 22%, rgba(251, 191, 36, 0.16) 0%, transparent 58%),
+    radial-gradient(ellipse 58% 42% at 88% 72%, rgba(233, 120, 28, 0.12) 0%, transparent 52%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--tips {
+  background:
+    radial-gradient(ellipse 80% 54% at 50% 18%, rgba(245, 158, 11, 0.2) 0%, transparent 62%),
+    radial-gradient(ellipse 44% 36% at 8% 82%, rgba(255, 184, 74, 0.11) 0%, transparent 50%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--qrStudio {
+  background:
+    radial-gradient(ellipse 92% 62% at 50% 12%, rgba(255, 158, 45, 0.26) 0%, transparent 58%),
+    radial-gradient(ellipse 48% 40% at 92% 68%, rgba(233, 120, 28, 0.14) 0%, transparent 54%),
+    radial-gradient(ellipse 36% 28% at 6% 58%, rgba(255, 214, 140, 0.1) 0%, transparent 48%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--analytics {
+  background:
+    radial-gradient(ellipse 76% 52% at 72% 20%, rgba(255, 214, 140, 0.18) 0%, transparent 56%),
+    radial-gradient(ellipse 54% 40% at 12% 78%, rgba(233, 120, 28, 0.1) 0%, transparent 52%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--performance {
+  background:
+    radial-gradient(ellipse 68% 48% at 50% 16%, rgba(255, 200, 87, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 34% at 14% 70%, rgba(233, 120, 28, 0.08) 0%, transparent 50%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--billing {
+  background:
+    radial-gradient(ellipse 70% 50% at 50% 22%, rgba(255, 248, 240, 0.14) 0%, transparent 58%),
+    radial-gradient(ellipse 52% 38% at 84% 74%, rgba(245, 158, 11, 0.14) 0%, transparent 52%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--locations {
+  background:
+    radial-gradient(ellipse 60% 44% at 24% 28%, rgba(233, 120, 28, 0.1) 0%, transparent 54%),
+    radial-gradient(ellipse 48% 36% at 78% 68%, rgba(255, 184, 74, 0.07) 0%, transparent 50%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--employees {
+  background:
+    radial-gradient(ellipse 74% 50% at 22% 24%, rgba(251, 146, 60, 0.14) 0%, transparent 56%),
+    radial-gradient(ellipse 50% 38% at 86% 70%, rgba(233, 120, 28, 0.1) 0%, transparent 52%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--notifications {
+  background:
+    radial-gradient(ellipse 64% 46% at 50% 20%, rgba(255, 184, 74, 0.14) 0%, transparent 56%),
+    radial-gradient(ellipse 42% 32% at 10% 76%, rgba(233, 120, 28, 0.08) 0%, transparent 48%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--customers {
+  background:
+    radial-gradient(ellipse 66% 46% at 30% 22%, rgba(251, 191, 36, 0.12) 0%, transparent 54%),
+    radial-gradient(ellipse 44% 34% at 82% 72%, rgba(233, 120, 28, 0.09) 0%, transparent 50%),
+    var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__atmosphere--overview {
+  background:
+    radial-gradient(ellipse 80% 48% at 50% 0%, rgba(255, 184, 74, 0.08) 0%, transparent 62%),
+    transparent;
+}
+
+@media (max-width: 1023px) {
+  .caretip-premium-backdrop__atmosphere--team,
+  .caretip-premium-backdrop__atmosphere--tips,
+  .caretip-premium-backdrop__atmosphere--qrStudio,
+  .caretip-premium-backdrop__atmosphere--analytics,
+  .caretip-premium-backdrop__atmosphere--performance,
+  .caretip-premium-backdrop__atmosphere--billing,
+  .caretip-premium-backdrop__atmosphere--locations,
+  .caretip-premium-backdrop__atmosphere--employees,
+  .caretip-premium-backdrop__atmosphere--notifications,
+  .caretip-premium-backdrop__atmosphere--customers {
+    background:
+      radial-gradient(ellipse 100% 48% at 50% 8%, rgba(233, 120, 28, 0.14) 0%, transparent 64%),
+      var(--caretip-premium-glow-mobile);
+  }
+
+  .premium-workspace-header {
+    padding: 1.125rem 1.125rem 1.25rem;
+  }
+
+  .premium-workspace-header__section-label {
+    font-size: 0.625rem;
+    letter-spacing: 0.12em;
+  }
+
+  .premium-workspace-header__purpose {
+    font-size: 0.8125rem;
+    line-height: 1.55;
+  }
+}
+
+@media (max-width: 374px) {
+  .premium-workspace-header__title {
+    font-size: 1.5rem;
+  }
+
+  .premium-workspace-header__icon {
+    height: 2.375rem;
+    width: 2.375rem;
+  }
+}

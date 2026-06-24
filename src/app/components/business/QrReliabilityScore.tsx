@@ -94,8 +94,8 @@ export function QrReliabilityScore({
   const Icon = style.icon;
 
   return (
-    <div className={cn(businessUi.cardStatic, "overflow-hidden", className)}>
-      <div className="flex flex-col gap-4 border-b border-border/80 p-4 sm:flex-row sm:items-start sm:justify-between">
+    <div className={cn(businessUi.cardStatic, "min-w-0 overflow-hidden", className)}>
+      <div className="flex min-w-0 flex-col gap-4 border-b border-border/80 p-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("business.qrReliability.title")}
@@ -127,11 +127,16 @@ export function QrReliabilityScore({
           </div>
         </div>
         {previewUrl ? (
-          <img
-            src={previewUrl}
-            alt=""
-            className={cn("h-28 w-auto rounded-lg border bg-white p-1 ring-2", style.ring)}
-          />
+          <div className="qr-studio-canvas-frame mx-auto w-full max-w-[8.5rem] shrink-0 sm:max-w-none sm:w-auto">
+            <img
+              src={previewUrl}
+              alt=""
+              className={cn(
+                "mx-auto block h-auto max-h-28 w-full max-w-full object-contain rounded-lg border bg-white p-1 ring-2",
+                style.ring,
+              )}
+            />
+          </div>
         ) : null}
       </div>
 

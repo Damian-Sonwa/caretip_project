@@ -66,7 +66,7 @@ export function QrAnalyticsLivePanel({ data, loading, compact, className }: QrAn
         ) : null}
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-3">
         <div className="rounded-xl border border-border/60 px-3 py-2.5">
           <p className="text-xs text-muted-foreground">{t("business.qrAnalytics.topQr")}</p>
           <p className="mt-1 truncate text-sm font-medium">{topQr?.label ?? t("format.noDataYet")}</p>

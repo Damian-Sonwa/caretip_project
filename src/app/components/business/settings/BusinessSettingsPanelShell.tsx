@@ -8,21 +8,27 @@ export function BusinessSettingsPanelShell({
   children,
   className,
 }: {
-  title: string;
+  title?: string;
   description?: string;
   children: ReactNode;
   className?: string;
 }) {
+  const showHeader = Boolean(title || description);
+
   return (
     <section
       className={cn(businessUi.cardStatic, businessUi.settingsPanel, "p-5 sm:p-6", className)}
     >
-      <header className="mb-6 border-b border-neutral-100/90 pb-5">
-        <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">{title}</h2>
-        {description ? (
-          <p className={cn("mt-1.5 max-w-2xl", businessUi.cardDesc)}>{description}</p>
-        ) : null}
-      </header>
+      {showHeader ? (
+        <header className="mb-6 border-b border-neutral-100/90 pb-5">
+          {title ? (
+            <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">{title}</h2>
+          ) : null}
+          {description ? (
+            <p className={cn(title ? "mt-1.5" : "", "max-w-2xl", businessUi.cardDesc)}>{description}</p>
+          ) : null}
+        </header>
+      ) : null}
       {children}
     </section>
   );

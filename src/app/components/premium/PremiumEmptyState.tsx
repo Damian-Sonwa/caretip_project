@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CaretipPremiumBackdrop } from "@/app/components/premium/CaretipPremiumBackdrop";
 import { cn } from "@/lib/utils";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
 
@@ -28,6 +29,7 @@ export function PremiumEmptyState({
       role="status"
     >
       <div className="premium-empty-state__header">
+        <CaretipPremiumBackdrop />
         {icon ? <div className="premium-empty-state__icon">{icon}</div> : null}
         <p className="premium-empty-state__title">{title}</p>
       </div>

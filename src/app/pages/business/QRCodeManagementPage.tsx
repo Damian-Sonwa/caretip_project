@@ -53,6 +53,7 @@ import {
   DEFAULT_QR_BORDER_STYLE,
   DEFAULT_QR_SHAPE,
   DEFAULT_QR_TEMPLATE,
+  QR_TEMPLATE_PRESETS,
 } from "../../lib/qrTemplateStyles";
 import type { QrBrandingOptions } from "../../lib/businessBranding";
 import {
@@ -82,7 +83,9 @@ import { DASH_BTN_PRIMARY, DASH_BTN_SECONDARY } from "@/components/ui/dashboard-
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import {
   QrManagementCard,
+  formatQrAssetUpdatedAt,
   type QrManagementCardItem,
+  type QrAssetMetadata,
 } from "@/app/components/business/QrManagementCard";
 import { cn } from "@/lib/utils";
 
@@ -107,7 +110,7 @@ export function QRCodeManagementPage({
   embedded = false,
   mode = "gallery",
 }: QRCodeManagementPageProps = {}) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
   const viewMode: QrStudioViewMode = embedded ? resolveEmbeddedQrMode(pathname) : mode;
   const { user, authHydrated, sessionValidated, isBusiness } = useRequireAuth();
@@ -137,6 +140,7 @@ export function QRCodeManagementPage({
   /** Stored API path for venue logo (PDF + print). */
   const [businessLogoPath, setBusinessLogoPath] = useState<string | null>(null);
   const [qrBrandingOpts, setQrBrandingOpts] = useState<QrBrandingOptions | null>(null);
+  const [assetsSyncedAt, setAssetsSyncedAt] = useState<string | null>(null);
   const employeeQrCacheKeyRef = useRef("");
   const venueQrCacheKeyRef = useRef("");
 
@@ -381,6 +385,7 @@ export function QRCodeManagementPage({
         venueQrCacheKeyRef.current = cacheKey;
         setVenueQrPreview(next);
         setQrScanMeta((prev) => ({ ...prev, ...meta }));
+        setAssetsSyncedAt(new Date().toISOString());
       }
     })();
     return () => {
@@ -439,6 +444,7 @@ export function QRCodeManagementPage({
         employeeQrCacheKeyRef.current = cacheKey;
         setQrImages(next);
         setQrScanMeta((prev) => ({ ...prev, ...meta }));
+        setAssetsSyncedAt(new Date().toISOString());
       }
     })();
     return () => {
@@ -453,6 +459,141 @@ export function QRCodeManagementPage({
       address: loc.description?.trim() || "N/A",
       qrUrl: qrLocationUrl(loc.id),
     }));
+
+  type GalleryAssetEntry = {
+    key: string;
+    item: QrManagementCardItem;
+    type: "storefront" | "employee" | "table" | "location";
+    previewDataUrl?: string;
+    metadata: QrAssetMetadata;
+    exportKey: string;
+  };
+
+  const galleryAssets = useMemo((): GalleryAssetEntry[] => {
+    if (!user?.businessId) return [];
+
+    const templateId = qrBrandingOpts?.qrTemplate ?? DEFAULT_QR_TEMPLATE;
+    const preset = QR_TEMPLATE_PRESETS[templateId] ?? QR_TEMPLATE_PRESETS[DEFAULT_QR_TEMPLATE];
+    const templateLabel = t(preset.labelKey);
+    const lastUpdatedLabel = formatQrAssetUpdatedAt(assetsSyncedAt, i18n.language);
+    const venueName =
+      String(businessDisplayName ?? "").trim() ||
+      user.businessName ||
+      t("business.qrPage.fallbackBusinessName");
+
+    const assets: GalleryAssetEntry[] = [
+      {
+        key: "storefront",
+        type: "storefront",
+        item: {
+          id: "storefront",
+          name: venueName,
+          qrUrl: businessSlug ? businessDirectoryUrl(businessSlug) : qrLandingUrl(user.businessId),
+        },
+        previewDataUrl: storefrontQr,
+        exportKey: "storefront",
+        metadata: {
+          templateLabel,
+          lastUpdatedLabel,
+          typeLabel: t("business.qrStudio.gallery.assetType.storefront"),
+          ownershipLabel: t("business.qrStudio.gallery.ownershipStorefront", { name: venueName }),
+        },
+      },
+    ];
+
+    for (const employee of safeEmployees) {
+      assets.push({
+        key: `emp-${employee.id}`,
+        type: "employee",
+        item: {
+          id: employee.id,
+          name: employee.name,
+          role: employee.role,
+          avatar: employee.avatar,
+          slug: employee.slug,
+          qrUrl:
+            businessSlug && employee.slug
+              ? publicEmployeeTipUrl(businessSlug, employee.slug)
+              : qrEmployeeLegacyUrl(employee.id),
+        },
+        previewDataUrl: qrImages[employee.id],
+        exportKey: employee.id,
+        metadata: {
+          templateLabel,
+          lastUpdatedLabel,
+          typeLabel: t("business.qrStudio.gallery.assetType.employee"),
+          ownershipLabel: t("business.qrStudio.gallery.ownershipEmployee", { name: employee.name }),
+        },
+      });
+    }
+
+    for (const loc of safeVenueLocations) {
+      assets.push({
+        key: `loc-${loc.id}`,
+        type: "location",
+        item: {
+          id: loc.id,
+          name: loc.name,
+          role: loc.description?.trim() || undefined,
+          qrUrl: qrLocationUrl(loc.id),
+        },
+        previewDataUrl: venueQrPreview[`loc-${loc.id}`],
+        exportKey: `loc-${loc.id}`,
+        metadata: {
+          templateLabel,
+          lastUpdatedLabel,
+          typeLabel: t("business.qrStudio.gallery.assetType.location"),
+          ownershipLabel: loc.description?.trim()
+            ? t("business.qrStudio.gallery.ownershipLocationNamed", {
+                name: loc.name,
+                area: loc.description,
+              })
+            : t("business.qrStudio.gallery.ownershipLocation", { name: loc.name }),
+        },
+      });
+    }
+
+    for (const tbl of safeVenueTables) {
+      assets.push({
+        key: `tbl-${tbl.id}`,
+        type: "table",
+        item: {
+          id: tbl.id,
+          name: tbl.name,
+          role: tbl.location?.name,
+          qrUrl: qrTableUrl(tbl.id),
+        },
+        previewDataUrl: venueQrPreview[`tbl-${tbl.id}`],
+        exportKey: `tbl-${tbl.id}`,
+        metadata: {
+          templateLabel,
+          lastUpdatedLabel,
+          typeLabel: t("business.qrStudio.gallery.assetType.table"),
+          ownershipLabel: t("business.qrStudio.gallery.ownershipTable", {
+            table: tbl.name,
+            location: tbl.location?.name ?? venueName,
+          }),
+        },
+      });
+    }
+
+    return assets;
+  }, [
+    user?.businessId,
+    user?.businessName,
+    qrBrandingOpts?.qrTemplate,
+    assetsSyncedAt,
+    i18n.language,
+    t,
+    businessDisplayName,
+    businessSlug,
+    storefrontQr,
+    safeEmployees,
+    safeVenueLocations,
+    safeVenueTables,
+    qrImages,
+    venueQrPreview,
+  ]);
 
   const handleCopy = (id: string, url: string) => {
     navigator.clipboard.writeText(url);
@@ -930,43 +1071,47 @@ export function QRCodeManagementPage({
             {viewMode === "gallery" && user?.businessId ? (
               <div className="space-y-6">
                 <div>
-                  <h2 className="mb-1 text-base font-semibold text-foreground">
-                    {t("business.qrStudio.gallery.mainVenueTitle")}
+                  <h2 className="text-base font-semibold text-foreground">
+                    {t("business.qrStudio.gallery.libraryTitle")}
                   </h2>
-                  <p className="mb-3 text-sm text-muted-foreground">{t("business.qrPage.storefrontQrDesc")}</p>
-                  <p className="mb-3 text-xs text-muted-foreground">
-                    {t("business.qrPage.storefrontQrUrlLabel")}{" "}
-                    <code className="break-all font-mono text-[11px] text-foreground/90">
-                      {businessSlug ? businessDirectoryUrl(businessSlug) : qrBusinessUrl(user.businessId)}
-                    </code>
+                  <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
+                    {t("business.qrStudio.gallery.libraryDesc")}
                   </p>
-                  <QrManagementCard
-                    item={{
-                      id: "storefront",
-                      name:
-                        String(businessDisplayName ?? "").trim() ||
-                        user?.businessName ||
-                        t("business.qrPage.fallbackBusinessName"),
-                      qrUrl: businessSlug
-                        ? businessDirectoryUrl(businessSlug)
-                        : qrLandingUrl(user.businessId),
-                    }}
-                    type="storefront"
-                    previewDataUrl={storefrontQr}
-                    copiedId={copiedId}
-                    qrLocked={qrLocked}
-                    regeneratingId={regeneratingId}
-                    onCopy={handleCopy}
-                    onRegenerateBusinessQr={() => void handleRegenerateBusinessQr()}
-                    onVenuePrint={(item, venueType, url) =>
-                      void handleVenueQrPrint(item as CardItem, venueType, url)
-                    }
-                    onVenuePrintPdf={(item, venueType, url) =>
-                      void handleVenuePrintPdf(item as CardItem, venueType, url)
-                    }
-                    exportBlocked={isQrExportBlocked("storefront")}
-                  />
                 </div>
+
+                {galleryAssets.length === 0 ? (
+                  <div className={cn(businessUi.cardStatic, businessUi.chartEmpty, "py-12 text-center")}>
+                    <p className="text-muted-foreground">{t("business.qrStudio.gallery.libraryEmpty")}</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                    {galleryAssets.map((asset) => (
+                      <QrManagementCard
+                        key={asset.key}
+                        item={asset.item}
+                        type={asset.type}
+                        layout="library"
+                        metadata={asset.metadata}
+                        previewDataUrl={asset.previewDataUrl}
+                        copiedId={copiedId}
+                        qrLocked={qrLocked}
+                        regeneratingId={regeneratingId}
+                        onCopy={handleCopy}
+                        onEmployeePrint={(item, url) => void handleEmployeePrint(item as CardItem, url)}
+                        onEmployeePrintPdf={(item) => void handleEmployeePrintPdf(item as CardItem)}
+                        onEmployeeRegenerate={onEmployeeRegenerateCard}
+                        onVenuePrint={(item, venueType, url) =>
+                          void handleVenueQrPrint(item as CardItem, venueType, url)
+                        }
+                        onVenuePrintPdf={(item, venueType, url) =>
+                          void handleVenuePrintPdf(item as CardItem, venueType, url)
+                        }
+                        onRegenerateBusinessQr={() => void handleRegenerateBusinessQr()}
+                        exportBlocked={isQrExportBlocked(asset.exportKey)}
+                      />
+                    ))}
+                  </div>
+                )}
 
                 <Card className={businessUi.cardStatic}>
                   <CardContent className="space-y-3 pt-6">

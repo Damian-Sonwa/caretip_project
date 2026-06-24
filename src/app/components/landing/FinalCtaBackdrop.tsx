@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { CreditCard, QrCode, Smartphone, Wallet } from "lucide-react";
+import { CaretipPremiumBackdrop } from "@/app/components/premium/CaretipPremiumBackdrop";
 import { cn } from "@/lib/utils";
 
 type FloatCardProps = {
@@ -25,9 +26,7 @@ function FloatCard({ className, children }: FloatCardProps) {
 export function FinalCtaBackdrop() {
   return (
     <div className="caretip-final-cta-scene pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-      <div className="caretip-final-cta-atmosphere absolute inset-0" />
-      <div className="caretip-final-cta-texture absolute inset-0" />
-      <div className="caretip-final-cta-noise absolute inset-0" />
+      <CaretipPremiumBackdrop />
 
       <FloatCard className="caretip-final-cta-float--qr left-[6%] top-[18%] hidden sm:flex lg:left-[10%]">
         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/15 text-primary">

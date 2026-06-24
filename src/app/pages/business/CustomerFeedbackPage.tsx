@@ -12,7 +12,6 @@ import { EmployeeEmptyState } from "@/app/components/employee/EmployeeEmptyState
 import { BusinessSubPageShellSkeleton } from "@/app/components/dashboard/BusinessSubPageShellSkeleton";
 import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
 import { CustomerFeedbackListItem } from "@/app/components/business/CustomerFeedbackListItem";
-import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -21,7 +20,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/app/components/ui/select";
-import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 import {
   getPageSessionCache,
@@ -127,30 +125,12 @@ export function CustomerFeedbackPage() {
   }
 
   return (
-    <div className={cn(businessUi.page, "mx-auto w-full max-w-4xl")}>
-      <header className="mb-6 space-y-2">
-        <div className="flex items-center gap-3">
-          <span
-            className={cn(businessUi.iconTileMuted, "flex h-11 w-11 items-center justify-center")}
-            aria-hidden
-          >
-            <MessageSquare className="h-5 w-5 text-primary" />
-          </span>
-          <div>
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {t("business.customerFeedback.pageTitle")}
-            </h1>
-            {t("business.customerFeedback.pageDesc").trim() ? (
-              <p className="text-sm text-muted-foreground">{t("business.customerFeedback.pageDesc")}</p>
-            ) : null}
-          </div>
-        </div>
-        {summaryLine ? (
-          <p className="text-sm text-muted-foreground">{summaryLine}</p>
-        ) : null}
-      </header>
+    <div className="space-y-4 pt-2 sm:space-y-5 sm:pt-4">
+      {summaryLine ? (
+        <p className="text-sm text-muted-foreground">{summaryLine}</p>
+      ) : null}
 
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <Select value={employeeId} onValueChange={setEmployeeId}>
           <SelectTrigger className="w-full sm:w-[240px]" aria-label={t("business.customerFeedback.filterEmployee")}>
             <SelectValue placeholder={t("business.customerFeedback.filterEmployee")} />

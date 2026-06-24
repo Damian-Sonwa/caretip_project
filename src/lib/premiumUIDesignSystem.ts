@@ -21,9 +21,13 @@ export const BRAND_COLORS = {
 // ============================================
 export const PREMIUM_GRADIENTS = {
   /**
-   * Color-system compliant gradients.
-   * Only uses: Primary (#e9781c), white, surface (#F9FAFB), border (#E5E7EB), and text tones.
+   * CareTip Premium Gradient — warm vertical band from landing Final CTA.
+   * Prefer CSS var(--caretip-premium-gradient) in stylesheets.
    */
+  PREMIUM_WARM_DARK: "var(--caretip-premium-gradient)",
+  PREMIUM_WARM_DARK_DARK: "var(--caretip-premium-gradient-dark)",
+  PREMIUM_CTA: "var(--caretip-premium-cta-gradient)",
+  /** Light tint for upgrade / locked feature cards (Tier 3 subtle) */
   ORANGE_SUBTLE: "linear-gradient(135deg, rgba(233, 120, 28, 0.10) 0%, rgba(233, 120, 28, 0.00) 100%)",
   SOFT_LIGHT: "linear-gradient(135deg, #F9FAFB 0%, #FFFFFF 100%)",
   DARK_WARM: "linear-gradient(135deg, #111827 0%, #111827 100%)",

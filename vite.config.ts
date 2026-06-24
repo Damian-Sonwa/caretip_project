@@ -79,6 +79,10 @@ export default defineConfig(({ mode }) => {
             return 'vendor-utils';
           }
           if (id.includes('recharts') || id.includes('d3-')) return 'vendor-recharts';
+          if (id.includes('/qrcode/') || id.includes('node_modules/qrcode')) return 'vendor-qrcode';
+          if (id.includes('three') && id.includes('node_modules')) return 'vendor-three';
+          if (id.includes('jspdf')) return 'vendor-jspdf';
+          if (id.includes('i18next') || id.includes('react-i18next')) return 'vendor-i18n';
           if (id.includes('socket.io-client') || id.includes('engine.io-client')) return 'vendor-socket';
           if (id.includes('firebase')) return 'vendor-firebase';
           if (id.includes('motion') || id.includes('framer-motion')) return 'vendor-motion';

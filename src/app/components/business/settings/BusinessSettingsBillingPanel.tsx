@@ -15,10 +15,7 @@ export function BusinessSettingsBillingPanel() {
   const [billingCycle, setBillingCycle] = useState<SubscriptionBillingCycle>("monthly");
 
   return (
-    <BusinessSettingsPanelShell
-      title={t("business.settings.panels.billingTitle")}
-      description={t("business.settings.panels.billingDesc")}
-    >
+    <BusinessSettingsPanelShell>
       {loading ? (
         <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" aria-hidden />

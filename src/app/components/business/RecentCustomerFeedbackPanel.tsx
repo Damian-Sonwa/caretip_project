@@ -9,10 +9,13 @@ import { EmployeeEmptyState } from "@/app/components/employee/EmployeeEmptyState
 import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
 import { CustomerFeedbackListItem } from "@/app/components/business/CustomerFeedbackListItem";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { CUSTOMERS_BASE } from "@/app/components/business/businessDashboardNav";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 import { isApiPendingVerificationError } from "@/app/lib/apiError";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
+
+export const DASHBOARD_CUSTOMER_FEEDBACK_TEASER_LIMIT = 3;
 
 type RecentCustomerFeedbackPanelProps = {
   enabled?: boolean;
@@ -36,7 +39,10 @@ export function RecentCustomerFeedbackPanel({
     setLoading(true);
     setError(null);
     try {
-      const res = await listBusinessCustomerFeedback({ take: 5, skip: 0 });
+      const res = await listBusinessCustomerFeedback({
+        take: DASHBOARD_CUSTOMER_FEEDBACK_TEASER_LIMIT,
+        skip: 0,
+      });
       setItems(res.items);
       setSummary(res.summary);
     } catch (err) {
@@ -77,7 +83,7 @@ export function RecentCustomerFeedbackPanel({
           </CardDescription>
         </div>
         <Button variant="ghost" size="sm" className="shrink-0" asChild>
-          <Link to="/dashboard/customers/feedback">{t("dashboard.viewAll")}</Link>
+          <Link to={CUSTOMERS_BASE}>{t("dashboard.viewAll")}</Link>
         </Button>
       </CardHeader>
       <CardContent>

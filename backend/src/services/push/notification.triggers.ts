@@ -331,7 +331,7 @@ export function onQrScanActivity(params: {
         title: "QR code scanned",
         body: "",
         localeTemplate: { id: "qr_scan", params: { place } },
-        url: "/dashboard/qr-studio/gallery",
+        url: "/dashboard/qr-studio/employees",
         timestamp: new Date().toISOString(),
         metadata: {
           entityId: dedupeSlug,
@@ -432,7 +432,7 @@ export function onBusinessVerificationStatusChanged(params: {
             id: "business_verification_approved",
             params: { businessName: params.businessName },
           },
-          url: "/dashboard/qr-studio/gallery",
+          url: "/dashboard/qr-studio/employees",
           timestamp: new Date().toISOString(),
           metadata: {
             entityId: params.businessId,

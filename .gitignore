@@ -68,6 +68,9 @@ Desktop.ini
 !/auth-navigation-audit-v2.md
 !/auth-mobile-consistency-audit.md
 !/auth-performance-report-v2.md
+!/docs/PERFORMANCE_AUDIT_REPORT.md
+!/docs/PERFORMANCE_OPTIMIZATION_ROADMAP.md
+!/docs/PERFORMANCE_IMPLEMENTATION_REPORT.md
 
 # --- Local restore / accidental paste dumps ---
 .restore_*.txt

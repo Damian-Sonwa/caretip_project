@@ -1,6 +1,5 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useCallback, useRef, type ComponentProps, type ReactNode } from "react";
-import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
@@ -47,8 +46,6 @@ import {
   setPageSessionCache,
   PAGE_CACHE_TTL_MEDIUM_MS,
 } from "../../lib/pageSessionCache";
-import { DashboardHero } from "@/components/ui/dashboard-hero";
-import { TracingBeam } from "@/components/ui/tracing-beam";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
@@ -583,121 +580,97 @@ export function StaffManagementPage() {
   const tipsMonthTotal = employees.reduce((s, e) => s + (e.tips ?? 0), 0);
 
   return (
-    <div className="min-h-screen overflow-x-hidden bg-background pb-20">
-      <div className={businessUi.subPageTop}>
-        <div className={businessUi.subPageBreadcrumb}>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
-          </Button>
-        </div>
-
-        <DashboardHero
-          stackHeroOnMobile
-          hideTabs
-          className={businessUi.subPageHero}
-          badgeClassName={businessUi.heroBadge}
-          badge={
-            <>
-              <Users className="h-3.5 w-3.5 text-foreground" />
-              {t("business.staffPage.badgeTeamRoster")}
-            </>
-          }
-          title={t("business.staffPage.heroTitle")}
-          description={t("business.staffPage.heroDesc")}
-          imageOverlay={false}
-          image={
-            <div className="relative mx-auto w-full max-w-full">
-              <div className="rounded-2xl border border-gray-100 bg-white p-3.5 shadow-none max-lg:p-3.5 sm:p-4">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {t("business.staffPage.inviteCodeLabel")}
+    <div className="space-y-4 pt-2 sm:space-y-5 sm:pt-4">
+      <Card className={cn(businessUi.cardStatic, "w-full")}>
+        <CardContent className="p-4 sm:p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                {t("business.staffPage.inviteCodeLabel")}
+              </p>
+              {inviteCode ? (
+                <>
+                  <p className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.24em] text-foreground sm:text-3xl">
+                    {inviteCode}
+                  </p>
+                  {inviteExpiresAt ? (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      {t("business.staffPage.inviteExpires", {
+                        date: formatExpiresAt(inviteExpiresAt) ?? "",
+                      })}
                     </p>
-                    {inviteCode ? (
-                      <>
-                        <p className="mt-2 select-all break-all font-mono text-2xl font-bold tracking-[0.24em] text-foreground sm:text-3xl">
-                          {inviteCode}
-                        </p>
-                        {inviteExpiresAt ? (
-                          <p className="mt-2 text-xs text-muted-foreground">
-                            {t("business.staffPage.inviteExpires", {
-                              date: formatExpiresAt(inviteExpiresAt) ?? "",
-                            })}
-                          </p>
-                        ) : null}
-                      </>
-                    ) : (
-                      <p className="mt-2 text-sm text-muted-foreground">{t("business.staffPage.inviteHint")}</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mt-3.5 flex w-full flex-col gap-2 max-lg:mt-3">
-                  {inviteCode ? (
-                    <div className="grid w-full grid-cols-2 gap-2">
-                      <HeroPanelButton
-                        type="button"
-                        variant="outline"
-                        className={cn(businessUi.btnSecondary, "min-w-0 px-3 sm:px-4")}
-                        onClick={handleCopyCode}
-                      >
-                        <HeroPanelButtonIcon>
-                          <Copy aria-hidden />
-                        </HeroPanelButtonIcon>
-                        <span className="min-w-0 leading-snug">{t("business.staffPage.copy")}</span>
-                      </HeroPanelButton>
-                      <HeroPanelButton
-                        type="button"
-                        className={cn(businessUi.btnPrimary, "min-w-0 px-3 sm:px-4")}
-                        onClick={handleRegenerate}
-                        disabled={isGenerating}
-                      >
-                        <HeroPanelButtonIcon>
-                          <RefreshCw className={cn(isGenerating && "animate-spin")} aria-hidden />
-                        </HeroPanelButtonIcon>
-                        <span className="min-w-0 leading-snug">{t("business.staffPage.regenerate")}</span>
-                      </HeroPanelButton>
-                    </div>
-                  ) : (
-                    <HeroPanelButton
-                      type="button"
-                      className={businessUi.btnPrimary}
-                      onClick={handleGenerateInvite}
-                      disabled={!isBusiness || isGenerating}
-                    >
-                      {isGenerating ? (
-                        <>
-                          <HeroPanelButtonIcon>
-                            <RefreshCw className="animate-spin" aria-hidden />
-                          </HeroPanelButtonIcon>
-                          <span className="leading-snug">{t("business.staffPage.generating")}</span>
-                        </>
-                      ) : (
-                        <>
-                          <HeroPanelButtonIcon>
-                            <KeyRound aria-hidden />
-                          </HeroPanelButtonIcon>
-                          <span className="leading-snug">{t("business.staffPage.generateInvite")}</span>
-                        </>
-                      )}
-                    </HeroPanelButton>
-                  )}
-                  <HeroPanelButton
-                    type="button"
-                    variant="outline"
-                    className={businessUi.btnSecondary}
-                    onClick={() => isBusiness && setShowAddModal(true)}
-                    disabled={!isBusiness}
-                  >
-                    <span className="leading-snug">{t("business.staffPage.addEmployee")}</span>
-                  </HeroPanelButton>
-                </div>
-              </div>
+                  ) : null}
+                </>
+              ) : (
+                <p className="mt-2 text-sm text-muted-foreground">{t("business.staffPage.inviteHint")}</p>
+              )}
             </div>
-          }
-        />
+          </div>
 
-        <Card className={businessUi.atAGlanceCard}>
+          <div className="mt-3.5 flex w-full flex-col gap-2 max-lg:mt-3">
+            {inviteCode ? (
+              <div className="grid w-full grid-cols-2 gap-2">
+                <HeroPanelButton
+                  type="button"
+                  variant="outline"
+                  className={cn(businessUi.btnSecondary, "min-w-0 px-3 sm:px-4")}
+                  onClick={handleCopyCode}
+                >
+                  <HeroPanelButtonIcon>
+                    <Copy aria-hidden />
+                  </HeroPanelButtonIcon>
+                  <span className="min-w-0 leading-snug">{t("business.staffPage.copy")}</span>
+                </HeroPanelButton>
+                <HeroPanelButton
+                  type="button"
+                  className={cn(businessUi.btnPrimary, "min-w-0 px-3 sm:px-4")}
+                  onClick={handleRegenerate}
+                  disabled={isGenerating}
+                >
+                  <HeroPanelButtonIcon>
+                    <RefreshCw className={cn(isGenerating && "animate-spin")} aria-hidden />
+                  </HeroPanelButtonIcon>
+                  <span className="min-w-0 leading-snug">{t("business.staffPage.regenerate")}</span>
+                </HeroPanelButton>
+              </div>
+            ) : (
+              <HeroPanelButton
+                type="button"
+                className={businessUi.btnPrimary}
+                onClick={handleGenerateInvite}
+                disabled={!isBusiness || isGenerating}
+              >
+                {isGenerating ? (
+                  <>
+                    <HeroPanelButtonIcon>
+                      <RefreshCw className="animate-spin" aria-hidden />
+                    </HeroPanelButtonIcon>
+                    <span className="leading-snug">{t("business.staffPage.generating")}</span>
+                  </>
+                ) : (
+                  <>
+                    <HeroPanelButtonIcon>
+                      <KeyRound aria-hidden />
+                    </HeroPanelButtonIcon>
+                    <span className="leading-snug">{t("business.staffPage.generateInvite")}</span>
+                  </>
+                )}
+              </HeroPanelButton>
+            )}
+            <HeroPanelButton
+              type="button"
+              variant="outline"
+              className={businessUi.btnSecondary}
+              onClick={() => isBusiness && setShowAddModal(true)}
+              disabled={!isBusiness}
+            >
+              <span className="leading-snug">{t("business.staffPage.addEmployee")}</span>
+            </HeroPanelButton>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card className={businessUi.atAGlanceCard}>
           <CardContent className={businessUi.atAGlanceContent}>
             <p className={businessUi.atAGlanceLabel}>{t("business.qrPage.atAGlance")}</p>
             <div className={businessUi.atAGlanceGrid}>
@@ -716,10 +689,8 @@ export function StaffManagementPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
 
-      <TracingBeam className={cn(businessUi.subPageMain, "min-w-0 pb-4")}>
-        <div className="min-w-0 space-y-6">
+      <div className="min-w-0 space-y-6">
           <Card className={cn(businessUi.cardStatic, "w-full")}>
             <CardHeader className="pb-3">
               <CardTitle className="text-base">{t("business.staffPage.searchTitle")}</CardTitle>
@@ -1079,7 +1050,6 @@ export function StaffManagementPage() {
           </>
         )}
       </div>
-      </TracingBeam>
 
       {/* Add Employee Modal — scrollable body, actions pinned to bottom */}
       {showAddModal && (

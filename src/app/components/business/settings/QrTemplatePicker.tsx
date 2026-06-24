@@ -112,7 +112,7 @@ export function QrTemplatePicker({
   const { t } = useTranslation();
 
   return (
-    <div className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-4">
+    <div className="grid min-w-0 grid-cols-2 gap-x-2 gap-y-4 min-[375px]:gap-x-3 min-[375px]:gap-y-5 sm:grid-cols-4">
       {QR_TEMPLATE_IDS.map((templateId) => {
         const locked = !canEdit && templateId !== "classic";
         const selected = value === templateId;

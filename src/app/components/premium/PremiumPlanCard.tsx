@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CaretipPremiumBackdrop } from "@/app/components/premium/CaretipPremiumBackdrop";
 import { cn } from "@/lib/utils";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
 
@@ -26,6 +27,7 @@ export function PremiumPlanCard({
 }: PremiumPlanCardProps) {
   return (
     <div className={cn(premiumVisualClasses.planCard, className)}>
+      <CaretipPremiumBackdrop />
       <div className="premium-plan-card__inner p-5 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0">

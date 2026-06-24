@@ -27,7 +27,7 @@ function defaultUrlForType(type: NotificationType, role: string | null): string 
     case "employee_invited":
       return role === "MANAGER" ? "/dashboard/team/employees" : "/employee/dashboard";
     case "qr_scan":
-      return "/dashboard/qr-studio/gallery";
+      return "/dashboard/qr-studio/employees";
     case "admin_announcement":
     case "system_alert":
     case "support_ticket_created":

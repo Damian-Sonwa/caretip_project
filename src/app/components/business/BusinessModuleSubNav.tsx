@@ -21,8 +21,8 @@ export function BusinessModuleSubNav({ items, ariaLabelKey, className }: Busines
   const { pathname } = useLocation();
 
   return (
-    <nav className={cn("mb-6", className)} aria-label={t(ariaLabelKey)}>
-      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory scroll-px-1 [-webkit-overflow-scrolling:touch]">
+    <nav className={cn("business-module-sub-nav", className)} aria-label={t(ariaLabelKey)}>
+      <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory scroll-px-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {items.map((item) => {
           const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
           return (

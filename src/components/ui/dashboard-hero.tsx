@@ -375,7 +375,7 @@ export function DashboardHero({
               ) : null}
             </div>
 
-            {/* Desktop/tablet layout unchanged */}
+            {/* Desktop/tablet: two-column hero (headline + CTAs left, media right). */}
             <div
               className={cn(
                 "dashboard-hero-container hidden min-w-0 lg:grid",

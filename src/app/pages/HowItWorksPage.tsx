@@ -39,7 +39,7 @@ export function HowItWorksPage() {
         className={cn(howItWorksPageUi.page, publicPagesBrandUi.pageAccent)}
         aria-label={t("nav.howItWorks")}
       >
-      <div className="caretip-how-marketing-hero caretip-public-marketing-hero text-center">
+      <div className={howItWorksPageUi.hero}>
         <PublicPageHeader
           centered
           introLayout="heroGroup"
@@ -66,7 +66,7 @@ export function HowItWorksPage() {
         />
       </div>
 
-      <div className={cn(howItWorksPageUi.timeline, "caretip-how-timeline")}>
+      <div className={howItWorksPageUi.timeline}>
         {HOW_IT_WORKS_STEPS.map((def, index) => (
           <HowItWorksTimelineStep
             key={def.step}

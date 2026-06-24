@@ -39,7 +39,7 @@ export function NotificationsPage() {
         const reads = [false, false, true, true, true, true] as const;
         const dates = ["2026-03-17", "2026-03-15", "2026-03-01", "2026-02-28", "2026-02-20", "2025-12-15"];
         const actionUrls = [
-          "/dashboard/qr-studio/gallery",
+          "/dashboard/qr-studio/employees",
           "/dashboard/tips/transactions",
           "/dashboard/tips/transactions",
           "/dashboard/team/employees",

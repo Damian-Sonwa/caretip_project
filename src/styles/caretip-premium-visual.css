@@ -1,37 +1,207 @@
-/* CareTip Premium Visual Layer — lightweight gradients, glow, tokens (no blur spam, no motion loops). */
+/**
+ * CareTip Premium Gradient System
+ * Single source of truth — exact values from landing Final CTA.
+ * Tokens: --caretip-premium-bg | -gradient | -glow | -border | -shadow
+ */
 
 :root {
-  --premium-gradient: linear-gradient(135deg, #0f0f0f 0%, #1a1a1a 40%, #eb992c 100%);
-  --premium-glow: 0 20px 50px -18px rgba(235, 153, 44, 0.38), 0 8px 24px -12px rgba(0, 0, 0, 0.45);
-  --premium-glow-soft: 0 12px 32px -14px rgba(235, 153, 44, 0.28), 0 4px 16px -8px rgba(0, 0, 0, 0.35);
-  --premium-radius: 1.5rem;
-  --premium-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  /* —— 1. Background anchor — warmed + slightly lifted —— */
+  --caretip-premium-bg: #100e0b;
+  --caretip-premium-bg-top: #1e1813;
+
+  /* —— 2. Vertical warm band — brighter with subtle orange lift —— */
+  --caretip-premium-gradient: linear-gradient(
+    180deg,
+    #1e1813 0%,
+    #1a1410 28%,
+    #16100d 55%,
+    #120e0b 78%,
+    #100e0b 100%
+  );
+  --caretip-premium-gradient-dark: linear-gradient(
+    180deg,
+    #181412 0%,
+    #14100d 38%,
+    #100d0a 68%,
+    #0c0a08 100%
+  );
+
+  /* —— 3. Radial glow — stronger orange atmosphere —— */
+  --caretip-premium-glow: radial-gradient(
+      ellipse 90% 58% at 50% 24%,
+      rgba(233, 120, 28, 0.22) 0%,
+      rgba(233, 120, 28, 0.07) 45%,
+      transparent 65%
+    ),
+    radial-gradient(ellipse 52% 42% at 14% 78%, rgba(233, 120, 28, 0.1) 0%, transparent 52%),
+    radial-gradient(ellipse 48% 38% at 88% 68%, rgba(245, 158, 11, 0.09) 0%, transparent 50%);
+
+  --caretip-premium-glow-mobile: radial-gradient(
+      ellipse 100% 52% at 50% 20%,
+      rgba(233, 120, 28, 0.18) 0%,
+      rgba(233, 120, 28, 0.06) 48%,
+      transparent 66%
+    ),
+    radial-gradient(ellipse 42% 32% at 12% 74%, rgba(233, 120, 28, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse 42% 32% at 88% 70%, rgba(245, 158, 11, 0.07) 0%, transparent 48%);
+
+  /* —— 4. Border —— */
+  --caretip-premium-border: rgba(233, 120, 28, 0.28);
+  --caretip-premium-border-highlight: rgba(255, 255, 255, 0.06);
+
+  /* —— 5. Shadow elevation —— */
+  --caretip-premium-shadow: 0 20px 50px -18px rgba(233, 120, 28, 0.44),
+    0 8px 24px -12px rgba(0, 0, 0, 0.4);
+  --caretip-premium-shadow-soft: 0 12px 32px -14px rgba(233, 120, 28, 0.34),
+    0 4px 16px -8px rgba(0, 0, 0, 0.32);
+  --caretip-premium-shadow-inset: inset 0 1px 0 var(--caretip-premium-border-highlight);
+
+  /* —— CTA layers (texture, noise, button — not alternate gradients) —— */
+  --caretip-premium-texture: linear-gradient(180deg, rgba(255, 255, 255, 0.05) 0%, transparent 40%),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.14) 0%, transparent 30%);
+  --caretip-premium-noise: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --caretip-premium-orange-light: #ff9e2d;
+  --caretip-premium-orange: #e9781c;
+  --caretip-premium-orange-deep: #d96f18;
+  --caretip-premium-cta-gradient: linear-gradient(
+    180deg,
+    #ff9e2d 0%,
+    #e9781c 48%,
+    #d96f18 100%
+  );
+  --caretip-premium-cta-glow: radial-gradient(
+    ellipse 75% 100% at 50% 50%,
+    rgba(233, 120, 28, 0.32) 0%,
+    rgba(233, 120, 28, 0.1) 45%,
+    transparent 72%
+  );
+  --caretip-premium-cta-shadow: 0 1px 0 rgba(255, 255, 255, 0.28) inset, 0 1px 2px rgba(0, 0, 0, 0.12),
+    0 12px 28px -6px rgba(233, 120, 28, 0.45), 0 0 36px -8px rgba(255, 158, 45, 0.2);
+  --caretip-premium-blur-orb: blur(64px);
+  --caretip-premium-radius: 1.5rem;
+
+  /* Aliases */
+  --caretip-premium-atmosphere: var(--caretip-premium-glow);
+  --premium-gradient: var(--caretip-premium-gradient);
+  --premium-glow: var(--caretip-premium-shadow);
+  --premium-glow-soft: var(--caretip-premium-shadow-soft);
+  --premium-radius: var(--caretip-premium-radius);
+  --premium-noise: var(--caretip-premium-noise);
+}
+
+html.dark {
+  --premium-gradient: var(--caretip-premium-gradient-dark);
+}
+
+/* —— Final CTA layer stack (shared landing + dashboard) —— */
+.caretip-premium-backdrop__atmosphere,
+.caretip-final-cta-atmosphere {
+  background: var(--caretip-premium-glow);
+}
+
+.caretip-premium-backdrop__texture,
+.caretip-final-cta-texture {
+  background: var(--caretip-premium-texture);
+  opacity: 0.7;
+}
+
+.caretip-premium-backdrop__noise,
+.caretip-final-cta-noise {
+  opacity: 0.035;
+  background-image: var(--caretip-premium-noise);
+  background-repeat: repeat;
+  background-size: 128px 128px;
+}
+
+@media (max-width: 1023px) {
+  .caretip-landing .caretip-premium-backdrop__atmosphere,
+  .caretip-landing .caretip-final-cta-atmosphere {
+    background: var(--caretip-premium-glow-mobile);
+  }
+}
+
+/* —— Premium surfaces: base band matches Final CTA; layers via CaretipPremiumBackdrop —— */
+.caretip-premium-surface,
+.premium-gradient-shell,
+.premium-gradient-surface,
+.premium-summary-card,
+.premium-plan-card,
+.premium-workspace-header,
+.premium-live-card,
+.premium-empty-state__header {
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background: var(--caretip-premium-gradient);
+  box-shadow: var(--caretip-premium-shadow-soft), var(--caretip-premium-shadow-inset);
+}
+
+.caretip-premium-surface,
+.premium-gradient-shell,
+.premium-gradient-surface,
+.premium-summary-card,
+.premium-plan-card,
+.premium-workspace-header,
+.premium-live-card {
+  border: none;
+}
+
+.premium-empty-state__header {
+  border: none;
+  box-shadow: none;
+}
+
+/* Dashboard: always warm Final CTA band (not cool dark variant) */
+.caretip-dashboard-shell .premium-workspace-header,
+.caretip-dashboard-shell .premium-summary-card,
+.caretip-dashboard-shell .premium-plan-card,
+.caretip-dashboard-shell .premium-live-card,
+.caretip-dashboard-shell .premium-empty-state__header {
+  background: var(--caretip-premium-gradient);
+}
+
+.caretip-premium-surface__inner,
+.premium-summary-card__inner,
+.premium-plan-card__inner,
+.premium-workspace-header__inner {
+  position: relative;
+  z-index: 1;
+}
+
+/* Shell utilities */
+.caretip-premium-surface {
+  border-radius: var(--caretip-premium-radius);
 }
 
 .premium-gradient-shell {
-  background: var(--premium-gradient);
-  box-shadow: var(--premium-glow-soft);
+  border-radius: var(--caretip-premium-radius);
+  box-shadow: var(--caretip-premium-shadow);
 }
 
 .premium-gradient-surface {
-  background: var(--premium-gradient);
+  border-radius: var(--caretip-premium-radius);
 }
 
 .premium-glow {
-  box-shadow: var(--premium-glow);
+  box-shadow: var(--caretip-premium-shadow);
 }
 
 .premium-card {
-  border-radius: var(--premium-radius);
+  border-radius: var(--caretip-premium-radius);
 }
 
+/* Tier 3 — badge / pill accent */
 .premium-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.375rem;
   border-radius: 9999px;
-  border: 1px solid rgba(235, 153, 44, 0.35);
-  background: linear-gradient(135deg, rgba(15, 15, 15, 0.92) 0%, rgba(235, 153, 44, 0.22) 100%);
+  border: 1px solid var(--caretip-premium-border);
+  background: linear-gradient(
+    135deg,
+    rgba(22, 20, 18, 0.92) 0%,
+    rgba(233, 120, 28, 0.22) 100%
+  );
   padding: 0.25rem 0.625rem;
   font-size: 0.6875rem;
   font-weight: 600;
@@ -40,7 +210,7 @@
   color: rgba(255, 255, 255, 0.92);
 }
 
-/* Dashboard hero — clean card frame (no orange/black gradient border). */
+/* Tier 1 — overview dashboard hero (intentionally flat — no full gradient band) */
 .premium-page-hero {
   position: relative;
   border-radius: 1.75rem;
@@ -51,7 +221,8 @@
   min-height: clamp(180px, 22vw, 260px);
 }
 
-.premium-page-hero::before {
+.premium-page-hero::before,
+.premium-page-hero::after {
   display: none;
 }
 
@@ -71,40 +242,18 @@
   margin-bottom: 0;
 }
 
-/* Analytics / health summary banner */
+/* Tier 2 — analytics / health summary */
 .premium-summary-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--premium-radius);
-  background: var(--premium-gradient);
-  box-shadow: var(--premium-glow);
-  color: #fff;
+  border-radius: var(--caretip-premium-radius);
+  box-shadow: var(--caretip-premium-shadow);
 }
 
-.premium-summary-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--premium-noise);
-  background-size: 160px 160px;
-  opacity: 0.45;
-  pointer-events: none;
-}
-
-.premium-summary-card__glow {
-  position: absolute;
-  right: -6%;
-  bottom: -40%;
-  width: 38%;
-  height: 80%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(235, 153, 44, 0.35) 0%, transparent 70%);
-  pointer-events: none;
+.premium-summary-card__glow,
+.premium-workspace-header__glow {
+  display: none;
 }
 
 .premium-summary-card__inner {
-  position: relative;
-  z-index: 1;
   padding: 1.25rem 1.25rem 1.375rem;
 }
 
@@ -153,76 +302,68 @@
   color: #fca5a5;
 }
 
-/* Billing current plan */
+/* Tier 2 — billing current plan */
 .premium-plan-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--premium-radius);
-  background: var(--premium-gradient);
-  box-shadow: var(--premium-glow);
-  color: #fff;
-}
-
-.premium-plan-card::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--premium-noise);
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.premium-plan-card__inner {
-  position: relative;
-  z-index: 1;
+  border-radius: var(--caretip-premium-radius);
+  box-shadow: var(--caretip-premium-shadow);
 }
 
 .premium-plan-card__details {
-  border-radius: calc(var(--premium-radius) - 4px);
+  border-radius: calc(var(--caretip-premium-radius) - 4px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(255, 255, 255, 0.96);
   color: var(--foreground);
 }
 
-/* Live activity — dark surface with orange glow accents */
+/* Tier 2 — live activity (Final CTA band + left accent) */
 .premium-live-card {
-  position: relative;
-  overflow: hidden;
-  border-radius: var(--premium-radius);
-  border: 1px solid rgba(235, 153, 44, 0.22);
-  background: linear-gradient(165deg, #0f0f0f 0%, #141414 55%, #1a1410 100%);
-  box-shadow: var(--premium-glow-soft);
-  color: #fff;
+  border-radius: var(--caretip-premium-radius);
 }
 
-.premium-live-card::after {
-  content: "";
+.premium-live-card__accent {
   position: absolute;
   left: 0;
   top: 0;
+  z-index: 1;
   width: 3px;
   height: 100%;
-  background: linear-gradient(180deg, #eb992c 0%, rgba(235, 153, 44, 0.15) 100%);
+  background: linear-gradient(
+    180deg,
+    var(--caretip-premium-orange) 0%,
+    rgba(233, 120, 28, 0.15) 100%
+  );
   pointer-events: none;
 }
 
 .premium-live-card__header {
+  position: relative;
+  z-index: 1;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* Premium empty states */
+/* Tier 2 — empty states (gradient header only) */
 .premium-empty-state {
   overflow: hidden;
-  border-radius: var(--premium-radius);
-  border: 1px solid rgba(235, 153, 44, 0.18);
+  border-radius: var(--caretip-premium-radius);
+  border: 1px solid var(--caretip-premium-border);
   background: #fff;
   box-shadow: 0 8px 28px -16px rgba(15, 15, 15, 0.12);
 }
 
 .premium-empty-state__header {
-  background: var(--premium-gradient);
+  position: relative;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
   padding: 1.5rem 1.5rem 1.25rem;
   text-align: center;
+  overflow: hidden;
+}
+
+.premium-empty-state__icon,
+.premium-empty-state__title {
+  position: relative;
+  z-index: 1;
 }
 
 .premium-empty-state__icon {
@@ -263,16 +404,11 @@
   margin-top: 1.25rem;
 }
 
-/* QR Studio workspace header */
+/* Tier 1 — module workspace heroes */
 .premium-workspace-header {
-  position: relative;
-  overflow: hidden;
   margin-bottom: 1.5rem;
-  border-radius: var(--premium-radius);
-  background: var(--premium-gradient);
-  box-shadow: var(--premium-glow-soft);
+  border-radius: var(--caretip-premium-radius);
   padding: 1.25rem 1.25rem 1.375rem;
-  color: #fff;
 }
 
 @media (min-width: 640px) {
@@ -281,27 +417,8 @@
   }
 }
 
-.premium-workspace-header::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background-image: var(--premium-noise);
-  opacity: 0.4;
-  pointer-events: none;
-}
-
-.premium-workspace-header__inner {
-  position: relative;
-  z-index: 1;
-}
-
-.premium-workspace-header__glow {
-  position: absolute;
-  right: 4%;
-  top: -20%;
-  width: 28%;
-  height: 120%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(235, 153, 44, 0.3) 0%, transparent 70%);
-  pointer-events: none;
+/* Tier 3 — premium CTA button accent (optional utility) */
+.caretip-premium-cta-button {
+  background: var(--caretip-premium-cta-gradient) !important;
+  box-shadow: var(--caretip-premium-cta-shadow) !important;
 }

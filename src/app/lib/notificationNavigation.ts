@@ -117,7 +117,7 @@ export function resolveInboxNotificationDestination(
   }
 
   if (type === "qr_scan" && role === "business") {
-    return "/dashboard/qr-studio/gallery";
+    return "/dashboard/qr-studio/employees";
   }
 
   if (type === "new_login") {

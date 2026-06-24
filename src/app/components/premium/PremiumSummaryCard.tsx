@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
+import { CaretipPremiumBackdrop } from "@/app/components/premium/CaretipPremiumBackdrop";
 import { cn } from "@/lib/utils";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
+import type { HeroPersonality } from "@/lib/heroPersonalitySystem";
+import { heroPersonalityDataAttr } from "@/lib/heroPersonalitySystem";
 
 export type PremiumSummaryMetric = {
   label: string;
@@ -18,6 +21,7 @@ export type PremiumSummaryCardProps = {
   footer?: ReactNode;
   className?: string;
   variant?: "banner" | "health";
+  personality?: HeroPersonality;
 };
 
 function TrendIcon({ direction }: { direction?: "up" | "down" | "neutral" }) {
@@ -37,13 +41,15 @@ export function PremiumSummaryCard({
   footer,
   className,
   variant = "banner",
+  personality,
 }: PremiumSummaryCardProps) {
   return (
     <section
       className={cn(premiumVisualClasses.summaryCard, className)}
       aria-label={title}
+      {...(personality ? heroPersonalityDataAttr(personality) : {})}
     >
-      <div className="premium-summary-card__glow" aria-hidden />
+      <CaretipPremiumBackdrop personality={personality} />
       <div className="premium-summary-card__inner">
         <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 space-y-1.5">

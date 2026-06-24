@@ -29,7 +29,7 @@ export function HowItWorksTimelineStep({
   children,
 }: HowItWorksTimelineStepProps) {
   return (
-    <article className={cn("relative", isFirst && "lg:-mt-1")}>
+    <article className="relative">
       {!isLast ? (
         <div
           aria-hidden
@@ -75,7 +75,7 @@ export function HowItWorksTimelineStep({
           variant={visual}
           className={cn(
             "lg:justify-self-center",
-            isFirst && "max-lg:mt-0 lg:-mt-5 xl:-mt-7",
+            isFirst && "pt-2 sm:pt-3 lg:pt-4",
           )}
         />
       </div>

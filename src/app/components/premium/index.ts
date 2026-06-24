@@ -1,3 +1,4 @@
+export { CaretipPremiumBackdrop } from "./CaretipPremiumBackdrop";
 export { PremiumPageHero } from "./PremiumPageHero";
 export { PremiumSummaryCard } from "./PremiumSummaryCard";
 export type { PremiumSummaryMetric, PremiumSummaryCardProps } from "./PremiumSummaryCard";

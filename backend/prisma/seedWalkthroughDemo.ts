@@ -213,7 +213,7 @@ async function seedWalkthroughDemoFeedback(
   tableGarden: { id: string },
 ): Promise<void> {
   const comments = [
-    "Exceptional service — thank you!",
+    "Exceptional service. Thank you!",
     "Made our evening special.",
     "Friendly and attentive team.",
     "Quick service on the terrace.",
@@ -414,7 +414,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     create: {
       id: LOCATION_MAIN_ID,
       name: "Main dining room",
-      description: "Walkthrough demo — indoor seating.",
+      description: "Walkthrough demo: indoor seating.",
       businessId: business.id,
     },
   });
@@ -425,16 +425,16 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
     create: {
       id: LOCATION_GARDEN_ID,
       name: "Terrace",
-      description: "Walkthrough demo — outdoor terrace.",
+      description: "Walkthrough demo: outdoor terrace.",
       businessId: business.id,
     },
   });
 
   await prisma.table.upsert({
     where: { qrSlug: TABLE_QR_MAIN },
-    update: { name: "Table 12 — Window", locationId: locMain.id },
+    update: { name: "Table 12 Window", locationId: locMain.id },
     create: {
-      name: "Table 12 — Window",
+      name: "Table 12 Window",
       qrSlug: TABLE_QR_MAIN,
       locationId: locMain.id,
     },
@@ -442,9 +442,9 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
 
   await prisma.table.upsert({
     where: { qrSlug: TABLE_QR_GARDEN },
-    update: { name: "Table 4 — Patio", locationId: locGarden.id },
+    update: { name: "Table 4 Patio", locationId: locGarden.id },
     create: {
-      name: "Table 4 — Patio",
+      name: "Table 4 Patio",
       qrSlug: TABLE_QR_GARDEN,
       locationId: locGarden.id,
     },
@@ -628,7 +628,7 @@ export async function seedWalkthroughDemo(prisma: PrismaClient): Promise<void> {
       {
         userId: adminUser.id,
         action: "walkthrough_demo.business_directory",
-        metadata: `${BUSINESS_NAME} — verification: verified.`,
+        metadata: `${BUSINESS_NAME}, verification: verified.`,
       },
       {
         userId: adminUser.id,

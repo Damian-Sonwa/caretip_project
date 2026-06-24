@@ -1,4 +1,4 @@
-import { DateTime } from "luxon";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../../prisma.js";
 import { businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../../utils/businessTime.js";
 import { buildBusinessDailyTipDistribution } from "../../utils/tipChartBuckets.js";
@@ -45,6 +45,30 @@ function scanLabel(
   return scanType;
 }
 
+async function queryQrScanDailyCounts(opts: {
+  businessId: string;
+  startUtc: Date;
+  endUtc: Date;
+  tz: string;
+}): Promise<Map<string, number>> {
+  const rows = await prisma.$queryRaw<Array<{ d: string; total: number }>>(Prisma.sql`
+    SELECT
+      to_char(date_trunc('day', scanned_at AT TIME ZONE ${opts.tz}), 'YYYY-MM-DD') AS d,
+      COUNT(*)::int AS total
+    FROM qr_scan_events
+    WHERE business_id = ${opts.businessId}
+      AND scanned_at >= ${opts.startUtc}
+      AND scanned_at <= ${opts.endUtc}
+    GROUP BY 1
+    ORDER BY 1 ASC
+  `);
+  const m = new Map<string, number>();
+  for (const r of rows) {
+    m.set(String(r.d).slice(0, 10), Number(r.total ?? 0));
+  }
+  return m;
+}
+
 export async function getBusinessQrAnalytics(
   businessId: string,
   timeframe: QrAnalyticsTimeframe,
@@ -63,7 +87,7 @@ export async function getBusinessQrAnalytics(
     scannedAt: { gte: startUtc, lte: endUtc },
   };
 
-  const [totalScans, sessionGroups, locationGroups, employeeGroups, tableGroups, slugGroups, deviceGroups, trendDates, recentRows] =
+  const [totalScans, sessionGroups, locationGroups, employeeGroups, tableGroups, slugGroups, deviceGroups, dailyByYmd, recentRows] =
     await Promise.all([
       prisma.qrScanEvent.count({ where }),
       prisma.qrScanEvent.groupBy({
@@ -96,10 +120,7 @@ export async function getBusinessQrAnalytics(
         where,
         _count: { _all: true },
       }),
-      prisma.qrScanEvent.findMany({
-        where,
-        select: { scannedAt: true },
-      }),
+      queryQrScanDailyCounts({ businessId, startUtc, endUtc, tz }),
       prisma.qrScanEvent.findMany({
         where,
         orderBy: { scannedAt: "desc" },
@@ -175,12 +196,6 @@ export async function getBusinessQrAnalytics(
       count: g._count._all,
     }))
     .sort((a, b) => b.count - a.count);
-
-  const dailyByYmd = new Map<string, number>();
-  for (const ev of trendDates) {
-    const key = DateTime.fromJSDate(ev.scannedAt, { zone: "utc" }).setZone(tz).toFormat("yyyy-LL-dd");
-    dailyByYmd.set(key, (dailyByYmd.get(key) ?? 0) + 1);
-  }
 
   const scanTrend = buildBusinessDailyTipDistribution(timeframe, dailyByYmd, startUtc, tz).map((row) => ({
     label: row.day,

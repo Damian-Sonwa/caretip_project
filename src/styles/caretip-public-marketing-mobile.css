@@ -237,7 +237,7 @@
 @media (max-width: 639px) {
   .caretip-how-marketing-hero .caretip-how-journey-band {
     margin-top: 1.75rem;
-    margin-bottom: 0;
+    margin-bottom: 0.5rem;
     max-width: 100%;
     padding: 0.875rem 0.75rem;
   }
@@ -289,6 +289,7 @@
 @media (min-width: 640px) {
   .caretip-how-marketing-hero .caretip-how-journey-band {
     margin-top: 1.75rem;
+    margin-bottom: 0.75rem;
   }
 
   .caretip-how-journey-list__item {
@@ -301,7 +302,7 @@
 /* —— How It Works: timeline —— */
 @media (max-width: 639px) {
   .caretip-how-timeline {
-    margin-top: 2.75rem;
+    margin-top: 3rem;
   }
 
   .caretip-how-step__badge {

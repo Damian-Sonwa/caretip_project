@@ -33,14 +33,13 @@ export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
 ] as const;
 
 export const QR_STUDIO_BASE = "/dashboard/qr-studio" as const;
+export const QR_STUDIO_DEFAULT_HREF = `${QR_STUDIO_BASE}/employees` as const;
 
 export const qrStudioSubNavItems = [
-  { labelKey: "business.qrStudio.nav.gallery", href: `${QR_STUDIO_BASE}/gallery` },
   { labelKey: "business.qrStudio.nav.employees", href: `${QR_STUDIO_BASE}/employees` },
   { labelKey: "business.qrStudio.nav.locations", href: `${QR_STUDIO_BASE}/locations` },
   { labelKey: "business.qrStudio.nav.tables", href: `${QR_STUDIO_BASE}/tables`, featureKey: "tableQr" as FeatureKey },
   { labelKey: "business.qrStudio.nav.branding", href: `${QR_STUDIO_BASE}/branding`, featureKey: "brandingCustomization" as FeatureKey },
-  { labelKey: "business.qrStudio.nav.downloads", href: `${QR_STUDIO_BASE}/downloads` },
 ] as const;
 
 export const TIPS_BASE = "/dashboard/tips" as const;
@@ -114,5 +113,5 @@ export function isBusinessDashboardNavActive(href: string, pathname: string): bo
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** QR Studio KYC lock — same path family as legacy qr-code-management. */
-export const QR_STUDIO_GALLERY_HREF = `${QR_STUDIO_BASE}/gallery` as const;
+/** QR Studio default hub — employee QR codes (gallery/downloads pages removed). */
+export const QR_STUDIO_GALLERY_HREF = QR_STUDIO_DEFAULT_HREF;

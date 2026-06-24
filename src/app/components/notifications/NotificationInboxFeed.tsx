@@ -9,6 +9,7 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
+import { BusinessModuleWorkspaceHeader } from "@/app/components/business/BusinessModuleWorkspaceHeader";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
@@ -349,37 +350,38 @@ export function NotificationInboxFeed({
   return (
     <div className="mx-auto w-full min-w-0 max-w-3xl space-y-4 pb-8 sm:space-y-5">
       {/* Header */}
-      <header className="rounded-2xl border border-border/80 bg-gradient-to-br from-card via-card to-muted/25 p-4 shadow-sm sm:p-5">
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">{pageTitle}</h1>
-            {pageSubtitle.trim() ? (
-              <p className="mt-0.5 text-sm text-muted-foreground">{pageSubtitle}</p>
-            ) : null}
-            <p className="mt-2 text-sm font-medium text-foreground/90">
-              {t("notifications.inbox.statsLine", {
-                unread: unreadCount,
-                shown: shownCount,
-                more: hasMore ? "+" : "",
-              })}
-            </p>
-          </div>
-          {unreadCount > 0 ? (
+      <BusinessModuleWorkspaceHeader
+        personality="notifications"
+        badge={t("notifications.inbox.badge")}
+        icon={Bell}
+        title={pageTitle}
+        subtitle={pageSubtitle}
+        actions={
+          unreadCount > 0 ? (
             <Button
               type="button"
               variant="outline"
               size="sm"
-              className="shrink-0 gap-1.5"
+              className="w-full shrink-0 gap-1.5 border-white/25 bg-white/10 text-white hover:bg-white/15 hover:text-white sm:w-auto"
               onClick={() => void markAllRead()}
             >
               <CheckCheck className="h-4 w-4" aria-hidden />
               {t("notifications.inbox.markAllRead")}
             </Button>
-          ) : null}
-        </div>
+          ) : undefined
+        }
+      />
+      <p className="text-sm font-medium text-muted-foreground">
+        {t("notifications.inbox.statsLine", {
+          unread: unreadCount,
+          shown: shownCount,
+          more: hasMore ? "+" : "",
+        })}
+      </p>
 
+      <div className="rounded-2xl border border-border/80 bg-card p-4 shadow-sm sm:p-5">
         <form
-          className="mt-4 flex gap-2"
+          className="flex gap-2"
           onSubmit={(e) => {
             e.preventDefault();
             setAppliedSearch(searchInput);
@@ -403,7 +405,7 @@ export function NotificationInboxFeed({
           </Button>
         </form>
 
-        <div className="mt-3 flex gap-2 overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="mt-3 flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-px-1 pb-0.5 [-webkit-overflow-scrolling:touch] [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {INBOX_FILTER_CHIPS.map((chip) => {
             const active = categoryFilter === chip;
             const chipUnread = chip === "unread" ? unreadCount : 0;
@@ -413,7 +415,7 @@ export function NotificationInboxFeed({
                 type="button"
                 onClick={() => setCategoryFilter(chip)}
                 className={cn(
-                  "inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                  "inline-flex min-h-[44px] shrink-0 snap-start touch-manipulation items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                   active
                     ? "border-primary/40 bg-primary text-primary-foreground shadow-sm"
                     : "border-border/80 bg-background/60 text-muted-foreground hover:border-border hover:text-foreground",
@@ -434,7 +436,7 @@ export function NotificationInboxFeed({
             );
           })}
         </div>
-      </header>
+      </div>
 
       {isRefreshing ? (
         <div

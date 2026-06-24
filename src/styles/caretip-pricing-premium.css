@@ -4,19 +4,9 @@
 
 .caretip-pricing-page {
   --caretip-pricing-card-min-h: 26rem;
-  --caretip-pricing-warm-dark-bg: linear-gradient(
-    180deg,
-    #161412 0%,
-    #12100e 38%,
-    #100e0c 72%,
-    #0e0d0b 100%
-  );
-  --caretip-pricing-warm-dark-border: rgb(233 120 28 / 0.28);
-  --caretip-pricing-warm-dark-glow: radial-gradient(
-    ellipse 85% 55% at 50% 0%,
-    rgb(233 120 28 / 0.16) 0%,
-    transparent 58%
-  );
+  --caretip-pricing-warm-dark-bg: var(--caretip-premium-gradient);
+  --caretip-pricing-warm-dark-border: var(--caretip-premium-border-strong);
+  --caretip-pricing-warm-dark-glow: var(--caretip-premium-glow);
   position: relative;
 }
 
@@ -1110,8 +1100,8 @@ html.dark .caretip-pricing-faq__answer p {
 }
 
 html.dark .caretip-pricing-final-cta {
-  border-color: rgb(233 120 28 / 0.32);
-  background: linear-gradient(180deg, #111010 0%, #0c0c0c 42%, #0a0a0a 78%, #090909 100%);
+  border-color: var(--caretip-premium-border-strong);
+  background: var(--caretip-premium-gradient-dark);
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0.03),
     0 20px 48px -20px rgb(0 0 0 / 0.5);

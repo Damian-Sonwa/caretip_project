@@ -6,7 +6,6 @@ import { toast } from "sonner";
 import { RevenueAnalyticsCards } from "./insights/RevenueAnalyticsCards";
 import { QrAnalyticsSection } from "./insights/QrAnalyticsSection";
 import { OperationalMetricsCards } from "./insights/OperationalMetricsCards";
-import { BusinessIntelligenceCharts } from "./insights/BusinessIntelligenceCharts";
 import { DashboardAnalyticsPeriodToggle } from "../dashboard/DashboardAnalyticsPeriodToggle";
 import { DashboardChartsIdleMount } from "../dashboard/DashboardChartsIdleMount";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
@@ -26,6 +25,12 @@ import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/char
 const BusinessDashboardAnalyticsCharts = lazy(() =>
   import("../../pages/business/BusinessDashboardAnalyticsCharts").then((mod) => ({
     default: mod.BusinessDashboardAnalyticsCharts,
+  })),
+);
+
+const BusinessIntelligenceCharts = lazy(() =>
+  import("./insights/BusinessIntelligenceCharts").then((mod) => ({
+    default: mod.BusinessIntelligenceCharts,
   })),
 );
 
@@ -133,6 +138,7 @@ export function BusinessAnalyticsReporting({
   return (
     <div className="space-y-8">
       <PremiumSummaryCard
+        personality="analytics"
         title={t("premium.summaryBanner.title")}
         periodLabel={periodLabel}
         metrics={[
@@ -245,7 +251,13 @@ export function BusinessAnalyticsReporting({
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           {t("business.tips.analytics.sections.trends")}
         </h2>
-        <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
+        <DashboardChartsIdleMount
+          fallback={
+            <div className={cn(businessUi.cardStatic, "h-[320px] animate-pulse bg-muted/30")} />
+          }
+        >
+          <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
+        </DashboardChartsIdleMount>
       </section>
 
       <section className="space-y-3">

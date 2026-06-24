@@ -1071,7 +1071,7 @@
       "accountTypeLabel": "Kontotyp",
       "roleBusiness": "Unternehmen",
       "roleStaff": "Team",
-      "roleLockedInviteHint": "Teameinladung — Kontotyp ist auf Team festgelegt"
+      "roleLockedInviteHint": "Teameinladung: Kontotyp ist auf Team festgelegt"
     },
     "employeeAuth": {
       "titleSignIn": "Team-Anmeldung",
@@ -1236,6 +1236,7 @@
       "daysAgo": "vor {{count}} T."
     },
     "inbox": {
+      "badge": "Posteingang",
       "title": "Benachrichtigungen",
       "subtitle": "Betriebliche Updates für Ihr Konto",
       "subtitleAdmin": "Support-Tickets, Verifizierungs-Hinweise und Plattform-Updates",
@@ -1782,7 +1783,7 @@
       "enterprise": "Enterprise"
     },
     "nav": {
-      "lockedAria": "{{feature}} — Premium-Funktion, tippen für Upgrade-Optionen"
+      "lockedAria": "{{feature}}: Premium-Funktion, tippen für Upgrade-Optionen"
     },
     "locked": {
       "eyebrow": "Premium-Funktion",
@@ -1824,7 +1825,7 @@
       },
       "tableQr": {
         "title": "Tisch-QR & erweiterte QR-Verwaltung",
-        "benefit": "Gäste tippen am Tisch — mit erweiterten QR-Workflows.",
+        "benefit": "Gäste tippen am Tisch mit erweiterten QR-Workflows.",
         "f0": "QR-Codes pro Tisch",
         "f1": "Druckfertige Marken-QR-Assets",
         "f2": "Tischzuweisung für Mitarbeitende",
@@ -1892,10 +1893,10 @@
     "business": {
       "overview": "Dashboard",
       "tips": "Trinkgelder",
-      "team": "Team",
+      "team": "Teamverwaltung",
       "qrStudio": "QR Studio",
       "locations": "Standorte",
-      "customers": "Gäste",
+      "customers": "Kundenfeedback",
       "billing": "Abrechnung",
       "settings": "Einstellungen"
     }
@@ -2730,7 +2731,7 @@
     },
     "tipHistory": {
       "title": "Trinkgeldverlauf",
-      "subtitle": "Ihr Einnahmenbuch — durchsuchbare Trinkgeld-Einträge mit Zahlungsstatus.",
+      "subtitle": "Ihr Einnahmenbuch mit durchsuchbaren Trinkgeld-Einträge mit Zahlungsstatus.",
       "backAria": "Zurück",
       "searchPlaceholder": "Standort, Tisch oder Trinkgeld-ID suchen…",
       "statusAll": "Alle Status",
@@ -3115,7 +3116,7 @@
       "review": {
         "brandingLabel": "Logo",
         "logoAdded": "Logo hinzugefügt",
-        "logoSkipped": "Kein Logo — später in den Einstellungen möglich"
+        "logoSkipped": "Kein Logo. Später in den Einstellungen möglich"
       },
       "fields": {
         "legalName": "Rechtlicher Betriebsname",
@@ -3271,6 +3272,8 @@
       "exportFailed": "Export fehlgeschlagen. Bitte erneut versuchen.",
       "topPerformers": "Top-Performer",
       "viewLeaderboard": "Vollständige Rangliste anzeigen",
+      "viewAllTopPerformers": "Alle anzeigen",
+      "goalsTeaserHint": "{{shown}} von {{total}} Teamzielen angezeigt. Top Performer für vollständige Ranglisten und Anerkennung öffnen.",
       "topPerformerBadge": "Top-Performer",
       "newMember": "Neu im Team",
       "quickActions": "Schnellaktionen",
@@ -3301,8 +3304,9 @@
     },
     "locationsPage": {
       "backAria": "Zurück zum Dashboard",
+      "eyebrow": "Standorte",
       "title": "Standorte",
-      "subtitle": "Bereiche und Orte für Tisch-QR-Codes",
+      "subtitle": "Strukturierte Bereiche für Tisch-QR-Codes und Multi-Standort-Betrieb.",
       "addNew": "+ Neuer Standort",
       "loading": "Standorte werden geladen…",
       "empty": "Noch keine Standorte. Legen Sie z. B. Hauptbar oder Dachterrasse an.",
@@ -3564,7 +3568,7 @@
       "toastPdfReady": "PDF zum Drucken bereit.",
       "toastPdfFail": "PDF konnte nicht erstellt werden.",
       "teamQrSubtitle": "Team-QR, Eingang oder Theke",
-      "storefrontCardHint": "Marken-Branding steckt in der QR-Karte — laden Sie das vollständige Erlebnis herunter oder drucken Sie es.",
+      "storefrontCardHint": "Marken-Branding steckt in der QR-Karte. Laden Sie das vollständige Erlebnis herunter oder drucken Sie es.",
       "labelQrUrl": "QR-Code-URL",
       "totalScans": "Scans gesamt:",
       "pendingTitle": "Geschäftsverifizierung ausstehend",
@@ -3607,6 +3611,8 @@
       "print": "Drucken",
       "downloadPdfLayout": "PDF-Layout herunterladen",
       "regenerateBusinessQr": "Unternehmens-QR neu erzeugen",
+      "regenerateEmployeeQr": "Neu erzeugen",
+      "generateProfileLink": "Profil-Link erzeugen",
       "staffTagsTitle": "Team-QR-Codes",
       "staffTagsDesc": "Individuelle QR-Codes pro Teammitglied, im gleichen Markenstil wie Schaufenster-, Tisch- und Standortcodes.",
       "designStudio": {
@@ -3685,7 +3691,7 @@
     "qrStudio": {
       "eyebrow": "Produkt",
       "title": "QR Studio",
-      "subtitle": "Markenerlebnisse gestalten, QR-Codes verwalten und druckfertige Hospitality-Assets exportieren.",
+      "subtitle": "Ihr Premium-Studio für Marken-QR-Codes, Gäste-Touchpoints und druckfertige Assets.",
       "navAria": "QR-Studio-Bereiche",
       "nav": {
         "gallery": "QR-Galerie",
@@ -3706,11 +3712,32 @@
         "quickAccessDesc": "Bereich öffnen zum Herunterladen, Drucken oder Teilen bestimmter QR-Codes.",
         "manageEmployees": "Mitarbeiter-QRs",
         "manageLocations": "Standort-QRs",
-        "manageTables": "Tisch-QRs"
+        "manageTables": "Tisch-QRs",
+        "libraryTitle": "QR-Asset-Bibliothek",
+        "libraryDesc": "Alle druckbaren Codes für Ihr Lokal — mit Vorlage, Zuordnung und Download-Aktionen an einem Ort.",
+        "libraryEmpty": "Noch keine QR-Assets. Fügen Sie Mitarbeitende, Standorte oder Tische hinzu.",
+        "preview": "Vorschau",
+        "downloadPng": "PNG herunterladen",
+        "previewAssetAria": "QR-Vorschau in voller Größe öffnen",
+        "metaType": "QR-Typ",
+        "metaOwnership": "Zuordnung",
+        "metaTemplate": "Vorlage",
+        "metaUpdated": "Zuletzt aktualisiert",
+        "assetType": {
+          "storefront": "Hauptlokal",
+          "employee": "Personal",
+          "location": "Standort",
+          "table": "Tisch"
+        },
+        "ownershipStorefront": "Hauptlokal · {{name}}",
+        "ownershipEmployee": "Personal · {{name}}",
+        "ownershipLocation": "Standort · {{name}}",
+        "ownershipLocationNamed": "Standort · {{name}} ({{area}})",
+        "ownershipTable": "Tisch · {{table}} in {{location}}"
       },
       "employees": {
         "pageTitle": "Mitarbeiter-QR-Codes",
-        "pageDesc": "Persönliche Codes pro Teammitglied — Tags drucken oder Links teilen."
+        "pageDesc": "Persönliche Codes pro Teammitglied. Tags drucken oder Links teilen."
       },
       "locations": {
         "pageTitle": "Standort-QR-Codes",
@@ -3722,7 +3749,7 @@
       },
       "design": {
         "title": "Marken-Erlebnis-Designer",
-        "subtitle": "Gestalten Sie ein vollständiges Markenerlebnis — nicht nur einen QR-Code.",
+        "subtitle": "Gestalten Sie ein vollständiges Markenerlebnis, nicht nur einen QR-Code.",
         "navAria": "QR-Studio-Designer-Bereiche",
         "sections": {
           "design": "Design",
@@ -3745,13 +3772,23 @@
         "headerLogo": "Logo auf Karte",
         "headerLogoHint": "Venue-Logo oben auf der Erlebniskarte anzeigen.",
         "qrSize": "QR-Größe",
-        "qrSizeHint": "Über Layout-Variante — größer für Poster, kompakt für Speisekarten.",
+        "qrSizeHint": "Über Layout-Variante: größer für Poster, kompakt für Speisekarten.",
         "scanSafeHint": "Nur scan-sichere Formen. Kreisformen sind ausgeblendet.",
         "cta": "Handlungsaufforderung",
         "promo": "Werbe-Tagline",
         "exportDesc": "Markenerlebnis exportieren. Unsichere Designs werden blockiert.",
         "canvasTitle": "Live-Vorschau",
         "canvasDesc": "Ihre Markenkarte aktualisiert sich sofort beim Bearbeiten.",
+        "stepsLabel": "Design-Schritte",
+        "sectionHints": {
+          "design": "Vorlage, Farben und Layout für Ihre Erlebniskarte wählen.",
+          "branding": "Logo hochladen und Markenidentität für Gäste festlegen.",
+          "qr": "QR-Form, Rahmen und scan-sichere Größe anpassen.",
+          "content": "Willkommenstext, Handlungsaufforderung und Dankesnachricht verfassen.",
+          "export": "PNG-Vorschau herunterladen oder Layout-Varianten für den Druck testen."
+        },
+        "saveFooterTitle": "Branding speichern",
+        "saveFooterDesc": "Dieses Design auf alle gästeorientierten QR-Erlebnisse Ihres Betriebs anwenden.",
         "layouts": {
           "table_tent": "Tischaufsteller",
           "poster": "Poster",
@@ -3836,15 +3873,16 @@
     "tips": {
       "eyebrow": "Umsatz",
       "title": "Trinkgelder",
-      "subtitle": "Live-Trinkgeldaktivität, Transaktionen und Performance-Einblicke.",
+      "subtitle": "Live-Trinkgeldaktivität, Transaktionen und Echtzeit-Umsatzimpuls.",
+      "analyticsHeaderSubtitle": "Executive-Reporting zu Umsatz, Trends, Exporten und Business Intelligence.",
       "navAria": "Trinkgeld-Bereiche",
       "nav": {
         "live": "Live-Trinkgelder",
         "transactions": "Transaktionen",
         "analytics": "Analysen"
       },
-      "liveDesc": "Operativer Stream — Trinkgelder, QR-Scans, Ziele und Team-Ereignisse in Echtzeit.",
-      "analyticsDesc": "Tiefenanalyse — Umsatz, QR, Mitarbeiter, Standorte und Trends. Nach Zeitraum filtern und exportieren.",
+      "liveDesc": "Operativer Stream: Trinkgelder, QR-Scans, Ziele und Team-Ereignisse in Echtzeit.",
+      "analyticsDesc": "Tiefenanalyse zu Umsatz, QR, Mitarbeiter, Standorte und Trends. Nach Zeitraum filtern und exportieren.",
       "live": {
         "cards": {
           "today": "Trinkgeld heute",
@@ -3893,14 +3931,16 @@
           "count": "Anzahl",
           "share": "Anteil",
           "export": "Transaktionen exportieren",
-          "exportSuccess": "Export gestartet — prüfen Sie Ihre Downloads."
+          "exportSuccess": "Export gestartet. Prüfen Sie Ihre Downloads."
         }
       }
     },
     "team": {
       "eyebrow": "Personal",
       "title": "Team",
-      "subtitle": "Mitarbeiter, Ziele und Team-Performance verwalten.",
+      "subtitle": "Mitarbeiter, Performance, Ziele und Teamwachstum verwalten.",
+      "employeesHeaderSubtitle": "Mitarbeitende onboarden, Einladungen verwalten und den Tagesbetrieb im Team.",
+      "topPerformersHeaderSubtitle": "Anerkennung, Ranglisten und Top Performer in Ihrem Team.",
       "navAria": "Team-Bereiche",
       "nav": {
         "employees": "Mitarbeiter",
@@ -3909,7 +3949,7 @@
         "topPerformers": "Top Performer"
       },
       "goalsDesc": "Team-Trinkgeldziele und Meilensteine.",
-      "performanceDesc": "Was jetzt zählt — Gesundheit, Risiken, Chancen und empfohlene Maßnahmen. Vollständige Berichte unter Analysen.",
+      "performanceDesc": "Was jetzt zählt: Gesundheit, Risiken, Chancen und empfohlene Maßnahmen. Vollständige Berichte unter Analysen.",
       "openAnalytics": "Vollständige Analysen öffnen",
       "topPerformersDesc": "Ranglisten, Auszeichnungen und Anerkennung für Ihr Team.",
       "goals": {
@@ -3920,6 +3960,7 @@
         "empty": "Noch keine aktiven Ziele. Ziele erscheinen, wenn das Team Monatsziele setzt."
       },
       "performance": {
+        "headerSubtitle": "Executive-Gesundheit, Risiken, Chancen und empfohlene Maßnahmen für Ihr Unternehmen.",
         "leaderboardTitle": "Team-Rangliste",
         "goalProgress": "{{percent}} % des Ziels",
         "rating": "★ {{rating}} Ø",
@@ -3969,7 +4010,7 @@
         },
         "executive": {
           "summaryTitle": "Executive Summary",
-          "healthExplain": "Der Gesundheitswert setzt sich aus Wachstum, Beteiligung, Zielen, Bewertungen und Trinkgeldaktivität zusammen — jeweils aus Live-Daten.",
+          "healthExplain": "Der Gesundheitswert setzt sich aus Wachstum, Beteiligung, Zielen, Bewertungen und Trinkgeldaktivität zusammen, jeweils aus Live-Daten.",
           "summary": {
             "composite": "Periodenüberblick",
             "collectingData": "Es werden noch ausreichend Daten für eine Zusammenfassung gesammelt.",
@@ -3981,7 +4022,7 @@
             "participationConcern": "Mitarbeiterbeteiligung sank von {{from}} % auf {{to}} % in der letzten Woche.",
             "participationConcernLow": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder in diesem Zeitraum.",
             "participationStrong": "Mitarbeiterbeteiligung ist stark bei {{percent}} %.",
-            "goalsNeedAttention": "Teamziel-Erfüllung liegt bei {{percent}} % — unter dem Ziel."
+            "goalsNeedAttention": "Teamziel-Erfüllung liegt bei {{percent}} %, unter dem Ziel."
           },
           "healthTitle": "Geschäftsgesundheit",
           "healthGrades": {
@@ -4011,26 +4052,26 @@
             "tipVolumeDecline": "Trinkgeldvolumen sank um {{percent}} % gegenüber dem Periodendurchschnitt.",
             "lowParticipation": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder in diesem Zeitraum.",
             "participationDecline": "Mitarbeiterbeteiligung sank von {{from}} % auf {{to}} % in der letzten Woche.",
-            "goalCompletionLow": "Teamziel-Erfüllung liegt bei {{percent}} % — unter dem Ziel.",
+            "goalCompletionLow": "Teamziel-Erfüllung liegt bei {{percent}} %, unter dem Ziel.",
             "noTipActivity": "Keine erfolgreichen Trinkgelder trotz aktivem Personal.",
             "qrScanDecline": "QR-Scans sanken um {{percent}} % in der zweiten Periodenhälfte.",
-            "locationUnderperformance": "{{location}}: nur {{count}} Scans — deutlich unter dem Standort-Durchschnitt.",
-            "satisfactionLow": "Durchschnittliche Gästebewertung: {{rating}} — unter dem Ziel."
+            "locationUnderperformance": "{{location}}: nur {{count}} Scans, deutlich unter dem Standort-Durchschnitt.",
+            "satisfactionLow": "Durchschnittliche Gästebewertung: {{rating}}, unter dem Ziel."
           },
           "recommendations": {
             "boostVisibility": "QR-Sichtbarkeit an frequentierten Punkten erhöhen.",
             "promoteTeamQrs": "Mitarbeiterengagement prüfen und Team-QR-Codes bewerben.",
             "enableGoals": "Teamziele aktivieren oder prüfen.",
-            "maintainMomentum": "Trinkgelder stiegen um {{percent}} % — QRs sichtbar halten.",
+            "maintainMomentum": "Trinkgelder stiegen um {{percent}} %. QRs sichtbar halten.",
             "reviewQrPlacement": "QR-Platzierung an schwachen Standorten prüfen.",
             "reviewFeedback": "Gästefeedback prüfen und wiederkehrende Themen adressieren.",
             "replicateLocation": "Erfolg des Top-Standorts auf andere Bereiche übertragen.",
-            "recognizePerformer": "{{name}} anerkennen — {{share}} % der Perioden-Trinkgelder."
+            "recognizePerformer": "{{name}} anerkennen. {{share}} % der Perioden-Trinkgelder."
           },
           "opportunities": {
-            "lowParticipation": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder — Potenzial für mehr Engagement.",
+            "lowParticipation": "Nur {{percent}} % der Mitarbeitenden erhielten Trinkgelder. Potenzial für mehr Engagement.",
             "teamGoals": "Teamziele zur Steigerung des Engagements erwägen.",
-            "tipGrowth": "Trinkgelder stiegen um {{percent}} % — Momentum beibehalten.",
+            "tipGrowth": "Trinkgelder stiegen um {{percent}} %. Momentum beibehalten.",
             "qrScanGrowth": "QR-Scans stiegen um {{percent}} % in der zweiten Periodenhälfte.",
             "topLocation": "{{location}} führt mit {{count}} Scans.",
             "topTable": "{{table}} führt Tisch-Scans mit {{count}}.",
@@ -4038,12 +4079,12 @@
             "topTippingTable": "{{table}}: {{share}} % des jüngsten Trinkgeld-Umsatzes."
           },
           "evidence": {
-            "tipVolumeDecline": "Quelle: week.totalTips vs period.totalTips/4.33 — Wachstum {{percent}} %.",
+            "tipVolumeDecline": "Quelle: week.totalTips vs period.totalTips/4.33, Wachstum {{percent}} %.",
             "lowParticipation": "Quelle: {{receiving}} von {{active}} aktiven Mitarbeitenden ({{percent}} %).",
             "participationDecline": "Periode {{from}} % vs Woche {{to}} % (eindeutige Mitarbeitende in recentTips).",
             "goalCompletionLow": "Quelle: durchschnittliche Zielerfüllung {{percent}} %.",
             "noTipActivity": "Quelle: 0 Trinkgelder bei {{active}} aktiven Mitarbeitenden.",
-            "qrScanDecline": "Quelle: Scan-Trend-Hälften — {{percent}} % Änderung, {{totalScans}} Scans gesamt.",
+            "qrScanDecline": "Quelle: Scan-Trend-Hälften: {{percent}} % Änderung, {{totalScans}} Scans gesamt.",
             "locationUnderperformance": "Quelle: {{location}} mit {{count}} vs ~{{average}} Standort-Durchschnitt.",
             "satisfactionLow": "Quelle: Ø-Bewertung {{rating}} aus {{count}} Bewertungen.",
             "lowParticipationOpp": "Beteiligung {{percent}} % ({{active}} aktiv).",
@@ -4112,7 +4153,7 @@
     "customers": {
       "eyebrow": "Gäste",
       "title": "Gäste",
-      "subtitle": "Gästefeedback und Bewertungen aus Trinkgeld-Journeys.",
+      "subtitle": "Gästefeedback, Bewertungen und Stimmung aus jeder Trinkgeld-Journey.",
       "navAria": "Gäste-Bereiche",
       "nav": {
         "feedback": "Feedback",
@@ -4193,7 +4234,7 @@
       "logoDesc": "In QR-Codes (Premium), Gäste-Headern und Drucklayouts.",
       "uploadLogo": "Logo hochladen",
       "bannerTitle": "Lokal-Banner",
-      "bannerDesc": "Hero-Bild auf Gäste-Landingpages — Hotels, Restaurants und Lounges.",
+      "bannerDesc": "Hero-Bild auf Gäste-Landingpages für Hotels, Restaurants und Lounges.",
       "uploadBanner": "Banner hochladen",
       "colorsTitle": "Markenfarben",
       "colorsDesc": "Primärfarbe für QR-Rahmen und Gäste-UI; Sekundärfarbe für QR-Module.",
@@ -4262,8 +4303,8 @@
       "contrast": "{{ratio}}:1 Kontrast",
       "passHint": "Dieses Design hat den Decode-Test bestanden und ist druckbereit.",
       "exportBlocked": "Dieser QR hat den Scan-Test nicht bestanden. Farben oder Form anpassen, bevor Sie speichern oder exportieren.",
-      "exportBlockedShort": "Export blockiert — Scan-Test fehlgeschlagen",
-      "saveBlocked": "Speichern nicht möglich — QR-Design hat den Scan-Zuverlässigkeitstest nicht bestanden.",
+      "exportBlockedShort": "Export blockiert: Scan-Test fehlgeschlagen",
+      "saveBlocked": "Speichern nicht möglich: QR-Design hat den Scan-Zuverlässigkeitstest nicht bestanden.",
       "toastUnsafeContrast": "QR-Modulfarben brauchen stärkeren Kontrast (mindestens 3:1).",
       "grades": {
         "excellent": "Ausgezeichnet",
@@ -4276,7 +4317,7 @@
         "unsafe_colors": "Dunkle und helle Module sind zu ähnlich für zuverlässiges Scannen.",
         "logo_too_large": "Center-Logo überschreitet die sichere 20%-Fläche.",
         "circle_shape_sanitized": "Kreis-Stil wird als sicheres abgerundetes Quadrat gerendert, um Finder-Muster zu schützen.",
-        "decode_failed": "Eine Kamera konnte diesen QR nicht decodieren — er scannt in Produktion möglicherweise nicht.",
+        "decode_failed": "Eine Kamera konnte diesen QR nicht decodieren. Er scannt in Produktion möglicherweise nicht.",
         "url_mismatch": "Decodierter Inhalt stimmt nicht mit der erwarteten Tipp-URL überein."
       }
     },
@@ -4330,7 +4371,7 @@
       "perMonth": "pro Monat",
       "perMonthBilledYearly": "pro Monat ({{total}} jährlich)",
       "checkoutSuccess": "Abo aktualisiert. Änderungen können kurz dauern.",
-      "checkoutCanceled": "Checkout abgebrochen — keine Änderungen.",
+      "checkoutCanceled": "Checkout abgebrochen. Keine Änderungen.",
       "checkoutError": "Checkout konnte nicht gestartet werden.",
       "checkoutNoUrl": "Checkout ohne URL zurückgegeben.",
       "portalError": "Abrechnungsportal konnte nicht geöffnet werden.",
@@ -4393,7 +4434,7 @@
     },
     "commercial": {
       "title": "Plan-Fit & Nutzung",
-      "desc": "Evidenzbasierte Signale der letzten 30 Tage — ohne Verkaufsdruck.",
+      "desc": "Evidenzbasierte Signale der letzten 30 Tage, ohne Verkaufsdruck.",
       "loadError": "Kommerzielle Einblicke konnten nicht geladen werden.",
       "utilizationTitle": "Feature-Nutzung",
       "hits30d": "{{count}} Signale in 30 Tagen",
@@ -4406,7 +4447,7 @@
       "retentionLevel": {
         "low": "Keine signifikanten Risikosignale.",
         "medium": "Einige Aktivitätsmuster verdienen Aufmerksamkeit.",
-        "high": "Mehrere Risikosignale — bitte prüfen."
+        "high": "Mehrere Risikosignale. Bitte prüfen."
       },
       "features": {
         "qr_studio": "QR Studio",
@@ -4420,14 +4461,14 @@
         "table_qr": "Tisch-QR"
       },
       "opportunities": {
-        "analytics_usage": "Sie besuchten Analyse-Seiten {{visits}} Mal — Premium bietet tiefere Berichte.",
-        "qr_intelligence": "Intensive QR-Nutzung (Analysen: {{qrAnalytics}}, Studio: {{qrStudio}}) — Premium ergänzt QR Intelligence.",
-        "team_scale": "{{staffCount}} aktive Mitarbeitende — Premium skaliert besser für größere Teams.",
-        "multi_location": "{{locationCount}} Standorte — Premium enthält Multi-Standort.",
-        "table_qr": "{{tableCount}} Tische konfiguriert — Tisch-QR ist Premium.",
-        "csv_export": "Sie exportierten Daten {{attempts}} Mal — CSV-Export ist in Premium enthalten.",
-        "employee_goals": "Mitarbeiterziele werden genutzt — in Premium enthalten.",
-        "branding": "Individuelles Branding ist konfiguriert — Premium bietet volle Branding-Tools.",
+        "analytics_usage": "Sie besuchten Analyse-Seiten {{visits}} Mal. Premium bietet tiefere Berichte.",
+        "qr_intelligence": "Intensive QR-Nutzung (Analysen: {{qrAnalytics}}, Studio: {{qrStudio}}). Premium ergänzt QR Intelligence.",
+        "team_scale": "{{staffCount}} aktive Mitarbeitende. Premium skaliert besser für größere Teams.",
+        "multi_location": "{{locationCount}} Standorte. Premium enthält Multi-Standort.",
+        "table_qr": "{{tableCount}} Tische konfiguriert. Tisch-QR ist Premium.",
+        "csv_export": "Sie exportierten Daten {{attempts}} Mal. CSV-Export ist in Premium enthalten.",
+        "employee_goals": "Mitarbeiterziele werden genutzt, in Premium enthalten.",
+        "branding": "Individuelles Branding ist konfiguriert. Premium bietet volle Branding-Tools.",
         "enterprise_scale": "Skalierung ({{locationCount}} Standorte, {{staffCount}} Personal, {{qrScans}} QR-Scans) passt möglicherweise zu Enterprise."
       },
       "retentionSignals": {
@@ -4649,7 +4690,7 @@
       "offline": "Offline"
     },
     "shell": {
-      "demoRibbon": "Walkthrough-Demo: Plattformansichten zeigen Live-Daten inkl. Demo-Lokal; Änderungen wirken auf echte Daten. Für Stakeholder-Touren nur lesend nutzen."
+      "demoRibbon": "Walkthrough Demo: Plattformansichten zeigen Live-Daten inkl. Demo-Lokal; Änderungen wirken auf echte Daten. Für Stakeholder-Touren nur lesend nutzen."
     },
     "sidebar": {
       "productLabel": "Plattform-Administration",

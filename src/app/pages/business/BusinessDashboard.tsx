@@ -11,6 +11,7 @@ import {
   Building2,
   Sparkles,
   HelpCircle,
+  ChevronRight,
 } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { toast } from "sonner";
@@ -59,7 +60,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BusinessDashboardMetricsGrid } from "../../components/business/BusinessDashboardMetricsGrid";
 import { RecentCustomerFeedbackPanel } from "../../components/business/RecentCustomerFeedbackPanel";
-import { TopPerformersTeaser } from "../../components/business/insights/TopPerformersTeaser";
+import { TopPerformersTeaser, TOP_PERFORMERS_PAGE_PATH, DASHBOARD_EMPLOYEE_TEASER_LIMIT } from "../../components/business/insights/TopPerformersTeaser";
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import { BusinessResponsiveData } from "../../components/business/BusinessResponsiveData";
@@ -202,18 +203,17 @@ export function BusinessDashboard() {
       ).length,
     [employees],
   );
-  const topEmployee = useMemo(() => {
-    const sorted = (employees ?? [])
+  const topPerformersTeaser = useMemo(() => {
+    return (employees ?? [])
       .filter((e) => e.isActive === true && e.activationStatus === "active" && e.emailVerified === true)
-      .sort((a, b) => b.tipsTotal - a.tipsTotal);
-    const first = sorted[0];
-    if (!first) return null;
-    return {
-      id: first.id,
-      name: first.name,
-      avatar: first.avatar,
-      tips: first.tipsTotal,
-    };
+      .sort((a, b) => b.tipsTotal - a.tipsTotal)
+      .slice(0, DASHBOARD_EMPLOYEE_TEASER_LIMIT)
+      .map((e) => ({
+        id: e.id,
+        name: e.name,
+        avatar: e.avatar,
+        tips: e.tipsTotal,
+      }));
   }, [employees]);
 
   const useDevDemo = shouldUseBusinessDashboardDevDemo({
@@ -241,6 +241,14 @@ export function BusinessDashboard() {
   const hasTipActivityInPeriod = useDevDemo || (displayMetrics?.totalTips ?? 0) > 0;
 
   const employeeGoalsList = displayStats?.employeeGoals ?? [];
+  const employeeGoalsTeaser = useMemo(
+    () =>
+      [...employeeGoalsList]
+        .sort((a, b) => b.percent - a.percent)
+        .slice(0, DASHBOARD_EMPLOYEE_TEASER_LIMIT),
+    [employeeGoalsList],
+  );
+  const hasMoreGoals = employeeGoalsList.length > DASHBOARD_EMPLOYEE_TEASER_LIMIT;
   const goalsTableColumns = useMemo(
     () => [
       t("business.dashboard.tableTeamMember"),
@@ -362,7 +370,7 @@ export function BusinessDashboard() {
           dismissPersistence="session"
           className="mb-5"
         />
-        <PremiumPageHero className="business-dashboard-hero mb-7 sm:mb-8 lg:mb-7">
+        <PremiumPageHero personality="overview" className="business-dashboard-hero mb-7 sm:mb-8 lg:mb-7">
         <DashboardHero
           stackHeroOnMobile
           hideTabs
@@ -427,7 +435,7 @@ export function BusinessDashboard() {
             >
               <div className="business-hero-cta-row">
                 <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
-                  <Link to="/dashboard/qr-studio/gallery" className={businessUi.heroCtaLink}>
+                  <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
                     <CareIcon name="tableQr" size="sm" className="shrink-0" />
                     {t("business.hero.manageQr")}
                   </Link>
@@ -536,7 +544,7 @@ export function BusinessDashboard() {
             title={t("business.fixQr.title")}
             description={t("business.fixQr.description")}
             actionLabel={t("business.fixQr.action")}
-            actionTo="/dashboard/qr-studio/gallery"
+            actionTo="/dashboard/qr-studio/employees"
           />
 
           <section className="business-dashboard-analytics-intro" aria-labelledby="business-analytics-period-heading">
@@ -605,7 +613,7 @@ export function BusinessDashboard() {
               loading={showMetricsSkeleton}
               isPeriodRefreshing={isPeriodRefreshing}
               hasTipActivityInPeriod={hasTipActivityInPeriod}
-              topPerformersCount={topEmployee ? 1 : 0}
+              topPerformersCount={topPerformersTeaser.length}
             />
           </motion.div>
 
@@ -617,19 +625,28 @@ export function BusinessDashboard() {
             <FeatureGate featureKey="employeeGoals" role="business" enabled={isBusiness}>
             <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
               <CardHeader className="business-dashboard-panel-card__header space-y-3">
-                <button
-                  type="button"
-                  onClick={() => setEmployeeGoalsExpanded((v) => !v)}
-                  className="flex w-full min-w-0 items-start justify-between gap-3 rounded-lg text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
-                  aria-expanded={employeeGoalsExpanded}
-                >
-                  <div className="flex min-w-0 items-start gap-3">
+                <div className="flex w-full min-w-0 items-start justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEmployeeGoalsExpanded((v) => !v)}
+                    className="flex min-w-0 flex-1 items-start gap-3 rounded-lg text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-expanded={employeeGoalsExpanded}
+                  >
                     <div className={businessUi.iconTileMuted}>
                       <CareIcon name="goals" size="md" />
                     </div>
                     <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
-                  </div>
-                </button>
+                  </button>
+                  {employeeGoalsList.length > 0 ? (
+                    <Link
+                      to={TOP_PERFORMERS_PAGE_PATH}
+                      className="flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary hover:underline"
+                    >
+                      {t("business.dashboard.viewAllTopPerformers")}
+                      <ChevronRight className="h-4 w-4" aria-hidden />
+                    </Link>
+                  ) : null}
+                </div>
                 {employeeGoalsSummary ? (
                   <div className="business-dashboard-goals-summary" aria-label={t("business.dashboard.goalsSummaryAria")}>
                     <span className="business-dashboard-goals-pill business-dashboard-goals-pill--accent">
@@ -667,11 +684,20 @@ export function BusinessDashboard() {
                         />
                       </div>
                     ) : (
-                      <BusinessResponsiveData
+                      <>
+                        {hasMoreGoals ? (
+                          <p className="mb-3 text-xs text-muted-foreground">
+                            {t("business.dashboard.goalsTeaserHint", {
+                              shown: employeeGoalsTeaser.length,
+                              total: employeeGoalsList.length,
+                            })}
+                          </p>
+                        ) : null}
+                        <BusinessResponsiveData
                           panelClassName="border-0 bg-transparent shadow-none lg:border lg:border-neutral-200/80 lg:bg-white lg:shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]"
                           mobile={
                             <>
-                              {employeeGoalsList.map((g) => (
+                              {employeeGoalsTeaser.map((g) => (
                                 <EmployeeGoalMobileCard
                                   key={g.employeeId}
                                   goal={g}
@@ -694,7 +720,7 @@ export function BusinessDashboard() {
                                 </tr>
                               </thead>
                               <tbody>
-                                {employeeGoalsList.map((g) => (
+                                {employeeGoalsTeaser.map((g) => (
                                   <tr key={g.employeeId} className="border-b border-border/60 last:border-0">
                                     <td className="px-4 py-3 font-medium text-foreground">{g.name}</td>
                                     <td className="px-4 py-3 text-muted-foreground">
@@ -712,6 +738,7 @@ export function BusinessDashboard() {
                             </table>
                           }
                         />
+                      </>
                     )}
                   </DashboardStableChartSlot>
                 </CardContent>
@@ -736,7 +763,7 @@ export function BusinessDashboard() {
             >
               <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
                 <TopPerformersTeaser
-                  topEmployee={topEmployee}
+                  employees={topPerformersTeaser}
                   loading={showMetricsSkeleton && !useDevDemo}
                 />
               </FeatureGate>
@@ -776,7 +803,7 @@ export function BusinessDashboard() {
                       </Link>
                     </Button>
                     <Button className={cn(businessUi.btnPrimary, "h-auto min-h-11 w-full justify-start gap-3 py-3")} asChild>
-                      <Link to="/dashboard/qr-studio/gallery" className="gap-3">
+                      <Link to="/dashboard/qr-studio/employees" className="gap-3">
                         <CareIcon name="tableQr" size="md" className="shrink-0" />
                         {t("business.dashboard.actionGenerateQr")}
                       </Link>

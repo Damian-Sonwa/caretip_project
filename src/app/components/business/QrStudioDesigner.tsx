@@ -80,7 +80,11 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
   const refreshPreview = useCallback(async () => {
     setPreviewLoading(true);
     try {
-      const dataUrl = await renderBrandedQrUrlToDataUrl(studio.sampleUrl, studio.previewBranding, { scale: 2 });
+      const scale =
+        typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches ? 1 : 2;
+      const dataUrl = await renderBrandedQrUrlToDataUrl(studio.sampleUrl, studio.previewBranding, {
+        scale,
+      });
       setPreviewUrl(dataUrl);
     } catch {
       setPreviewUrl("");
@@ -133,33 +137,34 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
   }
 
   const logoUrl = studio.settings?.logoPath ? resolveMediaUrl(studio.settings.logoPath) : null;
+  const activeSection = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0];
+  const ActiveSectionIcon = activeSection.icon;
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">{t("business.qrStudio.design.title")}</h2>
-          <p className="text-sm text-muted-foreground">{t("business.qrStudio.design.subtitle")}</p>
-        </div>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:flex-wrap">
-          {!canEdit ? <UpgradeCta featureKey="brandingCustomization" className="w-full sm:w-auto" /> : null}
-          <Button type="button" className="w-full sm:w-auto" onClick={() => void handleSave()} disabled={!canEdit || studio.saving}>
-            {studio.saving ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
-            ) : (
-              <Save className="mr-2 h-4 w-4" aria-hidden />
-            )}
-            {t("business.branding.save")}
-          </Button>
-        </div>
-      </div>
+    <div className="qr-studio-designer min-w-0 w-full max-w-full space-y-5 overflow-x-clip sm:space-y-6">
+      <header className="min-w-0 space-y-1">
+        <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+          {t("business.qrStudio.design.title")}
+        </h2>
+        <p className="max-w-2xl text-sm text-muted-foreground">{t("business.qrStudio.design.subtitle")}</p>
+      </header>
 
-      <div className="grid gap-6 xl:grid-cols-[minmax(280px,320px)_minmax(0,1fr)]">
-        <aside className="space-y-4">
-          <nav
-            className="-mx-1 flex gap-1.5 overflow-x-auto pb-1 xl:mx-0 xl:flex-col xl:overflow-visible xl:pb-0"
-            aria-label={t("business.qrStudio.design.navAria")}
-          >
+      {!canEdit ? (
+        <div className="min-w-0">
+          <UpgradeCta featureKey="brandingCustomization" className="w-full" />
+        </div>
+      ) : null}
+
+      <div className="grid min-w-0 w-full grid-cols-1 gap-5 auto-rows-auto lg:gap-6 xl:grid-cols-[minmax(0,320px)_minmax(0,1fr)]">
+        <aside className="order-2 row-start-2 flex min-w-0 flex-col gap-3 xl:order-1 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+          <div className="min-w-0">
+            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+              {t("business.qrStudio.design.stepsLabel")}
+            </p>
+            <nav
+              className="flex max-w-full gap-1.5 overflow-x-auto pb-1 snap-x snap-mandatory scroll-px-1 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden xl:flex-col xl:overflow-visible xl:pb-0"
+              aria-label={t("business.qrStudio.design.navAria")}
+            >
             {SECTIONS.map(({ id, icon: Icon, labelKey }) => (
               <button
                 key={id}
@@ -176,10 +181,24 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
                 {t(labelKey)}
               </button>
             ))}
-          </nav>
+            </nav>
+          </div>
 
-          <Card className={businessUi.cardStatic}>
-            <CardContent className="space-y-4 pt-5">
+          <Card className={cn(businessUi.cardStatic, "min-w-0 overflow-hidden")}>
+            <CardHeader className="space-y-1 border-b border-neutral-100/90 px-4 pb-3 pt-4 sm:px-6">
+              <div className="flex items-start gap-2.5">
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ActiveSectionIcon className="h-4 w-4" aria-hidden />
+                </span>
+                <div className="min-w-0">
+                  <CardTitle className="text-base">{t(activeSection.labelKey)}</CardTitle>
+                  <CardDescription className={cn(businessUi.cardDesc, "mt-1")}>
+                    {t(`business.qrStudio.design.sectionHints.${section}`)}
+                  </CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4 p-4 sm:p-6">
               {section === "design" ? (
                 <>
                   <div>
@@ -484,38 +503,77 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
           </Card>
         </aside>
 
-        <main className="space-y-4">
-          <Card className={cn(businessUi.cardStatic, "overflow-hidden")}>
-            <CardHeader className="border-b border-neutral-100/90 pb-3">
+        <main className="order-1 row-start-1 min-w-0 w-full max-w-full xl:col-start-2 xl:row-start-1">
+          <Card className={cn(businessUi.cardStatic, "min-w-0 overflow-hidden")}>
+            <CardHeader className="border-b border-neutral-100/90 px-4 pb-3 pt-4 sm:px-6">
               <CardTitle className="text-base">{t("business.qrStudio.design.canvasTitle")}</CardTitle>
               <CardDescription className={businessUi.cardDesc}>
                 {t("business.qrStudio.design.canvasDesc")}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex min-h-[420px] items-center justify-center bg-muted/20 p-6">
-              {previewLoading ? (
-                <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" aria-hidden />
-              ) : previewUrl ? (
-                <img
-                  src={previewUrl}
-                  alt=""
-                  className="max-h-[520px] w-auto max-w-full rounded-xl shadow-lg ring-1 ring-black/5"
-                />
-              ) : (
-                <p className="text-sm text-muted-foreground">{t("business.qrPage.toastQrNotReady")}</p>
-              )}
+            <CardContent className="flex w-full min-w-0 items-center justify-center overflow-hidden bg-muted/20 p-2 sm:p-4 lg:p-6">
+              <div className="qr-studio-canvas-frame flex w-full max-w-full min-w-0 items-center justify-center">
+                {previewLoading ? (
+                  <Loader2 className="h-10 w-10 animate-spin text-muted-foreground" aria-hidden />
+                ) : previewUrl ? (
+                  <img
+                    src={previewUrl}
+                    alt=""
+                    className="block h-auto max-h-[min(70vh,520px)] w-full max-w-full object-contain rounded-xl shadow-lg ring-1 ring-black/5"
+                  />
+                ) : (
+                  <p className="px-2 py-8 text-center text-sm text-muted-foreground">
+                    {t("business.qrPage.toastQrNotReady")}
+                  </p>
+                )}
+              </div>
             </CardContent>
           </Card>
+        </main>
 
+        <section
+          className="order-3 row-start-3 min-w-0 xl:col-start-2 xl:row-start-2"
+          aria-label={t("business.qrReliability.title")}
+        >
           <QrReliabilityScore
             sampleUrl={studio.sampleUrl}
             branding={studio.previewBranding}
             onReportChange={setReliabilityReport}
           />
-
-          <QrStudioPerformancePanel canView={canEdit} templateLabel={studio.previewBranding.qrTemplate ?? "classic"} />
-        </main>
+        </section>
       </div>
+
+      <footer
+        className={cn(
+          businessUi.cardStatic,
+          "border border-primary/15 bg-gradient-to-br from-muted/30 via-background to-primary/[0.04] p-4 sm:p-5",
+        )}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-sm font-semibold text-foreground">{t("business.qrStudio.design.saveFooterTitle")}</p>
+            <p className="mt-1 text-sm text-muted-foreground">{t("business.qrStudio.design.saveFooterDesc")}</p>
+          </div>
+          <Button
+            type="button"
+            className={cn(businessUi.btnPrimary, "h-11 min-h-11 w-full shrink-0 px-6 sm:w-auto")}
+            onClick={() => void handleSave()}
+            disabled={!canEdit || studio.saving}
+          >
+            {studio.saving ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden />
+            ) : (
+              <Save className="mr-2 h-4 w-4" aria-hidden />
+            )}
+            {t("business.branding.save")}
+          </Button>
+        </div>
+      </footer>
+
+      <QrStudioPerformancePanel
+        canView={canEdit}
+        templateLabel={studio.previewBranding.qrTemplate ?? "classic"}
+      />
     </div>
   );
 }

@@ -37,7 +37,6 @@ import { ApprovedBusinessGate } from './components/ApprovedBusinessGate';
 import { PendingVerificationAllowedGate } from './components/PendingVerificationAllowedGate';
 import { PendingVerification } from './components/PendingVerification';
 import { logClientError } from './lib/clientLog';
-import { DashboardDevDebugOverlayRoot } from './components/dashboard/DashboardDevDebugOverlayRoot';
 import { LoaderDiagRuntime } from './components/LoaderDiagRuntime';
 import { useNavigationFlashProbe } from './hooks/useNavigationFlashProbe';
 
@@ -116,7 +115,6 @@ function RootLayout() {
           <Outlet />
         </RouteChunkBoundary>
       </AuthBootstrapLoadingRegistrar>
-      {import.meta.env.DEV ? <DashboardDevDebugOverlayRoot /> : null}
     </>
   );
 }
@@ -298,14 +296,14 @@ const routes: RouteObject[] = [
         path: 'qr-studio',
         lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioLayout'), 'QrStudioLayout'),
         children: [
-          { index: true, element: <Navigate to="/dashboard/qr-studio/gallery" replace /> },
-          { path: 'gallery', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioGalleryPage'), 'QrStudioGalleryPage') },
+          { index: true, element: <Navigate to="/dashboard/qr-studio/employees" replace /> },
+          { path: 'gallery', element: <Navigate to="/dashboard/qr-studio/employees" replace /> },
           { path: 'employees', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioEmployeesPage'), 'QrStudioEmployeesPage') },
           { path: 'locations', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioLocationsPage'), 'QrStudioLocationsPage') },
           { path: 'templates', element: <Navigate to="/dashboard/qr-studio/branding" replace /> },
           { path: 'branding', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioBrandingPage'), 'QrStudioBrandingPage') },
           { path: 'tables', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioTablesPage'), 'QrStudioTablesPage') },
-          { path: 'downloads', lazy: routeLazy(() => import('./pages/business/qr-studio/QrStudioDownloadsPage'), 'QrStudioDownloadsPage') },
+          { path: 'downloads', element: <Navigate to="/dashboard/qr-studio/employees" replace /> },
         ],
       },
       /* —— Customers module —— */
@@ -333,7 +331,7 @@ const routes: RouteObject[] = [
       { path: 'locations', lazy: routeLazy(() => import('./pages/business/LocationsPage'), 'LocationsPage') },
       /* Legacy redirects */
       { path: 'staff-management', element: <Navigate to="/dashboard/team/employees" replace /> },
-      { path: 'qr-code-management', element: <Navigate to="/dashboard/qr-studio/gallery" replace /> },
+      { path: 'qr-code-management', element: <Navigate to="/dashboard/qr-studio/employees" replace /> },
       { path: 'tables', element: <Navigate to="/dashboard/qr-studio/tables" replace /> },
       { path: 'transactions', element: <Navigate to="/dashboard/tips/transactions" replace /> },
       { path: 'customer-feedback', element: <Navigate to="/dashboard/customers/feedback" replace /> },
@@ -609,7 +607,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business/dashboard/qr-code-management',
-    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
+    element: <Navigate to="/dashboard/qr-studio/employees" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -624,7 +622,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business/qr-management',
-    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
+    element: <Navigate to="/dashboard/qr-studio/employees" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
@@ -639,7 +637,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/business-dashboard/qr-code-management',
-    element: <Navigate to="/dashboard/qr-studio/gallery" replace />,
+    element: <Navigate to="/dashboard/qr-studio/employees" replace />,
     errorElement: <ErrorBoundary />,
   },
   {

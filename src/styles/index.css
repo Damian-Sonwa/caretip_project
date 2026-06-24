@@ -7,6 +7,8 @@
 @import "./caretip-public-motion.css";
 @import "./caretip-optical-balance.css";
 @import "./caretip-brand.css";
+@import "./caretip-premium-visual.css";
+@import "./caretip-hero-personality.css";
 @import "./caretip-buttons.css";
 @import "./caretip-auth.css";
 @import "./caretip-onboarding.css";
@@ -38,7 +40,6 @@
 @import "./caretip-landing-optical-audit.css";
 @import "./caretip-landing-content-density.css";
 @import "./business-dashboard-polish.css";
-@import "./caretip-premium-visual.css";
 @import "./caretip-dashboard-mobile.css";
 @import "./caretip-customer-flow-premium.css";
 @import "./caretip-pricing-premium.css";

@@ -22,10 +22,10 @@ export const businessUi = {
   /** Overview analytics stack — consistent vertical rhythm below hero. */
   section: "employee-section business-dashboard-section space-y-6 sm:space-y-7 lg:space-y-8",
   statsGrid:
-    "business-dashboard-stats-grid grid grid-cols-1 items-stretch gap-3 min-[375px]:grid-cols-2 min-[375px]:gap-3.5 sm:gap-4 lg:grid-cols-4 lg:gap-5",
-  /** At-a-glance mini-stats — readable at 320px without cramped 3-up columns. */
+    "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-5",
+  /** At-a-glance mini-stats — 2-up on phones, 3-up from tablet. */
   atAGlanceGrid:
-    "dashboard-at-a-glance__grid grid grid-cols-3 gap-1 text-center min-[375px]:gap-2 sm:gap-3",
+    "dashboard-at-a-glance__grid grid grid-cols-2 gap-2 text-center min-[375px]:gap-2.5 sm:grid-cols-3 sm:gap-3",
   /** Mobile list/card pattern (mirrors platform admin responsive data). */
   mobileList: "business-mobile-list space-y-3 p-4 max-lg:p-4 lg:hidden",
   mobileCard:

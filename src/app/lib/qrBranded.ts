@@ -5,7 +5,6 @@
  * Basic uses CareTip defaults. Footer always retains "Powered by CareTip".
  */
 
-import QRCode from "qrcode";
 import caretipLogoUrl from "@/assets/brand/company_logo.png";
 import { publicEmployeeTipUrl, qrEmployeeLegacyUrl } from "./appPublicUrl";
 import { resolveMediaUrl } from "./mediaUrl";
@@ -56,6 +55,13 @@ export {
 const BRAND_TOP_TEXT = "CareTip";
 const BRAND_FOOTER_TEXT = "Powered by CareTip";
 const QR_MODULE_DARK = "#000000";
+
+let qrcodeModulePromise: Promise<typeof import("qrcode")> | null = null;
+
+function loadQrCodeModule() {
+  qrcodeModulePromise ??= import("qrcode");
+  return qrcodeModulePromise;
+}
 
 /** Inner QR matrix width (px) — keep in sync across dashboard + PDF source images. */
 export const CARETIP_BRANDED_QR_MATRIX_PX = 256;
@@ -453,7 +459,8 @@ export async function renderBrandedQrUrlToCanvas(
   }
 
   const qrCanvas = document.createElement("canvas");
-  await QRCode.toCanvas(qrCanvas, encoded, {
+  const { toCanvas } = await loadQrCodeModule();
+  await toCanvas(qrCanvas, encoded, {
     width: qrSize,
     margin: qrMargin,
     color: { dark: moduleDark, light: visual.moduleLight },

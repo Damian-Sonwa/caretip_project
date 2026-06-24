@@ -127,6 +127,51 @@
     padding-top: 0;
   }
 
+  .caretip-dashboard-shell .qr-preview-frame {
+    max-width: min(100%, 12rem);
+    margin-inline: auto;
+  }
+
+  .caretip-dashboard-shell .qr-preview-frame img {
+    object-fit: contain;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  .caretip-dashboard-shell .qr-studio-designer {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .caretip-dashboard-shell .qr-studio-canvas-frame {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .caretip-dashboard-shell .qr-studio-canvas-frame img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .caretip-dashboard-shell .premium-workspace-header,
+  .caretip-dashboard-shell .premium-workspace-header__inner {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: clip;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-stats-grid,
+  .caretip-dashboard-shell .business-dashboard-stats-grid > *,
+  .caretip-dashboard-shell .employee-dashboard-stats-grid,
+  .caretip-dashboard-shell .employee-dashboard-stats-grid > * {
+    min-width: 0;
+    max-width: 100%;
+  }
+
   .caretip-dashboard-shell .business-dashboard-chart-card.business-dashboard-panel-card {
     min-height: 18rem;
   }

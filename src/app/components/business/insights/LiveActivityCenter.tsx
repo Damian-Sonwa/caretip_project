@@ -35,7 +35,7 @@ const KIND_ICON: Record<LiveActivityKind, typeof Radio> = {
 };
 
 const KIND_ACCENT: Record<LiveActivityKind, string> = {
-  tip_received: "text-[#EB992C]",
+  tip_received: "text-primary",
   qr_scanned: "text-sky-300",
   goal_achieved: "text-amber-300",
   goal_updated: "text-violet-300",
@@ -84,7 +84,7 @@ export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCent
                 key={item.id}
                 className={cn(
                   "flex items-start gap-3 px-4 py-3.5 transition-colors sm:px-5",
-                  isLive && "bg-[#EB992C]/[0.06]",
+                  isLive && "bg-primary/[0.06]",
                 )}
               >
                 <div
@@ -99,7 +99,7 @@ export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCent
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
                     <p className="truncate font-medium text-white">{item.title}</p>
                     {item.amountEur != null ? (
-                      <p className="shrink-0 font-semibold tabular-nums text-[#EB992C]">
+                      <p className="shrink-0 font-semibold tabular-nums text-primary">
                         {formatEur(item.amountEur)}
                       </p>
                     ) : null}
@@ -111,7 +111,7 @@ export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCent
                     {isLive ? (
                       <>
                         <span className="mx-1.5 text-white/25">·</span>
-                        <span className="font-medium uppercase tracking-wide text-[#EB992C]/90">
+                        <span className="font-medium uppercase tracking-wide text-primary/90">
                           {t("business.tips.live.liveBadge")}
                         </span>
                       </>

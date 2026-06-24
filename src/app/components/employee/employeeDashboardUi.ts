@@ -25,7 +25,7 @@ export const employeeUi = {
   section: "employee-section employee-dashboard-section space-y-6 sm:space-y-7 lg:space-y-8",
   sectionTight: "employee-section space-y-3 sm:space-y-4",
   statsGrid:
-    "employee-dashboard-stats-grid grid grid-cols-1 items-stretch gap-3 min-[375px]:grid-cols-2 min-[375px]:gap-3.5 sm:gap-4 lg:grid-cols-3 lg:gap-5",
+    "employee-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-3 lg:gap-5",
 
   card:
     "employee-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] transition-shadow hover:shadow-[0_14px_40px_-16px_rgba(15,23,42,0.14)]",

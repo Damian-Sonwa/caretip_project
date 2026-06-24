@@ -5,8 +5,7 @@ export type BusinessSettingsSectionId =
   | "business"
   | "notifications"
   | "security"
-  | "integrations"
-  | "language";
+  | "integrations";
 
 export type BusinessSettingsSection = {
   id: BusinessSettingsSectionId;
@@ -46,12 +45,6 @@ export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
     descriptionKey: "business.settings.sections.integrationsDesc",
     icon: "support",
   },
-  {
-    id: "language",
-    labelKey: "business.settings.sections.language",
-    descriptionKey: "business.settings.sections.languageDesc",
-    icon: "general",
-  },
 ] as const;
 
 export const BUSINESS_SETTINGS_DEFAULT_SECTION: BusinessSettingsSectionId = "general";
@@ -60,6 +53,7 @@ const LEGACY_SECTION_REDIRECTS: Record<string, BusinessSettingsSectionId | "exte
   profile: "business",
   account: "general",
   "profile-settings": "general",
+  language: "general",
   team: "external",
   billing: "external",
   branding: "external",

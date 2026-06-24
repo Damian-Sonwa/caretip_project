@@ -23,15 +23,9 @@ export type DashboardDevDebugEvent = {
 
 const MAX_EVENTS = 120;
 
-const DASHBOARD_PATH_HINTS = ["/employee", "/business", "/dashboard"];
-
-function isOnDashboardPath(pathname: string): boolean {
-  return DASHBOARD_PATH_HINTS.some((h) => pathname.includes(h));
-}
-
 /**
  * Single gate for overlay + instrumentation.
- * Default ON in local dev on dashboard routes (opt-out with ?dbdebug=0).
+ * Opt-in only: `?dbdebug=1` or localStorage `caretip_db_debug=1`.
  */
 export function isDashboardDevDebugEnabled(): boolean {
   if (!import.meta.env.DEV) return false;
@@ -40,8 +34,7 @@ export function isDashboardDevDebugEnabled(): boolean {
     const v = sp.get("dbdebug");
     if (v === "0") return false;
     if (v === "1") return true;
-    if (window.localStorage?.getItem("caretip_db_debug") === "1") return true;
-    return isOnDashboardPath(window.location.pathname || "");
+    return window.localStorage?.getItem("caretip_db_debug") === "1";
   } catch {
     return false;
   }

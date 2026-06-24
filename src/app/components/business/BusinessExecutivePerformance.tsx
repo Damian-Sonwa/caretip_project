@@ -30,7 +30,7 @@ function IntelligenceItem({
 }) {
   const { t } = useTranslation();
   return (
-    <div className={cn("flex gap-3 rounded-xl border px-4 py-3.5", borderClass)}>
+    <div className={cn("flex gap-3 rounded-xl border px-3.5 py-3 sm:px-4 sm:py-3.5", borderClass)}>
       <Icon className={cn("mt-0.5 h-4 w-4 shrink-0", iconClass)} aria-hidden />
       <div className="min-w-0 space-y-1">
         <p className="text-sm text-foreground">{t(item.messageKey, item.params)}</p>
@@ -50,8 +50,8 @@ function ExecutiveSummaryCard({ data }: { data: BiData }) {
     .join(" ");
 
   return (
-    <Card className={businessUi.cardStatic}>
-      <CardContent className="space-y-2 p-5">
+    <Card className={cn(businessUi.cardStatic, "premium-glass-surface premium-glass-surface--on-light")}>
+      <CardContent className="space-y-2 p-4">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
           {t("business.team.performance.executive.summaryTitle")}
         </h2>
@@ -69,6 +69,7 @@ function BusinessHealthCard({ data }: { data: BiData }) {
   return (
     <PremiumSummaryCard
       variant="health"
+      personality="performance"
       title={t("business.team.performance.executive.healthTitle")}
       eyebrow={<span className="premium-badge">{t(`business.team.performance.executive.healthGrades.${grade}`)}</span>}
       metrics={[
@@ -116,7 +117,7 @@ function InsightList({ insights }: { insights: BiData["bi"]["executiveInsights"]
       <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
         {t("business.team.performance.executive.insightsTitle")}
       </h2>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
         {insights.map((item: ExecutiveInsight) => (
           <Card key={item.id} className={businessUi.cardStatic}>
             <CardContent className="flex gap-3 p-4">
@@ -220,7 +221,7 @@ export function BusinessExecutivePerformance({ data }: BusinessExecutivePerforma
   );
 
   return (
-    <div className="space-y-6 sm:space-y-8">
+    <div className="space-y-4 sm:space-y-5">
       <ExecutiveSummaryCard data={data} />
       <BusinessHealthCard data={data} />
 

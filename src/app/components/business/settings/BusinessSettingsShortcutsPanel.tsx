@@ -29,7 +29,7 @@ export function BusinessSettingsShortcutsPanel({ variant }: { variant: "team" | 
           {
             titleKey: "business.settings.panels.brandingCardTitle",
             descKey: "business.settings.panels.brandingCardDesc",
-            href: "/dashboard/qr-studio/gallery",
+            href: "/dashboard/qr-studio/branding",
             icon: "tableQr",
           },
         ];

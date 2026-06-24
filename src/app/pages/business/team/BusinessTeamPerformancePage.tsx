@@ -22,9 +22,8 @@ export function BusinessTeamPerformancePage() {
   );
 
   return (
-    <div className="space-y-6 pt-6">
-      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-start sm:justify-between">
-        <p className="max-w-2xl text-sm text-muted-foreground">{t("business.team.performanceDesc")}</p>
+    <div className="space-y-4 pt-2 sm:space-y-5 sm:pt-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
         <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" asChild>
           <Link to="/dashboard/tips/analytics">
             <BarChart3 className="mr-2 h-4 w-4" aria-hidden />

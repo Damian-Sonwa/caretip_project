@@ -23,6 +23,7 @@ import { Label } from "../../components/ui/label";
 import { Button } from "../../components/ui/button";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { BusinessModuleWorkspaceHeader } from "../../components/business/BusinessModuleWorkspaceHeader";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -111,36 +112,35 @@ export function LocationsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="bg-card border-b border-border sticky top-0 z-10 backdrop-blur-xl bg-card/80">
-        <div className="dashboard-page-contained mx-auto flex w-full max-w-5xl flex-col gap-4 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <div className="flex min-w-0 flex-col gap-2 sm:gap-3">
-            <Link
-              to="/dashboard"
-              className="w-fit shrink-0 rounded-lg px-2 py-1.5 text-sm font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
-            >
-              {t("business.locationsPage.backAria")}
-            </Link>
-            <div className="min-w-0 space-y-1">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">{t("business.locationsPage.title")}</h1>
-              {t("business.locationsPage.subtitle").trim() ? (
-                <p className="text-sm text-muted-foreground">{t("business.locationsPage.subtitle")}</p>
-              ) : null}
-            </div>
+    <div className="min-h-screen bg-background pb-20">
+      <div className={businessUi.subPageTop}>
+        <div className="dashboard-page-contained mx-auto w-full max-w-5xl space-y-3">
+          <div className={businessUi.subPageBreadcrumb}>
+            <Button variant="outline" size="sm" asChild>
+              <Link to="/dashboard">{t("business.locationsPage.backAria")}</Link>
+            </Button>
           </div>
-          <Button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            disabled={!isBusiness || atSingleLocationCap}
-            className="shrink-0 w-full sm:w-auto"
-            style={{ backgroundColor: ACTION_TEAL }}
-          >
-            {t("business.locationsPage.addNew")}
-          </Button>
+          <BusinessModuleWorkspaceHeader
+            personality="locations"
+            badge={t("business.locationsPage.eyebrow")}
+            icon={MapPin}
+            title={t("business.locationsPage.title")}
+            subtitle={t("business.locationsPage.subtitle")}
+            actions={
+              <Button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                disabled={!isBusiness || atSingleLocationCap}
+                className={cn(businessUi.btnPrimary, "w-full sm:w-auto")}
+              >
+                {t("business.locationsPage.addNew")}
+              </Button>
+            }
+          />
         </div>
       </div>
 
-      <div className="dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6">
+      <div className={cn(businessUi.subPageMain, "dashboard-page-contained max-w-5xl")}>
         {loading ? (
           <LocationCardGridSkeleton />
         ) : locations.length === 0 ? (
