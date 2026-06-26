@@ -13,7 +13,6 @@ export function SubscriptionSuccessPage() {
   const [phase, setPhase] = useState<SyncPhase>("polling");
 
   useEffect(() => {
-    const expectedPlan = getCheckoutSyncExpectation();
     let cancelled = false;
 
     void (async () => {

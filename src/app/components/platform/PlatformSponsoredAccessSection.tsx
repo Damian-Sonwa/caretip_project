@@ -62,6 +62,17 @@ function defaultProfileForProgramme(
   return programmes.find((p) => p.programmeKey === programmeKey)?.profileKey ?? "business";
 }
 
+function profileKeyForGrant(
+  grant: SponsoredAccessGrant,
+  programmes: SponsoredProgrammeOption[],
+): SponsoredCapabilityProfileKey {
+  return (
+    grant.effectiveProfileKey ??
+    (grant.capabilityProfileKey as SponsoredCapabilityProfileKey | null) ??
+    defaultProfileForProgramme(programmes, grant.programmeKey)
+  );
+}
+
 export function PlatformSponsoredAccessSection({ businessId }: PlatformSponsoredAccessSectionProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language?.startsWith("de") ? "de-DE" : "en-GB";
@@ -129,10 +140,7 @@ export function PlatformSponsoredAccessSection({ businessId }: PlatformSponsored
     if (!displayGrant) return;
     setForm({
       programmeKey: displayGrant.programmeKey,
-      capabilityProfileKey:
-        displayGrant.capabilityProfileKey ??
-        displayGrant.effectiveProfileKey ??
-        defaultProfileForProgramme(programmes, displayGrant.programmeKey),
+      capabilityProfileKey: profileKeyForGrant(displayGrant, programmes),
       expiresAt: displayGrant.expiresAt ? displayGrant.expiresAt.slice(0, 10) : "",
       notes: displayGrant.notes ?? "",
     });
