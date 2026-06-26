@@ -1,5 +1,7 @@
 import {
   clearBusinessStatsClientCache,
+  clearBusinessBrandingSettingsClientCache,
+  clearBusinessProfileClientCache,
   clearEmployeeAccountClientCache,
   clearEmployeeProfileClientCache,
   clearEmployeeTipsClientCache,
@@ -10,6 +12,8 @@ import { clearBusinessDashboardSwrStore } from "../hooks/useBusinessDashboardSta
 import { clearEmployeePeriodSwrStore } from "../hooks/useEmployeeDashboardAnalytics";
 import { clearEmployeeAccountSwrStore } from "../hooks/useEmployeeAccountSummary";
 import { clearVenueCatalogStore } from "./businessVenueCatalog";
+import { resetQrStudioWarmCache } from "./qrStudioWarmCache";
+import { clearCheckoutIntent, clearCheckoutSyncExpectation } from "./checkoutIntent";
 
 /**
  * Wipe in-memory session caches on logout and account switch.
@@ -17,6 +21,7 @@ import { clearVenueCatalogStore } from "./businessVenueCatalog";
  */
 export function resetAllClientSessionCaches(): void {
   clearBusinessStatsClientCache();
+  clearBusinessProfileClientCache();
   clearEmployeeTipsClientCache();
   clearEmployeeAccountClientCache();
   clearEmployeeProfileClientCache();
@@ -26,4 +31,8 @@ export function resetAllClientSessionCaches(): void {
   clearEmployeePeriodSwrStore();
   clearEmployeeAccountSwrStore();
   clearVenueCatalogStore();
+  clearBusinessBrandingSettingsClientCache();
+  resetQrStudioWarmCache();
+  clearCheckoutIntent();
+  clearCheckoutSyncExpectation();
 }

@@ -16,11 +16,8 @@ import { isProtectedApiReady } from "../lib/authRestore";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import { logClientError } from "../lib/clientLog";
 import { useSocket, useDeferSocketConnect } from "./useSocket";
-import { useRealtimeFallback } from "./useRealtimeFallback";
-import { useRealtimeReconnect } from "../lib/realtime/useRealtimeReconnect";
 import { trackNotificationRefetch } from "../lib/realtime/realtimeMetrics";
-import { REALTIME_EVENTS } from "../lib/realtime/realtimeContracts";
-import { shouldProcessRealtimeEvent } from "../lib/realtime/realtimeEventDedupe";
+import { subscribeNotificationInboxPatches } from "../lib/realtime/notificationInboxRealtime";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import {
   getPageSessionCache,
@@ -53,7 +50,7 @@ export function useNotifications({
   const apiReady = isProtectedApiReady();
   const active = enabled && apiReady;
   const socketReady = useDeferSocketConnect(active);
-  const { socket, connected } = useSocket(socketReady);
+  const { connected } = useSocket(socketReady);
   const [unreadCount, setUnreadCount] = useState(0);
   const [items, setItems] = useState<InboxNotification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -138,14 +135,6 @@ export function useNotifications({
   const loadNotificationsRef = useRef(loadNotifications);
   loadNotificationsRef.current = loadNotifications;
 
-  useRealtimeFallback(connected, refreshUnread, 60_000);
-  useRealtimeReconnect(() => {
-    void refreshUnread();
-    if (loadList && loadedRef.current) {
-      void loadNotificationsRef.current({ reset: true });
-    }
-  }, active);
-
   const markRead = useCallback(async (id: string) => {
     try {
       const res = await markNotificationReadApi(id, uiLocale);
@@ -221,40 +210,30 @@ export function useNotifications({
   }, [active, loadList, loadNotifications, filterKey]);
 
   useEffect(() => {
-    if (!socket || !active) return;
+    if (!active) return;
 
-    const onCreated = (payload: {
-      notification?: InboxNotification;
-      unreadCount?: number;
-      eventId?: string;
-    }) => {
-      if (!shouldProcessRealtimeEvent(payload.eventId ?? payload.notification?.id)) return;
-      if (typeof payload.unreadCount === "number") {
-        setUnreadCount(payload.unreadCount);
+    return subscribeNotificationInboxPatches((patch) => {
+      if (patch.type === "unread_count") {
+        setUnreadCount(patch.unreadCount);
+        return;
       }
-      if (payload.notification) {
-        const localized = localizeInboxNotification(payload.notification, t, i18n.language);
+      if (patch.type === "created") {
+        if (typeof patch.unreadCount === "number") {
+          setUnreadCount(patch.unreadCount);
+        }
+        const localized = localizeInboxNotification(patch.notification, t, i18n.language);
         setItems((prev) => {
           const list = prev ?? [];
           if (list.some((n) => n.id === localized.id)) return list;
           return [localized, ...list].slice(0, 50);
         });
+        return;
       }
-    };
-
-    const onUnread = (payload: { unreadCount?: number }) => {
-      if (typeof payload.unreadCount === "number") setUnreadCount(payload.unreadCount);
-    };
-
-    socket.on("notification_created", onCreated);
-    socket.on(REALTIME_EVENTS.NOTIFICATION_CREATED, onCreated);
-    socket.on("notification_unread_count", onUnread);
-    return () => {
-      socket.off("notification_created", onCreated);
-      socket.off(REALTIME_EVENTS.NOTIFICATION_CREATED, onCreated);
-      socket.off("notification_unread_count", onUnread);
-    };
-  }, [socket, active, t, i18n.language, loadList, loadNotifications]);
+      if (patch.type === "sync_request" && loadList && loadedRef.current) {
+        void loadNotificationsRef.current({ reset: true });
+      }
+    });
+  }, [active, loadList, t, i18n.language]);
 
   useEffect(() => {
     if (!active) return;

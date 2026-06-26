@@ -1047,6 +1047,27 @@
   margin-inline: auto;
 }
 
+.caretip-auth-enter {
+  animation: caretip-auth-enter 0.45s ease-out both;
+}
+
+@keyframes caretip-auth-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-auth-enter {
+    animation: none;
+  }
+}
+
 .caretip-auth-card {
   position: relative;
   overflow: hidden;

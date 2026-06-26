@@ -6,8 +6,8 @@ import { BillingStatusBadge } from "./BillingStatusBadge";
 import { PremiumPlanCard } from "../../../premium/PremiumPlanCard";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
 
-function formatDate(iso: string | null, locale: string): string {
-  if (!iso) return "—";
+function formatDate(iso: string | null, locale: string, emptyLabel: string): string {
+  if (!iso) return emptyLabel;
   try {
     return new Intl.DateTimeFormat(locale, { dateStyle: "medium" }).format(new Date(iso));
   } catch {
@@ -72,7 +72,7 @@ export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) 
           <div>
             <dt className="text-xs text-muted-foreground">{t("business.billing.renewalDate")}</dt>
             <dd className="text-sm font-semibold text-foreground">
-              {formatDate(billing.renewalDate ?? billing.currentPeriodEnd, locale)}
+              {formatDate(billing.renewalDate ?? billing.currentPeriodEnd, locale, t("business.billing.notApplicable"))}
             </dd>
           </div>
         </div>
@@ -81,7 +81,9 @@ export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) 
           <div>
             <dt className="text-xs text-muted-foreground">{t("business.billing.trialEnd")}</dt>
             <dd className="text-sm font-semibold text-foreground">
-              {billing.trialEndsAt ? formatDate(billing.trialEndsAt, locale) : t("business.billing.notApplicable")}
+              {billing.trialEndsAt
+                ? formatDate(billing.trialEndsAt, locale, t("business.billing.notApplicable"))
+                : t("business.billing.notApplicable")}
             </dd>
           </div>
         </div>
@@ -90,7 +92,7 @@ export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) 
           <div>
             <dt className="text-xs text-muted-foreground">{t("business.billing.memberSince")}</dt>
             <dd className="text-sm font-semibold text-foreground">
-              {formatDate(billing.subscriptionCreatedAt, locale)}
+              {formatDate(billing.subscriptionCreatedAt, locale, t("business.billing.notApplicable"))}
             </dd>
           </div>
         </div>
@@ -100,7 +102,7 @@ export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) 
             <dt className="text-xs text-muted-foreground">{t("business.billing.cancellation")}</dt>
             <dd className="text-sm font-semibold text-foreground">
               {billing.cancelAtPeriodEnd
-                ? formatDate(billing.cancellationEffective, locale)
+                ? formatDate(billing.cancellationEffective, locale, t("business.billing.notApplicable"))
                 : t("business.billing.notScheduled")}
             </dd>
           </div>

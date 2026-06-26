@@ -18,7 +18,6 @@ import { fetchVenueCatalog } from "../../lib/businessVenueCatalog";
 import {
   getEmployees,
   fetchBusinessProfile,
-  fetchBusinessBrandingSettings,
   regenerateBusinessSlug,
   regenerateEmployeeSlug,
   type EmployeeItem,
@@ -47,13 +46,12 @@ import {
   type BrandedQrLayoutMetrics,
 } from "../../lib/qrBranded";
 import type { QrQualityGrade } from "../../lib/qrReliability";
-import { qrBrandingForManager, BUSINESS_BRANDING_CHANGED_EVENT, qrBrandingFingerprint } from "../../lib/businessBranding";
-import { loadQrStudioDesignExtras, mergeQrStudioBranding } from "../../lib/qrDesignSystem";
+import { BUSINESS_BRANDING_CHANGED_EVENT, qrBrandingFingerprint } from "../../lib/businessBranding";
 import {
-  DEFAULT_QR_BACKGROUND_COLOR,
-  DEFAULT_QR_BORDER_STYLE,
-  DEFAULT_QR_SHAPE,
-  DEFAULT_QR_TEMPLATE,
+  fallbackManagerQrRenderBranding,
+  loadQrRenderBranding,
+} from "../../lib/loadQrRenderBranding";
+import {
   normalizeQrTemplateId,
   QR_TEMPLATE_PRESETS,
 } from "../../lib/qrTemplateStyles";
@@ -112,6 +110,8 @@ export function QRCodeManagementPage({
   const { t, i18n } = useTranslation();
   const { pathname } = useLocation();
   const viewMode: QrStudioViewMode = embedded ? resolveEmbeddedQrMode(pathname) : mode;
+  const needsEmployeeData = viewMode === "employees" || viewMode === "gallery";
+  const needsVenueData = viewMode === "locations" || viewMode === "gallery";
   const { user, authHydrated, sessionValidated, isBusiness } = useRequireAuth();
   const { tier } = useSubscriptionEntitlements({
     enabled: isBusiness,
@@ -148,78 +148,41 @@ export function QRCodeManagementPage({
   const loadQrBranding = useCallback(async () => {
     if (!user?.businessId || user.role !== "business") return;
     try {
-      const [s, profile] = await Promise.all([
-        fetchBusinessBrandingSettings(),
-        fetchBusinessProfile(),
-      ]);
+      const profile = await fetchBusinessProfile();
+      setBusinessSlug(profile.slug?.trim() || null);
+      setBusinessDisplayName(String(profile.name ?? "").trim() || null);
+      setBusinessLocation(String(profile.registeredAddress ?? profile.location ?? "").trim() || null);
+      setBusinessLogoPath(profile.logo?.trim() ? profile.logo : null);
+      setVerificationStatus(profile.verificationStatus ?? "pending");
+      const branding = await loadQrRenderBranding({
+        mode: "manager",
+        businessId: user.businessId,
+        tier,
+        fallbackBusinessName: String(user?.businessName ?? "").trim() || undefined,
+      });
+      if (branding) {
+        setQrBrandingOpts(branding);
+        return;
+      }
       const name =
-        String(businessDisplayName ?? "").trim() ||
+        String(profile.name ?? "").trim() ||
         String(user?.businessName ?? "").trim() ||
         t("business.qrPage.fallbackBusinessName");
-      const base = qrBrandingForManager(tier, s, name);
-      const extras = loadQrStudioDesignExtras(user.businessId);
-      setQrBrandingOpts({
-        ...mergeQrStudioBranding(base, extras),
-        templateProfile: {
-          registeredAddress: profile.registeredAddress ?? null,
-          location: profile.location ?? null,
-          contactPhone: profile.contactPhone ?? null,
-          website: profile.website ?? null,
-        },
-      });
+      setQrBrandingOpts(fallbackManagerQrRenderBranding(tier, name, profile.logo));
     } catch (err) {
       logClientError("QRCodeManagementPage.branding", err);
+      if (user.status === "APPROVED") setVerificationStatus("verified");
+      else if (user.status === "REJECTED") setVerificationStatus("rejected");
+      else setVerificationStatus("pending");
       setQrBrandingOpts(
-        qrBrandingForManager(
+        fallbackManagerQrRenderBranding(
           tier,
-          {
-            logoPath: businessLogoPath,
-            brandPrimaryColor: "#EB992C",
-            brandSecondaryColor: "#000000",
-            brandDisplayName: null,
-            brandTagline: null,
-            welcomeMessage: null,
-            thankYouMessage: null,
-            qrTemplate: DEFAULT_QR_TEMPLATE,
-            qrBorderStyle: DEFAULT_QR_BORDER_STYLE,
-            qrShape: DEFAULT_QR_SHAPE,
-            qrAccentColor: "#EB992C",
-            qrBackgroundColor: DEFAULT_QR_BACKGROUND_COLOR,
-          },
           String(businessDisplayName ?? user?.businessName ?? "").trim() || "Business",
+          businessLogoPath,
         ),
       );
     }
-  }, [user?.businessId, user?.role, user?.businessName, tier, businessDisplayName, businessLogoPath, t]);
-
-  useEffect(() => {
-    if (!authHydrated || !sessionValidated) return;
-    if (!user?.businessId || user.role !== "business") return;
-    let cancelled = false;
-    void fetchBusinessProfile()
-      .then((p) => {
-        if (cancelled) return;
-        setBusinessSlug(p.slug?.trim() || null);
-        setBusinessDisplayName(String(p.name ?? "").trim() || null);
-        setBusinessLocation(String(p.registeredAddress ?? p.location ?? "").trim() || null);
-        setBusinessLogoPath(p.logo?.trim() ? p.logo : null);
-        setVerificationStatus(p.verificationStatus ?? "pending");
-      })
-      .catch((err) => {
-        logClientError("QRCodeManagementPage", err);
-        if (cancelled) return;
-        setBusinessSlug(null);
-        setBusinessDisplayName(user?.businessName ?? null);
-        setBusinessLocation(null);
-        setBusinessLogoPath(null);
-        if (user.status === "APPROVED") setVerificationStatus("verified");
-        else if (user.status === "REJECTED") setVerificationStatus("rejected");
-        else setVerificationStatus("pending");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [authHydrated, sessionValidated, user?.businessId, user?.role, user?.businessName]);
+  }, [user?.businessId, user?.role, user?.businessName, user?.status, tier, businessDisplayName, businessLogoPath, t]);
 
   useEffect(() => {
     void loadQrBranding();
@@ -288,12 +251,16 @@ export function QRCodeManagementPage({
   }, [authHydrated, sessionValidated, user?.businessId, t]);
 
   useEffect(() => {
+    if (!needsEmployeeData) {
+      setLoading(false);
+      return;
+    }
     loadEmployees();
-  }, [loadEmployees]);
+  }, [loadEmployees, needsEmployeeData]);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated) return;
-    if (!user?.businessId || !isBusiness) return;
+    if (!user?.businessId || !isBusiness || !needsVenueData) return;
     let cancelled = false;
     const venueCacheKey = `business:qr-venues:${user.businessId}`;
     const venueCached = getPageSessionCache<{ locations: LocationDTO[]; tables: TableDTO[] }>(
@@ -325,7 +292,7 @@ export function QRCodeManagementPage({
     return () => {
       cancelled = true;
     };
-  }, [authHydrated, sessionValidated, user?.businessId, isBusiness]);
+  }, [authHydrated, sessionValidated, user?.businessId, isBusiness, needsVenueData]);
 
   const safeEmployees = Array.isArray(employees) ? employees : [];
   const safeVenueLocations = Array.isArray(venueLocations) ? venueLocations : [];
@@ -350,52 +317,64 @@ export function QRCodeManagementPage({
   );
 
   useEffect(() => {
-    if (!venueQrFingerprint || !brandingFingerprint) return;
+    if (!needsVenueData || !venueQrFingerprint || !brandingFingerprint) return;
     const cacheKey = `${venueQrFingerprint}|${brandingFingerprint}`;
     if (venueQrCacheKeyRef.current === cacheKey) return;
     let cancelled = false;
     (async () => {
+      const tasks = [
+        ...safeVenueLocations.map((loc) => ({
+          key: `loc-${loc.id}`,
+          url: qrLocationUrl(loc.id),
+        })),
+        ...safeVenueTables.map((tbl) => ({
+          key: `tbl-${tbl.id}`,
+          url: qrTableUrl(tbl.id),
+        })),
+      ];
+      const results = await Promise.all(
+        tasks.map(async ({ key, url }) => {
+          try {
+            const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
+            return {
+              key,
+              dataUrl: canvas?.toDataURL("image/png") ?? "",
+              report,
+            };
+          } catch (err) {
+            logClientError("QRCodeManagementPage", err);
+            return { key, dataUrl: "", report: null };
+          }
+        }),
+      );
+      if (cancelled) return;
       const next: Record<string, string> = {};
       const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
-      for (const loc of safeVenueLocations) {
-        const url = qrLocationUrl(loc.id);
-        try {
-          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
-          next[`loc-${loc.id}`] = canvas?.toDataURL("image/png") ?? "";
-          if (report) {
-            meta[`loc-${loc.id}`] = { grade: report.grade, exportAllowed: report.exportAllowed };
-          }
-        } catch (err) {
-          logClientError("QRCodeManagementPage", err);
-          next[`loc-${loc.id}`] = "";
+      for (const { key, dataUrl, report } of results) {
+        next[key] = dataUrl;
+        if (report) {
+          meta[key] = { grade: report.grade, exportAllowed: report.exportAllowed };
         }
       }
-      for (const tbl of safeVenueTables) {
-        const url = qrTableUrl(tbl.id);
-        try {
-          const { canvas, report } = await validateBrandedQrReliability(url, qrBrand);
-          next[`tbl-${tbl.id}`] = canvas?.toDataURL("image/png") ?? "";
-          if (report) {
-            meta[`tbl-${tbl.id}`] = { grade: report.grade, exportAllowed: report.exportAllowed };
-          }
-        } catch (err) {
-          logClientError("QRCodeManagementPage", err);
-          next[`tbl-${tbl.id}`] = "";
-        }
-      }
-      if (!cancelled) {
-        venueQrCacheKeyRef.current = cacheKey;
-        setVenueQrPreview(next);
-        setQrScanMeta((prev) => ({ ...prev, ...meta }));
-        setAssetsSyncedAt(new Date().toISOString());
-      }
+      venueQrCacheKeyRef.current = cacheKey;
+      setVenueQrPreview(next);
+      setQrScanMeta((prev) => ({ ...prev, ...meta }));
+      setAssetsSyncedAt(new Date().toISOString());
     })();
     return () => {
       cancelled = true;
     };
-  }, [venueQrFingerprint, safeVenueLocations, safeVenueTables, qrBrand, brandingFingerprint]);
+  }, [
+    needsVenueData,
+    venueQrFingerprint,
+    safeVenueLocations,
+    safeVenueTables,
+    qrBrand,
+    brandingFingerprint,
+  ]);
 
   useEffect(() => {
+    if (!needsEmployeeData) return;
     const businessId = user?.businessId;
     if (!businessId || !brandingFingerprint) return;
     const cacheKey = `${businessId}|${businessSlug ?? ""}|${employeeQrFingerprint}|${brandingFingerprint}`;
@@ -423,34 +402,63 @@ export function QRCodeManagementPage({
 
       const next: Record<string, string> = {};
       const meta: Record<string, { grade: QrQualityGrade; exportAllowed: boolean }> = {};
-      let referenceLayout: BrandedQrLayoutMetrics | null = null;
+      const withSlug = safeEmployees.filter((e) => e.slug);
       for (const e of safeEmployees) {
-        if (!e.slug) {
-          next[e.id] = "";
-          continue;
-        }
+        if (!e.slug) next[e.id] = "";
+      }
+      let referenceLayout: BrandedQrLayoutMetrics | null = null;
+      if (withSlug.length > 0) {
+        const first = withSlug[0];
+        const firstUrl = businessSlug
+          ? publicEmployeeTipUrl(businessSlug, first.slug!)
+          : qrEmployeeLegacyUrl(first.id);
         try {
-          const url = businessSlug
-            ? publicEmployeeTipUrl(businessSlug, e.slug)
-            : qrEmployeeLegacyUrl(e.id);
-          const { canvas, report, diagnostics } = await validateBrandedQrReliability(url, qrBrand, {
-            employeeId: e.id,
-            employeeSlug: e.slug,
+          const { canvas, report, diagnostics } = await validateBrandedQrReliability(firstUrl, qrBrand, {
+            employeeId: first.id,
+            employeeSlug: first.slug!,
             referenceLayout,
           });
-          if (!referenceLayout && diagnostics) {
-            referenceLayout = diagnostics.layout;
-          }
+          if (diagnostics?.layout) referenceLayout = diagnostics.layout;
           if (import.meta.env.DEV && diagnostics) {
-            logQrScanDiagnostics(e.name, diagnostics);
+            logQrScanDiagnostics(first.name, diagnostics);
           }
-          next[e.id] = canvas?.toDataURL("image/png") ?? "";
-          if (report) {
-            meta[e.id] = { grade: report.grade, exportAllowed: report.exportAllowed };
-          }
+          next[first.id] = canvas?.toDataURL("image/png") ?? "";
+          if (report) meta[first.id] = { grade: report.grade, exportAllowed: report.exportAllowed };
         } catch (err) {
           logClientError("QRCodeManagementPage", err);
-          next[e.id] = "";
+          next[first.id] = "";
+        }
+        const rest = withSlug.slice(1);
+        if (rest.length > 0) {
+          const restResults = await Promise.all(
+            rest.map(async (e) => {
+              try {
+                const url = businessSlug
+                  ? publicEmployeeTipUrl(businessSlug, e.slug!)
+                  : qrEmployeeLegacyUrl(e.id);
+                const { canvas, report, diagnostics } = await validateBrandedQrReliability(url, qrBrand, {
+                  employeeId: e.id,
+                  employeeSlug: e.slug!,
+                  referenceLayout,
+                });
+                if (import.meta.env.DEV && diagnostics) {
+                  logQrScanDiagnostics(e.name, diagnostics);
+                }
+                return {
+                  id: e.id,
+                  dataUrl: canvas?.toDataURL("image/png") ?? "",
+                  report,
+                };
+              } catch (err) {
+                logClientError("QRCodeManagementPage", err);
+                return { id: e.id, dataUrl: "", report: null };
+              }
+            }),
+          );
+          for (const { id, dataUrl, report } of restResults) {
+            next[id] = dataUrl;
+            if (report) meta[id] = { grade: report.grade, exportAllowed: report.exportAllowed };
+          }
         }
       }
       if (!cancelled) {
@@ -463,7 +471,15 @@ export function QRCodeManagementPage({
     return () => {
       cancelled = true;
     };
-  }, [safeEmployees, employeeQrFingerprint, user?.businessId, businessSlug, qrBrand, brandingFingerprint]);
+  }, [
+    needsEmployeeData,
+    safeEmployees,
+    employeeQrFingerprint,
+    user?.businessId,
+    businessSlug,
+    qrBrand,
+    brandingFingerprint,
+  ]);
 
   const locations: Array<{ id: string; name: string; address: string; qrUrl: string }> =
     safeVenueLocations.map((loc) => ({

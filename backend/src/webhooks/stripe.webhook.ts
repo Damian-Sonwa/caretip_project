@@ -16,6 +16,7 @@ import {
   markStripeWebhookEventProcessed,
 } from "../services/stripeWebhookIdempotency.service.js";
 import { recordCheckoutSessionExpired } from "../services/checkoutFunnelMetrics.service.js";
+import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 import { logServerError } from "../utils/httpErrors.js";
 
 /**
@@ -51,6 +52,11 @@ router.post("/stripe", async (req: Request, res: Response) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       if (isSubscriptionCheckoutSession(session)) {
+        logTrialSync("webhook.stripe_router.billing_checkout", {
+          stripeEventId: event.id,
+          sessionId: session.id,
+          mode: session.mode,
+        });
         const billingResult = await handleStripeBillingWebhookEvent(event);
         return res.json(billingResult);
       }

@@ -34,9 +34,13 @@ export type LiveNewTipPayload = {
   tip: { id: string; amount: number; status: string; createdAt: string };
   employeeId: string;
   employeeName?: string;
+  /** Guest/tipper name when available from payment metadata or transaction row. */
+  customerName?: string | null;
   businessId: string;
   currentMonthTotal?: number;
   monthlyGoal?: number | null;
 };
 
 export const SOCKET_RECONNECTED_EVENT = "caretip:socket-reconnected";
+/** Fired on every successful socket connect, including first connect after login. */
+export const SOCKET_CONNECTED_EVENT = "caretip:socket-connected";

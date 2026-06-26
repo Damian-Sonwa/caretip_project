@@ -198,6 +198,7 @@ model User {
   twoFactorTempSecret String? @map("two_factor_temp_secret")
 
   @@unique([oauthProvider, oauthSubject], map: "User_oauth_provider_subject_key")
+  @@index([createdAt(sort: Desc)])
 }
 
 model UserSettings {
@@ -728,6 +729,12 @@ model Subscription {
   trialSource           TrialSource?         @map("trial_source")
   trialStartedAt        DateTime?            @map("trial_started_at")
   trialEndsAt           DateTime?            @map("trial_ends_at")
+  /// True while Stripe status is trialing (synced from webhooks).
+  isTrial               Boolean              @default(false) @map("is_trial")
+  /// Tracks which trial reminder emails were sent, e.g. {"7":"2026-06-17T…","3":"…","1":"…"}.
+  trialReminderSent     Json?                @map("trial_reminder_sent")
+  /// Set when the subscription transitions from trialing to active (first successful charge).
+  trialExpiredAt        DateTime?            @map("trial_expired_at")
 
   currentPeriodStart    DateTime?            @map("current_period_start")
   currentPeriodEnd      DateTime?            @map("current_period_end")

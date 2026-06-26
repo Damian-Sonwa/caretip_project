@@ -145,11 +145,11 @@ export function CareTipLandingHero({
             </div>
             <div className={landingUi.heroCtaUnit}>
               <Link
-                to="/join"
+                to="/contact"
                 className={landingUi.heroCtaSecondary}
-                aria-label={t("landing.showcase.secondaryCta")}
+                aria-label={t("nav.requestDemo")}
               >
-                {t("landing.showcase.secondaryCta")}
+                {t("nav.requestDemo")}
               </Link>
             </div>
           </div>

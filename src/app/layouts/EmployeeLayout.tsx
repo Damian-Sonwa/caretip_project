@@ -11,6 +11,7 @@ import { getEmployeeProfile } from "../lib/api";
 import { EMPLOYEE_DASHBOARD_ROOT } from "../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
 import { PushNotificationSync } from "../components/PushNotificationSync";
+import { NotificationInboxSync } from "../components/NotificationInboxSync";
 import { RouteChunkBoundary } from "../routing/RouteChunkBoundary";
 import { useRegisterPagePaintReady } from "../lib/globalAppLoading";
 
@@ -54,6 +55,7 @@ export function EmployeeLayout() {
   return (
     <div className="relative min-h-screen bg-background">
       <PushNotificationSync />
+      <NotificationInboxSync />
       <div className="relative z-10">
         {isAppReady ? (
           <EmployeeSidebar businessBranding={branding} />

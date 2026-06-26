@@ -1,8 +1,10 @@
 import { Check } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { CONTACT_INDUSTRIES } from "@/app/data/caretipIndustries";
 import { submitDemoLead } from "@/app/lib/leadApi";
+import { trackGoogleAdsConversion } from "@/app/lib/googleAdsConversion";
 import {
   Select,
   SelectContent,
@@ -20,11 +22,18 @@ type ContactDemoFormProps = {
   onBack: () => void;
   onSwitchToSupport: () => void;
   className?: string;
+  /** Optional plan interest from pricing page (`?intent=demo&plan=business`). */
+  pricingPlan?: string | null;
 };
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
-export function ContactDemoForm({ onBack, onSwitchToSupport, className }: ContactDemoFormProps) {
+export function ContactDemoForm({
+  onBack,
+  onSwitchToSupport,
+  className,
+  pricingPlan,
+}: ContactDemoFormProps) {
   const { t } = useTranslation();
   const bullets = Array.from({ length: DEMO_BULLET_COUNT }, (_, i) =>
     t(`staticPages.contact.demo.bullets.${i}`),
@@ -65,6 +74,7 @@ export function ContactDemoForm({ onBack, onSwitchToSupport, className }: Contac
 
     if (result.ok) {
       setStatus("success");
+      trackGoogleAdsConversion("demo_lead_submitted");
       form.reset();
       setBusinessType("");
       setTeamSize("");
@@ -101,6 +111,16 @@ export function ContactDemoForm({ onBack, onSwitchToSupport, className }: Contac
             <button type="button" className="caretip-contact-inline-link" onClick={onSwitchToSupport}>
               {t("staticPages.contact.intent.support.title")}
             </button>
+          </p>
+          {pricingPlan ? (
+            <p className="mt-3 text-sm text-muted-foreground">
+              {t("staticPages.contact.demo.pricingPlanInterest", { plan: pricingPlan })}
+            </p>
+          ) : null}
+          <p className="mt-4 text-sm">
+            <Link to="/pricing" className="caretip-contact-inline-link font-semibold">
+              {t("staticPages.contact.demo.viewPricing")}
+            </Link>
           </p>
         </aside>
 

@@ -1,6 +1,8 @@
-import { BusinessSubscriptionTier, Role } from "@prisma/client";
+import { BusinessSubscriptionTier, Role, SubscriptionStatus } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
+import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 import {
   type FeatureKey,
   type SubscriptionCapability,
@@ -23,9 +25,26 @@ export async function getSubscriptionTierForBusinessId(
 ): Promise<BusinessSubscriptionTier> {
   const row = await prisma.business.findUnique({
     where: { id: businessId },
-    select: { subscriptionTier: true },
+    select: {
+      subscriptionTier: true,
+      subscription: { select: { status: true, planKey: true } },
+    },
   });
-  return row?.subscriptionTier ?? DEFAULT_TIER;
+  if (!row) return DEFAULT_TIER;
+
+  // Trialing Stripe subscriptions grant full plan access (same as active).
+  if (row.subscription?.status === SubscriptionStatus.trialing) {
+    const tier = mapPlanKeyToBusinessTier(row.subscription.planKey);
+    logTrialSync("entitlement.tier_from_trialing_mirror", {
+      businessId,
+      mirrorStatus: row.subscription.status,
+      planKey: row.subscription.planKey,
+      resolvedTier: tier,
+    });
+    return tier;
+  }
+
+  return row.subscriptionTier ?? DEFAULT_TIER;
 }
 
 export async function getSubscriptionTierForManagerUserId(
@@ -33,9 +52,10 @@ export async function getSubscriptionTierForManagerUserId(
 ): Promise<BusinessSubscriptionTier | null> {
   const row = await prisma.business.findUnique({
     where: { userId },
-    select: { subscriptionTier: true },
+    select: { id: true },
   });
-  return row?.subscriptionTier ?? null;
+  if (!row) return null;
+  return getSubscriptionTierForBusinessId(row.id);
 }
 
 export async function getSubscriptionTierForEmployeeUserId(
@@ -43,9 +63,10 @@ export async function getSubscriptionTierForEmployeeUserId(
 ): Promise<BusinessSubscriptionTier | null> {
   const employee = await prisma.employee.findFirst({
     where: { userId },
-    select: { business: { select: { subscriptionTier: true } } },
+    select: { businessId: true },
   });
-  return employee?.business.subscriptionTier ?? null;
+  if (!employee) return null;
+  return getSubscriptionTierForBusinessId(employee.businessId);
 }
 
 export function hasFeatureForTier(tier: BusinessSubscriptionTier, featureKey: FeatureKey): boolean {

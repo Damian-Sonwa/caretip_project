@@ -1,8 +1,8 @@
-import type {
-  BillingCycle,
-  BusinessSubscriptionTier,
-  SubscriptionPlanKey,
+import {
   SubscriptionStatus,
+  type BillingCycle,
+  type BusinessSubscriptionTier,
+  type SubscriptionPlanKey,
 } from "@prisma/client";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { prisma } from "../prisma.js";
@@ -10,14 +10,21 @@ import {
   createBillingPortalSession,
   createPlatformSubscriptionCheckoutSession,
   scheduleStripeSubscriptionCancelAtPeriodEnd,
+  type BillingPortalFlow,
+  type SubscriptionCheckoutFlow,
 } from "./stripeBilling.service.js";
+import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
+import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
 import { isStripeConfigured } from "./stripe.service.js";
 
 export type BillingStatusDto = {
   planKey: SubscriptionPlanKey;
   billingCycle: BillingCycle;
   status: SubscriptionStatus;
+  trialStartedAt: string | null;
   trialEndsAt: string | null;
+  isTrial: boolean;
+  trialDaysRemaining: number | null;
   currentPeriodEnd: string | null;
   renewalDate: string | null;
   cancelAtPeriodEnd: boolean;
@@ -43,6 +50,13 @@ function iso(d: Date | null | undefined): string | null {
   return d ? d.toISOString() : null;
 }
 
+function trialDaysRemaining(trialEndsAt: Date | null | undefined): number | null {
+  if (!trialEndsAt) return null;
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const days = Math.ceil((trialEndsAt.getTime() - Date.now()) / msPerDay);
+  return Math.max(0, days);
+}
+
 const TIMELINE_AUDIT_TYPES = new Set([
   "subscription_created",
   "subscription_plan_changed",
@@ -64,7 +78,9 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
           planKey: true,
           billingCycle: true,
           status: true,
+          trialStartedAt: true,
           trialEndsAt: true,
+          isTrial: true,
           currentPeriodEnd: true,
           renewalDate: true,
           cancelAtPeriodEnd: true,
@@ -81,12 +97,19 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
   if (!row?.subscription) return null;
 
   const sub = row.subscription;
+  const effectiveTier = await getSubscriptionTierForBusinessId(businessId);
 
   return {
     planKey: sub.planKey,
     billingCycle: sub.billingCycle,
     status: sub.status,
+    trialStartedAt: iso(sub.trialStartedAt),
     trialEndsAt: iso(sub.trialEndsAt),
+    isTrial: sub.isTrial || sub.status === SubscriptionStatus.trialing,
+    trialDaysRemaining:
+      sub.status === SubscriptionStatus.trialing || sub.isTrial
+        ? trialDaysRemaining(sub.trialEndsAt)
+        : null,
     currentPeriodEnd: iso(sub.currentPeriodEnd),
     renewalDate: iso(sub.renewalDate),
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
@@ -95,7 +118,7 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
     stripeCustomerId: sub.stripeCustomerId,
     subscriptionCreatedAt: sub.createdAt.toISOString(),
     syncedAt: sub.updatedAt.toISOString(),
-    subscriptionTier: row.subscriptionTier,
+    subscriptionTier: effectiveTier,
     billingEnabled: isSubscriptionBillingEnabled(),
     stripeConfigured: isStripeConfigured(),
   };
@@ -139,12 +162,58 @@ export async function getBillingTimelineForBusiness(
   }));
 }
 
+export type CheckoutSyncStatusDto = {
+  synced: boolean;
+  status: SubscriptionStatus | null;
+  planKey: SubscriptionPlanKey | null;
+  subscriptionTier: BusinessSubscriptionTier | null;
+  isTrial: boolean;
+  hasStripeBilling: boolean;
+};
+
+export async function getCheckoutSyncStatusForBusiness(
+  businessId: string,
+  expectedPlanKey?: SubscriptionPlanKey,
+): Promise<CheckoutSyncStatusDto> {
+  const dto = await getBillingStatusForBusiness(businessId);
+  if (!dto) {
+    return {
+      synced: false,
+      status: null,
+      planKey: null,
+      subscriptionTier: null,
+      isTrial: false,
+      hasStripeBilling: false,
+    };
+  }
+
+  const statusOk =
+    dto.status === SubscriptionStatus.trialing || dto.status === SubscriptionStatus.active;
+  const linked = dto.hasStripeBilling;
+  const planOk = expectedPlanKey ? dto.planKey === expectedPlanKey : true;
+  const effectiveTier = await getSubscriptionTierForBusinessId(businessId);
+  const tierOk = expectedPlanKey
+    ? effectiveTier === mapPlanKeyToBusinessTier(expectedPlanKey)
+    : true;
+
+  return {
+    synced: statusOk && linked && planOk && tierOk,
+    status: dto.status,
+    planKey: dto.planKey,
+    subscriptionTier: effectiveTier,
+    isTrial: dto.isTrial,
+    hasStripeBilling: linked,
+  };
+}
+
 export async function createManagerCheckoutSession(params: {
   businessId: string;
   managerEmail: string;
   businessName: string;
   planKey: SubscriptionPlanKey;
   billingCycle?: "monthly" | "yearly";
+  includeTrial?: boolean;
+  checkoutFlow?: SubscriptionCheckoutFlow;
 }): Promise<{ sessionId: string; url: string | null }> {
   const subscription = await prisma.subscription.findUnique({
     where: { businessId: params.businessId },
@@ -161,13 +230,21 @@ export async function createManagerCheckoutSession(params: {
     businessName: params.businessName,
     planKey: params.planKey,
     billingCycle: params.billingCycle,
+    includeTrial: params.includeTrial,
+    checkoutFlow: params.checkoutFlow,
   });
 }
 
 export async function createManagerPortalSession(params: {
   stripeCustomerId: string;
+  flow?: BillingPortalFlow;
+  returnUrl?: string;
 }): Promise<{ url: string }> {
-  return createBillingPortalSession({ stripeCustomerId: params.stripeCustomerId });
+  return createBillingPortalSession({
+    stripeCustomerId: params.stripeCustomerId,
+    flow: params.flow,
+    returnUrl: params.returnUrl,
+  });
 }
 
 export async function scheduleManagerCancelAtPeriodEnd(params: {

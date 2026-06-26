@@ -5,9 +5,32 @@ import { BILLING_CHECKOUT_METADATA_KEYS } from "../lib/subscription/subscription
 import { mapBusinessTierToPlanKey } from "../lib/subscription/mapSubscriptionPlanKey.js";
 import type { SubscriptionPlanKey } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import {
+  isSubscriptionTrialEnabled,
+  SUBSCRIPTION_TRIAL_PERIOD_DAYS,
+} from "../config/subscriptionTrial.js";
 
 function frontendBaseUrl(): string {
   return (process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "");
+}
+
+export type SubscriptionCheckoutFlow = "billing" | "onboarding";
+
+function checkoutReturnUrls(flow: SubscriptionCheckoutFlow): {
+  successUrl: string;
+  cancelUrl: string;
+} {
+  const base = frontendBaseUrl();
+  if (flow === "onboarding") {
+    return {
+      successUrl: `${base}/subscription/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancelUrl: `${base}/subscription/canceled`,
+    };
+  }
+  return {
+    successUrl: `${base}/dashboard/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+    cancelUrl: `${base}/dashboard/settings?billing=canceled`,
+  };
 }
 
 function resolveCheckoutPriceId(planKey: SubscriptionPlanKey, billingCycle: "monthly" | "yearly"): string {
@@ -76,6 +99,10 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   businessName: string;
   planKey: SubscriptionPlanKey;
   billingCycle?: "monthly" | "yearly";
+  /** When true, Stripe collects payment details and starts a free trial before the first charge. */
+  includeTrial?: boolean;
+  /** billing = existing dashboard upgrade flow; onboarding = pricing → signup → onboarding flow. */
+  checkoutFlow?: SubscriptionCheckoutFlow;
 }): Promise<{ sessionId: string; url: string | null }> {
   if (!isSubscriptionBillingEnabled()) {
     throw new Error("Subscription billing is not enabled");
@@ -94,20 +121,31 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   });
 
   const stripe = getStripeClient();
+  const trialEligible =
+    params.includeTrial === true &&
+    isSubscriptionTrialEnabled() &&
+    params.planKey === "premium";
+  const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
+    metadata: {
+      [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
+      [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
+      [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
+      [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
+    },
+    ...(trialEligible ? { trial_period_days: SUBSCRIPTION_TRIAL_PERIOD_DAYS } : {}),
+  };
+
+  const checkoutFlow = params.checkoutFlow ?? "billing";
+  const { successUrl, cancelUrl } = checkoutReturnUrls(checkoutFlow);
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,
     line_items: [{ price: priceId, quantity: 1 }],
-    success_url: `${frontendBaseUrl()}/dashboard/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${frontendBaseUrl()}/dashboard/settings?billing=canceled`,
-    subscription_data: {
-      metadata: {
-        [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
-        [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
-        [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
-        [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
-      },
-    },
+    payment_method_collection: "always",
+    success_url: successUrl,
+    cancel_url: cancelUrl,
+    subscription_data: subscriptionData,
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
       [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
@@ -120,17 +158,24 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
 }
 
 /** Stripe Customer Portal session (scaffold — API route in Phase B.2). */
+export type BillingPortalFlow = "default" | "payment_methods";
+
 export async function createBillingPortalSession(params: {
   stripeCustomerId: string;
   returnUrl?: string;
+  flow?: BillingPortalFlow;
 }): Promise<{ url: string }> {
   if (!isSubscriptionBillingEnabled()) {
     throw new Error("Subscription billing is not enabled");
   }
   const stripe = getStripeClient();
+  const flow = params.flow ?? "default";
   const session = await stripe.billingPortal.sessions.create({
     customer: params.stripeCustomerId,
-    return_url: params.returnUrl ?? `${frontendBaseUrl()}/dashboard/settings`,
+    return_url: params.returnUrl ?? `${frontendBaseUrl()}/dashboard/billing/invoices`,
+    ...(flow === "payment_methods"
+      ? { flow_data: { type: "payment_method_update" as const } }
+      : {}),
   });
   return { url: session.url };
 }

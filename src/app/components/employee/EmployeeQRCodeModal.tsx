@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Dialog,
@@ -9,6 +9,9 @@ import {
 } from "../ui/dialog";
 import { Download, Link as LinkIcon } from "lucide-react";
 import { toast } from "sonner";
+import { getEmployeeProfile } from "../../lib/api";
+import { qrBrandingFingerprint } from "../../lib/businessBranding";
+import { loadQrRenderBranding } from "../../lib/loadQrRenderBranding";
 import {
   renderBrandedQRToDataUrl,
   renderBrandedQRToDataUrlLegacy,
@@ -41,19 +44,52 @@ export function EmployeeQRCodeModal({
   const { t } = useTranslation();
   const [dataUrl, setDataUrl] = useState("");
   const [imgLoading, setImgLoading] = useState(false);
+  const [brandingReady, setBrandingReady] = useState(false);
+  const [qrBranding, setQrBranding] = useState<Awaited<ReturnType<typeof loadQrRenderBranding>>>(null);
 
   const bs = businessSlug?.trim();
   const es = employeeSlug?.trim();
   const useSlugPair = Boolean(bs && es);
+  const brandingFingerprint = useMemo(() => qrBrandingFingerprint(qrBranding), [qrBranding]);
 
   useEffect(() => {
-    if (!open || !employeeId) return;
+    if (!open) {
+      setQrBranding(null);
+      setBrandingReady(false);
+      return;
+    }
+    let cancelled = false;
+    setBrandingReady(false);
+    void (async () => {
+      try {
+        const profile = await getEmployeeProfile();
+        if (cancelled) return;
+        const branding = await loadQrRenderBranding({
+          mode: "employee",
+          businessId: profile.businessId,
+        });
+        if (cancelled) return;
+        setQrBranding(branding);
+      } catch (err) {
+        logClientError("EmployeeQRCodeModal.branding", err);
+        if (!cancelled) setQrBranding(null);
+      } finally {
+        if (!cancelled) setBrandingReady(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open || !employeeId || !brandingReady) return;
     let cancelled = false;
     setImgLoading(true);
     setDataUrl("");
     const render = useSlugPair
-      ? renderBrandedQRToDataUrl(bs!, es!)
-      : renderBrandedQRToDataUrlLegacy(employeeId);
+      ? renderBrandedQRToDataUrl(bs!, es!, qrBranding ?? undefined)
+      : renderBrandedQRToDataUrlLegacy(employeeId, qrBranding ?? undefined);
     render
       .then((url) => {
         if (!cancelled) setDataUrl(url);
@@ -67,7 +103,7 @@ export function EmployeeQRCodeModal({
     return () => {
       cancelled = true;
     };
-  }, [open, employeeId, bs, es, useSlugPair]);
+  }, [open, employeeId, bs, es, useSlugPair, brandingReady, brandingFingerprint, qrBranding]);
 
   const shareUrl = useSlugPair ? getEmployeeQrShareUrl(bs!, es!) : getEmployeeQrLegacyShareUrl(employeeId);
 
@@ -82,8 +118,9 @@ export function EmployeeQRCodeModal({
   };
 
   const download = () => {
-    if (useSlugPair) void downloadBrandedQR(bs!, es!, employeeName);
-    else void downloadBrandedQRLegacy(employeeId, employeeName);
+    const branding = qrBranding ?? undefined;
+    if (useSlugPair) void downloadBrandedQR(bs!, es!, employeeName, branding);
+    else void downloadBrandedQRLegacy(employeeId, employeeName, branding);
   };
 
   return (

@@ -82,6 +82,10 @@ Desktop.ini
 !/docs/PDF_EXPORT_PARITY_FIX_REPORT.md
 !/docs/EMPLOYEE_ENTITLEMENT_FLASH_FIX_REPORT.md
 !/docs/BUSINESS_ENTITLEMENT_FLICKER_FIX.md
+!/docs/MOBILE_INTERACTION_FIXES.md
+!/docs/DASHBOARD_FILTER_UX_AUDIT.md
+!/docs/QR_STUDIO_PERFORMANCE_OPTIMIZATION.md
+!/docs/QR_ANALYTICS_CONSOLIDATION.md
 
 # --- Local restore / accidental paste dumps ---
 .restore_*.txt

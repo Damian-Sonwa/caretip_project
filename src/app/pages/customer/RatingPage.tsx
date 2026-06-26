@@ -12,7 +12,6 @@ import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { customerFlowUi as cf } from "./customerFlowUi";
 import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
 import { CustomerFlowShell } from "./CustomerFlowShell";
-import { CustomerJourneySkipButton } from "./CustomerJourneyHeader";
 import { useCustomerVenueBrand } from "./customerJourneyBrand";
 import { headerLeaveFeedbackFor } from "./customerJourneyHeaderCopy";
 
@@ -156,13 +155,6 @@ export function RatingPage() {
   return (
     <CustomerFlowShell
       withBottomCta
-      headerTrailing={
-        <CustomerJourneySkipButton
-          label={t("tipFlow.rating.skip")}
-          ariaLabel={t("tipFlow.rating.skipAria")}
-          onClick={handleSkip}
-        />
-      }
       venue={venueBrand}
       stepTitle={feedbackHeader.stepTitle}
       trustMessage={feedbackHeader.trustMessage}

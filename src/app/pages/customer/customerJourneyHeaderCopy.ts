@@ -1,4 +1,6 @@
 import type { TFunction } from "i18next";
+import type { PublicGuestBranding } from "../../lib/businessBranding";
+import { resolveGuestThankYouMessage } from "../../lib/businessBranding";
 
 /** Action + recipient in one natural line; helper text supports the title (no stacked fragments). */
 export function headerChooseAmountFor(
@@ -36,11 +38,25 @@ export function headerSelectTeamMember(t: TFunction) {
 }
 
 export function headerThankYouFor(t: TFunction, name: string, feedbackSubmitted?: boolean) {
+  return completionThankYouCopy(t, null, name, feedbackSubmitted);
+}
+
+/** Tip completion — branded thank-you from PublicGuestBranding (same source as QR Studio). */
+export function completionThankYouCopy(
+  t: TFunction,
+  branding: PublicGuestBranding | null | undefined,
+  employeeName: string,
+  feedbackSubmitted?: boolean,
+) {
+  const thankYouMessage = resolveGuestThankYouMessage(
+    branding,
+    t("tipFlow.completion.defaultThankYou"),
+  );
   return {
-    stepTitle: t("tipFlow.header.thankYouFor", { name }),
+    stepTitle: thankYouMessage,
     trustMessage: feedbackSubmitted
       ? t("tipFlow.completion.feedbackReceived")
-      : t("tipFlow.header.thankYouHint"),
+      : t("tipFlow.completion.tipSentTo", { name: employeeName }),
   };
 }
 

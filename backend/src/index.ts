@@ -60,6 +60,7 @@ import { getObservabilityHealthDiagnostics } from "./config/observabilityEnv.js"
 import { securityHeadersMiddleware } from "./middleware/securityHeaders.middleware.js";
 import { authenticatedApiRateLimit } from "./middleware/securityRateLimit.middleware.js";
 import socketRoutes from "./routes/socket.routes.js";
+import internalJobsRoutes from "./routes/internalJobs.routes.js";
 
 const app = express();
 const PORT = process.env.PORT ?? 3001;
@@ -197,6 +198,7 @@ app.use("/api/socket", socketRoutes);
 app.use("/api/platform", platformRoutes);
 app.use("/api/media", mediaRoutes);
 app.use("/api/push", pushRoutes);
+app.use("/api/internal/jobs", internalJobsRoutes);
 /** Alias for SuperAdmin clients (same handlers as `/api/platform`). */
 app.use("/api/admin", platformRoutes);
 

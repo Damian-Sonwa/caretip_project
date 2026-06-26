@@ -1,36 +1,18 @@
 import { Link } from "react-router";
 import { Shield, Zap } from "lucide-react";
-import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import { PublicPageHeader } from "@/components/public/PublicPageHeader";
+import { HowItWorksPageHero } from "@/components/public/howItWorks/HowItWorksPageHero";
 import { HowItWorksStepContent } from "@/components/public/HowItWorksStepContent";
 import { HOW_IT_WORKS_STEPS } from "@/components/public/howItWorksFlow";
 import { HowItWorksTimelineStep } from "@/components/public/HowItWorksTimelineStep";
-import { JourneyPillarIcon } from "@/components/public/JourneyPillarIcon";
 import { howItWorksPageUi } from "@/components/public/howItWorksPageUi";
 import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { publicPageUi } from "@/components/public/publicPageUi";
 import { cn } from "@/lib/utils";
 
-type JourneyPillar = { icon: string; label: string };
-
-function parseJourneyPillars(raw: unknown): JourneyPillar[] {
-  if (!Array.isArray(raw)) return [];
-  return raw.flatMap((item) => {
-    if (typeof item !== "object" || item === null) return [];
-    const { icon, label } = item as { icon?: unknown; label?: unknown };
-    if (typeof icon !== "string" || typeof label !== "string") return [];
-    return [{ icon, label }];
-  });
-}
-
 export function HowItWorksPage() {
   const { t } = useTranslation();
-  const journeyPillars = useMemo(() => {
-    const raw = t("staticPages.howItWorks.journeyPillars", { returnObjects: true });
-    return parseJourneyPillars(raw);
-  }, [t]);
 
   return (
     <PublicPageShell maxWidth="wide">
@@ -39,32 +21,7 @@ export function HowItWorksPage() {
         className={cn(howItWorksPageUi.page, publicPagesBrandUi.pageAccent)}
         aria-label={t("nav.howItWorks")}
       >
-      <div className={howItWorksPageUi.hero}>
-        <PublicPageHeader
-          centered
-          introLayout="heroGroup"
-          className={howItWorksPageUi.heroHeader}
-          title={t("staticPages.howItWorks.title")}
-          subtitle={t("staticPages.howItWorks.subtitle")}
-          afterSubtitle={
-            journeyPillars.length > 0 ? (
-              <div className={publicPagesBrandUi.journeyBand}>
-                <ul className={howItWorksPageUi.journeyList}>
-                  {journeyPillars.map((pillar) => (
-                    <li key={`${pillar.icon}-${pillar.label}`} className={howItWorksPageUi.journeyListItem}>
-                      <JourneyPillarIcon iconKey={pillar.icon} variant="obsidian" />
-                      <span className="caretip-how-journey-list__label font-medium leading-snug sm:text-base">
-                        {pillar.label}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ) : null
-          }
-          showTrustChips={false}
-        />
-      </div>
+      <HowItWorksPageHero className={howItWorksPageUi.hero} />
 
       <div className={howItWorksPageUi.timeline}>
         {HOW_IT_WORKS_STEPS.map((def, index) => (

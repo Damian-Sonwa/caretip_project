@@ -6,6 +6,8 @@ import { useBillingStatus } from "../../../hooks/useBillingStatus";
 import type { SubscriptionBillingCycle } from "../../../lib/api";
 import { BillingCurrentPlanCard } from "./billing/BillingCurrentPlanCard";
 import { BillingPlanManagement } from "./billing/BillingPlanManagement";
+import { BillingSubscriptionLifecycle } from "./billing/BillingSubscriptionLifecycle";
+import { BillingTrialSummary } from "./billing/BillingTrialSummary";
 import { BillingTimeline } from "./billing/BillingTimeline";
 import { CommercialInsightsPanel } from "./CommercialInsightsPanel";
 
@@ -35,6 +37,11 @@ export function BusinessSettingsBillingPanel() {
       ) : data ? (
         <div className="space-y-8">
           <BillingCurrentPlanCard billing={data} />
+          <BillingTrialSummary billing={data} />
+
+          {data.hasStripeBilling || data.planKey !== "basic" ? (
+            <BillingSubscriptionLifecycle billing={data} />
+          ) : null}
 
           <section id="billing-plans">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

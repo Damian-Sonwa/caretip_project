@@ -19,6 +19,49 @@ export const DEFAULT_BRAND_PRIMARY_COLOR = "#EB992C";
 export const DEFAULT_BRAND_SECONDARY_COLOR = "#000000";
 export const CARETIP_QR_BRAND_HEX = "#EB992C";
 
+/** Plan-aware QR / guest fallback when custom branding is unavailable or unset. */
+export const DEFAULT_QR_THANK_YOU_MESSAGE = "Thank you for your support.";
+
+/** Guest tip completion fallback (Basic or Premium without custom copy). */
+export const DEFAULT_GUEST_THANK_YOU_MESSAGE = "Thanks for your tip!";
+
+/** Resolve thank-you copy for QR rendering — never read hardcoded text from template assets. */
+export function resolveQrThankYouMessage(
+  tierAllowsCustomBranding: boolean,
+  customMessage: string | null | undefined,
+  fallbackMessage: string = DEFAULT_QR_THANK_YOU_MESSAGE,
+): string {
+  if (tierAllowsCustomBranding) {
+    const trimmed = customMessage?.trim();
+    if (trimmed) return trimmed;
+  }
+  return fallbackMessage.trim() || DEFAULT_QR_THANK_YOU_MESSAGE;
+}
+
+/** Thank-you copy for guest tip completion — uses Branding page message when Premium/Enterprise. */
+export function resolveGuestThankYouMessage(
+  branding: Pick<PublicGuestBranding, "premium" | "thankYouMessage"> | null | undefined,
+  fallbackMessage: string = DEFAULT_GUEST_THANK_YOU_MESSAGE,
+): string {
+  if (branding?.premium) {
+    const trimmed = branding.thankYouMessage?.trim();
+    if (trimmed) return trimmed;
+  }
+  return fallbackMessage.trim() || DEFAULT_GUEST_THANK_YOU_MESSAGE;
+}
+
+/** Primary accent for guest journey UI (completion CTA, icon ring). */
+export function guestBrandAccentColor(
+  branding: Pick<PublicGuestBranding, "premium" | "brandPrimaryColor" | "qrAccentColor"> | null | undefined,
+): string {
+  if (!branding?.premium) return DEFAULT_BRAND_PRIMARY_COLOR;
+  const primary = branding.brandPrimaryColor?.trim();
+  if (primary && isValidBrandHex(primary)) return primary;
+  const accent = branding.qrAccentColor?.trim();
+  if (accent && isValidBrandHex(accent)) return accent;
+  return DEFAULT_BRAND_PRIMARY_COLOR;
+}
+
 export type PublicGuestBranding = {
   premium: boolean;
   businessName: string;

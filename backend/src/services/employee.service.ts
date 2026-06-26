@@ -15,6 +15,7 @@ import {
 } from "./employeeActivationEmail.service.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
 
 import {
   GO_LIVE_REQUIRED_MESSAGE,
@@ -137,6 +138,7 @@ export interface EmployeeDetail {
   id: string;
   name: string;
   role: string;
+  bio: string | null;
   avatar: string | null;
   businessId: string;
   /** Public `Business.slug` for canonical `/{businessSlug}/{employeeSlug}` links. */
@@ -156,6 +158,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       id: true,
       name: true,
       jobTitle: true,
+      bio: true,
       avatar: true,
       slug: true,
       isActive: true,
@@ -206,6 +209,7 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     id: emp.id,
     name: emp.name,
     role: emp.jobTitle,
+    bio: emp.bio?.trim() || null,
     avatar: absolutizePublicMediaPath(emp.avatar),
     businessId: emp.businessId,
     businessSlug: emp.business.slug ?? null,
@@ -542,6 +546,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     });
     if (!emp) return null;
     if (!emp.user) return null;
+    const effectiveTier = await getSubscriptionTierForBusinessId(emp.businessId);
     return {
       id: emp.id,
       name: emp.name,
@@ -558,7 +563,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       businessName: emp.business.name ?? "",
       businessTimezone: (emp.business as any).timezone ?? undefined,
       slug: emp.slug ?? null,
-      subscriptionTier: emp.business.subscriptionTier,
+      subscriptionTier: effectiveTier,
     };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
@@ -577,6 +582,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       });
       if (!emp) return null;
       if (!emp.user) return null;
+      const effectiveTier = await getSubscriptionTierForBusinessId(emp.businessId);
       return {
         id: emp.id,
         name: emp.name,
@@ -593,6 +599,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         businessName: emp.business.name ?? "",
         businessTimezone: (emp.business as any).timezone ?? undefined,
         slug: emp.slug ?? null,
+        subscriptionTier: effectiveTier,
       };
     }
     throw e;

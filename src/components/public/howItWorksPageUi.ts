@@ -7,5 +7,5 @@ export const howItWorksPageUi = {
   journeyListItem: "caretip-how-journey-list__item flex min-w-0 items-center gap-2 text-left md:gap-3",
   timeline:
     "caretip-how-timeline relative mt-10 space-y-10 sm:mt-12 sm:space-y-12 lg:mt-14 lg:space-y-14 xl:space-y-16",
-  hero: "caretip-how-marketing-hero caretip-public-marketing-hero text-center pb-8 sm:pb-10 lg:pb-12",
+  hero: "caretip-how-hero-v2-wrap pb-2 sm:pb-4",
 } as const;

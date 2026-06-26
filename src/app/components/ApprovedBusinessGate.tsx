@@ -3,6 +3,7 @@ import { Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
 import { primeSubscriptionTierFromSession } from "../lib/subscriptionSessionCache";
+import { resolveSubscriptionTier } from "../lib/subscriptionCapabilities";
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
@@ -36,7 +37,7 @@ export function ApprovedBusinessGate() {
     void fetchBusinessProfile({ silent: true })
       .then((p) => {
         if (cancelled) return;
-        primeSubscriptionTierFromSession(p.subscriptionTier);
+        primeSubscriptionTierFromSession(resolveSubscriptionTier(p.subscriptionTier));
         const s = mapDbVerificationToStatus(p.verificationStatus);
         if (s) updateUser({ status: s });
       })

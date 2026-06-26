@@ -1,4 +1,9 @@
-import type { QrBrandingOptions } from "../businessBranding";
+import i18n from "@/i18n/i18n";
+import {
+  DEFAULT_QR_THANK_YOU_MESSAGE,
+  resolveQrThankYouMessage,
+  type QrBrandingOptions,
+} from "../businessBranding";
 import type { QrStudioDesignExtras } from "../qrDesignSystem";
 import {
   QR_TEMPLATE_FIELD_IDS,
@@ -67,7 +72,13 @@ export function buildQrTemplateBrandingPayload(input: {
     businessName: branding.businessName.trim(),
     tagline: premium ? branding.brandTagline?.trim() || null : null,
     welcomeMessage: premium ? branding.welcomeMessage?.trim() || null : null,
-    thankYouMessage: premium ? branding.thankYouMessage?.trim() || null : null,
+    thankYouMessage: resolveQrThankYouMessage(
+      premium,
+      branding.thankYouMessage,
+      i18n.t("business.branding.defaultThankYouMessage", {
+        defaultValue: DEFAULT_QR_THANK_YOU_MESSAGE,
+      }),
+    ),
     ctaText: premium ? extras?.ctaText?.trim() || branding.ctaText?.trim() || "Scan to tip" : null,
     address: premium ? address : null,
     phone: premium ? profile?.contactPhone?.trim() || null : null,

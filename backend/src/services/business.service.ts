@@ -20,6 +20,7 @@ import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
+import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
 import {
   businessDayKey,
   businessUtcRangeForTimeframe,
@@ -942,7 +943,11 @@ export async function getManagerBusinessProfileById(
   });
   if (!business) return null;
   const employeeCount = await countActivePublicEmployees(business.id);
-  return toManagerBusinessProfileDto(business, employeeCount);
+  const effectiveTier = await getSubscriptionTierForBusinessId(business.id);
+  return toManagerBusinessProfileDto(
+    { ...business, subscriptionTier: effectiveTier },
+    employeeCount,
+  );
 }
 
 /** @deprecated Use getPublicBusinessById or getManagerBusinessProfileById. */

@@ -12,6 +12,7 @@ import type { Socket } from "socket.io-client";
 import { resolveApiBaseUrl } from "../lib/apiOrigin";
 import { AUTH_STORAGE_SYNC_EVENT } from "../lib/authStorageSync";
 import { getMemoryAccessToken } from "../lib/accessTokenStore";
+import { SOCKET_CONNECTED_EVENT, SOCKET_RECONNECTED_EVENT } from "../lib/realtime/realtimeContracts";
 
 /** Same origin as REST: VITE_API_URL or current origin (Vite proxy for /socket.io in dev). */
 function getSocketUrl(): string {
@@ -90,9 +91,15 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       timeout: 20000,
     });
 
+    const dispatchSocketConnected = () => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent(SOCKET_CONNECTED_EVENT));
+      }
+    };
     const onConnect = () => {
       setConnected(true);
       setConnectionStatus("connected");
+      dispatchSocketConnected();
     };
     const onDisconnect = () => {
       setConnected(false);
@@ -107,7 +114,8 @@ export function SocketProvider({ children }: { children: ReactNode }) {
       setConnected(true);
       setConnectionStatus("connected");
       if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("caretip:socket-reconnected"));
+        window.dispatchEvent(new CustomEvent(SOCKET_RECONNECTED_EVENT));
+        window.dispatchEvent(new CustomEvent(SOCKET_CONNECTED_EVENT));
       }
     };
 

@@ -20,16 +20,21 @@ async function getRedis(): Promise<RedisClient | null> {
     console.info("[rateLimit] REDIS_URL not set — using in-memory buckets");
     return null;
   }
+  let client: (RedisClient & { connect(): Promise<void>; disconnect(): void }) | null = null;
   try {
     const RedisModule = await import("ioredis");
     const RedisCtor = RedisModule.default as unknown as new (
       url: string,
       opts?: Record<string, unknown>,
-    ) => RedisClient & { connect(): Promise<void> };
-    const client = new RedisCtor(url, {
+    ) => RedisClient & { connect(): Promise<void>; disconnect(): void };
+    client = new RedisCtor(url, {
       maxRetriesPerRequest: 1,
       enableOfflineQueue: false,
       lazyConnect: true,
+      retryStrategy: () => null,
+    });
+    client.on("error", () => {
+      // absorbed — avoids ioredis "Unhandled error event" when host is unreachable
     });
     await client.connect();
     redisClient = client as unknown as RedisClient;
@@ -37,6 +42,7 @@ async function getRedis(): Promise<RedisClient | null> {
     console.info("[rateLimit] Redis connected for distributed auth limits");
     return redisClient;
   } catch (err) {
+    client?.disconnect();
     console.warn("[rateLimit] Redis unavailable — falling back to in-memory", err);
     redisClient = null;
     redisReady = false;

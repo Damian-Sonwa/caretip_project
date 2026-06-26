@@ -51,33 +51,43 @@ async function qrScanChange(businessId: string): Promise<{ current: number; prev
 }
 
 /** Sprint 7D — evidence-based churn risk (no black-box scoring). */
-export async function getBusinessRetentionInsights(businessId: string): Promise<BusinessRetentionInsights> {
+export function computeRetentionInsightsFromFacts(facts: {
+  hasCompletedOnboarding: boolean;
+  userCreatedAt: Date | null;
+  subscription: {
+    status: string;
+    cancelAtPeriodEnd: boolean;
+    cancellationEffective: Date | null;
+    canceledAt: Date | null;
+  } | null;
+  tips30d: number;
+  tipsPrior30d: number;
+  qr30d: number;
+  qrPrior30d: number;
+  staffCount: number;
+}): BusinessRetentionInsights {
   const signals: RetentionSignal[] = [];
-
-  const [business, tips, qr, subscription] = await Promise.all([
-    prisma.business.findUnique({
-      where: { id: businessId },
-      select: {
-        subscriptionTier: true,
-        user: { select: { hasCompletedOnboarding: true, createdAt: true } },
-      },
-    }),
-    tipVolumeChange(businessId),
-    qrScanChange(businessId),
-    prisma.subscription.findUnique({
-      where: { businessId },
-      select: {
-        status: true,
-        cancelAtPeriodEnd: true,
-        cancellationEffective: true,
-        canceledAt: true,
-      },
-    }),
-  ]);
-
-  if (!business) {
-    return { level: "low", signals: [] };
-  }
+  const tips = {
+    current: facts.tips30d,
+    previous: facts.tipsPrior30d,
+    pct:
+      facts.tipsPrior30d > 0
+        ? Math.round(((facts.tips30d - facts.tipsPrior30d) / facts.tipsPrior30d) * 100)
+        : facts.tips30d > 0
+          ? 100
+          : 0,
+  };
+  const qr = {
+    current: facts.qr30d,
+    previous: facts.qrPrior30d,
+    pct:
+      facts.qrPrior30d > 0
+        ? Math.round(((facts.qr30d - facts.qrPrior30d) / facts.qrPrior30d) * 100)
+        : facts.qr30d > 0
+          ? 100
+          : 0,
+  };
+  const subscription = facts.subscription;
 
   if (subscription?.cancelAtPeriodEnd) {
     signals.push({
@@ -103,9 +113,9 @@ export async function getBusinessRetentionInsights(businessId: string): Promise<
     });
   }
 
-  if (!business.user.hasCompletedOnboarding) {
+  if (!facts.hasCompletedOnboarding && facts.userCreatedAt) {
     const ageDays = Math.floor(
-      (Date.now() - business.user.createdAt.getTime()) / (24 * 60 * 60 * 1000),
+      (Date.now() - facts.userCreatedAt.getTime()) / (24 * 60 * 60 * 1000),
     );
     if (ageDays >= 7) {
       signals.push({
@@ -141,20 +151,15 @@ export async function getBusinessRetentionInsights(businessId: string): Promise<
     });
   }
 
-  if (tips.current === 0 && tips.previous === 0) {
-    const staffCount = await prisma.employee.count({
-      where: { businessId, isDeleted: false, isActive: true },
+  if (tips.current === 0 && tips.previous === 0 && facts.staffCount > 0) {
+    signals.push({
+      id: "no-activity",
+      reasonCode: "no_tip_activity",
+      evidence: { staffCount: facts.staffCount },
+      sourceKpi: "tips.count",
+      calculationPath: "0 tips in 60d with active staff",
+      severity: "medium",
     });
-    if (staffCount > 0) {
-      signals.push({
-        id: "no-activity",
-        reasonCode: "no_tip_activity",
-        evidence: { staffCount },
-        sourceKpi: "tips.count",
-        calculationPath: "0 tips in 60d with active staff",
-        severity: "medium",
-      });
-    }
   }
 
   const maxSeverity = signals.reduce<RetentionRiskLevel>(
@@ -167,4 +172,45 @@ export async function getBusinessRetentionInsights(businessId: string): Promise<
   );
 
   return { level: signals.length === 0 ? "low" : maxSeverity, signals: signals.slice(0, 6) };
+}
+
+/** Sprint 7D — evidence-based churn risk (no black-box scoring). */
+export async function getBusinessRetentionInsights(businessId: string): Promise<BusinessRetentionInsights> {
+  const [business, tips, qr, subscription, staffCount] = await Promise.all([
+    prisma.business.findUnique({
+      where: { id: businessId },
+      select: {
+        user: { select: { hasCompletedOnboarding: true, createdAt: true } },
+      },
+    }),
+    tipVolumeChange(businessId),
+    qrScanChange(businessId),
+    prisma.subscription.findUnique({
+      where: { businessId },
+      select: {
+        status: true,
+        cancelAtPeriodEnd: true,
+        cancellationEffective: true,
+        canceledAt: true,
+      },
+    }),
+    prisma.employee.count({
+      where: { businessId, isDeleted: false, isActive: true },
+    }),
+  ]);
+
+  if (!business) {
+    return { level: "low", signals: [] };
+  }
+
+  return computeRetentionInsightsFromFacts({
+    hasCompletedOnboarding: business.user?.hasCompletedOnboarding ?? true,
+    userCreatedAt: business.user?.createdAt ?? null,
+    subscription: subscription ?? null,
+    tips30d: tips.current,
+    tipsPrior30d: tips.previous,
+    qr30d: qr.current,
+    qrPrior30d: qr.previous,
+    staffCount,
+  });
 }

@@ -22,6 +22,18 @@ export function useLandingReveal(delayS = 0): {
       return;
     }
 
+    const markVisibleIfInView = () => {
+      const rect = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      if (rect.top < vh * 0.92 && rect.bottom > vh * 0.05) {
+        el.classList.add(REVEAL_VISIBLE_CLASS);
+        return true;
+      }
+      return false;
+    };
+
+    if (markVisibleIfInView()) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry?.isIntersecting) {
@@ -29,7 +41,7 @@ export function useLandingReveal(delayS = 0): {
           observer.disconnect();
         }
       },
-      { root: null, rootMargin: "0px 0px -5% 0px", threshold: 0.15 },
+      { root: null, rootMargin: "0px 0px -2% 0px", threshold: 0.08 },
     );
 
     observer.observe(el);

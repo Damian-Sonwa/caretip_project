@@ -43,7 +43,11 @@ export function ContactPage() {
       <main id="contact" className={contactPageUi.page} aria-label={t("staticPages.contact.pageAria")}>
         {intent === "choose" ? <ContactIntentChooser onSelect={selectIntent} /> : null}
         {intent === "demo" ? (
-          <ContactDemoForm onBack={backToChooser} onSwitchToSupport={() => selectIntent("support")} />
+          <ContactDemoForm
+            onBack={backToChooser}
+            onSwitchToSupport={() => selectIntent("support")}
+            pricingPlan={searchParams.get("plan")}
+          />
         ) : null}
         {intent === "support" ? (
           <ContactSupportForm onBack={backToChooser} onSwitchToDemo={() => selectIntent("demo")} />

@@ -12,7 +12,7 @@ import {
   mapBusinessTierToPlanKey,
   mapPlanKeyToBusinessTier,
 } from "../lib/subscription/mapSubscriptionPlanKey.js";
-import { mapStripePriceToPlanKey } from "../lib/subscription/mapStripePriceToPlanKey.js";
+import { resolvePlanKeyForStripeSubscription } from "../lib/subscription/mapStripePriceToPlanKey.js";
 import { mapStripeSubscriptionStatus } from "../lib/subscription/mapStripeSubscriptionStatus.js";
 import {
   STRIPE_BILLING_AUDIT_TYPES,
@@ -20,6 +20,7 @@ import {
   type SubscriptionMirrorSource,
 } from "../lib/subscription/subscriptionAuditTypes.js";
 import { prisma } from "../prisma.js";
+import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 
 export type { SubscriptionMirrorSource };
 
@@ -39,6 +40,8 @@ export type StripeMirrorSnapshot = {
   trialStartedAt: Date | null;
   trialEndsAt: Date | null;
   trialSource: TrialSource | null;
+  isTrial: boolean;
+  trialExpiredAt: Date | null;
 };
 
 function unixToDate(seconds: number | null | undefined): Date | null {
@@ -66,7 +69,32 @@ export function buildMirrorSnapshotFromStripeSubscription(
   if (!rawPrice) {
     throw new Error("Stripe subscription missing price");
   }
-  const planKey = mapStripePriceToPlanKey(price ?? rawPrice);
+  const rawPriceId = typeof rawPrice === "string" ? rawPrice : rawPrice.id;
+  logTrialSync("mirror.build_snapshot.price_lookup", {
+    stripeSubscriptionId: sub.id,
+    stripeStatus: sub.status,
+    priceId: rawPriceId,
+    envPremiumMonthly: process.env.STRIPE_PRICE_PREMIUM_MONTHLY?.trim() ?? null,
+  });
+  let planKey: SubscriptionPlanKey;
+  try {
+    const resolved = resolvePlanKeyForStripeSubscription(sub, price ?? rawPrice);
+    planKey = resolved.planKey;
+    if (resolved.source === "subscription_metadata") {
+      logTrialSync("mirror.build_snapshot.plan_key_from_subscription_metadata", {
+        stripeSubscriptionId: sub.id,
+        priceId: rawPriceId,
+        planKey,
+      });
+    }
+  } catch (err) {
+    logTrialSync("mirror.build_snapshot.price_map_failed", {
+      stripeSubscriptionId: sub.id,
+      priceId: rawPriceId,
+      error: err instanceof Error ? err.message : String(err),
+    });
+    throw err;
+  }
   const { status } = mapStripeSubscriptionStatus(sub.status);
   const periodEnd = unixToDate(sub.current_period_end);
   const cancelAtPeriodEnd = sub.cancel_at_period_end === true;
@@ -102,6 +130,8 @@ export function buildMirrorSnapshotFromStripeSubscription(
     trialStartedAt: unixToDate(sub.trial_start),
     trialEndsAt: unixToDate(sub.trial_end),
     trialSource: sub.trial_end ? TrialSource.stripe : null,
+    isTrial: status === SubscriptionStatus.trialing,
+    trialExpiredAt: null,
   };
 }
 
@@ -216,12 +246,39 @@ export async function applyStripeMirrorTransactional(params: {
   auditPayload: Record<string, unknown>;
 }): Promise<void> {
   const tierUpdate = resolveBusinessTierDualWrite(params.snapshot);
+
+  logTrialSync("mirror.apply_transaction.start", {
+    businessId: params.businessId,
+    subscriptionRowId: params.subscriptionRowId,
+    auditType: params.auditType,
+    snapshotStatus: params.snapshot.status,
+    snapshotPlanKey: params.snapshot.planKey,
+    tierDualWrite: tierUpdate,
+    isTrial: params.snapshot.status === SubscriptionStatus.trialing,
+  });
+
   const eventData = createSubscriptionAuditEventData({
     auditType: params.auditType,
     payload: params.auditPayload,
     stripeEventId: params.stripeEventId,
     processingResult: SubscriptionEventProcessingResult.processed,
   });
+
+  const existing = await prisma.subscription.findUnique({
+    where: { id: params.subscriptionRowId },
+    select: { status: true, trialExpiredAt: true },
+  });
+
+  let trialExpiredAt = existing?.trialExpiredAt ?? params.snapshot.trialExpiredAt;
+  if (
+    existing?.status === SubscriptionStatus.trialing &&
+    params.snapshot.status === SubscriptionStatus.active &&
+    !trialExpiredAt
+  ) {
+    trialExpiredAt = new Date();
+  }
+
+  const isTrial = params.snapshot.status === SubscriptionStatus.trialing;
 
   const updates: Prisma.PrismaPromise<unknown>[] = [
     prisma.subscription.update({
@@ -242,6 +299,8 @@ export async function applyStripeMirrorTransactional(params: {
         trialStartedAt: params.snapshot.trialStartedAt,
         trialEndsAt: params.snapshot.trialEndsAt,
         trialSource: params.snapshot.trialSource,
+        isTrial,
+        trialExpiredAt,
       },
     }),
     prisma.subscriptionEvent.create({
@@ -262,6 +321,14 @@ export async function applyStripeMirrorTransactional(params: {
   }
 
   await prisma.$transaction(updates);
+
+  logTrialSync("mirror.apply_transaction.done", {
+    businessId: params.businessId,
+    subscriptionRowId: params.subscriptionRowId,
+    tierDualWrite: tierUpdate,
+    mirrorStatus: params.snapshot.status,
+    trialEndsAt: params.snapshot.trialEndsAt?.toISOString() ?? null,
+  });
 }
 
 /** Platform admin tier change — atomic business tier, mirror planKey, and audit event. */

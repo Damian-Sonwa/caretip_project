@@ -178,6 +178,36 @@ const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
   },
   {
+    path: '/subscription/success',
+    lazy: async () => {
+      const { SubscriptionSuccessPage } = await import('./pages/SubscriptionSuccessPage');
+      function SubscriptionSuccessRoute() {
+        return (
+          <ProtectedRoute allowedRoles={['business']}>
+            <SubscriptionSuccessPage />
+          </ProtectedRoute>
+        );
+      }
+      return { Component: SubscriptionSuccessRoute };
+    },
+    errorElement: <ErrorBoundary />,
+  },
+  {
+    path: '/subscription/canceled',
+    lazy: async () => {
+      const { SubscriptionCanceledPage } = await import('./pages/SubscriptionCanceledPage');
+      function SubscriptionCanceledRoute() {
+        return (
+          <ProtectedRoute allowedRoles={['business']}>
+            <SubscriptionCanceledPage />
+          </ProtectedRoute>
+        );
+      }
+      return { Component: SubscriptionCanceledRoute };
+    },
+    errorElement: <ErrorBoundary />,
+  },
+  {
     path: '/get-started',
     element: <Navigate to="/signup" replace />,
     errorElement: <ErrorBoundary />,
@@ -461,7 +491,7 @@ const routes: RouteObject[] = [
   },
   {
     path: '/help',
-    lazy: routeLazy(() => import('./pages/HelpPage'), 'HelpPage'),
+    element: <Navigate to="/contact?intent=support" replace />,
     errorElement: <ErrorBoundary />,
   },
   {

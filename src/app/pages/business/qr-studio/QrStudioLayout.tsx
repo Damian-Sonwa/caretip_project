@@ -49,7 +49,7 @@ export function QrStudioLayout() {
           subtitle={t("business.qrStudio.subtitle")}
         />
         <BusinessModuleSubNav items={subItems} ariaLabelKey="business.qrStudio.navAria" />
-        <Outlet key={pathname} />
+        <Outlet />
       </div>
     </div>
   );

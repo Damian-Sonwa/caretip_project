@@ -407,7 +407,14 @@ async function handleRes<T>(res: Response, opts?: { silent?: boolean }): Promise
       res.status === 403 &&
       (body.code === PENDING_VERIFICATION_CODE ||
         body.message?.toLowerCase().includes("pending verification"));
-    if (!opts?.silent && !(refreshPath && res.status >= 500) && !isExpectedPendingVerification) {
+    const isExpectedSubscriptionRequired =
+      res.status === 403 && body.code === SUBSCRIPTION_REQUIRED_CODE;
+    if (
+      !opts?.silent &&
+      !(refreshPath && res.status >= 500) &&
+      !isExpectedPendingVerification &&
+      !isExpectedSubscriptionRequired
+    ) {
       const apiErr = new Error(`HTTP ${res.status}`);
       logClientError("api.handleRes", apiErr, {
         status: res.status,
@@ -1413,6 +1420,15 @@ export function clearBusinessProfileClientCache(): void {
   businessProfileInflight = null;
 }
 
+let brandingSettingsCache: { at: number; data: BusinessBrandingSettings } | null = null;
+let brandingSettingsInflight: Promise<BusinessBrandingSettings> | null = null;
+const BUSINESS_BRANDING_SETTINGS_TTL_MS = 15_000;
+
+export function clearBusinessBrandingSettingsClientCache(): void {
+  brandingSettingsCache = null;
+  brandingSettingsInflight = null;
+}
+
 function primeBusinessSubscriptionTier(profile: BusinessInfo): void {
   primeSubscriptionTierFromSession(resolveSubscriptionTier(profile.subscriptionTier));
 }
@@ -1608,10 +1624,24 @@ export async function uploadMyBusinessLogo(file: File): Promise<{ success: boole
 }
 
 export async function fetchBusinessBrandingSettings(): Promise<BusinessBrandingSettings> {
-  return apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
+  const now = Date.now();
+  if (brandingSettingsCache && now - brandingSettingsCache.at < BUSINESS_BRANDING_SETTINGS_TTL_MS) {
+    return brandingSettingsCache.data;
+  }
+  if (brandingSettingsInflight) return brandingSettingsInflight;
+
+  const promise = apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
     headers: getHeaders(),
     credentials: "include",
+  }).then((data) => {
+    brandingSettingsCache = { at: Date.now(), data };
+    return data;
   });
+
+  brandingSettingsInflight = promise.finally(() => {
+    brandingSettingsInflight = null;
+  });
+  return brandingSettingsInflight;
 }
 
 export async function patchBusinessBrandingSettings(body: {
@@ -1627,12 +1657,14 @@ export async function patchBusinessBrandingSettings(body: {
   qrAccentColor?: string | null;
   qrBackgroundColor?: string;
 }): Promise<BusinessBrandingSettings> {
-  return apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
+  const result = await apiRequest<BusinessBrandingSettings>(apiPath("/api/business/profile/branding"), {
     method: "PATCH",
     headers: getHeaders(),
     body: JSON.stringify(body),
     credentials: "include",
   });
+  brandingSettingsCache = { at: Date.now(), data: result };
+  return result;
 }
 
 export async function uploadMyBusinessBanner(file: File): Promise<{ success: boolean; path: string }> {
@@ -1703,6 +1735,7 @@ export interface EmployeeDetail {
   id: string;
   name: string;
   role: string;
+  bio?: string | null;
   avatar: string | null;
   businessId: string;
   businessSlug: string | null;
@@ -2420,7 +2453,10 @@ export type BillingStatus = {
   planKey: SubscriptionPlanKey;
   billingCycle: SubscriptionBillingCycle;
   status: SubscriptionStatus;
+  trialStartedAt: string | null;
   trialEndsAt: string | null;
+  isTrial: boolean;
+  trialDaysRemaining: number | null;
   currentPeriodEnd: string | null;
   renewalDate: string | null;
   cancelAtPeriodEnd: boolean;
@@ -2446,6 +2482,9 @@ export async function fetchBillingStatus(): Promise<BillingStatus> {
 export async function createBillingCheckoutSession(params: {
   planKey: SubscriptionPlanKey;
   billingCycle?: SubscriptionBillingCycle;
+  includeTrial?: boolean;
+  /** billing = dashboard upgrade (default); onboarding = pricing → signup flow */
+  checkoutFlow?: "billing" | "onboarding";
 }): Promise<{ sessionId: string; url: string | null }> {
   return apiRequest(apiPath("/api/me/billing/checkout"), {
     method: "POST",
@@ -2455,11 +2494,36 @@ export async function createBillingCheckoutSession(params: {
   });
 }
 
-export async function createBillingPortalSession(): Promise<{ url: string }> {
+export type BillingSyncStatus = {
+  synced: boolean;
+  status: SubscriptionStatus | null;
+  planKey: SubscriptionPlanKey | null;
+  subscriptionTier: SubscriptionPlanKey | null;
+  isTrial: boolean;
+  hasStripeBilling: boolean;
+};
+
+export async function fetchBillingSyncStatus(
+  expectedPlan?: SubscriptionPlanKey,
+): Promise<BillingSyncStatus> {
+  const qs = expectedPlan ? `?expectedPlan=${encodeURIComponent(expectedPlan)}` : "";
+  return apiRequest<BillingSyncStatus>(apiPath(`/api/me/billing/sync-status${qs}`), {
+    method: "GET",
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function createBillingPortalSession(opts?: {
+  flow?: "default" | "payment_methods";
+}): Promise<{ url: string }> {
+  const body =
+    opts?.flow === "payment_methods" ? { flow: "payment_methods" as const } : {};
   return apiRequest(apiPath("/api/me/billing/portal"), {
     method: "POST",
     headers: getHeaders(),
     credentials: "include",
+    body: JSON.stringify(body),
   });
 }
 
@@ -2534,13 +2598,35 @@ export async function fetchMyNotifications(params?: {
   };
 }
 
+const UNREAD_COUNT_CACHE_MS = 3_000;
+let unreadCountInflight: Promise<{ unreadCount: number }> | null = null;
+let unreadCountCache: { at: number; data: { unreadCount: number } } | null = null;
+
+export function invalidateUnreadNotificationCountCache(): void {
+  unreadCountCache = null;
+}
+
 export async function fetchMyUnreadNotificationCount(): Promise<{ unreadCount: number }> {
-  return apiRequest(apiPath("/api/me/notifications/unread-count"), {
+  const now = Date.now();
+  if (unreadCountCache && now - unreadCountCache.at < UNREAD_COUNT_CACHE_MS) {
+    return unreadCountCache.data;
+  }
+  if (unreadCountInflight) return unreadCountInflight;
+  const promise = apiRequest<{ unreadCount: number }>(apiPath("/api/me/notifications/unread-count"), {
     method: "GET",
     headers: getHeaders(),
     credentials: "include",
     caretipSilentErrors: true,
-  } as CaretipRequestInit);
+  } as CaretipRequestInit)
+    .then((data) => {
+      unreadCountCache = { at: Date.now(), data };
+      return data;
+    })
+    .finally(() => {
+      if (unreadCountInflight === promise) unreadCountInflight = null;
+    });
+  unreadCountInflight = promise;
+  return promise;
 }
 
 export async function markNotificationReadApi(
@@ -2548,27 +2634,42 @@ export async function markNotificationReadApi(
   locale?: "en" | "de",
 ): Promise<{ notification: InboxNotification; unreadCount: number }> {
   const suffix = locale ? `?locale=${locale}` : "";
-  return apiRequest(apiPath(`/api/me/notifications/${id}/read${suffix}`), {
-    method: "PATCH",
-    headers: getHeaders(),
-    credentials: "include",
-  });
+  const res = await apiRequest<{ notification: InboxNotification; unreadCount: number }>(
+    apiPath(`/api/me/notifications/${id}/read${suffix}`),
+    {
+      method: "PATCH",
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  );
+  invalidateUnreadNotificationCountCache();
+  return res;
 }
 
 export async function markAllNotificationsReadApi(): Promise<{ updated: number; unreadCount: number }> {
-  return apiRequest(apiPath("/api/me/notifications/read-all"), {
-    method: "POST",
-    headers: getHeaders(),
-    credentials: "include",
-  });
+  const res = await apiRequest<{ updated: number; unreadCount: number }>(
+    apiPath("/api/me/notifications/read-all"),
+    {
+      method: "POST",
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  );
+  invalidateUnreadNotificationCountCache();
+  return res;
 }
 
 export async function deleteNotificationApi(id: string): Promise<{ success: boolean; unreadCount: number }> {
-  return apiRequest(apiPath(`/api/me/notifications/${encodeURIComponent(id)}`), {
-    method: "DELETE",
-    headers: getHeaders(),
-    credentials: "include",
-  });
+  const res = await apiRequest<{ success: boolean; unreadCount: number }>(
+    apiPath(`/api/me/notifications/${encodeURIComponent(id)}`),
+    {
+      method: "DELETE",
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  );
+  invalidateUnreadNotificationCountCache();
+  return res;
 }
 
 export type SupportTicketCategory =
@@ -2935,11 +3036,12 @@ export interface TableDTO {
   location: { id: string; name: string };
 }
 
-export async function fetchTables(): Promise<TableDTO[]> {
+export async function fetchTables(opts?: { silent?: boolean }): Promise<TableDTO[]> {
   const raw = await apiRequest<unknown>(apiPath("/api/tables"), {
     headers: getHeaders(),
     credentials: "include",
-  });
+    caretipSilentErrors: opts?.silent === true,
+  } as CaretipRequestInit);
   return normalizeApiList<TableDTO>(raw, ["tables", "items", "data"]);
 }
 
@@ -3136,6 +3238,7 @@ export type PlatformAnalytics = {
 const platformStatsInflight = new Map<string, Promise<PlatformGlobalStats>>();
 const platformBusinessesInflight = new Map<string, Promise<{ businesses: PlatformBusinessRow[] }>>();
 const platformAnalyticsInflight = new Map<string, Promise<PlatformAnalytics>>();
+const platformCommercialInflight = new Map<string, Promise<PlatformCommercialIntelligence>>();
 
 export function clearPlatformAnalyticsClientCache(days = 30, timezone?: string): void {
   const cacheKey = `platform:analytics:${days}:${timezone ?? ""}`;
@@ -3146,6 +3249,7 @@ export function clearPlatformDashboardClientCache(): void {
   platformStatsInflight.clear();
   platformBusinessesInflight.clear();
   platformAnalyticsInflight.clear();
+  platformCommercialInflight.clear();
 }
 
 export async function fetchPlatformStats(): Promise<PlatformGlobalStats> {
@@ -3543,8 +3647,18 @@ export type PlatformCommercialIntelligence = {
 };
 
 export async function fetchPlatformCommercialIntelligence(): Promise<PlatformCommercialIntelligence> {
-  return apiRequest<PlatformCommercialIntelligence>(apiPath("/api/platform/commercial-intelligence"), {
-    headers: getHeaders(),
-    credentials: "include",
+  const cacheKey = "platform:commercial-intelligence";
+  const inflight = platformCommercialInflight.get(cacheKey);
+  if (inflight) return inflight;
+  const promise = apiRequest<PlatformCommercialIntelligence>(
+    apiPath("/api/platform/commercial-intelligence"),
+    {
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  ).finally(() => {
+    if (platformCommercialInflight.get(cacheKey) === promise) platformCommercialInflight.delete(cacheKey);
   });
+  platformCommercialInflight.set(cacheKey, promise);
+  return promise;
 }

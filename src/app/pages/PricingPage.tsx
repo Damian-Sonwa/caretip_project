@@ -1,23 +1,28 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { PricingSection } from "../components/PricingSection";
-import { PRICING_TIER_DEFINITIONS, mapPricingTierFromI18n } from "../data/pricingConfig";
 import {
   DEFAULT_PRICING_UI_STATE,
   YEARLY_BILLING_ENABLED,
 } from "../data/pricingTypes";
-import type { BillingCycle, Industry } from "../data/pricingTypes";
-import { resolvePricingCopyScope } from "../data/pricingCopy";
+import type { BillingCycle } from "../data/pricingTypes";
+import {
+  DEFAULT_PRICING_AUDIENCE,
+  resolveCopyScopeForAudience,
+  resolveIndustryForAudience,
+  type PricingPageAudience,
+} from "../data/pricingAudience";
 import { PublicPageShell } from "@/components/public/PublicPageShell";
-import { PublicPageHeader } from "@/components/public/PublicPageHeader";
-import { PublicTrustChips } from "@/components/public/PublicTrustChips";
-import { publicPagesBrandUi } from "@/components/public/publicPagesBrandUi";
 import { PricingControlsPanel } from "@/components/pricing/PricingControlsPanel";
-import { PricingPlansIntro } from "@/components/pricing/PricingPlansIntro";
-import { PricingTrustSignals } from "@/components/pricing/PricingTrustSignals";
+import { PricingHero } from "@/components/pricing/PricingHero";
+import { PricingCardsHotels } from "@/components/pricing/PricingCardsHotels";
+import { PricingCardsFreelancers } from "@/components/pricing/PricingCardsFreelancers";
 import { PricingFaqSection } from "@/components/pricing/PricingFaqSection";
 import { PricingYearlyNotice } from "@/components/pricing/PricingYearlyNotice";
+import { PricingContractModels } from "@/components/pricing/PricingContractModels";
+import { PricingPackageAddOns } from "@/components/pricing/PricingPackageAddOns";
+import { PricingSpecialConditionsBanner } from "@/components/pricing/PricingSpecialConditionsBanner";
+import { PricingTrialCta } from "@/components/pricing/PricingTrialCta";
 import { pricingPageUi } from "@/components/pricing/pricingPageUi";
 import { cn } from "@/lib/utils";
 import { DeferredBelowFold } from "@/lib/publicRouteDefer";
@@ -25,80 +30,64 @@ import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
 export function PricingPage() {
   usePublicMountProbe("PricingPage");
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [billingCycle, setBillingCycle] = useState<BillingCycle>(DEFAULT_PRICING_UI_STATE.billingCycle);
-  const [industry, setIndustry] = useState<Industry>(DEFAULT_PRICING_UI_STATE.industry);
+  const [audience, setAudience] = useState<PricingPageAudience>(DEFAULT_PRICING_AUDIENCE);
 
-  const copyScope = resolvePricingCopyScope(industry);
+  const copyScope = resolveCopyScopeForAudience(audience);
+  const industry = resolveIndustryForAudience(audience);
   const showYearlyNotice = billingCycle === "yearly" && !YEARLY_BILLING_ENABLED;
-
-  const tiers = useMemo(
-    () => PRICING_TIER_DEFINITIONS.map((def) => mapPricingTierFromI18n(t, def)),
-    [t, i18n.language],
-  );
+  const isHotelsAudience = audience === "hotels_logistics";
 
   return (
     <PublicPageShell maxWidth="pricing">
       <main id="pricing" className="caretip-pricing-page scroll-mt-20">
-        <div className="caretip-pricing-hero caretip-public-marketing-hero caretip-public-hero-enter text-center">
-          <PublicPageHeader
-            centered
-            introLayout="heroGroup"
-            showTrustChips={false}
-            title={t(`${copyScope}.pageTitle`, {
-              defaultValue: t("staticPages.pricing.pageTitle"),
-            })}
-            subtitle={t(`${copyScope}.pageSubtitle`, {
-              defaultValue: t("staticPages.pricing.pageSubtitle"),
-            })}
-          />
-          <div
-            className={cn(
-              "caretip-public-hero-pills",
-              publicPagesBrandUi.warmDarkTrustStrip,
-            )}
-          >
-            <PublicTrustChips
-              variant="pricing"
-              tone="onDark"
-              className="caretip-public-hero-pills__list"
-            />
-          </div>
-        </div>
+        <PricingHero copyScope={copyScope} />
 
         <section
           id="pricing-plans"
-          className="caretip-pricing-plans-section"
+          className="caretip-pricing-plans-section caretip-pricing-plans-section--after-hero"
           aria-label={t("staticPages.pricing.plansAria")}
         >
-          <PricingPlansIntro copyScope={copyScope} className="mx-auto max-w-3xl" />
-
           <div className={pricingPageUi.controlsWrap}>
             <div className="caretip-pricing-controls-shell">
               <PricingControlsPanel
-                industry={industry}
+                audience={audience}
                 billingCycle={billingCycle}
-                onIndustryChange={setIndustry}
+                onAudienceChange={setAudience}
                 onBillingCycleChange={setBillingCycle}
               />
               {showYearlyNotice ? <PricingYearlyNotice className="mt-4" /> : null}
-              <PricingTrustSignals subtle className="caretip-pricing-trust--in-shell" />
             </div>
           </div>
 
-          <p className="caretip-pricing-social-note mx-auto max-w-3xl text-center text-sm text-muted-foreground">
-            {t("staticPages.pricing.socialProfessionsNote")}
-          </p>
-
           <div className={pricingPageUi.cardsStage}>
             <div className="caretip-pricing-cards-stage__glow" aria-hidden />
-            <PricingSection
-              tiers={tiers}
-              billingCycle={billingCycle}
-              industry={industry}
-              copyScope={copyScope}
-            />
+            <div
+              key={audience}
+              className="caretip-pricing-cards-swap"
+              data-pricing-audience={audience}
+            >
+              {isHotelsAudience ? (
+                <PricingCardsHotels
+                  billingCycle={billingCycle}
+                  industry={industry}
+                  copyScope={copyScope}
+                />
+              ) : (
+                <PricingCardsFreelancers billingCycle={billingCycle} copyScope={copyScope} />
+              )}
+            </div>
           </div>
+
+          <PricingSpecialConditionsBanner className="mt-8" />
+          {isHotelsAudience ? (
+            <>
+              <PricingPackageAddOns className="mt-6" />
+              <PricingContractModels billingCycle={billingCycle} className="mt-8" />
+              <PricingTrialCta className="mx-auto mt-8 max-w-3xl" billingCycle={billingCycle} />
+            </>
+          ) : null}
         </section>
 
         <PricingFaqSection className={pricingPageUi.sectionGap} />

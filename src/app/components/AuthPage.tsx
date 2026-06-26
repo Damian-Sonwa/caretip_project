@@ -34,6 +34,7 @@ import {
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { getPostAuthRedirect } from '../hooks/useAuth';
+import { persistCheckoutIntentFromSearchParams } from '../lib/checkoutIntent';
 import { commitAuthUser } from '../lib/authUserStore';
 import {
   AuthErrorSlot,
@@ -80,6 +81,11 @@ export function AuthPage() {
   const authLane = resolveAuthLane(location.pathname);
   const isEmployeeJoinSignup = location.pathname === '/join/signup';
   const role: AuthRole = authLane === 'employee' ? 'employee' : 'business';
+
+  useEffect(() => {
+    if (authLane !== 'business') return;
+    persistCheckoutIntentFromSearchParams(new URLSearchParams(location.search));
+  }, [authLane, location.search]);
 
   const [isLogin, setIsLogin] = useState(() => {
     const sp = new URLSearchParams(location.search);
@@ -357,7 +363,7 @@ export function AuthPage() {
     const nextLogin = !isLogin;
     setIsLogin(nextLogin);
     const base = nextLogin ? '/login' : '/signup';
-    navigate(base, { replace: true });
+    navigate(`${base}${location.search}`, { replace: true });
     setError('');
     setShowResendVerification(false);
     setEmail('');

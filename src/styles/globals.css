@@ -1276,22 +1276,16 @@ textarea::placeholder {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 0.625rem;
+    gap: 0.75rem;
   }
 
   .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions :is(a, button) {
     width: 100%;
     max-width: 100%;
-    min-height: 2.75rem;
+    min-height: 3rem;
     margin-inline: 0;
     box-sizing: border-box;
-  }
-
-  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions button {
-    padding: 0.625rem 0.875rem;
-    font-size: 0.9375rem;
-    line-height: 1.25;
-    white-space: normal;
+    text-align: center;
   }
 }
 
@@ -1307,6 +1301,102 @@ textarea::placeholder {
 
 .caretip-mobile-drawer-panel--open-top {
   animation: caretip-drawer-panel-top-in 100ms ease-out forwards;
+}
+
+.caretip-mobile-drawer-panel--open-right {
+  animation: caretip-drawer-panel-right-in 240ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.caretip-mobile-drawer-panel--open-left {
+  animation: caretip-drawer-panel-in 260ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+.caretip-public-mobile-nav-backdrop {
+  opacity: 0;
+}
+
+@keyframes caretip-drawer-panel-right-in {
+  from {
+    opacity: 0.98;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Public marketing mobile nav — full-height slide-over from the left */
+.caretip-public-mobile-nav-drawer {
+  touch-action: manipulation;
+  overscroll-behavior: contain;
+  isolation: isolate;
+}
+
+.caretip-public-mobile-nav-drawer__section-label {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.2;
+}
+
+.caretip-public-mobile-nav-drawer__nav-link {
+  display: flex;
+  min-height: 3.5rem;
+  width: 100%;
+  align-items: center;
+  border-radius: 0.625rem;
+  padding: 0.75rem 0.25rem;
+  text-align: left;
+  font-size: 1.125rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.caretip-public-mobile-nav-drawer__nav-link:hover {
+  background-color: hsl(var(--muted) / 0.45);
+}
+
+.caretip-public-mobile-nav-drawer__nav-link--active {
+  color: hsl(var(--primary));
+}
+
+.caretip-public-mobile-nav-drawer__account-link {
+  display: flex;
+  min-height: 3.5rem;
+  width: 100%;
+  align-items: center;
+  border-radius: 0.625rem;
+  padding: 0.75rem 0.25rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: hsl(var(--foreground));
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.caretip-public-mobile-nav-drawer__account-link:hover {
+  background-color: hsl(var(--muted) / 0.45);
+  color: hsl(var(--primary));
+}
+
+.caretip-public-mobile-nav-drawer__cta-primary {
+  width: 100%;
+  min-height: 3rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.caretip-public-mobile-nav-drawer__cta-secondary {
+  width: 100%;
+  min-height: 3rem;
+  font-size: 1rem;
+  font-weight: 600;
 }
 
 @keyframes caretip-drawer-backdrop-in {
@@ -1341,7 +1431,9 @@ textarea::placeholder {
 @media (prefers-reduced-motion: reduce) {
   .caretip-mobile-drawer-backdrop--open,
   .caretip-mobile-drawer-panel--open,
-  .caretip-mobile-drawer-panel--open-top {
+  .caretip-mobile-drawer-panel--open-top,
+  .caretip-mobile-drawer-panel--open-right,
+  .caretip-mobile-drawer-panel--open-left {
     animation: none;
   }
 }

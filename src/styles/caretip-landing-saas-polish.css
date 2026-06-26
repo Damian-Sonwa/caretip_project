@@ -1,0 +1,355 @@
+/**
+ * Landing SaaS polish — spacing, typography rhythm, cards, backgrounds, chips, micro-interactions.
+ * Presentation only; scoped to `.caretip-landing.caretip-landing--premium`.
+ * CSS-only; no new libraries. Respects prefers-reduced-motion.
+ */
+
+/* —— Design tokens —— */
+.caretip-landing.caretip-landing--premium {
+  --caretip-saas-card-radius: 1.25rem;
+  --caretip-saas-card-radius-lg: 1.5rem;
+  --caretip-saas-transition: 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  --caretip-saas-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.03),
+    0 10px 28px -8px rgba(17, 17, 17, 0.06);
+  --caretip-saas-shadow-hover:
+    0 2px 4px rgba(17, 17, 17, 0.04),
+    0 18px 42px -12px rgba(17, 17, 17, 0.09);
+
+  --caretip-narrative-gap-eyebrow-headline: 0.75rem;
+  --caretip-narrative-gap-headline-lead: 1rem;
+  --caretip-narrative-gap-lead-lines: 0.625rem;
+  --caretip-narrative-gap-lead-action: 1.375rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium {
+    --caretip-narrative-gap-eyebrow-headline: 0.875rem;
+    --caretip-narrative-gap-headline-lead: 1.125rem;
+    --caretip-narrative-gap-lead-lines: 0.6875rem;
+    --caretip-narrative-gap-lead-action: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium {
+    --caretip-narrative-gap-headline-lead: 1.25rem;
+    --caretip-narrative-gap-lead-action: 1.625rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-landing.caretip-landing--premium {
+    --caretip-narrative-gap-lead-action: 1.75rem;
+  }
+}
+
+/* —— Hero typography — larger display, readable measure —— */
+.caretip-landing.caretip-landing--premium .caretip-hero-grid {
+  --caretip-hero-headline-size: clamp(2.25rem, 8.6vw + 0.4rem, 2.875rem);
+  --caretip-hero-body-measure: min(100%, 34rem);
+  --caretip-hero-body-size: clamp(0.96875rem, 0.35vw + 0.88rem, 1.0625rem);
+  --caretip-hero-body-lh: 1.68;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-grid {
+    --caretip-hero-headline-size: clamp(2.375rem, 7.2vw + 0.45rem, 3rem);
+    --caretip-hero-body-size: clamp(1rem, 0.4vw + 0.9rem, 1.09375rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-grid {
+    --caretip-hero-headline-size: clamp(2.625rem, 1.75cqw + 1.75rem, 3.5rem);
+    --caretip-hero-body-measure: min(100%, 36rem);
+    --caretip-hero-body-size: clamp(1.03125rem, 0.35cqw + 0.88rem, 1.125rem);
+    --caretip-hero-body-lh: 1.72;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-grid {
+    --caretip-hero-headline-size: clamp(2.75rem, 1.85cqw + 1.75rem, 3.75rem);
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
+  --caretip-hero-headline-size: clamp(2.5rem, 9.8vw + 0.5rem, 3.375rem);
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-section[data-hero-art="en"] .caretip-hero-headline[data-hero-headline-mode="composed"] {
+    --caretip-hero-headline-size: clamp(3rem, 2.15cqw + 1.9rem, 4.25rem);
+  }
+}
+
+/* Section headlines — hierarchy + readable width */
+.caretip-landing.caretip-landing--premium .caretip-section-intro > h2,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-title,
+.caretip-landing.caretip-landing--premium .caretip-showcase-headline,
+.caretip-landing.caretip-landing--premium .caretip-mobile-section-headline {
+  letter-spacing: -0.03em;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro > p,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-subtitle,
+.caretip-landing.caretip-landing--premium .caretip-showcase-subtitle,
+.caretip-landing.caretip-landing--premium .caretip-mobile-stack-tagline {
+  max-width: min(100%, 38ch);
+  line-height: 1.72;
+}
+
+/* —— Section backgrounds — soft cream + radial glow (lightweight) —— */
+html:not(.dark) .caretip-landing.caretip-landing--premium main > section {
+  position: relative;
+  isolation: isolate;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium .caretip-hero-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 72% 52% at 78% 22%,
+    rgba(233, 120, 28, 0.055) 0%,
+    transparent 62%
+  );
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality::after,
+html:not(.dark) .caretip-landing.caretip-landing--premium #business-section::after,
+html:not(.dark) .caretip-landing.caretip-landing--premium #recognition::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 60% 44% at 88% 18%,
+    rgba(233, 120, 28, 0.04) 0%,
+    transparent 58%
+  );
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium #payments-trust::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(
+    ellipse 55% 40% at 12% 72%,
+    rgba(233, 120, 28, 0.038) 0%,
+    transparent 56%
+  );
+}
+
+/* —— Cards — unified radius, border, shadow, padding, hover lift —— */
+html:not(.dark) .caretip-landing.caretip-landing--premium {
+  --caretip-landing-border: rgba(17, 17, 17, 0.07);
+  --caretip-landing-card-shadow: var(--caretip-saas-shadow);
+  --caretip-landing-card-shadow-hover: var(--caretip-saas-shadow-hover);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-card:not(.caretip-landing-ecosystem-card),
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card,
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-panel,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-media-card,
+.caretip-landing.caretip-landing--premium .caretip-real-life-card,
+.caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel {
+  border-radius: var(--caretip-saas-card-radius);
+  transition:
+    transform var(--caretip-saas-transition),
+    box-shadow var(--caretip-saas-transition),
+    border-color 0.24s ease;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card {
+  border-radius: var(--caretip-saas-card-radius-lg);
+  padding: 1.125rem 1.25rem 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-feature-card {
+    padding: 1.5rem 1.625rem 1.75rem;
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-showcase-visual-frame,
+.caretip-landing.caretip-landing--premium .caretip-hero-media-clip {
+  border-radius: var(--caretip-saas-card-radius-lg);
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel--copy {
+    border-radius: var(--caretip-saas-card-radius-lg);
+    padding: 2.25rem;
+  }
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-card:not(.caretip-landing-ecosystem-card):hover,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-media-card:hover,
+  .caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel--mobile:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--caretip-saas-shadow-hover);
+  }
+}
+
+/* —— Buttons — taller, premium gradient, micro-interaction —— */
+.caretip-landing.caretip-landing--premium .caretip-hero-cta-button,
+.caretip-landing.caretip-landing--premium .caretip-section-cta-button,
+.caretip-landing.caretip-landing--premium .caretip-final-cta-button {
+  min-height: 2.75rem;
+  height: 2.75rem;
+  padding-inline: 1.875rem;
+  border-radius: 0.875rem;
+  transition:
+    transform var(--caretip-saas-transition),
+    box-shadow var(--caretip-saas-transition),
+    filter 0.24s ease,
+    background-color 0.24s ease,
+    border-color 0.24s ease !important;
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button,
+  .caretip-landing.caretip-landing--premium .caretip-section-cta-button,
+  .caretip-landing.caretip-landing--premium .caretip-final-cta-button {
+    min-height: 3rem;
+    height: 3rem;
+    padding-inline: 2rem;
+  }
+}
+
+@media (hover: hover) {
+  .caretip-landing.caretip-landing--premium .caretip-btn-primary:hover,
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button.caretip-btn-primary:hover,
+  .caretip-landing.caretip-landing--premium .caretip-section-cta-button.caretip-btn-primary:hover,
+  .caretip-landing.caretip-landing--premium .caretip-final-cta-button.caretip-btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.03);
+  }
+
+  .caretip-landing.caretip-landing--premium .caretip-btn-secondary:hover,
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button.caretip-btn-secondary:hover {
+    transform: translateY(-1px);
+  }
+}
+
+/* —— Trust & accent chips — clean white pills —— */
+.caretip-landing.caretip-landing--premium .caretip-trust-strip {
+  gap: 0.625rem;
+  margin-top: 2rem;
+}
+
+.caretip-landing.caretip-landing--premium .caretip-trust-strip__item {
+  padding: 0.4375rem 0.75rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: rgba(250, 250, 250, 0.88);
+  transition:
+    background-color var(--caretip-saas-transition),
+    border-color var(--caretip-saas-transition);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-trust-strip__check {
+  width: 0.875rem;
+  height: 0.875rem;
+  color: rgba(251, 191, 36, 0.95);
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium .caretip-hero-float-pill {
+  opacity: 1;
+  border: 1px solid rgba(17, 17, 17, 0.08) !important;
+  background: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 9999px;
+  box-shadow:
+    0 1px 2px rgba(17, 17, 17, 0.04),
+    0 8px 24px -8px rgba(17, 17, 17, 0.1) !important;
+}
+
+html:not(.dark) .caretip-landing.caretip-landing--premium .caretip-showcase-float-card {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background: rgba(255, 255, 255, 0.98) !important;
+  border-radius: 1rem;
+  border: 1px solid rgba(17, 17, 17, 0.07);
+}
+
+.caretip-landing.caretip-landing--premium .caretip-section-intro [data-landing-accent],
+.caretip-landing.caretip-landing--premium .caretip-showcase-intro [data-landing-accent],
+.caretip-landing.caretip-landing--premium .caretip-hospitality-intro [data-landing-accent],
+.caretip-landing.caretip-landing--premium .caretip-landing-feature-card [data-landing-accent] {
+  padding: 0.3125rem 0.625rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(17, 17, 17, 0.06);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 2px rgba(17, 17, 17, 0.03);
+}
+
+html.dark .caretip-landing.caretip-landing--premium .caretip-section-intro [data-landing-accent],
+html.dark .caretip-landing.caretip-landing--premium .caretip-showcase-intro [data-landing-accent],
+html.dark .caretip-landing.caretip-landing--premium .caretip-hospitality-intro [data-landing-accent],
+html.dark .caretip-landing.caretip-landing--premium .caretip-landing-feature-card [data-landing-accent] {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(23, 23, 23, 0.85);
+}
+
+/* —— Section intro spacing —— */
+.caretip-landing.caretip-landing--premium .caretip-section-intro,
+.caretip-landing.caretip-landing--premium .caretip-hospitality-intro {
+  margin-bottom: 2.25rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-section-intro,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-intro {
+    margin-bottom: 2.75rem;
+  }
+}
+
+.caretip-landing.caretip-landing--premium .caretip-landing-features-grid {
+  gap: 1.125rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-features-grid {
+    gap: 1.375rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-features-grid {
+    gap: 1.625rem;
+  }
+}
+
+/* —— Scroll reveal — subtle fade-up —— */
+@media (prefers-reduced-motion: no-preference) {
+  .caretip-landing.caretip-landing--premium .caretip-landing-scroll-reveal {
+    --reveal-y: 12px;
+    transition:
+      opacity 0.62s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-landing.caretip-landing--premium .caretip-hero-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-section-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-final-cta-button:hover,
+  .caretip-landing.caretip-landing--premium .caretip-landing-card:hover,
+  .caretip-landing.caretip-landing--premium .caretip-hospitality-media-card:hover {
+    transform: none !important;
+  }
+}

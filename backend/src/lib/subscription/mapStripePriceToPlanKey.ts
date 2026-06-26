@@ -1,21 +1,9 @@
 import type { SubscriptionPlanKey } from "@prisma/client";
 import type Stripe from "stripe";
-
-function parseEnvPriceMap(): Record<string, SubscriptionPlanKey> {
-  const out: Record<string, SubscriptionPlanKey> = {};
-  const pairs: Array<[string | undefined, SubscriptionPlanKey]> = [
-    [process.env.STRIPE_PRICE_BASIC_MONTHLY?.trim(), "basic"],
-    [process.env.STRIPE_PRICE_BASIC_YEARLY?.trim(), "basic"],
-    [process.env.STRIPE_PRICE_PREMIUM_MONTHLY?.trim(), "premium"],
-    [process.env.STRIPE_PRICE_PREMIUM_YEARLY?.trim(), "premium"],
-    [process.env.STRIPE_PRICE_ENTERPRISE_MONTHLY?.trim(), "enterprise"],
-    [process.env.STRIPE_PRICE_ENTERPRISE_YEARLY?.trim(), "enterprise"],
-  ];
-  for (const [priceId, planKey] of pairs) {
-    if (priceId) out[priceId] = planKey;
-  }
-  return out;
-}
+import {
+  buildStripePriceToPlanKeyMap,
+  normalizeStripePriceIdEnv,
+} from "./stripePricePlanCatalog.js";
 
 function planKeyFromMetadata(metadata: Stripe.Metadata | null | undefined): SubscriptionPlanKey | null {
   const raw =
@@ -28,19 +16,51 @@ function planKeyFromMetadata(metadata: Stripe.Metadata | null | undefined): Subs
   return null;
 }
 
-/** Resolve Stripe Price → SubscriptionPlanKey (metadata first, then env map). */
+function lookupPlanKeyForPriceId(priceId: string): SubscriptionPlanKey | undefined {
+  return buildStripePriceToPlanKeyMap()[normalizeStripePriceIdEnv(priceId) ?? priceId];
+}
+
+/** Resolve Stripe Price → SubscriptionPlanKey (metadata first, then catalog + env map). */
 export function mapStripePriceToPlanKey(price: Stripe.Price | string): SubscriptionPlanKey {
   if (typeof price === "string") {
-    const fromEnv = parseEnvPriceMap()[price];
-    if (fromEnv) return fromEnv;
+    const fromMap = lookupPlanKeyForPriceId(price);
+    if (fromMap) return fromMap;
     throw new Error(`Unknown Stripe price id: ${price}`);
   }
 
   const fromMeta = planKeyFromMetadata(price.metadata);
   if (fromMeta) return fromMeta;
 
-  const fromEnv = parseEnvPriceMap()[price.id];
-  if (fromEnv) return fromEnv;
+  const fromMap = lookupPlanKeyForPriceId(price.id);
+  if (fromMap) return fromMap;
 
   throw new Error(`Unable to map Stripe price ${price.id} to planKey`);
 }
+
+export type PlanKeyResolutionSource = "price" | "subscription_metadata";
+
+export type PlanKeyResolution = {
+  planKey: SubscriptionPlanKey;
+  source: PlanKeyResolutionSource;
+};
+
+/**
+ * Resolve plan key from Stripe Price, falling back to Subscription metadata
+ * (caretipPlanKey is set on subscription_data during platform checkout).
+ */
+export function resolvePlanKeyForStripeSubscription(
+  sub: Stripe.Subscription,
+  price: Stripe.Price | string,
+): PlanKeyResolution {
+  try {
+    return { planKey: mapStripePriceToPlanKey(price), source: "price" };
+  } catch (priceErr) {
+    const fromSubscriptionMetadata = planKeyFromMetadata(sub.metadata);
+    if (fromSubscriptionMetadata) {
+      return { planKey: fromSubscriptionMetadata, source: "subscription_metadata" };
+    }
+    throw priceErr;
+  }
+}
+
+export { buildStripePriceToPlanKeyMap, KNOWN_STRIPE_PRICE_TO_PLAN_KEY } from "./stripePricePlanCatalog.js";

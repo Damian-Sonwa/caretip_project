@@ -255,39 +255,19 @@
     min-height: 2.75rem;
     margin-inline: -0.125rem;
   }
-
-  .caretip-public-mobile-nav-drawer > div {
-    padding: 0.875rem 1rem 1rem;
-  }
-
-  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-links {
-    gap: 0.125rem;
-  }
-
-  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions {
-    margin-top: 0.625rem;
-    padding-top: 0.75rem;
-    gap: 0.625rem;
-  }
 }
 
 @media (max-width: 767px) {
   .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-links a {
-    min-height: 2.75rem;
-    padding-inline: 0.75rem;
-    font-size: 1.0625rem;
+    min-height: 3rem;
+    padding-inline: 0.25rem;
+    font-size: 1.125rem;
     line-height: 1.35;
     letter-spacing: -0.01em;
     white-space: normal;
     text-wrap: pretty;
-  }
-
-  .caretip-public-mobile-nav-drawer .caretip-public-mobile-nav-actions :is(a, button) {
-    min-height: 2.75rem;
-    font-size: 0.9375rem;
-    line-height: 1.25;
-    white-space: normal;
-    text-align: center;
+    text-align: left;
+    justify-content: flex-start;
   }
 }
 

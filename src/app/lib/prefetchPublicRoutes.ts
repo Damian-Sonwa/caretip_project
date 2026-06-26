@@ -8,7 +8,6 @@ const PUBLIC_ROUTE_IMPORTERS: Record<string, RouteImporter> = {
   "/pricing": () => import("../pages/PricingPage"),
   "/contact": () => import("../pages/ContactPage"),
   "/login": () => import("../components/AuthPage"),
-  "/help": () => import("../pages/HelpPage"),
   "/privacy": () => import("../pages/PrivacyPage"),
   "/terms": () => import("../pages/TermsPage"),
   "/cookies": () => import("../pages/CookiesPage"),

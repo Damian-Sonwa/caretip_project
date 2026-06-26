@@ -15,7 +15,9 @@
     "languageEnglish": "English",
     "languageGerman": "Deutsch",
     "becomePartner": "Konto erstellen",
-    "staffPortal": "Team beitreten"
+    "staffPortal": "Team beitreten",
+    "mobileNavigationSection": "Navigation",
+    "mobileAccountSection": "Konto"
   },
   "dashboardHero": {
     "overview": "Überblick",
@@ -196,6 +198,8 @@
           "Preise und Rollout-Optionen besprechen"
         ],
         "altPrompt": "Sie brauchen Hilfe mit einem bestehenden Konto?",
+        "viewPricing": "Preise & Tarife ansehen",
+        "pricingPlanInterest": "Sie interessieren sich für den {{plan}}-Tarif auf unserer Preisseite.",
         "fields": {
           "fullName": "Vollständiger Name",
           "workEmail": "Geschäftliche E-Mail",
@@ -315,8 +319,37 @@
       "ctaPricing": "Preise ansehen"
     },
     "pricing": {
-      "pageTitle": "Faire & transparente Abrechnung",
-      "pageSubtitle": "Volle Flexibilität für Ihre Kunden: Bezahlt wird nur, was von Herzen kommt.",
+      "pageTitle": "Fairer und transparenter Preis",
+      "pageSubtitle": "Alles, was Sie brauchen, um digitales Trinkgeld für Ihr Gastgewerbe zu starten. Keine versteckten Gebühren, sichere Stripe-Zahlungen, flexible Verträge und eine kostenlose 4-wöchige Testphase.",
+      "hero": {
+        "badge": "Transparente Preise",
+        "featuresAria": "Plattform-Highlights",
+        "features": {
+          "stripe": {
+            "title": "Sichere Stripe-Zahlungen",
+            "body": "Zahlungsabwicklung powered by Stripe."
+          },
+          "ready": {
+            "title": "In Minuten startklar",
+            "body": "Starten Sie Ihr digitales Trinkgeld-System schnell."
+          },
+          "gdpr": {
+            "title": "DSGVO-konform",
+            "body": "Enterprise-Sicherheit und Compliance."
+          },
+          "trial": {
+            "title": "4 Wochen kostenlos testen",
+            "body": "Volle Business-Funktionen mit automatischer Aktivierung nach der Anmeldung."
+          }
+        },
+        "trustRow": {
+          "aria": "Preisgarantien",
+          "noHiddenFees": "Keine versteckten Gebühren",
+          "cancelAnytime": "Jederzeit kündbar",
+          "secureOnboarding": "Sicheres Onboarding",
+          "trustedPayments": "Vertrauenswürdige Zahlungsabwicklung"
+        }
+      },
       "plansAria": "Tarife und Preisoptionen",
       "plansEyebrow": "Tarife & Preise",
       "sectionTitle": "Echte Anerkennung lebt von einfachen Wegen.",
@@ -335,6 +368,45 @@
         "saveBadge": "20 % sparen",
         "comingSoonBadge": "Bald",
         "yearlyComingSoon": "Jahrespreise mit 20 % Ersparnis kommen demnächst. Bis dahin gelten die angezeigten Monatspreise."
+      },
+      "audienceToggle": {
+        "label": "Zielgruppe",
+        "aria": "Preis-Zielgruppe",
+        "hotels_logistics": "Hotels & Logistik",
+        "midwives_freelancers": "Hebammen & Freelancer"
+      },
+      "soloPlans": {
+        "footnote": "Kein Monatsabo. Sie zahlen nur Transaktionsgebühren, wenn Trinkgeld eingeht.",
+        "free": {
+          "name": "Kostenlos",
+          "tagline": "Für selbstständige Praxis",
+          "feeLine": "0 €/Monat",
+          "feeNote": "Nur Transaktionsgebühren",
+          "description": "Starten Sie kostenlos mit digitalem Trinkgeld. Sie zahlen nur bei eingehenden Trinkgeldern.",
+          "f0": "QR-Trinkgeld",
+          "f1": "Digitale Zahlungen",
+          "f2": "Dashboard",
+          "f3": "Stripe-Auszahlungen",
+          "f4": "Gast-Trinkgeld",
+          "f5": "Nur Transaktionsgebühr",
+          "button": "Kostenloses Konto erstellen"
+        },
+        "professional": {
+          "name": "Professional",
+          "tagline": "Demnächst",
+          "feeLine": "Demnächst",
+          "feeNote": "Optionale Upgrades geplant",
+          "description": "Branding, Exporte und erweiterte Tools für wachsende Solo-Praxen.",
+          "button": "Demnächst"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "tagline": "Für Praxen & Agenturen",
+          "feeLine": "Auf Anfrage",
+          "feeNote": "Individuelle Einrichtung",
+          "description": "Individuelles Onboarding und Reporting für Solo-Profis und Kollektive mit höherem Volumen.",
+          "button": "Vertrieb kontaktieren"
+        }
       },
       "industry": {
         "label": "Geschäftstyp",
@@ -365,7 +437,7 @@
         "items": [
           {
             "q": "Gibt es monatliche Plattformgebühren?",
-            "a": "Starter hat keine monatliche Plattformgebühr. Sie zahlen nur Stripe-Gebühren auf erfolgreiche Trinkgelder. Business bietet optional 29 €/Monat für erweiterte Funktionen. Enterprise wird an Ihr Volumen angepasst."
+            "a": "Starter kostet 29 €/Monat (oder 290 €/Jahr) für zentrale Trinkgeld- und Team-Funktionen. Business kostet 79 €/Monat (oder 790 €/Jahr) für erweiterte Analysen, Mehrstandort-Support und Branding. Enterprise-Preise auf Anfrage für Gruppen und Ketten."
           },
           {
             "q": "Was bedeutet Preis pro Trinkgeld?",
@@ -377,71 +449,117 @@
           },
           {
             "q": "Wie funktioniert die Jahresabrechnung?",
-            "a": "Jahresabrechnung mit 20 % Ersparnis wird demnächst eingeführt. Die angezeigten Preise gelten derzeit monatlich. Wir informieren Sie rechtzeitig vor jeder Änderung."
+            "a": "Wählen Sie die Jahresabrechnung und sparen Sie 20 % gegenüber monatlicher Zahlung. Abgerechnet wird einmal alle 12 Monate. Jahresabos verlängern sich automatisch, sofern Sie nicht vor Ende der Laufzeit kündigen."
           }
         ]
+      },
+      "contractModels": {
+        "title": "Vertragsmodelle",
+        "monthly": {
+          "title": "Monatliches Abo",
+          "billing": "Abrechnung jeden Monat",
+          "commitment": "1 Monat Mindestlaufzeit",
+          "cancel": "Jederzeit in den Abrechnungseinstellungen kündbar",
+          "access": "Zugang bleibt bis zum Ende des bezahlten Abrechnungszeitraums nach Kündigung bestehen"
+        },
+        "annual": {
+          "title": "Jahresabo",
+          "body": "Abrechnung alle 12 Monate. Jahresabos haben eine Mindestlaufzeit von 12 Monaten. Um eine automatische Verlängerung um einen weiteren Jahrestermin zu vermeiden, muss die Kündigung mindestens 3 Monate vor Ende des laufenden Vertrags eingereicht werden. Wird die Kündigungsfrist versäumt, verlängert sich das Abo automatisch um den nächsten Jahresabrechnungszeitraum gemäß den vereinbarten Abrechnungsbedingungen."
+        }
+      },
+      "packageAddOns": {
+        "title": "Optionale Enterprise-Zusatzleistungen",
+        "subtitle": "Auf Anfrage für Business- und Enterprise-Kunden verfügbar.",
+        "qrStand": "Acryl- und physische QR-Ständer-Bereitstellung",
+        "merchandise": "Merchandise & gebrandete Materialien"
+      },
+      "additionalServices": {
+        "title": "Zusätzliche Business-Services",
+        "subtitle": "Optionale Leistungen auf Anfrage. Getrennt von Ihrem Software-Abo.",
+        "qrStand": "Acryl- und physische QR-Display-Ständer",
+        "merchandise": "Merchandise & gebrandete Materialien",
+        "customOnboarding": "Individuelles Onboarding",
+        "staffTraining": "Mitarbeiterschulung",
+        "deploymentAssistance": "Rollout-Unterstützung"
+      },
+      "specialConditions": {
+        "title": "Sonderkonditionen verfügbar",
+        "body": "Individuelle Sonderkonditionen für Sozialberufe und Solo-Selbstständige sind auf Anfrage erhältlich. Bitte kontaktieren Sie unser Vertriebsteam für ein persönliches Angebot."
+      },
+      "trialCta": {
+        "title": "CareTip risikofrei testen",
+        "body": "Starten Sie mit einer 4-wöchigen Testphase für Premium. Nach Ablauf wird automatisch ein kostenpflichtiges Abo aktiviert, sofern Sie nicht kündigen.",
+        "button": "4 Wochen kostenlos testen",
+        "paymentNote": "Zahlungsdaten werden vor Beginn der Testphase benötigt.",
+        "conversionNote": "Nach der Testphase verlängert sich Ihr Plan automatisch im gewählten Abrechnungsrhythmus, bis Sie kündigen."
       },
       "tiers": {
         "starter": {
           "name": "Starter",
-          "tagline": "Für unabhängige Betriebe",
-          "feeMonthly": "9 €/Monat",
-          "feeYearly": "90 €/Jahr",
-          "feeNoteMonthly": "oder 90 €/Jahr",
-          "feeNoteYearly": "oder 9 €/Monat",
-          "feeNote": "pro erfolgreichem Trinkgeld via Stripe",
-          "description": "QR-Trinkgeld für Ihr Service-Team — ohne monatliche Plattformgebühr.",
-          "f0": "Bis zu 10 Teammitglieder",
-          "f1": "QR-Codes & persönliche Trinkgeld-Links",
-          "f2": "Basis-Analysen",
-          "f3": "E-Mail-Support",
-          "f4": "Keine monatliche Plattformgebühr",
-          "f5": "Acryl-Ständer-Vorlagen (druckfertig)",
-          "f6": "Echtzeit-Benachrichtigungen",
-          "f7": "Einzelstandort",
-          "f8": "QR-Code-Generierung",
-          "f9": "DSGVO-konforme Kontotools",
-          "f10": "Support auf Deutsch & Englisch",
-          "button": "Demo anfragen"
-        },
-        "business": {
-          "name": "Business",
-          "tagline": "Für wachsende Gastronomie-Teams",
+          "tagline": "Für unabhängige Gastronomie-Betriebe",
           "feeMonthly": "29 €/Monat",
           "feeYearly": "290 €/Jahr",
           "feeNoteMonthly": "oder 290 €/Jahr",
           "feeNoteYearly": "oder 29 €/Monat",
-          "feeNote": "pro erfolgreichem Trinkgeld via Stripe",
-          "description": "Gebrandete Trinkgeld-Erlebnisse mit den Tools, die Restaurants und Hotels mit vielen Mitarbeitenden brauchen.",
+          "feeNote": "oder 290 €/Jahr",
+          "description": "Professionelles digitales Trinkgeld in Minuten: modernes Zahlungserlebnis für Ihr Team ohne operative Komplexität.",
+          "f0": "Bis zu 15 Mitarbeitende",
+          "f1": "Standard-QR-Codes",
+          "f2": "CSV-Export",
+          "f3": "QR-Code-Trinkgeld",
+          "f4": "Sichere Stripe-Zahlungen",
+          "f5": "Mitarbeiterkonten & Einladungen",
+          "f6": "Business-Dashboard",
+          "f7": "Mitarbeiter-Verdienst-Dashboard",
+          "f8": "Echtzeit-Benachrichtigungen",
+          "f9": "Basis-Analysen & Reporting",
+          "f10": "Einzelstandort-Verwaltung",
+          "f11": "QR-Code-Generierung",
+          "f12": "DSGVO-konforme Kontotools",
+          "button": "Jetzt starten"
+        },
+        "business": {
+          "name": "Business",
+          "tagline": "Für wachsende Gastronomie-Teams",
+          "feeMonthly": "79 €/Monat",
+          "feeYearly": "790 €/Jahr",
+          "feeNoteMonthly": "oder 790 €/Jahr",
+          "feeNoteYearly": "oder 79 €/Monat",
+          "feeNote": "oder 790 €/Jahr",
+          "description": "Skalieren Sie mit erweiterten Analysen, Team-Performance und Mehrstandort-Management für ambitionierte Gastronomie-Marken.",
           "f0": "Alles aus Starter",
-          "f1": "Echtzeit-Business-Intelligence",
-          "f2": "Erweiterte Analysen & Charts",
-          "f3": "Wöchentliche, monatliche & jährliche Berichte",
-          "f4": "Mehrere Standorte",
-          "f5": "Tisch-QR-Systeme",
-          "f6": "Erweiterte QR-Verwaltung",
-          "f7": "Mitarbeiterziele & Performance-Tracking",
-          "f8": "CSV-Export & Reporting",
-          "f9": "Branding & Anpassung",
-          "f10": "Erweiterte Benachrichtigungssteuerung",
-          "f11": "Vertiefte operative Einblicke",
-          "button": "Demo anfragen"
+          "f1": "Unbegrenzte Mitarbeitende",
+          "f2": "Mehrstandort-Support",
+          "f3": "Individuelles Business- und Hotel-Branding",
+          "f4": "Steuerexport",
+          "f5": "Echtzeit-Business-Intelligence",
+          "f6": "Erweiterte Analysen & Charts",
+          "f7": "Wöchentliche, monatliche & jährliche Berichte",
+          "f8": "Tisch-QR-Systeme",
+          "f9": "Erweiterte QR-Verwaltung",
+          "f10": "Mitarbeiterziele & Performance-Tracking",
+          "f11": "CSV-Export & Reporting",
+          "f12": "Branding & Anpassung",
+          "f13": "Prioritäts-Support",
+          "button": "Auf Business upgraden"
         },
         "enterprise": {
           "name": "Enterprise",
-          "tagline": "Für Gruppen & Ketten",
-          "feeNote": "Individuell für Ihre Organisation",
-          "description": "Individuelle Auszahlungsabläufe, Reporting und Onboarding für Gastronomie-Gruppen im großen Maßstab.",
+          "tagline": "Für Gastronomie-Gruppen & Ketten",
+          "feeMonthly": "Auf Anfrage",
+          "feeNote": "Kontaktieren Sie unser Vertriebsteam für ein individuelles Angebot",
+          "description": "Maßgeschneiderte Plattform für Organisationen mit erweiterten Anforderungen an Steuerung, Workflows und Support.",
           "f0": "Alles aus Business",
-          "f1": "Dediziertes Onboarding",
-          "f2": "Prioritäts-Support",
-          "f3": "Individuelle Integrationen",
-          "f4": "API-Zugang",
-          "f5": "Multi-Brand-Verwaltung",
-          "f6": "Individuelles Reporting",
-          "f7": "Mengenbasierte Preise",
-          "f8": "Dedizierter Account Manager",
+          "f1": "API-Integrationen",
+          "f2": "Multi-Property- und Ketten-Support",
+          "f3": "24/7 Premium-Support",
+          "f4": "Dediziertes Onboarding",
+          "f5": "Dedizierter Account Manager",
+          "f6": "Individuelle Integrationen",
+          "f7": "Multi-Brand-Verwaltung",
+          "f8": "Individuelles Reporting",
           "f9": "SLA-Optionen",
+          "f10": "Mengenbasierte Preise",
           "button": "Vertrieb kontaktieren"
         }
       },
@@ -449,12 +567,12 @@
       "audience": {
         "operations": {
           "pageTitle": "Preise für Hotels & Logistik",
-          "pageSubtitle": "Trinkgeld über Schichten, Standorte und Außendienst koordinieren — mit transparenten Gebühren pro Trinkgeld.",
+          "pageSubtitle": "Trinkgeld über Schichten, Standorte und Außendienst koordinieren, mit transparenten Gebühren pro Trinkgeld.",
           "sectionTitle": "Für Teams mit mehreren Bereichen.",
-          "sectionSubtitle": "Hotels und Logistikunternehmen nutzen CareTip für Rezeption, Housekeeping, Fahrer und Lager — ohne versteckte Plattformkosten.",
+          "sectionSubtitle": "Hotels und Logistikunternehmen nutzen CareTip für Rezeption, Housekeeping, Fahrer und Lager, ohne versteckte Plattformkosten.",
           "tiers": {
             "starter": {
-              "description": "QR-Trinkgeld für einen Standort oder Depot — ohne monatliche Plattformgebühr."
+              "description": "QR-Trinkgeld für einen Standort oder Depot, ohne monatliche Plattformgebühr."
             },
             "business": {
               "description": "Gebrandetes Trinkgeld mit Exporten und Mehrstandort-Übersicht für wachsende Hotel- und Logistikbetriebe."
@@ -466,12 +584,12 @@
         },
         "solo": {
           "pageTitle": "Preise für Hebammen & Freelancer",
-          "pageSubtitle": "Freemium im Starter — keine monatliche Plattformgebühr, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium im Starter ohne monatliche Plattformgebühr, nur Transaktionsgebühren.",
           "sectionTitle": "Kostenlos starten. Upgraden, wenn Sie mehr brauchen.",
           "sectionSubtitle": "Starter kostet nichts außer Gebühren pro Trinkgeld. Business ist optional und bietet Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen.",
           "tiers": {
             "starter": {
-              "description": "Keine monatliche Plattformgebühr — Trinkgeld-Seite, QR-Link und transparente Gebühren pro Trinkgeld."
+              "description": "Keine monatliche Plattformgebühr. Trinkgeld-Seite, QR-Link und transparente Gebühren pro Trinkgeld."
             },
             "business": {
               "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und kommende Premium-Funktionen."
@@ -482,8 +600,8 @@
           }
         },
         "general": {
-          "pageTitle": "Faire & transparente Abrechnung",
-          "pageSubtitle": "Volle Flexibilität für Ihre Kunden: Bezahlt wird nur, was von Herzen kommt.",
+          "pageTitle": "Fairer und transparenter Preis",
+          "pageSubtitle": "Alles, was Sie brauchen, um digitales Trinkgeld für Ihr Gastgewerbe zu starten. Keine versteckten Gebühren, sichere Stripe-Zahlungen, flexible Verträge und eine kostenlose 4-wöchige Testphase.",
           "sectionTitle": "Echte Anerkennung lebt von einfachen Wegen.",
           "sectionSubtitle": "Mit CareTip machen Sie den herausragenden Service Ihres Teams sichtbar und belohnen ihn direkt. Begeistern Sie Ihre Gäste, stärken Sie die Motivation Ihrer Mitarbeiter und binden Sie Kunden an Ihre Marke."
         }
@@ -493,7 +611,7 @@
           "pageTitle": "Preise für Hotelteams",
           "pageSubtitle": "Transparente Gebühren pro Trinkgeld für Rezeption, Housekeeping, F&B und Concierge.",
           "sectionTitle": "Trinkgeld, das in jedem Hotelteam funktioniert.",
-          "sectionSubtitle": "Hotels nutzen CareTip für Anerkennung über Schichten und Abteilungen — gleiche Tarifstruktur wie Logistik, mit hospitality-spezifischem Rollout-Support.",
+          "sectionSubtitle": "Hotels nutzen CareTip für Anerkennung über Schichten und Abteilungen, mit derselben Tarifstruktur wie Logistik und hospitality-spezifischem Rollout-Support.",
           "tiers": {
             "starter": { "description": "QR-Trinkgeld für ein einzelnes Haus ohne monatliche Plattformgebühr." },
             "business": { "description": "Gebrandete QR-Codes, CSV-Export und Mehrstandort-Übersicht für wachsende Hotelgruppen." },
@@ -504,7 +622,7 @@
           "pageTitle": "Preise für Logistikteams",
           "pageSubtitle": "Belohnen Sie Fahrer, Lager und Außendienst mit klaren Gebühren pro Trinkgeld.",
           "sectionTitle": "Anerkennung für Menschen unterwegs.",
-          "sectionSubtitle": "Logistikunternehmen nutzen CareTip mit derselben Tarifstruktur wie Hotels — für verteilte Teams und Echtzeit-Anerkennung im Außendienst.",
+          "sectionSubtitle": "Logistikunternehmen nutzen CareTip mit derselben Tarifstruktur wie Hotels, für verteilte Teams und Echtzeit-Anerkennung im Außendienst.",
           "tiers": {
             "starter": { "description": "QR-Trinkgeld für ein Depot oder Hub ohne monatliche Plattformgebühr." },
             "business": { "description": "Gebrandetes Trinkgeld, CSV-Export und Mehrstandort-Reporting für wachsende Logistikbetriebe." },
@@ -513,22 +631,22 @@
         },
         "midwife": {
           "pageTitle": "Preise für Hebammen",
-          "pageSubtitle": "Freemium — keine monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
           "sectionTitle": "Digitale Wertschätzung für die Einzelpraxis.",
           "sectionSubtitle": "Starter ist kostenlos bis auf Gebühren pro Trinkgeld. Business bietet optional Branding, CSV-Export, erweiterte Analysen und Premium-Support.",
           "tiers": {
-            "starter": { "description": "Kostenlos starten — persönliche Trinkgeld-Seite und QR-Link. Sie zahlen nur Transaktionsgebühren bei erfolgreichen Trinkgeldern." },
+            "starter": { "description": "Kostenlos starten mit persönlicher Trinkgeld-Seite und QR-Link. Sie zahlen nur Transaktionsgebühren bei erfolgreichen Trinkgeldern." },
             "business": { "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und künftige Premium-Funktionen." },
             "enterprise": { "description": "Maßgeschneidertes Setup für Hebammenpraxen mit höherem Volumen oder Compliance-Bedarf." }
           }
         },
         "freelancer": {
           "pageTitle": "Preise für Freelancer",
-          "pageSubtitle": "Freemium — keine monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
+          "pageSubtitle": "Freemium ohne monatliche Plattformgebühr im Starter, nur Transaktionsgebühren.",
           "sectionTitle": "Ein Trinkgeld-Link, der mit Ihrer Arbeit wächst.",
           "sectionSubtitle": "Starter ist kostenlos außer Transaktionsgebühren. Business ergänzt Branding, Exporte, Analysen und Premium-Support, wenn Sie bereit sind.",
           "tiers": {
-            "starter": { "description": "Kostenlos starten — Trinkgeld-Link oder QR teilen. Gebühren nur bei erhaltenen Trinkgeldern." },
+            "starter": { "description": "Kostenlos starten. Trinkgeld-Link oder QR teilen. Gebühren nur bei erhaltenen Trinkgeldern." },
             "business": { "description": "Optionale Plattformgebühr für Branding, CSV-Export, erweiterte Analysen, Premium-Support und kommende Premium-Funktionen." },
             "enterprise": { "description": "Individuelles Setup für Agenturen und Kollektive mit erweitertem Reporting." }
           }
@@ -623,6 +741,37 @@
     "howItWorks": {
       "title": "Die CareTip-Journey",
       "subtitle": "Richten Sie Ihr Konto ein, fügen Sie Ihr Team hinzu und legen Sie direkt los.",
+      "hero": {
+        "badge": "So funktioniert CareTip",
+        "getStarted": "Jetzt starten",
+        "featuresAria": "CareTip-Journey Highlights",
+        "trustRow": {
+          "aria": "Plattform-Highlights",
+          "noApp": "Kein App-Download",
+          "stripe": "Sichere Stripe-Zahlungen",
+          "liveMinutes": "In Minuten live",
+          "gdpr": "DSGVO-konform"
+        },
+        "timeline": {
+          "aria": "CareTip-Ablauf im Überblick",
+          "step1": {
+            "title": "Registrieren",
+            "description": "Business-Workspace in wenigen Minuten anlegen."
+          },
+          "step2": {
+            "title": "Betrieb einrichten",
+            "description": "Team hinzufügen und gebrandete QR-Codes erstellen."
+          },
+          "step3": {
+            "title": "Digitales Trinkgeld erhalten",
+            "description": "Gäste scannen und zahlen in Sekunden ohne App."
+          },
+          "step4": {
+            "title": "Performance verfolgen",
+            "description": "Trinkgelder, Teams und Wachstum im Dashboard überwachen."
+          }
+        }
+      },
       "journeyPillars": [
         { "icon": "tips", "label": "Digitales Trinkgeld" },
         { "icon": "notifications", "label": "Sofort-Benachrichtigungen" },
@@ -1302,8 +1451,8 @@
     },
     "templates": {
       "tip_received_employee": {
-        "title": "Neues Trinkgeld erhalten",
-        "body": "{{amount}} von {{name}}"
+        "title": "Sie haben ein neues Trinkgeld erhalten",
+        "body": "{{customerName}} hat Ihnen {{amount}} Trinkgeld gegeben"
       },
       "tip_received_business": {
         "title": "Neues Trinkgeld in Ihrem Betrieb",
@@ -1632,6 +1781,8 @@
       }
     },
     "completion": {
+      "defaultThankYou": "Danke für Ihr Trinkgeld!",
+      "tipSentTo": "Ihr Trinkgeld wurde an {{name}} gesendet.",
       "thankYouTipping": "Danke für Ihr Trinkgeld für {{name}}",
       "stepCompleteTitle": "Alles erledigt",
       "feedbackReceived": "Ihr Feedback wurde erhalten und mit dem Team geteilt.",
@@ -1644,6 +1795,14 @@
     },
     "success": {
       "validatingPayment": "Zahlung wird geprüft…",
+      "celebrationHeadline": "Vielen Dank!",
+      "celebrationHeadlineSent": "Ihr Trinkgeld wurde gesendet",
+      "celebrationHeadlineFeedback": "Vielen Dank für Ihr Feedback!",
+      "supportingLabel": "Sie unterstützen",
+      "paymentCompleted": "Zahlung abgeschlossen",
+      "secureTransaction": "Sichere Transaktion",
+      "trustPoweredBy": "Sichere Zahlung mit CareTip",
+      "trustCompleted": "Ihre Zahlung wurde erfolgreich abgeschlossen",
       "headline": "Trinkgeld erfolgreich gesendet!",
       "thankYou": "Vielen Dank für Ihre Großzügigkeit",
       "sentTo": "Ihr Trinkgeld wurde an {{name}} gesendet",
@@ -2665,6 +2824,9 @@
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "github": "GitHub",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
     "colProduct": "Produkt",
     "colIndustries": "Branchen",
     "colCompany": "Unternehmen",
@@ -2678,7 +2840,7 @@
     "linkIndustryDelivery": "Lieferdienst",
     "linkIndustryBeauty": "Beauty",
     "linkIndustryTrades": "Handwerk",
-    "linkContact": "Kontakt",
+    "linkContact": "Kontakt/Support",
     "linkSupport": "Support",
     "linkForBusinesses": "Für Unternehmen",
     "linkForEmployees": "Für Mitarbeitende",
@@ -3946,6 +4108,8 @@
       },
       "analytics": {
         "periodAria": "Analysezeitraum",
+        "revenuePeriodAria": "Umsatz-Analysezeitraum",
+        "qrPeriodAria": "QR-Analysezeitraum",
         "cards": {
           "totalTips": "Trinkgeld gesamt",
           "activeEmployees": "Aktive Mitarbeitende",
@@ -4004,6 +4168,7 @@
         "empty": "Noch keine aktiven Ziele. Ziele erscheinen, wenn das Team Monatsziele setzt."
       },
       "performance": {
+        "openAnalytics": "Leistungsanalysen anzeigen",
         "headerSubtitle": "Executive-Gesundheit, Risiken, Chancen und empfohlene Maßnahmen für Ihr Unternehmen.",
         "leaderboardTitle": "Team-Rangliste",
         "goalProgress": "{{percent}} % des Ziels",
@@ -4290,6 +4455,7 @@
       "welcomePlaceholder": "Willkommen bei {{name}}",
       "thankYouLabel": "Dankesnachricht",
       "thankYouPlaceholder": "Vielen Dank für Ihre Unterstützung. Ihre Wertschätzung bedeutet uns viel.",
+      "defaultThankYouMessage": "Vielen Dank für Ihre Unterstützung.",
       "save": "Branding speichern",
       "toastSaved": "Branding-Einstellungen gespeichert.",
       "toastSaveError": "Branding-Einstellungen konnten nicht gespeichert werden.",
@@ -4377,10 +4543,19 @@
         "paymentMethods": "Zahlungsmethoden",
         "history": "Abrechnungsverlauf"
       },
-      "historyDesc": "Abo-Ereignisse und Abrechnungsaktivität.",
-      "invoicesDesc": "Rechnungen im Stripe-Kundenportal herunterladen.",
+      "historyDesc": "Abo-Aktivität verfolgen: Testphasen, Verlängerungen, Zahlungen und Planwechsel.",
+      "historyEmptyTitle": "Noch keine Abrechnungsaktivität",
+      "historyEmptyBody": "Abo-Ereignisse erscheinen hier, sobald sich Ihr Plan ändert, verlängert wird oder Zahlungen verarbeitet werden.",
+      "invoicesDesc": "Rechnungen und Zahlungsbelege im Stripe-Kundenportal herunterladen.",
       "invoicesHint": "Rechnungen und Belege werden sicher über Stripe verwaltet.",
+      "openBillingPortal": "Abrechnungsportal öffnen",
       "openStripePortal": "Abrechnungsportal öffnen",
+      "paymentMethodsDesc": "Verwalten Sie Ihre gespeicherten Zahlungsmethoden sicher über Stripe.",
+      "paymentMethodsBulletAdd": "Neue Karte hinzufügen",
+      "paymentMethodsBulletReplace": "Standard-Zahlungsmethode ersetzen",
+      "paymentMethodsBulletRemove": "Abgelaufene Karten entfernen",
+      "paymentMethodsBulletUpdate": "Rechnungsinformationen aktualisieren",
+      "managePaymentMethods": "Zahlungsmethoden verwalten",
       "loadError": "Abrechnungsdaten konnten nicht geladen werden.",
       "loading": "Abrechnung wird geladen…",
       "retry": "Erneut versuchen",
@@ -4392,7 +4567,18 @@
       "no": "Nein",
       "renewalDate": "Verlängerungsdatum",
       "trialEnd": "Testphase endet",
-      "notApplicable": "—",
+      "trial": {
+        "badge": "Testphase",
+        "cardBadge_one": "Testphase noch {{count}} Tag",
+        "cardBadge_other": "Testphase noch {{count}} Tage",
+        "activeTitle": "Testphase aktiv",
+        "daysRemaining_one": "Noch {{count}} Tag",
+        "daysRemaining_other": "Noch {{count}} Tage",
+        "startDate": "Testbeginn",
+        "endDate": "Testende",
+        "autoRenewNotice": "Ihr Abonnement beginnt automatisch am {{date}}, sofern Sie nicht vorher kündigen."
+      },
+      "notApplicable": "Nicht zutreffend",
       "memberSince": "Mitglied seit",
       "cancellation": "Kündigung geplant",
       "notScheduled": "Nicht geplant",
@@ -4408,6 +4594,7 @@
       "cancelError": "Kündigung konnte nicht geplant werden.",
       "billingNotEnabled": "Self-Service-Abrechnung ist noch nicht aktiv. Bitte Support kontaktieren.",
       "upgrade": "Upgraden",
+      "upgradeToPlan": "Upgrade auf {{plan}}",
       "downgrade": "Downgraden",
       "downgradeUnavailable": "Support kontaktieren zum Downgrade",
       "contactSales": "Vertrieb kontaktieren",
@@ -4417,9 +4604,36 @@
       "perMonthBilledYearly": "pro Monat ({{total}} jährlich)",
       "checkoutSuccess": "Abo aktualisiert. Änderungen können kurz dauern.",
       "checkoutCanceled": "Checkout abgebrochen. Keine Änderungen.",
+      "subscriptionSuccess": {
+        "pollingTitle": "Abo wird aktiviert…",
+        "pollingBody": "Wir bestätigen Ihre Zahlung mit Stripe. Das dauert meist nur wenige Sekunden.",
+        "readyTitle": "Alles bereit!",
+        "readyBody": "Ihr Tarif ist aktiv. Dashboard wird geöffnet…",
+        "timeoutTitle": "Wird noch verarbeitet",
+        "timeoutBody": "Ihre Zahlung ist eingegangen, die Aktivierung dauert etwas länger. Sie können das Dashboard öffnen — Ihr Tarif sollte in Kürze erscheinen.",
+        "goToDashboard": "Zum Dashboard",
+        "viewBilling": "Abrechnung anzeigen",
+        "backToPricing": "Zurück zu Preise",
+        "canceledBody": "Es wurde nichts berechnet. Sie können jederzeit erneut einen Tarif wählen."
+      },
       "checkoutError": "Checkout konnte nicht gestartet werden.",
       "checkoutNoUrl": "Checkout ohne URL zurückgegeben.",
       "portalError": "Abrechnungsportal konnte nicht geöffnet werden.",
+      "startTrial": "4 Wochen kostenlos testen",
+      "trialPaymentNote": "Zahlungsdaten werden vor Beginn der Testphase benötigt. Nach der Testphase wird ein kostenpflichtiges Abo aktiviert.",
+      "lifecycle": {
+        "title": "Abo & Kündigung",
+        "subtitle": "Verlängerungs- und Kündigungstermine auf einen Blick.",
+        "currentSubscription": "Aktuelles Abo",
+        "cancellationEffective": "Kündigung wirksam ab",
+        "earliestTermination": "Frühestes Vertragsende",
+        "billingStopsOn": "Die Abrechnung endet mit dem aktuellen bezahlten Zeitraum. Der Zugang bleibt bis dahin bestehen.",
+        "billingContinues": "Ihr Abo verlängert sich automatisch zu den oben genannten Terminen, bis Sie kündigen.",
+        "trialConversion": "Ihre Testphase wird am {{date}} in ein kostenpflichtiges Abo umgewandelt, sofern Sie nicht vorher kündigen.",
+        "autoRenewalMonthly": "Monatliche Abos verlängern sich automatisch in jedem Abrechnungszeitraum, bis Sie kündigen.",
+        "autoRenewalAnnual": "Jahresabos verlängern sich automatisch jedes Jahr, sofern nicht vor dem Verlängerungstermin gekündigt wird.",
+        "cancelScheduledNotice": "Kündigung geplant. Zugang bis {{date}}; danach endet die Abrechnung."
+      },
       "timelineTitle": "Abo-Verlauf",
       "timelineEmpty": "Noch keine Abo-Ereignisse.",
       "status": {
@@ -4438,7 +4652,12 @@
         "stripe_subscription_deleted": "Abo beendet",
         "invoice_payment_succeeded": "Verlängerung bezahlt",
         "payment_failed": "Zahlung fehlgeschlagen",
-        "checkout_session_completed": "Checkout abgeschlossen"
+        "checkout_session_completed": "Checkout abgeschlossen",
+        "trial_started": "Testphase gestartet",
+        "cancellation": "Abonnement gekündigt",
+        "cancellation_scheduled": "Kündigung geplant",
+        "plan_upgraded": "Plan hochgestuft",
+        "plan_downgraded": "Plan herabgestuft"
       },
       "plans": {
         "basic": {
@@ -4639,7 +4858,7 @@
     },
     "commercial": {
       "title": "Kommerzielle Intelligence",
-      "desc": "Wachstum, Risiko, Upgrade-Chancen und Enterprise-Bereitschaft aus Plattformdaten.",
+      "desc": "Wachstum, Risiko, Upgrade-Chancen und Fortschritt der Enterprise-Plan-Funktionen aus Plattformdaten.",
       "subscriptionTitle": "Abo-Intelligence",
       "subscriptionPeriod": "Letzte {{days}} Tage aus Abo-Audit-Ereignissen",
       "upgrades": "Upgrades",
@@ -4654,8 +4873,25 @@
       "atRisk": "Risikobetriebe",
       "premiumOpportunities": "Premium-Chancen",
       "enterpriseCandidates": "Enterprise-Kandidaten",
-      "enterpriseReadiness": "Enterprise-Bereitschaft (Plattform)",
-      "enterpriseScore": "Score: {{score}} / {{max}}",
+      "enterprisePlanReadiness": "Enterprise-Plan-Bereitschaft",
+      "enterpriseReadinessBadge": "Enterprise-Funktionsfortschritt",
+      "enterpriseReadinessHelper": "Verfolgt nur Enterprise-Funktionen für große Organisationen. Dies ist kein Gesamt-Reifegrad der Plattform.",
+      "enterpriseProgressLabel": "Enterprise-Funktionsfortschritt",
+      "enterpriseProgressCount": "{{completed}} von {{total}} Enterprise-Funktionen ausgeliefert",
+      "enterpriseAvailableHeading": "In Enterprise verfügbar",
+      "enterprisePlannedHeading": "Geplant",
+      "enterpriseNoneAvailable": "Noch keine Enterprise-Funktionen als ausgeliefert markiert.",
+      "enterpriseNonePlanned": "Alle Checklistenpunkte sind ausgeliefert.",
+      "enterpriseChecks": {
+        "billing_mirror": "Abo-Spiegel aktiv",
+        "audit_trail": "Abo-Audit-Ereignisse",
+        "entitlements": "Serverseitige Berechtigungsprüfung",
+        "qr_analytics": "QR-Analyse-Persistenz",
+        "api_access": "Öffentlicher API-Zugang",
+        "multi_brand": "Multi-Brand-Unterstützung",
+        "sla": "SLA-Überwachung",
+        "custom_reporting": "Individuelle Reporting-Exporte"
+      },
       "none": "Keine Treffer in der aktuellen Stichprobe.",
       "loadFailed": "Commercial Intelligence konnte nicht geladen werden.",
       "reasons": {

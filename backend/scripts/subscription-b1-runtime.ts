@@ -56,6 +56,8 @@ function baseSnapshot(overrides: Partial<StripeMirrorSnapshot> = {}): StripeMirr
     trialStartedAt: null,
     trialEndsAt: null,
     trialSource: null,
+    isTrial: false,
+    trialExpiredAt: null,
     ...overrides,
   };
 }

@@ -1,4 +1,4 @@
-import { getBusinessStats, listBusinessTips, getBusinessQrAnalytics } from "../api";
+import { getBusinessStats, listBusinessTips, getBusinessQrAnalytics, type BusinessStatsScope } from "../api";
 import { runBusinessIntelligenceEngine } from "../businessIntelligenceEngine";import { buildBusinessIntelligenceInput, tipsFeedParamsForTimeframe } from "../buildBusinessIntelligenceInput";
 import {
   getBusinessAnalyticsBundle,
@@ -35,7 +35,7 @@ export async function fetchBusinessPeriodStats(
   trackAnalyticsRefetch();
 
   const periodStats = await getBusinessStats(timeframe, {
-    scope: "full",
+    scope: opts?.scope ?? "full",
     signal: opts?.signal,
     silent: opts?.silent,
     revalidate: opts?.revalidate,

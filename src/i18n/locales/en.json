@@ -15,7 +15,9 @@
     "languageEnglish": "English",
     "languageGerman": "Deutsch",
     "becomePartner": "Create Account",
-    "staffPortal": "Join Team"
+    "staffPortal": "Join Team",
+    "mobileNavigationSection": "Navigation",
+    "mobileAccountSection": "Account"
   },
   "dashboardHero": {
     "overview": "Overview",
@@ -196,6 +198,8 @@
           "Review pricing and rollout options"
         ],
         "altPrompt": "Need help with an existing account?",
+        "viewPricing": "View pricing & plans",
+        "pricingPlanInterest": "You are interested in the {{plan}} plan from our pricing page.",
         "fields": {
           "fullName": "Full name",
           "workEmail": "Work email",
@@ -315,8 +319,37 @@
       "ctaPricing": "View pricing"
     },
     "pricing": {
-      "pageTitle": "Fair & Transparent Billing",
-      "pageSubtitle": "Full flexibility for your customers: They only pay what they feel is right.",
+      "pageTitle": "Fair and Transparent Price",
+      "pageSubtitle": "Everything you need to launch digital tipping for your hospitality business. No hidden fees, secure Stripe payments, flexible contracts, and a free 4-week trial to get started.",
+      "hero": {
+        "badge": "Transparent Pricing",
+        "featuresAria": "Platform highlights",
+        "features": {
+          "stripe": {
+            "title": "Secure Stripe Payments",
+            "body": "Payment processing powered by Stripe."
+          },
+          "ready": {
+            "title": "Ready in Minutes",
+            "body": "Launch your digital tipping system quickly."
+          },
+          "gdpr": {
+            "title": "GDPR Compliant",
+            "body": "Enterprise-grade security and compliance."
+          },
+          "trial": {
+            "title": "4 Week Free Trial",
+            "body": "Full Business features with automatic activation after signup."
+          }
+        },
+        "trustRow": {
+          "aria": "Pricing guarantees",
+          "noHiddenFees": "No hidden fees",
+          "cancelAnytime": "Cancel anytime",
+          "secureOnboarding": "Secure onboarding",
+          "trustedPayments": "Trusted payment processing"
+        }
+      },
       "plansAria": "Pricing plans and controls",
       "plansEyebrow": "Plans & pricing",
       "sectionTitle": "True recognition is all about simplicity.",
@@ -335,6 +368,45 @@
         "saveBadge": "Save 20%",
         "comingSoonBadge": "Soon",
         "yearlyComingSoon": "Yearly pricing with 20% savings is coming soon. Prices shown are monthly until yearly billing launches."
+      },
+      "audienceToggle": {
+        "label": "Audience",
+        "aria": "Pricing audience",
+        "hotels_logistics": "Hotels & Logistics",
+        "midwives_freelancers": "Midwives & Freelancers"
+      },
+      "soloPlans": {
+        "footnote": "No monthly subscription. You only pay transaction fees when you receive tips.",
+        "free": {
+          "name": "Free",
+          "tagline": "For independent practice",
+          "feeLine": "€0/month",
+          "feeNote": "Transaction fees only",
+          "description": "Start with a free account and digital tipping. Pay only when you receive tips.",
+          "f0": "QR tipping",
+          "f1": "Digital payments",
+          "f2": "Dashboard",
+          "f3": "Stripe payouts",
+          "f4": "Guest tipping",
+          "f5": "Transaction fee only",
+          "button": "Create free account"
+        },
+        "professional": {
+          "name": "Professional",
+          "tagline": "Coming soon",
+          "feeLine": "Coming soon",
+          "feeNote": "Optional upgrades planned",
+          "description": "Branding, exports, and advanced tools for growing solo practices.",
+          "button": "Coming soon"
+        },
+        "enterprise": {
+          "name": "Enterprise",
+          "tagline": "For practices & agencies",
+          "feeLine": "Upon Request",
+          "feeNote": "Tailored setup",
+          "description": "Custom onboarding and reporting for higher-volume solo professionals and collectives.",
+          "button": "Contact Sales"
+        }
       },
       "industry": {
         "label": "Business Type",
@@ -365,7 +437,7 @@
         "items": [
           {
             "q": "Are there monthly platform fees?",
-            "a": "Starter has no monthly platform fee. You only pay Stripe processing on successful tips. Business includes an optional €29/month platform fee for advanced features. Enterprise is tailored to your volume."
+            "a": "Starter is €29/month (or €290/year) for core tipping and team tools. Business is €79/month (or €790/year) for advanced analytics, multi-location support, and branding. Enterprise pricing is upon request for groups and chains."
           },
           {
             "q": "What does per-tip pricing mean?",
@@ -377,71 +449,117 @@
           },
           {
             "q": "How does yearly billing work?",
-            "a": "Yearly billing with 20% savings is rolling out soon. Prices shown today reflect monthly billing. We'll notify you before any change takes effect."
+            "a": "Choose yearly billing to save 20% compared to paying monthly. You are billed once every 12 months. Annual subscriptions renew automatically unless you cancel before the end of the current term."
           }
         ]
+      },
+      "contractModels": {
+        "title": "Contract options",
+        "monthly": {
+          "title": "Monthly subscription",
+          "billing": "Billed every month",
+          "commitment": "1 month commitment period",
+          "cancel": "Cancel anytime from your billing settings",
+          "access": "Access continues until the end of the paid billing period after cancellation"
+        },
+        "annual": {
+          "title": "Annual subscription",
+          "body": "Billed every 12 months. Annual subscriptions require a 12 month commitment. To avoid automatic renewal for another annual term, cancellation must be submitted at least 3 months before the end of the current contract. If the notice period is missed, the subscription renews automatically for the next annual billing cycle according to the agreed billing terms."
+        }
+      },
+      "packageAddOns": {
+        "title": "Optional enterprise add-ons",
+        "subtitle": "Available for Business and Enterprise customers upon request.",
+        "qrStand": "Acrylic and physical QR stand provision",
+        "merchandise": "Merchandise & branded materials"
+      },
+      "additionalServices": {
+        "title": "Additional business services",
+        "subtitle": "Optional services available upon request. Separate from your software subscription.",
+        "qrStand": "Acrylic and physical QR display stands",
+        "merchandise": "Merchandise & Branded Materials",
+        "customOnboarding": "Custom Onboarding",
+        "staffTraining": "Staff Training",
+        "deploymentAssistance": "Deployment Assistance"
+      },
+      "specialConditions": {
+        "title": "Special Conditions Available",
+        "body": "Individual special conditions for social professions and solo entrepreneurs are available upon request. Please contact our sales team for personalized pricing."
+      },
+      "trialCta": {
+        "title": "Try CareTip risk-free",
+        "body": "Start with a 4-week free trial on Premium. Your subscription converts to paid automatically when the trial ends unless you cancel.",
+        "button": "Start 4 Week Free Trial",
+        "paymentNote": "Payment details required before the trial begins.",
+        "conversionNote": "After the trial, your plan renews automatically on your selected billing cycle until cancelled."
       },
       "tiers": {
         "starter": {
           "name": "Starter",
           "tagline": "For independent hospitality venues",
-          "feeMonthly": "€9/month",
-          "feeYearly": "€90/year",
-          "feeNoteMonthly": "or €90/year",
-          "feeNoteYearly": "or €9/month",
-          "feeNote": "or €90/year",
-          "description": "Launch professional digital tipping in minutes and give your team a modern payment experience without operational complexity.",
-          "f0": "QR Code Tipping",
-          "f1": "Secure Stripe Payments",
-          "f2": "Employee Accounts & Invitations",
-          "f3": "Business Dashboard",
-          "f4": "Employee Earnings Dashboard",
-          "f5": "Real-Time Notifications",
-          "f6": "Basic Analytics & Reporting",
-          "f7": "Single Location Management",
-          "f8": "QR Code Generation",
-          "f9": "GDPR-Compliant Account Tools",
-          "f10": "English & German Support",
-          "button": "Get Started"
-        },
-        "business": {
-          "name": "Business",
-          "tagline": "For growing hospitality teams",
           "feeMonthly": "€29/month",
           "feeYearly": "€290/year",
           "feeNoteMonthly": "or €290/year",
           "feeNoteYearly": "or €29/month",
           "feeNote": "or €290/year",
+          "description": "Launch professional digital tipping in minutes and give your team a modern payment experience without operational complexity.",
+          "f0": "Up to 15 employees",
+          "f1": "Standard QR Codes",
+          "f2": "CSV Export",
+          "f3": "QR Code Tipping",
+          "f4": "Secure Stripe Payments",
+          "f5": "Employee Accounts & Invitations",
+          "f6": "Business Dashboard",
+          "f7": "Employee Earnings Dashboard",
+          "f8": "Real-Time Notifications",
+          "f9": "Basic Analytics & Reporting",
+          "f10": "Single Location Management",
+          "f11": "QR Code Generation",
+          "f12": "GDPR-Compliant Account Tools",
+          "button": "Get Started"
+        },
+        "business": {
+          "name": "Business",
+          "tagline": "For growing hospitality teams",
+          "feeMonthly": "€79/month",
+          "feeYearly": "€790/year",
+          "feeNoteMonthly": "or €790/year",
+          "feeNoteYearly": "or €79/month",
+          "feeNote": "or €790/year",
           "description": "Scale operations with advanced analytics, team performance insights, and multi-location management built for ambitious hospitality brands.",
           "f0": "Everything in Starter",
-          "f1": "Real-Time Business Intelligence",
-          "f2": "Advanced Analytics & Charts",
-          "f3": "Weekly, Monthly & Annual Reporting",
-          "f4": "Multi-Location Support",
-          "f5": "Table QR Systems",
-          "f6": "Advanced QR Management",
-          "f7": "Employee Goals & Performance Tracking",
-          "f8": "CSV Export & Reporting",
-          "f9": "Branding & Customization",
-          "f10": "Advanced Notification Controls",
-          "f11": "Enhanced Operational Insights",
+          "f1": "Unlimited employees",
+          "f2": "Multi-location support",
+          "f3": "Custom business and hotel branding",
+          "f4": "Tax export",
+          "f5": "Real-Time Business Intelligence",
+          "f6": "Advanced Analytics & Charts",
+          "f7": "Weekly, Monthly & Annual Reporting",
+          "f8": "Table QR Systems",
+          "f9": "Advanced QR Management",
+          "f10": "Employee Goals & Performance Tracking",
+          "f11": "CSV Export & Reporting",
+          "f12": "Branding & Customization",
+          "f13": "Priority Support",
           "button": "Upgrade to Business"
         },
         "enterprise": {
           "name": "Enterprise",
           "tagline": "For hospitality groups & chains",
-          "feeNote": "Tailored to your organization",
+          "feeMonthly": "Upon Request",
+          "feeNote": "Contact our sales team for a tailored quote",
           "description": "A tailored platform experience for hospitality organizations requiring advanced operational control, custom workflows, and dedicated support.",
           "f0": "Everything in Business",
-          "f1": "Dedicated Onboarding",
-          "f2": "Priority Support",
-          "f3": "Custom Integrations",
-          "f4": "API Access",
-          "f5": "Multi-Brand Management",
-          "f6": "Custom Reporting",
-          "f7": "Volume-Based Pricing",
-          "f8": "Dedicated Account Manager",
+          "f1": "API Integrations",
+          "f2": "Multi-property and chain support",
+          "f3": "24/7 Premium Support",
+          "f4": "Dedicated Onboarding",
+          "f5": "Dedicated Account Manager",
+          "f6": "Custom Integrations",
+          "f7": "Multi-brand Management",
+          "f8": "Custom Reporting",
           "f9": "SLA Options",
+          "f10": "Volume-Based Pricing",
           "button": "Contact Sales"
         }
       },
@@ -451,7 +569,7 @@
           "pageTitle": "Pricing for hotels & logistics teams",
           "pageSubtitle": "Coordinate tipping across shifts, locations, and field staff with transparent per-tip fees.",
           "sectionTitle": "Built for multi-team operations.",
-          "sectionSubtitle": "Hotels and logistics companies use CareTip to recognize staff across reception, housekeeping, drivers, and warehouse teams — without hidden platform surprises.",
+          "sectionSubtitle": "Hotels and logistics companies use CareTip to recognize staff across reception, housekeeping, drivers, and warehouse teams, without hidden platform surprises.",
           "tiers": {
             "starter": {
               "description": "Launch QR tipping for a single site or depot without a monthly platform fee."
@@ -466,12 +584,12 @@
         },
         "solo": {
           "pageTitle": "Pricing for midwives & freelancers",
-          "pageSubtitle": "Freemium on Starter — no monthly platform fee, transaction fees only.",
+          "pageSubtitle": "Freemium on Starter with no monthly platform fee, transaction fees only.",
           "sectionTitle": "Start free. Upgrade when you need more.",
           "sectionSubtitle": "Starter costs nothing except per-tip transaction fees. Business is optional and adds branding, CSV exports, advanced analytics, premium support, and future premium capabilities.",
           "tiers": {
             "starter": {
-              "description": "No monthly platform fee — just a tip page, QR link, and transparent per-tip fees."
+              "description": "No monthly platform fee. Just a tip page, QR link, and transparent per-tip fees."
             },
             "business": {
               "description": "Optional monthly platform fee for branding, CSV exports, advanced analytics, premium support, and upcoming premium features."
@@ -482,8 +600,8 @@
           }
         },
         "general": {
-          "pageTitle": "Fair & Transparent Billing",
-          "pageSubtitle": "Full flexibility for your customers: They only pay what they feel is right.",
+          "pageTitle": "Fair and Transparent Price",
+          "pageSubtitle": "Everything you need to launch digital tipping for your hospitality business. No hidden fees, secure Stripe payments, flexible contracts, and a free 4-week trial to get started.",
           "sectionTitle": "True recognition is all about simplicity.",
           "sectionSubtitle": "With CareTip, you can spotlight your team's outstanding service and reward them directly. Delight your guests, boost team morale, and turn customers into loyal brand advocates."
         }
@@ -493,7 +611,7 @@
           "pageTitle": "Pricing for hotel teams",
           "pageSubtitle": "Transparent per-tip fees across reception, housekeeping, F&B, and concierge.",
           "sectionTitle": "Tipping that works across every hotel team.",
-          "sectionSubtitle": "Hotels use CareTip to coordinate recognition across shifts and departments — same tier structure as logistics, with hospitality-specific rollout support.",
+          "sectionSubtitle": "Hotels use CareTip to coordinate recognition across shifts and departments, with the same tier structure as logistics and hospitality-specific rollout support.",
           "tiers": {
             "starter": { "description": "QR tipping for a single property without a monthly platform fee." },
             "business": { "description": "Branded QR, CSV exports, and multi-location visibility for growing hotel groups." },
@@ -504,7 +622,7 @@
           "pageTitle": "Pricing for logistics teams",
           "pageSubtitle": "Reward drivers, warehouse staff, and field teams with clear per-tip fees.",
           "sectionTitle": "Recognition for people on the move.",
-          "sectionSubtitle": "Logistics companies use CareTip with the same tier structure as hotels — built for distributed teams and real-time field recognition.",
+          "sectionSubtitle": "Logistics companies use CareTip with the same tier structure as hotels, built for distributed teams and real-time field recognition.",
           "tiers": {
             "starter": { "description": "QR tipping for a depot or hub without a monthly platform fee." },
             "business": { "description": "Branded tipping, CSV exports, and multi-site reporting for growing logistics operations." },
@@ -513,22 +631,22 @@
         },
         "midwife": {
           "pageTitle": "Pricing for midwives",
-          "pageSubtitle": "Freemium tipping — no monthly platform fee on Starter, transaction fees only.",
+          "pageSubtitle": "Freemium tipping with no monthly platform fee on Starter, transaction fees only.",
           "sectionTitle": "Digital appreciation for independent practice.",
           "sectionSubtitle": "Start free on Starter with per-tip fees only. Upgrade to Business when you want branding, CSV exports, advanced analytics, and premium support.",
           "tiers": {
-            "starter": { "description": "Free to start — personal tip page and QR link. You only pay transaction fees on successful tips." },
+            "starter": { "description": "Free to start with a personal tip page and QR link. You only pay transaction fees on successful tips." },
             "business": { "description": "Optional platform fee unlocks branding, CSV exports, advanced analytics, premium support, and future premium capabilities." },
             "enterprise": { "description": "Tailored setup for midwife practices with higher volume or compliance needs." }
           }
         },
         "freelancer": {
           "pageTitle": "Pricing for freelancers",
-          "pageSubtitle": "Freemium tipping — no monthly platform fee on Starter, transaction fees only.",
+          "pageSubtitle": "Freemium tipping with no monthly platform fee on Starter, transaction fees only.",
           "sectionTitle": "A tip link that grows with your work.",
           "sectionSubtitle": "Starter is free except per-tip transaction fees. Business adds branding, exports, analytics, and premium support when you're ready to monetize further.",
           "tiers": {
-            "starter": { "description": "Free to start — share a tip link or QR. Transaction fees apply only when you receive tips." },
+            "starter": { "description": "Free to start. Share a tip link or QR. Transaction fees apply only when you receive tips." },
             "business": { "description": "Optional platform fee for branding, CSV exports, advanced analytics, premium support, and upcoming premium features." },
             "enterprise": { "description": "Custom setup for agencies and collectives with advanced reporting needs." }
           }
@@ -623,6 +741,37 @@
     "howItWorks": {
       "title": "The CareTip Journey",
       "subtitle": "Set up your account, add your team, and get started right away.",
+      "hero": {
+        "badge": "How CareTip Works",
+        "getStarted": "Get Started",
+        "featuresAria": "CareTip journey highlights",
+        "trustRow": {
+          "aria": "Platform highlights",
+          "noApp": "No app download",
+          "stripe": "Secure Stripe payments",
+          "liveMinutes": "Live in minutes",
+          "gdpr": "GDPR compliant"
+        },
+        "timeline": {
+          "aria": "How CareTip works overview",
+          "step1": {
+            "title": "Sign Up",
+            "description": "Register your business workspace in minutes."
+          },
+          "step2": {
+            "title": "Set Up Your Business",
+            "description": "Add your team and generate branded QR codes."
+          },
+          "step3": {
+            "title": "Receive Digital Tips",
+            "description": "Guests scan and pay in seconds with no app."
+          },
+          "step4": {
+            "title": "Track Performance",
+            "description": "Monitor tips, teams, and growth from one dashboard."
+          }
+        }
+      },
       "journeyPillars": [
         { "icon": "tips", "label": "Digital tips" },
         { "icon": "notifications", "label": "Instant notifications" },
@@ -1300,8 +1449,8 @@
     },
     "templates": {
       "tip_received_employee": {
-        "title": "New tip received",
-        "body": "{{amount}} from {{name}}"
+        "title": "You received a new tip",
+        "body": "{{customerName}} tipped you {{amount}}"
       },
       "tip_received_business": {
         "title": "New tip at your venue",
@@ -1630,6 +1779,8 @@
       }
     },
     "completion": {
+      "defaultThankYou": "Thanks for your tip!",
+      "tipSentTo": "Your tip was sent to {{name}}.",
       "thankYouTipping": "Thank you for tipping {{name}}",
       "stepCompleteTitle": "You're all set",
       "feedbackReceived": "Your feedback has been received and shared with the team.",
@@ -1642,6 +1793,14 @@
     },
     "success": {
       "validatingPayment": "Validating payment…",
+      "celebrationHeadline": "Thank you!",
+      "celebrationHeadlineSent": "Your tip was sent",
+      "celebrationHeadlineFeedback": "Thank you for your feedback!",
+      "supportingLabel": "You're supporting",
+      "paymentCompleted": "Payment completed",
+      "secureTransaction": "Secure transaction",
+      "trustPoweredBy": "Secure payment powered by CareTip",
+      "trustCompleted": "Your payment was completed successfully",
       "headline": "Tip Sent Successfully!",
       "thankYou": "Thank you for your generosity",
       "sentTo": "Your tip has been sent to {{name}}",
@@ -2663,6 +2822,9 @@
     "twitter": "Twitter",
     "linkedin": "LinkedIn",
     "github": "GitHub",
+    "facebook": "Facebook",
+    "instagram": "Instagram",
+    "tiktok": "TikTok",
     "colProduct": "Product",
     "colIndustries": "Industries",
     "colCompany": "Company",
@@ -2676,7 +2838,7 @@
     "linkIndustryDelivery": "Delivery",
     "linkIndustryBeauty": "Beauty",
     "linkIndustryTrades": "Trades",
-    "linkContact": "Contact",
+    "linkContact": "Contact/Support",
     "linkSupport": "Support",
     "linkForBusinesses": "For Businesses",
     "linkForEmployees": "For Employees",
@@ -3904,6 +4066,8 @@
       },
       "analytics": {
         "periodAria": "Analytics period",
+        "revenuePeriodAria": "Revenue analytics period",
+        "qrPeriodAria": "QR analytics period",
         "cards": {
           "totalTips": "Total tips",
           "activeEmployees": "Active employees",
@@ -3962,6 +4126,7 @@
         "empty": "No active goals yet. Goals appear when staff set monthly targets."
       },
       "performance": {
+        "openAnalytics": "View performance analytics",
         "headerSubtitle": "Executive health, risks, opportunities, and recommended actions for your business.",
         "leaderboardTitle": "Team leaderboard",
         "goalProgress": "{{percent}}% of goal",
@@ -4288,6 +4453,7 @@
       "welcomePlaceholder": "Welcome to {{name}}",
       "thankYouLabel": "Thank-you message",
       "thankYouPlaceholder": "Thank you for supporting our team. Your appreciation means a lot to us.",
+      "defaultThankYouMessage": "Thank you for your support.",
       "save": "Save branding",
       "toastSaved": "Branding settings saved.",
       "toastSaveError": "Could not save branding settings.",
@@ -4375,10 +4541,19 @@
         "paymentMethods": "Payment Methods",
         "history": "Billing History"
       },
-      "historyDesc": "Subscription events and billing activity.",
-      "invoicesDesc": "Download invoices from your Stripe customer portal.",
-      "invoicesHint": "Invoices and receipts are managed securely through Stripe.",
+      "historyDesc": "Track subscription activity including trials, renewals, payments, and plan changes.",
+      "historyEmptyTitle": "No billing activity yet",
+      "historyEmptyBody": "Subscription events will appear here when your plan changes, renews, or when payments are processed.",
+      "invoicesDesc": "Download invoices and payment receipts from your Stripe Customer Portal.",
+      "invoicesHint": "Invoices and receipts are securely managed by Stripe.",
+      "openBillingPortal": "Open Billing Portal",
       "openStripePortal": "Open billing portal",
+      "paymentMethodsDesc": "Manage your saved payment methods securely through Stripe.",
+      "paymentMethodsBulletAdd": "Add a new card",
+      "paymentMethodsBulletReplace": "Replace your default payment method",
+      "paymentMethodsBulletRemove": "Remove expired cards",
+      "paymentMethodsBulletUpdate": "Update billing information",
+      "managePaymentMethods": "Manage Payment Methods",
       "loadError": "Could not load billing information.",
       "loading": "Loading billing…",
       "retry": "Try again",
@@ -4390,7 +4565,18 @@
       "no": "No",
       "renewalDate": "Renewal date",
       "trialEnd": "Trial ends",
-      "notApplicable": "—",
+      "trial": {
+        "badge": "Trial",
+        "cardBadge_one": "Trial {{count}} day remaining",
+        "cardBadge_other": "Trial {{count}} days remaining",
+        "activeTitle": "Trial active",
+        "daysRemaining_one": "{{count}} day remaining",
+        "daysRemaining_other": "{{count}} days remaining",
+        "startDate": "Trial start",
+        "endDate": "Trial end",
+        "autoRenewNotice": "Your subscription will automatically begin on {{date}} unless cancelled."
+      },
+      "notApplicable": "Not applicable",
       "memberSince": "Member since",
       "cancellation": "Cancellation scheduled",
       "notScheduled": "Not scheduled",
@@ -4406,6 +4592,7 @@
       "cancelError": "Could not schedule cancellation.",
       "billingNotEnabled": "Self-service billing is not enabled yet. Contact support to change your plan.",
       "upgrade": "Upgrade",
+      "upgradeToPlan": "Upgrade to {{plan}}",
       "downgrade": "Downgrade",
       "downgradeUnavailable": "Contact support to downgrade",
       "contactSales": "Contact sales",
@@ -4415,9 +4602,36 @@
       "perMonthBilledYearly": "per month ({{total}} billed yearly)",
       "checkoutSuccess": "Subscription updated. Changes may take a moment to appear.",
       "checkoutCanceled": "Checkout canceled. No changes were made.",
+      "subscriptionSuccess": {
+        "pollingTitle": "Activating your subscription…",
+        "pollingBody": "We're confirming your payment with Stripe. This usually takes a few seconds.",
+        "readyTitle": "You're all set!",
+        "readyBody": "Your plan is active. Opening your dashboard…",
+        "timeoutTitle": "Still processing",
+        "timeoutBody": "Your payment was received but activation is taking longer than usual. You can open the dashboard now — your plan should appear shortly.",
+        "goToDashboard": "Go to dashboard",
+        "viewBilling": "View billing",
+        "backToPricing": "Back to pricing",
+        "canceledBody": "No payment was taken. You can choose a plan again whenever you're ready."
+      },
       "checkoutError": "Could not start checkout.",
       "checkoutNoUrl": "Checkout session did not return a URL.",
       "portalError": "Could not open the billing portal.",
+      "startTrial": "Start 4 Week Free Trial",
+      "trialPaymentNote": "Payment details required before the trial begins. Converts to a paid subscription when the trial ends.",
+      "lifecycle": {
+        "title": "Subscription & cancellation",
+        "subtitle": "Understand your renewal dates and when billing stops.",
+        "currentSubscription": "Current subscription",
+        "cancellationEffective": "Cancellation effective date",
+        "earliestTermination": "Earliest termination date",
+        "billingStopsOn": "Billing stops at the end of your current paid period. You keep access until that date.",
+        "billingContinues": "Your subscription renews automatically on the dates above until you cancel.",
+        "trialConversion": "Your free trial converts to a paid subscription on {{date}} unless you cancel before then.",
+        "autoRenewalMonthly": "Monthly subscriptions renew automatically each billing period until cancelled.",
+        "autoRenewalAnnual": "Annual subscriptions renew automatically each year unless cancelled before the renewal date.",
+        "cancelScheduledNotice": "Cancellation is scheduled. Access continues until {{date}}; billing stops after that date."
+      },
       "timelineTitle": "Subscription timeline",
       "timelineEmpty": "No subscription events yet.",
       "status": {
@@ -4436,7 +4650,12 @@
         "stripe_subscription_deleted": "Subscription ended",
         "invoice_payment_succeeded": "Renewal payment succeeded",
         "payment_failed": "Payment failed",
-        "checkout_session_completed": "Checkout completed"
+        "checkout_session_completed": "Checkout completed",
+        "trial_started": "Trial started",
+        "cancellation": "Subscription canceled",
+        "cancellation_scheduled": "Cancellation scheduled",
+        "plan_upgraded": "Plan upgraded",
+        "plan_downgraded": "Plan downgraded"
       },
       "plans": {
         "basic": {
@@ -4637,7 +4856,7 @@
     },
     "commercial": {
       "title": "Commercial intelligence",
-      "desc": "Growth, risk, upgrade opportunities, and enterprise readiness from platform data.",
+      "desc": "Growth, risk, upgrade opportunities, and enterprise plan capability progress from platform data.",
       "subscriptionTitle": "Subscription intelligence",
       "subscriptionPeriod": "Last {{days}} days from subscription audit events",
       "upgrades": "Upgrades",
@@ -4652,8 +4871,25 @@
       "atRisk": "At-risk businesses",
       "premiumOpportunities": "Premium opportunities",
       "enterpriseCandidates": "Enterprise candidates",
-      "enterpriseReadiness": "Enterprise readiness (platform)",
-      "enterpriseScore": "Score: {{score}} / {{max}}",
+      "enterprisePlanReadiness": "Enterprise Plan Readiness",
+      "enterpriseReadinessBadge": "Enterprise feature progress",
+      "enterpriseReadinessHelper": "Tracks enterprise-only capabilities required for large organizations. This is not an overall platform readiness score.",
+      "enterpriseProgressLabel": "Enterprise capability progress",
+      "enterpriseProgressCount": "{{completed}} of {{total}} enterprise features shipped",
+      "enterpriseAvailableHeading": "Available in Enterprise",
+      "enterprisePlannedHeading": "Planned",
+      "enterpriseNoneAvailable": "No enterprise capabilities marked as shipped yet.",
+      "enterpriseNonePlanned": "All checklist items are shipped.",
+      "enterpriseChecks": {
+        "billing_mirror": "Subscription mirror active",
+        "audit_trail": "Subscription audit events",
+        "entitlements": "Server-side entitlement enforcement",
+        "qr_analytics": "QR analytics persistence",
+        "api_access": "Public API access",
+        "multi_brand": "Multi-brand support",
+        "sla": "SLA monitoring",
+        "custom_reporting": "Custom reporting exports"
+      },
       "none": "None matching criteria in current sample.",
       "loadFailed": "Could not load commercial intelligence.",
       "reasons": {

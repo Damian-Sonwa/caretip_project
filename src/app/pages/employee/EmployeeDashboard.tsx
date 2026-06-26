@@ -7,11 +7,9 @@ import { toast } from "sonner";
 import { useTranslation } from "react-i18next";
 import { translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
-import i18n from "@/i18n/i18n";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import {
-  TrendingUp,
   Star,
   Eye,
   QrCode,
@@ -36,7 +34,6 @@ import { useRealtimeFallback } from "../../hooks/useRealtimeFallback";
 import { subscribeTipReceived } from "../../lib/realtime/subscribeTipReceived";
 import { useDashboardTabRefocus } from "../../hooks/useDashboardTabRefocus";
 import { DashboardStatusStrip } from "../../components/dashboard/DashboardStatusStrip";
-import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { deriveEmployeeDashboardStatus } from "../../lib/dashboardStatus/deriveDashboardStatus";
 import { getEmployeeProfile, ensureEmployeeSlug } from "../../lib/api";
 import { useEmployeeDashboardAnalytics } from "../../hooks/useEmployeeDashboardAnalytics";
@@ -49,10 +46,7 @@ import type { TipItem, EmployeeGoalProgress } from "../../lib/api";
 import { playChaChingSound } from "../../lib/tipSounds";
 import { FixPrompt } from "../../components/FixPrompt";
 import { EmployeeQRCodeModal } from "../../components/employee/EmployeeQRCodeModal";
-import {
-  recordNewEmployeeTip,
-  syncEmployeeNotificationTips,
-} from "../../lib/employeeNotificationStore";
+import { recordNewEmployeeTip } from "../../lib/employeeNotificationStore";
 import employeeHeroImage from "../../../../images/foremployee.png";
 import { cn } from "@/lib/utils";
 import { DashboardHero } from "@/components/ui/dashboard-hero";
@@ -71,7 +65,6 @@ import {
   devMockEmployeeChartSeries,
   devMockEmployeeGoalBundle,
   devMockEmployeeRating,
-  devMockEmployeeRecentTips,
   devMockEmployeeSummary,
   shouldUseEmployeeDashboardDevDemo,
 } from "../../lib/devAnalyticsMocks";
@@ -88,22 +81,6 @@ interface NewTipPayload {
   businessId: string;
   currentMonthTotal: number;
   monthlyGoal: number | null;
-}
-
-function formatTimeAgo(iso: string): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-  const diffHours = Math.floor(diffMs / 3600000);
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffMins < 60) return i18n.t("employee.relative.minutesAgo", { count: diffMins });
-  if (diffHours < 24) {
-    return diffHours === 1
-      ? i18n.t("employee.relative.hourAgo")
-      : i18n.t("employee.relative.hoursAgo", { count: diffHours });
-  }
-  return diffDays === 1 ? i18n.t("employee.relative.dayAgo") : i18n.t("employee.relative.daysAgo", { count: diffDays });
 }
 
 export function EmployeeDashboard() {
@@ -150,7 +127,6 @@ export function EmployeeDashboard() {
   const [employeeRecordId, setEmployeeRecordId] = useState<string | null>(null);
   const [qrModalOpen, setQrModalOpen] = useState(false);
   const [generatingSlug, setGeneratingSlug] = useState(false);
-  const [recentTipsExpanded, setRecentTipsExpanded] = useState(true);
   const refreshTimerRef = useRef<number | null>(null);
 
   const socketReady = useDeferSocketConnect(
@@ -265,7 +241,6 @@ export function EmployeeDashboard() {
   const displayChartSeries = useDevDemo
     ? devMockEmployeeChartSeries(analyticsTimeframe)
     : (chartPayload?.chartSeries ?? []);
-  const displayTips = useDevDemo ? devMockEmployeeRecentTips() : (chartPayload?.tips ?? []);
   const displayMonthlyGoal =
     devGoalBundle?.monthlyGoal ?? displayPayload?.monthlyGoal ?? displayMetrics?.monthlyGoal ?? null;
   const displayGoalProgress =
@@ -339,14 +314,6 @@ export function EmployeeDashboard() {
       t,
     ],
   );
-
-  const recentTipsSource = displayTips;
-  const recentTips = recentTipsSource.slice(0, 6).map((tipRow) => ({
-    id: tipRow.id,
-    amount: tipRow.amount,
-    customer: t("employee.dashboard.anonymous"),
-    time: formatTimeAgo(tipRow.createdAt),
-  }));
 
   const slugLoading = staffSlug === undefined;
   const hasSlug = Boolean(staffSlug);
@@ -670,125 +637,63 @@ export function EmployeeDashboard() {
           </DashboardChartsIdleMount>
           </FeatureGate>
 
-          <div className="w-full grid gap-6 lg:grid-cols-2">
-            <motion.div
-              {...dashboardBlockMotion}
-              transition={{ delay: 0.5 }}
-            >
-              <Card className={cn(employeeUi.cardStatic, "w-full")}>
-                <CardHeader className={cn(employeeUi.cardHeader, "flex flex-row items-center justify-between space-y-0")}>
-                  <button
+          <motion.div {...dashboardBlockMotion} transition={{ delay: 0.5 }}>
+            <Card className={cn(employeeUi.cardStatic, "w-full")}>
+              <CardHeader className={employeeUi.cardHeader}>
+                <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
+              </CardHeader>
+              <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
+                <div className="grid grid-cols-2 gap-3 sm:max-w-md">
+                  <Button
                     type="button"
-                    onClick={() => setRecentTipsExpanded((v) => !v)}
-                    className="flex min-w-0 flex-1 items-center justify-between gap-3 text-left"
-                    aria-expanded={recentTipsExpanded}
+                    className={cn(employeeUi.btnPrimary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                    onClick={() => void handleQrQuickAction()}
+                    disabled={slugLoading || generatingSlug}
                   >
-                    <div>
-                      <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.recentTips")}</CardTitle>
-                    </div>
-                  </button>
-                  <Link
-                    to="/employee/tip-history"
-                    className="flex items-center gap-1 text-sm font-medium text-foreground hover:underline"
-                  >
-                    {t("dashboard.viewAll")}
-                  </Link>
-                </CardHeader>
-                {recentTipsExpanded ? (
-                  <CardContent>
-                    <div className="space-y-3">
-                      {recentTips.length === 0 ? (
-                        <EmployeeEmptyState
-                          icon={<TrendingUp className="h-6 w-6" aria-hidden />}
-                          title={t("emptyState.tips.title")}
-                          description={t("emptyState.tips.description")}
-                          className="!py-8"
-                        />
-                      ) : (
-                        recentTips.map((tip) => (
-                          <div
-                            key={tip.id}
-                            className={cn(employeeUi.listItem, employeeUi.listRow, "flex items-center justify-between p-3.5")}
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="break-words font-semibold tabular-nums text-foreground">{formatEur(tip.amount)}</p>
-                              <p className="text-xs text-muted-foreground">
-                                {tip.customer} • {tip.time}
-                              </p>
-                            </div>
-                          </div>
-                        ))
-                      )}
-                    </div>
-                  </CardContent>
-                ) : null}
-              </Card>
-            </motion.div>
-
-            <div className="space-y-4">
-              <motion.div
-                {...dashboardBlockMotion}
-                transition={{ delay: 0.6 }}
-              >
-                <Card className={cn(employeeUi.cardStatic, "w-full")}>
-                  <CardHeader className={employeeUi.cardHeader}>
-                    <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
-                  </CardHeader>
-                  <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
-                    <div className="grid grid-cols-2 gap-3">
-                      <Button
-                        type="button"
-                        className={cn(employeeUi.btnPrimary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
-                        onClick={() => void handleQrQuickAction()}
-                        disabled={slugLoading || generatingSlug}
-                      >
-                        {generatingSlug ? (
-                          <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
-                        ) : (
-                          <QrCode className="h-6 w-6" aria-hidden />
-                        )}
+                    {generatingSlug ? (
+                      <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+                    ) : (
+                      <QrCode className="h-6 w-6" aria-hidden />
+                    )}
+                    <span className="text-center text-xs font-semibold leading-tight">
+                      {slugLoading
+                        ? t("employee.dashboard.qrTileLoading")
+                        : generatingSlug
+                          ? t("employee.dashboard.qrTileGenerating")
+                          : hasSlug
+                            ? t("employee.dashboard.qrTileMyQr")
+                            : t("employee.dashboard.qrTileGenerate")}
+                    </span>
+                  </Button>
+                  {hasSlug && !slugLoading ? (
+                    <Button
+                      variant="outline"
+                      className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                      asChild
+                    >
+                      <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
+                        <Eye className="h-6 w-6" aria-hidden />
                         <span className="text-center text-xs font-semibold leading-tight">
-                          {slugLoading
-                            ? t("employee.dashboard.qrTileLoading")
-                            : generatingSlug
-                              ? t("employee.dashboard.qrTileGenerating")
-                              : hasSlug
-                                ? t("employee.dashboard.qrTileMyQr")
-                                : t("employee.dashboard.qrTileGenerate")}
+                          {t("employee.dashboard.viewProfile")}
                         </span>
-                      </Button>
-                      {hasSlug && !slugLoading ? (
-                        <Button
-                          variant="outline"
-                          className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
-                          asChild
-                        >
-                          <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
-                            <Eye className="h-6 w-6" aria-hidden />
-                            <span className="text-center text-xs font-semibold leading-tight">
-                              {t("employee.dashboard.viewProfile")}
-                            </span>
-                          </a>
-                        </Button>
-                      ) : (
-                        <Button
-                          variant="outline"
-                          className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
-                          disabled
-                        >
-                          <Eye className="h-6 w-6" aria-hidden />
-                          <span className="text-center text-xs font-semibold leading-tight">
-                            {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}
-                          </span>
-                        </Button>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-
-            </div>
-          </div>
+                      </a>
+                    </Button>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                      disabled
+                    >
+                      <Eye className="h-6 w-6" aria-hidden />
+                      <span className="text-center text-xs font-semibold leading-tight">
+                        {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}
+                      </span>
+                    </Button>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
         </div>
       </TracingBeam>
 

@@ -15,26 +15,26 @@ export type PricingTierDefinition = {
 export const PRICING_TIER_DEFINITIONS: readonly PricingTierDefinition[] = [
   {
     tierKey: "starter",
-    feeLine: "€9/month",
+    feeLine: "€29/month",
     icon: Store,
     isPopular: false,
   },
   {
     tierKey: "business",
-    feeLine: "€29/month",
+    feeLine: "€79/month",
     icon: Building2,
     isPopular: true,
   },
   {
     tierKey: "enterprise",
-    feeLine: "Custom",
+    feeLine: "Upon Request",
     icon: Crown,
     isPopular: false,
   },
 ] as const;
 
 /** Max feature slots per tier in i18n (`f0` … `f{n}`). Empty strings are omitted. */
-export const PRICING_TIER_FEATURE_SLOT_COUNT = 12;
+export const PRICING_TIER_FEATURE_SLOT_COUNT = 15;
 
 export function buildPricingTierFeatures(t: TFunction, tierKey: PricingTierKey): string[] {
   const features: string[] = [];
@@ -62,11 +62,15 @@ export function mapPricingTierFromI18n(
   icon: ComponentType<{ className?: string }>;
 } {
   const k = def.tierKey;
+  const feeLine =
+    k === "enterprise"
+      ? t(`staticPages.pricing.tiers.${k}.feeMonthly`, { defaultValue: def.feeLine })
+      : def.feeLine;
   return {
     tierKey: k,
     name: t(`staticPages.pricing.tiers.${k}.name`),
     tagline: t(`staticPages.pricing.tiers.${k}.tagline`),
-    feeLine: def.feeLine,
+    feeLine,
     feeNote: t(`staticPages.pricing.tiers.${k}.feeNote`),
     description: t(`staticPages.pricing.tiers.${k}.description`),
     features: buildPricingTierFeatures(t, k),

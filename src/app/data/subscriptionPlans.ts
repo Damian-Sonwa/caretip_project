@@ -1,41 +1,6 @@
 import type { SubscriptionPlanKey } from "../lib/api";
 
-export type SubscriptionPlanDefinition = {
-  planKey: SubscriptionPlanKey;
-  monthlyPrice: string | null;
-  yearlyPrice: string | null;
-  yearlyMonthlyEquivalent: string | null;
-  isContactSales: boolean;
-  featureCount: number;
-};
-
-/** SaaS plan catalog for dashboard billing (display only — Stripe charges via backend price IDs). */
-export const SUBSCRIPTION_PLAN_DEFINITIONS: readonly SubscriptionPlanDefinition[] = [
-  {
-    planKey: "basic",
-    monthlyPrice: "€0",
-    yearlyPrice: "€0",
-    yearlyMonthlyEquivalent: "€0",
-    isContactSales: false,
-    featureCount: 6,
-  },
-  {
-    planKey: "premium",
-    monthlyPrice: "€49",
-    yearlyPrice: "€470",
-    yearlyMonthlyEquivalent: "€39",
-    isContactSales: false,
-    featureCount: 8,
-  },
-  {
-    planKey: "enterprise",
-    monthlyPrice: null,
-    yearlyPrice: null,
-    yearlyMonthlyEquivalent: null,
-    isContactSales: true,
-    featureCount: 8,
-  },
-] as const;
+/** Plan rank helpers for billing upgrade/downgrade logic. Display copy lives in `pricingPlanCatalog`. */
 
 const PLAN_RANK: Record<SubscriptionPlanKey, number> = {
   basic: 0,

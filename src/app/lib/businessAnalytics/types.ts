@@ -47,6 +47,8 @@ export type FetchBusinessAnalyticsOptions = {
   signal?: AbortSignal;
   silent?: boolean;
   revalidate?: boolean;
+  /** Stats API scope — use `summary` for Starter tier dashboards. */
+  scope?: BusinessStatsScope;
   /** When false, skips tips feed fetch (Overview KPI-only refresh). */
   includeTipsFeed?: boolean;
   /** When false, skips week comparison stats fetch. */

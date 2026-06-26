@@ -38,8 +38,10 @@ type BiData = ReturnType<typeof useBusinessIntelligenceData>;
 
 type BusinessAnalyticsReportingProps = {
   data: BiData;
-  timeframe: AnalyticsTimeframe;
-  onTimeframeChange: (timeframe: AnalyticsTimeframe) => void;
+  revenueTimeframe: AnalyticsTimeframe;
+  onRevenueTimeframeChange: (timeframe: AnalyticsTimeframe) => void;
+  qrTimeframe: AnalyticsTimeframe;
+  onQrTimeframeChange: (timeframe: AnalyticsTimeframe) => void;
 };
 
 function ComparisonTable({
@@ -92,8 +94,10 @@ function ComparisonTable({
 /** Sprint 2 — sole reporting surface for business managers. */
 export function BusinessAnalyticsReporting({
   data,
-  timeframe,
-  onTimeframeChange,
+  revenueTimeframe,
+  onRevenueTimeframeChange,
+  qrTimeframe,
+  onQrTimeframeChange,
 }: BusinessAnalyticsReportingProps) {
   const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
@@ -102,13 +106,13 @@ export function BusinessAnalyticsReporting({
     return data.dailyTipDistribution.map((row) => ({
       ...row,
       dayLabel:
-        timeframe === "week"
+        revenueTimeframe === "week"
           ? translateChartWeekdayLabel(row.day, t)
-          : timeframe === "year"
+          : revenueTimeframe === "year"
             ? translateChartMonthLabel(row.day, t)
             : row.day,
     }));
-  }, [data.dailyTipDistribution, timeframe, t]);
+  }, [data.dailyTipDistribution, revenueTimeframe, t]);
 
   const tipDistributionTotal = useMemo(
     () => data.dailyTipDistribution.reduce((acc, row) => acc + (Number(row.amount) || 0), 0),
@@ -128,14 +132,24 @@ export function BusinessAnalyticsReporting({
   };
 
   const periodLabel =
-    timeframe === "week"
+    revenueTimeframe === "week"
       ? t("dashboard.filter_week")
-      : timeframe === "year"
+      : revenueTimeframe === "year"
         ? t("dashboard.filter_year")
         : t("dashboard.filter_month");
 
   const revenueGrowth = data.bi.revenue.growthPercent;
   const periodLoading = data.loading || data.timeframeLoading;
+
+  const periodOptions = (["week", "month", "year"] as const).map((period) => ({
+    id: period,
+    label:
+      period === "week"
+        ? t("dashboard.filter_week")
+        : period === "year"
+          ? t("dashboard.filter_year")
+          : t("dashboard.filter_month"),
+  }));
 
   return (
     <div className="caretip-mobile-analytics-report space-y-6 md:space-y-8">
@@ -167,30 +181,55 @@ export function BusinessAnalyticsReporting({
         ]}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <DashboardAnalyticsPeriodToggle
-          ariaLabel={t("business.tips.analytics.periodAria")}
-          value={timeframe}
-          onChange={onTimeframeChange}
-          options={(["week", "month", "year"] as const).map((period) => ({
-            id: period,
-            label:
-              period === "week"
-                ? t("dashboard.filter_week")
-                : period === "year"
-                  ? t("dashboard.filter_year")
-                  : t("dashboard.filter_month"),
-            loading: data.timeframeLoading && timeframe === period,
-          }))}
-        />
-        <Button type="button" variant="outline" size="sm" disabled={exporting} onClick={() => void handleExport()}>
-          <Download className="mr-2 h-4 w-4" aria-hidden />
-          {t("business.tips.analytics.reporting.export")}
-        </Button>
-      </div>
+      <section className="space-y-3" aria-labelledby="business-revenue-analytics-heading">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2
+            id="business-revenue-analytics-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("business.team.performance.bi.revenueTitle")}
+          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <DashboardAnalyticsPeriodToggle
+              ariaLabel={t("business.tips.analytics.revenuePeriodAria")}
+              value={revenueTimeframe}
+              onChange={onRevenueTimeframeChange}
+              options={periodOptions.map((option) => ({
+                ...option,
+                loading: data.timeframeLoading && revenueTimeframe === option.id,
+              }))}
+            />
+            <Button type="button" variant="outline" size="sm" disabled={exporting} onClick={() => void handleExport()}>
+              <Download className="mr-2 h-4 w-4" aria-hidden />
+              {t("business.tips.analytics.reporting.export")}
+            </Button>
+          </div>
+        </div>
+        <RevenueAnalyticsCards data={data.input} loading={periodLoading} showHeading={false} />
+      </section>
 
-      <RevenueAnalyticsCards data={data.input} loading={periodLoading} />
-      <QrAnalyticsSection timeframe={timeframe} />
+      <section className="space-y-3" aria-labelledby="business-qr-analytics-heading">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2
+            id="business-qr-analytics-heading"
+            className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
+          >
+            {t("business.team.performance.bi.qrTitle")}
+          </h2>
+          <DashboardAnalyticsPeriodToggle
+            ariaLabel={t("business.tips.analytics.qrPeriodAria")}
+            value={qrTimeframe}
+            onChange={onQrTimeframeChange}
+            options={periodOptions}
+          />
+        </div>
+        <QrAnalyticsSection
+          timeframe={qrTimeframe}
+          showHeading={false}
+          data={qrTimeframe === revenueTimeframe ? data.input.qrAnalytics : undefined}
+          dataLoading={qrTimeframe === revenueTimeframe ? periodLoading : undefined}
+        />
+      </section>
 
       <section className="space-y-3">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">

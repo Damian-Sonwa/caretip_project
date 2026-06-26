@@ -1,23 +1,16 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { motion } from "motion/react";
 import { useNavigate, Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
-import { Footer } from "../../components/Footer";
 import { CareTipLogo, CARE_TIP_LOGO_AUTH_SURFACE_CLASS } from "../../components/CareTipLogo";
 import { useAuth, getPostAuthRedirect } from "../../hooks/useAuth";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { isApiRequestError, EMAIL_NOT_VERIFIED_CODE } from "../../lib/apiError";
-import {
-  isMfaLoginChallenge,
-  loginMfaEnableAPI,
-  loginMfaSetupAPI,
-  loginMfaVerifyAPI,
-} from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { isPlatformAdminSessionRole, shouldShowLoginSessionResumeUi } from "../../lib/authSession";
 import { shouldShowAuthBootstrapShell } from "../../lib/authBootstrapUi";
 import { AuthBootstrapShell } from "@/app/components/auth/AuthBootstrapShell";
+import { AuthMinimalFooter } from "@/app/components/auth/AuthMinimalFooter";
 import { caretipBtnPrimaryCompact, caretipBtnPrimaryFull } from "@/lib/caretipButtonSystem";
 import { cn } from "@/lib/utils";
 import { AuthPageAtmosphere } from "@/app/components/auth/AuthPageAtmosphere";
@@ -85,6 +78,7 @@ export function PlatformAdminLoginPage() {
           : user?.role ?? "";
 
   const startMfaSetup = useCallback(async (token: string) => {
+    const { loginMfaSetupAPI } = await import("../../lib/api");
     const setup = await loginMfaSetupAPI(token);
     setQrDataUrl(setup.qrDataUrl);
     setMfaStep("setup");
@@ -105,6 +99,7 @@ export function PlatformAdminLoginPage() {
     setSubmitting(true);
     try {
       const result = await login(trimmed, password);
+      const { isMfaLoginChallenge } = await import("../../lib/api");
       if (isMfaLoginChallenge(result)) {
         setPendingMfaToken(result.pendingMfaToken);
         setAuthFlowInProgress(false);
@@ -146,6 +141,7 @@ export function PlatformAdminLoginPage() {
     setAuthFlowInProgress(true);
     setSubmitting(true);
     try {
+      const { loginMfaEnableAPI, loginMfaVerifyAPI } = await import("../../lib/api");
       const data =
         mfaStep === "setup"
           ? await loginMfaEnableAPI(pendingMfaToken, code)
@@ -176,6 +172,7 @@ export function PlatformAdminLoginPage() {
     shouldShowAuthBootstrapShell({
       authStatus,
       authTransitionPending,
+      allowImmediateLoginPaint: true,
     })
   ) {
     return <AuthBootstrapShell />;
@@ -222,52 +219,27 @@ export function PlatformAdminLoginPage() {
             </div>
           ) : null}
 
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="caretip-auth-card-wrap relative z-10"
-          >
+          <div className="caretip-auth-card-wrap caretip-auth-enter relative z-10">
             <AuthBackToHomeNav className="caretip-auth-back-home--standalone" />
             <div className="caretip-auth-card">
               <div className="caretip-auth-header !mb-5">
-                <motion.div
-                  initial={{ scale: 0.98, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.45, ease: "easeOut" }}
+                <div
                   className={cn(CARE_TIP_LOGO_AUTH_SURFACE_CLASS, "caretip-auth-logo-wrap caretip-auth-logo-wrap--card")}
                 >
                   <CareTipLogo size="auth" align="center" className="caretip-auth-marketing__logo" />
-                </motion.div>
-                <motion.h1
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.06, duration: 0.4 }}
-                  className="caretip-auth-title"
-                >
-                  {t("admin.loginPage.title")}
-                </motion.h1>
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.1, duration: 0.4 }}
-                  className="mt-2 flex flex-wrap items-center justify-center gap-2"
-                >
+                </div>
+                <h1 className="caretip-auth-title">{t("admin.loginPage.title")}</h1>
+                <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-primary">
                     <ShieldCheck className="h-3 w-3" strokeWidth={2} aria-hidden />
                     {t("admin.loginPage.restricted")}
                   </span>
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.12 }}
-                    className="caretip-auth-subtitle w-full"
-                  >
+                  <p className="caretip-auth-subtitle w-full">
                     {mfaStep === "password"
                       ? t("admin.loginPage.subtitle")
                       : t("admin.loginPage.mfaSubtitle", { defaultValue: "Enter the code from your authenticator app to continue." })}
-                  </motion.p>
-                </motion.div>
+                  </p>
+                </div>
               </div>
 
               {locationState?.impersonationExitFailed ? (
@@ -423,10 +395,10 @@ export function PlatformAdminLoginPage() {
                 </Link>
               </p>
             </div>
-          </motion.div>
+          </div>
         </main>
 
-        <Footer variant="minimal" surface="light" />
+        <AuthMinimalFooter surface="light" />
       </div>
     </div>
   );

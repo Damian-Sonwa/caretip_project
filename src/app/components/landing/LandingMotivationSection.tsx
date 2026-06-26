@@ -82,11 +82,6 @@ export function LandingMotivationSection() {
                   {t("nav.requestDemo")}
                 </Link>
               </div>
-              <div className={landingUi.sectionCtaUnit}>
-                <Link to="/signup" className={landingUi.sectionCtaSecondary}>
-                  {t("nav.becomePartner")}
-                </Link>
-              </div>
             </div>
           </div>
         </LandingReveal>

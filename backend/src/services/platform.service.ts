@@ -248,8 +248,8 @@ async function getAllBusinessActivityImpl() {
       b.kyc_review_history,
       u.id AS owner_user_id,
       u.email AS owner_email,
-      (SELECT COUNT(*)::int FROM employees e WHERE e.business_id = b.id AND e.is_deleted = false) AS staff_count,
-      (SELECT COUNT(*)::int FROM locations l WHERE l.business_id = b.id) AS location_count,
+      COALESCE(sc.staff_count, 0)::int AS staff_count,
+      COALESCE(lc.location_count, 0)::int AS location_count,
       COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
       COALESCE(ts.success_tip_count, 0)::int AS success_tip_count,
       b.subscription_tier,
@@ -268,6 +268,17 @@ async function getAllBusinessActivityImpl() {
       WHERE status = 'success'
       GROUP BY business_id
     ) ts ON ts.business_id = b.id
+    LEFT JOIN (
+      SELECT business_id, COUNT(*)::int AS staff_count
+      FROM employees
+      WHERE is_deleted = false
+      GROUP BY business_id
+    ) sc ON sc.business_id = b.id
+    LEFT JOIN (
+      SELECT business_id, COUNT(*)::int AS location_count
+      FROM locations
+      GROUP BY business_id
+    ) lc ON lc.business_id = b.id
     ORDER BY COALESCE(ts.total_tips_eur, 0) DESC, b.name ASC
   `);
 

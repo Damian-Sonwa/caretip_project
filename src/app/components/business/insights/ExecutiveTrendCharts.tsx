@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Area,
@@ -12,13 +13,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { businessUi } from "../businessDashboardUi";
 import { formatEur } from "../../../lib/formatEur";
 import { BUSINESS_CHART_GRID, businessChartTooltipStyle } from "../businessDashboardChartTheme";
-import { QrAnalyticsComingSoon } from "./QrAnalyticsComingSoon";
+import { buildQrChartSeries, type BusinessIntelligenceInput } from "../../../lib/businessIntelligence";
 
 type ExecutiveTrendChartsProps = {
   data: {
     tips: Array<{ label: string; tips: number }>;
     participation: Array<{ label: string; participation: number }>;
   };
+  qrInput?: Pick<BusinessIntelligenceInput, "qrAnalytics" | "dailyTipDistribution" | "period"> | null;
   loading: boolean;
 };
 
@@ -40,7 +42,7 @@ function TrendCard({
       <CardContent className="pt-4">
         {empty ? (
           <p className="flex h-[180px] items-center justify-center text-sm text-muted-foreground">
-            {t("emptyState.chart.description")}
+            {t("business.qrAnalytics.emptyTrend")}
           </p>
         ) : (
           <div className="h-[180px] w-full">{children}</div>
@@ -50,11 +52,28 @@ function TrendCard({
   );
 }
 
-export function ExecutiveTrendCharts({ data, loading }: ExecutiveTrendChartsProps) {
+export function ExecutiveTrendCharts({ data, qrInput, loading }: ExecutiveTrendChartsProps) {
   const { t } = useTranslation();
   const hasTips = data.tips.some((r) => r.tips > 0);
+  const qrSeries = useMemo(
+    () =>
+      qrInput
+        ? buildQrChartSeries({
+            period: qrInput.period,
+            week: qrInput.period,
+            today: qrInput.period,
+            dailyTipDistribution: qrInput.dailyTipDistribution,
+            recentTips: [],
+            employees: [],
+            employeeGoals: [],
+            pulse: null,
+            qrAnalytics: qrInput.qrAnalytics,
+          })
+        : { scansOverTime: [], hasScans: false },
+    [qrInput],
+  );
 
-  if (loading && !hasTips) {
+  if (loading && !hasTips && !qrSeries.hasScans) {
     return null;
   }
 
@@ -75,8 +94,16 @@ export function ExecutiveTrendCharts({ data, loading }: ExecutiveTrendChartsProp
         </ResponsiveContainer>
       </TrendCard>
 
-      <TrendCard title={t("business.team.performance.executive.chartScanTrend")} empty={false}>
-        <QrAnalyticsComingSoon compact className="h-full min-h-[180px] border-0 shadow-none" />
+      <TrendCard title={t("business.team.performance.executive.chartScanTrend")} empty={!qrSeries.hasScans}>
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={qrSeries.scansOverTime} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 9 }} />
+            <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} allowDecimals={false} />
+            <Tooltip contentStyle={businessChartTooltipStyle} />
+            <Area type="monotone" dataKey="scans" stroke="#197278" fill="rgba(25,114,120,0.12)" strokeWidth={2} />
+          </AreaChart>
+        </ResponsiveContainer>
       </TrendCard>
 
       <TrendCard title={t("business.team.performance.executive.chartParticipation")} empty={!hasTips}>

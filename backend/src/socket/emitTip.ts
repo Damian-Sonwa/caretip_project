@@ -10,6 +10,8 @@ export interface NewTipPayload {
   };
   employeeId: string;
   employeeName: string;
+  /** Guest/tipper name from payment metadata or transaction row (may be empty). */
+  customerName?: string | null;
   /** When set, push notifications skip an employee lookup. */
   employeeUserId?: string;
   businessId: string;

@@ -20,7 +20,6 @@ export const CookiesPage = lazyNamed(() => import("../pages/CookiesPage"), "Cook
 export const ContactPage = lazyNamed(() => import("../pages/ContactPage"), "ContactPage");
 export const CareersPage = lazyNamed(() => import("../pages/CareersPage"), "CareersPage");
 export const BlogPage = lazyNamed(() => import("../pages/BlogPage"), "BlogPage");
-export const HelpPage = lazyNamed(() => import("../pages/HelpPage"), "HelpPage");
 export const FAQPage = lazyNamed(() => import("../pages/FAQPage"), "FAQPage");
 export const MobileAppPage = lazyNamed(() => import("../pages/MobileAppPage"), "MobileAppPage");
 export const HowItWorksPage = lazyNamed(() => import("../pages/HowItWorksPage"), "HowItWorksPage");

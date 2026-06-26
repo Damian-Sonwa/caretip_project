@@ -6,6 +6,8 @@ import {
   Bar,
   BarChart,
   CartesianGrid,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -20,8 +22,11 @@ import {
   BUSINESS_CHART_BAR_SOFT,
   businessChartTooltipStyle,
 } from "../businessDashboardChartTheme";
-import { buildTrendChartSeries, type BusinessIntelligenceInput } from "../../../lib/businessIntelligence";
-import { QrAnalyticsComingSoon } from "./QrAnalyticsComingSoon";
+import {
+  buildQrChartSeries,
+  buildTrendChartSeries,
+  type BusinessIntelligenceInput,
+} from "../../../lib/businessIntelligence";
 
 type BusinessIntelligenceChartsProps = {
   data: BusinessIntelligenceInput;
@@ -46,7 +51,7 @@ function ChartShell({
       <CardContent className="pt-4">
         {empty ? (
           <p className="flex min-h-[200px] items-center justify-center text-sm text-muted-foreground">
-            {t("emptyState.chart.description")}
+            {t("business.qrAnalytics.emptyTrend")}
           </p>
         ) : (
           <div className="h-[220px] w-full min-w-0">{children}</div>
@@ -62,10 +67,12 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
 }: BusinessIntelligenceChartsProps) {
   const { t } = useTranslation();
   const series = useMemo(() => buildTrendChartSeries(data), [data]);
+  const qrSeries = useMemo(() => buildQrChartSeries(data), [data]);
 
-  const hasData = data.period.totalTips > 0 && series.tipsOverTime.length > 0;
+  const hasTipData = data.period.totalTips > 0 && series.tipsOverTime.length > 0;
+  const showSkeleton = loading && !hasTipData && !qrSeries.hasScans;
 
-  if (loading && !hasData) {
+  if (showSkeleton) {
     return (
       <div className="grid gap-4 lg:grid-cols-2">
         {Array.from({ length: 4 }).map((_, i) => (
@@ -81,7 +88,7 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
         {t("business.team.performance.bi.trendsTitle")}
       </h2>
       <div className="grid gap-4 lg:grid-cols-2">
-        <ChartShell title={t("business.team.performance.bi.chartTipsOverTime")} empty={!hasData}>
+        <ChartShell title={t("business.team.performance.bi.chartTipsOverTime")} empty={!hasTipData}>
           <ResponsiveContainer width="100%" height="100%">
             <AreaChart data={series.tipsOverTime} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
@@ -102,15 +109,40 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
           </ResponsiveContainer>
         </ChartShell>
 
-        <ChartShell title={t("business.team.performance.bi.chartScansOverTime")} empty={false}>
-          <QrAnalyticsComingSoon compact className="min-h-[200px] border-0 shadow-none" />
+        <ChartShell title={t("business.team.performance.bi.chartScansOverTime")} empty={!qrSeries.hasScans}>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={qrSeries.scansOverTime} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 10 }} />
+              <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} allowDecimals={false} />
+              <Tooltip contentStyle={businessChartTooltipStyle} />
+              <Area
+                type="monotone"
+                dataKey="scans"
+                stroke="#197278"
+                fill="rgba(25, 114, 120, 0.15)"
+                strokeWidth={2}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </ChartShell>
 
-        <ChartShell title={t("business.team.performance.bi.chartConversion")} empty={false}>
-          <QrAnalyticsComingSoon compact className="min-h-[200px] border-0 shadow-none" />
+        <ChartShell title={t("business.team.performance.bi.chartConversion")} empty={!qrSeries.hasConversion}>
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={qrSeries.conversionTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 10 }} />
+              <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} unit="%" />
+              <Tooltip
+                formatter={(v: number) => [`${v}%`, t("business.team.performance.bi.scanConversion")]}
+                contentStyle={businessChartTooltipStyle}
+              />
+              <Line type="monotone" dataKey="conversion" stroke="#a78bfa" strokeWidth={2} dot={false} />
+            </LineChart>
+          </ResponsiveContainer>
         </ChartShell>
 
-        <ChartShell title={t("business.team.performance.bi.chartRevenue")} empty={!hasData}>
+        <ChartShell title={t("business.team.performance.bi.chartRevenue")} empty={!hasTipData}>
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={series.revenueTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
               <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />

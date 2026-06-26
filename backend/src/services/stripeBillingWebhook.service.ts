@@ -14,6 +14,7 @@ import {
   createSubscriptionAuditEventData,
   findSubscriptionForStripeBilling,
 } from "./subscription.service.js";
+import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 
 const BILLING_EVENT_TYPES = new Set<string>([
   "customer.subscription.created",
@@ -129,8 +130,20 @@ async function handleSubscriptionLifecycleEvent(
   sub: Stripe.Subscription,
   auditType: (typeof STRIPE_BILLING_AUDIT_TYPES)[keyof typeof STRIPE_BILLING_AUDIT_TYPES],
 ): Promise<void> {
+  logTrialSync("webhook.subscription_lifecycle.start", {
+    stripeEventId: event.id,
+    auditType,
+    stripeSubscriptionId: sub.id,
+    stripeStatus: sub.status,
+    trialEnd: sub.trial_end ?? null,
+  });
+
   const row = await resolveSubscriptionRow(sub);
   if (!row) {
+    logTrialSync("webhook.subscription_lifecycle.stop", {
+      reason: "subscription_row_not_found",
+      stripeSubscriptionId: sub.id,
+    });
     await recordIgnoredBillingEvent({
       stripeEventId: event.id,
       auditType,
@@ -139,7 +152,22 @@ async function handleSubscriptionLifecycleEvent(
     return;
   }
 
+  logTrialSync("webhook.subscription_lifecycle.row_resolved", {
+    subscriptionRowId: row.id,
+    businessId: row.businessId,
+  });
+
   const snapshot = buildMirrorSnapshotFromStripeSubscription(sub);
+
+  logTrialSync("webhook.subscription_lifecycle.snapshot_built", {
+    status: snapshot.status,
+    planKey: snapshot.planKey,
+    isTrial: snapshot.isTrial,
+    trialStartedAt: snapshot.trialStartedAt?.toISOString() ?? null,
+    trialEndsAt: snapshot.trialEndsAt?.toISOString() ?? null,
+    stripePriceId: snapshot.stripePriceId,
+  });
+
   await applyStripeMirrorTransactional({
     subscriptionRowId: row.id,
     businessId: row.businessId,
@@ -154,6 +182,12 @@ async function handleSubscriptionLifecycleEvent(
       cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
       cancellationEffective: snapshot.cancellationEffective?.toISOString() ?? null,
     },
+  });
+
+  logTrialSync("webhook.subscription_lifecycle.mirror_applied", {
+    businessId: row.businessId,
+    subscriptionRowId: row.id,
+    auditType,
   });
 }
 
@@ -249,6 +283,15 @@ async function handleSubscriptionCheckoutCompleted(
   const meta = metadataLookup(md);
   const stripeSubId = subscriptionIdFromStripeObject(session.subscription);
 
+  logTrialSync("webhook.checkout_completed.start", {
+    stripeEventId: event.id,
+    sessionId: session.id,
+    stripeSubscriptionId: stripeSubId,
+    caretipBusinessId: meta.caretipBusinessId,
+    caretipSubscriptionId: meta.caretipSubscriptionId,
+    caretipPlanKey: meta.caretipPlanKey,
+  });
+
   const row = await findSubscriptionForStripeBilling({
     stripeSubscriptionId: stripeSubId,
     stripeCustomerId: customerIdFromStripeObject(session.customer),
@@ -257,6 +300,10 @@ async function handleSubscriptionCheckoutCompleted(
   });
 
   if (!row) {
+    logTrialSync("webhook.checkout_completed.stop", {
+      reason: "subscription_row_not_found",
+      sessionId: session.id,
+    });
     await recordIgnoredBillingEvent({
       stripeEventId: event.id,
       auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
@@ -274,6 +321,11 @@ async function handleSubscriptionCheckoutCompleted(
       select: { id: true },
     });
     if (existing) {
+      logTrialSync("webhook.checkout_completed.stop", {
+        reason: "subscription_created_already_processed",
+        subscriptionRowId: row.id,
+        sessionId: session.id,
+      });
       await recordIgnoredBillingEvent({
         stripeEventId: event.id,
         auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
@@ -351,11 +403,15 @@ async function dispatchBillingEvent(event: Stripe.Event): Promise<void> {
 export async function handleStripeBillingWebhookEvent(
   event: Stripe.Event,
 ): Promise<{ received: true; duplicate?: boolean; billingDisabled?: boolean }> {
+  logTrialSync("webhook.dispatch", { stripeEventId: event.id, type: event.type });
+
   if (!isSubscriptionBillingEnabled()) {
+    logTrialSync("webhook.dispatch.stop", { reason: "billing_disabled" });
     return { received: true, billingDisabled: true };
   }
 
   if (await isBillingWebhookDuplicate(event.id)) {
+    logTrialSync("webhook.dispatch.stop", { reason: "duplicate", stripeEventId: event.id });
     return { received: true, duplicate: true };
   }
 
@@ -365,6 +421,10 @@ export async function handleStripeBillingWebhookEvent(
       try {
         await handleSubscriptionCheckoutCompleted(event, session);
       } catch (err) {
+        logTrialSync("webhook.checkout_completed.error", {
+          stripeEventId: event.id,
+          error: err instanceof Error ? err.message : String(err),
+        });
         await recordFailedBillingEvent({
           stripeEventId: event.id,
           auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,

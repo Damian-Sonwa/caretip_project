@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2, CircleDashed, Info } from "lucide-react";
 import {
   fetchPlatformCommercialIntelligence,
   type PlatformCommercialIntelligence,
   type PlatformCommercialBusinessInsight,
 } from "../../lib/api";
+import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import {
   Card,
   CardContent,
@@ -85,6 +86,124 @@ function SegmentList({
   );
 }
 
+function EnterpriseCapabilityCard({
+  readiness,
+}: {
+  readiness: PlatformCommercialIntelligence["enterpriseReadiness"];
+}) {
+  const { t } = useTranslation();
+  const available = readiness.checks.filter((c) => c.passed);
+  const planned = readiness.checks.filter((c) => !c.passed);
+  const progressPct =
+    readiness.maxScore > 0 ? Math.round((readiness.score / readiness.maxScore) * 100) : 0;
+
+  return (
+    <div className="rounded-xl border border-violet-500/20 bg-gradient-to-b from-violet-500/[0.04] to-muted/10 p-4 sm:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0 flex-1 space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-sm font-semibold text-foreground">
+              {t("admin.commercial.enterprisePlanReadiness")}
+            </h4>
+            <span className="inline-flex items-center rounded-full border border-violet-500/25 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+              {t("admin.commercial.enterpriseReadinessBadge")}
+            </span>
+          </div>
+          <p className="max-w-2xl text-xs leading-relaxed text-muted-foreground">
+            {t("admin.commercial.enterpriseReadinessHelper")}
+          </p>
+        </div>
+        <span
+          className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-500/10 text-violet-600 dark:text-violet-400"
+          title={t("admin.commercial.enterpriseReadinessHelper")}
+          aria-hidden
+        >
+          <Info className="h-4 w-4" />
+        </span>
+      </div>
+
+      <div className="mt-4 rounded-lg border border-border/50 bg-background/80 px-4 py-3">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          {t("admin.commercial.enterpriseProgressLabel")}
+        </p>
+        <p className="mt-1 text-sm font-semibold text-foreground">
+          {t("admin.commercial.enterpriseProgressCount", {
+            completed: readiness.score,
+            total: readiness.maxScore,
+          })}
+        </p>
+        <div
+          className="mt-3 h-2 overflow-hidden rounded-full bg-muted"
+          role="progressbar"
+          aria-valuenow={readiness.score}
+          aria-valuemin={0}
+          aria-valuemax={readiness.maxScore}
+          aria-label={t("admin.commercial.enterpriseProgressCount", {
+            completed: readiness.score,
+            total: readiness.maxScore,
+          })}
+        >
+          <div
+            className="h-full rounded-full bg-violet-500 transition-[width] duration-500 ease-out"
+            style={{ width: `${progressPct}%` }}
+          />
+        </div>
+        <p className="mt-1.5 text-xs tabular-nums text-muted-foreground">{progressPct}%</p>
+      </div>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <section aria-labelledby="enterprise-capabilities-available">
+          <h5
+            id="enterprise-capabilities-available"
+            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-400"
+          >
+            <CheckCircle2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {t("admin.commercial.enterpriseAvailableHeading")}
+          </h5>
+          {available.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">{t("admin.commercial.enterpriseNoneAvailable")}</p>
+          ) : (
+            <ul className="mt-2 space-y-2">
+              {available.map((check) => (
+                <li key={check.id} className="flex items-start gap-2 text-sm text-foreground">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-500" aria-hidden />
+                  <span>
+                    {t(`admin.commercial.enterpriseChecks.${check.id}`, { defaultValue: check.label })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        <section aria-labelledby="enterprise-capabilities-planned">
+          <h5
+            id="enterprise-capabilities-planned"
+            className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-amber-700 dark:text-amber-400"
+          >
+            <CircleDashed className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {t("admin.commercial.enterprisePlannedHeading")}
+          </h5>
+          {planned.length === 0 ? (
+            <p className="mt-2 text-xs text-muted-foreground">{t("admin.commercial.enterpriseNonePlanned")}</p>
+          ) : (
+            <ul className="mt-2 space-y-2">
+              {planned.map((check) => (
+                <li key={check.id} className="flex items-start gap-2 text-sm text-muted-foreground">
+                  <CircleDashed className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground/70" aria-hidden />
+                  <span>
+                    {t(`admin.commercial.enterpriseChecks.${check.id}`, { defaultValue: check.label })}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </div>
+    </div>
+  );
+}
+
 export function PlatformCommercialIntelligenceSection() {
   const { t } = useTranslation();
   const [data, setData] = useState<PlatformCommercialIntelligence | null>(null);
@@ -97,9 +216,15 @@ export function PlatformCommercialIntelligenceSection() {
     try {
       const d = await withTimeout(fetchPlatformCommercialIntelligence(), COMMERCIAL_FETCH_TIMEOUT_MS);
       setData(d);
-    } catch {
+    } catch (err) {
       setData(null);
-      setLoadError(t("admin.commercial.loadFailed"));
+      const devDetail =
+        import.meta.env.DEV && err instanceof Error && err.message === "timeout"
+          ? "Request timed out after 20s"
+          : import.meta.env.DEV
+            ? toUserFriendlyMessage(err)
+            : null;
+      setLoadError(devDetail ?? t("admin.commercial.loadFailed"));
     } finally {
       setLoading(false);
     }
@@ -207,29 +332,7 @@ export function PlatformCommercialIntelligenceSection() {
           />
         </div>
 
-        <div className="rounded-xl border border-border/60 bg-muted/10 p-4">
-          <h4 className="text-sm font-semibold text-foreground">{t("admin.commercial.enterpriseReadiness")}</h4>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("admin.commercial.enterpriseScore", {
-              score: readiness.score,
-              max: readiness.maxScore,
-            })}
-          </p>
-          <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-            {readiness.checks.map((check) => (
-              <li key={check.id} className="flex items-center gap-2 text-xs">
-                <span
-                  className={cn(
-                    "inline-block h-2 w-2 rounded-full",
-                    check.passed ? "bg-emerald-500" : "bg-muted-foreground/40",
-                  )}
-                  aria-hidden
-                />
-                <span className={check.passed ? "text-foreground" : "text-muted-foreground"}>{check.label}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <EnterpriseCapabilityCard readiness={readiness} />
       </CardContent>
     </Card>
   );

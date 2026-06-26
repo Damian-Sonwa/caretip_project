@@ -1,33 +1,49 @@
 import { useNavigate, useSearchParams } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { CheckCircle2, Users } from "lucide-react";
 import { clearCustomerFlowEntry } from "../../lib/customerFlowGuard";
 import { useTipFlow } from "../../context/TipFlowContext";
-import { customerFlowUi as cf } from "./customerFlowUi";
-import { Card, CardContent } from "@/components/ui/card";
 import { useVerifiedTipSession, isVerifiedTipSessionReady } from "../../hooks/useVerifiedTipSession";
 import { TipPaymentProcessingView } from "./TipPaymentProcessingView";
 import { CareTipPageLoader } from "../../components/CareTipPageLoader";
-import { CustomerVenueBanner } from "../../components/customer/CustomerVenueBanner";
-import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
-import { CustomerJourneyAttributionFooter } from "./CustomerJourneyCareTipAttribution";
 import { useCustomerVenueBrand } from "./customerJourneyBrand";
-import { headerThankYouFor } from "./customerJourneyHeaderCopy";
+import { resolveGuestThankYouMessage } from "../../lib/businessBranding";
+import { TipSuccessExperience } from "./TipSuccessExperience";
+import { useTipSuccessEmployeeProfile } from "./useTipSuccessEmployeeProfile";
 
 export function TipCompletionPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { reset, businessId: tipFlowBusinessId, employeeName: tipFlowEmployeeName } = useTipFlow();
+  const { reset, businessId: tipFlowBusinessId, employeeName: tipFlowEmployeeName, amount } = useTipFlow();
 
   const sessionId = searchParams.get("session_id")?.trim() ?? "";
   const feedbackSubmitted = searchParams.get("feedbackSubmitted") === "1";
 
   const verification = useVerifiedTipSession(sessionId);
-  const businessIdForVenue =
-    verification.phase === "ready" ? verification.context.businessId : tipFlowBusinessId;
+  const ready = isVerifiedTipSessionReady(verification);
+  const context = ready ? verification.context : null;
+
+  const businessIdForVenue = context?.businessId ?? tipFlowBusinessId;
   const venueBrand = useCustomerVenueBrand(businessIdForVenue, t("tipFlow.common.venue"));
+
+  const displayName =
+    context?.employee?.name ?? tipFlowEmployeeName ?? t("tipFlow.common.aTeamMember");
+  const employeeFallback = useMemo(
+    () => ({
+      name: displayName,
+      avatar: context?.employee?.avatar ?? null,
+      role: null,
+      bio: null,
+    }),
+    [displayName, context?.employee?.avatar],
+  );
+  const employee = useTipSuccessEmployeeProfile(context?.employee?.id, employeeFallback);
+  const tipAmount = amount != null && Number.isFinite(amount) && amount > 0 ? amount : null;
+  const thankYouMessage = resolveGuestThankYouMessage(
+    venueBrand.branding,
+    t("tipFlow.completion.defaultThankYou"),
+  );
 
   useEffect(() => {
     if (!sessionId) {
@@ -58,12 +74,10 @@ export function TipCompletionPage() {
     );
   }
 
-  if (!isVerifiedTipSessionReady(verification)) {
+  if (!ready || !context) {
     return null;
   }
 
-  const { context } = verification;
-  const displayName = context.employee?.name ?? t("tipFlow.common.aTeamMember");
   const businessId = context.businessId;
 
   const tipAnother = () => {
@@ -82,52 +96,22 @@ export function TipCompletionPage() {
     navigate("/", { replace: true });
   };
 
-  const completionHeader = headerThankYouFor(t, displayName, feedbackSubmitted);
-  const premiumThankYou =
-    venueBrand.branding?.premium && venueBrand.branding.thankYouMessage?.trim()
-      ? venueBrand.branding.thankYouMessage.trim()
-      : null;
-
   return (
-    <div className={cf.page}>
-      {venueBrand.branding?.premium ? (
-        <div className="border-b border-black/[0.06]">
-          <CustomerVenueBanner branding={venueBrand.branding} />
-        </div>
-      ) : null}
-      <CustomerJourneyHeader
-        venue={venueBrand}
-        stepTitle={completionHeader.stepTitle}
-        trustMessage={completionHeader.trustMessage}
-      />
-
-      <div className={`${cf.main} max-w-lg py-10 sm:py-14`}>
-        <div className={cf.successIconWrap} aria-hidden>
-          <CheckCircle2 className="size-11 text-primary sm:size-12" strokeWidth={1.75} />
-        </div>
-
-        {premiumThankYou ? (
-          <p className="mx-auto mb-6 max-w-md text-center text-sm leading-relaxed text-muted-foreground">
-            {premiumThankYou}
-          </p>
-        ) : null}
-
-        <Card className={cf.completionCard}>
-          <CardContent className="p-6 sm:p-8">
-            <div className={cf.completionActions}>
-              <button type="button" onClick={tipAnother} className={cf.completionPrimaryBtn}>
-                <Users className="size-5 shrink-0" aria-hidden />
-                {t("tipFlow.completion.tipAnotherMember")}
-              </button>
-              <button type="button" onClick={exit} className={cf.completionTextAction}>
-                {t("tipFlow.completion.exit")}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-        <CustomerJourneyAttributionFooter label={t("tipFlow.common.poweredByCareTip")} />
-      </div>
-    </div>
+    <TipSuccessExperience
+      venue={venueBrand}
+      employee={employee}
+      thankYouMessage={thankYouMessage}
+      headline={
+        feedbackSubmitted
+          ? t("tipFlow.success.celebrationHeadlineFeedback")
+          : t("tipFlow.success.celebrationHeadline")
+      }
+      tipAmount={tipAmount}
+      transactionId={context.transactionId}
+      primaryLabel={t("tipFlow.completion.tipAnotherMember")}
+      secondaryLabel={t("tipFlow.completion.exit")}
+      onPrimary={tipAnother}
+      onSecondary={exit}
+    />
   );
 }

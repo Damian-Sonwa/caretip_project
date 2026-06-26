@@ -82,6 +82,7 @@ export function isPublicAuthenticationPath(pathname: string): boolean {
   if (p === "/login" || p === "/signup" || p === "/auth" || p === "/forgot-password") return true;
   if (p === "/join/signup" || p === "/employee/login") return true;
   if (p === "/business/login") return true; // legacy; route redirects to /login
+  if (p === "/platform-admin/login") return true;
   if (p.startsWith("/reset-password/")) return true;
   return false;
 }

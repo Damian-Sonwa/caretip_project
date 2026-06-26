@@ -1,28 +1,22 @@
 import { useTranslation } from "react-i18next";
-import type { BillingCycle, Industry } from "@/app/data/pricingTypes";
-import { PRICING_INDUSTRIES } from "@/app/data/pricingTypes";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/app/components/ui/select";
+import type { BillingCycle } from "@/app/data/pricingTypes";
+import type { PricingPageAudience } from "@/app/data/pricingAudience";
+import { PricingAudienceToggle } from "@/components/pricing/PricingAudienceToggle";
 import { PricingBillingToggle } from "@/components/pricing/PricingBillingToggle";
 import { cn } from "@/lib/utils";
 
 type PricingControlsPanelProps = {
-  industry: Industry;
+  audience: PricingPageAudience;
   billingCycle: BillingCycle;
-  onIndustryChange: (industry: Industry) => void;
+  onAudienceChange: (audience: PricingPageAudience) => void;
   onBillingCycleChange: (cycle: BillingCycle) => void;
   className?: string;
 };
 
 export function PricingControlsPanel({
-  industry,
+  audience,
   billingCycle,
-  onIndustryChange,
+  onAudienceChange,
   onBillingCycleChange,
   className,
 }: PricingControlsPanelProps) {
@@ -31,25 +25,15 @@ export function PricingControlsPanel({
   return (
     <div className={cn("caretip-pricing-controls", className)}>
       <div className="caretip-pricing-controls__field">
-        <label className="caretip-pricing-controls__label" htmlFor="pricing-business-type">
-          {t("staticPages.pricing.industry.label")}
-        </label>
-        <Select value={industry} onValueChange={(v) => onIndustryChange(v as Industry)}>
-          <SelectTrigger
-            id="pricing-business-type"
-            className="caretip-pricing-select-trigger"
-            aria-label={t("staticPages.pricing.industry.selectAria")}
-          >
-            <SelectValue placeholder={t("staticPages.pricing.industry.selectPlaceholder")} />
-          </SelectTrigger>
-          <SelectContent className="caretip-pricing-select-content" position="popper">
-            {PRICING_INDUSTRIES.map((key) => (
-              <SelectItem key={key} value={key} className="caretip-pricing-select-item">
-                {t(`staticPages.pricing.industry.${key}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <span className="caretip-pricing-controls__label" id="pricing-audience-label">
+          {t("staticPages.pricing.audienceToggle.label")}
+        </span>
+        <PricingAudienceToggle
+          value={audience}
+          onChange={onAudienceChange}
+          className="caretip-pricing-audience-toggle--in-panel"
+          aria-labelledby="pricing-audience-label"
+        />
       </div>
 
       <div className="caretip-pricing-controls__field">

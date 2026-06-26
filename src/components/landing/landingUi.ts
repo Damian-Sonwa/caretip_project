@@ -89,7 +89,7 @@ function cnCta(layout: string) {
 
 /** Primary / secondary CTA sizing — shared across hero, sections, and nav. */
 const ctaPrimarySize =
-  "h-11 min-h-11 lg:h-12 lg:min-h-12 px-7 lg:px-8 max-lg:min-w-[12.75rem] max-lg:max-w-[min(100%,280px)] lg:min-w-[12rem]";
+  "h-11 min-h-11 lg:h-12 lg:min-h-12 px-7 lg:px-8 max-lg:min-w-[12.75rem] max-lg:max-w-[min(100%,280px)] lg:min-w-[12.5rem]";
 const ctaSecondarySize =
   "h-11 min-h-11 lg:h-12 lg:min-h-12 px-6 max-lg:min-w-[11.5rem] max-lg:max-w-[min(100%,260px)] lg:min-w-[10.5rem]";
 
@@ -105,13 +105,13 @@ export const landingUi = {
 
   sectionShell: "mx-auto w-full min-w-0 max-w-7xl",
   section:
-    "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20",
+    "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24",
   sectionMuted: "caretip-landing-surface relative dark:bg-neutral-900",
   sectionWhite: "caretip-landing-surface relative dark:bg-neutral-950",
 
   /** Eyebrow → headline → tagline stack (centered sections). */
-  sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-w-full sm:mb-10`,
-  sectionAfterIntro: "mb-8 sm:mb-10",
+  sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-10 w-full max-w-full sm:mb-12`,
+  sectionAfterIntro: "mb-10 sm:mb-12",
 
   /** Mobile: intro (headline+tagline) → visual → after. Desktop unchanged. */
   mobileStackGrid: "caretip-landing-mobile-stack",
@@ -130,7 +130,7 @@ export const landingUi = {
   realLifeCardBody: "caretip-real-life-card-body",
 
   splitGrid:
-    "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
+    "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-14",
   copyColumn:
     "caretip-mobile-stack-flatten flex w-full min-w-0 flex-col items-start text-left max-lg:contents max-lg:text-center lg:max-w-none",
   visualColumn:
@@ -184,11 +184,11 @@ export const landingUi = {
   ),
 
   showcaseSection:
-    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-clip px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20 dark:border-neutral-800/80",
+    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-clip px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24 dark:border-neutral-800/80",
   showcaseSectionToneWarm: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#121110_50%,#0a0a0a_100%)]",
   showcaseSectionToneMuted: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_48%,#0a0a0a_100%)]",
   showcaseGrid:
-    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-clip max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-12",
+    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-clip max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-14",
   showcaseCopy:
     "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start lg:caretip-split-showcase-content-panel lg:caretip-split-showcase-content-panel--copy",
   showcaseIntro: `caretip-mobile-stack-intro flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
@@ -221,8 +221,8 @@ export const landingUi = {
     "mx-auto block h-auto max-h-[min(40vh,320px)] w-full max-w-full object-contain object-center sm:max-h-[min(48vh,420px)] lg:max-h-none",
 
   hospitalitySection:
-    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-12 sm:px-6 sm:py-16 lg:px-8 lg:py-20",
-  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-8 w-full max-lg:mb-0 max-lg:text-center sm:mb-10 lg:mb-8`,
+    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24",
+  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-10 w-full max-lg:mb-0 max-lg:text-center sm:mb-12 lg:mb-10`,
   hospitalityTitle: cnSectionHeadline(
     "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
   ),

@@ -131,6 +131,8 @@ async function runDashboardProfile(
     goals?: string;
     topPerformers?: string;
     setupRoutes: () => Promise<void>;
+    /** Extra settle time after interactive milestone (deferred admin fetches). */
+    settleMs?: number;
   },
 ) {
   await page.context().addInitScript(DASHBOARD_PROBE_INIT);
@@ -152,6 +154,11 @@ async function runDashboardProfile(
     () => window.__caretipDashboardProbe?.milestones?.interactive != null,
     { timeout: 20_000 },
   );
+
+  // Optional settle window for deferred platform-admin fetches.
+  if (opts.settleMs && opts.settleMs > 0) {
+    await page.waitForTimeout(opts.settleMs);
+  }
 
   const result = await page.evaluate(() => ({
     milestones: window.__caretipDashboardProbe?.milestones ?? {},
@@ -349,15 +356,30 @@ test.describe("Dashboard initialization performance audit", () => {
     });
     await primeE2ESessionToken(page);
 
+    const requestCounts = {
+      stats: 0,
+      analytics: 0,
+      health: 0,
+      businesses: 0,
+      commercial: 0,
+      unreadCount: 0,
+    };
+    let analyticsFirstAt: number | null = null;
+    let statsFirstAt: number | null = null;
+    const navStart = Date.now();
+
     const profile = await runDashboardProfile(page, {
       label: "Admin",
       path: "/platform-admin/dashboard",
       shell: ".platform-admin-hero, main.bg-background",
       kpis: ".platform-admin-hero, [class*='platform-admin-stat']",
       charts: ".platform-admin-analytics-section, .recharts-surface, [class*='analyticsChartWrap']",
+      settleMs: 3_500,
       setupRoutes: async () => {
-        await page.route("**/api/platform/stats", async (route) =>
-          route.fulfill(
+        await page.route("**/api/platform/stats", async (route) => {
+          requestCounts.stats += 1;
+          if (statsFirstAt == null) statsFirstAt = Date.now() - navStart;
+          return route.fulfill(
             await jsonResponse(
               {
                 totalVolumeEurFormatted: "500.00",
@@ -367,10 +389,12 @@ test.describe("Dashboard initialization performance audit", () => {
               },
               STATS_MS,
             )(),
-          ),
-        );
-        await page.route("**/api/platform/analytics?**", async (route) =>
-          route.fulfill(
+          );
+        });
+        await page.route("**/api/platform/analytics?**", async (route) => {
+          requestCounts.analytics += 1;
+          if (analyticsFirstAt == null) analyticsFirstAt = Date.now() - navStart;
+          return route.fulfill(
             await jsonResponse(
               {
                 rangeDays: 30,
@@ -382,19 +406,71 @@ test.describe("Dashboard initialization performance audit", () => {
               },
               PLATFORM_ANALYTICS_MS,
             )(),
-          ),
-        );
-        await page.route("**/api/platform/businesses", async (route) =>
-          route.fulfill(await jsonResponse({ businesses: [] }, 80)()),
-        );
-        await page.route("**/api/platform/health", async (route) =>
-          route.fulfill(await jsonResponse({ status: "ok" }, 60)()),
-        );
+          );
+        });
+        await page.route("**/api/platform/businesses", async (route) => {
+          requestCounts.businesses += 1;
+          return route.fulfill(await jsonResponse({ businesses: [] }, 80)());
+        });
+        await page.route("**/api/platform/health", async (route) => {
+          requestCounts.health += 1;
+          return route.fulfill(await jsonResponse({ status: "ok" }, 60)());
+        });
+        await page.route("**/api/platform/commercial-intelligence**", async (route) => {
+          requestCounts.commercial += 1;
+          return route.fulfill(
+            await jsonResponse(
+              {
+                mrrEur: 0,
+                arrEur: 0,
+                activeSubscriptions: 0,
+                churnRatePct: 0,
+                planMix: [],
+              },
+              90,
+            )(),
+          );
+        });
+        await page.route("**/api/me/notifications/unread-count", async (route) => {
+          requestCounts.unreadCount += 1;
+          return route.fulfill(await jsonResponse({ unreadCount: 0 }, 40)());
+        });
       },
     });
 
+    console.log(
+      JSON.stringify(
+        {
+          adminRequestCounts: requestCounts,
+          statsFirstAtMs: statsFirstAt,
+          analyticsFirstAtMs: analyticsFirstAt,
+        },
+        null,
+        2,
+      ),
+    );
+
     expect(profile.milestones.shell).not.toBeNull();
+    expect(profile.milestones.kpis).not.toBeNull();
     expect(profile.milestones.interactive).not.toBeNull();
+
+    // Critical path: stats once; deferred endpoints at most once each during startup.
+    expect(requestCounts.stats).toBe(1);
+    expect(requestCounts.health).toBeLessThanOrEqual(1);
+    expect(requestCounts.businesses).toBeLessThanOrEqual(1);
+    expect(requestCounts.commercial).toBeLessThanOrEqual(1);
+    expect(requestCounts.unreadCount).toBeLessThanOrEqual(1);
+    expect(requestCounts.analytics).toBeLessThanOrEqual(1);
+    expect(requestCounts.health).toBeLessThanOrEqual(1);
+    expect(requestCounts.businesses).toBeLessThanOrEqual(1);
+
+    // KPIs must paint before analytics fetch begins (deferred chart section).
+    if (profile.milestones.kpis != null && analyticsFirstAt != null) {
+      expect(analyticsFirstAt).toBeGreaterThanOrEqual(profile.milestones.kpis);
+    }
+    if (profile.milestones.kpis != null && profile.milestones.charts != null) {
+      expect(profile.milestones.charts).toBeGreaterThanOrEqual(profile.milestones.kpis);
+    }
   });
 });
 

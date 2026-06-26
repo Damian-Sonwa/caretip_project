@@ -14,6 +14,7 @@ const managerBilling = [
 ] as const;
 
 router.get("/billing", ...managerBilling, billingController.getMyBilling);
+router.get("/billing/sync-status", ...managerBilling, billingController.getMyBillingSyncStatus);
 router.post("/billing/checkout", ...managerBilling, billingController.postMyBillingCheckout);
 router.post("/billing/portal", ...managerBilling, billingController.postMyBillingPortal);
 router.post("/billing/cancel", ...managerBilling, billingController.postMyBillingCancel);

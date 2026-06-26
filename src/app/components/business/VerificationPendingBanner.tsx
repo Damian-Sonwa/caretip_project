@@ -1,26 +1,27 @@
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 import { Clock, ShieldAlert } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "../../hooks/useAuth";
+import {
+  getBusinessVerificationNoticeLabels,
+  shouldSuppressLayoutVerificationBanner,
+} from "../../lib/businessVerificationNotice";
+import { useBusinessVerificationNotice } from "../../hooks/useBusinessVerificationNotice";
 import { cn } from "@/lib/utils";
 
 /**
  * Soft banner while platform business verification is pending or rejected.
- * Does not block navigation — live guest tips stay gated on go-live routes.
+ * Suppressed on {@link BUSINESS_VERIFICATION_INLINE_ROUTE} where the dashboard inline card is shown.
  */
 export function VerificationPendingBanner({ className }: { className?: string }) {
   const { t } = useTranslation();
-  const { user } = useAuth();
+  const { pathname } = useLocation();
+  const { show, rejected } = useBusinessVerificationNotice();
 
-  if (!user || user.role !== "business" || user.impersonation) {
+  if (!show || shouldSuppressLayoutVerificationBanner(pathname)) {
     return null;
   }
 
-  const rejected = user.status === "REJECTED";
-  const pending = user.status === "PENDING";
-  if (!pending && !rejected) {
-    return null;
-  }
+  const labels = getBusinessVerificationNoticeLabels(t, rejected);
 
   return (
     <div
@@ -42,23 +43,15 @@ export function VerificationPendingBanner({ className }: { className?: string })
             <Clock className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
           )}
           <div className="min-w-0">
-            <p className="text-sm font-semibold">
-              {rejected
-                ? t("business.dashboard.verificationBannerRejectedTitle")
-                : t("business.dashboard.verificationBannerTitle")}
-            </p>
-            <p className="mt-0.5 text-xs leading-relaxed opacity-90 sm:text-sm">
-              {rejected
-                ? t("business.dashboard.verificationBannerRejectedDesc")
-                : t("business.dashboard.verificationBannerDesc")}
-            </p>
+            <p className="text-sm font-semibold">{labels.title}</p>
+            <p className="mt-0.5 text-xs leading-relaxed opacity-90 sm:text-sm">{labels.description}</p>
           </div>
         </div>
         <Link
           to="/verification-pending"
           className="shrink-0 rounded-md bg-background/80 px-3 py-1.5 text-xs font-semibold shadow-sm ring-1 ring-border/60 hover:bg-background sm:text-sm"
         >
-          {t("business.dashboard.verificationBannerCta")}
+          {labels.cta}
         </Link>
       </div>
     </div>

@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import { useQrStudioDesign } from "../../hooks/useQrStudioDesign";
 import { QrTemplatePicker } from "./settings/QrTemplatePicker";
 import { QrReliabilityScore } from "./QrReliabilityScore";
-import { QrStudioPerformancePanel } from "./QrStudioPerformancePanel";
 import { UpgradeCta } from "../subscription/UpgradeCta";
 import {
   downloadQrDataUrlPng,
@@ -29,7 +28,6 @@ import {
   type QrLayoutVariantId,
 } from "../../lib/qrDesignSystem";
 import {
-  DEFAULT_QR_TEMPLATE,
   QR_BORDER_STYLE_IDS,
   QR_SHAPE_IDS,
   normalizeQrTemplateId,
@@ -594,11 +592,6 @@ export function QrStudioDesigner({ businessId, businessName, canEdit }: QrStudio
           </Button>
         </div>
       </footer>
-
-      <QrStudioPerformancePanel
-        canView={canEdit}
-        templateLabel={studio.previewBranding.qrTemplate ?? DEFAULT_QR_TEMPLATE}
-      />
     </div>
   );
 }

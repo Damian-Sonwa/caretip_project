@@ -446,14 +446,24 @@ export async function impersonate(req: Request, res: Response) {
 }
 
 export async function getCommercialIntelligence(_req: Request, res: Response) {
+  const startedAt = Date.now();
   try {
     const { getPlatformCommercialIntelligence } = await import(
       "../services/commercial/platformCommercialIntelligence.service.js"
     );
     const data = await getPlatformCommercialIntelligence();
+    if (process.env.NODE_ENV !== "production") {
+      console.info("[platform.getCommercialIntelligence] ok", {
+        ms: Date.now() - startedAt,
+        businessesScored: data.segments.growthCandidates.length +
+          data.segments.atRisk.length +
+          data.segments.premiumOpportunities.length +
+          data.segments.enterpriseCandidates.length,
+      });
+    }
     return res.json(data);
   } catch (err) {
-    logServerError("platform.getCommercialIntelligence", err);
+    logServerError("platform.getCommercialIntelligence", err, { ms: Date.now() - startedAt });
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't load commercial intelligence."),
     });

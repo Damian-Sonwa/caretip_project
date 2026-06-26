@@ -8,8 +8,8 @@ import { changeAppLanguage, type AppLanguage } from "@/i18n/i18n";
 
 type LanguageSwitcherProps = {
   className?: string;
-  /** Header: light surface. Inline: footer / dark band. */
-  variant?: "header" | "inline";
+  /** Header: light surface. Inline: footer / dark band. Drawer: full-width mobile nav row. */
+  variant?: "header" | "inline" | "drawer";
 };
 
 export const LanguageSwitcher = memo(function LanguageSwitcher({
@@ -23,6 +23,7 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
   const displayLang = pendingLang ?? active;
 
   const isInline = variant === "inline";
+  const isDrawer = variant === "drawer";
 
   const triggerBase =
     "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-[15px] font-semibold tracking-tight transition-[colors,opacity,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:opacity-90 lg:min-h-9 lg:text-sm lg:px-3.5";
@@ -62,6 +63,64 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
       })
       .finally(() => setPendingLang(null));
   }, []);
+
+  if (isDrawer) {
+    return (
+      <div className={cn("w-full", className)}>
+        <button
+          type="button"
+          className={cn(
+            "caretip-public-mobile-nav-drawer__lang-trigger",
+            "flex w-full min-h-12 items-center gap-3 rounded-xl px-1 text-left text-base font-medium text-foreground transition-colors hover:bg-muted/50 active:bg-muted/70",
+          )}
+          aria-label={t("nav.language")}
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+        >
+          <Globe className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+          <span className="tabular-nums">{displayLang === "de" ? "DE" : "EN"}</span>
+        </button>
+        {open ? (
+          <div
+            className="mt-1 flex flex-col gap-0.5 rounded-xl border border-border/60 bg-muted/30 p-1"
+            role="listbox"
+            aria-label={t("nav.language")}
+          >
+            <button
+              type="button"
+              role="option"
+              aria-selected={displayLang === "en"}
+              className={cn(
+                "flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-left text-[15px] font-semibold transition-colors",
+                displayLang === "en" ? "bg-[#fff6e8] text-neutral-900" : "text-neutral-700 hover:bg-muted/80",
+              )}
+              onClick={() => setLang("en")}
+            >
+              <span>{t("nav.languageEnglish")}</span>
+              {displayLang === "en" ? (
+                <Check className="h-4 w-4 shrink-0 text-[#b45309]" strokeWidth={2.5} aria-hidden />
+              ) : null}
+            </button>
+            <button
+              type="button"
+              role="option"
+              aria-selected={displayLang === "de"}
+              className={cn(
+                "flex min-h-11 w-full items-center justify-between rounded-lg px-3 text-left text-[15px] font-semibold transition-colors",
+                displayLang === "de" ? "bg-[#fff6e8] text-neutral-900" : "text-neutral-700 hover:bg-muted/80",
+              )}
+              onClick={() => setLang("de")}
+            >
+              <span>{t("nav.languageGerman")}</span>
+              {displayLang === "de" ? (
+                <Check className="h-4 w-4 shrink-0 text-[#b45309]" strokeWidth={2.5} aria-hidden />
+              ) : null}
+            </button>
+          </div>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <Popover open={open} onOpenChange={setOpen}>

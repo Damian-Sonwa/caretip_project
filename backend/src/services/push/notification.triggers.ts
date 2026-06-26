@@ -1,5 +1,8 @@
 import { prisma } from "../../prisma.js";
 import type { NewTipPayload } from "../../socket/emitTip.js";
+import {
+  normalizeTipCustomerName,
+} from "../../notifications/tipCustomerName.js";
 import { logPush } from "./pushSend.js";
 import { NotificationType } from "./notification.types.js";
 import {
@@ -41,18 +44,19 @@ export function onTipReceived(payload: NewTipPayload): void {
 
     const ts = new Date().toISOString();
     const amount = Number(payload.tip.amount);
+    const customerName = normalizeTipCustomerName(payload.customerName);
 
     await deliverUserNotification({
       userId: employeeUserId,
       payload: {
         type: NotificationType.TIP_RECEIVED,
-        title: "New tip received",
+        title: "You received a new tip",
         body: "",
         localeTemplate: {
           id: "tip_received_employee",
           params: {
             amount,
-            name: employeeName,
+            customerName,
           },
         },
         url: "/employee/tip-history",
@@ -64,6 +68,7 @@ export function onTipReceived(payload: NewTipPayload): void {
           businessId: payload.businessId,
           amount: String(amount),
           employeeName,
+          customerName,
         },
       },
       dedupeKey: `tip:${payload.tip.id}:employee:${employeeUserId}`,

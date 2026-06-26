@@ -422,7 +422,7 @@ export function useBusinessAnalytics(
 
     void load({ quiet: true, periodSwitch: true });
 
-  }, [load]);
+  }, [load, timeframe]);
 
 
 

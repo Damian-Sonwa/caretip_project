@@ -70,6 +70,7 @@ import {
 import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
 import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
+import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
 import businessHeroImage from "../../../../images/bizzy002.png";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
@@ -136,6 +137,10 @@ export function BusinessDashboard() {
     advancedAnalyticsEnabled,
   );
   const showPendingVerification = businessKycNeedsVerification || pendingVerification === true;
+  const verificationNoticeLabels = getBusinessVerificationNoticeLabels(
+    t,
+    user?.status === "REJECTED",
+  );
 
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const [employeeGoalsExpanded, setEmployeeGoalsExpanded] = useState(true);
@@ -339,17 +344,9 @@ export function BusinessDashboard() {
           id="pendingVerification"
           issueActive={showPendingVerification}
           tone="info"
-          title={
-            user?.status === "REJECTED"
-              ? t("business.dashboard.verificationBannerRejectedTitle")
-              : t("business.dashboard.verificationBannerTitle")
-          }
-          description={
-            user?.status === "REJECTED"
-              ? t("business.dashboard.verificationBannerRejectedDesc")
-              : t("business.dashboard.verificationBannerDesc")
-          }
-          actionLabel={t("business.dashboard.verificationBannerCta")}
+          title={verificationNoticeLabels.title}
+          description={verificationNoticeLabels.description}
+          actionLabel={verificationNoticeLabels.cta}
           actionTo="/verification-pending"
           dismissPersistence="session"
           className="mb-5"

@@ -479,6 +479,7 @@ export function useBusinessDashboardStats(
               silent,
               signal: controller.signal,
               revalidate,
+              scope: advancedAnalyticsEnabledRef.current ? "full" : "summary",
             });
             if (!stillActive()) return;
             summaryPartialRef.current.set(tf, periodStats);
@@ -661,6 +662,7 @@ export function useBusinessDashboardStats(
       const summaryData = await fetchBusinessPeriodStats("month", {
         silent: true,
         signal: controller.signal,
+        scope: advancedAnalyticsEnabledRef.current ? "full" : "summary",
       });
       if (controller.signal.aborted || tfRef.current !== activeAtStart) return;
       summaryPartialRef.current.set("month", summaryData);

@@ -80,7 +80,9 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
       setLoading(true);
     }
     try {
-      const { locations: locList, tables: tblList } = await fetchVenueCatalog({ revalidate: quiet });
+      const { locations: locList, tables: tblList } = await fetchVenueCatalog({
+        revalidate: useCachedFirst,
+      });
       setLocations(locList);
       setTables(tblList);
       setPageSessionCache(cacheKey, { locations: locList, tables: tblList });

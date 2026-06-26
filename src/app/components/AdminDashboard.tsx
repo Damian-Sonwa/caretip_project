@@ -1,4 +1,4 @@
-import { lazy, useState, useEffect, useMemo, useCallback, useRef } from "react";
+import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
@@ -22,7 +22,7 @@ import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { BusinessLogoMark } from "./business/BusinessLogoMark";
 import { FixPrompt } from "./FixPrompt";
 import { useAuth } from "../hooks/useAuth";
-import { useSocket } from "../hooks/useSocket";
+import { useSocket, useDeferSocketConnect } from "../hooks/useSocket";
 import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
 import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
 import { derivePlatformAdminDashboardStatus } from "../lib/dashboardStatus/deriveDashboardStatus";
@@ -47,13 +47,33 @@ import {
 } from "@/components/ui/card";
 import { DashboardChartsIdleMount } from "./dashboard/DashboardChartsIdleMount";
 import { AdminDashboardAnalyticsChartsFallback } from "./AdminDashboardAnalyticsChartsFallback";
-import { PlatformCommercialIntelligenceSection } from "./platform/PlatformCommercialIntelligenceSection";
 
 const AdminDashboardAnalyticsCharts = lazy(() =>
   import("./AdminDashboardAnalyticsCharts").then((mod) => ({
     default: mod.AdminDashboardAnalyticsCharts,
   })),
 );
+
+const PlatformCommercialIntelligenceSection = lazy(() =>
+  import("./platform/PlatformCommercialIntelligenceSection").then((mod) => ({
+    default: mod.PlatformCommercialIntelligenceSection,
+  })),
+);
+
+function PlatformCommercialIntelligenceFallback() {
+  const { t } = useTranslation();
+  return (
+    <Card className={cn(platformUi.contentCard, "mb-6")}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{t("admin.commercial.title")}</CardTitle>
+        <CardDescription>{t("admin.commercial.desc")}</CardDescription>
+      </CardHeader>
+      <CardContent className="py-6">
+        <div className="h-20 animate-pulse rounded-xl bg-muted/60" aria-hidden />
+      </CardContent>
+    </Card>
+  );
+}
 
 interface AdminStatCardProps {
   title: string;
@@ -122,6 +142,9 @@ function AdminStatCard({
 const ADMIN_ANALYTICS_TZ_KEY = "caretip_platform_admin_timezone";
 const ADMIN_ANALYTICS_TZ_DEFAULT = "Europe/Berlin";
 const VERIFICATION_TEASER_LIMIT = 10;
+const PLATFORM_SOCKET_DEFER_MS = 1_500;
+const PLATFORM_HEALTH_DEFER_MS = 800;
+const PLATFORM_BUSINESSES_DEFER_MS = 600;
 const ADMIN_ANALYTICS_TZ_OPTIONS = [
   "Europe/Berlin",
   "Europe/London",
@@ -186,9 +209,18 @@ function mergeTipStatusForCharts(
 export function AdminDashboard() {
   const { t } = useTranslation();
   const { user, authHydrated, sessionValidated } = useAuth();
-  const { socket, connected, connectionStatus } = useSocket(
-    Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated),
-  );
+  const socketEligible = Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated);
+  const [socketDeferredReady, setSocketDeferredReady] = useState(false);
+  useEffect(() => {
+    if (!socketEligible) {
+      setSocketDeferredReady(false);
+      return;
+    }
+    const id = window.setTimeout(() => setSocketDeferredReady(true), PLATFORM_SOCKET_DEFER_MS);
+    return () => window.clearTimeout(id);
+  }, [socketEligible]);
+  const socketReady = useDeferSocketConnect(socketDeferredReady);
+  const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
@@ -213,10 +245,14 @@ export function AdminDashboard() {
   const [analyticsSyncing, setAnalyticsSyncing] = useState(false);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
   const [analyticsUpdatedAt, setAnalyticsUpdatedAt] = useState<number | null>(null);
-  const businessesDeferTimerRef = useRef<number | null>(null);
+  const [analyticsDeferredLoading, setAnalyticsDeferredLoading] = useState(false);
+  const adminMountedRef = useRef(true);
   const refreshTimerRef = useRef<number | null>(null);
   const metricsRefreshTimerRef = useRef<number | null>(null);
+  const analyticsLoadStartedRef = useRef(false);
   const sessionHydratedRef = useRef(false);
+  const platformInitialLoadStartedRef = useRef(false);
+  const loadDashboardDataRef = useRef<(opts?: { includeAnalytics?: boolean }) => Promise<void>>(async () => {});
   const analyticsTimezoneRef = useRef(analyticsTimezone);
   analyticsTimezoneRef.current = analyticsTimezone;
 
@@ -269,22 +305,6 @@ export function AdminDashboard() {
     () => businesses.filter((b) => b.verificationStatus === "pending").length,
     [businesses],
   );
-
-  useEffect(() => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
-    let cancelled = false;
-    void fetchPlatformHealth()
-      .then((h) => {
-        if (!cancelled) setHealth(h);
-      })
-      .catch((err: unknown) => {
-        logClientError("AdminDashboard.fetchPlatformHealth", err);
-        if (!cancelled) setHealth({ database: "offline", stripe: "offline" });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [user, authHydrated, sessionValidated]);
 
   const persistSessionSnapshot = useCallback(
     (
@@ -364,6 +384,28 @@ export function AdminDashboard() {
     [persistSessionSnapshot],
   );
 
+  const scheduleSecondaryPlatformLoads = useCallback(
+    (loadGen: number) => {
+      window.setTimeout(() => {
+        void fetchPlatformHealth()
+          .then((h) => {
+            if (adminMountedRef.current) setHealth(h);
+          })
+          .catch((err: unknown) => {
+            logClientError("AdminDashboard.fetchPlatformHealth", err);
+            if (adminMountedRef.current) setHealth({ database: "offline", stripe: "offline" });
+          });
+      }, PLATFORM_HEALTH_DEFER_MS);
+
+      window.setTimeout(() => {
+        void refreshBusinesses(loadGen).catch((err: unknown) => {
+          logClientError("AdminDashboard.refreshBusinesses", err);
+        });
+      }, PLATFORM_BUSINESSES_DEFER_MS);
+    },
+    [refreshBusinesses],
+  );
+
   const refreshMetrics = useCallback(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     const statsGen = ++dashboardLoadGenRef.current;
@@ -374,28 +416,25 @@ export function AdminDashboard() {
     void loadAnalytics(analyticsGen, { bustCache: true });
   }, [user, authHydrated, sessionValidated, refreshStats, loadAnalytics]);
 
-  const scheduleDeferredBusinesses = useCallback(
-    (loadGen: number) => {
-      if (businessesDeferTimerRef.current != null) {
-        window.clearTimeout(businessesDeferTimerRef.current);
-      }
-      businessesDeferTimerRef.current = window.setTimeout(() => {
-        businessesDeferTimerRef.current = null;
-        void refreshBusinesses(loadGen).catch((err: unknown) => {
-          logClientError("AdminDashboard.refreshBusinesses", err);
-        });
-      }, 50);
-    },
-    [refreshBusinesses],
-  );
+  const handleAnalyticsSectionReady = useCallback(() => {
+    if (analyticsLoadStartedRef.current) return;
+    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
+    analyticsLoadStartedRef.current = true;
+    setAnalyticsDeferredLoading(true);
+    const analyticsGen = ++analyticsLoadGenRef.current;
+    void loadAnalytics(analyticsGen, { bustCache: false });
+  }, [user, authHydrated, sessionValidated, loadAnalytics]);
 
-  const loadDashboardData = useCallback(async () => {
+  const loadDashboardData = useCallback(
+    async (opts?: { includeAnalytics?: boolean }) => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
     const loadGen = ++dashboardLoadGenRef.current;
-    const analyticsGen = ++analyticsLoadGenRef.current;
+    const includeAnalytics = opts?.includeAnalytics === true;
     setIsSyncing(true);
     setServiceIssue(null);
-    setAnalyticsError(null);
+    if (includeAnalytics) {
+      setAnalyticsError(null);
+    }
 
     void refreshStats(loadGen)
       .catch((err: unknown) => {
@@ -407,23 +446,34 @@ export function AdminDashboard() {
         if (loadGen === dashboardLoadGenRef.current) {
           setInitialDashLoading(false);
           setIsSyncing(false);
+          if (!includeAnalytics) {
+            scheduleSecondaryPlatformLoads(loadGen);
+          }
         }
       });
 
-    void loadAnalytics(analyticsGen, { bustCache: false });
-
-    scheduleDeferredBusinesses(loadGen);
+    if (includeAnalytics) {
+      const analyticsGen = ++analyticsLoadGenRef.current;
+      void loadAnalytics(analyticsGen, { bustCache: false });
+      void refreshBusinesses(loadGen).catch((err: unknown) => {
+        logClientError("AdminDashboard.refreshBusinesses", err);
+      });
+    }
   }, [
     user,
     authHydrated,
     sessionValidated,
     refreshStats,
     loadAnalytics,
-    scheduleDeferredBusinesses,
+    scheduleSecondaryPlatformLoads,
+    t,
   ]);
+  loadDashboardDataRef.current = loadDashboardData;
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
+    if (platformInitialLoadStartedRef.current) return;
+    platformInitialLoadStartedRef.current = true;
     if (!sessionHydratedRef.current && adminSessionSnapshot) {
       sessionHydratedRef.current = true;
       setStats(adminSessionSnapshot.stats);
@@ -433,8 +483,12 @@ export function AdminDashboard() {
       setHealth(adminSessionSnapshot.health);
       setInitialDashLoading(false);
       if (adminSessionSnapshot.businesses.length > 0) setBusinessesInitialLoading(false);
+      if (adminSessionSnapshot.analytics) analyticsLoadStartedRef.current = true;
     }
-    void loadDashboardData();
+    void loadDashboardDataRef.current({ includeAnalytics: false });
+    return () => {
+      platformInitialLoadStartedRef.current = false;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per auth session
   }, [authHydrated, sessionValidated, user?.id, user?.role]);
 
@@ -445,12 +499,19 @@ export function AdminDashboard() {
         window.clearTimeout(metricsRefreshTimerRef.current);
         metricsRefreshTimerRef.current = null;
       }
-      if (businessesDeferTimerRef.current != null) {
-        window.clearTimeout(businessesDeferTimerRef.current);
-        businessesDeferTimerRef.current = null;
+      if (refreshTimerRef.current != null) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
       }
     };
   }, [authHydrated]);
+
+  useEffect(() => {
+    adminMountedRef.current = true;
+    return () => {
+      adminMountedRef.current = false;
+    };
+  }, []);
 
   // If the API is down (503), don't keep hammering it on a timer.
   useRealtimeFallback(connected || Boolean(serviceIssue), refreshMetrics);
@@ -461,7 +522,7 @@ export function AdminDashboard() {
       if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
       refreshTimerRef.current = window.setTimeout(() => {
         refreshTimerRef.current = null;
-        void loadDashboardData();
+        void loadDashboardData({ includeAnalytics: true });
       }, 900);
     };
     const scheduleMetricsRefresh = () => {
@@ -482,6 +543,10 @@ export function AdminDashboard() {
         window.clearTimeout(metricsRefreshTimerRef.current);
         metricsRefreshTimerRef.current = null;
       }
+      if (refreshTimerRef.current != null) {
+        window.clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = null;
+      }
     };
   }, [socket, user?.role, loadDashboardData, refreshMetrics]);
 
@@ -489,7 +554,7 @@ export function AdminDashboard() {
   const hasPlatformStats = Boolean(stats);
   const hasPlatformCharts = Boolean(chartAnalytics);
   const showStatLoading = !hasPlatformStats && initialDashLoading;
-  const showChartSkeletons = !hasPlatformCharts && initialDashLoading;
+  const showChartSkeletons = !hasPlatformCharts && (analyticsSyncing || analyticsDeferredLoading);
   const subscriptionMix = useMemo(() => {
     const mix = { basic: 0, premium: 0, enterprise: 0 };
     for (const b of businesses) {
@@ -670,12 +735,25 @@ export function AdminDashboard() {
           </Card>
         ) : null}
 
-        <DashboardChartsIdleMount fallback={null}>
-          <PlatformCommercialIntelligenceSection />
+        <DashboardChartsIdleMount
+          fallback={<PlatformCommercialIntelligenceFallback />}
+          whenVisible
+          timeoutMs={240}
+          rootMargin="200px"
+        >
+          <Suspense fallback={<PlatformCommercialIntelligenceFallback />}>
+            <PlatformCommercialIntelligenceSection />
+          </Suspense>
         </DashboardChartsIdleMount>
 
-        {/* Analytics charts — Recharts lazy-loaded after stat cards paint */}
-        <DashboardChartsIdleMount fallback={<AdminDashboardAnalyticsChartsFallback />}>
+        {/* Analytics charts — Recharts lazy-loaded when section nears viewport */}
+        <DashboardChartsIdleMount
+          fallback={<AdminDashboardAnalyticsChartsFallback />}
+          whenVisible
+          timeoutMs={200}
+          rootMargin="240px"
+          onReady={handleAnalyticsSectionReady}
+        >
           <AdminDashboardAnalyticsCharts
             showChartSkeletons={showChartSkeletons}
             chartAnalytics={chartAnalytics}
@@ -706,6 +784,18 @@ export function AdminDashboard() {
           />
         </DashboardChartsIdleMount>
 
+        <DashboardChartsIdleMount
+          fallback={
+            <div className="space-y-3 py-4" aria-busy="true">
+              {Array.from({ length: 4 }, (_, i) => (
+                <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
+              ))}
+            </div>
+          }
+          whenVisible
+          timeoutMs={280}
+          rootMargin="320px"
+        >
         <motion.div
           {...dashboardBlockMotion}
           transition={{ ...dashboardBlockMotion.transition, delay: 0.12 }}
@@ -822,6 +912,7 @@ export function AdminDashboard() {
             </>
           )}
         </motion.div>
+        </DashboardChartsIdleMount>
         </TracingBeam>
       </div>
     </main>

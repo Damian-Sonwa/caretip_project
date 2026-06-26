@@ -8,7 +8,13 @@ import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
 import { GlobalAppLoadingHold } from "../components/GlobalAppLoadingHold";
 import { toast } from "sonner";
-import { fetchBusinessProfile, patchBusinessProfile, uploadMyBusinessLogo } from "../lib/api";
+import { fetchBusinessProfile, patchBusinessProfile, uploadMyBusinessLogo, createBillingCheckoutSession } from "../lib/api";
+import {
+  clearCheckoutIntent,
+  peekCheckoutIntent,
+  primeCheckoutSyncExpectation,
+  shouldIncludeTrialForIntent,
+} from "../lib/checkoutIntent";
 import { isOnboardingCompleted, resolveResumeOnboardingStep } from "../lib/onboardingProgress";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 import { isApiSubscriptionRequiredError } from "../lib/apiError";
@@ -225,6 +231,28 @@ export function BusinessOnboardingPage() {
         navigate("/dashboard", { replace: true });
         return;
       }
+
+      const checkoutIntent = peekCheckoutIntent();
+      if (checkoutIntent && checkoutIntent.planKey !== "enterprise") {
+        try {
+          primeCheckoutSyncExpectation(checkoutIntent.planKey);
+          const session = await createBillingCheckoutSession({
+            planKey: checkoutIntent.planKey,
+            billingCycle: checkoutIntent.billingCycle,
+            includeTrial: shouldIncludeTrialForIntent(checkoutIntent),
+            checkoutFlow: "onboarding",
+          });
+          clearCheckoutIntent();
+          if (session.url) {
+            window.location.assign(session.url);
+            return;
+          }
+          toast.error(t("business.billing.checkoutNoUrl"));
+        } catch (err) {
+          toast.error(toUserFriendlyMessage(err) || t("business.billing.checkoutError"));
+        }
+      }
+
       navigate(getPostAuthRedirect(refreshed), { replace: true });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

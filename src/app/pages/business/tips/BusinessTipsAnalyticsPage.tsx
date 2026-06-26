@@ -11,7 +11,8 @@ import { FeatureGate } from "../../../components/subscription/FeatureGate";
 export function BusinessTipsAnalyticsPage() {
   const { t } = useTranslation();
   const { user, sessionValidated } = useRequireAuth();
-  const [timeframe, setTimeframe] = useState<AnalyticsTimeframe>("month");
+  const [revenueTimeframe, setRevenueTimeframe] = useState<AnalyticsTimeframe>("month");
+  const [qrTimeframe, setQrTimeframe] = useState<AnalyticsTimeframe>("month");
   const { advancedAnalyticsEnabled } = useSubscriptionEntitlements({
     enabled: user?.role === "business" && sessionValidated,
     role: user?.role === "business" ? "business" : null,
@@ -19,14 +20,20 @@ export function BusinessTipsAnalyticsPage() {
   const data = useBusinessIntelligenceData(
     Boolean(sessionValidated && user?.role === "business"),
     advancedAnalyticsEnabled,
-    timeframe,
+    revenueTimeframe,
   );
 
   return (
     <div className="space-y-6 pt-6">
       <p className="text-sm text-muted-foreground">{t("business.tips.analyticsDesc")}</p>
       <FeatureGate featureKey="advancedAnalytics" role="business" enabled={sessionValidated}>
-        <BusinessAnalyticsReporting data={data} timeframe={timeframe} onTimeframeChange={setTimeframe} />
+        <BusinessAnalyticsReporting
+          data={data}
+          revenueTimeframe={revenueTimeframe}
+          onRevenueTimeframeChange={setRevenueTimeframe}
+          qrTimeframe={qrTimeframe}
+          onQrTimeframeChange={setQrTimeframe}
+        />
       </FeatureGate>
     </div>
   );

@@ -1,3 +1,4 @@
+import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type { BillingTimelineEvent } from "../../../../lib/api";
 
@@ -6,6 +7,12 @@ const TIMELINE_ICON_TYPES = new Set([
   "stripe_subscription_created",
   "checkout_session_completed",
 ]);
+
+const TIER_RANK: Record<string, number> = {
+  basic: 0,
+  premium: 1,
+  enterprise: 2,
+};
 
 function formatWhen(iso: string, locale: string): string {
   try {
@@ -19,6 +26,47 @@ function formatWhen(iso: string, locale: string): string {
 
 function eventLabelKey(auditType: string): string {
   return `business.billing.timeline.${auditType}`;
+}
+
+function resolveEventTitle(event: BillingTimelineEvent, t: TFunction): string {
+  const payload = event.payload;
+  const auditType = event.auditType;
+
+  if (auditType === "stripe_subscription_updated") {
+    const status = typeof payload?.status === "string" ? payload.status : null;
+    if (status === "trialing") {
+      return t("business.billing.timeline.trial_started");
+    }
+    if (status === "canceled") {
+      return t("business.billing.timeline.cancellation");
+    }
+    if (payload?.cancelAtPeriodEnd === true) {
+      return t("business.billing.timeline.cancellation_scheduled");
+    }
+  }
+
+  if (auditType === "subscription_plan_changed" && payload) {
+    const prev = typeof payload.previousTier === "string" ? payload.previousTier : null;
+    const next = typeof payload.newTier === "string" ? payload.newTier : null;
+    if (prev && next) {
+      const prevRank = TIER_RANK[prev] ?? 0;
+      const nextRank = TIER_RANK[next] ?? 0;
+      if (nextRank > prevRank) {
+        return t("business.billing.timeline.plan_upgraded");
+      }
+      if (nextRank < prevRank) {
+        return t("business.billing.timeline.plan_downgraded");
+      }
+    }
+  }
+
+  if (auditType === "checkout_session_completed" && payload?.status === "trialing") {
+    return t("business.billing.timeline.trial_started");
+  }
+
+  const labelKey = eventLabelKey(auditType);
+  const label = t(labelKey);
+  return label !== labelKey ? label : auditType;
 }
 
 export function BillingTimeline({ events }: { events: BillingTimelineEvent[] }) {
@@ -36,9 +84,7 @@ export function BillingTimeline({ events }: { events: BillingTimelineEvent[] }) 
   return (
     <ol className="space-y-0">
       {events.map((event, index) => {
-        const labelKey = eventLabelKey(event.auditType);
-        const label = t(labelKey);
-        const title = label !== labelKey ? label : event.auditType;
+        const title = resolveEventTitle(event, t);
         const isMilestone = TIMELINE_ICON_TYPES.has(event.auditType);
 
         return (

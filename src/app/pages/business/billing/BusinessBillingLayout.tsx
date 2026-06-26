@@ -3,6 +3,9 @@ import { Outlet, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CreditCard } from "lucide-react";
+import { trackGoogleAdsConversion } from "../../../lib/googleAdsConversion";
+import { clearBusinessProfileClientCache } from "../../../lib/api";
+import { clearSubscriptionTierSession } from "../../../lib/subscriptionSessionCache";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
 import { billingSubNavItems } from "../../../components/business/businessDashboardNav";
@@ -15,7 +18,10 @@ export function BusinessBillingLayout() {
     const billing = searchParams.get("billing");
     if (!billing) return;
     if (billing === "success") {
+      clearBusinessProfileClientCache();
+      clearSubscriptionTierSession();
       toast.success(t("business.billing.checkoutSuccess"));
+      trackGoogleAdsConversion("billing_checkout_completed");
     } else if (billing === "canceled") {
       toast.message(t("business.billing.checkoutCanceled"));
     }

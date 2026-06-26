@@ -2,6 +2,7 @@ import type { EmailLocale } from "../emails/i18nEmail.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import type { SupportTicketCategory } from "@prisma/client";
 import { categoryLabelLocalized } from "../services/supportTicketFormat.js";
+import { resolveTipCustomerDisplayName } from "./tipCustomerName.js";
 
 export function formatNotificationAmount(amount: number, locale: EmailLocale): string {
   return new Intl.NumberFormat(locale === "de" ? "de-DE" : "en-GB", {
@@ -11,7 +12,7 @@ export function formatNotificationAmount(amount: number, locale: EmailLocale): s
 }
 
 export type NotificationTemplate =
-  | { id: "tip_received_employee"; params: { amount: number; name: string } }
+  | { id: "tip_received_employee"; params: { amount: number; customerName: string | null } }
   | { id: "tip_received_business"; params: { amount: number; employeeName: string } }
   | { id: "payout_completed"; params: { amount: number } }
   | { id: "login_security" }
@@ -40,9 +41,17 @@ export function renderNotificationTemplate(
   switch (template.id) {
     case "tip_received_employee": {
       const amount = formatNotificationAmount(template.params.amount, locale);
+      const legacyName = (template.params as { name?: string }).name;
+      const tipper = resolveTipCustomerDisplayName(
+        template.params.customerName ?? legacyName,
+        locale,
+      );
       return de
-        ? { title: "Neues Trinkgeld erhalten", body: `${amount} von ${template.params.name}` }
-        : { title: "New tip received", body: `${amount} from ${template.params.name}` };
+        ? {
+            title: "Sie haben ein neues Trinkgeld erhalten",
+            body: `${tipper} hat Ihnen ${amount} Trinkgeld gegeben`,
+          }
+        : { title: "You received a new tip", body: `${tipper} tipped you ${amount}` };
     }
     case "tip_received_business": {
       const amount = formatNotificationAmount(template.params.amount, locale);

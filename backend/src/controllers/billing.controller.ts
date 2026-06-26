@@ -1,14 +1,19 @@
 import type { Request, Response } from "express";
 import { SubscriptionPlanKey } from "@prisma/client";
+import Stripe from "stripe";
 import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
+import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
+import { isSubscriptionTrialEnabled } from "../config/subscriptionTrial.js";
 import {
   createManagerCheckoutSession,
   createManagerPortalSession,
   getBillingStatusForBusiness,
   getBillingTimelineForBusiness,
+  getCheckoutSyncStatusForBusiness,
   scheduleManagerCancelAtPeriodEnd,
 } from "../services/managerBilling.service.js";
+import { isStripeConfigured } from "../services/stripe.service.js";
 import { CLIENT_FALLBACK, clientSafeMessage, logServerError } from "../utils/httpErrors.js";
 
 function getUserId(req: Request): string | null {
@@ -24,6 +29,63 @@ function parsePlanKey(raw: unknown): SubscriptionPlanKey | null {
 function parseBillingCycle(raw: unknown): "monthly" | "yearly" | undefined {
   if (raw === "monthly" || raw === "yearly") return raw;
   return undefined;
+}
+
+const CHECKOUT_INACTIVE_PRICE_MESSAGE =
+  "This plan is temporarily unavailable for checkout. The Stripe price is inactive — reactivate it in the Stripe Dashboard or update the price ID in server configuration.";
+
+function checkoutClientMessage(err: unknown): string {
+  const msg = err instanceof Error ? err.message : String(err);
+  if (msg.includes("inactive") && msg.toLowerCase().includes("price")) {
+    return CHECKOUT_INACTIVE_PRICE_MESSAGE;
+  }
+  if (msg.includes("Stripe price not configured")) {
+    return "Subscription billing is not fully configured for this plan. Please contact support.";
+  }
+  return clientSafeMessage(err, CLIENT_FALLBACK.generic);
+}
+
+const PRICE_ENV_BY_PLAN: Record<
+  SubscriptionPlanKey,
+  { monthly: string; yearly: string }
+> = {
+  basic: {
+    monthly: "STRIPE_PRICE_BASIC_MONTHLY",
+    yearly: "STRIPE_PRICE_BASIC_YEARLY",
+  },
+  premium: {
+    monthly: "STRIPE_PRICE_PREMIUM_MONTHLY",
+    yearly: "STRIPE_PRICE_PREMIUM_YEARLY",
+  },
+  enterprise: {
+    monthly: "STRIPE_PRICE_ENTERPRISE_MONTHLY",
+    yearly: "STRIPE_PRICE_ENTERPRISE_YEARLY",
+  },
+};
+
+/** Temporary investigation logging — prints immediately before checkout HTTP 400 responses. */
+function logCheckout400(reason: string, details: Record<string, unknown>): void {
+  console.error(`[billing.checkout] 400 ${reason}`, JSON.stringify(details, null, 2));
+}
+
+function resolveConfiguredPriceId(
+  planKey: SubscriptionPlanKey,
+  billingCycle: "monthly" | "yearly",
+): string | null {
+  const envKey = PRICE_ENV_BY_PLAN[planKey][billingCycle];
+  return process.env[envKey]?.trim() ?? null;
+}
+
+function stripeErrorDetails(err: unknown): Record<string, unknown> {
+  if (err instanceof Stripe.errors.StripeError) {
+    return {
+      stripeType: err.type,
+      stripeCode: err.code ?? null,
+      stripeParam: err instanceof Stripe.errors.StripeInvalidRequestError ? err.param ?? null : null,
+      stripeMessage: err.message,
+    };
+  }
+  return {};
 }
 
 type ManagerBusinessContext =
@@ -83,25 +145,131 @@ export async function getMyBilling(req: Request, res: Response) {
   }
 }
 
-export async function postMyBillingCheckout(req: Request, res: Response) {
+function parseCheckoutFlow(raw: unknown): "billing" | "onboarding" | undefined {
+  if (raw === "billing" || raw === "onboarding") return raw;
+  return undefined;
+}
+
+export async function getMyBillingSyncStatus(req: Request, res: Response) {
   try {
     const ctx = await resolveManagerBusiness(req);
     if (!ctx.ok) {
       return res.status(ctx.status).json({ message: ctx.message });
     }
 
-    const planKey = parsePlanKey(req.body?.planKey);
+    const expectedPlan = parsePlanKey(req.query.expectedPlan);
+    const status = await getCheckoutSyncStatusForBusiness(ctx.businessId, expectedPlan ?? undefined);
+    return res.json(status);
+  } catch (err) {
+    logServerError("billing.getMyBillingSyncStatus", err);
+    return res.status(500).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.generic) });
+  }
+}
+
+export async function postMyBillingCheckout(req: Request, res: Response) {
+  const requestBody = (req.body ?? {}) as Record<string, unknown>;
+  let businessId: string | null = null;
+  let planKey: SubscriptionPlanKey | null = null;
+  let billingCycle: "monthly" | "yearly" | undefined;
+  let includeTrial = false;
+  let checkoutFlow: "billing" | "onboarding" | undefined;
+
+  try {
+    const ctx = await resolveManagerBusiness(req);
+    if (!ctx.ok) {
+      return res.status(ctx.status).json({ message: ctx.message });
+    }
+    businessId = ctx.businessId;
+
+    planKey = parsePlanKey(requestBody.planKey);
     if (!planKey) {
+      logCheckout400("invalid_plan_key", {
+        validation: "planKey must be basic, premium, or enterprise",
+        receivedBody: requestBody,
+        receivedPlanKey: requestBody.planKey,
+        receivedBillingCycle: requestBody.billingCycle,
+        receivedIncludeTrial: requestBody.includeTrial,
+        note: "successUrl and cancelUrl are not accepted from the client; they are set server-side in stripeBilling.service.ts",
+      });
       return res.status(400).json({ message: "planKey must be basic, premium, or enterprise" });
     }
 
-    const billingCycle = parseBillingCycle(req.body?.billingCycle);
+    billingCycle = parseBillingCycle(requestBody.billingCycle);
+    includeTrial = requestBody.includeTrial === true;
+    checkoutFlow = parseCheckoutFlow(requestBody.checkoutFlow);
+    const billingCycleResolved = billingCycle ?? "monthly";
+    const priceEnvKey = PRICE_ENV_BY_PLAN[planKey][billingCycleResolved];
+    const configuredPriceId = resolveConfiguredPriceId(planKey, billingCycleResolved);
+
+    const mirror = await prisma.subscription.findUnique({
+      where: { businessId: ctx.businessId },
+      select: {
+        id: true,
+        status: true,
+        planKey: true,
+        stripeCustomerId: true,
+        stripeSubscriptionId: true,
+        trialEndsAt: true,
+        isTrial: true,
+      },
+    });
+
+    console.info(
+      "[billing.checkout] attempt",
+      JSON.stringify({
+        businessId: ctx.businessId,
+        planKey,
+        billingCycle: billingCycleResolved,
+        includeTrial,
+        checkoutFlow: checkoutFlow ?? "billing",
+        subscriptionTrialEnabled: isSubscriptionTrialEnabled(),
+        subscriptionBillingEnabled: isSubscriptionBillingEnabled(),
+        stripeConfigured: isStripeConfigured(),
+        priceEnvKey,
+        configuredPriceId,
+        mirror: mirror
+          ? {
+              id: mirror.id,
+              status: mirror.status,
+              planKey: mirror.planKey,
+              stripeCustomerId: mirror.stripeCustomerId,
+              stripeSubscriptionId: mirror.stripeSubscriptionId,
+              isTrial: mirror.isTrial,
+              trialEndsAt: mirror.trialEndsAt?.toISOString() ?? null,
+            }
+          : null,
+        clientFields: {
+          planKey: requestBody.planKey,
+          billingCycle: requestBody.billingCycle ?? null,
+          includeTrial: requestBody.includeTrial ?? null,
+          successUrl: requestBody.successUrl ?? null,
+          cancelUrl: requestBody.cancelUrl ?? null,
+        },
+        serverUrls: {
+          successUrl:
+            checkoutFlow === "onboarding"
+              ? `${(process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "")}/subscription/success?session_id={CHECKOUT_SESSION_ID}`
+              : `${(process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "")}/dashboard/settings?billing=success&session_id={CHECKOUT_SESSION_ID}`,
+          cancelUrl:
+            checkoutFlow === "onboarding"
+              ? `${(process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "")}/subscription/canceled`
+              : `${(process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "")}/dashboard/settings?billing=canceled`,
+        },
+      }),
+    );
+
+    if (!mirror) {
+      throw new Error("Subscription mirror not found");
+    }
+
     const session = await createManagerCheckoutSession({
       businessId: ctx.businessId,
       managerEmail: ctx.email,
       businessName: ctx.businessName,
       planKey,
       billingCycle,
+      includeTrial,
+      checkoutFlow: checkoutFlow ?? "billing",
     });
 
     return res.json(session);
@@ -111,8 +279,37 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
     if (message.includes("not enabled") || message.includes("not configured")) {
       return res.status(503).json({ message });
     }
-    return res.status(400).json({ message: clientSafeMessage(err, CLIENT_FALLBACK.generic) });
+
+    const billingCycleResolved = billingCycle ?? "monthly";
+    logCheckout400("checkout_session_failed", {
+      validation: checkoutClientMessage(err),
+      businessId,
+      planKey,
+      billingCycle: billingCycleResolved,
+      includeTrial,
+      subscriptionTrialEnabled: isSubscriptionTrialEnabled(),
+      configuredPriceId:
+        planKey != null ? resolveConfiguredPriceId(planKey, billingCycleResolved) : null,
+      errorMessage: message,
+      ...stripeErrorDetails(err),
+      note: "No server-side guard rejects checkout for existing active/trialing mirror rows; failures here are thrown from Stripe or missing config",
+    });
+
+    return res.status(400).json({ message: checkoutClientMessage(err) });
   }
+}
+
+function parsePortalFlow(raw: unknown): "default" | "payment_methods" {
+  return raw === "payment_methods" ? "payment_methods" : "default";
+}
+
+function portalReturnUrl(flow: "default" | "payment_methods"): string {
+  const base = (process.env.FRONTEND_URL ?? "http://localhost:5173").replace(/\/$/, "");
+  const path =
+    flow === "payment_methods"
+      ? "/dashboard/billing/payment-methods"
+      : "/dashboard/billing/invoices";
+  return `${base}${path}`;
 }
 
 export async function postMyBillingPortal(req: Request, res: Response) {
@@ -127,7 +324,13 @@ export async function postMyBillingPortal(req: Request, res: Response) {
       return res.status(400).json({ message: "No Stripe customer linked to this account" });
     }
 
-    const portal = await createManagerPortalSession({ stripeCustomerId: status.stripeCustomerId });
+    const body = (req.body ?? {}) as Record<string, unknown>;
+    const flow = parsePortalFlow(body.flow);
+    const portal = await createManagerPortalSession({
+      stripeCustomerId: status.stripeCustomerId,
+      flow,
+      returnUrl: portalReturnUrl(flow),
+    });
     return res.json(portal);
   } catch (err) {
     logServerError("billing.postMyBillingPortal", err);

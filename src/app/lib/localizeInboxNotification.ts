@@ -53,6 +53,34 @@ function suffixAfter(message: string, needles: string[]): string | undefined {
   return undefined;
 }
 
+function prefixBefore(message: string, needles: string[]): string | undefined {
+  for (const needle of needles) {
+    const idx = message.indexOf(needle);
+    if (idx > 0) {
+      const rest = message.slice(0, idx).trim();
+      if (rest) return rest;
+    }
+  }
+  return undefined;
+}
+
+function stripLeadingDash(text: string): string {
+  return text.replace(/^[—–-]\s*/, "").trim();
+}
+
+function inferTipCustomerName(
+  meta: Record<string, unknown>,
+  message: string,
+): string | null {
+  const fromMeta = metaString(meta, "customerName");
+  if (fromMeta) return fromMeta;
+  const tippedYou = prefixBefore(message, [" tipped you ", " hat Ihnen "]);
+  if (tippedYou) return stripLeadingDash(tippedYou) || null;
+  const fromGuest = suffixAfter(message, [" from ", " von "]);
+  if (fromGuest) return stripLeadingDash(fromGuest) || null;
+  return null;
+}
+
 /** Reconstruct template for legacy notifications missing metadata.localeTemplate. */
 function inferLocaleTemplate(notification: InboxNotification): NotificationLocaleTemplate | null {
   const meta = notification.metadata ?? {};
@@ -94,10 +122,7 @@ function inferLocaleTemplate(notification: InboxNotification): NotificationLocal
         id: "tip_received_employee",
         params: {
           amount: amount ?? 0,
-          name:
-            employeeName ??
-            suffixAfter(message, [" from ", " von ", " — ", " – ", " - "]) ??
-            "Guest",
+          customerName: inferTipCustomerName(meta, message),
         },
       };
     }
@@ -190,6 +215,12 @@ function statusLabel(status: unknown, t: TFunction): string {
   return label || key;
 }
 
+function resolveInboxTipCustomerName(raw: unknown, t: TFunction): string {
+  const trimmed = typeof raw === "string" ? raw.trim() : "";
+  if (trimmed && trimmed !== "Anonymous" && trimmed !== "Anonym") return trimmed;
+  return t("employee.dashboard.anonymous");
+}
+
 function renderTemplate(
   template: NotificationLocaleTemplate,
   t: TFunction,
@@ -204,8 +235,8 @@ function renderTemplate(
         title: t("notifications.templates.tip_received_employee.title"),
         message: t("notifications.templates.tip_received_employee.body", {
           amount,
-          name: String(p.name ?? ""),
-        }),
+          customerName: resolveInboxTipCustomerName(p.customerName ?? p.name, t),
+        }).replace(/^[—–-]\s*/, ""),
       };
     case "tip_received_business":
       return {

@@ -253,6 +253,7 @@ async function emitTipSocketWithSnapshot(
     createdAt: Date;
     employeeId: string;
     businessId: string;
+    customerName?: string | null;
   },
   snapshot: NonNullable<Awaited<ReturnType<typeof loadTipEmitSnapshot>>>,
 ): Promise<void> {
@@ -279,6 +280,7 @@ async function emitTipSocketWithSnapshot(
     },
     employeeId: tip.employeeId,
     employeeName: snapshot.employeeName,
+    customerName: tip.customerName ?? null,
     employeeUserId: snapshot.employeeUserId,
     businessId: tip.businessId,
     businessManagerUserId: snapshot.businessManagerUserId,
@@ -505,6 +507,7 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
       createdAt: true,
       employeeId: true,
       businessId: true,
+      customerName: true,
       employee: { select: { name: true, monthlyGoal: true, userId: true } },
       business: { select: { timezone: true, userId: true } },
     },
@@ -672,6 +675,9 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     // invalid locationId/tableId — non-fatal; insert proceeds without venue ids
   }
 
+  const customerNameRaw =
+    typeof md.customerName === "string" ? md.customerName.trim() : "";
+
   const payload = {
     amount: confirmedEur,
     status: "success" as const,
@@ -680,6 +686,7 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     businessId,
     locationId: locId,
     tableId: tblId,
+    ...(customerNameRaw ? { customerName: customerNameRaw } : {}),
   };
 
   console.log("ATTEMPTING TIP INSERT", payload);

@@ -88,10 +88,16 @@ export function inferNotificationTemplate(input: InferInput): NotificationTempla
         id: "tip_received_employee",
         params: {
           amount: amount ?? 0,
-          name:
-            employeeName ??
-            suffixAfter(message, [" from ", " von ", " — ", " – ", " - "]) ??
-            "Guest",
+          customerName:
+            metaString(meta, "customerName") ??
+            (() => {
+              const tippedYou = message.match(/^(.+?)\s+tipped you\s/i)?.[1]?.trim();
+              if (tippedYou) return tippedYou.replace(/^[—–-]\s*/, "") || null;
+              const hatIhnen = message.match(/^(.+?)\s+hat Ihnen\s/i)?.[1]?.trim();
+              if (hatIhnen) return hatIhnen.replace(/^[—–-]\s*/, "") || null;
+              const fromGuest = suffixAfter(message, [" from ", " von "]);
+              return fromGuest?.replace(/^[—–-]\s*/, "") ?? null;
+            })(),
         },
       };
     }

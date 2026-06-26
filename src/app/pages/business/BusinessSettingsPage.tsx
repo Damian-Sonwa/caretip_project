@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
+import { clearBusinessProfileClientCache } from "../../lib/api";
+import { clearSubscriptionTierSession } from "../../lib/subscriptionSessionCache";
 import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
@@ -42,6 +44,8 @@ export function BusinessSettingsPage() {
     const billing = searchParams.get("billing");
     if (!billing) return;
     if (billing === "success") {
+      clearBusinessProfileClientCache();
+      clearSubscriptionTierSession();
       toast.success(t("business.billing.checkoutSuccess"));
     } else if (billing === "canceled") {
       toast.message(t("business.billing.checkoutCanceled"));

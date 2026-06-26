@@ -106,6 +106,14 @@ export async function deliverUserNotification(
       businessId && businessId.trim() ? businessId : null,
     );
     emitNotificationUnreadCount(input.userId, unread);
+    if (process.env.NODE_ENV !== "production") {
+      console.debug("[notifications] socket emit", {
+        userId: input.userId,
+        notificationId: notification.id,
+        type: notification.type,
+        unreadCount: unread,
+      });
+    }
   }
 
   if (channels.includes("push")) {
