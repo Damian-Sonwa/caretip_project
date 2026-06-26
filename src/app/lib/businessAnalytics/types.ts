@@ -1,4 +1,4 @@
-import type { BusinessDashboardStats, TipActivityRow } from "../api";
+import type { BusinessDashboardStats, TipActivityRow, BusinessStatsScope } from "../api";
 import type { BusinessIntelligenceInput } from "../businessIntelligence";
 import type { BusinessIntelligenceAggregate } from "../businessIntelligenceEngine";
 
