@@ -35,7 +35,7 @@ export type BusinessBrandingRow = {
   qrShape: string;
   qrAccentColor: string | null;
   qrBackgroundColor: string | null;
-  subscriptionTier: BusinessSubscriptionTier;
+  subscriptionTier: BusinessSubscriptionTier | null;
 };
 
 /** Manager settings panel — includes edit permission hint. */
@@ -124,8 +124,10 @@ function resolveQrBackgroundColor(
 export function toBusinessBrandingSettingsDto(
   row: BusinessBrandingRow,
   canEdit: boolean,
+  effectiveTier?: BusinessSubscriptionTier | null,
 ): BusinessBrandingSettingsDto {
-  const premium = isPremiumBrandingTier(row.subscriptionTier);
+  const tier = effectiveTier !== undefined ? effectiveTier : row.subscriptionTier;
+  const premium = tier != null && isPremiumBrandingTier(tier);
   return {
     logoPath: absolutizePublicMediaPath(row.logoPath ?? null),
     bannerImagePath: absolutizePublicMediaPath(row.bannerImagePath ?? null),
@@ -163,8 +165,10 @@ export function toPublicGuestBrandingDto(
     | "qrBackgroundColor"
     | "subscriptionTier"
   >,
+  effectiveTier?: BusinessSubscriptionTier | null,
 ): PublicGuestBrandingDto {
-  const premium = isPremiumBrandingTier(row.subscriptionTier);
+  const tier = effectiveTier !== undefined ? effectiveTier : row.subscriptionTier;
+  const premium = tier != null && isPremiumBrandingTier(tier);
   const logo = absolutizePublicMediaPath(row.logoPath ?? null);
 
   if (!premium) {

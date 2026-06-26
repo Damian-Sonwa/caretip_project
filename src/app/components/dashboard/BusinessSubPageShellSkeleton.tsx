@@ -1,4 +1,5 @@
 import { useDashboardShellAria } from "@/app/hooks/useDashboardShellAria";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { cn } from "@/lib/utils";
 
 type BusinessSubPageShellSkeletonProps = {
@@ -11,14 +12,14 @@ export function BusinessSubPageShellSkeleton({ narrow = false }: BusinessSubPage
   const aria = useDashboardShellAria();
 
   return (
-    <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8" aria-busy="true" aria-label={aria.loading}>
+    <main className={businessUi.modulePageShell} aria-busy="true" aria-label={aria.loading}>
       <div
         className={cn(
           "mx-auto w-full animate-pulse",
-          narrow ? "dashboard-page-narrow max-w-3xl" : "dashboard-page-contained max-w-6xl",
+          narrow ? "dashboard-page-narrow max-w-3xl" : businessUi.modulePageContained,
         )}
       >
-        <div className="mb-8 space-y-3">
+        <div className="mb-4 space-y-2">
           <div className="h-4 w-28 rounded bg-muted" />
           <div className="h-8 w-56 rounded bg-muted sm:w-72" />
           <div className="h-4 w-full max-w-md rounded bg-muted" />

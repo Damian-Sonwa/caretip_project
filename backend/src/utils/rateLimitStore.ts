@@ -6,6 +6,7 @@ type RedisClient = {
   get(key: string): Promise<string | null>;
   pexpire(key: string, ms: number): Promise<number>;
   quit(): Promise<string>;
+  on(event: string, listener: (...args: unknown[]) => void): unknown;
 };
 
 let redisClient: RedisClient | null = null;

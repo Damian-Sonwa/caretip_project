@@ -43,6 +43,21 @@ router.delete("/businesses/:id", platformController.deleteBusiness);
 router.patch("/businesses/:id/verify", platformController.verifyBusiness);
 router.patch("/businesses/:id/kyc-review-notes", platformController.patchBusinessKycReviewNotes);
 router.patch("/businesses/:id/subscription-tier", platformController.updateBusinessSubscriptionTier);
+router.get("/sponsored-access/programmes", platformController.listSponsoredProgrammes);
+router.get("/businesses/:id/sponsored-access", platformController.listBusinessSponsoredAccess);
+router.post("/businesses/:id/sponsored-access", platformController.createBusinessSponsoredAccess);
+router.post(
+  "/businesses/:id/sponsored-access/:grantId/activate",
+  platformController.activateBusinessSponsoredAccess,
+);
+router.post(
+  "/businesses/:id/sponsored-access/:grantId/revoke",
+  platformController.revokeBusinessSponsoredAccess,
+);
+router.patch(
+  "/businesses/:id/sponsored-access/:grantId",
+  platformController.updateBusinessSponsoredAccess,
+);
 router.patch("/businesses/:id", platformController.updateBusiness);
 router.post(
   "/businesses/:id/logo",

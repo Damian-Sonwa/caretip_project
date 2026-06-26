@@ -3,7 +3,7 @@ import {
   validateEmployeeInviteCode,
   listInviteHistoryForBusiness,
 } from "./employeeInvite.service.js";
-import { Prisma, TipStatus, BusinessSubscriptionTier, type EmployeeActivationStatus } from "@prisma/client";
+import { Prisma, TipStatus, type EmployeeActivationStatus } from "@prisma/client";
 import { DateTime } from "luxon";
 import { StatsFetchError, logStatsPhase } from "../utils/statsErrors.js";
 import { randomBytes } from "node:crypto";
@@ -19,8 +19,7 @@ import {
 import { listEmployeeGoalsForBusiness } from "./goal.service.js";
 import { PUBLIC_APP_RESERVED_SLUGS } from "../utils/publicReservedSlugs.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
-import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
-import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
+import { resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
 import {
   businessDayKey,
   businessUtcRangeForTimeframe,
@@ -113,13 +112,6 @@ export async function getBusinessByUserId(userId: string) {
       slug,
       businessType: null,
       location: null,
-      subscriptionTier: BusinessSubscriptionTier.basic,
-      subscription: {
-        create: buildNestedSubscriptionCreateData({
-          subscriptionTier: BusinessSubscriptionTier.basic,
-          source: "auto_heal",
-        }),
-      },
     },
   });
 }
@@ -307,7 +299,7 @@ function buildYearChartFromMonthTotals(monthTotals: number[]): { day: string; am
   return MONTH_CHART_LABELS.map((day, i) => ({ day, amount: monthTotals[i] ?? 0 }));
 }
 
-export type BusinessStatsScope = "summary" | "analytics" | "full";
+export type BusinessStatsScope = "summary" | "roster" | "analytics" | "full";
 
 /** Full invalidation (roster, employees, goals, all timeframes). */
 export function invalidateBusinessStatsCache(businessId: string): void {
@@ -353,6 +345,14 @@ export function getBusinessStats(
     return runSerializedByKey(`biz-stats-analytics:${businessId}:${timeframe}`, () =>
       getCachedOrLoad(cacheKey, BUSINESS_STATS_CACHE_TTL_MS, () =>
         getBusinessStatsAnalyticsImpl(businessId, timeframe),
+      ),
+    ) as Promise<Awaited<ReturnType<typeof getBusinessStatsImpl>>>;
+  }
+  if (scope === "roster") {
+    const cacheKey = `business-stats-roster:${businessId}`;
+    return runSerializedByKey(`biz-stats-roster:${businessId}`, () =>
+      getCachedOrLoad(cacheKey, BUSINESS_STATS_CACHE_TTL_MS, () =>
+        getBusinessStatsRosterImpl(businessId),
       ),
     ) as Promise<Awaited<ReturnType<typeof getBusinessStatsImpl>>>;
   }
@@ -807,6 +807,23 @@ async function getBusinessStatsAnalyticsImpl(
   };
 }
 
+async function getBusinessStatsRosterImpl(businessId: string) {
+  const { business } = await loadBusinessDashboardContextCached(businessId);
+  const { bundle } = await loadBusinessSqlBundleSliceCached(businessId, "all");
+  const employees = await loadBusinessAnalyticsEmployeesCached(businessId, true);
+  const ratingsByEmployee = await queryEmployeeRatingAggregates(businessId);
+  const employeeStats = mapEmployeesToStats(employees, bundle.tipsByEmployee, ratingsByEmployee);
+
+  return {
+    id: business.id,
+    name: business.name,
+    slug: business.slug,
+    verificationStatus: business.verificationStatus,
+    timeframe: "all" as const,
+    employees: employeeStats,
+  };
+}
+
 async function getBusinessStatsImpl(
   businessId: string,
   timeframe: BusinessDashboardTimeframe = "month",
@@ -930,7 +947,8 @@ export async function getPublicBusinessById(id: string): Promise<PublicBusinessP
     select: BUSINESS_PROFILE_SELECT,
   });
   if (!business) return null;
-  return toPublicBusinessProfileDto(business);
+  const entitlements = await resolveSubscriptionEntitlements(business.id);
+  return toPublicBusinessProfileDto(business, entitlements.subscriptionTier);
 }
 
 /** Manager profile + authenticated consumers — includes operational fields. */
@@ -943,10 +961,11 @@ export async function getManagerBusinessProfileById(
   });
   if (!business) return null;
   const employeeCount = await countActivePublicEmployees(business.id);
-  const effectiveTier = await getSubscriptionTierForBusinessId(business.id);
+  const entitlements = await resolveSubscriptionEntitlements(business.id);
   return toManagerBusinessProfileDto(
-    { ...business, subscriptionTier: effectiveTier },
+    { ...business, subscriptionTier: entitlements.subscriptionTier },
     employeeCount,
+    entitlements,
   );
 }
 

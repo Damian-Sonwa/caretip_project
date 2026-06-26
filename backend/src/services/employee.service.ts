@@ -15,7 +15,7 @@ import {
 } from "./employeeActivationEmail.service.js";
 import { resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
-import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
+import { getSubscriptionTierForBusinessId, resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
 
 import {
   GO_LIVE_REQUIRED_MESSAGE,
@@ -520,7 +520,11 @@ export interface EmployeeSelfProfile {
   /** Public staff page / QR URL segment (Postgres `slug`) */
   slug: string | null;
   /** Venue SaaS tier for entitlement UI (server remains source of truth). */
-  subscriptionTier?: "basic" | "premium" | "enterprise";
+  subscriptionTier?: "basic" | "premium" | "enterprise" | null;
+  subscriptionStatus?: "none" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "incomplete";
+  hasActiveSubscription?: boolean;
+  accessSource?: "none" | "subscription" | "sponsored";
+  sponsoredProgrammeKey?: string | null;
 }
 
 export async function getEmployeeProfileForUser(userId: string): Promise<EmployeeSelfProfile | null> {
@@ -546,7 +550,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
     });
     if (!emp) return null;
     if (!emp.user) return null;
-    const effectiveTier = await getSubscriptionTierForBusinessId(emp.businessId);
+    const entitlements = await resolveSubscriptionEntitlements(emp.businessId);
     return {
       id: emp.id,
       name: emp.name,
@@ -563,7 +567,11 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       businessName: emp.business.name ?? "",
       businessTimezone: (emp.business as any).timezone ?? undefined,
       slug: emp.slug ?? null,
-      subscriptionTier: effectiveTier,
+      subscriptionTier: entitlements.subscriptionTier,
+      subscriptionStatus: entitlements.status,
+      hasActiveSubscription: entitlements.hasActiveEntitlements,
+      accessSource: entitlements.accessSource,
+      sponsoredProgrammeKey: entitlements.sponsoredProgrammeKey,
     };
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2022") {
@@ -582,7 +590,7 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
       });
       if (!emp) return null;
       if (!emp.user) return null;
-      const effectiveTier = await getSubscriptionTierForBusinessId(emp.businessId);
+      const entitlements = await resolveSubscriptionEntitlements(emp.businessId);
       return {
         id: emp.id,
         name: emp.name,
@@ -599,7 +607,11 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
         businessName: emp.business.name ?? "",
         businessTimezone: (emp.business as any).timezone ?? undefined,
         slug: emp.slug ?? null,
-        subscriptionTier: effectiveTier,
+        subscriptionTier: entitlements.subscriptionTier,
+        subscriptionStatus: entitlements.status,
+        hasActiveSubscription: entitlements.hasActiveEntitlements,
+        accessSource: entitlements.accessSource,
+        sponsoredProgrammeKey: entitlements.sponsoredProgrammeKey,
       };
     }
     throw e;

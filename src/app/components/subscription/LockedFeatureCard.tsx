@@ -1,22 +1,65 @@
-import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import type { BusinessSubscriptionTier, FeatureKey } from "@/app/lib/subscriptionCapabilities";
 import { featureListKeys, getFeatureCatalog } from "@/app/lib/subscriptionFeatureCatalog";
 import { SubscriptionBadge } from "./SubscriptionBadge";
+import { ActivateCareTipCta } from "./ActivateCareTipCta";
 import { UpgradeCta } from "./UpgradeCta";
 import { cn } from "@/lib/utils";
 
 type LockedFeatureCardProps = {
   featureKey: FeatureKey;
-  tier: BusinessSubscriptionTier;
+  tier: BusinessSubscriptionTier | null;
+  subscriptionStatus?: "none" | string;
   className?: string;
   compact?: boolean;
 };
 
-export function LockedFeatureCard({ featureKey, tier, className, compact = false }: LockedFeatureCardProps) {
+export function LockedFeatureCard({
+  featureKey,
+  tier,
+  subscriptionStatus = "none",
+  className,
+  compact = false,
+}: LockedFeatureCardProps) {
   const { t } = useTranslation();
   const catalog = getFeatureCatalog(featureKey);
   const features = featureListKeys(catalog);
+  const isUnsubscribed = subscriptionStatus === "none" || tier == null;
+
+  if (isUnsubscribed) {
+    return (
+      <section
+        className={cn(
+          "relative overflow-hidden rounded-2xl border border-border/70 bg-muted/20 p-6 sm:p-8",
+          className,
+        )}
+        aria-labelledby={`locked-feature-${featureKey}-title`}
+      >
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 space-y-1">
+            <h2
+              id={`locked-feature-${featureKey}-title`}
+              className="text-lg font-semibold tracking-tight text-foreground"
+            >
+              {t(catalog.titleKey)}
+            </h2>
+            {!compact ? (
+              <p className="max-w-xl text-sm text-muted-foreground">{t(catalog.benefitKey)}</p>
+            ) : null}
+          </div>
+          {featureKey === "csvExport" ? (
+            <UpgradeCta
+              featureKey="csvExport"
+              labelKey="subscription.upgrade.premiumPlan"
+              className="shrink-0"
+            />
+          ) : (
+            <ActivateCareTipCta className="shrink-0" size="md" />
+          )}
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
@@ -29,31 +72,23 @@ export function LockedFeatureCard({ featureKey, tier, className, compact = false
       <div className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/5" aria-hidden />
       <div className="relative flex flex-col gap-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
-            <span
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary"
-              aria-hidden
+          <div className="min-w-0 space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+              {t("subscription.locked.eyebrow")}
+            </p>
+            <h2
+              id={`locked-feature-${featureKey}-title`}
+              className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
             >
-              <Lock className="h-5 w-5" />
-            </span>
-            <div className="min-w-0 space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                {t("subscription.locked.eyebrow")}
+              {t(catalog.titleKey)}
+            </h2>
+            {!compact ? (
+              <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+                {t(catalog.benefitKey)}
               </p>
-              <h2
-                id={`locked-feature-${featureKey}-title`}
-                className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
-              >
-                {t(catalog.titleKey)}
-              </h2>
-              {!compact ? (
-                <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
-                  {t(catalog.benefitKey)}
-                </p>
-              ) : null}
-            </div>
+            ) : null}
           </div>
-          <SubscriptionBadge tier={tier} size="md" />
+          {tier ? <SubscriptionBadge tier={tier} size="md" /> : null}
         </div>
 
         {!compact ? (
@@ -70,7 +105,7 @@ export function LockedFeatureCard({ featureKey, tier, className, compact = false
         <div className="flex flex-col gap-3 border-t border-border/60 pt-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
             {t("subscription.locked.currentPlan", {
-              plan: t(`subscription.tiers.${tier}`),
+              plan: tier ? t(`subscription.tiers.${tier}`) : t("subscription.activation.noPlan"),
               required: t(`subscription.tiers.${catalog.requiredTier}`),
             })}
           </p>

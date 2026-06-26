@@ -1,5 +1,4 @@
 import { useTranslation } from "react-i18next";
-import { Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   DEFAULT_QR_TEMPLATE,
@@ -155,7 +154,6 @@ export function QrTemplatePicker({
             <div className="mt-2 space-y-0.5 px-0.5">
               <div className="flex items-center justify-between gap-1">
                 <span className="truncate text-sm font-semibold text-foreground">{t(template.labelKey)}</span>
-                {locked ? <Lock className="h-3 w-3 shrink-0 text-muted-foreground" aria-hidden /> : null}
               </div>
               <p className="line-clamp-2 text-xs text-muted-foreground">{t(template.descriptionKey)}</p>
             </div>

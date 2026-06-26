@@ -4,6 +4,7 @@ import {
   fetchBillingStatus,
   type BillingStatus,
 } from "../lib/api";
+import { BILLING_CHECKOUT_SYNCED_EVENT } from "../lib/billingCheckoutSuccessSync";
 import { toUserFriendlyMessage } from "../lib/errorMessages";
 
 export function useBillingStatus() {
@@ -27,6 +28,14 @@ export function useBillingStatus() {
 
   useEffect(() => {
     void reload();
+  }, [reload]);
+
+  useEffect(() => {
+    const onSynced = () => {
+      void reload();
+    };
+    window.addEventListener(BILLING_CHECKOUT_SYNCED_EVENT, onSynced);
+    return () => window.removeEventListener(BILLING_CHECKOUT_SYNCED_EVENT, onSynced);
   }, [reload]);
 
   return { data, loading, error, reload };

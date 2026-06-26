@@ -1,5 +1,7 @@
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
-import type { BusinessSubscriptionTier, BusinessVerificationStatus } from "@prisma/client";
+import type { BusinessSubscriptionTier, BusinessVerificationStatus, SubscriptionPlanKey } from "@prisma/client";
+import { getSponsoredProgrammeDefinition } from "../config/sponsoredAccess.config.js";
+import type { SubscriptionEntitlementState } from "./subscriptionEntitlement.service.js";
 import {
   toPublicGuestBrandingDto,
   type PublicGuestBrandingDto,
@@ -26,7 +28,18 @@ export type PublicBusinessProfileDto = {
 /** Manager-authenticated profile (includes operational / KYC fields). */
 export type ManagerBusinessProfileDto = PublicBusinessProfileDto & {
   verificationStatus: BusinessVerificationStatus;
-  subscriptionTier: BusinessSubscriptionTier;
+  /** Mirrored tier when entitled; null when status is none. */
+  subscriptionTier: BusinessSubscriptionTier | null;
+  /** Authoritative lifecycle from entitlement resolver. */
+  subscriptionStatus: SubscriptionEntitlementState["status"];
+  plan: SubscriptionPlanKey | null;
+  hasActiveSubscription: boolean;
+  /** Resolved capability keys — same source as backend enforcement. */
+  capabilities: SubscriptionEntitlementState["capabilities"];
+  limits: SubscriptionEntitlementState["limits"];
+  accessSource: SubscriptionEntitlementState["accessSource"];
+  sponsoredProgrammeKey: string | null;
+  sponsoredProgrammeLabelKey: string | null;
   employeeCount: number;
   contactPhone: string | null;
   registeredAddress: string | null;
@@ -41,7 +54,7 @@ type BusinessRow = {
   location: string | null;
   registeredAddress: string | null;
   verificationStatus: BusinessVerificationStatus;
-  subscriptionTier: BusinessSubscriptionTier;
+  subscriptionTier: BusinessSubscriptionTier | null;
   contactPhone: string | null;
   website: string | null;
   logoPath: string | null;
@@ -61,12 +74,13 @@ type BusinessRow = {
 
 export function toPublicBusinessProfileDto(
   business: BusinessRow,
+  effectiveTier?: BusinessSubscriptionTier | null,
   opts?: { employeeCount?: never },
 ): PublicBusinessProfileDto {
   void opts;
   const logo = absolutizePublicMediaPath(business.logoPath ?? null);
   const publicLocation = business.location ?? null;
-  const branding = toPublicGuestBrandingDto(business);
+  const branding = toPublicGuestBrandingDto(business, effectiveTier);
   return {
     businessId: business.id,
     businessName: business.name,
@@ -86,11 +100,24 @@ export function toPublicBusinessProfileDto(
 export function toManagerBusinessProfileDto(
   business: BusinessRow,
   employeeCount: number,
+  entitlements: SubscriptionEntitlementState,
 ): ManagerBusinessProfileDto {
+  const sponsoredDef =
+    entitlements.accessSource === "sponsored" && entitlements.sponsoredProgrammeKey
+      ? getSponsoredProgrammeDefinition(entitlements.sponsoredProgrammeKey)
+      : null;
   return {
-    ...toPublicBusinessProfileDto(business),
+    ...toPublicBusinessProfileDto(business, entitlements.subscriptionTier),
     verificationStatus: business.verificationStatus,
-    subscriptionTier: business.subscriptionTier,
+    subscriptionTier: entitlements.subscriptionTier,
+    subscriptionStatus: entitlements.status,
+    plan: entitlements.plan,
+    hasActiveSubscription: entitlements.hasActiveEntitlements,
+    capabilities: entitlements.capabilities,
+    limits: entitlements.limits,
+    accessSource: entitlements.accessSource,
+    sponsoredProgrammeKey: entitlements.sponsoredProgrammeKey,
+    sponsoredProgrammeLabelKey: sponsoredDef?.labelKey ?? null,
     employeeCount,
     contactPhone: business.contactPhone ?? null,
     registeredAddress: business.registeredAddress ?? null,
@@ -102,6 +129,14 @@ export function toManagerBusinessProfileDto(
 export const MANAGER_ONLY_BUSINESS_FIELDS = [
   "verificationStatus",
   "subscriptionTier",
+  "subscriptionStatus",
+  "plan",
+  "hasActiveSubscription",
+  "capabilities",
+  "limits",
+  "accessSource",
+  "sponsoredProgrammeKey",
+  "sponsoredProgrammeLabelKey",
   "employeeCount",
   "contactPhone",
   "registeredAddress",

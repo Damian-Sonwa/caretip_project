@@ -71,6 +71,14 @@ enum SubscriptionEventProcessingResult {
   failed
 }
 
+/// Approval-based sponsored programme access (independent of Stripe Subscription mirror).
+enum SponsoredAccessStatus {
+  pending
+  active
+  revoked
+  expired
+}
+
 enum PayoutStatus {
   pending
   processing
@@ -189,6 +197,7 @@ model User {
   supportTicketMessages   SupportTicketMessage[]   @relation("SupportTicketMessageAuthor")
   employeeInvitesCreated  EmployeeInvite[]         @relation("EmployeeInvitesCreated")
   employeeInviteRedemptions EmployeeInviteRedemption[] @relation("EmployeeInviteRedemptions")
+  sponsoredAccessGrantsApproved SponsoredAccessGrant[] @relation("SponsoredAccessGrantsApproved")
 
   /**
    * Account-level security features (optional; does not change auth flow unless enforced).
@@ -426,6 +435,8 @@ model Business {
   inviteCode          String?   @unique @map("invite_code")
   inviteCodeExpiresAt DateTime? @map("invite_code_expires_at")
   stripeAccountId     String?   @map("stripe_account_id")
+  /// Platform Stripe Customer for checkout reuse before a Subscription row exists (Option A).
+  stripeCustomerId    String?   @unique @map("stripe_customer_id")
   userId              String    @unique @map("user_id")
   /**
    * IANA timezone used for all dashboard analytics/ranges (e.g. "Europe/Berlin").
@@ -487,10 +498,10 @@ model Business {
   kycReviewNotes           String?                    @map("kyc_review_notes") @db.Text
   kycReviewHistory         Json?                      @map("kyc_review_history")
   /**
-   * SaaS packaging tier for entitlement checks. New businesses default to basic (explicit in create paths);
-   * schema default is basic — demo seeds and platform admin may assign premium/enterprise.
+   * Mirrored SaaS tier for read-optimized UI. Not authoritative for authorization — use Subscription + resolver.
+   * Null when the business has no active subscription (Option A).
    */
-  subscriptionTier         BusinessSubscriptionTier   @default(basic) @map("subscription_tier")
+  subscriptionTier         BusinessSubscriptionTier?  @map("subscription_tier")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   employees      Employee[]
@@ -499,12 +510,34 @@ model Business {
   supportTickets SupportTicket[]
   employeeInvites EmployeeInvite[]
   subscription   Subscription?
+  sponsoredAccessGrants SponsoredAccessGrant[]
   qrScanEvents   QrScanEvent[]
   qrFunnelEvents QrFunnelEvent[]
   featureUtilizationDaily FeatureUtilizationDaily[]
 
   @@index([verificationStatus], map: "businesses_verification_status_idx")
   @@map("businesses")
+}
+
+/// Explicit approved sponsored programme grant — never inferred from businessType.
+model SponsoredAccessGrant {
+  id                 String                @id @default(cuid())
+  businessId         String                @map("business_id")
+  business           Business              @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  programmeKey       String                @map("programme_key")
+  capabilityProfileKey String?               @map("capability_profile_key")
+  status             SponsoredAccessStatus @default(pending)
+  approvedAt         DateTime?             @map("approved_at")
+  approvedByUserId   String?               @map("approved_by_user_id")
+  approvedBy         User?                 @relation("SponsoredAccessGrantsApproved", fields: [approvedByUserId], references: [id], onDelete: SetNull)
+  expiresAt          DateTime?             @map("expires_at")
+  notes              String?               @db.Text
+  createdAt          DateTime              @default(now()) @map("created_at")
+  updatedAt          DateTime              @updatedAt @map("updated_at")
+
+  @@index([businessId, status])
+  @@index([programmeKey, status])
+  @@map("sponsored_access_grants")
 }
 
 /// Manager-generated employee invite codes (multi-use until expiry or rotation).

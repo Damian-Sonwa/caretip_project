@@ -1,4 +1,4 @@
-/** Sprint 7B — trackable commercial feature keys (maps to Premium capabilities where applicable). */
+/** Sprint 7B — trackable commercial feature keys (maps to subscription capabilities). */
 
 export const COMMERCIAL_FEATURE_KEYS = [
   "qr_studio",
@@ -7,6 +7,7 @@ export const COMMERCIAL_FEATURE_KEYS = [
   "performance_page",
   "csv_export",
   "branding",
+  "qr_templates",
   "employee_goals",
   "multi_location",
   "table_qr",
@@ -27,8 +28,9 @@ export const FEATURE_CAPABILITY_MAP: Partial<
   performance_page: "advancedAnalytics",
   csv_export: "csvExport",
   branding: "brandingCustomization",
+  qr_templates: "qrTemplates",
   employee_goals: "employeeGoals",
   multi_location: "multiLocation",
   table_qr: "tableQr",
-  qr_studio: "brandingCustomization",
+  qr_studio: "employeeQr",
 };

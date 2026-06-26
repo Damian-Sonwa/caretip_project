@@ -3,6 +3,8 @@ import { getCachedOrLoad } from "../../utils/shortLivedCache.js";
 import type { FeatureUtilizationRow } from "./businessFeatureUtilization.service.js";
 import { computeUpgradeOpportunities } from "./upgradeOpportunityEngine.service.js";
 import { getSubscriptionIntelligence } from "./subscriptionIntelligence.service.js";
+import { prisma } from "../../prisma.js";
+import { resolveSubscriptionEntitlements } from "../subscriptionEntitlement.service.js";
 import {
   loadPlatformCommercialBatch,
   retentionForBusiness,
@@ -61,7 +63,7 @@ export type PlatformCommercialIntelligence = {
 
 function segmentBusiness(
 
-  business: { id: string; name: string; subscriptionTier: string },
+  business: { id: string; name: string; subscriptionTier: string | null },
 
   activity: ActivityFacts,
 
@@ -115,7 +117,7 @@ function segmentBusiness(
 
       name: business.name,
 
-      tier: business.subscriptionTier,
+      tier: business.subscriptionTier ?? "none",
 
       segment: "growth",
 
@@ -137,7 +139,7 @@ function segmentBusiness(
 
       name: business.name,
 
-      tier: business.subscriptionTier,
+      tier: business.subscriptionTier ?? "none",
 
       segment: "at_risk",
 
@@ -155,7 +157,7 @@ function segmentBusiness(
 
     const opps = computeUpgradeOpportunities({
 
-      tier: business.subscriptionTier,
+      tier: business.subscriptionTier ?? "none",
 
       staffCount: activity.staffCount,
 
@@ -175,7 +177,7 @@ function segmentBusiness(
 
         name: business.name,
 
-        tier: business.subscriptionTier,
+        tier: business.subscriptionTier ?? "none",
 
         segment: "premium_opportunity",
 
@@ -211,7 +213,7 @@ function segmentBusiness(
 
         name: business.name,
 
-        tier: business.subscriptionTier,
+        tier: business.subscriptionTier ?? "none",
 
         segment: "enterprise_candidate",
 
@@ -404,71 +406,34 @@ export async function getPlatformCommercialIntelligence(): Promise<PlatformComme
 /** Manager-facing commercial bundle (Sprint 7B–D). */
 
 export async function getManagerCommercialInsights(businessId: string) {
-
   const { getBusinessFeatureUtilization } = await import("./businessFeatureUtilization.service.js");
-
   const { getBusinessRetentionInsights } = await import("./businessRetentionInsights.service.js");
 
-  const { prisma } = await import("../../prisma.js");
-
-
-
-  const [business, utilization, retention, staffCount, locationCount, tableCount] = await Promise.all([
-
-    prisma.business.findUnique({
-
-      where: { id: businessId },
-
-      select: { subscriptionTier: true },
-
-    }),
-
+  const [entitlements, utilization, retention, staffCount, locationCount, tableCount] = await Promise.all([
+    resolveSubscriptionEntitlements(businessId),
     getBusinessFeatureUtilization(businessId),
-
     getBusinessRetentionInsights(businessId),
-
     prisma.employee.count({ where: { businessId, isDeleted: false, isActive: true } }),
-
     prisma.location.count({ where: { businessId } }),
-
     prisma.table.count({ where: { location: { businessId } } }),
-
   ]);
 
-
-
-  if (!business) throw new Error("Business not found");
-
-
+  const tier = entitlements.subscriptionTier ?? "basic";
 
   const upgradeOpportunities = computeUpgradeOpportunities({
-
-    tier: business.subscriptionTier,
-
+    tier,
     staffCount,
-
     locationCount,
-
     tableCount,
-
     utilization,
-
   });
 
-
-
   return {
-
     utilization,
-
     upgradeOpportunities,
-
     retention,
-
-    tier: business.subscriptionTier,
-
+    tier: entitlements.subscriptionTier,
   };
-
 }
 
 

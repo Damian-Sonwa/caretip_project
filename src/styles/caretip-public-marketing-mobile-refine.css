@@ -1,0 +1,409 @@
+/**
+ * Mobile & tablet responsive refinements — How It Works, Features, Pricing.
+ * Scoped to max-width: 1023px so desktop (lg+) layouts stay unchanged.
+ */
+
+/* —— Page shells: prevent horizontal scroll —— */
+@media (max-width: 1023px) {
+  .caretip-how-it-works-page,
+  .caretip-features-page,
+  .caretip-pricing-page {
+    overflow-x: clip;
+  }
+}
+
+/* —— Shared: relieve cramped ch-based heading widths on small screens —— */
+@media (max-width: 639px) {
+  .caretip-public-marketing-hero .caretip-public-page-hero > h1,
+  .caretip-public-marketing-section-title,
+  .caretip-public-warm-dark-cta__title,
+  .caretip-features-hero-v2__title,
+  .caretip-how-hero-v2__title,
+  .caretip-pricing-hero-v2__title,
+  .caretip-pricing-plans-intro__title,
+  .caretip-pricing-faq__title {
+    max-width: min(100%, 22rem);
+    margin-inline: auto;
+    font-size: clamp(1.75rem, 7.2vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+
+  .caretip-public-marketing-hero .caretip-public-page-hero > h1 + p,
+  .caretip-public-marketing-section-subtitle,
+  .caretip-public-warm-dark-cta__body,
+  .caretip-features-hero-v2__lead,
+  .caretip-features-hero-v2__body,
+  .caretip-how-hero-v2__subtitle,
+  .caretip-pricing-hero-v2__subtitle,
+  .caretip-pricing-plans-intro__subtitle {
+    max-width: min(100%, 36rem);
+    margin-inline: auto;
+    font-size: 1rem;
+    line-height: 1.65;
+  }
+
+  .caretip-public-warm-dark-cta__actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 20rem;
+    margin-inline: auto;
+  }
+
+  .caretip-public-warm-dark-cta__actions > a,
+  .caretip-public-warm-dark-cta__actions > button {
+    min-height: 2.75rem;
+    width: 100%;
+  }
+}
+
+/* —— How It Works —— */
+@media (max-width: 639px) {
+  .caretip-how-hero-v2__grid {
+    padding: 1.25rem 1rem 1.5rem;
+    gap: 1.75rem;
+  }
+
+  .caretip-how-hero-v2__title {
+    max-width: min(100%, 20rem);
+  }
+
+  .caretip-how-hero-v2__subtitle {
+    max-width: 100%;
+  }
+
+  .caretip-how-hero-v2__actions {
+    max-width: 100%;
+  }
+
+  .caretip-how-hero-v2__actions > a,
+  .caretip-how-hero-v2__actions > button {
+    min-height: 2.75rem;
+    width: 100%;
+  }
+
+  .caretip-how-hero-v2__visual-grid {
+    min-height: 14rem;
+    padding-inline: 0.25rem;
+  }
+
+  .caretip-how-hero-v2__visual-float--pay {
+    top: 2%;
+    right: 0;
+    max-width: min(72%, 11rem);
+  }
+
+  .caretip-how-hero-v2__visual-float--tip {
+    left: 0;
+    bottom: 6%;
+    max-width: min(72%, 11rem);
+  }
+
+  .caretip-how-hero-v2__visual-float--metric {
+    right: 0;
+    bottom: 0;
+  }
+
+  .caretip-how-hero-v2__timeline-wrap {
+    margin-top: 1.25rem;
+    padding-inline: 0;
+  }
+
+  .caretip-how-timeline {
+    margin-top: 2.5rem;
+  }
+
+  .caretip-how-timeline > * + * {
+    margin-top: 2.75rem;
+  }
+
+  .caretip-how-step__title {
+    font-size: 1.25rem;
+    line-height: 1.22;
+  }
+
+  .caretip-how-step__body {
+    font-size: 0.9375rem;
+    line-height: 1.68;
+  }
+
+  .caretip-how-trust-section {
+    padding-top: 2rem;
+  }
+
+  .caretip-how-trust-section .grid {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-how-hero-v2__title {
+    max-width: min(100%, 18rem);
+  }
+
+  .caretip-how-timeline {
+    margin-top: 3rem;
+  }
+}
+
+/* —— Features —— */
+@media (max-width: 639px) {
+  .caretip-features-hero-v2__grid {
+    padding: 1.25rem 1rem 1.5rem;
+    gap: 1.75rem;
+  }
+
+  .caretip-features-hero-v2__title {
+    max-width: min(100%, 20rem);
+  }
+
+  .caretip-features-hero-v2__copy {
+    max-width: 100%;
+    margin-top: 1rem;
+    gap: 0.75rem;
+  }
+
+  .caretip-features-hero-v2__lead,
+  .caretip-features-hero-v2__body {
+    max-width: 100%;
+  }
+
+  .caretip-features-hero-v2__chips {
+    margin-top: 1.25rem;
+    gap: 0.5rem;
+  }
+
+  .caretip-features-hero-v2__visual {
+    max-width: 100%;
+    padding-inline: 0.25rem;
+    overflow: hidden;
+  }
+
+  .caretip-features-hero-v2__visual-card--qr {
+    top: 2%;
+    right: 0;
+    width: min(36%, 6.25rem);
+  }
+
+  .caretip-features-hero-v2__visual-card--tip {
+    left: 0;
+    bottom: 8%;
+    max-width: min(70%, 12rem);
+  }
+
+  .caretip-features-hero-v2__visual-card--chart {
+    right: 0;
+    bottom: 0;
+    width: min(40%, 8.5rem);
+  }
+
+  .caretip-features-featured {
+    margin-top: 2.25rem;
+    gap: 1rem;
+  }
+
+  .caretip-features-standard-band {
+    margin-top: 1.75rem;
+    padding: 1rem 0;
+    border-radius: 1rem;
+  }
+
+  .caretip-features-standard-band .grid {
+    gap: 1rem;
+  }
+
+  .caretip-feature-showcase-card {
+    width: 100%;
+    border-radius: 1rem;
+  }
+
+  .caretip-feature-showcase-card .m-3,
+  .caretip-feature-showcase-card .sm\:m-4 {
+    margin: 0.75rem 0.75rem 0;
+  }
+
+  .caretip-features-moments {
+    margin-top: 2.25rem;
+  }
+
+  .caretip-features-moments__header {
+    margin-bottom: 1.25rem;
+    padding-inline: 0.25rem;
+  }
+
+  .caretip-features-moments .grid {
+    gap: 1rem;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-features-hero-v2__title {
+    max-width: min(100%, 18rem);
+  }
+
+  .caretip-features-featured {
+    margin-top: 2.5rem;
+  }
+}
+
+/* —— Pricing —— */
+@media (max-width: 639px) {
+  .caretip-pricing-page {
+    --caretip-pricing-card-min-h: 22rem;
+  }
+
+  .caretip-pricing-hero-v2 {
+    padding-bottom: 0.25rem;
+  }
+
+  .caretip-pricing-hero-v2__title {
+    max-width: min(100%, 20rem);
+  }
+
+  .caretip-pricing-hero-v2__subtitle {
+    max-width: 100%;
+    margin-top: 1rem;
+  }
+
+  .caretip-pricing-hero-v2__features {
+    margin-top: 1.5rem;
+    gap: 0.75rem;
+  }
+
+  .caretip-pricing-hero-v2__feature {
+    padding: 0.9375rem 1rem;
+  }
+
+  .caretip-pricing-hero-v2__trust {
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+  }
+
+  .caretip-pricing-plans-section--after-hero {
+    margin-top: 1.5rem;
+  }
+
+  .caretip-pricing-controls-wrap {
+    margin-top: 1.5rem;
+  }
+
+  .caretip-pricing-controls-shell {
+    padding: 0.875rem;
+    border-radius: 0.875rem;
+  }
+
+  .caretip-pricing-controls {
+    gap: 1rem;
+  }
+
+  .caretip-pricing-audience-toggle__option,
+  .caretip-pricing-billing-toggle__option {
+    min-height: 2.75rem;
+    font-size: 0.75rem;
+  }
+
+  .caretip-pricing-cards-stage {
+    margin-top: 2rem;
+    padding-inline: 0;
+  }
+
+  .caretip-pricing-tiers__grid {
+    gap: 1rem;
+  }
+
+  .caretip-pricing-tier-card {
+    min-height: auto;
+    padding: 1.375rem 1.25rem 1.25rem;
+    border-radius: 1.125rem;
+  }
+
+  .caretip-pricing-tier-card--featured,
+  .caretip-pricing-tier-card--has-badge {
+    padding-top: 2.5rem;
+  }
+
+  .caretip-pricing-tier-card__fee {
+    font-size: clamp(1.625rem, 6.5vw, 2rem);
+  }
+
+  .caretip-pricing-card-cta,
+  .caretip-pricing-tier-card__actions .caretip-btn-primary,
+  .caretip-pricing-tier-card__actions .caretip-btn-secondary {
+    min-height: 2.75rem;
+    width: 100%;
+  }
+
+  .caretip-pricing-trust--in-shell.caretip-pricing-trust {
+    grid-template-columns: 1fr;
+    gap: 0.625rem;
+  }
+
+  .caretip-pricing-faq {
+    padding-inline: 0;
+  }
+
+  .caretip-pricing-faq__list {
+    margin-top: 2rem;
+  }
+
+  .caretip-pricing-faq__trigger {
+    min-height: 2.75rem;
+    padding-block: 1rem;
+  }
+
+  .caretip-pricing-final-cta {
+    padding: 2rem 1.25rem;
+    border-radius: 1rem;
+  }
+
+  .caretip-pricing-final-cta__title {
+    max-width: min(100%, 18rem);
+    margin-inline: auto;
+  }
+}
+
+/* Tablet: stack pricing cards full-width until desktop 3-col */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .caretip-pricing-tiers__grid {
+    grid-template-columns: 1fr;
+    gap: 1.125rem;
+    max-width: 26rem;
+    margin-inline: auto;
+  }
+
+  .caretip-pricing-tier-card--featured {
+    transform: none;
+  }
+
+  .caretip-pricing-tier-card--featured:hover {
+    transform: translateY(-2px);
+  }
+
+  .caretip-pricing-cards-stage {
+    padding-inline: 0.25rem;
+  }
+}
+
+/* Narrow phones (320–360px) */
+@media (max-width: 360px) {
+  .caretip-public-marketing-hero .caretip-public-page-hero > h1,
+  .caretip-features-hero-v2__title,
+  .caretip-how-hero-v2__title,
+  .caretip-pricing-hero-v2__title {
+    font-size: 1.625rem;
+  }
+
+  .caretip-pricing-audience-toggle__option {
+    padding-inline: 0.4375rem;
+    font-size: 0.6875rem;
+  }
+
+  .caretip-how-hero-v2__visual-node {
+    max-width: calc(50% - 0.25rem);
+  }
+}

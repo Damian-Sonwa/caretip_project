@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/app/components/ui/select";
 import { logClientError } from "@/app/lib/clientLog";
+import { isApiSubscriptionRequiredError } from "@/app/lib/apiError";
+import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
 import {
   getPageSessionCache,
   setPageSessionCache,
@@ -38,7 +40,13 @@ type FeedbackCache = {
 export function CustomerFeedbackPage() {
   const { t } = useTranslation();
   const { user, authReady, authStatus } = useRequireAuth();
-  const canLoad = authReady && authStatus === "authenticated" && user?.role === "business";
+  const { ready, hasFeature, hasActiveEntitlements } = useSubscriptionEntitlements({
+    enabled: authReady && authStatus === "authenticated" && user?.role === "business",
+    role: "business",
+  });
+  const entitled = ready && hasActiveEntitlements && hasFeature("customerFeedback");
+  const canLoad =
+    authReady && authStatus === "authenticated" && user?.role === "business" && entitled;
 
   const [items, setItems] = useState<CustomerFeedbackRow[]>([]);
   const [total, setTotal] = useState(0);
@@ -93,6 +101,12 @@ export function CustomerFeedbackPage() {
       setPageSessionCache(cacheKey, { items: nextItems, total: nextTotal, summary: nextSummary });
     } catch (err) {
       logClientError("CustomerFeedbackPage.load", err);
+      if (isApiSubscriptionRequiredError(err)) {
+        setError(null);
+        setItems([]);
+        setTotal(0);
+        return;
+      }
       if (!useCachedFirst) {
         setError(t("business.customerFeedback.loadError"));
         setItems([]);

@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { Lock, type LucideIcon } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 
@@ -41,9 +41,6 @@ export function BusinessModuleSubNav({ items, ariaLabelKey, className }: Busines
             >
               {Icon ? <Icon className="h-4 w-4 shrink-0 opacity-80" aria-hidden /> : null}
               <span>{t(item.labelKey)}</span>
-              {item.locked ? (
-                <Lock className="h-3.5 w-3.5 shrink-0 opacity-60" aria-hidden />
-              ) : null}
             </Link>
           );
         })}

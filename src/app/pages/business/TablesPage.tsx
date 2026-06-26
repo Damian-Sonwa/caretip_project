@@ -44,7 +44,7 @@ const TOAST_OK = { style: { background: "#e9932f", color: "#ffffff" } } as const
 export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
-  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+  const { tier, ready, hasFeature, hasActiveEntitlements, limits } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
@@ -56,6 +56,11 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
   const [saving, setSaving] = useState(false);
   const [tableName, setTableName] = useState("");
   const [locationId, setLocationId] = useState("");
+  const atTableCap =
+    ready &&
+    tableQrEnabled &&
+    limits.maxTables != null &&
+    tables.length >= limits.maxTables;
 
   const loadAll = useCallback(async (opts?: { quiet?: boolean }) => {
     const quiet = opts?.quiet === true;
@@ -163,7 +168,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
             <Button
               type="button"
               onClick={() => setModalOpen(true)}
-              disabled={!isBusiness || (ready && !tableQrEnabled)}
+              disabled={!isBusiness || (ready && (!hasActiveEntitlements || atTableCap))}
               className="w-full shrink-0 sm:w-auto"
             >
               {t("business.tablesPage.create")}
@@ -176,7 +181,7 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
           <Button
             type="button"
             onClick={() => setModalOpen(true)}
-            disabled={!isBusiness || (ready && !tableQrEnabled)}
+            disabled={!isBusiness || (ready && (!hasActiveEntitlements || atTableCap))}
             className="w-full shrink-0 sm:w-auto"
           >
             {t("business.tablesPage.create")}
@@ -191,8 +196,12 @@ export function TablesPage({ embedded = false }: { embedded?: boolean } = {}) {
             : "dashboard-page-contained mx-auto w-full max-w-5xl px-4 py-8 sm:px-6",
         )}
       >
-        {ready && !tableQrEnabled ? (
+        {ready && !hasActiveEntitlements ? (
           <LockedFeatureCard featureKey="tableQr" tier={tier} />
+        ) : ready && atTableCap ? (
+          <div className="mb-6">
+            <LockedFeatureCard featureKey="multiLocation" tier={tier} />
+          </div>
         ) : !ready || loading ? (
           <div className={cn(businessUi.tablePanel, "-mx-4 px-4 sm:mx-0 sm:px-0")}>
             <TablesListSkeleton />

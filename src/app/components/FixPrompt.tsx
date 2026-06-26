@@ -22,12 +22,16 @@ export type FixPromptId = (typeof FIX_PROMPT_IDS)[number];
 
 export type FixPromptTone = "default" | "info";
 
+export type FixPromptDensity = "default" | "compact";
+
 export type FixPromptProps = {
   id: FixPromptId;
   /** When false, the prompt is hidden and this id is removed from dismissed storage. */
   issueActive: boolean;
   title: string;
   description?: string;
+  /** Slim status-bar layout for unobtrusive dashboard notices. */
+  density?: FixPromptDensity;
   /** Primary CTA; omit for dismiss-only informational prompts. */
   actionLabel?: string;
   /** Navigate on primary action (preferred for in-app routes). */
@@ -79,6 +83,7 @@ export function FixPrompt({
   onSecondaryClick,
   dismissPersistence = "local",
   tone = "default",
+  density = "default",
   className,
 }: FixPromptProps) {
   const panelId = useId();
@@ -102,14 +107,24 @@ export function FixPrompt({
   const hasPrimary = Boolean(actionLabel && (actionTo || onAction));
   const hasActions = hasSecondary || hasPrimary;
 
+  const compact = density === "compact";
+
   const shell =
     tone === "info"
-      ? "border-2 border-primary/30 bg-muted/40"
-      : "border-2 border-primary bg-muted/50 shadow-sm";
+      ? compact
+        ? "fix-prompt--info border-primary/20 bg-muted/30"
+        : "border-2 border-primary/30 bg-muted/40"
+      : compact
+        ? "fix-prompt--default"
+        : "border-2 border-primary bg-muted/50 shadow-sm";
 
   return (
     <div
-      className={cn("relative rounded-xl p-4 pt-3 pr-14 text-sm text-foreground sm:pr-16", shell, className)}
+      className={cn(
+        "fix-prompt relative text-sm text-foreground",
+        compact ? cn("fix-prompt--compact", shell) : cn("rounded-xl p-4 pt-3 pr-14 sm:pr-16", shell),
+        className,
+      )}
       role="region"
       aria-labelledby={panelId}
     >
@@ -118,28 +133,43 @@ export function FixPrompt({
         onClick={dismiss}
         aria-label="Dismiss"
         className={cn(
-          "absolute right-2 top-2 inline-flex min-h-[32px] min-w-[32px] items-center justify-center rounded-md",
+          "fix-prompt__dismiss absolute inline-flex items-center justify-center rounded-md",
+          compact
+            ? "right-1 top-1 min-h-[28px] min-w-[28px]"
+            : "right-2 top-2 min-h-[32px] min-w-[32px]",
           "text-muted-foreground transition-colors hover:bg-background/80 hover:text-foreground",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         )}
       >
-        <X className="h-4 w-4 shrink-0" aria-hidden />
+        <X className={cn("shrink-0", compact ? "h-3.5 w-3.5" : "h-4 w-4")} aria-hidden />
       </button>
 
       <div
         className={cn(
-          "flex flex-col gap-3 sm:gap-4",
-          hasActions && "sm:flex-row sm:items-center sm:justify-between",
+          "fix-prompt__body",
+          compact
+            ? cn(
+                "flex flex-col gap-2",
+                hasActions && "sm:flex-row sm:items-center sm:justify-between sm:gap-3",
+              )
+            : cn("flex flex-col gap-3 sm:gap-4", hasActions && "sm:flex-row sm:items-center sm:justify-between"),
         )}
       >
-        <div className="min-w-0 flex-1">
-          <p id={panelId} className="font-semibold text-foreground">
+        <div className={cn("min-w-0 flex-1", compact && "fix-prompt__text")}>
+          <p id={panelId} className={cn(compact ? "fix-prompt__title" : "font-semibold text-foreground")}>
             {title}
           </p>
-          {description ? <p className="mt-1 text-muted-foreground">{description}</p> : null}
+          {description ? (
+            <p className={cn(compact ? "fix-prompt__description" : "mt-1 text-muted-foreground")}>{description}</p>
+          ) : null}
         </div>
         {hasActions ? (
-          <div className="flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+          <div
+            className={cn(
+              "fix-prompt__actions flex shrink-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-end",
+              compact && "gap-1.5",
+            )}
+          >
             {hasSecondary ? (
               secondaryTo ? (
                 <Button variant="ghost" size="sm" className="h-9 justify-start px-2 sm:justify-center" asChild>

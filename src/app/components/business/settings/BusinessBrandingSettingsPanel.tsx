@@ -382,17 +382,6 @@ export function BusinessBrandingSettingsPanel({ businessName, canEdit }: Busines
           </CardHeader>
           <CardContent className="space-y-4 pt-6">
             <div className="space-y-2">
-              <Label htmlFor="brand-display-name">{t("business.branding.displayNameLabel")}</Label>
-              <Input
-                id="brand-display-name"
-                value={brandDisplayName}
-                onChange={(e) => setBrandDisplayName(e.target.value)}
-                maxLength={80}
-                placeholder={businessName}
-              />
-              <p className="text-xs text-muted-foreground">{brandDisplayName.length}/80</p>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="brand-tagline">{t("business.branding.taglineLabel")}</Label>
               <Input
                 id="brand-tagline"
@@ -557,7 +546,26 @@ export function BusinessBrandingSettingsPanel({ businessName, canEdit }: Busines
             <CardTitle className="text-base">{t("business.branding.messagingTitle")}</CardTitle>
             <CardDescription className={businessUi.cardDesc}>{t("business.branding.messagingDesc")}</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4 pt-6">
+          <CardContent className="space-y-6 pt-6">
+            <div className="space-y-3 rounded-xl border border-border/70 bg-muted/20 p-4">
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-foreground">{t("business.branding.businessIdentityTitle")}</p>
+                <p className="text-xs text-muted-foreground">{t("business.branding.businessIdentityDesc")}</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="brand-display-name">{t("business.branding.displayNameLabel")}</Label>
+                <Input
+                  id="brand-display-name"
+                  value={brandDisplayName}
+                  onChange={(e) => setBrandDisplayName(e.target.value)}
+                  maxLength={80}
+                  placeholder={businessName}
+                />
+                <p className="text-xs text-muted-foreground">{t("business.branding.displayNameHelper")}</p>
+                <p className="text-xs text-muted-foreground/80">{t("business.branding.displayNameExamples")}</p>
+                <p className="text-xs text-muted-foreground">{brandDisplayName.length}/80</p>
+              </div>
+            </div>
             <div className="space-y-2">
               <Label htmlFor="welcome-msg">{t("business.branding.welcomeLabel")}</Label>
               <Textarea

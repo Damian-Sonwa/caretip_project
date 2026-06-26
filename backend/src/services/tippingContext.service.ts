@@ -31,7 +31,7 @@ function mapPublicTippingBusiness(
     qrShape: string;
     qrAccentColor: string | null;
     qrBackgroundColor: string | null;
-    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier;
+    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier | null;
   },
 ): PublicTippingBusiness {
   const branding = toPublicGuestBrandingDto(row);

@@ -14,6 +14,8 @@ type UpgradeCtaProps = {
   className?: string;
   variant?: "primary" | "secondary" | "link";
   fullWidth?: boolean;
+  /** Override default upgrade label (i18n key). */
+  labelKey?: string;
 };
 
 export function UpgradeCta({
@@ -21,6 +23,7 @@ export function UpgradeCta({
   className,
   variant = "primary",
   fullWidth = false,
+  labelKey,
 }: UpgradeCtaProps) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
@@ -64,8 +67,9 @@ export function UpgradeCta({
     }
   }
 
-  const label =
-    requiredTier === "enterprise"
+  const label = labelKey
+    ? t(labelKey)
+    : requiredTier === "enterprise"
       ? t("subscription.upgrade.contactSales")
       : t("subscription.upgrade.upgradeToPremium");
 

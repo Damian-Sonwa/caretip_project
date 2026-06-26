@@ -8,12 +8,13 @@ import {
 } from "./subscription.service.js";
 import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
 import { STRIPE_BILLING_AUDIT_TYPES } from "../lib/subscription/subscriptionAuditTypes.js";
+import { tryActivateSubscriptionFromStripeForBusiness } from "./subscriptionActivation.service.js";
 
 export type SubscriptionDriftRow = {
   subscriptionId: string;
   businessId: string;
   field: string;
-  dbValue: string;
+  dbValue: string | null;
   stripeValue: string;
 };
 
@@ -134,4 +135,20 @@ export async function reconcileAllLinkedSubscriptions(limit = 100): Promise<numb
     if (ok) repaired += 1;
   }
   return repaired;
+}
+
+/**
+ * @deprecated Use tryActivateSubscriptionFromStripeForBusiness via checkout sync-status.
+ */
+export async function reconcileBusinessMirrorFromStripe(
+  businessId: string,
+): Promise<{ repaired: boolean; reason?: string }> {
+  const outcome = await tryActivateSubscriptionFromStripeForBusiness({
+    businessId,
+    source: "checkout_return_sync",
+  });
+  if (outcome === "mirror_created" || outcome === "mirror_updated") {
+    return { repaired: true };
+  }
+  return { repaired: false, reason: outcome };
 }

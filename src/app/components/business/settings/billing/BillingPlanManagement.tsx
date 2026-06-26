@@ -248,7 +248,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
 
 
 
-    if (isUpgrade(currentPlanKey, planKey)) {
+    if (currentPlanKey && isUpgrade(currentPlanKey, planKey)) {
 
       return (
 

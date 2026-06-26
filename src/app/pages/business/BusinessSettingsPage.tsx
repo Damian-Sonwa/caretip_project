@@ -5,8 +5,7 @@ import { toast } from "sonner";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
-import { clearBusinessProfileClientCache } from "../../lib/api";
-import { clearSubscriptionTierSession } from "../../lib/subscriptionSessionCache";
+import { processBillingCheckoutSuccess } from "../../lib/subscriptionActivationNotification";
 import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
 import { BusinessProfilePage } from "./BusinessProfilePage";
 import {
@@ -44,9 +43,10 @@ export function BusinessSettingsPage() {
     const billing = searchParams.get("billing");
     if (!billing) return;
     if (billing === "success") {
-      clearBusinessProfileClientCache();
-      clearSubscriptionTierSession();
-      toast.success(t("business.billing.checkoutSuccess"));
+      void processBillingCheckoutSuccess({
+        t,
+        sessionId: searchParams.get("session_id"),
+      });
     } else if (billing === "canceled") {
       toast.message(t("business.billing.checkoutCanceled"));
     }
@@ -70,9 +70,9 @@ export function BusinessSettingsPage() {
   }
 
   return (
-    <main className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="dashboard-page-contained mx-auto w-full max-w-6xl">
-        <header className="mb-8">
+    <main className={businessUi.modulePageShell}>
+      <div className={businessUi.modulePageContained}>
+        <header className="business-settings-page-header">
           <div className="mb-2 flex items-center gap-2 text-muted-foreground">
             <CareIcon name="settings" size="md" className="shrink-0 text-accent" />
             <span className="text-xs font-semibold uppercase tracking-wide">

@@ -12,8 +12,9 @@ import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { CUSTOMERS_BASE } from "@/app/components/business/businessDashboardNav";
 import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
-import { isApiPendingVerificationError } from "@/app/lib/apiError";
+import { isApiPendingVerificationError, isApiSubscriptionRequiredError } from "@/app/lib/apiError";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
+import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
 
 export const DASHBOARD_CUSTOMER_FEEDBACK_TEASER_LIMIT = 3;
 
@@ -27,6 +28,11 @@ export function RecentCustomerFeedbackPanel({
   className,
 }: RecentCustomerFeedbackPanelProps) {
   const { t } = useTranslation();
+  const { ready, hasFeature, hasActiveEntitlements } = useSubscriptionEntitlements({
+    enabled,
+    role: "business",
+  });
+  const entitled = ready && hasActiveEntitlements && hasFeature("customerFeedback");
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState<CustomerFeedbackSummary | null>(null);
   const [items, setItems] = useState<Awaited<ReturnType<typeof listBusinessCustomerFeedback>>["items"]>(
@@ -35,7 +41,7 @@ export function RecentCustomerFeedbackPanel({
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
-    if (!enabled) return;
+    if (!enabled || !entitled) return;
     setLoading(true);
     setError(null);
     try {
@@ -46,7 +52,7 @@ export function RecentCustomerFeedbackPanel({
       setItems(res.items);
       setSummary(res.summary);
     } catch (err) {
-      if (isApiPendingVerificationError(err)) {
+      if (isApiPendingVerificationError(err) || isApiSubscriptionRequiredError(err)) {
         setItems([]);
         setSummary(null);
         setError(null);
@@ -59,13 +65,22 @@ export function RecentCustomerFeedbackPanel({
     } finally {
       setLoading(false);
     }
-  }, [enabled, t]);
+  }, [enabled, entitled, t]);
 
   useEffect(() => {
+    if (!enabled) return;
+    if (!ready) return;
+    if (!entitled) {
+      setLoading(false);
+      setError(null);
+      setItems([]);
+      setSummary(null);
+      return;
+    }
     scheduleIdleWork(() => {
       void load();
     }, 1400);
-  }, [load]);
+  }, [enabled, entitled, load, ready]);
 
   return (
     <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full", className)}>

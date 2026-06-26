@@ -38,6 +38,8 @@ import { downloadBrandedQR, downloadBrandedQRLegacy } from "../../lib/qrBranded"
 import type { QrBrandingOptions } from "../../lib/businessBranding";
 import { loadQrRenderBranding } from "../../lib/loadQrRenderBranding";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { TeamGrowthUpgradeNotice } from "../../components/subscription/TeamGrowthUpgradeNotice";
+import { isApiSubscriptionRequiredError } from "../../lib/apiError";
 import { StaffRosterTableSkeleton, InlineSpinner } from "../../components/dashboard/DashboardSectionLoading";
 import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -175,10 +177,12 @@ export function StaffManagementPage() {
   const { t, i18n } = useTranslation();
   const dateLocale = i18n.language?.toLowerCase().startsWith("de") ? de : enUS;
   const { user, isBusiness, authHydrated, sessionValidated } = useRequireAuth();
-  const { tier } = useSubscriptionEntitlements({
+  const { tier, hasActiveEntitlements, advancedAnalyticsEnabled } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
+  const brandingTier = tier ?? "basic";
+  const canGrowTeam = hasActiveEntitlements;
   const [searchQuery, setSearchQuery] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [addForm, setAddForm] = useState({
@@ -248,7 +252,8 @@ export function StaffManagementPage() {
       setError(null);
     }
     try {
-      const data = await getBusinessStats("all", { scope: "analytics" });
+      const statsScope = advancedAnalyticsEnabled ? "analytics" : "roster";
+      const data = await getBusinessStats("all", { scope: statsScope });
       const empList = data.employees ?? [];
       const mapped: StaffRow[] = empList.map((e) => ({
         id: e.id,
@@ -275,13 +280,17 @@ export function StaffManagementPage() {
     } catch (err) {
       logClientError("StaffManagementPage", err);
       if (!quiet && !useCachedFirst) {
-        setError(toUserFriendlyMessage(err));
-        setEmployees([]);
+        if (isApiSubscriptionRequiredError(err)) {
+          setError(null);
+        } else {
+          setError(toUserFriendlyMessage(err));
+          setEmployees([]);
+        }
       }
     } finally {
       if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [user?.businessId, authHydrated, sessionValidated]);
+  }, [user?.businessId, authHydrated, sessionValidated, advancedAnalyticsEnabled]);
 
   const { socket, connected } = useSocket(isBusiness && authHydrated && sessionValidated);
 
@@ -333,7 +342,7 @@ export function StaffManagementPage() {
     void loadQrRenderBranding({
       mode: "manager",
       businessId: user.businessId,
-      tier,
+      tier: brandingTier,
       fallbackBusinessName: user.businessName ?? undefined,
     })
       .then((branding) => {
@@ -611,6 +620,9 @@ export function StaffManagementPage() {
 
   return (
     <div className="space-y-4 pt-2 sm:space-y-5 sm:pt-4">
+      {!canGrowTeam ? (
+        <TeamGrowthUpgradeNotice />
+      ) : (
       <Card className={cn(businessUi.cardStatic, "w-full")}>
         <CardContent className="p-4 sm:p-5">
           <div className="flex items-start justify-between gap-3">
@@ -700,6 +712,7 @@ export function StaffManagementPage() {
           </div>
         </CardContent>
       </Card>
+      )}
 
       <Card className={businessUi.atAGlanceCard}>
           <CardContent className={businessUi.atAGlanceContent}>

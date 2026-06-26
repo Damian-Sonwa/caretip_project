@@ -1,5 +1,5 @@
 import { prisma } from "../prisma.js";
-import { hasFeature } from "./subscriptionEntitlement.service.js";
+import { hasFeature, resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
 import { trackProductEvent } from "./productEvent.service.js";
 import { assertValidBrandHexColor, DEFAULT_BRAND_SECONDARY_COLOR } from "../lib/brandColorValidation.js";
 import {
@@ -40,7 +40,8 @@ export async function getBrandingSettingsForManager(
   });
   if (!row) return null;
   const canEdit = await hasFeature(businessId, "brandingCustomization");
-  return toBusinessBrandingSettingsDto(row, canEdit);
+  const entitlements = await resolveSubscriptionEntitlements(businessId);
+  return toBusinessBrandingSettingsDto(row, canEdit, entitlements.subscriptionTier);
 }
 
 export async function updateBrandingSettings(

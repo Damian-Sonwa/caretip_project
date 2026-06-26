@@ -16,9 +16,11 @@ import { prisma } from "../src/prisma.js";
 import { buildNestedSubscriptionCreateData } from "../src/services/subscription.service.js";
 import {
   applyStripeMirrorTransactional,
+  ensureInitialSubscriptionMirrorFromStripe,
   resolveBusinessTierDualWrite,
   type StripeMirrorSnapshot,
 } from "../src/services/subscription.service.js";
+import { resolveSubscriptionEntitlements } from "../src/services/subscriptionEntitlement.service.js";
 import {
   handleStripeBillingWebhookEvent,
   isStripeBillingEventType,
@@ -268,6 +270,90 @@ async function testBillingWebhookIdempotency(): Promise<boolean> {
   return true;
 }
 
+async function testOptionAInitialMirrorCreate(): Promise<boolean> {
+  const tag = `b1-opta-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const passwordHash = await bcrypt.hash("TestPass1!", 10);
+  const user = await prisma.user.create({
+    data: {
+      email: `${tag}@caretip-test.local`,
+      passwordHash,
+      role: "MANAGER",
+      emailVerified: true,
+      business: {
+        create: {
+          name: `${tag} venue`,
+          slug: `${tag}-venue`,
+          subscriptionTier: null,
+        },
+      },
+    },
+    include: { business: true },
+  });
+
+  const businessId = user.business!.id;
+  const before = await prisma.subscription.findUnique({ where: { businessId } });
+  if (before) {
+    fail("Option A test: business should have no subscription row before webhook create");
+    return false;
+  }
+
+  const snapshot = baseSnapshot({
+    stripeSubscriptionId: `sub_opta_${tag}`,
+    stripeCustomerId: `cus_opta_${tag}`,
+    planKey: SubscriptionPlanKey.premium,
+    status: SubscriptionStatus.trialing,
+    isTrial: true,
+    trialStartedAt: pastDate(1),
+    trialEndsAt: futureDate(28),
+  });
+
+  const stripeEventId = `evt_opta_${Date.now()}`;
+  const ensured = await ensureInitialSubscriptionMirrorFromStripe({
+    businessId,
+    snapshot,
+    auditType: STRIPE_BILLING_AUDIT_TYPES.subscriptionCreated,
+    stripeEventId,
+    auditPayload: { test: "option_a_create" },
+  });
+
+  if (!ensured.created) {
+    fail("Option A: first ensureInitialSubscriptionMirrorFromStripe should create mirror");
+    return false;
+  }
+
+  const entitlements = await resolveSubscriptionEntitlements(businessId);
+  if (!entitlements.hasActiveEntitlements || entitlements.plan !== SubscriptionPlanKey.premium) {
+    fail("Option A: entitlements should be premium trialing after mirror create");
+    return false;
+  }
+  if (entitlements.status !== SubscriptionStatus.trialing) {
+    fail(`Option A: expected trialing status, got ${entitlements.status}`);
+    return false;
+  }
+
+  const ensuredAgain = await ensureInitialSubscriptionMirrorFromStripe({
+    businessId,
+    snapshot,
+    auditType: STRIPE_BILLING_AUDIT_TYPES.subscriptionUpdated,
+    stripeEventId: `evt_opta_dup_${Date.now()}`,
+    auditPayload: { test: "option_a_idempotent" },
+  });
+
+  if (ensuredAgain.created) {
+    fail("Option A: second ensureInitialSubscriptionMirrorFromStripe must not duplicate mirror");
+    return false;
+  }
+
+  const mirrorCount = await prisma.subscription.count({ where: { businessId } });
+  if (mirrorCount !== 1) {
+    fail(`Option A: expected exactly one mirror row, got ${mirrorCount}`);
+    return false;
+  }
+
+  pass("Option A: ensureInitialSubscriptionMirrorFromStripe creates entitled mirror idempotently");
+  return true;
+}
+
 async function testTransactionNoP2028(): Promise<boolean> {
   const { businessId, subscriptionId } = await createTestBusiness(BusinessSubscriptionTier.basic);
   const snapshot = baseSnapshot({
@@ -308,6 +394,7 @@ async function main() {
   ok = (await testBillingDisabledNoOp()) && ok;
   ok = (await testMirrorCancelPreservesTier()) && ok;
   ok = (await testBillingWebhookIdempotency()) && ok;
+  ok = (await testOptionAInitialMirrorCreate()) && ok;
   ok = (await testTransactionNoP2028()) && ok;
 
   console.log("Phase B.1 Stripe billing lifecycle runtime checks\n");

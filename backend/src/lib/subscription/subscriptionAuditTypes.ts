@@ -18,7 +18,12 @@ export const STRIPE_BILLING_AUDIT_TYPES = {
 /** Reserved for `db:backfill-subscriptions` only — never emit from application code. */
 export const SUBSCRIPTION_AUDIT_TYPE_MIGRATION_BACKFILL = "migration_backfill" as const;
 
-export type SubscriptionMirrorSource = "email_signup" | "oauth_signup" | "auto_heal";
+export type SubscriptionMirrorSource =
+  | "email_signup"
+  | "oauth_signup"
+  | "auto_heal"
+  | "platform_admin"
+  | "stripe_webhook";
 
 export const BILLING_CHECKOUT_METADATA_KEYS = {
   businessId: "caretipBusinessId",

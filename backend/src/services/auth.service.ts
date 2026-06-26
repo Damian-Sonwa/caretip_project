@@ -1,6 +1,6 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
 import bcrypt from "bcrypt";
-import { BusinessSubscriptionTier, type BusinessVerificationStatus, type Role, type User } from "@prisma/client";
+import { type BusinessVerificationStatus, type Role, type User } from "@prisma/client";
 import { prisma } from "../prisma.js";
 import { validatePassword } from "../utils/passwordValidation.js";
 import { EmailNotVerifiedLoginError } from "../utils/httpErrors.js";
@@ -18,7 +18,6 @@ import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { resolveEmailLocale, resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { assertPlatformAdminMfaSessionAllowed } from "./mfaLogin.service.js";
 import { inferManagerOnboardingStep, type OnboardingStep } from "./onboardingProgress.service.js";
-import { buildNestedSubscriptionCreateData } from "./subscription.service.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -394,13 +393,6 @@ export async function registerBusiness(
           contactPhone: null,
           contactEmail: null,
           website: null,
-          subscriptionTier: BusinessSubscriptionTier.basic,
-          subscription: {
-            create: buildNestedSubscriptionCreateData({
-              subscriptionTier: BusinessSubscriptionTier.basic,
-              source: "email_signup",
-            }),
-          },
         },
       },
     },

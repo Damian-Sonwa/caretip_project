@@ -62,6 +62,7 @@ export async function getSubscriptionIntelligence(days = 30): Promise<Subscripti
 
   const byTier = { basic: 0, premium: 0, enterprise: 0 };
   for (const row of tierCounts) {
+    if (!row.subscriptionTier) continue;
     byTier[row.subscriptionTier] = row._count._all;
   }
 

@@ -49,8 +49,8 @@ export function BusinessTeamLayout() {
   }, [pathname, t]);
 
   return (
-    <div className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="dashboard-page-contained mx-auto w-full max-w-6xl">
+    <div className={businessUi.modulePageShell}>
+      <div className={businessUi.modulePageContained}>
         <div className={cn(businessUi.subPageBreadcrumb, "mb-3 max-lg:mb-2.5")}>
           <Button variant="outline" size="sm" asChild>
             <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>

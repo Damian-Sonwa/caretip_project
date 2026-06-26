@@ -8,7 +8,7 @@ import { computeRetentionInsightsFromFacts } from "./businessRetentionInsights.s
 export type BusinessCommercialRow = {
   id: string;
   name: string;
-  subscriptionTier: string;
+  subscriptionTier: string | null;
   bannerImagePath: string | null;
   brandDisplayName: string | null;
   brandTagline: string | null;

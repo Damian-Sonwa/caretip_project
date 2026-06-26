@@ -117,6 +117,7 @@ export function QRCodeManagementPage({
     enabled: isBusiness,
     role: "business",
   });
+  const brandingTier = tier ?? "basic";
   const [verificationStatus, setVerificationStatus] = useState<
     "pending" | "verified" | "rejected" | null
   >(null);
@@ -157,7 +158,7 @@ export function QRCodeManagementPage({
       const branding = await loadQrRenderBranding({
         mode: "manager",
         businessId: user.businessId,
-        tier,
+        tier: brandingTier,
         fallbackBusinessName: String(user?.businessName ?? "").trim() || undefined,
       });
       if (branding) {
@@ -168,7 +169,7 @@ export function QRCodeManagementPage({
         String(profile.name ?? "").trim() ||
         String(user?.businessName ?? "").trim() ||
         t("business.qrPage.fallbackBusinessName");
-      setQrBrandingOpts(fallbackManagerQrRenderBranding(tier, name, profile.logo));
+      setQrBrandingOpts(fallbackManagerQrRenderBranding(brandingTier, name, profile.logo));
     } catch (err) {
       logClientError("QRCodeManagementPage.branding", err);
       if (user.status === "APPROVED") setVerificationStatus("verified");
@@ -176,13 +177,13 @@ export function QRCodeManagementPage({
       else setVerificationStatus("pending");
       setQrBrandingOpts(
         fallbackManagerQrRenderBranding(
-          tier,
+          brandingTier,
           String(businessDisplayName ?? user?.businessName ?? "").trim() || "Business",
           businessLogoPath,
         ),
       );
     }
-  }, [user?.businessId, user?.role, user?.businessName, user?.status, tier, businessDisplayName, businessLogoPath, t]);
+  }, [user?.businessId, user?.role, user?.businessName, user?.status, brandingTier, businessDisplayName, businessLogoPath, t]);
 
   useEffect(() => {
     void loadQrBranding();
@@ -857,7 +858,7 @@ export function QRCodeManagementPage({
     return <PageLoader message={t("business.qrPage.checkingVerification")} />;
   }
 
-  if (qrLocked) {
+  if (qrLocked && !embedded) {
     return (
       <div
         className={cn(

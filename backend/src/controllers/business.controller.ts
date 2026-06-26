@@ -459,7 +459,9 @@ export async function getMyStats(req: Request, res: Response) {
       : "month";
   const scopeRaw = typeof req.query.scope === "string" ? req.query.scope.trim() : "";
   const scope =
-    scopeRaw === "summary" || scopeRaw === "analytics" ? scopeRaw : "full";
+    scopeRaw === "summary" || scopeRaw === "analytics" || scopeRaw === "roster"
+      ? scopeRaw
+      : "full";
 
   try {
     if (!userId) {

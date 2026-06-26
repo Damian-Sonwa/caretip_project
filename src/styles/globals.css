@@ -624,7 +624,7 @@ textarea::placeholder {
 
 /* Hero chart frame — business + employee (shared mobile/tablet sizing & balanced depth). */
 @media (max-width: 1023px) {
-  .business-dashboard-hero .business-hero-chart-frame,
+  .business-dashboard-hero .business-hero-chart-frame:not(.business-hero-chart-frame--photo),
   .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) {
     position: relative;
     width: 100%;
@@ -640,7 +640,7 @@ textarea::placeholder {
       inset 0 1px 0 rgb(255 255 255 / 0.68);
   }
 
-  .business-dashboard-hero .business-hero-chart-frame img,
+  .business-dashboard-hero .business-hero-chart-frame:not(.business-hero-chart-frame--photo) img,
   .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
     position: absolute;
     inset: 0;
@@ -983,16 +983,52 @@ textarea::placeholder {
   }
 }
 
-.business-dashboard-hero .business-hero-chart-frame img,
+.business-dashboard-hero .business-hero-chart-frame:not(.business-hero-chart-frame--photo) img,
 .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
   transform-origin: 50% 48%;
   object-position: 50% 48%;
 }
 
 @media (min-width: 1024px) {
-  .business-dashboard-hero .business-hero-chart-frame img,
+  .business-dashboard-hero .business-hero-chart-frame:not(.business-hero-chart-frame--photo) img,
   .employee-dashboard-hero .employee-hero-chart-frame:not(.employee-hero-chart-frame--photo) img {
     transform: scale(1.02);
+  }
+}
+
+/* Business hero photo asset — full image visible (no crop), compact max height. */
+.business-dashboard-hero .business-hero-chart-frame--photo {
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  max-height: none !important;
+  overflow: visible;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.business-dashboard-hero .business-hero-chart-frame--photo .business-hero-chart-frame__img {
+  position: static !important;
+  display: block;
+  width: 100% !important;
+  height: auto !important;
+  max-height: min(42svh, 272px);
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+  padding: 0 !important;
+}
+
+@media (min-width: 1024px) {
+  .business-dashboard-hero .business-hero-chart-frame--photo {
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  .business-dashboard-hero .business-hero-chart-frame--photo .business-hero-chart-frame__img {
+    max-height: 21rem;
+    width: 100%;
   }
 }
 

@@ -14,6 +14,7 @@ import {
   scheduleManagerCancelAtPeriodEnd,
 } from "../services/managerBilling.service.js";
 import { isStripeConfigured } from "../services/stripe.service.js";
+import { resolveSubscriptionEntitlements } from "../services/subscriptionEntitlement.service.js";
 import { CLIENT_FALLBACK, clientSafeMessage, logServerError } from "../utils/httpErrors.js";
 
 function getUserId(req: Request): string | null {
@@ -132,10 +133,6 @@ export async function getMyBilling(req: Request, res: Response) {
     }
 
     const status = await getBillingStatusForBusiness(ctx.businessId);
-    if (!status) {
-      return res.status(404).json({ message: "Subscription not found" });
-    }
-
     const events = await getBillingTimelineForBusiness(ctx.businessId);
 
     return res.json({ ...status, events });
@@ -158,7 +155,13 @@ export async function getMyBillingSyncStatus(req: Request, res: Response) {
     }
 
     const expectedPlan = parsePlanKey(req.query.expectedPlan);
-    const status = await getCheckoutSyncStatusForBusiness(ctx.businessId, expectedPlan ?? undefined);
+    const checkoutSessionId =
+      typeof req.query.session_id === "string" ? req.query.session_id.trim() : null;
+    const status = await getCheckoutSyncStatusForBusiness(
+      ctx.businessId,
+      expectedPlan ?? undefined,
+      { checkoutSessionId: checkoutSessionId || null },
+    );
     return res.json(status);
   } catch (err) {
     logServerError("billing.getMyBillingSyncStatus", err);
@@ -180,6 +183,13 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
       return res.status(ctx.status).json({ message: ctx.message });
     }
     businessId = ctx.businessId;
+
+    const entitlements = await resolveSubscriptionEntitlements(ctx.businessId);
+    if (entitlements.accessSource === "sponsored") {
+      return res.status(403).json({
+        message: "Checkout is not available while sponsored access is active.",
+      });
+    }
 
     planKey = parsePlanKey(requestBody.planKey);
     if (!planKey) {
@@ -258,10 +268,6 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
       }),
     );
 
-    if (!mirror) {
-      throw new Error("Subscription mirror not found");
-    }
-
     const session = await createManagerCheckoutSession({
       businessId: ctx.businessId,
       managerEmail: ctx.email,
@@ -320,7 +326,7 @@ export async function postMyBillingPortal(req: Request, res: Response) {
     }
 
     const status = await getBillingStatusForBusiness(ctx.businessId);
-    if (!status?.stripeCustomerId) {
+    if (!status.stripeCustomerId) {
       return res.status(400).json({ message: "No Stripe customer linked to this account" });
     }
 

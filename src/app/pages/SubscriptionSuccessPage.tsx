@@ -1,60 +1,41 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { CheckCircle2, Loader2 } from "lucide-react";
-import { clearBusinessProfileClientCache, fetchBillingSyncStatus } from "../lib/api";
-import {
-  clearCheckoutSyncExpectation,
-  getCheckoutSyncExpectation,
-} from "../lib/checkoutIntent";
-import { clearSubscriptionTierSession } from "../lib/subscriptionSessionCache";
-
-const POLL_INTERVAL_MS = 2000;
-const MAX_ATTEMPTS = 45;
+import { processBillingCheckoutSuccess } from "../lib/subscriptionActivationNotification";
 
 type SyncPhase = "polling" | "ready" | "timeout";
 
 export function SubscriptionSuccessPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [phase, setPhase] = useState<SyncPhase>("polling");
 
   useEffect(() => {
-    clearBusinessProfileClientCache();
-    clearSubscriptionTierSession();
-
     const expectedPlan = getCheckoutSyncExpectation();
     let cancelled = false;
-    let attempts = 0;
 
-    async function poll(): Promise<void> {
-      while (!cancelled && attempts < MAX_ATTEMPTS) {
-        attempts += 1;
-        try {
-          const result = await fetchBillingSyncStatus(expectedPlan ?? undefined);
-          if (result.synced) {
-            clearCheckoutSyncExpectation();
-            clearBusinessProfileClientCache();
-            clearSubscriptionTierSession();
-            setPhase("ready");
-            window.setTimeout(() => {
-              if (!cancelled) navigate("/dashboard", { replace: true });
-            }, 1200);
-            return;
-          }
-        } catch {
-          // keep polling — webhook may still be in flight
-        }
-        await new Promise((resolve) => window.setTimeout(resolve, POLL_INTERVAL_MS));
+    void (async () => {
+      const synced = await processBillingCheckoutSuccess({
+        t,
+        sessionId: searchParams.get("session_id"),
+      });
+      if (cancelled) return;
+      if (synced) {
+        setPhase("ready");
+        window.setTimeout(() => {
+          if (!cancelled) navigate("/dashboard", { replace: true });
+        }, 1200);
+        return;
       }
-      if (!cancelled) setPhase("timeout");
-    }
+      setPhase("timeout");
+    })();
 
-    void poll();
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, searchParams, t]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-16">

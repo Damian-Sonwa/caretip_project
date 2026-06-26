@@ -68,7 +68,7 @@ export function onTipReceived(payload: NewTipPayload): void {
           businessId: payload.businessId,
           amount: String(amount),
           employeeName,
-          customerName,
+          ...(customerName ? { customerName } : {}),
         },
       },
       dedupeKey: `tip:${payload.tip.id}:employee:${employeeUserId}`,

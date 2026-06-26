@@ -22,7 +22,7 @@ export function QrStudioTemplatesPage() {
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
-  const canEdit = ready && hasFeature("brandingCustomization");
+  const canEdit = ready && hasFeature("qrTemplates");
   const [loading, setLoading] = useState(true);
   const [template, setTemplate] = useState<QrTemplateId>(DEFAULT_QR_TEMPLATE);
   const [accent, setAccent] = useState("#EB992C");
@@ -73,7 +73,7 @@ export function QrStudioTemplatesPage() {
             <div className="rounded-lg border border-border bg-muted/30 px-4 py-3">
               <p className="text-sm text-muted-foreground">{t("business.qrStudio.templates.basicHint")}</p>
               <div className="mt-3">
-                <UpgradeCta featureKey="brandingCustomization" variant="secondary" />
+                <UpgradeCta featureKey="qrTemplates" variant="secondary" />
               </div>
             </div>
           ) : null}

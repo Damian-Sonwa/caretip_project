@@ -4,6 +4,7 @@ import { Calendar, CreditCard, RefreshCw, Sparkles } from "lucide-react";
 import type { BillingStatus } from "../../../../lib/api";
 import { BillingStatusBadge } from "./BillingStatusBadge";
 import { PremiumPlanCard } from "../../../premium/PremiumPlanCard";
+import { SubscriptionActivationPanel } from "../../../subscription/SubscriptionActivationPanel";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
 
 function formatDate(iso: string | null, locale: string, emptyLabel: string): string {
@@ -15,9 +16,54 @@ function formatDate(iso: string | null, locale: string, emptyLabel: string): str
   }
 }
 
+function sponsoredProgrammeLabel(
+  billing: BillingStatus,
+  t: (key: string, opts?: Record<string, unknown>) => string,
+): string {
+  if (billing.sponsoredProgrammeLabelKey) {
+    return t(billing.sponsoredProgrammeLabelKey);
+  }
+  if (billing.sponsoredProgrammeKey) {
+    return t(`sponsored.programmes.${billing.sponsoredProgrammeKey}`, {
+      defaultValue: billing.sponsoredProgrammeKey,
+    });
+  }
+  return t("sponsored.programmes.generic");
+}
+
 export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language?.startsWith("de") ? "de-DE" : "en-GB";
+
+  if (billing.accessSource === "sponsored") {
+    const programme = sponsoredProgrammeLabel(billing, t);
+    return (
+      <div className="space-y-4">
+        <PremiumPlanCard
+          badge={<span className={premiumVisualClasses.badge}>{t("business.billing.sponsoredAccessTitle")}</span>}
+          title={
+            <h3 className="text-2xl font-bold tracking-tight text-white">
+              {programme}
+            </h3>
+          }
+          subtitle={<p>{t("business.billing.sponsoredAccessBody")}</p>}
+        />
+      </div>
+    );
+  }
+
+  if (billing.status === "none" || !billing.planKey) {
+    return (
+      <div className="space-y-4">
+        <div className="rounded-xl border border-border/70 bg-muted/20 px-4 py-3">
+          <h3 className="text-lg font-semibold text-foreground">{t("business.billing.noActiveSubscriptionTitle")}</h3>
+          <p className="mt-1 text-sm text-muted-foreground">{t("business.billing.noActiveSubscriptionBody")}</p>
+        </div>
+        <SubscriptionActivationPanel compact />
+      </div>
+    );
+  }
+
   const cycleLabel =
     billing.billingCycle === "yearly"
       ? t("business.billing.cycleYearly")

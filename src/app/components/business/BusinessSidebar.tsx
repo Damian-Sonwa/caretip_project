@@ -23,7 +23,6 @@ export function BusinessSidebar() {
     role: user?.role === "business" ? "business" : null,
   });
   const navItems = businessDashboardNavItems;
-  const qrLocked = user?.status === "PENDING" || user?.status === "REJECTED";
 
   return (
     <motion.aside
@@ -55,12 +54,6 @@ export function BusinessSidebar() {
                   <CareIcon name={item.icon} size="nav" />
                   <span className="flex min-w-0 flex-1 items-center gap-2 tracking-tight">
                     <span className="truncate">{t(item.labelKey)}</span>
-                    {item.href === "/dashboard/qr-studio" && qrLocked ? (
-                      <Lock
-                        className="h-3.5 w-3.5 shrink-0 opacity-70"
-                        aria-label={t("business.verification.qrNavLocked")}
-                      />
-                    ) : null}
                     {subscriptionLocked ? (
                       <Lock
                         className="h-3.5 w-3.5 shrink-0 opacity-70"

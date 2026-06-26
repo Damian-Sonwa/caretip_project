@@ -1,50 +1,141 @@
-import { BusinessSubscriptionTier, Role, SubscriptionStatus } from "@prisma/client";
+import { BusinessSubscriptionTier, Role, SubscriptionStatus, type SubscriptionPlanKey } from "@prisma/client";
 import type { NextFunction, Request, Response } from "express";
-import { prisma } from "../prisma.js";
-import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
-import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 import {
-  type FeatureKey,
+  type PlanResourceLimit,
+  PLAN_LIMIT_EXCEEDED_CODE,
   type SubscriptionCapability,
+  capabilitiesForTier,
+  getPlanLimitForResource,
+  getPlanLimitsForTier,
   hasSubscriptionCapability,
+  isWithinPlanLimit,
   minimumTierForCapability,
 } from "../config/subscriptionCapabilities.js";
+import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
+import { isSubscriptionMirrorEntitled } from "../lib/subscription/subscriptionMirrorEntitlement.js";
+import {
+  EMPTY_SUBSCRIPTION_ENTITLEMENTS,
+  type SubscriptionEntitlementState,
+  type SubscriptionLifecycleStatus,
+} from "../lib/subscription/subscriptionEntitlementTypes.js";
+import { resolveSponsoredCapabilityProfile } from "../config/sponsoredAccess.config.js";
+import { findActiveSponsoredGrantForBusiness } from "./sponsoredAccess.service.js";
+import { prisma } from "../prisma.js";
+
+export type { SubscriptionEntitlementState, SubscriptionLifecycleStatus } from "../lib/subscription/subscriptionEntitlementTypes.js";
+export { EMPTY_SUBSCRIPTION_ENTITLEMENTS } from "../lib/subscription/subscriptionEntitlementTypes.js";
 
 export const SUBSCRIPTION_REQUIRED_CODE = "SUBSCRIPTION_REQUIRED" as const;
 
-const DEFAULT_TIER = BusinessSubscriptionTier.basic;
+export type FeatureKey = SubscriptionCapability;
 
-export function subscriptionBypass(req: Request): boolean {
-  if (req.user?.impersonatedBy) return true;
-  if (req.user?.role === Role.SUPER_ADMIN) return true;
-  return false;
+function capabilitiesForPlan(plan: SubscriptionPlanKey): SubscriptionCapability[] {
+  const tier = mapPlanKeyToBusinessTier(plan);
+  return capabilitiesForTier(tier);
 }
 
-export async function getSubscriptionTierForBusinessId(
+function isMirrorRowEntitled(sub: {
+  status: SubscriptionStatus;
+  cancelAtPeriodEnd: boolean;
+  cancellationEffective: Date | null;
+  currentPeriodEnd: Date | null;
+  canceledAt: Date | null;
+}): boolean {
+  return isSubscriptionMirrorEntitled(sub);
+}
+
+function buildEntitledState(
+  status: SubscriptionLifecycleStatus,
+  plan: SubscriptionPlanKey,
+): SubscriptionEntitlementState {
+  const subscriptionTier = mapPlanKeyToBusinessTier(plan);
+  return {
+    status,
+    plan,
+    capabilities: capabilitiesForPlan(plan),
+    limits: getPlanLimitsForTier(subscriptionTier),
+    subscriptionTier,
+    hasActiveEntitlements: true,
+    accessSource: "subscription",
+    sponsoredProgrammeKey: null,
+  };
+}
+
+function buildSponsoredState(
+  programmeKey: string,
+  capabilityProfileKey?: string | null,
+): SubscriptionEntitlementState | null {
+  const profile = resolveSponsoredCapabilityProfile(programmeKey, capabilityProfileKey);
+  if (!profile) return null;
+  return {
+    status: "none",
+    plan: null,
+    capabilities: profile.capabilities,
+    limits: profile.limits,
+    subscriptionTier: profile.subscriptionTier,
+    hasActiveEntitlements: true,
+    accessSource: "sponsored",
+    sponsoredProgrammeKey: programmeKey,
+  };
+}
+
+/**
+ * Authoritative subscription + entitlement resolver.
+ * Never infers a plan from missing data or Business.subscriptionTier alone.
+ */
+export async function resolveSubscriptionEntitlements(
   businessId: string,
-): Promise<BusinessSubscriptionTier> {
+): Promise<SubscriptionEntitlementState> {
   const row = await prisma.business.findUnique({
     where: { id: businessId },
     select: {
-      subscriptionTier: true,
-      subscription: { select: { status: true, planKey: true } },
+      subscription: {
+        select: {
+          planKey: true,
+          status: true,
+          cancelAtPeriodEnd: true,
+          cancellationEffective: true,
+          currentPeriodEnd: true,
+          canceledAt: true,
+        },
+      },
     },
   });
-  if (!row) return DEFAULT_TIER;
 
-  // Trialing Stripe subscriptions grant full plan access (same as active).
-  if (row.subscription?.status === SubscriptionStatus.trialing) {
-    const tier = mapPlanKeyToBusinessTier(row.subscription.planKey);
-    logTrialSync("entitlement.tier_from_trialing_mirror", {
-      businessId,
-      mirrorStatus: row.subscription.status,
-      planKey: row.subscription.planKey,
-      resolvedTier: tier,
-    });
-    return tier;
+  if (!row?.subscription) {
+    const sponsoredGrant = await findActiveSponsoredGrantForBusiness(businessId);
+    if (sponsoredGrant) {
+      const sponsored = buildSponsoredState(
+        sponsoredGrant.programmeKey,
+        sponsoredGrant.capabilityProfileKey,
+      );
+      if (sponsored) return sponsored;
+    }
+    return EMPTY_SUBSCRIPTION_ENTITLEMENTS;
   }
 
-  return row.subscriptionTier ?? DEFAULT_TIER;
+  const sub = row.subscription;
+  if (!isMirrorRowEntitled(sub)) {
+    const sponsoredGrant = await findActiveSponsoredGrantForBusiness(businessId);
+    if (sponsoredGrant) {
+      const sponsored = buildSponsoredState(
+        sponsoredGrant.programmeKey,
+        sponsoredGrant.capabilityProfileKey,
+      );
+      if (sponsored) return sponsored;
+    }
+    return EMPTY_SUBSCRIPTION_ENTITLEMENTS;
+  }
+
+  return buildEntitledState(sub.status, sub.planKey);
+}
+
+/** @deprecated Use resolveSubscriptionEntitlements — returns null when no entitled subscription. */
+export async function getSubscriptionTierForBusinessId(
+  businessId: string,
+): Promise<BusinessSubscriptionTier | null> {
+  const state = await resolveSubscriptionEntitlements(businessId);
+  return state.subscriptionTier;
 }
 
 export async function getSubscriptionTierForManagerUserId(
@@ -55,7 +146,8 @@ export async function getSubscriptionTierForManagerUserId(
     select: { id: true },
   });
   if (!row) return null;
-  return getSubscriptionTierForBusinessId(row.id);
+  const state = await resolveSubscriptionEntitlements(row.id);
+  return state.subscriptionTier;
 }
 
 export async function getSubscriptionTierForEmployeeUserId(
@@ -66,16 +158,35 @@ export async function getSubscriptionTierForEmployeeUserId(
     select: { businessId: true },
   });
   if (!employee) return null;
-  return getSubscriptionTierForBusinessId(employee.businessId);
+  const state = await resolveSubscriptionEntitlements(employee.businessId);
+  return state.subscriptionTier;
 }
 
-export function hasFeatureForTier(tier: BusinessSubscriptionTier, featureKey: FeatureKey): boolean {
+export function subscriptionBypass(req: Request): boolean {
+  if (req.user?.impersonatedBy) return true;
+  if (req.user?.role === Role.SUPER_ADMIN) return true;
+  return false;
+}
+
+export function hasFeatureForTier(
+  tier: BusinessSubscriptionTier | null,
+  featureKey: FeatureKey,
+): boolean {
+  if (!tier) return false;
   return hasSubscriptionCapability(tier, featureKey);
 }
 
+export function hasFeatureForEntitlements(
+  state: SubscriptionEntitlementState,
+  featureKey: FeatureKey,
+): boolean {
+  if (!state.hasActiveEntitlements) return false;
+  return state.capabilities.includes(featureKey);
+}
+
 export async function hasFeature(businessId: string, featureKey: FeatureKey): Promise<boolean> {
-  const tier = await getSubscriptionTierForBusinessId(businessId);
-  return hasFeatureForTier(tier, featureKey);
+  const state = await resolveSubscriptionEntitlements(businessId);
+  return hasFeatureForEntitlements(state, featureKey);
 }
 
 export async function resolveBusinessIdForRequest(req: Request): Promise<string | null> {
@@ -118,11 +229,43 @@ export function subscriptionRequiredPayload(capability: SubscriptionCapability |
     code: SUBSCRIPTION_REQUIRED_CODE,
     capability,
     requiredTier: minimumTierForCapability(capability),
-    message: "This feature requires a Premium subscription.",
+    message: "An active subscription is required to use this feature.",
   };
 }
 
-/** Strip goal fields from tips/dashboard payloads when employeeGoals is not entitled. */
+export function planLimitExceededPayload(
+  resource: PlanResourceLimit,
+  tier: BusinessSubscriptionTier | null,
+) {
+  const limit = getPlanLimitForResource(tier, resource);
+  return {
+    success: false,
+    code: PLAN_LIMIT_EXCEEDED_CODE,
+    resource,
+    limit,
+    requiredTier: "premium" as const,
+    message:
+      resource === "locations"
+        ? "Your plan supports one location. Upgrade to Business for multi-location support."
+        : "Your plan supports one table. Upgrade to Business for multiple tables.",
+  };
+}
+
+export async function assertPlanLimitForBusiness(
+  businessId: string,
+  resource: PlanResourceLimit,
+  currentCount: number,
+): Promise<{ ok: true } | { ok: false; tier: BusinessSubscriptionTier | null }> {
+  const state = await resolveSubscriptionEntitlements(businessId);
+  if (!state.hasActiveEntitlements) {
+    return { ok: false, tier: null };
+  }
+  if (isWithinPlanLimit(state.subscriptionTier, resource, currentCount)) {
+    return { ok: true };
+  }
+  return { ok: false, tier: state.subscriptionTier };
+}
+
 export function maskEmployeeGoalsInResponse<T extends Record<string, unknown>>(
   body: T,
   includeGoals: boolean,
@@ -135,9 +278,28 @@ export function maskEmployeeGoalsInResponse<T extends Record<string, unknown>>(
   };
 }
 
-/**
- * Express middleware — returns 403 with SUBSCRIPTION_REQUIRED when the business tier lacks the feature.
- */
+/** Any entitled subscription (Starter+). Operational APIs use this before capability checks. */
+export function requireOperationalSubscription() {
+  return async (req: Request, res: Response, next: NextFunction) => {
+    if (subscriptionBypass(req)) {
+      return next();
+    }
+    const uid = req.user?.userId ?? req.user?.id;
+    if (!uid) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    const businessId = await resolveBusinessIdForRequest(req);
+    if (!businessId) {
+      return res.status(403).json({ message: "Insufficient permissions" });
+    }
+    const state = await resolveSubscriptionEntitlements(businessId);
+    if (!state.hasActiveEntitlements) {
+      return res.status(403).json(subscriptionRequiredPayload("tipManagement"));
+    }
+    return next();
+  };
+}
+
 export function requireFeature(featureKey: FeatureKey) {
   return async (req: Request, res: Response, next: NextFunction) => {
     if (subscriptionBypass(req)) {
@@ -158,9 +320,6 @@ export function requireFeature(featureKey: FeatureKey) {
   };
 }
 
-/**
- * Controller helper — send 403 when feature is missing. Returns true when allowed to proceed.
- */
 export async function enforceFeatureForRequest(
   req: Request,
   res: Response,
@@ -175,4 +334,33 @@ export async function enforceFeatureForRequest(
   if (await hasFeature(businessId, featureKey)) return true;
   res.status(403).json(subscriptionRequiredPayload(featureKey));
   return false;
+}
+
+export async function requireActiveSubscriptionForRequest(
+  req: Request,
+  res: Response,
+): Promise<SubscriptionEntitlementState | null> {
+  if (subscriptionBypass(req)) {
+    return {
+      status: SubscriptionStatus.active,
+      plan: "premium",
+      capabilities: capabilitiesForPlan("premium"),
+      limits: getPlanLimitsForTier(BusinessSubscriptionTier.premium),
+      subscriptionTier: BusinessSubscriptionTier.premium,
+      hasActiveEntitlements: true,
+      accessSource: "subscription",
+      sponsoredProgrammeKey: null,
+    };
+  }
+  const businessId = await resolveBusinessIdForRequest(req);
+  if (!businessId) {
+    res.status(403).json({ message: "Insufficient permissions" });
+    return null;
+  }
+  const state = await resolveSubscriptionEntitlements(businessId);
+  if (!state.hasActiveEntitlements) {
+    res.status(403).json(subscriptionRequiredPayload("tableQr"));
+    return null;
+  }
+  return state;
 }

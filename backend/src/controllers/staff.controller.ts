@@ -105,7 +105,7 @@ type StaffBySlugRow = {
     qrShape: string;
     qrAccentColor: string | null;
     qrBackgroundColor: string | null;
-    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier;
+    subscriptionTier: import("@prisma/client").BusinessSubscriptionTier | null;
   };
 };
 

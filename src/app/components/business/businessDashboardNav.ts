@@ -25,7 +25,6 @@ export const businessDashboardNavItems: readonly BusinessDashboardNavItem[] = [
     labelKey: "dashboardNav.business.qrStudio",
     href: "/dashboard/qr-studio",
     icon: "tableQr",
-    featureKey: "tableQr",
   },
   { labelKey: "dashboardNav.business.locations", href: "/dashboard/locations", icon: "locations" },
   { labelKey: "dashboardNav.business.customers", href: "/dashboard/customers", icon: "inbox" },
@@ -39,9 +38,17 @@ export const QR_STUDIO_DEFAULT_HREF = `${QR_STUDIO_BASE}/employees` as const;
 export const qrStudioSubNavItems = [
   { labelKey: "business.qrStudio.nav.employees", href: `${QR_STUDIO_BASE}/employees` },
   { labelKey: "business.qrStudio.nav.locations", href: `${QR_STUDIO_BASE}/locations` },
-  { labelKey: "business.qrStudio.nav.tables", href: `${QR_STUDIO_BASE}/tables`, featureKey: "tableQr" as FeatureKey },
-  { labelKey: "business.qrStudio.nav.templates", href: `${QR_STUDIO_BASE}/templates` },
-  { labelKey: "business.qrStudio.nav.branding", href: `${QR_STUDIO_BASE}/branding`, featureKey: "brandingCustomization" as FeatureKey },
+  { labelKey: "business.qrStudio.nav.tables", href: `${QR_STUDIO_BASE}/tables` },
+  {
+    labelKey: "business.qrStudio.nav.templates",
+    href: `${QR_STUDIO_BASE}/templates`,
+    featureKey: "qrTemplates" as FeatureKey,
+  },
+  {
+    labelKey: "business.qrStudio.nav.branding",
+    href: `${QR_STUDIO_BASE}/branding`,
+    featureKey: "brandingCustomization" as FeatureKey,
+  },
 ] as const;
 
 export const TIPS_BASE = "/dashboard/tips" as const;
@@ -93,6 +100,19 @@ export function showBusinessNavSubscriptionLock(
 ): boolean {
   if (!entitlementsReady) return false;
   return isBusinessNavItemLocked(item, tier);
+}
+
+export type BusinessNavLockKind = "subscription" | "verification";
+
+/** Single lock icon for QR Studio — verification only (subscription gates are per-section). */
+export function resolveQrStudioNavLock(
+  entitlementsReady: boolean,
+  _tier: BusinessSubscriptionTier | undefined | null,
+  verificationPending: boolean,
+): BusinessNavLockKind | null {
+  if (!entitlementsReady) return null;
+  if (verificationPending) return "verification";
+  return null;
 }
 
 /** @deprecated Use full nav list + isBusinessNavItemLocked — items are no longer hidden. */

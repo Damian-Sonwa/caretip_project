@@ -4,13 +4,14 @@ import { MessageSquareHeart } from "lucide-react";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
 import { customersSubNavItems } from "../../../components/business/businessDashboardNav";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function BusinessCustomersLayout() {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="dashboard-page-contained mx-auto w-full max-w-6xl">
+    <div className={businessUi.modulePageShell}>
+      <div className={businessUi.modulePageContained}>
         <BusinessModuleWorkspaceHeader
           personality="customers"
           badge={t("business.customers.eyebrow")}

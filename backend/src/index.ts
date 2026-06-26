@@ -233,6 +233,16 @@ initSocketServer(httpServer);
 void assertEnvForAuth().then(() => {
   httpServer.listen(PORT, () => {
     console.log(`Caretip API running on http://localhost:${PORT}`);
+    const billingOn = process.env.SUBSCRIPTION_BILLING_ENABLED?.trim().toLowerCase();
+    const billingEnabled =
+      billingOn === "true" || billingOn === "1" || billingOn === "yes" || billingOn === "on";
+    if (billingEnabled && !process.env.STRIPE_WEBHOOK_SECRET?.trim()) {
+      console.warn(
+        "[billing] SUBSCRIPTION_BILLING_ENABLED=true but STRIPE_WEBHOOK_SECRET is unset. " +
+          "Stripe webhooks will not verify locally until you run `stripe listen` and set the secret. " +
+          "Checkout return sync (/api/me/billing/sync-status) still activates mirrors from Stripe.",
+      );
+    }
     if (
       process.env.NODE_ENV === "production" &&
       process.env.RENDER &&

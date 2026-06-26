@@ -1,5 +1,10 @@
 import { randomBytes } from "crypto";
 import { prisma } from "../prisma.js";
+import {
+  assertPlanLimitForBusiness,
+  planLimitExceededPayload,
+  resolveSubscriptionEntitlements,
+} from "./subscriptionEntitlement.service.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
 import { invalidateBusinessStatsCache } from "./business.service.js";
 import * as locationsService from "./locations.service.js";
@@ -34,6 +39,21 @@ export async function createTableForBusinessUser(
   const business = await prisma.business.findUnique({ where: { userId } });
   if (!business) {
     throw new Error("Business not found");
+  }
+  const entitlements = await resolveSubscriptionEntitlements(business.id);
+  if (!entitlements.hasActiveEntitlements) {
+    throw new Error("An active subscription is required to manage tables.");
+  }
+  if (!entitlements.capabilities.includes("tableQr")) {
+    throw new Error("Table QR is not available on your current plan.");
+  }
+  const tableCount = await prisma.table.count({
+    where: { location: { businessId: business.id } },
+  });
+  const limitCheck = await assertPlanLimitForBusiness(business.id, "tables", tableCount);
+  if (!limitCheck.ok) {
+    const payload = planLimitExceededPayload("tables", limitCheck.tier);
+    throw new Error(payload.message);
   }
   await locationsService.assertLocationOwnedByBusiness(input.locationId, business.id);
 

@@ -4,6 +4,10 @@ import { authMiddleware, requireRole, requireVerifiedEmail } from "../middleware
 import { requireCompletedOnboarding } from "../middleware/requireCompletedOnboarding.middleware.js";
 import { feedbackTipRateLimit } from "../middleware/securityRateLimit.middleware.js";
 import * as feedbackController from "../controllers/feedback.controller.js";
+import {
+  requireFeature,
+  requireOperationalSubscription,
+} from "../services/subscriptionEntitlement.service.js";
 
 const router = Router();
 
@@ -15,6 +19,8 @@ router.get(
   requireVerifiedEmail,
   requireRole(Role.MANAGER),
   requireCompletedOnboarding,
+  requireOperationalSubscription(),
+  requireFeature("customerFeedback"),
   feedbackController.listBusinessFeedback,
 );
 

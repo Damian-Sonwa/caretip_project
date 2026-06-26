@@ -436,6 +436,7 @@ async function refundTipPaymentForEligibilityFailure(
 
 export async function handlePaymentSuccess(paymentIntentId: string): Promise<void> {
   let confirmedEur: number | null = null;
+  let customerNameFromPi: string | null = null;
   try {
     const stripe = getStripe();
     const pi = await stripe.paymentIntents.retrieve(paymentIntentId);
@@ -452,6 +453,9 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
       });
       return;
     }
+    const mdName =
+      typeof pi.metadata?.customerName === "string" ? pi.metadata.customerName.trim() : "";
+    customerNameFromPi = mdName || null;
     confirmedEur = stripeCentsToEur(pi.amount_received ?? pi.amount);
   } catch (err) {
     console.error("[stripe.handlePaymentSuccess] retrieve PI", paymentIntentId, err);
@@ -498,6 +502,11 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
     data,
   });
 
+  const emitSnapshot = await loadTipEmitSnapshot(pending.employeeId, pending.businessId);
+  if (!emitSnapshot) {
+    return;
+  }
+
   const tip = await prisma.transaction.findFirst({
     where: { stripePaymentIntentId: paymentIntentId },
     select: {
@@ -507,23 +516,14 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
       createdAt: true,
       employeeId: true,
       businessId: true,
-      customerName: true,
-      employee: { select: { name: true, monthlyGoal: true, userId: true } },
-      business: { select: { timezone: true, userId: true } },
     },
   });
 
-  if (!tip?.employee) {
+  if (!tip) {
     return;
   }
 
-  await emitTipSocketWithSnapshot(tip, {
-    employeeName: tip.employee.name,
-    employeeUserId: tip.employee.userId,
-    monthlyGoal: tip.employee.monthlyGoal != null ? Number(tip.employee.monthlyGoal) : null,
-    businessTimezone: tip.business.timezone,
-    businessManagerUserId: tip.business.userId,
-  });
+  await emitTipSocketWithSnapshot({ ...tip, customerName: customerNameFromPi }, emitSnapshot);
 }
 
 export async function handlePaymentFailed(paymentIntentId: string): Promise<void> {
@@ -686,7 +686,6 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     businessId,
     locationId: locId,
     tableId: tblId,
-    ...(customerNameRaw ? { customerName: customerNameRaw } : {}),
   };
 
   console.log("ATTEMPTING TIP INSERT", payload);
@@ -721,7 +720,10 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
     }
 
     if (emitSnapshot) {
-      await emitTipSocketWithSnapshot(tip, emitSnapshot);
+      await emitTipSocketWithSnapshot(
+        { ...tip, customerName: customerNameRaw || null },
+        emitSnapshot,
+      );
     }
   } catch (err) {
     const code = (err as { code?: string })?.code;

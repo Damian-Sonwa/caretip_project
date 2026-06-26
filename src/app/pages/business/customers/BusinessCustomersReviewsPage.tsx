@@ -10,27 +10,37 @@ import { businessUi } from "../../../components/business/businessDashboardUi";
 import { BusinessStatCard } from "../../../components/business/BusinessStatCard";
 import { CountUpMetric } from "../../../components/dashboard/CountUpMetric";
 import { cn } from "@/lib/utils";
+import { FeatureGate } from "@/app/components/subscription/FeatureGate";
+import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
+import { isApiSubscriptionRequiredError } from "@/app/lib/apiError";
 
-export function BusinessCustomersReviewsPage() {
+function BusinessCustomersReviewsPageContent() {
   const { t } = useTranslation();
   const { user, sessionValidated } = useRequireAuth();
+  const { ready, hasFeature, hasActiveEntitlements } = useSubscriptionEntitlements({
+    enabled: sessionValidated && user?.role === "business",
+    role: "business",
+  });
+  const entitled = ready && hasActiveEntitlements && hasFeature("customerFeedback");
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<CustomerFeedbackRow[]>([]);
   const [summary, setSummary] = useState({ averageRating: null as number | null, ratingCount: 0, feedbackCount: 0 });
 
   const load = useCallback(async () => {
-    if (!sessionValidated || user?.role !== "business") return;
+    if (!sessionValidated || user?.role !== "business" || !entitled) return;
     setLoading(true);
     try {
       const res = await listBusinessCustomerFeedback({ take: 30, skip: 0 });
       setItems(res.items);
       setSummary(res.summary);
     } catch (err) {
-      logClientError("BusinessCustomersReviewsPage", err);
+      if (!isApiSubscriptionRequiredError(err)) {
+        logClientError("BusinessCustomersReviewsPage", err);
+      }
     } finally {
       setLoading(false);
     }
-  }, [sessionValidated, user?.role]);
+  }, [entitled, sessionValidated, user?.role]);
 
   useEffect(() => {
     void load();
@@ -119,5 +129,13 @@ export function BusinessCustomersReviewsPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export function BusinessCustomersReviewsPage() {
+  return (
+    <FeatureGate featureKey="customerFeedback" role="business">
+      <BusinessCustomersReviewsPageContent />
+    </FeatureGate>
   );
 }

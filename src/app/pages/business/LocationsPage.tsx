@@ -36,7 +36,7 @@ const ACTION_TEAL = "#e9781c";
 export function LocationsPage() {
   const { t } = useTranslation();
   const { isBusiness } = useRequireAuth();
-  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+  const { tier, ready, hasFeature, hasActiveEntitlements, limits } = useSubscriptionEntitlements({
     enabled: isBusiness,
     role: "business",
   });
@@ -83,7 +83,11 @@ export function LocationsPage() {
     void load();
   }, [load]);
 
-  const atSingleLocationCap = ready && !multiLocationEnabled && locations.length >= 1;
+  const atSingleLocationCap =
+    ready &&
+    hasActiveEntitlements &&
+    limits.maxLocations != null &&
+    locations.length >= limits.maxLocations;
 
   const handleSave = async () => {
     const trimmed = name.trim();
@@ -116,7 +120,7 @@ export function LocationsPage() {
   return (
     <div className="min-h-screen bg-background pb-20">
       <div className={businessUi.subPageTop}>
-        <div className="dashboard-page-contained mx-auto w-full max-w-5xl space-y-3">
+        <div className="dashboard-page-contained mx-auto w-full max-w-5xl space-y-2.5">
           <div className={businessUi.subPageBreadcrumb}>
             <Button variant="outline" size="sm" asChild>
               <Link to="/dashboard">{t("business.locationsPage.backAria")}</Link>

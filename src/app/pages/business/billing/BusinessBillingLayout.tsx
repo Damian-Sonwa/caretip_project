@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CreditCard } from "lucide-react";
 import { trackGoogleAdsConversion } from "../../../lib/googleAdsConversion";
-import { clearBusinessProfileClientCache } from "../../../lib/api";
-import { clearSubscriptionTierSession } from "../../../lib/subscriptionSessionCache";
+import { processBillingCheckoutSuccess } from "../../../lib/subscriptionActivationNotification";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { billingSubNavItems } from "../../../components/business/businessDashboardNav";
 
 export function BusinessBillingLayout() {
@@ -18,10 +18,11 @@ export function BusinessBillingLayout() {
     const billing = searchParams.get("billing");
     if (!billing) return;
     if (billing === "success") {
-      clearBusinessProfileClientCache();
-      clearSubscriptionTierSession();
-      toast.success(t("business.billing.checkoutSuccess"));
       trackGoogleAdsConversion("billing_checkout_completed");
+      void processBillingCheckoutSuccess({
+        t,
+        sessionId: searchParams.get("session_id"),
+      });
     } else if (billing === "canceled") {
       toast.message(t("business.billing.checkoutCanceled"));
     }
@@ -32,8 +33,8 @@ export function BusinessBillingLayout() {
   }, [searchParams, setSearchParams, t]);
 
   return (
-    <div className="bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
-      <div className="dashboard-page-contained mx-auto w-full max-w-6xl">
+    <div className={businessUi.modulePageShell}>
+      <div className={businessUi.modulePageContained}>
         <BusinessModuleWorkspaceHeader
           personality="billing"
           badge={t("business.billing.moduleEyebrow")}

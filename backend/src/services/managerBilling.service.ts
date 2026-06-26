@@ -5,6 +5,7 @@ import {
   type SubscriptionPlanKey,
 } from "@prisma/client";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
+import { getSponsoredProgrammeDefinition } from "../config/sponsoredAccess.config.js";
 import { prisma } from "../prisma.js";
 import {
   createBillingPortalSession,
@@ -14,13 +15,18 @@ import {
   type SubscriptionCheckoutFlow,
 } from "./stripeBilling.service.js";
 import { mapPlanKeyToBusinessTier } from "../lib/subscription/mapSubscriptionPlanKey.js";
-import { getSubscriptionTierForBusinessId } from "./subscriptionEntitlement.service.js";
+import { resolveSubscriptionEntitlements } from "./subscriptionEntitlement.service.js";
+import type { EntitlementAccessSource } from "../lib/subscription/subscriptionEntitlementTypes.js";
 import { isStripeConfigured } from "./stripe.service.js";
+import { tryActivateSubscriptionFromStripeForBusiness } from "./subscriptionActivation.service.js";
+import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
+
+export type BillingLifecycleStatus = SubscriptionStatus | "none";
 
 export type BillingStatusDto = {
-  planKey: SubscriptionPlanKey;
-  billingCycle: BillingCycle;
-  status: SubscriptionStatus;
+  planKey: SubscriptionPlanKey | null;
+  billingCycle: BillingCycle | null;
+  status: BillingLifecycleStatus;
   trialStartedAt: string | null;
   trialEndsAt: string | null;
   isTrial: boolean;
@@ -31,11 +37,14 @@ export type BillingStatusDto = {
   cancellationEffective: string | null;
   hasStripeBilling: boolean;
   stripeCustomerId: string | null;
-  subscriptionCreatedAt: string;
-  syncedAt: string;
-  subscriptionTier: BusinessSubscriptionTier;
+  subscriptionCreatedAt: string | null;
+  syncedAt: string | null;
+  subscriptionTier: BusinessSubscriptionTier | null;
   billingEnabled: boolean;
   stripeConfigured: boolean;
+  accessSource: EntitlementAccessSource;
+  sponsoredProgrammeKey: string | null;
+  sponsoredProgrammeLabelKey: string | null;
 };
 
 export type BillingTimelineEventDto = {
@@ -68,11 +77,11 @@ const TIMELINE_AUDIT_TYPES = new Set([
   "checkout_session_completed",
 ]);
 
-export async function getBillingStatusForBusiness(businessId: string): Promise<BillingStatusDto | null> {
+export async function getBillingStatusForBusiness(businessId: string): Promise<BillingStatusDto> {
   const row = await prisma.business.findUnique({
     where: { id: businessId },
     select: {
-      subscriptionTier: true,
+      stripeCustomerId: true,
       subscription: {
         select: {
           planKey: true,
@@ -94,15 +103,49 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
     },
   });
 
-  if (!row?.subscription) return null;
+  const entitlements = await resolveSubscriptionEntitlements(businessId);
+  const billingEnabled = isSubscriptionBillingEnabled();
+  const stripeConfigured = isStripeConfigured();
+  const sponsoredDef =
+    entitlements.accessSource === "sponsored" && entitlements.sponsoredProgrammeKey
+      ? getSponsoredProgrammeDefinition(entitlements.sponsoredProgrammeKey)
+      : null;
+  const sponsoredFields = {
+    accessSource: entitlements.accessSource,
+    sponsoredProgrammeKey: entitlements.sponsoredProgrammeKey,
+    sponsoredProgrammeLabelKey: sponsoredDef?.labelKey ?? null,
+  };
+
+  if (!row?.subscription) {
+    return {
+      planKey: null,
+      billingCycle: null,
+      status: "none",
+      trialStartedAt: null,
+      trialEndsAt: null,
+      isTrial: false,
+      trialDaysRemaining: null,
+      currentPeriodEnd: null,
+      renewalDate: null,
+      cancelAtPeriodEnd: false,
+      cancellationEffective: null,
+      hasStripeBilling: false,
+      stripeCustomerId: row?.stripeCustomerId ?? null,
+      subscriptionCreatedAt: null,
+      syncedAt: null,
+      subscriptionTier: entitlements.subscriptionTier,
+      billingEnabled,
+      stripeConfigured,
+      ...sponsoredFields,
+    };
+  }
 
   const sub = row.subscription;
-  const effectiveTier = await getSubscriptionTierForBusinessId(businessId);
 
   return {
-    planKey: sub.planKey,
+    planKey: entitlements.plan,
     billingCycle: sub.billingCycle,
-    status: sub.status,
+    status: entitlements.hasActiveEntitlements ? sub.status : "none",
     trialStartedAt: iso(sub.trialStartedAt),
     trialEndsAt: iso(sub.trialEndsAt),
     isTrial: sub.isTrial || sub.status === SubscriptionStatus.trialing,
@@ -115,12 +158,13 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
     cancelAtPeriodEnd: sub.cancelAtPeriodEnd,
     cancellationEffective: iso(sub.cancellationEffective),
     hasStripeBilling: Boolean(sub.stripeSubscriptionId),
-    stripeCustomerId: sub.stripeCustomerId,
+    stripeCustomerId: sub.stripeCustomerId ?? row.stripeCustomerId,
     subscriptionCreatedAt: sub.createdAt.toISOString(),
     syncedAt: sub.updatedAt.toISOString(),
-    subscriptionTier: effectiveTier,
-    billingEnabled: isSubscriptionBillingEnabled(),
-    stripeConfigured: isStripeConfigured(),
+    subscriptionTier: entitlements.subscriptionTier,
+    billingEnabled,
+    stripeConfigured,
+    ...sponsoredFields,
   };
 }
 
@@ -164,7 +208,7 @@ export async function getBillingTimelineForBusiness(
 
 export type CheckoutSyncStatusDto = {
   synced: boolean;
-  status: SubscriptionStatus | null;
+  status: SubscriptionStatus | "none" | null;
   planKey: SubscriptionPlanKey | null;
   subscriptionTier: BusinessSubscriptionTier | null;
   isTrial: boolean;
@@ -174,12 +218,32 @@ export type CheckoutSyncStatusDto = {
 export async function getCheckoutSyncStatusForBusiness(
   businessId: string,
   expectedPlanKey?: SubscriptionPlanKey,
+  opts?: { checkoutSessionId?: string | null },
 ): Promise<CheckoutSyncStatusDto> {
-  const dto = await getBillingStatusForBusiness(businessId);
-  if (!dto) {
+  let dto = await getBillingStatusForBusiness(businessId);
+
+  if (dto.status === "none" && dto.stripeConfigured && dto.billingEnabled) {
+    const activation = await tryActivateSubscriptionFromStripeForBusiness({
+      businessId,
+      checkoutSessionId: opts?.checkoutSessionId ?? null,
+      expectedPlanKey: expectedPlanKey,
+      source: "checkout_return_sync",
+    });
+    logTrialSync("activation.checkout_return_sync", {
+      businessId,
+      checkoutSessionId: opts?.checkoutSessionId ?? null,
+      outcome: activation,
+      expectedPlanKey: expectedPlanKey ?? null,
+    });
+    if (activation === "mirror_created" || activation === "mirror_updated") {
+      dto = await getBillingStatusForBusiness(businessId);
+    }
+  }
+
+  if (dto.status === "none") {
     return {
       synced: false,
-      status: null,
+      status: "none",
       planKey: null,
       subscriptionTier: null,
       isTrial: false,
@@ -191,16 +255,15 @@ export async function getCheckoutSyncStatusForBusiness(
     dto.status === SubscriptionStatus.trialing || dto.status === SubscriptionStatus.active;
   const linked = dto.hasStripeBilling;
   const planOk = expectedPlanKey ? dto.planKey === expectedPlanKey : true;
-  const effectiveTier = await getSubscriptionTierForBusinessId(businessId);
   const tierOk = expectedPlanKey
-    ? effectiveTier === mapPlanKeyToBusinessTier(expectedPlanKey)
+    ? dto.subscriptionTier === mapPlanKeyToBusinessTier(expectedPlanKey)
     : true;
 
   return {
     synced: statusOk && linked && planOk && tierOk,
     status: dto.status,
     planKey: dto.planKey,
-    subscriptionTier: effectiveTier,
+    subscriptionTier: dto.subscriptionTier,
     isTrial: dto.isTrial,
     hasStripeBilling: linked,
   };
@@ -215,17 +278,19 @@ export async function createManagerCheckoutSession(params: {
   includeTrial?: boolean;
   checkoutFlow?: SubscriptionCheckoutFlow;
 }): Promise<{ sessionId: string; url: string | null }> {
+  const entitlements = await resolveSubscriptionEntitlements(params.businessId);
+  if (entitlements.accessSource === "sponsored") {
+    throw new Error("Checkout is not available while sponsored access is active");
+  }
+
   const subscription = await prisma.subscription.findUnique({
     where: { businessId: params.businessId },
     select: { id: true },
   });
-  if (!subscription) {
-    throw new Error("Subscription mirror not found");
-  }
 
   return createPlatformSubscriptionCheckoutSession({
     businessId: params.businessId,
-    subscriptionId: subscription.id,
+    subscriptionId: subscription?.id ?? null,
     managerEmail: params.managerEmail,
     businessName: params.businessName,
     planKey: params.planKey,

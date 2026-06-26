@@ -1,4 +1,3 @@
-import { Twitter, Linkedin, Github } from "lucide-react";
 import { Link } from "react-router";
 import { useMemo, memo } from "react";
 import { useTranslation } from "react-i18next";
@@ -143,27 +142,6 @@ export const Footer = memo(function Footer({
                 aria-label={t("footer.tiktok")}
               >
                 <TikTokIcon className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
-                aria-label={t("footer.twitter")}
-              >
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
-                aria-label={t("footer.linkedin")}
-              >
-                <Linkedin className="h-5 w-5" />
-              </a>
-              <a
-                href="#"
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/15 bg-white/5 text-neutral-300 transition-[color,background-color,opacity,transform] duration-200 hover:bg-white/10 hover:text-white"
-                aria-label={t("footer.github")}
-              >
-                <Github className="h-5 w-5" />
               </a>
             </div>
           </div>

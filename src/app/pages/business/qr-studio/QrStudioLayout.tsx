@@ -3,16 +3,22 @@ import { useTranslation } from "react-i18next";
 import { QrCode, Sparkles } from "lucide-react";
 import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
+import {
+  QrStudioAccessPanel,
+  resolveQrStudioAccessBlock,
+} from "../../../components/business/QrStudioAccessPanel";
 import { qrStudioSubNavItems, showBusinessNavSubscriptionLock } from "../../../components/business/businessDashboardNav";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
+import { canUseProductionQr } from "../../../lib/businessVerificationCapabilities";
 import { cn } from "@/lib/utils";
+import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function QrStudioLayout() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const { user } = useRequireAuth();
-  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
+  const { tier, ready: entitlementsReady, hasActiveEntitlements } = useSubscriptionEntitlements({
     enabled: user?.role === "business",
     role: user?.role === "business" ? "business" : null,
   });
@@ -26,9 +32,14 @@ export function QrStudioLayout() {
   }));
 
   const isBrandingStudio = pathname.includes("/qr-studio/branding");
+  const accessBlock = resolveQrStudioAccessBlock(
+    entitlementsReady,
+    hasActiveEntitlements,
+    canUseProductionQr(user?.status, Boolean(user?.impersonation)),
+  );
 
   return (
-    <div className="min-w-0 w-full overflow-x-clip bg-background px-4 pb-20 pt-5 sm:px-6 lg:px-8">
+    <div className={cn("min-w-0 w-full overflow-x-clip", businessUi.modulePageShell)}>
       <div
         className={cn(
           "dashboard-page-contained mx-auto min-w-0 w-full max-w-full",
@@ -49,7 +60,13 @@ export function QrStudioLayout() {
           subtitle={t("business.qrStudio.subtitle")}
         />
         <BusinessModuleSubNav items={subItems} ariaLabelKey="business.qrStudio.navAria" />
-        <Outlet />
+        {accessBlock ? (
+          <div className="py-8 sm:py-12">
+            <QrStudioAccessPanel reason={accessBlock} />
+          </div>
+        ) : (
+          <Outlet />
+        )}
       </div>
     </div>
   );

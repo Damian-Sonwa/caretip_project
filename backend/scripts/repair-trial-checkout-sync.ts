@@ -1,146 +1,78 @@
 /**
- * Repair subscription mirror from Stripe after a failed checkout webhook.
+ * Repair subscription mirror from Stripe after a failed Option A checkout webhook.
+ * Creates the initial mirror when none exists, or syncs an existing row from Stripe.
+ *
  * Usage: npm run repair:trial-checkout -- [businessId]
  */
 import "dotenv/config";
 import "../src/loadEnv.js";
-import { randomUUID } from "node:crypto";
-import Stripe from "stripe";
 import { prisma } from "../src/prisma.js";
-import { isStripeConfigured } from "../src/services/stripe.service.js";
-import {
-  applyStripeMirrorTransactional,
-  buildMirrorSnapshotFromStripeSubscription,
-} from "../src/services/subscription.service.js";
-import { STRIPE_BILLING_AUDIT_TYPES } from "../src/lib/subscription/subscriptionAuditTypes.js";
+import { resolveSubscriptionEntitlements } from "../src/services/subscriptionEntitlement.service.js";
+import { reconcileBusinessMirrorFromStripe } from "../src/services/subscriptionReconciliation.service.js";
 
-async function findStripeSubscriptionForCustomer(
-  stripe: Stripe,
-  customerId: string,
-): Promise<Stripe.Subscription | null> {
-  const list = await stripe.subscriptions.list({
-    customer: customerId,
-    status: "all",
-    limit: 10,
-    expand: ["data.items.data.price"],
+async function findBusinessIdFromIgnoredCheckout(): Promise<string | null> {
+  const ignored = await prisma.subscriptionEvent.findFirst({
+    where: {
+      auditType: "checkout_session_completed",
+      processingResult: "ignored",
+      payload: { path: ["reason"], equals: "subscription_row_not_found" },
+    },
+    orderBy: { occurredAt: "desc" },
+    select: { payload: true },
   });
-  const preferred =
-    list.data.find((s) => s.status === "trialing") ??
-    list.data.find((s) => s.status === "active") ??
-    list.data[0];
-  return preferred ?? null;
+  const sessionId = (ignored?.payload as { sessionId?: string } | null)?.sessionId;
+  if (!sessionId) return null;
+
+  const { getStripeClient, isStripeConfigured } = await import("../src/services/stripe.service.js");
+  if (!isStripeConfigured()) return null;
+
+  const stripe = getStripeClient();
+  const session = await stripe.checkout.sessions.retrieve(sessionId);
+  const businessId = session.metadata?.caretipBusinessId?.trim();
+  return businessId || null;
 }
 
 async function main(): Promise<void> {
-  const businessIdArg = process.argv[2]?.trim();
+  let businessId = process.argv[2]?.trim() || null;
+  if (!businessId) {
+    businessId = await findBusinessIdFromIgnoredCheckout();
+  }
 
-  if (!isStripeConfigured()) {
-    console.error("FAIL: STRIPE_SECRET_KEY is not configured.");
+  if (!businessId) {
+    console.error("FAIL: Pass businessId or ensure a recent ignored checkout_session_completed exists.");
     process.exitCode = 1;
     return;
   }
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!.trim());
+  console.log(`Repairing Option A mirror for business=${businessId}`);
 
-  let businessId = businessIdArg;
-  if (!businessId) {
-    const failed = await prisma.subscriptionEvent.findFirst({
-      where: {
-        auditType: "checkout_session_completed",
-        processingResult: "failed",
-      },
-      orderBy: { occurredAt: "desc" },
-      select: { subscriptionId: true },
-    });
-    if (!failed?.subscriptionId) {
-      console.error("FAIL: No failed checkout event with subscriptionId. Pass businessId explicitly.");
-      process.exitCode = 1;
-      return;
-    }
-    const subRow = await prisma.subscription.findUnique({
-      where: { id: failed.subscriptionId },
-      select: { businessId: true },
-    });
-    businessId = subRow?.businessId;
-  }
-
-  if (!businessId) {
-    console.error("FAIL: businessId not found.");
+  const result = await reconcileBusinessMirrorFromStripe(businessId);
+  if (!result.repaired) {
+    console.error(`FAIL: ${result.reason ?? "unknown"}`);
     process.exitCode = 1;
     return;
   }
 
-  const row = await prisma.subscription.findUnique({
+  const mirror = await prisma.subscription.findUnique({
     where: { businessId },
     select: {
-      id: true,
-      businessId: true,
-      stripeCustomerId: true,
-      stripeSubscriptionId: true,
-      status: true,
       planKey: true,
-      business: { select: { name: true, subscriptionTier: true } },
-    },
-  });
-
-  if (!row) {
-    console.error(`FAIL: No subscription row for business ${businessId}`);
-    process.exitCode = 1;
-    return;
-  }
-
-  console.log(`Repairing business=${row.business.name} (${businessId})`);
-
-  let stripeSubId = row.stripeSubscriptionId;
-  if (!stripeSubId && row.stripeCustomerId) {
-    const sub = await findStripeSubscriptionForCustomer(stripe, row.stripeCustomerId);
-    stripeSubId = sub?.id ?? null;
-  }
-
-  if (!stripeSubId && row.stripeCustomerId) {
-    console.error("FAIL: No Stripe subscription found for customer", row.stripeCustomerId);
-    process.exitCode = 1;
-    return;
-  }
-
-  if (!stripeSubId) {
-    console.error("FAIL: No stripeSubscriptionId or stripeCustomerId on mirror row.");
-    process.exitCode = 1;
-    return;
-  }
-
-  const sub = await stripe.subscriptions.retrieve(stripeSubId, {
-    expand: ["items.data.price"],
-  });
-  const snapshot = buildMirrorSnapshotFromStripeSubscription(sub);
-
-  await applyStripeMirrorTransactional({
-    subscriptionRowId: row.id,
-    businessId: row.businessId,
-    snapshot,
-    auditType: STRIPE_BILLING_AUDIT_TYPES.reconciliationRepair,
-    stripeEventId: `repair_trial_checkout_${randomUUID()}`,
-    auditPayload: {
-      source: "repair_trial_checkout",
-      stripeSubscriptionId: stripeSubId,
-    },
-  });
-
-  const updated = await prisma.subscription.findUnique({
-    where: { id: row.id },
-    select: {
       status: true,
-      planKey: true,
       isTrial: true,
       trialStartedAt: true,
       trialEndsAt: true,
       stripeSubscriptionId: true,
-      business: { select: { subscriptionTier: true } },
+      stripeCustomerId: true,
+      business: { select: { subscriptionTier: true, name: true } },
     },
   });
 
+  const entitlements = await resolveSubscriptionEntitlements(businessId);
+
   console.log("\n=== Mirror after repair ===");
-  console.log(JSON.stringify(updated, null, 2));
+  console.log(JSON.stringify(mirror, null, 2));
+  console.log("\n=== Entitlements ===");
+  console.log(JSON.stringify(entitlements, null, 2));
   await prisma.$disconnect();
 }
 

@@ -11,6 +11,8 @@ import {
   businessTipsQueryRequiresAdvancedAnalytics,
   employeeTipsListQueryRequiresAdvancedAnalytics,
   type FeatureKey,
+  type SubscriptionCapability,
+  capabilitiesForTier,
   hasSubscriptionCapability,
 } from "../src/config/subscriptionCapabilities.js";
 import { buildNestedSubscriptionCreateData } from "../src/services/subscription.service.js";
@@ -22,11 +24,21 @@ import {
 } from "../src/services/subscriptionEntitlement.service.js";
 import { createLocationForBusinessUser } from "../src/services/locations.service.js";
 
-const PREMIUM_FEATURES: FeatureKey[] = [
+const STARTER_FEATURES: SubscriptionCapability[] = [
+  "employeeQr",
+  "locationQr",
+  "tableQr",
+  "teamManagement",
+  "customerFeedback",
+  "tipManagement",
+  "basicAnalytics",
+];
+
+const BUSINESS_ONLY_FEATURES: FeatureKey[] = [
+  "qrTemplates",
   "advancedAnalytics",
   "csvExport",
   "multiLocation",
-  "tableQr",
   "employeeGoals",
   "brandingCustomization",
 ];
@@ -68,21 +80,33 @@ async function createTestBusiness(
 
 function testTierMatrix(): boolean {
   let ok = true;
-  for (const feature of PREMIUM_FEATURES) {
-    if (hasFeatureForTier(BusinessSubscriptionTier.basic, feature)) {
-      fail(`basic must not have ${feature}`);
+  for (const feature of STARTER_FEATURES) {
+    if (!hasFeatureForTier(BusinessSubscriptionTier.basic, feature)) {
+      fail(`basic must have starter feature ${feature}`);
       ok = false;
     }
     if (!hasFeatureForTier(BusinessSubscriptionTier.premium, feature)) {
-      fail(`premium must have ${feature}`);
-      ok = false;
-    }
-    if (!hasFeatureForTier(BusinessSubscriptionTier.enterprise, feature)) {
-      fail(`enterprise must have ${feature}`);
+      fail(`premium must have starter feature ${feature}`);
       ok = false;
     }
   }
-  if (ok) pass("tier matrix: basic denied, premium + enterprise granted for all premium features");
+  for (const feature of BUSINESS_ONLY_FEATURES) {
+    if (hasFeatureForTier(BusinessSubscriptionTier.basic, feature)) {
+      fail(`basic must not have business feature ${feature}`);
+      ok = false;
+    }
+    if (!hasFeatureForTier(BusinessSubscriptionTier.premium, feature)) {
+      fail(`premium must have business feature ${feature}`);
+      ok = false;
+    }
+    if (!hasFeatureForTier(BusinessSubscriptionTier.enterprise, feature)) {
+      fail(`enterprise must have business feature ${feature}`);
+      ok = false;
+    }
+  }
+  if (ok) {
+    pass("tier matrix: starter on basic+, business-only on premium+, enterprise full");
+  }
   return ok;
 }
 
@@ -129,13 +153,13 @@ function testMaskEmployeeGoals(): boolean {
   return true;
 }
 
-async function testMissingTierDefaultsBasic(): Promise<boolean> {
+async function testMissingTierDefaultsNone(): Promise<boolean> {
   const tier = await getSubscriptionTierForBusinessId("nonexistent-business-id-b21");
-  if (tier !== BusinessSubscriptionTier.basic) {
-    fail(`missing business tier should default to basic, got ${tier}`);
+  if (tier !== null) {
+    fail(`missing business tier should be null, got ${tier}`);
     return false;
   }
-  pass("getSubscriptionTierForBusinessId: missing business defaults to basic");
+  pass("getSubscriptionTierForBusinessId: missing business returns null");
   return true;
 }
 
@@ -145,21 +169,29 @@ async function testHasFeatureDbTiers(): Promise<boolean> {
   const enterprise = await createTestBusiness(BusinessSubscriptionTier.enterprise);
 
   let ok = true;
-  for (const feature of PREMIUM_FEATURES) {
-    if (await hasFeature(basic.businessId, feature)) {
-      fail(`hasFeature DB: basic business should not have ${feature}`);
-      ok = false;
-    }
-    if (!(await hasFeature(premium.businessId, feature))) {
-      fail(`hasFeature DB: premium business should have ${feature}`);
-      ok = false;
-    }
-    if (!(await hasFeature(enterprise.businessId, feature))) {
-      fail(`hasFeature DB: enterprise business should have ${feature}`);
+  for (const feature of STARTER_FEATURES) {
+    if (!(await hasFeature(basic.businessId, feature))) {
+      fail(`hasFeature DB: basic business should have starter feature ${feature}`);
       ok = false;
     }
   }
-  if (ok) pass("hasFeature(businessId): basic 403-equivalent false, premium + enterprise true");
+  for (const feature of BUSINESS_ONLY_FEATURES) {
+    if (await hasFeature(basic.businessId, feature)) {
+      fail(`hasFeature DB: basic business should not have business feature ${feature}`);
+      ok = false;
+    }
+    if (!(await hasFeature(premium.businessId, feature))) {
+      fail(`hasFeature DB: premium business should have business feature ${feature}`);
+      ok = false;
+    }
+    if (!(await hasFeature(enterprise.businessId, feature))) {
+      fail(`hasFeature DB: enterprise business should have business feature ${feature}`);
+      ok = false;
+    }
+  }
+  if (ok) {
+    pass("hasFeature(businessId): starter on basic, business features on premium + enterprise");
+  }
   return ok;
 }
 
@@ -194,17 +226,16 @@ async function main() {
   ok = testTierMatrix() && ok;
   ok = testTipsQueryHelpers() && ok;
   ok = testMaskEmployeeGoals() && ok;
-  ok = (await testMissingTierDefaultsBasic()) && ok;
+  ok = (await testMissingTierDefaultsNone()) && ok;
   ok = (await testHasFeatureDbTiers()) && ok;
   ok = (await testMultiLocationBasicCap()) && ok;
   ok = (await testMultiLocationPremiumUnlimited()) && ok;
 
-  // Sanity: hasFeatureForTier matches hasSubscriptionCapability
-  if (!hasSubscriptionCapability(BusinessSubscriptionTier.premium, "csvExport")) {
-    fail("hasSubscriptionCapability sanity check failed");
+  if (capabilitiesForTier(BusinessSubscriptionTier.basic).length !== STARTER_FEATURES.length) {
+    fail("basic tier capability count mismatch");
     ok = false;
   } else {
-    pass("hasFeatureForTier delegates to subscription capability matrix");
+    pass("capabilitiesForTier: basic returns starter capability set");
   }
 
   console.log("Phase B.2.1 backend entitlements runtime checks\n");

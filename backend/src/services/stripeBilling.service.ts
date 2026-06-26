@@ -54,10 +54,9 @@ function resolveCheckoutPriceId(planKey: SubscriptionPlanKey, billingCycle: "mon
   return priceId;
 }
 
-/** Create or retrieve Stripe Customer for a business mirror row. */
+/** Create or retrieve Stripe Customer for a business (stored on Business; mirrored on Subscription when present). */
 export async function ensureStripeCustomerForBusiness(params: {
   businessId: string;
-  subscriptionId: string;
   email: string;
   businessName: string;
 }): Promise<string> {
@@ -65,12 +64,24 @@ export async function ensureStripeCustomerForBusiness(params: {
     throw new Error("Stripe is not configured");
   }
 
-  const existing = await prisma.subscription.findUnique({
-    where: { id: params.subscriptionId },
-    select: { stripeCustomerId: true },
+  const business = await prisma.business.findUnique({
+    where: { id: params.businessId },
+    select: {
+      stripeCustomerId: true,
+      subscription: { select: { stripeCustomerId: true } },
+    },
   });
-  if (existing?.stripeCustomerId) {
-    return existing.stripeCustomerId;
+
+  const existing =
+    business?.stripeCustomerId ?? business?.subscription?.stripeCustomerId ?? null;
+  if (existing) {
+    if (!business?.stripeCustomerId) {
+      await prisma.business.update({
+        where: { id: params.businessId },
+        data: { stripeCustomerId: existing },
+      });
+    }
+    return existing;
   }
 
   const stripe = getStripeClient();
@@ -79,14 +90,27 @@ export async function ensureStripeCustomerForBusiness(params: {
     name: params.businessName,
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
-      [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
     },
   });
 
-  await prisma.subscription.update({
-    where: { id: params.subscriptionId },
+  await prisma.business.update({
+    where: { id: params.businessId },
     data: { stripeCustomerId: customer.id },
   });
+
+  const subscriptionId = (
+    await prisma.subscription.findUnique({
+      where: { businessId: params.businessId },
+      select: { id: true },
+    })
+  )?.id;
+
+  if (subscriptionId) {
+    await prisma.subscription.update({
+      where: { id: subscriptionId },
+      data: { stripeCustomerId: customer.id },
+    });
+  }
 
   return customer.id;
 }
@@ -94,7 +118,7 @@ export async function ensureStripeCustomerForBusiness(params: {
 /** Create Stripe Checkout Session (mode: subscription). Gated by SUBSCRIPTION_BILLING_ENABLED. */
 export async function createPlatformSubscriptionCheckoutSession(params: {
   businessId: string;
-  subscriptionId: string;
+  subscriptionId?: string | null;
   managerEmail: string;
   businessName: string;
   planKey: SubscriptionPlanKey;
@@ -115,10 +139,19 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   const priceId = resolveCheckoutPriceId(params.planKey, billingCycle);
   const customerId = await ensureStripeCustomerForBusiness({
     businessId: params.businessId,
-    subscriptionId: params.subscriptionId,
     email: params.managerEmail,
     businessName: params.businessName,
   });
+
+  const subscriptionId =
+    params.subscriptionId ??
+    (
+      await prisma.subscription.findUnique({
+        where: { businessId: params.businessId },
+        select: { id: true },
+      })
+    )?.id ??
+    null;
 
   const stripe = getStripeClient();
   const trialEligible =
@@ -128,7 +161,9 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
-      [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
+      ...(subscriptionId
+        ? { [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: subscriptionId }
+        : {}),
       [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
       [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
     },
@@ -148,7 +183,9 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
     subscription_data: subscriptionData,
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,
-      [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: params.subscriptionId,
+      ...(subscriptionId
+        ? { [BILLING_CHECKOUT_METADATA_KEYS.subscriptionId]: subscriptionId }
+        : {}),
       [BILLING_CHECKOUT_METADATA_KEYS.planKey]: params.planKey,
       [BILLING_CHECKOUT_METADATA_KEYS.source]: "platform_checkout",
     },

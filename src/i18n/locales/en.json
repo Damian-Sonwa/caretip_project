@@ -1933,6 +1933,18 @@
     "businessDashboardSubtitle": "Business dashboard",
     "viewAll": "View all"
   },
+  "sponsored": {
+    "programmes": {
+      "freelancer_support": "Freelancer Support Programme",
+      "midwife_support": "Midwife Support Programme",
+      "generic": "CareTip Sponsored Access Programme"
+    },
+    "profiles": {
+      "starter": "Starter",
+      "business": "Business",
+      "enterprise": "Enterprise"
+    }
+  },
   "subscription": {
     "tiers": {
       "basic": "Starter",
@@ -1947,7 +1959,36 @@
       "includesAria": "Included with upgrade",
       "currentPlan": "You are on {{plan}}. Upgrade to {{required}} to unlock this."
     },
+    "activation": {
+      "noPlan": "No active plan",
+      "eyebrow": "Activate CareTip",
+      "title": "Choose how you want to get started",
+      "body": "Your venue is ready. Start a free trial or subscribe to unlock analytics, QR tools, and team features.",
+      "trialCta": "Start 4-Week Trial",
+      "trialHint": "Business plan · card required",
+      "starterCta": "Subscribe to Starter",
+      "starterHint": "Essential tipping tools",
+      "businessCta": "Subscribe to Business",
+      "businessHint": "Advanced analytics & QR",
+      "billingNote": "Compare plans and manage billing anytime in",
+      "billingLink": "Billing settings",
+      "activateCta": "Activate CareTip",
+      "billingCompactTitle": "Choose a plan to get started",
+      "resolvingEntitlements": "Preparing your dashboard…",
+      "preview": {
+        "sectionAria": "Dashboard preview — unlock with a subscription",
+        "lead": "Preview of your dashboard once CareTip is activated.",
+        "sampleData": "Sample preview",
+        "avgTip": "Avg. tip",
+        "perGuest": "Per guest · preview",
+        "topPerformers": "Top performers",
+        "qrStudio": "QR Studio",
+        "feedback": "Customer feedback",
+        "footer": "Sample data shown — activate to start tracking real tips and team performance."
+      }
+    },
     "upgrade": {
+      "premiumPlan": "Premium Plan",
       "upgradeToPremium": "Upgrade to Premium",
       "contactSales": "Contact sales"
     },
@@ -1976,17 +2017,66 @@
       "multiLocation": {
         "title": "Multi-location support",
         "benefit": "Manage tipping across multiple venues from one dashboard.",
-        "f0": "Unlimited locations on Premium",
+        "f0": "Unlimited locations on Business",
         "f1": "Per-location QR codes",
         "f2": "Location-level reporting"
       },
       "tableQr": {
-        "title": "Table QR & advanced QR management",
-        "benefit": "Let guests tip by table and manage advanced QR workflows.",
+        "title": "Table QR codes",
+        "benefit": "Let guests tip by table with dedicated QR codes.",
         "f0": "Table-level QR codes",
-        "f1": "Print-ready branded QR assets",
-        "f2": "Table assignment for staff",
-        "f3": "Advanced QR hub tools"
+        "f1": "Table assignment for staff",
+        "f2": "Print-ready table assets",
+        "f3": "Starter includes one table"
+      },
+      "employeeQr": {
+        "title": "Employee QR codes",
+        "benefit": "Personal tipping QR codes for every team member.",
+        "f0": "Individual staff QR codes",
+        "f1": "Download and print assets",
+        "f2": "Included on Starter"
+      },
+      "locationQr": {
+        "title": "Location QR codes",
+        "benefit": "Venue-level QR codes for flexible guest entry points.",
+        "f0": "Per-location QR codes",
+        "f1": "Starter includes one location",
+        "f2": "Upgrade for multi-location"
+      },
+      "teamManagement": {
+        "title": "Team management",
+        "benefit": "Invite, organize, and manage your tipping team.",
+        "f0": "Employee roster",
+        "f1": "Roles and activation",
+        "f2": "Included on Starter"
+      },
+      "customerFeedback": {
+        "title": "Customer feedback",
+        "benefit": "Collect ratings, reviews, and guest sentiment after every tipping experience.",
+        "f0": "Customer ratings",
+        "f1": "Guest reviews",
+        "f2": "Sentiment insights"
+      },
+      "tipManagement": {
+        "title": "Tip management",
+        "benefit": "Track live tips, transactions, and payouts.",
+        "f0": "Live tip feed",
+        "f1": "Transaction history",
+        "f2": "Included on Starter"
+      },
+      "basicAnalytics": {
+        "title": "Basic analytics",
+        "benefit": "Essential dashboard metrics for day-to-day operations.",
+        "f0": "Period summaries",
+        "f1": "Team overview metrics",
+        "f2": "Included on Starter"
+      },
+      "qrTemplates": {
+        "title": "QR templates",
+        "benefit": "Choose from premium QR design templates for your brand.",
+        "f0": "Template library",
+        "f1": "Live preview",
+        "f2": "Business plan and above"
       },
       "employeeGoals": {
         "title": "Employee tip goals",
@@ -3166,7 +3256,9 @@
       "action": "Fix QR links"
     },
     "shell": {
-      "demoRibbon": "Walkthrough demo: sample venue, staff, tables, and tips are for product tours only and do not affect other accounts."
+      "demoRibbon": "Walkthrough demo: sample venue, staff, tables, and tips are for product tours only and do not affect other accounts.",
+      "sidebarAria": "Business dashboard navigation",
+      "navAria": "Main navigation"
     },
     "onboarding": {
       "toastSessionExpired": "Your session expired. Please sign in again.",
@@ -3370,6 +3462,7 @@
       "analyticsSectionTitle": "Period analytics",
       "analyticsSectionDesc": "Metrics and charts for {{period}}.",
       "analyticsPeriodAria": "Select analytics period",
+      "backToCareTip": "Back to CareTip",
       "impersonationBanner": "Support mode: you are viewing this venue as the manager.",
       "exitImpersonation": "Exit to Platform Admin",
       "fixVerificationTitle": "Business verification pending",
@@ -3822,6 +3915,21 @@
         "branding": "Branding",
         "downloads": "Downloads"
       },
+      "access": {
+        "subscriptionTitle": "Activate your subscription",
+        "subscriptionBody": "Choose a plan or start your free trial to unlock QR Studio and generate codes for your team.",
+        "viewPlans": "View Plans",
+        "verificationTitle": "Complete business verification",
+        "verificationBody": "Finish verifying your business so you can generate live QR codes for guests.",
+        "continueVerification": "Continue verification",
+        "checklistTitle": "Get ready to generate QR codes",
+        "checklistBody": "Complete these steps to unlock QR Studio for your venue.",
+        "checklist": {
+          "subscription": "Activate your subscription",
+          "verification": "Complete business verification",
+          "generate": "Start generating QR codes"
+        }
+      },
       "gallery": {
         "inventoryTitle": "Your QR library",
         "inventoryDesc": "Counts across employee, location, and table codes.",
@@ -4113,6 +4221,12 @@
         "goals": "Goals",
         "performance": "Performance",
         "topPerformers": "Leaderboard"
+      },
+      "upgradeNotice": {
+        "eyebrow": "Grow your team",
+        "title": "Invite staff after activation",
+        "body": "Activate your subscription to invite employees and generate QR codes for your team.",
+        "viewPlans": "View Plans"
       },
       "goalsDesc": "Team tip goals and milestones.",
       "performanceDesc": "What matters now: health, risks, opportunities, and recommended actions. Full reporting lives in Analytics.",
@@ -4466,8 +4580,12 @@
       "toastWelcomeMax": "Welcome message must be 120 characters or fewer.",
       "toastThankYouMax": "Thank-you message must be 250 characters or fewer.",
       "identityTitle": "Brand identity",
-      "identityDesc": "How your venue appears on QR codes and guest tipping pages.",
-      "displayNameLabel": "Display name",
+      "identityDesc": "Tagline and visual cues shown on QR codes and guest tipping pages.",
+      "businessIdentityTitle": "Business identity",
+      "businessIdentityDesc": "How guests see your venue name across the CareTip experience.",
+      "displayNameLabel": "Display business name",
+      "displayNameHelper": "This name is shown throughout your CareTip experience and can differ from your registered legal business name.",
+      "displayNameExamples": "Examples: Mike's Café, Bella Restaurant, Emma Hair Studio",
       "taglineLabel": "Tagline",
       "taglinePlaceholder": "Exceptional service, every visit",
       "toastDisplayNameMax": "Display name must be 80 characters or fewer.",
@@ -4559,6 +4677,11 @@
       "retry": "Try again",
       "emptyStateTitle": "You are currently on the CareTip Starter plan.",
       "emptyStateBody": "Upgrade to Premium for advanced analytics, CSV exports, table QR, and more.",
+      "noActiveSubscriptionTitle": "No active subscription",
+      "noActiveSubscriptionBody": "Choose a plan to unlock CareTip features for your venue. You can start with a trial or subscribe directly.",
+      "sponsoredAccessTitle": "Sponsored access",
+      "sponsoredAccessBody": "Your access is provided through the CareTip Sponsored Access Programme.",
+      "sponsoredAccessProgramme": "Programme: {{programme}}",
       "currentPlan": "Current plan",
       "stripeBillingActive": "Stripe billing active",
       "yes": "Yes",
@@ -4602,6 +4725,14 @@
       "perMonthBilledYearly": "per month ({{total}} billed yearly)",
       "checkoutSuccess": "Subscription updated. Changes may take a moment to appear.",
       "checkoutCanceled": "Checkout canceled. No changes were made.",
+      "activationToast": {
+        "trialTitle": "Trial started",
+        "trialBody": "🎉 Your 4-week {{plan}} trial is now active.",
+        "subscriptionTitle": "Subscription activated",
+        "subscriptionBody": "🎉 Your {{plan}} subscription is now active.",
+        "planUpdatedTitle": "Plan updated",
+        "planUpdatedBody": "Your subscription has been updated successfully."
+      },
       "subscriptionSuccess": {
         "pollingTitle": "Activating your subscription…",
         "pollingBody": "We're confirming your payment with Stripe. This usually takes a few seconds.",
@@ -5205,7 +5336,48 @@
       "subscriptionTierPremium": "Premium",
       "subscriptionTierEnterprise": "Enterprise",
       "saveSubscriptionTier": "Save plan tier",
-      "toastSubscriptionTierSaved": "Plan tier updated."
+      "toastSubscriptionTierSaved": "Plan tier updated.",
+      "sponsoredAccess": {
+        "title": "Sponsored Access",
+        "subtitle": "Separate from paid subscriptions and Stripe. Grants capabilities through the entitlement resolver.",
+        "statusLabel": "Status",
+        "programmeLabel": "Programme",
+        "profileLabel": "Capability profile",
+        "grantedByLabel": "Granted by",
+        "grantedOnLabel": "Granted on",
+        "expiresLabel": "Expires",
+        "notesLabel": "Notes",
+        "never": "Never",
+        "statusNone": "None",
+        "status": {
+          "pending": "Pending",
+          "active": "Active",
+          "revoked": "Revoked",
+          "expired": "Expired"
+        },
+        "grantCta": "Grant Sponsored Access",
+        "editCta": "Edit",
+        "revokeCta": "Revoke",
+        "activateCta": "Activate",
+        "grantModalTitle": "Grant Sponsored Access",
+        "editModalTitle": "Edit Sponsored Access",
+        "modalDescription": "Configure programme and capability profile. Access takes effect immediately when granted.",
+        "fieldProgramme": "Programme",
+        "fieldProfile": "Capability profile",
+        "fieldExpiry": "Expiry date (optional)",
+        "fieldExpiryHint": "Leave blank for no expiry.",
+        "fieldNotes": "Internal notes (optional)",
+        "fieldNotesPlaceholder": "Approval context, partner reference, etc.",
+        "profileCustomFuture": "Custom profile (coming soon)",
+        "saveChanges": "Save changes",
+        "saving": "Saving…",
+        "revokeConfirm": "Revoke this sponsored access grant? The business will return to the normal subscription flow.",
+        "toastGranted": "Sponsored access granted.",
+        "toastUpdated": "Sponsored access updated.",
+        "toastRevoked": "Sponsored access revoked.",
+        "toastActivated": "Sponsored access activated.",
+        "toastProgrammeRequired": "Select a programme."
+      }
     },
     "fallbackAdminName": "Admin"
   }

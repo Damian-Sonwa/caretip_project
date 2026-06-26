@@ -14,6 +14,10 @@ import {
   createSubscriptionAuditEventData,
   findSubscriptionForStripeBilling,
 } from "./subscription.service.js";
+import {
+  activateSubscriptionMirrorFromStripeSubscription,
+  clearRetryableIgnoredBillingWebhook,
+} from "./subscriptionActivation.service.js";
 import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 
 const BILLING_EVENT_TYPES = new Set<string>([
@@ -35,9 +39,20 @@ export function isSubscriptionCheckoutSession(session: Stripe.Checkout.Session):
 async function isBillingWebhookDuplicate(stripeEventId: string): Promise<boolean> {
   const row = await prisma.subscriptionEvent.findUnique({
     where: { stripeEventId },
-    select: { id: true },
+    select: { id: true, processingResult: true, payload: true },
   });
-  return Boolean(row);
+  if (!row) return false;
+
+  const payload = row.payload as { reason?: string } | null;
+  if (
+    row.processingResult === SubscriptionEventProcessingResult.ignored &&
+    payload?.reason === "subscription_row_not_found"
+  ) {
+    await clearRetryableIgnoredBillingWebhook(stripeEventId);
+    return false;
+  }
+
+  return true;
 }
 
 async function recordIgnoredBillingEvent(params: {
@@ -129,20 +144,20 @@ async function handleSubscriptionLifecycleEvent(
   event: Stripe.Event,
   sub: Stripe.Subscription,
   auditType: (typeof STRIPE_BILLING_AUDIT_TYPES)[keyof typeof STRIPE_BILLING_AUDIT_TYPES],
+  source:
+    | "webhook_subscription_created"
+    | "webhook_subscription_updated"
+    | "webhook_subscription_deleted",
 ): Promise<void> {
-  logTrialSync("webhook.subscription_lifecycle.start", {
-    stripeEventId: event.id,
-    auditType,
-    stripeSubscriptionId: sub.id,
-    stripeStatus: sub.status,
-    trialEnd: sub.trial_end ?? null,
-  });
-
-  const row = await resolveSubscriptionRow(sub);
-  if (!row) {
+  const meta = metadataLookup(sub.metadata);
+  const businessId = meta.caretipBusinessId;
+  if (!businessId) {
     logTrialSync("webhook.subscription_lifecycle.stop", {
-      reason: "subscription_row_not_found",
+      source,
+      outcome: "ignored",
+      reason: "missing_caretipBusinessId_on_subscription",
       stripeSubscriptionId: sub.id,
+      stripeEventId: event.id,
     });
     await recordIgnoredBillingEvent({
       stripeEventId: event.id,
@@ -152,43 +167,21 @@ async function handleSubscriptionLifecycleEvent(
     return;
   }
 
-  logTrialSync("webhook.subscription_lifecycle.row_resolved", {
-    subscriptionRowId: row.id,
-    businessId: row.businessId,
-  });
-
-  const snapshot = buildMirrorSnapshotFromStripeSubscription(sub);
-
-  logTrialSync("webhook.subscription_lifecycle.snapshot_built", {
-    status: snapshot.status,
-    planKey: snapshot.planKey,
-    isTrial: snapshot.isTrial,
-    trialStartedAt: snapshot.trialStartedAt?.toISOString() ?? null,
-    trialEndsAt: snapshot.trialEndsAt?.toISOString() ?? null,
-    stripePriceId: snapshot.stripePriceId,
-  });
-
-  await applyStripeMirrorTransactional({
-    subscriptionRowId: row.id,
-    businessId: row.businessId,
-    snapshot,
+  const outcome = await activateSubscriptionMirrorFromStripeSubscription({
+    businessId,
+    sub,
     auditType,
     stripeEventId: event.id,
-    auditPayload: {
-      stripeSubscriptionId: sub.id,
-      stripeStatus: sub.status,
-      planKey: snapshot.planKey,
-      status: snapshot.status,
-      cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
-      cancellationEffective: snapshot.cancellationEffective?.toISOString() ?? null,
-    },
+    source,
   });
 
-  logTrialSync("webhook.subscription_lifecycle.mirror_applied", {
-    businessId: row.businessId,
-    subscriptionRowId: row.id,
-    auditType,
-  });
+  if (outcome === "ignored") {
+    await recordIgnoredBillingEvent({
+      stripeEventId: event.id,
+      auditType,
+      payload: { reason: "activation_ignored", stripeSubscriptionId: sub.id, source },
+    });
+  }
 }
 
 async function handleInvoicePaymentSucceeded(event: Stripe.Event, invoice: Stripe.Invoice): Promise<void> {
@@ -290,79 +283,60 @@ async function handleSubscriptionCheckoutCompleted(
     caretipBusinessId: meta.caretipBusinessId,
     caretipSubscriptionId: meta.caretipSubscriptionId,
     caretipPlanKey: meta.caretipPlanKey,
+    mirrorExisted: Boolean(
+      await findSubscriptionForStripeBilling({
+        stripeSubscriptionId: stripeSubId,
+        stripeCustomerId: customerIdFromStripeObject(session.customer),
+        caretipBusinessId: meta.caretipBusinessId,
+        caretipSubscriptionId: meta.caretipSubscriptionId,
+      }),
+    ),
   });
 
-  const row = await findSubscriptionForStripeBilling({
-    stripeSubscriptionId: stripeSubId,
-    stripeCustomerId: customerIdFromStripeObject(session.customer),
-    caretipBusinessId: meta.caretipBusinessId,
-    caretipSubscriptionId: meta.caretipSubscriptionId,
-  });
-
-  if (!row) {
+  if (!meta.caretipBusinessId) {
     logTrialSync("webhook.checkout_completed.stop", {
-      reason: "subscription_row_not_found",
+      outcome: "ignored",
+      reason: "missing_caretipBusinessId_on_session",
       sessionId: session.id,
     });
     await recordIgnoredBillingEvent({
       stripeEventId: event.id,
       auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
-      payload: { reason: "subscription_row_not_found", sessionId: session.id },
+      payload: { reason: "missing_caretipBusinessId", sessionId: session.id },
     });
     return;
   }
 
-  if (stripeSubId) {
-    const existing = await prisma.subscriptionEvent.findFirst({
-      where: {
-        subscriptionId: row.id,
-        auditType: STRIPE_BILLING_AUDIT_TYPES.subscriptionCreated,
-      },
-      select: { id: true },
+  if (!stripeSubId) {
+    logTrialSync("webhook.checkout_completed.stop", {
+      outcome: "ignored",
+      reason: "missing_stripe_subscription_on_session",
+      sessionId: session.id,
     });
-    if (existing) {
-      logTrialSync("webhook.checkout_completed.stop", {
-        reason: "subscription_created_already_processed",
-        subscriptionRowId: row.id,
-        sessionId: session.id,
-      });
-      await recordIgnoredBillingEvent({
-        stripeEventId: event.id,
-        auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
-        payload: { reason: "subscription_created_already_processed", sessionId: session.id },
-        subscriptionId: row.id,
-      });
-      return;
-    }
-  }
-
-  if (stripeSubId) {
-    const stripe = getStripeClient();
-    const sub = await stripe.subscriptions.retrieve(stripeSubId);
-    await handleSubscriptionLifecycleEvent(event, sub, STRIPE_BILLING_AUDIT_TYPES.subscriptionCreated);
+    await recordIgnoredBillingEvent({
+      stripeEventId: event.id,
+      auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
+      payload: { reason: "missing_stripe_subscription", sessionId: session.id },
+    });
     return;
   }
 
-  await prisma.subscriptionEvent.create({
-    data: {
-      subscriptionId: row.id,
-      ...createSubscriptionAuditEventData({
-        auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
-        payload: { sessionId: session.id, mode: session.mode },
-        stripeEventId: event.id,
-        processingResult: SubscriptionEventProcessingResult.processed,
-      }),
-    },
+  const stripe = getStripeClient();
+  const sub = await stripe.subscriptions.retrieve(stripeSubId);
+  const outcome = await activateSubscriptionMirrorFromStripeSubscription({
+    businessId: meta.caretipBusinessId,
+    sub,
+    auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
+    stripeEventId: event.id,
+    source: "webhook_checkout_completed",
   });
 
-  if (session.customer) {
-    const customerId = customerIdFromStripeObject(session.customer);
-    if (customerId) {
-      await prisma.subscription.update({
-        where: { id: row.id },
-        data: { stripeCustomerId: customerId },
-      });
-    }
+  if (outcome === "ignored") {
+    await recordIgnoredBillingEvent({
+      stripeEventId: event.id,
+      auditType: STRIPE_BILLING_AUDIT_TYPES.checkoutSessionCompleted,
+      payload: { reason: "activation_ignored", sessionId: session.id, outcome },
+    });
   }
 }
 
@@ -370,17 +344,32 @@ async function dispatchBillingEvent(event: Stripe.Event): Promise<void> {
   switch (event.type) {
     case "customer.subscription.created": {
       const sub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionLifecycleEvent(event, sub, STRIPE_BILLING_AUDIT_TYPES.subscriptionCreated);
+      await handleSubscriptionLifecycleEvent(
+        event,
+        sub,
+        STRIPE_BILLING_AUDIT_TYPES.subscriptionCreated,
+        "webhook_subscription_created",
+      );
       return;
     }
     case "customer.subscription.updated": {
       const sub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionLifecycleEvent(event, sub, STRIPE_BILLING_AUDIT_TYPES.subscriptionUpdated);
+      await handleSubscriptionLifecycleEvent(
+        event,
+        sub,
+        STRIPE_BILLING_AUDIT_TYPES.subscriptionUpdated,
+        "webhook_subscription_updated",
+      );
       return;
     }
     case "customer.subscription.deleted": {
       const sub = event.data.object as Stripe.Subscription;
-      await handleSubscriptionLifecycleEvent(event, sub, STRIPE_BILLING_AUDIT_TYPES.subscriptionDeleted);
+      await handleSubscriptionLifecycleEvent(
+        event,
+        sub,
+        STRIPE_BILLING_AUDIT_TYPES.subscriptionDeleted,
+        "webhook_subscription_deleted",
+      );
       return;
     }
     case "invoice.payment_succeeded": {

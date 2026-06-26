@@ -16,6 +16,21 @@ import { removeUploadedObjectByPublicUrlIfPossible } from "../lib/supabaseStorag
 import { sanitizeIanaTimezone, DEFAULT_BUSINESS_TIMEZONE } from "../utils/businessTime.js";
 import { DateTime } from "luxon";
 import { isPrismaPoolTimeout } from "../utils/prismaErrors.js";
+import {
+  SPONSORED_CAPABILITY_PROFILE_KEYS,
+  SPONSORED_PROGRAMMES,
+  isSponsoredCapabilityProfileKey,
+  isSponsoredProgrammeKey,
+  type SponsoredCapabilityProfileKey,
+  type SponsoredProgrammeKey,
+} from "../config/sponsoredAccess.config.js";
+import {
+  activateSponsoredAccessGrant,
+  createSponsoredAccessGrant,
+  listSponsoredGrantsForBusiness,
+  revokeSponsoredAccessGrant,
+  updateSponsoredAccessGrant,
+} from "../services/sponsoredAccess.service.js";
 
 export async function getKycQueueMetrics(_req: Request, res: Response) {
   try {
@@ -466,6 +481,187 @@ export async function getCommercialIntelligence(_req: Request, res: Response) {
     logServerError("platform.getCommercialIntelligence", err, { ms: Date.now() - startedAt });
     return res.status(500).json({
       message: clientSafeMessage(err, "We couldn't load commercial intelligence."),
+    });
+  }
+}
+
+export async function listSponsoredProgrammes(_req: Request, res: Response) {
+  return res.json({
+    programmes: Object.values(SPONSORED_PROGRAMMES).map((p) => ({
+      programmeKey: p.programmeKey,
+      profileKey: p.profileKey,
+      labelKey: p.labelKey,
+    })),
+    capabilityProfiles: SPONSORED_CAPABILITY_PROFILE_KEYS.map((profileKey) => ({
+      profileKey,
+      labelKey: `sponsored.profiles.${profileKey}`,
+    })),
+  });
+}
+
+export async function listBusinessSponsoredAccess(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const business = await prisma.business.findUnique({ where: { id }, select: { id: true } });
+    if (!business) return res.status(404).json({ message: "Business not found" });
+    const grants = await listSponsoredGrantsForBusiness(id);
+    return res.json({ grants });
+  } catch (err) {
+    logServerError("platform.listBusinessSponsoredAccess", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load sponsored access grants."),
+    });
+  }
+}
+
+export async function createBusinessSponsoredAccess(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const business = await prisma.business.findUnique({ where: { id }, select: { id: true } });
+    if (!business) return res.status(404).json({ message: "Business not found" });
+
+    const body = req.body as Record<string, unknown>;
+    const programmeKey = typeof body.programmeKey === "string" ? body.programmeKey.trim() : "";
+    if (!isSponsoredProgrammeKey(programmeKey)) {
+      return res.status(400).json({ message: "programmeKey must be a registered sponsored programme" });
+    }
+
+    const actorUserId = req.user?.userId ?? req.user?.id;
+    const activate = body.activate !== false;
+    const notes = typeof body.notes === "string" ? body.notes : null;
+    const capabilityProfileRaw =
+      typeof body.capabilityProfileKey === "string" ? body.capabilityProfileKey.trim() : null;
+    const capabilityProfileKey =
+      capabilityProfileRaw && isSponsoredCapabilityProfileKey(capabilityProfileRaw)
+        ? (capabilityProfileRaw as SponsoredCapabilityProfileKey)
+        : null;
+    const expiresAtRaw = typeof body.expiresAt === "string" ? body.expiresAt.trim() : null;
+    const expiresAt = expiresAtRaw ? new Date(expiresAtRaw) : null;
+    if (expiresAtRaw && Number.isNaN(expiresAt?.getTime())) {
+      return res.status(400).json({ message: "expiresAt must be a valid ISO date" });
+    }
+
+    const grant = await createSponsoredAccessGrant({
+      businessId: id,
+      programmeKey: programmeKey as SponsoredProgrammeKey,
+      capabilityProfileKey,
+      notes,
+      expiresAt,
+      activate,
+      approvedByUserId: activate ? actorUserId ?? null : null,
+    });
+    return res.status(201).json({ grant });
+  } catch (err) {
+    logServerError("platform.createBusinessSponsoredAccess", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't create the sponsored access grant."),
+    });
+  }
+}
+
+export async function activateBusinessSponsoredAccess(req: Request, res: Response) {
+  try {
+    const { id, grantId } = req.params;
+    if (!id || !grantId) return res.status(400).json({ message: "id and grantId are required" });
+    const actorUserId = req.user?.userId ?? req.user?.id;
+    if (!actorUserId) return res.status(401).json({ message: "Authentication required" });
+
+    const grant = await prisma.sponsoredAccessGrant.findFirst({
+      where: { id: grantId, businessId: id },
+      select: { id: true },
+    });
+    if (!grant) return res.status(404).json({ message: "Sponsored access grant not found" });
+
+    const updated = await activateSponsoredAccessGrant(grantId, actorUserId);
+    return res.json({ grant: updated });
+  } catch (err) {
+    logServerError("platform.activateBusinessSponsoredAccess", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't activate sponsored access."),
+    });
+  }
+}
+
+export async function revokeBusinessSponsoredAccess(req: Request, res: Response) {
+  try {
+    const { id, grantId } = req.params;
+    if (!id || !grantId) return res.status(400).json({ message: "id and grantId are required" });
+
+    const grant = await prisma.sponsoredAccessGrant.findFirst({
+      where: { id: grantId, businessId: id },
+      select: { id: true },
+    });
+    if (!grant) return res.status(404).json({ message: "Sponsored access grant not found" });
+
+    const updated = await revokeSponsoredAccessGrant(grantId);
+    return res.json({ grant: updated });
+  } catch (err) {
+    logServerError("platform.revokeBusinessSponsoredAccess", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't revoke sponsored access."),
+    });
+  }
+}
+
+export async function updateBusinessSponsoredAccess(req: Request, res: Response) {
+  try {
+    const { id, grantId } = req.params;
+    if (!id || !grantId) return res.status(400).json({ message: "id and grantId are required" });
+
+    const grant = await prisma.sponsoredAccessGrant.findFirst({
+      where: { id: grantId, businessId: id },
+      select: { id: true },
+    });
+    if (!grant) return res.status(404).json({ message: "Sponsored access grant not found" });
+
+    const body = req.body as Record<string, unknown>;
+    const updates: Parameters<typeof updateSponsoredAccessGrant>[1] = {};
+
+    if (typeof body.programmeKey === "string") {
+      const programmeKey = body.programmeKey.trim();
+      if (!isSponsoredProgrammeKey(programmeKey)) {
+        return res.status(400).json({ message: "programmeKey must be a registered sponsored programme" });
+      }
+      updates.programmeKey = programmeKey as SponsoredProgrammeKey;
+    }
+
+    if (body.capabilityProfileKey === null) {
+      updates.capabilityProfileKey = null;
+    } else if (typeof body.capabilityProfileKey === "string") {
+      const profileKey = body.capabilityProfileKey.trim();
+      if (!isSponsoredCapabilityProfileKey(profileKey)) {
+        return res.status(400).json({ message: "capabilityProfileKey must be starter, business, or enterprise" });
+      }
+      updates.capabilityProfileKey = profileKey as SponsoredCapabilityProfileKey;
+    }
+
+    if (typeof body.notes === "string") {
+      updates.notes = body.notes;
+    }
+
+    if (body.clearExpiresAt === true) {
+      updates.clearExpiresAt = true;
+    } else if (typeof body.expiresAt === "string") {
+      const expiresAtRaw = body.expiresAt.trim();
+      if (!expiresAtRaw) {
+        updates.clearExpiresAt = true;
+      } else {
+        const expiresAt = new Date(expiresAtRaw);
+        if (Number.isNaN(expiresAt.getTime())) {
+          return res.status(400).json({ message: "expiresAt must be a valid ISO date" });
+        }
+        updates.expiresAt = expiresAt;
+      }
+    }
+
+    const updated = await updateSponsoredAccessGrant(grantId, updates);
+    return res.json({ grant: updated });
+  } catch (err) {
+    logServerError("platform.updateBusinessSponsoredAccess", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't update sponsored access."),
     });
   }
 }

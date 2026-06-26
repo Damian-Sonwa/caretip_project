@@ -1935,6 +1935,18 @@
     "businessDashboardSubtitle": "Unternehmensdashboard",
     "viewAll": "Alle anzeigen"
   },
+  "sponsored": {
+    "programmes": {
+      "freelancer_support": "Freelancer-Förderprogramm",
+      "midwife_support": "Hebammen-Förderprogramm",
+      "generic": "CareTip-Programm für geförderten Zugang"
+    },
+    "profiles": {
+      "starter": "Starter",
+      "business": "Business",
+      "enterprise": "Enterprise"
+    }
+  },
   "subscription": {
     "tiers": {
       "basic": "Starter",
@@ -1949,7 +1961,36 @@
       "includesAria": "Im Upgrade enthalten",
       "currentPlan": "Sie nutzen {{plan}}. Upgrade auf {{required}}, um dies freizuschalten."
     },
+    "activation": {
+      "noPlan": "Kein aktiver Plan",
+      "eyebrow": "CareTip aktivieren",
+      "title": "Wählen Sie, wie Sie starten möchten",
+      "body": "Ihr Betrieb ist bereit. Starten Sie eine Testphase oder abonnieren Sie, um Analysen, QR-Tools und Teamfunktionen freizuschalten.",
+      "trialCta": "4-Wochen-Test starten",
+      "trialHint": "Business-Plan · Karte erforderlich",
+      "starterCta": "Starter abonnieren",
+      "starterHint": "Grundlegende Trinkgeld-Tools",
+      "businessCta": "Business abonnieren",
+      "businessHint": "Erweiterte Analysen & QR",
+      "billingNote": "Pläne vergleichen und Abrechnung jederzeit unter",
+      "billingLink": "Abrechnungseinstellungen",
+      "activateCta": "CareTip aktivieren",
+      "billingCompactTitle": "Wählen Sie einen Plan zum Start",
+      "resolvingEntitlements": "Dashboard wird vorbereitet…",
+      "preview": {
+        "sectionAria": "Dashboard-Vorschau — mit Abonnement freischalten",
+        "lead": "Vorschau Ihres Dashboards nach der CareTip-Aktivierung.",
+        "sampleData": "Beispielvorschau",
+        "avgTip": "Ø Trinkgeld",
+        "perGuest": "Pro Gast · Vorschau",
+        "topPerformers": "Top-Performer",
+        "qrStudio": "QR-Studio",
+        "feedback": "Kundenfeedback",
+        "footer": "Beispieldaten. Aktivieren Sie CareTip für echte Tipps und Team-Insights."
+      }
+    },
     "upgrade": {
+      "premiumPlan": "Premium-Tarif",
       "upgradeToPremium": "Auf Premium upgraden",
       "contactSales": "Vertrieb kontaktieren"
     },
@@ -1978,17 +2019,66 @@
       "multiLocation": {
         "title": "Multi-Standort-Unterstützung",
         "benefit": "Trinkgeld an mehreren Standorten aus einem Dashboard verwalten.",
-        "f0": "Unbegrenzte Standorte mit Premium",
+        "f0": "Unbegrenzte Standorte mit Business",
         "f1": "QR-Codes pro Standort",
         "f2": "Berichte pro Standort"
       },
       "tableQr": {
-        "title": "Tisch-QR & erweiterte QR-Verwaltung",
-        "benefit": "Gäste tippen am Tisch mit erweiterten QR-Workflows.",
+        "title": "Tisch-QR-Codes",
+        "benefit": "Gäste tippen am Tisch mit eigenen QR-Codes.",
         "f0": "QR-Codes pro Tisch",
-        "f1": "Druckfertige Marken-QR-Assets",
-        "f2": "Tischzuweisung für Mitarbeitende",
-        "f3": "Erweiterte QR-Hub-Tools"
+        "f1": "Tischzuweisung für Mitarbeitende",
+        "f2": "Druckfertige Tisch-Assets",
+        "f3": "Starter enthält einen Tisch"
+      },
+      "employeeQr": {
+        "title": "Mitarbeiter-QR-Codes",
+        "benefit": "Persönliche Trinkgeld-QR-Codes für jedes Teammitglied.",
+        "f0": "Individuelle Mitarbeiter-QR-Codes",
+        "f1": "Download und Druck",
+        "f2": "Im Starter enthalten"
+      },
+      "locationQr": {
+        "title": "Standort-QR-Codes",
+        "benefit": "QR-Codes auf Standortebene für flexible Einstiegspunkte.",
+        "f0": "QR-Codes pro Standort",
+        "f1": "Starter enthält einen Standort",
+        "f2": "Upgrade für mehrere Standorte"
+      },
+      "teamManagement": {
+        "title": "Teamverwaltung",
+        "benefit": "Trinkgeld-Team einladen, organisieren und verwalten.",
+        "f0": "Mitarbeiterliste",
+        "f1": "Rollen und Aktivierung",
+        "f2": "Im Starter enthalten"
+      },
+      "customerFeedback": {
+        "title": "Kundenfeedback",
+        "benefit": "Bewertungen, Rezensionen und Gästestimmung nach jedem Trinkgelderlebnis sammeln.",
+        "f0": "Kundenbewertungen",
+        "f1": "Gästerezensionen",
+        "f2": "Stimmungs-Insights"
+      },
+      "tipManagement": {
+        "title": "Trinkgeldverwaltung",
+        "benefit": "Live-Trinkgelder, Transaktionen und Auszahlungen verfolgen.",
+        "f0": "Live-Trinkgeld-Feed",
+        "f1": "Transaktionsverlauf",
+        "f2": "Im Starter enthalten"
+      },
+      "basicAnalytics": {
+        "title": "Basis-Analysen",
+        "benefit": "Wesentliche Dashboard-Metriken für den Alltag.",
+        "f0": "Zeitraum-Zusammenfassungen",
+        "f1": "Team-Übersichtsmetriken",
+        "f2": "Im Starter enthalten"
+      },
+      "qrTemplates": {
+        "title": "QR-Vorlagen",
+        "benefit": "Premium-QR-Designvorlagen für Ihre Marke.",
+        "f0": "Vorlagenbibliothek",
+        "f1": "Live-Vorschau",
+        "f2": "Business-Tarif und höher"
       },
       "employeeGoals": {
         "title": "Trinkgeldziele für Mitarbeitende",
@@ -3168,7 +3258,9 @@
       "action": "QR Links beheben"
     },
     "shell": {
-      "demoRibbon": "Demo-Tour: Beispielbetrieb, Team, Tische und Trinkgelder dienen nur Produkttouren und betreffen keine anderen Konten."
+      "demoRibbon": "Demo-Tour: Beispielbetrieb, Team, Tische und Trinkgelder dienen nur Produkttouren und betreffen keine anderen Konten.",
+      "sidebarAria": "Unternehmens-Dashboard-Navigation",
+      "navAria": "Hauptnavigation"
     },
     "onboarding": {
       "toastSessionExpired": "Ihre Sitzung ist abgelaufen. Bitte melden Sie sich erneut an.",
@@ -3372,6 +3464,7 @@
       "analyticsSectionTitle": "Zeitraum-Analysen",
       "analyticsSectionDesc": "Kennzahlen und Diagramme für {{period}}.",
       "analyticsPeriodAria": "Analysezeitraum wählen",
+      "backToCareTip": "Zurück zu CareTip",
       "impersonationBanner": "Supportmodus: Sie sehen dieses Lokal als Manager.",
       "exitImpersonation": "Zur Plattformadministration",
       "fixVerificationTitle": "Geschäftsverifizierung ausstehend",
@@ -3864,6 +3957,21 @@
         "branding": "Branding",
         "downloads": "Downloads"
       },
+      "access": {
+        "subscriptionTitle": "Abo aktivieren",
+        "subscriptionBody": "Wählen Sie einen Tarif oder starten Sie die Testphase, um QR Studio freizuschalten und Codes für Ihr Team zu erstellen.",
+        "viewPlans": "Tarife ansehen",
+        "verificationTitle": "Unternehmensverifizierung abschließen",
+        "verificationBody": "Schließen Sie die Verifizierung ab, um Live-QR-Codes für Gäste zu erstellen.",
+        "continueVerification": "Verifizierung fortsetzen",
+        "checklistTitle": "Bereit für QR-Codes",
+        "checklistBody": "Erledigen Sie diese Schritte, um QR Studio für Ihr Lokal freizuschalten.",
+        "checklist": {
+          "subscription": "Abo aktivieren",
+          "verification": "Unternehmensverifizierung abschließen",
+          "generate": "QR-Codes erstellen"
+        }
+      },
       "gallery": {
         "inventoryTitle": "Ihre QR-Bibliothek",
         "inventoryDesc": "Übersicht über Mitarbeiter-, Standort- und Tisch-QR-Codes.",
@@ -4155,6 +4263,12 @@
         "goals": "Ziele",
         "performance": "Performance",
         "topPerformers": "Rangliste"
+      },
+      "upgradeNotice": {
+        "eyebrow": "Team erweitern",
+        "title": "Mitarbeitende nach Aktivierung einladen",
+        "body": "Aktivieren Sie Ihr Abo, um Mitarbeitende einzuladen und QR-Codes für Ihr Team zu erstellen.",
+        "viewPlans": "Tarife ansehen"
       },
       "goalsDesc": "Team-Trinkgeldziele und Meilensteine.",
       "performanceDesc": "Was jetzt zählt: Gesundheit, Risiken, Chancen und empfohlene Maßnahmen. Vollständige Berichte unter Analysen.",
@@ -4468,8 +4582,12 @@
       "toastWelcomeMax": "Willkommensnachricht max. 120 Zeichen.",
       "toastThankYouMax": "Dankesnachricht max. 250 Zeichen.",
       "identityTitle": "Markenidentität",
-      "identityDesc": "So erscheint Ihr Betrieb auf QR-Codes und Gäste-Trinkgeldseiten.",
-      "displayNameLabel": "Anzeigename",
+      "identityDesc": "Tagline und visuelle Hinweise auf QR-Codes und Gäste-Trinkgeldseiten.",
+      "businessIdentityTitle": "Betriebsidentität",
+      "businessIdentityDesc": "So sehen Gäste Ihren Betriebsnamen in der CareTip-Erfahrung.",
+      "displayNameLabel": "Anzeigename des Betriebs",
+      "displayNameHelper": "Dieser Name wird in Ihrer CareTip-Erfahrung angezeigt und kann vom eingetragenen rechtlichen Namen abweichen.",
+      "displayNameExamples": "Beispiele: Mike's Café, Bella Restaurant, Emma Hair Studio",
       "taglineLabel": "Tagline",
       "taglinePlaceholder": "Außergewöhnlicher Service bei jedem Besuch",
       "toastDisplayNameMax": "Anzeigename max. 80 Zeichen.",
@@ -4561,6 +4679,11 @@
       "retry": "Erneut versuchen",
       "emptyStateTitle": "Sie nutzen derzeit den CareTip Starter-Plan.",
       "emptyStateBody": "Upgraden Sie auf Premium für erweiterte Analysen, CSV-Export, Tisch-QR und mehr.",
+      "noActiveSubscriptionTitle": "Kein aktives Abonnement",
+      "noActiveSubscriptionBody": "Wählen Sie einen Plan, um CareTip-Funktionen für Ihren Betrieb freizuschalten. Starten Sie mit einer Testphase oder abonnieren Sie direkt.",
+      "sponsoredAccessTitle": "Geförderter Zugang",
+      "sponsoredAccessBody": "Ihr Zugang wird über das CareTip-Programm für geförderten Zugang bereitgestellt.",
+      "sponsoredAccessProgramme": "Programm: {{programme}}",
       "currentPlan": "Aktueller Plan",
       "stripeBillingActive": "Stripe-Abrechnung aktiv",
       "yes": "Ja",
@@ -4604,6 +4727,14 @@
       "perMonthBilledYearly": "pro Monat ({{total}} jährlich)",
       "checkoutSuccess": "Abo aktualisiert. Änderungen können kurz dauern.",
       "checkoutCanceled": "Checkout abgebrochen. Keine Änderungen.",
+      "activationToast": {
+        "trialTitle": "Testphase gestartet",
+        "trialBody": "🎉 Ihre 4-wöchige {{plan}}-Testphase ist jetzt aktiv.",
+        "subscriptionTitle": "Abo aktiviert",
+        "subscriptionBody": "🎉 Ihr {{plan}}-Abo ist jetzt aktiv.",
+        "planUpdatedTitle": "Tarif aktualisiert",
+        "planUpdatedBody": "Ihr Abo wurde erfolgreich aktualisiert."
+      },
       "subscriptionSuccess": {
         "pollingTitle": "Abo wird aktiviert…",
         "pollingBody": "Wir bestätigen Ihre Zahlung mit Stripe. Das dauert meist nur wenige Sekunden.",
@@ -5207,7 +5338,48 @@
       "subscriptionTierPremium": "Premium",
       "subscriptionTierEnterprise": "Enterprise",
       "saveSubscriptionTier": "Tarif speichern",
-      "toastSubscriptionTierSaved": "Tarif aktualisiert."
+      "toastSubscriptionTierSaved": "Tarif aktualisiert.",
+      "sponsoredAccess": {
+        "title": "Geförderter Zugang",
+        "subtitle": "Getrennt von kostenpflichtigen Abos und Stripe. Gewährt Funktionen über den Entitlement-Resolver.",
+        "statusLabel": "Status",
+        "programmeLabel": "Programm",
+        "profileLabel": "Funktionsprofil",
+        "grantedByLabel": "Gewährt von",
+        "grantedOnLabel": "Gewährt am",
+        "expiresLabel": "Läuft ab",
+        "notesLabel": "Notizen",
+        "never": "Nie",
+        "statusNone": "Keiner",
+        "status": {
+          "pending": "Ausstehend",
+          "active": "Aktiv",
+          "revoked": "Widerrufen",
+          "expired": "Abgelaufen"
+        },
+        "grantCta": "Geförderten Zugang gewähren",
+        "editCta": "Bearbeiten",
+        "revokeCta": "Widerrufen",
+        "activateCta": "Aktivieren",
+        "grantModalTitle": "Geförderten Zugang gewähren",
+        "editModalTitle": "Geförderten Zugang bearbeiten",
+        "modalDescription": "Programm und Funktionsprofil konfigurieren. Der Zugang gilt sofort nach der Gewährung.",
+        "fieldProgramme": "Programm",
+        "fieldProfile": "Funktionsprofil",
+        "fieldExpiry": "Ablaufdatum (optional)",
+        "fieldExpiryHint": "Leer lassen für unbegrenzten Zugang.",
+        "fieldNotes": "Interne Notizen (optional)",
+        "fieldNotesPlaceholder": "Freigabekontext, Partnerreferenz usw.",
+        "profileCustomFuture": "Individuelles Profil (demnächst)",
+        "saveChanges": "Änderungen speichern",
+        "saving": "Speichern…",
+        "revokeConfirm": "Diesen geförderten Zugang widerrufen? Das Unternehmen kehrt zum normalen Abo-Ablauf zurück.",
+        "toastGranted": "Geförderter Zugang gewährt.",
+        "toastUpdated": "Geförderter Zugang aktualisiert.",
+        "toastRevoked": "Geförderter Zugang widerrufen.",
+        "toastActivated": "Geförderter Zugang aktiviert.",
+        "toastProgrammeRequired": "Bitte ein Programm auswählen."
+      }
     },
     "fallbackAdminName": "Admin"
   }

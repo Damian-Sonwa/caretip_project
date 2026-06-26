@@ -25,7 +25,7 @@ export function FeatureGate({
   lockedCardCompact = false,
   lockedCardClassName,
 }: FeatureGateProps) {
-  const { tier, ready, hasFeature } = useSubscriptionEntitlements({
+  const { tier, status, ready, hasFeature } = useSubscriptionEntitlements({
     enabled,
     role,
   });
@@ -41,6 +41,7 @@ export function FeatureGate({
     <LockedFeatureCard
       featureKey={featureKey}
       tier={tier}
+      subscriptionStatus={status}
       compact={lockedCardCompact}
       className={lockedCardClassName}
     />

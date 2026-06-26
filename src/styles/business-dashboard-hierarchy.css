@@ -1,0 +1,224 @@
+/**
+ * Business dashboard page hierarchy — compact heroes, slim status, tighter rhythm.
+ * Scoped to the business shell only; premium tokens elsewhere stay unchanged.
+ */
+
+/* —— Locations sub-page (breadcrumb + hero) —— */
+.caretip-dashboard-shell.business-dashboard .dashboard-subpage-top {
+  padding-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .dashboard-subpage-top {
+    padding-top: 1rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-page {
+  padding-top: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-page {
+    padding-top: 1rem;
+  }
+}
+
+/* —— Compact workspace module heroes —— */
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header.premium-workspace-header {
+  margin-bottom: 0.75rem;
+  padding: 0.875rem 1rem 1rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header.premium-workspace-header {
+    margin-bottom: 0.875rem;
+    padding: 1rem 1.375rem 1.125rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__inner {
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__inner {
+    gap: 0.875rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__identity {
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__identity {
+    gap: 0.625rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__title {
+  font-size: clamp(1.375rem, 4vw, 1.625rem);
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__title {
+    font-size: clamp(1.5rem, 2.5vw, 1.75rem);
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__purpose {
+  margin-top: 0.375rem;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__purpose {
+    margin-top: 0.4375rem;
+    font-size: 0.875rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__icon {
+  height: 2.125rem;
+  width: 2.125rem;
+  border-radius: 0.75rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__title-row {
+  gap: 0.625rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__head {
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-workspace-header .premium-workspace-header__head {
+    gap: 1rem;
+  }
+}
+
+/* —— Module sub-nav — tighter gap to content —— */
+.caretip-dashboard-shell.business-dashboard .business-module-sub-nav {
+  margin-bottom: 1rem;
+}
+
+@media (max-width: 639px) {
+  .caretip-dashboard-shell.business-dashboard .business-module-sub-nav {
+    margin-bottom: 0.875rem;
+  }
+}
+
+/* —— Settings page header (non-gradient) —— */
+.caretip-dashboard-shell.business-dashboard .business-settings-page-header {
+  margin-bottom: 1rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-settings-page-header h1 {
+  font-size: 1.5rem;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-settings-page-header h1 {
+    font-size: 1.75rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-settings-page-header p {
+  margin-top: 0.375rem;
+}
+
+/* —— Overview dashboard hero —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero.premium-page-hero {
+  min-height: auto;
+}
+
+/* —— Compact inline verification prompt (dashboard overview) —— */
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact {
+  border-width: 1px;
+  border-radius: 0.625rem;
+  padding: 0.4375rem 2.25rem 0.4375rem 0.75rem;
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact.fix-prompt--info {
+  border-color: rgb(245 158 11 / 0.18);
+  background: rgb(245 158 11 / 0.04);
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact.fix-prompt--default {
+  border-color: hsl(var(--primary) / 0.22);
+  background: hsl(var(--muted) / 0.35);
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__dismiss {
+  right: 0.25rem;
+  top: 0.25rem;
+  min-height: 1.75rem;
+  min-width: 1.75rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__body {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__title {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__description {
+  display: none;
+  margin-top: 0;
+  font-size: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__text {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    align-items: baseline;
+    gap: 0.375rem;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__description {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: hsl(var(--muted-foreground));
+  }
+
+  .caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__title {
+    flex-shrink: 0;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__actions .btn,
+.caretip-dashboard-shell.business-dashboard .fix-prompt--compact .fix-prompt__actions button {
+  height: 1.75rem;
+  padding-inline: 0.625rem;
+  font-size: 0.6875rem;
+}

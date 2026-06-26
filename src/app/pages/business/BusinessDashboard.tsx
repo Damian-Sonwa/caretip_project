@@ -344,14 +344,15 @@ export function BusinessDashboard() {
           id="pendingVerification"
           issueActive={showPendingVerification}
           tone="info"
+          density="compact"
           title={verificationNoticeLabels.title}
           description={verificationNoticeLabels.description}
           actionLabel={verificationNoticeLabels.cta}
           actionTo="/verification-pending"
           dismissPersistence="session"
-          className="mb-5"
+          className="mb-3"
         />
-        <PremiumPageHero personality="overview" className="business-dashboard-hero mb-7 sm:mb-8 lg:mb-7">
+        <PremiumPageHero personality="overview" className="business-dashboard-hero">
         <DashboardHero
           stackHeroOnMobile
           hideTabs
@@ -390,15 +391,15 @@ export function BusinessDashboard() {
             >
               <div
                 className={cn(
-                  "business-hero-chart-frame dashboard-hero-media-frame relative mx-auto w-full min-h-0 overflow-hidden max-lg:max-w-none",
+                  "business-hero-chart-frame business-hero-chart-frame--photo dashboard-hero-media-frame relative mx-auto w-full min-h-0 max-lg:max-w-none",
                   "rounded-[1.75rem]",
-                  "lg:h-[420px] lg:max-w-[560px]",
+                  "lg:max-w-[480px]",
                 )}
               >
                 <img
                   src={businessHeroImage}
                   alt=""
-                  className="block h-full w-full object-cover object-center max-lg:absolute max-lg:inset-0 lg:h-full"
+                  className="business-hero-chart-frame__img block w-full object-contain object-center"
                   loading="eager"
                   decoding="async"
                   {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
@@ -730,9 +731,9 @@ export function BusinessDashboard() {
 
           {/* Recent customer feedback */}
           <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
-            <RecentCustomerFeedbackPanel
-              enabled={isBusiness && sessionValidated}
-            />
+            <FeatureGate featureKey="customerFeedback" role="business" enabled={isBusiness}>
+              <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
+            </FeatureGate>
           </motion.div>
 
           {/* Top Performers teaser & Quick Actions */}

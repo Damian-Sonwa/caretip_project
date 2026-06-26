@@ -13,7 +13,7 @@
 }
 
 .caretip-dashboard-shell.business-dashboard .business-dashboard-hero {
-  margin-bottom: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: clamp(1rem, 2vw, 1.25rem);
 }
 
 .caretip-dashboard-shell.business-dashboard .business-dashboard-body {

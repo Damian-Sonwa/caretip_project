@@ -20,6 +20,7 @@ import {
   type SubscriptionMirrorSource,
 } from "../lib/subscription/subscriptionAuditTypes.js";
 import { prisma } from "../prisma.js";
+import { isSubscriptionMirrorEntitled } from "../lib/subscription/subscriptionMirrorEntitlement.js";
 import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
 
 export type { SubscriptionMirrorSource };
@@ -137,28 +138,22 @@ export function buildMirrorSnapshotFromStripeSubscription(
 
 /**
  * Resolve Business.subscriptionTier dual-write from mirror state.
- * Never downgrade while cancel_at_period_end is active and period not ended.
+ * Returns null to clear the mirrored tier when access has fully ended.
+ * Returns undefined when the mirror tier should remain unchanged (cancel grace).
  */
-export function resolveBusinessTierDualWrite(snapshot: StripeMirrorSnapshot): BusinessSubscriptionTier | null {
-  const now = new Date();
+export function resolveBusinessTierDualWrite(
+  snapshot: StripeMirrorSnapshot,
+): BusinessSubscriptionTier | null | undefined {
+  const entitled = isSubscriptionMirrorEntitled({
+    status: snapshot.status,
+    cancelAtPeriodEnd: snapshot.cancelAtPeriodEnd,
+    cancellationEffective: snapshot.cancellationEffective,
+    currentPeriodEnd: snapshot.currentPeriodEnd,
+    canceledAt: snapshot.canceledAt,
+  });
 
-  if (snapshot.cancelAtPeriodEnd) {
-    const effective = snapshot.cancellationEffective ?? snapshot.currentPeriodEnd;
-    if (effective && effective > now) {
-      return null;
-    }
-    if (effective && effective <= now) {
-      return BusinessSubscriptionTier.basic;
-    }
+  if (!entitled) {
     return null;
-  }
-
-  if (snapshot.status === SubscriptionStatus.canceled) {
-    const effective = snapshot.cancellationEffective ?? snapshot.currentPeriodEnd ?? snapshot.canceledAt;
-    if (effective && effective > now) {
-      return null;
-    }
-    return BusinessSubscriptionTier.basic;
   }
 
   if (
@@ -171,10 +166,14 @@ export function resolveBusinessTierDualWrite(snapshot: StripeMirrorSnapshot): Bu
     return mapPlanKeyToBusinessTier(snapshot.planKey);
   }
 
-  return null;
+  if (snapshot.status === SubscriptionStatus.canceled) {
+    return mapPlanKeyToBusinessTier(snapshot.planKey);
+  }
+
+  return undefined;
 }
 
-/** Nested `subscription.create` payload for Business create trees (signup / auto-heal). */
+/** @deprecated Signup no longer creates mirror rows — kept for legacy test scripts only. */
 export function buildNestedSubscriptionCreateData(params: {
   subscriptionTier: BusinessSubscriptionTier;
   source: SubscriptionMirrorSource;
@@ -311,11 +310,23 @@ export async function applyStripeMirrorTransactional(params: {
     }),
   ];
 
-  if (tierUpdate) {
+  if (tierUpdate !== undefined) {
     updates.unshift(
       prisma.business.update({
         where: { id: params.businessId },
-        data: { subscriptionTier: tierUpdate },
+        data: {
+          subscriptionTier: tierUpdate,
+          ...(params.snapshot.stripeCustomerId
+            ? { stripeCustomerId: params.snapshot.stripeCustomerId }
+            : {}),
+        },
+      }),
+    );
+  } else if (params.snapshot.stripeCustomerId) {
+    updates.unshift(
+      prisma.business.update({
+        where: { id: params.businessId },
+        data: { stripeCustomerId: params.snapshot.stripeCustomerId },
       }),
     );
   }
@@ -335,16 +346,13 @@ export async function applyStripeMirrorTransactional(params: {
 export async function updateSubscriptionMirrorPlanTransactional(params: {
   businessId: string;
   newTier: BusinessSubscriptionTier;
-  previousTier: BusinessSubscriptionTier;
+  previousTier: BusinessSubscriptionTier | null;
   actorUserId: string;
 }): Promise<void> {
-  const subscription = await prisma.subscription.findUnique({
+  let subscription = await prisma.subscription.findUnique({
     where: { businessId: params.businessId },
     select: { id: true },
   });
-  if (!subscription) {
-    throw new Error("Subscription mirror not found for business");
-  }
 
   const newPlanKey = mapBusinessTierToPlanKey(params.newTier);
   const eventData = createSubscriptionAuditEventData({
@@ -352,11 +360,37 @@ export async function updateSubscriptionMirrorPlanTransactional(params: {
     payload: {
       previousTier: params.previousTier,
       newTier: params.newTier,
-      previousPlanKey: mapBusinessTierToPlanKey(params.previousTier),
+      previousPlanKey: params.previousTier
+        ? mapBusinessTierToPlanKey(params.previousTier)
+        : null,
       newPlanKey,
       actorUserId: params.actorUserId,
     },
   });
+
+  if (!subscription) {
+    const created = await prisma.subscription.create({
+      data: {
+        businessId: params.businessId,
+        planKey: newPlanKey,
+        status: SubscriptionStatus.active,
+        billingCycle: BillingCycle.monthly,
+        events: {
+          create: createSubscriptionAuditEventData({
+            auditType: SUBSCRIPTION_AUDIT_TYPES.created,
+            source: "platform_admin",
+            payload: {
+              planKey: newPlanKey,
+              subscriptionTier: params.newTier,
+              status: SubscriptionStatus.active,
+            },
+          }),
+        },
+      },
+      select: { id: true },
+    });
+    subscription = created;
+  }
 
   await prisma.$transaction([
     prisma.business.update({
@@ -365,13 +399,181 @@ export async function updateSubscriptionMirrorPlanTransactional(params: {
     }),
     prisma.subscription.update({
       where: { businessId: params.businessId },
-      data: { planKey: newPlanKey },
+      data: { planKey: newPlanKey, status: SubscriptionStatus.active },
     }),
     prisma.subscriptionEvent.create({
       data: {
         subscriptionId: subscription.id,
         ...eventData,
       },
+    }),
+  ]);
+}
+
+/** First Subscription row — created on trial start, checkout success, or enterprise activation. */
+export async function createInitialSubscriptionMirrorFromStripe(params: {
+  businessId: string;
+  snapshot: StripeMirrorSnapshot;
+  auditType: SubscriptionAuditType;
+  stripeEventId: string;
+  auditPayload: Record<string, unknown>;
+}): Promise<{ id: string; businessId: string }> {
+  const tierUpdate = resolveBusinessTierDualWrite(params.snapshot);
+  const eventData = createSubscriptionAuditEventData({
+    auditType: params.auditType,
+    payload: params.auditPayload,
+    stripeEventId: params.stripeEventId,
+    processingResult: SubscriptionEventProcessingResult.processed,
+  });
+
+  const isTrial = params.snapshot.status === SubscriptionStatus.trialing;
+
+  const created = await prisma.$transaction(async (tx) => {
+    const row = await tx.subscription.create({
+      data: {
+        businessId: params.businessId,
+        planKey: params.snapshot.planKey,
+        status: params.snapshot.status,
+        billingCycle: params.snapshot.billingCycle,
+        stripeSubscriptionId: params.snapshot.stripeSubscriptionId,
+        stripeCustomerId: params.snapshot.stripeCustomerId,
+        stripePriceId: params.snapshot.stripePriceId,
+        currentPeriodStart: params.snapshot.currentPeriodStart,
+        currentPeriodEnd: params.snapshot.currentPeriodEnd,
+        renewalDate: params.snapshot.renewalDate,
+        cancelAtPeriodEnd: params.snapshot.cancelAtPeriodEnd,
+        canceledAt: params.snapshot.canceledAt,
+        cancellationEffective: params.snapshot.cancellationEffective,
+        trialStartedAt: params.snapshot.trialStartedAt,
+        trialEndsAt: params.snapshot.trialEndsAt,
+        trialSource: params.snapshot.trialSource,
+        isTrial,
+        trialExpiredAt: params.snapshot.trialExpiredAt,
+        events: {
+          create: {
+            ...createSubscriptionAuditEventData({
+              auditType: SUBSCRIPTION_AUDIT_TYPES.created,
+              source: "stripe_webhook",
+              payload: {
+                planKey: params.snapshot.planKey,
+                status: params.snapshot.status,
+                stripeSubscriptionId: params.snapshot.stripeSubscriptionId,
+              },
+            }),
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    await tx.subscriptionEvent.create({
+      data: {
+        subscriptionId: row.id,
+        ...eventData,
+      },
+    });
+
+    if (tierUpdate !== undefined) {
+      await tx.business.update({
+        where: { id: params.businessId },
+        data: {
+          subscriptionTier: tierUpdate,
+          stripeCustomerId: params.snapshot.stripeCustomerId,
+        },
+      });
+    } else {
+      await tx.business.update({
+        where: { id: params.businessId },
+        data: { stripeCustomerId: params.snapshot.stripeCustomerId },
+      });
+    }
+
+    return row;
+  });
+
+  return { id: created.id, businessId: params.businessId };
+}
+
+/**
+ * Idempotent first-mirror create for Option A (no pre-existing Subscription row).
+ * Safe under concurrent checkout.session.completed + customer.subscription.* webhooks.
+ */
+export async function ensureInitialSubscriptionMirrorFromStripe(params: {
+  businessId: string;
+  snapshot: StripeMirrorSnapshot;
+  auditType: SubscriptionAuditType;
+  stripeEventId: string;
+  auditPayload: Record<string, unknown>;
+}): Promise<{ id: string; businessId: string; created: boolean }> {
+  const byBusiness = await prisma.subscription.findUnique({
+    where: { businessId: params.businessId },
+    select: { id: true, businessId: true },
+  });
+  if (byBusiness) {
+    return { ...byBusiness, created: false };
+  }
+
+  if (params.snapshot.stripeSubscriptionId) {
+    const byStripeSub = await prisma.subscription.findUnique({
+      where: { stripeSubscriptionId: params.snapshot.stripeSubscriptionId },
+      select: { id: true, businessId: true },
+    });
+    if (byStripeSub) {
+      return { ...byStripeSub, created: false };
+    }
+  }
+
+  try {
+    const row = await createInitialSubscriptionMirrorFromStripe(params);
+    return { ...row, created: true };
+  } catch (err) {
+    const code = (err as { code?: string })?.code;
+    if (code === "P2002") {
+      const existing = await prisma.subscription.findFirst({
+        where: {
+          OR: [
+            { businessId: params.businessId },
+            ...(params.snapshot.stripeSubscriptionId
+              ? [{ stripeSubscriptionId: params.snapshot.stripeSubscriptionId }]
+              : []),
+          ],
+        },
+        select: { id: true, businessId: true },
+      });
+      if (existing) {
+        return { ...existing, created: false };
+      }
+    }
+    throw err;
+  }
+}
+
+/** Remove mirror when subscription access has fully ended (cancel / delete). */
+export async function removeEndedSubscriptionMirror(params: {
+  subscriptionRowId: string;
+  businessId: string;
+  auditType: SubscriptionAuditType;
+  stripeEventId: string;
+  auditPayload: Record<string, unknown>;
+}): Promise<void> {
+  const eventData = createSubscriptionAuditEventData({
+    auditType: params.auditType,
+    payload: params.auditPayload,
+    stripeEventId: params.stripeEventId,
+    processingResult: SubscriptionEventProcessingResult.processed,
+  });
+
+  await prisma.$transaction([
+    prisma.subscriptionEvent.create({
+      data: {
+        subscriptionId: params.subscriptionRowId,
+        ...eventData,
+      },
+    }),
+    prisma.subscription.delete({ where: { id: params.subscriptionRowId } }),
+    prisma.business.update({
+      where: { id: params.businessId },
+      data: { subscriptionTier: null },
     }),
   ]);
 }

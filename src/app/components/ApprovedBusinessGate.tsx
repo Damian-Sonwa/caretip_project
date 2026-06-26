@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { Outlet } from "react-router";
 import { useAuth } from "../hooks/useAuth";
 import { fetchBusinessProfile, hasClientAccessToken } from "../lib/api";
-import { primeSubscriptionTierFromSession } from "../lib/subscriptionSessionCache";
+import { BILLING_CHECKOUT_SYNCED_EVENT } from "../lib/billingCheckoutSuccessSync";
+import { primeSubscriptionEntitlementsFromSession } from "../lib/subscriptionSessionCache";
 import { resolveSubscriptionTier } from "../lib/subscriptionCapabilities";
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
@@ -37,7 +38,9 @@ export function ApprovedBusinessGate() {
     void fetchBusinessProfile({ silent: true })
       .then((p) => {
         if (cancelled) return;
-        primeSubscriptionTierFromSession(resolveSubscriptionTier(p.subscriptionTier));
+        const tier = resolveSubscriptionTier(p.subscriptionTier);
+        const status = p.subscriptionStatus ?? (tier ? "active" : "none");
+        primeSubscriptionEntitlementsFromSession({ tier, status });
         const s = mapDbVerificationToStatus(p.verificationStatus);
         if (s) updateUser({ status: s });
       })
@@ -53,17 +56,24 @@ export function ApprovedBusinessGate() {
 
   useEffect(() => {
     if (!canSyncProfile) return;
-    const refresh = () => {
+    const refreshProfile = () => {
       if (!hasClientAccessToken()) return;
-      void fetchBusinessProfile({ silent: true })
+      void fetchBusinessProfile({ silent: true, revalidate: true })
         .then((p) => {
+          const tier = resolveSubscriptionTier(p.subscriptionTier);
+          const status = p.subscriptionStatus ?? (tier ? "active" : "none");
+          primeSubscriptionEntitlementsFromSession({ tier, status });
           const s = mapDbVerificationToStatus(p.verificationStatus);
           if (s) updateUser({ status: s });
         })
         .catch(() => {});
     };
-    window.addEventListener("focus", refresh);
-    return () => window.removeEventListener("focus", refresh);
+    window.addEventListener("focus", refreshProfile);
+    window.addEventListener(BILLING_CHECKOUT_SYNCED_EVENT, refreshProfile);
+    return () => {
+      window.removeEventListener("focus", refreshProfile);
+      window.removeEventListener(BILLING_CHECKOUT_SYNCED_EVENT, refreshProfile);
+    };
   }, [canSyncProfile, updateUser]);
 
   if (!user) return null;

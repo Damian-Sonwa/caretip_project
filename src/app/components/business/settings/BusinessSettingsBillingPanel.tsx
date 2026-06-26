@@ -37,12 +37,16 @@ export function BusinessSettingsBillingPanel() {
       ) : data ? (
         <div className="space-y-8">
           <BillingCurrentPlanCard billing={data} />
-          <BillingTrialSummary billing={data} />
+          {data.accessSource !== "sponsored" && data.status !== "none" && data.planKey ? (
+            <BillingTrialSummary billing={data} />
+          ) : null}
 
-          {data.hasStripeBilling || data.planKey !== "basic" ? (
+          {data.accessSource !== "sponsored" &&
+          (data.hasStripeBilling || (data.planKey && data.planKey !== "basic")) ? (
             <BillingSubscriptionLifecycle billing={data} />
           ) : null}
 
+          {data.accessSource !== "sponsored" ? (
           <section id="billing-plans">
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="text-lg font-semibold text-foreground">{t("business.billing.billingCycle")}</h3>
@@ -66,11 +70,14 @@ export function BusinessSettingsBillingPanel() {
             </div>
             <BillingPlanManagement billing={data} billingCycle={billingCycle} onChanged={() => void reload()} />
           </section>
+          ) : null}
 
+          {data.accessSource !== "sponsored" ? (
           <section>
             <h3 className="mb-4 text-lg font-semibold text-foreground">{t("business.billing.timelineTitle")}</h3>
             <BillingTimeline events={data.events} />
           </section>
+          ) : null}
 
           <CommercialInsightsPanel />
         </div>

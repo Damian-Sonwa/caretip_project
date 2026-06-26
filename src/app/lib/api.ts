@@ -23,7 +23,10 @@ import { resolveApiBaseUrl } from "./apiOrigin";
 import { logClientError } from "./clientLog";
 import { captureClientException } from "./sentry";
 import { validateImageFileForUpload } from "./imageClientUpload";
-import { primeSubscriptionTierFromSession } from "./subscriptionSessionCache";
+import {
+  primeSubscriptionEntitlementsFromSession,
+  primeSubscriptionTierFromSession,
+} from "./subscriptionSessionCache";
 import { resolveSubscriptionTier } from "./subscriptionCapabilities";
 import { authDebug } from "./authDebugLog";
 import {
@@ -1153,7 +1156,7 @@ const businessStatsResultCache = new Map<
 >();
 const BUSINESS_STATS_CLIENT_RESULT_TTL_MS = 90_000;
 
-export type BusinessStatsScope = "summary" | "analytics" | "full";
+export type BusinessStatsScope = "summary" | "roster" | "analytics" | "full";
 
 function businessStatsClientCacheKey(timeframe: string, scope: BusinessStatsScope = "full"): string {
   // Endpoint is scoped to the authenticated session (business resolved from JWT),
@@ -1377,8 +1380,15 @@ export interface BusinessInfo {
   /** Present on manager profile only — not returned by public GET /api/business/:id */
   employeeCount?: number;
   verificationStatus?: "pending" | "verified" | "rejected";
-  /** SaaS tier for entitlement UI; manager profile only. */
-  subscriptionTier?: "basic" | "premium" | "enterprise";
+  /** SaaS tier for entitlement UI; manager profile only. Null when no subscription. */
+  subscriptionTier?: "basic" | "premium" | "enterprise" | null;
+  subscriptionStatus?: "none" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "incomplete";
+  hasActiveSubscription?: boolean;
+  accessSource?: "none" | "subscription" | "sponsored";
+  sponsoredProgrammeKey?: string | null;
+  sponsoredProgrammeLabelKey?: string | null;
+  capabilities?: import("./subscriptionCapabilities").SubscriptionCapability[];
+  limits?: import("./subscriptionCapabilities").PlanLimits;
   /** Explicit finish persisted on the user row. */
   onboardingCompleted?: boolean;
   /** Resume wizard at 1–3 from saved profile fields. */
@@ -1430,12 +1440,24 @@ export function clearBusinessBrandingSettingsClientCache(): void {
 }
 
 function primeBusinessSubscriptionTier(profile: BusinessInfo): void {
-  primeSubscriptionTierFromSession(resolveSubscriptionTier(profile.subscriptionTier));
+  const tier = resolveSubscriptionTier(profile.subscriptionTier);
+  const accessSource = profile.accessSource ?? (tier ? "subscription" : "none");
+  const status = profile.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
+  primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
+  primeSubscriptionTierFromSession(tier ?? undefined);
 }
 
-export async function fetchBusinessProfile(opts?: { silent?: boolean }): Promise<BusinessInfo> {
+export async function fetchBusinessProfile(opts?: {
+  silent?: boolean;
+  /** Bypass the in-memory TTL (e.g. after Stripe checkout webhook sync). */
+  revalidate?: boolean;
+}): Promise<BusinessInfo> {
   const now = Date.now();
-  if (businessProfileCache && now - businessProfileCache.at < BUSINESS_PROFILE_CLIENT_TTL_MS) {
+  if (
+    !opts?.revalidate &&
+    businessProfileCache &&
+    now - businessProfileCache.at < BUSINESS_PROFILE_CLIENT_TTL_MS
+  ) {
     primeBusinessSubscriptionTier(businessProfileCache.data);
     return businessProfileCache.data;
   }
@@ -2251,8 +2273,12 @@ export interface EmployeeSelfProfile {
   slug: string | null;
   /** Business IANA timezone for analytics reporting. */
   businessTimezone?: string;
-  /** Venue SaaS tier for entitlement UI. */
-  subscriptionTier?: "basic" | "premium" | "enterprise";
+  /** Venue SaaS tier for entitlement UI. Null when no subscription. */
+  subscriptionTier?: "basic" | "premium" | "enterprise" | null;
+  subscriptionStatus?: "none" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "incomplete";
+  hasActiveSubscription?: boolean;
+  accessSource?: "none" | "subscription" | "sponsored";
+  sponsoredProgrammeKey?: string | null;
 }
 
 const EMPLOYEE_PROFILE_CACHE_TTL_MS = 30_000;
@@ -2265,7 +2291,11 @@ export function clearEmployeeProfileClientCache(): void {
 }
 
 function primeEmployeeSubscriptionTier(profile: EmployeeSelfProfile): void {
-  primeSubscriptionTierFromSession(resolveSubscriptionTier(profile.subscriptionTier));
+  const tier = resolveSubscriptionTier(profile.subscriptionTier);
+  const accessSource = profile.accessSource ?? (profile.hasActiveSubscription ? "subscription" : "none");
+  const status = profile.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
+  primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
+  primeSubscriptionTierFromSession(tier ?? undefined);
 }
 
 export async function getEmployeeProfile(
@@ -2450,9 +2480,9 @@ export type BillingTimelineEvent = {
 };
 
 export type BillingStatus = {
-  planKey: SubscriptionPlanKey;
-  billingCycle: SubscriptionBillingCycle;
-  status: SubscriptionStatus;
+  planKey: SubscriptionPlanKey | null;
+  billingCycle: SubscriptionBillingCycle | null;
+  status: SubscriptionStatus | "none";
   trialStartedAt: string | null;
   trialEndsAt: string | null;
   isTrial: boolean;
@@ -2463,11 +2493,14 @@ export type BillingStatus = {
   cancellationEffective: string | null;
   hasStripeBilling: boolean;
   stripeCustomerId: string | null;
-  subscriptionCreatedAt: string;
-  syncedAt: string;
-  subscriptionTier: SubscriptionPlanKey;
+  subscriptionCreatedAt: string | null;
+  syncedAt: string | null;
+  subscriptionTier: SubscriptionPlanKey | null;
   billingEnabled: boolean;
   stripeConfigured: boolean;
+  accessSource?: "none" | "subscription" | "sponsored";
+  sponsoredProgrammeKey?: string | null;
+  sponsoredProgrammeLabelKey?: string | null;
   events: BillingTimelineEvent[];
 };
 
@@ -2496,7 +2529,7 @@ export async function createBillingCheckoutSession(params: {
 
 export type BillingSyncStatus = {
   synced: boolean;
-  status: SubscriptionStatus | null;
+  status: SubscriptionStatus | "none" | null;
   planKey: SubscriptionPlanKey | null;
   subscriptionTier: SubscriptionPlanKey | null;
   isTrial: boolean;
@@ -3473,6 +3506,126 @@ export async function updatePlatformBusinessSubscriptionTier(
       body: JSON.stringify({ subscriptionTier }),
       credentials: "include",
     },
+  );
+}
+
+export type SponsoredAccessGrantStatus = "pending" | "active" | "revoked" | "expired";
+
+export type SponsoredCapabilityProfileKey = "starter" | "business" | "enterprise";
+
+export interface SponsoredAccessGrant {
+  id: string;
+  businessId: string;
+  programmeKey: string;
+  programmeLabelKey: string;
+  capabilityProfileKey: string | null;
+  effectiveProfileKey: SponsoredCapabilityProfileKey | null;
+  status: SponsoredAccessGrantStatus;
+  approvedAt: string | null;
+  approvedByUserId: string | null;
+  approvedByEmail: string | null;
+  expiresAt: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SponsoredProgrammeOption {
+  programmeKey: string;
+  profileKey: SponsoredCapabilityProfileKey;
+  labelKey: string;
+}
+
+export interface SponsoredCapabilityProfileOption {
+  profileKey: SponsoredCapabilityProfileKey;
+  labelKey: string;
+}
+
+export async function fetchSponsoredProgrammes(): Promise<{
+  programmes: SponsoredProgrammeOption[];
+  capabilityProfiles: SponsoredCapabilityProfileOption[];
+}> {
+  return apiRequest(apiPath("/api/platform/sponsored-access/programmes"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function fetchBusinessSponsoredAccess(
+  businessId: string,
+): Promise<{ grants: SponsoredAccessGrant[] }> {
+  return apiRequest(
+    apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/sponsored-access`),
+    { headers: getHeaders(), credentials: "include" },
+  );
+}
+
+export async function createBusinessSponsoredAccess(
+  businessId: string,
+  body: {
+    programmeKey: string;
+    capabilityProfileKey?: SponsoredCapabilityProfileKey | null;
+    notes?: string | null;
+    expiresAt?: string | null;
+    activate?: boolean;
+  },
+): Promise<{ grant: SponsoredAccessGrant }> {
+  return apiRequest(
+    apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/sponsored-access`),
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(body),
+      credentials: "include",
+    },
+  );
+}
+
+export async function updateBusinessSponsoredAccess(
+  businessId: string,
+  grantId: string,
+  body: {
+    programmeKey?: string;
+    capabilityProfileKey?: SponsoredCapabilityProfileKey | null;
+    notes?: string | null;
+    expiresAt?: string | null;
+    clearExpiresAt?: boolean;
+  },
+): Promise<{ grant: SponsoredAccessGrant }> {
+  return apiRequest(
+    apiPath(
+      `/api/platform/businesses/${encodeURIComponent(businessId)}/sponsored-access/${encodeURIComponent(grantId)}`,
+    ),
+    {
+      method: "PATCH",
+      headers: getHeaders(),
+      body: JSON.stringify(body),
+      credentials: "include",
+    },
+  );
+}
+
+export async function activateBusinessSponsoredAccess(
+  businessId: string,
+  grantId: string,
+): Promise<{ grant: SponsoredAccessGrant }> {
+  return apiRequest(
+    apiPath(
+      `/api/platform/businesses/${encodeURIComponent(businessId)}/sponsored-access/${encodeURIComponent(grantId)}/activate`,
+    ),
+    { method: "POST", headers: getHeaders(), credentials: "include" },
+  );
+}
+
+export async function revokeBusinessSponsoredAccess(
+  businessId: string,
+  grantId: string,
+): Promise<{ grant: SponsoredAccessGrant }> {
+  return apiRequest(
+    apiPath(
+      `/api/platform/businesses/${encodeURIComponent(businessId)}/sponsored-access/${encodeURIComponent(grantId)}/revoke`,
+    ),
+    { method: "POST", headers: getHeaders(), credentials: "include" },
   );
 }
 
