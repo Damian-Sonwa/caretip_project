@@ -356,17 +356,17 @@ export function BusinessDashboard() {
           dismissPersistence="session"
           className="mb-3"
         />
-        <PremiumPageHero personality="overview" className="business-dashboard-hero">
+        <PremiumPageHero personality="overview" autoHeight className="business-dashboard-hero">
         <DashboardHero
           stackHeroOnMobile
           hideTabs
           actionsPlacement="belowText"
           mobileAlign="left"
-          className="!mb-0"
+          className="business-hero-dashboard-root !mb-0"
           cardClassName="border-0 bg-transparent shadow-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:rounded-[calc(1.75rem-3px)] lg:border-0 lg:bg-transparent lg:shadow-none"
           badgeClassName="business-hero-badge normal-case px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal shadow-none"
           titleClassName="business-hero-title max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
-          descriptionClassName="business-hero-description !line-clamp-2 max-w-[34ch] leading-relaxed max-lg:text-left lg:max-w-md"
+          descriptionClassName="business-hero-description !line-clamp-2 max-w-[34ch] leading-relaxed max-lg:mb-0 max-lg:text-left lg:max-w-md"
           textColumnClassName="lg:py-2 xl:pr-6"
           badge={
             <>
@@ -392,10 +392,14 @@ export function BusinessDashboard() {
               transition={{ duration: 0.45, ease: "easeOut" }}
               className="business-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
             >
+              <div className="business-hero-illustration-glow" aria-hidden>
+                <span className="business-hero-illustration-glow__orb business-hero-illustration-glow__orb--primary" />
+                <span className="business-hero-illustration-glow__orb business-hero-illustration-glow__orb--secondary" />
+              </div>
               <img
                 src={businessHeroImage}
                 alt=""
-                className="business-hero-illustration mx-auto block w-full max-w-[560px] object-contain object-center lg:max-w-[40rem]"
+                className="business-hero-illustration relative z-[1] mx-auto block w-full max-w-[468px] object-contain object-center lg:max-w-[32rem]"
                 loading="eager"
                 decoding="async"
                 {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
@@ -413,13 +417,13 @@ export function BusinessDashboard() {
               <div className="business-hero-cta-row">
                 {isPreviewMode ? (
                   <>
-                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
+                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 w-full max-lg:w-full")} asChild>
                       <Link to="/dashboard/billing/subscription" className={businessUi.heroCtaLink}>
                         <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
                         {t("business.dashboard.preview.viewPlans")}
                       </Link>
                     </Button>
-                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 w-full max-lg:w-full")} asChild>
                       <Link to="#dashboard-premium-features" className={businessUi.heroCtaLink}>
                         {t("business.dashboard.preview.exploreFeatures")}
                       </Link>
@@ -427,13 +431,13 @@ export function BusinessDashboard() {
                   </>
                 ) : (
                   <>
-                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
+                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 w-full max-lg:w-full")} asChild>
                       <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
                         <CareIcon name="tableQr" size="sm" className="shrink-0" />
                         {t("business.hero.manageQr")}
                       </Link>
                     </Button>
-                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 w-full max-lg:w-full")} asChild>
                       <Link to="/dashboard/team/employees" className={businessUi.heroCtaLink}>
                         <Users className="h-4 w-4 shrink-0" aria-hidden />
                         {t("business.hero.manageTeam")}

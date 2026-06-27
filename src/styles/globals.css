@@ -1002,7 +1002,7 @@ textarea::placeholder {
   display: block;
   width: 100% !important;
   height: auto !important;
-  max-height: min(52svh, 360px);
+  max-height: min(42svh, 280px);
   object-fit: contain !important;
   object-position: center;
   transform: none !important;
@@ -1014,7 +1014,7 @@ textarea::placeholder {
 
 @media (min-width: 1024px) {
   .business-dashboard-hero .business-hero-illustration {
-    max-height: 28rem;
+    max-height: 22rem;
     width: 100%;
   }
 }

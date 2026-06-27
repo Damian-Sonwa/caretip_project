@@ -346,7 +346,7 @@
   .employee-dashboard-hero .employee-hero-visual,
   .business-dashboard-hero .business-hero-visual {
     width: 100%;
-    max-width: 40rem;
+    max-width: 32rem;
   }
 }
 
