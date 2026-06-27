@@ -5,10 +5,8 @@ import { toast } from "sonner";
 import { CreditCard } from "lucide-react";
 import { trackGoogleAdsConversion } from "../../../lib/googleAdsConversion";
 import { processBillingCheckoutSuccess } from "../../../lib/subscriptionActivationNotification";
-import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
-import { billingSubNavItems } from "../../../components/business/businessDashboardNav";
 
 export function BusinessBillingLayout() {
   const { t } = useTranslation();
@@ -42,7 +40,6 @@ export function BusinessBillingLayout() {
           title={t("business.settings.panels.billingTitle")}
           subtitle={t("business.billing.moduleSubtitle")}
         />
-        <BusinessModuleSubNav items={billingSubNavItems} ariaLabelKey="business.billing.navAria" />
         <Outlet />
       </div>
     </div>

@@ -38,32 +38,19 @@ import {
   onboardingContinueBtn,
   onboardingDisplayFont,
   onboardingHeadline,
-  onboardingStepHint,
   onboardingSubhead,
 } from "../components/business/businessOnboardingUi";
 import { BUSINESS_TYPE_OPTIONS } from "../lib/businessVenueOptions";
 
-const STEP_TITLE_KEYS = [
+const PAGE_HEADLINE_KEYS = [
   "business.onboarding.stepTitle.businessDetails",
   "business.onboarding.stepTitle.brandingSetup",
-  "business.onboarding.stepTitle.reviewPublish",
-] as const;
-
-const STEP_HINT_KEYS = [
-  "business.onboarding.stepHint.businessDetails",
-  "business.onboarding.stepHint.brandingSetup",
-  "business.onboarding.stepHint.reviewPublish",
-] as const;
-
-const PAGE_HEADLINE_KEYS = [
-  "business.onboarding.headline",
-  "business.onboarding.headline",
   "business.onboarding.finalStep.headline",
 ] as const;
 
 const PAGE_DESC_KEYS = [
-  "business.onboarding.description",
-  "business.onboarding.description",
+  "business.onboarding.stepHint.businessDetails",
+  "business.onboarding.stepHint.brandingSetup",
   "business.onboarding.finalStep.description",
 ] as const;
 
@@ -300,6 +287,7 @@ export function BusinessOnboardingPage() {
               <div className="business-onboarding-workspace min-w-0 space-y-8">
                 <header className="space-y-2">
                   <h1
+                    id="onboarding-page-title"
                     className={onboardingHeadline}
                     style={{ fontFamily: onboardingDisplayFont }}
                   >
@@ -308,18 +296,7 @@ export function BusinessOnboardingPage() {
                   <p className={onboardingSubhead}>{t(PAGE_DESC_KEYS[step - 1])}</p>
                 </header>
 
-                <section className="space-y-8" aria-labelledby="onboarding-step-title">
-                  <div className="space-y-1 border-b border-zinc-200/80 pb-6 dark:border-zinc-800">
-                    <h2
-                      id="onboarding-step-title"
-                      className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50"
-                      style={{ fontFamily: onboardingDisplayFont }}
-                    >
-                      {t(STEP_TITLE_KEYS[step - 1])}
-                    </h2>
-                    <p className={onboardingStepHint}>{t(STEP_HINT_KEYS[step - 1])}</p>
-                  </div>
-
+                <section className="space-y-6" aria-labelledby="onboarding-page-title">
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={step}

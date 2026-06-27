@@ -1,5 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
-import { Check, Sparkles } from "lucide-react";
+import { Check, CheckCircle2, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import type { BillingCycle } from "@/app/data/pricingTypes";
@@ -19,10 +19,13 @@ type PricingTierCardProps = {
   copyScope?: PricingCopyScope;
   badge?: PricingTierCardBadge | null;
   footer: ReactNode;
+  subscriptionInfo?: ReactNode;
   /** Public pricing page defers feature list paint for perf. Billing uses immediate render. */
   deferFeatureSkeleton?: boolean;
   /** UI-only cards — skip billing-cycle price swap and audience copy overrides. */
   displayOnly?: boolean;
+  /** Subscription management layout: description before price, footer divider, aligned actions. */
+  variant?: "marketing" | "subscription";
   className?: string;
 };
 
@@ -80,6 +83,7 @@ function CardBadge({ badge, inline = false }: { badge: PricingTierCardBadge; inl
   if (badge.kind === "current") {
     return (
       <div className={className}>
+        <CheckCircle2 className="size-3 shrink-0" aria-hidden />
         {t("business.billing.currentPlanBadge")}
       </div>
     );
@@ -101,18 +105,48 @@ function resolveCardBadge(
   return null;
 }
 
+function TierPrice({
+  feeLine,
+  feeNote,
+  billingCycle,
+  animate,
+}: {
+  feeLine: string;
+  feeNote: string;
+  billingCycle: BillingCycle;
+  animate: boolean;
+}) {
+  return (
+    <div className="caretip-pricing-tier-card__price">
+      <p
+        key={animate ? billingCycle : "static"}
+        className={cn(
+          "caretip-pricing-tier-card__fee",
+          animate && "caretip-pricing-tier-card__fee--animated",
+        )}
+      >
+        {feeLine}
+      </p>
+      <p className="caretip-pricing-tier-card__fee-note">{feeNote}</p>
+    </div>
+  );
+}
+
 export function PricingTierCard({
   tier,
   billingCycle,
   copyScope = "staticPages.pricing.audience.general",
   badge,
   footer,
+  subscriptionInfo,
   deferFeatureSkeleton = false,
   displayOnly = false,
+  variant = "marketing",
   className,
 }: PricingTierCardProps) {
   const { t } = useTranslation();
   const isEnterprise = tier.tierKey === "enterprise";
+  const isSubscription = variant === "subscription";
   const { feeLine, feeNote } = displayOnly
     ? { feeLine: tier.feeLine, feeNote: tier.feeNote }
     : resolveTierPricing(tier, billingCycle, t);
@@ -121,10 +155,57 @@ export function PricingTierCard({
     : resolveTierDescription(tier, t, copyScope);
   const cardBadge = resolveCardBadge(tier, badge);
   const isTrialBadge = cardBadge?.kind === "trial";
+  const isCurrent = cardBadge?.kind === "current" || cardBadge?.kind === "trial";
   const isFeatured =
     tier.isPopular ||
     cardBadge?.kind === "current" ||
     isTrialBadge;
+
+  const TierIcon = tier.icon;
+
+  const header = (
+    <div className="caretip-pricing-tier-card__header">
+      {isTrialBadge ? <CardBadge badge={cardBadge} inline /> : null}
+      <div className="caretip-pricing-tier-card__title-row">
+        {isSubscription && isEnterprise && TierIcon ? (
+          <span className="caretip-pricing-tier-card__tier-icon" aria-hidden>
+            <TierIcon className="size-5" />
+          </span>
+        ) : null}
+        <h3 className="caretip-pricing-tier-card__name">{tier.name}</h3>
+        {isSubscription && isCurrent && !isTrialBadge ? (
+          <CheckCircle2
+            className="caretip-pricing-tier-card__current-check size-5 shrink-0 text-[var(--caretip-brand-orange,#e9781c)]"
+            aria-hidden
+          />
+        ) : null}
+      </div>
+      {tier.tagline ? <p className="caretip-pricing-tier-card__tagline">{tier.tagline}</p> : null}
+    </div>
+  );
+
+  const priceBlock = (
+    <TierPrice
+      feeLine={feeLine}
+      feeNote={feeNote}
+      billingCycle={billingCycle}
+      animate={isSubscription && !displayOnly}
+    />
+  );
+
+  const features = (
+    <TierFeatureList features={tier.features} deferSkeleton={deferFeatureSkeleton} />
+  );
+
+  const footerBlock = (
+    <div className="caretip-pricing-tier-card__footer">
+      {isSubscription ? <div className="caretip-pricing-tier-card__footer-divider" aria-hidden /> : null}
+      <div className="caretip-pricing-tier-card__actions">{footer}</div>
+      {subscriptionInfo ? (
+        <div className="caretip-pricing-tier-card__subscription-info">{subscriptionInfo}</div>
+      ) : null}
+    </div>
+  );
 
   return (
     <article
@@ -134,32 +215,33 @@ export function PricingTierCard({
         cardBadge && !isTrialBadge && "caretip-pricing-tier-card--has-badge",
         isTrialBadge && "caretip-pricing-tier-card--trial-badge",
         isEnterprise && "caretip-pricing-tier-card--enterprise",
-        cardBadge?.kind === "current" && "caretip-pricing-tier-card--current",
+        isCurrent && "caretip-pricing-tier-card--current",
+        isSubscription && "caretip-pricing-tier-card--subscription",
         className,
       )}
     >
       {cardBadge && !isTrialBadge ? <CardBadge badge={cardBadge} /> : null}
 
-      <div className="caretip-pricing-tier-card__header">
-        {isTrialBadge ? <CardBadge badge={cardBadge} inline /> : null}
-        <h3 className="caretip-pricing-tier-card__name">{tier.name}</h3>
-        {tier.tagline ? <p className="caretip-pricing-tier-card__tagline">{tier.tagline}</p> : null}
-      </div>
-
-      <div className="caretip-pricing-tier-card__divider" aria-hidden />
-
-      <div className="caretip-pricing-tier-card__price">
-        <p className="caretip-pricing-tier-card__fee">{feeLine}</p>
-        <p className="caretip-pricing-tier-card__fee-note">{feeNote}</p>
-      </div>
-
-      <div className="caretip-pricing-tier-card__divider" aria-hidden />
-
-      <p className="caretip-pricing-tier-card__desc">{description}</p>
-
-      <TierFeatureList features={tier.features} deferSkeleton={deferFeatureSkeleton} />
-
-      <div className="caretip-pricing-tier-card__actions">{footer}</div>
+      {isSubscription ? (
+        <>
+          {header}
+          <p className="caretip-pricing-tier-card__desc">{description}</p>
+          <div className="caretip-pricing-tier-card__divider" aria-hidden />
+          {priceBlock}
+          {features}
+          {footerBlock}
+        </>
+      ) : (
+        <>
+          {header}
+          <div className="caretip-pricing-tier-card__divider" aria-hidden />
+          {priceBlock}
+          <div className="caretip-pricing-tier-card__divider" aria-hidden />
+          <p className="caretip-pricing-tier-card__desc">{description}</p>
+          {features}
+          {footerBlock}
+        </>
+      )}
     </article>
   );
 }

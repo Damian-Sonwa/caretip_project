@@ -20,6 +20,7 @@ import type { EntitlementAccessSource } from "../lib/subscription/subscriptionEn
 import { isStripeConfigured } from "./stripe.service.js";
 import { tryActivateSubscriptionFromStripeForBusiness } from "./subscriptionActivation.service.js";
 import { logTrialSync } from "../lib/subscription/trialSyncDebugLog.js";
+import { resolveTrialEligibilityForBusiness } from "./trialEligibility.service.js";
 
 export type BillingLifecycleStatus = SubscriptionStatus | "none";
 
@@ -45,6 +46,12 @@ export type BillingStatusDto = {
   accessSource: EntitlementAccessSource;
   sponsoredProgrammeKey: string | null;
   sponsoredProgrammeLabelKey: string | null;
+  trialEligible: boolean;
+  trialUsed: boolean;
+  /** Active trial plan (same as planKey while trialing). */
+  trialPlanKey: SubscriptionPlanKey | null;
+  /** Plan from a previous trial — preselect for post-trial upgrade. */
+  lastTrialPlanKey: SubscriptionPlanKey | null;
 };
 
 export type BillingTimelineEventDto = {
@@ -104,6 +111,7 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
   });
 
   const entitlements = await resolveSubscriptionEntitlements(businessId);
+  const trialEligibility = await resolveTrialEligibilityForBusiness(businessId);
   const billingEnabled = isSubscriptionBillingEnabled();
   const stripeConfigured = isStripeConfigured();
   const sponsoredDef =
@@ -136,11 +144,22 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
       subscriptionTier: entitlements.subscriptionTier,
       billingEnabled,
       stripeConfigured,
+      trialEligible: trialEligibility.eligible,
+      trialUsed: trialEligibility.trialUsed,
+      trialPlanKey: null,
+      lastTrialPlanKey: trialEligibility.lastTrialPlanKey,
       ...sponsoredFields,
     };
   }
 
   const sub = row.subscription;
+  const trialFields = {
+    trialEligible: trialEligibility.eligible,
+    trialUsed: trialEligibility.trialUsed,
+    trialPlanKey:
+      sub.isTrial || sub.status === SubscriptionStatus.trialing ? sub.planKey : null,
+    lastTrialPlanKey: trialEligibility.lastTrialPlanKey,
+  };
 
   return {
     planKey: entitlements.plan,
@@ -164,6 +183,7 @@ export async function getBillingStatusForBusiness(businessId: string): Promise<B
     subscriptionTier: entitlements.subscriptionTier,
     billingEnabled,
     stripeConfigured,
+    ...trialFields,
     ...sponsoredFields,
   };
 }

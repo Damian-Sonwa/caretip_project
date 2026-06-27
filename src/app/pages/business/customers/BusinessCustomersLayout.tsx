@@ -1,9 +1,7 @@
 import { Outlet } from "react-router";
 import { useTranslation } from "react-i18next";
 import { MessageSquareHeart } from "lucide-react";
-import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
-import { customersSubNavItems } from "../../../components/business/businessDashboardNav";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function BusinessCustomersLayout() {
@@ -19,7 +17,6 @@ export function BusinessCustomersLayout() {
           title={t("business.customers.title")}
           subtitle={t("business.customers.subtitle")}
         />
-        <BusinessModuleSubNav items={customersSubNavItems} ariaLabelKey="business.customers.navAria" />
         <Outlet />
       </div>
     </div>

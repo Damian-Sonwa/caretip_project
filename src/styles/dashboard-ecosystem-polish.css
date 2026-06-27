@@ -5,7 +5,7 @@
 
 .caretip-dashboard-shell.business-dashboard,
 .caretip-dashboard-shell.employee-dashboard {
-  --dashboard-card-radius: 1rem;
+  --dashboard-card-radius: 1.125rem;
   --dashboard-section-gap: 1.25rem;
   --dashboard-block-gap: 1.5rem;
 }
@@ -346,7 +346,7 @@
   .employee-dashboard-hero .employee-hero-visual,
   .business-dashboard-hero .business-hero-visual {
     width: 100%;
-    max-width: 34rem;
+    max-width: 40rem;
   }
 }
 

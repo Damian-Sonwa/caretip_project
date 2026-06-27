@@ -5,6 +5,7 @@ import * as businessService from "../services/business.service.js";
 import { prisma } from "../prisma.js";
 import { isSubscriptionBillingEnabled } from "../config/featureFlags.js";
 import { isSubscriptionTrialEnabled } from "../config/subscriptionTrial.js";
+import { assertTrialCheckoutAllowed } from "../services/trialEligibility.service.js";
 import {
   createManagerCheckoutSession,
   createManagerPortalSession,
@@ -267,6 +268,10 @@ export async function postMyBillingCheckout(req: Request, res: Response) {
         },
       }),
     );
+
+    if (includeTrial) {
+      await assertTrialCheckoutAllowed(ctx.businessId, planKey);
+    }
 
     const session = await createManagerCheckoutSession({
       businessId: ctx.businessId,

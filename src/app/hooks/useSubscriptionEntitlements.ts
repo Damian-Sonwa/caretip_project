@@ -42,6 +42,8 @@ import {
 
 } from "../lib/subscriptionSessionCache";
 
+import { isEntitlementsSessionPrimed } from "../lib/subscriptionEntitlementFastPath";
+
 
 
 type Role = "business" | "employee";
@@ -95,10 +97,9 @@ export function useSubscriptionEntitlements(opts: {
   );
 
   const [ready, setReady] = useState(() => {
-    if (opts.cacheOnly) {
-      return Boolean(sessionStatus || sessionAccessSource || sessionTier);
-    }
-    return false;
+    if (!opts.enabled || !opts.role) return false;
+    if (opts.cacheOnly) return isEntitlementsSessionPrimed();
+    return isEntitlementsSessionPrimed();
   });
 
 

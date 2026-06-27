@@ -2,41 +2,26 @@ import { Link, Outlet, useLocation } from "react-router";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Users } from "lucide-react";
-import { BusinessModuleSubNav } from "../../../components/business/BusinessModuleSubNav";
 import { BusinessModuleWorkspaceHeader } from "../../../components/business/BusinessModuleWorkspaceHeader";
-import { showBusinessNavSubscriptionLock, teamSubNavItems } from "../../../components/business/businessDashboardNav";
-import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
-import { useRequireAuth } from "../../../hooks/useRequireAuth";
-import { Button } from "@/components/ui/button";
+import { PremiumModuleFeatureGate } from "../../../components/subscription/PremiumModuleFeatureGate";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
-import { cn } from "@/lib/utils";
 import type { HeroPersonality } from "@/lib/heroPersonalitySystem";
 
 export function BusinessTeamLayout() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
-  const { user } = useRequireAuth();
-  const { tier, ready: entitlementsReady } = useSubscriptionEntitlements({
-    enabled: user?.role === "business",
-    role: user?.role === "business" ? "business" : null,
-  });
-
-  const subItems = teamSubNavItems.map((item) => ({
-    ...item,
-    locked:
-      "featureKey" in item && item.featureKey
-        ? showBusinessNavSubscriptionLock(entitlementsReady, item, tier)
-        : false,
-  }));
+  const isPerformance = pathname.includes("/performance");
+  const isTopPerformers = pathname.includes("/top-performers");
+  const isPremiumAnalyticsRoute = isPerformance || isTopPerformers;
 
   const header = useMemo(() => {
-    if (pathname.includes("/performance")) {
+    if (isPerformance) {
       return {
         personality: "performance" as HeroPersonality,
         subtitle: t("business.team.performance.headerSubtitle"),
       };
     }
-    if (pathname.includes("/top-performers")) {
+    if (isTopPerformers) {
       return {
         personality: "team" as HeroPersonality,
         subtitle: t("business.team.topPerformersHeaderSubtitle"),
@@ -46,25 +31,29 @@ export function BusinessTeamLayout() {
       personality: "employees" as HeroPersonality,
       subtitle: t("business.team.employeesHeaderSubtitle"),
     };
-  }, [pathname, t]);
+  }, [isPerformance, isTopPerformers, t]);
+
+  const moduleContent = (
+    <>
+      <BusinessModuleWorkspaceHeader
+        personality={header.personality}
+        badge={t("business.team.eyebrow")}
+        icon={Users}
+        title={t("business.team.title")}
+        subtitle={header.subtitle}
+      />
+      <Outlet />
+    </>
+  );
 
   return (
     <div className={businessUi.modulePageShell}>
       <div className={businessUi.modulePageContained}>
-        <div className={cn(businessUi.subPageBreadcrumb, "mb-3 max-lg:mb-2.5")}>
-          <Button variant="outline" size="sm" asChild>
-            <Link to="/dashboard">{t("business.staffPage.backAria")}</Link>
-          </Button>
-        </div>
-        <BusinessModuleWorkspaceHeader
-          personality={header.personality}
-          badge={t("business.team.eyebrow")}
-          icon={Users}
-          title={t("business.team.title")}
-          subtitle={header.subtitle}
-        />
-        <BusinessModuleSubNav items={subItems} ariaLabelKey="business.team.navAria" />
-        <Outlet />
+        {isPremiumAnalyticsRoute ? (
+          <PremiumModuleFeatureGate featureKey="advancedAnalytics">{moduleContent}</PremiumModuleFeatureGate>
+        ) : (
+          moduleContent
+        )}
       </div>
     </div>
   );

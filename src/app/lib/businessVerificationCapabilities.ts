@@ -52,3 +52,14 @@ export function resolveBusinessVerificationCapabilities(
 export function canUseProductionQr(status: BusinessVerificationUiStatus, impersonating?: boolean): boolean {
   return resolveBusinessVerificationCapabilities(status, { impersonating }).canGenerateQrCodes;
 }
+
+export type QrStudioVerificationPhase = "in_review" | "action_required" | "rejected";
+
+/** QR Studio verification empty state — submitted docs awaiting admin vs still needs action. */
+export function resolveQrStudioVerificationPhase(
+  status: BusinessVerificationUiStatus,
+): QrStudioVerificationPhase {
+  if (status === "REJECTED" || status === "rejected") return "rejected";
+  if (status === "PENDING" || status === "pending") return "in_review";
+  return "action_required";
+}

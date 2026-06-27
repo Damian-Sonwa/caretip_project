@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Loader2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -7,6 +7,10 @@ import { createBillingCheckoutSession, fetchBillingStatus } from "@/app/lib/api"
 import { toUserFriendlyMessage } from "@/app/lib/errorMessages";
 import type { FeatureKey } from "@/app/lib/subscriptionCapabilities";
 import { getFeatureCatalog } from "@/app/lib/subscriptionFeatureCatalog";
+import {
+  closeOverlayThenNavigate,
+  type CloseBeforeNavigate,
+} from "@/app/lib/activateCareTipNavigation";
 import { cn } from "@/lib/utils";
 
 type UpgradeCtaProps = {
@@ -16,6 +20,9 @@ type UpgradeCtaProps = {
   fullWidth?: boolean;
   /** Override default upgrade label (i18n key). */
   labelKey?: string;
+  /** When provided (e.g. inside a modal), closes the overlay before redirecting to billing. */
+  closeBeforeNavigate?: CloseBeforeNavigate;
+  closeAnimationMs?: number;
 };
 
 export function UpgradeCta({
@@ -24,8 +31,11 @@ export function UpgradeCta({
   variant = "primary",
   fullWidth = false,
   labelKey,
+  closeBeforeNavigate,
+  closeAnimationMs,
 }: UpgradeCtaProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
   const requiredTier = featureKey ? getFeatureCatalog(featureKey).requiredTier : "premium";
 
@@ -41,6 +51,9 @@ export function UpgradeCta({
 
   async function handleUpgrade() {
     if (requiredTier === "enterprise") {
+      if (closeBeforeNavigate) {
+        await closeBeforeNavigate();
+      }
       window.location.assign("/contact?intent=demo");
       return;
     }
@@ -48,6 +61,9 @@ export function UpgradeCta({
     try {
       const billing = await fetchBillingStatus();
       if (billing?.billingEnabled && billing.stripeConfigured) {
+        if (closeBeforeNavigate) {
+          await closeBeforeNavigate();
+        }
         const session = await createBillingCheckoutSession({
           planKey: "premium",
           billingCycle: billing.billingCycle ?? "monthly",
@@ -59,7 +75,7 @@ export function UpgradeCta({
         toast.error(t("business.billing.checkoutNoUrl"));
         return;
       }
-      window.location.assign("/dashboard/billing/subscription");
+      await closeOverlayThenNavigate(navigate, { closeBeforeNavigate, closeAnimationMs });
     } catch (err) {
       toast.error(toUserFriendlyMessage(err) || t("business.billing.checkoutError"));
     } finally {

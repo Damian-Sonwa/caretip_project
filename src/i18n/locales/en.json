@@ -1948,7 +1948,7 @@
   "subscription": {
     "tiers": {
       "basic": "Starter",
-      "premium": "Premium",
+      "premium": "Business",
       "enterprise": "Enterprise"
     },
     "nav": {
@@ -1959,13 +1959,19 @@
       "includesAria": "Included with upgrade",
       "currentPlan": "You are on {{plan}}. Upgrade to {{required}} to unlock this."
     },
+    "featureInfo": {
+      "activationEyebrow": "CareTip Premium",
+      "upgradeEyebrow": "Upgrade required",
+      "keyBenefits": "Key benefits",
+      "includedIn": "Included in"
+    },
     "activation": {
       "noPlan": "No active plan",
       "eyebrow": "Activate CareTip",
       "title": "Choose how you want to get started",
       "body": "Your venue is ready. Start a free trial or subscribe to unlock analytics, QR tools, and team features.",
       "trialCta": "Start 4-Week Trial",
-      "trialHint": "Business plan · card required",
+      "trialHint": "Starter or Business · card required",
       "starterCta": "Subscribe to Starter",
       "starterHint": "Essential tipping tools",
       "businessCta": "Subscribe to Business",
@@ -2002,10 +2008,11 @@
       "advancedAnalytics": {
         "title": "Advanced analytics",
         "benefit": "See trends, performance charts, and period comparisons across your team.",
-        "f0": "Interactive charts and trend lines",
-        "f1": "Weekly, monthly, and annual views",
-        "f2": "Top performer insights",
-        "f3": "Operational pulse metrics"
+        "f0": "Revenue trends",
+        "f1": "Employee performance",
+        "f2": "Location comparisons",
+        "f3": "Historical reports",
+        "f4": "Growth insights"
       },
       "csvExport": {
         "title": "CSV export & reporting",
@@ -2052,10 +2059,11 @@
       },
       "customerFeedback": {
         "title": "Customer feedback",
-        "benefit": "Collect ratings, reviews, and guest sentiment after every tipping experience.",
-        "f0": "Customer ratings",
-        "f1": "Guest reviews",
-        "f2": "Sentiment insights"
+        "benefit": "Collect guest ratings and reviews automatically after each tipping experience.",
+        "f0": "Guest satisfaction insights",
+        "f1": "Public review management",
+        "f2": "Team performance feedback",
+        "f3": "Rating trends"
       },
       "tipManagement": {
         "title": "Tip management",
@@ -2080,9 +2088,9 @@
       },
       "employeeGoals": {
         "title": "Employee tip goals",
-        "benefit": "Motivate your team with trackable tipping targets and progress.",
-        "f0": "Personal and team goals",
-        "f1": "Progress tracking on dashboards",
+        "benefit": "Employees set their own tip goals; your business tracks progress, celebrates milestones, and supports team motivation.",
+        "f0": "Employees create their own goals",
+        "f1": "Track progress on your dashboard",
         "f2": "Goal history and achievements"
       },
       "brandingCustomization": {
@@ -2145,7 +2153,34 @@
       "locations": "Locations",
       "customers": "Customer Feedback",
       "billing": "Billing",
-      "settings": "Settings"
+      "settings": "Settings",
+      "planLabels": {
+        "starter": "Starter Plan",
+        "business": "Business Plan",
+        "enterprise": "Enterprise Plan"
+      },
+      "subscriptionStatus": {
+        "loading": "Checking subscription…",
+        "none": "No Subscription",
+        "starter": "Starter Plan",
+        "business": "Business Plan",
+        "enterprise": "Enterprise Plan",
+        "trialLabel": "{{plan}} Trial",
+        "sponsored": "Sponsored Access"
+      },
+      "locked": {
+        "requiresActivation": "Requires CareTip activation",
+        "includedInPlan": "Included in {{plan}}",
+        "tooltipActivation": "Activate CareTip to unlock this feature and start using your dashboard.",
+        "tooltipUpgrade": "Included with {{plan}}. Upgrade to unlock this feature."
+      },
+      "premiumDialog": {
+        "activationEyebrow": "Activation required",
+        "upgradeEyebrow": "Premium feature",
+        "activationPlanHint": "Activate CareTip to unlock QR codes, team tools, feedback, and analytics.",
+        "includedWithPlan": "Included with {{plan}}.",
+        "maybeLater": "Maybe later"
+      }
     }
   },
   "charts": {
@@ -3465,10 +3500,10 @@
       "backToCareTip": "Back to CareTip",
       "impersonationBanner": "Support mode: you are viewing this venue as the manager.",
       "exitImpersonation": "Exit to Platform Admin",
-      "fixVerificationTitle": "Business verification pending",
-      "fixVerificationDesc": "Your venue is under review. Our team is reviewing your onboarding information.",
-      "verificationBannerTitle": "Business verification pending",
-      "verificationBannerDesc": "Your venue is under review. Our team is reviewing your onboarding information. Approval is required before accepting live guest tips.",
+      "fixVerificationTitle": "Your business is under review",
+      "fixVerificationDesc": "Thank you for submitting your business verification. Our team is reviewing your information.",
+      "verificationBannerTitle": "Your business is under review",
+      "verificationBannerDesc": "Thank you for submitting your business verification. Our team is reviewing your information and you'll be notified as soon as your business is approved.",
       "verificationBannerRejectedTitle": "Business verification needs attention",
       "verificationBannerRejectedDesc": "Our team could not approve your venue yet. Contact support if you have questions.",
       "verificationBannerCta": "View verification status",
@@ -3539,6 +3574,37 @@
       "needHelpTitle": "Need help?",
       "needHelpDesc": "Learn how to maximize your team's earnings and keep guests tipping smoothly.",
       "viewGuidelines": "View guidelines",
+      "preview": {
+        "viewPlans": "View plans",
+        "exploreFeatures": "Explore CareTip features",
+        "premiumEyebrow": "CareTip Premium",
+        "premiumTitle": "Unlock Premium Features",
+        "premiumLead": "Start accepting guest feedback, generate QR experiences, manage your team, access analytics, branding, and automation.",
+        "premiumIncludes": "Included with CareTip Premium",
+        "features": {
+          "customerFeedback": "Customer Feedback",
+          "employeeGoals": "Employee Goals",
+          "advancedAnalytics": "Advanced Analytics",
+          "qrBranding": "QR Branding",
+          "qrTemplates": "QR Templates",
+          "unlimitedLocations": "Unlimited Locations",
+          "unlimitedTables": "Unlimited Tables"
+        },
+        "availableWithPremium": "Available with CareTip Premium",
+        "learnMore": "Learn more",
+        "goalsDesc": "Track employee tip goals, monitor progress, and support your team.",
+        "feedbackDesc": "Collect guest reviews and ratings after every tipping experience.",
+        "analyticsTitle": "Advanced Analytics",
+        "analyticsDesc": "Revenue trends, performance reports, and growth insights in one place.",
+        "analyticsSample": {
+          "revenue": "Revenue trends",
+          "performance": "Performance reports",
+          "growth": "Growth insights"
+        },
+        "actionVerification": "Verification",
+        "actionBilling": "Billing",
+        "actionSettings": "Settings"
+      },
       "guidelinesDialogTitle": "CareTip usage guidelines",
       "guidelinesDialogDesc": "Practical steps to get your team set up and grow tips. This is a quick reference you can save or print for your staff room.",
       "guidelinesSectionOnboardTitle": "Onboard your staff",
@@ -3922,11 +3988,23 @@
         "verificationTitle": "Complete business verification",
         "verificationBody": "Finish verifying your business so you can generate live QR codes for guests.",
         "continueVerification": "Continue verification",
+        "verificationInReviewTitle": "Your business is under review",
+        "verificationInReviewBadge": "Verification in Progress",
+        "verificationInReviewBody": "Thank you for submitting your business verification. Our team is currently reviewing your information. This process usually takes a short time, and you'll receive an in-app notification and email as soon as your business has been approved.",
+        "verificationInReviewLimitedAccess": "While your review is in progress, features that require a verified business (such as generating live QR codes) will remain temporarily unavailable.",
+        "viewVerificationStatus": "View verification status",
+        "verificationInReviewSupportBefore": "Need to update your submission?",
+        "verificationInReviewSupportLink": "Contact support",
+        "verificationInReviewSupportAfter": "or wait until the review is complete.",
+        "verificationRejectedTitle": "Business verification needs attention",
+        "verificationRejectedBody": "Our team could not approve your business yet. Review your submission or contact support for next steps.",
         "checklistTitle": "Get ready to generate QR codes",
         "checklistBody": "Complete these steps to unlock QR Studio for your venue.",
         "checklist": {
           "subscription": "Activate your subscription",
           "verification": "Complete business verification",
+          "verificationInReview": "Verification in progress",
+          "verificationRejected": "Verification needs attention",
           "generate": "Start generating QR codes"
         }
       },
@@ -4720,6 +4798,26 @@
       "downgradeUnavailable": "Contact support to downgrade",
       "contactSales": "Contact sales",
       "currentPlanBadge": "Current plan",
+      "subscriptionSummary": {
+        "title": "Current subscription",
+        "noActiveTitle": "No active subscription",
+        "noActiveBody": "Activate CareTip to unlock premium features.",
+        "statusLabel": "Status",
+        "renewsOn": "Renews",
+        "paymentMethod": "Payment method",
+        "paymentMethodPortal": "Manage in billing portal",
+        "trialLabel": "{{plan}} trial",
+        "sponsoredProgramme": "Your access is provided through the CareTip Sponsored Access Programme.",
+        "contactSupport": "Contact support"
+      },
+      "planCard": {
+        "subscribeToPlan": "Subscribe to {{plan}}",
+        "downgradeToPlan": "Downgrade to {{plan}}",
+        "downgradeViaPortal": "Plan changes apply at the end of your billing period.",
+        "renewsOn": "Renews {{date}}",
+        "trialEnds": "Trial ends {{date}}",
+        "cancelScheduled": "Access until {{date}}"
+      },
       "customPricing": "Custom",
       "perMonth": "per month",
       "perMonthBilledYearly": "per month ({{total}} billed yearly)",
@@ -4749,6 +4847,28 @@
       "checkoutNoUrl": "Checkout session did not return a URL.",
       "portalError": "Could not open the billing portal.",
       "startTrial": "Start 4 Week Free Trial",
+      "trialFlow": {
+        "recommended": "Recommended for new users",
+        "promoTitle": "Start your 4-week free trial",
+        "promoBody": "Choose Starter or Business and explore CareTip with full plan capabilities. Payment details are collected now; you are not charged until the trial ends.",
+        "promoCta": "Start 4-Week Free Trial",
+        "promoCtaAlt": "Start Free Trial, no payment today",
+        "orSubscribeBelow": "Or subscribe immediately to a plan below",
+        "chooseTitle": "Choose your trial experience",
+        "chooseDesc": "Select the plan you want to evaluate during your 4-week trial. You can upgrade or change plans before the trial ends.",
+        "confirmCta": "Start 4-Week Trial",
+        "enterpriseNote": "Contact sales",
+        "alreadyUsed": "Your free trial has already been used. Choose a subscription plan to continue.",
+        "expiredTitle": "Your {{plan}} trial has ended",
+        "expiredBody": "Continue with {{plan}} to keep the features you evaluated during your trial.",
+        "expiredEnterpriseBody": "Contact our team to continue with Enterprise capabilities.",
+        "upgradeCta": "Upgrade to {{plan}}",
+        "planHint": {
+          "basic": "Essential tipping tools for small teams",
+          "premium": "Advanced analytics, QR branding, and team tools",
+          "enterprise": "Custom rollout for your organization. Contact our sales team."
+        }
+      },
       "trialPaymentNote": "Payment details required before the trial begins. Converts to a paid subscription when the trial ends.",
       "lifecycle": {
         "title": "Subscription & cancellation",

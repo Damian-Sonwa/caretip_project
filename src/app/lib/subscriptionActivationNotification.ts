@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { peekCheckoutIntent, clearCheckoutIntent } from "./checkoutIntent";
 import { runBillingCheckoutSuccessSync } from "./billingCheckoutSuccessSync";
 import { clearBusinessProfileClientCache, fetchBillingSyncStatus, type BillingSyncStatus, type SubscriptionPlanKey } from "./api";
+import { subscriptionPlanDisplayName } from "./subscriptionPlanDisplayName";
 import { clearSubscriptionTierSession } from "./subscriptionSessionCache";
 
 const TOAST_SHOWN_PREFIX = "caretip.subscriptionActivationToast.";
@@ -29,9 +30,7 @@ function markToastShown(sessionId?: string | null): void {
 }
 
 function planMarketingLabel(planKey: SubscriptionPlanKey | null | undefined, t: TFunction): string {
-  if (planKey === "basic") return t("business.billing.plans.basic.name");
-  if (planKey === "enterprise") return t("business.billing.plans.enterprise.name");
-  return t("business.billing.plans.premium.name");
+  return subscriptionPlanDisplayName(planKey, t);
 }
 
 function resolveActivationToastCopy(
@@ -45,7 +44,7 @@ function resolveActivationToastCopy(
     return {
       title: t("business.billing.activationToast.trialTitle"),
       description: t("business.billing.activationToast.trialBody", {
-        plan: planMarketingLabel(syncStatus?.planKey ?? intent?.planKey ?? "premium", t),
+        plan: planMarketingLabel(syncStatus?.planKey ?? intent?.planKey, t),
       }),
     };
   }

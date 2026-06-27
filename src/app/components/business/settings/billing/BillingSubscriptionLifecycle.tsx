@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { AlertCircle, Calendar, RefreshCw } from "lucide-react";
 import type { BillingStatus } from "../../../../lib/api";
+import { subscriptionPlanDisplayName, resolveBillingTrialPlanKey } from "../../../../lib/subscriptionPlanDisplayName";
 
 function formatDate(iso: string | null, locale: string, emptyLabel: string): string {
   if (!iso) return emptyLabel;
@@ -32,6 +33,8 @@ export function BillingSubscriptionLifecycle({ billing }: Props) {
     ? t("business.billing.lifecycle.billingStopsOn")
     : t("business.billing.lifecycle.billingContinues");
 
+  const displayPlanKey = resolveBillingTrialPlanKey(billing) ?? billing.planKey;
+
   return (
     <section
       className="rounded-xl border border-border/70 bg-card p-5 shadow-sm"
@@ -48,7 +51,7 @@ export function BillingSubscriptionLifecycle({ billing }: Props) {
             {t("business.billing.lifecycle.currentSubscription")}
           </dt>
           <dd className="mt-1 text-sm font-semibold text-foreground">
-            {t(`business.billing.plans.${billing.planKey}.name`)},{" "}
+            {subscriptionPlanDisplayName(displayPlanKey, t)},{" "}
             {billing.billingCycle === "yearly"
               ? t("business.billing.cycleYearly")
               : t("business.billing.cycleMonthly")}

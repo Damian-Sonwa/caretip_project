@@ -5,6 +5,7 @@ import type { BillingStatus } from "../../../../lib/api";
 import { BillingStatusBadge } from "./BillingStatusBadge";
 import { PremiumPlanCard } from "../../../premium/PremiumPlanCard";
 import { SubscriptionActivationPanel } from "../../../subscription/SubscriptionActivationPanel";
+import { subscriptionPlanDisplayName, resolveBillingTrialPlanKey } from "../../../../lib/subscriptionPlanDisplayName";
 import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
 
 function formatDate(iso: string | null, locale: string, emptyLabel: string): string {
@@ -72,12 +73,14 @@ export function BillingCurrentPlanCard({ billing }: { billing: BillingStatus }) 
   const showEmptyState = !billing.hasStripeBilling && billing.planKey === "basic";
   const showUpgrade = billing.planKey !== "enterprise";
 
+  const displayPlanKey = resolveBillingTrialPlanKey(billing) ?? billing.planKey;
+
   return (
     <PremiumPlanCard
       badge={<span className={premiumVisualClasses.badge}>{t("business.billing.currentPlan")}</span>}
       title={
         <h3 className="text-2xl font-bold tracking-tight text-white">
-          {t(`business.billing.plans.${billing.planKey}.name`)}
+          {subscriptionPlanDisplayName(displayPlanKey, t)}
         </h3>
       }
       subtitle={

@@ -1950,7 +1950,7 @@
   "subscription": {
     "tiers": {
       "basic": "Starter",
-      "premium": "Premium",
+      "premium": "Business",
       "enterprise": "Enterprise"
     },
     "nav": {
@@ -1961,13 +1961,19 @@
       "includesAria": "Im Upgrade enthalten",
       "currentPlan": "Sie nutzen {{plan}}. Upgrade auf {{required}}, um dies freizuschalten."
     },
+    "featureInfo": {
+      "activationEyebrow": "CareTip Premium",
+      "upgradeEyebrow": "Upgrade erforderlich",
+      "keyBenefits": "Hauptvorteile",
+      "includedIn": "Enthalten in"
+    },
     "activation": {
       "noPlan": "Kein aktiver Plan",
       "eyebrow": "CareTip aktivieren",
       "title": "Wählen Sie, wie Sie starten möchten",
       "body": "Ihr Betrieb ist bereit. Starten Sie eine Testphase oder abonnieren Sie, um Analysen, QR-Tools und Teamfunktionen freizuschalten.",
       "trialCta": "4-Wochen-Test starten",
-      "trialHint": "Business-Plan · Karte erforderlich",
+      "trialHint": "Starter oder Business · Karte erforderlich",
       "starterCta": "Starter abonnieren",
       "starterHint": "Grundlegende Trinkgeld-Tools",
       "businessCta": "Business abonnieren",
@@ -2004,10 +2010,11 @@
       "advancedAnalytics": {
         "title": "Erweiterte Analysen",
         "benefit": "Trends, Leistungsdiagramme und Periodenvergleiche für Ihr Team.",
-        "f0": "Interaktive Charts und Trendlinien",
-        "f1": "Wochen-, Monats- und Jahresansichten",
-        "f2": "Top-Performer-Einblicke",
-        "f3": "Operative Pulse-Metriken"
+        "f0": "Umsatztrends",
+        "f1": "Mitarbeiterleistung",
+        "f2": "Standortvergleiche",
+        "f3": "Historische Berichte",
+        "f4": "Wachstums-Insights"
       },
       "csvExport": {
         "title": "CSV-Export & Berichte",
@@ -2054,10 +2061,11 @@
       },
       "customerFeedback": {
         "title": "Kundenfeedback",
-        "benefit": "Bewertungen, Rezensionen und Gästestimmung nach jedem Trinkgelderlebnis sammeln.",
-        "f0": "Kundenbewertungen",
-        "f1": "Gästerezensionen",
-        "f2": "Stimmungs-Insights"
+        "benefit": "Gästebewertungen und Rezensionen automatisch nach jedem Trinkgelderlebnis sammeln.",
+        "f0": "Einblicke in Gästezufriedenheit",
+        "f1": "Verwaltung öffentlicher Bewertungen",
+        "f2": "Feedback zur Teamleistung",
+        "f3": "Bewertungstrends"
       },
       "tipManagement": {
         "title": "Trinkgeldverwaltung",
@@ -2082,9 +2090,9 @@
       },
       "employeeGoals": {
         "title": "Trinkgeldziele für Mitarbeitende",
-        "benefit": "Motivieren Sie Ihr Team mit messbaren Trinkgeldzielen.",
-        "f0": "Persönliche und Teamziele",
-        "f1": "Fortschritt auf Dashboards",
+        "benefit": "Mitarbeitende legen eigene Trinkgeldziele fest; Ihr Unternehmen verfolgt den Fortschritt, feiert Meilensteine und unterstützt die Team-Motivation.",
+        "f0": "Mitarbeitende erstellen eigene Ziele",
+        "f1": "Fortschritt auf Ihrem Dashboard verfolgen",
         "f2": "Zielverlauf und Erfolge"
       },
       "brandingCustomization": {
@@ -2147,7 +2155,34 @@
       "locations": "Standorte",
       "customers": "Kundenfeedback",
       "billing": "Abrechnung",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "planLabels": {
+        "starter": "Starter-Tarif",
+        "business": "Business-Tarif",
+        "enterprise": "Enterprise-Tarif"
+      },
+      "subscriptionStatus": {
+        "loading": "Abonnement wird geprüft…",
+        "none": "Kein Abonnement",
+        "starter": "Starter-Tarif",
+        "business": "Business-Tarif",
+        "enterprise": "Enterprise-Tarif",
+        "trialLabel": "{{plan}}-Testphase",
+        "sponsored": "Gesponsorter Zugang"
+      },
+      "locked": {
+        "requiresActivation": "CareTip-Aktivierung erforderlich",
+        "includedInPlan": "Enthalten in {{plan}}",
+        "tooltipActivation": "Aktivieren Sie CareTip, um diese Funktion freizuschalten.",
+        "tooltipUpgrade": "Enthalten in {{plan}}. Upgrade zum Freischalten dieser Funktion."
+      },
+      "premiumDialog": {
+        "activationEyebrow": "Aktivierung erforderlich",
+        "upgradeEyebrow": "Premium-Funktion",
+        "activationPlanHint": "Aktivieren Sie CareTip für QR-Codes, Team-Tools, Feedback und Analysen.",
+        "includedWithPlan": "Enthalten in {{plan}}.",
+        "maybeLater": "Vielleicht später"
+      }
     }
   },
   "charts": {
@@ -3467,10 +3502,10 @@
       "backToCareTip": "Zurück zu CareTip",
       "impersonationBanner": "Supportmodus: Sie sehen dieses Lokal als Manager.",
       "exitImpersonation": "Zur Plattformadministration",
-      "fixVerificationTitle": "Geschäftsverifizierung ausstehend",
-      "fixVerificationDesc": "Ihr Lokal wird geprüft. Unser Team prüft Ihre Onboarding-Angaben.",
-      "verificationBannerTitle": "Geschäftsverifizierung ausstehend",
-      "verificationBannerDesc": "Ihr Lokal wird geprüft. Unser Team prüft Ihre Onboarding-Angaben. Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann.",
+      "fixVerificationTitle": "Ihr Unternehmen wird geprüft",
+      "fixVerificationDesc": "Vielen Dank für die Einreichung Ihrer Unternehmensverifizierung. Unser Team prüft Ihre Angaben.",
+      "verificationBannerTitle": "Ihr Unternehmen wird geprüft",
+      "verificationBannerDesc": "Vielen Dank für die Einreichung Ihrer Unternehmensverifizierung. Unser Team prüft Ihre Angaben — Sie werden benachrichtigt, sobald Ihr Unternehmen freigegeben wurde.",
       "verificationBannerRejectedTitle": "Geschäftsverifizierung erfordert Aufmerksamkeit",
       "verificationBannerRejectedDesc": "Ihr Lokal konnte noch nicht freigegeben werden. Kontaktieren Sie den Support bei Fragen.",
       "verificationBannerCta": "Verifizierungsstatus anzeigen",
@@ -3541,6 +3576,37 @@
       "needHelpTitle": "Brauchen Sie Hilfe?",
       "needHelpDesc": "So steigern Sie die Einnahmen Ihres Teams und halten das Tippen für Gäste einfach.",
       "viewGuidelines": "Richtlinien ansehen",
+      "preview": {
+        "viewPlans": "Tarife ansehen",
+        "exploreFeatures": "CareTip-Funktionen entdecken",
+        "premiumEyebrow": "CareTip Premium",
+        "premiumTitle": "Premium-Funktionen freischalten",
+        "premiumLead": "Gästefeedback empfangen, QR-Erlebnisse erstellen, Ihr Team verwalten, Analysen, Branding und Automatisierung nutzen.",
+        "premiumIncludes": "Enthalten in CareTip Premium",
+        "features": {
+          "customerFeedback": "Kundenfeedback",
+          "employeeGoals": "Mitarbeiterziele",
+          "advancedAnalytics": "Erweiterte Analysen",
+          "qrBranding": "QR-Branding",
+          "qrTemplates": "QR-Vorlagen",
+          "unlimitedLocations": "Unbegrenzte Standorte",
+          "unlimitedTables": "Unbegrenzte Tische"
+        },
+        "availableWithPremium": "Verfügbar mit CareTip Premium",
+        "learnMore": "Mehr erfahren",
+        "goalsDesc": "Trinkgeldziele Ihres Teams verfolgen, Fortschritt überwachen und Mitarbeitende unterstützen.",
+        "feedbackDesc": "Gästebewertungen und Feedback nach jedem Trinkgeld-Erlebnis sammeln.",
+        "analyticsTitle": "Erweiterte Analysen",
+        "analyticsDesc": "Umsatztrends, Leistungsberichte und Wachstumseinblicke an einem Ort.",
+        "analyticsSample": {
+          "revenue": "Umsatztrends",
+          "performance": "Leistungsberichte",
+          "growth": "Wachstumseinblicke"
+        },
+        "actionVerification": "Verifizierung",
+        "actionBilling": "Abrechnung",
+        "actionSettings": "Einstellungen"
+      },
       "guidelinesDialogTitle": "CareTip Nutzungsrichtlinien",
       "guidelinesDialogDesc": "Praktische Schritte, um Ihr Team einzurichten und Trinkgelder zu steigern. Kurzreferenz zum Speichern oder Ausdrucken für die Personalräume.",
       "guidelinesSectionOnboardTitle": "Team einbinden",
@@ -3964,11 +4030,23 @@
         "verificationTitle": "Unternehmensverifizierung abschließen",
         "verificationBody": "Schließen Sie die Verifizierung ab, um Live-QR-Codes für Gäste zu erstellen.",
         "continueVerification": "Verifizierung fortsetzen",
+        "verificationInReviewTitle": "Ihr Unternehmen wird geprüft",
+        "verificationInReviewBadge": "Verifizierung läuft",
+        "verificationInReviewBody": "Vielen Dank für die Einreichung Ihrer Unternehmensverifizierung. Unser Team prüft derzeit Ihre Angaben. Dies dauert in der Regel nur kurz — Sie erhalten eine In-App-Benachrichtigung und E-Mail, sobald Ihr Unternehmen freigegeben wurde.",
+        "verificationInReviewLimitedAccess": "Während der Prüfung bleiben Funktionen, die ein verifiziertes Unternehmen erfordern (z. B. Live-QR-Codes), vorübergehend nicht verfügbar.",
+        "viewVerificationStatus": "Verifizierungsstatus anzeigen",
+        "verificationInReviewSupportBefore": "Möchten Sie Ihre Einreichung aktualisieren?",
+        "verificationInReviewSupportLink": "Support kontaktieren",
+        "verificationInReviewSupportAfter": "oder warten Sie, bis die Prüfung abgeschlossen ist.",
+        "verificationRejectedTitle": "Verifizierung erfordert Aufmerksamkeit",
+        "verificationRejectedBody": "Ihr Unternehmen konnte noch nicht freigegeben werden. Prüfen Sie Ihre Einreichung oder kontaktieren Sie den Support für die nächsten Schritte.",
         "checklistTitle": "Bereit für QR-Codes",
         "checklistBody": "Erledigen Sie diese Schritte, um QR Studio für Ihr Lokal freizuschalten.",
         "checklist": {
           "subscription": "Abo aktivieren",
           "verification": "Unternehmensverifizierung abschließen",
+          "verificationInReview": "Verifizierung läuft",
+          "verificationRejected": "Verifizierung erfordert Aufmerksamkeit",
           "generate": "QR-Codes erstellen"
         }
       },
@@ -4722,6 +4800,26 @@
       "downgradeUnavailable": "Support kontaktieren zum Downgrade",
       "contactSales": "Vertrieb kontaktieren",
       "currentPlanBadge": "Aktueller Plan",
+      "subscriptionSummary": {
+        "title": "Aktuelles Abonnement",
+        "noActiveTitle": "Kein aktives Abonnement",
+        "noActiveBody": "Aktivieren Sie CareTip, um Premium-Funktionen freizuschalten.",
+        "statusLabel": "Status",
+        "renewsOn": "Verlängert sich",
+        "paymentMethod": "Zahlungsmethode",
+        "paymentMethodPortal": "Im Abrechnungsportal verwalten",
+        "trialLabel": "{{plan}}-Testphase",
+        "sponsoredProgramme": "Ihr Zugang wird über das CareTip Sponsored Access Programme bereitgestellt.",
+        "contactSupport": "Support kontaktieren"
+      },
+      "planCard": {
+        "subscribeToPlan": "{{plan}} abonnieren",
+        "downgradeToPlan": "Auf {{plan}} downgraden",
+        "downgradeViaPortal": "Planänderungen gelten zum Ende Ihres Abrechnungszeitraums.",
+        "renewsOn": "Verlängert sich am {{date}}",
+        "trialEnds": "Testphase endet am {{date}}",
+        "cancelScheduled": "Zugang bis {{date}}"
+      },
       "customPricing": "Individuell",
       "perMonth": "pro Monat",
       "perMonthBilledYearly": "pro Monat ({{total}} jährlich)",
@@ -4751,6 +4849,28 @@
       "checkoutNoUrl": "Checkout ohne URL zurückgegeben.",
       "portalError": "Abrechnungsportal konnte nicht geöffnet werden.",
       "startTrial": "4 Wochen kostenlos testen",
+      "trialFlow": {
+        "recommended": "Empfohlen für neue Nutzer",
+        "promoTitle": "Starten Sie Ihre 4-wöchige Testphase",
+        "promoBody": "Wählen Sie Starter oder Business und testen Sie CareTip mit allen Funktionen des Plans. Zahlungsdaten werden jetzt erfasst; die Belastung erfolgt erst nach Ende der Testphase.",
+        "promoCta": "4 Wochen kostenlos testen",
+        "promoCtaAlt": "Kostenlos testen, heute keine Zahlung",
+        "orSubscribeBelow": "Oder abonnieren Sie sofort einen Plan unten",
+        "chooseTitle": "Test-Erlebnis wählen",
+        "chooseDesc": "Wählen Sie den Plan, den Sie in Ihrer 4-wöchigen Testphase ausprobieren möchten.",
+        "confirmCta": "4-wöchige Testphase starten",
+        "enterpriseNote": "Vertrieb kontaktieren",
+        "alreadyUsed": "Ihre kostenlose Testphase wurde bereits genutzt. Wählen Sie einen Abonnementplan, um fortzufahren.",
+        "expiredTitle": "Ihre {{plan}}-Testphase ist beendet",
+        "expiredBody": "Setzen Sie mit {{plan}} fort, um die Funktionen aus Ihrer Testphase zu behalten.",
+        "expiredEnterpriseBody": "Kontaktieren Sie unser Team, um Enterprise-Funktionen weiter zu nutzen.",
+        "upgradeCta": "Upgrade auf {{plan}}",
+        "planHint": {
+          "basic": "Essenzielle Trinkgeld-Tools für kleine Teams",
+          "premium": "Erweiterte Analysen, QR-Branding und Team-Tools",
+          "enterprise": "Individuelle Einführung für Ihre Organisation. Vertrieb kontaktieren."
+        }
+      },
       "trialPaymentNote": "Zahlungsdaten werden vor Beginn der Testphase benötigt. Nach der Testphase wird ein kostenpflichtiges Abo aktiviert.",
       "lifecycle": {
         "title": "Abo & Kündigung",

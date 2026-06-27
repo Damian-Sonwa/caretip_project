@@ -42,6 +42,7 @@
 @import "./caretip-landing-saas-polish.css";
 @import "./business-dashboard-polish.css";
 @import "./business-dashboard-hierarchy.css";
+@import "./business-dashboard-sidebar.css";
 @import "./caretip-dashboard-mobile.css";
 @import "./caretip-customer-flow-premium.css";
 @import "./caretip-pricing-premium.css";
@@ -53,3 +54,4 @@
 @import "./caretip-public-marketing-mobile-refine.css";
 @import "./dashboard-desktop-layout.css";
 @import "./theme.css";
+@import "./business-dashboard-premium-refresh.css";

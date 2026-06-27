@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Crown, Sparkles } from "lucide-react";
 import type { BusinessSubscriptionTier } from "@/app/lib/subscriptionCapabilities";
+import { subscriptionPlanDisplayName } from "@/app/lib/subscriptionPlanDisplayName";
 import { cn } from "@/lib/utils";
 
 type SubscriptionBadgeProps = {
@@ -11,7 +12,7 @@ type SubscriptionBadgeProps = {
 
 export function SubscriptionBadge({ tier, className, size = "sm" }: SubscriptionBadgeProps) {
   const { t } = useTranslation();
-  const label = t(`subscription.tiers.${tier}`);
+  const label = subscriptionPlanDisplayName(tier, t);
   const isPremium = tier === "premium";
   const isEnterprise = tier === "enterprise";
 

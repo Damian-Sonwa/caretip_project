@@ -157,7 +157,7 @@ export async function createPlatformSubscriptionCheckoutSession(params: {
   const trialEligible =
     params.includeTrial === true &&
     isSubscriptionTrialEnabled() &&
-    params.planKey === "premium";
+    (params.planKey === "basic" || params.planKey === "premium");
   const subscriptionData: Stripe.Checkout.SessionCreateParams.SubscriptionData = {
     metadata: {
       [BILLING_CHECKOUT_METADATA_KEYS.businessId]: params.businessId,

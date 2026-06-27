@@ -18,7 +18,9 @@ import { VerificationPendingBanner } from "../components/business/VerificationPe
 import { useBusinessVerificationRealtime } from "../hooks/useBusinessVerificationRealtime";
 import { useMobileMenuState } from "../hooks/useMobileMenuState";
 import { useCommercialPageTracking } from "../hooks/useCommercialPageTracking";
-import { preloadQrStudioDashboardData } from "../lib/qrStudioWarmCache";
+import { BusinessEntitlementsProvider } from "../contexts/BusinessEntitlementsContext";
+import { BusinessFeatureInfoDrawerProvider } from "../components/business/BusinessFeatureInfoDrawerProvider";
+import { sessionHasActiveEntitlements } from "../lib/subscriptionEntitlementFastPath";
 
 /**
  * Approved business manager shell: admin-style sidebar + top bar + footer.
@@ -37,7 +39,10 @@ export function BusinessLayout() {
 
   useEffect(() => {
     if (!isAppReady || user?.impersonation) return;
-    preloadQrStudioDashboardData();
+    if (!sessionHasActiveEntitlements()) return;
+    void import("../lib/qrStudioWarmCache").then(({ preloadQrStudioDashboardData }) => {
+      preloadQrStudioDashboardData();
+    });
   }, [isAppReady, user?.impersonation]);
 
   return (
@@ -59,14 +64,18 @@ export function BusinessLayout() {
         <BusinessMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
-            "caretip-dashboard-shell font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-stone-50/40 lg:pl-64",
+            "caretip-dashboard-shell business-dashboard-atmosphere font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden lg:pl-64",
             BUSINESS_DASHBOARD_ROOT,
           )}
         >
           <DashboardHeader onMenuClick={openMobileMenu} />
           <main className="min-w-0 flex-1 overflow-x-clip">
             <RouteChunkBoundary variant="shell" registrationKey="business-outlet">
-              <Outlet />
+              <BusinessEntitlementsProvider>
+                <BusinessFeatureInfoDrawerProvider>
+                  <Outlet />
+                </BusinessFeatureInfoDrawerProvider>
+              </BusinessEntitlementsProvider>
             </RouteChunkBoundary>
           </main>
           <Footer variant="minimal" />

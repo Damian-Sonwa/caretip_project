@@ -17,6 +17,7 @@ const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest }
 
 export const businessUi = {
   ...employeeUiRest,
+  iconTileMuted: "business-dash-icon-tile shrink-0",
   page: "business-page min-h-0 pb-16 sm:pb-20",
   pageInner: "caretip-container business-page__inner px-4 pt-3 max-lg:pt-3 sm:px-6 sm:pt-4",
   /** Shared shell for module routes (Billing, Team, QR Studio, etc.). */
@@ -38,9 +39,9 @@ export const businessUi = {
     "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
   bottomGrid:
     "business-dashboard-bottom-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-3 lg:gap-6",
-  card: "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] transition-shadow hover:shadow-[0_14px_40px_-16px_rgba(15,23,42,0.14)]",
+  card: "business-card overflow-hidden rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] backdrop-blur-[2px] transition-[box-shadow,transform,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-18px_rgba(15,23,42,0.16)]",
   cardStatic:
-    "business-card overflow-hidden rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
+    "business-card overflow-hidden rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] backdrop-blur-[2px]",
   statCard: `business-stat-card ${DASHBOARD_METRIC_STAT_CARD_SHELL}`,
   periodToggle:
     "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-neutral-200/80 bg-white p-1 shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)] sm:w-fit",
@@ -56,7 +57,7 @@ export const businessUi = {
   heroCtaLink:
     "inline-flex min-w-0 items-center justify-center gap-1.5 px-2 text-center text-xs font-semibold leading-snug [text-wrap:balance] sm:gap-2 sm:px-3 sm:text-sm",
   atAGlanceCard:
-    "business-card dashboard-at-a-glance mt-3 w-full rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)] max-lg:mt-2.5",
+    "business-card dashboard-at-a-glance mt-3 w-full rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] max-lg:mt-2.5",
   atAGlanceContent: "dashboard-at-a-glance__content p-0",
   atAGlanceLabel: "dashboard-at-a-glance__label mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground",
   atAGlanceStatLabel: caretipType.kpiLabel,

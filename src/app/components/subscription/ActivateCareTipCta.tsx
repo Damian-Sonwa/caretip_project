@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { Loader2, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
@@ -8,6 +8,11 @@ import {
   startActivationCheckout,
   type ActivationCheckoutPlan,
 } from "@/app/lib/activateCareTipCheckout";
+import {
+  BILLING_SUBSCRIPTION_PLANS_URL,
+  closeOverlayThenNavigate,
+  type CloseBeforeNavigate,
+} from "@/app/lib/activateCareTipNavigation";
 import { cn } from "@/lib/utils";
 
 type ActivateCareTipCtaProps = {
@@ -16,6 +21,10 @@ type ActivateCareTipCtaProps = {
   size?: "sm" | "md";
   /** billing = link to billing page; trial = start trial checkout */
   action?: "billing" | "trial";
+  /** When provided (e.g. inside a modal), closes the overlay before navigating. */
+  closeBeforeNavigate?: CloseBeforeNavigate;
+  /** Overlay close animation duration — use ACTIVATION_SHEET_CLOSE_MS for sheets. */
+  closeAnimationMs?: number;
 };
 
 export function ActivateCareTipCta({
@@ -23,8 +32,11 @@ export function ActivateCareTipCta({
   variant = "primary",
   size = "sm",
   action = "billing",
+  closeBeforeNavigate,
+  closeAnimationMs,
 }: ActivateCareTipCtaProps) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState(false);
 
   const baseClass = cn(
@@ -37,9 +49,34 @@ export function ActivateCareTipCta({
     className,
   );
 
+  async function handleBillingActivate() {
+    if (busy) return;
+    setBusy(true);
+    try {
+      await closeOverlayThenNavigate(navigate, { closeBeforeNavigate, closeAnimationMs });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   if (action === "billing") {
+    if (closeBeforeNavigate) {
+      return (
+        <button
+          type="button"
+          className={baseClass}
+          disabled={busy}
+          onClick={() => void handleBillingActivate()}
+        >
+          {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
+          <Sparkles className="h-3.5 w-3.5" aria-hidden />
+          {t("subscription.activation.activateCta")}
+        </button>
+      );
+    }
+
     return (
-      <Link to="/dashboard/billing/subscription" className={baseClass}>
+      <Link to={BILLING_SUBSCRIPTION_PLANS_URL} className={baseClass}>
         <Sparkles className="h-3.5 w-3.5" aria-hidden />
         {t("subscription.activation.activateCta")}
       </Link>
@@ -53,13 +90,16 @@ export function ActivateCareTipCta({
       disabled={busy}
       onClick={() => {
         setBusy(true);
-        void startActivationCheckout("trial", t)
+        void startActivationCheckout("trial", t, {
+          navigate,
+          closeBeforeNavigate,
+        })
           .catch((err) => toast.error(activationCheckoutErrorMessage(err, t)))
           .finally(() => setBusy(false));
       }}
     >
       {busy ? <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden /> : null}
-      {t(action === "trial" ? "subscription.activation.trialCta" : "subscription.activation.activateCta")}
+      {t("subscription.activation.trialCta")}
     </button>
   );
 }
@@ -72,12 +112,13 @@ export function ActivationPlanButtons({
   layout?: "grid" | "row";
 }) {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [busy, setBusy] = useState<ActivationCheckoutPlan | null>(null);
 
   async function handle(plan: ActivationCheckoutPlan) {
     setBusy(plan);
     try {
-      await startActivationCheckout(plan, t);
+      await startActivationCheckout(plan, t, { navigate });
     } catch (err) {
       toast.error(activationCheckoutErrorMessage(err, t));
     } finally {

@@ -2501,6 +2501,10 @@ export type BillingStatus = {
   accessSource?: "none" | "subscription" | "sponsored";
   sponsoredProgrammeKey?: string | null;
   sponsoredProgrammeLabelKey?: string | null;
+  trialEligible?: boolean;
+  trialUsed?: boolean;
+  trialPlanKey?: SubscriptionPlanKey | null;
+  lastTrialPlanKey?: SubscriptionPlanKey | null;
   events: BillingTimelineEvent[];
 };
 

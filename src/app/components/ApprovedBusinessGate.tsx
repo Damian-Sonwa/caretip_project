@@ -39,8 +39,9 @@ export function ApprovedBusinessGate() {
       .then((p) => {
         if (cancelled) return;
         const tier = resolveSubscriptionTier(p.subscriptionTier);
-        const status = p.subscriptionStatus ?? (tier ? "active" : "none");
-        primeSubscriptionEntitlementsFromSession({ tier, status });
+        const accessSource = p.accessSource ?? (p.hasActiveSubscription ? "subscription" : "none");
+        const status = p.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
+        primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
         const s = mapDbVerificationToStatus(p.verificationStatus);
         if (s) updateUser({ status: s });
       })
@@ -61,8 +62,9 @@ export function ApprovedBusinessGate() {
       void fetchBusinessProfile({ silent: true, revalidate: true })
         .then((p) => {
           const tier = resolveSubscriptionTier(p.subscriptionTier);
-          const status = p.subscriptionStatus ?? (tier ? "active" : "none");
-          primeSubscriptionEntitlementsFromSession({ tier, status });
+          const accessSource = p.accessSource ?? (p.hasActiveSubscription ? "subscription" : "none");
+          const status = p.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
+          primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
           const s = mapDbVerificationToStatus(p.verificationStatus);
           if (s) updateUser({ status: s });
         })

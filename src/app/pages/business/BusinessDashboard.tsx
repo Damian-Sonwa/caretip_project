@@ -5,10 +5,7 @@ import { Link, Navigate } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
   Users,
-  TrendingUp,
-  MapPin,
   Star,
-  Building2,
   Sparkles,
   HelpCircle,
   ChevronRight,
@@ -28,7 +25,12 @@ import { deriveBusinessDashboardStatus } from "../../lib/dashboardStatus/deriveD
 import { FixPrompt } from "../../components/FixPrompt";
 import { useBusinessDashboardStats } from "../../hooks/useBusinessDashboardStats";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import { useBusinessEntitlementsContext } from "../../contexts/BusinessEntitlementsContext";
 import { FeatureGate } from "../../components/subscription/FeatureGate";
+import { DashboardPremiumFeaturesSection } from "../../components/business/dashboard/DashboardPremiumFeaturesSection";
+import { DashboardFeaturePreviewCard } from "../../components/business/dashboard/DashboardFeaturePreviewCard";
+import { DashboardAnalyticsPreviewCard } from "../../components/business/dashboard/DashboardAnalyticsPreviewCard";
+import { isUnsubscribedDashboardPreview } from "../../components/business/dashboard/isUnsubscribedDashboardPreview";
 import {
   DashboardHeroMetricSkeleton,
 } from "../../components/dashboard/DashboardAnalyticsLoader";
@@ -71,7 +73,7 @@ import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
 import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
-import businessHeroImage from "../../../../images/bizzy002.png";
+import businessHeroImage from "../../../../images/byz001.png";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -104,10 +106,14 @@ export function BusinessDashboard() {
     logout();
   };
 
-  const { advancedAnalyticsEnabled } = useSubscriptionEntitlements({
-    enabled: user?.role === "business" && authReady,
+  const businessEntitlements = useBusinessEntitlementsContext();
+  const fallbackEntitlements = useSubscriptionEntitlements({
+    enabled: user?.role === "business" && authReady && businessEntitlements == null,
     role: user?.role === "business" ? "business" : null,
   });
+  const { ready: entitlementsReady, hasActiveEntitlements, advancedAnalyticsEnabled } =
+    businessEntitlements ?? fallbackEntitlements;
+  const isPreviewMode = isUnsubscribedDashboardPreview(entitlementsReady, hasActiveEntitlements);
   const businessKycApproved = Boolean(user?.impersonation || user?.status === "APPROVED");
   const businessKycNeedsVerification = Boolean(
     isBusiness &&
@@ -144,8 +150,6 @@ export function BusinessDashboard() {
 
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
   const [employeeGoalsExpanded, setEmployeeGoalsExpanded] = useState(true);
-  /** Mobile-only: expand long “how it works” copy under the employee goals title. */
-  const [quickActionsExpanded, setQuickActionsExpanded] = useState(true);
   const socketReady = useDeferSocketConnect(authReady && user?.role === "business");
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
@@ -359,14 +363,14 @@ export function BusinessDashboard() {
           actionsPlacement="belowText"
           mobileAlign="left"
           className="!mb-0"
-          cardClassName="border-0 bg-card shadow-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:rounded-[calc(1.75rem-3px)] lg:border-0 lg:bg-card lg:shadow-none"
-          badgeClassName="normal-case border-primary/15 bg-primary/[0.06] px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal text-primary/90 shadow-none"
-          titleClassName="max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
-          descriptionClassName="!line-clamp-2 max-w-[34ch] leading-relaxed text-muted-foreground/90 max-lg:text-left lg:max-w-md"
+          cardClassName="border-0 bg-transparent shadow-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:rounded-[calc(1.75rem-3px)] lg:border-0 lg:bg-transparent lg:shadow-none"
+          badgeClassName="business-hero-badge normal-case px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal shadow-none"
+          titleClassName="business-hero-title max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
+          descriptionClassName="business-hero-description !line-clamp-2 max-w-[34ch] leading-relaxed max-lg:text-left lg:max-w-md"
           textColumnClassName="lg:py-2 xl:pr-6"
           badge={
             <>
-              <Sparkles className="h-3 w-3 shrink-0 text-primary/75" aria-hidden />
+              <Sparkles className="h-3 w-3 shrink-0 opacity-90" aria-hidden />
               <span>
                 {user.name
                   ? t("business.hero.welcomeBackNamed", { name: user.name.split(" ")[0] })
@@ -378,8 +382,7 @@ export function BusinessDashboard() {
             <>
               {t("business.hero.headlineLine1")}
               <br />
-              <span className="text-foreground/85">{t("business.hero.headlineLine2")}</span>
-            </>
+              <span className="business-hero-title">{t("business.hero.headlineLine2")}</span>            </>
           }
           description={t("business.hero.sub")}
           image={
@@ -389,22 +392,14 @@ export function BusinessDashboard() {
               transition={{ duration: 0.45, ease: "easeOut" }}
               className="business-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
             >
-              <div
-                className={cn(
-                  "business-hero-chart-frame business-hero-chart-frame--photo dashboard-hero-media-frame relative mx-auto w-full min-h-0 max-lg:max-w-none",
-                  "rounded-[1.75rem]",
-                  "lg:max-w-[480px]",
-                )}
-              >
-                <img
-                  src={businessHeroImage}
-                  alt=""
-                  className="business-hero-chart-frame__img block w-full object-contain object-center"
-                  loading="eager"
-                  decoding="async"
-                  {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
-                />
-              </div>
+              <img
+                src={businessHeroImage}
+                alt=""
+                className="business-hero-illustration mx-auto block w-full max-w-[560px] object-contain object-center lg:max-w-[40rem]"
+                loading="eager"
+                decoding="async"
+                {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
+              />
             </motion.div>
           }
           imageOverlay={false}
@@ -416,18 +411,36 @@ export function BusinessDashboard() {
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
               <div className="business-hero-cta-row">
-                <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
-                  <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
-                    <CareIcon name="tableQr" size="sm" className="shrink-0" />
-                    {t("business.hero.manageQr")}
-                  </Link>
-                </Button>
-                <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
-                  <Link to="/dashboard/team/employees" className={businessUi.heroCtaLink}>
-                    <Users className="h-4 w-4 shrink-0" aria-hidden />
-                    {t("business.hero.manageTeam")}
-                  </Link>
-                </Button>
+                {isPreviewMode ? (
+                  <>
+                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
+                      <Link to="/dashboard/billing/subscription" className={businessUi.heroCtaLink}>
+                        <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+                        {t("business.dashboard.preview.viewPlans")}
+                      </Link>
+                    </Button>
+                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                      <Link to="#dashboard-premium-features" className={businessUi.heroCtaLink}>
+                        {t("business.dashboard.preview.exploreFeatures")}
+                      </Link>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 flex-1")} asChild>
+                      <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
+                        <CareIcon name="tableQr" size="sm" className="shrink-0" />
+                        {t("business.hero.manageQr")}
+                      </Link>
+                    </Button>
+                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 flex-1")} asChild>
+                      <Link to="/dashboard/team/employees" className={businessUi.heroCtaLink}>
+                        <Users className="h-4 w-4 shrink-0" aria-hidden />
+                        {t("business.hero.manageTeam")}
+                      </Link>
+                    </Button>
+                  </>
+                )}
               </div>
               <dl
                 className={cn(
@@ -519,15 +532,17 @@ export function BusinessDashboard() {
 
       <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body !pt-2 sm:!pt-3")}>
         <div className={businessUi.section}>
-          <FixPrompt
-            id="missingQR"
-            issueActive={brokenQrLinks}
-            dismissPersistence="session"
-            title={t("business.fixQr.title")}
-            description={t("business.fixQr.description")}
-            actionLabel={t("business.fixQr.action")}
-            actionTo="/dashboard/qr-studio/employees"
-          />
+          {!isPreviewMode ? (
+            <FixPrompt
+              id="missingQR"
+              issueActive={brokenQrLinks}
+              dismissPersistence="session"
+              title={t("business.fixQr.title")}
+              description={t("business.fixQr.description")}
+              actionLabel={t("business.fixQr.action")}
+              actionTo="/dashboard/qr-studio/employees"
+            />
+          ) : null}
 
           <section className="business-dashboard-analytics-intro" aria-labelledby="business-analytics-period-heading">
             <div className="business-dashboard-analytics-intro__head">
@@ -599,11 +614,25 @@ export function BusinessDashboard() {
             />
           </motion.div>
 
+          {isPreviewMode ? (
+            <motion.div {...dashboardBlockMotion} transition={{ delay: 0.28 }} className="business-dashboard-block">
+              <DashboardPremiumFeaturesSection />
+            </motion.div>
+          ) : null}
+
           <motion.div
             {...dashboardBlockMotion}
             transition={{ delay: 0.35 }}
             className="business-dashboard-block"
           >
+            {isPreviewMode ? (
+              <DashboardFeaturePreviewCard
+                featureKey="employeeGoals"
+                title={t("business.dashboard.employeeGoalsTitle")}
+                description={t("business.dashboard.preview.goalsDesc")}
+                icon={<CareIcon name="goals" size="md" className="text-primary/80" />}
+              />
+            ) : (
             <FeatureGate featureKey="employeeGoals" role="business" enabled={isBusiness}>
             <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
               <CardHeader className="business-dashboard-panel-card__header space-y-3">
@@ -614,7 +643,7 @@ export function BusinessDashboard() {
                     className="flex min-w-0 flex-1 items-start gap-3 rounded-lg text-left outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-ring"
                     aria-expanded={employeeGoalsExpanded}
                   >
-                    <div className={businessUi.iconTileMuted}>
+                    <div className={cn(businessUi.iconTileMuted, "business-dash-icon-tile--blue")}>
                       <CareIcon name="goals" size="md" />
                     </div>
                     <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
@@ -727,105 +756,54 @@ export function BusinessDashboard() {
               ) : null}
             </Card>
             </FeatureGate>
+            )}
           </motion.div>
 
           {/* Recent customer feedback */}
           <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
-            <FeatureGate featureKey="customerFeedback" role="business" enabled={isBusiness}>
-              <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
-            </FeatureGate>
+            {isPreviewMode ? (
+              <DashboardFeaturePreviewCard
+                featureKey="customerFeedback"
+                title={t("business.customerFeedback.recentTitle")}
+                description={t("business.dashboard.preview.feedbackDesc")}
+                icon={<Star className="h-5 w-5 text-primary/80" aria-hidden />}
+              />
+            ) : (
+              <FeatureGate featureKey="customerFeedback" role="business" enabled={isBusiness}>
+                <RecentCustomerFeedbackPanel enabled={isBusiness && sessionValidated} />
+              </FeatureGate>
+            )}
           </motion.div>
 
-          {/* Top Performers teaser & Quick Actions */}
+          {/* Top Performers teaser & help */}
           <div className={businessUi.bottomGrid}>
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.6 }}
               className="business-dashboard-bottom-grid__main lg:col-span-2"
             >
-              <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
-                <TopPerformersTeaser
-                  employees={topPerformersTeaser}
-                  loading={showMetricsSkeleton && !useDevDemo}
-                />
-              </FeatureGate>
+              {isPreviewMode ? (
+                <DashboardAnalyticsPreviewCard />
+              ) : (
+                <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
+                  <TopPerformersTeaser
+                    employees={topPerformersTeaser}
+                    loading={showMetricsSkeleton && !useDevDemo}
+                  />
+                </FeatureGate>
+              )}
             </motion.div>
 
-            {/* Quick Actions */}
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.7 }}
               className="business-dashboard-bottom-grid__aside flex h-full flex-col gap-5 sm:gap-6"
             >
-              <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
-                <CardHeader className="business-dashboard-panel-card__header">
-                  <button
-                    type="button"
-                    onClick={() => setQuickActionsExpanded((v) => !v)}
-                    className="flex w-full min-w-0 items-start justify-between gap-3 text-left"
-                    aria-expanded={quickActionsExpanded}
-                  >
-                    <div className="min-w-0 flex-1">
-                      <CardTitle className="text-lg">{t("business.dashboard.quickActions")}</CardTitle>
-                    </div>
-                  </button>
-                </CardHeader>
-                {quickActionsExpanded ? (
-                  <CardContent className="space-y-3">
-                    <Button
-                      variant="outline"
-                      className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
-                      asChild
-                    >
-                      <Link to="/dashboard/settings?section=business" className="gap-3">
-                        <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
-                          <Building2 className="h-5 w-5" aria-hidden />
-                        </span>
-                        {t("business.dashboard.actionBusinessProfile")}
-                      </Link>
-                    </Button>
-                    <Button className={cn(businessUi.btnPrimary, "h-auto min-h-11 w-full justify-start gap-3 py-3")} asChild>
-                      <Link to="/dashboard/qr-studio/employees" className="gap-3">
-                        <CareIcon name="tableQr" size="md" className="shrink-0" />
-                        {t("business.dashboard.actionGenerateQr")}
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
-                      asChild
-                    >
-                      <Link to="/dashboard/locations" className="gap-3">
-                        <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
-                          <MapPin className="h-5 w-5" aria-hidden />
-                        </span>
-                        {t("business.dashboard.actionManageLocations")}
-                      </Link>
-                    </Button>
-                    <Button
-                      variant="outline"
-                      className={cn(businessUi.btnSecondary, "h-auto min-h-11 w-full justify-start gap-3 py-3")}
-                      asChild
-                    >
-                      <Link to="/dashboard/tips/analytics" className="gap-3">
-                        <span className={cn(businessUi.iconTileMuted, "!p-0 flex h-10 w-10 items-center justify-center")}>
-                          <TrendingUp className="h-5 w-5" aria-hidden />
-                        </span>
-                        {t("business.dashboard.actionViewAnalytics")}
-                      </Link>
-                    </Button>
-                  </CardContent>
-                ) : null}
-              </Card>
-
               <Card className={cn(businessUi.cardStatic, "business-dashboard-help-card business-dashboard-panel-card mt-auto w-full")}>
                 <CardHeader className="business-dashboard-panel-card__header !pb-2">
                   <div className="business-dashboard-help-head">
                     <div
-                      className={cn(
-                        businessUi.iconTileMuted,
-                        "flex h-10 w-10 shrink-0 items-center justify-center text-primary/85",
-                      )}
+                      className={cn(businessUi.iconTileMuted, "business-dash-icon-tile--slate")}
                       aria-hidden
                     >
                       <HelpCircle className="h-5 w-5" />

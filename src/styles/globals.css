@@ -996,38 +996,25 @@ textarea::placeholder {
   }
 }
 
-/* Business hero photo asset — full image visible (no crop), compact max height. */
-.business-dashboard-hero .business-hero-chart-frame--photo {
+/* Business hero illustration — bare asset, no frame card. */
+.business-dashboard-hero .business-hero-illustration {
+  position: static !important;
+  display: block;
+  width: 100% !important;
   height: auto !important;
-  min-height: 0 !important;
-  aspect-ratio: auto !important;
-  max-height: none !important;
-  overflow: visible;
+  max-height: min(52svh, 360px);
+  object-fit: contain !important;
+  object-position: center;
+  transform: none !important;
+  padding: 0 !important;
   border: none;
   background: transparent;
   box-shadow: none;
 }
 
-.business-dashboard-hero .business-hero-chart-frame--photo .business-hero-chart-frame__img {
-  position: static !important;
-  display: block;
-  width: 100% !important;
-  height: auto !important;
-  max-height: min(42svh, 272px);
-  object-fit: contain !important;
-  object-position: center;
-  transform: none !important;
-  padding: 0 !important;
-}
-
 @media (min-width: 1024px) {
-  .business-dashboard-hero .business-hero-chart-frame--photo {
-    width: 100%;
-    max-width: 30rem;
-  }
-
-  .business-dashboard-hero .business-hero-chart-frame--photo .business-hero-chart-frame__img {
-    max-height: 21rem;
+  .business-dashboard-hero .business-hero-illustration {
+    max-height: 28rem;
     width: 100%;
   }
 }

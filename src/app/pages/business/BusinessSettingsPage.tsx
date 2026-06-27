@@ -12,7 +12,6 @@ import {
   BUSINESS_SETTINGS_SECTIONS,
   legacySettingsSectionRedirectTarget,
   parseBusinessSettingsSection,
-  type BusinessSettingsSectionId,
 } from "../../components/business/settings/businessSettingsSections";
 import { BusinessSettingsGeneralPanel } from "../../components/business/settings/BusinessSettingsGeneralPanel";
 import { BusinessSettingsSecurityPanel } from "../../components/business/settings/BusinessSettingsSecurityPanel";
@@ -61,10 +60,6 @@ export function BusinessSettingsPage() {
     setSearchParams({ section }, { replace: true });
   }, [section, searchParams, setSearchParams, rawSection]);
 
-  const setSection = (id: BusinessSettingsSectionId) => {
-    setSearchParams({ section: id }, { replace: false });
-  };
-
   if (!user || user.role !== "business") {
     return <BusinessSubPageShellSkeleton />;
   }
@@ -80,52 +75,19 @@ export function BusinessSettingsPage() {
             </span>
           </div>
           <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {t("business.settings.title")}
+            {t(activeMeta.labelKey)}
           </h1>
-          {t("business.settings.subtitle").trim() ? (
-            <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
-              {t("business.settings.subtitle")}
-            </p>
-          ) : null}
+          <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
+            {t(activeMeta.descriptionKey)}
+          </p>
         </header>
 
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:gap-8">
-          <nav className="lg:w-56 lg:shrink-0" aria-label={t("business.settings.navAria")}>
-            <div className="flex gap-2 overflow-x-auto pb-1 lg:flex-col lg:overflow-visible lg:pb-0">
-              {BUSINESS_SETTINGS_SECTIONS.map((item) => {
-                const active = item.id === section;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => setSection(item.id)}
-                    className={cn(
-                      "inline-flex min-h-[44px] shrink-0 touch-manipulation items-center gap-2.5 rounded-xl border px-3.5 py-2.5 text-left text-sm font-medium transition-colors lg:w-full",
-                      active
-                        ? "border-primary/30 bg-primary/[0.06] text-foreground shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)]"
-                        : cn(businessUi.cardStatic, "text-muted-foreground hover:border-neutral-200 hover:text-foreground"),
-                    )}
-                  >
-                    <CareIcon name={item.icon} size="sm" className={cn(active && "text-primary")} />
-                    <span className="truncate">{t(item.labelKey)}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </nav>
-
-          <div className="min-w-0 flex-1">
-            <div className="mb-5 lg:hidden">
-              <h2 className="text-lg font-semibold text-foreground">{t(activeMeta.labelKey)}</h2>
-              <p className="mt-1 text-sm text-muted-foreground">{t(activeMeta.descriptionKey)}</p>
-            </div>
-
-            {section === "general" ? <BusinessSettingsGeneralPanel {...settings} /> : null}
-            {section === "business" ? <BusinessProfilePage embedded /> : null}
-            {section === "notifications" ? <BusinessSettingsNotificationsPanel {...settings} /> : null}
-            {section === "security" ? <BusinessSettingsSecurityPanel {...settings} /> : null}
-            {section === "integrations" ? <BusinessSettingsIntegrationsPanel /> : null}
-          </div>
+        <div className="min-w-0">
+          {section === "general" ? <BusinessSettingsGeneralPanel {...settings} /> : null}
+          {section === "business" ? <BusinessProfilePage embedded /> : null}
+          {section === "notifications" ? <BusinessSettingsNotificationsPanel {...settings} /> : null}
+          {section === "security" ? <BusinessSettingsSecurityPanel {...settings} /> : null}
+          {section === "integrations" ? <BusinessSettingsIntegrationsPanel /> : null}
         </div>
       </div>
     </main>

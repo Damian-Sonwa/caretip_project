@@ -1,0 +1,47 @@
+/* Business dashboard collapsible sidebar navigation */
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-group-panel {
+  will-change: grid-template-rows;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-child-link {
+  position: relative;
+  border-radius: 0.5rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-child-link::before {
+  content: "";
+  position: absolute;
+  left: 1.375rem;
+  top: 50%;
+  width: 4px;
+  height: 4px;
+  border-radius: 9999px;
+  transform: translateY(-50%);
+  background: transparent;
+  transition: background-color 0.18s ease;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-child-link[aria-current="page"] {
+  font-weight: 600;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-child-link .text-muted-foreground {
+  opacity: 0.95;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-group-trigger:focus-visible,
+.caretip-dashboard-shell.business-dashboard .business-sidebar-child-link:focus-visible {
+  outline: 2px solid hsl(var(--sidebar-ring));
+  outline-offset: 2px;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-sidebar-tier-badge {
+  letter-spacing: 0.04em;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-dashboard-shell.business-dashboard .business-sidebar-group-panel {
+    transition: none !important;
+  }
+}

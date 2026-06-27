@@ -41,7 +41,7 @@ const CATALOG: Record<FeatureKey, FeatureCatalogEntry> = {
     titleKey: "subscription.features.teamManagement.title",
     benefitKey: "subscription.features.teamManagement.benefit",
     featureListPrefix: "subscription.features.teamManagement",
-    featureListCount: 3,
+    featureListCount: 4,
     requiredTier: "basic",
   },
   customerFeedback: {
@@ -49,7 +49,7 @@ const CATALOG: Record<FeatureKey, FeatureCatalogEntry> = {
     titleKey: "subscription.features.customerFeedback.title",
     benefitKey: "subscription.features.customerFeedback.benefit",
     featureListPrefix: "subscription.features.customerFeedback",
-    featureListCount: 3,
+    featureListCount: 4,
     requiredTier: "basic",
   },
   tipManagement: {
@@ -81,7 +81,7 @@ const CATALOG: Record<FeatureKey, FeatureCatalogEntry> = {
     titleKey: "subscription.features.advancedAnalytics.title",
     benefitKey: "subscription.features.advancedAnalytics.benefit",
     featureListPrefix: "subscription.features.advancedAnalytics",
-    featureListCount: 4,
+    featureListCount: 5,
     requiredTier: "premium",
   },
   csvExport: {

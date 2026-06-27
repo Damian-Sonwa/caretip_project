@@ -1,24 +1,34 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
+import { useBusinessEntitlementsContext } from "../../../contexts/BusinessEntitlementsContext";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
 import { useBusinessIntelligenceData } from "../../../hooks/useBusinessIntelligenceData";
 import { BusinessExecutivePerformance } from "../../../components/business/BusinessExecutivePerformance";
-import { FeatureGate } from "../../../components/subscription/FeatureGate";
 import { Button } from "@/components/ui/button";
 import { BarChart3 } from "lucide-react";
+import {
+  isEntitlementsSessionPrimed,
+  sessionHasFeature,
+} from "../../../lib/subscriptionEntitlementFastPath";
 
-/** Team → Performance: executive insights — health, trends, recommendations (not raw analytics). */
+/** Team → Performance: executive insights — health, trends, recommendations. Gated at layout level. */
 export function BusinessTeamPerformancePage() {
   const { t } = useTranslation();
   const { user, sessionValidated } = useRequireAuth();
-  const { advancedAnalyticsEnabled } = useSubscriptionEntitlements({
-    enabled: user?.role === "business" && sessionValidated,
+  const businessContext = useBusinessEntitlementsContext();
+  const fallbackEntitlements = useSubscriptionEntitlements({
+    enabled: user?.role === "business" && sessionValidated && businessContext == null,
     role: user?.role === "business" ? "business" : null,
   });
+  const { ready, hasFeature } = businessContext ?? fallbackEntitlements;
+  const analyticsAllowed =
+    (ready && hasFeature("advancedAnalytics")) ||
+    (isEntitlementsSessionPrimed() && sessionHasFeature("advancedAnalytics"));
+
   const data = useBusinessIntelligenceData(
-    Boolean(sessionValidated && user?.role === "business"),
-    advancedAnalyticsEnabled,
+    Boolean(sessionValidated && user?.role === "business" && analyticsAllowed),
+    true,
   );
 
   return (
@@ -31,10 +41,7 @@ export function BusinessTeamPerformancePage() {
           </Link>
         </Button>
       </div>
-
-      <FeatureGate featureKey="advancedAnalytics" role="business" enabled={sessionValidated}>
-        <BusinessExecutivePerformance data={data} />
-      </FeatureGate>
+      <BusinessExecutivePerformance data={data} />
     </div>
   );
 }
