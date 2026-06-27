@@ -627,16 +627,28 @@
 }
 
 .caretip-dashboard-shell.business-dashboard .business-stat-card .dashboard-metric-stat-card__icon {
-  height: 2.625rem;
-  width: 2.625rem;
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  padding: 0.625rem;
   border-radius: 0.75rem;
   border: none;
   background: var(--metric-accent, var(--biz-icon-orange));
   box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.28);
   color: #fff !important;
+  overflow: visible;
 }
 
 .caretip-dashboard-shell.business-dashboard .business-stat-card .dashboard-metric-stat-card__icon svg {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+  max-width: 1.125rem;
+  max-height: 1.125rem;
   color: #fff !important;
 }
 

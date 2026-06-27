@@ -63,15 +63,19 @@ export function DashboardMetricStatCard({
       <div
         className={cn(
           tokens.labelRowClass,
-          "dashboard-metric-stat-card__label-row flex items-start justify-between gap-2",
+          "dashboard-metric-stat-card__header dashboard-metric-stat-card__label-row flex min-w-0 items-start justify-between gap-2.5",
         )}
       >
-        <p className={cn(tokens.statLabel, "min-w-0 flex-1")}>{label}</p>
+        <p
+          className={cn(
+            tokens.statLabel,
+            "dashboard-metric-stat-card__label min-w-0 flex-1 basis-0",
+          )}
+        >
+          {label}
+        </p>
         {icon ? (
-          <div
-            className="dashboard-metric-stat-card__icon flex h-8 w-8 shrink-0 items-center justify-center text-primary/75 sm:h-9 sm:w-9"
-            aria-hidden
-          >
+          <div className="dashboard-metric-stat-card__icon shrink-0" aria-hidden>
             {icon}
           </div>
         ) : null}

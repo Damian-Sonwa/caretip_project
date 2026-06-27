@@ -74,6 +74,7 @@ import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
 import businessHeroImage from "../../../../images/byz001.png";
+import { BusinessDashboardMobileHero } from "../../components/business/BusinessDashboardMobileHero";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -314,7 +315,7 @@ export function BusinessDashboard() {
   }
 
   return (
-    <div className={cn(businessUi.page, "overflow-x-hidden")}>
+    <div className={cn(businessUi.page, "business-dashboard-overview overflow-x-hidden")}>
       {statsLoadFailed && !isMetricsInitialLoad && !showStatsSkeleton && (
         <div className="mb-4 rounded-lg border border-destructive/30 bg-destructive/5 px-4 py-3 text-sm text-destructive">
           <p className="font-medium">{statsLoadFailed}</p>
@@ -343,7 +344,30 @@ export function BusinessDashboard() {
         </div>
       )}
 
-      <div className={businessUi.pageInner}>
+      <div className="lg:hidden">
+        <div className="business-dashboard-overview__prompts">
+          <FixPrompt
+            id="pendingVerification"
+            issueActive={showPendingVerification}
+            tone="info"
+            density="compact"
+            title={verificationNoticeLabels.title}
+            description={verificationNoticeLabels.description}
+            actionLabel={verificationNoticeLabels.cta}
+            actionTo="/verification-pending"
+            dismissPersistence="session"
+          />
+        </div>
+        <BusinessDashboardMobileHero
+          welcomeName={user.name?.split(" ")[0]}
+          isPreviewMode={isPreviewMode}
+          heroPulseLoading={heroPulseLoading}
+          operationalPulse={operationalPulse ?? null}
+          isPeriodRefreshing={isPeriodRefreshing}
+        />
+      </div>
+
+      <div className={cn(businessUi.pageInner, "hidden lg:block")}>
         <FixPrompt
           id="pendingVerification"
           issueActive={showPendingVerification}
@@ -534,7 +558,7 @@ export function BusinessDashboard() {
         </PremiumPageHero>
       </div>
 
-      <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body !pt-2 sm:!pt-3")}>
+      <TracingBeam className={cn(businessUi.pageInner, "business-dashboard-body business-dashboard-mobile-body !pt-2 sm:!pt-3")}>
         <div className={businessUi.section}>
           {!isPreviewMode ? (
             <FixPrompt

@@ -71,7 +71,7 @@
 .caretip-dashboard-shell .platform-admin-stat-card,
 .caretip-dashboard-shell .dashboard-metric-stat-card {
   display: grid;
-  grid-template-rows: minmax(2.5rem, auto) minmax(2.5rem, auto) minmax(2.5rem, 1fr);
+  grid-template-rows: minmax(2.75rem, auto) minmax(2.25rem, auto) minmax(2.25rem, 1fr);
   gap: 0.375rem;
   align-content: start;
   height: 100%;
@@ -79,6 +79,54 @@
     box-shadow 0.22s ease,
     border-color 0.22s ease,
     transform 0.18s ease;
+}
+
+/* KPI header — title left, icon badge right (localization-safe) */
+.caretip-dashboard-shell .dashboard-metric-stat-card__header,
+.caretip-dashboard-shell .dashboard-metric-stat-card__label-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.625rem;
+  min-width: 0;
+  width: 100%;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__label,
+.caretip-dashboard-shell .dashboard-metric-stat-card__label-text,
+.caretip-dashboard-shell .dashboard-metric-stat-card__header > p {
+  flex: 1 1 0%;
+  min-width: 0;
+  margin: 0;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__icon {
+  flex: 0 0 auto;
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem;
+  overflow: visible;
+  border-radius: 0.75rem;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__icon svg {
+  width: 1.125rem !important;
+  height: 1.125rem !important;
+  min-width: 1.125rem;
+  min-height: 1.125rem;
+  max-width: 1.125rem;
+  max-height: 1.125rem;
+  flex-shrink: 0;
 }
 
 .caretip-dashboard-shell .employee-dashboard-stats-grid,
