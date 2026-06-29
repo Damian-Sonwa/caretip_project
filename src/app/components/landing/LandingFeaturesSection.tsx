@@ -105,7 +105,7 @@ export function LandingFeaturesSection() {
         </svg>
         <div className={landingUi.sectionIntro}>
           {landingCopyVisible(t("landing.features.eyebrow")) ? (
-            <div className="flex w-full justify-center lg:justify-start">
+            <div className={landingUi.sectionAccentRow}>
               <LandingSectionAccent variant="spark">{t("landing.features.eyebrow")}</LandingSectionAccent>
             </div>
           ) : null}

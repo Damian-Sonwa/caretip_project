@@ -37,6 +37,25 @@ html.dark .caretip-landing #features.caretip-landing-features-section::before {
   );
 }
 
+/* Section intro — spark icon snug to “Funktionen”, eyebrow close to headline */
+.caretip-landing #features .caretip-section-intro > .flex:first-child {
+  margin-top: 0;
+}
+
+.caretip-landing #features .caretip-section-intro [data-landing-accent] {
+  gap: 0.3125rem;
+}
+
+.caretip-landing #features .caretip-section-intro > h2 {
+  margin-top: 0.625rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing #features .caretip-section-intro > h2 {
+    margin-top: 0.75rem;
+  }
+}
+
 .caretip-landing .caretip-landing-feature-panel {
   transition:
     transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
