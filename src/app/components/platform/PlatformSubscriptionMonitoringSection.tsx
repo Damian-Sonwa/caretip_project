@@ -205,7 +205,7 @@ export function PlatformSubscriptionMonitoringSection({
       const data = await fetchPlatformSubscriptionMonitoring(30);
       setMonitoring(data);
     } catch (err) {
-      setMonitoringError(toUserFriendlyMessage(err, t("admin.subscriptions.loadFailed")));
+      setMonitoringError(toUserFriendlyMessage(err) || t("admin.subscriptions.loadFailed"));
     } finally {
       setMonitoringLoading(false);
     }
@@ -226,7 +226,7 @@ export function PlatformSubscriptionMonitoringSection({
       setActivity(data.items);
       setActivityTotal(data.total);
     } catch (err) {
-      setActivityError(toUserFriendlyMessage(err, t("admin.subscriptions.activityLoadFailed")));
+      setActivityError(toUserFriendlyMessage(err) || t("admin.subscriptions.activityLoadFailed"));
     } finally {
       setActivityLoading(false);
     }
