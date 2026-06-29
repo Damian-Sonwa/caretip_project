@@ -28,7 +28,7 @@ import {
   BUSINESS_CHART_BAR_SOFT,
   BUSINESS_CHART_GRID,
   businessChartBarFill,
-  businessChartTooltipStyle,
+  getBusinessChartTooltipStyle,
 } from "../../components/business/businessDashboardChartTheme";
 
 export type BusinessDashboardAnalyticsChartsProps = {
@@ -113,7 +113,7 @@ export function BusinessDashboardAnalyticsCharts({
                         />
                         <Tooltip
                           formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                          contentStyle={businessChartTooltipStyle}
+                          contentStyle={getBusinessChartTooltipStyle()}
                           cursor={{ fill: "rgba(25, 114, 120, 0.06)" }}
                         />
                         <Bar
@@ -216,7 +216,7 @@ export function BusinessDashboardAnalyticsCharts({
                         />
                         <Tooltip
                           formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
-                          contentStyle={businessChartTooltipStyle}
+                          contentStyle={getBusinessChartTooltipStyle()}
                           cursor={{ fill: "rgba(25, 114, 120, 0.05)" }}
                         />
                         <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4}>

@@ -27,6 +27,7 @@ const STARTER_CAPABILITIES: SubscriptionCapability[] = [
   "customerFeedback",
   "tipManagement",
   "basicAnalytics",
+  "csvExport",
 ];
 
 const BUSINESS_CAPABILITIES: SubscriptionCapability[] = [
@@ -34,7 +35,6 @@ const BUSINESS_CAPABILITIES: SubscriptionCapability[] = [
   "qrTemplates",
   "brandingCustomization",
   "advancedAnalytics",
-  "csvExport",
   "multiLocation",
   "employeeGoals",
 ];

@@ -2,7 +2,8 @@ import { lazy, Suspense, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangle, Lightbulb, Sparkles } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { PremiumSummaryCard } from "../premium/PremiumSummaryCard";
+import { DashboardWorkspaceSummaryCard } from "../dashboard/DashboardWorkspaceSummaryCard";
+import { dashboardWorkspaceUi } from "../dashboard/dashboardWorkspaceUi";
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { businessUi } from "./businessDashboardUi";
 import { cn } from "@/lib/utils";
@@ -50,9 +51,9 @@ function ExecutiveSummaryCard({ data }: { data: BiData }) {
     .join(" ");
 
   return (
-    <Card className={cn(businessUi.cardStatic, "premium-glass-surface premium-glass-surface--on-light")}>
+    <Card className={cn(businessUi.cardStatic, dashboardWorkspaceUi.cardPad)}>
       <CardContent className="space-y-2 p-4">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className={dashboardWorkspaceUi.eyebrow}>
           {t("business.team.performance.executive.summaryTitle")}
         </h2>
         <p className="text-base leading-relaxed text-foreground">{text}</p>
@@ -67,18 +68,17 @@ function BusinessHealthCard({ data }: { data: BiData }) {
   const growth = data.bi.snapshot.growthRate;
 
   return (
-    <PremiumSummaryCard
+    <DashboardWorkspaceSummaryCard
       variant="health"
-      personality="performance"
       title={t("business.team.performance.executive.healthTitle")}
-      eyebrow={<span className="premium-badge">{t(`business.team.performance.executive.healthGrades.${grade}`)}</span>}
+      eyebrow={t(`business.team.performance.executive.healthGrades.${grade}`)}
       metrics={[
         {
           label: t("business.team.performance.executive.snapshot.health"),
           value: (
             <>
               <CountUpMetric value={score} kind="integer" />
-              <span className="text-lg font-medium text-white/70"> / 100</span>
+              <span className="text-base font-medium text-muted-foreground"> / 100</span>
             </>
           ),
           trend: t(`business.team.performance.executive.healthGrades.${grade}`),
@@ -100,11 +100,7 @@ function BusinessHealthCard({ data }: { data: BiData }) {
           value: t(`business.team.performance.executive.healthGrades.${grade}`),
         },
       ]}
-      footer={
-        <p className="text-sm text-white/80">
-          {t("business.team.performance.executive.healthExplain")}
-        </p>
-      }
+      footer={<p>{t("business.team.performance.executive.healthExplain")}</p>}
     />
   );
 }
@@ -114,7 +110,7 @@ function InsightList({ insights }: { insights: BiData["bi"]["executiveInsights"]
   if (insights.length === 0) return null;
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className={dashboardWorkspaceUi.eyebrow}>
         {t("business.team.performance.executive.insightsTitle")}
       </h2>
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2">
@@ -138,7 +134,7 @@ function OpportunityList({ items }: { items: ExecutiveOpportunity[] }) {
   if (items.length === 0) return null;
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className={dashboardWorkspaceUi.eyebrow}>
         {t("business.team.performance.executive.opportunitiesTitle")}
       </h2>
       <div className="space-y-2">
@@ -171,7 +167,7 @@ function RiskList({ items }: { items: ExecutiveOpportunity[] }) {
   if (items.length === 0) return null;
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className={dashboardWorkspaceUi.eyebrow}>
         {t("business.team.performance.executive.risksTitle")}
       </h2>
       <div className="space-y-2">
@@ -194,7 +190,7 @@ function RecommendationList({ items }: { items: ExecutiveOpportunity[] }) {
   if (items.length === 0) return null;
   return (
     <section className="space-y-3">
-      <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+      <h2 className={dashboardWorkspaceUi.eyebrow}>
         {t("business.team.performance.executive.recommendationsTitle")}
       </h2>
       <div className="space-y-2">
@@ -226,7 +222,7 @@ export function BusinessExecutivePerformance({ data }: BusinessExecutivePerforma
       <BusinessHealthCard data={data} />
 
       <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+        <h2 className={dashboardWorkspaceUi.eyebrow}>
           {t("business.team.performance.executive.healthTrendsTitle")}
         </h2>
         <Suspense

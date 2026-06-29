@@ -46,7 +46,10 @@ export function PricingHero({ copyScope, className }: PricingHeroProps) {
           })}
         </p>
 
-        <ul className="caretip-pricing-hero-v2__features" aria-label={t(`${heroNs}.featuresAria`)}>
+        <ul
+          className="caretip-pricing-hero-v2__features caretip-pricing-hero-v2__features--flat"
+          aria-label={t(`${heroNs}.featuresAria`)}
+        >
           {FEATURE_KEYS.map((key, index) => {
             const Icon = FEATURE_ICONS[key];
             return (

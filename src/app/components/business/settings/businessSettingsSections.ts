@@ -2,6 +2,7 @@ import type { CareIconName } from "@/components/icons";
 
 export type BusinessSettingsSectionId =
   | "general"
+  | "appearance"
   | "business"
   | "notifications"
   | "security"
@@ -20,6 +21,12 @@ export const BUSINESS_SETTINGS_SECTIONS: readonly BusinessSettingsSection[] = [
     labelKey: "business.settings.sections.general",
     descriptionKey: "business.settings.sections.generalDesc",
     icon: "general",
+  },
+  {
+    id: "appearance",
+    labelKey: "business.settings.sections.appearance",
+    descriptionKey: "business.settings.sections.appearanceDesc",
+    icon: "settings",
   },
   {
     id: "business",

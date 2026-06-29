@@ -24,7 +24,7 @@ export const businessUi = {
   modulePageShell: "business-module-page bg-background px-4 pb-20 sm:px-6 lg:px-8",
   modulePageContained: "dashboard-page-contained mx-auto w-full max-w-6xl",
   /** Overview analytics stack — consistent vertical rhythm below hero. */
-  section: "employee-section business-dashboard-section space-y-6 sm:space-y-7 lg:space-y-8",
+  section: "employee-section business-dashboard-section space-y-6",
   statsGrid:
     "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-5",
   /** At-a-glance mini-stats — 2-up on phones, 3-up from tablet. */
@@ -33,18 +33,19 @@ export const businessUi = {
   /** Mobile list/card pattern (mirrors platform admin responsive data). */
   mobileList: "business-mobile-list space-y-3 p-4 max-lg:p-4 lg:hidden",
   mobileCard:
-    "business-mobile-card block rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-[0_6px_24px_-12px_rgba(15,23,42,0.08)] transition-colors active:bg-muted/30",
+    "business-mobile-card block rounded-lg border border-border bg-card p-4 shadow-sm transition-colors active:bg-muted/30",
   tableWrap: "hidden overflow-x-auto lg:block",
   analyticsChartsGrid:
     "business-dashboard-analytics-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2 lg:gap-6",
   bottomGrid:
     "business-dashboard-bottom-grid grid items-stretch gap-5 sm:gap-6 lg:grid-cols-3 lg:gap-6",
-  card: "business-card overflow-hidden rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] backdrop-blur-[2px] transition-[box-shadow,transform,border-color] duration-200 hover:-translate-y-0.5 hover:shadow-[0_18px_48px_-18px_rgba(15,23,42,0.16)]",
+  card:
+    "business-card overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-colors",
   cardStatic:
-    "business-card overflow-hidden rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] backdrop-blur-[2px]",
+    "business-card overflow-hidden rounded-lg border border-border bg-card shadow-sm",
   statCard: `business-stat-card ${DASHBOARD_METRIC_STAT_CARD_SHELL}`,
   periodToggle:
-    "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-neutral-200/80 bg-white p-1 shadow-[0_4px_18px_-8px_rgba(15,23,42,0.08)] sm:w-fit",
+    "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-border bg-card p-1 shadow-sm sm:w-fit",
 
   /** Business sub-routes with back link + DashboardHero (QR, staff, etc.). */
   subPageTop: "dashboard-subpage-top w-full px-4 sm:px-6",
@@ -57,7 +58,7 @@ export const businessUi = {
   heroCtaLink:
     "inline-flex min-w-0 items-center justify-center gap-1.5 px-2 text-center text-xs font-semibold leading-snug [text-wrap:balance] sm:gap-2 sm:px-3 sm:text-sm",
   atAGlanceCard:
-    "business-card dashboard-at-a-glance mt-3 w-full rounded-[1.125rem] border border-neutral-200/70 bg-white/95 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] max-lg:mt-2.5",
+    "business-card dashboard-at-a-glance mt-3 w-full rounded-lg border border-border bg-card shadow-sm max-lg:mt-2.5",
   atAGlanceContent: "dashboard-at-a-glance__content p-0",
   atAGlanceLabel: "dashboard-at-a-glance__label mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground",
   atAGlanceStatLabel: caretipType.kpiLabel,

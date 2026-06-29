@@ -24,7 +24,7 @@ export function LandingPage() {
   return (
     <div
       ref={setLandingRoot}
-      className="caretip-landing caretip-landing--premium relative min-h-screen w-full min-w-0 font-sans dark:bg-neutral-950"
+      className="caretip-landing caretip-landing--premium caretip-marketing-page relative min-h-screen w-full min-w-0 bg-background font-sans"
     >
       <div
         aria-hidden

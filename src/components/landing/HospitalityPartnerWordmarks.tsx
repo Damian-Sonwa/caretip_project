@@ -15,11 +15,11 @@ const logoClass = (className?: string) =>
 const wordPrimary =
   "block whitespace-nowrap font-sans text-[0.8125rem] font-semibold tracking-[0.06em] text-inherit sm:text-sm";
 const wordSecondary =
-  "mt-0.5 block whitespace-nowrap font-sans text-[0.6875rem] font-medium tracking-[0.12em] text-neutral-500 dark:text-neutral-400 sm:text-xs";
+  "mt-0.5 block whitespace-nowrap font-sans text-[0.6875rem] font-medium tracking-[0.12em] text-muted-foreground sm:text-xs";
 const wordSerifPrimary =
   "block whitespace-nowrap font-serif text-[0.8125rem] font-semibold tracking-[0.08em] text-inherit sm:text-sm";
 const wordSerifSecondary =
-  "mt-0.5 block whitespace-nowrap font-serif text-[0.6875rem] font-normal tracking-[0.16em] text-neutral-500 dark:text-neutral-400 sm:text-xs";
+  "mt-0.5 block whitespace-nowrap font-serif text-[0.6875rem] font-normal tracking-[0.16em] text-muted-foreground sm:text-xs";
 
 export function AureliaHotelsLogo({ className }: WordmarkProps) {
   return (
@@ -44,7 +44,7 @@ export function SolisCafeLogo({ className }: WordmarkProps) {
   return (
     <span className={cn(logoClass(className), "min-w-[5.5rem]")} aria-hidden>
       <span className={wordPrimary}>
-        SOLIS <span className="font-medium text-neutral-500 dark:text-neutral-400">CAFÉ</span>
+        SOLIS <span className="font-medium text-muted-foreground">CAFÉ</span>
       </span>
     </span>
   );
@@ -54,7 +54,7 @@ export function NoirLoungeLogo({ className }: WordmarkProps) {
   return (
     <span className={cn(logoClass(className), "min-w-[6.25rem]")} aria-hidden>
       <span className={wordPrimary}>
-        NOIR <span className="text-[0.75rem] font-medium tracking-[0.14em] text-neutral-500 dark:text-neutral-400 sm:text-xs">LOUNGE</span>
+        NOIR <span className="text-[0.75rem] font-medium tracking-[0.14em] text-muted-foreground sm:text-xs">LOUNGE</span>
       </span>
     </span>
   );

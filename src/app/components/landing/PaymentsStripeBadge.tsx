@@ -13,7 +13,7 @@ export function PaymentsStripeBadge({ label, className }: PaymentsStripeBadgePro
   return (
     <div
       className={cn(
-        "caretip-stripe-trust-badge inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-background/80 px-4 py-2 shadow-sm backdrop-blur-sm dark:border-neutral-700/80 dark:bg-neutral-900/70",
+        "caretip-stripe-trust-badge inline-flex items-center gap-2.5 rounded-full border border-border/70 bg-background/80 px-4 py-2 shadow-sm backdrop-blur-sm",
         className,
       )}
     >

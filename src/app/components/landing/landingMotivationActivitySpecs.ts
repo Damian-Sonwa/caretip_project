@@ -91,7 +91,8 @@ export const MOTIVATION_ACTIVITY_CARD_SPECS: ActivityCardSpec[] = [
     titleMetric: {
       value: 24,
       kind: "percent",
-      beforeKey: "landing.motivation.cards.dashboard.titleBefore",
+      beforeKey: "landing.motivation.cards.dashboard.metaBefore",
+      afterKey: "landing.motivation.cards.dashboard.metaAfter",
     },
     mobilePrimary: "title",
     mobileSecondary: "meta",

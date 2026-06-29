@@ -8,10 +8,7 @@ export function BusinessSettingsLanguagePanel() {
   const current = i18n.language?.startsWith("de") ? "de" : "en";
 
   return (
-    <BusinessSettingsPanelShell
-      title={t("business.settings.panels.languageTitle")}
-      description={t("business.settings.panels.languageDesc")}
-    >
+    <BusinessSettingsPanelShell embedded>
       <div className="max-w-sm space-y-2">
         <Label htmlFor="settings-language">{t("business.settings.language.label")}</Label>
         <Select

@@ -6,7 +6,6 @@ import {
   ChevronRight,
   Loader2,
   Search,
-  Sparkles,
   Trash2,
 } from "lucide-react";
 import { BusinessModuleWorkspaceHeader } from "@/app/components/business/BusinessModuleWorkspaceHeader";
@@ -17,6 +16,7 @@ import {
   InlineSpinner,
   NotificationInboxListSkeleton,
 } from "@/app/components/dashboard/DashboardSectionLoading";
+import { DashboardWorkspaceEmptyState } from "@/app/components/dashboard/DashboardWorkspaceEmptyState";
 import { useNotifications, type NotificationListFilters } from "@/app/hooks/useNotifications";
 import type { InboxNotification } from "@/app/lib/api";
 import {
@@ -253,22 +253,14 @@ function NotificationDetailPanel({
   );
 }
 
-function PremiumEmptyState() {
+function InboxEmptyState() {
   const { t } = useTranslation();
   return (
-    <div className="flex flex-col items-center rounded-2xl border border-dashed border-border/80 bg-gradient-to-b from-muted/30 to-card px-6 py-12 text-center sm:py-16">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 ring-1 ring-primary/15">
-        <BellRing className="h-8 w-8 text-primary" aria-hidden />
-      </div>
-      <h2 className="text-base font-semibold text-foreground">{t("notifications.inbox.emptyTitle")}</h2>
-      <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
-        {t("notifications.inbox.emptyBodyPremium")}
-      </p>
-      <p className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-        <Sparkles className="h-3.5 w-3.5 text-primary/80" aria-hidden />
-        {t("notifications.inbox.emptyHint")}
-      </p>
-    </div>
+    <DashboardWorkspaceEmptyState
+      icon={<BellRing className="h-5 w-5" aria-hidden />}
+      title={t("notifications.inbox.emptyTitle")}
+      description={`${t("notifications.inbox.emptyBodyPremium")} ${t("notifications.inbox.emptyHint")}`}
+    />
   );
 }
 
@@ -454,7 +446,7 @@ export function NotificationInboxFeed({
         <NotificationInboxListSkeleton rows={5} />
       ) : filteredList.length === 0 ? (
         rawList.length === 0 ? (
-          <PremiumEmptyState />
+          <InboxEmptyState />
         ) : (
           <div className="rounded-xl border border-dashed border-border bg-muted/20 px-6 py-10 text-center">
             <Bell className="mx-auto mb-2 h-7 w-7 text-muted-foreground/60" aria-hidden />

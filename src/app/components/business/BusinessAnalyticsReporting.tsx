@@ -11,7 +11,7 @@ import { DashboardChartsIdleMount } from "../dashboard/DashboardChartsIdleMount"
 import { CountUpMetric } from "../dashboard/CountUpMetric";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PremiumSummaryCard } from "../premium/PremiumSummaryCard";
+import { DashboardWorkspaceSummaryCard } from "../dashboard/DashboardWorkspaceSummaryCard";
 import { businessUi } from "./businessDashboardUi";
 import { cn } from "@/lib/utils";
 import { formatEur } from "../../lib/formatEur";
@@ -153,8 +153,7 @@ export function BusinessAnalyticsReporting({
 
   return (
     <div className="caretip-mobile-analytics-report space-y-6 md:space-y-8">
-      <PremiumSummaryCard
-        personality="analytics"
+      <DashboardWorkspaceSummaryCard
         title={t("premium.summaryBanner.title")}
         periodLabel={periodLabel}
         metrics={[

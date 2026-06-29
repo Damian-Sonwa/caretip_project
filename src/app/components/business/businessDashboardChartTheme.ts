@@ -5,5 +5,5 @@ export {
   DASHBOARD_CHART_BAR_SOFT as BUSINESS_CHART_BAR_SOFT,
   DASHBOARD_CHART_GRID as BUSINESS_CHART_GRID,
   dashboardChartBarFill as businessChartBarFill,
-  dashboardChartTooltipStyle as businessChartTooltipStyle,
+  getDashboardChartTooltipStyle as getBusinessChartTooltipStyle,
 } from "@/app/components/dashboard/dashboardChartTheme";

@@ -1,5 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { PublicLegalPageShell } from "@/components/public/PublicLegalPageShell";
+import { publicPageUi } from "@/components/public/publicPageUi";
+import { cn } from "@/lib/utils";
 
 export function TermsPage() {
   const { t } = useTranslation();
@@ -88,12 +90,12 @@ export function TermsPage() {
           <p>{t("staticPages.terms.s11Body")}</p>
         </div>
 
-        <div className="border-t border-neutral-200/80 pt-6 not-prose dark:border-neutral-800">
-          <p className="text-sm text-neutral-700 dark:text-neutral-300">
-            <strong className="text-neutral-950 dark:text-neutral-50">{t("staticPages.terms.footerLastLabel")}</strong>{" "}
+        <div className={publicPageUi.legalFooter}>
+          <p className={publicPageUi.legalFooterText}>
+            <strong className={publicPageUi.legalFooterStrong}>{t("staticPages.terms.footerLastLabel")}</strong>{" "}
             {t("staticPages.terms.footerLastDate")}
           </p>
-          <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{t("staticPages.terms.footerContact")}</p>
+          <p className={cn("mt-3", publicPageUi.legalFooterText)}>{t("staticPages.terms.footerContact")}</p>
         </div>
       </div>
     </PublicLegalPageShell>

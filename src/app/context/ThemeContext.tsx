@@ -1,44 +1,108 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-export type ThemeMode = "light" | "dark";
+/** User-selected theme preference. */
+export type ThemePreference = "light" | "dark" | "system";
+
+/** Resolved paint mode applied to the document. */
+export type ResolvedTheme = "light" | "dark";
+
+/** @deprecated Use `ThemePreference` or `ResolvedTheme`. */
+export type ThemeMode = ResolvedTheme;
 
 type ThemeContextValue = {
-  mode: ThemeMode;
-  setMode: (mode: ThemeMode) => void;
+  /** Stored user preference (light, dark, or follow OS). */
+  preference: ThemePreference;
+  setPreference: (preference: ThemePreference) => void;
+  /** Active paint mode after resolving system preference. */
+  resolvedTheme: ResolvedTheme;
+  /** @deprecated Alias for `resolvedTheme`. */
+  mode: ResolvedTheme;
+  /** @deprecated Use `setPreference`. */
+  setMode: (mode: ResolvedTheme) => void;
 };
 
-const THEME_STORAGE_KEY = "caretip-theme";
+export const THEME_STORAGE_KEY = "caretip-theme";
 
-function applyModeToDocument(mode: ThemeMode) {
-  const root = document.documentElement;
-  root.classList.toggle("dark", mode === "dark");
-  root.style.colorScheme = mode;
+function getSystemTheme(): ResolvedTheme {
+  if (typeof window === "undefined") return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-function getInitialMode(): ThemeMode {
-  // App-wide default: always start in light mode.
-  // We intentionally ignore system preference and any previously saved value.
+function parseStoredPreference(raw: string | null): ThemePreference {
+  if (raw === "light" || raw === "dark" || raw === "system") return raw;
   return "light";
+}
+
+function resolveTheme(preference: ThemePreference): ResolvedTheme {
+  if (preference === "system") return getSystemTheme();
+  return preference;
+}
+
+function readStoredPreference(): ThemePreference {
+  try {
+    return parseStoredPreference(window.localStorage.getItem(THEME_STORAGE_KEY));
+  } catch {
+    return "light";
+  }
+}
+
+function applyResolvedTheme(resolved: ResolvedTheme) {
+  const root = document.documentElement;
+  root.classList.add("theme-transition");
+  root.classList.toggle("dark", resolved === "dark");
+  root.style.colorScheme = resolved;
+  root.dataset.theme = resolved;
+  window.setTimeout(() => root.classList.remove("theme-transition"), 250);
+}
+
+function getInitialPreference(): ThemePreference {
+  if (typeof window === "undefined") return "light";
+  return readStoredPreference();
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [mode, setModeState] = useState<ThemeMode>(() => getInitialMode());
+  const [preference, setPreferenceState] = useState<ThemePreference>(() => getInitialPreference());
+  const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => resolveTheme(getInitialPreference()));
 
   useEffect(() => {
-    applyModeToDocument(mode);
+    const resolved = resolveTheme(preference);
+    setResolvedTheme(resolved);
+    applyResolvedTheme(resolved);
+
     try {
-      window.localStorage.setItem(THEME_STORAGE_KEY, mode);
+      window.localStorage.setItem(THEME_STORAGE_KEY, preference);
     } catch {
       // ignore
     }
-  }, [mode]);
+  }, [preference]);
+
+  useEffect(() => {
+    if (preference !== "system") return undefined;
+
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+    const onChange = () => {
+      const resolved = resolveTheme("system");
+      setResolvedTheme(resolved);
+      applyResolvedTheme(resolved);
+    };
+
+    media.addEventListener("change", onChange);
+    return () => media.removeEventListener("change", onChange);
+  }, [preference]);
 
   const value = useMemo<ThemeContextValue>(() => {
-    const setMode = (next: ThemeMode) => setModeState(next);
-    return { mode, setMode };
-  }, [mode]);
+    const setPreference = (next: ThemePreference) => setPreferenceState(next);
+    const setMode = (next: ResolvedTheme) => setPreferenceState(next);
+    return {
+      preference,
+      setPreference,
+      resolvedTheme,
+      mode: resolvedTheme,
+      setMode,
+    };
+  }, [preference, resolvedTheme]);
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 }
@@ -48,4 +112,3 @@ export function useTheme() {
   if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
   return ctx;
 }
-

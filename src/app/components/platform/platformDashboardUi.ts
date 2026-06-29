@@ -9,9 +9,12 @@ import { caretipBtnPrimary } from "@/lib/caretipButtonSystem";
 export const platformUi = {
   btnPrimary: caretipBtnPrimary,
   pageMain: "bg-background",
-  page: "caretip-container w-full min-w-0 pb-16 pt-5 sm:pb-20 sm:pt-7",
+  /** Matches business/employee overview shells — padding lives on pageInner. */
+  page: "platform-page min-h-0 w-full min-w-0 pb-16 sm:pb-20",
+  pageInner:
+    "caretip-container platform-page__inner w-full min-w-0 px-4 pt-3 max-lg:pt-3 sm:px-6 sm:pt-4",
 
-  pageHeader: "mb-8 max-lg:mb-10",
+  pageHeader: "mb-6 max-lg:mb-7",
   pageTitleRow: "flex items-start gap-3",
   pageTitleIcon: "mt-0.5 h-7 w-7 shrink-0 text-accent sm:h-8 sm:w-8",
   pageTitle: "text-xl font-semibold tracking-tight text-foreground sm:text-2xl lg:text-[1.75rem]",

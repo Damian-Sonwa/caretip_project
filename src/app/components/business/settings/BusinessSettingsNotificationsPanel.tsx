@@ -112,10 +112,7 @@ export function BusinessSettingsNotificationsPanel({
   };
 
   return (
-    <BusinessSettingsPanelShell
-      title={t("business.settings.panels.notificationsTitle")}
-      description={t("business.settings.panels.notificationsDesc")}
-    >
+    <BusinessSettingsPanelShell embedded>
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("business.settings.loading")}</p>
       ) : (

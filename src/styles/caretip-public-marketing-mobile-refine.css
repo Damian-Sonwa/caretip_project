@@ -171,8 +171,11 @@
     max-width: 100%;
   }
 
-  .caretip-features-hero-v2__chips {
+  .caretip-features-hero-v2__quick-start {
     margin-top: 1.25rem;
+  }
+
+  .caretip-features-hero-v2__quick-start-list {
     gap: 0.5rem;
   }
 
@@ -273,8 +276,8 @@
     gap: 0.75rem;
   }
 
-  .caretip-pricing-hero-v2__feature {
-    padding: 0.9375rem 1rem;
+  .caretip-pricing-hero-v2__features--flat .caretip-pricing-hero-v2__feature {
+    padding: 0;
   }
 
   .caretip-pricing-hero-v2__trust {

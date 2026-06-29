@@ -94,7 +94,7 @@ html.caretip-font-inter {
 
 @utility text-section-title {
   font-size: var(--caretip-section-size);
-  line-height: 1.08;
+  line-height: 1.1;
   letter-spacing: -0.028em;
 }
 
@@ -118,13 +118,13 @@ html.caretip-font-inter {
 
 @utility text-body-copy {
   font-size: var(--caretip-body-size);
-  line-height: 1.68;
+  line-height: 1.72;
   letter-spacing: -0.008em;
 }
 
 @utility text-feature-copy {
   font-size: var(--caretip-feature-size);
-  line-height: 1.5;
+  line-height: 1.58;
   letter-spacing: -0.006em;
 }
 

@@ -27,12 +27,8 @@
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.6;
-    color: rgb(115 115 115);
+    color: hsl(var(--muted-foreground));
     text-wrap: pretty;
-  }
-
-  html.dark .caretip-public-marketing-hero .caretip-public-page-hero > h1 + p {
-    color: rgb(163 163 163);
   }
 }
 
@@ -129,12 +125,8 @@
     margin-inline: auto;
     font-size: 1rem;
     line-height: 1.6;
-    color: rgb(115 115 115);
+    color: hsl(var(--muted-foreground));
     text-wrap: pretty;
-  }
-
-  html.dark .caretip-public-marketing-section-subtitle {
-    color: rgb(163 163 163);
   }
 }
 

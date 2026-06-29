@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router";
+import { Link, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { BusinessSettingsPanelShell } from "./BusinessSettingsPanelShell";
 import { useBillingStatus } from "../../../hooks/useBillingStatus";
 import { createBillingPortalSession, type SubscriptionBillingCycle } from "../../../lib/api";
 import { toUserFriendlyMessage } from "../../../lib/errorMessages";
@@ -12,10 +11,12 @@ import { BillingTrialSection, BILLING_START_TRIAL_HASH } from "./billing/Billing
 import { BillingSubscriptionLifecycle } from "./billing/BillingSubscriptionLifecycle";
 import { BillingSubscriptionSummary } from "./billing/BillingSubscriptionSummary";
 import { BillingTimeline } from "./billing/BillingTimeline";
-import { CommercialInsightsPanel } from "./CommercialInsightsPanel";
 import { PricingBillingToggle } from "@/components/pricing/PricingBillingToggle";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 import { BILLING_PLANS_SECTION_ID, scrollToBillingPlansSection } from "../../../lib/activateCareTipNavigation";
+
+const BILLING_HISTORY_PREVIEW_LIMIT = 8;
 
 export function BusinessSettingsBillingPanel() {
   const { t } = useTranslation();
@@ -59,79 +60,103 @@ export function BusinessSettingsBillingPanel() {
   const canOpenPortal =
     Boolean(data?.billingEnabled && data.stripeConfigured && data.stripeCustomerId);
 
+  if (loading) {
+    return (
+      <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+        <span className="sr-only">{t("business.billing.loading")}</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div
+        className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800 dark:border-red-900/40 dark:bg-red-950/30 dark:text-red-200"
+        role="alert"
+      >
+        <p>{error}</p>
+        <button
+          type="button"
+          onClick={() => void reload()}
+          className="mt-2 font-semibold underline underline-offset-2"
+        >
+          {t("business.billing.retry")}
+        </button>
+      </div>
+    );
+  }
+
+  if (!data) return null;
+
+  const historyPreview = data.events.slice(0, BILLING_HISTORY_PREVIEW_LIMIT);
+
   return (
-    <BusinessSettingsPanelShell>
-      {loading ? (
-        <div className="flex min-h-[200px] items-center justify-center text-muted-foreground">
-          <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
-          <span className="sr-only">{t("business.billing.loading")}</span>
-        </div>
-      ) : error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
-          <p>{error}</p>
-          <button
-            type="button"
-            onClick={() => void reload()}
-            className="mt-2 font-semibold underline underline-offset-2"
-          >
-            {t("business.billing.retry")}
-          </button>
-        </div>
-      ) : data ? (
-        <div className="space-y-8">
-          <BillingSubscriptionSummary
+    <div className="space-y-8">
+      <BillingSubscriptionSummary
+        billing={data}
+        onManagePayment={canOpenPortal && !portalBusy ? () => void openBillingPortal() : undefined}
+      />
+
+      <BillingSubscriptionLifecycle billing={data} />
+
+      {data.accessSource !== "sponsored" && historyPreview.length > 0 ? (
+        <section aria-labelledby="billing-history-heading">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+            <h2 id="billing-history-heading" className={dashboardWorkspaceUi.sectionTitle}>
+              {t("business.billing.nav.history")}
+            </h2>
+            {data.events.length > BILLING_HISTORY_PREVIEW_LIMIT ? (
+              <Link
+                to="/dashboard/billing/history"
+                className={cn(dashboardWorkspaceUi.btnGhost, "text-sm")}
+              >
+                {t("dashboard.viewAll")}
+              </Link>
+            ) : null}
+          </div>
+          <div className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
+            <BillingTimeline events={historyPreview} />
+          </div>
+        </section>
+      ) : null}
+
+      {data.accessSource !== "sponsored" ? (
+        <section id="billing-plans" className="space-y-5">
+          <div>
+            <h2 className={dashboardWorkspaceUi.sectionTitle}>{t("business.billing.planManagement")}</h2>
+            <p className={dashboardWorkspaceUi.pageDescription}>{t("business.billing.planManagementDesc")}</p>
+          </div>
+
+          <BillingTrialSection
             billing={data}
-            onManagePayment={canOpenPortal && !portalBusy ? () => void openBillingPortal() : undefined}
+            billingCycle={billingCycle}
+            autoOpenTrial={trialAutoOpen}
+            onAutoOpenHandled={() => setTrialAutoOpen(false)}
           />
 
-          {data.accessSource !== "sponsored" &&
-          (data.hasStripeBilling || (data.planKey && data.planKey !== "basic")) ? (
-            <BillingSubscriptionLifecycle billing={data} />
-          ) : null}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h3 id="billing-cycle-heading" className={dashboardWorkspaceUi.subsectionTitle}>
+                {t("business.billing.billingCycle")}
+              </h3>
+              {billingCycle === "yearly" ? (
+                <p className="mt-1 text-sm font-medium text-primary">
+                  {t("staticPages.pricing.billing.saveBadge")}
+                </p>
+              ) : null}
+            </div>
+            <PricingBillingToggle
+              value={billingCycle}
+              onChange={setBillingCycle}
+              className={cn("caretip-pricing-billing-toggle--in-panel sm:max-w-xs")}
+              aria-labelledby="billing-cycle-heading"
+            />
+          </div>
 
-          <section id="billing-plans" className="space-y-5">
-            {data.accessSource !== "sponsored" ? (
-              <>
-                <BillingTrialSection
-                  billing={data}
-                  billingCycle={billingCycle}
-                  autoOpenTrial={trialAutoOpen}
-                  onAutoOpenHandled={() => setTrialAutoOpen(false)}
-                />
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h3 id="billing-cycle-heading" className="text-lg font-semibold text-foreground">
-                    {t("business.billing.billingCycle")}
-                  </h3>
-                  {billingCycle === "yearly" ? (
-                    <p className="mt-1 text-sm font-medium text-[var(--caretip-brand-orange,#e9781c)]">
-                      {t("staticPages.pricing.billing.saveBadge")}
-                    </p>
-                  ) : null}
-                </div>
-                <PricingBillingToggle
-                  value={billingCycle}
-                  onChange={setBillingCycle}
-                  className={cn("caretip-pricing-billing-toggle--in-panel sm:max-w-xs")}
-                  aria-labelledby="billing-cycle-heading"
-                />
-              </div>
-              </>
-            ) : null}
-
-            <BillingPlanManagement billing={data} billingCycle={billingCycle} onChanged={() => void reload()} />
-          </section>
-
-          {data.accessSource !== "sponsored" ? (
-            <section>
-              <h3 className="mb-4 text-lg font-semibold text-foreground">{t("business.billing.timelineTitle")}</h3>
-              <BillingTimeline events={data.events} />
-            </section>
-          ) : null}
-
-          <CommercialInsightsPanel />
-        </div>
+          <BillingPlanManagement billing={data} billingCycle={billingCycle} onChanged={() => void reload()} />
+        </section>
       ) : null}
-    </BusinessSettingsPanelShell>
+    </div>
   );
 }

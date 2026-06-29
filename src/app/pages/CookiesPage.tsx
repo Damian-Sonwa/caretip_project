@@ -7,8 +7,8 @@ export function CookiesPage() {
   const { t } = useTranslation();
 
   const cookieType = (titleKey: string, bodyKey: string, liKeys: string[]) => (
-    <div className={cn(publicPageUi.insetPanel, "not-prose bg-white dark:bg-neutral-950/70")}>
-      <h3 className="mb-2 text-lg font-semibold text-neutral-950 dark:text-neutral-50">{t(titleKey)}</h3>
+    <div className={cn(publicPageUi.insetPanel, "not-prose")}>
+      <h3 className={publicPageUi.legalInsetTitle}>{t(titleKey)}</h3>
       <p className="text-sm">{t(bodyKey)}</p>
       <ul className="ml-4 mt-2 list-disc space-y-1 text-sm">
         {liKeys.map((key) => (
@@ -98,12 +98,12 @@ export function CookiesPage() {
           <p>{t("staticPages.cookies.updatesBody")}</p>
         </div>
 
-        <div className="border-t border-neutral-200/80 pt-6 not-prose dark:border-neutral-800">
-          <p className="text-sm text-neutral-700 dark:text-neutral-300">
-            <strong className="text-neutral-950 dark:text-neutral-50">{t("staticPages.cookies.footerLastLabel")}</strong>{" "}
+        <div className={publicPageUi.legalFooter}>
+          <p className={publicPageUi.legalFooterText}>
+            <strong className={publicPageUi.legalFooterStrong}>{t("staticPages.cookies.footerLastLabel")}</strong>{" "}
             {t("staticPages.cookies.footerLastDate")}
           </p>
-          <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">{t("staticPages.cookies.footerContact")}</p>
+          <p className={cn("mt-3", publicPageUi.legalFooterText)}>{t("staticPages.cookies.footerContact")}</p>
         </div>
       </div>
     </PublicLegalPageShell>

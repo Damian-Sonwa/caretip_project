@@ -4,10 +4,11 @@ import { Lock } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { CareIcon } from "@/components/icons";
 import { cn } from "@/lib/utils";
+import {
+  dashboardSidebarNavLinkIdle,
+} from "@/lib/theme/dashboardSidebarUi";
 import type { FeatureKey } from "@/app/lib/subscriptionCapabilities";
-import { useBusinessEntitlementsContext } from "@/app/contexts/BusinessEntitlementsContext";
-import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
-import { useAuth } from "@/app/hooks/useAuth";
+import { useBusinessSidebarEntitlements } from "./useBusinessSidebarEntitlements";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/app/components/ui/tooltip";
 import {
   businessSidebarNavEntries,
@@ -38,13 +39,7 @@ type LockedDialogState = {
 };
 
 function useSidebarEntitlements() {
-  const { user } = useAuth();
-  const businessContext = useBusinessEntitlementsContext();
-  const fallback = useSubscriptionEntitlements({
-    enabled: user?.role === "business" && businessContext == null,
-    role: user?.role === "business" ? "business" : null,
-  });
-  return businessContext ?? fallback;
+  return useBusinessSidebarEntitlements();
 }
 
 function SidebarLink({
@@ -71,7 +66,7 @@ function SidebarLink({
           "business-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium",
           isActive
             ? "business-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
-            : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+            : dashboardSidebarNavLinkIdle,
         )}
         aria-current={isActive ? "page" : undefined}
       >
@@ -132,7 +127,7 @@ function SidebarChildNavItem({
   const itemClass = cn(
     "business-sidebar-child-link flex w-full flex-col items-stretch py-2 pl-11 pr-3 text-left text-[13px] font-medium transition-colors",
     lock.locked
-      ? "cursor-pointer text-sidebar-foreground/55 hover:bg-stone-100/60 hover:text-sidebar-foreground/75"
+      ? "cursor-pointer text-sidebar-foreground/55 hover:bg-sidebar-accent/60 hover:text-sidebar-foreground/75"
       : childActive
         ? "text-primary before:bg-primary"
         : "text-sidebar-foreground/75 hover:text-sidebar-foreground before:bg-transparent",
@@ -211,8 +206,8 @@ function SidebarGroup({
         className={cn(
           "business-dash-nav-link flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm font-medium transition-colors",
           groupActive
-            ? "bg-stone-100/90 font-semibold text-sidebar-foreground"
-            : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+            ? "bg-sidebar-accent font-semibold text-sidebar-foreground"
+            : dashboardSidebarNavLinkIdle,
         )}
         aria-expanded={isExpanded}
         aria-controls={panelId}

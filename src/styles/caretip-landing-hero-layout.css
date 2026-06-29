@@ -5,43 +5,48 @@
 /* Marketing narrative rhythm — headline → lead copy → lines → action (landing + public pages). */
 .caretip-landing,
 .caretip-public-page {
-  --caretip-narrative-gap-eyebrow-headline: 0.625rem;
-  --caretip-narrative-gap-headline-lead: 0.875rem;
-  --caretip-narrative-gap-lead-lines: 0.5rem;
-  --caretip-narrative-gap-lead-action: 1.25rem;
+  --caretip-narrative-gap-eyebrow-headline: 0.75rem;
+  --caretip-narrative-gap-headline-lead: 1.125rem;
+  --caretip-narrative-gap-lead-lines: 0.625rem;
+  --caretip-narrative-gap-lead-action: 1.5rem;
+  --caretip-narrative-gap-intro-content: 2.75rem;
 }
 
 @media (min-width: 640px) {
   .caretip-landing,
   .caretip-public-page {
-    --caretip-narrative-gap-eyebrow-headline: 0.75rem;
-    --caretip-narrative-gap-headline-lead: 1rem;
-    --caretip-narrative-gap-lead-lines: 0.5625rem;
-    --caretip-narrative-gap-lead-action: 1.375rem;
+    --caretip-narrative-gap-eyebrow-headline: 0.875rem;
+    --caretip-narrative-gap-headline-lead: 1.25rem;
+    --caretip-narrative-gap-lead-lines: 0.6875rem;
+    --caretip-narrative-gap-lead-action: 1.625rem;
+    --caretip-narrative-gap-intro-content: 3.25rem;
   }
 }
 
 @media (min-width: 768px) {
   .caretip-landing,
   .caretip-public-page {
-    --caretip-narrative-gap-headline-lead: 1.0625rem;
-    --caretip-narrative-gap-lead-lines: 0.625rem;
-    --caretip-narrative-gap-lead-action: 1.5rem;
+    --caretip-narrative-gap-headline-lead: 1.375rem;
+    --caretip-narrative-gap-lead-lines: 0.75rem;
+    --caretip-narrative-gap-lead-action: 1.75rem;
+    --caretip-narrative-gap-intro-content: 3.5rem;
   }
 }
 
 @media (min-width: 1024px) {
   .caretip-landing,
   .caretip-public-page {
-    --caretip-narrative-gap-headline-lead: 1.125rem;
-    --caretip-narrative-gap-lead-action: 1.5rem;
+    --caretip-narrative-gap-headline-lead: 1.5rem;
+    --caretip-narrative-gap-lead-action: 1.875rem;
+    --caretip-narrative-gap-intro-content: 4rem;
   }
 }
 
 @media (min-width: 1280px) {
   .caretip-landing,
   .caretip-public-page {
-    --caretip-narrative-gap-lead-action: 1.625rem;
+    --caretip-narrative-gap-lead-action: 2rem;
+    --caretip-narrative-gap-intro-content: 4.25rem;
   }
 }
 

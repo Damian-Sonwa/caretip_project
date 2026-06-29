@@ -416,14 +416,10 @@ export function BusinessDashboard() {
               transition={{ duration: 0.45, ease: "easeOut" }}
               className="business-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
             >
-              <div className="business-hero-illustration-glow" aria-hidden>
-                <span className="business-hero-illustration-glow__orb business-hero-illustration-glow__orb--primary" />
-                <span className="business-hero-illustration-glow__orb business-hero-illustration-glow__orb--secondary" />
-              </div>
               <img
                 src={businessHeroImage}
                 alt=""
-                className="business-hero-illustration relative z-[1] mx-auto block w-full max-w-[468px] object-contain object-center lg:max-w-[32rem]"
+                className="business-hero-illustration relative z-[1] mx-auto block w-full max-w-[560px] object-contain object-center lg:max-w-[40rem]"
                 loading="eager"
                 decoding="async"
                 {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}

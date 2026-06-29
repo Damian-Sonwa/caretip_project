@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { businessUi } from "../businessDashboardUi";
 import { formatEur } from "../../../lib/formatEur";
-import { BUSINESS_CHART_GRID, businessChartTooltipStyle } from "../businessDashboardChartTheme";
+import { BUSINESS_CHART_GRID, getBusinessChartTooltipStyle } from "../businessDashboardChartTheme";
 import { buildQrChartSeries, type BusinessIntelligenceInput } from "../../../lib/businessIntelligence";
 
 type ExecutiveTrendChartsProps = {
@@ -87,7 +87,7 @@ export function ExecutiveTrendCharts({ data, qrInput, loading }: ExecutiveTrendC
             <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} />
             <Tooltip
               formatter={(v: number) => [formatEur(v), t("charts.tooltip.tips")]}
-              contentStyle={businessChartTooltipStyle}
+              contentStyle={getBusinessChartTooltipStyle()}
             />
             <Area type="monotone" dataKey="tips" stroke="#197278" fill="rgba(25,114,120,0.12)" strokeWidth={2} />
           </AreaChart>
@@ -100,7 +100,7 @@ export function ExecutiveTrendCharts({ data, qrInput, loading }: ExecutiveTrendC
             <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
             <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 9 }} />
             <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} allowDecimals={false} />
-            <Tooltip contentStyle={businessChartTooltipStyle} />
+            <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
             <Area type="monotone" dataKey="scans" stroke="#197278" fill="rgba(25,114,120,0.12)" strokeWidth={2} />
           </AreaChart>
         </ResponsiveContainer>
@@ -112,7 +112,7 @@ export function ExecutiveTrendCharts({ data, qrInput, loading }: ExecutiveTrendC
             <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
             <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 9 }} />
             <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} />
-            <Tooltip contentStyle={businessChartTooltipStyle} />
+            <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
             <Area
               type="monotone"
               dataKey="participation"

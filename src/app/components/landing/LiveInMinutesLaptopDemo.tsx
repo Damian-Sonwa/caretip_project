@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { cn } from "@/lib/utils";
 import { useMinWidthMedia } from "@/lib/motionPerf";
 import { usePrefersReducedMotion } from "@/lib/usePrefersReducedMotion";
+import { landingCopyVisible } from "@/components/landing/landingUi";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import caretipLogo from "@/assets/brand/company_logo.png";
 import { LiveInMinutesOnboardingPhone } from "@/app/components/landing/LiveInMinutesOnboardingPhone";
@@ -19,6 +20,13 @@ const PROGRESS_ITEM_KEYS = [
   "progressTeam",
   "progressQr",
   "progressReceiving",
+] as const;
+
+const SETUP_STEP_TITLE_KEYS = [
+  "step1Title",
+  "step2Title",
+  "step3Title",
+  "step4Title",
 ] as const;
 
 const NEXT_STEP_TITLE_KEYS = [
@@ -60,6 +68,8 @@ export function LiveInMinutesLaptopDemo({
     [t, i18n.language],
   );
 
+  const caption = captions[index];
+
   if (videoSrc) {
     return (
       <LandingReveal className="caretip-live-minutes-stage caretip-live-minutes-device-lift relative mx-auto w-full max-w-[min(100%,15.75rem)] overflow-hidden rounded-[1.35rem] shadow-[0_20px_40px_-24px_rgba(30,24,16,0.26),0_8px_18px_-10px_rgba(30,24,16,0.12)] ring-1 ring-neutral-900/[0.06] sm:max-w-[20rem] sm:rounded-[1.5rem] lg:max-w-[22rem] dark:ring-white/[0.08]">
@@ -83,8 +93,12 @@ export function LiveInMinutesLaptopDemo({
             activeIndex={index}
             language={i18n.language}
             reduceMotion={reduceMotion}
-            caption={captions[index]}
-            demoAriaLabel={t("landing.liveDemo.demoAria", { label: captions[index] })}
+            caption={caption}
+            demoAriaLabel={t("landing.liveDemo.demoAria", {
+              label: landingCopyVisible(caption)
+                ? caption
+                : t(`landing.simpleSetup.${SETUP_STEP_TITLE_KEYS[index]}`),
+            })}
             fallback={
               <PhoneFrame compact={!isLgUp}>
                 <PhoneStepScreen activeIndex={index} />
@@ -93,9 +107,11 @@ export function LiveInMinutesLaptopDemo({
           />
         </LandingReveal>
 
-        <p className="caretip-live-minutes-caption mt-1 font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-1.5 sm:text-[13px] lg:text-sm">
-          {captions[index]}
-        </p>
+        {landingCopyVisible(caption) ? (
+          <p className="caretip-live-minutes-caption mt-1 font-sans text-[12px] leading-snug tracking-tight text-neutral-600 dark:text-neutral-400 sm:mt-1.5 sm:text-[13px] lg:text-sm">
+            {caption}
+          </p>
+        ) : null}
       </div>
     </div>
   );
@@ -146,6 +162,7 @@ function AccountStepPhone({ activeIndex }: { activeIndex: number }) {
       allComplete={false}
       highlightTitleKey="phoneWelcome"
       highlightSubKey="phoneWelcomeSub"
+      showSecureTrust
       headerIcon={<UserPlus className="h-3.5 w-3.5" strokeWidth={2.25} aria-hidden />}
     />
   );
@@ -275,12 +292,14 @@ function OnboardingProgressScreen({
   allComplete,
   highlightTitleKey,
   highlightSubKey,
+  showSecureTrust = false,
   headerIcon,
 }: {
   activeIndex: number;
   allComplete: boolean;
   highlightTitleKey?: "phoneWelcome";
   highlightSubKey?: "phoneWelcomeSub";
+  showSecureTrust?: boolean;
   headerIcon?: React.ReactNode;
 }) {
   const { t } = useTranslation();
@@ -322,6 +341,17 @@ function OnboardingProgressScreen({
           );
         })}
       </ul>
+
+      {showSecureTrust ? (
+        <div className="mt-2 rounded-lg border border-primary/15 bg-primary/[0.05] px-2 py-1.5 text-center">
+          <p className="text-[8px] font-semibold text-neutral-900 dark:text-neutral-50">
+            {t("landing.simpleSetup.phoneSecureTitle")}
+          </p>
+          <p className="mt-0.5 text-[7px] leading-snug text-neutral-600 dark:text-neutral-400">
+            {t("landing.simpleSetup.phoneSecureBody")}
+          </p>
+        </div>
+      ) : null}
 
       <ProgressChecklistFooter activeIndex={activeIndex} allComplete={allComplete} />
     </PhoneStepShell>

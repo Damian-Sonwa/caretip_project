@@ -70,13 +70,13 @@ export function AuthOAuthButtons({
 
   if (!googleClientId?.trim()) {
     return (
-      <p className="text-center text-[11px] text-neutral-600 dark:text-neutral-400">
+      <p className="text-center text-[11px] text-muted-foreground">
         {t("auth.oauth.envHintBefore")}{" "}
-        <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
+        <code className="rounded bg-muted px-1 text-foreground">
           VITE_GOOGLE_CLIENT_ID
         </code>{" "}
         {t("auth.oauth.envHintOr")}{" "}
-        <code className="rounded bg-gray-50 px-1 text-neutral-900 dark:bg-neutral-900 dark:text-neutral-100">
+        <code className="rounded bg-muted px-1 text-foreground">
           NEXT_PUBLIC_GOOGLE_CLIENT_ID
         </code>{" "}
         {t("auth.oauth.envHintAfter")}

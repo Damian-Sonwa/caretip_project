@@ -56,10 +56,7 @@ export function BusinessSettingsGeneralPanel({
   };
 
   return (
-    <BusinessSettingsPanelShell
-      title={t("business.settings.panels.generalTitle")}
-      description={t("business.settings.panels.generalDesc")}
-    >
+    <BusinessSettingsPanelShell embedded>
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("business.settings.loading")}</p>
       ) : (

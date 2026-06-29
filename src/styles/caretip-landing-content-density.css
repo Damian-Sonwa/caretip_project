@@ -33,7 +33,7 @@
 .caretip-landing-copy-scan-list {
   display: flex;
   flex-direction: column;
-  gap: 0.625rem;
+  gap: 0.875rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -57,7 +57,7 @@
 }
 
 .caretip-landing-density-lead {
-  max-width: min(100%, 42ch);
+  max-width: var(--caretip-marketing-measure, min(100%, 36rem));
   margin-inline: auto;
   line-height: 1.72;
   text-wrap: pretty;
@@ -108,27 +108,34 @@
   line-height: 1.65;
 }
 
-.caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs {
+.caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list {
   gap: 0.75rem;
   margin-top: 0.75rem;
   padding-top: 0.75rem;
   border-top: 1px solid rgb(245 245 244 / 0.9);
 }
 
-html.dark .caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs {
+html.dark .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list {
   border-top-color: rgb(38 38 38);
 }
 
-.caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs > p {
-  margin: 0;
+.caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list-item {
   font-size: 0.875rem;
   line-height: 1.65;
   color: rgb(82 82 82);
   text-wrap: pretty;
 }
 
-html.dark .caretip-landing .caretip-expandable-info-card__detail-inner.caretip-landing-copy-paragraphs > p {
+html.dark .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list-item {
   color: rgb(163 163 163);
+}
+
+.caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-label {
+  color: rgb(23 23 23);
+}
+
+html.dark .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-label {
+  color: rgb(250 250 250);
 }
 
 .caretip-expandable-info-card__tag-slot {

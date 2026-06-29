@@ -304,6 +304,7 @@ export type BusinessStatsScope = "summary" | "roster" | "analytics" | "full";
 /** Full invalidation (roster, employees, goals, all timeframes). */
 export function invalidateBusinessStatsCache(businessId: string): void {
   invalidateBusinessStatsTipCaches(businessId);
+  invalidateCacheKey(`business-stats-roster:${businessId}`);
   invalidateCacheKey(`biz-dash-context:${businessId}`);
   invalidateCacheKey(`biz-dash-meta-roster:${businessId}`);
   invalidateCacheKey(`biz-dash-tz:${businessId}`);

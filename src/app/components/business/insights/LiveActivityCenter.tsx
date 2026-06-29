@@ -13,7 +13,7 @@ import {
 import type { LiveActivityItem, LiveActivityKind } from "../../../hooks/useLiveActivityStream";
 import { formatEur } from "../../../lib/formatEur";
 import { formatTimeAgo } from "../../../lib/formatTimeAgo";
-import { PremiumLiveActivityCard } from "../../premium/PremiumLiveActivityCard";
+import { DashboardWorkspacePanel } from "../../dashboard/DashboardWorkspacePanel";
 import { cn } from "@/lib/utils";
 
 type LiveActivityCenterProps = {
@@ -34,48 +34,32 @@ const KIND_ICON: Record<LiveActivityKind, typeof Radio> = {
   billing_updated: CreditCard,
 };
 
-const KIND_ACCENT: Record<LiveActivityKind, string> = {
-  tip_received: "text-primary",
-  qr_scanned: "text-sky-300",
-  goal_achieved: "text-amber-300",
-  goal_updated: "text-violet-300",
-  employee_joined: "text-emerald-300",
-  employee_invited: "text-blue-300",
-  employee_updated: "text-white/80",
-  location_created: "text-teal-300",
-  billing_updated: "text-rose-300",
-};
-
 export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCenterProps) {
   const { t } = useTranslation();
 
   return (
-    <PremiumLiveActivityCard
+    <DashboardWorkspacePanel
       title={t("business.liveActivity.centerTitle")}
-      headerExtra={
-        <span className="text-xs font-medium uppercase tracking-wide text-white/50">
-          {t("business.liveActivity.streamLabel")}
-        </span>
-      }
+      headerExtra={t("business.liveActivity.streamLabel")}
     >
       {loading && items.length === 0 ? (
-        <div className="space-y-0 divide-y divide-white/8">
+        <div className="divide-y divide-border">
           {Array.from({ length: 8 }).map((_, i) => (
             <div key={i} className="flex animate-pulse items-center gap-3 px-4 py-4 sm:px-5">
-              <div className="h-9 w-9 rounded-full bg-white/10" />
+              <div className="h-9 w-9 rounded-full bg-muted" />
               <div className="flex-1 space-y-2">
-                <div className="h-3 w-40 rounded bg-white/10" />
-                <div className="h-2.5 w-28 rounded bg-white/10" />
+                <div className="h-3 w-40 rounded bg-muted" />
+                <div className="h-2.5 w-28 rounded bg-muted" />
               </div>
             </div>
           ))}
         </div>
       ) : items.length === 0 ? (
-        <p className="px-4 py-10 text-center text-sm text-white/65 sm:px-5">
+        <p className="px-4 py-10 text-center text-sm text-muted-foreground sm:px-5">
           {t("business.liveActivity.empty")}
         </p>
       ) : (
-        <ul className="divide-y divide-white/8">
+        <ul className="divide-y divide-border">
           {items.map((item) => {
             const Icon = KIND_ICON[item.kind];
             const isLive = liveIds.has(item.id) || item.live;
@@ -83,35 +67,30 @@ export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCent
               <li
                 key={item.id}
                 className={cn(
-                  "flex items-start gap-3 px-4 py-3.5 transition-colors sm:px-5",
-                  isLive && "bg-primary/[0.06]",
+                  "flex items-start gap-3 px-4 py-3.5 sm:px-5",
+                  isLive && "bg-primary/[0.04]",
                 )}
               >
-                <div
-                  className={cn(
-                    "mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/[0.06]",
-                    KIND_ACCENT[item.kind],
-                  )}
-                >
+                <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted/40 text-muted-foreground">
                   <Icon className="h-4 w-4" aria-hidden />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="truncate font-medium text-white">{item.title}</p>
+                    <p className="truncate font-medium text-foreground">{item.title}</p>
                     {item.amountEur != null ? (
                       <p className="shrink-0 font-semibold tabular-nums text-primary">
                         {formatEur(item.amountEur)}
                       </p>
                     ) : null}
                   </div>
-                  <p className="mt-0.5 truncate text-xs text-white/55">
+                  <p className="mt-0.5 truncate text-xs text-muted-foreground">
                     {item.subtitle ?? t(`business.liveActivity.kind.${item.kind}`)}
-                    <span className="mx-1.5 text-white/25">·</span>
+                    <span className="mx-1.5 text-border">·</span>
                     {formatTimeAgo(item.at)}
                     {isLive ? (
                       <>
-                        <span className="mx-1.5 text-white/25">·</span>
-                        <span className="font-medium uppercase tracking-wide text-primary/90">
+                        <span className="mx-1.5 text-border">·</span>
+                        <span className="font-medium uppercase tracking-wide text-primary">
                           {t("business.tips.live.liveBadge")}
                         </span>
                       </>
@@ -123,6 +102,6 @@ export function LiveActivityCenter({ items, liveIds, loading }: LiveActivityCent
           })}
         </ul>
       )}
-    </PremiumLiveActivityCard>
+    </DashboardWorkspacePanel>
   );
 }

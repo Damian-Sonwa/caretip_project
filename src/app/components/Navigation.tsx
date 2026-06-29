@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { CareTipLogo } from "./CareTipLogo";
 import { useTheme } from "../context/ThemeContext";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { ThemeQuickToggle } from "@/app/components/theme/ThemeQuickToggle";
 import { PrefetchLink } from "./PrefetchLink";
 import { prefetchPrimaryNavRoutes } from "../lib/prefetchPublicRoutes";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
@@ -16,9 +17,10 @@ import { usePublicMountProbe } from "@/lib/publicMountProbe";
 let primaryNavPrefetchScheduled = false;
 
 const NAV_ROUTES = [
-  { to: "/how-it-works" as const, nameKey: "nav.howItWorks" },
   { to: "/features" as const, nameKey: "nav.features" },
   { to: "/pricing" as const, nameKey: "nav.pricing" },
+  { to: "/faq" as const, nameKey: "nav.faq" },
+  { to: "/contact" as const, nameKey: "nav.contact" },
 ] as const;
 
 export type NavigationVariant = "default" | "dark";
@@ -29,8 +31,8 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
   const { mobileMenuOpen, toggleMobileMenu, closeMobileMenu, backdropDismissible } =
     useMobileMenuState();
   const location = useLocation();
-  const { mode } = useTheme();
-  const isDark = mode === "dark" || variant === "dark";
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark" || variant === "dark";
 
   useEffect(() => {
     if (primaryNavPrefetchScheduled) return;
@@ -74,14 +76,13 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
   );
 
   const linkClass = cn(
-    "caretip-public-nav-link text-sm font-semibold text-neutral-800 transition-[color,background-color,opacity] duration-200",
-    "hover:text-primary active:opacity-85 rounded-lg px-2.5 py-1.5 hover:bg-neutral-900/[0.04]",
-    "dark:text-neutral-100 dark:hover:bg-white/[0.06]",
+    "caretip-public-nav-link text-sm font-semibold text-foreground transition-[color,background-color,opacity] duration-200",
+    "hover:text-primary active:opacity-85 rounded-lg px-2.5 py-1.5 hover:bg-muted/60",
   );
 
   const headerSurface = cn(
-    "caretip-public-nav border-b border-stone-200/88 dark:border-neutral-700/75",
-    "bg-white/88 backdrop-blur-md dark:bg-neutral-950/88 md:backdrop-blur-lg",
+    "caretip-public-nav border-b border-border/88",
+    "bg-background/88 backdrop-blur-md md:backdrop-blur-lg",
     "shadow-[0_6px_32px_-18px_rgba(15,23,42,0.12)] dark:shadow-[0_8px_32px_-16px_rgba(0,0,0,0.45)]",
   );
 
@@ -130,8 +131,12 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
                 </button>
               </div>
 
-              <div className="shrink-0 px-5 pb-4">
+              <div className="shrink-0 px-5 pb-4 space-y-3">
                 <LanguageSwitcher variant="drawer" />
+                <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
+                  <span className="text-sm font-medium text-foreground">{t("theme.appearance.title")}</span>
+                  <ThemeQuickToggle />
+                </div>
               </div>
 
               <div className="mx-5 shrink-0 border-t border-border/60" />
@@ -255,6 +260,7 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
             </div>
 
             <div className="relative z-[2] hidden items-center gap-3 lg:flex shrink-0">
+              <ThemeQuickToggle />
               <LanguageSwitcher />
               <PrefetchLink
                 to="/join"

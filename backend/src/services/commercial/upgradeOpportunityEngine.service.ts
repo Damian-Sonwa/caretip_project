@@ -92,17 +92,6 @@ export function computeUpgradeOpportunities(facts: BusinessFacts): UpgradeOpport
     });
   }
 
-  if (hits(utilization, "csv_export") >= 1) {
-    out.push({
-      id: "csv-export",
-      suggestedTier: "premium",
-      reasonCode: "csv_export",
-      evidence: { attempts: hits(utilization, "csv_export") },
-      sourceKpi: "csv_export",
-      calculationPath: "CSV export attempted on basic tier",
-    });
-  }
-
   if (hits(utilization, "employee_goals") >= 1) {
     out.push({
       id: "goals-active",

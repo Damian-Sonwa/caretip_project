@@ -13,9 +13,7 @@ import { cn } from "@/lib/utils";
 
 const cardClassName = cn(
   "caretip-landing-card caretip-landing-feature-card group relative flex h-full flex-col overflow-hidden rounded-2xl",
-  "border border-neutral-200/80 bg-white/95",
-  "px-4 pb-4 pt-4 sm:px-6 sm:pb-7 sm:pt-6",
-  "dark:border-neutral-700/85 dark:bg-neutral-900/95",
+  "border border-border/80 bg-card/95",
 );
 
 const iconWrapBaseClassName = cn(
@@ -106,13 +104,18 @@ export function LandingFeaturesSection() {
           </defs>
         </svg>
         <div className={landingUi.sectionIntro}>
-          <LandingReveal as="h2" className={landingUi.sectionTitle}>
+          {landingCopyVisible(t("landing.features.eyebrow")) ? (
+            <div className="flex w-full justify-center lg:justify-start">
+              <LandingSectionAccent variant="spark">{t("landing.features.eyebrow")}</LandingSectionAccent>
+            </div>
+          ) : null}
+          <h2 className={cn(landingUi.sectionTitle, "caretip-landing-scroll-reveal--visible")}>
             {t("landing.features.title")}
-          </LandingReveal>
+          </h2>
           {landingCopyVisible(sectionSubtitle) ? (
-            <LandingReveal as="p" delay={landingStaggerDelay(1)} className={landingUi.sectionSubtitle}>
+            <p className={cn(landingUi.sectionSubtitle, "caretip-landing-scroll-reveal--visible")}>
               {sectionSubtitle}
-            </LandingReveal>
+            </p>
           ) : null}
         </div>
 
@@ -146,11 +149,11 @@ export function LandingFeaturesSection() {
                     />
                   </div>
                   {landingCopyVisible(item.tag) ? (
-                    <h3 className={cn(landingType.cardTitle, "tracking-tight text-neutral-900 dark:text-neutral-50")}>
+                    <h3 className={cn(landingType.cardTitle, "tracking-tight text-foreground")}>
                       {item.tag}
                     </h3>
                   ) : null}
-                  <p className={cn(landingUi.cardFeatureBody, "flex-1 text-neutral-600 dark:text-neutral-400")}>
+                  <p className={cn(landingUi.cardFeatureBody, "flex-1")}>
                     {item.text}
                   </p>
                 </article>

@@ -3,6 +3,7 @@ import {
   DASHBOARD_SIDEBAR_BRAND_CLASS,
   DASHBOARD_SIDEBAR_NAV_CLASS,
 } from "@/app/components/CareTipLogo";
+import { DASHBOARD_SIDEBAR_SHELL_CLASS } from "@/lib/theme/dashboardSidebarUi";
 
 type SidebarSkeletonProps = {
   className?: string;
@@ -13,8 +14,8 @@ type SidebarSkeletonProps = {
 export function SidebarSkeleton({ className, variant = "desktop" }: SidebarSkeletonProps) {
   const shell =
     variant === "desktop"
-      ? "hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-border lg:bg-card/50 lg:backdrop-blur-xl"
-      : "flex w-64 flex-col border-r border-border bg-card text-foreground";
+      ? cn(DASHBOARD_SIDEBAR_SHELL_CLASS, "hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col")
+      : "flex w-64 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground";
 
   return (
     <aside className={cn(shell, className)} aria-label="Loading navigation" aria-busy="true">
@@ -33,7 +34,7 @@ export function SidebarSkeleton({ className, variant = "desktop" }: SidebarSkele
         </ul>
       </nav>
 
-      <div className="border-t border-border p-4">
+      <div className="border-t border-sidebar-border p-4">
         <div className="flex items-center gap-3 rounded-lg px-3 py-2.5">
           <div className="h-9 w-9 rounded-full bg-muted animate-pulse" />
           <div className="min-w-0 flex-1">

@@ -4,7 +4,7 @@ import { Link, Navigate } from "react-router";
 import { motion, useReducedMotion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
 import { CheckCircle, XCircle } from "lucide-react";
-import { CareIcon, createCareStatIcon } from "@/components/icons";
+import { createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
   fetchPlatformStats,
@@ -27,7 +27,6 @@ import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
 import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
 import { derivePlatformAdminDashboardStatus } from "../lib/dashboardStatus/deriveDashboardStatus";
 import { NetworkOverviewHero } from "./NetworkOverviewHero";
-import { PremiumPageHero } from "./premium/PremiumPageHero";
 import { TracingBeam } from "@/components/ui/tracing-beam";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { cn } from "@/lib/utils";
@@ -47,6 +46,10 @@ import {
 } from "@/components/ui/card";
 import { DashboardChartsIdleMount } from "./dashboard/DashboardChartsIdleMount";
 import { AdminDashboardAnalyticsChartsFallback } from "./AdminDashboardAnalyticsChartsFallback";
+import {
+  PlatformDashboardCollapsibleSection,
+  usePlatformDashboardSectionState,
+} from "./platform/PlatformDashboardCollapsibleSection";
 
 const AdminDashboardAnalyticsCharts = lazy(() =>
   import("./AdminDashboardAnalyticsCharts").then((mod) => ({
@@ -60,6 +63,12 @@ const PlatformCommercialIntelligenceSection = lazy(() =>
   })),
 );
 
+const PlatformSubscriptionMonitoringSection = lazy(() =>
+  import("./platform/PlatformSubscriptionMonitoringSection").then((mod) => ({
+    default: mod.PlatformSubscriptionMonitoringSection,
+  })),
+);
+
 function PlatformCommercialIntelligenceFallback() {
   const { t } = useTranslation();
   return (
@@ -70,6 +79,25 @@ function PlatformCommercialIntelligenceFallback() {
       </CardHeader>
       <CardContent className="py-6">
         <div className="h-20 animate-pulse rounded-xl bg-muted/60" aria-hidden />
+      </CardContent>
+    </Card>
+  );
+}
+
+function PlatformSubscriptionMonitoringFallback() {
+  const { t } = useTranslation();
+  return (
+    <Card className={cn(platformUi.contentCard, "mb-6")}>
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">{t("admin.subscriptions.title")}</CardTitle>
+        <CardDescription>{t("admin.subscriptions.desc")}</CardDescription>
+      </CardHeader>
+      <CardContent className="py-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" aria-hidden />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );
@@ -208,6 +236,7 @@ function mergeTipStatusForCharts(
  */
 export function AdminDashboard() {
   const { t } = useTranslation();
+  const { expandedSections, setSectionExpanded } = usePlatformDashboardSectionState();
   const { user, authHydrated, sessionValidated } = useAuth();
   const socketEligible = Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated);
   const [socketDeferredReady, setSocketDeferredReady] = useState(false);
@@ -613,8 +642,8 @@ export function AdminDashboard() {
   }
 
   return (
-    <main className="bg-background">
-      <div className={platformUi.page}>
+    <div className={cn(platformUi.page, "platform-dashboard-overview overflow-x-hidden")}>
+      <TracingBeam className={cn(platformUi.pageInner, "platform-dashboard-body pt-3 sm:pt-4")}>
         <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
           <DashboardStatusStrip
             placeholder={showStatLoading}
@@ -622,213 +651,278 @@ export function AdminDashboard() {
             className="justify-end"
           />
         </div>
-        <PremiumPageHero personality="overview" className="mb-10 max-lg:mb-8" autoHeight>
-          <NetworkOverviewHero health={health} embedded />
-        </PremiumPageHero>
+        <FixPrompt
+          id="platformDataLoad"
+          issueActive={Boolean(serviceIssue)}
+          dismissPersistence="session"
+          title={t("admin.loadErrorTitle")}
+          description={serviceIssue ?? undefined}
+          actionLabel={t("admin.retry")}
+          onAction={() => void loadDashboardData()}
+          className="mb-6"
+        />
 
-        <TracingBeam>
-          <FixPrompt
-            id="platformDataLoad"
-            issueActive={Boolean(serviceIssue)}
-            dismissPersistence="session"
-            title={t("admin.loadErrorTitle")}
-            description={serviceIssue ?? undefined}
-            actionLabel={t("admin.retry")}
-            onAction={() => void loadDashboardData()}
-            className="mb-6"
-          />
+        <PlatformDashboardCollapsibleSection
+          sectionId="platformOverview"
+          title={t("admin.sections.platformOverview.title")}
+          description={t("admin.sections.platformOverview.desc")}
+          expanded={expandedSections.platformOverview}
+          onExpandedChange={(open) => setSectionExpanded("platformOverview", open)}
+        >
+          <NetworkOverviewHero health={health} embedded variant="copy" />
           <div
             className={cn(
               platformUi.statGrid,
+              "mt-6",
               showStatLoading && "platform-admin-stat-grid--loading",
             )}
             aria-busy={showStatLoading || undefined}
           >
-          <AdminStatCard
-            title={t("admin.statTips")}
-            value={stats ? formatEur(stats.totalVolumeEur) : t("format.notAvailable")}
-            numericValue={stats?.totalVolumeEur}
-            countUpKind="eur"
-            loading={showStatLoading}
-            loadingVariant="currency"
-            change={
-              stats
-                ? t("admin.statTipsChange", {
-                    success: stats.successTransactionCount,
-                    total: stats.transactionCount,
-                    biz:
-                      typeof stats.businessesWithSuccessfulTips === "number"
-                        ? t("admin.statTipsBizPart", { count: stats.businessesWithSuccessfulTips })
-                        : "",
-                  })
-                : undefined
+            <AdminStatCard
+              title={t("admin.statTips")}
+              value={stats ? formatEur(stats.totalVolumeEur) : t("format.notAvailable")}
+              numericValue={stats?.totalVolumeEur}
+              countUpKind="eur"
+              loading={showStatLoading}
+              loadingVariant="currency"
+              change={
+                stats
+                  ? t("admin.statTipsChange", {
+                      success: stats.successTransactionCount,
+                      total: stats.transactionCount,
+                      biz:
+                        typeof stats.businessesWithSuccessfulTips === "number"
+                          ? t("admin.statTipsBizPart", { count: stats.businessesWithSuccessfulTips })
+                          : "",
+                    })
+                  : undefined
+              }
+              icon={createCareStatIcon("tips")}
+              delay={0.1}
+              beam
+              wideOnTablet
+            />
+            <AdminStatCard
+              title={t("admin.statVenues")}
+              value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
+              numericValue={stats?.businessesCount}
+              loading={showStatLoading}
+              change={t("admin.statVenuesChange")}
+              icon={createCareStatIcon("hospitalityVenue")}
+              delay={0.15}
+            />
+            <AdminStatCard
+              title={t("admin.statLocations")}
+              value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
+              numericValue={stats?.locationsCount}
+              loading={showStatLoading}
+              change={t("admin.statLocationsChange")}
+              icon={createCareStatIcon("locations")}
+              delay={0.18}
+            />
+            <AdminStatCard
+              title={t("admin.statStaff")}
+              value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
+              numericValue={stats?.employeesCount}
+              loading={showStatLoading}
+              change={t("admin.statStaffChange")}
+              icon={createCareStatIcon("team")}
+              delay={0.2}
+            />
+            <AdminStatCard
+              title={t("admin.statActiveUsers")}
+              value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
+              numericValue={stats?.activeUsersCount}
+              loading={showStatLoading}
+              change={t("admin.statActiveUsersChange")}
+              icon={createCareStatIcon("users")}
+              delay={0.25}
+            />
+          </div>
+        </PlatformDashboardCollapsibleSection>
+
+        <PlatformDashboardCollapsibleSection
+          sectionId="systemHealth"
+          title={t("admin.sections.systemHealth.title")}
+          description={t("admin.sections.systemHealth.desc")}
+          expanded={expandedSections.systemHealth}
+          onExpandedChange={(open) => setSectionExpanded("systemHealth", open)}
+        >
+          <NetworkOverviewHero health={health} embedded variant="health" />
+        </PlatformDashboardCollapsibleSection>
+
+        <PlatformDashboardCollapsibleSection
+          sectionId="subscriptionOverview"
+          title={t("admin.sections.subscriptionOverview.title")}
+          description={t("admin.sections.subscriptionOverview.desc")}
+          expanded={expandedSections.subscriptionOverview}
+          onExpandedChange={(open) => setSectionExpanded("subscriptionOverview", open)}
+          contentClassName="!py-4"
+        >
+          <DashboardChartsIdleMount
+            fallback={<PlatformSubscriptionMonitoringFallback />}
+            whenVisible
+            timeoutMs={200}
+            rootMargin="180px"
+          >
+            <Suspense fallback={<PlatformSubscriptionMonitoringFallback />}>
+              <PlatformSubscriptionMonitoringSection part="overview" embedded />
+            </Suspense>
+          </DashboardChartsIdleMount>
+        </PlatformDashboardCollapsibleSection>
+
+        <PlatformDashboardCollapsibleSection
+          sectionId="subscriptionActivity"
+          title={t("admin.sections.subscriptionActivity.title")}
+          description={t("admin.sections.subscriptionActivity.desc")}
+          expanded={expandedSections.subscriptionActivity}
+          onExpandedChange={(open) => setSectionExpanded("subscriptionActivity", open)}
+          contentClassName="!p-0 sm:!p-0"
+        >
+          <DashboardChartsIdleMount
+            fallback={
+              <div className="space-y-3 px-4 py-4" aria-busy="true">
+                {Array.from({ length: 4 }, (_, i) => (
+                  <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
+                ))}
+              </div>
             }
-            icon={createCareStatIcon("tips")}
-            delay={0.1}
-            beam
-            wideOnTablet
-          />
-          <AdminStatCard
-            title={t("admin.statVenues")}
-            value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
-            numericValue={stats?.businessesCount}
-            loading={showStatLoading}
-            change={t("admin.statVenuesChange")}
-            icon={createCareStatIcon("hospitalityVenue")}
-            delay={0.15}
-          />
-          <AdminStatCard
-            title={t("admin.statLocations")}
-            value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
-            numericValue={stats?.locationsCount}
-            loading={showStatLoading}
-            change={t("admin.statLocationsChange")}
-            icon={createCareStatIcon("locations")}
-            delay={0.18}
-          />
-          <AdminStatCard
-            title={t("admin.statStaff")}
-            value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
-            numericValue={stats?.employeesCount}
-            loading={showStatLoading}
-            change={t("admin.statStaffChange")}
-            icon={createCareStatIcon("team")}
-            delay={0.2}
-          />
-          <AdminStatCard
-            title={t("admin.statActiveUsers")}
-            value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
-            numericValue={stats?.activeUsersCount}
-            loading={showStatLoading}
-            change={t("admin.statActiveUsersChange")}
-            icon={createCareStatIcon("users")}
-            delay={0.25}
-          />
-        </div>
+            whenVisible
+            timeoutMs={200}
+            rootMargin="200px"
+          >
+            <Suspense
+              fallback={
+                <div className="space-y-3 px-4 py-4" aria-busy="true">
+                  {Array.from({ length: 4 }, (_, i) => (
+                    <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
+                  ))}
+                </div>
+              }
+            >
+              <PlatformSubscriptionMonitoringSection part="activity" embedded />
+            </Suspense>
+          </DashboardChartsIdleMount>
+        </PlatformDashboardCollapsibleSection>
 
         {subscriptionTotal > 0 ? (
-          <Card className={cn(platformUi.contentCard, "mb-6")}>
-            <CardHeader>
-              <CardTitle className="text-base">{t("admin.subscriptionBreakdown.title")}</CardTitle>
-              <CardDescription>{t("admin.subscriptionBreakdown.desc")}</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-4 sm:grid-cols-3">
-                {(["basic", "premium", "enterprise"] as const).map((tier) => {
-                  const count = subscriptionMix[tier];
-                  const pct = subscriptionTotal > 0 ? Math.round((count / subscriptionTotal) * 100) : 0;
-                  return (
-                    <div key={tier} className="rounded-xl border border-border/60 bg-muted/20 p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                        {t(`admin.subscriptionBreakdown.${tier}`)}
-                      </p>
-                      <p className="mt-1 text-2xl font-semibold tabular-nums">{count}</p>
-                      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                      </div>
-                      <p className="mt-1 text-xs text-muted-foreground">{pct}%</p>
+          <PlatformDashboardCollapsibleSection
+            sectionId="businessOverview"
+            title={t("admin.sections.businessOverview.title")}
+            description={t("admin.sections.businessOverview.desc")}
+            expanded={expandedSections.businessOverview}
+            onExpandedChange={(open) => setSectionExpanded("businessOverview", open)}
+          >
+            <div className="grid gap-4 sm:grid-cols-3">
+              {(["basic", "premium", "enterprise"] as const).map((tier) => {
+                const count = subscriptionMix[tier];
+                const pct = subscriptionTotal > 0 ? Math.round((count / subscriptionTotal) * 100) : 0;
+                return (
+                  <div key={tier} className="rounded-xl border border-border/60 bg-muted/20 p-4">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                      {t(`admin.subscriptionBreakdown.${tier}`)}
+                    </p>
+                    <p className="mt-1 text-2xl font-semibold tabular-nums">{count}</p>
+                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
+                      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
                     </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
+                    <p className="mt-1 text-xs text-muted-foreground">{pct}%</p>
+                  </div>
+                );
+              })}
+            </div>
+          </PlatformDashboardCollapsibleSection>
         ) : null}
 
-        <DashboardChartsIdleMount
-          fallback={<PlatformCommercialIntelligenceFallback />}
-          whenVisible
-          timeoutMs={240}
-          rootMargin="200px"
+        <PlatformDashboardCollapsibleSection
+          sectionId="revenueAnalytics"
+          title={t("admin.sections.revenueAnalytics.title")}
+          description={t("admin.sections.revenueAnalytics.desc")}
+          expanded={expandedSections.revenueAnalytics}
+          onExpandedChange={(open) => setSectionExpanded("revenueAnalytics", open)}
+          contentClassName="!px-3 !py-3 sm:!px-4 sm:!py-4"
         >
-          <Suspense fallback={<PlatformCommercialIntelligenceFallback />}>
-            <PlatformCommercialIntelligenceSection />
-          </Suspense>
-        </DashboardChartsIdleMount>
-
-        {/* Analytics charts — Recharts lazy-loaded when section nears viewport */}
-        <DashboardChartsIdleMount
-          fallback={<AdminDashboardAnalyticsChartsFallback />}
-          whenVisible
-          timeoutMs={200}
-          rootMargin="240px"
-          onReady={handleAnalyticsSectionReady}
-        >
-          <AdminDashboardAnalyticsCharts
-            showChartSkeletons={showChartSkeletons}
-            chartAnalytics={chartAnalytics}
-            chartTipStatus={chartTipStatus}
-            chartsLookEmpty={chartsLookEmpty}
-            analyticsError={analyticsError}
-            analyticsMeta={analyticsMeta}
-            analyticsTimezone={analyticsTimezone}
-            analyticsSyncing={analyticsSyncing}
-            analyticsUpdatedAt={analyticsUpdatedAt}
-            onTimezoneChange={(v) => {
-              runWithViewportScrollPreserved(() => {
-                setAnalyticsTimezone(v);
-                analyticsTimezoneRef.current = v;
-                try {
-                  localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                } catch {
-                  // ignore
-                }
+          <DashboardChartsIdleMount
+            fallback={<AdminDashboardAnalyticsChartsFallback />}
+            whenVisible
+            timeoutMs={200}
+            rootMargin="240px"
+            onReady={handleAnalyticsSectionReady}
+          >
+            <AdminDashboardAnalyticsCharts
+              hideHeader
+              showChartSkeletons={showChartSkeletons}
+              chartAnalytics={chartAnalytics}
+              chartTipStatus={chartTipStatus}
+              chartsLookEmpty={chartsLookEmpty}
+              analyticsError={analyticsError}
+              analyticsMeta={analyticsMeta}
+              analyticsTimezone={analyticsTimezone}
+              analyticsSyncing={analyticsSyncing}
+              analyticsUpdatedAt={analyticsUpdatedAt}
+              onTimezoneChange={(v) => {
+                runWithViewportScrollPreserved(() => {
+                  setAnalyticsTimezone(v);
+                  analyticsTimezoneRef.current = v;
+                  try {
+                    localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
+                  } catch {
+                    // ignore
+                  }
+                  const nextGen = ++analyticsLoadGenRef.current;
+                  void loadAnalytics(nextGen, { bustCache: true });
+                });
+              }}
+              onRetryAnalytics={() => {
                 const nextGen = ++analyticsLoadGenRef.current;
                 void loadAnalytics(nextGen, { bustCache: true });
-              });
-            }}
-            onRetryAnalytics={() => {
-              const nextGen = ++analyticsLoadGenRef.current;
-              void loadAnalytics(nextGen, { bustCache: true });
-            }}
-          />
-        </DashboardChartsIdleMount>
+              }}
+            />
+          </DashboardChartsIdleMount>
+        </PlatformDashboardCollapsibleSection>
 
-        <DashboardChartsIdleMount
-          fallback={
-            <div className="space-y-3 py-4" aria-busy="true">
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
-              ))}
-            </div>
-          }
-          whenVisible
-          timeoutMs={280}
-          rootMargin="320px"
+        <PlatformDashboardCollapsibleSection
+          sectionId="commercialIntelligence"
+          title={t("admin.sections.commercialIntelligence.title")}
+          description={t("admin.sections.commercialIntelligence.desc")}
+          expanded={expandedSections.commercialIntelligence}
+          onExpandedChange={(open) => setSectionExpanded("commercialIntelligence", open)}
         >
-        <motion.div
-          {...dashboardBlockMotion}
-          transition={{ ...dashboardBlockMotion.transition, delay: 0.12 }}
-          className={platformUi.businessesPanel}
-        >
-          <div className={platformUi.businessesPanelHeader}>
-            <div className="flex min-w-0 flex-1 items-center gap-2">
-              <CareIcon name="hospitalityVenue" size="md" className="text-foreground" />
-              <div className="min-w-0">
-                <h3 className="text-base font-semibold leading-snug text-foreground sm:text-lg">
-                  {t("admin.verificationTeaser.title")}
-                </h3>
-                <p className="mt-0.5 text-xs font-medium text-muted-foreground">
-                  {t("admin.verificationTeaser.subtitle", { limit: VERIFICATION_TEASER_LIMIT })}
-                </p>
-                {pendingVerificationCount > 0 ? (
-                  <p className="mt-1 text-xs font-medium text-amber-700">
-                    {t("admin.verificationTeaser.pendingCount", { count: pendingVerificationCount })}
-                  </p>
-                ) : null}
-              </div>
-            </div>
+          <DashboardChartsIdleMount
+            fallback={<PlatformCommercialIntelligenceFallback />}
+            whenVisible
+            timeoutMs={240}
+            rootMargin="200px"
+          >
+            <Suspense fallback={<PlatformCommercialIntelligenceFallback />}>
+              <PlatformCommercialIntelligenceSection embedded />
+            </Suspense>
+          </DashboardChartsIdleMount>
+        </PlatformDashboardCollapsibleSection>
 
+        <PlatformDashboardCollapsibleSection
+          sectionId="verificationQueue"
+          title={t("admin.sections.verificationQueue.title")}
+          description={t("admin.sections.verificationQueue.desc", { limit: VERIFICATION_TEASER_LIMIT })}
+          expanded={expandedSections.verificationQueue}
+          onExpandedChange={(open) => setSectionExpanded("verificationQueue", open)}
+          headerAction={
             <Link
               to="/platform-admin/businesses"
               className="shrink-0 text-xs font-medium text-foreground underline-offset-4 hover:underline sm:text-sm"
             >
               {t("admin.verificationTeaser.viewAll")}
             </Link>
-          </div>
-
+          }
+          contentClassName="!p-0 sm:!p-0"
+        >
+          {pendingVerificationCount > 0 ? (
+            <p className="border-b border-border px-4 py-2 text-xs font-medium text-amber-700 sm:px-5">
+              {t("admin.verificationTeaser.pendingCount", { count: pendingVerificationCount })}
+            </p>
+          ) : null}
           {businessesInitialLoading ? (
-            <div className="space-y-3 py-4" aria-busy="true">
+            <div className="space-y-3 px-4 py-4" aria-busy="true">
               {Array.from({ length: 4 }, (_, i) => (
                 <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
               ))}
@@ -911,10 +1005,8 @@ export function AdminDashboard() {
               </div>
             </>
           )}
-        </motion.div>
-        </DashboardChartsIdleMount>
-        </TracingBeam>
-      </div>
-    </main>
+        </PlatformDashboardCollapsibleSection>
+      </TracingBeam>
+    </div>
   );
 }

@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { publicPageUi } from "@/components/public/publicPageUi";
 import { FeatureProductVisual } from "@/components/public/features/FeatureProductVisual";
 import type { FeatureVisualVariant } from "@/components/public/features/featuresPageConfig";
 import { usePublicScrollReveal } from "@/lib/usePublicScrollReveal";
@@ -31,11 +32,10 @@ export function FeatureShowcaseCard({
     <article
       ref={featured ? undefined : reveal.ref}
       className={cn(
-        "group relative flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200/80 bg-white/95 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_14px_40px_-18px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color,transform] duration-300",
+        "caretip-feature-showcase-card group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border/80 bg-card/95 shadow-[0_2px_8px_rgba(15,23,42,0.04),0_14px_40px_-18px_rgba(15,23,42,0.12)] transition-[box-shadow,border-color,transform] duration-300",
         !brandAccent &&
-          "hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(233,120,28,0.18)] dark:border-neutral-800 dark:bg-neutral-950/90 dark:hover:border-primary/25",
+          "hover:-translate-y-0.5 hover:border-primary/20 hover:shadow-[0_8px_32px_-12px_rgba(233,120,28,0.18)]",
         featured && "lg:min-h-[22rem]",
-        "caretip-feature-showcase-card",
         brandAccent && "caretip-feature-showcase-card--brand",
         !featured && reveal.className,
       )}
@@ -50,18 +50,14 @@ export function FeatureShowcaseCard({
 
       <div className={cn("flex flex-1 flex-col p-4 sm:p-5", featured && "sm:p-6")}>
         <div className="mb-3 flex flex-wrap items-center gap-2">
-          <span
-            className={cn(
-              "caretip-feature-showcase-card__tag inline-flex items-center gap-1.5 rounded-full border border-neutral-200/90 bg-[#fafaf8] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400",
-            )}
-          >
+          <span className="caretip-feature-showcase-card__tag inline-flex items-center gap-1.5 rounded-full border border-border/90 bg-muted/50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-muted-foreground">
             <Icon className="h-3 w-3 text-primary transition-transform duration-300 group-hover:scale-110" aria-hidden />
             {tag}
           </span>
         </div>
         <h2
           className={cn(
-            "caretip-feature-showcase-card__title font-semibold tracking-[-0.02em] text-neutral-950 dark:text-neutral-50",
+            "caretip-feature-showcase-card__title font-semibold tracking-[-0.02em] text-foreground",
             featured ? "text-xl sm:text-2xl" : "text-lg",
           )}
         >
@@ -69,7 +65,7 @@ export function FeatureShowcaseCard({
         </h2>
         <p
           className={cn(
-            "caretip-feature-showcase-card__desc mt-2 leading-relaxed text-neutral-700 dark:text-neutral-300",
+            "caretip-feature-showcase-card__desc mt-2 leading-relaxed text-muted-foreground",
             featured ? "text-[0.9375rem] sm:text-base" : "text-sm",
           )}
         >

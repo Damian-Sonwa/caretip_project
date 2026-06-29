@@ -1,0 +1,528 @@
+/**
+ * CareTip authenticated dashboard workspace — information-first B2B SaaS.
+ * Replaces decorative rules from business-dashboard-premium-refresh.css
+ * and business-dashboard-mobile-redesign.css.
+ * Scoped to `.caretip-dashboard-shell`.
+ */
+
+.caretip-dashboard-shell {
+  --dash-surface: hsl(var(--background));
+  --dash-card-radius: 0.5rem;
+  --dash-card-border: hsl(var(--border));
+  --dash-card-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --dash-section-gap: 1.5rem;
+  --dash-metric-min-h: 0;
+  background-color: var(--dash-surface) !important;
+  background-image: none !important;
+}
+
+.caretip-dashboard-shell.business-dashboard,
+.caretip-dashboard-shell.employee-dashboard,
+.caretip-dashboard-shell.platform-dashboard {
+  background-color: hsl(var(--background)) !important;
+  background-image: none !important;
+}
+
+/* —— Flat page / module headers —— */
+.caretip-dashboard-shell .dashboard-workspace-page-header,
+.caretip-dashboard-shell .premium-page-hero {
+  position: relative;
+  min-height: 0 !important;
+  margin-bottom: var(--dash-section-gap);
+  padding: 0 !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+.caretip-dashboard-shell .premium-page-hero::before,
+.caretip-dashboard-shell .premium-page-hero::after {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .premium-page-hero__content {
+  position: static;
+  min-height: 0 !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border-radius: 0 !important;
+  color: inherit !important;
+}
+
+.caretip-dashboard-shell .dashboard-workspace-module-header,
+.caretip-dashboard-shell .business-module-workspace-header {
+  position: relative;
+  margin-bottom: var(--dash-section-gap);
+  padding: 0 0 1.25rem !important;
+  border: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
+.caretip-dashboard-shell .business-module-workspace-header .caretip-premium-backdrop,
+.caretip-dashboard-shell .premium-workspace-header .caretip-premium-backdrop {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .premium-workspace-header__title,
+.caretip-dashboard-shell .dashboard-workspace-module-header h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground)) !important;
+}
+
+.caretip-dashboard-shell .premium-workspace-header__purpose,
+.caretip-dashboard-shell .premium-workspace-header__section-label {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.caretip-dashboard-shell .premium-workspace-header__icon {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .platform-admin-hero {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell .platform-admin-hero__atmosphere {
+  display: none !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard
+  .premium-page-hero[data-hero-personality="overview"]:has(.platform-admin-hero) {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell .platform-admin-hero h1,
+.caretip-dashboard-shell .platform-admin-hero .platform-admin-page-title {
+  color: hsl(var(--foreground)) !important;
+  font-size: clamp(1.75rem, 4.2vw, 2.35rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+}
+
+.caretip-dashboard-shell .platform-admin-hero p {
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell .platform-admin-hero [class*="uppercase"] {
+  color: hsl(var(--muted-foreground));
+}
+
+/* —— Overview hero content (no dark band) —— */
+.caretip-dashboard-shell .business-dashboard-hero .business-hero-title,
+.caretip-dashboard-shell .business-dashboard-hero .premium-page-hero__content :is(h1, h2, h3),
+.caretip-dashboard-shell .employee-dashboard-hero .premium-page-hero__content :is(h1, h2, h3) {
+  color: hsl(var(--foreground)) !important;
+}
+
+.caretip-dashboard-shell .business-dashboard-hero .business-hero-description,
+.caretip-dashboard-shell .employee-dashboard-hero [class*="text-muted-foreground"] {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.caretip-dashboard-shell .business-dashboard-hero .business-hero-badge {
+  border-color: hsl(var(--primary) / 0.2) !important;
+  background: hsl(var(--primary) / 0.06) !important;
+  color: hsl(var(--foreground)) !important;
+  backdrop-filter: none !important;
+}
+
+.caretip-dashboard-shell .business-hero-illustration-glow,
+.caretip-dashboard-shell .business-dashboard-mobile-hero__glow {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .business-hero-account-stats {
+  border-top-color: hsl(var(--border)) !important;
+}
+
+.caretip-dashboard-shell .business-hero-account-stats dt {
+  color: hsl(var(--muted-foreground)) !important;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.caretip-dashboard-shell .business-hero-account-stats dd,
+.caretip-dashboard-shell .business-hero-account-stats dd span {
+  color: hsl(var(--foreground)) !important;
+}
+
+.caretip-dashboard-shell .business-hero-account-stats > div {
+  background: hsl(var(--muted) / 0.35) !important;
+  border-color: hsl(var(--border)) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* —— Mobile overview hero (flat) —— */
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell .business-dashboard-mobile-hero {
+    padding: 0 1rem 1rem;
+    color: inherit;
+    background: transparent !important;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-mobile-hero__badge {
+    border-color: hsl(var(--primary) / 0.2);
+    background: hsl(var(--primary) / 0.06);
+    color: hsl(var(--foreground));
+    backdrop-filter: none;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-mobile-hero__title {
+    color: hsl(var(--foreground));
+  }
+
+  .caretip-dashboard-shell .business-dashboard-mobile-hero__description {
+    color: hsl(var(--muted-foreground));
+  }
+
+  .caretip-dashboard-shell .business-dashboard-mobile-hero__btn--secondary {
+    border-color: hsl(var(--border)) !important;
+    background: hsl(var(--background)) !important;
+    color: hsl(var(--foreground)) !important;
+    backdrop-filter: none !important;
+  }
+
+  .caretip-dashboard-shell .business-hero-pulse-card {
+    background: hsl(var(--card)) !important;
+    border: 1px solid hsl(var(--border)) !important;
+    box-shadow: var(--dash-card-shadow) !important;
+    backdrop-filter: none !important;
+  }
+
+  .caretip-dashboard-shell .business-hero-pulse-card__value {
+    font-size: 1.125rem !important;
+  }
+}
+
+/* —— Cards —— */
+.caretip-dashboard-shell .business-card,
+.caretip-dashboard-shell .employee-card,
+.caretip-dashboard-shell .dashboard-surface-panel,
+.caretip-dashboard-shell .dashboard-filter-panel,
+.caretip-dashboard-shell .dashboard-settings-panel,
+.caretip-dashboard-shell .dashboard-table-panel {
+  border-radius: var(--dash-card-radius) !important;
+  border-color: var(--dash-card-border) !important;
+  background: hsl(var(--card)) !important;
+  box-shadow: var(--dash-card-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+.caretip-dashboard-shell .business-card:hover,
+.caretip-dashboard-shell .employee-card:hover {
+  transform: none !important;
+  box-shadow: var(--dash-card-shadow) !important;
+}
+
+/* —— Compact KPI cards —— */
+.caretip-dashboard-shell .dashboard-metric-stat-card {
+  grid-template-rows: auto auto auto;
+  gap: 0.25rem;
+  min-height: var(--dash-metric-min-h) !important;
+  transition: border-color 0.15s ease;
+}
+
+.caretip-dashboard-shell .business-stat-card.business-metric-stat-card-shell::before {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .business-stat-card.business-metric-stat-card-shell,
+.caretip-dashboard-shell .employee-stat-card,
+.caretip-dashboard-shell .platform-admin-stat-card {
+  background: hsl(var(--card)) !important;
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell .business-stat-card .dashboard-metric-stat-card__icon,
+.caretip-dashboard-shell .employee-stat-card .dashboard-metric-stat-card__icon,
+.caretip-dashboard-shell .platform-admin-stat-card .dashboard-metric-stat-card__icon {
+  width: 1.25rem !important;
+  height: 1.25rem !important;
+  min-width: 1.25rem !important;
+  min-height: 1.25rem !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__icon svg {
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  min-height: 1rem !important;
+  max-width: 1rem !important;
+  max-height: 1rem !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__value {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  min-height: 0 !important;
+}
+
+.caretip-dashboard-shell .dashboard-metric-stat-card__change {
+  font-size: 0.75rem !important;
+}
+
+.caretip-dashboard-shell .business-stat-card--featured,
+.caretip-dashboard-shell .employee-stat-card--featured,
+.caretip-dashboard-shell .dashboard-metric-stat-card--featured {
+  border-color: hsl(var(--primary) / 0.3) !important;
+  box-shadow: none !important;
+  background: hsl(var(--card)) !important;
+}
+
+.caretip-dashboard-shell .business-stat-card:hover {
+  transform: none !important;
+}
+
+/* —— Dashboard buttons (compact default; tiles exempt) —— */
+.caretip-dashboard-shell .dashboard-workspace-btn:not(.dashboard-action-tile) {
+  height: 2.25rem;
+  min-height: 2.25rem;
+  padding-inline: 1rem;
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+}
+
+.caretip-dashboard-shell .dashboard-action-tile {
+  height: auto !important;
+  min-height: 5.75rem;
+  padding: 0.875rem 0.75rem;
+  white-space: normal !important;
+  flex-direction: column;
+  gap: 0.5rem;
+  line-height: 1.35;
+}
+
+.caretip-dashboard-shell .dashboard-action-tile svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.caretip-dashboard-shell .dashboard-action-tile span {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+
+.caretip-dashboard-shell .caretip-btn-primary:hover,
+.caretip-dashboard-shell .caretip-btn-secondary:hover {
+  transform: none !important;
+}
+
+/* —— Sidebar active state (no glow) —— */
+.caretip-dashboard-shell .business-dash-nav-link--active {
+  box-shadow: none !important;
+  background: hsl(var(--primary) / 0.08) !important;
+}
+
+/* —— Billing subscription summary (flat) —— */
+.caretip-dashboard-shell .billing-subscription-summary {
+  border: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 0 1.25rem !important;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__eyebrow {
+  display: none;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__plan {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__meta {
+  display: none;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__inline-meta {
+  margin-top: 0.375rem;
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__actions {
+  margin-top: 0.875rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* —— Section rhythm —— */
+.caretip-dashboard-shell .business-dashboard-section,
+.caretip-dashboard-shell .employee-dashboard-section {
+  gap: var(--dash-section-gap) !important;
+}
+
+/* —— Neutralize leftover premium dashboard cards —— */
+.caretip-dashboard-shell .premium-summary-card,
+.caretip-dashboard-shell .premium-live-card,
+.caretip-dashboard-shell .premium-plan-card,
+.caretip-dashboard-shell .premium-empty-state {
+  border-radius: var(--dash-card-radius) !important;
+  border: 1px solid hsl(var(--border)) !important;
+  background: hsl(var(--card)) !important;
+  box-shadow: var(--dash-card-shadow) !important;
+  color: inherit !important;
+}
+
+.caretip-dashboard-shell .premium-summary-card .caretip-premium-backdrop,
+.caretip-dashboard-shell .premium-live-card .caretip-premium-backdrop,
+.caretip-dashboard-shell .premium-empty-state .caretip-premium-backdrop,
+.caretip-dashboard-shell .premium-live-card__accent {
+  display: none !important;
+}
+
+.caretip-dashboard-shell .premium-summary-card__inner,
+.caretip-dashboard-shell .premium-summary-card__metric {
+  color: inherit !important;
+}
+
+.caretip-dashboard-shell .premium-summary-card__metric-value,
+.caretip-dashboard-shell .premium-live-card__header h3 {
+  color: hsl(var(--foreground)) !important;
+}
+
+/* —— Mobile QA: overflow, billing, tabs —— */
+.caretip-dashboard-shell {
+  overflow-x: clip;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__inline-meta {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+.caretip-dashboard-shell .billing-subscription-summary__actions {
+  flex-wrap: wrap;
+}
+
+.caretip-dashboard-shell .dashboard-workspace-btn {
+  max-width: 100%;
+  white-space: normal;
+  text-wrap: balance;
+}
+
+.caretip-dashboard-shell .business-module-sub-nav {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.caretip-dashboard-shell .business-module-sub-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.caretip-dashboard-shell .caretip-mobile-table-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell .dashboard-metric-stat-card__label-text {
+    font-size: 0.6875rem;
+    line-height: 1.35;
+  }
+
+  .caretip-dashboard-shell .dashboard-metric-stat-card__value {
+    font-size: 1.125rem !important;
+  }
+
+  .caretip-dashboard-shell .business-hero-cta-row {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .caretip-dashboard-shell .business-hero-cta-row > :is(a, button) {
+    width: 100%;
+    max-width: 100%;
+  }
+}
+
+/* —— Billing plan management (workspace cards) —— */
+.caretip-dashboard-shell .billing-workspace-plans {
+  min-width: 0;
+}
+
+.caretip-dashboard-shell .billing-workspace-plan-card {
+  min-width: 0;
+}
+
+@media (max-width: 359px) {
+  .caretip-dashboard-shell .billing-workspace-plan-card {
+    padding: 1rem;
+  }
+
+  .caretip-dashboard-shell .billing-workspace-plan-card .dashboard-workspace-btn {
+    min-height: 2.5rem;
+    padding-inline: 0.75rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* —— Platform admin collapsible dashboard sections —— */
+@keyframes platform-dashboard-collapsible-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes platform-dashboard-collapsible-up {
+  from {
+    height: var(--radix-collapsible-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-dashboard-section__content[data-state="open"] {
+  animation: platform-dashboard-collapsible-down 220ms ease-out;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-dashboard-section__content[data-state="closed"] {
+  animation: platform-dashboard-collapsible-up 220ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caretip-dashboard-shell.platform-dashboard .platform-dashboard-section__content[data-state="open"],
+  .caretip-dashboard-shell.platform-dashboard .platform-dashboard-section__content[data-state="closed"] {
+    animation: none;
+  }
+}

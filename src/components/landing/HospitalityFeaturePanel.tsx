@@ -75,9 +75,7 @@ export function HospitalityFeaturePanel({ features, className }: HospitalityFeat
                     className={cn(
                       caretipType.featureCopySemibold,
                       "caretip-hospitality-feature-heading m-0 tracking-tight transition-[color,opacity] duration-300 ease-out",
-                      isActive
-                        ? "text-neutral-900 dark:text-neutral-50"
-                        : "text-neutral-800 dark:text-neutral-100",
+                      isActive ? "text-foreground" : "text-foreground/90",
                     )}
                   >
                     {feature.title}

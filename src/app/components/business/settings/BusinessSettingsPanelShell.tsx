@@ -1,31 +1,47 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 
 export function BusinessSettingsPanelShell({
   title,
   description,
   children,
   className,
+  /** Page already provides title — render form only. */
+  embedded = false,
+  /** Subgroup card with optional title (e.g. password, 2FA). */
+  grouped = false,
 }: {
   title?: string;
   description?: string;
   children: ReactNode;
   className?: string;
+  embedded?: boolean;
+  grouped?: boolean;
 }) {
+  if (embedded) {
+    return <div className={cn("space-y-5", className)}>{children}</div>;
+  }
+
   const showHeader = Boolean(title || description);
 
   return (
     <section
-      className={cn(businessUi.cardStatic, businessUi.settingsPanel, "p-5 sm:p-6", className)}
+      className={cn(
+        grouped ? businessUi.cardStatic : dashboardWorkspaceUi.card,
+        businessUi.settingsPanel,
+        grouped ? "p-5 sm:p-6" : dashboardWorkspaceUi.cardPad,
+        className,
+      )}
     >
       {showHeader ? (
-        <header className="mb-6 border-b border-neutral-100/90 pb-5">
-          {title ? (
-            <h2 className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">{title}</h2>
-          ) : null}
+        <header className={cn(showHeader && "mb-5", grouped && "border-b border-border pb-4")}>
+          {title ? <h2 className={dashboardWorkspaceUi.sectionTitle}>{title}</h2> : null}
           {description ? (
-            <p className={cn(title ? "mt-1.5" : "", "max-w-2xl", businessUi.cardDesc)}>{description}</p>
+            <p className={cn(title ? "mt-1.5" : "", "max-w-2xl", dashboardWorkspaceUi.helperText)}>
+              {description}
+            </p>
           ) : null}
         </header>
       ) : null}

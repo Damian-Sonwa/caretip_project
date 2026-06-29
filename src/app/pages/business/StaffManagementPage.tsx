@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
 import { useState, useEffect, useCallback, useRef, type ComponentProps, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
@@ -30,6 +31,7 @@ import {
   updateEmployee,
   updateEmployeeStatus,
   deleteEmployee,
+  clearBusinessStatsClientCache,
   type LocationDTO,
   type TableDTO,
 } from "../../lib/api";
@@ -48,6 +50,7 @@ import { logClientError } from "../../lib/clientLog";
 import {
   getPageSessionCache,
   setPageSessionCache,
+  invalidatePageSessionCache,
   PAGE_CACHE_TTL_MEDIUM_MS,
 } from "../../lib/pageSessionCache";
 import { Button } from "@/components/ui/button";
@@ -215,16 +218,28 @@ export function StaffManagementPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<StaffRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [showDeactivateModal, setShowDeactivateModal] = useState(false);
+  const [deactivateTarget, setDeactivateTarget] = useState<StaffRow | null>(null);
+  const [deactivateAcknowledged, setDeactivateAcknowledged] = useState(false);
+  const [deactivating, setDeactivating] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [businessPublicSlug, setBusinessPublicSlug] = useState<string | null>(null);
   const [qrBranding, setQrBranding] = useState<QrBrandingOptions | null>(null);
   const employeesRef = useRef(employees);
   employeesRef.current = employees;
+  const togglingEmployeeIdsRef = useRef<Set<string>>(new Set());
+
+  const invalidateStaffRosterCaches = useCallback(() => {
+    clearBusinessStatsClientCache();
+    if (user?.businessId) {
+      invalidatePageSessionCache(`business:staff:${user.businessId}`);
+    }
+  }, [user?.businessId]);
 
   const canUseQr = canUseProductionQr(user?.status, Boolean(user?.impersonation));
 
-  const fetchEmployees = useCallback(async (opts?: { quiet?: boolean }) => {
+  const fetchEmployees = useCallback(async (opts?: { quiet?: boolean; revalidate?: boolean }) => {
     const quiet = opts?.quiet === true;
     if (!authHydrated || !sessionValidated) {
       // Keep strict loading gate until auth is resolved to prevent UI flash/flicker.
@@ -253,7 +268,13 @@ export function StaffManagementPage() {
     }
     try {
       const statsScope = advancedAnalyticsEnabled ? "analytics" : "roster";
-      const data = await getBusinessStats("all", { scope: statsScope });
+      if (opts?.revalidate) {
+        invalidateStaffRosterCaches();
+      }
+      const data = await getBusinessStats("all", {
+        scope: statsScope,
+        revalidate: opts?.revalidate === true,
+      });
       const empList = data.employees ?? [];
       const mapped: StaffRow[] = empList.map((e) => ({
         id: e.id,
@@ -267,7 +288,7 @@ export function StaffManagementPage() {
         phone: e.phone ?? "",
         joinedDate: "",
         growth: "",
-        isActive: e.isActive ?? true,
+        isActive: e.isActive ?? false,
         activationStatus: e.activationStatus,
         emailVerified: e.emailVerified,
         passwordIsSet: e.passwordIsSet,
@@ -290,15 +311,15 @@ export function StaffManagementPage() {
     } finally {
       if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [user?.businessId, authHydrated, sessionValidated, advancedAnalyticsEnabled]);
+  }, [user?.businessId, authHydrated, sessionValidated, advancedAnalyticsEnabled, invalidateStaffRosterCaches]);
 
   const { socket, connected } = useSocket(isBusiness && authHydrated && sessionValidated);
 
-  useRealtimeFallback(connected, () => void fetchEmployees({ quiet: true }));
+  useRealtimeFallback(connected, () => void fetchEmployees({ quiet: true, revalidate: true }));
 
   useEffect(() => {
     if (!socket || !isBusiness) return;
-    const sync = () => void fetchEmployees({ quiet: true });
+    const sync = () => void fetchEmployees({ quiet: true, revalidate: true });
     socket.on("business_data_updated", sync);
     socket.on("verification_updated", sync);
     return () => {
@@ -510,7 +531,8 @@ export function StaffManagementPage() {
         tableIds: editForm.tableIds,
       });
       setShowEditModal(false);
-      await fetchEmployees();
+      invalidateStaffRosterCaches();
+      await fetchEmployees({ revalidate: true });
       toastOk(t("business.staffPage.toastStaffUpdated"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
@@ -532,7 +554,8 @@ export function StaffManagementPage() {
       await deleteEmployee(deleteTarget.id);
       setShowDeleteModal(false);
       setDeleteTarget(null);
-      await fetchEmployees();
+      invalidateStaffRosterCaches();
+      await fetchEmployees({ revalidate: true });
       toastOk(t("business.staffPage.toastStaffRemoved"));
     } catch (err) {
       logClientError("StaffManagementPage", err);
@@ -542,17 +565,28 @@ export function StaffManagementPage() {
     }
   };
 
-  const handleToggleActive = async (employee: StaffRow) => {
-    const next = !employee.isActive;
+  const openDeactivateConfirm = (employee: StaffRow) => {
+    setDeactivateTarget(employee);
+    setDeactivateAcknowledged(false);
+    setShowDeactivateModal(true);
+  };
+
+  const closeDeactivateConfirm = () => {
+    setShowDeactivateModal(false);
+    setDeactivateTarget(null);
+    setDeactivateAcknowledged(false);
+  };
+
+  const applyEmployeeActiveState = async (employee: StaffRow, next: boolean) => {
+    if (togglingEmployeeIdsRef.current.has(employee.id)) return;
+    togglingEmployeeIdsRef.current.add(employee.id);
+    const previousActive = employee.isActive;
     try {
-      // Optimistic UI flip (will be reconciled from backend response/refetch)
       setEmployees((prev) =>
-        prev.map((e) => (e.id === employee.id ? { ...e, isActive: next } : e))
+        prev.map((e) => (e.id === employee.id ? { ...e, isActive: next } : e)),
       );
 
       const updated = await updateEmployeeStatus(employee.id, next);
-
-      // Update from backend response (source of truth)
       setEmployees((prev) =>
         prev.map((e) =>
           e.id === employee.id
@@ -560,21 +594,40 @@ export function StaffManagementPage() {
                 ...e,
                 isActive: updated.isActive,
               }
-            : e
-        )
+            : e,
+        ),
       );
-
-      // Final reconcile: refetch from DB-backed stats
-      await fetchEmployees({ quiet: true });
+      invalidateStaffRosterCaches();
+      await fetchEmployees({ quiet: true, revalidate: true });
       toastOk(next ? t("business.staffPage.toastActiveOn") : t("business.staffPage.toastActiveOff"));
+      return true;
     } catch (err) {
       logClientError("StaffManagementPage", err);
-      // Revert UI on failure
       setEmployees((prev) =>
-        prev.map((e) => (e.id === employee.id ? { ...e, isActive: employee.isActive } : e))
+        prev.map((e) => (e.id === employee.id ? { ...e, isActive: previousActive } : e)),
       );
       toastErr(toUserFriendlyMessage(err));
+      return false;
+    } finally {
+      togglingEmployeeIdsRef.current.delete(employee.id);
     }
+  };
+
+  const handleActivationToggleRequest = (employee: StaffRow) => {
+    if (togglingEmployeeIdsRef.current.has(employee.id)) return;
+    if (employee.isActive) {
+      openDeactivateConfirm(employee);
+      return;
+    }
+    void applyEmployeeActiveState(employee, true);
+  };
+
+  const handleDeactivateConfirm = async () => {
+    if (!deactivateTarget || !deactivateAcknowledged) return;
+    setDeactivating(true);
+    const ok = await applyEmployeeActiveState(deactivateTarget, false);
+    setDeactivating(false);
+    if (ok) closeDeactivateConfirm();
   };
 
   const handleQrDownload = async (employee: StaffRow) => {
@@ -900,7 +953,7 @@ export function StaffManagementPage() {
                       type="button"
                       role="switch"
                       aria-checked={employee.isActive}
-                      onClick={() => handleToggleActive(employee)}
+                      onClick={() => handleActivationToggleRequest(employee)}
                       className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                         employee.isActive ? "bg-primary" : "bg-muted"
                       }`}
@@ -937,7 +990,10 @@ export function StaffManagementPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => openEdit(employee)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEdit(employee);
+                        }}
                         className="p-2 rounded-lg border border-transparent hover:bg-muted hover:border-border active:opacity-90 transition-all"
                         title={t("business.staffPage.editTooltip")}
                       >
@@ -1011,7 +1067,7 @@ export function StaffManagementPage() {
                     type="button"
                     role="switch"
                     aria-checked={employee.isActive}
-                    onClick={() => handleToggleActive(employee)}
+                    onClick={() => handleActivationToggleRequest(employee)}
                     className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-all hover:opacity-90 active:opacity-90 ${
                       employee.isActive ? "bg-primary" : "bg-muted"
                     }`}
@@ -1071,7 +1127,10 @@ export function StaffManagementPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => openEdit(employee)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEdit(employee);
+                  }}
                   className="px-4 py-2 border border-border rounded-lg hover:bg-muted active:opacity-90 transition-all text-sm font-medium flex items-center justify-center gap-2"
                 >
                   <Edit className="w-4 h-4" />
@@ -1095,9 +1154,12 @@ export function StaffManagementPage() {
         )}
       </div>
 
+      {typeof document !== "undefined"
+        ? createPortal(
+            <>
       {/* Add Employee Modal — scrollable body, actions pinned to bottom */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1245,7 +1307,7 @@ export function StaffManagementPage() {
 
       {/* Edit employee — scrollable body, actions pinned */}
       {showEditModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1387,9 +1449,61 @@ export function StaffManagementPage() {
         </div>
       )}
 
+      {/* Deactivate confirmation */}
+      {showDeactivateModal && deactivateTarget && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            className="w-full max-w-md rounded-xl border border-border bg-card p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h2 className="mb-2 text-xl font-bold text-foreground">
+              {t("business.staffPage.deactivateConfirmTitle")}
+            </h2>
+            <p className="mb-4 text-sm text-muted-foreground">
+              {t("business.staffPage.deactivateConfirmBody", { name: deactivateTarget.name })}
+            </p>
+            <label className="mb-6 flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-muted/20 p-3">
+              <input
+                type="checkbox"
+                checked={deactivateAcknowledged}
+                onChange={(e) => setDeactivateAcknowledged(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-border accent-primary"
+              />
+              <span className="text-sm text-foreground">
+                {t("business.staffPage.deactivateConfirmCheckbox")}
+              </span>
+            </label>
+            <div className="flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={closeDeactivateConfirm}
+                disabled={deactivating}
+              >
+                {t("business.staffPage.modalCancel")}
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                className="flex-1"
+                disabled={!deactivateAcknowledged || deactivating}
+                onClick={() => void handleDeactivateConfirm()}
+              >
+                {deactivating
+                  ? t("business.staffPage.deactivating")
+                  : t("business.staffPage.deactivateConfirmAction")}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+
       {/* Delete confirmation */}
       {showDeleteModal && deleteTarget && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1424,6 +1538,10 @@ export function StaffManagementPage() {
           </motion.div>
         </div>
       )}
+            </>,
+            document.body,
+          )
+        : null}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import { Trans, useTranslation } from "react-i18next";
 import logyImg from "../../../../images/logy.png";
 import repImg from "../../../../images/rep.png";
 import hospitalImg from "../../../../images/hospital002.png";
-import homeImg from "../../../../images/home.jpeg";
+import fieldServicesImg from "../../../../images/trade and home services.webp";
 import { landingStaggerDelay } from "@/lib/landingMotion";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
@@ -34,20 +34,20 @@ export function LandingRealLifeSection() {
           alt: t("landing.realLife.s2Alt"),
         },
         {
-          headline: t("landing.realLife.s3Headline"),
-          tag: t("landing.realLife.s3Tag"),
-          textKey: "landing.realLife.s3Text" as const,
-          detail: t("landing.realLife.s3Detail"),
-          img: hospitalImg,
-          alt: t("landing.realLife.s3Alt"),
-        },
-        {
           headline: t("landing.realLife.s4Headline"),
           tag: t("landing.realLife.s4Tag"),
           textKey: "landing.realLife.s4Text" as const,
           detail: t("landing.realLife.s4Detail"),
-          img: homeImg,
+          img: hospitalImg,
           alt: t("landing.realLife.s4Alt"),
+        },
+        {
+          headline: t("landing.realLife.s5Headline"),
+          tag: t("landing.realLife.s5Tag"),
+          textKey: "landing.realLife.s5Text" as const,
+          detail: t("landing.realLife.s5Detail"),
+          img: fieldServicesImg,
+          alt: t("landing.realLife.s5Alt"),
         },
       ],
     [t, i18n.language],
@@ -60,15 +60,14 @@ export function LandingRealLifeSection() {
     <section id="real-life" className={cn(landingUi.section, landingUi.sectionWhite, "caretip-landing-rhythm-stone")}>
       <div className="mx-auto max-w-7xl">
         <div className={cn(landingUi.sectionIntro, "caretip-real-life-section-intro")}>
-          <LandingReveal
-            as="h2"
+          <h2
             className={cn(
               landingUi.sectionTitle,
-              "max-lg:caretip-mobile-section-headline caretip-real-life-section-title",
+              "max-lg:caretip-mobile-section-headline caretip-real-life-section-title caretip-landing-scroll-reveal--visible",
             )}
           >
             {t("landing.realLife.title")}
-          </LandingReveal>
+          </h2>
         </div>
 
         <div className="grid grid-cols-1 justify-items-center gap-4 sm:grid-cols-2 sm:justify-items-stretch sm:gap-6 lg:gap-7">

@@ -24,16 +24,13 @@ export type CareTipLogoAlign = "left" | "center";
  * Use with border-b so the mark sits on a clean, consistent ground.
  */
 export const CARE_TIP_LOGO_SURFACE_CLASS =
-  "bg-white border-b border-border/80";
+  "bg-background border-b border-border/80";
 
 /**
- * Compact dashboard sidebar branding strip (~35% shorter than legacy px-6 py-4 + nav py-5).
- * Logo size unchanged; padding and nav offset tightened (Stripe / Linear pattern).
+ * Dashboard sidebar branding strip — semantic surface (light + dark).
  */
-export const DASHBOARD_SIDEBAR_BRAND_CLASS = cn(
-  CARE_TIP_LOGO_SURFACE_CLASS,
-  "flex shrink-0 items-center px-4 py-2 lg:px-5 lg:py-2",
-);
+export const DASHBOARD_SIDEBAR_BRAND_CLASS =
+  "flex shrink-0 items-center border-b border-sidebar-border bg-sidebar px-4 py-2 lg:px-5 lg:py-2";
 
 /** Shared nav region — sits close to branding without extra top gap. */
 export const DASHBOARD_SIDEBAR_NAV_CLASS =

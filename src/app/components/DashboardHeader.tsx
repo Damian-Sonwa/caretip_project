@@ -10,6 +10,7 @@ import { ProfileAvatar } from "./ui/profile-avatar";
 import { useBusinessVenueBrand } from "../hooks/useBusinessVenueBrand";
 import { NotificationBell } from "@/app/components/notifications/NotificationBell";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
+import { ThemeQuickToggle } from "@/app/components/theme/ThemeQuickToggle";
 import { cn } from "@/lib/utils";
 
 interface DashboardHeaderProps {
@@ -27,7 +28,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const displayEmail = user?.email?.trim() || "";
 
   return (
-    <header className="caretip-dashboard-header-bar sticky top-0 z-30 border-b border-border/80 bg-white/95 backdrop-blur-[4px]">
+    <header className="caretip-dashboard-header-bar sticky top-0 z-30 border-b border-border/80 bg-background/95 backdrop-blur-[4px]">
       <div
         className={cn(
           "flex min-w-0 max-w-full items-center justify-between px-3 py-2.5 sm:px-4 sm:py-3.5 lg:px-8",
@@ -97,7 +98,11 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           ) : null}
 
           {user?.role === "employee" || user?.role === "business" || user?.role === "platform_admin" ? (
-            <LanguageSwitcher />
+            <ThemeQuickToggle />
+          ) : null}
+
+          {user?.role === "employee" || user?.role === "business" || user?.role === "platform_admin" ? (
+            <LanguageSwitcher variant="dashboard" />
           ) : null}
 
           {isBusinessManager ? (

@@ -25,7 +25,7 @@ export function HowItWorksStepContent({ step, extras }: HowItWorksStepContentPro
 
       {extras === "tip" ? (
         <HowItWorksInsetPanel>
-          <strong className="text-neutral-900 dark:text-neutral-50">{t(`staticPages.howItWorks.s${n}TipLabel`)}</strong>{" "}
+          <strong className="text-foreground">{t(`staticPages.howItWorks.s${n}TipLabel`)}</strong>{" "}
           {t(`staticPages.howItWorks.s${n}TipBody`)}
         </HowItWorksInsetPanel>
       ) : null}
@@ -41,12 +41,12 @@ export function HowItWorksStepContent({ step, extras }: HowItWorksStepContentPro
       {extras === "guest" ? (
         <div className="space-y-3">
           <HowItWorksInsetPanel>
-            <strong className="text-neutral-900 dark:text-neutral-50">{t(`staticPages.howItWorks.s${n}GuestLabel`)}</strong>{" "}
+            <strong className="text-foreground">{t(`staticPages.howItWorks.s${n}GuestLabel`)}</strong>{" "}
             {t(`staticPages.howItWorks.s${n}GuestBody`)}
           </HowItWorksInsetPanel>
           {showOptionalExtras ? (
             <HowItWorksInsetPanel>
-              <strong className="text-neutral-900 dark:text-neutral-50">{t(extrasPanelKey)}</strong>{" "}
+              <strong className="text-foreground">{t(extrasPanelKey)}</strong>{" "}
               {t(`staticPages.howItWorks.s${n}ExtrasBody`)}
             </HowItWorksInsetPanel>
           ) : null}

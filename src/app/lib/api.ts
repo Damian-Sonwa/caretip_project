@@ -3819,3 +3819,104 @@ export async function fetchPlatformCommercialIntelligence(): Promise<PlatformCom
   platformCommercialInflight.set(cacheKey, promise);
   return promise;
 }
+
+export type PlatformSubscriptionActivityFilter =
+  | "all"
+  | "successful"
+  | "failed"
+  | "trialing"
+  | "active"
+  | "cancelled"
+  | "past_due";
+
+export type PlatformSubscriptionPaymentStatus = "succeeded" | "failed" | "pending" | "none";
+
+export type PlatformSubscriptionOverview = {
+  active: number;
+  trialing: number;
+  successful: number;
+  failed: number;
+  cancelled: number;
+  expired: number;
+};
+
+export type PlatformSubscriptionWidgets = {
+  successRatePercent: number;
+  failedPaymentsToday: number;
+  failedPaymentsThisWeek: number;
+  trialsEndingSoon: number;
+  renewalsDueToday: number;
+};
+
+export type PlatformSubscriptionMonitoring = {
+  overview: PlatformSubscriptionOverview;
+  widgets: PlatformSubscriptionWidgets;
+  periodDays: number;
+};
+
+export type PlatformSubscriptionActivityRow = {
+  businessId: string;
+  businessName: string;
+  contactEmail: string | null;
+  planKey: string;
+  billingCycle: string;
+  status: SubscriptionStatus;
+  paymentStatus: PlatformSubscriptionPaymentStatus;
+  amountCents: number | null;
+  billingPeriodEnd: string | null;
+  activityAt: string;
+  lastPaymentAttemptAt: string | null;
+};
+
+export type PlatformSubscriptionActivityResult = {
+  items: PlatformSubscriptionActivityRow[];
+  total: number;
+};
+
+const platformSubscriptionInflight = new Map<string, Promise<unknown>>();
+
+export async function fetchPlatformSubscriptionMonitoring(
+  days = 30,
+): Promise<PlatformSubscriptionMonitoring> {
+  const cacheKey = `platform:subscriptions:monitoring:${days}`;
+  const inflight = platformSubscriptionInflight.get(cacheKey);
+  if (inflight) return inflight as Promise<PlatformSubscriptionMonitoring>;
+  const promise = apiRequest<PlatformSubscriptionMonitoring>(
+    apiPath(`/api/platform/subscriptions/monitoring?days=${days}`),
+    {
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  ).finally(() => {
+    if (platformSubscriptionInflight.get(cacheKey) === promise) {
+      platformSubscriptionInflight.delete(cacheKey);
+    }
+  });
+  platformSubscriptionInflight.set(cacheKey, promise);
+  return promise;
+}
+
+export async function fetchPlatformSubscriptionActivity(params: {
+  filter?: PlatformSubscriptionActivityFilter;
+  q?: string;
+  take?: number;
+  skip?: number;
+  sort?: "date" | "business" | "status" | "amount";
+  sortDir?: "asc" | "desc";
+}): Promise<PlatformSubscriptionActivityResult> {
+  const search = new URLSearchParams();
+  if (params.filter && params.filter !== "all") search.set("filter", params.filter);
+  if (params.q?.trim()) search.set("q", params.q.trim());
+  search.set("take", String(params.take ?? 25));
+  search.set("skip", String(params.skip ?? 0));
+  if (params.sort) search.set("sort", params.sort);
+  if (params.sortDir) search.set("sortDir", params.sortDir);
+  const qs = search.toString();
+  return apiRequest<PlatformSubscriptionActivityResult>(
+    apiPath(`/api/platform/subscriptions/activity?${qs}`),
+    {
+      headers: getHeaders(),
+      credentials: "include",
+    },
+  );
+}

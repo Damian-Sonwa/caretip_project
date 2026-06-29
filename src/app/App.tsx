@@ -14,7 +14,7 @@ import { googleOAuthWebClientId } from "./lib/googleOAuthWebClientId";
 const googleClientId = googleOAuthWebClientId();
 
 function AppTree() {
-  const { mode } = useTheme();
+  const { resolvedTheme } = useTheme();
   return (
     <TipFlowProvider>
       <AppLoadingSplashProvider>
@@ -25,7 +25,7 @@ function AppTree() {
             </SocketProvider>
           </AppLoadingManagerProvider>
         </AuthProvider>
-        <Toaster theme={mode} position="top-center" closeButton />
+        <Toaster theme={resolvedTheme} position="top-center" closeButton />
         <PwaInstallPrompt />
       </AppLoadingSplashProvider>
     </TipFlowProvider>

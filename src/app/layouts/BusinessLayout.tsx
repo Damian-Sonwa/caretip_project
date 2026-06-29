@@ -64,7 +64,7 @@ export function BusinessLayout() {
         <BusinessMobileSidebar isOpen={mobileMenuOpen} onClose={closeMobileMenu} />
         <div
           className={cn(
-            "caretip-dashboard-shell business-dashboard-atmosphere font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden lg:pl-64",
+            "caretip-dashboard-shell dashboard-workspace font-sans flex min-h-screen min-w-0 flex-col overflow-x-hidden lg:pl-64",
             BUSINESS_DASHBOARD_ROOT,
           )}
         >

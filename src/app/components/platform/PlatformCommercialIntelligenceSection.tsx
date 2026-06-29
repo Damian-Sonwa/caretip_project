@@ -204,7 +204,74 @@ function EnterpriseCapabilityCard({
   );
 }
 
-export function PlatformCommercialIntelligenceSection() {
+function CommercialIntelligenceBody({
+  data,
+}: {
+  data: PlatformCommercialIntelligence;
+}) {
+  const { t } = useTranslation();
+  const sub = data.subscription;
+  const readiness = data.enterpriseReadiness;
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h4 className="text-sm font-semibold text-foreground">{t("admin.commercial.subscriptionTitle")}</h4>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t("admin.commercial.subscriptionPeriod", { days: sub.periodDays })}
+        </p>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { label: t("admin.commercial.upgrades"), value: sub.upgrades },
+            { label: t("admin.commercial.downgrades"), value: sub.downgrades },
+            { label: t("admin.commercial.cancellationsScheduled"), value: sub.cancellationsScheduled },
+            { label: t("admin.commercial.paymentFailures"), value: sub.paymentFailures },
+            { label: t("admin.commercial.renewals"), value: sub.renewalsSucceeded },
+            { label: t("admin.commercial.activeSubscriptions"), value: sub.activeSubscriptions },
+            { label: t("admin.commercial.cancelAtPeriodEnd"), value: sub.cancelAtPeriodEnd },
+            { label: t("admin.commercial.pastDue"), value: sub.pastDue },
+          ].map((m) => (
+            <div key={m.label} className="rounded-lg border border-border/60 bg-background px-3 py-2">
+              <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{m.label}</p>
+              <p className="text-xl font-semibold tabular-nums">{m.value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        <SegmentList
+          title={t("admin.commercial.growthCandidates")}
+          items={data.segments.growthCandidates}
+          emptyLabel={t("admin.commercial.none")}
+          variant="growth"
+        />
+        <SegmentList
+          title={t("admin.commercial.atRisk")}
+          items={data.segments.atRisk}
+          emptyLabel={t("admin.commercial.none")}
+          variant="risk"
+        />
+        <SegmentList
+          title={t("admin.commercial.premiumOpportunities")}
+          items={data.segments.premiumOpportunities}
+          emptyLabel={t("admin.commercial.none")}
+          variant="opportunity"
+        />
+        <SegmentList
+          title={t("admin.commercial.enterpriseCandidates")}
+          items={data.segments.enterpriseCandidates}
+          emptyLabel={t("admin.commercial.none")}
+          variant="enterprise"
+        />
+      </div>
+
+      <EnterpriseCapabilityCard readiness={readiness} />
+    </div>
+  );
+}
+
+export function PlatformCommercialIntelligenceSection({ embedded = false }: { embedded?: boolean }) {
   const { t } = useTranslation();
   const [data, setData] = useState<PlatformCommercialIntelligence | null>(null);
   const [loading, setLoading] = useState(true);
@@ -235,6 +302,14 @@ export function PlatformCommercialIntelligenceSection() {
   }, [load]);
 
   if (loading) {
+    if (embedded) {
+      return (
+        <div className="flex min-h-[88px] items-center justify-center py-6">
+          <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" aria-hidden />
+          <span className="sr-only">{t("admin.networkHero.checking")}</span>
+        </div>
+      );
+    }
     return (
       <Card className={cn(platformUi.contentCard, "mb-6")}>
         <CardHeader className="pb-2">
@@ -250,6 +325,20 @@ export function PlatformCommercialIntelligenceSection() {
   }
 
   if (loadError) {
+    if (embedded) {
+      return (
+        <div className="flex flex-col items-start gap-3 py-2 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-muted-foreground">{loadError}</p>
+          <button
+            type="button"
+            onClick={() => void load()}
+            className="text-sm font-medium text-foreground underline-offset-4 hover:underline"
+          >
+            {t("admin.retry")}
+          </button>
+        </div>
+      );
+    }
     return (
       <Card className={cn(platformUi.contentCard, "mb-6")}>
         <CardHeader className="pb-2">
@@ -271,8 +360,9 @@ export function PlatformCommercialIntelligenceSection() {
 
   if (!data) return null;
 
-  const sub = data.subscription;
-  const readiness = data.enterpriseReadiness;
+  if (embedded) {
+    return <CommercialIntelligenceBody data={data} />;
+  }
 
   return (
     <Card className={cn(platformUi.contentCard, "mb-6")}>
@@ -280,59 +370,8 @@ export function PlatformCommercialIntelligenceSection() {
         <CardTitle className="text-base">{t("admin.commercial.title")}</CardTitle>
         <CardDescription>{t("admin.commercial.desc")}</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
-        <div>
-          <h4 className="text-sm font-semibold text-foreground">{t("admin.commercial.subscriptionTitle")}</h4>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {t("admin.commercial.subscriptionPeriod", { days: sub.periodDays })}
-          </p>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: t("admin.commercial.upgrades"), value: sub.upgrades },
-              { label: t("admin.commercial.downgrades"), value: sub.downgrades },
-              { label: t("admin.commercial.cancellationsScheduled"), value: sub.cancellationsScheduled },
-              { label: t("admin.commercial.paymentFailures"), value: sub.paymentFailures },
-              { label: t("admin.commercial.renewals"), value: sub.renewalsSucceeded },
-              { label: t("admin.commercial.activeSubscriptions"), value: sub.activeSubscriptions },
-              { label: t("admin.commercial.cancelAtPeriodEnd"), value: sub.cancelAtPeriodEnd },
-              { label: t("admin.commercial.pastDue"), value: sub.pastDue },
-            ].map((m) => (
-              <div key={m.label} className="rounded-lg border border-border/60 bg-background px-3 py-2">
-                <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{m.label}</p>
-                <p className="text-xl font-semibold tabular-nums">{m.value}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <SegmentList
-            title={t("admin.commercial.growthCandidates")}
-            items={data.segments.growthCandidates}
-            emptyLabel={t("admin.commercial.none")}
-            variant="growth"
-          />
-          <SegmentList
-            title={t("admin.commercial.atRisk")}
-            items={data.segments.atRisk}
-            emptyLabel={t("admin.commercial.none")}
-            variant="risk"
-          />
-          <SegmentList
-            title={t("admin.commercial.premiumOpportunities")}
-            items={data.segments.premiumOpportunities}
-            emptyLabel={t("admin.commercial.none")}
-            variant="opportunity"
-          />
-          <SegmentList
-            title={t("admin.commercial.enterpriseCandidates")}
-            items={data.segments.enterpriseCandidates}
-            emptyLabel={t("admin.commercial.none")}
-            variant="enterprise"
-          />
-        </div>
-
-        <EnterpriseCapabilityCard readiness={readiness} />
+      <CardContent>
+        <CommercialIntelligenceBody data={data} />
       </CardContent>
     </Card>
   );

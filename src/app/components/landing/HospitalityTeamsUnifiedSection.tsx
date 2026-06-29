@@ -34,7 +34,7 @@ export function HospitalityTeamsUnifiedSection() {
         "caretip-landing-hospitality relative",
       )}
     >
-      <LandingReveal className={cn("mx-auto w-full max-w-7xl min-w-0", landingUi.mobileStackGrid)}>
+      <div className="mx-auto w-full max-w-7xl min-w-0">
         <header
           className={cn(
             landingUi.hospitalityIntro,
@@ -103,7 +103,7 @@ export function HospitalityTeamsUnifiedSection() {
             </div>
           </div>
         </LandingReveal>
-      </LandingReveal>
+      </div>
     </section>
   );
 }

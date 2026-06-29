@@ -18,10 +18,13 @@ import {
   mapPricingTierToPlanKey,
   type PricingTierKey,
 } from "../../../../data/pricingPlanCatalog";
-import { PricingTierCard, type PricingTierCardBadge } from "@/components/pricing/PricingTierCard";
-import { pricingPageUi } from "@/components/pricing/pricingPageUi";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 import { formatBillingDate, resolveBillingLocale } from "./billingFormatters";
+import {
+  BillingWorkspacePlanCard,
+  type BillingWorkspacePlanBadge,
+} from "./BillingWorkspacePlanCard";
 
 type Props = {
   billing: BillingStatus;
@@ -44,7 +47,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
 
   const canCheckout = billing.billingEnabled && billing.stripeConfigured;
   const canPortal = canCheckout && Boolean(billing.stripeCustomerId);
-  const canDowngrade = canPortal && billing.hasStripeBilling;
+  const canDowngradeViaPortal = canPortal && billing.hasStripeBilling;
 
   async function handleUpgrade(planKey: SubscriptionPlanKey) {
     if (planKey === "enterprise") return;
@@ -89,7 +92,7 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
     }
   }
 
-  function resolveBadge(tierKey: PricingTierKey): PricingTierCardBadge | null {
+  function resolveBadge(tierKey: PricingTierKey): BillingWorkspacePlanBadge | null {
     const planKey = mapPricingTierToPlanKey(tierKey);
     const isCurrent = !isUnsubscribed && planKey === currentPlanKey;
 
@@ -108,64 +111,53 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
     if (!isCurrent) return null;
 
     const renewalDate = billing.renewalDate ?? billing.currentPeriodEnd;
-    const lines: ReactNode[] = [];
+    const lines: string[] = [];
 
-    if (billing.status !== "none") {
+    if (billing.cancelAtPeriodEnd && billing.cancellationEffective) {
       lines.push(
-        <p key="status" className="caretip-pricing-tier-card__subscription-line">
-          {t("business.billing.subscriptionSummary.statusLabel")}:{" "}
-          <span className="font-medium text-foreground">{t(`business.billing.status.${billing.status}`)}</span>
-        </p>,
+        t("business.billing.planCard.cancelScheduled", {
+          date: formatBillingDate(billing.cancellationEffective, locale, emptyDate),
+        }),
+      );
+      return (
+        <p className="leading-relaxed">{lines.join(" ")}</p>
       );
     }
 
     if (isTrialing && billing.trialEndsAt) {
-      lines.push(
-        <p key="trial" className="caretip-pricing-tier-card__subscription-line">
+      return (
+        <p className="leading-relaxed">
           {t("business.billing.planCard.trialEnds", {
             date: formatBillingDate(billing.trialEndsAt, locale, emptyDate),
           })}
-        </p>,
+        </p>
       );
-      if (trialDaysRemaining > 0) {
-        lines.push(
-          <p key="days" className="caretip-pricing-tier-card__subscription-line">
-            {t("business.billing.trial.daysRemaining", { count: trialDaysRemaining })}
-          </p>,
-        );
-      }
-    } else if (renewalDate) {
-      lines.push(
-        <p key="renewal" className="caretip-pricing-tier-card__subscription-line">
+    }
+
+    if (renewalDate) {
+      return (
+        <p className="leading-relaxed">
           {t("business.billing.planCard.renewsOn", {
             date: formatBillingDate(renewalDate, locale, emptyDate),
           })}
-        </p>,
+        </p>
       );
     }
 
-    if (billing.cancelAtPeriodEnd && billing.cancellationEffective) {
-      lines.push(
-        <p key="cancel" className="caretip-pricing-tier-card__subscription-line caretip-pricing-tier-card__subscription-line--muted">
-          {t("business.billing.planCard.cancelScheduled", {
-            date: formatBillingDate(billing.cancellationEffective, locale, emptyDate),
-          })}
-        </p>,
-      );
-    }
-
-    if (lines.length === 0) return null;
-    return <div className="space-y-1">{lines}</div>;
+    return null;
   }
 
-  function renderTierFooter(tierKey: PricingTierKey, tierName: string, isPopular: boolean): ReactNode {
+  function renderTierFooter(tierKey: PricingTierKey, tierName: string): ReactNode {
     const planKey = mapPricingTierToPlanKey(tierKey);
     const isCurrent = !isUnsubscribed && planKey === currentPlanKey;
     const isEnterprise = tierKey === "enterprise";
 
     if (isEnterprise) {
       return (
-        <Link to="/contact?intent=enterprise" className={pricingPageUi.cardCtaEnterprise}>
+        <Link
+          to="/contact?intent=enterprise"
+          className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center")}
+        >
           {t("business.billing.contactSales")}
         </Link>
       );
@@ -177,8 +169,8 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
           type="button"
           disabled
           className={cn(
-            pricingPageUi.cardCtaSecondary,
-            "inline-flex items-center justify-center gap-2 opacity-70",
+            dashboardWorkspaceUi.btnSecondary,
+            "w-full cursor-default justify-center gap-2 opacity-70",
           )}
           aria-disabled="true"
         >
@@ -190,45 +182,42 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
 
     if (isUnsubscribed || (currentPlanKey && isUpgrade(currentPlanKey, planKey))) {
       return (
-        <div className="flex w-full flex-col gap-2">
-          <button
-            type="button"
-            disabled={!canCheckout || busyPlan !== null}
-            onClick={() => void handleUpgrade(planKey)}
-            className={cn(
-              isPopular || isUnsubscribed ? pricingPageUi.cardCtaPrimary : pricingPageUi.cardCtaSecondary,
-              "disabled:opacity-60",
-            )}
-          >
-            {busyPlan === planKey ? (
-              <Loader2 className="mx-auto h-4 w-4 animate-spin" />
-            ) : isUnsubscribed ? (
-              t("business.billing.planCard.subscribeToPlan", { plan: tierName })
-            ) : (
-              t("business.billing.upgradeToPlan", { plan: tierName })
-            )}
-          </button>
-        </div>
+        <button
+          type="button"
+          disabled={!canCheckout || busyPlan !== null}
+          onClick={() => void handleUpgrade(planKey)}
+          className={cn(dashboardWorkspaceUi.btnPrimary, "w-full justify-center disabled:opacity-60")}
+          aria-busy={busyPlan === planKey || undefined}
+        >
+          {busyPlan === planKey ? (
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          ) : isUnsubscribed ? (
+            t("business.billing.planCard.subscribeToPlan", { plan: tierName })
+          ) : (
+            t("business.billing.upgradeToPlan", { plan: tierName })
+          )}
+        </button>
       );
     }
 
     if (currentPlanKey && isDowngrade(currentPlanKey, planKey)) {
-      if (canDowngrade) {
+      if (canDowngradeViaPortal) {
         return (
           <div className="flex w-full flex-col gap-2">
             <button
               type="button"
               disabled={busyPlan !== null}
               onClick={() => void handlePortal()}
-              className={cn(pricingPageUi.cardCtaSecondary, "disabled:opacity-60")}
+              className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center disabled:opacity-60")}
+              aria-busy={busyPlan === "portal" || undefined}
             >
               {busyPlan === "portal" ? (
-                <Loader2 className="mx-auto h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               ) : (
                 t("business.billing.planCard.downgradeToPlan", { plan: tierName })
               )}
             </button>
-            <p className="text-center text-[11px] leading-snug text-muted-foreground">
+            <p className="text-center text-xs leading-snug text-muted-foreground">
               {t("business.billing.planCard.downgradeViaPortal")}
             </p>
           </div>
@@ -240,12 +229,12 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
           <button
             type="button"
             disabled
-            className={cn(pricingPageUi.cardCtaSecondary, "opacity-60")}
+            className={cn(dashboardWorkspaceUi.btnSecondary, "w-full justify-center opacity-60")}
             aria-disabled="true"
           >
             {t("business.billing.downgrade")}
           </button>
-          <p className="text-center text-[11px] leading-snug text-muted-foreground">
+          <p className="text-center text-xs leading-snug text-muted-foreground">
             {t("business.billing.downgradeUnavailable")}
           </p>
         </div>
@@ -257,72 +246,78 @@ export function BillingPlanManagement({ billing, billingCycle, onChanged }: Prop
 
   if (billing.accessSource === "sponsored") {
     return (
-      <div className="space-y-4">
-        <div className="rounded-xl border border-border/70 bg-muted/20 px-5 py-4">
-          <h3 className="text-lg font-semibold text-foreground">{t("business.billing.sponsoredAccessTitle")}</h3>
-          <p className="mt-2 text-sm text-muted-foreground">{t("business.billing.subscriptionSummary.sponsoredProgramme")}</p>
-          <Link
-            to="/contact?intent=support"
-            className={cn(pricingPageUi.cardCtaPrimary, "mt-4 inline-flex w-full sm:w-auto")}
-          >
-            {t("business.billing.subscriptionSummary.contactSupport")}
-          </Link>
-        </div>
+      <div className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
+        <h3 className={dashboardWorkspaceUi.sectionTitle}>{t("business.billing.sponsoredAccessTitle")}</h3>
+        <p className={cn(dashboardWorkspaceUi.helperText, "mt-1.5")}>
+          {t("business.billing.subscriptionSummary.sponsoredProgramme")}
+        </p>
+        <Link
+          to="/contact?intent=support"
+          className={cn(dashboardWorkspaceUi.btnSecondary, "mt-4 inline-flex")}
+        >
+          {t("business.billing.subscriptionSummary.contactSupport")}
+        </Link>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h3 className="text-lg font-semibold text-foreground">{t("business.billing.planManagement")}</h3>
-          <p className="text-sm text-muted-foreground">{t("business.billing.planManagementDesc")}</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {canPortal ? (
-            <button
-              type="button"
-              disabled={busyPlan !== null}
-              onClick={() => void handlePortal()}
-              className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-border bg-background px-4 text-sm font-medium text-foreground hover:bg-muted/50 disabled:opacity-60"
-            >
-              {busyPlan === "portal" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("business.billing.manageBilling")}
-            </button>
-          ) : null}
-          {canCheckout && billing.hasStripeBilling && !billing.cancelAtPeriodEnd ? (
-            <button
-              type="button"
-              disabled={busyPlan !== null}
-              onClick={() => void handleCancel()}
-              className="inline-flex min-h-[40px] items-center justify-center rounded-lg border border-red-200 px-4 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-60"
-            >
-              {busyPlan === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" /> : t("business.billing.cancelSubscription")}
-            </button>
-          ) : null}
-        </div>
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+        {canPortal ? (
+          <button
+            type="button"
+            disabled={busyPlan !== null}
+            onClick={() => void handlePortal()}
+            className={cn(dashboardWorkspaceUi.btnSecondary, "justify-center disabled:opacity-60")}
+            aria-busy={busyPlan === "portal" || undefined}
+          >
+            {busyPlan === "portal" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+            {t("business.billing.manageBilling")}
+          </button>
+        ) : null}
+        {canCheckout && billing.hasStripeBilling && !billing.cancelAtPeriodEnd ? (
+          <button
+            type="button"
+            disabled={busyPlan !== null}
+            onClick={() => void handleCancel()}
+            className={cn(
+              dashboardWorkspaceUi.btnGhost,
+              "justify-center border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-60 dark:border-red-900/40 dark:text-red-300 dark:hover:bg-red-950/30",
+            )}
+            aria-busy={busyPlan === "cancel" || undefined}
+          >
+            {busyPlan === "cancel" ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
+            {t("business.billing.cancelSubscription")}
+          </button>
+        ) : null}
       </div>
 
       {!canCheckout ? (
-        <p className="rounded-lg border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <p
+          className="rounded-lg border border-amber-200/80 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-900/40 dark:bg-amber-950/30 dark:text-amber-200"
+          role="status"
+        >
           {t("business.billing.billingNotEnabled")}
         </p>
       ) : null}
 
-      <div className="caretip-pricing-tiers caretip-pricing-tiers--billing" data-billing-cycle={billingCycle}>
-        <div className="caretip-pricing-tiers__grid">
-          {tiers.map((tier) => (
-            <PricingTierCard
-              key={tier.tierKey}
+      <div
+        className="billing-workspace-plans grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3"
+        role="list"
+        aria-label={t("business.billing.planManagement")}
+      >
+        {tiers.map((tier) => (
+          <div key={tier.tierKey} role="listitem" className="min-w-0">
+            <BillingWorkspacePlanCard
               tier={tier}
               billingCycle={billingCycle}
-              variant="subscription"
               badge={resolveBadge(tier.tierKey)}
-              footer={renderTierFooter(tier.tierKey, tier.name, tier.isPopular)}
+              footer={renderTierFooter(tier.tierKey, tier.name)}
               subscriptionInfo={renderSubscriptionInfo(tier.tierKey)}
             />
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
     </div>
   );

@@ -460,6 +460,65 @@ export async function impersonate(req: Request, res: Response) {
   }
 }
 
+
+export async function getSubscriptionMonitoring(req: Request, res: Response) {
+  try {
+    const days = Math.min(Math.max(Number(req.query.days) || 30, 7), 90);
+    const { getPlatformSubscriptionMonitoringBundle } = await import(
+      "../services/commercial/platformSubscriptionMonitoring.service.js"
+    );
+    const data = await getPlatformSubscriptionMonitoringBundle(days);
+    return res.json(data);
+  } catch (err) {
+    logServerError("platform.getSubscriptionMonitoring", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load subscription monitoring."),
+    });
+  }
+}
+
+export async function listSubscriptionActivity(req: Request, res: Response) {
+  try {
+    const filterRaw = typeof req.query.filter === "string" ? req.query.filter : "all";
+    const allowedFilters = new Set([
+      "all",
+      "successful",
+      "failed",
+      "trialing",
+      "active",
+      "cancelled",
+      "past_due",
+    ]);
+    const filter = allowedFilters.has(filterRaw) ? filterRaw : "all";
+    const q = typeof req.query.q === "string" ? req.query.q : undefined;
+    const take = Math.min(Math.max(Number(req.query.take) || 25, 1), 100);
+    const skip = Math.max(Number(req.query.skip) || 0, 0);
+    const sortRaw = typeof req.query.sort === "string" ? req.query.sort : "date";
+    const sort = ["date", "business", "status", "amount"].includes(sortRaw)
+      ? (sortRaw as "date" | "business" | "status" | "amount")
+      : "date";
+    const sortDir = req.query.sortDir === "asc" ? "asc" : "desc";
+
+    const { listPlatformSubscriptionActivity } = await import(
+      "../services/commercial/platformSubscriptionMonitoring.service.js"
+    );
+    const result = await listPlatformSubscriptionActivity({
+      filter: filter as import("../services/commercial/platformSubscriptionMonitoring.service.js").PlatformSubscriptionActivityFilter,
+      q,
+      take,
+      skip,
+      sort,
+      sortDir,
+    });
+    return res.json(result);
+  } catch (err) {
+    logServerError("platform.listSubscriptionActivity", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load subscription activity."),
+    });
+  }
+}
+
 export async function getCommercialIntelligence(_req: Request, res: Response) {
   const startedAt = Date.now();
   try {

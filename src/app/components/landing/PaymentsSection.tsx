@@ -98,17 +98,11 @@ export function PaymentsSection() {
       <div className="relative mx-auto max-w-7xl">
 
         <LandingReveal
-
           as="header"
-
           className={cn(
-
             landingUi.sectionIntro,
-
-            "caretip-payments-trust-intro mx-auto mb-8 max-w-3xl text-center sm:mb-10 lg:mb-12",
-
+            "caretip-payments-trust-intro mx-auto mb-8 max-w-3xl text-center sm:mb-10 lg:mb-12 caretip-landing-scroll-reveal--visible",
           )}
-
         >
 
           {landingCopyVisible(t("landing.paymentsTrust.pill")) ? (
@@ -210,7 +204,7 @@ export function PaymentsSection() {
             {landingCopyVisible(principle) ? (
               <p className="caretip-payments-trust-principle">
                 {landingCopyVisible(principleLabel) ? (
-                  <strong className="font-semibold text-neutral-900 dark:text-neutral-50">
+                  <strong className="font-semibold text-foreground">
                     {principleLabel}
                   </strong>
                 ) : null}

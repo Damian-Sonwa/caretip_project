@@ -10,7 +10,9 @@ import {
   DASHBOARD_SIDEBAR_NAV_CLASS,
 } from "../CareTipLogo";
 import { BusinessSidebarNavShell } from "./sidebar/BusinessSidebarNavShell";
+import { BusinessSidebarUpgradeCta } from "./sidebar/BusinessSidebarUpgradeCta";
 import { MobileDrawer } from "../ui/MobileDrawer";
+import { dashboardSidebarIconButtonIdle, dashboardSidebarSignOutButton } from "@/lib/theme/dashboardSidebarUi";
 
 interface BusinessMobileSidebarProps {
   isOpen: boolean;
@@ -31,7 +33,10 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
         <button
           type="button"
           onClick={onClose}
-          className="touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-stone-100"
+          className={cn(
+            "touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5",
+            dashboardSidebarIconButtonIdle,
+          )}
         >
           <X className="h-5 w-5 text-sidebar-foreground" />
         </button>
@@ -46,7 +51,8 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
         <BusinessSidebarNavShell onNavigate={onClose} />
       </nav>
 
-      <div className="shrink-0 px-4 pb-4">
+      <div className="shrink-0 border-t border-sidebar-border px-3 pt-2 pb-4">
+        <BusinessSidebarUpgradeCta />
         <button
           type="button"
           onClick={() => {
@@ -59,7 +65,7 @@ export function BusinessMobileSidebar({ isOpen, onClose }: BusinessMobileSidebar
             onClose();
             navigate("/business/login", { replace: true });
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>

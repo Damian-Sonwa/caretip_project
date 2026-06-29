@@ -65,7 +65,7 @@ export function SimpleSetupSection() {
         )}
       >
         <div className={cn(landingUi.copyColumn, "caretip-live-minutes-copy lg:order-1")}>
-          <LandingReveal
+          <div
             className={cn(landingUi.copyStack, landingUi.mobileStackIntro, "caretip-live-minutes-intro")}
           >
             <div className={cn(landingUi.sectionAccentRow, "max-md:flex-col max-md:items-center")}>
@@ -81,7 +81,7 @@ export function SimpleSetupSection() {
             {landingCopyVisible(sectionSubtitle) ? (
               <p className={cn(landingUi.subtitle, "max-md:max-w-[min(280px,30ch)]")}>{sectionSubtitle}</p>
             ) : null}
-          </LandingReveal>
+          </div>
 
           <div
             role="list"

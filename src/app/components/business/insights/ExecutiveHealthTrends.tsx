@@ -10,7 +10,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { businessUi } from "../businessDashboardUi";
-import { BUSINESS_CHART_GRID, businessChartTooltipStyle } from "../businessDashboardChartTheme";
+import { BUSINESS_CHART_GRID, getBusinessChartTooltipStyle } from "../businessDashboardChartTheme";
 
 type ExecutiveHealthTrendsProps = {
   participation: Array<{ label: string; participation: number }>;
@@ -48,7 +48,7 @@ export function ExecutiveHealthTrends({ participation, loading }: ExecutiveHealt
                 <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
                 <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 9 }} />
                 <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} />
-                <Tooltip contentStyle={businessChartTooltipStyle} />
+                <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
                 <Area
                   type="monotone"
                   dataKey="participation"

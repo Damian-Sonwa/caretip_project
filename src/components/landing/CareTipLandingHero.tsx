@@ -143,15 +143,6 @@ export function CareTipLandingHero({
                 {t("landing.showcase.primaryCta")}
               </Link>
             </div>
-            <div className={landingUi.heroCtaUnit}>
-              <Link
-                to="/contact"
-                className={landingUi.heroCtaSecondary}
-                aria-label={t("nav.requestDemo")}
-              >
-                {t("nav.requestDemo")}
-              </Link>
-            </div>
           </div>
         </div>
 

@@ -2,8 +2,6 @@ import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useSearchParams } from "react-router";
 import { toast } from "sonner";
-import { CareIcon } from "@/components/icons";
-import { cn } from "@/lib/utils";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { processBillingCheckoutSuccess } from "../../lib/subscriptionActivationNotification";
 import { BusinessSubPageShellSkeleton } from "../../components/dashboard/BusinessSubPageShellSkeleton";
@@ -14,10 +12,12 @@ import {
   parseBusinessSettingsSection,
 } from "../../components/business/settings/businessSettingsSections";
 import { BusinessSettingsGeneralPanel } from "../../components/business/settings/BusinessSettingsGeneralPanel";
+import { BusinessSettingsAppearancePanel } from "../../components/business/settings/BusinessSettingsAppearancePanel";
 import { BusinessSettingsSecurityPanel } from "../../components/business/settings/BusinessSettingsSecurityPanel";
 import { BusinessSettingsNotificationsPanel } from "../../components/business/settings/BusinessSettingsNotificationsPanel";
 import { BusinessSettingsIntegrationsPanel } from "../../components/business/settings/BusinessSettingsIntegrationsPanel";
 import { useBusinessSettingsData } from "../../components/business/settings/useBusinessSettingsData";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 
 export function BusinessSettingsPage() {
@@ -67,23 +67,15 @@ export function BusinessSettingsPage() {
   return (
     <main className={businessUi.modulePageShell}>
       <div className={businessUi.modulePageContained}>
-        <header className="business-settings-page-header">
-          <div className="mb-2 flex items-center gap-2 text-muted-foreground">
-            <CareIcon name="settings" size="md" className="shrink-0 text-accent" />
-            <span className="text-xs font-semibold uppercase tracking-wide">
-              {t("business.settings.eyebrow")}
-            </span>
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-            {t(activeMeta.labelKey)}
-          </h1>
-          <p className={cn("mt-2 max-w-2xl sm:text-base", businessUi.cardDesc)}>
-            {t(activeMeta.descriptionKey)}
-          </p>
+        <header className="mb-6 border-b border-border pb-5">
+          <p className={dashboardWorkspaceUi.eyebrow}>{t("business.settings.eyebrow")}</p>
+          <h1 className={dashboardWorkspaceUi.pageTitle}>{t(activeMeta.labelKey)}</h1>
+          <p className={dashboardWorkspaceUi.pageDescription}>{t(activeMeta.descriptionKey)}</p>
         </header>
 
         <div className="min-w-0">
           {section === "general" ? <BusinessSettingsGeneralPanel {...settings} /> : null}
+          {section === "appearance" ? <BusinessSettingsAppearancePanel /> : null}
           {section === "business" ? <BusinessProfilePage embedded /> : null}
           {section === "notifications" ? <BusinessSettingsNotificationsPanel {...settings} /> : null}
           {section === "security" ? <BusinessSettingsSecurityPanel {...settings} /> : null}

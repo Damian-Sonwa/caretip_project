@@ -1,0 +1,332 @@
+/**
+ * Marketing dark mode — charcoal surfaces mapped to semantic tokens.
+ * Light mode remains in caretip-landing-section-flow.css (ivory system).
+ * Preserves orange accents and section gradients; avoids pure black heroes.
+ */
+
+.dark .caretip-landing.caretip-landing--premium {
+  --caretip-ivory-base: hsl(var(--background));
+  --caretip-ivory-soft: hsl(var(--card));
+  --caretip-ivory-depth: hsl(var(--secondary));
+  --caretip-ivory-stone: hsl(var(--muted));
+  --caretip-ivory-premium: hsl(var(--card));
+  --caretip-ivory-white: hsl(var(--card));
+  --caretip-landing-border: hsl(var(--border) / 0.85);
+  --caretip-landing-card-bg: hsl(var(--card));
+  --caretip-landing-card-shadow:
+    0 1px 2px hsl(0 0% 0% / 0.2),
+    0 8px 24px -6px hsl(0 0% 0% / 0.35);
+  --caretip-landing-card-shadow-hover:
+    0 2px 4px hsl(0 0% 0% / 0.25),
+    0 14px 36px -8px hsl(0 0% 0% / 0.4);
+
+  background-color: hsl(var(--background)) !important;
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-landing .caretip-hero-section {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--background)) 0%,
+    hsl(220 14% 10%) 42%,
+    hsl(var(--card)) 100%
+  );
+}
+
+.dark .caretip-landing #how-it-works {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--background)) 48%,
+    hsl(220 12% 11%) 100%
+  );
+}
+
+.dark .caretip-landing #for-employees {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--background)) 0%,
+    hsl(220 13% 9%) 50%,
+    hsl(var(--card)) 100%
+  );
+}
+
+.dark .caretip-landing #for-employees::before {
+  background: radial-gradient(
+    ellipse 68% 48% at 28% 42%,
+    hsl(var(--primary) / 0.12) 0%,
+    transparent 62%
+  );
+}
+
+.dark .caretip-landing #business-section {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--background)) 48%,
+    hsl(220 14% 10%) 100%
+  );
+}
+
+.dark .caretip-landing #business-section::before {
+  background: radial-gradient(
+    ellipse 70% 50% at 72% 38%,
+    hsl(var(--primary) / 0.1) 0%,
+    transparent 60%
+  );
+}
+
+.dark .caretip-landing #payments-trust {
+  background: linear-gradient(
+    180deg,
+    hsl(220 12% 11%) 0%,
+    hsl(var(--background)) 28%,
+    hsl(var(--card)) 62%,
+    hsl(var(--background)) 100%
+  ) !important;
+}
+
+.dark .caretip-landing #real-life {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--card)) 100%
+  ) !important;
+}
+
+.dark .caretip-landing #recognition {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--card)) 0%,
+    hsl(var(--background)) 48%,
+    hsl(220 13% 9%) 100%
+  ) !important;
+}
+
+.dark .caretip-landing #social-proof {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--secondary)) 0%,
+    hsl(var(--card)) 38%,
+    hsl(var(--background)) 100%
+  ) !important;
+}
+
+.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
+  background: linear-gradient(
+    180deg,
+    hsl(220 14% 10%) 0%,
+    hsl(var(--background)) 48%,
+    hsl(220 12% 11%) 100%
+  );
+}
+
+.dark .caretip-landing .caretip-landing-card:not(.caretip-landing-ecosystem-card) {
+  border-color: var(--caretip-landing-border) !important;
+  background: var(--caretip-landing-card-bg) !important;
+  box-shadow: var(--caretip-landing-card-shadow) !important;
+}
+
+.dark .caretip-landing .caretip-hospitality-media-card,
+.dark .caretip-landing .caretip-showcase-visual-frame {
+  border-color: hsl(var(--border) / 0.9);
+  background: hsl(var(--card));
+  box-shadow: var(--caretip-landing-card-shadow);
+}
+
+.dark .caretip-landing .caretip-landing-social-proof .caretip-landing-venue-logos {
+  border-top-color: hsl(var(--border) / 0.6);
+  border-bottom-color: hsl(var(--border) / 0.6);
+}
+
+/* Public navigation — semantic header surface */
+.dark .caretip-public-nav {
+  border-bottom-color: hsl(var(--border) / 0.85);
+  background-color: hsl(var(--background) / 0.9);
+}
+
+.dark .caretip-public-mobile-nav-drawer {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-public-mobile-nav-drawer__nav-link {
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-public-mobile-nav-drawer__nav-link:hover,
+.dark .caretip-public-mobile-nav-drawer__account-link:hover {
+  background-color: hsl(var(--muted) / 0.5);
+}
+
+/* FAQ + public forms */
+.dark .caretip-faq-item {
+  border-color: hsl(var(--border) / 0.85);
+  background-color: hsl(var(--card));
+}
+
+.dark .caretip-faq-trigger:hover {
+  background-color: hsl(var(--muted) / 0.45);
+}
+
+/* Showcase split sections — charcoal gradients (not pure black) */
+.dark .caretip-landing .caretip-showcase-section-tone-warm {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--background)) 0%,
+    hsl(220 13% 10%) 50%,
+    hsl(var(--background)) 100%
+  );
+}
+
+.dark .caretip-landing .caretip-showcase-section-tone-muted {
+  background: linear-gradient(
+    180deg,
+    hsl(var(--card)) 0%,
+    hsl(220 12% 11%) 48%,
+    hsl(var(--background)) 100%
+  );
+}
+
+/* Standalone public marketing pages (Features, Pricing, FAQ, Contact) */
+.dark .caretip-marketing-page {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-marketing-page .caretip-marketing-card {
+  border-color: hsl(var(--border) / 0.85);
+  background-color: hsl(var(--card) / 0.95);
+  box-shadow: var(--caretip-landing-card-shadow, 0 8px 24px -6px hsl(0 0% 0% / 0.35));
+}
+
+.dark .caretip-marketing-page .caretip-marketing-lead {
+  color: hsl(var(--muted-foreground));
+}
+
+/* —— Universal ivory variable bridge (all public scopes) —— */
+.dark .caretip-marketing-page,
+.dark .caretip-public-page,
+.dark .caretip-landing,
+.dark .caretip-auth-page,
+.dark .caretip-contact-page,
+.dark .caretip-pricing-page,
+.dark .caretip-features-page,
+.dark .caretip-how-it-works-page {
+  --caretip-ivory-base: hsl(var(--background));
+  --caretip-ivory-soft: hsl(var(--card));
+  --caretip-ivory-depth: hsl(var(--secondary));
+  --caretip-ivory-stone: hsl(var(--muted));
+  --caretip-ivory-premium: hsl(var(--card));
+  --caretip-ivory-white: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-contact-page {
+  background-color: hsl(var(--background));
+}
+
+.dark .caretip-landing-atmosphere {
+  background-color: hsl(var(--background)) !important;
+}
+
+/* Auth surfaces */
+.dark .caretip-auth-card {
+  background-color: hsl(var(--card));
+  border-color: hsl(var(--border) / 0.88);
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-auth-title,
+.dark .caretip-auth-form {
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-auth-subtitle {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Business sidebar subscription strip on marketing — N/A */
+
+/* Feature / moment cards (CSS class hooks) */
+.dark .caretip-features-moment-card {
+  border-color: hsl(var(--border) / 0.85);
+  background-color: hsl(var(--card) / 0.9);
+}
+
+.dark .caretip-feature-showcase-card {
+  border-color: hsl(var(--border) / 0.85);
+  background-color: hsl(var(--card) / 0.95);
+}
+
+.dark .caretip-feature-showcase-card__tag {
+  border-color: hsl(var(--border) / 0.9);
+  background-color: hsl(var(--muted) / 0.5);
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .caretip-features-standard-band {
+  border-color: hsl(var(--border) / 0.5);
+  background-color: hsl(var(--secondary) / 0.4);
+}
+
+/* How-it-works timeline */
+.dark .caretip-how-step__title {
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-how-step__body {
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .caretip-how-trust-section {
+  border-top-color: hsl(var(--border) / 0.8);
+}
+
+/* Legal prose */
+.dark .caretip-legal-prose {
+  color: hsl(var(--muted-foreground));
+}
+
+.dark .caretip-legal-prose :is(h1, h2, h3, h4, strong) {
+  color: hsl(var(--foreground));
+}
+
+/* Contact form inputs (class hook) */
+.dark .caretip-contact-input {
+  border-color: hsl(var(--border) / 0.9);
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-contact-input::placeholder {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Hospitality feature nav */
+.dark .caretip-hospitality-feature-heading {
+  color: hsl(var(--foreground));
+}
+
+.dark .caretip-hospitality-feature-desc {
+  color: hsl(var(--muted-foreground));
+}
+
+/* Public page header — back link, title, subtitle (FAQ, legal, contact, etc.) */
+.caretip-public-page .caretip-public-back-link {
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-public-page .caretip-public-back-link:hover {
+  color: hsl(var(--foreground));
+}
+
+.caretip-public-page .caretip-public-page-header h1 {
+  color: hsl(var(--foreground));
+}
+
+.caretip-public-page .caretip-public-page-header .caretip-marketing-lead,
+.caretip-public-page .caretip-public-page-header > div > p {
+  color: hsl(var(--muted-foreground));
+}

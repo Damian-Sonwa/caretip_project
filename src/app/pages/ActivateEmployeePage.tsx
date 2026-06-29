@@ -123,7 +123,7 @@ export function ActivateEmployeePage() {
             businessName={branding?.businessName ?? t("dashboard.venueDashboardFallback")}
             size="lg"
           />
-          <p className="text-sm font-semibold text-neutral-800 dark:text-neutral-200">
+          <p className="text-sm font-semibold text-foreground">
             {branding?.businessName ?? t("dashboard.venueDashboardFallback")}
           </p>
         </div>

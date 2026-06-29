@@ -58,7 +58,7 @@ export function BusinessSettingsSecurityPanel({ loading, twoFactorEnabled, setTw
 
   return (
     <div className="space-y-6">
-      <BusinessSettingsPanelShell
+      <BusinessSettingsPanelShell grouped
         title={t("business.accountSettings.passwordTitle")}
         description={t("business.accountSettings.passwordDesc")}
       >
@@ -150,7 +150,7 @@ export function BusinessSettingsSecurityPanel({ loading, twoFactorEnabled, setTw
         )}
       </BusinessSettingsPanelShell>
 
-      <BusinessSettingsPanelShell
+      <BusinessSettingsPanelShell grouped
         title={t("business.accountSettings.twoFactorTitle")}
         description={t("business.accountSettings.twoFactorDesc")}
       >

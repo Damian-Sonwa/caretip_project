@@ -7,6 +7,7 @@ const PUBLIC_ROUTE_IMPORTERS: Record<string, RouteImporter> = {
   "/features": () => import("../pages/FeaturesPage"),
   "/pricing": () => import("../pages/PricingPage"),
   "/contact": () => import("../pages/ContactPage"),
+  "/faq": () => import("../pages/FAQPage"),
   "/login": () => import("../components/AuthPage"),
   "/privacy": () => import("../pages/PrivacyPage"),
   "/terms": () => import("../pages/TermsPage"),
@@ -26,7 +27,7 @@ export function prefetchPublicRoute(path: string) {
 
 /** Warm high-traffic nav targets after landing is idle. */
 export function prefetchPrimaryNavRoutes() {
-  for (const path of ["/features", "/pricing", "/contact", "/login", "/how-it-works"]) {
+  for (const path of ["/features", "/pricing", "/faq", "/contact", "/login"]) {
     prefetchPublicRoute(path);
   }
 }

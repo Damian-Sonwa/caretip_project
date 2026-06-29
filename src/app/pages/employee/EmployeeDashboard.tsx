@@ -643,19 +643,20 @@ export function EmployeeDashboard() {
                 <CardTitle className={employeeUi.cardTitle}>{t("employee.dashboard.quickActions")}</CardTitle>
               </CardHeader>
               <CardContent className="px-5 pb-5 sm:px-6 sm:pb-6">
+                <p className="mb-4 text-sm text-muted-foreground">{t("employee.dashboard.quickActionsDesc")}</p>
                 <div className="grid grid-cols-2 gap-3 sm:max-w-md">
                   <Button
                     type="button"
-                    className={cn(employeeUi.btnPrimary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                    className={cn(employeeUi.btnPrimary, employeeUi.quickActionTile)}
                     onClick={() => void handleQrQuickAction()}
                     disabled={slugLoading || generatingSlug}
                   >
                     {generatingSlug ? (
-                      <Loader2 className="h-6 w-6 animate-spin" aria-hidden />
+                      <Loader2 className="h-5 w-5 animate-spin" aria-hidden />
                     ) : (
-                      <QrCode className="h-6 w-6" aria-hidden />
+                      <QrCode className="h-5 w-5" aria-hidden />
                     )}
-                    <span className="text-center text-xs font-semibold leading-tight">
+                    <span className={employeeUi.quickActionLabel}>
                       {slugLoading
                         ? t("employee.dashboard.qrTileLoading")
                         : generatingSlug
@@ -668,12 +669,12 @@ export function EmployeeDashboard() {
                   {hasSlug && !slugLoading ? (
                     <Button
                       variant="outline"
-                      className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                      className={cn(employeeUi.btnSecondary, employeeUi.quickActionTile)}
                       asChild
                     >
                       <a href={`/staff/${staffSlug}`} target="_blank" rel="noopener noreferrer">
-                        <Eye className="h-6 w-6" aria-hidden />
-                        <span className="text-center text-xs font-semibold leading-tight">
+                        <Eye className="h-5 w-5" aria-hidden />
+                        <span className={employeeUi.quickActionLabel}>
                           {t("employee.dashboard.viewProfile")}
                         </span>
                       </a>
@@ -681,11 +682,11 @@ export function EmployeeDashboard() {
                   ) : (
                     <Button
                       variant="outline"
-                      className={cn(employeeUi.btnSecondary, "h-auto min-h-[6.5rem] flex-col gap-2 py-4")}
+                      className={cn(employeeUi.btnSecondary, employeeUi.quickActionTile)}
                       disabled
                     >
-                      <Eye className="h-6 w-6" aria-hidden />
-                      <span className="text-center text-xs font-semibold leading-tight">
+                      <Eye className="h-5 w-5" aria-hidden />
+                      <span className={employeeUi.quickActionLabel}>
                         {slugLoading ? t("employee.dashboard.qrTileLoading") : t("employee.dashboard.viewProfile")}
                       </span>
                     </Button>

@@ -1,36 +1,34 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { premiumVisualClasses } from "@/lib/premiumVisualTokens";
-import type { HeroPersonality } from "@/lib/heroPersonalitySystem";
-import { heroPersonalityDataAttr } from "@/lib/heroPersonalitySystem";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 
 export type PremiumPageHeroProps = {
   children: ReactNode;
   className?: string;
   /** When true, omits min-height band (e.g. admin hero with custom height). */
   autoHeight?: boolean;
-  personality?: HeroPersonality;
+  /** @deprecated Personality gradients removed — kept for API compatibility. */
+  personality?: string;
 };
 
 /**
- * Dashboard hero frame — wraps existing hero content with premium surface tokens.
+ * Flat dashboard page header region — no decorative container.
  */
 export function PremiumPageHero({
   children,
   className,
   autoHeight = false,
-  personality = "overview",
 }: PremiumPageHeroProps) {
   return (
     <div
       className={cn(
-        premiumVisualClasses.hero,
+        dashboardWorkspaceUi.pageHeader,
+        "premium-page-hero",
         autoHeight && "min-h-0",
         className,
       )}
-      {...heroPersonalityDataAttr(personality)}
     >
-      <div className={premiumVisualClasses.heroContent}>{children}</div>
+      <div className="premium-page-hero__content">{children}</div>
     </div>
   );
 }

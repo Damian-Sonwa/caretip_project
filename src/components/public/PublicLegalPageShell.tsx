@@ -19,7 +19,7 @@ export function PublicLegalPageShell({ title, subtitle, children }: PublicLegalP
           publicPageUi.sectionGap,
           publicPageUi.card,
           publicPageUi.cardPad,
-          "prose prose-neutral max-w-none text-neutral-700 prose-headings:font-hero-display prose-headings:font-bold prose-headings:tracking-[-0.02em] prose-headings:text-neutral-950 prose-p:leading-relaxed prose-li:leading-relaxed dark:prose-invert dark:text-neutral-300 dark:prose-headings:text-neutral-50",
+          publicPageUi.legalProse,
         )}
       >
         {children}

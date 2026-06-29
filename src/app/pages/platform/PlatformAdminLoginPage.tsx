@@ -210,7 +210,7 @@ export function PlatformAdminLoginPage() {
                       setError("");
                       setMfaStep("password");
                     }}
-                    className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-white px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:bg-neutral-900 dark:text-amber-100 dark:hover:bg-neutral-800"
+                    className="inline-flex h-9 min-h-9 items-center justify-center rounded-lg border border-amber-300/80 bg-card px-3 text-xs font-semibold text-amber-950 transition hover:bg-amber-100/80 dark:border-amber-400/40 dark:text-amber-100 dark:hover:bg-amber-950/40"
                   >
                     {t("auth.page.crossSessionSwitch")}
                   </button>
@@ -258,7 +258,7 @@ export function PlatformAdminLoginPage() {
                 <form
                   onSubmit={(e) => void handlePasswordSubmit(e)}
                   aria-busy={submitting || loginSubmitBlocked}
-                  className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
+                  className="caretip-auth-form text-foreground"
                   method="post"
                   action=""
                   noValidate
@@ -320,12 +320,12 @@ export function PlatformAdminLoginPage() {
               ) : (
                 <form
                   onSubmit={(e) => void handleMfaSubmit(e)}
-                  className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
+                  className="caretip-auth-form text-foreground"
                   noValidate
                 >
                   {mfaStep === "setup" && qrDataUrl ? (
                     <div className="mb-4 flex flex-col items-center gap-3">
-                      <p className="text-center text-sm text-neutral-600 dark:text-neutral-400">
+                      <p className="text-center text-sm text-muted-foreground">
                         {t("admin.loginPage.mfaSetupHint", {
                           defaultValue: "Scan this QR code with your authenticator app, then enter the 6-digit code.",
                         })}
@@ -372,7 +372,7 @@ export function PlatformAdminLoginPage() {
 
                   <button
                     type="button"
-                    className="mt-2 text-center text-sm font-medium text-neutral-600 underline-offset-4 hover:underline dark:text-neutral-400"
+                    className="mt-2 text-center text-sm font-medium text-muted-foreground underline-offset-4 hover:underline"
                     onClick={() => {
                       setMfaStep("password");
                       setMfaCode("");
@@ -389,7 +389,7 @@ export function PlatformAdminLoginPage() {
               <p className="caretip-auth-form-footer mt-6">
                 <Link
                   to="/login"
-                  className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline dark:text-neutral-100"
+                  className="font-semibold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline"
                 >
                   {t("admin.loginPage.businessStaffLink")}
                 </Link>

@@ -35,7 +35,7 @@ export function LandingMotivationSection() {
           "relative",
         )}
       >
-        <LandingReveal className={cn(landingUi.copyColumn, "lg:order-1")}>
+        <div className={cn(landingUi.copyColumn, "lg:order-1")}>
           <div
             className={cn(
               landingUi.copyStack,
@@ -66,7 +66,7 @@ export function LandingMotivationSection() {
             ) : null}
           </div>
 
-          <div className={cn(landingUi.mobileStackAfter, "caretip-motivation-after w-full")}>
+          <LandingReveal className={cn(landingUi.mobileStackAfter, "caretip-motivation-after w-full")}>
             <LandingBenefitChecklist
               items={points.filter(landingCopyVisible)}
               tone="split"
@@ -83,8 +83,8 @@ export function LandingMotivationSection() {
                 </Link>
               </div>
             </div>
-          </div>
-        </LandingReveal>
+          </LandingReveal>
+        </div>
 
         <LandingReveal
           delay={0.08}

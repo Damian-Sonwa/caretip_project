@@ -90,7 +90,7 @@ const CATALOG: Record<FeatureKey, FeatureCatalogEntry> = {
     benefitKey: "subscription.features.csvExport.benefit",
     featureListPrefix: "subscription.features.csvExport",
     featureListCount: 3,
-    requiredTier: "premium",
+    requiredTier: "basic",
   },
   multiLocation: {
     featureKey: "multiLocation",

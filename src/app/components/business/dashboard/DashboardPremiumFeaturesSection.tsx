@@ -1,6 +1,7 @@
 import { Check, Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ActivateCareTipCta } from "../../subscription/ActivateCareTipCta";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 import { cn } from "@/lib/utils";
 
 export const DASHBOARD_PREMIUM_SECTION_ID = "dashboard-premium-features";
@@ -26,14 +27,10 @@ export function DashboardPremiumFeaturesSection({ className }: DashboardPremiumF
   return (
     <section
       id={DASHBOARD_PREMIUM_SECTION_ID}
-      className={cn(
-        "relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.06] via-card to-stone-50/85 p-6 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] sm:p-8",
-        className,
-      )}
+      className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad, className)}
       aria-labelledby="dashboard-premium-features-title"
     >
-      <div className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-primary/[0.06]" aria-hidden />
-      <div className="relative flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0 max-w-2xl space-y-4">
           <div className="flex items-center gap-2 text-primary">
             <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
@@ -44,7 +41,7 @@ export function DashboardPremiumFeaturesSection({ className }: DashboardPremiumF
           <div className="space-y-2">
             <h2
               id="dashboard-premium-features-title"
-              className="text-xl font-semibold tracking-tight text-foreground sm:text-2xl"
+              className={dashboardWorkspaceUi.sectionTitle}
             >
               {t("business.dashboard.preview.premiumTitle")}
             </h2>

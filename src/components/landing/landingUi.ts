@@ -25,7 +25,7 @@ const brandAccentGradient =
 
 /** Hero headline — Manrope extrabold, oversized display scale. */
 const heroHeadlineTone =
-  "font-hero-display font-extrabold text-neutral-950 dark:text-neutral-50 max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
+  "font-hero-display font-extrabold text-foreground max-lg:text-left max-lg:text-wrap lg:text-pretty antialiased";
 /** Below lg — size/rhythm from caretip-landing-hero.css */
 const heroHeadlineMobile = "max-lg:tracking-[inherit]";
 /** Desktop scale — fluid sizes in caretip-landing-hero.css */
@@ -36,7 +36,7 @@ function cnHeroHeadline(layout: string) {
 }
 /** Shared intro/lead copy — hero subtitle + section taglines. */
 const landingLeadCopy =
-  "font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] leading-[1.65] text-neutral-600 dark:text-neutral-400";
+  "font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] leading-[1.72] text-muted-foreground";
 function cnHeroSubtitle(layout: string) {
   return `${landingLeadCopy} ${layout}`;
 }
@@ -61,10 +61,10 @@ function cnSectionLead(layout: string) {
 const sectionIntroStack =
   "caretip-section-intro flex w-full flex-col items-center space-y-0 px-0.5 text-center";
 const sectionIntroChildRhythm =
-  "[&>h2]:mt-2.5 [&>h2:first-child]:mt-0 [&>div~h2]:mt-3 [&>motion.div]:mt-6 sm:[&>motion.div]:mt-7 [&>motion.div~*]:mt-0 [&>div.flex]:mt-6 sm:[&>div.flex]:mt-7";
-/** Narrower centered body copy — headlines stay wider via section title tokens. */
+  "[&>[data-landing-accent]]:mb-0 [&>h2]:mt-3.5 [&>h2:first-child]:mt-0 [&>div~h2]:mt-4 [&>motion.div]:mt-7 sm:[&>motion.div]:mt-8 [&>motion.div~*]:mt-0 [&>div.flex]:mt-7 sm:[&>div.flex]:mt-8";
+/** Narrower centered body copy — ~55–65 character measure for effortless scanning. */
 const sectionLeadReadable =
-  "mx-auto w-full max-w-lg max-lg:leading-[1.65] sm:max-w-xl";
+  "mx-auto w-full max-w-[min(100%,36rem)] max-lg:leading-[1.72] sm:max-w-[min(100%,38rem)]";
 function cnBodyLead(layout: string) {
   return `${landingType.bodyLead} ${layout}`;
 }
@@ -101,17 +101,16 @@ const sectionCtaWidth =
 
 export const landingUi = {
   /** Section surface — background from caretip-landing-section-flow.css (light). */
-  landingSurface: "caretip-landing-surface relative dark:bg-neutral-950",
-
+  landingSurface: "caretip-landing-surface relative",
   sectionShell: "mx-auto w-full min-w-0 max-w-7xl",
   section:
-    "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24",
-  sectionMuted: "caretip-landing-surface relative dark:bg-neutral-900",
-  sectionWhite: "caretip-landing-surface relative dark:bg-neutral-950",
+    "scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28",
+  sectionMuted: "caretip-landing-surface relative bg-secondary/30 dark:bg-secondary/20",
+  sectionWhite: "caretip-landing-surface relative",
 
   /** Eyebrow → headline → tagline stack (centered sections). */
-  sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-10 w-full max-w-full sm:mb-12`,
-  sectionAfterIntro: "mb-10 sm:mb-12",
+  sectionIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} mb-12 w-full max-w-full sm:mb-14 lg:mb-16`,
+  sectionAfterIntro: "mb-12 sm:mb-14 lg:mb-16",
 
   /** Mobile: intro (headline+tagline) → visual → after. Desktop unchanged. */
   mobileStackGrid: "caretip-landing-mobile-stack",
@@ -130,7 +129,7 @@ export const landingUi = {
   realLifeCardBody: "caretip-real-life-card-body",
 
   splitGrid:
-    "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-7 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-14",
+    "caretip-split-section-grid caretip-landing-mobile-stack mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-hidden max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-start lg:gap-16 xl:gap-[4.5rem]",
   copyColumn:
     "caretip-mobile-stack-flatten flex w-full min-w-0 flex-col items-start text-left max-lg:contents max-lg:text-center lg:max-w-none",
   visualColumn:
@@ -143,11 +142,11 @@ export const landingUi = {
   sectionAccentText:
     `text-[11px] font-semibold uppercase tracking-[0.17em] ${brandAccentGradient}`,
   sectionAccentTextMuted:
-    "text-[11px] font-medium uppercase tracking-[0.15em] text-neutral-600 dark:text-neutral-400",
+    "text-[11px] font-medium uppercase tracking-[0.15em] text-muted-foreground",
   sectionAccentIcon:
     "h-3 w-3 shrink-0 text-primary",
   sectionAccentIconMuted:
-    "h-3 w-3 shrink-0 text-neutral-500/90 dark:text-neutral-500",
+    "h-3 w-3 shrink-0 text-muted-foreground/80",
   sectionAccentGlow:
     "pointer-events-none absolute -inset-x-3.5 -inset-y-1.5 -z-10 rounded-full bg-[radial-gradient(ellipse_at_center,rgba(233,120,28,0.13),transparent_72%)] opacity-52 blur-md",
   sectionAccentLine:
@@ -157,7 +156,7 @@ export const landingUi = {
 
   copyStack: `caretip-copy-stack flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
   eyebrowSecondary: cnSectionLead(
-    `${sectionLeadReadable} text-neutral-600 max-lg:text-center sm:text-left lg:mx-0 lg:max-w-md lg:text-left dark:text-neutral-400`,
+    `${sectionLeadReadable} text-muted-foreground max-lg:text-center sm:text-left lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   headline: cnSectionHeadline(
     "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] lg:mx-0 lg:max-w-[26ch] lg:text-left",
@@ -165,12 +164,12 @@ export const landingUi = {
   subtitle: cnSectionLead(
     `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
-  cardFeatureBody: `${landingType.featureBody} mt-2 leading-snug sm:mt-2.5 text-neutral-700 dark:text-neutral-300`,
+  cardFeatureBody: `${landingType.featureBody} mt-2 leading-snug sm:mt-2.5 text-muted-foreground`,
   /** In-card body / quote — same scale as hero subtitle & section leads. */
   cardBodyLead: cnSectionLead("text-left"),
   cardCopyStack: "flex flex-col gap-2.5 text-left sm:gap-3",
 
-  benefitList: "w-full space-y-3 max-lg:mt-1 max-lg:space-y-2.5 sm:space-y-3.5",
+  benefitList: "caretip-landing-benefit-list w-full space-y-4 max-lg:mt-1 max-lg:space-y-3.5 sm:space-y-4 lg:space-y-[1.125rem]",
   /** Section CTAs — premium centered width on sm+; full width on xs. */
   cta: cnCtaPrimary(
     `${caretipBtnPrimary} caretip-section-cta-button no-underline ${sectionCtaSize} ${sectionCtaWidth}`,
@@ -184,11 +183,11 @@ export const landingUi = {
   ),
 
   showcaseSection:
-    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-clip px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24 dark:border-neutral-800/80",
-  showcaseSectionToneWarm: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#121110_50%,#0a0a0a_100%)]",
-  showcaseSectionToneMuted: "dark:bg-[linear-gradient(180deg,#0a0a0a_0%,#141414_48%,#0a0a0a_100%)]",
+    "caretip-landing-surface scroll-mt-[80px] relative w-full min-w-0 overflow-x-clip px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28",
+  showcaseSectionToneWarm: "caretip-showcase-section-tone-warm",
+  showcaseSectionToneMuted: "caretip-showcase-section-tone-muted",
   showcaseGrid:
-    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-clip max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-center lg:gap-14",
+    "caretip-split-section-grid caretip-landing-mobile-stack relative mx-auto grid w-full min-w-0 max-w-7xl grid-cols-1 items-start gap-8 overflow-x-clip max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-start lg:gap-16 xl:gap-[4.5rem]",
   showcaseCopy:
     "caretip-mobile-stack-flatten flex w-full min-w-0 max-w-xl flex-col items-start max-lg:contents max-lg:mx-auto lg:max-w-2xl lg:items-start lg:text-left lg:self-start lg:caretip-split-showcase-content-panel lg:caretip-split-showcase-content-panel--copy",
   showcaseIntro: `caretip-mobile-stack-intro flex w-full flex-col items-start max-lg:items-center max-lg:text-center lg:items-start lg:text-left ${sectionIntroChildRhythm}`,
@@ -212,17 +211,17 @@ export const landingUi = {
   showcaseVisualGlow:
     "pointer-events-none absolute -inset-3 rounded-[2rem] bg-[radial-gradient(ellipse_80%_70%_at_50%_55%,rgba(17,17,17,0.04),transparent_68%)] max-lg:-inset-2 sm:-inset-6",
   showcaseVisualFrame:
-    "caretip-showcase-visual-frame relative mx-auto w-full overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_4px_8px_rgba(15,15,15,0.04),0_20px_48px_rgba(15,15,15,0.1)] dark:border-neutral-700 dark:bg-neutral-900 dark:shadow-[0_20px_48px_rgba(0,0,0,0.4)]",
+    "caretip-showcase-visual-frame relative mx-auto w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
   showcaseVisualImg: "aspect-[5/4] w-full object-cover",
 
   visualFrame:
-    "mx-auto w-full overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg dark:border-neutral-800 dark:bg-neutral-900 sm:rounded-[2rem] lg:rounded-[2.5rem]",
+    "mx-auto w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm sm:rounded-[2rem] lg:rounded-[2.5rem]",
   visualImgContain:
     "mx-auto block h-auto max-h-[min(40vh,320px)] w-full max-w-full object-contain object-center sm:max-h-[min(48vh,420px)] lg:max-h-none",
 
   hospitalitySection:
-    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-14 sm:px-6 sm:py-[4.5rem] lg:px-8 lg:py-24",
-  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-10 w-full max-lg:mb-0 max-lg:text-center sm:mb-12 lg:mb-10`,
+    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28",
+  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-12 w-full max-lg:mb-0 max-lg:text-center sm:mb-14 lg:mb-12`,
   hospitalityTitle: cnSectionHeadline(
     "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
   ),
@@ -236,7 +235,7 @@ export const landingUi = {
   hospitalityMediaStack:
     "flex w-full min-w-0 flex-col gap-3 pt-0.5 max-lg:items-center max-lg:text-center sm:gap-4 lg:items-start lg:text-left",
   hospitalityMediaCard:
-    "caretip-hospitality-media-card w-full min-w-0 overflow-hidden rounded-2xl border border-neutral-200/90 bg-white shadow-[0_1px_2px_rgba(17,17,17,0.05),0_10px_32px_-8px_rgba(17,17,17,0.08)] dark:border-neutral-800/90 dark:bg-neutral-950 dark:shadow-[0_16px_36px_rgba(0,0,0,0.35)]",
+    "caretip-hospitality-media-card w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
 
   heroSectionCinematic: heroSectionPadTop,
   heroShell:
@@ -258,7 +257,7 @@ export const landingUi = {
   /** Hero animated keyword — same gradient as section accents (see `.caretip-hero-headline-accent`). */
   heroHeadlineEmphasis: `font-inherit font-extrabold max-lg:tracking-[inherit] ${brandAccentGradient}`,
   heroHeadlineLine:
-    "caretip-hero-headline-line block text-neutral-950 dark:text-neutral-50 max-lg:[&:not(:first-child)]:mt-0 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
+    "caretip-hero-headline-line block text-foreground max-lg:[&:not(:first-child)]:mt-0 [&:not(:first-child)]:mt-1 md:[&:not(:first-child)]:mt-1.25 lg:[&:not(:first-child)]:mt-1",
   heroSubtitle: cnHeroSubtitle(
     "caretip-hero-subtitle w-full text-left",
   ),
@@ -271,7 +270,7 @@ export const landingUi = {
   heroCtaUnit:
     "caretip-hero-cta-unit caretip-landing-cta-unit flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch gap-0.5 max-lg:mx-auto lg:max-w-[15rem]",
   heroCtaHint:
-    "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-neutral-500 dark:text-neutral-400 sm:text-[11px] sm:leading-[1.3]",
+    "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-muted-foreground sm:text-[11px] sm:leading-[1.3]",
   sectionCtaCluster:
     "caretip-landing-section-cta flex w-full justify-center",
   sectionCtaUnit:

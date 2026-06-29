@@ -28,11 +28,11 @@ export const dashboardSharedUi = {
   settingsPanel: "dashboard-settings-panel",
   pageShell: "dashboard-page-shell",
   filterPanel:
-    "dashboard-filter-panel rounded-2xl border border-neutral-200/80 bg-white shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
+    "dashboard-filter-panel rounded-lg border border-border bg-card shadow-sm",
   tablePanel:
-    "dashboard-table-panel max-w-full overflow-x-auto overflow-y-visible rounded-2xl border border-neutral-200/80 bg-white pb-1 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.1)]",
+    "dashboard-table-panel max-w-full overflow-x-auto overflow-y-visible rounded-lg border border-border bg-card pb-1 shadow-sm",
   notificationCard:
-    "dashboard-notification-card rounded-2xl border border-neutral-200/80 bg-white p-4 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.08)] sm:p-5",
+    "dashboard-notification-card rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5",
   notificationCardUnread:
-    "dashboard-notification-card rounded-2xl border border-primary/20 bg-primary/[0.04] p-4 shadow-[0_10px_36px_-14px_rgba(15,23,42,0.08)] sm:p-5",
+    "dashboard-notification-card rounded-lg border border-primary/20 bg-primary/[0.04] p-4 shadow-sm sm:p-5",
 } as const;

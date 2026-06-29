@@ -36,8 +36,8 @@ export function PublicPageHeader({
       <div
         className={cn(
           introLayout === "heroGroup"
-            ? "caretip-public-page-hero space-y-0"
-            : "space-y-3 sm:space-y-4",
+            ? "caretip-public-page-hero caretip-public-marketing-hero space-y-0"
+            : "space-y-4 sm:space-y-5",
           centered && "mx-auto w-full",
           centered && introLayout === "heroGroup" && "max-w-3xl",
           centered && introLayout !== "heroGroup" && "max-w-2xl",

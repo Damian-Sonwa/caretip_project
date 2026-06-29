@@ -61,7 +61,7 @@ export function LandingAnimatedTestimonials() {
       subtitle={subtitle}
       testimonials={testimonials}
       autoRotateInterval={6000}
-      className="caretip-animated-testimonials--landing rounded-2xl border border-border/60 bg-transparent dark:border-neutral-800/80"
+      className="caretip-animated-testimonials--landing rounded-2xl border border-border/60 bg-transparent"
       sectionId="social-proof-testimonials"
     />
   );

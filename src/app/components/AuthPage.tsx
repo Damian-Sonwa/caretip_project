@@ -522,7 +522,7 @@ export function AuthPage() {
               logout();
               setError('');
             }}
-            className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-black/[0.08] bg-white px-4 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-[#fafaf8] sm:w-auto dark:border-white/10 dark:bg-card dark:hover:bg-muted/40"
+            className="inline-flex min-h-10 w-full items-center justify-center rounded-lg border border-border bg-card px-4 text-sm font-semibold text-foreground shadow-[0_2px_8px_rgba(0,0,0,0.03)] transition-[transform,background-color] duration-150 hover:-translate-y-0.5 hover:bg-muted/60 sm:w-auto"
           >
             {t('auth.page.crossSessionSwitch')}
           </button>
@@ -550,7 +550,7 @@ export function AuthPage() {
           <form
             onSubmit={handleSubmit}
             aria-busy={isSubmitting || resumeSessionPending}
-            className="caretip-auth-form text-neutral-900 dark:text-neutral-100"
+            className="caretip-auth-form text-foreground"
             noValidate
           >
             <input
@@ -824,7 +824,7 @@ export function AuthPage() {
                   }
                   toggleAuthMode();
                 }}
-                className="font-semibold text-neutral-900 underline-offset-4 transition-colors hover:text-primary hover:underline disabled:opacity-50 dark:text-neutral-100"
+                className="font-semibold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline disabled:opacity-50"
               >
                 {isLogin
                   ? authLane === 'employee'

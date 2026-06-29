@@ -5,6 +5,8 @@ import { CareIcon } from "@/components/icons";
 import { useAuth } from "../../hooks/useAuth";
 import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from "../CareTipLogo";
 import { BusinessSidebarNavShell } from "./sidebar/BusinessSidebarNavShell";
+import { BusinessSidebarUpgradeCta } from "./sidebar/BusinessSidebarUpgradeCta";
+import { DASHBOARD_SIDEBAR_SHELL_CLASS, dashboardSidebarSignOutButton } from "@/lib/theme/dashboardSidebarUi";
 import { cn } from "@/lib/utils";
 
 export function BusinessSidebar() {
@@ -17,7 +19,7 @@ export function BusinessSidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="business-sidebar hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
+      className={cn("business-sidebar", DASHBOARD_SIDEBAR_SHELL_CLASS)}
     >
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <CareTipLogo size="sm" />
@@ -27,7 +29,8 @@ export function BusinessSidebar() {
         <BusinessSidebarNavShell />
       </nav>
 
-      <div className="shrink-0 px-4 pb-4">
+      <div className="mt-auto shrink-0 border-t border-sidebar-border px-3 pt-2 pb-4">
+        <BusinessSidebarUpgradeCta />
         <button
           type="button"
           onClick={() => {
@@ -38,7 +41,7 @@ export function BusinessSidebar() {
             logout();
             navigate("/business/login", { replace: true });
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>

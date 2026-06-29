@@ -175,7 +175,7 @@ export function CheckEmailPage() {
                 </button>
               </div>
             </label>
-            <p className="text-[11px] leading-snug text-neutral-600 dark:text-neutral-400">
+            <p className="text-[11px] leading-snug text-muted-foreground">
               {t("auth.checkEmail.forgotPasswordLead")}{" "}
               <Link to="/forgot-password" className="font-semibold text-primary underline-offset-2 hover:underline">
                 {t("auth.checkEmail.resetIt")}

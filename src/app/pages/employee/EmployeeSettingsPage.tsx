@@ -21,7 +21,7 @@ import {
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { registerFcmDeviceToken, unregisterFcmDeviceToken } from "../../lib/fcmPush";
-import { ProfileAvatar } from "../../components/ui/profile-avatar";
+import { ThemeAppearanceControl } from "@/app/components/theme/ThemeAppearanceControl";
 import { EmployeeSettingsFormSkeleton } from "../../components/dashboard/DashboardSectionLoading";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -38,6 +38,7 @@ import {
   AlertDialogTrigger,
 } from "../../components/ui/alert-dialog";
 import { Button } from "../../components/ui/button";
+import { ProfileAvatar } from "../../components/ui/profile-avatar";
 import { EmployeePageHeader } from "../../components/employee/EmployeePageHeader";
 import { employeeUi } from "../../components/employee/employeeDashboardUi";
 import { cn } from "@/lib/utils";
@@ -384,6 +385,10 @@ export function EmployeeSettingsPage() {
           >
             {t("employee.settings.changePassword")}
           </Button>
+        </section>
+
+        <section className={employeeUi.settingsSection}>
+          <ThemeAppearanceControl variant="inline" />
         </section>
 
         <section className={employeeUi.settingsSection}>

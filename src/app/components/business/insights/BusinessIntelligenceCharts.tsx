@@ -20,7 +20,7 @@ import { formatEur } from "../../../lib/formatEur";
 import {
   BUSINESS_CHART_GRID,
   BUSINESS_CHART_BAR_SOFT,
-  businessChartTooltipStyle,
+  getBusinessChartTooltipStyle,
 } from "../businessDashboardChartTheme";
 import {
   buildQrChartSeries,
@@ -96,7 +96,7 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
               <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} />
               <Tooltip
                 formatter={(v: number) => [formatEur(v), t("charts.tooltip.tips")]}
-                contentStyle={businessChartTooltipStyle}
+                contentStyle={getBusinessChartTooltipStyle()}
               />
               <Area
                 type="monotone"
@@ -115,7 +115,7 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
               <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
               <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 10 }} />
               <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip contentStyle={businessChartTooltipStyle} />
+              <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
               <Area
                 type="monotone"
                 dataKey="scans"
@@ -135,7 +135,7 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
               <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} unit="%" />
               <Tooltip
                 formatter={(v: number) => [`${v}%`, t("business.team.performance.bi.scanConversion")]}
-                contentStyle={businessChartTooltipStyle}
+                contentStyle={getBusinessChartTooltipStyle()}
               />
               <Line type="monotone" dataKey="conversion" stroke="#a78bfa" strokeWidth={2} dot={false} />
             </LineChart>
@@ -150,7 +150,7 @@ export const BusinessIntelligenceCharts = memo(function BusinessIntelligenceChar
               <YAxis tickLine={false} axisLine={false} width={44} style={{ fontSize: 10 }} />
               <Tooltip
                 formatter={(v: number) => [formatEur(v), t("business.team.performance.bi.revenueLabel")]}
-                contentStyle={businessChartTooltipStyle}
+                contentStyle={getBusinessChartTooltipStyle()}
               />
               <Bar dataKey="revenue" fill={BUSINESS_CHART_BAR_SOFT} radius={[4, 4, 0, 0]} maxBarSize={36} />
             </BarChart>

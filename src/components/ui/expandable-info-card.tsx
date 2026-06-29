@@ -5,6 +5,20 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { caretipBtnPrimary, caretipBtnSecondary } from "@/lib/caretipButtonSystem";
 
+function ExpandableInfoDetailBullet({ text }: { text: string }) {
+  const colonIndex = text.indexOf(":");
+  if (colonIndex === -1) return <>{text}</>;
+
+  const label = text.slice(0, colonIndex).trim();
+  const body = text.slice(colonIndex + 1).trim();
+
+  return (
+    <>
+      <strong className="caretip-expandable-info-card__detail-label font-semibold">{label}:</strong>
+      {body ? ` ${body}` : null}
+    </>
+  );
+}
 export type ExpandableInfoCardProps = {
   imageSrc: string;
   imageWebpSrc?: string;
@@ -92,16 +106,27 @@ export function ExpandableInfoCard({
             expanded && "caretip-expandable-info-card__detail--open",
           )}
         >
-          <div
-            className={cn(
-              "caretip-expandable-info-card__detail-inner",
-              detailSentences.length > 1 && "caretip-landing-copy-paragraphs",
-            )}
-          >
+          <div className="caretip-expandable-info-card__detail-inner">
             {detailSentences.length > 1 ? (
-              detailSentences.map((sentence, index) => <p key={index}>{sentence}</p>)
-            ) : (
-              <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
+              <ul
+                className={cn(
+                  "caretip-landing-copy-scan-list caretip-expandable-info-card__detail-list",
+                )}
+                role="list"
+              >
+                {detailSentences.map((sentence, index) => (
+                  <li
+                    key={index}
+                    className={cn(
+                      "caretip-landing-copy-scan-list__item caretip-expandable-info-card__detail-list-item",
+                    )}
+                    role="listitem"
+                  >
+                    <ExpandableInfoDetailBullet text={sentence} />
+                  </li>
+                ))}
+              </ul>
+            ) : (              <p className="mt-3 border-t border-neutral-100/90 pt-3 text-sm leading-[1.65] text-neutral-600 text-pretty dark:border-neutral-800 dark:text-neutral-400">
                 {detail}
               </p>
             )}

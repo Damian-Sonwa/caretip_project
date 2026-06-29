@@ -4,23 +4,26 @@ import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { Cloud, Database } from "lucide-react";
 import type { PlatformHealthResponse } from "../lib/api";
+import { cn } from "@/lib/utils";
 
 export type NetworkOverviewHeroProps = {
   health: PlatformHealthResponse | null;
   /** When true, sits inside PremiumPageHero — drops outer frame styles. */
   embedded?: boolean;
+  /** Render headline only, health cards only, or both (default). */
+  variant?: "full" | "copy" | "health";
 };
 
 function LivePulse({ className }: { className?: string }) {
   return (
-    <span className={`relative flex h-3 w-3 ${className ?? ""}`}>
-      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-      <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(52,211,153,0.9)]" />
+    <span className={cn("relative flex h-3 w-3", className)}>
+      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500/60 opacity-75" />
+      <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
     </span>
   );
 }
 
-function GlassStatCard({
+function HealthStatCard({
   icon: Icon,
   label,
   value,
@@ -39,25 +42,28 @@ function GlassStatCard({
 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: delay * 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="flex min-w-0 flex-1 flex-col gap-1 rounded-2xl border border-white/20 bg-white/[0.09] px-4 py-3 shadow-[0_8px_28px_-8px_rgba(0,0,0,0.35),0_4px_12px_-4px_rgba(0,0,0,0.15)] backdrop-blur-md sm:px-5 sm:py-4"
+      className="flex min-w-0 flex-1 flex-col gap-2 rounded-lg border border-border bg-card px-4 py-3 shadow-sm sm:px-5 sm:py-4"
     >
-      <div className="flex items-center gap-2 text-white/90">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/15 bg-white/10">
+      <div className="flex items-center gap-2">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-muted/40">
           <Icon
-            className={`h-4 w-4 text-primary sm:h-[18px] sm:w-[18px] ${iconClassName ?? ""}`}
+            className={cn("h-4 w-4 text-muted-foreground sm:h-[18px] sm:w-[18px]", iconClassName)}
             strokeWidth={2}
           />
         </div>
-        <span className="truncate text-[12px] font-medium uppercase tracking-[0.11em] text-white/72 sm:text-xs">
+        <span className="truncate text-xs font-medium uppercase tracking-wide text-muted-foreground">
           {label}
         </span>
       </div>
-      <div className="flex items-baseline justify-between gap-2 pl-[2px]">
+      <div className="flex items-center justify-between gap-2">
         <p
-          className={`font-sans text-[1.625rem] font-bold tabular-nums tracking-tight text-white sm:text-3xl ${valueClassName ?? ""}`}
+          className={cn(
+            "font-sans text-xl font-semibold tabular-nums tracking-tight text-foreground sm:text-2xl",
+            valueClassName,
+          )}
         >
           {value}
         </p>
@@ -67,42 +73,36 @@ function GlassStatCard({
   );
 }
 
-/** Abstract map backdrop — warm premium gradient with orange atmosphere. */
-function MapGraphic3D() {
-  return (
-    <div
-      className="platform-admin-hero__atmosphere pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]"
-      aria-hidden
-    />
-  );
-}
-
 function statusPulse(state: "checking" | "online" | "offline"): ReactNode {
   if (state === "checking") {
-    return <span className="h-3 w-3 animate-pulse rounded-full bg-white/30" />;
+    return <span className="h-3 w-3 animate-pulse rounded-full bg-muted-foreground/40" />;
   }
   if (state === "online") {
     return <LivePulse />;
   }
-  return (
-    <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(248,113,113,0.85)]" />
-  );
+  return <span className="relative inline-flex h-3 w-3 rounded-full bg-destructive" />;
 }
 
 function valueClass(state: "checking" | "online" | "offline"): string {
-  if (state === "checking") return "!text-[1.125rem] sm:!text-2xl text-white/90";
-  if (state === "online") return "!text-[1.125rem] sm:!text-2xl text-emerald-300";
-  return "!text-[1.125rem] sm:!text-2xl text-red-300";
+  if (state === "checking") return "text-foreground";
+  if (state === "online") return "text-emerald-600 dark:text-emerald-400";
+  return "text-destructive";
 }
 
 function iconTint(state: "checking" | "online" | "offline"): string {
   if (state === "checking") return "text-primary";
-  if (state === "online") return "text-emerald-400";
-  return "text-red-400";
+  if (state === "online") return "text-emerald-600 dark:text-emerald-400";
+  return "text-destructive";
 }
 
-export function NetworkOverviewHero({ health, embedded = false }: NetworkOverviewHeroProps) {
+export function NetworkOverviewHero({
+  health,
+  embedded = false,
+  variant = "full",
+}: NetworkOverviewHeroProps) {
   const { t } = useTranslation();
+  const showCopy = variant === "full" || variant === "copy";
+  const showHealth = variant === "full" || variant === "health";
 
   const pg = useMemo(() => {
     if (!health) return { text: t("admin.networkHero.checking"), state: "checking" as const };
@@ -124,41 +124,51 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
 
   return (
     <section
-      className={
-        embedded
-          ? "platform-admin-hero relative overflow-hidden rounded-[1.75rem]"
-          : "platform-admin-hero relative mb-10 overflow-hidden rounded-3xl border border-white/10 shadow-[0_22px_50px_-24px_rgba(233,120,28,0.38),0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.06] max-lg:mb-12"
-      }
+      className={cn(
+        "platform-admin-hero relative",
+        !embedded && "mb-6",
+      )}
     >
-      <MapGraphic3D />
-
-      <div className="relative z-10 flex min-h-[min(380px,68svh)] flex-col gap-8 px-5 py-8 max-lg:gap-7 sm:px-8 sm:py-10 lg:min-h-[420px] lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-10 lg:py-12">
-        <div className="relative max-w-xl lg:max-w-[28rem]">
+      <div
+        className={cn(
+          "flex flex-col gap-6",
+          showCopy && showHealth && "lg:flex-row lg:items-end lg:justify-between lg:gap-8",
+        )}
+      >
+        {showCopy ? (
+        <div className="min-w-0 max-w-xl lg:max-w-[28rem]">
           <motion.h1
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="relative font-sans text-[1.75rem] font-bold leading-[1.16] tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.45)] sm:text-4xl md:text-[2.6rem]"
+            transition={{ duration: 0.4 }}
+            className="platform-admin-page-title font-sans text-[clamp(1.75rem,4.2vw,2.35rem)] font-bold leading-[1.08] tracking-tight text-foreground sm:leading-[1.1]"
           >
             {t("admin.networkHero.title")}
           </motion.h1>
           <motion.p
-            initial={{ opacity: 0, y: 8 }}
+            initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="relative mt-3 font-sans text-[15px] font-normal leading-relaxed text-neutral-200/95 drop-shadow-[0_1px_8px_rgba(0,0,0,0.5)] sm:text-base lg:text-lg"
+            transition={{ duration: 0.4, delay: 0.06 }}
+            className="mt-3 max-w-prose text-pretty text-sm leading-relaxed text-muted-foreground sm:mt-3.5 sm:text-base sm:leading-[1.65]"
           >
             <span className="lg:hidden">{t("admin.networkHero.subtitleMobile")}</span>
             <span className="hidden lg:inline">{t("admin.networkHero.subtitle")}</span>
           </motion.p>
         </div>
+        ) : null}
 
-        <div className="flex w-full flex-col gap-3 lg:ml-auto lg:w-auto lg:max-w-md xl:max-w-lg">
-          <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-white/58 sm:text-left sm:text-xs">
+        {showHealth ? (
+        <div
+          className={cn(
+            "flex w-full flex-col gap-3",
+            showCopy && "lg:ml-auto lg:w-auto lg:max-w-md xl:max-w-lg",
+          )}
+        >
+          <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("admin.networkHero.systemHealth")}
           </p>
           <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-stretch sm:gap-3">
-            <GlassStatCard
+            <HealthStatCard
               icon={Database}
               label={t("admin.networkHero.labelPostgres")}
               value={pg.text}
@@ -167,7 +177,7 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
               pulse={statusPulse(pg.state)}
               delay={0.12}
             />
-            <GlassStatCard
+            <HealthStatCard
               icon={Cloud}
               label={t("admin.networkHero.labelStripe")}
               value={st.text}
@@ -178,6 +188,7 @@ export function NetworkOverviewHero({ health, embedded = false }: NetworkOvervie
             />
           </div>
         </div>
+        ) : null}
       </div>
     </section>
   );

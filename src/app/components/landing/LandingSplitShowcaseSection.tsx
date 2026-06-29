@@ -72,15 +72,11 @@ export function LandingSplitShowcaseSection({
           <LandingParallaxWrap className="relative w-full">{visual}</LandingParallaxWrap>
         </LandingReveal>
 
-        <LandingReveal
-          data-polish-view
-          delay={copyDelay}
-          className={cn(landingUi.showcaseCopy, "lg:flex lg:flex-col", copyLgOrder)}
-        >
+        <div className={cn(landingUi.copyColumn, "lg:flex lg:flex-col", copyLgOrder)}>
           <div className={landingUi.showcaseIntro}>
             <LandingSectionAccent variant={eyebrowVariant}>{eyebrow}</LandingSectionAccent>
             <h2 className={landingUi.showcaseHeadline}>
-              <span className="block text-neutral-900 dark:text-neutral-100">{titleLine1}</span>
+              <span className="block text-foreground">{titleLine1}</span>
               {titleLine2 ? (
                 <span className={landingUi.showcaseHeadlineAccent}>{titleLine2}</span>
               ) : null}
@@ -90,7 +86,8 @@ export function LandingSplitShowcaseSection({
             ) : null}
           </div>
 
-          <div
+          <LandingReveal
+            delay={copyDelay}
             className={cn(
               landingUi.showcaseActionCluster,
               landingUi.mobileStackAfter,
@@ -129,8 +126,8 @@ export function LandingSplitShowcaseSection({
                 </div>
               </div>
             ) : null}
-          </div>
-        </LandingReveal>
+          </LandingReveal>
+        </div>
       </div>
     </section>
   );

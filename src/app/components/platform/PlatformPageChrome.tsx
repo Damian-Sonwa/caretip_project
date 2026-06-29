@@ -12,16 +12,16 @@ export function PlatformPage({
   className?: string;
 }) {
   return (
-    <main className={platformUi.pageMain}>
+    <div className={cn(platformUi.page, className)}>
       <motion.div
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className={cn(platformUi.page, className)}
+        className={platformUi.pageInner}
       >
         {children}
       </motion.div>
-    </main>
+    </div>
   );
 }
 

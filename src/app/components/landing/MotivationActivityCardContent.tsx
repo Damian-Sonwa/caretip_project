@@ -44,12 +44,7 @@ export function MotivationActivityCardTitle({
   }
 
   if (card.id === "dashboard") {
-    return (
-      <>
-        {before}
-        <CountUpMetric value={metric.value} kind={metric.kind} durationMs={850} />
-      </>
-    );
+    return <>{title}</>;
   }
 
   if (card.id === "goal") {
@@ -75,6 +70,16 @@ export function MotivationActivityCardMeta({
 }) {
   const { t } = useTranslation();
   const metric = card.titleMetric;
+
+  if (card.id === "dashboard" && metric && animateMetrics) {
+    return (
+      <>
+        {t(metric.beforeKey!)}
+        <CountUpMetric value={metric.value} kind={metric.kind} durationMs={850} />
+        {metric.afterKey ? t(metric.afterKey) : null}
+      </>
+    );
+  }
 
   if (card.id === "shift" && metric && animateMetrics) {
     return (

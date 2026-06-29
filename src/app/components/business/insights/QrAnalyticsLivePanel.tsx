@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
 import { businessUi } from "../businessDashboardUi";
-import { BUSINESS_CHART_GRID, businessChartTooltipStyle } from "../businessDashboardChartTheme";
+import { BUSINESS_CHART_GRID, getBusinessChartTooltipStyle } from "../businessDashboardChartTheme";
 import { CountUpMetric } from "../../dashboard/CountUpMetric";
 import { cn } from "@/lib/utils";
 import type { BusinessQrAnalytics } from "../../../lib/api";
@@ -113,7 +113,7 @@ export function QrAnalyticsLivePanel({ data, loading, compact, className }: QrAn
                     <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
                     <XAxis dataKey="label" tickLine={false} axisLine={false} style={{ fontSize: 9 }} />
                     <YAxis tickLine={false} axisLine={false} width={28} style={{ fontSize: 9 }} allowDecimals={false} />
-                    <Tooltip contentStyle={businessChartTooltipStyle} />
+                    <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
                     <Area type="monotone" dataKey="count" stroke="#197278" fill="rgba(25,114,120,0.12)" strokeWidth={2} />
                   </AreaChart>
                 </ResponsiveContainer>

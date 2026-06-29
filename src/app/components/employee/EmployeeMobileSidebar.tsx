@@ -17,6 +17,13 @@ import {
 } from "./employeeDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { MobileDrawer } from "../ui/MobileDrawer";
+import {
+  dashboardSidebarIconButtonIdle,
+  dashboardSidebarNavLinkActive,
+  dashboardSidebarNavLinkBase,
+  dashboardSidebarNavLinkIdle,
+  dashboardSidebarSignOutButton,
+} from "@/lib/theme/dashboardSidebarUi";
 
 const EMPLOYEE_DASHBOARD_HOME = employeeDashboardNavItems[0]!.href;
 
@@ -66,15 +73,18 @@ export function EmployeeMobileSidebar({
             </>
           ) : (
             <>
-              <div className="h-9 w-9 shrink-0 rounded-lg bg-muted animate-pulse" />
-              <div className="h-3 min-w-0 flex-1 max-w-[8rem] rounded bg-muted animate-pulse" />
+              <div className="h-9 w-9 shrink-0 animate-pulse rounded-lg bg-muted" />
+              <div className="h-3 min-w-0 max-w-[8rem] flex-1 rounded bg-muted animate-pulse" />
             </>
           )}
         </Link>
         <button
           type="button"
           onClick={onClose}
-          className="touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-stone-100"
+          className={cn(
+            "touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5",
+            dashboardSidebarIconButtonIdle,
+          )}
         >
           <X className="h-5 w-5 text-sidebar-foreground" />
         </button>
@@ -91,10 +101,11 @@ export function EmployeeMobileSidebar({
                   to={item.href}
                   onClick={onClose}
                   className={cn(
-                    "employee-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium",
+                    "employee-dash-nav-link",
+                    dashboardSidebarNavLinkBase,
                     isActive
-                      ? "employee-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
-                      : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+                      ? cn("employee-dash-nav-link--active", dashboardSidebarNavLinkActive)
+                      : dashboardSidebarNavLinkIdle,
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
@@ -114,7 +125,7 @@ export function EmployeeMobileSidebar({
         </ul>
       </nav>
 
-      <div className="px-4 pb-4">
+      <div className="shrink-0 border-t border-sidebar-border px-4 pb-4 pt-3">
         <button
           type="button"
           onClick={() => {
@@ -122,7 +133,7 @@ export function EmployeeMobileSidebar({
             onClose();
             navigate("/employee/login", { replace: true });
           }}
-          className="employee-dash-nav-link flex w-full items-center gap-3 px-3 py-2.5 text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground"
+          className={cn("employee-dash-nav-link", dashboardSidebarSignOutButton)}
         >
           <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>

@@ -12,6 +12,7 @@ import { formatEur } from "../../lib/formatEur";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
@@ -23,6 +24,7 @@ import {
 } from "@/app/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { employeeUi } from "./employeeDashboardUi";
 import {
   Select,
   SelectContent,
@@ -197,7 +199,7 @@ export const EmployeeGoalCard = forwardRef<EmployeeGoalCardHandle, Props>(functi
 
   return (
     <>
-      <Card className="w-full rounded-2xl border border-[#E5E7EB] bg-white shadow-[0_2px_12px_-4px_rgba(15,23,42,0.06)]">
+      <Card className={cn(employeeUi.card, "w-full rounded-2xl")}>
         <CardHeader>
           <div className="flex items-start gap-3">
             <div className="rounded-lg bg-primary p-2 text-primary-foreground">

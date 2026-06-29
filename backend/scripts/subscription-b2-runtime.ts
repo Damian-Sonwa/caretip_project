@@ -32,12 +32,12 @@ const STARTER_FEATURES: SubscriptionCapability[] = [
   "customerFeedback",
   "tipManagement",
   "basicAnalytics",
+  "csvExport",
 ];
 
 const BUSINESS_ONLY_FEATURES: FeatureKey[] = [
   "qrTemplates",
   "advancedAnalytics",
-  "csvExport",
   "multiLocation",
   "employeeGoals",
   "brandingCustomization",

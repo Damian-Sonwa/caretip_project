@@ -22,7 +22,7 @@ import {
   DASHBOARD_CHART_AXIS,
   DASHBOARD_CHART_GRID,
   DASHBOARD_CHART_AREA_STROKE,
-  dashboardChartTooltipStyle,
+  getDashboardChartTooltipStyle,
 } from "../../components/dashboard/dashboardChartTheme";
 
 export type EmployeeDashboardEarningsChartProps = {
@@ -102,7 +102,7 @@ export function EmployeeDashboardEarningsChart({
                     />
                     <Tooltip
                       formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.earnings")]}
-                      contentStyle={dashboardChartTooltipStyle}
+                      contentStyle={getDashboardChartTooltipStyle()}
                     />
                     <Area
                       type="monotone"

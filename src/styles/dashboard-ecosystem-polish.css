@@ -142,14 +142,14 @@
 .caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card,
 .caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card,
 .caretip-dashboard-shell .platform-admin-stat-grid .dashboard-metric-stat-card {
-  min-height: 7.5rem;
+  min-height: 0;
 }
 
 @media (min-width: 640px) {
   .caretip-dashboard-shell .employee-dashboard-stats-grid > .employee-stat-card,
   .caretip-dashboard-shell .business-dashboard-stats-grid > .business-stat-card,
   .caretip-dashboard-shell .platform-admin-stat-grid .dashboard-metric-stat-card {
-    min-height: 8.5rem;
+    min-height: 0;
   }
 }
 
@@ -344,8 +344,12 @@
 
 /* Employee page header matches card system */
 .caretip-dashboard-shell .employee-page-header {
-  border-color: rgba(226, 232, 240, 0.88);
-  box-shadow: 0 10px 36px -14px rgba(15, 23, 42, 0.1);
+  border-color: hsl(var(--border) / 0.88);
+  box-shadow: 0 10px 36px -14px hsl(220 20% 10% / 0.1);
+}
+
+.dark .caretip-dashboard-shell .employee-page-header {
+  box-shadow: 0 10px 36px -14px hsl(0 0% 0% / 0.35);
 }
 
 .caretip-dashboard-shell .employee-settings-section {
@@ -394,7 +398,7 @@
   .employee-dashboard-hero .employee-hero-visual,
   .business-dashboard-hero .business-hero-visual {
     width: 100%;
-    max-width: 32rem;
+    max-width: 40rem;
   }
 }
 

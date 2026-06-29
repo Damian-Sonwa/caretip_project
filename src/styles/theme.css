@@ -26,6 +26,8 @@
   --color-accent-foreground: hsl(var(--accent-foreground));
   --color-success: hsl(var(--success));
   --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
   --color-border: hsl(var(--border));
@@ -61,8 +63,7 @@
   }
 
   body {
-    @apply min-h-screen bg-white font-sans text-body-copy text-neutral-900 antialiased transition-colors duration-300;
-    @apply dark:bg-neutral-950 dark:text-neutral-100;
+    @apply min-h-screen bg-background font-sans text-body-copy text-foreground antialiased transition-colors duration-200;
     font-weight: 400;
   }
 
@@ -71,20 +72,20 @@
   }
 
   h1 {
-    @apply font-sans text-app-title font-bold text-neutral-900 dark:text-neutral-100;
+    @apply font-sans text-app-title font-bold text-foreground;
   }
 
   h2 {
-    @apply font-sans text-app-subtitle font-semibold text-neutral-900 dark:text-neutral-100;
+    @apply font-sans text-app-subtitle font-semibold text-foreground;
   }
 
   h3,
   h4 {
-    @apply font-sans text-card-title font-semibold text-neutral-900 dark:text-neutral-100;
+    @apply font-sans text-card-title font-semibold text-foreground;
   }
 
   label {
-    @apply font-sans text-feature-copy font-semibold text-neutral-900 dark:text-neutral-100;
+    @apply font-sans text-feature-copy font-semibold text-foreground;
   }
 
   button {

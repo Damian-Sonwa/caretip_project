@@ -1,9 +1,9 @@
 import { caretipType } from "@/lib/typography/caretipType";
 import type { DashboardMetricStatCardTokens } from "./DashboardMetricStatCard";
 
-/** Shared shell — height/grid handled by `.dashboard-metric-stat-card` CSS. */
+/** Shared shell — compact workspace KPI card. */
 export const DASHBOARD_METRIC_STAT_CARD_SHELL =
-  "business-metric-stat-card-shell min-h-[7.5rem] rounded-[1.125rem] border border-neutral-200/70 bg-white/95 p-3.5 text-left shadow-[0_12px_40px_-16px_rgba(15,23,42,0.12)] backdrop-blur-[2px] sm:min-h-[8.5rem] sm:p-5";
+  "business-metric-stat-card-shell min-h-0 rounded-lg border border-border bg-card p-3 text-left shadow-none sm:p-3.5";
 
 export const DASHBOARD_METRIC_STAT_LABEL = `${caretipType.kpiLabel} dashboard-metric-stat-card__label-text line-clamp-2 break-normal leading-snug`;
 export const DASHBOARD_METRIC_STAT_VALUE = caretipType.kpiValue;

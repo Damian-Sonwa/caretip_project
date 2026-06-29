@@ -17,6 +17,13 @@ import {
   showEmployeeNavSubscriptionLock,
 } from "./employeeDashboardNav";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
+import {
+  DASHBOARD_SIDEBAR_SHELL_CLASS,
+  dashboardSidebarNavLinkActive,
+  dashboardSidebarNavLinkBase,
+  dashboardSidebarNavLinkIdle,
+  dashboardSidebarSignOutButton,
+} from "@/lib/theme/dashboardSidebarUi";
 
 const EMPLOYEE_DASHBOARD_HOME = employeeDashboardNavItems[0]!.href;
 
@@ -48,7 +55,7 @@ export function EmployeeSidebar({
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
+      className={cn("employee-sidebar", DASHBOARD_SIDEBAR_SHELL_CLASS)}
     >
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <Link
@@ -77,10 +84,11 @@ export function EmployeeSidebar({
                 <Link
                   to={item.href}
                   className={cn(
-                    "employee-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium",
+                    "employee-dash-nav-link",
+                    dashboardSidebarNavLinkBase,
                     isActive
-                      ? "employee-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
-                      : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+                      ? cn("employee-dash-nav-link--active", dashboardSidebarNavLinkActive)
+                      : dashboardSidebarNavLinkIdle,
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
@@ -100,14 +108,14 @@ export function EmployeeSidebar({
         </ul>
       </nav>
 
-      <div className="px-4 pb-4">
+      <div className="mt-auto shrink-0 border-t border-sidebar-border px-4 pb-4 pt-3">
         <button
           type="button"
           onClick={() => {
             logout();
             navigate("/employee/login", { replace: true });
           }}
-          className="employee-dash-nav-link flex w-full items-center gap-3 px-3 py-2.5 text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground"
+          className={cn("employee-dash-nav-link", dashboardSidebarSignOutButton)}
         >
           <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t("dashboard.signOut")}</span>
@@ -116,4 +124,3 @@ export function EmployeeSidebar({
     </motion.aside>
   );
 }
-

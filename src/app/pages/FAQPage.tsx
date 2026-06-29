@@ -19,33 +19,33 @@ interface FAQItemProps {
 
 function FaqAnswerWithLead({ lead, body }: { lead: string; body: string }) {
   return (
-    <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
-      <strong className="font-semibold text-neutral-950 dark:text-neutral-50">{lead}</strong> {body}
+    <p className="text-sm leading-relaxed text-muted-foreground">
+      <strong className="font-semibold text-foreground">{lead}</strong> {body}
     </p>
   );
 }
 
 function FAQItem({ question, questionContent, answer, answerContent, isOpen, onToggle }: FAQItemProps) {
   return (
-    <div className={cn(publicPageUi.card, publicPageUi.cardInteractive, "overflow-hidden p-0")}>
+    <div className={cn(publicPageUi.card, publicPageUi.cardInteractive, "caretip-faq-item overflow-hidden p-0")}>
       <button
         type="button"
         onClick={onToggle}
-        className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors hover:bg-neutral-50/80 sm:px-6 dark:hover:bg-neutral-900/50"
+        className="caretip-faq-trigger flex w-full items-center justify-between text-left transition-colors hover:bg-muted/50"
       >
-        <span className="pr-4 font-semibold text-neutral-950 dark:text-neutral-50">
+        <span className="caretip-faq-question pr-4 text-foreground">
           {questionContent ?? question}
         </span>
         {isOpen ? (
           <Minus className="h-5 w-5 shrink-0 text-primary" />
         ) : (
-          <Plus className="h-5 w-5 shrink-0 text-neutral-500" />
+          <Plus className="h-5 w-5 shrink-0 text-muted-foreground" />
         )}
       </button>
       {isOpen ? (
-        <div className="border-t border-neutral-200/80 px-5 py-4 sm:px-6 dark:border-neutral-800">
+        <div className="caretip-faq-answer-wrap border-t border-border/80">
           {answerContent ?? (
-            <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300 whitespace-pre-line">{answer}</p>
+            <p className="caretip-faq-answer whitespace-pre-line">{answer}</p>
           )}
         </div>
       ) : null}
@@ -65,45 +65,6 @@ export function FAQPage() {
 
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
-  const whatIsAnswer = useMemo(() => {
-    const w = "staticPages.faq.whatIs";
-    return [
-      t(`${w}.lead`),
-      `${t(`${w}.guestsLabel`)} ${t(`${w}.guestsBody`)}`,
-      `${t(`${w}.businessLabel`)} ${t(`${w}.businessBody`)}`,
-      `${t(`${w}.employeesLabel`)} ${t(`${w}.employeesBody`)}`,
-    ].join("\n\n");
-  }, [t]);
-
-  const whatIsAnswerContent = useMemo(
-    () => (
-      <div className="space-y-3 text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
-        <p className="text-base font-bold leading-snug text-neutral-950 sm:text-lg dark:text-neutral-50">
-          {t("staticPages.faq.whatIs.lead")}
-        </p>
-        <p>
-          <strong className="font-semibold text-neutral-950 dark:text-neutral-50">
-            {t("staticPages.faq.whatIs.guestsLabel")}
-          </strong>{" "}
-          {t("staticPages.faq.whatIs.guestsBody")}
-        </p>
-        <p>
-          <strong className="font-semibold text-neutral-950 dark:text-neutral-50">
-            {t("staticPages.faq.whatIs.businessLabel")}
-          </strong>{" "}
-          {t("staticPages.faq.whatIs.businessBody")}
-        </p>
-        <p>
-          <strong className="font-semibold text-neutral-950 dark:text-neutral-50">
-            {t("staticPages.faq.whatIs.employeesLabel")}
-          </strong>{" "}
-          {t("staticPages.faq.whatIs.employeesBody")}
-        </p>
-      </div>
-    ),
-    [t],
-  );
-
   const faqItems = useMemo(() => {
     const raw = t("staticPages.faq.items", { returnObjects: true });
     const items = Array.isArray(raw) ? raw : [];
@@ -122,33 +83,26 @@ export function FAQPage() {
         "q" in item &&
         typeof (item as RawFaqItem).q === "string",
     );
-    return [
-      {
-        question: t("staticPages.faq.whatIs.title"),
-        answer: whatIsAnswer,
-        answerContent: whatIsAnswerContent,
-      },
-      ...parsed.map((item) => {
-        const questionContent =
-          item.qBefore && item.qBold ? (
-            <>
-              {item.qBefore}
-              <strong className="font-bold">{item.qBold}</strong>
-            </>
-          ) : undefined;
+    return parsed.map((item) => {
+      const questionContent =
+        item.qBefore && item.qBold ? (
+          <>
+            {item.qBefore}
+            <strong className="font-bold">{item.qBold}</strong>
+          </>
+        ) : undefined;
 
-        if (item.aLead && item.aBody) {
-          return {
-            question: item.q,
-            questionContent,
-            answer: `${item.aLead} ${item.aBody}`,
-            answerContent: <FaqAnswerWithLead lead={item.aLead} body={item.aBody} />,
-          };
-        }
-        return { question: item.q, questionContent, answer: item.a ?? "" };
-      }),
-    ];
-  }, [t, whatIsAnswer]);
+      if (item.aLead && item.aBody) {
+        return {
+          question: item.q,
+          questionContent,
+          answer: `${item.aLead} ${item.aBody}`,
+          answerContent: <FaqAnswerWithLead lead={item.aLead} body={item.aBody} />,
+        };
+      }
+      return { question: item.q, questionContent, answer: item.a ?? "" };
+    });
+  }, [t]);
 
   const filteredFaqs = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -180,7 +134,7 @@ export function FAQPage() {
       </div>
 
       <div className={cn(publicPageUi.sectionGap, "relative max-w-xl")}>
-        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500" />
+        <Search className="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <input
           type="search"
           value={searchQuery}
@@ -188,13 +142,13 @@ export function FAQPage() {
           placeholder={t("faq.searchPlaceholder")}
           autoComplete="off"
           aria-label={t("faq.searchAria")}
-          className="w-full rounded-xl border border-neutral-200/90 bg-white py-3 pl-12 pr-4 text-neutral-900 placeholder:text-neutral-500 transition-all focus:outline-none focus:ring-2 focus:ring-primary/30 dark:border-neutral-700 dark:bg-neutral-950 dark:text-neutral-100"
+          className="w-full rounded-xl border border-border/90 bg-card py-3 pl-12 pr-4 text-foreground placeholder:text-muted-foreground transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
         />
       </div>
 
       <div className={cn(publicPageUi.sectionGap, "space-y-3")}>
         {filteredFaqs.length === 0 ? (
-          <p className="py-8 text-center text-neutral-600 dark:text-neutral-400">
+          <p className="py-8 text-center text-muted-foreground">
             {t("faq.noMatch")}{" "}
             <button
               type="button"
@@ -220,10 +174,10 @@ export function FAQPage() {
       </div>
 
       <section className={cn(publicPageUi.sectionGap, publicPageUi.ctaPanel)}>
-        <h3 className="mb-2 text-2xl font-semibold text-neutral-950 dark:text-neutral-50">
+        <h3 className="mb-2 text-2xl font-semibold text-foreground">
           {t("staticPages.faq.ctaTitle")}
         </h3>
-        <p className="mx-auto mb-6 max-w-lg text-neutral-700 dark:text-neutral-300">{t("staticPages.faq.ctaBody")}</p>
+        <p className="mx-auto mb-6 max-w-lg text-muted-foreground">{t("staticPages.faq.ctaBody")}</p>
         <Link to="/contact" className={publicPageUi.ctaPrimary}>
           {t("staticPages.faq.ctaButton")}
         </Link>

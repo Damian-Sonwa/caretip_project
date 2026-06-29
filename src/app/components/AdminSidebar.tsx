@@ -4,6 +4,13 @@ import { CareIcon } from '@/components/icons';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
+import {
+  DASHBOARD_SIDEBAR_SHELL_CLASS,
+  dashboardSidebarNavLinkActive,
+  dashboardSidebarNavLinkBase,
+  dashboardSidebarNavLinkIdle,
+  dashboardSidebarSignOutButton,
+} from "@/lib/theme/dashboardSidebarUi";
 import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from './CareTipLogo';
 import { adminDashboardNavItems, isAdminDashboardNavActive } from './adminDashboardNav';
 
@@ -19,7 +26,7 @@ export function AdminSidebar() {
       initial={{ x: -20, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5 }}
-      className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-neutral-200/80 lg:bg-gradient-to-b lg:from-white lg:to-stone-50/95 lg:text-sidebar-foreground"
+      className={cn("admin-sidebar", DASHBOARD_SIDEBAR_SHELL_CLASS)}
     >
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
         <CareTipLogo size="sm" />
@@ -34,10 +41,11 @@ export function AdminSidebar() {
                 <Link
                   to={item.href}
                   className={cn(
-                    "admin-dash-nav-link flex items-center gap-3 px-3 py-2.5 text-sm font-medium transition-all",
+                    "admin-dash-nav-link",
+                    dashboardSidebarNavLinkBase,
                     isActive
-                      ? "admin-dash-nav-link--active bg-primary font-semibold text-primary-foreground"
-                      : "text-sidebar-foreground/85 hover:bg-stone-100/90 hover:text-sidebar-foreground",
+                      ? cn("admin-dash-nav-link--active", dashboardSidebarNavLinkActive)
+                      : dashboardSidebarNavLinkIdle,
                   )}
                 >
                   <CareIcon name={item.icon} size="nav" />
@@ -56,14 +64,14 @@ export function AdminSidebar() {
             logout();
             navigate('/platform-admin/login');
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sidebar-foreground/90 transition-colors hover:bg-sidebar-accent hover:text-sidebar-foreground"
+          className={dashboardSidebarSignOutButton}
         >
           <CareIcon name="signOut" size="md" />
           <span className="text-sm font-medium">{t('admin.sidebar.signOut')}</span>
         </button>
       </div>
 
-      <div className="border-t border-border/70 p-3 sm:p-4">
+      <div className="border-t border-sidebar-border p-3 sm:p-4">
         <div className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
             {displayName.charAt(0)}

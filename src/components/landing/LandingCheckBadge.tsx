@@ -19,7 +19,7 @@ export function LandingBenefitChecklist({ items, tone, className }: LandingBenef
   const textClass =
     tone === "default"
       ? "text-foreground"
-      : "text-neutral-900 dark:text-neutral-50";
+      : "text-foreground";
 
   return (
     <ul

@@ -284,6 +284,8 @@ export type AdminDashboardAnalyticsChartsProps = {
   analyticsUpdatedAt: number | null;
   onTimezoneChange: (tz: string) => void;
   onRetryAnalytics: () => void;
+  /** When true, omit section title (parent collapsible provides header). */
+  hideHeader?: boolean;
 };
 
 export function AdminDashboardAnalyticsCharts({
@@ -298,6 +300,7 @@ export function AdminDashboardAnalyticsCharts({
   analyticsUpdatedAt,
   onTimezoneChange,
   onRetryAnalytics,
+  hideHeader = false,
 }: AdminDashboardAnalyticsChartsProps) {
   const { t } = useTranslation();
 
@@ -306,9 +309,10 @@ export function AdminDashboardAnalyticsCharts({
       initial={false}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className={platformUi.analyticsSection}
+      className={cn(platformUi.analyticsSection, hideHeader && "mb-0")}
       aria-busy={showChartSkeletons || undefined}
     >
+      {hideHeader ? null : (
       <div className={platformUi.analyticsHeader}>
         <div className={platformUi.analyticsHeaderCopy}>
           <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
@@ -344,6 +348,36 @@ export function AdminDashboardAnalyticsCharts({
           </span>
         </div>
       </div>
+      )}
+
+      {hideHeader ? (
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-end">
+          <div className={platformUi.analyticsControls}>
+            <div className="flex w-full min-w-0 flex-col gap-1.5 sm:items-end">
+              <Select value={analyticsTimezone} onValueChange={onTimezoneChange} disabled={analyticsSyncing}>
+                <SelectTrigger size="sm" className="w-full sm:min-w-[14rem]" aria-label={t("admin.timezoneAria")}>
+                  <SelectValue placeholder={t("admin.timezonePlaceholder")} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ADMIN_ANALYTICS_TZ_OPTIONS.map((tz) => (
+                    <SelectItem key={tz} value={tz}>
+                      {tz}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <DashboardRefreshIndicator
+                isRefreshing={analyticsSyncing}
+                lastUpdatedAt={analyticsUpdatedAt}
+                className="shrink-0 text-right"
+              />
+            </div>
+            <span className="text-xs font-medium leading-snug text-muted-foreground max-lg:line-clamp-2">
+              {t("admin.tipStatusNote")}
+            </span>
+          </div>
+        </div>
+      ) : null}
 
       {analyticsError && !chartAnalytics ? (
         <p className="mb-3 text-sm text-destructive" role="alert">

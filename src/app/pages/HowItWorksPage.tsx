@@ -44,7 +44,7 @@ export function HowItWorksPage() {
       <section
         className={cn(
           publicPageUi.sectionGap,
-          "caretip-how-trust-section border-t border-neutral-200/80 pt-10 sm:pt-12 dark:border-neutral-800",
+          "caretip-how-trust-section border-t border-border/80 pt-10 sm:pt-12",
         )}
       >
         <h2
@@ -72,10 +72,10 @@ export function HowItWorksPage() {
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary/10">
               <Zap className="h-5 w-5 text-primary" aria-hidden />
             </div>
-            <h3 className="mb-2 text-lg font-semibold text-neutral-950 dark:text-neutral-50">
+            <h3 className="mb-2 text-lg font-semibold text-foreground">
               {t("staticPages.howItWorks.trust2Title")}
             </h3>
-            <p className="text-sm leading-relaxed text-neutral-700 dark:text-neutral-300">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {t("staticPages.howItWorks.trust2Body")}
             </p>
           </div>

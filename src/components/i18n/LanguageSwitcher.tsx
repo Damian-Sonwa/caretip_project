@@ -8,8 +8,8 @@ import { changeAppLanguage, type AppLanguage } from "@/i18n/i18n";
 
 type LanguageSwitcherProps = {
   className?: string;
-  /** Header: light surface. Inline: footer / dark band. Drawer: full-width mobile nav row. */
-  variant?: "header" | "inline" | "drawer";
+  /** Header: light surface. Inline: footer / dark band. Drawer: full-width mobile nav row. Dashboard: semantic tokens. */
+  variant?: "header" | "inline" | "drawer" | "dashboard";
 };
 
 export const LanguageSwitcher = memo(function LanguageSwitcher({
@@ -24,26 +24,37 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
 
   const isInline = variant === "inline";
   const isDrawer = variant === "drawer";
+  const isDashboard = variant === "dashboard";
 
   const triggerBase =
     "touch-manipulation inline-flex min-h-10 items-center gap-2 rounded-full border px-3 py-2 text-[15px] font-semibold tracking-tight transition-[colors,opacity,box-shadow] outline-none focus-visible:ring-2 focus-visible:ring-offset-2 active:opacity-90 lg:min-h-9 lg:text-sm lg:px-3.5";
 
-  const triggerStyles = isInline
+  const triggerStyles = isDashboard
+    ? "border-border bg-card text-foreground shadow-sm hover:bg-muted/60 focus-visible:ring-ring focus-visible:ring-offset-background"
+    : isInline
     ? "border-white/25 bg-white/10 text-white shadow-[0_1px_0_rgba(255,255,255,0.08)_inset] hover:border-white/35 hover:bg-white/[0.14] focus-visible:ring-white/40 focus-visible:ring-offset-neutral-950"
     : "border-neutral-200/90 bg-white text-neutral-900 shadow-[0_1px_0_rgba(255,255,255,0.9)_inset,0_4px_14px_rgba(15,23,42,0.06)] hover:border-neutral-300 hover:bg-neutral-50/90 focus-visible:ring-[#e9781c]/35 focus-visible:ring-offset-background";
 
-  const menuSurface = isInline
+  const menuSurface = isDashboard
+    ? "border-border bg-popover p-1.5 text-popover-foreground shadow-xl"
+    : isInline
     ? "border-white/15 bg-neutral-950/98 p-1.5 text-white shadow-xl backdrop-blur-md"
     : "border-neutral-200/80 bg-white p-1.5 text-neutral-900 shadow-xl";
 
   const rowBase =
     "flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold transition-colors lg:text-sm";
 
-  const rowIdle = isInline
+  const rowIdle = isDashboard
+    ? "text-muted-foreground hover:bg-muted"
+    : isInline
     ? "text-neutral-200 hover:bg-white/10"
     : "text-neutral-700 hover:bg-neutral-100";
 
-  const rowActive = isInline ? "bg-white/12 text-white" : "bg-[#fff6e8] text-neutral-900";
+  const rowActive = isDashboard
+    ? "bg-primary/10 text-foreground"
+    : isInline
+    ? "bg-white/12 text-white"
+    : "bg-[#fff6e8] text-neutral-900";
 
   const setLang = useCallback((lng: AppLanguage) => {
     setPendingLang(lng);
@@ -132,7 +143,7 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
           aria-expanded={open}
           aria-haspopup="dialog"
         >
-          <Globe className={cn("h-4 w-4 shrink-0 opacity-90", isInline ? "text-white/90" : "text-neutral-600")} aria-hidden />
+          <Globe className={cn("h-4 w-4 shrink-0 opacity-90", isInline ? "text-white/90" : isDashboard ? "text-muted-foreground" : "text-neutral-600")} aria-hidden />
           <span className="tabular-nums">{displayLang === "de" ? "DE" : "EN"}</span>
         </button>
       </PopoverTrigger>
@@ -153,7 +164,7 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
             <span>{t("nav.languageEnglish")}</span>
             {displayLang === "en" ? (
               <Check
-                className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : "text-[#b45309]")}
+                className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : isDashboard ? "text-primary" : "text-[#b45309]")}
                 strokeWidth={2.5}
                 aria-hidden
               />
@@ -169,7 +180,7 @@ export const LanguageSwitcher = memo(function LanguageSwitcher({
             <span>{t("nav.languageGerman")}</span>
             {displayLang === "de" ? (
               <Check
-                className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : "text-[#b45309]")}
+                className={cn("h-4 w-4 shrink-0", isInline ? "text-amber-300" : isDashboard ? "text-primary" : "text-[#b45309]")}
                 strokeWidth={2.5}
                 aria-hidden
               />

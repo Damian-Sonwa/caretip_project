@@ -17,7 +17,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/app/components/ui/dialog";
-import { pricingPageUi } from "@/components/pricing/pricingPageUi";
+import { dashboardWorkspaceUi } from "@/app/components/dashboard/dashboardWorkspaceUi";
 
 const TRIAL_TIER_OPTIONS: PricingTierKey[] = ["starter", "business", "enterprise"];
 
@@ -67,11 +67,11 @@ export function BillingTrialPlanDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="space-y-2 border-b border-border/60 bg-gradient-to-br from-emerald-50/80 via-background to-stone-50/80 px-6 py-5 text-left">
-          <DialogTitle className="text-xl font-semibold tracking-tight">
+        <DialogHeader className="space-y-2 border-b border-border bg-background px-6 py-5 text-left">
+          <DialogTitle className={dashboardWorkspaceUi.sectionTitle}>
             {t("business.billing.trialFlow.chooseTitle")}
           </DialogTitle>
-          <DialogDescription className="text-sm leading-relaxed">
+          <DialogDescription className={dashboardWorkspaceUi.helperText}>
             {t("business.billing.trialFlow.chooseDesc")}
           </DialogDescription>
         </DialogHeader>
@@ -87,7 +87,7 @@ export function BillingTrialPlanDialog({
               <label
                 key={tierKey}
                 className={cn(
-                  "flex cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 transition-colors",
+                  "flex cursor-pointer items-start gap-3 rounded-lg border px-4 py-3 transition-colors",
                   isSelected
                     ? "border-primary/40 bg-primary/[0.06] ring-1 ring-primary/20"
                     : "border-border/70 bg-background hover:bg-muted/30",
@@ -123,7 +123,8 @@ export function BillingTrialPlanDialog({
             type="button"
             disabled={busy}
             onClick={() => void startTrialCheckout()}
-            className={cn(pricingPageUi.cardCtaPrimary, "w-full justify-center")}
+            className={cn(dashboardWorkspaceUi.btnPrimary, "w-full justify-center")}
+            aria-busy={busy || undefined}
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
             {selectedTier === "enterprise"
@@ -169,21 +170,25 @@ export function BillingTrialSection({
       <>
         <section
           id={BILLING_START_TRIAL_HASH}
-          className="billing-trial-promo"
+          className={cn(
+            dashboardWorkspaceUi.card,
+            dashboardWorkspaceUi.cardPad,
+            "flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between",
+          )}
           aria-labelledby="billing-trial-promo-title"
         >
-          <div className="billing-trial-promo__content">
-            <h3 id="billing-trial-promo-title" className="text-lg font-semibold tracking-tight text-foreground">
+          <div className="min-w-0">
+            <h3 id="billing-trial-promo-title" className={dashboardWorkspaceUi.sectionTitle}>
               {t("business.billing.trialFlow.promoTitle")}
             </h3>
-            <p className="mt-1 max-w-2xl text-sm leading-relaxed text-muted-foreground">
+            <p className={cn(dashboardWorkspaceUi.helperText, "mt-1 max-w-2xl")}>
               {t("business.billing.trialFlow.promoBody")}
             </p>
           </div>
           <button
             type="button"
             onClick={() => setDialogOpen(true)}
-            className="billing-trial-promo__cta"
+            className={cn(dashboardWorkspaceUi.btnPrimary, "w-full shrink-0 justify-center sm:w-auto")}
           >
             {t("business.billing.trialFlow.promoCta")}
           </button>
@@ -205,8 +210,8 @@ export function BillingTrialSection({
       return <BillingTrialExpiredUpgrade billing={billing} billingCycle={billingCycle} />;
     }
     return (
-      <section className="rounded-xl border border-border/70 bg-muted/20 px-5 py-4">
-        <p className="text-sm text-muted-foreground">{t("business.billing.trialFlow.alreadyUsed")}</p>
+      <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
+        <p className={dashboardWorkspaceUi.helperText}>{t("business.billing.trialFlow.alreadyUsed")}</p>
       </section>
     );
   }
@@ -227,14 +232,19 @@ function BillingTrialExpiredUpgrade({
 
   if (planKey === "enterprise") {
     return (
-      <section className="billing-trial-expired">
-        <h3 className="text-lg font-semibold text-foreground">
+      <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
+        <h3 className={dashboardWorkspaceUi.sectionTitle}>
           {t("business.billing.trialFlow.expiredTitle", {
             plan: subscriptionPlanDisplayName("enterprise", t),
           })}
         </h3>
-        <p className="mt-2 text-sm text-muted-foreground">{t("business.billing.trialFlow.expiredEnterpriseBody")}</p>
-        <Link to="/contact?intent=enterprise" className={cn(pricingPageUi.cardCtaPrimary, "mt-4 inline-flex w-full justify-center sm:w-auto")}>
+        <p className={cn(dashboardWorkspaceUi.helperText, "mt-1.5")}>
+          {t("business.billing.trialFlow.expiredEnterpriseBody")}
+        </p>
+        <Link
+          to="/contact?intent=enterprise"
+          className={cn(dashboardWorkspaceUi.btnPrimary, "mt-4 inline-flex w-full justify-center sm:w-auto")}
+        >
           {t("business.billing.contactSales")}
         </Link>
       </section>
@@ -265,18 +275,19 @@ function BillingTrialExpiredUpgrade({
   }
 
   return (
-    <section className="billing-trial-expired">
-      <h3 className="text-lg font-semibold text-foreground">
+    <section className={cn(dashboardWorkspaceUi.card, dashboardWorkspaceUi.cardPad)}>
+      <h3 className={dashboardWorkspaceUi.sectionTitle}>
         {t("business.billing.trialFlow.expiredTitle", { plan: planName })}
       </h3>
-      <p className="mt-2 text-sm text-muted-foreground">
+      <p className={cn(dashboardWorkspaceUi.helperText, "mt-1.5")}>
         {t("business.billing.trialFlow.expiredBody", { plan: planName })}
       </p>
       <button
         type="button"
         disabled={busy}
         onClick={() => void handleUpgrade()}
-        className={cn(pricingPageUi.cardCtaPrimary, "mt-4 inline-flex w-full justify-center sm:w-auto")}
+        className={cn(dashboardWorkspaceUi.btnPrimary, "mt-4 inline-flex w-full justify-center sm:w-auto")}
+        aria-busy={busy || undefined}
       >
         {busy ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : null}
         {t("business.billing.trialFlow.upgradeCta", { plan: planName })}

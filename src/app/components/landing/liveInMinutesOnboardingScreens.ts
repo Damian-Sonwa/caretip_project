@@ -2,7 +2,7 @@ import enStep01 from "../../../../images/onboarding/en-step-01-create-account.jp
 import enStep02 from "../../../../images/onboarding/en-step-02-add-team.jpeg";
 import enStep03 from "../../../../images/onboarding/en-step-03-activate-qr.jpeg";
 import enStep04 from "../../../../images/onboarding/en-step-04-receive-tips.jpeg";
-import deStep01 from "../../../../images/onboarding/de-step-01-konto-erstellen.jpeg";
+import deStep01 from "../../../../images/change01.jpeg";
 import deStep02 from "../../../../images/onboarding/de-step-02-team-einladen.jpeg";
 import deStep03 from "../../../../images/onboarding/de-step-03-qr-aktivieren.jpeg";
 import deStep04 from "../../../../images/onboarding/de-step-04-tipps-empfangen.jpeg";
@@ -25,7 +25,7 @@ const STEP_LABELS: Record<OnboardingLocale, readonly string[]> = {
     "Start receiving tips",
   ],
   de: [
-    "Konto erstellen",
+    "Account erstellen",
     "Team hinzufügen",
     "QR-Codes aktivieren",
     "Tipps empfangen",

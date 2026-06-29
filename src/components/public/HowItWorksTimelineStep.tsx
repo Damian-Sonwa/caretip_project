@@ -33,7 +33,7 @@ export function HowItWorksTimelineStep({
       {!isLast ? (
         <div
           aria-hidden
-          className="absolute bottom-0 left-[1.3125rem] top-14 hidden w-px bg-gradient-to-b from-primary/40 via-neutral-200/90 to-transparent sm:block lg:left-[1.375rem]"
+          className="absolute bottom-0 left-[1.3125rem] top-14 hidden w-px bg-gradient-to-b from-primary/40 via-border to-transparent sm:block lg:left-[1.375rem]"
         />
       ) : null}
 
@@ -61,11 +61,11 @@ export function HowItWorksTimelineStep({
                   {badge}
                 </span>
               </div>
-              <h2 className="caretip-how-step__title text-xl font-semibold tracking-[-0.02em] text-neutral-950 sm:text-2xl dark:text-neutral-50">
+              <h2 className="caretip-how-step__title text-xl font-semibold tracking-[-0.02em] text-foreground sm:text-2xl">
                 {title}
               </h2>
             </div>
-            <div className="caretip-how-step__body space-y-4 text-[0.9375rem] leading-[1.68] text-neutral-700 dark:text-neutral-300">
+            <div className="caretip-how-step__body space-y-4 text-[0.9375rem] leading-[1.68] text-muted-foreground">
               {children}
             </div>
           </div>
@@ -93,9 +93,9 @@ export function HowItWorksMiniGrid({ children }: { children: ReactNode }) {
 
 export function HowItWorksMiniCard({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div className={cn(publicPageUi.insetPanel, "bg-white p-3 text-center dark:bg-neutral-950/70")}>
-      <p className="mb-1 text-xs font-semibold text-neutral-900 dark:text-neutral-50">{title}</p>
-      <p className="text-xs text-neutral-600 dark:text-neutral-400">{subtitle}</p>
+    <div className={cn(publicPageUi.miniCard)}>
+      <p className={publicPageUi.miniCardTitle}>{title}</p>
+      <p className={publicPageUi.miniCardSubtitle}>{subtitle}</p>
     </div>
   );
 }
@@ -106,9 +106,9 @@ export function HowItWorksStatGrid({ children }: { children: ReactNode }) {
 
 export function HowItWorksStatCard({ value, label }: { value: string; label: string }) {
   return (
-    <div className={cn(publicPageUi.insetPanel, "bg-white p-3 dark:bg-neutral-950/70")}>
+    <div className={cn(publicPageUi.miniCard, "text-left")}>
       <p className="text-lg font-semibold text-primary">{value}</p>
-      <p className="text-xs text-neutral-600 dark:text-neutral-400">{label}</p>
+      <p className={publicPageUi.miniCardSubtitle}>{label}</p>
     </div>
   );
 }

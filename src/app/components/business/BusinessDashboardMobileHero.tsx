@@ -35,11 +35,6 @@ export function BusinessDashboardMobileHero({
       className={cn("business-dashboard-mobile-hero", className)}
       aria-labelledby="business-mobile-hero-title"
     >
-      <div className="business-dashboard-mobile-hero__glow" aria-hidden>
-        <span className="business-dashboard-mobile-hero__orb business-dashboard-mobile-hero__orb--primary" />
-        <span className="business-dashboard-mobile-hero__orb business-dashboard-mobile-hero__orb--secondary" />
-      </div>
-
       <div className="business-dashboard-mobile-hero__content">
         <div className="business-dashboard-mobile-hero__badge">
           <Sparkles className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
