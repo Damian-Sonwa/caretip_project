@@ -220,22 +220,11 @@ export const landingUi = {
     "mx-auto block h-auto max-h-[min(40vh,320px)] w-full max-w-full object-contain object-center sm:max-h-[min(48vh,420px)] lg:max-h-none",
 
   hospitalitySection:
-    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28",
-  hospitalityIntro: `caretip-mobile-stack-intro ${sectionIntroStack} ${sectionIntroChildRhythm} mb-12 w-full max-lg:mb-0 max-lg:text-center sm:mb-14 lg:mb-12`,
-  hospitalityTitle: cnSectionHeadline(
-    "caretip-mobile-section-headline mx-auto max-w-[min(100%,22ch)] text-center max-lg:px-0 max-md:max-w-[min(100%,24ch)] sm:max-w-2xl lg:max-w-[28ch]",
-  ),
-  hospitalitySubtitle: cnSectionLead(
-    `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0`,
-  ),
-  hospitalityGrid:
-    "caretip-mobile-stack-flatten grid w-full min-w-0 grid-cols-1 items-center gap-8 overflow-x-hidden max-lg:contents max-lg:gap-0 sm:gap-0 lg:grid-cols-2 lg:items-start lg:gap-10 xl:gap-11",
-  hospitalityFeaturePanel:
-    "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full",
-  hospitalityMediaStack:
-    "flex w-full min-w-0 flex-col gap-3 pt-0.5 max-lg:items-center max-lg:text-center sm:gap-4 lg:items-start lg:text-left",
-  hospitalityMediaCard:
-    "caretip-hospitality-media-card w-full min-w-0 overflow-hidden rounded-2xl border border-border bg-card shadow-sm",
+    "caretip-landing-surface scroll-mt-[80px] w-full min-w-0 overflow-x-hidden px-4 sm:px-6 lg:px-8",
+  hospitalityIntro: `${sectionIntroStack} ${sectionIntroChildRhythm} w-full min-w-0`,
+  hospitalityTitle: cnSectionHeadline("caretip-mobile-section-headline w-full min-w-0"),
+  hospitalitySubtitle: cnSectionLead("w-full min-w-0 text-muted-foreground"),
+  hospitalityGrid: "w-full min-w-0",
 
   heroSectionCinematic: heroSectionPadTop,
   heroShell:

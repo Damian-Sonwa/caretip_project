@@ -119,7 +119,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium .caretip-hero-section:
   );
 }
 
-html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality::after,
 html:not(.dark) .caretip-landing.caretip-landing--premium #business-section::after,
 html:not(.dark) .caretip-landing.caretip-landing--premium #recognition::after {
   content: "";
@@ -157,7 +156,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium {
 .caretip-landing.caretip-landing--premium .caretip-landing-card:not(.caretip-landing-ecosystem-card),
 .caretip-landing.caretip-landing--premium .caretip-landing-feature-card,
 .caretip-landing.caretip-landing--premium .caretip-landing-feature-panel,
-.caretip-landing.caretip-landing--premium .caretip-hospitality-media-card,
 .caretip-landing.caretip-landing--premium .caretip-real-life-card,
 .caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel {
   border-radius: var(--caretip-saas-card-radius);
@@ -192,7 +190,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium {
 
 @media (hover: hover) {
   .caretip-landing.caretip-landing--premium .caretip-landing-card:not(.caretip-landing-ecosystem-card):hover,
-  .caretip-landing.caretip-landing--premium .caretip-hospitality-media-card:hover,
   .caretip-landing.caretip-landing--premium .caretip-split-showcase-content-panel--mobile:hover {
     transform: translateY(-3px);
     box-shadow: var(--caretip-saas-shadow-hover);
@@ -348,8 +345,7 @@ html.dark .caretip-landing.caretip-landing--premium .caretip-landing-feature-car
   .caretip-landing.caretip-landing--premium .caretip-hero-cta-button:hover,
   .caretip-landing.caretip-landing--premium .caretip-section-cta-button:hover,
   .caretip-landing.caretip-landing--premium .caretip-final-cta-button:hover,
-  .caretip-landing.caretip-landing--premium .caretip-landing-card:hover,
-  .caretip-landing.caretip-landing--premium .caretip-hospitality-media-card:hover {
+  .caretip-landing.caretip-landing--premium .caretip-landing-card:hover {
     transform: none !important;
   }
 }

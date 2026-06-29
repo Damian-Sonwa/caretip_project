@@ -113,22 +113,12 @@
   ) !important;
 }
 
-.dark .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
-  background: linear-gradient(
-    180deg,
-    hsl(220 14% 10%) 0%,
-    hsl(var(--background)) 48%,
-    hsl(220 12% 11%) 100%
-  );
-}
-
 .dark .caretip-landing .caretip-landing-card:not(.caretip-landing-ecosystem-card) {
   border-color: var(--caretip-landing-border) !important;
   background: var(--caretip-landing-card-bg) !important;
   box-shadow: var(--caretip-landing-card-shadow) !important;
 }
 
-.dark .caretip-landing .caretip-hospitality-media-card,
 .dark .caretip-landing .caretip-showcase-visual-frame {
   border-color: hsl(var(--border) / 0.9);
   background: hsl(var(--card));

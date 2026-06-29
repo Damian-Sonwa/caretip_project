@@ -22,11 +22,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium > .relative.z-10::befo
     padding-bottom: 3.5rem;
   }
 
-  .caretip-landing.caretip-landing--premium #built-for-hospitality {
-    padding-top: 4.5rem;
-    padding-bottom: 4.5rem;
-  }
-
   .caretip-landing.caretip-landing--premium #how-it-works {
     padding-top: 4.5rem;
     padding-bottom: 4.5rem;
@@ -62,11 +57,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium > .relative.z-10::befo
 @media (min-width: 1024px) {
   .caretip-landing.caretip-landing--premium .caretip-hero-section {
     padding-bottom: 4.5rem;
-  }
-
-  .caretip-landing.caretip-landing--premium #built-for-hospitality {
-    padding-top: 5.75rem;
-    padding-bottom: 5.75rem;
   }
 
   .caretip-landing.caretip-landing--premium #how-it-works {
@@ -125,14 +115,6 @@ html:not(.dark) .caretip-landing.caretip-landing--premium main > section + secti
     rgba(17, 17, 17, 0.055) 82%,
     transparent 100%
   );
-}
-
-html:not(.dark) .caretip-landing.caretip-landing--premium #built-for-hospitality {
-  background: linear-gradient(
-    180deg,
-    var(--caretip-ivory-white) 0%,
-    var(--caretip-ivory-premium) 100%
-  ) !important;
 }
 
 html:not(.dark) .caretip-landing.caretip-landing--premium #how-it-works {
@@ -219,14 +201,12 @@ html:not(.dark) .caretip-landing.caretip-landing--premium #recognition {
   content: none;
 }
 
-.caretip-landing.caretip-landing--premium .caretip-section-intro > p,
-.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-subtitle {
+.caretip-landing.caretip-landing--premium .caretip-section-intro > p {
   color: rgba(64, 64, 64, 0.88);
   max-width: 36rem;
 }
 
-html.dark .caretip-landing.caretip-landing--premium .caretip-section-intro > p,
-html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-subtitle {
+html.dark .caretip-landing.caretip-landing--premium .caretip-section-intro > p {
   color: rgba(163, 163, 163, 0.95);
 }
 
@@ -253,20 +233,6 @@ html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .care
   .caretip-landing.caretip-landing--premium .caretip-hero-copy-block {
     gap: 0;
   }
-}
-
-/* —— Hospitality — editorial feature list + media stage —— */
-
-.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-heading {
-  color: #171717;
-}
-
-html.dark .caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-heading {
-  color: #fafafa;
-}
-
-.caretip-landing.caretip-landing--premium #built-for-hospitality .caretip-hospitality-media-card {
-  border-radius: 1.5rem;
 }
 
 /* Setup journey step cards — uniform structure in caretip-landing-live-minutes-refine.css */

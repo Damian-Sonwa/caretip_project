@@ -1,16 +1,14 @@
 /**
- * Feature list rhythm — #built-for-hospitality, #for-employees, #business-section only.
+ * Feature list rhythm — #for-employees, #business-section only.
  * Whitespace separation (24–32px), no dividers, cards, or borders on feature items.
  */
 
-.caretip-landing #built-for-hospitality .caretip-landing-feature-rhythm,
 .caretip-landing #for-employees .caretip-landing-feature-rhythm,
 .caretip-landing #business-section .caretip-landing-feature-rhythm {
   gap: 1.5rem;
 }
 
 @media (min-width: 640px) {
-  .caretip-landing #built-for-hospitality .caretip-landing-feature-rhythm,
   .caretip-landing #for-employees .caretip-landing-feature-rhythm,
   .caretip-landing #business-section .caretip-landing-feature-rhythm {
     gap: 2rem;
@@ -18,7 +16,6 @@
 }
 
 /* Strip any legacy divide / border utilities on these panels only */
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-panel,
 .caretip-landing #for-employees .caretip-hospitality-feature-panel,
 .caretip-landing #business-section .caretip-hospitality-feature-panel {
   border: none;
@@ -30,29 +27,23 @@
   --tw-divide-y-reverse: 0;
 }
 
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-panel > *,
 .caretip-landing #for-employees .caretip-hospitality-feature-panel > *,
 .caretip-landing #business-section .caretip-hospitality-feature-panel > * {
   border-top: none !important;
   border-bottom: none !important;
 }
 
-/* Shared icon axis + left-aligned title / description stack */
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-entry,
 .caretip-landing #for-employees .caretip-landing-feature-rhythm > *,
 .caretip-landing #business-section .caretip-landing-feature-rhythm > * {
   align-items: flex-start;
   text-align: left;
 }
 
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-heading,
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-desc,
 .caretip-landing #for-employees .caretip-landing-feature-rhythm .min-w-0.flex-1,
 .caretip-landing #business-section .caretip-landing-feature-rhythm .min-w-0.flex-1 {
   text-align: left;
 }
 
-.caretip-landing #built-for-hospitality .caretip-hospitality-feature-entry > :first-child,
 .caretip-landing #for-employees .caretip-landing-feature-rhythm > * > :first-child,
 .caretip-landing #business-section .caretip-landing-feature-rhythm > * > :first-child {
   flex-shrink: 0;
@@ -62,10 +53,6 @@
 @media (max-width: 639px) {
   .caretip-landing #for-employees .caretip-landing-feature-rhythm,
   .caretip-landing #business-section .caretip-landing-feature-rhythm {
-    gap: 1.5rem;
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-nav {
     gap: 1.5rem;
   }
 }

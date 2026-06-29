@@ -214,6 +214,7 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon {
   gap: 0.875rem;
 }
 
+.caretip-landing .caretip-hospitality-feature-list__item,
 .caretip-landing .caretip-hospitality-feature-panel li,
 .caretip-landing .caretip-landing-benefit-list li {
   align-items: flex-start;
@@ -222,6 +223,7 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon {
   text-wrap: pretty;
 }
 
+.caretip-landing .caretip-hospitality-feature-list__mark,
 .caretip-landing .caretip-hospitality-feature-panel li > span:first-child,
 .caretip-landing .caretip-landing-benefit-list li > span:first-child {
   margin-top: 0.125rem;
@@ -229,7 +231,6 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon {
 
 /* —— Image frames —— */
 .caretip-landing .caretip-showcase-visual-frame,
-.caretip-landing .caretip-hospitality-media-card,
 .caretip-landing .caretip-expandable-info-card__media,
 .caretip-features-hero-v2__visual-shell,
 .caretip-pricing-hero-v2__visual {
@@ -238,7 +239,7 @@ html.dark .caretip-landing #payments-trust .caretip-landing-feature-icon {
 }
 
 .caretip-landing .caretip-showcase-visual-frame::before,
-.caretip-landing .caretip-hospitality-media-card::before {
+.caretip-landing .caretip-expandable-info-card__media::before {
   content: "";
   position: absolute;
   inset: -1.5rem;

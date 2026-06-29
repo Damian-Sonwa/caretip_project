@@ -2,13 +2,21 @@ import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 
 import HospitalityBusinessesMarquee from "@/components/ui/team";
-import { HospitalityFeaturePanel } from "@/components/landing/HospitalityFeaturePanel";
+import { HospitalityFeatureList } from "@/components/landing/HospitalityFeatureList";
 import { LandingSectionAccent } from "@/components/landing/LandingSectionAccent";
 import { LandingReveal } from "@/components/landing/LandingReveal";
 import { landingCopyVisible, landingUi } from "@/components/landing/landingUi";
 import { landingBoldComponents } from "@/components/landing/landingRichText";
 import { landingStaggerDelay } from "@/lib/landingMotion";
 import { cn } from "@/lib/utils";
+
+function introParagraphVisible(t: (key: string) => string): boolean {
+  return (
+    landingCopyVisible(t("landing.hospitality.subtitle1")) ||
+    landingCopyVisible(t("landing.hospitality.subtitle2")) ||
+    landingCopyVisible(t("landing.hospitality.subtitle3"))
+  );
+}
 
 export function HospitalityTeamsUnifiedSection() {
   const { t, i18n } = useTranslation();
@@ -29,77 +37,47 @@ export function HospitalityTeamsUnifiedSection() {
     <section
       id="built-for-hospitality"
       data-landing-lang={isDe ? "de" : "en"}
-      className={cn(
-        landingUi.hospitalitySection,
-        "caretip-landing-hospitality relative",
-      )}
+      className={cn(landingUi.hospitalitySection, "caretip-landing-hospitality")}
     >
       <div className="mx-auto w-full max-w-7xl min-w-0">
-        <header
-          className={cn(
-            landingUi.hospitalityIntro,
-            landingUi.mobileStackIntro,
-            "caretip-hospitality-intro caretip-hospitality-intro--centered",
-          )}
-        >
+        <header className={cn(landingUi.hospitalityIntro, "caretip-hospitality-intro")}>
           {landingCopyVisible(t("landing.hospitality.eyebrow")) ? (
-            <div className={cn(landingUi.sectionAccentRow, "mb-4 justify-center")}>
+            <div className={cn(landingUi.sectionAccentRow, "mb-4")}>
               <LandingSectionAccent variant="spark">{t("landing.hospitality.eyebrow")}</LandingSectionAccent>
             </div>
           ) : null}
-          <h2 className={landingUi.hospitalityTitle}>{t("landing.hospitality.title")}</h2>
-          {landingCopyVisible(t("landing.hospitality.subtitle")) ? (
-            <p className={cn(landingUi.hospitalitySubtitle, "caretip-landing-density-lead")}>
-              <Trans i18nKey="landing.hospitality.subtitle" components={landingBoldComponents} />
-            </p>
+          <h2 className={cn(landingUi.hospitalityTitle, "caretip-hospitality-title")}>
+            {t("landing.hospitality.title")}
+          </h2>
+          {introParagraphVisible(t) ? (
+            <div className="caretip-hospitality-intro-copy">
+              {landingCopyVisible(t("landing.hospitality.subtitle1")) ? (
+                <p className={cn(landingUi.hospitalitySubtitle, "caretip-hospitality-subtitle")}>
+                  {t("landing.hospitality.subtitle1")}
+                </p>
+              ) : null}
+              {landingCopyVisible(t("landing.hospitality.subtitle2")) ? (
+                <p className={cn(landingUi.hospitalitySubtitle, "caretip-hospitality-subtitle")}>
+                  {t("landing.hospitality.subtitle2")}
+                </p>
+              ) : null}
+              {landingCopyVisible(t("landing.hospitality.subtitle3")) ? (
+                <p className={cn(landingUi.hospitalitySubtitle, "caretip-hospitality-subtitle")}>
+                  <Trans i18nKey="landing.hospitality.subtitle3" components={landingBoldComponents} />
+                </p>
+              ) : null}
+            </div>
           ) : null}
         </header>
 
-        <LandingReveal
-          delay={landingStaggerDelay(1)}
-          className={cn(landingUi.hospitalityGrid, "caretip-hospitality-split lg:grid")}
-        >
-          <div className={cn("caretip-hospitality-features-col max-lg:contents lg:order-1")}>
-            <div
-              className={cn(
-                "caretip-hospitality-features-stack min-w-0",
-                landingUi.mobileStackAfter,
-              )}
-            >
-              <div className={landingUi.hospitalityFeaturePanel}>
-                <HospitalityFeaturePanel features={features} />
-              </div>
-            </div>
-          </div>
-
-          <div
-            className={cn(
-              "caretip-hospitality-visual-col min-w-0",
-              landingUi.mobileStackVisual,
-              "lg:order-2",
-            )}
-          >
-            <div className={landingUi.hospitalityMediaStack}>
-              <div className="caretip-hospitality-showcase">
-                <div
-                  className={cn(
-                    landingUi.hospitalityMediaCard,
-                    "caretip-hospitality-media-stage flex flex-col overflow-hidden",
-                  )}
-                >
-                  {landingCopyVisible(t("landing.industries.title")) ? (
-                    <div className="caretip-hospitality-media-eyebrow shrink-0">
-                      <p className="caretip-hospitality-media-label">{t("landing.industries.title")}</p>
-                    </div>
-                  ) : null}
-                  <div className="caretip-hospitality-media-visual relative min-h-0 flex-1 overflow-hidden">
-                    <div aria-hidden className="caretip-hospitality-media-glow" />
-                    <div aria-hidden className="caretip-hospitality-media-overlay" />
-                    <div aria-hidden className="caretip-hospitality-media-vignette" />
-                    <HospitalityBusinessesMarquee />
-                  </div>
-                </div>
-              </div>
+        <LandingReveal delay={landingStaggerDelay(1)} className={cn(landingUi.hospitalityGrid, "caretip-hospitality-split")}>
+          <HospitalityFeatureList features={features} />
+          <div className="caretip-hospitality-showcase">
+            {landingCopyVisible(t("landing.industries.title")) ? (
+              <p className="caretip-hospitality-showcase-label">{t("landing.industries.title")}</p>
+            ) : null}
+            <div className="caretip-hospitality-showcase-visual">
+              <HospitalityBusinessesMarquee />
             </div>
           </div>
         </LandingReveal>

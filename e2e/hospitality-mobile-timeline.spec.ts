@@ -29,7 +29,7 @@ async function loadWhyCareTip(page: import("@playwright/test").Page) {
   return section;
 }
 
-test.describe("Why CareTip mobile timeline cleanup", () => {
+test.describe("Why CareTip mobile feature list", () => {
   test.beforeAll(() => {
     fs.mkdirSync(OUT_DIR, { recursive: true });
   });
@@ -47,14 +47,17 @@ test.describe("Why CareTip mobile timeline cleanup", () => {
 
       expect(timelineVisible).toBe(false);
 
+      const featureList = section.locator(".caretip-hospitality-feature-list");
+      await expect(featureList).toBeVisible();
+      await expect(featureList.locator("li")).not.toHaveCount(0);
+
       const overflow = await page.evaluate(() => {
         return document.documentElement.scrollWidth > window.innerWidth + 1;
       });
       expect(overflow).toBe(false);
 
-      const featureNav = section.locator(".caretip-hospitality-feature-nav");
-      await featureNav.screenshot({
-        path: path.join(OUT_DIR, `why-caretip-feature-nav--${width}px.png`),
+      await featureList.screenshot({
+        path: path.join(OUT_DIR, `why-caretip-feature-list--${width}px.png`),
       });
     });
   }

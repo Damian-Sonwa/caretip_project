@@ -16,7 +16,6 @@
 
 /* —— Intro → content rhythm (2rem / 2.5rem) —— */
 @media (max-width: 1023px) {
-  .caretip-landing #built-for-hospitality .caretip-mobile-stack-intro,
   .caretip-landing #built-for-hospitality .caretip-hospitality-intro {
     margin-bottom: 2rem;
   }
@@ -57,7 +56,6 @@
 }
 
 @media (min-width: 640px) and (max-width: 1023px) {
-  .caretip-landing #built-for-hospitality .caretip-mobile-stack-intro,
   .caretip-landing #built-for-hospitality .caretip-hospitality-intro,
   .caretip-landing #how-it-works .caretip-live-minutes-intro,
   .caretip-landing #real-life .caretip-real-life-section-intro {
@@ -144,35 +142,6 @@
   object-position: center 46%;
 }
 
-/* —— Why CareTip: intro width + feature card weight —— */
-.caretip-landing #built-for-hospitality .caretip-hospitality-subtitle {
-  max-width: 38rem;
-  margin-inline: auto;
-}
-
-@media (min-width: 1024px) {
-  .caretip-landing #built-for-hospitality.caretip-landing-hospitality {
-    padding-top: 7rem;
-    padding-bottom: 7rem;
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-intro--centered {
-    margin-bottom: clamp(2.5rem, 4vw, 3.25rem);
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-timeline {
-    padding-top: 1.3125rem;
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-card {
-    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.055);
-  }
-
-  html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-feature-item--active .caretip-hospitality-feature-card {
-    box-shadow: 0 8px 26px rgba(0, 0, 0, 0.28);
-  }
-}
-
 /* —— Live in Minutes: phone column rhythm + caption under device —— */
 @media (min-width: 1024px) {
   .caretip-landing #how-it-works .caretip-live-minutes-intro {
@@ -248,17 +217,9 @@
 
 /* —— Mobile / tablet polish (desktop rules above unchanged) —— */
 @media (max-width: 1023px) {
-  .caretip-landing #built-for-hospitality .caretip-hospitality-subtitle {
-    max-width: min(100%, 34rem);
-  }
-
   .caretip-landing #how-it-works .caretip-live-minutes-caption {
     margin-top: 0.375rem;
     padding-inline: 0.25rem;
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-showcase {
-    margin-inline: auto;
   }
 
   .caretip-landing .caretip-final-cta-actions {
@@ -268,10 +229,6 @@
 
 @media (max-width: 767px) {
   .caretip-landing #how-it-works .caretip-live-minutes-intro {
-    margin-bottom: 2rem;
-  }
-
-  .caretip-landing #built-for-hospitality .caretip-hospitality-intro--centered {
     margin-bottom: 2rem;
   }
 }
