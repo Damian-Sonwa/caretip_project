@@ -117,7 +117,8 @@ export function BusinessDashboard() {
   const isPreviewMode = isUnsubscribedDashboardPreview(entitlementsReady, hasActiveEntitlements);
   const onboardingReviewPending = Boolean(
     isBusiness &&
-      !user?.impersonation &&
+      user &&
+      !user.impersonation &&
       user.onboardingVerificationStatus &&
       (user.onboardingVerificationStatus === "submitted" ||
         user.onboardingVerificationStatus === "rejected"),

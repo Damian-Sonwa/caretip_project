@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { createCareStatIcon } from "@/components/icons";
+import { CareIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
   fetchPlatformStats,
@@ -255,7 +255,7 @@ export function AdminDashboard() {
               countUpKind="eur"
               loading={loading}
               loadingVariant="currency"
-              icon={createCareStatIcon("tips")}
+              icon={<CareIcon name="tips" size="md" />}
             />
             <PlatformStatCard
               label={t("admin.overview.kpi.staff")}

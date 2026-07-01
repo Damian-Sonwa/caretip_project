@@ -6,7 +6,7 @@ import { useRequireAuth } from "../../hooks/useRequireAuth";
 /** KYC is not yet exposed to business managers — informational only. */
 export function BusinessKycComingSoonPage() {
   const { t } = useTranslation();
-  useRequireAuth(["business"]);
+  useRequireAuth();
 
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-4 py-12">
