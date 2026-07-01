@@ -1,6 +1,6 @@
 -- Collapse obsolete onboarding "under_review" into "submitted" and remove enum value.
 
-UPDATE "Business"
+UPDATE "businesses"
 SET "onboarding_verification_status" = 'submitted'
 WHERE "onboarding_verification_status" = 'under_review';
 
@@ -13,14 +13,14 @@ CREATE TYPE "OnboardingVerificationStatus" AS ENUM (
   'rejected'
 );
 
-ALTER TABLE "Business"
+ALTER TABLE "businesses"
   ALTER COLUMN "onboarding_verification_status" DROP DEFAULT;
 
-ALTER TABLE "Business"
+ALTER TABLE "businesses"
   ALTER COLUMN "onboarding_verification_status" TYPE "OnboardingVerificationStatus"
   USING ("onboarding_verification_status"::text::"OnboardingVerificationStatus");
 
-ALTER TABLE "Business"
+ALTER TABLE "businesses"
   ALTER COLUMN "onboarding_verification_status" SET DEFAULT 'draft';
 
 DROP TYPE "OnboardingVerificationStatus_old";
