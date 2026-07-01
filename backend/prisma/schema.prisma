@@ -33,6 +33,23 @@ enum BusinessVerificationStatus {
   rejected
 }
 
+/// Admin-approved platform access (separate from KYC / go-live compliance).
+enum OnboardingVerificationStatus {
+  draft
+  submitted
+  approved
+  rejected
+}
+
+/// Financial / compliance document verification (separate from onboarding approval).
+enum KycVerificationStatus {
+  not_started
+  awaiting_upload
+  pending_review
+  verified
+  rejected
+}
+
 enum BusinessSubscriptionTier {
   basic
   premium
@@ -445,6 +462,11 @@ model Business {
   timezone            String    @default("Europe/Berlin") @map("timezone")
 
   verificationStatus       BusinessVerificationStatus @default(pending) @map("verification_status")
+  onboardingVerificationStatus OnboardingVerificationStatus @default(draft) @map("onboarding_verification_status")
+  kycVerificationStatus    KycVerificationStatus    @default(not_started) @map("kyc_verification_status")
+  onboardingSubmittedAt    DateTime?                @map("onboarding_submitted_at")
+  onboardingReviewNotes    String?                  @map("onboarding_review_notes") @db.Text
+  onboardingReviewHistory  Json?                    @map("onboarding_review_history")
   taxId                    String?                    @map("tax_id")
   legalContactName         String?                    @map("legal_contact_name")
   contactEmail             String?                    @map("contact_email")
@@ -516,6 +538,8 @@ model Business {
   featureUtilizationDaily FeatureUtilizationDaily[]
 
   @@index([verificationStatus], map: "businesses_verification_status_idx")
+  @@index([onboardingVerificationStatus], map: "businesses_onboarding_verification_status_idx")
+  @@index([kycVerificationStatus], map: "businesses_kyc_verification_status_idx")
   @@map("businesses")
 }
 

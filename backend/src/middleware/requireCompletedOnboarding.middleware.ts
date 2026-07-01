@@ -4,8 +4,11 @@ import { prisma } from "../prisma.js";
 import { managerHasCompletedOnboarding } from "../services/auth.service.js";
 
 /**
- * Blocks business managers who have not finished onboarding from dashboard APIs.
+ * Blocks business managers who have not finished the onboarding wizard from dashboard APIs.
  * Profile/onboarding routes stay open so the wizard can save progress.
+ *
+ * Platform onboarding *approval* (admin review) does not block dashboard access — it gates
+ * go-live features (QR generation, public tipping) via `requireBusinessVerificationCapability`.
  */
 export async function requireCompletedOnboarding(
   req: Request,

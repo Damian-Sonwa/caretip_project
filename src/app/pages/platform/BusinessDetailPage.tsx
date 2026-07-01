@@ -2,17 +2,19 @@ import { useState, useEffect, useCallback } from "react";
 import { Link, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { CheckCircle, Shield, XCircle } from "lucide-react";
+import { Shield } from "lucide-react";
 import { toast } from "sonner";
 import {
   fetchPlatformBusiness,
-  updatePlatformBusinessVerificationStatus,
+  updatePlatformBusinessOnboardingStatus,
+  updatePlatformBusinessKycStatus,
   updatePlatformBusinessSubscriptionTier,
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
   fetchAuthedObjectUrl,
   type PlatformBusinessRow,
+  type PlatformOnboardingVerificationAction,
   type PlatformVerificationAction,
 } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
@@ -22,6 +24,7 @@ import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../../components/business/BusinessLogoMark";
 import { PlatformPage, PlatformPageHeader } from "../../components/platform/PlatformPageChrome";
 import { PlatformSponsoredAccessSection } from "../../components/platform/PlatformSponsoredAccessSection";
+import { BusinessWorkflowVerificationPanels } from "../../components/platform/BusinessWorkflowVerificationPanels";
 import { platformUi } from "../../components/platform/platformDashboardUi";
 import { cn } from "@/lib/utils";
 
@@ -72,9 +75,36 @@ export function BusinessDetailPage() {
     setSubscriptionTier(row.subscriptionTier ?? "premium");
   }, [row]);
 
-  const handleStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
+  const handleOnboardingAction = async (action: PlatformOnboardingVerificationAction) => {
+    if (!id) return;
+    let reviewNote: string | undefined;
+    if (action === "rejected") {
+      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
+    }
     try {
-      await updatePlatformBusinessVerificationStatus(businessId, status);
+      await updatePlatformBusinessOnboardingStatus(id, action, reviewNote);
+      toast.success(
+        action === "approved"
+          ? t("admin.businessDetailPage.toastOnboardingApproved")
+          : action === "rejected"
+            ? t("admin.businessDetailPage.toastOnboardingRejected")
+            : t("admin.businessVerificationPage.toastStatusUpdated"),
+      );
+      await load();
+    } catch (e) {
+      logClientError("BusinessDetailPage.handleOnboardingAction", e);
+      toast.error(toUserFriendlyMessage(e));
+    }
+  };
+
+  const handleKycAction = async (status: PlatformVerificationAction) => {
+    if (!id) return;
+    let reviewNote: string | undefined;
+    if (status === "rejected") {
+      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
+    }
+    try {
+      await updatePlatformBusinessKycStatus(id, status, reviewNote);
       if (status === "verified") {
         toast.success(t("admin.businessVerificationPage.toastApproved"));
       } else if (status === "rejected") {
@@ -84,7 +114,7 @@ export function BusinessDetailPage() {
       }
       await load();
     } catch (e) {
-      logClientError("BusinessDetailPage.handleStatusUpdate", e);
+      logClientError("BusinessDetailPage.handleKycAction", e);
       toast.error(toUserFriendlyMessage(e));
     }
   };
@@ -136,33 +166,15 @@ export function BusinessDetailPage() {
     }
   };
 
-  const statusBadge = (b: PlatformBusinessRow) => {
-    if (b.verificationStatus === "verified") {
-      return (
-        <span className="inline-flex items-center gap-1 rounded-full bg-success px-2.5 py-1 text-sm font-medium text-success-foreground">
-          <CheckCircle className="h-4 w-4" /> {t("admin.businessVerificationPage.statusVerified")}
-        </span>
-      );
-    }
-    if (b.verificationStatus === "rejected") {
-      return (
-        <span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 text-sm font-medium">
-          <XCircle className="w-4 h-4" /> {t("admin.businessVerificationPage.statusRejected")}
-        </span>
-      );
-    }
-    return (
-      <span className="text-amber-600 dark:text-amber-400 text-sm font-medium">
-        {t("admin.businessVerificationPage.statusPending")}
-      </span>
-    );
+  const scrollToDocuments = () => {
+    document.getElementById("kyc-documents")?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const isInitialLoad = loading && !row;
 
   return (
     <PlatformPage>
-      <Link to="/platform-admin/businesses" className={platformUi.backLink}>
+      <Link to="/platform-admin/businesses/onboarding-verification" className={platformUi.backLink}>
         {t("admin.businessDetailPage.backLink")}
       </Link>
 
@@ -191,8 +203,14 @@ export function BusinessDetailPage() {
                   <p className="text-sm text-muted-foreground mt-1">{row.ownerEmail}</p>
                 </div>
               </div>
-              <div className="flex flex-col items-start gap-2">{statusBadge(row)}</div>
             </div>
+
+            <BusinessWorkflowVerificationPanels
+              row={row}
+              onOnboardingAction={(action) => void handleOnboardingAction(action)}
+              onKycAction={(status) => void handleKycAction(status)}
+              onReviewDocuments={scrollToDocuments}
+            />
 
             <div className="rounded-lg border border-border/80 bg-muted/20 p-4 space-y-3">
               <p className="text-sm font-medium text-foreground">{t("admin.businessDetailPage.dtSubscriptionTier")}</p>
@@ -275,7 +293,7 @@ export function BusinessDetailPage() {
               </div>
             </dl>
 
-            <div className="flex flex-wrap gap-2">
+            <div id="kyc-documents" className="flex flex-wrap gap-2">
               {row.logoPath ? (
                 <button
                   type="button"
@@ -322,24 +340,6 @@ export function BusinessDetailPage() {
               >
                 {t("admin.businessDetailPage.editDetails")}
               </button>
-              {row.verificationStatus !== "verified" && (
-                <button
-                  type="button"
-                  onClick={() => void handleStatusUpdate(row.id, "verified")}
-                  className="text-sm font-medium px-3 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary-hover"
-                >
-                  {t("admin.businessVerificationPage.btnApprove")}
-                </button>
-              )}
-              {row.verificationStatus === "pending" && (
-                <button
-                  type="button"
-                  onClick={() => void handleStatusUpdate(row.id, "rejected")}
-                  className="text-sm font-medium px-3 py-2 rounded-lg border border-destructive text-destructive hover:bg-destructive/10"
-                >
-                  {t("admin.businessVerificationPage.btnReject")}
-                </button>
-              )}
             </div>
           </motion.div>
         )}

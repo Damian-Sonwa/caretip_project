@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { prisma } from "../prisma.js";
+import { kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 import { hasBusinessVerificationCapability } from "../config/businessVerificationCapabilities.js";
 import { signPublicSocketRoomToken } from "../services/publicSocketToken.service.js";
 import { logServerError, clientSafeMessage } from "../utils/httpErrors.js";
@@ -22,18 +23,26 @@ export async function getPublicRoomToken(req: Request, res: Response) {
     const business = businessId
       ? await prisma.business.findUnique({
           where: { id: businessId },
-          select: { id: true, verificationStatus: true },
+          select: { id: true, kycVerificationStatus: true, onboardingVerificationStatus: true },
         })
       : await prisma.business.findFirst({
           where: { slug: businessSlug },
-          select: { id: true, verificationStatus: true },
+          select: { id: true, kycVerificationStatus: true, onboardingVerificationStatus: true },
         });
 
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
     }
 
-    if (!hasBusinessVerificationCapability(business.verificationStatus, "activateTipping")) {
+    if (
+      !hasBusinessVerificationCapability(
+        kycStatusToLegacyMirror(business.kycVerificationStatus),
+        "activateTipping",
+        {
+          onboardingVerificationStatus: business.onboardingVerificationStatus,
+        },
+      )
+    ) {
       return res.status(403).json({ message: "This business is not accepting tips yet." });
     }
 

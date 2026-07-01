@@ -16,6 +16,7 @@ import { logDashboardTiming } from "../utils/dashboardTiming.js";
 import { logDashboardTenant } from "../utils/dashboardTenantLog.js";
 import { runSerializedByKey } from "../utils/serializedByKey.js";
 import { businessUtcRangeForLocalDates, businessUtcRangeForTimeframe, sanitizeIanaTimezone } from "../utils/businessTime.js";
+import { sanitizeLikeContainsSearch } from "../utils/likeSearch.js";
 import { businessTipsQueryRequiresAdvancedAnalytics, employeeTipsListQueryRequiresAdvancedAnalytics, isEmployeeTipsScopeAllowedForTier } from "../config/subscriptionCapabilities.js";
 import {
   getSubscriptionTierForBusinessId,
@@ -277,6 +278,27 @@ function toTipRow(t: {
   };
 }
 
+function withTipTextSearch(
+  base: Record<string, unknown>,
+  qRaw: string | undefined,
+): Record<string, unknown> {
+  const q = sanitizeLikeContainsSearch(qRaw);
+  if (!q) return base;
+  return {
+    AND: [
+      base,
+      {
+        OR: [
+          { id: { contains: q, mode: "insensitive" } },
+          { employee: { name: { contains: q, mode: "insensitive" } } },
+          { location: { name: { contains: q, mode: "insensitive" } } },
+          { table: { name: { contains: q, mode: "insensitive" } } },
+        ],
+      },
+    ],
+  };
+}
+
 export async function getByBusiness(req: Request, res: Response) {
   try {
     const userId = req.user?.userId ?? req.user?.id;
@@ -304,6 +326,7 @@ export async function getByBusiness(req: Request, res: Response) {
     const employeeId = typeof req.query.employeeId === "string" ? req.query.employeeId.trim() : "";
     const locationId = typeof req.query.locationId === "string" ? req.query.locationId.trim() : "";
     const tableId = typeof req.query.tableId === "string" ? req.query.tableId.trim() : "";
+    const searchQ = typeof req.query.q === "string" ? req.query.q : undefined;
 
     if (
       !subscriptionBypass(req) &&
@@ -356,28 +379,31 @@ export async function getByBusiness(req: Request, res: Response) {
     const customRange = rangeRaw === "custom" ? businessUtcRangeForLocalDates(customFrom, customTo, tz) : null;
     const chosenRange = presetRange ?? customRange;
 
-    const where: Record<string, unknown> = {
-      businessId: b.id,
-      ...(status ? { status } : {}),
-      ...(employeeId ? { employeeId } : {}),
-      ...(locationId ? { locationId } : {}),
-      ...(tableId ? { tableId } : {}),
-      ...(chosenRange
-        ? {
-            createdAt: {
-              gte: chosenRange.startUtc,
-              lte: chosenRange.endUtc,
-            },
-          }
-        : from || to
-        ? {
-            createdAt: {
-              ...(from ? { gte: from } : {}),
-              ...(to ? { lte: to } : {}),
-            },
-          }
-        : {}),
-    };
+    const where = withTipTextSearch(
+      {
+        businessId: b.id,
+        ...(status ? { status } : {}),
+        ...(employeeId ? { employeeId } : {}),
+        ...(locationId ? { locationId } : {}),
+        ...(tableId ? { tableId } : {}),
+        ...(chosenRange
+          ? {
+              createdAt: {
+                gte: chosenRange.startUtc,
+                lte: chosenRange.endUtc,
+              },
+            }
+          : from || to
+            ? {
+                createdAt: {
+                  ...(from ? { gte: from } : {}),
+                  ...(to ? { lte: to } : {}),
+                },
+              }
+            : {}),
+      },
+      searchQ,
+    );
 
     const [total, rows] = await Promise.all([
       prisma.transaction.count({ where: where as never }),
@@ -419,6 +445,7 @@ export async function listByEmployee(req: Request, res: Response) {
     const customTo = typeof req.query.toDate === "string" ? req.query.toDate.trim() : undefined;
     const from = parseDate(req.query.from); // legacy
     const to = parseDate(req.query.to); // legacy
+    const searchQ = typeof req.query.q === "string" ? req.query.q : undefined;
 
     if (
       !subscriptionBypass(req) &&
@@ -437,25 +464,28 @@ export async function listByEmployee(req: Request, res: Response) {
     const customRange = rangeRaw === "custom" ? businessUtcRangeForLocalDates(customFrom, customTo, tz) : null;
     const chosenRange = presetRange ?? customRange;
 
-    const where: Record<string, unknown> = {
-      employeeId: employee.id,
-      ...(status ? { status } : {}),
-      ...(chosenRange
-        ? {
-            createdAt: {
-              gte: chosenRange.startUtc,
-              lte: chosenRange.endUtc,
-            },
-          }
-        : from || to
-        ? {
-            createdAt: {
-              ...(from ? { gte: from } : {}),
-              ...(to ? { lte: to } : {}),
-            },
-          }
-        : {}),
-    };
+    const where = withTipTextSearch(
+      {
+        employeeId: employee.id,
+        ...(status ? { status } : {}),
+        ...(chosenRange
+          ? {
+              createdAt: {
+                gte: chosenRange.startUtc,
+                lte: chosenRange.endUtc,
+              },
+            }
+          : from || to
+            ? {
+                createdAt: {
+                  ...(from ? { gte: from } : {}),
+                  ...(to ? { lte: to } : {}),
+                },
+              }
+            : {}),
+      },
+      searchQ,
+    );
 
     const [total, rows] = await Promise.all([
       prisma.transaction.count({ where: where as never }),

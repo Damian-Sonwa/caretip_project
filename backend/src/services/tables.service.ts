@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { prisma } from "../prisma.js";
+import { isOnboardingApprovedForPublicGoLive } from "../lib/verificationWorkflow.js";
 import {
   assertPlanLimitForBusiness,
   planLimitExceededPayload,
@@ -107,7 +108,7 @@ export async function getTippingContextByQrSlug(qrSlug: string) {
         select: {
           name: true,
           businessId: true,
-          business: { select: { id: true, name: true, verificationStatus: true, logoPath: true } },
+          business: { select: { id: true, name: true, onboardingVerificationStatus: true, logoPath: true } },
         },
       },
     },
@@ -115,7 +116,7 @@ export async function getTippingContextByQrSlug(qrSlug: string) {
   if (!table) {
     return null;
   }
-  if (table.location.business.verificationStatus !== "verified") {
+  if (!isOnboardingApprovedForPublicGoLive(table.location.business.onboardingVerificationStatus)) {
     return { locked: true as const };
   }
   return {

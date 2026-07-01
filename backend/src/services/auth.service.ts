@@ -18,6 +18,7 @@ import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { resolveEmailLocale, resolveUserPreferredLocale } from "../emails/i18nEmail.js";
 import { assertPlatformAdminMfaSessionAllowed } from "./mfaLogin.service.js";
 import { inferManagerOnboardingStep, type OnboardingStep } from "./onboardingProgress.service.js";
+import { kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 
 /** Mirrors the frontend `AuthResponse.user` shape (see `src/app/lib/api.ts`). */
 export interface AuthUserDto {
@@ -37,6 +38,8 @@ export interface AuthUserDto {
   impersonation?: boolean;
   impersonatedBy?: string;
   businessVerificationStatus?: "pending" | "verified" | "rejected";
+  onboardingVerificationStatus?: "draft" | "submitted" | "approved" | "rejected";
+  kycVerificationStatus?: "not_started" | "awaiting_upload" | "pending_review" | "verified" | "rejected";
   /** UI + email language (`en` / `de`). */
   preferredLocale?: string | null;
 }
@@ -127,6 +130,8 @@ type BusinessForAuthResult = {
   id: string;
   name: string;
   verificationStatus: BusinessVerificationStatus;
+  onboardingVerificationStatus?: string;
+  kycVerificationStatus?: string;
   businessType?: string | null;
   registeredAddress?: string | null;
 };
@@ -141,6 +146,8 @@ const businessIncludeForAuth = {
     id: true,
     name: true,
     verificationStatus: true,
+    onboardingVerificationStatus: true,
+    kycVerificationStatus: true,
     businessType: true,
     registeredAddress: true,
   },
@@ -158,6 +165,8 @@ type ImpersonatedManagerBusiness = {
   id: string;
   name: string;
   verificationStatus: BusinessVerificationStatus;
+  onboardingVerificationStatus?: string;
+  kycVerificationStatus?: string;
   businessType?: string | null;
   registeredAddress?: string | null;
 };
@@ -197,7 +206,11 @@ export function impersonationAuthUserDto(
           registeredAddress: business.registeredAddress,
         }),
     businessId: business.id,
-    businessVerificationStatus: business.verificationStatus,
+    businessVerificationStatus: kycStatusToLegacyMirror(
+      business.kycVerificationStatus as import("@prisma/client").KycVerificationStatus | undefined,
+    ),
+    onboardingVerificationStatus: business.onboardingVerificationStatus as AuthUserDto["onboardingVerificationStatus"],
+    kycVerificationStatus: business.kycVerificationStatus as AuthUserDto["kycVerificationStatus"],
     impersonation: true,
     impersonatedBy: platformAdminUserId,
   };
@@ -239,7 +252,13 @@ function buildAuthUserDto(user: UserForAuthResult): AuthUserDto {
         );
     if (user.business) {
       dto.businessId = user.business.id;
-      dto.businessVerificationStatus = user.business.verificationStatus;
+      dto.businessVerificationStatus = kycStatusToLegacyMirror(
+        user.business.kycVerificationStatus as import("@prisma/client").KycVerificationStatus | undefined,
+      );
+      dto.onboardingVerificationStatus =
+        user.business.onboardingVerificationStatus as AuthUserDto["onboardingVerificationStatus"];
+      dto.kycVerificationStatus =
+        user.business.kycVerificationStatus as AuthUserDto["kycVerificationStatus"];
     }
   }
   if (user.role === "EMPLOYEE" && user.employee) {
@@ -397,7 +416,15 @@ export async function registerBusiness(
       },
     },
     include: {
-      business: { select: { id: true, name: true, verificationStatus: true } },
+      business: {
+        select: {
+          id: true,
+          name: true,
+          verificationStatus: true,
+          onboardingVerificationStatus: true,
+          kycVerificationStatus: true,
+        },
+      },
       employee: { select: { id: true, name: true, avatar: true, businessId: true } },
     },
   });
@@ -454,7 +481,15 @@ export async function registerEmployee(
   const withEmployee = await prisma.user.findUnique({
     where: { id: created.id },
     include: {
-      business: { select: { id: true, name: true, verificationStatus: true } },
+      business: {
+        select: {
+          id: true,
+          name: true,
+          verificationStatus: true,
+          onboardingVerificationStatus: true,
+          kycVerificationStatus: true,
+        },
+      },
       employee: { select: { id: true, name: true, avatar: true, businessId: true } },
     },
   });

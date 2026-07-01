@@ -1052,6 +1052,13 @@ export async function patchMe(req: Request, res: Response) {
       },
     });
 
+    if (body.hasCompletedOnboarding === true) {
+      const { submitBusinessOnboardingForReview } = await import(
+        "../services/businessVerificationWorkflow.service.js"
+      );
+      await submitBusinessOnboardingForReview(userId);
+    }
+
     // Re-issue a fresh auth payload so the client immediately routes correctly.
     const result = await authService.authResultForUserId(userId);
     try {

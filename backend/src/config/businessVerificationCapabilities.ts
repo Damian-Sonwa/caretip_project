@@ -1,6 +1,6 @@
-import type { BusinessVerificationStatus } from "@prisma/client";
+import type { BusinessVerificationStatus, OnboardingVerificationStatus } from "@prisma/client";
 
-/** Product capabilities gated by admin KYC / go-live approval. */
+/** Product capabilities gated by admin review — not dashboard access. */
 export type BusinessVerificationCapability =
   | "setup"
   | "qrCodes"
@@ -14,7 +14,7 @@ export type BusinessVerificationCapabilityFlags = {
   canGenerateQrCodes: boolean;
   /** Public tipping surfaces (QR landing, staff directory) may activate. */
   canActivateTipping: boolean;
-  /** Stripe checkout and tip ledger acceptance. */
+  /** Stripe checkout and tip ledger acceptance (KYC / compliance). */
   canReceiveTips: boolean;
 };
 
@@ -22,17 +22,30 @@ export const GO_LIVE_REQUIRED_CODE = "GO_LIVE_REQUIRED" as const;
 export const GO_LIVE_REQUIRED_MESSAGE =
   "This feature is available after your venue is approved to go live.";
 
+export const ONBOARDING_APPROVAL_REQUIRED_CODE = "ONBOARDING_APPROVAL_REQUIRED" as const;
+export const ONBOARDING_APPROVAL_REQUIRED_MESSAGE =
+  "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.";
+
 type ResolveOpts = {
   impersonating?: boolean;
   superAdmin?: boolean;
+  /** Platform onboarding review — gates public QR / venue exposure. */
+  onboardingVerificationStatus?: OnboardingVerificationStatus | null;
 };
 
+/** Admin-approved onboarding (or legacy rows without a status column value). */
+export function isOnboardingApprovedForPublicGoLive(
+  status: OnboardingVerificationStatus | null | undefined,
+): boolean {
+  return status == null || status === "approved";
+}
+
 /**
- * Verification is a go-live gate, not a platform-access gate.
- * Pending managers may configure the venue; public tipping stays locked until `verified`.
+ * Setup vs go-live capabilities.
+ * Dashboard access is not gated here — only public QR exposure and live tipping.
  */
 export function resolveBusinessVerificationCapabilities(
-  status: BusinessVerificationStatus | null | undefined,
+  kycStatus: BusinessVerificationStatus | null | undefined,
   opts?: ResolveOpts,
 ): BusinessVerificationCapabilityFlags {
   if (opts?.impersonating || opts?.superAdmin) {
@@ -44,23 +57,24 @@ export function resolveBusinessVerificationCapabilities(
     };
   }
 
-  const verified = status === "verified";
-  const hasBusiness = status != null;
+  const onboardingApproved = isOnboardingApprovedForPublicGoLive(opts?.onboardingVerificationStatus);
+  const kycVerified = kycStatus === "verified";
+  const hasBusiness = kycStatus != null;
 
   return {
-    canAccessSetupFeatures: hasBusiness && status !== "rejected",
-    canGenerateQrCodes: verified,
-    canActivateTipping: verified,
-    canReceiveTips: verified,
+    canAccessSetupFeatures: hasBusiness && kycStatus !== "rejected",
+    canGenerateQrCodes: onboardingApproved,
+    canActivateTipping: onboardingApproved,
+    canReceiveTips: kycVerified,
   };
 }
 
 export function hasBusinessVerificationCapability(
-  status: BusinessVerificationStatus | null | undefined,
+  kycStatus: BusinessVerificationStatus | null | undefined,
   capability: Exclude<BusinessVerificationCapability, "setup">,
   opts?: ResolveOpts,
 ): boolean {
-  const flags = resolveBusinessVerificationCapabilities(status, opts);
+  const flags = resolveBusinessVerificationCapabilities(kycStatus, opts);
   switch (capability) {
     case "qrCodes":
       return flags.canGenerateQrCodes;

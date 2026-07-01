@@ -676,6 +676,19 @@ export async function fetchAuthedObjectUrl(inputUrl: string): Promise<string> {
 }
 
 // Auth
+export type OnboardingVerificationStatus =
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "rejected";
+
+export type KycVerificationStatus =
+  | "not_started"
+  | "awaiting_upload"
+  | "pending_review"
+  | "verified"
+  | "rejected";
+
 export interface RegisterPendingResponse {
   requiresEmailVerification: true;
   user: AuthResponse["user"];
@@ -696,8 +709,10 @@ export interface AuthResponse {
     avatar?: string | null;
     impersonation?: boolean;
     impersonatedBy?: string;
-    /** Backend Prisma enum; managers only. */
+    /** Legacy KYC mirror column; prefer `kycVerificationStatus`. */
     businessVerificationStatus?: "pending" | "verified" | "rejected";
+    onboardingVerificationStatus?: OnboardingVerificationStatus;
+    kycVerificationStatus?: KycVerificationStatus;
     /** `en` | `de` — UI + transactional email language. */
     preferredLocale?: string | null;
   };
@@ -1091,7 +1106,8 @@ export async function generateInviteCode(): Promise<{ inviteCode: string; expire
 export interface BusinessDashboardStats {
   name?: string;
   slug?: string | null;
-  verificationStatus?: "pending" | "verified";
+  kycVerificationStatus?: KycVerificationStatus;
+  onboardingVerificationStatus?: OnboardingVerificationStatus;
   /** Selected period for totals and charts (matches query). */
   timeframe?: "week" | "month" | "year" | "all";
   totalTips?: number;
@@ -1379,7 +1395,10 @@ export interface BusinessInfo {
   website?: string | null;
   /** Present on manager profile only — not returned by public GET /api/business/:id */
   employeeCount?: number;
+  /** @deprecated Legacy KYC mirror — use `kycVerificationStatus`. */
   verificationStatus?: "pending" | "verified" | "rejected";
+  onboardingVerificationStatus?: OnboardingVerificationStatus;
+  kycVerificationStatus?: KycVerificationStatus;
   /** SaaS tier for entitlement UI; manager profile only. Null when no subscription. */
   subscriptionTier?: "basic" | "premium" | "enterprise" | null;
   subscriptionStatus?: "none" | "trialing" | "active" | "past_due" | "canceled" | "unpaid" | "incomplete";
@@ -1951,6 +1970,7 @@ export type TipActivityRow = {
 export async function listBusinessTips(params: {
   take?: number;
   skip?: number;
+  q?: string;
   status?: TipStatus;
   /** Optional preset range handled by backend in business timezone */
   range?: "today" | "week" | "month" | "custom";
@@ -1967,6 +1987,7 @@ export async function listBusinessTips(params: {
   const sp = new URLSearchParams();
   if (params.take != null) sp.set("take", String(params.take));
   if (params.skip != null) sp.set("skip", String(params.skip));
+  if (params.q?.trim()) sp.set("q", params.q.trim());
   if (params.status) sp.set("status", params.status);
   if (params.range) sp.set("range", params.range);
   if (params.fromDate) sp.set("fromDate", params.fromDate);
@@ -1983,6 +2004,7 @@ export async function listBusinessTips(params: {
 export async function listEmployeeTips(params: {
   take?: number;
   skip?: number;
+  q?: string;
   status?: TipStatus;
   /** Optional preset range handled by backend in business timezone */
   range?: "today" | "week" | "month" | "custom";
@@ -1996,6 +2018,7 @@ export async function listEmployeeTips(params: {
   const sp = new URLSearchParams();
   if (params.take != null) sp.set("take", String(params.take));
   if (params.skip != null) sp.set("skip", String(params.skip));
+  if (params.q?.trim()) sp.set("q", params.q.trim());
   if (params.status) sp.set("status", params.status);
   if (params.range) sp.set("range", params.range);
   if (params.fromDate) sp.set("fromDate", params.fromDate);
@@ -3355,7 +3378,13 @@ export interface PlatformBusinessRow {
   id: string;
   name: string;
   slug: string;
+  /** @deprecated Legacy mirror of KYC outcome — use `kycVerificationStatus`. */
   verificationStatus: "pending" | "verified" | "rejected";
+  onboardingVerificationStatus?: OnboardingVerificationStatus;
+  kycVerificationStatus?: KycVerificationStatus;
+  onboardingSubmittedAt?: string | null;
+  onboardingReviewNotes?: string | null;
+  onboardingReviewHistory?: Array<{ status: string; at: string; note?: string | null }>;
   legalContactName: string | null;
   contactEmail: string | null;
   contactPhone: string | null;
@@ -3386,17 +3415,97 @@ export interface PlatformBusinessRow {
   kycReviewHistory?: Array<{ status: string; at: string; note?: string | null }>;
   kycHoursPending?: number | null;
   kycSlaBreached?: boolean;
+  /** Owner account creation — proxy for business registration date */
+  registeredAt?: string | null;
+  /** When false, the owner account is suspended */
+  ownerIsActive?: boolean;
 }
+
+export type PlatformBusinessStatusFilter =
+  | "all"
+  | "verified"
+  | "pending_review"
+  | "awaiting_upload"
+  | "sla_breach"
+  | "rejected"
+  | "suspended"
+  | "draft"
+  | "submitted"
+  | "approved"
+  | "not_started";
+
+export type PlatformBusinessDatePreset =
+  | "all"
+  | "today"
+  | "last_7"
+  | "last_30"
+  | "this_month"
+  | "last_month"
+  | "custom";
+
+export type PlatformBusinessTipsFilter =
+  | "all"
+  | "zero"
+  | "1_500"
+  | "501_5000"
+  | "5001_plus"
+  | "highest"
+  | "lowest";
+
+export type PlatformBusinessSort =
+  | "newest"
+  | "oldest"
+  | "tips_high"
+  | "tips_low"
+  | "name_asc"
+  | "name_desc";
+
+export type PlatformBusinessListParams = {
+  q?: string;
+  status?: PlatformBusinessStatusFilter;
+  workflow?: "onboarding" | "kyc";
+  date?: PlatformBusinessDatePreset;
+  dateFrom?: string;
+  dateTo?: string;
+  tips?: PlatformBusinessTipsFilter;
+  sort?: PlatformBusinessSort;
+  take?: number;
+  skip?: number;
+  page?: number;
+};
+
+export type PlatformBusinessListResult = {
+  businesses: PlatformBusinessRow[];
+  total?: number;
+  warning?: string;
+};
 
 export type KycQueueMetrics = {
   pendingReview: number;
   slaBreached: number;
   awaitingUpload: number;
+  verified: number;
   slaHours: number;
+};
+
+export type OnboardingQueueMetrics = {
+  draft: number;
+  submitted: number;
+  approved: number;
+  rejected: number;
+  /** Onboarding approved + KYC verified — hidden in MVP until KYC ships. */
+  fullyVerified?: number;
 };
 
 export async function fetchKycQueueMetrics(): Promise<KycQueueMetrics> {
   return apiRequest<KycQueueMetrics>(apiPath("/api/platform/kyc/metrics"), {
+    headers: getHeaders(),
+    credentials: "include",
+  });
+}
+
+export async function fetchOnboardingQueueMetrics(): Promise<OnboardingQueueMetrics> {
+  return apiRequest<OnboardingQueueMetrics>(apiPath("/api/platform/onboarding/metrics"), {
     headers: getHeaders(),
     credentials: "include",
   });
@@ -3414,33 +3523,81 @@ export async function updatePlatformBusinessKycReviewNotes(
   });
 }
 
-export async function fetchPlatformBusinesses(): Promise<{ businesses: PlatformBusinessRow[] }> {
-  const cacheKey = "platform:businesses";
-  const inflight = platformBusinessesInflight.get(cacheKey);
-  if (inflight) return inflight;
-  const promise = apiRequest<{ businesses: PlatformBusinessRow[] }>(apiPath("/api/platform/businesses"), {
+export async function fetchPlatformBusinesses(): Promise<{ businesses: PlatformBusinessRow[] }>;
+export async function fetchPlatformBusinesses(
+  params: PlatformBusinessListParams,
+): Promise<PlatformBusinessListResult>;
+export async function fetchPlatformBusinesses(
+  params?: PlatformBusinessListParams,
+): Promise<PlatformBusinessListResult> {
+  if (!params || Object.keys(params).length === 0) {
+    const cacheKey = "platform:businesses";
+    const inflight = platformBusinessesInflight.get(cacheKey);
+    if (inflight) return inflight;
+    const promise = apiRequest<{ businesses: PlatformBusinessRow[] }>(apiPath("/api/platform/businesses"), {
+      headers: getHeaders(),
+      credentials: "include",
+    }).finally(() => {
+      if (platformBusinessesInflight.get(cacheKey) === promise) platformBusinessesInflight.delete(cacheKey);
+    });
+    platformBusinessesInflight.set(cacheKey, promise);
+    return promise;
+  }
+
+  const search = new URLSearchParams();
+  if (params.q?.trim()) search.set("q", params.q.trim());
+  if (params.status && params.status !== "all") search.set("status", params.status);
+  if (params.workflow) search.set("workflow", params.workflow);
+  if (params.date && params.date !== "all") search.set("date", params.date);
+  if (params.dateFrom) search.set("dateFrom", params.dateFrom);
+  if (params.dateTo) search.set("dateTo", params.dateTo);
+  if (params.tips && params.tips !== "all") search.set("tips", params.tips);
+  if (params.sort && params.sort !== "newest") search.set("sort", params.sort);
+  search.set("take", String(params.take ?? 25));
+  if (params.skip != null) search.set("skip", String(params.skip));
+  if (params.page != null && params.page > 0) search.set("page", String(params.page));
+  const qs = search.toString();
+  return apiRequest<PlatformBusinessListResult>(apiPath(`/api/platform/businesses?${qs}`), {
     headers: getHeaders(),
     credentials: "include",
-  }).finally(() => {
-    if (platformBusinessesInflight.get(cacheKey) === promise) platformBusinessesInflight.delete(cacheKey);
   });
-  platformBusinessesInflight.set(cacheKey, promise);
-  return promise;
 }
 
 export type PlatformVerificationAction = "verified" | "rejected" | "pending";
+export type PlatformOnboardingVerificationAction = "approved" | "rejected";
+
+export async function updatePlatformBusinessOnboardingStatus(
+  businessId: string,
+  status: PlatformOnboardingVerificationAction,
+  reviewNote?: string,
+): Promise<void> {
+  await apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/verify-onboarding`), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({ status, ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}) }),
+    credentials: "include",
+  });
+}
+
+export async function updatePlatformBusinessKycStatus(
+  businessId: string,
+  status: PlatformVerificationAction,
+  reviewNote?: string,
+): Promise<void> {
+  await apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/verify-kyc`), {
+    method: "PATCH",
+    headers: getHeaders(),
+    body: JSON.stringify({ status, ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}) }),
+    credentials: "include",
+  });
+}
 
 export async function updatePlatformBusinessVerificationStatus(
   businessId: string,
   status: PlatformVerificationAction,
   reviewNote?: string,
 ): Promise<void> {
-  await apiRequest(apiPath(`/api/platform/businesses/${encodeURIComponent(businessId)}/verify`), {
-    method: "PATCH",
-    headers: getHeaders(),
-    body: JSON.stringify({ status, ...(reviewNote?.trim() ? { reviewNote: reviewNote.trim() } : {}) }),
-    credentials: "include",
-  });
+  await updatePlatformBusinessKycStatus(businessId, status, reviewNote);
 }
 
 /** Approve business KYC (verified). */

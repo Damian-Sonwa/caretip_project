@@ -142,49 +142,43 @@ function isExpiredSubscription(
   return false;
 }
 
+export async function countPlatformSubscriptionActivity(
+  filter: PlatformSubscriptionActivityFilter,
+): Promise<number> {
+  const lastPayments = await loadLastPaymentEvents();
+  const where = buildActivityWhere(filter, undefined, lastPayments);
+  return prisma.subscription.count({ where });
+}
+
 export async function getPlatformSubscriptionOverview(): Promise<PlatformSubscriptionOverview> {
-  const [subs, lastPayments] = await Promise.all([
+  const [active, trialing, successful, failed, cancelled, subs] = await Promise.all([
+    countPlatformSubscriptionActivity("active"),
+    countPlatformSubscriptionActivity("trialing"),
+    countPlatformSubscriptionActivity("successful"),
+    countPlatformSubscriptionActivity("failed"),
+    countPlatformSubscriptionActivity("cancelled"),
     prisma.subscription.findMany({
       select: {
-        id: true,
         status: true,
         isTrial: true,
         trialEndsAt: true,
       },
     }),
-    loadLastPaymentEvents(),
   ]);
 
-  let successful = 0;
-  let failed = 0;
   let expired = 0;
-
   for (const sub of subs) {
-    const lastPayment = lastPayments.get(sub.id);
-    if (
-      lastPayment?.auditType === STRIPE_BILLING_AUDIT_TYPES.invoicePaymentSucceeded ||
-      (sub.status === SubscriptionStatus.active && !sub.isTrial)
-    ) {
-      successful += 1;
-    }
-    if (
-      sub.status === SubscriptionStatus.past_due ||
-      sub.status === SubscriptionStatus.unpaid ||
-      lastPayment?.auditType === STRIPE_BILLING_AUDIT_TYPES.invoicePaymentFailed
-    ) {
-      failed += 1;
-    }
     if (isExpiredSubscription(sub.status, sub.trialEndsAt, sub.isTrial)) {
       expired += 1;
     }
   }
 
   return {
-    active: subs.filter((s) => s.status === SubscriptionStatus.active).length,
-    trialing: subs.filter((s) => s.status === SubscriptionStatus.trialing).length,
+    active,
+    trialing,
     successful,
     failed,
-    cancelled: subs.filter((s) => s.status === SubscriptionStatus.canceled).length,
+    cancelled,
     expired,
   };
 }

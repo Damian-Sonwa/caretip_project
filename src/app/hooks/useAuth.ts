@@ -140,8 +140,10 @@ export interface User {
   employeeId?: string;
   businessName?: string;
   avatar?: string;
-  /** Derived from `businessVerificationStatus` for managers; drives soft KYC banners and go-live gates. */
+  /** @deprecated Legacy KYC mirror — use `kycVerificationStatus` instead. */
   status?: BusinessAccountStatus;
+  onboardingVerificationStatus?: import("../lib/api").OnboardingVerificationStatus;
+  kycVerificationStatus?: import("../lib/api").KycVerificationStatus;
   /** True when platform admin is viewing as a business manager (JWT impersonation). */
   impersonation?: boolean;
   impersonatedBy?: string;
@@ -179,15 +181,6 @@ function mapApiRoleToUserRole(apiRole: string): UserRole {
   }
 }
 
-function mapVerificationToStatus(
-  v: "pending" | "verified" | "rejected" | undefined
-): BusinessAccountStatus | undefined {
-  if (v === "pending") return "PENDING";
-  if (v === "verified") return "APPROVED";
-  if (v === "rejected") return "REJECTED";
-  return undefined;
-}
-
 /** Normalize API auth user payloads for UI state (login, refresh, impersonation). */
 export function userFromAuthResponse(data: AuthResponse["user"]): User {
   return parseUser(data);
@@ -198,9 +191,10 @@ export function parseUser(data: AuthResponse["user"]): User {
     impersonation?: boolean;
     impersonatedBy?: string;
     preferredLocale?: string | null;
+    onboardingVerificationStatus?: import("../lib/api").OnboardingVerificationStatus;
+    kycVerificationStatus?: import("../lib/api").KycVerificationStatus;
   };
   const role = mapApiRoleToUserRole(data.role);
-  const kyc = data.businessVerificationStatus;
   /** Only verified when the API sends `true`. Missing/false keeps users on the verify-email gate until refresh matches the DB. */
   const emailVerified =
     typeof ext.emailVerified === "boolean"
@@ -233,7 +227,8 @@ export function parseUser(data: AuthResponse["user"]): User {
     impersonation: ext.impersonation,
     impersonatedBy: ext.impersonatedBy,
     preferredLocale: typeof ext.preferredLocale === "string" ? ext.preferredLocale : null,
-    ...(role === "business" && mapVerificationToStatus(kyc) ? { status: mapVerificationToStatus(kyc)! } : {}),
+    onboardingVerificationStatus: ext.onboardingVerificationStatus,
+    kycVerificationStatus: ext.kycVerificationStatus,
   };
   // Super admins must not carry business/employee scope in client state (API maps SUPER_ADMIN → platform_admin).
   if (role === "platform_admin" && !ext.impersonation) {

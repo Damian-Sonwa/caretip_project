@@ -1,23 +1,28 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { Building2, CheckCircle, Shield, XCircle } from "lucide-react";
+import { Building2, CheckCircle, ClipboardList, Shield, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Link } from "react-router";
 import {
   fetchPlatformBusinesses,
   fetchKycQueueMetrics,
-  updatePlatformBusinessVerificationStatus,
+  fetchOnboardingQueueMetrics,
+  updatePlatformBusinessKycStatus,
+  updatePlatformBusinessOnboardingStatus,
   updatePlatformBusinessKyc,
   uploadPlatformBusinessLogo,
   uploadPlatformBusinessVerification,
   fetchAuthedObjectUrl,
   type KycQueueMetrics,
+  type OnboardingQueueMetrics,
   type PlatformBusinessRow,
   type PlatformVerificationAction,
+  type PlatformOnboardingVerificationAction,
 } from "../../lib/api";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { logClientError } from "../../lib/clientLog";
+import { PlatformKycComingSoonPage } from "./PlatformKycComingSoonPage";
 import {
   DashboardListSkeleton,
   PlatformAdminTableSkeleton,
@@ -30,23 +35,48 @@ import {
   PlatformPage,
   PlatformPageHeader,
   PlatformResponsiveData,
-  PlatformSearchField,
 } from "../../components/platform/PlatformPageChrome";
+import { BusinessVerificationFilters } from "../../components/platform/BusinessVerificationFilters";
+import { BusinessVerificationKpiCards } from "../../components/platform/BusinessVerificationKpiCards";
+import { BusinessOnboardingKpiCards } from "../../components/platform/BusinessOnboardingKpiCards";
 import { PlatformBusinessVerificationMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { ListFilterLoadError } from "../../components/shared/ListFilterLoadError";
 import {
-  getPageSessionCache,
-  setPageSessionCache,
-  PAGE_CACHE_TTL_MEDIUM_MS,
-} from "../../lib/pageSessionCache";
+  buildBusinessVerificationFilterSummary,
+  resolveBusinessVerificationEmptyState,
+} from "../../lib/businessVerificationFilterUx";
+import { classifyFetchError } from "../../lib/listFilterUx";
+import {
+  BUSINESS_VERIFICATION_PAGE_SIZE,
+  useBusinessVerificationFilters,
+} from "../../hooks/useBusinessVerificationFilters";
 
-export function BusinessVerificationPage() {
+export type BusinessVerificationWorkflow = "kyc" | "onboarding";
+
+function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerificationWorkflow }) {
+  const isKyc = workflow === "kyc";
   const { t } = useTranslation();
   const { user } = useAuth();
+  const {
+    filters,
+    debouncedQ,
+    setFilters,
+    clearAllFilters,
+    removeFilter,
+    toggleStatusFilter,
+    applyKpiStatusFilter,
+    hasActiveFilters,
+  } = useBusinessVerificationFilters(workflow);
   const [rows, setRows] = useState<PlatformBusinessRow[]>([]);
+  const [total, setTotal] = useState(0);
   const [kycMetrics, setKycMetrics] = useState<KycQueueMetrics | null>(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [onboardingMetrics, setOnboardingMetrics] = useState<OnboardingQueueMetrics | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadErrorKind, setLoadErrorKind] = useState<ReturnType<typeof classifyFetchError>>("api");
+  const loadGenRef = useRef(0);
   const [editing, setEditing] = useState<PlatformBusinessRow | null>(null);
   const [form, setForm] = useState({
     legalContactName: "",
@@ -56,40 +86,100 @@ export function BusinessVerificationPage() {
     registeredAddress: "",
   });
 
-  const load = useCallback(async (opts?: { quiet?: boolean }) => {
-    const quiet = opts?.quiet === true;
-    const cacheKey = "platform:business-verification";
-    const cached = getPageSessionCache<PlatformBusinessRow[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
-    const useCachedFirst = !quiet && cached !== null;
-    if (useCachedFirst) {
-      setRows(cached);
-      setLoading(false);
-    } else if (!quiet) {
-      setLoading(true);
-    }
-    try {
-      const res = await fetchPlatformBusinesses();
-      setRows(res.businesses);
-      setPageSessionCache(cacheKey, res.businesses);
-    } catch (e) {
-      logClientError("BusinessVerificationPage.load", e);
-      if (!useCachedFirst) {
-        toast.error(toUserFriendlyMessage(e));
-        setRows([]);
+  const listParams = useMemo(
+    () => ({
+      q: debouncedQ || undefined,
+      status: filters.status,
+      workflow,
+      date: filters.date,
+      dateFrom: filters.date === "custom" ? filters.dateFrom || undefined : undefined,
+      dateTo: filters.date === "custom" ? filters.dateTo || undefined : undefined,
+      tips: filters.tips,
+      sort: filters.sort,
+      take: BUSINESS_VERIFICATION_PAGE_SIZE,
+      page: filters.page,
+    }),
+    [debouncedQ, filters, workflow],
+  );
+
+  const refreshKycMetrics = useCallback(async () => {
+    if (isKyc) {
+      try {
+        const metrics = await fetchKycQueueMetrics();
+        setKycMetrics(metrics);
+      } catch (e) {
+        logClientError("BusinessVerificationPage.kycMetrics", e);
       }
-    } finally {
-      if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, []);
+  }, [isKyc]);
+
+  const refreshOnboardingMetrics = useCallback(async () => {
+    if (!isKyc) {
+      try {
+        const metrics = await fetchOnboardingQueueMetrics();
+        setOnboardingMetrics(metrics);
+      } catch (e) {
+        logClientError("BusinessVerificationPage.onboardingMetrics", e);
+      }
+    }
+  }, [isKyc]);
+
+  const load = useCallback(
+    async (opts?: { quiet?: boolean }) => {
+      const quiet = opts?.quiet === true;
+      const gen = ++loadGenRef.current;
+      if (!quiet) {
+        setLoading(true);
+        setLoadError(null);
+      }
+      try {
+        const res = await fetchPlatformBusinesses(listParams);
+        if (gen !== loadGenRef.current) return;
+        if (res.warning) {
+          throw new Error(res.warning);
+        }
+        setRows(res.businesses);
+        setTotal(res.total ?? res.businesses.length);
+        if (!isKyc) {
+          void refreshOnboardingMetrics();
+        } else {
+          void refreshKycMetrics();
+        }
+      } catch (e) {
+        if (gen !== loadGenRef.current) return;
+        logClientError("BusinessVerificationPage.load", e);
+        if (!quiet) {
+          const message = toUserFriendlyMessage(e);
+          setLoadError(message);
+          setLoadErrorKind(classifyFetchError(e));
+          setRows([]);
+          setTotal(0);
+        }
+      } finally {
+        if (!quiet && gen === loadGenRef.current) setLoading(false);
+      }
+    },
+    [listParams, isKyc, refreshOnboardingMetrics, refreshKycMetrics],
+  );
 
   const loadQuiet = useCallback(async () => {
+    const gen = ++loadGenRef.current;
     try {
-      const res = await fetchPlatformBusinesses();
+      const res = await fetchPlatformBusinesses(listParams);
+      if (gen !== loadGenRef.current) return;
+      if (res.warning) return;
       setRows(res.businesses);
+      setTotal(res.total ?? res.businesses.length);
+      setLoadError(null);
+      if (!isKyc) {
+        void refreshOnboardingMetrics();
+      } else {
+        void refreshKycMetrics();
+      }
     } catch (e) {
       logClientError("BusinessVerificationPage.loadQuiet", e);
     }
-  }, []);
+  }, [listParams, isKyc, refreshOnboardingMetrics, refreshKycMetrics]);
 
   const { socket, connected } = useSocket(user?.role === "platform_admin");
 
@@ -108,38 +198,27 @@ export function BusinessVerificationPage() {
 
   useEffect(() => {
     void load();
-    void fetchKycQueueMetrics()
-      .then(setKycMetrics)
-      .catch((e) => logClientError("BusinessVerificationPage.kycMetrics", e));
   }, [load]);
 
-  const filteredRows = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return rows;
-    return rows.filter((b) => {
-      const hay = [
-        b.name,
-        b.slug,
-        b.ownerEmail,
-        b.contactEmail,
-        b.contactPhone,
-        b.legalContactName,
-        b.registeredAddress,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      return hay.includes(q);
-    });
-  }, [rows, searchQuery]);
+  useEffect(() => {
+    if (isKyc) {
+      void fetchKycQueueMetrics()
+        .then(setKycMetrics)
+        .catch((e) => logClientError("BusinessVerificationPage.kycMetrics", e));
+    } else {
+      void fetchOnboardingQueueMetrics()
+        .then(setOnboardingMetrics)
+        .catch((e) => logClientError("BusinessVerificationPage.onboardingMetrics", e));
+    }
+  }, [isKyc]);
 
-  const handleStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
+  const handleKycStatusUpdate = async (businessId: string, status: PlatformVerificationAction) => {
     let reviewNote: string | undefined;
     if (status === "rejected") {
       reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
     }
     try {
-      await updatePlatformBusinessVerificationStatus(businessId, status, reviewNote);
+      await updatePlatformBusinessKycStatus(businessId, status, reviewNote);
       if (status === "verified") {
         toast.success(t("admin.businessVerificationPage.toastApproved"));
       } else if (status === "rejected") {
@@ -149,7 +228,31 @@ export function BusinessVerificationPage() {
       }
       await load();
     } catch (e) {
-      logClientError("BusinessVerificationPage.handleStatusUpdate", e);
+      logClientError("BusinessVerificationPage.handleKycStatusUpdate", e);
+      toast.error(toUserFriendlyMessage(e));
+    }
+  };
+
+  const handleOnboardingStatusUpdate = async (
+    businessId: string,
+    status: PlatformOnboardingVerificationAction,
+  ) => {
+    let reviewNote: string | undefined;
+    if (status === "rejected") {
+      reviewNote = window.prompt(t("admin.businessVerificationPage.rejectNotePrompt")) ?? undefined;
+    }
+    try {
+      await updatePlatformBusinessOnboardingStatus(businessId, status, reviewNote);
+      toast.success(
+        status === "approved"
+          ? t("admin.onboardingVerificationPage.toastApproved")
+          : status === "rejected"
+            ? t("admin.onboardingVerificationPage.toastRejected")
+            : t("admin.businessVerificationPage.toastStatusUpdated"),
+      );
+      await load();
+    } catch (e) {
+      logClientError("BusinessVerificationPage.handleOnboardingStatusUpdate", e);
       toast.error(toUserFriendlyMessage(e));
     }
   };
@@ -221,57 +324,233 @@ export function BusinessVerificationPage() {
     }
   };
 
-  const emptyMessage =
-    rows.length === 0
-      ? t("admin.businessVerificationPage.emptyList")
-      : t("admin.businessVerificationPage.noSearchMatches");
-  const isInitialLoad = loading && rows.length === 0;
+  const pageCount = Math.max(1, Math.ceil(total / BUSINESS_VERIFICATION_PAGE_SIZE));
+  const emptyCopy = useMemo(
+    () => resolveBusinessVerificationEmptyState(filters, debouncedQ, t, workflow),
+    [filters, debouncedQ, t, workflow],
+  );
+  const filterSummary = useMemo(
+    () => buildBusinessVerificationFilterSummary(filters, debouncedQ, total, t, workflow),
+    [filters, debouncedQ, total, t, workflow],
+  );
+  const emptyStateIcon = isKyc ? (
+    <Shield className="h-8 w-8 text-muted-foreground" aria-hidden />
+  ) : (
+    <ClipboardList className="h-8 w-8 text-muted-foreground" aria-hidden />
+  );
+  const showTableLoading = loading;
+
+  const renderWorkflowStatus = (b: PlatformBusinessRow) => {
+    if (!isKyc) {
+      const s = b.onboardingVerificationStatus ?? "draft";
+      if (s === "approved") {
+        return (
+          <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+            <CheckCircle className="h-3.5 w-3.5" /> {t("admin.onboardingVerificationPage.statusApproved")}
+          </span>
+        );
+      }
+      if (s === "rejected") {
+        return (
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+            <XCircle className="h-3.5 w-3.5" /> {t("admin.onboardingVerificationPage.statusRejected")}
+          </span>
+        );
+      }
+      if (s === "submitted") {
+        return (
+          <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+            {t("admin.onboardingVerificationPage.statusSubmitted")}
+          </span>
+        );
+      }
+      return (
+        <span className="text-xs font-medium text-muted-foreground">
+          {t("admin.onboardingVerificationPage.statusDraft")}
+        </span>
+      );
+    }
+
+  const kyc = b.kycVerificationStatus ?? "not_started";
+    if (kyc === "verified") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
+          <CheckCircle className="h-3.5 w-3.5" /> {t("admin.businessVerificationPage.statusVerified")}
+        </span>
+      );
+    }
+    if (kyc === "rejected") {
+      return (
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
+          <XCircle className="h-3.5 w-3.5" /> {t("admin.businessVerificationPage.statusRejected")}
+        </span>
+      );
+    }
+    if (b.ownerIsActive === false) {
+      return (
+        <span className="text-xs font-medium text-red-600 dark:text-red-400">
+          {t("admin.businessVerificationPage.filters.status.suspended")}
+        </span>
+      );
+    }
+    return (
+      <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
+        {kyc === "awaiting_upload"
+          ? t("admin.businessVerificationPage.filters.status.awaiting_upload")
+          : kyc === "not_started"
+            ? t("admin.businessVerificationPage.filters.status.not_started")
+            : t("admin.businessVerificationPage.statusPending")}
+        {b.kycSlaBreached ? (
+          <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+            SLA
+          </span>
+        ) : null}
+      </span>
+    );
+  };
+
+  const approveBusiness = (businessId: string) => {
+    if (isKyc) void handleKycStatusUpdate(businessId, "verified");
+    else void handleOnboardingStatusUpdate(businessId, "approved");
+  };
+
+  const rejectBusiness = (businessId: string) => {
+    if (isKyc) void handleKycStatusUpdate(businessId, "rejected");
+    else void handleOnboardingStatusUpdate(businessId, "rejected");
+  };
+
+  const canApproveRow = (b: PlatformBusinessRow) =>
+    isKyc ? b.kycVerificationStatus !== "verified" : b.onboardingVerificationStatus !== "approved";
+
+  const canRejectRow = (b: PlatformBusinessRow) =>
+    isKyc
+      ? b.kycVerificationStatus === "pending_review"
+      : b.onboardingVerificationStatus === "submitted";
+
+  const tableColCount = isKyc ? 7 : 6;
+
+  const paginationFooter =
+    total > BUSINESS_VERIFICATION_PAGE_SIZE ? (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          {t("admin.businessVerificationPage.pagination", {
+            from: total === 0 ? 0 : filters.page * BUSINESS_VERIFICATION_PAGE_SIZE + 1,
+            to: Math.min((filters.page + 1) * BUSINESS_VERIFICATION_PAGE_SIZE, total),
+            total,
+          })}
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={filters.page === 0 || loading}
+            onClick={() => setFilters({ page: filters.page - 1 }, { resetPage: false })}
+            className="min-h-[40px] rounded-lg border border-border px-3 text-xs font-medium text-foreground disabled:opacity-50"
+          >
+            {t("admin.businessVerificationPage.prevPage")}
+          </button>
+          <span className="text-xs tabular-nums text-muted-foreground">
+            {filters.page + 1} / {pageCount}
+          </span>
+          <button
+            type="button"
+            disabled={filters.page + 1 >= pageCount || loading}
+            onClick={() => setFilters({ page: filters.page + 1 }, { resetPage: false })}
+            className="min-h-[40px] rounded-lg border border-border px-3 text-xs font-medium text-foreground disabled:opacity-50"
+          >
+            {t("admin.businessVerificationPage.nextPage")}
+          </button>
+        </div>
+      </div>
+    ) : total > 0 ? (
+      <p className="text-xs text-muted-foreground">
+        {t("admin.businessVerificationPage.pagination", {
+          from: 1,
+          to: total,
+          total,
+        })}
+      </p>
+    ) : null;
 
   return (
     <PlatformPage>
       <PlatformPageHeader
         icon={Shield}
-        title={t("admin.businessVerificationPage.title")}
-        subtitle={t("admin.businessVerificationPage.subtitle")}
+        title={
+          isKyc
+            ? t("admin.businessVerificationPage.title")
+            : t("admin.onboardingVerificationPage.title")
+        }
+        subtitle={
+          isKyc
+            ? t("admin.businessVerificationPage.subtitle")
+            : t("admin.onboardingVerificationPage.subtitle")
+        }
       />
 
-      {kycMetrics ? (
-        <div className="mb-4 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-lg border bg-card p-3 text-sm">
-            <div className="text-muted-foreground">Pending review</div>
-            <div className="text-2xl font-semibold">{kycMetrics.pendingReview}</div>
-          </div>
-          <div className="rounded-lg border bg-card p-3 text-sm">
-            <div className="text-muted-foreground">Awaiting upload</div>
-            <div className="text-2xl font-semibold">{kycMetrics.awaitingUpload}</div>
-          </div>
-          <div className={`rounded-lg border p-3 text-sm ${kycMetrics.slaBreached > 0 ? "border-amber-500 bg-amber-50 dark:bg-amber-950/30" : "bg-card"}`}>
-            <div className="text-muted-foreground">SLA breach (&gt;{kycMetrics.slaHours}h)</div>
-            <div className="text-2xl font-semibold text-amber-700 dark:text-amber-400">{kycMetrics.slaBreached}</div>
-          </div>
-        </div>
+      {isKyc && kycMetrics ? (
+        <BusinessVerificationKpiCards
+          metrics={kycMetrics}
+          activeStatus={filters.status}
+          onToggleStatus={applyKpiStatusFilter}
+        />
+      ) : null}
+      {!isKyc && onboardingMetrics ? (
+        <BusinessOnboardingKpiCards
+          metrics={onboardingMetrics}
+          activeStatus={filters.status}
+          onToggleStatus={applyKpiStatusFilter}
+        />
       ) : null}
 
-      <PlatformSearchField
-        value={searchQuery}
-        onChange={setSearchQuery}
-        placeholder={t("admin.businessVerificationPage.searchPlaceholder")}
-        ariaLabel={t("admin.businessVerificationPage.searchAria")}
+      {!loadError && !showTableLoading ? (
+        <p className="mb-3 text-sm font-medium text-foreground" role="status">
+          {filterSummary}
+        </p>
+      ) : null}
+
+      <BusinessVerificationFilters
+        workflow={workflow}
+        filters={filters}
+        onChange={(patch) => setFilters(patch)}
+        onClearAll={clearAllFilters}
+        onRemoveChip={removeFilter}
+        hasActiveFilters={hasActiveFilters}
+        searchValue={filters.q}
+        onSearchChange={(q) => setFilters({ q })}
       />
 
       <PlatformResponsiveData
+        footer={paginationFooter}
         mobile={
-          isInitialLoad ? (
+          showTableLoading ? (
             <DashboardListSkeleton rows={6} minHeightClass="min-h-0" />
-          ) : filteredRows.length === 0 ? (
-            <p className={platformUi.emptyState}>{emptyMessage}</p>
+          ) : loadError ? (
+            <ListFilterLoadError message={loadError} kind={loadErrorKind} onRetry={() => void load()} />
+          ) : rows.length === 0 ? (
+            <EmptyState
+              compact
+              icon={emptyStateIcon}
+              title={emptyCopy.title}
+              description={emptyCopy.description}
+              action={
+                hasActiveFilters ? (
+                  <button
+                    type="button"
+                    onClick={clearAllFilters}
+                    className="text-sm font-medium text-accent hover:underline"
+                  >
+                    {t("admin.businessVerificationPage.filters.clearAll")}
+                  </button>
+                ) : undefined
+              }
+            />
           ) : (
-            filteredRows.map((b) => (
+            rows.map((b) => (
               <PlatformBusinessVerificationMobileCard
                 key={b.id}
                 business={b}
-                onApprove={() => void handleStatusUpdate(b.id, "verified")}
-                onReject={() => void handleStatusUpdate(b.id, "rejected")}
+                onApprove={() => approveBusiness(b.id)}
+                onReject={() => rejectBusiness(b.id)}
                 onEdit={() => openEdit(b)}
                 onOpenFile={(path) => void openAuthedFile(path)}
               />
@@ -287,27 +566,54 @@ export function BusinessVerificationPage() {
                 <th className={platformUi.tableTh}>{t("admin.businessVerificationPage.colContact")}</th>
                 <th className={platformUi.tableTh}>{t("admin.businessVerificationPage.colLiveTips")}</th>
                 <th className={platformUi.tableTh}>{t("admin.businessVerificationPage.colStatus")}</th>
-                <th className={platformUi.tableTh}>{t("admin.businessVerificationPage.colFiles")}</th>
+                {isKyc ? <th className={platformUi.tableTh}>{t("admin.businessVerificationPage.colFiles")}</th> : null}
                 <th className={`${platformUi.tableTh} text-right`}>{t("admin.businessVerificationPage.colActions")}</th>
               </tr>
             </thead>
             <tbody>
-              {isInitialLoad ? (
-                <PlatformAdminTableSkeleton rows={8} cols={7} />
-              ) : filteredRows.length === 0 ? (
+              {showTableLoading ? (
+                <PlatformAdminTableSkeleton rows={8} cols={tableColCount} />
+              ) : loadError ? (
                 <tr>
-                  <td colSpan={7} className={platformUi.emptyState}>
-                    {emptyMessage}
+                  <td colSpan={tableColCount} className="p-0">
+                    <ListFilterLoadError
+                      message={loadError}
+                      kind={loadErrorKind}
+                      onRetry={() => void load()}
+                      compact
+                    />
+                  </td>
+                </tr>
+              ) : rows.length === 0 ? (
+                <tr>
+                  <td colSpan={tableColCount} className="p-0">
+                    <EmptyState
+                      compact
+                      icon={emptyStateIcon}
+                      title={emptyCopy.title}
+                      description={emptyCopy.description}
+                      action={
+                        hasActiveFilters ? (
+                          <button
+                            type="button"
+                            onClick={clearAllFilters}
+                            className="text-sm font-medium text-accent hover:underline"
+                          >
+                            {t("admin.businessVerificationPage.filters.clearAll")}
+                          </button>
+                        ) : undefined
+                      }
+                    />
                   </td>
                 </tr>
               ) : (
-                filteredRows.map((b) => (
+                rows.map((b) => (
                   <tr key={b.id} className={platformUi.tableRow}>
                     <td className={platformUi.tableTd}>
                       <div className="flex items-center gap-2">
                         <Building2 className="h-4 w-4 shrink-0 text-muted-foreground" />
                         <div>
-                          <div className="font-medium">{b.name}</div>
+                          <div className="font-medium text-foreground">{b.name}</div>
                           <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
                         </div>
                       </div>
@@ -326,26 +632,8 @@ export function BusinessVerificationPage() {
                         })}
                       </div>
                     </td>
-                    <td className={platformUi.tableTd}>
-                      {b.verificationStatus === "verified" ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                          <CheckCircle className="h-3.5 w-3.5" /> {t("admin.businessVerificationPage.statusVerified")}
-                        </span>
-                      ) : b.verificationStatus === "rejected" ? (
-                        <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 dark:text-red-400">
-                          <XCircle className="h-3.5 w-3.5" /> {t("admin.businessVerificationPage.statusRejected")}
-                        </span>
-                      ) : (
-                        <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                          {t("admin.businessVerificationPage.statusPending")}
-                          {b.kycSlaBreached ? (
-                            <span className="ml-1 rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-amber-800 dark:bg-amber-900 dark:text-amber-200">
-                              SLA
-                            </span>
-                          ) : null}
-                        </span>
-                      )}
-                    </td>
+                    <td className={platformUi.tableTd}>{renderWorkflowStatus(b)}</td>
+                    {isKyc ? (
                     <td className={`${platformUi.tableTd} space-y-1 text-xs`}>
                       {b.logoPath ? (
                         <button
@@ -388,6 +676,7 @@ export function BusinessVerificationPage() {
                         </button>
                       ))}
                     </td>
+                    ) : null}
                     <td className={`${platformUi.tableTd} text-right`}>
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <Link
@@ -403,22 +692,26 @@ export function BusinessVerificationPage() {
                         >
                           {t("admin.businessVerificationPage.linkEditDetails")}
                         </button>
-                        {b.verificationStatus !== "verified" ? (
+                        {canApproveRow(b) ? (
                           <button
                             type="button"
-                            onClick={() => void handleStatusUpdate(b.id, "verified")}
+                            onClick={() => approveBusiness(b.id)}
                             className="rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground hover:bg-primary-hover"
                           >
-                            {t("admin.businessVerificationPage.btnApprove")}
+                            {isKyc
+                              ? t("admin.businessVerificationPage.btnApprove")
+                              : t("admin.onboardingVerificationPage.btnApprove")}
                           </button>
                         ) : null}
-                        {b.verificationStatus === "pending" ? (
+                        {canRejectRow(b) ? (
                           <button
                             type="button"
-                            onClick={() => void handleStatusUpdate(b.id, "rejected")}
+                            onClick={() => rejectBusiness(b.id)}
                             className="rounded border border-destructive px-2 py-1 text-xs font-medium text-destructive hover:bg-destructive/10"
                           >
-                            {t("admin.businessVerificationPage.btnReject")}
+                            {isKyc
+                              ? t("admin.businessVerificationPage.btnReject")
+                              : t("admin.onboardingVerificationPage.btnReject")}
                           </button>
                         ) : null}
                       </div>
@@ -438,7 +731,7 @@ export function BusinessVerificationPage() {
             animate={{ scale: 1, opacity: 1 }}
             className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border-2 border-border bg-card p-6"
           >
-            <h2 className="mb-1 text-lg font-semibold">
+            <h2 className="mb-1 text-lg font-semibold text-foreground">
               {t("admin.businessVerificationPage.modalTitle", { name: editing.name })}
             </h2>
             <p className="mb-4 text-sm text-muted-foreground">{t("admin.businessVerificationPage.sectionContactInfo")}</p>
@@ -522,4 +815,17 @@ export function BusinessVerificationPage() {
       ) : null}
     </PlatformPage>
   );
+}
+
+export function BusinessKycVerificationPage() {
+  return <PlatformKycComingSoonPage />;
+}
+
+export function BusinessOnboardingVerificationPage() {
+  return <BusinessVerificationQueuePage workflow="onboarding" />;
+}
+
+/** @deprecated Use PlatformKycComingSoonPage */
+export function BusinessVerificationPage() {
+  return <PlatformKycComingSoonPage />;
 }

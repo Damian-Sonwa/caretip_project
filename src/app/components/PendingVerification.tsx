@@ -1,12 +1,6 @@
-import { BusinessKycVerificationPage } from "../pages/business/BusinessKycVerificationPage";
+import { Navigate } from "react-router";
 
-/**
- * `/verification-pending` — business verification status (MVP: admin review; upload UI optional).
- */
+/** Legacy KYC route — not exposed in MVP; send managers to the dashboard. */
 export function PendingVerification() {
-  return (
-    <div className="min-h-screen bg-background">
-      <BusinessKycVerificationPage />
-    </div>
-  );
+  return <Navigate to="/dashboard" replace />;
 }

@@ -36,7 +36,6 @@ import {
 const CATEGORIES: SupportTicketCategory[] = [
   "technical",
   "billing",
-  "kyc",
   "feature_request",
   "general",
 ];
@@ -52,6 +51,7 @@ export function BusinessSupportPage() {
   const [submitting, setSubmitting] = useState(false);
   const [statusFilter, setStatusFilter] = useState<SupportTicketStatus | "">("");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [subject, setSubject] = useState("");
   const [category, setCategory] = useState<SupportTicketCategory>("general");
   const [message, setMessage] = useState("");
@@ -59,10 +59,15 @@ export function BusinessSupportPage() {
   const canLoad =
     authReady && authStatus === "authenticated" && user?.role === "business";
 
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearch(search.trim()), 400);
+    return () => window.clearTimeout(timer);
+  }, [search]);
+
   const loadTickets = useCallback(async (opts?: { quiet?: boolean }) => {
     if (!canLoad || !user?.id) return;
     const quiet = opts?.quiet === true;
-    const cacheKey = `business:support:${user.id}:${statusFilter}:${search.trim().toLowerCase()}`;
+    const cacheKey = `business:support:${user.id}:${statusFilter}:${debouncedSearch.toLowerCase()}`;
     const cached = getPageSessionCache<SupportTicketSummary[]>(cacheKey, PAGE_CACHE_TTL_MEDIUM_MS);
     const useCachedFirst = !quiet && cached !== null;
     if (useCachedFirst) {
@@ -75,7 +80,7 @@ export function BusinessSupportPage() {
     try {
       const res = await fetchBusinessSupportTickets({
         status: statusFilter || undefined,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
       });
       setTickets(res.tickets);
       setPageSessionCache(cacheKey, res.tickets);
@@ -84,7 +89,7 @@ export function BusinessSupportPage() {
     } finally {
       if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [canLoad, search, statusFilter, t, user?.id]);
+  }, [canLoad, debouncedSearch, statusFilter, t, user?.id]);
 
   useEffect(() => {
     void loadTickets();

@@ -151,9 +151,11 @@ const ERROR_MAP: Record<string, string> = {
 
   // QR / KYC (business managers — employees see audience-specific copy in {@link toUserFriendlyMessage})
   "QR code will be available after business verification.":
-    "QR code generation and guest tipping activation unlock after your venue is verified by CareTip.",
+    "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.",
   "QR code generation will be enabled after admin verification.":
-    "QR code generation and guest tipping activation unlock after your venue is verified by CareTip.",
+    "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.",
+  "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.":
+    "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.",
 
   // Locations / tables
   "Location name is required": "Please enter a location name.",

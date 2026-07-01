@@ -1,5 +1,6 @@
 import { Link } from "react-router";
-import { CheckCircle, UserCog, XCircle } from "lucide-react";
+import { UserCog } from "lucide-react";
+import { OnboardingVerificationStatusChip } from "../verification/VerificationWorkflowStatusChip";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { GlobalTransactionRow, PlatformAuditLogRow, PlatformBusinessRow } from "../../lib/api";
@@ -14,29 +15,6 @@ function payoutStatusLabel(status: string, t: TFunction) {
   return label === key ? status.replace(/_/g, " ") : label;
 }
 
-function verificationStatusBadge(b: PlatformBusinessRow, t: TFunction) {
-  if (b.verificationStatus === "verified") {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-success px-2 py-0.5 text-[11px] font-medium text-success-foreground">
-        <CheckCircle className="h-3.5 w-3.5" aria-hidden />
-        {t("admin.businessVerificationPage.statusVerified")}
-      </span>
-    );
-  }
-  if (b.verificationStatus === "rejected") {
-    return (
-      <span className="inline-flex shrink-0 items-center gap-1 text-[11px] font-medium text-red-700">
-        <XCircle className="h-3.5 w-3.5" aria-hidden />
-        {t("admin.businessVerificationPage.statusRejected")}
-      </span>
-    );
-  }
-  return (
-    <span className="shrink-0 text-[11px] font-medium text-amber-700">
-      {t("admin.businessVerificationPage.statusPending")}
-    </span>
-  );
-}
 
 export function PlatformTransactionMobileCard({ row }: { row: GlobalTransactionRow }) {
   const { t } = useTranslation();
@@ -124,7 +102,9 @@ export function PlatformUserMobileCard({
         <div className="min-w-0 flex-1">
           <h4 className="truncate text-base font-semibold text-foreground">{b.name}</h4>
           <p className="mt-1 truncate text-xs text-muted-foreground">{b.ownerEmail}</p>
-          <p className="mt-1 text-xs capitalize text-muted-foreground">{b.verificationStatus}</p>
+          <div className="mt-2">
+            <OnboardingVerificationStatusChip status={b.onboardingVerificationStatus} />
+          </div>
         </div>
       </div>
       <button
@@ -161,7 +141,7 @@ export function PlatformBusinessVerificationMobileCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
             <h4 className="min-w-0 truncate text-base font-semibold text-foreground">{b.name}</h4>
-            {verificationStatusBadge(b, t)}
+            <OnboardingVerificationStatusChip status={b.onboardingVerificationStatus} />
           </div>
           <p className="mt-1 truncate font-mono text-xs text-muted-foreground">{b.slug}</p>
           <p className="mt-1 truncate text-xs text-muted-foreground">{b.ownerEmail}</p>
@@ -218,22 +198,22 @@ export function PlatformBusinessVerificationMobileCard({
         >
           {t("admin.businessVerificationPage.linkEditDetails")}
         </button>
-        {b.verificationStatus !== "verified" ? (
+        {b.onboardingVerificationStatus !== "approved" ? (
           <button
             type="button"
             onClick={onApprove}
-            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary-hover"
+            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl bg-primary px-3 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
           >
-            {t("admin.businessVerificationPage.btnApprove")}
+            {t("admin.businessDetailPage.approveOnboarding")}
           </button>
         ) : null}
-        {b.verificationStatus === "pending" ? (
+        {b.onboardingVerificationStatus === "submitted" ? (
           <button
             type="button"
             onClick={onReject}
             className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl border-2 border-destructive px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
           >
-            {t("admin.businessVerificationPage.btnReject")}
+            {t("admin.businessDetailPage.rejectOnboarding")}
           </button>
         ) : null}
       </div>

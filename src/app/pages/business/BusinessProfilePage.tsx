@@ -25,22 +25,13 @@ import {
   setPageSessionCache,
   PAGE_CACHE_TTL_LOW_MS,
 } from "../../lib/pageSessionCache";
+import {
+  OnboardingVerificationStatusChip,
+} from "../../components/verification/VerificationWorkflowStatusChip";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 const LOGO_MAX_BYTES = 5 * 1024 * 1024;
 const LOCATION_MAX = 2000;
-
-function verificationLabel(s: BusinessInfo["verificationStatus"]): string {
-  if (s === "verified") return "Verified";
-  if (s === "rejected") return "Rejected";
-  return "Pending";
-}
-
-function verificationClass(s: BusinessInfo["verificationStatus"]): string {
-  if (s === "verified") return "bg-emerald-500/15 text-emerald-800 dark:text-emerald-200";
-  if (s === "rejected") return "bg-destructive/15 text-destructive";
-  return "bg-muted text-muted-foreground";
-}
 
 /**
  * Full venue profile management: read, edit (PUT), logo upload (POST), read-only slug & verification.
@@ -396,19 +387,12 @@ export function BusinessProfilePage({ embedded = false }: { embedded?: boolean }
             ) : null}
           </div>
           <div>
-            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{t("business.profilePage.verification")}</p>
-            <span
-              className={cn(
-                "mt-2 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold",
-                verificationClass(profile?.verificationStatus),
-              )}
-            >
-              {profile?.verificationStatus === "verified"
-                ? t("business.profilePage.statusVerified")
-                : profile?.verificationStatus === "rejected"
-                  ? t("business.profilePage.statusRejected")
-                  : t("business.profilePage.statusPending")}
-            </span>
+            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t("business.profilePage.labelOnboardingVerification")}
+            </p>
+            <div className="mt-2">
+              <OnboardingVerificationStatusChip status={profile?.onboardingVerificationStatus} />
+            </div>
           </div>
         </CardContent>
       </Card>

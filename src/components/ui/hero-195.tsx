@@ -70,7 +70,7 @@ export function Hero195({ className, headlineStats }: Hero195Props) {
             </span>
           </Link>
           <Link
-            to="/platform-admin/transactions"
+            to="/platform-admin/revenue/transactions"
             className="flex items-center justify-between rounded-lg px-2 py-2 font-medium text-foreground hover:bg-muted"
           >
             <span className="flex items-center gap-2">
@@ -83,10 +83,10 @@ export function Hero195({ className, headlineStats }: Hero195Props) {
       actions={
         <>
           <Button asChild>
-            <Link to="/platform-admin/businesses">Review businesses</Link>
+            <Link to="/platform-admin/businesses/onboarding-verification">Review businesses</Link>
           </Button>
           <Button variant="outline" asChild>
-            <Link to="/platform-admin/transactions">View transactions</Link>
+            <Link to="/platform-admin/revenue/transactions">View transactions</Link>
           </Button>
         </>
       }

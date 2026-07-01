@@ -148,6 +148,7 @@ export async function upsertManagerKycDocument(
       id: true,
       name: true,
       verificationStatus: true,
+      kycVerificationStatus: true,
       kycDocuments: true,
       kycSubmittedAt: true,
     },
@@ -163,17 +164,21 @@ export async function upsertManagerKycDocument(
     docs[documentType] = publicPath;
   }
 
-  const nextStatus: BusinessVerificationStatus =
-    business.verificationStatus === "rejected" ? "pending" : business.verificationStatus;
-
   await prisma.business.update({
     where: { id: business.id },
     data: {
       kycDocuments: docs,
-      verificationStatus: nextStatus,
       verificationDocumentPath: publicPath,
+      kycVerificationStatus:
+        business.kycVerificationStatus === "rejected" ? "awaiting_upload" : business.kycSubmittedAt
+          ? "pending_review"
+          : "awaiting_upload",
+      verificationStatus: "pending",
     },
   });
+
+  const { refreshKycStatusFromDocuments } = await import("./businessVerificationWorkflow.service.js");
+  const nextKyc = await refreshKycStatusFromDocuments(business.id);
 
   emitBusinessDataChanged(business.id, "verification_doc_updated");
   emitPlatformDataUpdated("verification_document");
@@ -186,7 +191,7 @@ export async function upsertManagerKycDocument(
   }
 
   const kycUiStatus = resolveKycUiStatus({
-    verificationStatus: nextStatus,
+    verificationStatus: nextKyc === "verified" ? "verified" : nextKyc === "rejected" ? "rejected" : "pending",
     kycDocuments: docs,
     kycSubmittedAt: business.kycSubmittedAt,
   });
@@ -219,6 +224,7 @@ export async function submitManagerKycForReview(userId: string) {
     data: {
       kycSubmittedAt: now,
       verificationStatus: "pending",
+      kycVerificationStatus: "pending_review",
       kycDocuments: docs,
     },
   });

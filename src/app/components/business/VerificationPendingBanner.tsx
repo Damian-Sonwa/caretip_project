@@ -9,8 +9,8 @@ import { useBusinessVerificationNotice } from "../../hooks/useBusinessVerificati
 import { cn } from "@/lib/utils";
 
 /**
- * Soft banner while platform business verification is pending or rejected.
- * Suppressed on {@link BUSINESS_VERIFICATION_INLINE_ROUTE} where the dashboard inline card is shown.
+ * Soft banner while platform onboarding review is pending or rejected.
+ * KYC status does not trigger this banner — see dashboard status bar "Coming soon".
  */
 export function VerificationPendingBanner({ className }: { className?: string }) {
   const { t } = useTranslation();
@@ -51,7 +51,7 @@ export function VerificationPendingBanner({ className }: { className?: string })
           </div>
         </div>
         <Link
-          to="/verification-pending"
+          to="/awaiting-approval"
           className={cn(
             "shrink-0 text-xs font-semibold underline-offset-2 transition-colors hover:underline",
             rejected ? "text-destructive" : "text-amber-900/90 dark:text-amber-100",

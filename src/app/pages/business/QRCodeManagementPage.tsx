@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../hooks/useRequireAuth";
 import { useSubscriptionEntitlements } from "../../hooks/useSubscriptionEntitlements";
 import { canUseProductionQr } from "../../lib/businessVerificationCapabilities";
+import { onboardingStatusLabel } from "../../lib/verificationWorkflowUi";
 import { fetchVenueCatalog } from "../../lib/businessVenueCatalog";
 import {
   getEmployees,
@@ -118,8 +119,8 @@ export function QRCodeManagementPage({
     role: "business",
   });
   const brandingTier = tier ?? "basic";
-  const [verificationStatus, setVerificationStatus] = useState<
-    "pending" | "verified" | "rejected" | null
+  const [onboardingVerificationStatus, setOnboardingVerificationStatus] = useState<
+    import("../../lib/api").OnboardingVerificationStatus | null
   >(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [employees, setEmployees] = useState<EmployeeItem[]>([]);
@@ -154,7 +155,7 @@ export function QRCodeManagementPage({
       setBusinessDisplayName(String(profile.name ?? "").trim() || null);
       setBusinessLocation(String(profile.registeredAddress ?? profile.location ?? "").trim() || null);
       setBusinessLogoPath(profile.logo?.trim() ? profile.logo : null);
-      setVerificationStatus(profile.verificationStatus ?? "pending");
+      setOnboardingVerificationStatus(profile.onboardingVerificationStatus ?? null);
       const branding = await loadQrRenderBranding({
         mode: "manager",
         businessId: user.businessId,
@@ -172,9 +173,7 @@ export function QRCodeManagementPage({
       setQrBrandingOpts(fallbackManagerQrRenderBranding(brandingTier, name, profile.logo));
     } catch (err) {
       logClientError("QRCodeManagementPage.branding", err);
-      if (user.status === "APPROVED") setVerificationStatus("verified");
-      else if (user.status === "REJECTED") setVerificationStatus("rejected");
-      else setVerificationStatus("pending");
+      setOnboardingVerificationStatus(user.onboardingVerificationStatus ?? null);
       setQrBrandingOpts(
         fallbackManagerQrRenderBranding(
           brandingTier,
@@ -183,7 +182,7 @@ export function QRCodeManagementPage({
         ),
       );
     }
-  }, [user?.businessId, user?.role, user?.businessName, user?.status, brandingTier, businessDisplayName, businessLogoPath, t]);
+  }, [user?.businessId, user?.role, user?.businessName, user?.onboardingVerificationStatus, brandingTier, businessDisplayName, businessLogoPath, t]);
 
   useEffect(() => {
     void loadQrBranding();
@@ -841,20 +840,19 @@ export function QRCodeManagementPage({
   if (!user) return <BusinessSubPageShellSkeleton />;
 
   const canUseQr = canUseProductionQr(
-    verificationStatus ?? user.status,
+    user?.onboardingVerificationStatus,
     Boolean(user.impersonation),
   );
 
   const qrLocked = !canUseQr;
 
-  /** Only block the shell while we still expect `fetchBusinessProfile` to set KYC (managers with a business id). */
-  const awaitingBusinessVerification =
+  const awaitingOnboardingStatus =
     !user.impersonation &&
     user.role === "business" &&
     Boolean(user.businessId) &&
-    verificationStatus === null;
+    user.onboardingVerificationStatus == null;
 
-  if (awaitingBusinessVerification) {
+  if (awaitingOnboardingStatus) {
     return <PageLoader message={t("business.qrPage.checkingVerification")} />;
   }
 
@@ -882,12 +880,10 @@ export function QRCodeManagementPage({
     );
   }
 
-  const statusLabel =
-    verificationStatus === "verified"
-      ? t("admin.verification.verified")
-      : verificationStatus === "rejected"
-        ? t("admin.verification.rejected")
-        : t("admin.verification.pending");
+  const statusLabel = onboardingStatusLabel(
+    onboardingVerificationStatus ?? user?.onboardingVerificationStatus,
+    t,
+  );
 
   const atAGlanceCard = !embedded ? (
     <Card className={businessUi.atAGlanceCard}>
@@ -899,7 +895,7 @@ export function QRCodeManagementPage({
             <p className={businessUi.atAGlanceStatValue}>{safeEmployees.length}</p>
           </div>
           <div>
-            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statStatus")}</p>
+            <p className={businessUi.atAGlanceStatLabel}>{t("business.qrPage.statOnboardingVerification")}</p>
             <p className={businessUi.atAGlanceStatValue}>{statusLabel}</p>
           </div>
           <div>

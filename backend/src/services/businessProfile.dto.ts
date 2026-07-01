@@ -1,5 +1,10 @@
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
-import type { BusinessSubscriptionTier, BusinessVerificationStatus, SubscriptionPlanKey } from "@prisma/client";
+import type {
+  BusinessSubscriptionTier,
+  KycVerificationStatus,
+  OnboardingVerificationStatus,
+  SubscriptionPlanKey,
+} from "@prisma/client";
 import { getSponsoredProgrammeDefinition } from "../config/sponsoredAccess.config.js";
 import type { SubscriptionEntitlementState } from "./subscriptionEntitlement.service.js";
 import {
@@ -25,9 +30,10 @@ export type PublicBusinessProfileDto = {
   branding: PublicGuestBrandingDto;
 };
 
-/** Manager-authenticated profile (includes operational / KYC fields). */
+/** Manager-authenticated profile (includes operational fields). */
 export type ManagerBusinessProfileDto = PublicBusinessProfileDto & {
-  verificationStatus: BusinessVerificationStatus;
+  onboardingVerificationStatus: OnboardingVerificationStatus;
+  kycVerificationStatus: KycVerificationStatus;
   /** Mirrored tier when entitled; null when status is none. */
   subscriptionTier: BusinessSubscriptionTier | null;
   /** Authoritative lifecycle from entitlement resolver. */
@@ -53,7 +59,8 @@ type BusinessRow = {
   businessType: string | null;
   location: string | null;
   registeredAddress: string | null;
-  verificationStatus: BusinessVerificationStatus;
+  onboardingVerificationStatus: OnboardingVerificationStatus;
+  kycVerificationStatus: KycVerificationStatus;
   subscriptionTier: BusinessSubscriptionTier | null;
   contactPhone: string | null;
   website: string | null;
@@ -108,7 +115,8 @@ export function toManagerBusinessProfileDto(
       : null;
   return {
     ...toPublicBusinessProfileDto(business, entitlements.subscriptionTier),
-    verificationStatus: business.verificationStatus,
+    onboardingVerificationStatus: business.onboardingVerificationStatus,
+    kycVerificationStatus: business.kycVerificationStatus,
     subscriptionTier: entitlements.subscriptionTier,
     subscriptionStatus: entitlements.status,
     plan: entitlements.plan,
@@ -127,7 +135,8 @@ export function toManagerBusinessProfileDto(
 
 /** Sensitive keys that must never appear on the public business-by-id API. */
 export const MANAGER_ONLY_BUSINESS_FIELDS = [
-  "verificationStatus",
+  "onboardingVerificationStatus",
+  "kycVerificationStatus",
   "subscriptionTier",
   "subscriptionStatus",
   "plan",

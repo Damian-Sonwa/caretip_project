@@ -20,6 +20,9 @@ import {
   PlatformSearchField,
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformUserMobileCard } from "../../components/platform/platformAdminMobileCards";
+import {
+  OnboardingVerificationStatusChip,
+} from "../../components/verification/VerificationWorkflowStatusChip";
 import { platformUi } from "../../components/platform/platformDashboardUi";
 import {
   getPageSessionCache,
@@ -144,7 +147,7 @@ export function PlatformUserManagementPage() {
               <tr className={platformUi.tableHeadRow}>
                 <th className={platformUi.tableTh}>{t("admin.userManagementPage.colBusiness")}</th>
                 <th className={platformUi.tableTh}>{t("admin.userManagementPage.colManagerEmail")}</th>
-                <th className={platformUi.tableTh}>{t("admin.userManagementPage.colVerification")}</th>
+                <th className={platformUi.tableTh}>{t("admin.userManagementPage.colOnboardingVerification")}</th>
                 <th className={`${platformUi.tableTh} text-right`}>{t("admin.userManagementPage.colActions")}</th>
               </tr>
             </thead>
@@ -162,7 +165,9 @@ export function PlatformUserManagementPage() {
                   <tr key={b.id} className={platformUi.tableRow}>
                     <td className={`${platformUi.tableTd} font-medium`}>{b.name}</td>
                     <td className={`${platformUi.tableTd} text-xs text-muted-foreground`}>{b.ownerEmail}</td>
-                    <td className={`${platformUi.tableTd} text-xs capitalize`}>{b.verificationStatus}</td>
+                    <td className={platformUi.tableTd}>
+                      <OnboardingVerificationStatusChip status={b.onboardingVerificationStatus} />
+                    </td>
                     <td className={`${platformUi.tableTd} text-right`}>
                       <button
                         type="button"

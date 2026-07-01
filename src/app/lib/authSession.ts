@@ -13,6 +13,7 @@ export type SessionUserLike = {
   hasCompletedOnboarding: boolean;
   /** Manager KYC status — mirrors auth payload; soft UI + go-live gates only. */
   status?: BusinessKycStatus;
+  onboardingVerificationStatus?: import("./api").OnboardingVerificationStatus;
 };
 
 /**

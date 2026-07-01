@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useTranslation } from "react-i18next";
-import { Loader2 } from "lucide-react";
+import { ArrowLeft, Loader2, MapPin, Palette } from "lucide-react";
 import { useAuth, getPostAuthRedirect } from "../hooks/useAuth";
 import { getAuthSessionFlags } from "../lib/authSessionBootstrap";
 import { useRegisterGlobalAppInit } from "../lib/globalAppLoading";
@@ -35,9 +35,13 @@ import {
   BusinessOnboardingTextField,
 } from "../components/business/BusinessOnboardingFormField";
 import {
+  onboardingBackBtn,
   onboardingContinueBtn,
   onboardingDisplayFont,
+  onboardingFormCard,
   onboardingHeadline,
+  onboardingSectionCard,
+  onboardingSectionTitle,
   onboardingSubhead,
 } from "../components/business/businessOnboardingUi";
 import { BUSINESS_TYPE_OPTIONS } from "../lib/businessVenueOptions";
@@ -270,22 +274,17 @@ export function BusinessOnboardingPage() {
 
       <main className="business-onboarding-main flex-1">
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
           className="business-onboarding-shell mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8"
         >
           <div className="space-y-8 lg:space-y-10">
             <BusinessOnboardingProgressHeader step={step} />
 
-            <div
-              className={cn(
-                "business-onboarding-split",
-                isReviewStep ? "business-onboarding-split--final" : "business-onboarding-split--entry",
-              )}
-            >
-              <div className="business-onboarding-workspace min-w-0 space-y-8">
-                <header className="space-y-2">
+            {isReviewStep ? (
+              <div className="business-onboarding-final-layout space-y-8">
+                <header className="space-y-3 text-center lg:text-left">
                   <h1
                     id="onboarding-page-title"
                     className={onboardingHeadline}
@@ -293,81 +292,134 @@ export function BusinessOnboardingPage() {
                   >
                     {t(PAGE_HEADLINE_KEYS[step - 1])}
                   </h1>
-                  <p className={onboardingSubhead}>{t(PAGE_DESC_KEYS[step - 1])}</p>
+                  <p className={cn(onboardingSubhead, "mx-auto lg:mx-0")}>{t(PAGE_DESC_KEYS[step - 1])}</p>
                 </header>
 
-                <section className="space-y-6" aria-labelledby="onboarding-page-title">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={step}
-                      initial={{ opacity: 0, y: 6 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-6"
+                <div className="business-onboarding-final-grid">
+                  <aside
+                    className="business-onboarding-preview-aside min-w-0"
+                    aria-label={t("business.onboarding.preview.panelAria")}
+                  >
+                    <BusinessOnboardingGuestPreview {...previewData} variant="final" />
+                  </aside>
+
+                  <div className="business-onboarding-final-content min-w-0 space-y-6">
+                    <BusinessOnboardingReviewSummary
+                      legalBusinessName={legalBusinessName}
+                      businessType={businessType}
+                      registeredAddress={registeredAddress}
+                      contactPhone={contactPhone}
+                      website={website}
+                      logoPreviewUrl={logoPreviewUrl}
+                    />
+                    <BusinessOnboardingFinishCta
+                      busy={busy}
+                      disabled={!canContinue}
+                      onFinish={() => void goForward()}
+                    />
+                    <button type="button" onClick={goBack} disabled={busy} className={onboardingBackBtn}>
+                      <ArrowLeft className="h-4 w-4" aria-hidden />
+                      {t("business.onboarding.actions.back")}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="business-onboarding-split business-onboarding-split--entry">
+                <div className={cn(onboardingFormCard, "business-onboarding-workspace min-w-0")}>
+                  <header className="mb-8 space-y-3 border-b border-zinc-200/70 pb-8 dark:border-zinc-800/70">
+                    <h1
+                      id="onboarding-page-title"
+                      className={onboardingHeadline}
+                      style={{ fontFamily: onboardingDisplayFont }}
                     >
-                      {step === 1 ? (
-                        <>
-                          <BusinessOnboardingTextField
-                            label={t("business.onboarding.fields.legalName")}
-                            placeholder={t("business.onboarding.fields.legalNamePlaceholder")}
-                            value={legalBusinessName}
-                            onChange={setLegalBusinessName}
-                          />
-                          <BusinessOnboardingSelectField
-                            label={t("business.onboarding.fields.businessType")}
-                            value={businessType}
-                            onChange={setBusinessType}
-                            placeholder={t("business.onboarding.fields.businessTypePlaceholder")}
-                          >
-                            {BUSINESS_TYPE_OPTIONS.map((opt) => (
-                              <option key={opt.value} value={opt.value}>
-                                {t(opt.labelKey)}
-                              </option>
-                            ))}
-                          </BusinessOnboardingSelectField>
-                        </>
-                      ) : null}
+                      {t(PAGE_HEADLINE_KEYS[step - 1])}
+                    </h1>
+                    <p className={onboardingSubhead}>{t(PAGE_DESC_KEYS[step - 1])}</p>
+                  </header>
 
-                      {step === 2 ? (
-                        <>
-                          <BusinessOnboardingLogoUpload file={logoFile} onFile={setLogoFile} />
-                          <BusinessOnboardingTextField
-                            label={t("business.onboarding.fields.address")}
-                            placeholder={t("business.onboarding.fields.addressPlaceholder")}
-                            value={registeredAddress}
-                            onChange={setRegisteredAddress}
-                          />
-                          <BusinessOnboardingTextField
-                            label={t("business.onboarding.fields.phone")}
-                            placeholder={t("business.onboarding.fields.phonePlaceholder")}
-                            value={contactPhone}
-                            onChange={setContactPhone}
-                          />
-                          <BusinessOnboardingTextField
-                            label={t("business.onboarding.fields.website")}
-                            placeholder={t("business.onboarding.fields.optional")}
-                            value={website}
-                            onChange={setWebsite}
-                          />
-                        </>
-                      ) : null}
+                  <section className="space-y-8" aria-labelledby="onboarding-page-title">
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={step}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+                        className="space-y-8"
+                      >
+                        {step === 1 ? (
+                          <div className="space-y-6">
+                            <BusinessOnboardingTextField
+                              label={t("business.onboarding.fields.legalName")}
+                              placeholder={t("business.onboarding.fields.legalNamePlaceholder")}
+                              value={legalBusinessName}
+                              onChange={setLegalBusinessName}
+                              hint={t("business.onboarding.fields.legalNameHint")}
+                            />
+                            <BusinessOnboardingSelectField
+                              label={t("business.onboarding.fields.businessType")}
+                              value={businessType}
+                              onChange={setBusinessType}
+                              placeholder={t("business.onboarding.fields.businessTypePlaceholder")}
+                              hint={t("business.onboarding.fields.businessTypeHint")}
+                            >
+                              {BUSINESS_TYPE_OPTIONS.map((opt) => (
+                                <option key={opt.value} value={opt.value}>
+                                  {t(opt.labelKey)}
+                                </option>
+                              ))}
+                            </BusinessOnboardingSelectField>
+                          </div>
+                        ) : null}
 
-                      {step === 3 ? (
-                        <BusinessOnboardingReviewSummary
-                          legalBusinessName={legalBusinessName}
-                          businessType={businessType}
-                          registeredAddress={registeredAddress}
-                          contactPhone={contactPhone}
-                          website={website}
-                          logoPreviewUrl={logoPreviewUrl}
-                        />
-                      ) : null}
-                    </motion.div>
-                  </AnimatePresence>
+                        {step === 2 ? (
+                          <div className="space-y-6">
+                            <div className={onboardingSectionCard}>
+                              <h2 className={onboardingSectionTitle}>
+                                <Palette className="h-4 w-4 text-orange-600 dark:text-orange-400" aria-hidden />
+                                {t("business.onboarding.sections.branding")}
+                              </h2>
+                              <BusinessOnboardingLogoUpload file={logoFile} onFile={setLogoFile} />
+                            </div>
 
-                  {!isReviewStep ? (
-                    <div className="space-y-4 pt-2">
+                            <div className={onboardingSectionCard}>
+                              <h2 className={onboardingSectionTitle}>
+                                <MapPin className="h-4 w-4 text-orange-600 dark:text-orange-400" aria-hidden />
+                                {t("business.onboarding.sections.locationContact")}
+                              </h2>
+                              <div className="space-y-6">
+                                <BusinessOnboardingTextField
+                                  label={t("business.onboarding.fields.address")}
+                                  placeholder={t("business.onboarding.fields.addressPlaceholder")}
+                                  value={registeredAddress}
+                                  onChange={setRegisteredAddress}
+                                  hint={t("business.onboarding.fields.addressHint")}
+                                />
+                                <BusinessOnboardingTextField
+                                  label={t("business.onboarding.fields.phone")}
+                                  placeholder={t("business.onboarding.fields.phonePlaceholder")}
+                                  value={contactPhone}
+                                  onChange={setContactPhone}
+                                  hint={t("business.onboarding.fields.phoneHint")}
+                                  optional
+                                />
+                                <BusinessOnboardingTextField
+                                  label={t("business.onboarding.fields.website")}
+                                  placeholder={t("business.onboarding.fields.websitePlaceholder")}
+                                  value={website}
+                                  onChange={setWebsite}
+                                  hint={t("business.onboarding.fields.websiteHint")}
+                                  optional
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </motion.div>
+                    </AnimatePresence>
+
+                    <div className="space-y-4 border-t border-zinc-200/70 pt-8 dark:border-zinc-800/70">
                       <button
                         type="button"
                         onClick={() => void goForward()}
@@ -384,48 +436,18 @@ export function BusinessOnboardingPage() {
                           t("business.onboarding.actions.continue")
                         )}
                       </button>
+
+                      {step > 1 ? (
+                        <button type="button" onClick={goBack} disabled={busy} className={onboardingBackBtn}>
+                          <ArrowLeft className="h-4 w-4" aria-hidden />
+                          {t("business.onboarding.actions.back")}
+                        </button>
+                      ) : null}
                     </div>
-                  ) : null}
-
-                  {step > 1 && !isReviewStep ? (
-                    <button
-                      type="button"
-                      onClick={goBack}
-                      disabled={busy}
-                      className="text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-                    >
-                      {t("business.onboarding.actions.back")}
-                    </button>
-                  ) : null}
-                </section>
+                  </section>
+                </div>
               </div>
-
-              {isReviewStep ? (
-                <>
-                  <aside
-                    className="business-onboarding-preview-aside min-w-0"
-                    aria-label={t("business.onboarding.preview.panelAria")}
-                  >
-                    <BusinessOnboardingGuestPreview {...previewData} variant="final" />
-                  </aside>
-                  <div className="business-onboarding-finish-slot min-w-0">
-                    <BusinessOnboardingFinishCta
-                      busy={busy}
-                      disabled={!canContinue}
-                      onFinish={() => void goForward()}
-                    />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={goBack}
-                    disabled={busy}
-                    className="business-onboarding-back-slot text-sm font-medium text-zinc-500 transition-colors hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200"
-                  >
-                    {t("business.onboarding.actions.back")}
-                  </button>
-                </>
-              ) : null}
-            </div>
+            )}
 
             <BusinessOnboardingFootnote />
           </div>

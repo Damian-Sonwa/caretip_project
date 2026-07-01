@@ -6,7 +6,6 @@ import { ActivationPlanButtons } from "../subscription/ActivateCareTipCta";
 import {
   resolveQrStudioVerificationPhase,
   type QrStudioVerificationPhase,
-  type BusinessVerificationUiStatus,
 } from "@/app/lib/businessVerificationCapabilities";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,11 +14,11 @@ export type QrStudioAccessBlockReason = "subscription" | "verification" | "both"
 
 type QrStudioAccessPanelProps = {
   reason: QrStudioAccessBlockReason;
-  verificationStatus?: BusinessVerificationUiStatus;
+  onboardingVerificationStatus?: import("../../lib/api").OnboardingVerificationStatus;
   className?: string;
 };
 
-const VERIFICATION_STATUS_PATH = "/verification-pending";
+const ONBOARDING_STATUS_PATH = "/awaiting-approval";
 
 function VerificationAccessPanel({
   phase,
@@ -68,7 +67,7 @@ function VerificationAccessPanel({
             asChild
             className="min-h-11 border-amber-600/20 bg-amber-600 px-6 text-white hover:bg-amber-600/90"
           >
-            <Link to={VERIFICATION_STATUS_PATH}>
+            <Link to={ONBOARDING_STATUS_PATH}>
               {t("business.qrStudio.access.viewVerificationStatus")}
             </Link>
           </Button>
@@ -109,7 +108,7 @@ function VerificationAccessPanel({
         </p>
         <div className="mt-6">
           <Button asChild className="min-h-11 px-6">
-            <Link to={VERIFICATION_STATUS_PATH}>{t("business.qrStudio.access.viewVerificationStatus")}</Link>
+            <Link to={ONBOARDING_STATUS_PATH}>{t("business.qrStudio.access.viewVerificationStatus")}</Link>
           </Button>
         </div>
       </section>
@@ -136,16 +135,16 @@ function VerificationAccessPanel({
       </p>
       <div className="mt-6">
         <Button asChild className="min-h-11 px-6">
-          <Link to={VERIFICATION_STATUS_PATH}>{t("business.qrStudio.access.continueVerification")}</Link>
+          <Link to={ONBOARDING_STATUS_PATH}>{t("business.qrStudio.access.continueVerification")}</Link>
         </Button>
       </div>
     </section>
   );
 }
 
-export function QrStudioAccessPanel({ reason, verificationStatus, className }: QrStudioAccessPanelProps) {
+export function QrStudioAccessPanel({ reason, onboardingVerificationStatus, className }: QrStudioAccessPanelProps) {
   const { t } = useTranslation();
-  const verificationPhase = resolveQrStudioVerificationPhase(verificationStatus);
+  const verificationPhase = resolveQrStudioVerificationPhase(onboardingVerificationStatus);
 
   if (reason === "subscription") {
     return (
@@ -232,7 +231,7 @@ export function QrStudioAccessPanel({ reason, verificationStatus, className }: Q
         <ActivationPlanButtons className="text-left" />
         <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
           <Button asChild variant="outline" className="min-h-11">
-            <Link to={VERIFICATION_STATUS_PATH}>
+            <Link to={ONBOARDING_STATUS_PATH}>
               {verificationPhase === "in_review"
                 ? t("business.qrStudio.access.viewVerificationStatus")
                 : t("business.qrStudio.access.continueVerification")}

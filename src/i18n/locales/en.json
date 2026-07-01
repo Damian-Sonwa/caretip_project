@@ -106,7 +106,17 @@
     "syncingAccountStatus": "Syncing account status…",
     "loadingTeamMembers": "Loading team members…",
     "loadingTeam": "Loading team…",
-    "openingTip": "Opening tip…"
+    "openingTip": "Opening tip…",
+    "listFilter": {
+      "retry": "Try again",
+      "loadError": {
+        "generic": "We couldn't load this list right now.",
+        "api": "We couldn't load this list right now.",
+        "network": "Network error — check your connection and try again.",
+        "permission": "You don't have permission to view this data.",
+        "hint": "Your filters are still applied. Retry to refresh the results."
+      }
+    }
   },
   "join": {
     "eyebrow": "Join your team",
@@ -1929,7 +1939,13 @@
       "connectionOfflineDesc": "Realtime updates paused until reconnected",
       "dataLoadFailed": "Could not refresh dashboard data",
       "kycPending": "Business verification pending",
-      "kycPendingDesc": "Your venue is under review. Approval is required before accepting live guest tips.",
+      "kycPendingDesc": "Financial/compliance verification is in progress. You can use the dashboard while KYC is pending.",
+      "platformAccessApproved": "Platform access",
+      "platformAccessApprovedDesc": "Your business is approved to use the CareTip dashboard.",
+      "platformAccessPending": "Onboarding review in progress",
+      "platformAccessPendingDesc": "You can use your dashboard while we review your business. QR code generation unlocks after onboarding is approved.",
+      "kycComingSoon": "KYC verification — coming soon",
+      "kycComingSoonDesc": "Financial compliance verification will be available in a future update. It does not affect your dashboard access.",
       "kycVerified": "Verified",
       "kycVerifiedDesc": "Your venue is approved for live guest tips",
       "kycRejected": "Verification needs attention",
@@ -3302,6 +3318,16 @@
     }
   },
   "business": {
+    "awaitingApproval": {
+      "titlePending": "Your business profile is under review",
+      "titleRejected": "Onboarding not approved",
+      "descPending": "Your registration has been submitted successfully. While our team reviews your business, you can continue setting up your account and exploring your dashboard. QR code generation will become available once your business has been approved.",
+      "descRejected": "Your onboarding was not approved. Update your business profile or contact support for next steps.",
+      "emailNotice": "We will email you when your onboarding has been approved.",
+      "reviewProfile": "Review business profile",
+      "goToDashboard": "Go to dashboard",
+      "signOut": "Sign out"
+    },
     "hero": {
       "headline": "Team Performance Overview",
       "headlineLine1": "Your venue",
@@ -3381,13 +3407,21 @@
         "badge": "Final step",
         "headline": "Review & publish",
         "description": "Confirm your details and preview the guest tipping experience before you go live.",
-        "readyMessage": "Everything looks good? Publish your venue and open your dashboard."
+        "readyTitle": "Ready to go live",
+        "readyMessage": "Everything looks good? Publish your venue and open your dashboard.",
+        "publishHint": "You can update branding and contact details anytime in settings."
+      },
+      "sections": {
+        "branding": "Branding",
+        "locationContact": "Location & contact"
       },
       "upload": {
         "cta": "Click to upload your logo",
-        "formats": "PNG, JPG, or SVG",
+        "formats": "PNG, JPG, or SVG · square works best",
         "dragHint": "or drag and drop",
-        "remove": "Remove image"
+        "remove": "Remove",
+        "replace": "Replace",
+        "previewReady": "Logo ready for your guest page"
       },
       "preview": {
         "panelAria": "Guest tipping page preview (not interactive)",
@@ -3432,6 +3466,33 @@
         "statusTeamReady": "Pending admin verification",
         "statusAlmostReady": "Complete your venue details",
         "statusPendingSub": "QR codes and guest tipping unlock after CareTip approval",
+        "customerJourney": {
+          "aria": "Customer tipping journey steps",
+          "title": "Customer tipping journey",
+          "subtitle": "What guests experience from scan to thank-you",
+          "steps": {
+            "scan": {
+              "title": "Scan QR",
+              "desc": "Guest scans your table or staff QR"
+            },
+            "select": {
+              "title": "Choose team member",
+              "desc": "Pick who served them today"
+            },
+            "amount": {
+              "title": "Pick amount",
+              "desc": "Quick presets or a custom tip"
+            },
+            "pay": {
+              "title": "Pay securely",
+              "desc": "Stripe checkout on their phone"
+            },
+            "thanks": {
+              "title": "Thank you",
+              "desc": "Tip sent. Optional feedback"
+            }
+          }
+        },
         "ctaHelper": "Guests can review and change tip amount before payment.",
         "qrReady": "QR codes ready for tables and staff links",
         "qrPreviewLabel": "Your QR code",
@@ -3474,20 +3535,34 @@
         "reviewPublish": "Verify everything below, then publish when you are ready."
       },
       "review": {
+        "summaryEyebrow": "Review summary",
         "brandingLabel": "Logo",
         "logoAdded": "Logo added",
-        "logoSkipped": "No logo. You can add one later in settings"
+        "logoSkipped": "No logo. You can add one later in settings",
+        "publicPageReady": "Your guest tipping page is configured and ready to preview below.",
+        "sections": {
+          "businessInfo": "Business information",
+          "contactInfo": "Contact information",
+          "branding": "Branding",
+          "publicPage": "Public page settings"
+        }
       },
       "fields": {
         "legalName": "Legal business name",
         "legalNamePlaceholder": "The Harbor Kitchen Ltd",
+        "legalNameHint": "Use the registered legal name for your venue or company.",
         "businessType": "Business type",
         "businessTypePlaceholder": "Select a type",
+        "businessTypeHint": "Helps us tailor your guest tipping experience.",
         "address": "Registered address",
         "addressPlaceholder": "Street, city, postal code",
+        "addressHint": "Shown on your public tipping page so guests know where you are.",
         "phone": "Team contact phone",
-        "phonePlaceholder": "Optional",
+        "phonePlaceholder": "+44 20 7946 0958",
+        "phoneHint": "Optional. For internal contact only, not shown to guests.",
         "website": "Website",
+        "websitePlaceholder": "https://yourvenue.com",
+        "websiteHint": "Optional. Link to your venue website or social page.",
         "logo": "Logo",
         "logoHint": "Optional. PNG or JPEG, square works best.",
         "optional": "Optional"
@@ -3515,13 +3590,20 @@
         "back": "Back",
         "continue": "Continue",
         "finish": "Publish & finish setup",
-        "saving": "Saving…"
+        "saving": "Saving…",
+        "publishing": "Publishing…"
       }
     },
     "goalStatus": {
       "achieved": "Achieved",
       "on_track": "On track",
       "below_target": "Below target"
+    },
+    "onboardingVerification": {
+      "approvedToastTitle": "Onboarding verification approved",
+      "approvedToastBody": "QR code generation and public venue pages are now available.",
+      "rejectedToastTitle": "Onboarding verification not approved",
+      "rejectedToastBody": "Please contact support if you have questions about your application."
     },
     "verification": {
       "pendingPageTitle": "Business verification pending",
@@ -3564,6 +3646,13 @@
         "UNDER_REVIEW": "Under review",
         "APPROVED": "Approved",
         "REJECTED": "Rejected"
+      },
+      "comingSoon": {
+        "badge": "Coming soon",
+        "title": "KYC verification is coming soon",
+        "body": "Identity and compliance verification for payouts and financial features is not available yet. It does not affect your dashboard, staff, locations, or billing. Onboarding approval is separate and controls when you can generate QR codes.",
+        "backDashboard": "Back to dashboard",
+        "onboardingStatus": "Onboarding status"
       }
     },
     "dashboard": {
@@ -3580,6 +3669,11 @@
       "verificationBannerRejectedTitle": "Business verification needs attention",
       "verificationBannerRejectedDesc": "Our team could not approve your venue yet. Contact support if you have questions.",
       "verificationBannerCta": "View verification status",
+      "onboardingReviewBannerTitle": "Onboarding review in progress",
+      "onboardingReviewBannerDesc": "Your dashboard stays available while we review your business. QR code generation unlocks after onboarding is approved.",
+      "onboardingReviewBannerRejectedTitle": "Onboarding not approved",
+      "onboardingReviewBannerRejectedDesc": "Update your business profile or contact support. Your dashboard remains available for setup.",
+      "onboardingReviewBannerCta": "View onboarding status",
       "kycBannerTitle": "Business verification pending",
       "kycBannerDesc": "Your venue is under review. Our team is reviewing your onboarding information. Approval is required before accepting live guest tips.",
       "kycBannerRejectedTitle": "Business verification needs attention",
@@ -3776,7 +3870,9 @@
       "publicDesc": "Read-only. Contact support if you need a slug change after launch.",
       "teamQrPath": "Team QR path",
       "guestDirectory": "Guest directory:",
-      "verification": "Verification",
+      "verification": "Verification statuses",
+      "labelOnboardingVerification": "Onboarding verification",
+      "labelKycVerification": "KYC verification",
       "statusVerified": "Verified",
       "statusRejected": "Rejected",
       "statusPending": "Pending"
@@ -3855,7 +3951,7 @@
       "toastActiveOn": "Staff profile is now active.",
       "toastActiveOff": "Staff profile deactivated. QR links are disabled.",
       "toastActivateForQr": "Activate this profile before downloading a QR code.",
-      "toastQrAfterVerification": "QR code generation and guest tipping unlock after your venue is verified.",
+      "toastQrAfterVerification": "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved.",
       "toastQrDownloaded": "QR code downloaded.",
       "toastQrDownloadFailed": "Failed to download QR.",
       "loading": "Loading staff…",
@@ -3968,14 +4064,14 @@
       "storefrontCardHint": "Venue branding lives inside the QR card. Download or print the complete experience.",
       "labelQrUrl": "QR code URL",
       "totalScans": "Total scans:",
-      "pendingTitle": "Business verification pending",
+      "pendingTitle": "Onboarding review in progress",
       "dashboardBreadcrumb": "Business dashboard",
       "atAGlance": "At a glance",
       "statStaff": "Staff",
-      "statStatus": "Status",
+      "statOnboardingVerification": "Onboarding verification",
       "statSlug": "Slug",
-      "reviewBody": "Your venue is under review. Our team is reviewing your onboarding information.",
-      "qrLockedSub": "Approval is required before accepting live guest tips. QR publishing and guest tipping unlock after platform approval. You can continue setting up your team and venue in the meantime.",
+      "reviewBody": "Your business profile is under review. You can continue using the dashboard while you wait.",
+      "qrLockedSub": "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved. You can continue setting up your team and venue in the meantime.",
       "sectionsTitle": "Sections",
       "sectionsDesc": "Employees, tables, and locations",
       "tabEmployees": "Employees",
@@ -3994,7 +4090,7 @@
       "storefrontQrUrlLabel": "Public page:",
       "addLocations": "Add locations",
       "checkingVerification": "Checking verification status…",
-      "pendingBody": "Your venue is under review. Approval is required before accepting live guest tips.",
+      "pendingBody": "Your business verification is still in progress. QR codes can be generated after your onboarding has been approved. You can continue using your dashboard in the meantime.",
       "backDashboard": "Back to dashboard",
       "badgePrintable": "Printable & shareable",
       "badgePending": "Awaiting approval",
@@ -5387,6 +5483,7 @@
       "systemHealth": "System health",
       "labelPostgres": "PostgreSQL",
       "labelStripe": "Stripe API",
+      "labelApi": "Platform API",
       "checking": "Checking…",
       "online": "Online",
       "offline": "Offline"
@@ -5406,8 +5503,210 @@
       "navNotifications": "My inbox",
       "navAnnouncements": "Communication",
       "signOut": "Sign out",
-      "closeMenuAria": "Close menu"
+      "closeMenuAria": "Close menu",
+      "groups": {
+        "businessManagement": "Business Management",
+        "revenue": "Revenue & Transactions",
+        "users": "Users",
+        "communication": "Communication",
+        "reports": "Reports",
+        "system": "System"
+      },
+      "business": {
+        "all": "All Businesses",
+        "onboardingVerification": "Onboarding Verification",
+        "kycVerification": "KYC Verification",
+        "verification": "Company Verification",
+        "subscriptions": "Subscription Management",
+        "analytics": "Business Analytics"
+      },
+      "revenue": {
+        "transactions": "Global Transactions",
+        "failedPayments": "Failed Payments",
+        "successfulSubscriptions": "Successful Subscriptions",
+        "failedSubscriptions": "Failed Subscriptions",
+        "refunds": "Refunds"
+      },
+      "users": {
+        "management": "User Management",
+        "staff": "Staff Accounts",
+        "admins": "Platform Admins"
+      },
+      "communication": {
+        "inbox": "Inbox",
+        "notifications": "Notifications",
+        "broadcasts": "Broadcasts"
+      },
+      "reports": {
+        "auditLogs": "Audit Logs",
+        "security": "Security",
+        "usage": "Usage Reports",
+        "commercial": "Commercial Intelligence"
+      },
+      "system": {
+        "health": "System Health",
+        "settings": "System Settings"
+      }
     },
+    "overview": {
+      "title": "Platform overview",
+      "subtitle": "Executive summary. Drill into modules for full datasets.",
+      "kpisTitle": "At a glance",
+      "teasersTitle": "Module previews",
+      "viewAll": "View all",
+      "viewDetails": "View details",
+      "footerHint": "Open any module from the sidebar for full management and reporting.",
+      "hero": {
+        "welcome": "Welcome back",
+        "welcomeNamed": "Welcome back, {{name}}",
+        "summary": "Platform health, today's activity, and items that need your attention.",
+        "statusOperational": "All systems operational",
+        "statusDegraded": "Service degradation detected",
+        "statusChecking": "Checking platform status",
+        "systemHealthLink": "System health details"
+      },
+      "alerts": {
+        "title": "Needs attention",
+        "review": "Review",
+        "systemHealth": "One or more core services are offline.",
+        "pendingOnboarding": "{{count}} onboarding review(s) awaiting approval.",
+        "failedPaymentsToday": "{{count}} failed subscription payment(s) today.",
+        "atRiskSubscriptions": "{{count}} subscription(s) flagged as at-risk."
+      },
+      "kpi": {
+        "totalBusinesses": "Total businesses",
+        "activeBusinesses": "Active businesses",
+        "activeUsers": "Active users",
+        "pendingVerifications": "Pending verifications",
+        "pendingOnboarding": "Awaiting onboarding approval",
+        "pendingKyc": "Pending KYC review",
+        "fullyVerified": "Fully verified",
+        "tipVolume": "Tip volume (all time)",
+        "venues": "Venues",
+        "staff": "Staff",
+        "transactions": "Total transactions"
+      },
+      "businessGrowth": {
+        "title": "Business overview",
+        "desc": "Platform growth across venues, staff, and locations.",
+        "activeBusinesses": "Active businesses",
+        "employees": "Employees",
+        "locations": "Locations",
+        "venuesWithTips": "Venues with tips",
+        "newThisWeek": "New this week"
+      },
+      "verification": {
+        "empty": "No pending onboarding reviews.",
+        "slaWarnings": "SLA warnings",
+        "desc": "Companies awaiting KYC review.",
+        "awaiting": "Awaiting upload",
+        "pendingReview": "Pending review",
+        "slaBreach": "SLA breach (48h)"
+      },
+      "onboardingQueue": {
+        "title": "Onboarding verification queue",
+        "desc": "Businesses awaiting platform access approval."
+      },
+      "subscriptionHealth": {
+        "title": "Subscription health",
+        "desc": "Payment and subscription signals across the platform.",
+        "churn": "Success rate (30d)"
+      },
+      "revenue": {
+        "title": "Revenue & transactions",
+        "desc": "Platform-wide financial metrics and transaction activity.",
+        "totalVolume": "Total tip volume",
+        "successTips": "Successful tips",
+        "venuesWithTips": "Venues with tips",
+        "todayVolume": "Today's tips",
+        "weeklyVolume": "Weekly volume",
+        "monthlyVolume": "Monthly volume (30d)",
+        "trend": "7-day trend"
+      },
+      "subscriptionOverview": {
+        "title": "Subscription overview",
+        "desc": "Active subscriptions, trials, failed payments, and renewals due.",
+        "revenue": "Monthly revenue"
+      },
+      "recentActivity": {
+        "title": "Recent activity",
+        "desc": "Latest platform events.",
+        "empty": "No recent activity."
+      },
+      "systemHealth": {
+        "desc": "Core infrastructure status."
+      },
+      "commercial": {
+        "desc": "Growth, risk, and upgrade opportunities.",
+        "upgrades": "Upgrade opportunities",
+        "trials": "Trial businesses",
+        "highVolume": "High-volume businesses",
+        "atRisk": "At-risk subscriptions"
+      }
+    },
+    "allBusinessesPage": {
+      "title": "All businesses",
+      "subtitle": "Registered venues on the platform.",
+      "colOnboardingVerification": "Onboarding verification"
+    },
+    "kycComingSoon": {
+      "title": "KYC Verification",
+      "subtitle": "Financial compliance and payouts",
+      "badge": "Coming soon",
+      "body": "KYC verification for financial compliance and payouts is planned for a future release. This feature is not yet available in the current MVP.",
+      "onboardingLink": "Manage onboarding verification →",
+      "learnMore": "Learn more about KYC plans →"
+    },
+    "businessAnalyticsPage": {
+      "title": "Business analytics",
+      "subtitle": "Platform-wide growth, tip volume, and user distribution."
+    },
+    "usageReportsPage": {
+      "title": "Usage reports",
+      "subtitle": "Platform adoption, activity trends, and usage analytics."
+    },
+    "systemHealthPage": {
+      "title": "System health",
+      "subtitle": "Database, Stripe, queue, email, and storage status."
+    },
+    "securityReportsPage": {
+      "title": "Security",
+      "subtitle": "Authentication events and access monitoring.",
+      "body": "Detailed security reports are available in audit logs. Filter by security-related actions for full history."
+    },
+    "staffAccountsPage": {
+      "title": "Staff accounts",
+      "subtitle": "Employee accounts across all businesses.",
+      "body": "Use User Management to search staff by business. Dedicated staff directory views are coming soon."
+    },
+    "platformAdminsPage": {
+      "title": "Platform admins",
+      "subtitle": "SuperAdmin and platform operator accounts.",
+      "body": "Platform admin accounts are managed through User Management with the platform_admin role filter."
+    },
+    "communicationNotificationsPage": {
+      "title": "Notification preferences",
+      "subtitle": "Platform-wide notification and delivery settings."
+    },
+    "revenuePages": {
+      "failedPayments": {
+        "title": "Failed payments",
+        "subtitle": "Subscriptions with failed or past-due payment attempts."
+      },
+      "successfulSubscriptions": {
+        "title": "Successful subscriptions",
+        "subtitle": "Active paid subscriptions with successful billing."
+      },
+      "failedSubscriptions": {
+        "title": "Failed subscriptions",
+        "subtitle": "Past-due and at-risk subscription accounts."
+      },
+      "refunds": {
+        "title": "Refunds",
+        "subtitle": "Global transaction ledger including reversals."
+      }
+    },
+    "loading": "Loading…",
     "loginPage": {
       "title": "Platform admin",
       "restricted": "Restricted",
@@ -5493,7 +5792,15 @@
       "colPayout": "Payout",
       "loading": "Loading…",
       "empty": "No transactions found.",
-      "footerShowing": "Showing {{shown}} of {{total}} total",
+      "summaryDefault": "Showing {{total}} transactions",
+      "summarySearch": "Showing {{total}} transactions matching \"{{q}}\"",
+      "emptySearch": {
+        "title": "No transactions match your search",
+        "description": "No results for \"{{q}}\". Try a transaction ID, business name, or staff name."
+      },
+      "footerShowing": "{{from}}–{{to}} of {{total}}",
+      "prevPage": "Previous",
+      "nextPage": "Next",
       "payoutStatus": {
         "paid": "Paid",
         "failed": "Failed",
@@ -5542,7 +5849,8 @@
       "searchAria": "Search businesses",
       "colBusiness": "Business",
       "colManagerEmail": "Manager email",
-      "colVerification": "Verification",
+      "colOnboardingVerification": "Onboarding verification",
+      "colKyc": "KYC",
       "colActions": "Actions",
       "loading": "Loading…",
       "emptyList": "No businesses on the platform yet.",
@@ -5552,8 +5860,8 @@
       "impersonateToast": "Viewing dashboard as {{name}}"
     },
     "businessVerificationPage": {
-      "title": "Business verification (KYC)",
-      "subtitle": "New businesses are Pending until you verify them. Verified businesses can generate QR codes. Store contact details for compliance. Tip totals and staff counts load live from the database; the list also refreshes when you return to this tab.",
+      "title": "KYC verification",
+      "subtitle": "Review compliance documents, tax/banking data, and approve financial go-live. This is separate from onboarding platform access.",
       "searchPlaceholder": "Search by business, owner, contact…",
       "searchAria": "Search businesses",
       "colBusiness": "Business",
@@ -5595,12 +5903,282 @@
       "toastDetailsSaved": "Business details saved.",
       "toastLogoUploaded": "Logo uploaded successfully.",
       "toastDocUploaded": "Verification document uploaded successfully.",
-      "rejectNotePrompt": "Rejection reason (optional):"
+      "rejectNotePrompt": "Rejection reason (optional):",
+      "noFilterMatches": "No businesses match your combined filters.",
+      "resultSummary": "{{total}} businesses",
+      "kpi": {
+        "verified": "Verified",
+        "pendingReview": "Pending review",
+        "awaitingUpload": "Awaiting upload",
+        "slaBreach": "SLA breach (>{{hours}}h)"
+      },
+      "summary": {
+        "default": "Showing {{total}} businesses",
+        "search": "Showing {{total}} businesses matching \"{{q}}\"",
+        "status": {
+          "verified": "Showing {{total}} verified businesses",
+          "pending_review": "Showing {{total}} businesses pending manual review",
+          "awaiting_upload": "Showing {{total}} businesses awaiting document upload",
+          "sla_breach": "Showing {{total}} businesses exceeding the SLA threshold",
+          "rejected": "Showing {{total}} rejected businesses",
+          "not_started": "Showing {{total}} businesses that have not started KYC",
+          "suspended": "Showing {{total}} suspended businesses"
+        },
+        "date": {
+          "today": "Showing {{total}} businesses registered today",
+          "last_7": "Showing {{total}} businesses registered in the last 7 days",
+          "last_30": "Showing {{total}} businesses registered in the last 30 days",
+          "this_month": "Showing {{total}} businesses registered this month",
+          "last_month": "Showing {{total}} businesses registered last month",
+          "custom": "Showing {{total}} businesses registered {{from}} – {{to}}"
+        },
+        "tips": {
+          "zero": "Showing {{total}} businesses with €0 in tips",
+          "1_500": "Showing {{total}} businesses with €1–€500 in tips",
+          "501_5000": "Showing {{total}} businesses with €501–€5,000 in tips",
+          "5001_plus": "Showing {{total}} businesses with €5,001+ in tips"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "No businesses match your filters",
+          "description": "Try removing one filter at a time or clear all filters to see more results."
+        },
+        "search": {
+          "title": "No businesses match your search",
+          "description": "No results for \"{{q}}\". Try a different name, slug, or owner email."
+        },
+        "status": {
+          "verified": {
+            "title": "No verified businesses were found",
+            "description": "Adjust your filters or check back after more businesses complete verification."
+          },
+          "pending_review": {
+            "title": "No businesses are currently awaiting manual review",
+            "description": "The queue is clear — new submissions will appear here automatically."
+          },
+          "awaiting_upload": {
+            "title": "Every business has uploaded verification documents",
+            "description": "No businesses are waiting to upload KYC files right now."
+          },
+          "sla_breach": {
+            "title": "Great news! No businesses are exceeding the SLA threshold",
+            "description": "All pending reviews are within the {{hours}}-hour SLA window."
+          },
+          "rejected": {
+            "title": "No rejected businesses were found",
+            "description": "No businesses match the rejected verification status."
+          },
+          "not_started": {
+            "title": "No businesses with KYC not started were found",
+            "description": "All businesses have begun or completed KYC. Try another filter or clear filters."
+          },
+          "suspended": {
+            "title": "No suspended businesses were found",
+            "description": "No businesses match the suspended status."
+          }
+        },
+        "date": {
+          "today": {
+            "title": "No businesses were registered today",
+            "description": "Try a wider date range to see more registrations."
+          },
+          "last_7": {
+            "title": "No businesses were registered in the last 7 days",
+            "description": "Try a wider date range to see more registrations."
+          },
+          "last_30": {
+            "title": "No businesses were registered in the last 30 days",
+            "description": "Try a wider date range to see more registrations."
+          },
+          "this_month": {
+            "title": "No businesses were registered this month",
+            "description": "Try a wider date range to see more registrations."
+          },
+          "last_month": {
+            "title": "No businesses were registered last month",
+            "description": "Try a different date range."
+          },
+          "custom": {
+            "title": "No businesses were registered during the selected period",
+            "description": "Adjust the custom date range and try again."
+          }
+        },
+        "tips": {
+          "zero": {
+            "title": "No businesses with €0 in tips",
+            "description": "Every business in this view has received at least one tip."
+          },
+          "1_500": {
+            "title": "No businesses in the €1–€500 tip range",
+            "description": "Try a different tips volume filter."
+          },
+          "501_5000": {
+            "title": "No businesses in the €501–€5,000 tip range",
+            "description": "Try a different tips volume filter."
+          },
+          "5001_plus": {
+            "title": "No businesses with €5,001+ in tips",
+            "description": "Try a different tips volume filter."
+          }
+        }
+      },
+      "pagination": "{{from}}–{{to}} of {{total}}",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "filters": {
+        "dateLabel": "Registration date",
+        "dateFrom": "From",
+        "dateTo": "To",
+        "statusLabel": "Verification status",
+        "tipsLabel": "Live tips volume",
+        "sortLabel": "Sort by",
+        "clearAll": "Clear all filters",
+        "openDrawer": "Filters",
+        "drawerTitle": "Filter businesses",
+        "removeChip": "Remove filter",
+        "date": {
+          "all": "All dates",
+          "today": "Today",
+          "last_7": "Last 7 days",
+          "last_30": "Last 30 days",
+          "this_month": "This month",
+          "last_month": "Last month",
+          "custom": "Custom range"
+        },
+        "status": {
+          "all": "All statuses",
+          "verified": "Active (Verified)",
+          "pending_review": "Pending review",
+          "awaiting_upload": "Awaiting upload",
+          "not_started": "Not started",
+          "sla_breach": "SLA breach (>48h)",
+          "rejected": "Rejected",
+          "suspended": "Suspended"
+        },
+        "tips": {
+          "all": "All volumes",
+          "zero": "€0",
+          "1_500": "€1–€500",
+          "501_5000": "€501–€5,000",
+          "5001_plus": "€5,001+",
+          "highest": "Highest first",
+          "lowest": "Lowest first"
+        },
+        "sort": {
+          "newest": "Newest registrations",
+          "oldest": "Oldest registrations",
+          "tips_high": "Highest tips",
+          "tips_low": "Lowest tips",
+          "name_asc": "Alphabetical (A–Z)",
+          "name_desc": "Alphabetical (Z–A)"
+        },
+        "chips": {
+          "search": "Search: {{q}}",
+          "customDate": "{{from}} – {{to}}"
+        }
+      }
+    },
+    "onboardingVerificationPage": {
+      "title": "Onboarding verification",
+      "subtitle": "Review submitted business profiles and approve platform dashboard access. KYC is handled separately.",
+      "emptyList": "No businesses on the platform yet.",
+      "btnApprove": "Approve access",
+      "btnReject": "Reject",
+      "statusDraft": "Draft",
+      "statusSubmitted": "Submitted",
+      "statusApproved": "Approved",
+      "statusRejected": "Rejected",
+      "toastApproved": "Business approved for platform access.",
+      "toastRejected": "Onboarding rejected.",
+      "kpi": {
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "summary": {
+        "default": "Showing {{total}} businesses",
+        "search": "Showing {{total}} businesses matching \"{{q}}\"",
+        "status": {
+          "draft": "Showing {{total}} businesses in draft onboarding",
+          "submitted": "Showing {{total}} newly submitted onboarding requests",
+          "approved": "Showing {{total}} approved businesses",
+          "rejected": "Showing {{total}} rejected onboarding requests",
+          "suspended": "Showing {{total}} suspended businesses"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "No businesses match your filters",
+          "description": "Try removing one filter at a time or clear all filters to see more results."
+        },
+        "search": {
+          "title": "No businesses match your search",
+          "description": "No results for \"{{q}}\". Try a different name, slug, or owner email."
+        },
+        "status": {
+          "draft": {
+            "title": "No draft onboarding profiles found",
+            "description": "Businesses appear here before they submit their profile for platform review."
+          },
+          "submitted": {
+            "title": "No newly submitted onboarding requests were found",
+            "description": "There are no pending submissions matching your filters. Try another status or clear filters."
+          },
+          "approved": {
+            "title": "No approved businesses match the selected filters",
+            "description": "Adjust your filters or check back after more businesses complete onboarding approval."
+          },
+          "rejected": {
+            "title": "No rejected onboarding requests match the current filters",
+            "description": "No businesses match the rejected onboarding status with your current filters."
+          },
+          "suspended": {
+            "title": "No suspended businesses were found",
+            "description": "No businesses match the suspended status."
+          }
+        }
+      },
+      "filters": {
+        "status": {
+          "all": "All statuses",
+          "draft": "Draft",
+          "submitted": "Submitted",
+          "approved": "Approved",
+          "rejected": "Rejected",
+          "suspended": "Suspended"
+        }
+      }
     },
     "businessDetailPage": {
       "backLink": "Back to businesses",
-      "title": "Business details",
-      "subtitle": "Review KYC data, approve or reject verification, and manage compliance files.",
+      "title": "Business profile",
+      "subtitle": "Manage platform onboarding approval and KYC compliance as separate workflows.",
+      "sectionOnboarding": "Business onboarding",
+      "sectionOnboardingDesc": "Controls whether this business can access the CareTip dashboard.",
+      "sectionKyc": "KYC verification",
+      "sectionKycDesc": "Financial and compliance verification for go-live (QR codes, live tips, payments).",
+      "approveOnboarding": "Approve platform access",
+      "rejectOnboarding": "Reject onboarding",
+      "markOnboardingUnderReview": "Mark under review",
+      "reviewKycDocuments": "Review documents",
+      "approveKyc": "Approve KYC",
+      "rejectKyc": "Reject KYC",
+      "toastOnboardingApproved": "Platform access approved.",
+      "toastOnboardingRejected": "Onboarding rejected.",
+      "onboardingStatus": {
+        "draft": "Draft",
+        "submitted": "Submitted",
+        "approved": "Approved",
+        "rejected": "Rejected"
+      },
+      "kycStatus": {
+        "notStarted": "Not started",
+        "awaitingUpload": "Awaiting upload",
+        "pendingReview": "Pending review",
+        "verified": "Verified",
+        "rejected": "Rejected"
+      },
       "loading": "Loading business…",
       "notFound": "Business not found.",
       "dtTotalTips": "Total tips (successful)",

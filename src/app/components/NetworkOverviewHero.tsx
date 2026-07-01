@@ -2,7 +2,7 @@ import type { ElementType, ReactNode } from "react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
-import { Cloud, Database } from "lucide-react";
+import { Cloud, Database, Server } from "lucide-react";
 import type { PlatformHealthResponse } from "../lib/api";
 import { cn } from "@/lib/utils";
 
@@ -12,6 +12,8 @@ export type NetworkOverviewHeroProps = {
   embedded?: boolean;
   /** Render headline only, health cards only, or both (default). */
   variant?: "full" | "copy" | "health";
+  /** Show derived platform API status alongside Postgres and Stripe. */
+  includeApiCard?: boolean;
 };
 
 function LivePulse({ className }: { className?: string }) {
@@ -99,6 +101,7 @@ export function NetworkOverviewHero({
   health,
   embedded = false,
   variant = "full",
+  includeApiCard = false,
 }: NetworkOverviewHeroProps) {
   const { t } = useTranslation();
   const showCopy = variant === "full" || variant === "copy";
@@ -116,6 +119,15 @@ export function NetworkOverviewHero({
   const st = useMemo(() => {
     if (!health) return { text: t("admin.networkHero.checking"), state: "checking" as const };
     const ok = health.stripe === "online";
+    return {
+      text: ok ? t("admin.networkHero.online") : t("admin.networkHero.offline"),
+      state: ok ? ("online" as const) : ("offline" as const),
+    };
+  }, [health, t]);
+
+  const api = useMemo(() => {
+    if (!health) return { text: t("admin.networkHero.checking"), state: "checking" as const };
+    const ok = health.database === "online" && health.stripe === "online";
     return {
       text: ok ? t("admin.networkHero.online") : t("admin.networkHero.offline"),
       state: ok ? ("online" as const) : ("offline" as const),
@@ -167,7 +179,12 @@ export function NetworkOverviewHero({
           <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             {t("admin.networkHero.systemHealth")}
           </p>
-          <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-row sm:items-stretch sm:gap-3">
+          <div
+            className={cn(
+              "grid gap-2 sm:gap-3",
+              includeApiCard ? "grid-cols-1 sm:grid-cols-3" : "grid-cols-2 sm:flex sm:flex-row sm:items-stretch",
+            )}
+          >
             <HealthStatCard
               icon={Database}
               label={t("admin.networkHero.labelPostgres")}
@@ -186,6 +203,17 @@ export function NetworkOverviewHero({
               pulse={statusPulse(st.state)}
               delay={0.2}
             />
+            {includeApiCard ? (
+              <HealthStatCard
+                icon={Server}
+                label={t("admin.networkHero.labelApi")}
+                value={api.text}
+                valueClassName={valueClass(api.state)}
+                iconClassName={iconTint(api.state)}
+                pulse={statusPulse(api.state)}
+                delay={0.28}
+              />
+            ) : null}
           </div>
         </div>
         ) : null}

@@ -1,9 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import { Role } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { isOnboardingApprovedForPublicGoLive, kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 import {
   GO_LIVE_REQUIRED_CODE,
   GO_LIVE_REQUIRED_MESSAGE,
+  ONBOARDING_APPROVAL_REQUIRED_CODE,
+  ONBOARDING_APPROVAL_REQUIRED_MESSAGE,
   hasBusinessVerificationCapability,
   type BusinessVerificationCapability,
 } from "../config/businessVerificationCapabilities.js";
@@ -41,7 +44,10 @@ export function requireBusinessVerificationCapability(
     try {
       const business = await prisma.business.findUnique({
         where: { userId: uid },
-        select: { verificationStatus: true },
+        select: {
+          kycVerificationStatus: true,
+          onboardingVerificationStatus: true,
+        },
       });
       if (!business) {
         return res.status(403).json({
@@ -49,11 +55,25 @@ export function requireBusinessVerificationCapability(
           code: GO_LIVE_REQUIRED_CODE,
         });
       }
+
+      const capabilityOpts = {
+        impersonating: Boolean(req.user?.impersonatedBy),
+        onboardingVerificationStatus: business.onboardingVerificationStatus,
+      };
+
       if (
-        !hasBusinessVerificationCapability(business.verificationStatus, capability, {
-          impersonating: Boolean(req.user?.impersonatedBy),
-        })
+        (capability === "qrCodes" || capability === "activateTipping") &&
+        !isOnboardingApprovedForPublicGoLive(business.onboardingVerificationStatus)
       ) {
+        return res.status(403).json({
+          message: ONBOARDING_APPROVAL_REQUIRED_MESSAGE,
+          code: ONBOARDING_APPROVAL_REQUIRED_CODE,
+        });
+      }
+
+      const kycLegacy = kycStatusToLegacyMirror(business.kycVerificationStatus);
+
+      if (!hasBusinessVerificationCapability(kycLegacy, capability, capabilityOpts)) {
         return res.status(403).json({
           message: GO_LIVE_REQUIRED_MESSAGE,
           code: GO_LIVE_REQUIRED_CODE,

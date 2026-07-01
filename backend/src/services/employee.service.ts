@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
-import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
 import { prisma } from "../prisma.js";
+import { generateSlug, ensureUniqueSlug } from "../utils/slug.js";
+import { kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 import { emitBusinessDataChanged } from "../socket/socketEmitters.js";
 import { invalidateBusinessStatsCache } from "./business.service.js";
 
@@ -165,7 +166,15 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
       isDeleted: true,
       activationStatus: true,
       businessId: true,
-      business: { select: { verificationStatus: true, slug: true, logoPath: true, name: true } },
+      business: {
+        select: {
+          kycVerificationStatus: true,
+          onboardingVerificationStatus: true,
+          slug: true,
+          logoPath: true,
+          name: true,
+        },
+      },
       user: { select: { emailVerified: true } },
     },
   });
@@ -202,7 +211,15 @@ export async function getEmployeeById(employeeId: string): Promise<EmployeeDetai
     });
     return null;
   }
-  if (!hasBusinessVerificationCapability(emp.business.verificationStatus, "activateTipping")) {
+  if (
+    !hasBusinessVerificationCapability(
+      kycStatusToLegacyMirror(emp.business.kycVerificationStatus),
+      "activateTipping",
+      {
+        onboardingVerificationStatus: emp.business.onboardingVerificationStatus,
+      },
+    )
+  ) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   return {
@@ -430,12 +447,16 @@ export async function updateEmployeeActiveStatusForBusiness(
 export async function regenerateEmployeeSlugForBusiness(businessId: string, employeeId: string) {
   const biz = await prisma.business.findUnique({
     where: { id: businessId },
-    select: { verificationStatus: true },
+    select: { kycVerificationStatus: true, onboardingVerificationStatus: true },
   });
   if (!biz) {
     throw new Error("Business not found");
   }
-  if (!hasBusinessVerificationCapability(biz.verificationStatus, "qrCodes")) {
+  if (
+    !hasBusinessVerificationCapability(kycStatusToLegacyMirror(biz.kycVerificationStatus), "qrCodes", {
+      onboardingVerificationStatus: biz.onboardingVerificationStatus,
+    })
+  ) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   const emp = await prisma.employee.findFirst({
@@ -622,12 +643,23 @@ export async function getEmployeeProfileForUser(userId: string): Promise<Employe
 export async function ensureEmployeeSlugForUser(userId: string): Promise<EmployeeSelfProfile> {
   const emp = await prisma.employee.findUnique({
     where: { userId },
-    include: { user: { select: { email: true } }, business: { select: { verificationStatus: true } } },
+    include: {
+      user: { select: { email: true } },
+      business: { select: { kycVerificationStatus: true, onboardingVerificationStatus: true } },
+    },
   });
   if (!emp) {
     throw new Error("Employee not found");
   }
-  if (!hasBusinessVerificationCapability(emp.business.verificationStatus, "qrCodes")) {
+  if (
+    !hasBusinessVerificationCapability(
+      kycStatusToLegacyMirror(emp.business.kycVerificationStatus),
+      "qrCodes",
+      {
+        onboardingVerificationStatus: emp.business.onboardingVerificationStatus,
+      },
+    )
+  ) {
     throw new Error(VERIFICATION_REQUIRED_MSG);
   }
   if (emp.slug) {

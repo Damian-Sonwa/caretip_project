@@ -12,7 +12,9 @@ import { BUSINESS_TYPE_I18N } from "../../lib/businessVenueOptions";
 import { getEmployees } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
 import { buildPreviewStaffSlots } from "./businessOnboardingGuestPreview.utils";
+import { BusinessOnboardingCustomerJourney } from "./BusinessOnboardingCustomerJourney";
 import { BusinessOnboardingFinalPhoneScreen } from "./BusinessOnboardingFinalPhoneScreen";
+import { PhoneMockup } from "../ui/PhoneMockup";
 import type { GuestPreviewData, TipPreviewStaffMember } from "./BusinessOnboardingGuestPreview.types";
 import type { PreviewStaffSlot } from "./businessOnboardingGuestPreview.utils";
 
@@ -245,7 +247,10 @@ export function BusinessOnboardingGuestPreview({
       </div>
 
       <div
-        className="business-onboarding-guest-preview__device-wrap"
+        className={cn(
+          "business-onboarding-guest-preview__device-wrap",
+          isFinal && "business-onboarding-guest-preview__device-wrap--final",
+        )}
         role="group"
         aria-labelledby="onboarding-guest-preview-label"
       >
@@ -255,34 +260,36 @@ export function BusinessOnboardingGuestPreview({
             : t("business.onboarding.preview.guestAria")}
         </p>
 
-        <div
-          className={cn(
-            "business-onboarding-guest-preview__device",
-            isFinal && "business-onboarding-guest-preview__device--premium",
-          )}
-          aria-hidden="true"
-        >
+        {isFinal ? (
+          <>
+            <PhoneMockup
+              size="xl"
+              maxShellHeight={580}
+              variant="iphone-15-pro"
+              label={t("business.onboarding.preview.panelAria")}
+              className="business-onboarding-guest-preview__phone-mockup"
+            >
+              <div className="business-onboarding-final-phone flex h-full min-h-0 flex-col">
+                <BusinessOnboardingFinalPhoneScreen
+                  displayName={displayName}
+                  venueNameLine={venueNameLine}
+                  venueTypeLine={venueTypeLine}
+                  addressLine={addressLine}
+                  heroLogoSrc={heroLogoSrc}
+                  tipStaff={tipStaff}
+                  employeeCount={employeeCount}
+                />
+              </div>
+            </PhoneMockup>
+            <BusinessOnboardingCustomerJourney className="business-onboarding-guest-preview__customer-journey" />
+          </>
+        ) : (
+          <>
+        <div className="business-onboarding-guest-preview__device" aria-hidden="true">
           <div className="business-onboarding-guest-preview__device-notch" />
-          {isFinal ? <div className="business-onboarding-guest-preview__device-side-btn" aria-hidden /> : null}
           <div
-            className={cn(
-              "business-onboarding-guest-preview__device-screen customer-flow",
-              isFinal && "business-onboarding-guest-preview__device-screen--premium business-onboarding-final-phone",
-            )}
+            className="business-onboarding-guest-preview__device-screen customer-flow"
           >
-            {isFinal ? (
-              <BusinessOnboardingFinalPhoneScreen
-                displayName={displayName}
-                venueNameLine={venueNameLine}
-                venueTypeLine={venueTypeLine}
-                addressLine={addressLine}
-                heroLogoSrc={heroLogoSrc}
-                tipStaff={tipStaff}
-                employeeCount={employeeCount}
-                hasBusinessName={hasBusinessName}
-              />
-            ) : (
-              <>
             <div className="business-onboarding-guest-preview__chrome-header">
               <CareTipLogo
                 size="xs"
@@ -367,12 +374,12 @@ export function BusinessOnboardingGuestPreview({
                 {t("business.onboarding.preview.previewPayBar")}
               </div>
             </div>
-              </>
-            )}
           </div>
         </div>
 
-        <div className="business-onboarding-guest-preview__device-shadow" aria-hidden />
+            <div className="business-onboarding-guest-preview__device-shadow" aria-hidden />
+          </>
+        )}
       </div>
     </section>
   );

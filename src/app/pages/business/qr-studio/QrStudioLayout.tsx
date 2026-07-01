@@ -30,7 +30,7 @@ export function QrStudioLayout() {
   const { ready: entitlementsReady, hasActiveEntitlements } = businessContext ?? fallbackEntitlements;
 
   const isBrandingStudio = pathname.includes("/qr-studio/branding");
-  const canUseQr = canUseProductionQr(user?.status, Boolean(user?.impersonation));
+  const canUseQr = canUseProductionQr(user?.onboardingVerificationStatus, Boolean(user?.impersonation));
   const entitlementsKnown = entitlementsReady || isEntitlementsSessionPrimed();
   const operationalAccess = entitlementsReady
     ? hasActiveEntitlements
@@ -68,7 +68,7 @@ export function QrStudioLayout() {
         />
         {accessBlock ? (
           <div className="py-8 sm:py-12">
-            <QrStudioAccessPanel reason={accessBlock} verificationStatus={user?.status} />
+            <QrStudioAccessPanel reason={accessBlock} onboardingVerificationStatus={user?.onboardingVerificationStatus} />
           </div>
         ) : showPending ? (
           <FeatureGatePending className="mx-auto max-w-2xl" />

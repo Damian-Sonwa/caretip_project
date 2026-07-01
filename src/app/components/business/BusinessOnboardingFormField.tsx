@@ -1,9 +1,11 @@
 import type { ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import {
   onboardingFieldHint,
   onboardingFileInput,
   onboardingInput,
   onboardingLabel,
+  onboardingOptionalBadge,
   onboardingSelect,
 } from "./businessOnboardingUi";
 
@@ -12,18 +14,33 @@ type TextFieldProps = {
   placeholder: string;
   value: string;
   onChange: (v: string) => void;
+  hint?: string;
+  optional?: boolean;
 };
 
-export function BusinessOnboardingTextField({ label, placeholder, value, onChange }: TextFieldProps) {
+export function BusinessOnboardingTextField({
+  label,
+  placeholder,
+  value,
+  onChange,
+  hint,
+  optional,
+}: TextFieldProps) {
+  const { t } = useTranslation();
+
   return (
-    <label className="block min-w-0">
-      <span className={onboardingLabel}>{label}</span>
+    <label className="business-onboarding-field block min-w-0">
+      <span className={onboardingLabel}>
+        {label}
+        {optional ? <span className={onboardingOptionalBadge}>{t("business.onboarding.fields.optional")}</span> : null}
+      </span>
       <input
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         className={onboardingInput}
       />
+      {hint ? <p className={onboardingFieldHint}>{hint}</p> : null}
     </label>
   );
 }
@@ -33,6 +50,7 @@ type SelectFieldProps = {
   value: string;
   onChange: (v: string) => void;
   placeholder: string;
+  hint?: string;
   children: ReactNode;
 };
 
@@ -41,10 +59,11 @@ export function BusinessOnboardingSelectField({
   value,
   onChange,
   placeholder,
+  hint,
   children,
 }: SelectFieldProps) {
   return (
-    <label className="block min-w-0">
+    <label className="business-onboarding-field block min-w-0">
       <span className={onboardingLabel}>{label}</span>
       <select
         value={value}
@@ -55,6 +74,7 @@ export function BusinessOnboardingSelectField({
         <option value="">{placeholder}</option>
         {children}
       </select>
+      {hint ? <p className={onboardingFieldHint}>{hint}</p> : null}
     </label>
   );
 }
@@ -69,7 +89,7 @@ export function BusinessOnboardingFileField({
   onFile: (file: File | null) => void;
 }) {
   return (
-    <label className="block min-w-0">
+    <label className="business-onboarding-field block min-w-0">
       <span className={onboardingLabel}>{label}</span>
       <input
         type="file"

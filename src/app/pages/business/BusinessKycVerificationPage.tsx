@@ -18,6 +18,7 @@ import { logClientError } from "../../lib/clientLog";
 import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import { cn } from "@/lib/utils";
 import { MVP_KYC_DOCUMENT_UPLOAD_ENABLED } from "../../lib/mvpVerificationPolicy";
+import { BusinessKycComingSoonPage } from "./BusinessKycComingSoonPage";
 
 const DOC_SLOTS: Array<{ type: KycDocumentType; labelKey: string }> = [
   { type: "registration", labelKey: "business.kyc.docRegistration" },
@@ -33,6 +34,13 @@ function statusIcon(status: KycUiStatus) {
 }
 
 export function BusinessKycVerificationPage() {
+  if (!MVP_KYC_DOCUMENT_UPLOAD_ENABLED) {
+    return <BusinessKycComingSoonPage />;
+  }
+  return <BusinessKycVerificationPageLive />;
+}
+
+function BusinessKycVerificationPageLive() {
   const { t } = useTranslation();
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
@@ -46,13 +54,16 @@ export function BusinessKycVerificationPage() {
     try {
       const s = await fetchKycStatus();
       setStatus(s);
-      const nextUserStatus =
-        s.kycUiStatus === "APPROVED"
-          ? "APPROVED"
-          : s.kycUiStatus === "REJECTED"
-            ? "REJECTED"
-            : "PENDING";
-      updateUser({ status: nextUserStatus });
+      updateUser({
+        kycVerificationStatus:
+          s.kycUiStatus === "APPROVED"
+            ? "verified"
+            : s.kycUiStatus === "REJECTED"
+              ? "rejected"
+              : s.kycUiStatus === "UNDER_REVIEW"
+                ? "pending_review"
+                : "awaiting_upload",
+      });
       if (s.kycUiStatus === "APPROVED") {
         navigate("/dashboard", { replace: true });
       }
@@ -108,7 +119,7 @@ export function BusinessKycVerificationPage() {
       const r = await submitKycForReview();
       setStatus(r);
       toast.success(t("business.kyc.submitSuccess"));
-      updateUser({ status: "PENDING" });
+      updateUser({ kycVerificationStatus: "pending_review" });
     } catch (err) {
       toast.error(toUserFriendlyMessage(err));
     } finally {

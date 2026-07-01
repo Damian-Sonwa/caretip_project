@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma.js";
+import { isOnboardingApprovedForPublicGoLive } from "../lib/verificationWorkflow.js";
 import { logServerError, clientSafeMessage, CLIENT_FALLBACK } from "../utils/httpErrors.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { toPublicGuestBrandingDto, BUSINESS_BRANDING_SELECT, type PublicGuestBrandingDto } from "../services/businessBranding.dto.js";
@@ -23,7 +24,7 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
       select: {
         ...BUSINESS_BRANDING_SELECT,
         slug: true,
-        verificationStatus: true,
+        onboardingVerificationStatus: true,
         businessType: true,
         location: true,
       },
@@ -31,7 +32,7 @@ export async function listActiveEmployeesByBusinessSlug(req: Request, res: Respo
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
     }
-    if (business.verificationStatus !== "verified") {
+    if (!isOnboardingApprovedForPublicGoLive(business.onboardingVerificationStatus)) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
     recordQrScanEvent({
@@ -91,7 +92,7 @@ type StaffBySlugRow = {
     id: string;
     name: string;
     slug: string;
-    verificationStatus?: "pending" | "verified" | "rejected";
+    onboardingVerificationStatus?: import("@prisma/client").OnboardingVerificationStatus;
     logoPath: string | null;
     bannerImagePath: string | null;
     brandPrimaryColor: string | null;
@@ -118,7 +119,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
     jobTitle: true,
     bio: true,
     businessId: true,
-    business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
+    business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, onboardingVerificationStatus: true } },
   } as const;
   try {
     return prisma.employee.findFirst({
@@ -149,7 +150,7 @@ async function findActiveStaffBySlug(trimmedSlug: string): Promise<StaffBySlugRo
           jobTitle: true,
           bio: true,
           businessId: true,
-          business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
+          business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, onboardingVerificationStatus: true } },
         },
       });
     }
@@ -187,12 +188,12 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
     }
     const business = await prisma.business.findFirst({
       where: { slug: businessSlug },
-      select: { id: true, verificationStatus: true },
+      select: { id: true, onboardingVerificationStatus: true },
     });
     if (!business) {
       return res.status(404).json({ message: "Business not found" });
     }
-    if (business.verificationStatus !== "verified") {
+    if (!isOnboardingApprovedForPublicGoLive(business.onboardingVerificationStatus)) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
 
@@ -204,7 +205,7 @@ export async function getStaffByBusinessAndEmployeeSlug(req: Request, res: Respo
       jobTitle: true,
       bio: true,
       businessId: true,
-      business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, verificationStatus: true } },
+      business: { select: { ...BUSINESS_BRANDING_SELECT, slug: true, onboardingVerificationStatus: true } },
     } as const;
 
     const employee = await prisma.employee.findFirst({
@@ -252,7 +253,10 @@ export async function getStaffBySlug(req: Request, res: Response) {
     if (!employee) {
       return res.status(404).json({ message: "Staff member not found" });
     }
-    if (employee.business.verificationStatus && employee.business.verificationStatus !== "verified") {
+    if (
+      employee.business.onboardingVerificationStatus &&
+      !isOnboardingApprovedForPublicGoLive(employee.business.onboardingVerificationStatus)
+    ) {
       return res.status(403).json({ message: VERIFICATION_REQUIRED_MSG });
     }
 

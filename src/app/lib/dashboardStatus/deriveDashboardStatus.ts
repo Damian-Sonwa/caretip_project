@@ -57,7 +57,7 @@ export function deriveBusinessDashboardStatus(
     isInitialLoading: boolean;
     isPeriodRefreshing: boolean;
     pendingVerification: boolean;
-    verificationStatus?: "pending" | "verified" | "rejected";
+    platformAccessApproved?: boolean;
     statsLoadFailed: string | null;
     socketStatus: SocketConnectionStatus;
   },
@@ -77,26 +77,17 @@ export function deriveBusinessDashboardStatus(
     return items;
   }
 
-  if (input.verificationStatus === "rejected" || input.pendingVerification) {
-    const rejected = input.verificationStatus === "rejected";
-    items.push({
-      id: "kyc",
-      tone: rejected ? "action" : "updating",
-      label: rejected
-        ? t("dashboard.status.kycRejected")
-        : t("dashboard.status.kycPending"),
-      description: rejected
-        ? t("dashboard.status.kycRejectedDesc")
-        : t("dashboard.status.kycPendingDesc"),
-    });
-  } else if (input.verificationStatus === "verified") {
-    items.push({
-      id: "kyc",
-      tone: "live",
-      label: t("dashboard.status.kycVerified"),
-      description: t("dashboard.status.kycVerifiedDesc"),
-    });
-  }
+  const platformApproved = input.platformAccessApproved !== false;
+  items.push({
+    id: "platform-access",
+    tone: platformApproved ? "live" : "updating",
+    label: platformApproved
+      ? t("dashboard.status.platformAccessApproved")
+      : t("dashboard.status.platformAccessPending"),
+    description: platformApproved
+      ? t("dashboard.status.platformAccessApprovedDesc")
+      : t("dashboard.status.platformAccessPendingDesc"),
+  });
 
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);

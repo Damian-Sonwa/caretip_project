@@ -376,7 +376,8 @@ type BusinessDashboardContext = {
     id: string;
     name: string;
     slug: string | null;
-    verificationStatus: string;
+    onboardingVerificationStatus: string;
+    kycVerificationStatus: string;
     timezone: string | null;
   };
   tz: string;
@@ -413,7 +414,8 @@ async function loadBusinessDashboardContextImpl(businessId: string): Promise<Bus
         id: true,
         name: true,
         slug: true,
-        verificationStatus: true,
+        onboardingVerificationStatus: true,
+        kycVerificationStatus: true,
         timezone: true,
       },
     }),
@@ -450,7 +452,8 @@ async function loadBusinessDashboardContextImpl(businessId: string): Promise<Bus
       id: business.id,
       name: business.name,
       slug: business.slug,
-      verificationStatus: business.verificationStatus,
+      onboardingVerificationStatus: business.onboardingVerificationStatus,
+      kycVerificationStatus: business.kycVerificationStatus,
       timezone: business.timezone,
     },
     tz: sanitizeIanaTimezone(business.timezone),
@@ -753,7 +756,8 @@ async function getBusinessStatsSummaryImpl(
     id: business.id,
     name: business.name,
     slug: business.slug,
-    verificationStatus: business.verificationStatus,
+    onboardingVerificationStatus: business.onboardingVerificationStatus,
+    kycVerificationStatus: business.kycVerificationStatus,
     timeframe,
     totalTips,
     tipCount,
@@ -819,7 +823,8 @@ async function getBusinessStatsRosterImpl(businessId: string) {
     id: business.id,
     name: business.name,
     slug: business.slug,
-    verificationStatus: business.verificationStatus,
+    onboardingVerificationStatus: business.onboardingVerificationStatus,
+    kycVerificationStatus: business.kycVerificationStatus,
     timeframe: "all" as const,
     employees: employeeStats,
   };
@@ -911,7 +916,8 @@ const BUSINESS_PROFILE_SELECT = {
   businessType: true,
   location: true,
   registeredAddress: true,
-  verificationStatus: true,
+  onboardingVerificationStatus: true,
+  kycVerificationStatus: true,
   subscriptionTier: true,
   contactPhone: true,
   website: true,

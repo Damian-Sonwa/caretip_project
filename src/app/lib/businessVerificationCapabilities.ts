@@ -1,3 +1,4 @@
+import type { OnboardingVerificationStatus } from "./api";
 import type { BusinessAccountStatus } from "../hooks/useAuth";
 
 export type BusinessVerificationUiStatus =
@@ -15,7 +16,7 @@ export type BusinessVerificationCapabilityFlags = {
   canReceiveTips: boolean;
 };
 
-function normalizeStatus(
+function normalizeKycStatus(
   status: BusinessVerificationUiStatus,
 ): "pending" | "verified" | "rejected" | null {
   if (status === "APPROVED" || status === "verified") return "verified";
@@ -24,10 +25,20 @@ function normalizeStatus(
   return null;
 }
 
+/** Platform onboarding approval — gates QR generation and public venue exposure. */
+export function isOnboardingApprovedForPublicGoLive(
+  status: OnboardingVerificationStatus | null | undefined,
+): boolean {
+  return status == null || status === "approved";
+}
+
 /** Mirrors backend `resolveBusinessVerificationCapabilities` for UI gating. */
 export function resolveBusinessVerificationCapabilities(
-  status: BusinessVerificationUiStatus,
-  opts?: { impersonating?: boolean },
+  kycStatus: BusinessVerificationUiStatus,
+  opts?: {
+    impersonating?: boolean;
+    onboardingVerificationStatus?: OnboardingVerificationStatus | null;
+  },
 ): BusinessVerificationCapabilityFlags {
   if (opts?.impersonating) {
     return {
@@ -38,28 +49,35 @@ export function resolveBusinessVerificationCapabilities(
     };
   }
 
-  const normalized = normalizeStatus(status);
-  const verified = normalized === "verified";
+  const onboardingApproved = isOnboardingApprovedForPublicGoLive(opts?.onboardingVerificationStatus);
+  const normalized = normalizeKycStatus(kycStatus);
+  const kycVerified = normalized === "verified";
 
   return {
     canAccessSetupFeatures: normalized != null && normalized !== "rejected",
-    canGenerateQrCodes: verified,
-    canActivateTipping: verified,
-    canReceiveTips: verified,
+    canGenerateQrCodes: onboardingApproved,
+    canActivateTipping: onboardingApproved,
+    canReceiveTips: kycVerified,
   };
 }
 
-export function canUseProductionQr(status: BusinessVerificationUiStatus, impersonating?: boolean): boolean {
-  return resolveBusinessVerificationCapabilities(status, { impersonating }).canGenerateQrCodes;
+export function canUseProductionQr(
+  onboardingStatus: OnboardingVerificationStatus | null | undefined,
+  impersonating?: boolean,
+): boolean {
+  if (impersonating) return true;
+  return isOnboardingApprovedForPublicGoLive(onboardingStatus);
 }
 
 export type QrStudioVerificationPhase = "in_review" | "action_required" | "rejected";
 
-/** QR Studio verification empty state — submitted docs awaiting admin vs still needs action. */
+/** QR Studio onboarding review empty state. */
 export function resolveQrStudioVerificationPhase(
-  status: BusinessVerificationUiStatus,
+  onboardingStatus: OnboardingVerificationStatus | null | undefined,
 ): QrStudioVerificationPhase {
-  if (status === "REJECTED" || status === "rejected") return "rejected";
-  if (status === "PENDING" || status === "pending") return "in_review";
+  if (onboardingStatus === "rejected") return "rejected";
+  if (onboardingStatus === "submitted" || onboardingStatus === "draft") {
+    return "in_review";
+  }
   return "action_required";
 }

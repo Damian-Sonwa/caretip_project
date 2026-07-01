@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useSearchParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import { CreditCard } from "lucide-react";
 import { fetchPlatformTransactions, type GlobalTransactionRow } from "../../lib/api";
 import { logClientError } from "../../lib/clientLog";
+import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import {
   DashboardListSkeleton,
   GlobalTransactionsTableSkeleton,
-  InlineSpinner,
 } from "../../components/dashboard/DashboardSectionLoading";
 import { formatEur } from "../../lib/formatEur";
 import {
@@ -18,11 +19,12 @@ import {
 } from "../../components/platform/PlatformPageChrome";
 import { PlatformTransactionMobileCard } from "../../components/platform/platformAdminMobileCards";
 import { platformUi } from "../../components/platform/platformDashboardUi";
-import {
-  getPageSessionCache,
-  setPageSessionCache,
-  PAGE_CACHE_TTL_HIGH_MS,
-} from "../../lib/pageSessionCache";
+import { EmptyState } from "../../components/ui/EmptyState";
+import { ListFilterLoadError } from "../../components/shared/ListFilterLoadError";
+import { classifyFetchError } from "../../lib/listFilterUx";
+import { setPageSessionCache } from "../../lib/pageSessionCache";
+
+const PAGE_SIZE = 50;
 
 function payoutStatusLabel(status: string, t: TFunction) {
   const key = `admin.globalTransactionsPage.payoutStatus.${status}`;
@@ -43,65 +45,135 @@ function payoutBadgeClass(status: string): string {
   return "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100";
 }
 
+function readPage(sp: URLSearchParams): number {
+  const raw = Number(sp.get("page") ?? "0");
+  return Number.isFinite(raw) && raw >= 0 ? raw : 0;
+}
+
 export function GlobalTransactionsPage() {
   const { t } = useTranslation();
-  const [q, setQ] = useState("");
-  const [debouncedQ, setDebouncedQ] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const q = searchParams.get("q") ?? "";
+  const page = readPage(searchParams);
+  const [debouncedQ, setDebouncedQ] = useState(q);
   const [items, setItems] = useState<GlobalTransactionRow[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadErrorKind, setLoadErrorKind] = useState<ReturnType<typeof classifyFetchError>>("api");
+  const loadGenRef = useRef(0);
 
   useEffect(() => {
     const id = window.setTimeout(() => setDebouncedQ(q.trim()), 400);
     return () => window.clearTimeout(id);
   }, [q]);
 
-  const load = useCallback(async (opts?: { quiet?: boolean }) => {
-    const quiet = opts?.quiet === true;
-    const cacheKey = `platform:transactions:${debouncedQ || "_"}`;
-    const cached = getPageSessionCache<{ items: GlobalTransactionRow[]; total: number }>(
-      cacheKey,
-      PAGE_CACHE_TTL_HIGH_MS,
-    );
-    const useCachedFirst = !quiet && cached !== null;
-    if (useCachedFirst) {
-      setItems(cached.items);
-      setTotal(cached.total);
-      setLoading(false);
-    } else if (!quiet) {
-      setLoading(true);
-    }
+  const setQ = useCallback(
+    (next: string) => {
+      const sp = new URLSearchParams(searchParams);
+      if (next.trim()) sp.set("q", next.trim());
+      else sp.delete("q");
+      sp.delete("page");
+      setSearchParams(sp, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const setPage = useCallback(
+    (next: number) => {
+      const sp = new URLSearchParams(searchParams);
+      if (next > 0) sp.set("page", String(next));
+      else sp.delete("page");
+      setSearchParams(sp, { replace: true });
+    },
+    [searchParams, setSearchParams],
+  );
+
+  const load = useCallback(async () => {
+    const gen = ++loadGenRef.current;
+    setLoading(true);
+    setLoadError(null);
+    const cacheKey = `platform:transactions:${debouncedQ || "_"}:${page}`;
     try {
       const res = await fetchPlatformTransactions({
         q: debouncedQ || undefined,
-        take: 100,
-        skip: 0,
+        take: PAGE_SIZE,
+        skip: page * PAGE_SIZE,
       });
+      if (gen !== loadGenRef.current) return;
       setItems(res.items);
       setTotal(res.total);
       setPageSessionCache(cacheKey, { items: res.items, total: res.total });
     } catch (e) {
+      if (gen !== loadGenRef.current) return;
       logClientError("GlobalTransactionsPage", e);
-      if (!useCachedFirst) {
-        setItems([]);
-        setTotal(0);
-      }
+      setLoadError(toUserFriendlyMessage(e));
+      setLoadErrorKind(classifyFetchError(e));
+      setItems([]);
+      setTotal(0);
     } finally {
-      if (!quiet && !useCachedFirst) setLoading(false);
+      if (gen === loadGenRef.current) setLoading(false);
     }
-  }, [debouncedQ]);
+  }, [debouncedQ, page]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const emptyMessage = t("admin.globalTransactionsPage.empty");
-  const isInitialLoad = loading && items.length === 0;
-  const isBackgroundRefresh = loading && items.length > 0;
+  const showTableLoading = loading;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const filterSummary = useMemo(() => {
+    if (debouncedQ) {
+      return t("admin.globalTransactionsPage.summarySearch", { total, q: debouncedQ });
+    }
+    return t("admin.globalTransactionsPage.summaryDefault", { total });
+  }, [debouncedQ, t, total]);
+
+  const emptyCopy = useMemo(() => {
+    if (debouncedQ) {
+      return {
+        title: t("admin.globalTransactionsPage.emptySearch.title"),
+        description: t("admin.globalTransactionsPage.emptySearch.description", { q: debouncedQ }),
+      };
+    }
+    return { title: t("admin.globalTransactionsPage.empty") };
+  }, [debouncedQ, t]);
+
   const footer =
-    !loading && items.length > 0
-      ? t("admin.globalTransactionsPage.footerShowing", { shown: items.length, total })
-      : undefined;
+    !showTableLoading && !loadError && total > 0 ? (
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-muted-foreground">
+          {t("admin.globalTransactionsPage.footerShowing", {
+            from: page * PAGE_SIZE + 1,
+            to: Math.min((page + 1) * PAGE_SIZE, total),
+            total,
+          })}
+        </p>
+        {total > PAGE_SIZE ? (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={page === 0 || loading}
+              onClick={() => setPage(page - 1)}
+              className="min-h-[40px] rounded-lg border border-border px-3 text-xs font-medium text-foreground disabled:opacity-50"
+            >
+              {t("admin.globalTransactionsPage.prevPage")}
+            </button>
+            <span className="text-xs tabular-nums text-muted-foreground">
+              {page + 1} / {pageCount}
+            </span>
+            <button
+              type="button"
+              disabled={page + 1 >= pageCount || loading}
+              onClick={() => setPage(page + 1)}
+              className="min-h-[40px] rounded-lg border border-border px-3 text-xs font-medium text-foreground disabled:opacity-50"
+            >
+              {t("admin.globalTransactionsPage.nextPage")}
+            </button>
+          </div>
+        ) : null}
+      </div>
+    ) : undefined;
 
   return (
     <PlatformPage>
@@ -121,24 +193,21 @@ export function GlobalTransactionsPage() {
         hint={t("admin.globalTransactionsPage.hintLiveSearch")}
       />
 
-      {isBackgroundRefresh ? (
-        <div
-          className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
-          role="status"
-          aria-live="polite"
-        >
-          <InlineSpinner />
-          <span>{t("dashboard.refresh.updating")}</span>
-        </div>
+      {!loadError && !showTableLoading ? (
+        <p className="mb-3 text-sm font-medium text-foreground" role="status">
+          {filterSummary}
+        </p>
       ) : null}
 
       <PlatformResponsiveData
         footer={footer}
         mobile={
-          isInitialLoad ? (
+          showTableLoading ? (
             <DashboardListSkeleton rows={5} minHeightClass="min-h-[12rem]" />
+          ) : loadError ? (
+            <ListFilterLoadError message={loadError} kind={loadErrorKind} onRetry={() => void load()} />
           ) : items.length === 0 ? (
-            <p className={platformUi.emptyState}>{emptyMessage}</p>
+            <EmptyState compact title={emptyCopy.title} description={emptyCopy.description} />
           ) : (
             items.map((row) => <PlatformTransactionMobileCard key={row.id} row={row} />)
           )
@@ -156,12 +225,23 @@ export function GlobalTransactionsPage() {
               </tr>
             </thead>
             <tbody>
-              {isInitialLoad ? (
+              {showTableLoading ? (
                 <GlobalTransactionsTableSkeleton />
+              ) : loadError ? (
+                <tr>
+                  <td colSpan={6} className="p-0">
+                    <ListFilterLoadError
+                      message={loadError}
+                      kind={loadErrorKind}
+                      onRetry={() => void load()}
+                      compact
+                    />
+                  </td>
+                </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className={platformUi.emptyState}>
-                    {emptyMessage}
+                  <td colSpan={6} className="p-0">
+                    <EmptyState compact title={emptyCopy.title} description={emptyCopy.description} />
                   </td>
                 </tr>
               ) : (

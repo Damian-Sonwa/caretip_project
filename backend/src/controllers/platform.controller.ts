@@ -32,6 +32,76 @@ import {
   updateSponsoredAccessGrant,
 } from "../services/sponsoredAccess.service.js";
 
+export async function getOnboardingQueueMetrics(_req: Request, res: Response) {
+  try {
+    const { getOnboardingQueueMetrics, getFullyVerifiedBusinessCount } = await import(
+      "../services/platformBusinessList.service.js"
+    );
+    const [metrics, fullyVerified] = await Promise.all([
+      getOnboardingQueueMetrics(),
+      getFullyVerifiedBusinessCount(),
+    ]);
+    return res.json({ ...metrics, fullyVerified });
+  } catch (err) {
+    logServerError("platform.getOnboardingQueueMetrics", err);
+    return res.status(500).json({
+      message: clientSafeMessage(err, "We couldn't load onboarding queue metrics."),
+    });
+  }
+}
+
+export async function verifyBusinessOnboarding(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const body = req.body as { status?: string; reviewNote?: string } | undefined;
+    const raw = body?.status;
+    const action =
+      raw === "rejected" || raw === "approved" || raw === "submitted"
+        ? raw
+        : "approved";
+    const { updateOnboardingVerificationStatus } = await import(
+      "../services/businessVerificationWorkflow.service.js"
+    );
+    await updateOnboardingVerificationStatus(id, action, { reviewNote: body?.reviewNote });
+    return res.json({ success: true });
+  } catch (err) {
+    logServerError("platform.verifyBusinessOnboarding", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't update onboarding verification."),
+    });
+  }
+}
+
+export async function verifyBusinessKyc(req: Request, res: Response) {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: "id is required" });
+    const body = req.body as { status?: string; reviewNote?: string } | undefined;
+    const raw = body?.status;
+    const action =
+      raw === "rejected" || raw === "verified" || raw === "pending" || raw === "pending_review"
+        ? raw === "pending"
+          ? "pending_review"
+          : raw === "verified"
+            ? "verified"
+            : raw
+        : "verified";
+    const { updateKycVerificationStatus } = await import(
+      "../services/businessVerificationWorkflow.service.js"
+    );
+    await updateKycVerificationStatus(id, action as "verified" | "rejected" | "pending_review", {
+      reviewNote: body?.reviewNote,
+    });
+    return res.json({ success: true });
+  } catch (err) {
+    logServerError("platform.verifyBusinessKyc", err);
+    return res.status(400).json({
+      message: clientSafeMessage(err, "We couldn't update KYC verification."),
+    });
+  }
+}
+
 export async function getKycQueueMetrics(_req: Request, res: Response) {
   try {
     const metrics = await platformService.getKycQueueMetrics();
@@ -175,7 +245,27 @@ export async function getAnalytics(req: Request, res: Response) {
 }
 
 /** SuperAdmin: all businesses with live KYC fields, tip totals, and staff/location counts. */
-export async function listBusinesses(_req: Request, res: Response) {
+export async function listBusinesses(req: Request, res: Response) {
+  const query = req.query as Record<string, unknown>;
+  const {
+    hasBusinessListQueryParams,
+    listPlatformBusinesses,
+    parseBusinessListQuery,
+  } = await import("../services/platformBusinessList.service.js");
+
+  if (hasBusinessListQueryParams(query)) {
+    try {
+      const params = parseBusinessListQuery(query);
+      const result = await listPlatformBusinesses(params);
+      return res.json({ businesses: result.items, total: result.total });
+    } catch (err) {
+      logServerError("platform.listBusinesses.filtered", err);
+      return res.status(500).json({
+        message: clientSafeMessage(err, "We couldn't load the business list. Try again."),
+      });
+    }
+  }
+
   try {
     const businesses = await platformService.getAllBusinessActivity();
     return res.json({ businesses });

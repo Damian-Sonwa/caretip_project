@@ -1,4 +1,4 @@
-import { Link, useLocation, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { X } from 'lucide-react';
 import { CareIcon } from '@/components/icons';
 import { useTranslation } from 'react-i18next';
@@ -11,12 +11,9 @@ import {
 } from './CareTipLogo';
 import {
   dashboardSidebarIconButtonIdle,
-  dashboardSidebarNavLinkActive,
-  dashboardSidebarNavLinkBase,
-  dashboardSidebarNavLinkIdle,
   dashboardSidebarSignOutButton,
 } from "@/lib/theme/dashboardSidebarUi";
-import { adminDashboardNavItems, isAdminDashboardNavActive } from './adminDashboardNav';
+import { PlatformSidebarNavShell } from './platform/PlatformSidebarNavShell';
 import { MobileDrawer } from './ui/MobileDrawer';
 
 interface AdminMobileSidebarProps {
@@ -26,7 +23,6 @@ interface AdminMobileSidebarProps {
 
 export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps) {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const displayName = user?.name || t('admin.fallbackAdminName');
@@ -50,31 +46,8 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
         </button>
       </div>
 
-      <nav className={DASHBOARD_SIDEBAR_NAV_CLASS}>
-        <ul className="space-y-0.5">
-          {adminDashboardNavItems.map((item) => {
-            const isActive = isAdminDashboardNavActive(item.href, location.pathname);
-
-            return (
-              <li key={item.href}>
-                <Link
-                  to={item.href}
-                  onClick={onClose}
-                  className={cn(
-                    "admin-dash-nav-link",
-                    dashboardSidebarNavLinkBase,
-                    isActive
-                      ? cn("admin-dash-nav-link--active", dashboardSidebarNavLinkActive)
-                      : dashboardSidebarNavLinkIdle,
-                  )}
-                >
-                  <CareIcon name={item.icon} size="nav" />
-                  <span className="truncate tracking-tight">{t(item.labelKey)}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, "min-h-0 flex-1 overflow-y-auto overscroll-contain px-0")}>
+        <PlatformSidebarNavShell onNavigate={onClose} />
       </nav>
 
       <div className="px-4 pb-4">

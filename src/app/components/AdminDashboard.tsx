@@ -1,1012 +1,442 @@
-import { lazy, Suspense, useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router";
-import { motion, useReducedMotion } from "motion/react";
-import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { CheckCircle, XCircle } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { createCareStatIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
   fetchPlatformStats,
   fetchPlatformBusinesses,
+  fetchOnboardingQueueMetrics,
+  fetchPlatformSubscriptionMonitoring,
+  fetchPlatformAuditLogs,
+  fetchPlatformCommercialIntelligence,
   fetchPlatformAnalytics,
-  clearPlatformAnalyticsClientCache,
   type PlatformHealthResponse,
   type PlatformGlobalStats,
   type PlatformBusinessRow,
+  type OnboardingQueueMetrics,
   type PlatformAnalytics,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
 import { formatEur } from "../lib/formatEur";
-import { toUserFriendlyMessage } from "../lib/errorMessages";
-import { BusinessLogoMark } from "./business/BusinessLogoMark";
-import { FixPrompt } from "./FixPrompt";
 import { useAuth } from "../hooks/useAuth";
-import { useSocket, useDeferSocketConnect } from "../hooks/useSocket";
-import { useRealtimeFallback } from "../hooks/useRealtimeFallback";
-import { DashboardStatusStrip } from "./dashboard/DashboardStatusStrip";
-import { derivePlatformAdminDashboardStatus } from "../lib/dashboardStatus/deriveDashboardStatus";
-import { NetworkOverviewHero } from "./NetworkOverviewHero";
-import { TracingBeam } from "@/components/ui/tracing-beam";
-import { BorderBeam } from "@/components/ui/border-beam";
-import { cn } from "@/lib/utils";
-import { platformUi } from "./platform/platformDashboardUi";
-import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
-import {
-  DashboardHeroMetricSkeleton,
-} from "./dashboard/DashboardAnalyticsLoader";
 import { PlatformStatCard } from "./platform/PlatformStatCard";
-import { runWithViewportScrollPreserved } from "../lib/dashboardScrollStability";
+import { PlatformOverviewTeaserCard } from "./platform/PlatformOverviewTeaserCard";
+import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
+import { PlatformAdminOverviewHero } from "./platform/PlatformAdminOverviewHero";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { DashboardChartsIdleMount } from "./dashboard/DashboardChartsIdleMount";
-import { AdminDashboardAnalyticsChartsFallback } from "./AdminDashboardAnalyticsChartsFallback";
+  PlatformAdminAttentionAlerts,
+  type PlatformAdminAlert,
+} from "./platform/PlatformAdminAttentionAlerts";
+import { platformUi } from "./platform/platformDashboardUi";
 import {
-  PlatformDashboardCollapsibleSection,
-  usePlatformDashboardSectionState,
-} from "./platform/PlatformDashboardCollapsibleSection";
+  PLATFORM_BUSINESS_BASE,
+  PLATFORM_REVENUE_BASE,
+  PLATFORM_REPORTS_BASE,
+  PLATFORM_SYSTEM_BASE,
+} from "./platform/platformAdminNav";
+import { cn } from "@/lib/utils";
 
-const AdminDashboardAnalyticsCharts = lazy(() =>
-  import("./AdminDashboardAnalyticsCharts").then((mod) => ({
-    default: mod.AdminDashboardAnalyticsCharts,
-  })),
-);
+const VERIFICATION_TEASER_LIMIT = 3;
+const RECENT_ACTIVITY_LIMIT = 4;
 
-const PlatformCommercialIntelligenceSection = lazy(() =>
-  import("./platform/PlatformCommercialIntelligenceSection").then((mod) => ({
-    default: mod.PlatformCommercialIntelligenceSection,
-  })),
-);
-
-const PlatformSubscriptionMonitoringSection = lazy(() =>
-  import("./platform/PlatformSubscriptionMonitoringSection").then((mod) => ({
-    default: mod.PlatformSubscriptionMonitoringSection,
-  })),
-);
-
-function PlatformCommercialIntelligenceFallback() {
-  const { t } = useTranslation();
-  return (
-    <Card className={cn(platformUi.contentCard, "mb-6")}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{t("admin.commercial.title")}</CardTitle>
-        <CardDescription>{t("admin.commercial.desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="py-6">
-        <div className="h-20 animate-pulse rounded-xl bg-muted/60" aria-hidden />
-      </CardContent>
-    </Card>
-  );
-}
-
-function PlatformSubscriptionMonitoringFallback() {
-  const { t } = useTranslation();
-  return (
-    <Card className={cn(platformUi.contentCard, "mb-6")}>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-base">{t("admin.subscriptions.title")}</CardTitle>
-        <CardDescription>{t("admin.subscriptions.desc")}</CardDescription>
-      </CardHeader>
-      <CardContent className="py-6">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {Array.from({ length: 6 }, (_, i) => (
-            <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" aria-hidden />
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-interface AdminStatCardProps {
-  title: string;
-  value: string;
-  numericValue?: number;
-  countUpKind?: "eur" | "eur-whole" | "integer" | "decimal" | "percent";
-  change?: string;
-  icon: React.ElementType;
-  delay: number;
-  beam?: boolean;
-  wideOnTablet?: boolean;
-  loading?: boolean;
-  loadingVariant?: "currency" | "count" | "pulse";
-}
-
-function AdminStatCard({
-  title,
-  value,
-  numericValue,
-  countUpKind = "integer",
-  change,
-  icon: Icon,
-  delay,
-  beam,
-  wideOnTablet,
-  loading,
-  loadingVariant = "count",
-}: AdminStatCardProps) {
-  const reduceMotion = useReducedMotion();
-  return (
-    <motion.div
-      {...dashboardBlockMotion}
-      transition={{
-        ...dashboardBlockMotion.transition,
-        delay: reduceMotion || !loading ? 0 : delay * 0.5,
-      }}
-      className={cn(
-        "h-full min-w-0",
-        wideOnTablet && "sm:col-span-2 lg:col-span-2 min-[1536px]:col-span-1",
-      )}
-    >
-      <div className="relative h-full overflow-hidden rounded-2xl">
-        {beam && !reduceMotion && !loading ? (
-          <BorderBeam size={220} duration={20} colorFrom="#e9932f" colorTo="#000000" />
-        ) : null}
-        <PlatformStatCard
-          label={title}
-          value={value}
-          numericValue={numericValue}
-          countUpKind={countUpKind}
-          change={change}
-          icon={<Icon className="h-5 w-5" aria-hidden />}
-          featured={beam}
-          loading={loading}
-          loadingVariant={loadingVariant}
-          className={cn(
-            "h-full transition-shadow hover:shadow-md",
-            loading && "platform-admin-stat-card--loading",
-          )}
-        />
-      </div>
-    </motion.div>
-  );
-}
-
-const ADMIN_ANALYTICS_TZ_KEY = "caretip_platform_admin_timezone";
-const ADMIN_ANALYTICS_TZ_DEFAULT = "Europe/Berlin";
-const VERIFICATION_TEASER_LIMIT = 10;
-const PLATFORM_SOCKET_DEFER_MS = 1_500;
-const PLATFORM_HEALTH_DEFER_MS = 800;
-const PLATFORM_BUSINESSES_DEFER_MS = 600;
-const ADMIN_ANALYTICS_TZ_OPTIONS = [
-  "Europe/Berlin",
-  "Europe/London",
-  "Europe/Paris",
-  "America/New_York",
-  "America/Chicago",
-  "America/Los_Angeles",
-  "Africa/Lagos",
-  "Asia/Dubai",
-  "Asia/Singapore",
-  "Asia/Tokyo",
-  "Australia/Sydney",
-] as const;
-
-// Session-memory snapshot (no persistence): paints instantly within same session.
-type AdminSessionSnapshot = {
-  stats: PlatformGlobalStats | null;
-  businesses: PlatformBusinessRow[];
-  analytics: PlatformAnalytics | null;
-  health: PlatformHealthResponse | null;
-  at: number;
-};
-
-let adminSessionSnapshot: AdminSessionSnapshot | null = null;
-
-function verificationTeaserPriority(status: PlatformBusinessRow["verificationStatus"]): number {
-  if (status === "pending") return 0;
+function onboardingTeaserPriority(status: PlatformBusinessRow["onboardingVerificationStatus"]): number {
+  if (status === "submitted") return 0;
   if (status === "rejected") return 1;
   return 2;
 }
 
-function analyticsHasVisibleData(a: PlatformAnalytics): boolean {
-  const tipVol = a.tipVolume.reduce((s, r) => s + (r.tipsEur ?? 0), 0);
-  const tipCount = a.tipStatus.reduce((s, r) => s + (r.count ?? 0), 0);
-  const users = a.userDistribution.reduce((s, r) => s + (r.count ?? 0), 0);
-  const growth = a.growth.some((r) => r.newUsers > 0 || r.newBusinesses > 0 || r.newTips > 0);
-  return tipVol > 0 || tipCount > 0 || users > 0 || growth || (a.topBusinessesByTips?.length ?? 0) > 0;
+function computeTipVolumeWindows(analytics: PlatformAnalytics | null): {
+  todayEur: number;
+  weekEur: number;
+  monthEur: number;
+} {
+  const rows = analytics?.tipVolume ?? [];
+  if (rows.length === 0) return { todayEur: 0, weekEur: 0, monthEur: 0 };
+  const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+  const todayEur = sorted[sorted.length - 1]?.tipsEur ?? 0;
+  const weekEur = sorted.slice(-7).reduce((sum, row) => sum + row.tipsEur, 0);
+  const monthEur = sorted.reduce((sum, row) => sum + row.tipsEur, 0);
+  return { todayEur, weekEur, monthEur };
 }
 
-/** Align tip-status chart with lifetime stat cards when analytics status rows are empty. */
-function mergeTipStatusForCharts(
-  analytics: PlatformAnalytics,
-  stats: PlatformGlobalStats | null,
-): PlatformAnalytics["tipStatus"] {
-  const rows = analytics.tipStatus;
-  const sum = rows.reduce((s, r) => s + (r.count ?? 0), 0);
-  if (sum > 0 || !stats) return rows;
-  const success = stats.successTransactionCount ?? 0;
-  const total = stats.transactionCount ?? 0;
-  const pending = Math.max(0, total - success);
-  return [
-    { status: "success", count: success },
-    { status: "pending", count: pending },
-    { status: "failed", count: 0 },
-  ];
+function computeRevenueTrend(analytics: PlatformAnalytics | null): string {
+  const rows = analytics?.tipVolume ?? [];
+  if (rows.length < 8) return "0%";
+  const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
+  const recent = sorted.slice(-7).reduce((sum, row) => sum + row.tipsEur, 0);
+  const prior = sorted.slice(-14, -7).reduce((sum, row) => sum + row.tipsEur, 0);
+  if (prior <= 0) return recent > 0 ? "+100%" : "0%";
+  const pct = Math.round(((recent - prior) / prior) * 100);
+  return `${pct >= 0 ? "+" : ""}${pct}%`;
 }
 
-/**
- * Super Admin home: global platform stats + all businesses (live aggregates).
- * Renders inside SuperAdminLayout only (no business dashboard UI).
- */
+function computeNewBusinessesThisWeek(analytics: PlatformAnalytics | null): number {
+  return (analytics?.growth ?? []).slice(-7).reduce((sum, row) => sum + row.newBusinesses, 0);
+}
+
 export function AdminDashboard() {
-  const { t } = useTranslation();
-  const { expandedSections, setSectionExpanded } = usePlatformDashboardSectionState();
+  const { t, i18n } = useTranslation();
   const { user, authHydrated, sessionValidated } = useAuth();
-  const socketEligible = Boolean(user?.role === "platform_admin" && authHydrated && sessionValidated);
-  const [socketDeferredReady, setSocketDeferredReady] = useState(false);
-  useEffect(() => {
-    if (!socketEligible) {
-      setSocketDeferredReady(false);
-      return;
-    }
-    const id = window.setTimeout(() => setSocketDeferredReady(true), PLATFORM_SOCKET_DEFER_MS);
-    return () => window.clearTimeout(id);
-  }, [socketEligible]);
-  const socketReady = useDeferSocketConnect(socketDeferredReady);
-  const { socket, connected, connectionStatus } = useSocket(socketReady);
-
   const [health, setHealth] = useState<PlatformHealthResponse | null>(null);
   const [stats, setStats] = useState<PlatformGlobalStats | null>(null);
-  const [businesses, setBusinesses] = useState<PlatformBusinessRow[]>([]);
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
-  const [analyticsTimezone, setAnalyticsTimezone] = useState<string>(() => {
+  const [onboardingTeaser, setOnboardingTeaser] = useState<PlatformBusinessRow[]>([]);
+  const [onboardingMetrics, setOnboardingMetrics] = useState<OnboardingQueueMetrics | null>(null);
+  const [subscriptionOverview, setSubscriptionOverview] = useState<{
+    active: number;
+    trialing: number;
+    failed: number;
+    successful: number;
+    failedPaymentsToday: number;
+  } | null>(null);
+  const [commercialSummary, setCommercialSummary] = useState<{
+    upgrades: number;
+    trials: number;
+    atRisk: number;
+  } | null>(null);
+  const [recentLogs, setRecentLogs] = useState<Array<{ action: string; at: string; email?: string | null }>>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = useCallback(async () => {
+    setLoading(true);
     try {
-      const raw = localStorage.getItem(ADMIN_ANALYTICS_TZ_KEY);
-      return raw?.trim() || ADMIN_ANALYTICS_TZ_DEFAULT;
-    } catch {
-      return ADMIN_ANALYTICS_TZ_DEFAULT;
-    }
-  });
-  const [serviceIssue, setServiceIssue] = useState<string | null>(null);
-  /** First businesses list fetch only — teaser panel skeleton. */
-  const [businessesInitialLoading, setBusinessesInitialLoading] = useState(true);
-  /** First full platform stats + businesses fetch only (background refreshes do not flash loaders). */
-  const [initialDashLoading, setInitialDashLoading] = useState(true);
-  const dashboardLoadGenRef = useRef(0);
-  const analyticsLoadGenRef = useRef(0);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [analyticsSyncing, setAnalyticsSyncing] = useState(false);
-  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
-  const [analyticsUpdatedAt, setAnalyticsUpdatedAt] = useState<number | null>(null);
-  const [analyticsDeferredLoading, setAnalyticsDeferredLoading] = useState(false);
-  const adminMountedRef = useRef(true);
-  const refreshTimerRef = useRef<number | null>(null);
-  const metricsRefreshTimerRef = useRef<number | null>(null);
-  const analyticsLoadStartedRef = useRef(false);
-  const sessionHydratedRef = useRef(false);
-  const platformInitialLoadStartedRef = useRef(false);
-  const loadDashboardDataRef = useRef<(opts?: { includeAnalytics?: boolean }) => Promise<void>>(async () => {});
-  const analyticsTimezoneRef = useRef(analyticsTimezone);
-  analyticsTimezoneRef.current = analyticsTimezone;
+      const [
+        healthRes,
+        statsRes,
+        analyticsRes,
+        onboardingRes,
+        onboardingSubmittedRes,
+        subRes,
+        logsRes,
+        commercialRes,
+      ] = await Promise.all([
+        fetchPlatformHealth().catch(() => null),
+        fetchPlatformStats().catch(() => null),
+        fetchPlatformAnalytics(30).catch(() => null),
+        fetchOnboardingQueueMetrics().catch(() => null),
+        fetchPlatformBusinesses({
+          workflow: "onboarding",
+          status: "submitted",
+          take: VERIFICATION_TEASER_LIMIT,
+          sort: "newest",
+        }).catch(() => ({ businesses: [] as PlatformBusinessRow[] })),
+        fetchPlatformSubscriptionMonitoring(30).catch(() => null),
+        fetchPlatformAuditLogs({ take: RECENT_ACTIVITY_LIMIT, skip: 0 }).catch(() => ({ items: [], total: 0 })),
+        fetchPlatformCommercialIntelligence().catch(() => null),
+      ]);
 
-  const emptyAnalytics = useMemo<PlatformAnalytics>(() => {
-    const rangeDays = 30;
-    const end = new Date();
-    end.setHours(0, 0, 0, 0);
-    const start = new Date(end);
-    start.setDate(start.getDate() - (rangeDays - 1));
-    const growth: PlatformAnalytics["growth"] = [];
-    const tipVolume: PlatformAnalytics["tipVolume"] = [];
-    for (let i = 0; i < rangeDays; i += 1) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      const iso = d.toISOString().slice(0, 10);
-      growth.push({ date: iso, newUsers: 0, newBusinesses: 0, newTips: 0 });
-      tipVolume.push({ date: iso, tipsEur: 0, tipCount: 0 });
-    }
-    return {
-      rangeDays,
-      userDistribution: [
-        { role: "business", count: 0 },
-        { role: "employee", count: 0 },
-        { role: "platform_admin", count: 0 },
-      ],
-      tipStatus: [
-        { status: "success", count: 0 },
-        { status: "pending", count: 0 },
-        { status: "failed", count: 0 },
-      ],
-      growth,
-      tipVolume,
-      topBusinessesByTips: [],
-    };
-  }, []);
+      if (healthRes) setHealth(healthRes);
+      if (statsRes) setStats(statsRes);
+      if (analyticsRes) setAnalytics(analyticsRes);
+      if (onboardingRes) setOnboardingMetrics(onboardingRes);
 
-  const verificationTeaserBusinesses = useMemo(() => {
-    return [...businesses]
-      .sort((a, b) => {
-        const priority =
-          verificationTeaserPriority(a.verificationStatus) -
-          verificationTeaserPriority(b.verificationStatus);
-        if (priority !== 0) return priority;
-        return a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
-      })
-      .slice(0, VERIFICATION_TEASER_LIMIT);
-  }, [businesses]);
+      const onboardingQueue = (onboardingSubmittedRes.businesses ?? [])
+        .sort(
+          (a, b) =>
+            onboardingTeaserPriority(a.onboardingVerificationStatus) -
+              onboardingTeaserPriority(b.onboardingVerificationStatus) ||
+            a.name.localeCompare(b.name, undefined, { sensitivity: "base" }),
+        )
+        .slice(0, VERIFICATION_TEASER_LIMIT);
+      setOnboardingTeaser(onboardingQueue);
 
-  const pendingVerificationCount = useMemo(
-    () => businesses.filter((b) => b.verificationStatus === "pending").length,
-    [businesses],
-  );
-
-  const persistSessionSnapshot = useCallback(
-    (
-      next: Partial<{
-        stats: PlatformGlobalStats | null;
-        businesses: PlatformBusinessRow[];
-        analytics: PlatformAnalytics | null;
-        health: PlatformHealthResponse | null;
-      }>,
-    ) => {
-      adminSessionSnapshot = {
-        stats: next.stats ?? adminSessionSnapshot?.stats ?? null,
-        businesses: next.businesses ?? adminSessionSnapshot?.businesses ?? [],
-        analytics: next.analytics ?? adminSessionSnapshot?.analytics ?? null,
-        health: next.health ?? adminSessionSnapshot?.health ?? null,
-        at: Date.now(),
-      };
-    },
-    [],
-  );
-
-  const loadAnalytics = useCallback(
-    async (gen: number, opts?: { bustCache?: boolean }) => {
-      const tz = analyticsTimezoneRef.current;
-      if (opts?.bustCache) clearPlatformAnalyticsClientCache(30, tz);
-      setAnalyticsSyncing(true);
-      setAnalyticsError(null);
-      try {
-        const a = await fetchPlatformAnalytics(30, tz);
-        if (gen !== analyticsLoadGenRef.current) return;
-        if (a.warning) {
-          setAnalyticsError(a.warning);
-        } else {
-          setAnalyticsError(null);
-        }
-        // Still hydrate charts from the safe payload (zeros) so Recharts mounts; stats cards stay separate.
-        setAnalytics(a);
-        setAnalyticsUpdatedAt(Date.now());
-        persistSessionSnapshot({ analytics: a });
-      } catch (e) {
-        if (gen !== analyticsLoadGenRef.current) return;
-        logClientError("AdminDashboard.analytics", e);
-        const msg = toUserFriendlyMessage(e);
-        setAnalyticsError(msg || t("admin.analyticsLoadFailed"));
-        setAnalytics((prev) => prev ?? null);
-      } finally {
-        if (gen === analyticsLoadGenRef.current) setAnalyticsSyncing(false);
-      }
-    },
-    [persistSessionSnapshot, t],
-  );
-
-  const refreshStats = useCallback(
-    async (loadGen: number) => {
-      const s = await fetchPlatformStats();
-      if (loadGen !== dashboardLoadGenRef.current) return;
-      setStats(s);
-      persistSessionSnapshot({ stats: s });
-    },
-    [persistSessionSnapshot],
-  );
-
-  const refreshBusinesses = useCallback(
-    async (loadGen: number) => {
-      try {
-        const b = await fetchPlatformBusinesses();
-        if (loadGen !== dashboardLoadGenRef.current) return;
-        setBusinesses(b.businesses);
-        persistSessionSnapshot({ businesses: b.businesses });
-      } catch (err: unknown) {
-        if (loadGen !== dashboardLoadGenRef.current) return;
-        logClientError("AdminDashboard.refreshBusinesses", err);
-      } finally {
-        if (loadGen === dashboardLoadGenRef.current) setBusinessesInitialLoading(false);
-      }
-    },
-    [persistSessionSnapshot],
-  );
-
-  const scheduleSecondaryPlatformLoads = useCallback(
-    (loadGen: number) => {
-      window.setTimeout(() => {
-        void fetchPlatformHealth()
-          .then((h) => {
-            if (adminMountedRef.current) setHealth(h);
-          })
-          .catch((err: unknown) => {
-            logClientError("AdminDashboard.fetchPlatformHealth", err);
-            if (adminMountedRef.current) setHealth({ database: "offline", stripe: "offline" });
-          });
-      }, PLATFORM_HEALTH_DEFER_MS);
-
-      window.setTimeout(() => {
-        void refreshBusinesses(loadGen).catch((err: unknown) => {
-          logClientError("AdminDashboard.refreshBusinesses", err);
+      if (subRes?.overview) {
+        setSubscriptionOverview({
+          active: subRes.overview.active ?? 0,
+          trialing: subRes.overview.trialing ?? 0,
+          failed: subRes.overview.failed ?? 0,
+          successful: subRes.overview.successful ?? 0,
+          failedPaymentsToday: subRes.widgets?.failedPaymentsToday ?? 0,
         });
-      }, PLATFORM_BUSINESSES_DEFER_MS);
-    },
-    [refreshBusinesses],
-  );
-
-  const refreshMetrics = useCallback(() => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
-    const statsGen = ++dashboardLoadGenRef.current;
-    const analyticsGen = ++analyticsLoadGenRef.current;
-    void refreshStats(statsGen).catch((err: unknown) => {
-      logClientError("AdminDashboard.refreshStats", err);
-    });
-    void loadAnalytics(analyticsGen, { bustCache: true });
-  }, [user, authHydrated, sessionValidated, refreshStats, loadAnalytics]);
-
-  const handleAnalyticsSectionReady = useCallback(() => {
-    if (analyticsLoadStartedRef.current) return;
-    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
-    analyticsLoadStartedRef.current = true;
-    setAnalyticsDeferredLoading(true);
-    const analyticsGen = ++analyticsLoadGenRef.current;
-    void loadAnalytics(analyticsGen, { bustCache: false });
-  }, [user, authHydrated, sessionValidated, loadAnalytics]);
-
-  const loadDashboardData = useCallback(
-    async (opts?: { includeAnalytics?: boolean }) => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
-    const loadGen = ++dashboardLoadGenRef.current;
-    const includeAnalytics = opts?.includeAnalytics === true;
-    setIsSyncing(true);
-    setServiceIssue(null);
-    if (includeAnalytics) {
-      setAnalyticsError(null);
-    }
-
-    void refreshStats(loadGen)
-      .catch((err: unknown) => {
-        if (loadGen !== dashboardLoadGenRef.current) return;
-        logClientError("AdminDashboard.refreshStats", err);
-        setServiceIssue(toUserFriendlyMessage(err) || t("admin.serviceGenericError"));
-      })
-      .finally(() => {
-        if (loadGen === dashboardLoadGenRef.current) {
-          setInitialDashLoading(false);
-          setIsSyncing(false);
-          if (!includeAnalytics) {
-            scheduleSecondaryPlatformLoads(loadGen);
-          }
-        }
-      });
-
-    if (includeAnalytics) {
-      const analyticsGen = ++analyticsLoadGenRef.current;
-      void loadAnalytics(analyticsGen, { bustCache: false });
-      void refreshBusinesses(loadGen).catch((err: unknown) => {
-        logClientError("AdminDashboard.refreshBusinesses", err);
-      });
-    }
-  }, [
-    user,
-    authHydrated,
-    sessionValidated,
-    refreshStats,
-    loadAnalytics,
-    scheduleSecondaryPlatformLoads,
-    t,
-  ]);
-  loadDashboardDataRef.current = loadDashboardData;
-
-  useEffect(() => {
-    if (!authHydrated || !sessionValidated || !user || user.role !== "platform_admin") return;
-    if (platformInitialLoadStartedRef.current) return;
-    platformInitialLoadStartedRef.current = true;
-    if (!sessionHydratedRef.current && adminSessionSnapshot) {
-      sessionHydratedRef.current = true;
-      setStats(adminSessionSnapshot.stats);
-      setBusinesses(adminSessionSnapshot.businesses);
-      setAnalytics(adminSessionSnapshot.analytics);
-      if (adminSessionSnapshot.analytics) setAnalyticsUpdatedAt(adminSessionSnapshot.at);
-      setHealth(adminSessionSnapshot.health);
-      setInitialDashLoading(false);
-      if (adminSessionSnapshot.businesses.length > 0) setBusinessesInitialLoading(false);
-      if (adminSessionSnapshot.analytics) analyticsLoadStartedRef.current = true;
-    }
-    void loadDashboardDataRef.current({ includeAnalytics: false });
-    return () => {
-      platformInitialLoadStartedRef.current = false;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once per auth session
-  }, [authHydrated, sessionValidated, user?.id, user?.role]);
-
-  useEffect(() => {
-    if (!authHydrated) return;
-    return () => {
-      if (metricsRefreshTimerRef.current != null) {
-        window.clearTimeout(metricsRefreshTimerRef.current);
-        metricsRefreshTimerRef.current = null;
       }
-      if (refreshTimerRef.current != null) {
-        window.clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = null;
-      }
-    };
-  }, [authHydrated]);
 
-  useEffect(() => {
-    adminMountedRef.current = true;
-    return () => {
-      adminMountedRef.current = false;
-    };
+      setRecentLogs(
+        (logsRes.items ?? []).map((row) => ({
+          action: row.action,
+          at: row.createdAt,
+          email: row.userEmail,
+        })),
+      );
+
+      if (commercialRes?.segments) {
+        setCommercialSummary({
+          upgrades: commercialRes.segments.premiumOpportunities?.length ?? 0,
+          trials: commercialRes.segments.growthCandidates?.length ?? 0,
+          atRisk: commercialRes.segments.atRisk?.length ?? 0,
+        });
+      }
+    } catch (e) {
+      logClientError("AdminDashboard.load", e);
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
-  // If the API is down (503), don't keep hammering it on a timer.
-  useRealtimeFallback(connected || Boolean(serviceIssue), refreshMetrics);
-
   useEffect(() => {
-    if (!socket || user?.role !== "platform_admin") return;
-    const scheduleFullRefresh = () => {
-      if (refreshTimerRef.current != null) window.clearTimeout(refreshTimerRef.current);
-      refreshTimerRef.current = window.setTimeout(() => {
-        refreshTimerRef.current = null;
-        void loadDashboardData({ includeAnalytics: true });
-      }, 900);
-    };
-    const scheduleMetricsRefresh = () => {
-      if (metricsRefreshTimerRef.current != null) window.clearTimeout(metricsRefreshTimerRef.current);
-      metricsRefreshTimerRef.current = window.setTimeout(() => {
-        metricsRefreshTimerRef.current = null;
-        refreshMetrics();
-      }, 600);
-    };
-    socket.on("platform_data_updated", scheduleFullRefresh);
-    socket.on("platform_verification_updated", scheduleFullRefresh);
-    socket.on("platform_metrics_updated", scheduleMetricsRefresh);
-    return () => {
-      socket.off("platform_data_updated", scheduleFullRefresh);
-      socket.off("platform_verification_updated", scheduleFullRefresh);
-      socket.off("platform_metrics_updated", scheduleMetricsRefresh);
-      if (metricsRefreshTimerRef.current != null) {
-        window.clearTimeout(metricsRefreshTimerRef.current);
-        metricsRefreshTimerRef.current = null;
-      }
-      if (refreshTimerRef.current != null) {
-        window.clearTimeout(refreshTimerRef.current);
-        refreshTimerRef.current = null;
-      }
-    };
-  }, [socket, user?.role, loadDashboardData, refreshMetrics]);
+    void load();
+  }, [load]);
 
-  const chartAnalytics = analytics;
-  const hasPlatformStats = Boolean(stats);
-  const hasPlatformCharts = Boolean(chartAnalytics);
-  const showStatLoading = !hasPlatformStats && initialDashLoading;
-  const showChartSkeletons = !hasPlatformCharts && (analyticsSyncing || analyticsDeferredLoading);
-  const subscriptionMix = useMemo(() => {
-    const mix = { basic: 0, premium: 0, enterprise: 0 };
-    for (const b of businesses) {
-      const tier = b.subscriptionTier ?? "basic";
-      if (tier === "enterprise") mix.enterprise += 1;
-      else if (tier === "premium") mix.premium += 1;
-      else mix.basic += 1;
+  const activeBusinessesCount = onboardingMetrics?.approved ?? 0;
+  const pendingOnboardingCount = onboardingMetrics?.submitted ?? 0;
+  const tipVolumes = useMemo(() => computeTipVolumeWindows(analytics), [analytics]);
+  const revenueTrend = useMemo(() => computeRevenueTrend(analytics), [analytics]);
+  const newBusinessesWeek = useMemo(() => computeNewBusinessesThisWeek(analytics), [analytics]);
+
+  const attentionAlerts = useMemo((): PlatformAdminAlert[] => {
+    const alerts: PlatformAdminAlert[] = [];
+
+    if (health && (health.database !== "online" || health.stripe !== "online")) {
+      alerts.push({
+        id: "health",
+        message: t("admin.overview.alerts.systemHealth"),
+        href: `${PLATFORM_SYSTEM_BASE}/health`,
+        severity: "critical",
+      });
     }
-    return mix;
-  }, [businesses]);
-  const subscriptionTotal = subscriptionMix.basic + subscriptionMix.premium + subscriptionMix.enterprise;
-  const analyticsMeta = chartAnalytics ?? emptyAnalytics;
-  const chartTipStatus = useMemo(
-    () =>
-      chartAnalytics ? mergeTipStatusForCharts(chartAnalytics, stats) : analyticsMeta.tipStatus,
-    [chartAnalytics, stats, analyticsMeta.tipStatus],
-  );
-  const chartsLookEmpty =
-    Boolean(stats?.successTransactionCount) &&
-    (chartAnalytics
-      ? !analyticsHasVisibleData({
-          ...chartAnalytics,
-          tipStatus: chartTipStatus,
-        })
-      : false);
 
-  const adminStatusItems = useMemo(
-    () =>
-      derivePlatformAdminDashboardStatus(
-        {
-          isInitialLoading: showStatLoading,
-          isSyncing,
-          analyticsSyncing,
-          serviceIssue,
-          socketStatus: connectionStatus,
-          pendingVerificationCount,
-        },
-        t,
-      ),
-    [
-      showStatLoading,
-      isSyncing,
-      analyticsSyncing,
-      serviceIssue,
-      connectionStatus,
-      pendingVerificationCount,
-      t,
-    ],
-  );
+    if (pendingOnboardingCount > 0) {
+      alerts.push({
+        id: "onboarding",
+        message: t("admin.overview.alerts.pendingOnboarding", { count: pendingOnboardingCount }),
+        href: `${PLATFORM_BUSINESS_BASE}/onboarding-verification`,
+        severity: "warning",
+      });
+    }
 
-  if (!authHydrated || !sessionValidated || !user) {
-    return null;
-  }
-  if (user.role !== "platform_admin") {
-    return <Navigate to="/unauthorized" replace />;
-  }
+    if ((subscriptionOverview?.failedPaymentsToday ?? 0) > 0) {
+      alerts.push({
+        id: "failed-payments",
+        message: t("admin.overview.alerts.failedPaymentsToday", {
+          count: subscriptionOverview?.failedPaymentsToday ?? 0,
+        }),
+        href: `${PLATFORM_REVENUE_BASE}/failed-payments`,
+        severity: "warning",
+      });
+    }
+
+    if ((commercialSummary?.atRisk ?? 0) > 0) {
+      alerts.push({
+        id: "at-risk",
+        message: t("admin.overview.alerts.atRiskSubscriptions", { count: commercialSummary?.atRisk ?? 0 }),
+        href: `${PLATFORM_REPORTS_BASE}/commercial`,
+        severity: "warning",
+      });
+    }
+
+    return alerts;
+  }, [commercialSummary?.atRisk, health, pendingOnboardingCount, subscriptionOverview?.failedPaymentsToday, t]);
+
+  if (!authHydrated || !sessionValidated || !user) return null;
+  if (user.role !== "platform_admin") return <Navigate to="/unauthorized" replace />;
 
   return (
     <div className={cn(platformUi.page, "platform-dashboard-overview overflow-x-hidden")}>
-      <TracingBeam className={cn(platformUi.pageInner, "platform-dashboard-body pt-3 sm:pt-4")}>
-        <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
-          <DashboardStatusStrip
-            placeholder={showStatLoading}
-            items={adminStatusItems}
-            className="justify-end"
-          />
-        </div>
-        <FixPrompt
-          id="platformDataLoad"
-          issueActive={Boolean(serviceIssue)}
-          dismissPersistence="session"
-          title={t("admin.loadErrorTitle")}
-          description={serviceIssue ?? undefined}
-          actionLabel={t("admin.retry")}
-          onAction={() => void loadDashboardData()}
-          className="mb-6"
-        />
+      <div className={cn(platformUi.pageInner, "platform-dashboard-body", platformUi.overviewSection, "pt-3 sm:pt-4")}>
+        <PlatformAdminOverviewHero health={health} adminName={user.name} locale={i18n.language} />
 
-        <PlatformDashboardCollapsibleSection
-          sectionId="platformOverview"
-          title={t("admin.sections.platformOverview.title")}
-          description={t("admin.sections.platformOverview.desc")}
-          expanded={expandedSections.platformOverview}
-          onExpandedChange={(open) => setSectionExpanded("platformOverview", open)}
-        >
-          <NetworkOverviewHero health={health} embedded variant="copy" />
-          <div
-            className={cn(
-              platformUi.statGrid,
-              "mt-6",
-              showStatLoading && "platform-admin-stat-grid--loading",
-            )}
-            aria-busy={showStatLoading || undefined}
-          >
-            <AdminStatCard
-              title={t("admin.statTips")}
-              value={stats ? formatEur(stats.totalVolumeEur) : t("format.notAvailable")}
-              numericValue={stats?.totalVolumeEur}
+        <section aria-labelledby="platform-kpis-heading">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <h2 id="platform-kpis-heading" className="text-sm font-semibold text-foreground sm:text-base">
+              {t("admin.overview.kpisTitle")}
+            </h2>
+          </div>
+          <div className={cn(platformUi.overviewKpiGrid, loading && "platform-admin-stat-grid--loading")}>
+            <PlatformStatCard
+              label={t("admin.overview.kpi.activeBusinesses")}
+              value={String(activeBusinessesCount)}
+              numericValue={activeBusinessesCount}
+              loading={loading}
+            />
+            <PlatformStatCard
+              label={t("admin.overview.revenue.todayVolume")}
+              value={formatEur(tipVolumes.todayEur)}
+              numericValue={tipVolumes.todayEur}
               countUpKind="eur"
-              loading={showStatLoading}
+              loading={loading}
               loadingVariant="currency"
-              change={
-                stats
-                  ? t("admin.statTipsChange", {
-                      success: stats.successTransactionCount,
-                      total: stats.transactionCount,
-                      biz:
-                        typeof stats.businessesWithSuccessfulTips === "number"
-                          ? t("admin.statTipsBizPart", { count: stats.businessesWithSuccessfulTips })
-                          : "",
-                    })
-                  : undefined
-              }
               icon={createCareStatIcon("tips")}
-              delay={0.1}
-              beam
-              wideOnTablet
             />
-            <AdminStatCard
-              title={t("admin.statVenues")}
-              value={stats ? String(stats.businessesCount) : t("format.notAvailable")}
-              numericValue={stats?.businessesCount}
-              loading={showStatLoading}
-              change={t("admin.statVenuesChange")}
-              icon={createCareStatIcon("hospitalityVenue")}
-              delay={0.15}
+            <PlatformStatCard
+              label={t("admin.overview.kpi.staff")}
+              value={String(stats?.employeesCount ?? 0)}
+              numericValue={stats?.employeesCount ?? 0}
+              loading={loading}
             />
-            <AdminStatCard
-              title={t("admin.statLocations")}
-              value={stats ? String(stats.locationsCount) : t("format.notAvailable")}
-              numericValue={stats?.locationsCount}
-              loading={showStatLoading}
-              change={t("admin.statLocationsChange")}
-              icon={createCareStatIcon("locations")}
-              delay={0.18}
+            <PlatformStatCard
+              label={t("admin.overview.kpi.transactions")}
+              value={String(stats?.successTransactionCount ?? 0)}
+              numericValue={stats?.successTransactionCount ?? 0}
+              loading={loading}
             />
-            <AdminStatCard
-              title={t("admin.statStaff")}
-              value={stats ? String(stats.employeesCount) : t("format.notAvailable")}
-              numericValue={stats?.employeesCount}
-              loading={showStatLoading}
-              change={t("admin.statStaffChange")}
-              icon={createCareStatIcon("team")}
-              delay={0.2}
+            <PlatformStatCard
+              label={t("admin.overview.revenue.monthlyVolume")}
+              value={formatEur(tipVolumes.monthEur)}
+              numericValue={tipVolumes.monthEur}
+              countUpKind="eur"
+              loading={loading}
+              loadingVariant="currency"
             />
-            <AdminStatCard
-              title={t("admin.statActiveUsers")}
-              value={stats ? String(stats.activeUsersCount) : t("format.notAvailable")}
-              numericValue={stats?.activeUsersCount}
-              loading={showStatLoading}
-              change={t("admin.statActiveUsersChange")}
-              icon={createCareStatIcon("users")}
-              delay={0.25}
+            <PlatformStatCard
+              label={t("admin.overview.kpi.pendingOnboarding")}
+              value={String(pendingOnboardingCount)}
+              numericValue={pendingOnboardingCount}
+              loading={loading}
+              featured={pendingOnboardingCount > 0}
             />
           </div>
-        </PlatformDashboardCollapsibleSection>
+        </section>
 
-        <PlatformDashboardCollapsibleSection
-          sectionId="systemHealth"
-          title={t("admin.sections.systemHealth.title")}
-          description={t("admin.sections.systemHealth.desc")}
-          expanded={expandedSections.systemHealth}
-          onExpandedChange={(open) => setSectionExpanded("systemHealth", open)}
-        >
-          <NetworkOverviewHero health={health} embedded variant="health" />
-        </PlatformDashboardCollapsibleSection>
+        <PlatformAdminAttentionAlerts alerts={attentionAlerts} />
 
-        <PlatformDashboardCollapsibleSection
-          sectionId="subscriptionOverview"
-          title={t("admin.sections.subscriptionOverview.title")}
-          description={t("admin.sections.subscriptionOverview.desc")}
-          expanded={expandedSections.subscriptionOverview}
-          onExpandedChange={(open) => setSectionExpanded("subscriptionOverview", open)}
-          contentClassName="!py-4"
-        >
-          <DashboardChartsIdleMount
-            fallback={<PlatformSubscriptionMonitoringFallback />}
-            whenVisible
-            timeoutMs={200}
-            rootMargin="180px"
-          >
-            <Suspense fallback={<PlatformSubscriptionMonitoringFallback />}>
-              <PlatformSubscriptionMonitoringSection part="overview" embedded />
-            </Suspense>
-          </DashboardChartsIdleMount>
-        </PlatformDashboardCollapsibleSection>
-
-        <PlatformDashboardCollapsibleSection
-          sectionId="subscriptionActivity"
-          title={t("admin.sections.subscriptionActivity.title")}
-          description={t("admin.sections.subscriptionActivity.desc")}
-          expanded={expandedSections.subscriptionActivity}
-          onExpandedChange={(open) => setSectionExpanded("subscriptionActivity", open)}
-          contentClassName="!p-0 sm:!p-0"
-        >
-          <DashboardChartsIdleMount
-            fallback={
-              <div className="space-y-3 px-4 py-4" aria-busy="true">
-                {Array.from({ length: 4 }, (_, i) => (
-                  <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
-                ))}
-              </div>
-            }
-            whenVisible
-            timeoutMs={200}
-            rootMargin="200px"
-          >
-            <Suspense
-              fallback={
-                <div className="space-y-3 px-4 py-4" aria-busy="true">
-                  {Array.from({ length: 4 }, (_, i) => (
-                    <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
-                  ))}
-                </div>
+        <section aria-labelledby="platform-teasers-heading">
+          <h2 id="platform-teasers-heading" className="sr-only">
+            {t("admin.overview.teasersTitle")}
+          </h2>
+          <div className={platformUi.overviewTeaserGrid}>
+            <PlatformOverviewTeaserCard
+              title={t("admin.overview.subscriptionOverview.title")}
+              viewAllHref={`${PLATFORM_BUSINESS_BASE}/subscriptions`}
+              viewAllLabel={t("admin.overview.viewAll")}
+              metrics={
+                subscriptionOverview
+                  ? [
+                      { label: t("admin.subscriptions.kpi.active"), value: String(subscriptionOverview.active) },
+                      { label: t("admin.subscriptions.kpi.trialing"), value: String(subscriptionOverview.trialing) },
+                      { label: t("admin.subscriptions.kpi.failed"), value: String(subscriptionOverview.failed) },
+                      {
+                        label: t("admin.overview.subscriptionOverview.revenue"),
+                        value: formatEur(tipVolumes.monthEur),
+                      },
+                    ]
+                  : []
               }
-            >
-              <PlatformSubscriptionMonitoringSection part="activity" embedded />
-            </Suspense>
-          </DashboardChartsIdleMount>
-        </PlatformDashboardCollapsibleSection>
-
-        {subscriptionTotal > 0 ? (
-          <PlatformDashboardCollapsibleSection
-            sectionId="businessOverview"
-            title={t("admin.sections.businessOverview.title")}
-            description={t("admin.sections.businessOverview.desc")}
-            expanded={expandedSections.businessOverview}
-            onExpandedChange={(open) => setSectionExpanded("businessOverview", open)}
-          >
-            <div className="grid gap-4 sm:grid-cols-3">
-              {(["basic", "premium", "enterprise"] as const).map((tier) => {
-                const count = subscriptionMix[tier];
-                const pct = subscriptionTotal > 0 ? Math.round((count / subscriptionTotal) * 100) : 0;
-                return (
-                  <div key={tier} className="rounded-xl border border-border/60 bg-muted/20 p-4">
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      {t(`admin.subscriptionBreakdown.${tier}`)}
-                    </p>
-                    <p className="mt-1 text-2xl font-semibold tabular-nums">{count}</p>
-                    <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
-                      <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">{pct}%</p>
-                  </div>
-                );
-              })}
-            </div>
-          </PlatformDashboardCollapsibleSection>
-        ) : null}
-
-        <PlatformDashboardCollapsibleSection
-          sectionId="revenueAnalytics"
-          title={t("admin.sections.revenueAnalytics.title")}
-          description={t("admin.sections.revenueAnalytics.desc")}
-          expanded={expandedSections.revenueAnalytics}
-          onExpandedChange={(open) => setSectionExpanded("revenueAnalytics", open)}
-          contentClassName="!px-3 !py-3 sm:!px-4 sm:!py-4"
-        >
-          <DashboardChartsIdleMount
-            fallback={<AdminDashboardAnalyticsChartsFallback />}
-            whenVisible
-            timeoutMs={200}
-            rootMargin="240px"
-            onReady={handleAnalyticsSectionReady}
-          >
-            <AdminDashboardAnalyticsCharts
-              hideHeader
-              showChartSkeletons={showChartSkeletons}
-              chartAnalytics={chartAnalytics}
-              chartTipStatus={chartTipStatus}
-              chartsLookEmpty={chartsLookEmpty}
-              analyticsError={analyticsError}
-              analyticsMeta={analyticsMeta}
-              analyticsTimezone={analyticsTimezone}
-              analyticsSyncing={analyticsSyncing}
-              analyticsUpdatedAt={analyticsUpdatedAt}
-              onTimezoneChange={(v) => {
-                runWithViewportScrollPreserved(() => {
-                  setAnalyticsTimezone(v);
-                  analyticsTimezoneRef.current = v;
-                  try {
-                    localStorage.setItem(ADMIN_ANALYTICS_TZ_KEY, v);
-                  } catch {
-                    // ignore
-                  }
-                  const nextGen = ++analyticsLoadGenRef.current;
-                  void loadAnalytics(nextGen, { bustCache: true });
-                });
-              }}
-              onRetryAnalytics={() => {
-                const nextGen = ++analyticsLoadGenRef.current;
-                void loadAnalytics(nextGen, { bustCache: true });
-              }}
             />
-          </DashboardChartsIdleMount>
-        </PlatformDashboardCollapsibleSection>
 
-        <PlatformDashboardCollapsibleSection
-          sectionId="commercialIntelligence"
-          title={t("admin.sections.commercialIntelligence.title")}
-          description={t("admin.sections.commercialIntelligence.desc")}
-          expanded={expandedSections.commercialIntelligence}
-          onExpandedChange={(open) => setSectionExpanded("commercialIntelligence", open)}
-        >
-          <DashboardChartsIdleMount
-            fallback={<PlatformCommercialIntelligenceFallback />}
-            whenVisible
-            timeoutMs={240}
-            rootMargin="200px"
-          >
-            <Suspense fallback={<PlatformCommercialIntelligenceFallback />}>
-              <PlatformCommercialIntelligenceSection embedded />
-            </Suspense>
-          </DashboardChartsIdleMount>
-        </PlatformDashboardCollapsibleSection>
+            <PlatformOverviewTeaserCard
+              title={t("admin.overview.revenue.title")}
+              viewAllHref={`${PLATFORM_REVENUE_BASE}/transactions`}
+              viewAllLabel={t("admin.overview.viewAll")}
+              metrics={[
+                {
+                  label: t("admin.overview.revenue.todayVolume"),
+                  value: formatEur(tipVolumes.todayEur),
+                },
+                {
+                  label: t("admin.overview.revenue.monthlyVolume"),
+                  value: formatEur(tipVolumes.monthEur),
+                },
+                {
+                  label: t("admin.overview.revenue.trend"),
+                  value: revenueTrend,
+                },
+              ]}
+            />
 
-        <PlatformDashboardCollapsibleSection
-          sectionId="verificationQueue"
-          title={t("admin.sections.verificationQueue.title")}
-          description={t("admin.sections.verificationQueue.desc", { limit: VERIFICATION_TEASER_LIMIT })}
-          expanded={expandedSections.verificationQueue}
-          onExpandedChange={(open) => setSectionExpanded("verificationQueue", open)}
-          headerAction={
-            <Link
-              to="/platform-admin/businesses"
-              className="shrink-0 text-xs font-medium text-foreground underline-offset-4 hover:underline sm:text-sm"
+            <PlatformOverviewTeaserCard
+              title={t("admin.overview.businessGrowth.title")}
+              viewAllHref={`${PLATFORM_BUSINESS_BASE}/all`}
+              viewAllLabel={t("admin.overview.viewAll")}
+              metrics={[
+                { label: t("admin.overview.kpi.totalBusinesses"), value: String(stats?.businessesCount ?? 0) },
+                {
+                  label: t("admin.overview.businessGrowth.newThisWeek"),
+                  value: String(newBusinessesWeek),
+                },
+                {
+                  label: t("admin.overview.kpi.pendingOnboarding"),
+                  value: String(pendingOnboardingCount),
+                },
+              ]}
+            />
+
+            <PlatformOverviewTeaserCard
+              title={t("admin.sections.verificationQueue.title")}
+              viewAllHref={`${PLATFORM_BUSINESS_BASE}/onboarding-verification`}
+              viewAllLabel={t("admin.verificationTeaser.viewAll")}
+              metrics={[
+                {
+                  label: t("admin.onboardingVerificationPage.kpi.submitted"),
+                  value: String(pendingOnboardingCount),
+                },
+                {
+                  label: t("admin.onboardingVerificationPage.kpi.rejected"),
+                  value: String(onboardingMetrics?.rejected ?? 0),
+                },
+              ]}
             >
-              {t("admin.verificationTeaser.viewAll")}
-            </Link>
-          }
-          contentClassName="!p-0 sm:!p-0"
-        >
-          {pendingVerificationCount > 0 ? (
-            <p className="border-b border-border px-4 py-2 text-xs font-medium text-amber-700 sm:px-5">
-              {t("admin.verificationTeaser.pendingCount", { count: pendingVerificationCount })}
-            </p>
-          ) : null}
-          {businessesInitialLoading ? (
-            <div className="space-y-3 px-4 py-4" aria-busy="true">
-              {Array.from({ length: 4 }, (_, i) => (
-                <div key={i} className="h-16 animate-pulse rounded-xl bg-muted/60" />
-              ))}
-            </div>
-          ) : businesses.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">{t("admin.noBusinesses")}</p>
-          ) : (
-            <>
-              <div className={platformUi.businessesMobileList}>
-                {verificationTeaserBusinesses.map((b) => (
-                  <PlatformBusinessMobileCard key={b.id} business={b} />
-                ))}
-              </div>
-              <div className={platformUi.businessesTableWrap}>
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-border bg-muted text-left">
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colBusiness")}</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colOwner")}</th>
-                      <th className="px-4 py-3 font-medium text-muted-foreground">{t("admin.colStatus")}</th>
-                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                        {t("admin.colTipsEur")}
-                      </th>
-                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                        {t("admin.colStaffLoc")}
-                      </th>
-                      <th className="px-4 py-3 text-right font-medium text-muted-foreground">
-                        {t("admin.colActions")}
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {verificationTeaserBusinesses.map((b) => (
-                      <tr key={b.id} className="border-b border-border hover:bg-muted/50">
-                        <td className="px-2 py-3 align-middle">
-                          <BusinessLogoMark
-                            logoPathOrUrl={b.logoPath ?? null}
-                            businessName={b.name}
-                            size="sm"
-                          />
-                        </td>
-                        <td className="px-4 py-3">
-                          <div className="font-medium text-foreground">{b.name}</div>
-                          <div className="font-mono text-xs text-muted-foreground">{b.slug}</div>
-                        </td>
-                        <td className="px-4 py-3 text-xs">{b.ownerEmail}</td>
-                        <td className="px-4 py-3">
-                          {b.verificationStatus === "verified" ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-success px-2 py-0.5 text-xs font-medium text-success-foreground">
-                              <CheckCircle className="h-3.5 w-3.5" /> {t("admin.verification.verified")}
-                            </span>
-                          ) : b.verificationStatus === "rejected" ? (
-                            <span className="inline-flex items-center gap-1 text-xs font-medium text-red-700">
-                              <XCircle className="h-3.5 w-3.5" /> {t("admin.verification.rejected")}
-                            </span>
-                          ) : (
-                            <span className="text-xs font-medium text-amber-700">
-                              {t("admin.verification.pending")}
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-4 py-3 text-right tabular-nums">
-                          {formatEur(b.totalTipsEur ?? 0)}
-                        </td>
-                        <td className="px-4 py-3 text-right text-xs text-muted-foreground">
-                          {b.staffCount ?? 0} / {b.locationCount ?? 0}
-                        </td>
-                        <td className="px-4 py-3 text-right">
-                          <Link
-                            to={`/platform-admin/businesses/${b.id}`}
-                            className="text-xs font-medium text-foreground underline-offset-2 hover:underline"
-                          >
-                            {t("admin.view")}
-                          </Link>
-                        </td>
-                      </tr>
+              {onboardingTeaser.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{t("admin.overview.verification.empty")}</p>
+              ) : (
+                <ul className="space-y-2">
+                  {onboardingTeaser.map((b) => (
+                    <li key={b.id} className="hidden sm:block">
+                      <Link
+                        to={`${PLATFORM_BUSINESS_BASE}/${b.id}`}
+                        className="flex items-center justify-between rounded-lg border border-border/80 px-3 py-2 text-sm transition-colors hover:bg-muted/40"
+                      >
+                        <span className="font-medium text-foreground">{b.name}</span>
+                        <span className="text-xs text-muted-foreground">{b.ownerEmail}</span>
+                      </Link>
+                    </li>
+                  ))}
+                  <div className="space-y-2 sm:hidden">
+                    {onboardingTeaser.map((b) => (
+                      <PlatformBusinessMobileCard key={b.id} business={b} />
                     ))}
-                  </tbody>
-                </table>
-              </div>
-            </>
+                  </div>
+                </ul>
+              )}
+            </PlatformOverviewTeaserCard>
+
+            <PlatformOverviewTeaserCard
+              title={t("admin.sections.commercialIntelligence.title")}
+              viewAllHref={`${PLATFORM_REPORTS_BASE}/commercial`}
+              viewAllLabel={t("admin.overview.viewAll")}
+              metrics={
+                commercialSummary
+                  ? [
+                      { label: t("admin.overview.commercial.upgrades"), value: String(commercialSummary.upgrades) },
+                      { label: t("admin.overview.commercial.trials"), value: String(commercialSummary.trials) },
+                      { label: t("admin.overview.commercial.atRisk"), value: String(commercialSummary.atRisk) },
+                    ]
+                  : []
+              }
+            />
+          </div>
+        </section>
+
+        <PlatformOverviewTeaserCard
+          title={t("admin.overview.recentActivity.title")}
+          viewAllHref={`${PLATFORM_REPORTS_BASE}/audit-logs`}
+          viewAllLabel={t("admin.overview.viewAll")}
+          metrics={[]}
+          className="max-w-3xl"
+        >
+          {recentLogs.length === 0 ? (
+            <p className="text-sm text-muted-foreground">{t("admin.overview.recentActivity.empty")}</p>
+          ) : (
+            <ul className="space-y-2">
+              {recentLogs.map((row, i) => (
+                <li
+                  key={`${row.action}-${row.at}-${i}`}
+                  className="flex flex-col gap-0.5 rounded-lg border border-border/70 px-3 py-2 text-sm sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <span className="font-medium text-foreground">{row.action}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {row.email ? `${row.email} · ` : ""}
+                    {new Date(row.at).toLocaleString()}
+                  </span>
+                </li>
+              ))}
+            </ul>
           )}
-        </PlatformDashboardCollapsibleSection>
-      </TracingBeam>
+        </PlatformOverviewTeaserCard>
+
+        <p className="text-center text-xs leading-relaxed text-muted-foreground lg:text-left">
+          {t("admin.overview.footerHint")}
+        </p>
+      </div>
     </div>
   );
 }

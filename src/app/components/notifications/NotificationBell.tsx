@@ -29,7 +29,7 @@ function formatGroupTime(iso: string, locale: string, t: TFunction): string {
 function inboxPathForRole(role: string | undefined): string {
   if (role === "employee") return "/employee/inbox";
   if (role === "business") return "/dashboard/notifications";
-  if (role === "platform_admin") return "/platform-admin/notifications";
+  if (role === "platform_admin") return "/platform-admin/communication/inbox";
   return "/dashboard/notifications";
 }
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Building2, Lock, QrCode, Signal, Users, Wifi } from "lucide-react";
+import { Building2, Lock, Signal, Users, Wifi } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { BusinessLogoMark } from "./BusinessLogoMark";
 import { ProfileAvatar } from "../ui/profile-avatar";
@@ -17,7 +17,6 @@ type BusinessOnboardingFinalPhoneScreenProps = {
   heroLogoSrc: string | null;
   tipStaff: TipPreviewStaffMember[];
   employeeCount: number;
-  hasBusinessName: boolean;
 };
 
 function PreviewInfoCard({
@@ -122,7 +121,6 @@ export function BusinessOnboardingFinalPhoneScreen({
   heroLogoSrc,
   tipStaff,
   employeeCount,
-  hasBusinessName,
 }: BusinessOnboardingFinalPhoneScreenProps) {
   const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState(tipStaff[0]?.id ?? "");
@@ -139,16 +137,12 @@ export function BusinessOnboardingFinalPhoneScreen({
 
   const selected = tipStaff.find((member) => member.id === selectedId) ?? tipStaff[0];
 
-  const teamLine =
+  const guestStatusTitle =
     employeeCount > 0
       ? t("tipFlow.qrLanding.staffReady", { count: employeeCount })
-      : t("business.onboarding.preview.staffReadyGeneric");
+      : t("tipFlow.qrLanding.leaveTip");
 
-  const statusLabel = hasBusinessName
-    ? t("business.onboarding.preview.statusReadyTips")
-    : t("business.onboarding.preview.statusAlmostReady");
-
-  const qrCaption = t("business.onboarding.preview.statusPendingSub");
+  const guestStatusSub = t("tipFlow.qrLanding.secureFooter");
 
   return (
     <>
@@ -192,7 +186,7 @@ export function BusinessOnboardingFinalPhoneScreen({
         <div className="business-onboarding-final-phone__hero">
           <span className="business-onboarding-final-phone__live-chip">
             <span className="business-onboarding-final-phone__live-dot" aria-hidden />
-            {t("business.onboarding.preview.livePreviewChip")}
+            {t("tipFlow.qrLanding.tippingLabel")}
           </span>
           <div className="business-onboarding-final-phone__hero-visual">
             <BusinessLogoMark
@@ -203,12 +197,10 @@ export function BusinessOnboardingFinalPhoneScreen({
             />
           </div>
           <p className="business-onboarding-final-phone__hero-title">
-            {t("business.onboarding.preview.guestExperiencePreview")}
+            {t("tipFlow.qrLanding.whoServedYou")}
           </p>
           <p className="business-onboarding-final-phone__hero-sub">
-            {hasBusinessName
-              ? t("business.onboarding.preview.guestExperienceNamed", { name: displayName })
-              : t("business.onboarding.preview.guestExperienceGeneric")}
+            {t("tipFlow.qrLanding.whoServedYouDesc")}
           </p>
         </div>
 
@@ -220,12 +212,6 @@ export function BusinessOnboardingFinalPhoneScreen({
             label={t("business.onboarding.preview.infoVenue")}
             value={venueTypeLine.text}
             isPlaceholder={venueTypeLine.isPlaceholder}
-          />
-          <PreviewInfoCard
-            icon={Users}
-            label={t("business.onboarding.preview.infoTeam")}
-            value={teamLine}
-            isPlaceholder={!hasBusinessName && employeeCount === 0}
           />
         </div>
 
@@ -246,10 +232,10 @@ export function BusinessOnboardingFinalPhoneScreen({
         <div className="business-onboarding-final-phone__status-card">
           <span className="business-onboarding-final-phone__status-dot" aria-hidden />
           <div className="min-w-0 flex-1">
-            <p className="business-onboarding-final-phone__status-title">{statusLabel}</p>
-            <p className="business-onboarding-final-phone__status-sub">{qrCaption}</p>
+            <p className="business-onboarding-final-phone__status-title">{guestStatusTitle}</p>
+            <p className="business-onboarding-final-phone__status-sub">{guestStatusSub}</p>
           </div>
-          <QrCode className="h-4 w-4 shrink-0 text-primary/55" strokeWidth={1.75} aria-hidden />
+          <Lock className="h-3.5 w-3.5 shrink-0 text-emerald-600/70 dark:text-emerald-400/75" strokeWidth={2} aria-hidden />
         </div>
       </div>
 

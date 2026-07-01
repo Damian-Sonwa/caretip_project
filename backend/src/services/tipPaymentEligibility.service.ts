@@ -4,6 +4,7 @@ import {
   GO_LIVE_REQUIRED_MESSAGE,
   hasBusinessVerificationCapability,
 } from "../config/businessVerificationCapabilities.js";
+import { kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 
 /** Guest-safe error when employee or venue cannot receive tips. */
 export class TipPaymentEligibilityError extends Error {
@@ -53,7 +54,7 @@ export async function assertEmployeeEligibleForTipPayment(
       isDeleted: true,
       activationStatus: true,
       user: { select: { emailVerified: true, isActive: true } },
-      business: { select: { id: true, verificationStatus: true } },
+      business: { select: { id: true, kycVerificationStatus: true } },
     },
   });
 
@@ -68,7 +69,7 @@ export async function assertEmployeeEligibleForTipPayment(
     activationStatus: emp.activationStatus,
     emailVerified: emp.user?.emailVerified === true,
     userIsActive: emp.user?.isActive !== false,
-    businessVerificationStatus: emp.business.verificationStatus,
+    businessVerificationStatus: kycStatusToLegacyMirror(emp.business.kycVerificationStatus),
   };
 
   if (emp.businessId !== trimmedBusinessId) {
@@ -95,7 +96,12 @@ export async function assertEmployeeEligibleForTipPayment(
     throw new TipPaymentEligibilityError(EMPLOYEE_UNAVAILABLE_MSG, "EMPLOYEE_USER_INACTIVE");
   }
 
-  if (!hasBusinessVerificationCapability(emp.business.verificationStatus, "receiveTips")) {
+  if (
+    !hasBusinessVerificationCapability(
+      kycStatusToLegacyMirror(emp.business.kycVerificationStatus),
+      "receiveTips",
+    )
+  ) {
     throw new TipPaymentEligibilityError(GO_LIVE_REQUIRED_MESSAGE, GO_LIVE_REQUIRED_CODE);
   }
 

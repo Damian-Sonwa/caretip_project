@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
 import { Role } from "@prisma/client";
+import { prisma } from "../prisma.js";
 import * as employeeService from "../services/employee.service.js";
 import { QR_SCAN_TYPES, recordQrScanEvent } from "../services/qr/qrScanEvent.service.js";
 import * as businessService from "../services/business.service.js";
-import { prisma } from "../prisma.js";
+import { kycStatusToLegacyMirror } from "../lib/verificationWorkflow.js";
 import {
   GO_LIVE_REQUIRED_CODE,
   GO_LIVE_REQUIRED_MESSAGE,
@@ -193,11 +194,17 @@ export async function getEmployees(req: Request, res: Response) {
     if (!managerOwnsBusiness) {
       const business = await prisma.business.findUnique({
         where: { id: businessId },
-        select: { verificationStatus: true },
+        select: { kycVerificationStatus: true, onboardingVerificationStatus: true },
       });
       if (
         !business ||
-        !hasBusinessVerificationCapability(business.verificationStatus, "activateTipping")
+        !hasBusinessVerificationCapability(
+          kycStatusToLegacyMirror(business.kycVerificationStatus),
+          "activateTipping",
+          {
+            onboardingVerificationStatus: business.onboardingVerificationStatus,
+          },
+        )
       ) {
         return res.status(403).json({
           message: GO_LIVE_REQUIRED_MESSAGE,

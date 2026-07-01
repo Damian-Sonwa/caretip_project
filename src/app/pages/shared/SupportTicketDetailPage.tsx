@@ -65,8 +65,8 @@ export function SupportTicketDetailPage() {
   const ticketRef = useRef<SupportTicketDetail | null>(null);
   ticketRef.current = ticket;
 
-  const backHref = isAdmin ? "/platform-admin/notifications" : "/dashboard/support";
-  const listHref = isAdmin ? "/platform-admin/notifications" : "/dashboard/support";
+  const backHref = isAdmin ? "/platform-admin/communication/inbox" : "/dashboard/support";
+  const listHref = isAdmin ? "/platform-admin/communication/inbox" : "/dashboard/support";
 
   const canLoad = authHydrated && sessionValidated && Boolean(user) && Boolean(ticketId);
 

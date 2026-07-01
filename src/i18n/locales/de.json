@@ -106,7 +106,17 @@
     "syncingAccountStatus": "Kontostatus wird synchronisiert…",
     "loadingTeamMembers": "Team wird geladen…",
     "loadingTeam": "Team wird geladen…",
-    "openingTip": "Trinkgeld wird geöffnet…"
+    "openingTip": "Trinkgeld wird geöffnet…",
+    "listFilter": {
+      "retry": "Erneut versuchen",
+      "loadError": {
+        "generic": "Diese Liste konnte gerade nicht geladen werden.",
+        "api": "Diese Liste konnte gerade nicht geladen werden.",
+        "network": "Netzwerkfehler — Verbindung prüfen und erneut versuchen.",
+        "permission": "Sie haben keine Berechtigung, diese Daten anzuzeigen.",
+        "hint": "Ihre Filter bleiben aktiv. Erneut versuchen, um die Ergebnisse zu aktualisieren."
+      }
+    }
   },
   "join": {
     "eyebrow": "Tritt deinem Team bei",
@@ -1929,7 +1939,13 @@
       "connectionOfflineDesc": "Echtzeit-Updates pausiert bis zur Wiederverbindung",
       "dataLoadFailed": "Dashboard-Daten konnten nicht geladen werden",
       "kycPending": "Geschäftsverifizierung ausstehend",
-      "kycPendingDesc": "Ihr Lokal wird geprüft. Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann.",
+      "kycPendingDesc": "Die KYC-/Compliance-Prüfung läuft. Sie können das Dashboard nutzen, während KYC noch aussteht.",
+      "platformAccessApproved": "Plattformzugang",
+      "platformAccessApprovedDesc": "Ihr Unternehmen ist für das CareTip-Dashboard freigegeben.",
+      "platformAccessPending": "Onboarding-Prüfung läuft",
+      "platformAccessPendingDesc": "Sie können Ihr Dashboard nutzen, während wir Ihr Unternehmen prüfen. QR-Codes stehen nach der Onboarding-Freigabe zur Verfügung.",
+      "kycComingSoon": "KYC-Verifizierung — demnächst",
+      "kycComingSoonDesc": "Die finanzielle Compliance-Prüfung folgt in einem künftigen Update. Sie blockiert nicht den Dashboard-Zugang.",
       "kycVerified": "Verifiziert",
       "kycVerifiedDesc": "Ihr Lokal ist für Live-Gast-Trinkgeld freigegeben",
       "kycRejected": "Verifizierung erfordert Aufmerksamkeit",
@@ -3302,6 +3318,16 @@
     }
   },
   "business": {
+    "awaitingApproval": {
+      "titlePending": "Ihr Unternehmensprofil wird geprüft",
+      "titleRejected": "Onboarding nicht freigegeben",
+      "descPending": "Ihre Registrierung wurde erfolgreich eingereicht. Während unser Team Ihr Unternehmen prüft, können Sie Ihr Konto einrichten und Ihr Dashboard erkunden. QR-Codes stehen nach der Freigabe zur Verfügung.",
+      "descRejected": "Ihr Onboarding wurde nicht freigegeben. Aktualisieren Sie Ihr Unternehmensprofil oder kontaktieren Sie den Support.",
+      "emailNotice": "Wir senden Ihnen eine E-Mail, sobald Ihr Onboarding freigegeben wurde.",
+      "reviewProfile": "Unternehmensprofil prüfen",
+      "goToDashboard": "Zum Dashboard",
+      "signOut": "Abmelden"
+    },
     "hero": {
       "headline": "Teamleistung im Überblick",
       "headlineLine1": "Ihr Betrieb",
@@ -3381,13 +3407,21 @@
         "badge": "Letzter Schritt",
         "headline": "Prüfen & veröffentlichen",
         "description": "Angaben bestätigen und die mobile Gastvorschau prüfen, bevor Sie live gehen.",
-        "readyMessage": "Alles in Ordnung? Veröffentlichen Sie Ihren Betrieb und öffnen Sie Ihr Dashboard."
+        "readyTitle": "Bereit für den Start",
+        "readyMessage": "Alles in Ordnung? Veröffentlichen Sie Ihren Betrieb und öffnen Sie Ihr Dashboard.",
+        "publishHint": "Branding und Kontaktdaten können Sie jederzeit in den Einstellungen ändern."
+      },
+      "sections": {
+        "branding": "Branding",
+        "locationContact": "Standort & Kontakt"
       },
       "upload": {
         "cta": "Logo hochladen",
-        "formats": "PNG, JPG oder SVG",
+        "formats": "PNG, JPG oder SVG · quadratisch ideal",
         "dragHint": "oder per Drag & Drop",
-        "remove": "Bild entfernen"
+        "remove": "Entfernen",
+        "replace": "Ersetzen",
+        "previewReady": "Logo bereit für Ihre Gastseite"
       },
       "preview": {
         "panelAria": "Vorschau der Gast-Trinkgeldseite (nicht interaktiv)",
@@ -3432,6 +3466,33 @@
         "statusTeamReady": "Admin-Verifizierung ausstehend",
         "statusAlmostReady": "Lokalangaben vervollständigen",
         "statusPendingSub": "QR-Codes und Gast-Trinkgeld nach CareTip-Freigabe",
+        "customerJourney": {
+          "aria": "Schritte der Gast-Trinkgeldreise",
+          "title": "Gast-Trinkgeldreise",
+          "subtitle": "Was Gäste vom Scan bis zum Dankeschön erleben",
+          "steps": {
+            "scan": {
+              "title": "QR scannen",
+              "desc": "Gast scannt Tisch- oder Team-QR"
+            },
+            "select": {
+              "title": "Team wählen",
+              "desc": "Wer hat heute bedient?"
+            },
+            "amount": {
+              "title": "Betrag wählen",
+              "desc": "Schnellauswahl oder eigener Betrag"
+            },
+            "pay": {
+              "title": "Sicher zahlen",
+              "desc": "Stripe-Checkout auf dem Handy"
+            },
+            "thanks": {
+              "title": "Danke",
+              "desc": "Trinkgeld gesendet. Feedback optional"
+            }
+          }
+        },
         "ctaHelper": "Gäste können den Betrag vor der Zahlung prüfen und ändern.",
         "qrReady": "QR-Codes für Tische und Team-Links bereit",
         "qrPreviewLabel": "Ihr QR-Code",
@@ -3474,20 +3535,34 @@
         "reviewPublish": "Alles prüfen und veröffentlichen, wenn Sie bereit sind."
       },
       "review": {
+        "summaryEyebrow": "Zusammenfassung",
         "brandingLabel": "Logo",
         "logoAdded": "Logo hinzugefügt",
-        "logoSkipped": "Kein Logo. Später in den Einstellungen möglich"
+        "logoSkipped": "Kein Logo. Später in den Einstellungen möglich",
+        "publicPageReady": "Ihre Gast-Trinkgeldseite ist eingerichtet und in der Vorschau sichtbar.",
+        "sections": {
+          "businessInfo": "Betriebsinformationen",
+          "contactInfo": "Kontaktinformationen",
+          "branding": "Branding",
+          "publicPage": "Öffentliche Seite"
+        }
       },
       "fields": {
         "legalName": "Rechtlicher Betriebsname",
         "legalNamePlaceholder": "The Harbor Kitchen GmbH",
+        "legalNameHint": "Verwenden Sie den eingetragenen rechtlichen Namen Ihres Betriebs.",
         "businessType": "Betriebstyp",
         "businessTypePlaceholder": "Typ wählen",
+        "businessTypeHint": "Hilft uns, Ihr Gasterlebnis anzupassen.",
         "address": "Registrierte Adresse",
         "addressPlaceholder": "Straße, Ort, PLZ",
+        "addressHint": "Wird auf Ihrer öffentlichen Trinkgeldseite angezeigt.",
         "phone": "Team-Telefon",
-        "phonePlaceholder": "Optional",
+        "phonePlaceholder": "+49 30 12345678",
+        "phoneHint": "Optional. Nur intern, nicht für Gäste sichtbar.",
         "website": "Website",
+        "websitePlaceholder": "https://ihr-betrieb.de",
+        "websiteHint": "Optional. Link zu Website oder Social-Media-Profil.",
         "logo": "Logo",
         "logoHint": "Optional. PNG oder JPEG, quadratisch ideal.",
         "optional": "Optional"
@@ -3515,13 +3590,20 @@
         "back": "Zurück",
         "continue": "Weiter",
         "finish": "Veröffentlichen & abschließen",
-        "saving": "Speichern…"
+        "saving": "Speichern…",
+        "publishing": "Veröffentlichen…"
       }
     },
     "goalStatus": {
       "achieved": "Erreicht",
       "on_track": "Im Plan",
       "below_target": "Unter Ziel"
+    },
+    "onboardingVerification": {
+      "approvedToastTitle": "Onboarding-Verifizierung freigegeben",
+      "approvedToastBody": "QR-Code-Erstellung und öffentliche Venue-Seiten sind jetzt verfügbar.",
+      "rejectedToastTitle": "Onboarding-Verifizierung nicht freigegeben",
+      "rejectedToastBody": "Bitte kontaktieren Sie den Support, wenn Sie Fragen zu Ihrer Bewerbung haben."
     },
     "verification": {
       "pendingPageTitle": "Geschäftsverifizierung ausstehend",
@@ -3564,6 +3646,13 @@
         "UNDER_REVIEW": "In Prüfung",
         "APPROVED": "Genehmigt",
         "REJECTED": "Abgelehnt"
+      },
+      "comingSoon": {
+        "badge": "Demnächst",
+        "title": "KYC-Verifizierung demnächst verfügbar",
+        "body": "Identitäts- und Compliance-Prüfung für Auszahlungen und Finanzfunktionen ist noch nicht verfügbar. Dies betrifft nicht Dashboard, Team, Standorte oder Abrechnung. Die Onboarding-Freigabe ist separat und steuert, wann Sie QR-Codes erstellen können.",
+        "backDashboard": "Zum Dashboard",
+        "onboardingStatus": "Onboarding-Status"
       }
     },
     "dashboard": {
@@ -3580,6 +3669,11 @@
       "verificationBannerRejectedTitle": "Geschäftsverifizierung erfordert Aufmerksamkeit",
       "verificationBannerRejectedDesc": "Ihr Lokal konnte noch nicht freigegeben werden. Kontaktieren Sie den Support bei Fragen.",
       "verificationBannerCta": "Verifizierungsstatus anzeigen",
+      "onboardingReviewBannerTitle": "Onboarding-Prüfung läuft",
+      "onboardingReviewBannerDesc": "Ihr Dashboard bleibt verfügbar, während wir Ihr Unternehmen prüfen. QR-Codes stehen nach der Onboarding-Freigabe zur Verfügung.",
+      "onboardingReviewBannerRejectedTitle": "Onboarding nicht freigegeben",
+      "onboardingReviewBannerRejectedDesc": "Aktualisieren Sie Ihr Unternehmensprofil oder kontaktieren Sie den Support. Ihr Dashboard bleibt für die Einrichtung verfügbar.",
+      "onboardingReviewBannerCta": "Onboarding-Status anzeigen",
       "kycBannerTitle": "Geschäftsverifizierung ausstehend",
       "kycBannerDesc": "Ihr Lokal wird geprüft. Unser Team prüft Ihre Onboarding-Angaben. Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann.",
       "kycBannerRejectedTitle": "Geschäftsverifizierung erfordert Aufmerksamkeit",
@@ -3776,7 +3870,9 @@
       "publicDesc": "Nur lesen. Support kontaktieren, wenn der Slug nach dem Start geändert werden soll.",
       "teamQrPath": "Team-QR-Pfad",
       "guestDirectory": "Gäste-Verzeichnis:",
-      "verification": "Verifizierung",
+      "verification": "Verifizierungsstatus",
+      "labelOnboardingVerification": "Onboarding-Verifizierung",
+      "labelKycVerification": "KYC-Verifizierung",
       "statusVerified": "Verifiziert",
       "statusRejected": "Abgelehnt",
       "statusPending": "Ausstehend"
@@ -3855,7 +3951,7 @@
       "toastActiveOn": "Profil ist jetzt aktiv.",
       "toastActiveOff": "Profil deaktiviert. QR-Links sind deaktiviert.",
       "toastActivateForQr": "Profil aktivieren, bevor ein QR-Code heruntergeladen wird.",
-      "toastQrAfterVerification": "QR-Code-Erstellung und Gast-Trinkgeld werden nach Verifizierung freigeschaltet.",
+      "toastQrAfterVerification": "Ihre Unternehmensverifizierung läuft noch. QR-Codes können nach der Onboarding-Freigabe erstellt werden.",
       "toastQrDownloaded": "QR-Code heruntergeladen.",
       "toastQrDownloadFailed": "QR-Download fehlgeschlagen.",
       "loading": "Team wird geladen…",
@@ -3968,14 +4064,14 @@
       "storefrontCardHint": "Marken-Branding steckt in der QR-Karte. Laden Sie das vollständige Erlebnis herunter oder drucken Sie es.",
       "labelQrUrl": "QR-Code-URL",
       "totalScans": "Scans gesamt:",
-      "pendingTitle": "Geschäftsverifizierung ausstehend",
+      "pendingTitle": "Onboarding-Prüfung läuft",
       "dashboardBreadcrumb": "Unternehmens-Dashboard",
       "atAGlance": "Auf einen Blick",
       "statStaff": "Team",
-      "statStatus": "Status",
+      "statOnboardingVerification": "Onboarding-Verifizierung",
       "statSlug": "Slug",
       "reviewBody": "Ihr Lokal wird derzeit geprüft.",
-      "qrLockedSub": "Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann. QR-Veröffentlichung und Gast-Trinkgeld werden nach Plattform-Freigabe freigeschaltet. Team und Lokal können Sie weiter einrichten.",
+      "qrLockedSub": "Ihre Unternehmensverifizierung läuft noch. QR-Codes können nach der Onboarding-Freigabe erstellt werden. Team und Lokal können Sie weiter einrichten.",
       "sectionsTitle": "Bereiche",
       "sectionsDesc": "Team, Tische und Standorte",
       "tabEmployees": "Team",
@@ -3994,7 +4090,7 @@
       "storefrontQrUrlLabel": "Öffentliche Seite:",
       "addLocations": "Standorte hinzufügen",
       "checkingVerification": "Verifizierungsstatus wird geprüft…",
-      "pendingBody": "Ihr Lokal wird geprüft. Freigabe ist erforderlich, bevor Live-Gast-Trinkgeld angenommen werden kann.",
+      "pendingBody": "Ihre Unternehmensverifizierung läuft noch. QR-Codes können nach der Onboarding-Freigabe erstellt werden. Sie können Ihr Dashboard in der Zwischenzeit weiter nutzen.",
       "backDashboard": "Zurück zum Dashboard",
       "badgePrintable": "Druckbar & teilbar",
       "badgePending": "Freigabe ausstehend",
@@ -5387,6 +5483,7 @@
       "systemHealth": "Systemstatus",
       "labelPostgres": "PostgreSQL",
       "labelStripe": "Stripe-API",
+      "labelApi": "Plattform-API",
       "checking": "Prüfe…",
       "online": "Online",
       "offline": "Offline"
@@ -5406,8 +5503,210 @@
       "navNotifications": "Mein Posteingang",
       "navAnnouncements": "Kommunikation",
       "signOut": "Abmelden",
-      "closeMenuAria": "Menü schließen"
+      "closeMenuAria": "Menü schließen",
+      "groups": {
+        "businessManagement": "Unternehmensverwaltung",
+        "revenue": "Umsatz & Transaktionen",
+        "users": "Benutzer",
+        "communication": "Kommunikation",
+        "reports": "Berichte",
+        "system": "System"
+      },
+      "business": {
+        "all": "Alle Unternehmen",
+        "onboardingVerification": "Onboarding-Verifizierung",
+        "kycVerification": "KYC-Verifizierung",
+        "verification": "Unternehmensverifizierung",
+        "subscriptions": "Abonnementverwaltung",
+        "analytics": "Unternehmensanalysen"
+      },
+      "revenue": {
+        "transactions": "Globale Transaktionen",
+        "failedPayments": "Fehlgeschlagene Zahlungen",
+        "successfulSubscriptions": "Erfolgreiche Abonnements",
+        "failedSubscriptions": "Fehlgeschlagene Abonnements",
+        "refunds": "Erstattungen"
+      },
+      "users": {
+        "management": "Benutzerverwaltung",
+        "staff": "Mitarbeiterkonten",
+        "admins": "Plattform-Admins"
+      },
+      "communication": {
+        "inbox": "Posteingang",
+        "notifications": "Benachrichtigungen",
+        "broadcasts": "Broadcasts"
+      },
+      "reports": {
+        "auditLogs": "Audit-Protokolle",
+        "security": "Sicherheit",
+        "usage": "Nutzungsberichte",
+        "commercial": "Commercial Intelligence"
+      },
+      "system": {
+        "health": "Systemstatus",
+        "settings": "Systemeinstellungen"
+      }
     },
+    "overview": {
+      "title": "Plattform-Überblick",
+      "subtitle": "Executive Summary. Vollständige Daten in den Modulen.",
+      "kpisTitle": "Auf einen Blick",
+      "teasersTitle": "Modul-Vorschauen",
+      "viewAll": "Alle anzeigen",
+      "viewDetails": "Details anzeigen",
+      "footerHint": "Vollständige Verwaltung und Berichte finden Sie in den Modulen der Seitenleiste.",
+      "hero": {
+        "welcome": "Willkommen zurück",
+        "welcomeNamed": "Willkommen zurück, {{name}}",
+        "summary": "Plattformstatus, heutige Aktivität und Punkte, die Ihre Aufmerksamkeit brauchen.",
+        "statusOperational": "Alle Systeme betriebsbereit",
+        "statusDegraded": "Leistungseinbußen erkannt",
+        "statusChecking": "Plattformstatus wird geprüft",
+        "systemHealthLink": "Systemstatus-Details"
+      },
+      "alerts": {
+        "title": "Erfordert Aufmerksamkeit",
+        "review": "Prüfen",
+        "systemHealth": "Ein oder mehrere Kernservices sind offline.",
+        "pendingOnboarding": "{{count}} Onboarding-Prüfung(en) warten auf Freigabe.",
+        "failedPaymentsToday": "{{count}} fehlgeschlagene Abo-Zahlung(en) heute.",
+        "atRiskSubscriptions": "{{count}} Abonnement(s) als gefährdet markiert."
+      },
+      "kpi": {
+        "totalBusinesses": "Unternehmen gesamt",
+        "activeBusinesses": "Aktive Unternehmen",
+        "activeUsers": "Aktive Benutzer",
+        "pendingVerifications": "Ausstehende Verifizierungen",
+        "pendingOnboarding": "Onboarding-Freigabe ausstehend",
+        "pendingKyc": "KYC-Prüfung ausstehend",
+        "fullyVerified": "Vollständig verifiziert",
+        "tipVolume": "Trinkgeldvolumen (gesamt)",
+        "venues": "Lokale",
+        "staff": "Mitarbeitende",
+        "transactions": "Transaktionen gesamt"
+      },
+      "businessGrowth": {
+        "title": "Unternehmens-Überblick",
+        "desc": "Plattformwachstum über Lokale, Mitarbeitende und Standorte.",
+        "activeBusinesses": "Aktive Unternehmen",
+        "employees": "Mitarbeitende",
+        "locations": "Standorte",
+        "venuesWithTips": "Lokale mit Trinkgeldern",
+        "newThisWeek": "Neu diese Woche"
+      },
+      "onboardingQueue": {
+        "title": "Onboarding-Verifizierungs-Warteschlange",
+        "desc": "Unternehmen, die auf Plattformzugang warten."
+      },
+      "subscriptionHealth": {
+        "title": "Abonnement-Gesundheit",
+        "desc": "Zahlungs- und Abonnement-Signale auf der Plattform.",
+        "churn": "Erfolgsrate (30 T.)"
+      },
+      "verification": {
+        "empty": "Keine ausstehenden Onboarding-Prüfungen.",
+        "slaWarnings": "SLA-Warnungen",
+        "desc": "Unternehmen mit ausstehender KYC-Prüfung.",
+        "awaiting": "Upload ausstehend",
+        "pendingReview": "Prüfung ausstehend",
+        "slaBreach": "SLA-Verletzung (48 Std.)"
+      },
+      "revenue": {
+        "title": "Umsatz & Transaktionen",
+        "desc": "Plattformweite Finanzkennzahlen und Transaktionsaktivität.",
+        "totalVolume": "Trinkgeldvolumen gesamt",
+        "successTips": "Erfolgreiche Trinkgelder",
+        "venuesWithTips": "Lokale mit Trinkgeldern",
+        "todayVolume": "Trinkgelder heute",
+        "weeklyVolume": "Wochenvolumen",
+        "monthlyVolume": "Monatsvolumen (30 T.)",
+        "trend": "7-Tage-Trend"
+      },
+      "subscriptionOverview": {
+        "title": "Abonnement-Überblick",
+        "desc": "Aktive Abos, Testphasen, fehlgeschlagene Zahlungen und fällige Verlängerungen.",
+        "revenue": "Monatsumsatz"
+      },
+      "recentActivity": {
+        "title": "Letzte Aktivität",
+        "desc": "Neueste Plattform-Ereignisse.",
+        "empty": "Keine recente Aktivität."
+      },
+      "systemHealth": {
+        "desc": "Status der Kerninfrastruktur."
+      },
+      "commercial": {
+        "desc": "Wachstum, Risiko und Upgrade-Chancen.",
+        "upgrades": "Upgrade-Chancen",
+        "trials": "Test-Unternehmen",
+        "highVolume": "High-Volume-Unternehmen",
+        "atRisk": "Gefährdete Abonnements"
+      }
+    },
+    "allBusinessesPage": {
+      "title": "Alle Unternehmen",
+      "subtitle": "Registrierte Lokale auf der Plattform.",
+      "colOnboardingVerification": "Onboarding-Verifizierung"
+    },
+    "kycComingSoon": {
+      "title": "KYC-Verifizierung",
+      "subtitle": "Finanz-Compliance und Auszahlungen",
+      "badge": "Demnächst",
+      "body": "Die KYC-Verifizierung für finanzielle Compliance und Auszahlungen ist für eine künftige Version geplant. Diese Funktion ist in der aktuellen MVP-Phase noch nicht verfügbar.",
+      "onboardingLink": "Onboarding-Verifizierung verwalten →",
+      "learnMore": "Mehr zu geplanten KYC-Funktionen →"
+    },
+    "businessAnalyticsPage": {
+      "title": "Unternehmensanalysen",
+      "subtitle": "Plattformweites Wachstum, Trinkgeldvolumen und Benutzerverteilung."
+    },
+    "usageReportsPage": {
+      "title": "Nutzungsberichte",
+      "subtitle": "Plattform-Adoption, Aktivitätstrends und Nutzungsanalysen."
+    },
+    "systemHealthPage": {
+      "title": "Systemstatus",
+      "subtitle": "Datenbank, Stripe, Queue, E-Mail und Storage."
+    },
+    "securityReportsPage": {
+      "title": "Sicherheit",
+      "subtitle": "Authentifizierungsereignisse und Zugriffsüberwachung.",
+      "body": "Detaillierte Sicherheitsberichte finden Sie in den Audit-Protokollen. Filtern Sie nach sicherheitsrelevanten Aktionen."
+    },
+    "staffAccountsPage": {
+      "title": "Mitarbeiterkonten",
+      "subtitle": "Mitarbeiterkonten aller Unternehmen.",
+      "body": "Nutzen Sie die Benutzerverwaltung zur Suche nach Mitarbeitern pro Unternehmen."
+    },
+    "platformAdminsPage": {
+      "title": "Plattform-Admins",
+      "subtitle": "SuperAdmin- und Plattform-Betreiberkonten.",
+      "body": "Plattform-Admin-Konten werden über die Benutzerverwaltung mit der Rolle platform_admin verwaltet."
+    },
+    "communicationNotificationsPage": {
+      "title": "Benachrichtigungseinstellungen",
+      "subtitle": "Plattformweite Benachrichtigungs- und Zustellungseinstellungen."
+    },
+    "revenuePages": {
+      "failedPayments": {
+        "title": "Fehlgeschlagene Zahlungen",
+        "subtitle": "Abonnements mit fehlgeschlagenen oder überfälligen Zahlungsversuchen."
+      },
+      "successfulSubscriptions": {
+        "title": "Erfolgreiche Abonnements",
+        "subtitle": "Aktive bezahlte Abonnements mit erfolgreicher Abrechnung."
+      },
+      "failedSubscriptions": {
+        "title": "Fehlgeschlagene Abonnements",
+        "subtitle": "Überfällige und gefährdete Abonnementkonten."
+      },
+      "refunds": {
+        "title": "Erstattungen",
+        "subtitle": "Globales Transaktionsledger inkl. Stornierungen."
+      }
+    },
+    "loading": "Laden…",
     "loginPage": {
       "title": "Plattform-Administration",
       "restricted": "Geschützt",
@@ -5493,7 +5792,15 @@
       "colPayout": "Auszahlung",
       "loading": "Laden…",
       "empty": "Keine Transaktionen gefunden.",
-      "footerShowing": "{{shown}} von {{total}} Einträgen angezeigt",
+      "summaryDefault": "{{total}} Transaktionen angezeigt",
+      "summarySearch": "{{total}} Transaktionen für \"{{q}}\" angezeigt",
+      "emptySearch": {
+        "title": "Keine Transaktionen entsprechen Ihrer Suche",
+        "description": "Keine Ergebnisse für \"{{q}}\". Transaktions-ID, Unternehmens- oder Teamname versuchen."
+      },
+      "footerShowing": "{{from}}–{{to}} von {{total}}",
+      "prevPage": "Zurück",
+      "nextPage": "Weiter",
       "payoutStatus": {
         "paid": "Ausgezahlt",
         "failed": "Fehlgeschlagen",
@@ -5542,7 +5849,8 @@
       "searchAria": "Unternehmen durchsuchen",
       "colBusiness": "Unternehmen",
       "colManagerEmail": "Manager-E-Mail",
-      "colVerification": "Verifizierung",
+      "colOnboardingVerification": "Onboarding-Verifizierung",
+      "colKyc": "KYC",
       "colActions": "Aktionen",
       "loading": "Laden…",
       "emptyList": "Noch keine Unternehmen auf der Plattform.",
@@ -5595,12 +5903,282 @@
       "toastDetailsSaved": "Unternehmensdaten gespeichert.",
       "toastLogoUploaded": "Logo erfolgreich hochgeladen.",
       "toastDocUploaded": "Verifizierungsdokument erfolgreich hochgeladen.",
-      "rejectNotePrompt": "Ablehnungsgrund (optional):"
+      "rejectNotePrompt": "Ablehnungsgrund (optional):",
+      "noFilterMatches": "Keine Unternehmen entsprechen Ihren kombinierten Filtern.",
+      "resultSummary": "{{total}} Unternehmen",
+      "kpi": {
+        "verified": "Verifiziert",
+        "pendingReview": "Ausstehende Prüfung",
+        "awaitingUpload": "Wartet auf Upload",
+        "slaBreach": "SLA-Verstoß (>{{hours}}h)"
+      },
+      "summary": {
+        "default": "{{total}} Unternehmen angezeigt",
+        "search": "{{total}} Unternehmen für \"{{q}}\" angezeigt",
+        "status": {
+          "verified": "{{total}} verifizierte Unternehmen angezeigt",
+          "pending_review": "{{total}} Unternehmen warten auf manuelle Prüfung",
+          "awaiting_upload": "{{total}} Unternehmen warten auf Dokumenten-Upload",
+          "sla_breach": "{{total}} Unternehmen überschreiten den SLA-Schwellenwert",
+          "rejected": "{{total}} abgelehnte Unternehmen angezeigt",
+          "not_started": "{{total}} Unternehmen ohne begonnenes KYC angezeigt",
+          "suspended": "{{total}} gesperrte Unternehmen angezeigt"
+        },
+        "date": {
+          "today": "{{total}} Unternehmen heute registriert",
+          "last_7": "{{total}} Unternehmen in den letzten 7 Tagen registriert",
+          "last_30": "{{total}} Unternehmen in den letzten 30 Tagen registriert",
+          "this_month": "{{total}} Unternehmen diesen Monat registriert",
+          "last_month": "{{total}} Unternehmen im letzten Monat registriert",
+          "custom": "{{total}} Unternehmen registriert {{from}} – {{to}}"
+        },
+        "tips": {
+          "zero": "{{total}} Unternehmen mit €0 Trinkgeldvolumen",
+          "1_500": "{{total}} Unternehmen mit €1–€500 Trinkgeldvolumen",
+          "501_5000": "{{total}} Unternehmen mit €501–€5.000 Trinkgeldvolumen",
+          "5001_plus": "{{total}} Unternehmen mit €5.001+ Trinkgeldvolumen"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "Keine Unternehmen entsprechen Ihren Filtern",
+          "description": "Entfernen Sie einzelne Filter oder setzen Sie alle zurück."
+        },
+        "search": {
+          "title": "Keine Unternehmen entsprechen Ihrer Suche",
+          "description": "Keine Ergebnisse für \"{{q}}\". Anderen Namen, Slug oder E-Mail versuchen."
+        },
+        "status": {
+          "verified": {
+            "title": "Keine verifizierten Unternehmen gefunden",
+            "description": "Filter anpassen oder später erneut prüfen."
+          },
+          "pending_review": {
+            "title": "Derzeit warten keine Unternehmen auf manuelle Prüfung",
+            "description": "Die Warteschlange ist leer — neue Einreichungen erscheinen automatisch."
+          },
+          "awaiting_upload": {
+            "title": "Alle Unternehmen haben Verifizierungsdokumente hochgeladen",
+            "description": "Derzeit warten keine Unternehmen auf KYC-Upload."
+          },
+          "sla_breach": {
+            "title": "Gute Nachricht! Keine Unternehmen überschreiten den SLA-Schwellenwert",
+            "description": "Alle ausstehenden Prüfungen liegen im {{hours}}-Stunden-SLA-Fenster."
+          },
+          "rejected": {
+            "title": "Keine abgelehnten Unternehmen gefunden",
+            "description": "Keine Unternehmen mit abgelehntem Verifizierungsstatus."
+          },
+          "not_started": {
+            "title": "Keine Unternehmen ohne begonnenes KYC gefunden",
+            "description": "Alle Unternehmen haben KYC begonnen oder abgeschlossen. Anderen Filter wählen oder Filter zurücksetzen."
+          },
+          "suspended": {
+            "title": "Keine gesperrten Unternehmen gefunden",
+            "description": "Keine Unternehmen mit gesperrtem Status."
+          }
+        },
+        "date": {
+          "today": {
+            "title": "Heute wurden keine Unternehmen registriert",
+            "description": "Breiteren Datumsbereich wählen."
+          },
+          "last_7": {
+            "title": "In den letzten 7 Tagen wurden keine Unternehmen registriert",
+            "description": "Breiteren Datumsbereich wählen."
+          },
+          "last_30": {
+            "title": "In den letzten 30 Tagen wurden keine Unternehmen registriert",
+            "description": "Breiteren Datumsbereich wählen."
+          },
+          "this_month": {
+            "title": "Diesen Monat wurden keine Unternehmen registriert",
+            "description": "Breiteren Datumsbereich wählen."
+          },
+          "last_month": {
+            "title": "Im letzten Monat wurden keine Unternehmen registriert",
+            "description": "Anderen Datumsbereich wählen."
+          },
+          "custom": {
+            "title": "Im gewählten Zeitraum wurden keine Unternehmen registriert",
+            "description": "Benutzerdefinierten Datumsbereich anpassen."
+          }
+        },
+        "tips": {
+          "zero": {
+            "title": "Keine Unternehmen mit €0 Trinkgeldvolumen",
+            "description": "Alle Unternehmen in dieser Ansicht haben mindestens ein Trinkgeld erhalten."
+          },
+          "1_500": {
+            "title": "Keine Unternehmen im Bereich €1–€500",
+            "description": "Anderen Trinkgeld-Filter wählen."
+          },
+          "501_5000": {
+            "title": "Keine Unternehmen im Bereich €501–€5.000",
+            "description": "Anderen Trinkgeld-Filter wählen."
+          },
+          "5001_plus": {
+            "title": "Keine Unternehmen mit €5.001+ Trinkgeldvolumen",
+            "description": "Anderen Trinkgeld-Filter wählen."
+          }
+        }
+      },
+      "pagination": "{{from}}–{{to}} von {{total}}",
+      "prevPage": "Zurück",
+      "nextPage": "Weiter",
+      "filters": {
+        "dateLabel": "Registrierungsdatum",
+        "dateFrom": "Von",
+        "dateTo": "Bis",
+        "statusLabel": "Verifizierungsstatus",
+        "tipsLabel": "Live-Trinkgeldvolumen",
+        "sortLabel": "Sortieren nach",
+        "clearAll": "Alle Filter zurücksetzen",
+        "openDrawer": "Filter",
+        "drawerTitle": "Unternehmen filtern",
+        "removeChip": "Filter entfernen",
+        "date": {
+          "all": "Alle Daten",
+          "today": "Heute",
+          "last_7": "Letzte 7 Tage",
+          "last_30": "Letzte 30 Tage",
+          "this_month": "Dieser Monat",
+          "last_month": "Letzter Monat",
+          "custom": "Benutzerdefiniert"
+        },
+        "status": {
+          "all": "Alle Status",
+          "verified": "Aktiv (Verifiziert)",
+          "pending_review": "Ausstehende Prüfung",
+          "awaiting_upload": "Wartet auf Upload",
+          "not_started": "Nicht begonnen",
+          "sla_breach": "SLA-Verstoß (>48h)",
+          "rejected": "Abgelehnt",
+          "suspended": "Gesperrt"
+        },
+        "tips": {
+          "all": "Alle Volumina",
+          "zero": "€0",
+          "1_500": "€1–€500",
+          "501_5000": "€501–€5.000",
+          "5001_plus": "€5.001+",
+          "highest": "Höchste zuerst",
+          "lowest": "Niedrigste zuerst"
+        },
+        "sort": {
+          "newest": "Neueste Registrierungen",
+          "oldest": "Älteste Registrierungen",
+          "tips_high": "Höchste Trinkgelder",
+          "tips_low": "Niedrigste Trinkgelder",
+          "name_asc": "Alphabetisch (A–Z)",
+          "name_desc": "Alphabetisch (Z–A)"
+        },
+        "chips": {
+          "search": "Suche: {{q}}",
+          "customDate": "{{from}} – {{to}}"
+        }
+      }
+    },
+    "onboardingVerificationPage": {
+      "title": "Onboarding-Verifizierung",
+      "subtitle": "Eingereichte Unternehmensprofile prüfen und Dashboard-Zugang freigeben. KYC wird separat bearbeitet.",
+      "emptyList": "Noch keine Unternehmen auf der Plattform.",
+      "btnApprove": "Zugang freigeben",
+      "btnReject": "Ablehnen",
+      "statusDraft": "Entwurf",
+      "statusSubmitted": "Eingereicht",
+      "statusApproved": "Freigegeben",
+      "statusRejected": "Abgelehnt",
+      "toastApproved": "Plattformzugang freigegeben.",
+      "toastRejected": "Onboarding abgelehnt.",
+      "kpi": {
+        "submitted": "Eingereicht",
+        "approved": "Freigegeben",
+        "rejected": "Abgelehnt"
+      },
+      "summary": {
+        "default": "{{total}} Unternehmen angezeigt",
+        "search": "{{total}} Unternehmen für „{{q}}“",
+        "status": {
+          "draft": "{{total}} Unternehmen im Onboarding-Entwurf",
+          "submitted": "{{total}} neu eingereichte Onboarding-Anfragen",
+          "approved": "{{total}} freigegebene Unternehmen",
+          "rejected": "{{total}} abgelehnte Onboarding-Anfragen",
+          "suspended": "{{total}} gesperrte Unternehmen"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "Keine Unternehmen entsprechen Ihren Filtern",
+          "description": "Entfernen Sie Filter schrittweise oder setzen Sie alle Filter zurück."
+        },
+        "search": {
+          "title": "Keine Unternehmen entsprechen Ihrer Suche",
+          "description": "Keine Ergebnisse für „{{q}}“. Versuchen Sie einen anderen Namen, Slug oder Inhaber-E-Mail."
+        },
+        "status": {
+          "draft": {
+            "title": "Keine Onboarding-Entwürfe gefunden",
+            "description": "Unternehmen erscheinen hier, bevor sie ihr Profil zur Plattformprüfung einreichen."
+          },
+          "submitted": {
+            "title": "Keine neu eingereichten Onboarding-Anfragen gefunden",
+            "description": "Es gibt keine passenden Einreichungen. Wählen Sie einen anderen Status oder setzen Sie Filter zurück."
+          },
+          "approved": {
+            "title": "Keine freigegebenen Unternehmen für die gewählten Filter",
+            "description": "Passen Sie Ihre Filter an oder schauen Sie später erneut vorbei."
+          },
+          "rejected": {
+            "title": "Keine abgelehnten Onboarding-Anfragen für die aktuellen Filter",
+            "description": "Keine Unternehmen mit abgelehntem Onboarding-Status bei den aktuellen Filtern."
+          },
+          "suspended": {
+            "title": "Keine gesperrten Unternehmen gefunden",
+            "description": "Keine Unternehmen mit gesperrtem Status."
+          }
+        }
+      },
+      "filters": {
+        "status": {
+          "all": "Alle Status",
+          "draft": "Entwurf",
+          "submitted": "Eingereicht",
+          "approved": "Freigegeben",
+          "rejected": "Abgelehnt",
+          "suspended": "Gesperrt"
+        }
+      }
     },
     "businessDetailPage": {
       "backLink": "Zurück zu den Unternehmen",
-      "title": "Unternehmensdetails",
-      "subtitle": "KYC-Daten prüfen, Verifizierung freigeben oder ablehnen und Compliance-Dateien verwalten.",
+      "title": "Unternehmensprofil",
+      "subtitle": "Onboarding-Freigabe und KYC-Compliance als getrennte Workflows verwalten.",
+      "sectionOnboarding": "Business-Onboarding",
+      "sectionOnboardingDesc": "Steuert, ob dieses Unternehmen auf das CareTip-Dashboard zugreifen darf.",
+      "sectionKyc": "KYC-Verifizierung",
+      "sectionKycDesc": "Finanzielle und Compliance-Prüfung für Go-live (QR-Codes, Live-Trinkgeld, Zahlungen).",
+      "approveOnboarding": "Plattformzugang freigeben",
+      "rejectOnboarding": "Onboarding ablehnen",
+      "markOnboardingUnderReview": "Als in Prüfung markieren",
+      "reviewKycDocuments": "Dokumente prüfen",
+      "approveKyc": "KYC freigeben",
+      "rejectKyc": "KYC ablehnen",
+      "toastOnboardingApproved": "Plattformzugang freigegeben.",
+      "toastOnboardingRejected": "Onboarding abgelehnt.",
+      "onboardingStatus": {
+        "draft": "Entwurf",
+        "submitted": "Eingereicht",
+        "approved": "Freigegeben",
+        "rejected": "Abgelehnt"
+      },
+      "kycStatus": {
+        "notStarted": "Nicht begonnen",
+        "awaitingUpload": "Upload ausstehend",
+        "pendingReview": "Prüfung ausstehend",
+        "verified": "Verifiziert",
+        "rejected": "Abgelehnt"
+      },
       "loading": "Unternehmen wird geladen…",
       "notFound": "Unternehmen nicht gefunden.",
       "dtTotalTips": "Trinkgelder gesamt (erfolgreich)",

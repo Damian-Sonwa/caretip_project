@@ -1,5 +1,6 @@
 import { prisma } from "../prisma.js";
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
+import { isOnboardingApprovedForPublicGoLive } from "../lib/verificationWorkflow.js";
 import {
   toPublicGuestBrandingDto,
   type PublicGuestBrandingDto,
@@ -62,7 +63,7 @@ const tippingBusinessSelect = {
   qrAccentColor: true,
   qrBackgroundColor: true,
   subscriptionTier: true,
-  verificationStatus: true,
+  onboardingVerificationStatus: true,
 } as const;
 
 export interface PublicTippingEmployee {
@@ -181,7 +182,9 @@ export async function getPublicLocationContext(
     },
   });
   if (!loc) return null;
-  if (loc.business.verificationStatus !== "verified") return { locked: true };
+  if (!isOnboardingApprovedForPublicGoLive(loc.business.onboardingVerificationStatus)) {
+    return { locked: true };
+  }
 
   const employees = await employeesForLocationQr(loc.businessId, loc.id);
   return {
@@ -216,7 +219,9 @@ export async function getPublicTableContextById(
     },
   });
   if (!table) return null;
-  if (table.location.business.verificationStatus !== "verified") return { locked: true };
+  if (!isOnboardingApprovedForPublicGoLive(table.location.business.onboardingVerificationStatus)) {
+    return { locked: true };
+  }
 
   const employees = await employeesForTableQr(table.location.businessId, table.id);
   return {

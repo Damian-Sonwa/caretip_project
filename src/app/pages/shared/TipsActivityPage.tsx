@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
@@ -13,7 +13,6 @@ import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { employeeUi } from "@/app/components/employee/employeeDashboardUi";
 import { EmployeePageHeader } from "@/app/components/employee/EmployeePageHeader";
 import {
-  InlineSpinner,
   TipsActivityTableSkeleton,
 } from "@/app/components/dashboard/DashboardSectionLoading";
 import { useRequireAuth } from "@/app/hooks/useRequireAuth";
@@ -84,6 +83,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
   });
   const canExportCsv = user?.role === "business" && entitlementsReady && hasFeature("csvExport");
   const [q, setQ] = useState("");
+  const [debouncedQ, setDebouncedQ] = useState("");
   const [status, setStatus] = useState<"all" | TipStatus>("all");
   const [range, setRange] = useState<"today" | "week" | "month" | "custom">("month");
   const [customFrom, setCustomFrom] = useState("");
@@ -100,8 +100,15 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
   const take = 50;
   const skip = (page - 1) * take;
   const totalPages = Math.max(1, Math.ceil(total / take));
-  const isInitialTableLoad = loading && items.length === 0;
-  const isBackgroundRefresh = loading && items.length > 0;
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedQ(q.trim()), 400);
+    return () => window.clearTimeout(timer);
+  }, [q]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedQ]);
 
   const statusLabel = useCallback(
     (s: TipStatus | string) => {
@@ -119,7 +126,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
       if (sessionValidated) setLoading(false);
       return;
     }
-    const cacheKey = `tips-activity:${variant}:${user.id}:${user.role}:${status}:${range}:${skip}:${customFrom}:${customTo}`;
+    const cacheKey = `tips-activity:${variant}:${user.id}:${user.role}:${status}:${range}:${skip}:${customFrom}:${customTo}:${debouncedQ}`;
     const cached = getPageSessionCache<TipsActivityCache>(cacheKey, PAGE_CACHE_TTL_HIGH_MS);
     const useCachedFirst = !quiet && cached !== null;
     if (useCachedFirst) {
@@ -127,7 +134,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
       setTotal(cached.total);
       setDataTimezone(cached.timezone);
       setLoading(false);
-    } else if (!quiet && items.length === 0) {
+    } else if (!quiet) {
       setLoading(true);
     }
     setError(null);
@@ -135,6 +142,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
       const common = {
         take,
         skip,
+        q: debouncedQ || undefined,
         status: status === "all" ? undefined : status,
         range,
         ...(range === "custom" ? { fromDate: customFrom || undefined, toDate: customTo || undefined } : {}),
@@ -161,26 +169,13 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
     } finally {
       if (!quiet && !useCachedFirst) setLoading(false);
     }
-  }, [copy, customFrom, customTo, isEmployeeHistory, range, sessionValidated, skip, status, user?.id, user?.role, variant]);
+  }, [copy, customFrom, customTo, debouncedQ, isEmployeeHistory, range, sessionValidated, skip, status, user?.id, user?.role, variant]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
-  const filtered = useMemo(() => {
-    const s = q.trim().toLowerCase();
-    if (!s) return items;
-    return items.filter((tip) => {
-      return (
-        tip.id.toLowerCase().includes(s) ||
-        (!isEmployeeHistory && (tip.staffName ?? "").toLowerCase().includes(s)) ||
-        (tip.locationName ?? "").toLowerCase().includes(s) ||
-        (tip.tableName ?? "").toLowerCase().includes(s)
-      );
-    });
-  }, [isEmployeeHistory, items, q]);
-
-  const exportDisabled = !canExportCsv || exporting || loading || filtered.length === 0;
+  const exportDisabled = !canExportCsv || exporting || loading || items.length === 0;
   const ui = isEmployeeHistory || user?.role === "employee" ? employeeUi : businessUi;
   const showStaffColumn = !isEmployeeHistory;
   const subtitle = copy("subtitle");
@@ -267,13 +262,19 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
                 <input
                   type="date"
                   value={customFrom}
-                  onChange={(e) => setCustomFrom(e.target.value)}
+                  onChange={(e) => {
+                    setPage(1);
+                    setCustomFrom(e.target.value);
+                  }}
                   className="appearance-none px-3 py-3 bg-input-background border border-border rounded-lg text-sm"
                 />
                 <input
                   type="date"
                   value={customTo}
-                  onChange={(e) => setCustomTo(e.target.value)}
+                  onChange={(e) => {
+                    setPage(1);
+                    setCustomTo(e.target.value);
+                  }}
                   className="appearance-none px-3 py-3 bg-input-background border border-border rounded-lg text-sm"
                 />
               </div>
@@ -284,7 +285,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
               type="button"
               disabled={exportDisabled}
               onClick={() => {
-                if (filtered.length === 0) return;
+                if (items.length === 0) return;
                 setExporting(true);
                 try {
                   const header = [
@@ -294,7 +295,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
                     t("business.tipsActivity.csvLocationTable"),
                     t("business.tipsActivity.csvStatus"),
                   ];
-                  const rows = filtered.map((tip) => [
+                  const rows = items.map((tip) => [
                     formatDateTime(tip.createdAt, dateLocale, dataTimezone ?? undefined),
                     formatEur(tip.amount),
                     tip.staffName ?? "",
@@ -333,18 +334,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
       </motion.div>
 
       {error ? (
-        <div className={cn(ui.filterPanel, "mb-6 p-4 text-sm text-muted-foreground")}>{error}</div>
-      ) : null}
-
-      {isBackgroundRefresh ? (
-        <div
-          className="mb-3 flex items-center justify-end gap-2 text-xs font-medium text-muted-foreground"
-          role="status"
-          aria-live="polite"
-        >
-          <InlineSpinner />
-          <span>{t("dashboard.refresh.updating")}</span>
-        </div>
+        <div className={cn(ui.filterPanel, "mb-6 p-4 text-sm text-destructive")}>{error}</div>
       ) : null}
 
       <motion.div
@@ -352,11 +342,11 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        {isInitialTableLoad ? (
+        {loading ? (
           <div className={cn(ui.tablePanel, "overflow-hidden")}>
             <TipsActivityTableSkeleton />
           </div>
-        ) : filtered.length === 0 ? (
+        ) : items.length === 0 ? (
           <div className={cn(ui.tablePanel, "overflow-hidden")}>
             <EmptyState
               icon={<CreditCard className="h-6 w-6" aria-hidden />}
@@ -369,7 +359,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
           <BusinessResponsiveData
             mobile={
               <>
-                {filtered.map((tip) => (
+                {items.map((tip) => (
                   <TipActivityMobileCard
                     key={tip.id}
                     tip={tip}
@@ -403,7 +393,7 @@ export function TipsActivityPage({ variant = "default", embedded = false }: Tips
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((tip) => (
+                  {items.map((tip) => (
                     <tr key={tip.id} className="border-b border-border/60 hover:bg-muted/30">
                       <td className="px-4 py-3 tabular-nums font-medium">{formatEur(tip.amount)}</td>
                       {isEmployeeHistory ? (

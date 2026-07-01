@@ -48,8 +48,10 @@ export function kycHoursPending(submittedAt: Date | null): number | null {
   return (Date.now() - submittedAt.getTime()) / (1000 * 60 * 60);
 }
 
-export function isKycSlaBreached(submittedAt: Date | null, verificationStatus: string): boolean {
-  if (verificationStatus !== "pending") return false;
+export function isKycSlaBreached(submittedAt: Date | null, kycOrLegacyStatus: string): boolean {
+  const pending =
+    kycOrLegacyStatus === "pending_review" || kycOrLegacyStatus === "pending";
+  if (!pending) return false;
   const hours = kycHoursPending(submittedAt);
   return hours != null && hours > KYC_SLA_HOURS;
 }
@@ -197,155 +199,24 @@ export async function listGlobalTransactions(params: {
   return { items, total };
 }
 
-type PlatformBusinessActivityRow = {
-  id: string;
-  name: string;
-  slug: string;
-  verification_status: string;
-  legal_contact_name: string | null;
-  contact_email: string | null;
-  contact_phone: string | null;
-  website: string | null;
-  registered_address: string | null;
-  logo_path: string | null;
-  verification_document_path: string | null;
-  kyc_documents: unknown;
-  kyc_submitted_at: Date | null;
-  kyc_review_notes: string | null;
-  kyc_review_history: unknown;
-  owner_user_id: string;
-  owner_email: string;
-  staff_count: number;
-  location_count: number;
-  total_tips_eur: number;
-  success_tip_count: number;
-  subscription_tier: string;
-  subscription_status: string | null;
-  cancel_at_period_end: boolean | null;
-  has_completed_onboarding: boolean;
-};
-
-/**
- * SuperAdmin “all businesses” view: KYC fields plus live staff/location counts and successful tip totals per business.
- */
-async function getAllBusinessActivityImpl() {
-  const rows = await prisma.$queryRaw<PlatformBusinessActivityRow[]>(Prisma.sql`
-    SELECT
-      b.id,
-      b.name,
-      b.slug,
-      b.verification_status,
-      b.legal_contact_name,
-      b.contact_email,
-      b.contact_phone,
-      b.website,
-      b.registered_address,
-      b.logo_path,
-      b.verification_document_path,
-      b.kyc_documents,
-      b.kyc_submitted_at,
-      b.kyc_review_notes,
-      b.kyc_review_history,
-      u.id AS owner_user_id,
-      u.email AS owner_email,
-      COALESCE(sc.staff_count, 0)::int AS staff_count,
-      COALESCE(lc.location_count, 0)::int AS location_count,
-      COALESCE(ts.total_tips_eur, 0)::float AS total_tips_eur,
-      COALESCE(ts.success_tip_count, 0)::int AS success_tip_count,
-      b.subscription_tier,
-      s.status AS subscription_status,
-      s.cancel_at_period_end,
-      u.has_completed_onboarding
-    FROM businesses b
-    INNER JOIN "User" u ON u.id = b.user_id
-    LEFT JOIN subscriptions s ON s.business_id = b.id
-    LEFT JOIN (
-      SELECT
-        business_id,
-        SUM(amount)::float AS total_tips_eur,
-        COUNT(*)::int AS success_tip_count
-      FROM tips
-      WHERE status = 'success'
-      GROUP BY business_id
-    ) ts ON ts.business_id = b.id
-    LEFT JOIN (
-      SELECT business_id, COUNT(*)::int AS staff_count
-      FROM employees
-      WHERE is_deleted = false
-      GROUP BY business_id
-    ) sc ON sc.business_id = b.id
-    LEFT JOIN (
-      SELECT business_id, COUNT(*)::int AS location_count
-      FROM locations
-      GROUP BY business_id
-    ) lc ON lc.business_id = b.id
-    ORDER BY COALESCE(ts.total_tips_eur, 0) DESC, b.name ASC
-  `);
-
-  return rows.map((b) => ({
-    id: b.id,
-    name: b.name,
-    slug: b.slug,
-    verificationStatus: b.verification_status,
-    legalContactName: b.legal_contact_name,
-    contactEmail: b.contact_email,
-    contactPhone: b.contact_phone,
-    website: b.website,
-    registeredAddress: b.registered_address,
-    ownerUserId: b.owner_user_id,
-    ownerEmail: b.owner_email,
-    staffCount: Number(b.staff_count ?? 0),
-    locationCount: Number(b.location_count ?? 0),
-    logoPath: b.logo_path,
-    verificationDocumentPath: b.verification_document_path,
-    kycDocuments: parseKycDocuments(b.kyc_documents) as KycDocuments,
-    kycSubmittedAt: b.kyc_submitted_at?.toISOString() ?? null,
-    kycReviewNotes: b.kyc_review_notes,
-    kycReviewHistory: parseKycReviewHistory(b.kyc_review_history),
-    kycHoursPending: kycHoursPending(b.kyc_submitted_at),
-    kycSlaBreached: isKycSlaBreached(b.kyc_submitted_at, b.verification_status),
-    totalTipsEur: Number(b.total_tips_eur ?? 0),
-    successTipCount: Number(b.success_tip_count ?? 0),
-    subscriptionTier: b.subscription_tier as "basic" | "premium" | "enterprise",
-    subscriptionStatus: b.subscription_status,
-    cancelAtPeriodEnd: Boolean(b.cancel_at_period_end),
-    hasCompletedOnboarding: Boolean(b.has_completed_onboarding),
-  }));
-}
-
 export async function getKycQueueMetrics() {
-  const slaHours = KYC_SLA_HOURS;
-  const rows = await prisma.$queryRaw<
-    Array<{ pending_review: bigint; awaiting_upload: bigint; sla_breached: bigint }>
-  >`
-    SELECT
-      COUNT(*) FILTER (
-        WHERE verification_status = 'pending' AND kyc_submitted_at IS NOT NULL
-      )::bigint AS pending_review,
-      COUNT(*) FILTER (
-        WHERE verification_status = 'pending' AND kyc_submitted_at IS NULL
-      )::bigint AS awaiting_upload,
-      COUNT(*) FILTER (
-        WHERE verification_status = 'pending'
-          AND kyc_submitted_at IS NOT NULL
-          AND kyc_submitted_at < NOW() - (${slaHours}::int * INTERVAL '1 hour')
-      )::bigint AS sla_breached
-    FROM businesses
-  `;
-  const row = rows[0];
-  return {
-    pendingReview: Number(row?.pending_review ?? 0),
-    awaitingUpload: Number(row?.awaiting_upload ?? 0),
-    slaBreached: Number(row?.sla_breached ?? 0),
-    slaHours: KYC_SLA_HOURS,
-  };
+  const { getKycQueueMetrics: countKycMetrics } = await import("./platformBusinessList.service.js");
+  return countKycMetrics();
 }
 
 export async function getAllBusinessActivity() {
   return getCachedOrLoad(
     "platform:businesses",
     PLATFORM_BUSINESSES_CACHE_TTL_MS,
-    getAllBusinessActivityImpl,
+    async () => {
+      const { listPlatformBusinesses } = await import("./platformBusinessList.service.js");
+      const { items } = await listPlatformBusinesses({
+        take: 10_000,
+        skip: 0,
+        sort: "tips_high",
+      });
+      return items;
+    },
   );
 }
 
@@ -359,49 +230,10 @@ export async function updateBusinessVerificationStatus(
   status: "pending" | "verified" | "rejected",
   opts?: { reviewNote?: string | null; adminUserId?: string },
 ) {
-  const previous = await prisma.business.findUnique({
-    where: { id: businessId },
-    select: { verificationStatus: true, name: true, userId: true, kycReviewHistory: true },
-  });
-  if (!previous) {
-    throw new Error("Business not found");
-  }
-
-  const note = opts?.reviewNote?.trim() || null;
-  const history = parseKycReviewHistory(previous.kycReviewHistory);
-  if (previous.verificationStatus !== status) {
-    history.push({
-      status,
-      at: new Date().toISOString(),
-      note,
-    });
-  }
-
-  await prisma.business.update({
-    where: { id: businessId },
-    data: {
-      verificationStatus: status,
-      ...(note ? { kycReviewNotes: note } : {}),
-      kycReviewHistory: history,
-    },
-  });
-  emitVerificationUpdated(businessId, status);
-  invalidatePlatformDashboardCache();
-  emitPlatformDataUpdated("verification_status");
-
-  if (previous.verificationStatus !== status && previous.userId) {
-    void import("./push/notification.triggers.js").then(
-      ({ onBusinessVerificationStatusChanged }) => {
-        onBusinessVerificationStatusChanged({
-          businessId,
-          businessName: previous.name?.trim() || "Your venue",
-          managerUserId: previous.userId,
-          previousStatus: previous.verificationStatus,
-          nextStatus: status,
-        });
-      },
-    );
-  }
+  const { updateKycVerificationStatus } = await import("./businessVerificationWorkflow.service.js");
+  const action =
+    status === "verified" ? "verified" : status === "rejected" ? "rejected" : "pending_review";
+  await updateKycVerificationStatus(businessId, action, opts);
 }
 
 /** @deprecated prefer updateBusinessVerificationStatus */
@@ -430,6 +262,11 @@ export async function getBusinessForAdmin(businessId: string) {
     name: b.name,
     slug: b.slug,
     verificationStatus: b.verificationStatus,
+    onboardingVerificationStatus: b.onboardingVerificationStatus,
+    kycVerificationStatus: b.kycVerificationStatus,
+    onboardingSubmittedAt: b.onboardingSubmittedAt?.toISOString() ?? null,
+    onboardingReviewNotes: b.onboardingReviewNotes,
+    onboardingReviewHistory: parseKycReviewHistory(b.onboardingReviewHistory),
     legalContactName: b.legalContactName,
     contactEmail: b.contactEmail,
     contactPhone: b.contactPhone,
@@ -446,7 +283,7 @@ export async function getBusinessForAdmin(businessId: string) {
     kycReviewNotes: b.kycReviewNotes,
     kycReviewHistory: parseKycReviewHistory(b.kycReviewHistory),
     kycHoursPending: kycHoursPending(b.kycSubmittedAt),
-    kycSlaBreached: isKycSlaBreached(b.kycSubmittedAt, b.verificationStatus),
+    kycSlaBreached: isKycSlaBreached(b.kycSubmittedAt, b.kycVerificationStatus),
     totalTipsEur: Number(tipSum._sum.amount ?? 0),
     successTipCount,
     subscriptionTier: b.subscriptionTier,

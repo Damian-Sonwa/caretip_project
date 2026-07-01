@@ -237,7 +237,7 @@ export function StaffManagementPage() {
     }
   }, [user?.businessId]);
 
-  const canUseQr = canUseProductionQr(user?.status, Boolean(user?.impersonation));
+  const canUseQr = canUseProductionQr(user?.onboardingVerificationStatus, Boolean(user?.impersonation));
 
   const fetchEmployees = useCallback(async (opts?: { quiet?: boolean; revalidate?: boolean }) => {
     const quiet = opts?.quiet === true;

@@ -115,11 +115,12 @@ export function BusinessDashboard() {
   const { ready: entitlementsReady, hasActiveEntitlements, advancedAnalyticsEnabled } =
     businessEntitlements ?? fallbackEntitlements;
   const isPreviewMode = isUnsubscribedDashboardPreview(entitlementsReady, hasActiveEntitlements);
-  const businessKycApproved = Boolean(user?.impersonation || user?.status === "APPROVED");
-  const businessKycNeedsVerification = Boolean(
+  const onboardingReviewPending = Boolean(
     isBusiness &&
       !user?.impersonation &&
-      (user?.status === "PENDING" || user?.status === "REJECTED"),
+      user.onboardingVerificationStatus &&
+      (user.onboardingVerificationStatus === "submitted" ||
+        user.onboardingVerificationStatus === "rejected"),
   );
 
   const {
@@ -143,10 +144,10 @@ export function BusinessDashboard() {
     sessionValidated,
     advancedAnalyticsEnabled,
   );
-  const showPendingVerification = businessKycNeedsVerification || pendingVerification === true;
+  const showOnboardingReviewNotice = onboardingReviewPending;
   const verificationNoticeLabels = getBusinessVerificationNoticeLabels(
     t,
-    user?.status === "REJECTED",
+    user?.onboardingVerificationStatus === "rejected",
   );
 
   const [guidelinesOpen, setGuidelinesOpen] = useState(false);
@@ -214,7 +215,7 @@ export function BusinessDashboard() {
     isDev: import.meta.env.DEV,
     isWalkthroughDemoAccount: isWalkthroughDemoManager(user),
     statsLoading: isMetricsInitialLoad,
-    pendingVerification: showPendingVerification,
+    pendingVerification: showOnboardingReviewNotice,
     tipCount: displayStats?.tipCount ?? 0,
   });
 
@@ -282,8 +283,9 @@ export function BusinessDashboard() {
         {
           isInitialLoading: showMetricsSkeleton,
           isPeriodRefreshing,
-          pendingVerification: showPendingVerification,
-          verificationStatus: displayStats?.verificationStatus,
+          pendingVerification: showOnboardingReviewNotice,
+          platformAccessApproved:
+            !user?.onboardingVerificationStatus || user.onboardingVerificationStatus === "approved",
           statsLoadFailed,
           socketStatus: connectionStatus,
         },
@@ -292,8 +294,8 @@ export function BusinessDashboard() {
     [
       showMetricsSkeleton,
       isPeriodRefreshing,
-      showPendingVerification,
-      displayStats?.verificationStatus,
+      showOnboardingReviewNotice,
+      user?.onboardingVerificationStatus,
       statsLoadFailed,
       connectionStatus,
       t,
@@ -348,13 +350,13 @@ export function BusinessDashboard() {
         <div className="business-dashboard-overview__prompts">
           <FixPrompt
             id="pendingVerification"
-            issueActive={showPendingVerification}
+            issueActive={showOnboardingReviewNotice}
             tone="info"
             density="compact"
             title={verificationNoticeLabels.title}
             description={verificationNoticeLabels.description}
             actionLabel={verificationNoticeLabels.cta}
-            actionTo="/verification-pending"
+            actionTo="/awaiting-approval"
             dismissPersistence="session"
           />
         </div>
@@ -370,13 +372,13 @@ export function BusinessDashboard() {
       <div className={cn(businessUi.pageInner, "hidden lg:block")}>
         <FixPrompt
           id="pendingVerification"
-          issueActive={showPendingVerification}
+          issueActive={showOnboardingReviewNotice}
           tone="info"
           density="compact"
           title={verificationNoticeLabels.title}
           description={verificationNoticeLabels.description}
           actionLabel={verificationNoticeLabels.cta}
-          actionTo="/verification-pending"
+          actionTo="/awaiting-approval"
           dismissPersistence="session"
           className="mb-3"
         />

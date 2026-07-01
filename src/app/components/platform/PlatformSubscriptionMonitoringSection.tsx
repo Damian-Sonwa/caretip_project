@@ -174,11 +174,16 @@ type PlatformSubscriptionMonitoringSectionProps = {
   part?: PlatformSubscriptionMonitoringPart;
   /** When true, omit outer Card chrome (parent provides collapsible header). */
   embedded?: boolean;
+  initialFilter?: PlatformSubscriptionActivityFilter;
+  /** Hide filter chips when the page preset is fixed (e.g. failed payments module). */
+  hideActivityFilters?: boolean;
 };
 
 export function PlatformSubscriptionMonitoringSection({
   part = "full",
   embedded = false,
+  initialFilter = "all",
+  hideActivityFilters = false,
 }: PlatformSubscriptionMonitoringSectionProps) {
   const { t, i18n } = useTranslation();
   const locale = i18n.language;
@@ -189,7 +194,11 @@ export function PlatformSubscriptionMonitoringSection({
   const [monitoringLoading, setMonitoringLoading] = useState(true);
   const [monitoringError, setMonitoringError] = useState<string | null>(null);
 
-  const [filter, setFilter] = useState<PlatformSubscriptionActivityFilter>("all");
+  const [filter, setFilter] = useState<PlatformSubscriptionActivityFilter>(initialFilter);
+
+  useEffect(() => {
+    setFilter(initialFilter);
+  }, [initialFilter]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [page, setPage] = useState(0);
@@ -351,26 +360,28 @@ export function PlatformSubscriptionMonitoringSection({
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {ACTIVITY_FILTERS.map((chip) => {
-            const active = filter === chip;
-            return (
-              <button
-                key={chip}
-                type="button"
-                onClick={() => setFilter(chip)}
-                className={cn(
-                  "inline-flex min-h-[40px] shrink-0 touch-manipulation items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                  active
-                    ? "border-primary/40 bg-primary text-primary-foreground shadow-sm"
-                    : "border-border/80 bg-background text-muted-foreground hover:border-border hover:text-foreground",
-                )}
-              >
-                {t(`admin.subscriptions.filters.${chip}`)}
-              </button>
-            );
-          })}
-        </div>
+        {!hideActivityFilters ? (
+          <div className="flex gap-2 overflow-x-auto pb-0.5 [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {ACTIVITY_FILTERS.map((chip) => {
+              const active = filter === chip;
+              return (
+                <button
+                  key={chip}
+                  type="button"
+                  onClick={() => setFilter(chip)}
+                  className={cn(
+                    "inline-flex min-h-[40px] shrink-0 touch-manipulation items-center rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
+                    active
+                      ? "border-primary/40 bg-primary text-primary-foreground shadow-sm"
+                      : "border-border/80 bg-background text-muted-foreground hover:border-border hover:text-foreground",
+                  )}
+                >
+                  {t(`admin.subscriptions.filters.${chip}`)}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       {activityError ? (

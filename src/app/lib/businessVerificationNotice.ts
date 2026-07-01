@@ -1,7 +1,8 @@
 import type { TFunction } from "i18next";
+import type { OnboardingVerificationStatus } from "./api";
 import type { User } from "../hooks/useAuth";
 
-/** Business dashboard home — inline verification card; layout banner is suppressed here. */
+/** Business dashboard home — inline onboarding review card; layout banner is suppressed here. */
 export const BUSINESS_VERIFICATION_INLINE_ROUTE = "/dashboard";
 
 export type BusinessVerificationNoticeState = {
@@ -10,8 +11,13 @@ export type BusinessVerificationNoticeState = {
   pending: boolean;
 };
 
-type NoticeUser = Pick<User, "role" | "status" | "impersonation"> | null | undefined;
+type NoticeUser = Pick<User, "role" | "impersonation" | "onboardingVerificationStatus"> | null | undefined;
 
+function isOnboardingReviewPending(status: OnboardingVerificationStatus | undefined): boolean {
+  return status === "submitted";
+}
+
+/** Onboarding review banner only — KYC does not trigger layout notices. */
 export function resolveBusinessVerificationNoticeState(
   user: NoticeUser,
 ): BusinessVerificationNoticeState {
@@ -19,8 +25,9 @@ export function resolveBusinessVerificationNoticeState(
     return { show: false, rejected: false, pending: false };
   }
 
-  const rejected = user.status === "REJECTED";
-  const pending = user.status === "PENDING";
+  const status = user.onboardingVerificationStatus;
+  const rejected = status === "rejected";
+  const pending = isOnboardingReviewPending(status);
   return {
     show: pending || rejected,
     rejected,
@@ -36,11 +43,11 @@ export function shouldSuppressLayoutVerificationBanner(pathname: string): boolea
 export function getBusinessVerificationNoticeLabels(t: TFunction, rejected: boolean) {
   return {
     title: rejected
-      ? t("business.dashboard.verificationBannerRejectedTitle")
-      : t("business.dashboard.verificationBannerTitle"),
+      ? t("business.dashboard.onboardingReviewBannerRejectedTitle")
+      : t("business.dashboard.onboardingReviewBannerTitle"),
     description: rejected
-      ? t("business.dashboard.verificationBannerRejectedDesc")
-      : t("business.dashboard.verificationBannerDesc"),
-    cta: t("business.dashboard.verificationBannerCta"),
+      ? t("business.dashboard.onboardingReviewBannerRejectedDesc")
+      : t("business.dashboard.onboardingReviewBannerDesc"),
+    cta: t("business.dashboard.onboardingReviewBannerCta"),
   };
 }

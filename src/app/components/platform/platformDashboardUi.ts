@@ -32,6 +32,14 @@ export const platformUi = {
 
   contentCard: "rounded-xl border-2 border-border bg-card p-5 shadow-sm sm:p-6",
 
+  /** Overview hub — softer cards aligned with business dashboard rhythm. */
+  overviewHero: "rounded-lg border border-border bg-card shadow-sm",
+  overviewSection: "space-y-8 lg:space-y-10",
+  overviewKpiGrid:
+    "platform-admin-overview-kpis grid grid-cols-2 items-stretch gap-3 sm:gap-3.5 lg:grid-cols-3 xl:grid-cols-6 xl:gap-4",
+  overviewTeaserGrid: "grid items-stretch gap-5 sm:gap-6 lg:grid-cols-2",
+  overviewTeaserCard: "rounded-lg border border-border bg-card p-5 shadow-sm sm:p-6",
+
   dataPanel: "overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm",
   mobileList: "space-y-3 p-4 max-lg:p-4 lg:hidden",
   tableWrap: "hidden overflow-x-auto lg:block",

@@ -7,20 +7,10 @@ import { primeSubscriptionEntitlementsFromSession } from "../lib/subscriptionSes
 import { resolveSubscriptionTier } from "../lib/subscriptionCapabilities";
 import { logClientError } from "../lib/clientLog";
 import { isApiConnectivityError } from "../lib/errorMessages";
-import type { BusinessAccountStatus } from "../hooks/useAuth";
-
-function mapDbVerificationToStatus(
-  v: "pending" | "verified" | "rejected" | undefined,
-): BusinessAccountStatus | undefined {
-  if (v === "pending") return "PENDING";
-  if (v === "verified") return "APPROVED";
-  if (v === "rejected") return "REJECTED";
-  return undefined;
-}
 
 /**
- * Keeps manager `user.status` fresh without blocking the dashboard shell.
- * QR / public flows gate on `user.status` elsewhere.
+ * Keeps manager subscription entitlements and split verification fields fresh.
+ * Does not gate the dashboard shell.
  */
 export function ApprovedBusinessGate() {
   const { user, updateUser, sessionValidated, authStatus } = useAuth();
@@ -32,18 +22,23 @@ export function ApprovedBusinessGate() {
     user?.role === "business" &&
     !user.impersonation;
 
+  const applyProfile = (p: Awaited<ReturnType<typeof fetchBusinessProfile>>) => {
+    const tier = resolveSubscriptionTier(p.subscriptionTier);
+    const accessSource = p.accessSource ?? (p.hasActiveSubscription ? "subscription" : "none");
+    const status = p.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
+    primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
+    updateUser({
+      onboardingVerificationStatus: p.onboardingVerificationStatus,
+    });
+  };
+
   useEffect(() => {
     if (!canSyncProfile) return;
     let cancelled = false;
     void fetchBusinessProfile({ silent: true })
       .then((p) => {
         if (cancelled) return;
-        const tier = resolveSubscriptionTier(p.subscriptionTier);
-        const accessSource = p.accessSource ?? (p.hasActiveSubscription ? "subscription" : "none");
-        const status = p.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
-        primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
-        const s = mapDbVerificationToStatus(p.verificationStatus);
-        if (s) updateUser({ status: s });
+        applyProfile(p);
       })
       .catch((err: unknown) => {
         if (!isApiConnectivityError(err)) {
@@ -60,14 +55,7 @@ export function ApprovedBusinessGate() {
     const refreshProfile = () => {
       if (!hasClientAccessToken()) return;
       void fetchBusinessProfile({ silent: true, revalidate: true })
-        .then((p) => {
-          const tier = resolveSubscriptionTier(p.subscriptionTier);
-          const accessSource = p.accessSource ?? (p.hasActiveSubscription ? "subscription" : "none");
-          const status = p.subscriptionStatus ?? (accessSource !== "none" ? "active" : "none");
-          primeSubscriptionEntitlementsFromSession({ tier, status, accessSource });
-          const s = mapDbVerificationToStatus(p.verificationStatus);
-          if (s) updateUser({ status: s });
-        })
+        .then(applyProfile)
         .catch(() => {});
     };
     window.addEventListener("focus", refreshProfile);

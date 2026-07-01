@@ -163,6 +163,21 @@ const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
   },
   {
+    path: '/awaiting-approval',
+    lazy: async () => {
+      const { BusinessAwaitingApprovalPage } = await import('./pages/business/BusinessAwaitingApprovalPage');
+      function AwaitingApprovalRoute() {
+        return (
+          <ProtectedRoute allowedRoles={['business']}>
+            <BusinessAwaitingApprovalPage />
+          </ProtectedRoute>
+        );
+      }
+      return { Component: AwaitingApprovalRoute };
+    },
+    errorElement: <ErrorBoundary />,
+  },
+  {
     path: '/onboarding',
     lazy: async () => {
       const { BusinessOnboardingPage } = await import('./pages/BusinessOnboardingPage');
@@ -406,15 +421,38 @@ const routes: RouteObject[] = [
     errorElement: <ErrorBoundary />,
     children: [
       { path: 'dashboard', lazy: routeLazy(() => import('./components/AdminDashboard'), 'AdminDashboard') },
-      { path: 'businesses', lazy: routeLazy(() => import('./pages/platform/BusinessVerificationPage'), 'BusinessVerificationPage') },
+      { path: 'businesses/all', lazy: routeLazy(() => import('./pages/platform/PlatformAllBusinessesPage'), 'PlatformAllBusinessesPage') },
+      { path: 'businesses/onboarding-verification', lazy: routeLazy(() => import('./pages/platform/BusinessVerificationPage'), 'BusinessOnboardingVerificationPage') },
+      { path: 'businesses/kyc-verification', lazy: routeLazy(() => import('./pages/platform/BusinessVerificationPage'), 'BusinessKycVerificationPage') },
+      { path: 'businesses/verification', element: <Navigate to="/platform-admin/businesses/kyc-verification" replace /> },
+      { path: 'businesses/subscriptions', lazy: routeLazy(() => import('./pages/platform/PlatformBusinessSubscriptionsPage'), 'PlatformBusinessSubscriptionsPage') },
+      { path: 'businesses/analytics', lazy: routeLazy(() => import('./pages/platform/PlatformBusinessAnalyticsPage'), 'PlatformBusinessAnalyticsPage') },
       { path: 'businesses/:id', lazy: routeLazy(() => import('./pages/platform/BusinessDetailPage'), 'BusinessDetailPage') },
-      { path: 'transactions', lazy: routeLazy(() => import('./pages/platform/GlobalTransactionsPage'), 'GlobalTransactionsPage') },
-      { path: 'logs', lazy: routeLazy(() => import('./pages/platform/AuditLogsPage'), 'AuditLogsPage') },
-      { path: 'settings', lazy: routeLazy(() => import('./pages/platform/PlatformSettingsPage'), 'PlatformSettingsPage') },
-      { path: 'users', lazy: routeLazy(() => import('./pages/platform/PlatformUserManagementPage'), 'PlatformUserManagementPage') },
-      { path: 'notifications', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
+      { path: 'businesses', element: <Navigate to="/platform-admin/businesses/onboarding-verification" replace /> },
+      { path: 'revenue/transactions', lazy: routeLazy(() => import('./pages/platform/GlobalTransactionsPage'), 'GlobalTransactionsPage') },
+      { path: 'revenue/failed-payments', lazy: routeLazy(() => import('./pages/platform/revenue/PlatformFailedPaymentsPage'), 'PlatformFailedPaymentsPage') },
+      { path: 'revenue/successful-subscriptions', lazy: routeLazy(() => import('./pages/platform/revenue/PlatformSuccessfulSubscriptionsPage'), 'PlatformSuccessfulSubscriptionsPage') },
+      { path: 'revenue/failed-subscriptions', lazy: routeLazy(() => import('./pages/platform/revenue/PlatformFailedSubscriptionsPage'), 'PlatformFailedSubscriptionsPage') },
+      { path: 'revenue/refunds', lazy: routeLazy(() => import('./pages/platform/revenue/PlatformRefundsPage'), 'PlatformRefundsPage') },
+      { path: 'users/management', lazy: routeLazy(() => import('./pages/platform/PlatformUserManagementPage'), 'PlatformUserManagementPage') },
+      { path: 'users/staff', lazy: routeLazy(() => import('./pages/platform/users/PlatformStaffAccountsPage'), 'PlatformStaffAccountsPage') },
+      { path: 'users/admins', lazy: routeLazy(() => import('./pages/platform/users/PlatformAdminsPage'), 'PlatformAdminsPage') },
+      { path: 'users', element: <Navigate to="/platform-admin/users/management" replace /> },
+      { path: 'communication/inbox', lazy: routeLazy(() => import('./pages/shared/NotificationInboxPage'), 'NotificationInboxPage') },
+      { path: 'communication/notifications', lazy: routeLazy(() => import('./pages/platform/communication/PlatformCommunicationNotificationsPage'), 'PlatformCommunicationNotificationsPage') },
+      { path: 'communication/broadcasts', lazy: routeLazy(() => import('./pages/platform/PlatformAnnouncementsPage'), 'PlatformAnnouncementsPage') },
+      { path: 'reports/audit-logs', lazy: routeLazy(() => import('./pages/platform/AuditLogsPage'), 'AuditLogsPage') },
+      { path: 'reports/security', lazy: routeLazy(() => import('./pages/platform/reports/PlatformSecurityReportsPage'), 'PlatformSecurityReportsPage') },
+      { path: 'reports/usage', lazy: routeLazy(() => import('./pages/platform/reports/PlatformUsageReportsPage'), 'PlatformUsageReportsPage') },
+      { path: 'reports/commercial', lazy: routeLazy(() => import('./pages/platform/reports/PlatformCommercialIntelligencePage'), 'PlatformCommercialIntelligencePage') },
+      { path: 'system/health', lazy: routeLazy(() => import('./pages/platform/PlatformSystemHealthPage'), 'PlatformSystemHealthPage') },
+      { path: 'system/settings', lazy: routeLazy(() => import('./pages/platform/PlatformSettingsPage'), 'PlatformSettingsPage') },
       { path: 'support/:ticketId', lazy: routeLazy(() => import('./pages/shared/SupportTicketDetailPage'), 'SupportTicketDetailPage') },
-      { path: 'announcements', lazy: routeLazy(() => import('./pages/platform/PlatformAnnouncementsPage'), 'PlatformAnnouncementsPage') },
+      { path: 'transactions', element: <Navigate to="/platform-admin/revenue/transactions" replace /> },
+      { path: 'logs', element: <Navigate to="/platform-admin/reports/audit-logs" replace /> },
+      { path: 'settings', element: <Navigate to="/platform-admin/system/settings" replace /> },
+      { path: 'notifications', element: <Navigate to="/platform-admin/communication/inbox" replace /> },
+      { path: 'announcements', element: <Navigate to="/platform-admin/communication/broadcasts" replace /> },
       { index: true, element: <Navigate to="/platform-admin/dashboard" replace /> },
     ],
   },
@@ -425,37 +463,37 @@ const routes: RouteObject[] = [
   },
   {
     path: '/admin/transactions',
-    element: <Navigate to="/platform-admin/transactions" replace />,
+    element: <Navigate to="/platform-admin/revenue/transactions" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/verification',
-    element: <Navigate to="/platform-admin/businesses" replace />,
+    element: <Navigate to="/platform-admin/businesses/kyc-verification" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/users',
-    element: <Navigate to="/platform-admin/users" replace />,
+    element: <Navigate to="/platform-admin/users/management" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/subscriptions',
-    element: <Navigate to="/platform-admin/dashboard" replace />,
+    element: <Navigate to="/platform-admin/businesses/subscriptions" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/settings',
-    element: <Navigate to="/platform-admin/settings" replace />,
+    element: <Navigate to="/platform-admin/system/settings" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/notifications',
-    element: <Navigate to="/platform-admin/announcements" replace />,
+    element: <Navigate to="/platform-admin/communication/broadcasts" replace />,
     errorElement: <ErrorBoundary />,
   },
   {
     path: '/admin/activity',
-    element: <Navigate to="/platform-admin/logs" replace />,
+    element: <Navigate to="/platform-admin/reports/audit-logs" replace />,
     errorElement: <ErrorBoundary />,
   },
   // Legal & Company Pages

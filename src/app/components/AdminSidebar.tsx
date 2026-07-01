@@ -1,22 +1,18 @@
 import { motion } from 'motion/react';
-import { Link, useLocation, useNavigate } from 'react-router';
-import { CareIcon } from '@/components/icons';
+import { useNavigate } from 'react-router';
 import { useTranslation } from 'react-i18next';
+import { CareIcon } from '@/components/icons';
 import { useAuth } from '../hooks/useAuth';
 import { cn } from '@/lib/utils';
 import {
   DASHBOARD_SIDEBAR_SHELL_CLASS,
-  dashboardSidebarNavLinkActive,
-  dashboardSidebarNavLinkBase,
-  dashboardSidebarNavLinkIdle,
   dashboardSidebarSignOutButton,
 } from "@/lib/theme/dashboardSidebarUi";
 import { CareTipLogo, DASHBOARD_SIDEBAR_BRAND_CLASS, DASHBOARD_SIDEBAR_NAV_CLASS } from './CareTipLogo';
-import { adminDashboardNavItems, isAdminDashboardNavActive } from './adminDashboardNav';
+import { PlatformSidebarNavShell } from './platform/PlatformSidebarNavShell';
 
 export function AdminSidebar() {
   const { t } = useTranslation();
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const displayName = user?.name || t("admin.fallbackAdminName");
@@ -32,29 +28,8 @@ export function AdminSidebar() {
         <CareTipLogo size="sm" />
       </div>
 
-      <nav className={DASHBOARD_SIDEBAR_NAV_CLASS}>
-        <ul className="space-y-0.5">
-          {adminDashboardNavItems.map((item) => {
-            const isActive = isAdminDashboardNavActive(item.href, location.pathname);
-            return (
-              <li key={item.href}>
-                <Link
-                  to={item.href}
-                  className={cn(
-                    "admin-dash-nav-link",
-                    dashboardSidebarNavLinkBase,
-                    isActive
-                      ? cn("admin-dash-nav-link--active", dashboardSidebarNavLinkActive)
-                      : dashboardSidebarNavLinkIdle,
-                  )}
-                >
-                  <CareIcon name={item.icon} size="nav" />
-                  <span className="truncate tracking-tight">{t(item.labelKey)}</span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+      <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, "min-h-0 flex-1 overflow-y-auto overscroll-contain px-0")}>
+        <PlatformSidebarNavShell />
       </nav>
 
       <div className="px-4 pb-4">

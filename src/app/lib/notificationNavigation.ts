@@ -123,13 +123,13 @@ export function resolveInboxNotificationDestination(
   if (type === "new_login") {
     if (role === "business") return "/dashboard/settings?section=security";
     if (role === "employee") return "/employee/settings";
-    if (opts.isPlatformAdmin) return "/platform-admin/settings";
+    if (opts.isPlatformAdmin) return "/platform-admin/system/settings";
   }
 
   if (tid === "verification_document_uploaded" && opts.isPlatformAdmin) {
     const businessId = metaString(meta, "businessId");
     if (businessId) return `/platform-admin/businesses/${businessId}`;
-    return "/platform-admin/businesses";
+    return "/platform-admin/businesses/kyc-verification";
   }
 
   const raw = notification.url?.trim() ?? metaString(meta, "url");
