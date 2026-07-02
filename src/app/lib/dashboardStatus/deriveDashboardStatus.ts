@@ -57,7 +57,6 @@ export function deriveBusinessDashboardStatus(
     isInitialLoading: boolean;
     isPeriodRefreshing: boolean;
     pendingVerification: boolean;
-    platformAccessApproved?: boolean;
     statsLoadFailed: string | null;
     socketStatus: SocketConnectionStatus;
   },
@@ -76,18 +75,6 @@ export function deriveBusinessDashboardStatus(
     });
     return items;
   }
-
-  const platformApproved = input.platformAccessApproved !== false;
-  items.push({
-    id: "platform-access",
-    tone: platformApproved ? "live" : "updating",
-    label: platformApproved
-      ? t("dashboard.status.platformAccessApproved")
-      : t("dashboard.status.platformAccessPending"),
-    description: platformApproved
-      ? t("dashboard.status.platformAccessApprovedDesc")
-      : t("dashboard.status.platformAccessPendingDesc"),
-  });
 
   const connection = deriveConnectionStatusItem(input.socketStatus, t);
   if (connection) items.push(connection);

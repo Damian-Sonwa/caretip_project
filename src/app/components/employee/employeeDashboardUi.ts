@@ -19,10 +19,10 @@ export const EMPLOYEE_DASHBOARD_ROOT = "employee-dashboard";
 const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest } = dashboardSharedUi;
 
 export const employeeUi = {
-  page: "employee-page w-full min-w-0 min-h-0 pb-16 sm:pb-20",
+  page: "employee-page w-full min-w-0 min-h-0 pb-10 sm:pb-12",
   pageInner:
-    "caretip-container employee-page__inner w-full min-w-0 px-4 pt-5 sm:px-6 sm:pt-7",
-  section: "employee-section employee-dashboard-section space-y-6",
+    "caretip-container employee-page__inner w-full min-w-0 px-4 pt-4 sm:px-6 sm:pt-5",
+  section: "employee-section employee-dashboard-section",
   sectionTight: "employee-section space-y-3 sm:space-y-4",
   statsGrid:
     "employee-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-3 lg:gap-5",
@@ -35,7 +35,7 @@ export const employeeUi = {
   cardHeader: "border-b border-border px-4 py-3.5 sm:px-6 sm:py-4",
   cardTitle: "text-base font-semibold tracking-tight text-foreground",
 
-  pageHeader: "employee-page-header mb-6 border-b border-border pb-5",
+  pageHeader: "employee-page-header mb-5 border-b border-border pb-4 sm:pb-5",
   pageHeaderInner: "flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between sm:gap-6",
   pageTitle: "text-xl font-bold tracking-tight text-foreground sm:text-2xl",
   pageDesc: "mt-1.5 max-w-prose text-sm leading-relaxed text-muted-foreground",
@@ -44,8 +44,8 @@ export const employeeUi = {
   btnSecondary: caretipBtnSecondary,
   btnGhost: caretipBtnGhost,
 
-  iconTile: "inline-flex rounded-xl bg-primary/10 p-2.5",
-  iconTileMuted: "inline-flex rounded-xl bg-muted p-2.5 text-muted-foreground",
+  iconTile: "inline-flex rounded-lg bg-primary/10 p-2.5",
+  iconTileMuted: "inline-flex rounded-lg bg-muted p-2.5 text-muted-foreground",
 
   periodToggle: `employee-period-toggle ${dashboardPeriodUi.periodToggle}`,
   periodBtn: dashboardPeriodUi.periodBtn,
@@ -64,7 +64,7 @@ export const employeeUi = {
   quickActionLabel: "block w-full min-w-0 text-center text-[0.8125rem] font-semibold leading-snug [text-wrap:balance]",
 
   listItem:
-    "employee-list-item rounded-2xl border border-border bg-card shadow-sm transition-colors",
+    "employee-list-item rounded-lg border border-border bg-card shadow-sm transition-colors",
   listItemSelected: "bg-primary/[0.04] ring-1 ring-primary/20",
 
   statCard: `employee-stat-card ${DASHBOARD_METRIC_STAT_CARD_SHELL}`,
@@ -73,12 +73,12 @@ export const employeeUi = {
   statChange: DASHBOARD_METRIC_STAT_CHANGE,
 
   emptyWrap: "employee-empty flex flex-col items-center justify-center px-4 py-10 text-center sm:px-6 sm:py-14 md:py-16",
-  emptyIcon: "flex h-14 w-14 items-center justify-center rounded-2xl bg-muted text-muted-foreground/70",
+  emptyIcon: "flex h-14 w-14 items-center justify-center rounded-lg bg-muted text-muted-foreground/70",
   emptyTitle: "mt-5 text-base font-semibold text-foreground",
   emptyDesc: "mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground",
 
   settingsSection:
-    "employee-settings-section dashboard-settings-panel space-y-4 rounded-2xl border border-border bg-card p-5 shadow-sm sm:p-6",
+    "employee-settings-section dashboard-settings-panel space-y-4 rounded-lg border border-border bg-card p-4 shadow-sm sm:p-5",
   settingsHeading: "text-base font-semibold tracking-tight text-foreground",
 
   ...dashboardSharedRest,

@@ -1,8 +1,9 @@
-import { motion } from "motion/react";
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import type { PlatformAnalytics } from "../lib/api";
 import { cn } from "@/lib/utils";
 import { platformUi } from "./platform/platformDashboardUi";
+import { CHART_ANIMATION_OFF } from "../lib/lightweightChartProps";
 import {
   DashboardChartSkeleton,
   DashboardRefreshIndicator,
@@ -38,8 +39,6 @@ import {
   Legend,
   Line,
   LineChart,
-  Pie,
-  PieChart,
   XAxis,
   YAxis,
 } from "recharts";
@@ -102,6 +101,52 @@ function AnalyticsCard({
   );
 }
 
+function HorizontalCountBarChart({
+  rows,
+  config,
+  emptyLabel,
+}: {
+  rows: Array<{ name: string; key: string; value: number }>;
+  config: ChartConfig;
+  emptyLabel: string;
+}) {
+  const total = rows.reduce((sum, row) => sum + row.value, 0);
+  const chartRows =
+    total > 0
+      ? rows.map((row) => ({
+          ...row,
+          fill: `var(--color-${row.key})`,
+        }))
+      : [{ name: emptyLabel, key: "empty", value: 1, fill: "var(--color-empty)" }];
+
+  return (
+    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
+      <BarChart
+        data={chartRows}
+        layout="vertical"
+        margin={{ left: 4, right: 12, top: 8, bottom: 4 }}
+      >
+        <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+        <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11 }} />
+        <YAxis
+          dataKey="name"
+          type="category"
+          width={88}
+          tick={{ fontSize: 11 }}
+          tickLine={false}
+          axisLine={false}
+        />
+        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
+        <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={20} {...CHART_ANIMATION_OFF}>
+          {chartRows.map((row) => (
+            <Cell key={row.key} fill={row.fill} />
+          ))}
+        </Bar>
+      </BarChart>
+    </ChartContainer>
+  );
+}
+
 function UserDistributionChart({
   data,
 }: {
@@ -117,75 +162,21 @@ function UserDistributionChart({
 
   const rows = data.map((d) => ({
     name: String(config[d.role]?.label ?? d.role),
-    role: d.role,
+    key: d.role,
     value: Number.isFinite(d.count) ? d.count : 0,
-    fill: `var(--color-${d.role})`,
   }));
-  const total = rows.reduce((s, r) => s + (Number.isFinite(r.value) ? r.value : 0), 0);
-  const chartRows =
-    total > 0
-      ? rows
-      : [{ name: t("admin.legendNoData"), role: "empty", value: 1, fill: "var(--color-empty)" }];
 
   return (
-    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
-      <PieChart>
-        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-        <Pie data={chartRows} dataKey="value" nameKey="name" innerRadius={62} outerRadius={92} paddingAngle={3}>
-          {chartRows.map((r) => (
-            <Cell key={r.role} fill={r.fill} />
-          ))}
-        </Pie>
-        <Legend verticalAlign="bottom" height={24} />
-      </PieChart>
-    </ChartContainer>
-  );
-}
-
-function TipStatusChart({
-  data,
-}: {
-  data: Array<{ status: "success" | "pending" | "failed"; count: number }>;
-}) {
-  const { t } = useTranslation();
-  const config: ChartConfig = {
-    success: { label: t("admin.tipStatusSuccess"), color: ADMIN_CHART_COLORS.emerald },
-    pending: { label: t("admin.tipStatusPending"), color: ADMIN_CHART_COLORS.amber },
-    failed: { label: t("admin.tipStatusFailed"), color: ADMIN_CHART_COLORS.red },
-    empty: { label: t("admin.legendNoData"), color: ADMIN_CHART_COLORS.slate },
-  };
-
-  const rows = data.map((d) => ({
-    name: String(config[d.status]?.label ?? d.status),
-    status: d.status,
-    value: Number.isFinite(d.count) ? d.count : 0,
-    fill: `var(--color-${d.status})`,
-  }));
-  const total = rows.reduce((s, r) => s + (Number.isFinite(r.value) ? r.value : 0), 0);
-  const chartRows =
-    total > 0
-      ? rows
-      : [{ name: t("admin.legendNoData"), status: "empty", value: 1, fill: "var(--color-empty)" }];
-
-  return (
-    <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
-      <PieChart>
-        <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-        <Pie data={chartRows} dataKey="value" nameKey="name" innerRadius={62} outerRadius={92} paddingAngle={3}>
-          {chartRows.map((r) => (
-            <Cell key={r.status} fill={r.fill} />
-          ))}
-        </Pie>
-        <Legend verticalAlign="bottom" height={24} />
-      </PieChart>
-    </ChartContainer>
+    <HorizontalCountBarChart rows={rows} config={config} emptyLabel={t("admin.legendNoData")} />
   );
 }
 
 function GrowthChart({
   data,
+  mode = "full",
 }: {
   data: Array<{ date: string; newUsers: number; newBusinesses: number; newTips: number }>;
+  mode?: "full" | "users" | "business";
 }) {
   const { t } = useTranslation();
   const config: ChartConfig = {
@@ -193,6 +184,10 @@ function GrowthChart({
     newBusinesses: { label: t("admin.legendNewVenues"), color: ADMIN_CHART_COLORS.purple },
     newTips: { label: t("admin.legendNewTips"), color: ADMIN_CHART_COLORS.cyan },
   };
+
+  const showUsers = mode === "full" || mode === "users";
+  const showBusinesses = mode === "full" || mode === "business";
+  const showTips = mode === "full" || mode === "business";
 
   return (
     <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
@@ -209,9 +204,15 @@ function GrowthChart({
           }
         />
         <Legend verticalAlign="bottom" height={24} />
-        <Line type="monotone" dataKey="newUsers" stroke="var(--color-newUsers)" strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="newBusinesses" stroke="var(--color-newBusinesses)" strokeWidth={2} dot={false} />
-        <Line type="monotone" dataKey="newTips" stroke="var(--color-newTips)" strokeWidth={2} dot={false} />
+        {showUsers ? (
+          <Line type="monotone" dataKey="newUsers" stroke="var(--color-newUsers)" strokeWidth={2} dot={false} {...CHART_ANIMATION_OFF} />
+        ) : null}
+        {showBusinesses ? (
+          <Line type="monotone" dataKey="newBusinesses" stroke="var(--color-newBusinesses)" strokeWidth={2} dot={false} {...CHART_ANIMATION_OFF} />
+        ) : null}
+        {showTips ? (
+          <Line type="monotone" dataKey="newTips" stroke="var(--color-newTips)" strokeWidth={2} dot={false} {...CHART_ANIMATION_OFF} />
+        ) : null}
       </LineChart>
     </ChartContainer>
   );
@@ -220,9 +221,11 @@ function GrowthChart({
 function TipVolumeChart({
   data,
   top,
+  preferTopBusinesses = true,
 }: {
   data: Array<{ date: string; tipsEur: number; tipCount: number }>;
   top: Array<{ businessId: string; businessName: string; tipsEur: number }>;
+  preferTopBusinesses?: boolean;
 }) {
   const { t } = useTranslation();
   const config: ChartConfig = {
@@ -231,7 +234,7 @@ function TipVolumeChart({
   };
 
   const topBars = (top ?? []).map((b) => ({ name: b.businessName, tipsEur: b.tipsEur }));
-  const showTop = topBars.length > 0;
+  const showTop = preferTopBusinesses && topBars.length > 0;
 
   return (
     <ChartContainer config={config} className="aspect-auto h-full w-full min-h-0">
@@ -250,7 +253,7 @@ function TipVolumeChart({
           />
           <YAxis tickFormatter={formatCompact} width={40} />
           <ChartTooltip content={<ChartTooltipContent indicator="dot" />} />
-          <Bar dataKey="tipsEur" fill="var(--color-tipsEur)" radius={[10, 10, 0, 0]} />
+          <Bar dataKey="tipsEur" fill="var(--color-tipsEur)" radius={[6, 6, 0, 0]} maxBarSize={40} {...CHART_ANIMATION_OFF} />
         </BarChart>
       ) : (
         <AreaChart data={data} margin={{ left: 6, right: 6, top: 12, bottom: 6 }}>
@@ -263,14 +266,18 @@ function TipVolumeChart({
             dataKey="tipsEur"
             stroke="var(--color-tipsEur)"
             fill="var(--color-tipsEur)"
-            fillOpacity={0.15}
+            fillOpacity={0.12}
             strokeWidth={2}
+            dot={false}
+            {...CHART_ANIMATION_OFF}
           />
         </AreaChart>
       )}
     </ChartContainer>
   );
 }
+
+export type AdminAnalyticsChartVariant = "business" | "usage";
 
 export type AdminDashboardAnalyticsChartsProps = {
   showChartSkeletons: boolean;
@@ -286,9 +293,11 @@ export type AdminDashboardAnalyticsChartsProps = {
   onRetryAnalytics: () => void;
   /** When true, omit section title (parent collapsible provides header). */
   hideHeader?: boolean;
+  /** Controls which charts render — business vs usage reporting. */
+  variant?: AdminAnalyticsChartVariant;
 };
 
-export function AdminDashboardAnalyticsCharts({
+export const AdminDashboardAnalyticsCharts = memo(function AdminDashboardAnalyticsCharts({
   showChartSkeletons,
   chartAnalytics,
   chartTipStatus,
@@ -301,23 +310,65 @@ export function AdminDashboardAnalyticsCharts({
   onTimezoneChange,
   onRetryAnalytics,
   hideHeader = false,
+  variant = "usage",
 }: AdminDashboardAnalyticsChartsProps) {
   const { t } = useTranslation();
 
+  const titleKey =
+    variant === "business"
+      ? "admin.businessAnalyticsPage.chartsTitle"
+      : "admin.usageReportsPage.chartsTitle";
+  const subtitleKey =
+    variant === "business"
+      ? "admin.businessAnalyticsPage.chartsSubtitle"
+      : "admin.usageReportsPage.chartsSubtitle";
+
+  const showUserDist = variant === "usage";
+  const showGrowth = true;
+  const showTipVolume = true;
+  const growthMode = variant === "usage" ? "users" : "business";
+  const preferTopBusinesses = variant === "business";
+
+  const userDistTitle =
+    variant === "usage" ? t("admin.usageReportsPage.chartUserRoles") : t("admin.chartUserDist");
+  const userDistDesc =
+    variant === "usage" ? t("admin.usageReportsPage.chartUserRolesDesc") : t("admin.chartUserDistDesc");
+  const growthTitle =
+    variant === "usage"
+      ? t("admin.usageReportsPage.chartSignups")
+      : variant === "business"
+        ? t("admin.businessAnalyticsPage.chartGrowth")
+        : t("admin.chartGrowth");
+  const growthDesc =
+    variant === "usage"
+      ? t("admin.usageReportsPage.chartSignupsDesc")
+      : variant === "business"
+        ? t("admin.businessAnalyticsPage.chartGrowthDesc")
+        : t("admin.chartGrowthDesc");
+  const tipVolTitle =
+    variant === "usage"
+      ? t("admin.usageReportsPage.chartTipVolume")
+      : variant === "business"
+        ? t("admin.businessAnalyticsPage.chartTopBusinesses")
+        : t("admin.chartTipVol");
+  const tipVolDesc =
+    variant === "usage"
+      ? t("admin.usageReportsPage.chartTipVolumeDesc")
+      : variant === "business"
+        ? t("admin.businessAnalyticsPage.chartTopBusinessesDesc")
+        : t("admin.chartTipVolDesc");
+
   return (
-    <motion.section
-      initial={false}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.22, ease: "easeOut" }}
+    <section
       className={cn(platformUi.analyticsSection, hideHeader && "mb-0")}
       aria-busy={showChartSkeletons || undefined}
     >
       {hideHeader ? null : (
       <div className={platformUi.analyticsHeader}>
         <div className={platformUi.analyticsHeaderCopy}>
-          <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t("admin.analyticsTitle")}</h3>
+          <h3 className="text-lg font-semibold text-foreground sm:text-xl">{t(titleKey)}</h3>
           <p className="text-pretty text-sm leading-relaxed text-muted-foreground max-lg:line-clamp-3 lg:line-clamp-none">
-            {t("admin.analyticsSubtitle", {
+            {t(subtitleKey, {
               days: analyticsMeta.rangeDays,
               tz: analyticsMeta.timezone ?? analyticsTimezone,
             })}
@@ -395,7 +446,8 @@ export function AdminDashboardAnalyticsCharts({
         </p>
       ) : null}
       <div className={platformUi.analyticsChartsGrid}>
-        <AnalyticsCard title={t("admin.chartUserDist")} description={t("admin.chartUserDistDesc")}>
+        {showUserDist ? (
+        <AnalyticsCard title={userDistTitle} description={userDistDesc}>
           <DashboardStableChartSlot loading={showChartSkeletons} skeleton={<DashboardChartSkeleton />}>
             {chartAnalytics ? (
               <UserDistributionChart data={chartAnalytics.userDistribution} />
@@ -404,43 +456,42 @@ export function AdminDashboardAnalyticsCharts({
             )}
           </DashboardStableChartSlot>
         </AnalyticsCard>
+        ) : null}
 
-        <AnalyticsCard title={t("admin.chartTipStatus")} description={t("admin.chartTipStatusDesc")}>
-          <DashboardStableChartSlot loading={showChartSkeletons} skeleton={<DashboardChartSkeleton />}>
-            {chartAnalytics ? (
-              <TipStatusChart data={chartTipStatus} />
-            ) : (
-              <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
-            )}
-          </DashboardStableChartSlot>
-        </AnalyticsCard>
-
-        <AnalyticsCard title={t("admin.chartGrowth")} description={t("admin.chartGrowthDesc")}>
+        {showGrowth ? (
+        <AnalyticsCard title={growthTitle} description={growthDesc}>
           <DashboardStableChartSlot
             loading={showChartSkeletons}
             skeleton={<DashboardChartSkeleton barHeights={[38, 62, 44, 78, 52, 66, 40, 84, 58, 46]} />}
           >
             {chartAnalytics ? (
-              <GrowthChart data={chartAnalytics.growth} />
+              <GrowthChart data={chartAnalytics.growth} mode={growthMode} />
             ) : (
               <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
             )}
           </DashboardStableChartSlot>
         </AnalyticsCard>
+        ) : null}
 
-        <AnalyticsCard title={t("admin.chartTipVol")} description={t("admin.chartTipVolDesc")}>
+        {showTipVolume ? (
+        <AnalyticsCard title={tipVolTitle} description={tipVolDesc}>
           <DashboardStableChartSlot
             loading={showChartSkeletons}
             skeleton={<DashboardChartSkeleton barHeights={[55, 72, 48, 88, 60, 76, 42, 80, 64, 50]} />}
           >
             {chartAnalytics ? (
-              <TipVolumeChart data={chartAnalytics.tipVolume} top={chartAnalytics.topBusinessesByTips} />
+              <TipVolumeChart
+                data={chartAnalytics.tipVolume}
+                top={chartAnalytics.topBusinessesByTips}
+                preferTopBusinesses={preferTopBusinesses}
+              />
             ) : (
               <span className="block min-h-[220px] sm:min-h-[260px]" aria-hidden />
             )}
           </DashboardStableChartSlot>
         </AnalyticsCard>
+        ) : null}
       </div>
-    </motion.section>
+    </section>
   );
-}
+});

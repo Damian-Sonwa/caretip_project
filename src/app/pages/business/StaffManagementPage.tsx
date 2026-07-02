@@ -1109,7 +1109,7 @@ export function StaffManagementPage() {
                   onClick={() => handleQrDownload(employee)}
                   disabled={!canUseQr || !employee.isActive}
                   className={[
-                    "flex items-center justify-center gap-2 rounded-lg border-2 border-border px-4 py-2 text-sm font-medium transition-all",
+                    "flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-medium transition-all",
                     canUseQr && employee.isActive
                       ? "bg-primary/10 text-foreground hover:bg-primary/20 active:opacity-90"
                       : "bg-muted/40 text-muted-foreground cursor-not-allowed opacity-60",
@@ -1139,7 +1139,7 @@ export function StaffManagementPage() {
                 <button
                   type="button"
                   onClick={() => openDelete(employee)}
-                  className="col-span-2 flex items-center justify-center gap-2 rounded-lg border-2 border-destructive px-4 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10 active:opacity-90"
+                  className="col-span-2 flex items-center justify-center gap-2 rounded-lg border border-destructive px-4 py-2 text-sm font-medium text-destructive transition-all hover:bg-destructive/10 active:opacity-90"
                 >
                   <Trash2 className="h-4 w-4" />
                   {t("business.staffPage.removeStaffButton")}

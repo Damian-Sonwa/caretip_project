@@ -4,6 +4,7 @@ import { OnboardingVerificationStatusChip } from "../verification/VerificationWo
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 import type { GlobalTransactionRow, PlatformAuditLogRow, PlatformBusinessRow } from "../../lib/api";
+import type { RefundRecord } from "../../lib/platformRefunds";
 import { formatEur } from "../../lib/formatEur";
 import { BusinessLogoMark } from "../business/BusinessLogoMark";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,62 @@ export function PlatformTransactionMobileCard({ row }: { row: GlobalTransactionR
           </dd>
         </div>
       </dl>
+    </article>
+  );
+}
+
+function refundStatusLabel(status: string, t: TFunction): string {
+  const key = `admin.refundsPage.status.${status}`;
+  const label = t(key);
+  return label === key ? status.replace(/_/g, " ") : label;
+}
+
+export function PlatformRefundMobileCard({
+  row,
+  onView,
+}: {
+  row: RefundRecord;
+  onView: () => void;
+}) {
+  const { t } = useTranslation();
+  const statusClass =
+    row.status === "processed"
+      ? "bg-success/15 text-success"
+      : row.status === "failed"
+        ? "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-200"
+        : "bg-amber-100 text-amber-900 dark:bg-amber-900/40 dark:text-amber-100";
+
+  return (
+    <article className={platformUi.mobileCard}>
+      <div className="flex items-start justify-between gap-2">
+        <p className="font-mono text-xs font-semibold text-foreground">{row.refundId}</p>
+        <span className={cn("inline-flex shrink-0 rounded px-2 py-0.5 text-[11px] font-medium", statusClass)}>
+          {refundStatusLabel(row.status, t)}
+        </span>
+      </div>
+      <p className="mt-2 text-sm font-semibold text-foreground">{row.businessName}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{row.employeeName}</p>
+      <dl className="mt-3 grid grid-cols-2 gap-x-3 gap-y-2 text-xs">
+        <div>
+          <dt className="font-medium uppercase tracking-wide text-muted-foreground">
+            {t("admin.refundsPage.colRefundAmount")}
+          </dt>
+          <dd className="mt-0.5 text-sm font-semibold tabular-nums">{formatEur(row.refundAmountEur)}</dd>
+        </div>
+        <div>
+          <dt className="font-medium uppercase tracking-wide text-muted-foreground">
+            {t("admin.refundsPage.colReason")}
+          </dt>
+          <dd className="mt-0.5 text-sm">{t(`admin.refundsPage.reason.${row.reason}`, { defaultValue: row.reason })}</dd>
+        </div>
+      </dl>
+      <button
+        type="button"
+        onClick={onView}
+        className="mt-3 text-xs font-medium text-primary hover:underline"
+      >
+        {t("admin.refundsPage.view")}
+      </button>
     </article>
   );
 }
@@ -187,14 +244,14 @@ export function PlatformBusinessVerificationMobileCard({
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <Link
           to={`/platform-admin/businesses/${b.id}`}
-          className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl border-2 border-border px-3 py-2 text-center text-sm font-medium transition-colors hover:bg-muted"
+          className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-border px-3 py-2 text-center text-sm font-medium transition-colors hover:bg-muted"
         >
           {t("admin.businessVerificationPage.linkViewDetails")}
         </Link>
         <button
           type="button"
           onClick={onEdit}
-          className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl border-2 border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
+          className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-border px-3 py-2 text-sm font-medium transition-colors hover:bg-muted"
         >
           {t("admin.businessVerificationPage.linkEditDetails")}
         </button>
@@ -211,7 +268,7 @@ export function PlatformBusinessVerificationMobileCard({
           <button
             type="button"
             onClick={onReject}
-            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-xl border-2 border-destructive px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
+            className="inline-flex min-h-[44px] touch-manipulation items-center justify-center rounded-lg border border-destructive px-3 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
           >
             {t("admin.businessDetailPage.rejectOnboarding")}
           </button>

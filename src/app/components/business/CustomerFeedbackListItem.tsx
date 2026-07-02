@@ -13,22 +13,22 @@ type CustomerFeedbackListItemProps = {
   className?: string;
 };
 
-function StarRating({ rating }: { rating: number | null }) {
+function StarRating({ rating, className }: { rating: number | null; className?: string }) {
   if (rating == null) return null;
   const rounded = Math.max(1, Math.min(5, Math.round(rating)));
   return (
-    <div className="flex items-center gap-0.5" aria-label={`${rating} / 5`}>
+    <div className={cn("business-dashboard-feedback-item__rating flex items-center gap-0.5", className)} aria-label={`${rating} / 5`}>
       {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
           className={cn(
             "h-3.5 w-3.5",
-            i < rounded ? "fill-primary text-primary" : "text-muted-foreground/35",
+            i < rounded ? "fill-primary text-primary" : "text-muted-foreground/30",
           )}
           aria-hidden
         />
       ))}
-      <span className="ml-1 text-xs tabular-nums text-muted-foreground">{rating}</span>
+      <span className="ml-1 text-xs font-semibold tabular-nums text-foreground/80">{rating}</span>
     </div>
   );
 }
@@ -59,36 +59,31 @@ export function CustomerFeedbackListItem({ item, className }: CustomerFeedbackLi
     t("business.customerFeedback.anonymousGuest");
 
   return (
-    <article
-      className={cn(
-        "rounded-xl border border-border/60 bg-card p-4 shadow-[0_4px_18px_-12px_rgba(15,23,42,0.06)]",
-        className,
-      )}
-    >
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-        <div className="min-w-0 flex-1 space-y-1">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <h3 className="font-semibold text-foreground">{item.employeeName}</h3>
-            <span className="text-xs text-muted-foreground" aria-hidden>
-              ·
-            </span>
-            <p className="text-sm text-muted-foreground">{customerLabel}</p>
+    <article className={cn("business-dashboard-feedback-item", className)}>
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0 flex-1 space-y-1.5">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <h3 className="business-dashboard-feedback-item__guest">{customerLabel}</h3>
+            <p className="business-dashboard-feedback-item__staff">
+              <span aria-hidden>· </span>
+              {item.employeeName}
+            </p>
           </div>
           <StarRating rating={item.rating} />
         </div>
-        <time className="shrink-0 text-xs text-muted-foreground" dateTime={item.createdAt}>
+        <time className="business-dashboard-feedback-item__time shrink-0" dateTime={item.createdAt}>
           {submittedAt}
         </time>
       </div>
 
       {comment ? (
-        <div className="mt-3 space-y-2">
-          <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground">{displayComment}</p>
+        <div className="space-y-2">
+          <p className="business-dashboard-feedback-item__comment whitespace-pre-wrap">{displayComment}</p>
           {hasLongComment ? (
             <button
               type="button"
               onClick={() => setExpanded((v) => !v)}
-              className="text-sm font-medium text-primary hover:underline"
+              className="text-xs font-medium text-primary hover:underline"
             >
               {expanded
                 ? t("business.customerFeedback.showLess")
@@ -99,11 +94,11 @@ export function CustomerFeedbackListItem({ item, className }: CustomerFeedbackLi
       ) : null}
 
       {item.tags.length > 0 ? (
-        <ul className="mt-3 flex flex-wrap gap-1.5" aria-label={t("business.customerFeedback.tagsAria")}>
+        <ul className="mt-2.5 flex flex-wrap gap-1.5" aria-label={t("business.customerFeedback.tagsAria")}>
           {item.tags.map((tag) => (
             <li
               key={tag}
-              className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground"
+              className="rounded-full bg-muted/80 px-2 py-0.5 text-[0.6875rem] font-medium text-muted-foreground"
             >
               {tag}
             </li>

@@ -1020,14 +1020,19 @@ textarea::placeholder {
   }
 }
 
-/* Business hero illustration — bare asset, no frame card. */
+/* Business hero illustration — clipped inside rounded card. */
+.business-dashboard-hero .business-hero-illustration-card {
+  border-color: hsl(var(--border) / 0.9);
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+}
+
 .business-dashboard-hero .business-hero-illustration {
   position: static !important;
   display: block;
   width: 100% !important;
   height: auto !important;
   max-height: min(48svh, 360px);
-  object-fit: contain !important;
+  object-fit: cover !important;
   object-position: center;
   transform: none !important;
   padding: 0 !important;
@@ -1038,8 +1043,8 @@ textarea::placeholder {
 
 @media (min-width: 1024px) {
   .business-dashboard-hero .business-hero-illustration {
-    max-height: 28rem;
     width: 100%;
+    object-position: left center;
   }
 }
 

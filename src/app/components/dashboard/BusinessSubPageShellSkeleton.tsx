@@ -24,7 +24,7 @@ export function BusinessSubPageShellSkeleton({ narrow = false }: BusinessSubPage
           <div className="h-8 w-56 rounded bg-muted sm:w-72" />
           <div className="h-4 w-full max-w-md rounded bg-muted" />
         </div>
-        <div className="h-64 rounded-xl bg-muted sm:h-80" />
+        <div className="h-64 rounded-lg bg-muted sm:h-80" />
       </div>
     </main>
   );

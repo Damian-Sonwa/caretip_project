@@ -1,4 +1,4 @@
-import { lazy, useMemo, useState } from "react";
+import { lazy, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Download } from "lucide-react";
@@ -20,13 +20,6 @@ import { toUserFriendlyMessage } from "../../lib/errorMessages";
 import type { useBusinessIntelligenceData } from "../../hooks/useBusinessIntelligenceData";
 import type { TopTipSourceRow } from "../../lib/businessIntelligence";
 import type { AnalyticsTimeframe } from "../../hooks/useBusinessDashboardStats";
-import { translateChartMonthLabel, translateChartWeekdayLabel } from "@/lib/chartAxisLabels";
-
-const BusinessDashboardAnalyticsCharts = lazy(() =>
-  import("../../pages/business/BusinessDashboardAnalyticsCharts").then((mod) => ({
-    default: mod.BusinessDashboardAnalyticsCharts,
-  })),
-);
 
 const BusinessIntelligenceCharts = lazy(() =>
   import("./insights/BusinessIntelligenceCharts").then((mod) => ({
@@ -101,23 +94,6 @@ export function BusinessAnalyticsReporting({
 }: BusinessAnalyticsReportingProps) {
   const { t } = useTranslation();
   const [exporting, setExporting] = useState(false);
-
-  const tipDistributionChartData = useMemo(() => {
-    return data.dailyTipDistribution.map((row) => ({
-      ...row,
-      dayLabel:
-        revenueTimeframe === "week"
-          ? translateChartWeekdayLabel(row.day, t)
-          : revenueTimeframe === "year"
-            ? translateChartMonthLabel(row.day, t)
-            : row.day,
-    }));
-  }, [data.dailyTipDistribution, revenueTimeframe, t]);
-
-  const tipDistributionTotal = useMemo(
-    () => data.dailyTipDistribution.reduce((acc, row) => acc + (Number(row.amount) || 0), 0),
-    [data.dailyTipDistribution],
-  );
 
   const handleExport = async () => {
     setExporting(true);
@@ -287,23 +263,12 @@ export function BusinessAnalyticsReporting({
         </Card>
       </section>
 
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("business.tips.analytics.sections.trends")}
-        </h2>
-        <DashboardChartsIdleMount
-          whenVisible
-          fallback={
-            <div className={cn(businessUi.cardStatic, "h-[320px] animate-pulse bg-muted/30")} />
-          }
+      <section className="space-y-3" aria-labelledby="business-advanced-trends-heading">
+        <h2
+          id="business-advanced-trends-heading"
+          className="text-sm font-semibold uppercase tracking-wide text-muted-foreground"
         >
-          <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
-        </DashboardChartsIdleMount>
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-          {t("business.tips.analytics.sections.drilldown")}
+          {t("business.tips.analytics.sections.advancedTrends")}
         </h2>
         <DashboardChartsIdleMount
           whenVisible
@@ -311,16 +276,7 @@ export function BusinessAnalyticsReporting({
             <div className={cn(businessUi.cardStatic, "h-[280px] animate-pulse bg-muted/30")} />
           }
         >
-          <BusinessDashboardAnalyticsCharts
-            showChartsLoading={periodLoading}
-            useDevDemo={false}
-            hasTipActivityInPeriod={data.period.totalTips > 0}
-            tipDistributionChartData={tipDistributionChartData}
-            tipDistributionTotal={tipDistributionTotal}
-            employeePerformance={[]}
-            employeeCount={data.employees.length}
-            chartMode="revenueOnly"
-          />
+          <BusinessIntelligenceCharts data={data.input} loading={periodLoading} />
         </DashboardChartsIdleMount>
       </section>
     </div>

@@ -1,7 +1,10 @@
+import { memo } from "react";
 import { motion } from "motion/react";
 import { useTranslation } from "react-i18next";
 import { Users, TrendingUp } from "lucide-react";
 import {
+  Area,
+  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -25,25 +28,29 @@ import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState
 import { businessUi } from "../../components/business/businessDashboardUi";
 import {
   BUSINESS_CHART_AXIS,
-  BUSINESS_CHART_BAR_SOFT,
   BUSINESS_CHART_GRID,
   businessChartBarFill,
   getBusinessChartTooltipStyle,
 } from "../../components/business/businessDashboardChartTheme";
+import { DASHBOARD_CHART_AREA_STROKE } from "../../components/dashboard/dashboardChartTheme";
+import { CHART_ANIMATION_OFF, LIGHTWEIGHT_AREA, LIGHTWEIGHT_BAR } from "../../lib/lightweightChartProps";
+import type {
+  EmployeePerformanceChartRow,
+  TipPerformanceChartRow,
+} from "../../lib/businessDashboardChartData";
 
 export type BusinessDashboardAnalyticsChartsProps = {
   showChartsLoading: boolean;
   useDevDemo: boolean;
   hasTipActivityInPeriod: boolean;
-  tipDistributionChartData: Array<{ day: string; dayLabel: string; amount: number }>;
+  tipDistributionChartData: TipPerformanceChartRow[];
   tipDistributionTotal: number;
-  employeePerformance: Array<{ name: string; tips: number; rating: number; color: string }>;
+  employeePerformance: EmployeePerformanceChartRow[];
   employeeCount: number;
-  /** Overview shows revenue trend only; full mode includes employee leaderboard chart. */
-  chartMode?: "full" | "revenueOnly";
+  analyticsTimeframe: "week" | "month" | "year";
 };
 
-export function BusinessDashboardAnalyticsCharts({
+export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardAnalyticsCharts({
   showChartsLoading,
   useDevDemo,
   hasTipActivityInPeriod,
@@ -51,20 +58,33 @@ export function BusinessDashboardAnalyticsCharts({
   tipDistributionTotal,
   employeePerformance,
   employeeCount,
-  chartMode = "full",
+  analyticsTimeframe,
 }: BusinessDashboardAnalyticsChartsProps) {
   const { t } = useTranslation();
 
+  const tipsPerformanceDescKey =
+    analyticsTimeframe === "week"
+      ? "business.dashboard.tipsPerformanceDescWeek"
+      : analyticsTimeframe === "year"
+        ? "business.dashboard.tipsPerformanceDescYear"
+        : "business.dashboard.tipsPerformanceDescMonth";
+
+  const monthAxisInterval =
+    analyticsTimeframe === "month" && tipDistributionChartData.length > 10
+      ? Math.max(1, Math.floor(tipDistributionChartData.length / 6))
+      : 0;
+
   return (
-    <div className={cn(businessUi.analyticsChartsGrid, chartMode === "revenueOnly" && "grid-cols-1")}>
+    <div className={businessUi.analyticsChartsGrid}>
       <motion.div
         {...dashboardBlockMotion}
         transition={{ delay: 0.4 }}
         className="flex h-full min-h-0 w-full"
       >
         <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
-          <CardHeader className="business-dashboard-panel-card__header">
-            <CardTitle className="text-lg leading-snug">{t("business.dashboard.dailyTipDistTitle")}</CardTitle>
+          <CardHeader className="business-dashboard-panel-card__header space-y-1">
+            <CardTitle className="text-lg leading-snug">{t("business.dashboard.tipsPerformanceTitle")}</CardTitle>
+            <p className="text-sm text-muted-foreground">{t(tipsPerformanceDescKey)}</p>
           </CardHeader>
           <CardContent
             className={cn(
@@ -89,10 +109,9 @@ export function BusinessDashboardAnalyticsCharts({
                 <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                   <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
                     <ResponsiveContainer width="100%" height="100%" minWidth={0}>
-                      <BarChart
+                      <AreaChart
                         data={tipDistributionChartData}
                         margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
-                        barCategoryGap="18%"
                       >
                         <CartesianGrid strokeDasharray="4 6" stroke={BUSINESS_CHART_GRID} vertical={false} />
                         <XAxis
@@ -102,6 +121,8 @@ export function BusinessDashboardAnalyticsCharts({
                           axisLine={{ stroke: BUSINESS_CHART_GRID }}
                           style={{ fontSize: "11px" }}
                           tickMargin={8}
+                          interval={monthAxisInterval}
+                          minTickGap={analyticsTimeframe === "month" ? 12 : 8}
                         />
                         <YAxis
                           stroke={BUSINESS_CHART_AXIS}
@@ -114,16 +135,16 @@ export function BusinessDashboardAnalyticsCharts({
                         <Tooltip
                           formatter={(value: number) => [formatEur(Number(value)), t("charts.tooltip.tips")]}
                           contentStyle={getBusinessChartTooltipStyle()}
-                          cursor={{ fill: "rgba(25, 114, 120, 0.06)" }}
+                          cursor={{ stroke: "hsl(var(--primary) / 0.2)", strokeWidth: 1 }}
                         />
-                        <Bar
+                        <Area
                           dataKey="amount"
-                          fill={BUSINESS_CHART_BAR_SOFT}
-                          radius={[6, 6, 0, 0]}
-                          maxBarSize={44}
-                          minPointSize={3}
+                          stroke={DASHBOARD_CHART_AREA_STROKE}
+                          fill="hsl(var(--primary) / 0.12)"
+                          activeDot={{ r: 4, strokeWidth: 0 }}
+                          {...LIGHTWEIGHT_AREA}
                         />
-                      </BarChart>
+                      </AreaChart>
                     </ResponsiveContainer>
                   </div>
                   <p className="business-dashboard-chart-insight">
@@ -138,7 +159,6 @@ export function BusinessDashboardAnalyticsCharts({
         </Card>
       </motion.div>
 
-      {chartMode === "full" ? (
       <motion.div
         {...dashboardBlockMotion}
         transition={{ delay: 0.5 }}
@@ -219,7 +239,7 @@ export function BusinessDashboardAnalyticsCharts({
                           contentStyle={getBusinessChartTooltipStyle()}
                           cursor={{ fill: "rgba(25, 114, 120, 0.05)" }}
                         />
-                        <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4}>
+                        <Bar dataKey="tips" radius={[0, 6, 6, 0]} maxBarSize={22} minPointSize={4} {...LIGHTWEIGHT_BAR}>
                           {employeePerformance.map((entry, index) => (
                             <Cell
                               key={`cell-${entry.name}`}
@@ -242,7 +262,6 @@ export function BusinessDashboardAnalyticsCharts({
           </CardContent>
         </Card>
       </motion.div>
-      ) : null}
     </div>
   );
-}
+});

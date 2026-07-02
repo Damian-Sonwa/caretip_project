@@ -27,10 +27,17 @@ import type {
 import type { BusinessVerificationFilterState } from "../../hooks/useBusinessVerificationFilters";
 
 const filterSelectTrigger =
-  "min-h-[44px] w-full rounded-xl border-2 border-border bg-card text-sm text-foreground shadow-sm focus:border-accent/40 focus:ring-accent/25";
+  "min-h-[44px] w-full rounded-lg border border-border bg-card text-sm text-foreground shadow-sm focus:border-accent/40 focus:ring-accent/25";
+
+/** Single responsive row from lg up; labels never overlap (DE/EN). */
+const filterGridInline =
+  "grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-4 min-[1440px]:grid-cols-[repeat(4,minmax(0,1fr))] min-[1440px]:gap-4";
+
+const filterLabelClass =
+  "block min-h-[2.5rem] text-pretty text-xs font-medium leading-snug text-muted-foreground line-clamp-2 sm:min-h-[2.25rem]";
 
 type BusinessVerificationFiltersProps = {
-  workflow?: "kyc" | "onboarding";
+  workflow?: "kyc" | "onboarding" | "all";
   filters: BusinessVerificationFilterState;
   onChange: (patch: Partial<BusinessVerificationFilterState>) => void;
   onClearAll: () => void;
@@ -46,7 +53,7 @@ function FilterFields({
   onChange,
   layout,
 }: {
-  workflow?: "kyc" | "onboarding";
+  workflow?: "kyc" | "onboarding" | "all";
   filters: BusinessVerificationFilterState;
   onChange: (patch: Partial<BusinessVerificationFilterState>) => void;
   layout: "inline" | "stacked";
@@ -54,14 +61,19 @@ function FilterFields({
   const { t } = useTranslation();
   const stacked = layout === "stacked";
   const statusOptions: PlatformBusinessStatusFilter[] =
-    workflow === "onboarding"
+    workflow === "onboarding" || workflow === "all"
       ? ["all", "draft", "submitted", "approved", "rejected", "suspended"]
       : ["all", "verified", "pending_review", "awaiting_upload", "not_started", "sla_breach", "rejected", "suspended"];
 
+  const statusLabelKey =
+    workflow === "all"
+      ? "admin.allBusinessesPage.filters.statusLabel"
+      : "admin.businessVerificationPage.filters.statusLabel";
+
   return (
-    <div className={cn("gap-3", stacked ? "flex flex-col" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4")}>
+    <div className={cn(stacked ? "flex flex-col gap-3" : filterGridInline)}>
       <label className="block min-w-0 space-y-1.5">
-        <span className={dashboardWorkspaceUi.formLabel}>
+        <span className={filterLabelClass}>
           {t("admin.businessVerificationPage.filters.dateLabel")}
         </span>
         <Select
@@ -91,7 +103,7 @@ function FilterFields({
       {filters.date === "custom" ? (
         <div className={cn("grid gap-2", stacked ? "grid-cols-1" : "sm:col-span-2 sm:grid-cols-2")}>
           <label className="block space-y-1.5">
-            <span className={dashboardWorkspaceUi.formLabel}>
+            <span className={filterLabelClass}>
               {t("admin.businessVerificationPage.filters.dateFrom")}
             </span>
             <input
@@ -102,7 +114,7 @@ function FilterFields({
             />
           </label>
           <label className="block space-y-1.5">
-            <span className={dashboardWorkspaceUi.formLabel}>
+            <span className={filterLabelClass}>
               {t("admin.businessVerificationPage.filters.dateTo")}
             </span>
             <input
@@ -116,8 +128,8 @@ function FilterFields({
       ) : null}
 
       <label className="block min-w-0 space-y-1.5">
-        <span className={dashboardWorkspaceUi.formLabel}>
-          {t("admin.businessVerificationPage.filters.statusLabel")}
+        <span className={filterLabelClass}>
+          {t(statusLabelKey)}
         </span>
         <Select
           value={filters.status}
@@ -139,7 +151,7 @@ function FilterFields({
       </label>
 
       <label className="block min-w-0 space-y-1.5">
-        <span className={dashboardWorkspaceUi.formLabel}>
+        <span className={filterLabelClass}>
           {t("admin.businessVerificationPage.filters.tipsLabel")}
         </span>
         <Select
@@ -162,7 +174,7 @@ function FilterFields({
       </label>
 
       <label className="block min-w-0 space-y-1.5">
-        <span className={dashboardWorkspaceUi.formLabel}>
+        <span className={filterLabelClass}>
           {t("admin.businessVerificationPage.filters.sortLabel")}
         </span>
         <Select
@@ -192,13 +204,13 @@ function ActiveFilterChips({
   filters,
   onRemoveChip,
 }: {
-  workflow?: "kyc" | "onboarding";
+  workflow?: "kyc" | "onboarding" | "all";
   filters: BusinessVerificationFilterState;
   onRemoveChip: (key: keyof BusinessVerificationFilterState) => void;
 }) {
   const { t } = useTranslation();
   const statusRoot =
-    workflow === "onboarding"
+    workflow === "onboarding" || workflow === "all"
       ? "admin.onboardingVerificationPage.filters.status"
       : "admin.businessVerificationPage.filters.status";
 
@@ -282,39 +294,46 @@ export function BusinessVerificationFilters({
 }: BusinessVerificationFiltersProps) {
   const { t } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const searchPlaceholder =
+    workflow === "all"
+      ? t("admin.allBusinessesPage.searchPlaceholder")
+      : t("admin.businessVerificationPage.searchPlaceholder");
+  const searchAria =
+    workflow === "all"
+      ? t("admin.allBusinessesPage.searchAria")
+      : t("admin.businessVerificationPage.searchAria");
 
   return (
-    <div className="mb-6 space-y-4">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-        <div className={cn(platformUi.searchWrap, "w-full lg:max-w-md lg:shrink-0")}>
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
-          <input
-            type="search"
-            value={searchValue}
-            onChange={(e) => onSearchChange(e.target.value)}
-            placeholder={t("admin.businessVerificationPage.searchPlaceholder")}
-            autoComplete="off"
-            aria-label={t("admin.businessVerificationPage.searchAria")}
-            className={platformUi.searchInput}
-          />
-        </div>
+    <div className="platform-verification-filters mb-6 space-y-4">
+      <div className={cn(platformUi.searchWrap, "w-full max-w-xl")}>
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
+        <input
+          type="search"
+          value={searchValue}
+          onChange={(e) => onSearchChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          autoComplete="off"
+          aria-label={searchAria}
+          className={platformUi.searchInput}
+        />
+      </div>
 
-        <div className="hidden flex-1 flex-col gap-3 lg:flex">
-          <FilterFields workflow={workflow} filters={filters} onChange={onChange} layout="inline" />
-          {hasActiveFilters ? (
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={onClearAll}
-                className={cn(dashboardWorkspaceUi.btnSecondary, "min-h-[40px] px-4 text-xs")}
-              >
-                {t("admin.businessVerificationPage.filters.clearAll")}
-              </button>
-            </div>
-          ) : null}
-        </div>
+      <div className="hidden flex-col gap-3 lg:flex">
+        <FilterFields workflow={workflow} filters={filters} onChange={onChange} layout="inline" />
+        {hasActiveFilters ? (
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClearAll}
+              className={cn(dashboardWorkspaceUi.btnSecondary, "min-h-[40px] px-4 text-xs")}
+            >
+              {t("admin.businessVerificationPage.filters.clearAll")}
+            </button>
+          </div>
+        ) : null}
+      </div>
 
-        <div className="flex items-center gap-2 lg:hidden">
+      <div className="flex items-center gap-2 lg:hidden">
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
             <SheetTrigger asChild>
               <button
@@ -359,7 +378,6 @@ export function BusinessVerificationFilters({
               </div>
             </SheetContent>
           </Sheet>
-        </div>
       </div>
 
       {hasActiveFilters ? (
@@ -380,3 +398,5 @@ export function BusinessVerificationFilters({
     </div>
   );
 }
+
+export { BusinessVerificationFilters as PlatformBusinessListFilters };

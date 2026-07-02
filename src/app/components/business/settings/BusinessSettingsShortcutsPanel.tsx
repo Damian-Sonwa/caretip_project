@@ -50,7 +50,7 @@ export function BusinessSettingsShortcutsPanel({ variant }: { variant: "team" | 
           <li key={item.href}>
             <Link
               to={item.href}
-              className="flex min-h-[44px] touch-manipulation items-center gap-4 rounded-xl border-2 border-border bg-muted/20 p-4 transition-colors hover:border-accent/40 hover:bg-muted/40"
+              className="flex min-h-[44px] touch-manipulation items-center gap-4 rounded-lg border border-border bg-muted/20 p-4 transition-colors hover:border-primary/25 hover:bg-muted/40"
             >
               <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent/10 text-accent">
                 <CareIcon name={item.icon} size="md" />

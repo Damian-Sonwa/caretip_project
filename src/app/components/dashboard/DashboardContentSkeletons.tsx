@@ -55,9 +55,9 @@ export function NotificationInboxListSkeleton({
       {Array.from({ length: rows }).map((_, i) => (
         <li
           key={i}
-          className="flex gap-3 rounded-xl border border-border bg-card p-3.5 shadow-sm sm:p-4"
+          className="flex gap-3 rounded-lg border border-border bg-card p-3.5 shadow-sm sm:p-4"
         >
-          <ShimmerBar className="h-10 w-10 shrink-0 rounded-xl sm:h-11 sm:w-11" />
+          <ShimmerBar className="h-10 w-10 shrink-0 rounded-lg sm:h-11 sm:w-11" />
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex items-start justify-between gap-2">
               <ShimmerBar className="h-3 w-16 rounded-full" />
@@ -111,7 +111,7 @@ export function LocationCardGridSkeleton({
       aria-label={aria.loading}
     >
       {Array.from({ length: cards }).map((_, i) => (
-        <li key={i} className="flex gap-3 rounded-xl border border-border bg-card p-4">
+        <li key={i} className="flex gap-3 rounded-lg border border-border bg-card p-4">
           <ShimmerBar className="h-10 w-10 shrink-0 rounded-lg" />
           <div className="flex min-w-0 flex-1 flex-col gap-2">
             <ShimmerBar className="h-4 w-[55%] max-w-[9rem]" />
@@ -214,7 +214,7 @@ export function StaffRosterTableSkeleton({
 
   return (
     <div className={className} role="status" aria-busy="true" aria-label={aria.loading}>
-      <div className="hidden lg:block overflow-x-auto rounded-xl border border-border bg-card">
+      <div className="hidden lg:block overflow-x-auto rounded-lg border border-border bg-card">
         <table className="w-full min-w-[72rem]">
           <thead className="bg-muted/50">
             <tr>
@@ -249,7 +249,7 @@ export function StaffRosterTableSkeleton({
       </div>
       <ul className="space-y-4 lg:hidden" aria-hidden>
         {Array.from({ length: Math.min(rows, 4) }).map((_, i) => (
-          <li key={i} className="rounded-xl border border-border bg-card p-4">
+          <li key={i} className="rounded-lg border border-border bg-card p-4">
             <div className="flex items-center gap-3">
               <ShimmerBar className="h-12 w-12 shrink-0 rounded-full" />
               <div className="flex-1 space-y-2">
@@ -308,7 +308,7 @@ export function EmployeeGoalListSkeleton({
             <ShimmerBar className="h-4 w-[45%] max-w-[10rem]" />
             <ShimmerBar className="h-3 w-[62%] max-w-[14rem]" />
           </div>
-          <ShimmerBar className="h-9 w-20 rounded-xl" />
+          <ShimmerBar className="h-9 w-20 rounded-lg" />
         </li>
       ))}
     </ul>
@@ -320,7 +320,7 @@ export function EmployeeSettingsFormSkeleton({ className }: { className?: string
   return (
     <div className={cn("space-y-6", className)} role="status" aria-busy="true">
       {[1, 2, 3].map((section) => (
-        <section key={section} className="space-y-4 rounded-2xl border border-border bg-card p-5 sm:p-6">
+        <section key={section} className="space-y-4 rounded-lg border border-border bg-card p-5 sm:p-6">
           <ShimmerBar className="h-4 w-32" />
           <div className="space-y-3">
             <ShimmerBar className="h-10 w-full rounded-lg" />

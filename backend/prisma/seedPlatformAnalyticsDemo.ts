@@ -34,9 +34,18 @@ async function main() {
   }
 
   const days = clampInt(Number(process.env.SEED_DAYS ?? 45), 14, 120);
-  const businessesCount = clampInt(Number(process.env.SEED_BUSINESSES ?? 8), 5, 15);
-  const defaultPassword = process.env.SEED_PASSWORD ?? "password123";
+  /** Default 0 — `npm run db:seed` already provisions 5 curated demo businesses. */
+  const businessesCount = clampInt(Number(process.env.SEED_BUSINESSES ?? 0), 0, 15);
+  const defaultPassword = process.env.SEED_PASSWORD ?? "Demo1234!";
   const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+  console.log(
+    "Platform analytics supplement: optional extra businesses/tips. Main demo uses `npm run db:seed` (5 businesses × 5 staff).",
+  );
+
+  if (businessesCount === 0) {
+    console.log("SEED_BUSINESSES=0 — skipping synthetic business creation; adding platform-wide tip volume only.");
+  }
 
   // Ensure the real platform admin exists and is active.
   await prisma.user.upsert({
@@ -52,77 +61,24 @@ async function main() {
     },
   });
 
-  // Ensure walkthrough/demo accounts used in the UI exist and have visible dashboard data.
+  // Do not overwrite the curated Brasserie demo — only ensure accounts exist if main seed was skipped.
   const demoManagerEmail = "demo@caretip.de";
   const demoEmployeeEmail = "employee@caretip.de";
 
-  const demoManager = await prisma.user.upsert({
-    where: { email: demoManagerEmail },
-    update: { role: "MANAGER", isPlatformAdmin: false, isActive: true, emailVerified: true },
-    create: {
-      email: demoManagerEmail,
-      passwordHash,
-      role: "MANAGER",
-      isPlatformAdmin: false,
-      isActive: true,
-      emailVerified: true,
-      hasCompletedOnboarding: true,
-    },
+  const demoManager = await prisma.user.findUnique({ where: { email: demoManagerEmail } });
+  const demoBusiness = demoManager
+    ? await prisma.business.findUnique({ where: { userId: demoManager.id } })
+    : null;
+  const demoEmployee = await prisma.employee.findFirst({
+    where: { user: { email: demoEmployeeEmail } },
+    select: { id: true },
   });
 
-  const demoBusiness = await prisma.business.upsert({
-    where: { userId: demoManager.id },
-    update: { name: "CareTip Demo Venue", slug: "caretip-demo-venue", verificationStatus: "verified" },
-    create: {
-      name: "CareTip Demo Venue",
-      slug: "caretip-demo-venue",
-      userId: demoManager.id,
-      verificationStatus: "verified",
-      inviteCode: "DEMO-DE",
-      businessType: "Restaurant",
-      location: "Berlin, Germany",
-      contactEmail: demoManagerEmail,
-      legalContactName: "Demo Manager",
-      subscriptionTier: "premium",
-    },
-  });
-
-  const demoEmpUser = await prisma.user.upsert({
-    where: { email: demoEmployeeEmail },
-    update: { role: "EMPLOYEE", isPlatformAdmin: false, isActive: true, emailVerified: true },
-    create: {
-      email: demoEmployeeEmail,
-      passwordHash,
-      role: "EMPLOYEE",
-      isPlatformAdmin: false,
-      isActive: true,
-      emailVerified: true,
-      hasCompletedOnboarding: true,
-    },
-  });
-
-  const demoEmployee = await prisma.employee.upsert({
-    where: { userId: demoEmpUser.id },
-    update: {
-      name: "Demo Employee",
-      jobTitle: "Server",
-      slug: "caretip-demo-employee",
-      businessId: demoBusiness.id,
-      isActive: true,
-      activationStatus: "active",
-      monthlyGoal: 350,
-    },
-    create: {
-      name: "Demo Employee",
-      jobTitle: "Server",
-      slug: "caretip-demo-employee",
-      businessId: demoBusiness.id,
-      userId: demoEmpUser.id,
-      isActive: true,
-      activationStatus: "active",
-      monthlyGoal: 350,
-    },
-  });
+  if (!demoBusiness || !demoEmployee) {
+    console.warn(
+      "Walkthrough demo not found. Run `npm run db:seed` first for the curated 5-business demo environment.",
+    );
+  }
 
   const businessNames = [
     "Cafe Sonnenberg",
@@ -245,6 +201,20 @@ async function main() {
     }
   }
 
+  if (createdEmployees.length === 0) {
+    const existing = await prisma.employee.findMany({
+      where: { isActive: true, isDeleted: false },
+      select: { id: true, businessId: true },
+      take: 200,
+    });
+    createdEmployees.push(...existing);
+  }
+
+  if (createdEmployees.length === 0) {
+    console.log("No employees available for analytics supplement — run `npm run db:seed` first.");
+    return;
+  }
+
   const end = new Date();
   end.setHours(0, 0, 0, 0);
   const start = new Date(end);
@@ -299,6 +269,9 @@ async function main() {
     where: {
       createdAt: { gte: start, lte: new Date(end.getTime() + 24 * 60 * 60 * 1000 - 1) },
       stripePaymentIntentId: null,
+      NOT: {
+        OR: [{ id: { startsWith: "wdemotip" } }, { id: { startsWith: "demotip-" } }],
+      },
     },
   });
   if (transactions.length > 0) {
@@ -308,76 +281,78 @@ async function main() {
   // Ensure demo@caretip.de / employee@caretip.de dashboards always show tips + goal in the *current month*.
   const now = new Date();
   const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 12, 0, 0, 0));
-  const existingDemoGoal = await prisma.employeeGoal.findFirst({
-    where: { employeeId: demoEmployee.id },
-    orderBy: { updatedAt: "desc" },
-    select: { id: true },
-  });
-  if (existingDemoGoal) {
-    await prisma.employeeGoal.update({
-      where: { id: existingDemoGoal.id },
-      data: {
-        name: "Monthly tip goal",
-        goalAmount: 350,
-        goalPeriod: "monthly",
-        startDate: monthStart,
-        status: "active",
-      },
+  if (demoEmployee && demoBusiness) {
+    const existingDemoGoal = await prisma.employeeGoal.findFirst({
+      where: { employeeId: demoEmployee.id },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true },
     });
-  } else {
-    await prisma.employeeGoal.create({
-      data: {
-        employeeId: demoEmployee.id,
-        name: "Monthly tip goal",
-        goalAmount: 350,
-        goalPeriod: "monthly",
-        startDate: monthStart,
-        status: "active",
-      },
-    });
-  }
+    if (existingDemoGoal) {
+      await prisma.employeeGoal.update({
+        where: { id: existingDemoGoal.id },
+        data: {
+          name: "Monthly tip goal",
+          goalAmount: 350,
+          goalPeriod: "monthly",
+          startDate: monthStart,
+          status: "active",
+        },
+      });
+    } else {
+      await prisma.employeeGoal.create({
+        data: {
+          employeeId: demoEmployee.id,
+          name: "Monthly tip goal",
+          goalAmount: 350,
+          goalPeriod: "monthly",
+          startDate: monthStart,
+          status: "active",
+        },
+      });
+    }
 
-  const demoTips: Array<{
-    id: string;
-    amount: number;
-    status: "success" | "pending" | "failed";
-    payoutStatus: "pending" | "failed" | "not_applicable";
-    employeeId: string;
-    businessId: string;
-    createdAt: Date;
-    stripePaymentIntentId: string | null;
-  }> = [];
-  for (let i = 0; i < 18; i += 1) {
-    const d = new Date();
-    d.setUTCDate(d.getUTCDate() - (i % 12));
-    d.setUTCHours(12 + (i % 6), 10 + (i % 40), 0, 0);
-    const roll = i % 10;
-    const status: "success" | "pending" | "failed" = roll < 8 ? "success" : roll === 8 ? "pending" : "failed";
-    demoTips.push({
-      id: `seed-demo-tip-${String(i + 1).padStart(3, "0")}`,
-      amount: Math.round((6 + Math.random() * 22) * 100) / 100,
-      status,
-      payoutStatus: status === "success" ? "pending" : status === "failed" ? "failed" : "not_applicable",
-      employeeId: demoEmployee.id,
-      businessId: demoBusiness.id,
-      createdAt: d,
-      stripePaymentIntentId: null,
-    });
-  }
-  for (const t of demoTips) {
-    await prisma.transaction.upsert({
-      where: { id: t.id },
-      update: {
-        amount: t.amount,
-        status: t.status,
-        payoutStatus: t.payoutStatus,
-        employeeId: t.employeeId,
-        businessId: t.businessId,
-        createdAt: t.createdAt,
+    const demoTips: Array<{
+      id: string;
+      amount: number;
+      status: "success" | "pending" | "failed";
+      payoutStatus: "pending" | "failed" | "not_applicable";
+      employeeId: string;
+      businessId: string;
+      createdAt: Date;
+      stripePaymentIntentId: string | null;
+    }> = [];
+    for (let i = 0; i < 18; i += 1) {
+      const d = new Date();
+      d.setUTCDate(d.getUTCDate() - (i % 12));
+      d.setUTCHours(12 + (i % 6), 10 + (i % 40), 0, 0);
+      const roll = i % 10;
+      const status: "success" | "pending" | "failed" = roll < 8 ? "success" : roll === 8 ? "pending" : "failed";
+      demoTips.push({
+        id: `seed-demo-tip-${String(i + 1).padStart(3, "0")}`,
+        amount: Math.round((6 + Math.random() * 22) * 100) / 100,
+        status,
+        payoutStatus: status === "success" ? "pending" : status === "failed" ? "failed" : "not_applicable",
+        employeeId: demoEmployee.id,
+        businessId: demoBusiness.id,
+        createdAt: d,
         stripePaymentIntentId: null,
-      },
-      create: t,
-    });
+      });
+    }
+    for (const t of demoTips) {
+      await prisma.transaction.upsert({
+        where: { id: t.id },
+        update: {
+          amount: t.amount,
+          status: t.status,
+          payoutStatus: t.payoutStatus,
+          employeeId: t.employeeId,
+          businessId: t.businessId,
+          createdAt: t.createdAt,
+          stripePaymentIntentId: null,
+        },
+        create: t,
+      });
+    }
   }
 
   console.log("Platform analytics demo seed completed.");

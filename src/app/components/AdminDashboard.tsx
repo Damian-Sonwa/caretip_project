@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { Link, Navigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { CareIcon } from "@/components/icons";
 import {
   fetchPlatformHealth,
   fetchPlatformStats,
@@ -16,14 +15,16 @@ import {
   type PlatformBusinessRow,
   type OnboardingQueueMetrics,
   type PlatformAnalytics,
+  type PlatformSubscriptionMonitoring,
 } from "../lib/api";
 import { logClientError } from "../lib/clientLog";
-import { formatEur } from "../lib/formatEur";
 import { useAuth } from "../hooks/useAuth";
 import { PlatformStatCard } from "./platform/PlatformStatCard";
 import { PlatformOverviewTeaserCard } from "./platform/PlatformOverviewTeaserCard";
 import { PlatformBusinessMobileCard } from "./platform/PlatformBusinessMobileCard";
 import { PlatformAdminOverviewHero } from "./platform/PlatformAdminOverviewHero";
+import { DashboardChartsIdleMount } from "./dashboard/DashboardChartsIdleMount";
+import { AdminDashboardAnalyticsChartsFallback } from "./AdminDashboardAnalyticsChartsFallback";
 import {
   PlatformAdminAttentionAlerts,
   type PlatformAdminAlert,
@@ -37,6 +38,12 @@ import {
 } from "./platform/platformAdminNav";
 import { cn } from "@/lib/utils";
 
+const PlatformOverviewSummaryCharts = lazy(() =>
+  import("./platform/PlatformOverviewSummaryCharts").then((mod) => ({
+    default: mod.PlatformOverviewSummaryCharts,
+  })),
+);
+
 const VERIFICATION_TEASER_LIMIT = 3;
 const RECENT_ACTIVITY_LIMIT = 4;
 
@@ -44,31 +51,6 @@ function onboardingTeaserPriority(status: PlatformBusinessRow["onboardingVerific
   if (status === "submitted") return 0;
   if (status === "rejected") return 1;
   return 2;
-}
-
-function computeTipVolumeWindows(analytics: PlatformAnalytics | null): {
-  todayEur: number;
-  weekEur: number;
-  monthEur: number;
-} {
-  const rows = analytics?.tipVolume ?? [];
-  if (rows.length === 0) return { todayEur: 0, weekEur: 0, monthEur: 0 };
-  const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
-  const todayEur = sorted[sorted.length - 1]?.tipsEur ?? 0;
-  const weekEur = sorted.slice(-7).reduce((sum, row) => sum + row.tipsEur, 0);
-  const monthEur = sorted.reduce((sum, row) => sum + row.tipsEur, 0);
-  return { todayEur, weekEur, monthEur };
-}
-
-function computeRevenueTrend(analytics: PlatformAnalytics | null): string {
-  const rows = analytics?.tipVolume ?? [];
-  if (rows.length < 8) return "0%";
-  const sorted = [...rows].sort((a, b) => a.date.localeCompare(b.date));
-  const recent = sorted.slice(-7).reduce((sum, row) => sum + row.tipsEur, 0);
-  const prior = sorted.slice(-14, -7).reduce((sum, row) => sum + row.tipsEur, 0);
-  if (prior <= 0) return recent > 0 ? "+100%" : "0%";
-  const pct = Math.round(((recent - prior) / prior) * 100);
-  return `${pct >= 0 ? "+" : ""}${pct}%`;
 }
 
 function computeNewBusinessesThisWeek(analytics: PlatformAnalytics | null): number {
@@ -83,13 +65,7 @@ export function AdminDashboard() {
   const [analytics, setAnalytics] = useState<PlatformAnalytics | null>(null);
   const [onboardingTeaser, setOnboardingTeaser] = useState<PlatformBusinessRow[]>([]);
   const [onboardingMetrics, setOnboardingMetrics] = useState<OnboardingQueueMetrics | null>(null);
-  const [subscriptionOverview, setSubscriptionOverview] = useState<{
-    active: number;
-    trialing: number;
-    failed: number;
-    successful: number;
-    failedPaymentsToday: number;
-  } | null>(null);
+  const [subscriptionMonitoring, setSubscriptionMonitoring] = useState<PlatformSubscriptionMonitoring | null>(null);
   const [commercialSummary, setCommercialSummary] = useState<{
     upgrades: number;
     trials: number;
@@ -141,15 +117,7 @@ export function AdminDashboard() {
         .slice(0, VERIFICATION_TEASER_LIMIT);
       setOnboardingTeaser(onboardingQueue);
 
-      if (subRes?.overview) {
-        setSubscriptionOverview({
-          active: subRes.overview.active ?? 0,
-          trialing: subRes.overview.trialing ?? 0,
-          failed: subRes.overview.failed ?? 0,
-          successful: subRes.overview.successful ?? 0,
-          failedPaymentsToday: subRes.widgets?.failedPaymentsToday ?? 0,
-        });
-      }
+      if (subRes) setSubscriptionMonitoring(subRes);
 
       setRecentLogs(
         (logsRes.items ?? []).map((row) => ({
@@ -179,9 +147,8 @@ export function AdminDashboard() {
 
   const activeBusinessesCount = onboardingMetrics?.approved ?? 0;
   const pendingOnboardingCount = onboardingMetrics?.submitted ?? 0;
-  const tipVolumes = useMemo(() => computeTipVolumeWindows(analytics), [analytics]);
-  const revenueTrend = useMemo(() => computeRevenueTrend(analytics), [analytics]);
   const newBusinessesWeek = useMemo(() => computeNewBusinessesThisWeek(analytics), [analytics]);
+  const failedPaymentsToday = subscriptionMonitoring?.widgets?.failedPaymentsToday ?? 0;
 
   const attentionAlerts = useMemo((): PlatformAdminAlert[] => {
     const alerts: PlatformAdminAlert[] = [];
@@ -204,11 +171,11 @@ export function AdminDashboard() {
       });
     }
 
-    if ((subscriptionOverview?.failedPaymentsToday ?? 0) > 0) {
+    if (failedPaymentsToday > 0) {
       alerts.push({
         id: "failed-payments",
         message: t("admin.overview.alerts.failedPaymentsToday", {
-          count: subscriptionOverview?.failedPaymentsToday ?? 0,
+          count: failedPaymentsToday,
         }),
         href: `${PLATFORM_REVENUE_BASE}/failed-payments`,
         severity: "warning",
@@ -225,7 +192,7 @@ export function AdminDashboard() {
     }
 
     return alerts;
-  }, [commercialSummary?.atRisk, health, pendingOnboardingCount, subscriptionOverview?.failedPaymentsToday, t]);
+  }, [commercialSummary?.atRisk, failedPaymentsToday, health, pendingOnboardingCount, t]);
 
   if (!authHydrated || !sessionValidated || !user) return null;
   if (user.role !== "platform_admin") return <Navigate to="/unauthorized" replace />;
@@ -235,8 +202,8 @@ export function AdminDashboard() {
       <div className={cn(platformUi.pageInner, "platform-dashboard-body", platformUi.overviewSection, "pt-3 sm:pt-4")}>
         <PlatformAdminOverviewHero health={health} adminName={user.name} locale={i18n.language} />
 
-        <section aria-labelledby="platform-kpis-heading">
-          <div className="mb-4 flex items-end justify-between gap-3">
+        <section aria-labelledby="platform-kpis-heading" className="platform-overview-kpis">
+          <div className="mb-5 flex items-end justify-between gap-3">
             <h2 id="platform-kpis-heading" className="text-sm font-semibold text-foreground sm:text-base">
               {t("admin.overview.kpisTitle")}
             </h2>
@@ -247,15 +214,6 @@ export function AdminDashboard() {
               value={String(activeBusinessesCount)}
               numericValue={activeBusinessesCount}
               loading={loading}
-            />
-            <PlatformStatCard
-              label={t("admin.overview.revenue.todayVolume")}
-              value={formatEur(tipVolumes.todayEur)}
-              numericValue={tipVolumes.todayEur}
-              countUpKind="eur"
-              loading={loading}
-              loadingVariant="currency"
-              icon={<CareIcon name="tips" size="md" />}
             />
             <PlatformStatCard
               label={t("admin.overview.kpi.staff")}
@@ -270,14 +228,6 @@ export function AdminDashboard() {
               loading={loading}
             />
             <PlatformStatCard
-              label={t("admin.overview.revenue.monthlyVolume")}
-              value={formatEur(tipVolumes.monthEur)}
-              numericValue={tipVolumes.monthEur}
-              countUpKind="eur"
-              loading={loading}
-              loadingVariant="currency"
-            />
-            <PlatformStatCard
               label={t("admin.overview.kpi.pendingOnboarding")}
               value={String(pendingOnboardingCount)}
               numericValue={pendingOnboardingCount}
@@ -287,52 +237,26 @@ export function AdminDashboard() {
           </div>
         </section>
 
+        <DashboardChartsIdleMount
+          whenVisible
+          fallback={<AdminDashboardAnalyticsChartsFallback chartCount={2} />}
+        >
+          <Suspense fallback={<AdminDashboardAnalyticsChartsFallback chartCount={2} />}>
+            <PlatformOverviewSummaryCharts
+              analytics={analytics}
+              subscriptionMonitoring={subscriptionMonitoring}
+              loading={loading}
+            />
+          </Suspense>
+        </DashboardChartsIdleMount>
+
         <PlatformAdminAttentionAlerts alerts={attentionAlerts} />
 
-        <section aria-labelledby="platform-teasers-heading">
+        <section aria-labelledby="platform-teasers-heading" className="platform-overview-teasers">
           <h2 id="platform-teasers-heading" className="sr-only">
             {t("admin.overview.teasersTitle")}
           </h2>
           <div className={platformUi.overviewTeaserGrid}>
-            <PlatformOverviewTeaserCard
-              title={t("admin.overview.subscriptionOverview.title")}
-              viewAllHref={`${PLATFORM_BUSINESS_BASE}/subscriptions`}
-              viewAllLabel={t("admin.overview.viewAll")}
-              metrics={
-                subscriptionOverview
-                  ? [
-                      { label: t("admin.subscriptions.kpi.active"), value: String(subscriptionOverview.active) },
-                      { label: t("admin.subscriptions.kpi.trialing"), value: String(subscriptionOverview.trialing) },
-                      { label: t("admin.subscriptions.kpi.failed"), value: String(subscriptionOverview.failed) },
-                      {
-                        label: t("admin.overview.subscriptionOverview.revenue"),
-                        value: formatEur(tipVolumes.monthEur),
-                      },
-                    ]
-                  : []
-              }
-            />
-
-            <PlatformOverviewTeaserCard
-              title={t("admin.overview.revenue.title")}
-              viewAllHref={`${PLATFORM_REVENUE_BASE}/transactions`}
-              viewAllLabel={t("admin.overview.viewAll")}
-              metrics={[
-                {
-                  label: t("admin.overview.revenue.todayVolume"),
-                  value: formatEur(tipVolumes.todayEur),
-                },
-                {
-                  label: t("admin.overview.revenue.monthlyVolume"),
-                  value: formatEur(tipVolumes.monthEur),
-                },
-                {
-                  label: t("admin.overview.revenue.trend"),
-                  value: revenueTrend,
-                },
-              ]}
-            />
-
             <PlatformOverviewTeaserCard
               title={t("admin.overview.businessGrowth.title")}
               viewAllHref={`${PLATFORM_BUSINESS_BASE}/all`}

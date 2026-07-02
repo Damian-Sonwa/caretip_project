@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { businessUi } from "../businessDashboardUi";
 import { BUSINESS_CHART_GRID, getBusinessChartTooltipStyle } from "../businessDashboardChartTheme";
+import { LIGHTWEIGHT_AREA } from "../../../lib/lightweightChartProps";
 
 type ExecutiveHealthTrendsProps = {
   participation: Array<{ label: string; participation: number }>;
@@ -50,11 +51,10 @@ export function ExecutiveHealthTrends({ participation, loading }: ExecutiveHealt
                 <YAxis tickLine={false} axisLine={false} width={40} style={{ fontSize: 9 }} />
                 <Tooltip contentStyle={getBusinessChartTooltipStyle()} />
                 <Area
-                  type="monotone"
                   dataKey="participation"
                   stroke="#a78bfa"
                   fill="rgba(167,139,250,0.12)"
-                  strokeWidth={2}
+                  {...LIGHTWEIGHT_AREA}
                 />
               </AreaChart>
             </ResponsiveContainer>

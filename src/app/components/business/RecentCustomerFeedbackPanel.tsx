@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router";
 import { MessageSquare, Star } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { DashboardViewAllLink } from "@/app/components/dashboard/DashboardViewAllLink";
 import { listBusinessCustomerFeedback, type CustomerFeedbackSummary } from "@/app/lib/api";
 import { EmployeeEmptyState } from "@/app/components/employee/EmployeeEmptyState";
 import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
@@ -83,10 +83,10 @@ export function RecentCustomerFeedbackPanel({
   }, [enabled, entitled, load, ready]);
 
   return (
-    <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full", className)}>
+    <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card business-dashboard-panel-card--secondary w-full", className)}>
       <CardHeader className="business-dashboard-panel-card__header flex flex-row items-start justify-between gap-4 space-y-0">
         <div className="min-w-0 space-y-1">
-          <CardTitle className="text-lg">{t("business.customerFeedback.recentTitle")}</CardTitle>
+          <CardTitle className="text-base font-semibold">{t("business.customerFeedback.recentTitle")}</CardTitle>
           <CardDescription className={businessUi.cardDesc}>
             {summary && summary.feedbackCount > 0
               ? t("business.customerFeedback.recentDescWithStats", {
@@ -97,11 +97,9 @@ export function RecentCustomerFeedbackPanel({
               : t("business.customerFeedback.recentDesc")}
           </CardDescription>
         </div>
-        <Button variant="ghost" size="sm" className="shrink-0" asChild>
-          <Link to={CUSTOMERS_BASE}>{t("dashboard.viewAll")}</Link>
-        </Button>
+        <DashboardViewAllLink to={CUSTOMERS_BASE}>{t("dashboard.viewAll")}</DashboardViewAllLink>
       </CardHeader>
-      <CardContent>
+      <CardContent className="business-dashboard-panel-card__content pt-0">
         {loading ? (
           <DashboardListSkeleton minHeightClass="min-h-[200px]" />
         ) : error ? (
@@ -124,9 +122,9 @@ export function RecentCustomerFeedbackPanel({
             description={t("emptyState.ratings.description")}
           />
         ) : (
-          <div className="space-y-3">
+          <div className="business-dashboard-feedback-list">
             {items.map((item) => (
-              <CustomerFeedbackListItem key={item.id} item={item} />
+              <CustomerFeedbackListItem key={item.id} item={item} className="business-dashboard-feedback-item" />
             ))}
           </div>
         )}

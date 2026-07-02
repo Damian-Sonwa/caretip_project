@@ -24,6 +24,7 @@ import {
   DASHBOARD_CHART_AREA_STROKE,
   getDashboardChartTooltipStyle,
 } from "../../components/dashboard/dashboardChartTheme";
+import { LIGHTWEIGHT_AREA } from "../../lib/lightweightChartProps";
 
 export type EmployeeDashboardEarningsChartProps = {
   showChartLoading: boolean;
@@ -77,12 +78,6 @@ export function EmployeeDashboardEarningsChart({
               >
                 <ResponsiveContainer width="100%" height="100%" minWidth={0}>
                   <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 4 }}>
-                    <defs>
-                      <linearGradient id="empColorAmount" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.32} />
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="4 6" stroke={DASHBOARD_CHART_GRID} vertical={false} />
                     <XAxis
                       dataKey="time"
@@ -105,11 +100,10 @@ export function EmployeeDashboardEarningsChart({
                       contentStyle={getDashboardChartTooltipStyle()}
                     />
                     <Area
-                      type="monotone"
                       dataKey="amount"
                       stroke={DASHBOARD_CHART_AREA_STROKE}
-                      strokeWidth={2}
-                      fill="url(#empColorAmount)"
+                      fill="hsl(var(--primary) / 0.12)"
+                      {...LIGHTWEIGHT_AREA}
                     />
                   </AreaChart>
                 </ResponsiveContainer>

@@ -10,8 +10,15 @@
   --dash-card-radius: 0.5rem;
   --dash-card-border: hsl(var(--border));
   --dash-card-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --dash-section-gap: 1.5rem;
+  --dash-section-gap: 2.5rem;
+  --dash-hero-gap: 3rem;
+  --dash-block-gap: 2.5rem;
   --dash-metric-min-h: 0;
+  --dash-panel-header-py: 1rem;
+  --dash-panel-header-px: 1.125rem;
+  --dash-panel-content-px: 1.125rem;
+  --dash-panel-content-pb: 1.125rem;
+  --dash-page-pb: 3rem;
   background-color: var(--dash-surface) !important;
   background-image: none !important;
 }

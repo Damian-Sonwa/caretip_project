@@ -18,13 +18,13 @@ const { page: _sharedPage, pageInner: _sharedPageInner, ...dashboardSharedRest }
 export const businessUi = {
   ...employeeUiRest,
   iconTileMuted: "business-dash-icon-tile shrink-0",
-  page: "business-page min-h-0 pb-16 sm:pb-20",
+  page: "business-page min-h-0 pb-10 sm:pb-12",
   pageInner: "caretip-container business-page__inner px-4 pt-3 max-lg:pt-3 sm:px-6 sm:pt-4",
   /** Shared shell for module routes (Billing, Team, QR Studio, etc.). */
   modulePageShell: "business-module-page bg-background px-4 pb-20 sm:px-6 lg:px-8",
   modulePageContained: "dashboard-page-contained mx-auto w-full max-w-6xl",
   /** Overview analytics stack — consistent vertical rhythm below hero. */
-  section: "employee-section business-dashboard-section space-y-6",
+  section: "employee-section business-dashboard-section",
   statsGrid:
     "business-dashboard-stats-grid grid grid-cols-2 items-stretch gap-3 gap-y-3 sm:gap-3.5 md:grid-cols-3 md:gap-4 lg:grid-cols-4 lg:gap-5",
   /** At-a-glance mini-stats — 2-up on phones, 3-up from tablet. */
@@ -45,7 +45,7 @@ export const businessUi = {
     "business-card overflow-hidden rounded-lg border border-border bg-card shadow-sm",
   statCard: `business-stat-card ${DASHBOARD_METRIC_STAT_CARD_SHELL}`,
   periodToggle:
-    "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-xl border border-border bg-card p-1 shadow-sm sm:w-fit",
+    "business-period-toggle flex w-full max-w-full flex-wrap gap-1.5 rounded-lg border border-border bg-card p-1 shadow-sm sm:w-fit",
 
   /** Business sub-routes with back link + DashboardHero (QR, staff, etc.). */
   subPageTop: "dashboard-subpage-top w-full px-4 sm:px-6",

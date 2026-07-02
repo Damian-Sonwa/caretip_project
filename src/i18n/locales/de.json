@@ -3718,6 +3718,10 @@
       "dailyTipDistDescWeek": "Trinkgelder pro Tag (Mo bis So, aktuelle Woche)",
       "dailyTipDistDescMonth": "Trinkgelder pro Tag (aktueller Monat)",
       "dailyTipDistDescYear": "Trinkgelder pro Monat (aktuelles Jahr)",
+      "tipsPerformanceTitle": "Trinkgeld-Performance",
+      "tipsPerformanceDescWeek": "Trinkgeldvolumen der letzten 7 Tage",
+      "tipsPerformanceDescMonth": "Täglicher Trinkgeld-Trend im aktuellen Monat",
+      "tipsPerformanceDescYear": "Monatlicher Trinkgeld-Trend im aktuellen Jahr",
       "employeePerformanceTitle": "Teamleistung",
       "employeePerformanceDesc": "Trinkgeldsummen pro Person",
       "noEmployees": "Noch keine Mitarbeitenden",
@@ -4481,6 +4485,7 @@
           "locations": "Standort- & Tisch-Analysen",
           "topQr": "Top-QR-Codes",
           "trends": "Trendanalyse",
+          "advancedTrends": "Erweiterte Trends",
           "drilldown": "Mitarbeiter-Drilldown"
         },
         "employeeTipCount": "{{count}} Trinkgelder",
@@ -4497,7 +4502,8 @@
           "count": "Anzahl",
           "share": "Anteil",
           "export": "Transaktionen exportieren",
-          "exportSuccess": "Export gestartet. Prüfen Sie Ihre Downloads."
+          "exportSuccess": "Export gestartet. Prüfen Sie Ihre Downloads.",
+          "tipEvents": "Trinkgeld-Ereignisse"
         }
       }
     },
@@ -5559,11 +5565,11 @@
       "hero": {
         "welcome": "Willkommen zurück",
         "welcomeNamed": "Willkommen zurück, {{name}}",
-        "summary": "Plattformstatus, heutige Aktivität und Punkte, die Ihre Aufmerksamkeit brauchen.",
-        "statusOperational": "Alle Systeme betriebsbereit",
+        "summary": "Plattformstatus, heutige Aktivität und Punkte, die Ihre Aufmerksamkeit erfordern.",
+        "statusOperational": "Plattform betriebsbereit",
         "statusDegraded": "Leistungseinbußen erkannt",
         "statusChecking": "Plattformstatus wird geprüft",
-        "systemHealthLink": "Systemstatus-Details"
+        "statusLinkAria": "Systemstatus-Details anzeigen"
       },
       "alerts": {
         "title": "Erfordert Aufmerksamkeit",
@@ -5642,12 +5648,86 @@
         "trials": "Test-Unternehmen",
         "highVolume": "High-Volume-Unternehmen",
         "atRisk": "Gefährdete Abonnements"
+      },
+      "charts": {
+        "sectionTitle": "Trends",
+        "tipsTitle": "Trinkgeld-Überblick",
+        "tipsDesc": "Tägliches Trinkgeldvolumen der letzten 30 Tage.",
+        "tipsVolume": "Trinkgeldvolumen (EUR)",
+        "subscriptionsTitle": "Abonnement-Überblick",
+        "subscriptionsDesc": "Aktive, Test- und gefährdete Abonnements auf einen Blick.",
+        "subscriptions": "Abonnements",
+        "cancelled": "Gekündigt",
+        "expired": "Abgelaufen",
+        "empty": "Noch keine Daten für diesen Zeitraum."
       }
     },
     "allBusinessesPage": {
       "title": "Alle Unternehmen",
       "subtitle": "Registrierte Lokale auf der Plattform.",
-      "colOnboardingVerification": "Onboarding-Verifizierung"
+      "colOnboardingVerification": "Onboarding-Verifizierung",
+      "searchPlaceholder": "Betriebsname, Inhaber, E-Mail oder Kontakt suchen…",
+      "searchAria": "Unternehmen durchsuchen",
+      "emptyList": "Noch keine Unternehmen auf der Plattform.",
+      "filters": {
+        "statusLabel": "Onboarding-Status"
+      },
+      "summary": {
+        "default": "{{total}} Unternehmen",
+        "search": "{{total}} Unternehmen passend zu „{{q}}“",
+        "status": {
+          "draft": "{{total}} Unternehmen im Onboarding-Entwurf",
+          "submitted": "{{total}} eingereichte Onboarding-Anfragen",
+          "approved": "{{total}} freigegebene Unternehmen",
+          "rejected": "{{total}} abgelehnte Onboarding-Anfragen",
+          "suspended": "{{total}} gesperrte Unternehmen"
+        },
+        "date": {
+          "today": "{{total}} Unternehmen heute registriert",
+          "last_7": "{{total}} Unternehmen in den letzten 7 Tagen registriert",
+          "last_30": "{{total}} Unternehmen in den letzten 30 Tagen registriert",
+          "this_month": "{{total}} Unternehmen diesen Monat registriert",
+          "last_month": "{{total}} Unternehmen im letzten Monat registriert",
+          "custom": "{{total}} Unternehmen registriert {{from}} – {{to}}"
+        },
+        "tips": {
+          "zero": "{{total}} Unternehmen mit 0 € Trinkgeld",
+          "1_500": "{{total}} Unternehmen mit 1–500 € Trinkgeld",
+          "501_5000": "{{total}} Unternehmen mit 501–5.000 € Trinkgeld",
+          "5001_plus": "{{total}} Unternehmen mit 5.001+ € Trinkgeld"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "Keine Unternehmen passen zu Ihren Filtern",
+          "description": "Entfernen Sie einzelne Filter oder setzen Sie alle zurück."
+        },
+        "search": {
+          "title": "Keine Unternehmen passend zur Suche",
+          "description": "Keine Ergebnisse für „{{q}}“. Versuchen Sie einen anderen Namen, Inhaber oder Kontakt."
+        },
+        "status": {
+          "draft": { "title": "Keine Entwürfe im Onboarding", "description": "Passen Sie die Filter an." },
+          "submitted": { "title": "Keine eingereichten Anfragen", "description": "Neue Einreichungen erscheinen hier." },
+          "approved": { "title": "Keine freigegebenen Unternehmen", "description": "Filter erweitern für mehr Ergebnisse." },
+          "rejected": { "title": "Keine abgelehnten Anfragen", "description": "" },
+          "suspended": { "title": "Keine gesperrten Unternehmen", "description": "" }
+        },
+        "date": {
+          "today": { "title": "Heute keine Registrierungen", "description": "Zeitraum erweitern." },
+          "last_7": { "title": "Keine Registrierungen in 7 Tagen", "description": "Zeitraum erweitern." },
+          "last_30": { "title": "Keine Registrierungen in 30 Tagen", "description": "Zeitraum erweitern." },
+          "this_month": { "title": "Diesen Monat keine Registrierungen", "description": "Zeitraum erweitern." },
+          "last_month": { "title": "Letzten Monat keine Registrierungen", "description": "Zeitraum erweitern." },
+          "custom": { "title": "Keine Unternehmen in diesem Zeitraum", "description": "Daten anpassen oder Filter löschen." }
+        },
+        "tips": {
+          "zero": { "title": "Keine Unternehmen mit 0 €", "description": "Anderen Volumenfilter wählen." },
+          "1_500": { "title": "Keine Unternehmen in dieser Spanne", "description": "Anderen Volumenfilter wählen." },
+          "501_5000": { "title": "Keine Unternehmen in dieser Spanne", "description": "Anderen Volumenfilter wählen." },
+          "5001_plus": { "title": "Keine Unternehmen in dieser Spanne", "description": "Anderen Volumenfilter wählen." }
+        }
+      }
     },
     "kycComingSoon": {
       "title": "KYC-Verifizierung",
@@ -5659,11 +5739,39 @@
     },
     "businessAnalyticsPage": {
       "title": "Unternehmensanalysen",
-      "subtitle": "Plattformweites Wachstum, Trinkgeldvolumen und Benutzerverteilung."
+      "subtitle": "Unternehmensleistung der Plattform — Wachstum, Umsatz, Abonnements und Top-Betriebe.",
+      "chartsTitle": "Unternehmensleistung",
+      "chartsSubtitle": "Letzte {{days}} Tage ({{tz}}). Umsatz, Wachstum und Zahlungsstatus über alle Betriebe.",
+      "chartGrowth": "Wachstumstrends",
+      "chartGrowthDesc": "Neue Betriebe und Trinkgeldvolumen im Zeitverlauf.",
+      "chartTopBusinesses": "Top-Betriebe nach Trinkgeld",
+      "chartTopBusinessesDesc": "Umsatzstärkste Betriebe im gewählten Zeitraum.",
+      "chartSubscriptions": "Abonnementverteilung",
+      "chartSubscriptionsDesc": "Aktive Abonnements nach Tarifstufe auf der Plattform.",
+      "subscriptions": "Abonnements",
+      "tierBasic": "Basic",
+      "tierPremium": "Premium",
+      "tierEnterprise": "Enterprise"
     },
     "usageReportsPage": {
       "title": "Nutzungsberichte",
-      "subtitle": "Plattform-Adoption, Aktivitätstrends und Nutzungsanalysen."
+      "subtitle": "Produktadoption und Engagement — Nutzer, Aktivität und Nutzungssignale.",
+      "chartsTitle": "Nutzung & Engagement",
+      "chartsSubtitle": "Letzte {{days}} Tage ({{tz}}). Registrierungen, Rollen und Trinkgeldaktivität als Nutzungsindikatoren.",
+      "chartUserRoles": "Benutzerrollen",
+      "chartUserRolesDesc": "Manager, Mitarbeitende und Plattform-Admins.",
+      "chartTipActivity": "Trinkgeld-Aktivität",
+      "chartTipActivityDesc": "Erfolgreiche, ausstehende und fehlgeschlagene Trinkgelder als Nutzungssignale.",
+      "chartSignups": "Neue Registrierungen",
+      "chartSignupsDesc": "Täglich neu registrierte Konten auf der Plattform.",
+      "chartTipVolume": "Tägliche Trinkgeldaktivität",
+      "chartTipVolumeDesc": "Trinkgeldvolumen im Zeitverlauf — Indikator für QR-Scans und Kundenengagement.",
+      "kpi": {
+        "activeUsers": "Aktive Nutzer",
+        "employees": "Mitarbeiterkonten",
+        "locations": "Standorte",
+        "transactions": "Trinkgeldtransaktionen"
+      }
     },
     "systemHealthPage": {
       "title": "Systemstatus",
@@ -5703,7 +5811,7 @@
       },
       "refunds": {
         "title": "Erstattungen",
-        "subtitle": "Globales Transaktionsledger inkl. Stornierungen."
+        "subtitle": "Fehlgeschlagene und stornierte Trinkgeldtransaktionen zur Erstattungsprüfung."
       }
     },
     "loading": "Laden…",
@@ -5777,6 +5885,50 @@
       "loading": "Laden…",
       "empty": "Noch keine Audit-Einträge.",
       "noSearchMatches": "Keine Einträge entsprechen Ihrer Suche."
+    },
+    "refundsPage": {
+      "searchPlaceholder": "Erstattungs-ID, Transaktions-ID, Betrieb oder Mitarbeiter…",
+      "searchAria": "Erstattungen durchsuchen",
+      "hintLiveSearch": "Ergebnisse aktualisieren sich beim Tippen. Nur fehlgeschlagene oder stornierte Trinkgelder.",
+      "colRefundId": "Erstattungs-ID",
+      "colOriginalTransaction": "Ursprüngliche Transaktion",
+      "colBusiness": "Betrieb",
+      "colCustomer": "Kunde",
+      "colRefundAmount": "Erstattungsbetrag",
+      "colOriginalAmount": "Ursprünglicher Betrag",
+      "colReason": "Erstattungsgrund",
+      "colStatus": "Erstattungsstatus",
+      "colRequested": "Angefragt",
+      "colProcessed": "Verarbeitet",
+      "colProvider": "Zahlungsanbieter",
+      "colStaff": "Betroffenes Team",
+      "colActions": "Aktionen",
+      "anonymousCustomer": "Gast-Tipper",
+      "view": "Ansehen",
+      "detailSubtitle": "Details zur Erstattung",
+      "summaryDefault": "{{total}} Erstattungsdatensätze",
+      "summarySearch": "{{total}} Erstattungen passend zu „{{q}}“",
+      "footerShowing": "{{from}}–{{to}} von {{total}}",
+      "prevPage": "Zurück",
+      "nextPage": "Weiter",
+      "empty": {
+        "title": "Keine Erstattungen gefunden",
+        "description": "Es gibt noch keine fehlgeschlagenen oder stornierten Trinkgeldtransaktionen."
+      },
+      "emptySearch": {
+        "title": "Keine Erstattungen passend zur Suche",
+        "description": "Keine Ergebnisse für „{{q}}“. Versuchen Sie Erstattungs-ID, Transaktions-ID oder Betriebsname."
+      },
+      "status": {
+        "pending": "Ausstehend",
+        "processed": "Verarbeitet",
+        "failed": "Fehlgeschlagen"
+      },
+      "reason": {
+        "payout_failed": "Auszahlung fehlgeschlagen",
+        "payment_reversed": "Zahlung storniert",
+        "chargeback_or_dispute": "Rückbuchung oder Streitfall"
+      }
     },
     "globalTransactionsPage": {
       "title": "Globale Transaktionen",

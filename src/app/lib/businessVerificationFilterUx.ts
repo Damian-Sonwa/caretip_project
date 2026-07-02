@@ -2,12 +2,12 @@ import type { TFunction } from "i18next";
 import type { BusinessVerificationFilterState } from "../hooks/useBusinessVerificationFilters";
 import { countRestrictiveFilterDimensions, type ListEmptyStateCopy } from "./listFilterUx";
 
-export type BusinessVerificationWorkflow = "kyc" | "onboarding";
+export type BusinessVerificationWorkflow = "kyc" | "onboarding" | "all";
 
 function i18nRoot(workflow: BusinessVerificationWorkflow): string {
-  return workflow === "onboarding"
-    ? "admin.onboardingVerificationPage"
-    : "admin.businessVerificationPage";
+  if (workflow === "onboarding") return "admin.onboardingVerificationPage";
+  if (workflow === "all") return "admin.allBusinessesPage";
+  return "admin.businessVerificationPage";
 }
 
 function tipsIsRestrictive(tips: BusinessVerificationFilterState["tips"]): boolean {

@@ -6,7 +6,7 @@ export function SubscriptionCanceledPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-border/70 bg-card p-8 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-lg border border-border/70 bg-card p-8 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-foreground">
           {t("business.billing.checkoutCanceled")}
         </h1>

@@ -38,7 +38,7 @@ export function SubscriptionSuccessPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-16">
-      <div className="w-full max-w-md rounded-2xl border border-border/70 bg-card p-8 text-center shadow-sm">
+      <div className="w-full max-w-md rounded-lg border border-border/70 bg-card p-8 text-center shadow-sm">
         {phase === "polling" ? (
           <>
             <Loader2 className="mx-auto h-10 w-10 animate-spin text-primary" aria-hidden />

@@ -1,0 +1,622 @@
+/**
+ * CareTip platform UI polish — Business Dashboard benchmark applied app-wide.
+ * Presentation only: spacing, hierarchy, typography, borders. No layout changes.
+ *
+ * Audit summary (standardized):
+ * - Section rhythm: --dash-block-gap (2.5rem) across business · employee · platform shells
+ * - KPI cards: number-first hierarchy on all dashboard stat cards
+ * - Borders: border (1px) + rounded-lg; removed border-2 / rounded-xl drift on admin surfaces
+ * - View-all links: muted tertiary .dashboard-view-all-link (not accent underline)
+ * - Panel padding: --dash-panel-* tokens on dashboard-panel-card
+ * - Tables / filters / empty states: unified cell padding and label scale
+ * - Footers: subtle transparent treatment on all .caretip-dashboard-shell layouts
+ * - Auth / onboarding: tighter card radius, label scale, input heights
+ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Authenticated dashboards (business · employee · platform admin)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.caretip-dashboard-shell {
+  --dash-section-gap: var(--dash-block-gap);
+}
+
+/* Section rhythm */
+.caretip-dashboard-shell .employee-dashboard-section,
+.caretip-dashboard-shell .business-dashboard-section,
+.caretip-dashboard-shell .platform-admin-overview-section,
+.caretip-dashboard-shell.platform-dashboard .platform-dashboard-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--dash-block-gap) !important;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-section {
+  gap: var(--dash-block-gap);
+}
+
+.caretip-dashboard-shell .platform-page {
+  padding-bottom: var(--dash-page-pb) !important;
+}
+
+.caretip-dashboard-shell .employee-page {
+  padding-bottom: var(--dash-page-pb) !important;
+}
+
+/* Page & module headers */
+.caretip-dashboard-shell .dashboard-workspace-page-header,
+.caretip-dashboard-shell .dashboard-workspace-module-header,
+.caretip-dashboard-shell .platform-admin-page-header,
+.caretip-dashboard-shell .employee-page-header {
+  margin-bottom: 1.5rem !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard header[class*="pageHeader"],
+.caretip-dashboard-shell.platform-dashboard .platform-admin-page-header {
+  margin-bottom: 1.25rem !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-page-title,
+.caretip-dashboard-shell.platform-dashboard .platform-page-header h1 {
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.02em;
+  line-height: 1.2 !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-page-subtitle,
+.caretip-dashboard-shell.platform-dashboard .platform-page-header p {
+  margin-top: 0.375rem !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+
+.caretip-dashboard-shell .premium-workspace-header__title {
+  font-size: clamp(1.25rem, 2.2vw, 1.625rem) !important;
+  font-weight: 600 !important;
+}
+
+.caretip-dashboard-shell .premium-workspace-header__purpose {
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+
+/* KPI cards — number-first hierarchy (all dashboard shells) */
+.caretip-dashboard-shell .business-stat-card.dashboard-metric-stat-card,
+.caretip-dashboard-shell .employee-stat-card.dashboard-metric-stat-card,
+.caretip-dashboard-shell .platform-admin-stat-card.dashboard-metric-stat-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1875rem;
+  padding: 0.875rem 1rem !important;
+}
+
+.caretip-dashboard-shell .business-stat-card .dashboard-metric-stat-card__value,
+.caretip-dashboard-shell .employee-stat-card .dashboard-metric-stat-card__value,
+.caretip-dashboard-shell .platform-admin-stat-card .dashboard-metric-stat-card__value {
+  order: 1;
+  min-height: 0 !important;
+  align-items: flex-start !important;
+  font-size: clamp(1.375rem, 2.4vw, 1.75rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.03em;
+  line-height: 1.05 !important;
+}
+
+.caretip-dashboard-shell .business-stat-card .dashboard-metric-stat-card__label-row,
+.caretip-dashboard-shell .employee-stat-card .dashboard-metric-stat-card__label-row,
+.caretip-dashboard-shell .platform-admin-stat-card .dashboard-metric-stat-card__label-row {
+  order: 2;
+}
+
+.caretip-dashboard-shell .business-stat-card .dashboard-metric-stat-card__label-text,
+.caretip-dashboard-shell .employee-stat-card .dashboard-metric-stat-card__label-text,
+.caretip-dashboard-shell .platform-admin-stat-card .dashboard-metric-stat-card__label-text {
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: hsl(var(--foreground) / 0.82);
+}
+
+.caretip-dashboard-shell .business-stat-card .dashboard-metric-stat-card__change,
+.caretip-dashboard-shell .employee-stat-card .dashboard-metric-stat-card__change,
+.caretip-dashboard-shell .platform-admin-stat-card .dashboard-metric-stat-card__change {
+  order: 3;
+  min-height: 0 !important;
+  margin-top: 0.125rem;
+  padding-top: 0 !important;
+  font-size: 0.6875rem !important;
+  color: hsl(var(--muted-foreground) / 0.9);
+}
+
+/* Panel cards — unified padding */
+.caretip-dashboard-shell .dashboard-panel-card > [class*="CardHeader"],
+.caretip-dashboard-shell .business-dashboard-panel-card__header,
+.caretip-dashboard-shell .dashboard-workspace-module-header {
+  padding: var(--dash-panel-header-py) var(--dash-panel-header-px) 0.625rem !important;
+}
+
+.caretip-dashboard-shell .dashboard-panel-card > [class*="CardContent"],
+.caretip-dashboard-shell .business-dashboard-panel-card__content {
+  padding: 0 var(--dash-panel-content-px) var(--dash-panel-content-pb) !important;
+}
+
+.caretip-dashboard-shell .dashboard-panel-card [class*="CardTitle"],
+.caretip-dashboard-shell .business-dashboard-panel-card [class*="CardTitle"] {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+.caretip-dashboard-shell .dashboard-panel-card [class*="CardDescription"] {
+  font-size: 0.75rem !important;
+  line-height: 1.45 !important;
+}
+
+/* Platform admin — soften heavy borders to match business dashboard */
+.caretip-dashboard-shell.platform-dashboard .border-2.border-border {
+  border-width: 1px !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .rounded-2xl.border-border {
+  border-radius: var(--dash-card-radius) !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-analytics-section {
+  margin-bottom: var(--dash-block-gap) !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-stat-grid {
+  margin-bottom: var(--dash-block-gap) !important;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-section {
+  gap: clamp(1.75rem, 3vw, 2.5rem);
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-overview-kpis,
+.caretip-dashboard-shell.platform-dashboard .platform-overview-summary-charts,
+.caretip-dashboard-shell.platform-dashboard .platform-overview-teasers {
+  margin-bottom: 0;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-admin-overview-kpis {
+  gap: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.platform-dashboard .platform-admin-overview-kpis {
+    gap: 1.375rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.platform-dashboard .platform-admin-overview-kpis {
+    gap: 1.5rem !important;
+  }
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-overview-teaser-metric {
+  display: flex;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  min-height: 4.5rem;
+  padding: 0.875rem 1rem !important;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-overview-teaser-metric__value {
+  font-size: 1.0625rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+}
+
+.caretip-dashboard-shell.platform-dashboard .platform-overview-teaser-metric__label {
+  font-size: 0.6875rem !important;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+
+/* View all → (all dashboard shells) */
+.caretip-dashboard-shell .dashboard-view-all-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 0.25rem;
+  padding-top: 0.125rem;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.25;
+  color: hsl(var(--muted-foreground));
+  transition: color 0.15s ease;
+}
+
+.caretip-dashboard-shell .dashboard-view-all-link:hover {
+  color: hsl(var(--foreground));
+  text-decoration: none;
+}
+
+.caretip-dashboard-shell .dashboard-view-all-link__icon {
+  height: 0.75rem;
+  width: 0.75rem;
+  flex-shrink: 0;
+  opacity: 0.72;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.caretip-dashboard-shell .dashboard-view-all-link:hover .dashboard-view-all-link__icon {
+  opacity: 1;
+  transform: translateX(1px);
+}
+
+/* Tables */
+.caretip-dashboard-shell table thead th {
+  padding: 0.625rem 1rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell table thead th {
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+}
+
+.caretip-dashboard-shell table tbody td {
+  padding: 0.625rem 1rem;
+  font-size: 0.8125rem;
+  vertical-align: middle;
+}
+
+.caretip-dashboard-shell table tbody tr {
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+}
+
+.caretip-dashboard-shell table tbody tr:last-child {
+  border-bottom: none;
+}
+
+/* Search / filter fields */
+.caretip-dashboard-shell input[type="search"],
+.caretip-dashboard-shell .dashboard-filter-panel input,
+.caretip-dashboard-shell.platform-dashboard input.rounded-xl {
+  min-height: 2.5rem;
+  border-radius: var(--dash-card-radius) !important;
+  border-width: 1px !important;
+  font-size: 0.875rem;
+}
+
+.caretip-dashboard-shell.platform-dashboard input:focus-visible {
+  outline: none;
+  border-color: hsl(var(--primary) / 0.35) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.12);
+}
+
+/* Empty states */
+.caretip-dashboard-shell .employee-empty,
+.caretip-dashboard-shell [role="status"].rounded-lg.border {
+  padding: 2rem 1.25rem !important;
+}
+
+.caretip-dashboard-shell [role="status"] .text-base.font-semibold,
+.caretip-dashboard-shell .employee-empty-title {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+}
+
+.caretip-dashboard-shell [role="status"] .text-sm.text-muted-foreground,
+.caretip-dashboard-shell .employee-empty-desc {
+  font-size: 0.8125rem !important;
+  line-height: 1.55 !important;
+  color: hsl(var(--muted-foreground) / 0.9);
+}
+
+/* Forms in workspace */
+.caretip-dashboard-shell .dashboard-settings-panel,
+.caretip-dashboard-shell .employee-settings-section {
+  border-radius: var(--dash-card-radius) !important;
+  padding: 1.125rem 1.25rem !important;
+  box-shadow: var(--dash-card-shadow) !important;
+}
+
+.caretip-dashboard-shell label.text-sm,
+.caretip-dashboard-shell .dashboard-workspace-module-header + form label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.caretip-dashboard-shell .dashboard-workspace-btn {
+  min-height: 2.25rem;
+  font-size: 0.875rem;
+}
+
+/* Compact heroes — employee + platform */
+.caretip-dashboard-shell .employee-dashboard-hero.premium-page-hero,
+.caretip-dashboard-shell.platform-dashboard .premium-page-hero {
+  margin-bottom: var(--dash-hero-gap) !important;
+}
+
+.caretip-dashboard-shell .employee-dashboard-hero .dashboard-hero-container.hidden.lg\:grid,
+.caretip-dashboard-shell.platform-dashboard .dashboard-hero-container.hidden.lg\:grid {
+  gap: 1.25rem 2.25rem !important;
+  padding: 1rem 1.25rem 1rem !important;
+}
+
+.caretip-dashboard-shell .employee-dashboard-hero .premium-page-hero__content :is(h1, h2, h3),
+.caretip-dashboard-shell.platform-dashboard .platform-admin-hero h1 {
+  font-size: clamp(1.375rem, 2.4vw, 1.875rem) !important;
+  line-height: 1.12 !important;
+}
+
+/* Footer — subtle */
+.caretip-dashboard-shell > footer {
+  margin-top: 2.5rem;
+  border-top-color: hsl(var(--border) / 0.45) !important;
+  background: transparent !important;
+  padding-top: 1.5rem !important;
+  padding-bottom: 1.125rem !important;
+}
+
+.caretip-dashboard-shell > footer p {
+  font-size: 0.6875rem !important;
+  font-weight: 400;
+  color: hsl(var(--muted-foreground) / 0.78) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Onboarding
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.business-onboarding-page .business-onboarding-main {
+  padding: 1.5rem 0 3rem;
+}
+
+@media (min-width: 1024px) {
+  .business-onboarding-page .business-onboarding-main {
+    padding: 2rem 0 3.5rem;
+  }
+}
+
+.business-onboarding-page .business-onboarding-workspace {
+  padding: 1.25rem 1.375rem !important;
+}
+
+@media (min-width: 640px) {
+  .business-onboarding-page .business-onboarding-workspace {
+    padding: 1.375rem 1.5rem !important;
+  }
+}
+
+.business-onboarding-page label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Authentication
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.caretip-auth-page .caretip-auth-card,
+.caretip-auth-shell .caretip-auth-card {
+  border-radius: 0.75rem;
+  border-width: 1px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.04);
+}
+
+.caretip-auth-page .caretip-auth-card h1,
+.caretip-auth-shell .caretip-auth-card h1 {
+  font-size: clamp(1.375rem, 3vw, 1.625rem);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.caretip-auth-page .caretip-auth-card label,
+.caretip-auth-shell .caretip-auth-card label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+}
+
+.caretip-auth-page input:not([type="checkbox"]):not([type="radio"]),
+.caretip-auth-shell input:not([type="checkbox"]):not([type="radio"]) {
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+.caretip-auth-page .caretip-btn-primary,
+.caretip-auth-shell .caretip-btn-primary {
+  min-height: 2.5rem;
+  font-size: 0.875rem;
+}
+
+/* Onboarding / KYC verification — filter bar alignment */
+.caretip-dashboard-shell .platform-verification-filters {
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell .platform-verification-filters {
+    margin-bottom: 1.75rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Customer tipping journey (existing premium layer — rhythm only)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.caretip-dashboard-shell [role="dialog"],
+.caretip-dashboard-shell [data-radix-dialog-content] {
+  border-radius: 0.75rem !important;
+  border-width: 1px !important;
+}
+
+.caretip-dashboard-shell [role="dialog"] h2,
+.caretip-dashboard-shell [data-radix-dialog-content] h2 {
+  font-size: 1.0625rem !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+}
+
+/* Platform overview hero — spacious executive framing */
+.caretip-dashboard-shell .platform-admin-overview-hero {
+  overflow: hidden;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__inner {
+  padding: 2rem 2.5rem 2.25rem !important; /* 32px × 40px vertical breathing */
+  min-height: 10.5rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__inner {
+    padding: 2.25rem 2.75rem 2.5rem !important; /* 36px × 44px */
+    min-height: 11rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__inner {
+    padding: 2.5rem 3rem 2.75rem !important; /* 40px × 48px */
+    min-height: 11.5rem;
+  }
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__grid {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 2.5rem;
+  }
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__copy {
+  min-width: 0;
+  max-width: 36rem;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__welcome {
+  margin: 0 0 1.125rem; /* 18px → heading */
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: hsl(var(--muted-foreground) / 0.82);
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__title {
+  margin: 0 0 0.875rem; /* 14px → description */
+  font-size: clamp(1.625rem, 2.8vw, 2.125rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em;
+  line-height: 1.12 !important;
+  color: hsl(var(--foreground));
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__summary {
+  margin: 0;
+  max-width: 32rem;
+  font-size: 0.9375rem;
+  line-height: 1.65 !important;
+  color: hsl(var(--muted-foreground) / 0.88);
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__summary {
+    font-size: 1rem;
+    line-height: 1.7 !important;
+  }
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__meta {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.25rem; /* 20px between datetime and status */
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__meta {
+    align-items: flex-end;
+    text-align: right;
+  }
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__meta {
+    padding-top: 0.125rem;
+  }
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__datetime {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: hsl(var(--muted-foreground) / 0.78);
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__datetime-icon {
+  width: 0.875rem;
+  height: 0.875rem;
+  flex-shrink: 0;
+  opacity: 0.65;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__status {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 9999px;
+  border-width: 1px;
+  border-style: solid;
+  padding: 0.3125rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell .platform-admin-overview-hero__status {
+    font-size: 0.8125rem;
+    padding: 0.375rem 0.875rem;
+  }
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero__status-dot {
+  width: 0.4375rem;
+  height: 0.4375rem;
+  flex-shrink: 0;
+  border-radius: 9999px;
+}
+
+.caretip-dashboard-shell .platform-admin-overview-hero h1 {
+  /* legacy hook — prefer __title */
+  font-size: clamp(1.625rem, 2.8vw, 2.125rem) !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.025em;
+  line-height: 1.12 !important;
+}
+
+.customer-flow .cf-card,
+.customer-flow [class*="cardShadcn"] {
+  border-radius: 0.75rem;
+}

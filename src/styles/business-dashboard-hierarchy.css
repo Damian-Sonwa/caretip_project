@@ -1,7 +1,359 @@
 /**
- * Business dashboard page hierarchy — compact heroes, slim status, tighter rhythm.
- * Scoped to the business shell only; premium tokens elsewhere stay unchanged.
+ * Business dashboard page hierarchy — compact heroes, KPI emphasis, section tiers.
+ * Scoped to the business shell only; loads after dashboard-workspace.css.
  */
+
+.caretip-dashboard-shell.business-dashboard {
+  --business-dash-hero-gap: var(--dash-hero-gap);
+  --business-dash-block-gap: var(--dash-block-gap);
+}
+
+/* —— Section rhythm (48px after hero, 40px between blocks) —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero.premium-page-hero {
+  min-height: auto;
+  margin-bottom: var(--business-dash-hero-gap) !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--business-dash-block-gap) !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-body {
+  padding-top: 0 !important;
+}
+
+/* —— Compact overview hero —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-dashboard-root {
+  margin-bottom: 0 !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-container.hidden.lg\:grid {
+  align-items: start;
+  gap: 0.875rem 1rem !important;
+  padding: 1rem 1.125rem 0.875rem !important;
+}
+
+@media (min-width: 1024px) {
+  /* 50 / 50 column balance — text left, illustration right */
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-container.hidden.lg\:grid > .lg\:col-span-5 {
+    grid-column: 1 / span 6;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-media-column {
+    grid-column: 7 / span 6;
+    justify-content: flex-start !important;
+    align-items: stretch !important;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-container .lg\:col-span-5 {
+  gap: 0.5rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-container .min-h-0.space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-title,
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .premium-page-hero__content :is(h1, h2, h3) {
+  font-size: clamp(1.375rem, 2.4vw, 1.875rem) !important;
+  line-height: 1.12 !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-description {
+  margin-top: 0 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.5 !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-badge {
+  margin-bottom: 0.125rem;
+  padding-block: 0.1875rem !important;
+  font-size: 0.6875rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-cta-block {
+  max-width: 21rem;
+  margin-top: 0.125rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-cta-row {
+  gap: 0.5rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .dashboard-hero-container .pt-2.lg\:pt-3 {
+  padding-top: 0.375rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-account-stats {
+  margin-top: 0.625rem !important;
+  padding-top: 0.75rem !important;
+  column-gap: 1rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-hero .business-hero-visual {
+  max-width: none !important;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-hero-illustration-card {
+  width: 100%;
+  max-width: min(100%, 22rem);
+  margin-inline: auto;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-hero-illustration {
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: min(34svh, 240px) !important;
+  margin-inline: 0;
+  object-position: center;
+}
+
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.business-dashboard .business-hero-illustration-card {
+    max-width: 100%;
+    margin-inline: 0;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-hero-illustration {
+    max-height: 18.5rem !important;
+    object-position: left center;
+  }
+}
+
+@media (min-width: 1280px) {
+  .caretip-dashboard-shell.business-dashboard .business-hero-illustration {
+    max-height: 20.5rem !important;
+  }
+}
+
+/* Card clip — curved edges on hero illustration */
+@media (min-width: 1024px) {
+  .caretip-dashboard-shell.business-dashboard .business-hero-visual {
+    position: relative;
+  }
+}
+
+/* —— Mobile overview hero (compact) —— */
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-mobile-hero {
+    padding: 0 1rem 0.75rem !important;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-mobile-hero__title {
+    font-size: 1.375rem !important;
+    line-height: 1.12 !important;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-mobile-hero__description {
+    margin-top: 0.375rem !important;
+    font-size: 0.875rem !important;
+  }
+
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-mobile-hero__content {
+    gap: 0.5rem !important;
+  }
+}
+
+/* —— KPI row — business-specific sizing —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
+  min-height: 6.75rem !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-stats-grid > .business-stat-card {
+    min-height: 7rem !important;
+  }
+}
+
+.caretip-dashboard-shell.business-dashboard .business-stat-card--featured {
+  border-color: hsl(var(--primary) / 0.28) !important;
+}
+
+/* —— Analytics intro (primary band) —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro {
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-analytics-intro h2 {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-block--primary {
+  margin-top: -0.25rem;
+}
+
+/* —— Secondary panels (goals, feedback) —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary {
+  border-color: hsl(var(--border) / 0.88);
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary .business-dashboard-panel-card__header {
+  padding: 1rem 1.125rem 0.625rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary .business-dashboard-panel-card__content,
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary > [class*="CardContent"] {
+  padding: 0 1.125rem 1.125rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary [class*="CardTitle"],
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary h3 {
+  font-size: 0.9375rem !important;
+  font-weight: 600 !important;
+  line-height: 1.35 !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-panel-card--secondary [class*="CardDescription"] {
+  font-size: 0.75rem !important;
+  line-height: 1.45 !important;
+}
+
+
+/* —— Guest feedback list —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0.875rem 0;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item + .business-dashboard-feedback-item {
+  border-top: 1px solid hsl(var(--border) / 0.55);
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item__guest {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item__staff {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item__time {
+  font-size: 0.6875rem;
+  color: hsl(var(--muted-foreground) / 0.85);
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item__rating svg {
+  height: 0.8125rem;
+  width: 0.8125rem;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-feedback-item__comment {
+  margin-top: 0.625rem;
+  font-size: 0.8125rem;
+  line-height: 1.55;
+  color: hsl(var(--foreground) / 0.88);
+}
+
+/* —— Top performer highlight —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-card {
+  border-color: hsl(var(--primary) / 0.2) !important;
+  background: hsl(var(--primary) / 0.025) !important;
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-card > [class*="CardHeader"] {
+  padding: 1rem 1.125rem 0.75rem !important;
+  border-bottom-color: hsl(var(--primary) / 0.12) !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-card [class*="CardTitle"] {
+  font-size: 0.9375rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-card > [class*="CardContent"] {
+  padding: 0.875rem 1.125rem 1.125rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-row {
+  border-color: hsl(var(--border) / 0.65) !important;
+  background: hsl(var(--card) / 0.92) !important;
+  padding: 0.75rem 0.875rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-rank {
+  height: 2rem;
+  width: 2rem;
+  border-radius: 0.625rem;
+  border: 1px solid hsl(var(--primary) / 0.22);
+  background: hsl(var(--primary) / 0.08);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: hsl(var(--primary));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-avatar {
+  height: 2.75rem !important;
+  width: 2.75rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-earnings {
+  font-size: 1.0625rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-top-performer-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+/* —— Tertiary help card —— */
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card {
+  border-color: hsl(var(--border) / 0.75) !important;
+  background: hsl(var(--muted) / 0.22) !important;
+  box-shadow: none !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card .business-dashboard-panel-card__header {
+  padding: 1rem 1.125rem 0.5rem !important;
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card [class*="CardTitle"] {
+  font-size: 0.875rem !important;
+  font-weight: 600 !important;
+  color: hsl(var(--muted-foreground));
+}
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-help-card > [class*="CardContent"] {
+  padding: 0 1.125rem 1rem !important;
+}
+
+
+.caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid {
+  gap: 1.25rem !important;
+}
+
+@media (min-width: 640px) {
+  .caretip-dashboard-shell.business-dashboard .business-dashboard-bottom-grid {
+    gap: 1.5rem !important;
+  }
+}
 
 /* —— Locations sub-page (breadcrumb + hero) —— */
 .caretip-dashboard-shell.business-dashboard .dashboard-subpage-top {
@@ -129,11 +481,6 @@
 
 .caretip-dashboard-shell.business-dashboard .business-settings-page-header p {
   margin-top: 0.375rem;
-}
-
-/* —— Overview dashboard hero —— */
-.caretip-dashboard-shell.business-dashboard .business-dashboard-hero.premium-page-hero {
-  min-height: auto;
 }
 
 /* —— Compact inline verification prompt (dashboard overview) —— */

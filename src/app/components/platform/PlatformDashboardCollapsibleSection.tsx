@@ -60,7 +60,7 @@ export function PlatformDashboardCollapsibleSection({
       data-section={sectionId}
       className={cn("platform-dashboard-section mb-6", className)}
     >
-      <div className="overflow-hidden rounded-xl border-2 border-border bg-card shadow-sm">
+      <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
         <CollapsibleTrigger
           id={triggerId}
           type="button"

@@ -161,11 +161,12 @@ export function hasRestrictiveBusinessVerificationFilters(
   );
 }
 
-export function useBusinessVerificationFilters(workflow: "kyc" | "onboarding" = "kyc") {
+export function useBusinessVerificationFilters(workflow: "kyc" | "onboarding" | "all" = "kyc") {
+  const statusWorkflow = workflow === "all" ? "onboarding" : workflow;
   const [searchParams, setSearchParams] = useSearchParams();
   const filters = useMemo(
-    () => readFiltersFromSearchParams(searchParams, workflow),
-    [searchParams, workflow],
+    () => readFiltersFromSearchParams(searchParams, statusWorkflow),
+    [searchParams, statusWorkflow],
   );
   const [debouncedQ, setDebouncedQ] = useState(filters.q);
 

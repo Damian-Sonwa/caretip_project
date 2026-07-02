@@ -3718,6 +3718,10 @@
       "dailyTipDistDescWeek": "Tips per day (Mon to Sun, current week)",
       "dailyTipDistDescMonth": "Tips per day (current month)",
       "dailyTipDistDescYear": "Tips per month (current year)",
+      "tipsPerformanceTitle": "Tips performance",
+      "tipsPerformanceDescWeek": "Tip volume over the last 7 days",
+      "tipsPerformanceDescMonth": "Daily tip trend for the current month",
+      "tipsPerformanceDescYear": "Monthly tip trend for the current year",
       "employeePerformanceTitle": "Employee performance",
       "employeePerformanceDesc": "Tip totals by team member",
       "noEmployees": "No employees yet",
@@ -4441,6 +4445,7 @@
           "locations": "Location & table analytics",
           "topQr": "Top QR codes",
           "trends": "Trend analysis",
+          "advancedTrends": "Advanced trends",
           "drilldown": "Employee drilldown"
         },
         "employeeTipCount": "{{count}} tips",
@@ -4457,7 +4462,8 @@
           "count": "Count",
           "share": "Share",
           "export": "Export transactions",
-          "exportSuccess": "Export started. Check your downloads."
+          "exportSuccess": "Export started. Check your downloads.",
+          "tipEvents": "Tip events"
         }
       }
     },
@@ -5559,11 +5565,11 @@
       "hero": {
         "welcome": "Welcome back",
         "welcomeNamed": "Welcome back, {{name}}",
-        "summary": "Platform health, today's activity, and items that need your attention.",
-        "statusOperational": "All systems operational",
+        "summary": "Platform health, today's activity, and items requiring attention.",
+        "statusOperational": "Platform healthy",
         "statusDegraded": "Service degradation detected",
         "statusChecking": "Checking platform status",
-        "systemHealthLink": "System health details"
+        "statusLinkAria": "View system health details"
       },
       "alerts": {
         "title": "Needs attention",
@@ -5642,12 +5648,131 @@
         "trials": "Trial businesses",
         "highVolume": "High-volume businesses",
         "atRisk": "At-risk subscriptions"
+      },
+      "charts": {
+        "sectionTitle": "Trends",
+        "tipsTitle": "Tips overview",
+        "tipsDesc": "Daily tip volume over the last 30 days.",
+        "tipsVolume": "Tip volume (EUR)",
+        "subscriptionsTitle": "Subscription overview",
+        "subscriptionsDesc": "Active, trial, and at-risk subscriptions at a glance.",
+        "subscriptions": "Subscriptions",
+        "cancelled": "Cancelled",
+        "expired": "Expired",
+        "empty": "No data for this period yet."
       }
     },
     "allBusinessesPage": {
       "title": "All businesses",
       "subtitle": "Registered venues on the platform.",
-      "colOnboardingVerification": "Onboarding verification"
+      "colOnboardingVerification": "Onboarding verification",
+      "searchPlaceholder": "Search business name, owner, email, or contact…",
+      "searchAria": "Search businesses",
+      "emptyList": "No businesses on the platform yet.",
+      "filters": {
+        "statusLabel": "Onboarding status"
+      },
+      "summary": {
+        "default": "Showing {{total}} businesses",
+        "search": "Showing {{total}} businesses matching \"{{q}}\"",
+        "status": {
+          "draft": "Showing {{total}} businesses in draft onboarding",
+          "submitted": "Showing {{total}} submitted onboarding requests",
+          "approved": "Showing {{total}} approved businesses",
+          "rejected": "Showing {{total}} rejected onboarding requests",
+          "suspended": "Showing {{total}} suspended businesses"
+        },
+        "date": {
+          "today": "Showing {{total}} businesses registered today",
+          "last_7": "Showing {{total}} businesses registered in the last 7 days",
+          "last_30": "Showing {{total}} businesses registered in the last 30 days",
+          "this_month": "Showing {{total}} businesses registered this month",
+          "last_month": "Showing {{total}} businesses registered last month",
+          "custom": "Showing {{total}} businesses registered {{from}} – {{to}}"
+        },
+        "tips": {
+          "zero": "Showing {{total}} businesses with €0 in tips",
+          "1_500": "Showing {{total}} businesses with €1–€500 in tips",
+          "501_5000": "Showing {{total}} businesses with €501–€5,000 in tips",
+          "5001_plus": "Showing {{total}} businesses with €5,001+ in tips"
+        }
+      },
+      "empty": {
+        "combinedFilters": {
+          "title": "No businesses match your filters",
+          "description": "Try removing one filter at a time or clear all filters to see more results."
+        },
+        "search": {
+          "title": "No businesses match your search",
+          "description": "No results for \"{{q}}\". Try a different business name, owner, or contact email."
+        },
+        "status": {
+          "draft": {
+            "title": "No businesses in draft onboarding",
+            "description": "Adjust your filters or check back when more businesses start onboarding."
+          },
+          "submitted": {
+            "title": "No submitted onboarding requests",
+            "description": "New submissions will appear here when businesses apply for access."
+          },
+          "approved": {
+            "title": "No approved businesses match your filters",
+            "description": "Try broadening your filters to see more results."
+          },
+          "rejected": {
+            "title": "No rejected onboarding requests",
+            "description": "Rejected businesses will appear here when applicable."
+          },
+          "suspended": {
+            "title": "No suspended businesses",
+            "description": "Suspended accounts will appear here when applicable."
+          }
+        },
+        "date": {
+          "today": {
+            "title": "No businesses registered today",
+            "description": "Try a wider date range to see more results."
+          },
+          "last_7": {
+            "title": "No businesses registered in the last 7 days",
+            "description": "Try a wider date range to see more results."
+          },
+          "last_30": {
+            "title": "No businesses registered in the last 30 days",
+            "description": "Try a wider date range to see more results."
+          },
+          "this_month": {
+            "title": "No businesses registered this month",
+            "description": "Try a wider date range to see more results."
+          },
+          "last_month": {
+            "title": "No businesses registered last month",
+            "description": "Try a wider date range to see more results."
+          },
+          "custom": {
+            "title": "No businesses in this date range",
+            "description": "Adjust the custom dates or clear the filter."
+          }
+        },
+        "tips": {
+          "zero": {
+            "title": "No businesses with €0 in tips",
+            "description": "Try a different tip volume filter."
+          },
+          "1_500": {
+            "title": "No businesses in this tip range",
+            "description": "Try a different tip volume filter."
+          },
+          "501_5000": {
+            "title": "No businesses in this tip range",
+            "description": "Try a different tip volume filter."
+          },
+          "5001_plus": {
+            "title": "No businesses in this tip range",
+            "description": "Try a different tip volume filter."
+          }
+        }
+      }
     },
     "kycComingSoon": {
       "title": "KYC Verification",
@@ -5659,11 +5784,39 @@
     },
     "businessAnalyticsPage": {
       "title": "Business analytics",
-      "subtitle": "Platform-wide growth, tip volume, and user distribution."
+      "subtitle": "Platform business performance — growth, revenue, subscriptions, and top venues.",
+      "chartsTitle": "Business performance",
+      "chartsSubtitle": "Last {{days}} days ({{tz}}). Revenue, growth, and payment health across venues.",
+      "chartGrowth": "Business growth trends",
+      "chartGrowthDesc": "New venues and tip volume over time.",
+      "chartTopBusinesses": "Top businesses by tips",
+      "chartTopBusinessesDesc": "Highest-earning venues in the selected period.",
+      "chartSubscriptions": "Subscription distribution",
+      "chartSubscriptionsDesc": "Active subscriptions by plan tier across the platform.",
+      "subscriptions": "Subscriptions",
+      "tierBasic": "Basic",
+      "tierPremium": "Premium",
+      "tierEnterprise": "Enterprise"
     },
     "usageReportsPage": {
       "title": "Usage reports",
-      "subtitle": "Platform adoption, activity trends, and usage analytics."
+      "subtitle": "Product adoption and engagement — users, activity, and platform usage signals.",
+      "chartsTitle": "Usage & engagement",
+      "chartsSubtitle": "Last {{days}} days ({{tz}}). Sign-ups, roles, and tipping activity as usage proxies.",
+      "chartUserRoles": "User roles",
+      "chartUserRolesDesc": "Managers, employees, and platform admins on the platform.",
+      "chartTipActivity": "Tip transaction activity",
+      "chartTipActivityDesc": "Successful, pending, and failed tips as product usage signals.",
+      "chartSignups": "New user sign-ups",
+      "chartSignupsDesc": "Daily new accounts registered on the platform.",
+      "chartTipVolume": "Daily tip activity",
+      "chartTipVolumeDesc": "Tip volume over time — a proxy for QR scans and customer engagement.",
+      "kpi": {
+        "activeUsers": "Active users",
+        "employees": "Employee accounts",
+        "locations": "Locations",
+        "transactions": "Tip transactions"
+      }
     },
     "systemHealthPage": {
       "title": "System health",
@@ -5703,7 +5856,7 @@
       },
       "refunds": {
         "title": "Refunds",
-        "subtitle": "Global transaction ledger including reversals."
+        "subtitle": "Failed and reversed tip transactions requiring refund review."
       }
     },
     "loading": "Loading…",
@@ -5777,6 +5930,50 @@
       "loading": "Loading…",
       "empty": "No audit entries yet.",
       "noSearchMatches": "No entries match your search."
+    },
+    "refundsPage": {
+      "searchPlaceholder": "Refund ID, transaction ID, business, or staff name…",
+      "searchAria": "Search refunds",
+      "hintLiveSearch": "Results update as you type. Only failed or reversed tips are shown.",
+      "colRefundId": "Refund ID",
+      "colOriginalTransaction": "Original transaction",
+      "colBusiness": "Business",
+      "colCustomer": "Customer",
+      "colRefundAmount": "Refund amount",
+      "colOriginalAmount": "Original amount",
+      "colReason": "Refund reason",
+      "colStatus": "Refund status",
+      "colRequested": "Requested",
+      "colProcessed": "Processed",
+      "colProvider": "Payment provider",
+      "colStaff": "Staff affected",
+      "colActions": "Actions",
+      "anonymousCustomer": "Guest tipper",
+      "view": "View",
+      "detailSubtitle": "Refund record details",
+      "summaryDefault": "Showing {{total}} refund records",
+      "summarySearch": "Showing {{total}} refunds matching \"{{q}}\"",
+      "footerShowing": "{{from}}–{{to}} of {{total}}",
+      "prevPage": "Previous",
+      "nextPage": "Next",
+      "empty": {
+        "title": "No refunds found",
+        "description": "There are no failed or reversed tip transactions on the platform yet."
+      },
+      "emptySearch": {
+        "title": "No refunds match your search",
+        "description": "No results for \"{{q}}\". Try a refund ID, transaction ID, or business name."
+      },
+      "status": {
+        "pending": "Pending",
+        "processed": "Processed",
+        "failed": "Failed"
+      },
+      "reason": {
+        "payout_failed": "Payout failed",
+        "payment_reversed": "Payment reversed",
+        "chargeback_or_dispute": "Chargeback or dispute"
+      }
     },
     "globalTransactionsPage": {
       "title": "Global transactions",

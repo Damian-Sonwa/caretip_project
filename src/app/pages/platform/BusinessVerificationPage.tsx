@@ -502,12 +502,6 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
         />
       ) : null}
 
-      {!loadError && !showTableLoading ? (
-        <p className="mb-3 text-sm font-medium text-foreground" role="status">
-          {filterSummary}
-        </p>
-      ) : null}
-
       <BusinessVerificationFilters
         workflow={workflow}
         filters={filters}
@@ -518,6 +512,12 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
         searchValue={filters.q}
         onSearchChange={(q) => setFilters({ q })}
       />
+
+      {!loadError && !showTableLoading ? (
+        <p className="mb-4 text-sm font-medium text-foreground" role="status">
+          {filterSummary}
+        </p>
+      ) : null}
 
       <PlatformResponsiveData
         footer={paginationFooter}
@@ -729,7 +729,7 @@ function BusinessVerificationQueuePage({ workflow }: { workflow: BusinessVerific
           <motion.div
             initial={{ scale: 0.96, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border-2 border-border bg-card p-6"
+            className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-lg border border-border bg-card p-6"
           >
             <h2 className="mb-1 text-lg font-semibold text-foreground">
               {t("admin.businessVerificationPage.modalTitle", { name: editing.name })}

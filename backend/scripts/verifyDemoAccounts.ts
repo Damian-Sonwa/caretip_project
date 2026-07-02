@@ -1,11 +1,17 @@
 import "../src/loadEnv.js";
 import { prisma } from "../src/prisma.js";
 import { login } from "../src/services/auth.service.js";
+import { PLATFORM_ADMIN_TEAM } from "../prisma/seedPlatformAdminTeam.js";
 
-const ACCOUNTS = [
-  { email: "demo@caretip.de", role: "MANAGER" as const },
-  { email: "employee@caretip.de", role: "EMPLOYEE" as const },
-  { email: "admin@caretip.de", role: "SUPER_ADMIN" as const },
+const ACCOUNTS: Array<{ email: string; role: "MANAGER" | "EMPLOYEE" | "SUPER_ADMIN"; password: string }> = [
+  { email: "demo@caretip.de", role: "MANAGER", password: "Demo1234!" },
+  { email: "employee@caretip.de", role: "EMPLOYEE", password: "Demo1234!" },
+  { email: "admin@caretip.de", role: "SUPER_ADMIN", password: "Demo1234!" },
+  ...PLATFORM_ADMIN_TEAM.map((m) => ({
+    email: m.email,
+    role: "SUPER_ADMIN" as const,
+    password: m.tempPassword,
+  })),
 ];
 
 async function main() {
@@ -25,7 +31,7 @@ async function main() {
     }
     let auth = "skip";
     try {
-      await login({ email: a.email, password: "Demo1234!" });
+      await login({ email: a.email, password: a.password });
       auth = "OK";
     } catch (e) {
       auth = e instanceof Error ? e.message : "fail";
@@ -35,6 +41,8 @@ async function main() {
         email: a.email,
         userId: user.id,
         role: user.role,
+        isPlatformAdmin: user.isPlatformAdmin,
+        twoFactorEnabled: user.twoFactorEnabled,
         isActive: user.isActive,
         emailVerified: user.emailVerified,
         businessId: user.business?.id ?? null,

@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import { dashboardBlockMotion } from "@/lib/motionPerf";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, lazy } from "react";
 import { Link, Navigate } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
@@ -8,7 +8,6 @@ import {
   Star,
   Sparkles,
   HelpCircle,
-  ChevronRight,
 } from "lucide-react";
 import { CareIcon } from "@/components/icons";
 import { toast } from "sonner";
@@ -41,6 +40,7 @@ import {
 } from "../../components/dashboard/DashboardSectionLoading";
 import { CountUpMetric } from "../../components/dashboard/CountUpMetric";
 import { DashboardAnalyticsPeriodToggle } from "../../components/dashboard/DashboardAnalyticsPeriodToggle";
+import { DashboardChartsIdleMount } from "../../components/dashboard/DashboardChartsIdleMount";
 import { runWithViewportScrollPreserved } from "../../lib/dashboardScrollStability";
 import { formatEur } from "../../lib/formatEur";
 import type {
@@ -62,18 +62,36 @@ import { TopPerformersTeaser, TOP_PERFORMERS_PAGE_PATH, DASHBOARD_EMPLOYEE_TEASE
 import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import { BusinessResponsiveData } from "../../components/business/BusinessResponsiveData";
+import { DashboardViewAllLink } from "../../components/dashboard/DashboardViewAllLink";
 import { EmployeeGoalMobileCard } from "../../components/business/businessDashboardMobileCards";
 
 import {
   devMockBusinessOperationalPulse,
   devMockBusinessPeriodStats,
+  devMockBusinessTipDistribution,
+  devMockBusinessEmployeePerformance,
   shouldUseBusinessDashboardDevDemo,
 } from "../../lib/devAnalyticsMocks";
+import {
+  buildEmployeePerformanceChartRows,
+  buildTipPerformanceChartData,
+  hasTipPerformanceChartActivity,
+  resolveBusinessDashboardChartStats,
+  sumTipPerformanceTotal,
+} from "../../lib/businessDashboardChartData";
+import { dashboardChartBarFill } from "../../components/dashboard/dashboardChartTheme";
+import { BusinessDashboardChartsFallback } from "./BusinessDashboardChartsFallback";
+
+const BusinessDashboardAnalyticsCharts = lazy(() =>
+  import("./BusinessDashboardAnalyticsCharts").then((mod) => ({
+    default: mod.BusinessDashboardAnalyticsCharts,
+  })),
+);
 import { getAuthSessionFlags } from "../../lib/authSessionBootstrap";
 import { isOnboardingCompleted } from "../../lib/onboardingProgress";
 import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
-import businessHeroImage from "../../../../images/byz001.png";
+import businessHeroImage from "../../../../images/bizzy001.png";
 import { BusinessDashboardMobileHero } from "../../components/business/BusinessDashboardMobileHero";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
@@ -133,9 +151,12 @@ export function BusinessDashboard() {
     pendingVerification,
     displayStats,
     displayMetrics,
+    statsTimeframe,
+    dataRevision,
     isMetricsInitialLoad,
     isGoalsInitialLoad,
     isPeriodRefreshing,
+    analyticsLoading: isAnalyticsSectionLoading,
     showStatsSkeleton,
     refreshStatsQuiet,
     retryStats,
@@ -236,6 +257,44 @@ export function BusinessDashboard() {
 
   const hasTipActivityInPeriod = useDevDemo || (displayMetrics?.totalTips ?? 0) > 0;
 
+  const chartPeriodStats = useMemo(
+    () =>
+      useDevDemo
+        ? null
+        : resolveBusinessDashboardChartStats(analyticsTimeframe, displayStats, statsTimeframe),
+    [useDevDemo, analyticsTimeframe, displayStats, statsTimeframe, dataRevision],
+  );
+
+  const dailyTipRows = useMemo(() => {
+    if (useDevDemo) return devMockBusinessTipDistribution(analyticsTimeframe);
+    return chartPeriodStats?.dailyTipDistribution ?? [];
+  }, [useDevDemo, analyticsTimeframe, chartPeriodStats?.dailyTipDistribution]);
+
+  const tipDistributionChartData = useMemo(
+    () => buildTipPerformanceChartData(dailyTipRows, analyticsTimeframe, t),
+    [dailyTipRows, analyticsTimeframe, t],
+  );
+
+  const tipDistributionTotal = useMemo(
+    () => sumTipPerformanceTotal(dailyTipRows),
+    [dailyTipRows],
+  );
+
+  const hasChartTipActivity = useDevDemo
+    ? hasTipActivityInPeriod
+    : hasTipPerformanceChartActivity(dailyTipRows, chartPeriodStats?.totalTips ?? displayMetrics?.totalTips);
+
+  const employeePerformance = useMemo(() => {
+    if (useDevDemo) {
+      return devMockBusinessEmployeePerformance(
+        Array.from({ length: 5 }, (_, index) => dashboardChartBarFill(index, 5)),
+      );
+    }
+    return buildEmployeePerformanceChartRows(chartPeriodStats?.employees ?? displayStats?.employees);
+  }, [useDevDemo, chartPeriodStats?.employees, displayStats?.employees]);
+
+  const showChartsLoading = isAnalyticsSectionLoading && !useDevDemo;
+
   const employeeGoalsList = displayStats?.employeeGoals ?? [];
   const employeeGoalsTeaser = useMemo(
     () =>
@@ -285,8 +344,6 @@ export function BusinessDashboard() {
           isInitialLoading: showMetricsSkeleton,
           isPeriodRefreshing,
           pendingVerification: showOnboardingReviewNotice,
-          platformAccessApproved:
-            !user?.onboardingVerificationStatus || user.onboardingVerificationStatus === "approved",
           statsLoadFailed,
           socketStatus: connectionStatus,
         },
@@ -296,7 +353,6 @@ export function BusinessDashboard() {
       showMetricsSkeleton,
       isPeriodRefreshing,
       showOnboardingReviewNotice,
-      user?.onboardingVerificationStatus,
       statsLoadFailed,
       connectionStatus,
       t,
@@ -392,9 +448,9 @@ export function BusinessDashboard() {
           className="business-hero-dashboard-root !mb-0"
           cardClassName="border-0 bg-transparent shadow-none max-lg:border-0 max-lg:bg-transparent max-lg:shadow-none lg:rounded-[calc(1.75rem-3px)] lg:border-0 lg:bg-transparent lg:shadow-none"
           badgeClassName="business-hero-badge normal-case px-2.5 py-1 text-[11px] max-lg:text-[12px] font-medium tracking-normal shadow-none"
-          titleClassName="business-hero-title max-lg:!leading-[1.05] lg:!leading-[1.08] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[2.35rem]"
-          descriptionClassName="business-hero-description !line-clamp-2 max-w-[34ch] leading-relaxed max-lg:mb-0 max-lg:text-left lg:max-w-md"
-          textColumnClassName="lg:py-2 xl:pr-6"
+          titleClassName="business-hero-title max-lg:!leading-[1.05] lg:!leading-[1.1] tracking-tight max-lg:text-left lg:max-w-[14ch] lg:text-left xl:text-[1.875rem]"
+          descriptionClassName="business-hero-description !line-clamp-2 max-w-[32ch] leading-snug max-lg:mb-0 max-lg:text-left lg:max-w-sm"
+          textColumnClassName="lg:py-1 xl:pr-1"
           badge={
             <>
               <Sparkles className="h-3 w-3 shrink-0 opacity-90" aria-hidden />
@@ -417,16 +473,18 @@ export function BusinessDashboard() {
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: "easeOut" }}
-              className="business-hero-visual relative mx-auto flex w-full max-w-full flex-col items-center justify-center touch-manipulation lg:justify-self-center"
+              className="business-hero-visual relative flex w-full max-w-full flex-col items-center justify-center touch-manipulation max-lg:mx-auto lg:items-start lg:justify-start lg:justify-self-stretch"
             >
-              <img
-                src={businessHeroImage}
-                alt=""
-                className="business-hero-illustration relative z-[1] mx-auto block w-full max-w-[560px] object-contain object-center lg:max-w-[40rem]"
-                loading="eager"
-                decoding="async"
-                {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
-              />
+              <div className="business-hero-illustration-card w-full overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                <img
+                  src={businessHeroImage}
+                  alt=""
+                  className="business-hero-illustration relative z-[1] block w-full max-w-[min(100%,20rem)] object-cover object-center max-lg:mx-auto lg:max-w-none lg:object-left"
+                  loading="eager"
+                  decoding="async"
+                  {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
+                />
+              </div>
             </motion.div>
           }
           imageOverlay={false}
@@ -571,7 +629,7 @@ export function BusinessDashboard() {
             />
           ) : null}
 
-          <section className="business-dashboard-analytics-intro" aria-labelledby="business-analytics-period-heading">
+          <section className="business-dashboard-analytics-intro business-dashboard-block--primary" aria-labelledby="business-analytics-period-heading">
             <div className="business-dashboard-analytics-intro__head">
               <div className="min-w-0 space-y-1">
                 <h2
@@ -608,7 +666,7 @@ export function BusinessDashboard() {
           <motion.div
             {...dashboardBlockMotion}
             className={cn(
-              "business-dashboard-block dashboard-swr-swap",
+              "business-dashboard-block business-dashboard-block--primary dashboard-swr-swap",
               isPeriodRefreshing && "dashboard-swr-swap--revalidating",
             )}
             initial={false}
@@ -642,6 +700,38 @@ export function BusinessDashboard() {
           </motion.div>
 
           {isPreviewMode ? (
+            <motion.div {...dashboardBlockMotion} transition={{ delay: 0.32 }} className="business-dashboard-block business-dashboard-block--primary">
+              <DashboardFeaturePreviewCard
+                featureKey="advancedAnalytics"
+                title={t("business.dashboard.preview.analyticsTitle")}
+                description={t("business.dashboard.preview.analyticsDesc")}
+                icon={<CareIcon name="analytics" size="md" className="text-primary/80" />}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              {...dashboardBlockMotion}
+              transition={{ delay: 0.32 }}
+              className="business-dashboard-block business-dashboard-block--primary"
+            >
+              <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
+                <DashboardChartsIdleMount whenVisible fallback={<BusinessDashboardChartsFallback />}>
+                  <BusinessDashboardAnalyticsCharts
+                    showChartsLoading={showChartsLoading}
+                    useDevDemo={useDevDemo}
+                    hasTipActivityInPeriod={hasChartTipActivity}
+                    tipDistributionChartData={tipDistributionChartData}
+                    tipDistributionTotal={tipDistributionTotal}
+                    employeePerformance={employeePerformance}
+                    employeeCount={activeRosterCount}
+                    analyticsTimeframe={analyticsTimeframe}
+                  />
+                </DashboardChartsIdleMount>
+              </FeatureGate>
+            </motion.div>
+          )}
+
+          {isPreviewMode ? (
             <motion.div {...dashboardBlockMotion} transition={{ delay: 0.28 }} className="business-dashboard-block">
               <DashboardPremiumFeaturesSection />
             </motion.div>
@@ -650,7 +740,7 @@ export function BusinessDashboard() {
           <motion.div
             {...dashboardBlockMotion}
             transition={{ delay: 0.35 }}
-            className="business-dashboard-block"
+            className="business-dashboard-block business-dashboard-block--secondary"
           >
             {isPreviewMode ? (
               <DashboardFeaturePreviewCard
@@ -661,8 +751,8 @@ export function BusinessDashboard() {
               />
             ) : (
             <FeatureGate featureKey="employeeGoals" role="business" enabled={isBusiness}>
-            <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card w-full")}>
-              <CardHeader className="business-dashboard-panel-card__header space-y-3">
+            <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card business-dashboard-panel-card--secondary w-full")}>
+              <CardHeader className="business-dashboard-panel-card__header space-y-2.5">
                 <div className="flex w-full min-w-0 items-start justify-between gap-3">
                   <button
                     type="button"
@@ -673,16 +763,12 @@ export function BusinessDashboard() {
                     <div className={cn(businessUi.iconTileMuted, "business-dash-icon-tile--blue")}>
                       <CareIcon name="goals" size="md" />
                     </div>
-                    <CardTitle className="text-lg leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
+                    <CardTitle className="text-base font-semibold leading-snug">{t("business.dashboard.employeeGoalsTitle")}</CardTitle>
                   </button>
                   {employeeGoalsList.length > 0 ? (
-                    <Link
-                      to={TOP_PERFORMERS_PAGE_PATH}
-                      className="flex shrink-0 items-center gap-1 pt-1 text-sm font-medium text-primary hover:underline"
-                    >
+                    <DashboardViewAllLink to={TOP_PERFORMERS_PAGE_PATH}>
                       {t("business.dashboard.viewAllTopPerformers")}
-                      <ChevronRight className="h-4 w-4" aria-hidden />
-                    </Link>
+                    </DashboardViewAllLink>
                   ) : null}
                 </div>
                 {employeeGoalsSummary ? (
@@ -787,7 +873,7 @@ export function BusinessDashboard() {
           </motion.div>
 
           {/* Recent customer feedback */}
-          <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }}>
+          <motion.div {...dashboardBlockMotion} transition={{ delay: 0.55 }} className="business-dashboard-block business-dashboard-block--secondary">
             {isPreviewMode ? (
               <DashboardFeaturePreviewCard
                 featureKey="customerFeedback"
@@ -803,7 +889,7 @@ export function BusinessDashboard() {
           </motion.div>
 
           {/* Top Performers teaser & help */}
-          <div className={businessUi.bottomGrid}>
+          <div className={cn(businessUi.bottomGrid, "business-dashboard-block--tertiary")}>
             <motion.div
               {...dashboardBlockMotion}
               transition={{ delay: 0.6 }}

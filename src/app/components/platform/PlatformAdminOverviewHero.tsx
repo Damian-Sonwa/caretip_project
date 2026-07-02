@@ -3,9 +3,8 @@ import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
 import { format } from "date-fns";
 import { de, enUS } from "date-fns/locale";
-import { Activity, ArrowRight } from "lucide-react";
+import { Activity } from "lucide-react";
 import type { PlatformHealthResponse } from "../../lib/api";
-import { NetworkOverviewHero } from "../NetworkOverviewHero";
 import { platformUi } from "./platformDashboardUi";
 import { PLATFORM_SYSTEM_BASE } from "./platformAdminNav";
 import { cn } from "@/lib/utils";
@@ -33,7 +32,7 @@ export function PlatformAdminOverviewHero({ health, adminName, locale }: Platfor
       return {
         label: t("admin.overview.hero.statusOperational"),
         className:
-          "border-emerald-500/25 bg-emerald-500/10 text-emerald-800 dark:border-emerald-500/30 dark:bg-emerald-500/10 dark:text-emerald-300",
+          "border-emerald-500/20 bg-emerald-500/[0.07] text-emerald-800 hover:border-emerald-500/30 hover:bg-emerald-500/[0.1] dark:border-emerald-500/25 dark:bg-emerald-500/10 dark:text-emerald-300",
         dot: "bg-emerald-500",
       };
     }
@@ -41,66 +40,50 @@ export function PlatformAdminOverviewHero({ health, adminName, locale }: Platfor
       return {
         label: t("admin.overview.hero.statusDegraded"),
         className:
-          "border-amber-500/25 bg-amber-500/10 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200",
+          "border-amber-500/20 bg-amber-500/[0.07] text-amber-900 hover:border-amber-500/30 hover:bg-amber-500/[0.1] dark:border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-200",
         dot: "bg-amber-500",
       };
     }
     return {
       label: t("admin.overview.hero.statusChecking"),
-      className: "border-border bg-muted/60 text-muted-foreground",
+      className: "border-border/80 bg-muted/40 text-muted-foreground",
       dot: "bg-muted-foreground/50 animate-pulse",
     };
   }, [status, t]);
 
   return (
-    <section className={cn(platformUi.overviewHero, "platform-admin-overview-hero")} aria-labelledby="platform-overview-hero-title">
-      <div className="p-5 sm:p-6 lg:p-8">
-        <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between lg:gap-8">
-          <div className="min-w-0 space-y-4">
-            <div
-              className={cn(
-                "inline-flex max-w-full items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold",
-                statusBadge.className,
-              )}
-            >
-              <span className={cn("h-2 w-2 shrink-0 rounded-full", statusBadge.dot)} aria-hidden />
-              {statusBadge.label}
-            </div>
-
-            <div className="space-y-2">
-              <p className="text-sm font-medium text-muted-foreground">
-                {adminName
-                  ? t("admin.overview.hero.welcomeNamed", { name: adminName })
-                  : t("admin.overview.hero.welcome")}
+    <section
+      className={cn(platformUi.overviewHero, "platform-admin-overview-hero mb-8 sm:mb-10")}
+      aria-labelledby="platform-overview-hero-title"
+    >
+      <div className="platform-admin-overview-hero__inner">
+        <div className="platform-admin-overview-hero__grid">
+          <div className="platform-admin-overview-hero__copy">
+            {adminName ? (
+              <p className="platform-admin-overview-hero__welcome">
+                {t("admin.overview.hero.welcomeNamed", { name: adminName })}
               </p>
-              <h1
-                id="platform-overview-hero-title"
-                className="text-balance text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-[2rem]"
-              >
-                {t("admin.overview.title")}
-              </h1>
-              <p className="max-w-2xl text-pretty text-sm leading-relaxed text-muted-foreground sm:text-base">
-                {t("admin.overview.hero.summary")}
-              </p>
-            </div>
-
-            <p className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Activity className="h-3.5 w-3.5 shrink-0 opacity-70" aria-hidden />
-              <time dateTime={new Date().toISOString()}>{nowLabel}</time>
-            </p>
+            ) : null}
+            <h1 id="platform-overview-hero-title" className="platform-admin-overview-hero__title">
+              {t("admin.overview.title")}
+            </h1>
+            <p className="platform-admin-overview-hero__summary">{t("admin.overview.hero.summary")}</p>
           </div>
 
-          <Link
-            to={`${PLATFORM_SYSTEM_BASE}/health`}
-            className="inline-flex shrink-0 items-center gap-1 self-start text-sm font-medium text-accent hover:underline"
-          >
-            {t("admin.overview.hero.systemHealthLink")}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
-        </div>
-
-        <div className="mt-6 border-t border-border/70 pt-6">
-          <NetworkOverviewHero health={health} embedded variant="health" includeApiCard />
+          <div className="platform-admin-overview-hero__meta">
+            <p className="platform-admin-overview-hero__datetime">
+              <Activity className="platform-admin-overview-hero__datetime-icon" aria-hidden />
+              <time dateTime={new Date().toISOString()}>{nowLabel}</time>
+            </p>
+            <Link
+              to={`${PLATFORM_SYSTEM_BASE}/health`}
+              className={cn("platform-admin-overview-hero__status", statusBadge.className)}
+              aria-label={t("admin.overview.hero.statusLinkAria")}
+            >
+              <span className={cn("platform-admin-overview-hero__status-dot", statusBadge.dot)} aria-hidden />
+              <span className="truncate">{statusBadge.label}</span>
+            </Link>
+          </div>
         </div>
       </div>
     </section>

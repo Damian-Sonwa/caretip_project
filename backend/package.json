@@ -70,6 +70,7 @@
     "db:backfill-slugs": "tsx prisma/backfill-slugs.ts",
     "admin:create": "tsx scripts/createAdmin.js",
     "admin:create:extra": "node scripts/runCreateAdminExtra.mjs",
+    "admin:seed-team": "tsx scripts/seedPlatformAdminTeam.ts",
     "admin:verify": "tsx scripts/verify-platform-admin.ts",
     "db:mark-email-verified": "tsx scripts/markAllUsersEmailVerified.ts",
     "db:backfill-pending-employee-users": "tsx scripts/backfillPendingEmployeeUsers.ts",

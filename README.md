@@ -124,20 +124,25 @@ npm run db:migrate
 
 ### Walkthrough demo (product tour)
 
-`npm run db:seed` (from `backend/`) provisions a **multi-role tour**: verified venue, staff with slugs (including a dedicated primary staff login), table QRs, tips for business and employee dashboards, platform admin, and a few audit log rows.
+`npm run db:seed` (from `backend/`) provisions a **clean SaaS demo**: **5 businesses** (varied onboarding, KYC, and subscription states), **5 employees per business**, tips, feedback, goals, notifications, table QRs on the primary venue, and platform admin audit rows.
 
 | Role | Sign-in URL | Email | Password |
 |------|-------------|-------|----------|
 | **Business (manager)** | `/login` → Business | `demo@caretip.de` | `Demo1234!` |
 | **Employee (primary demo)** | `/login` → Staff | `employee@caretip.de` | `Demo1234!` |
 | **Platform admin** | `/platform-admin/login` | `admin@caretip.de` | `Demo1234!` |
+| **Platform admin (Albertina)** | `/platform-admin/login` | `albertina@caretip.de` | `caretip@2026!` |
+| **Platform admin (Fanny)** | `/platform-admin/login` | `fanny@caretip.de` | `caretip@2026!` |
+
+All platform admins share the **same** dashboard and platform data. Each has a separate login, MFA (Google Authenticator), sessions, and audit trail. Seed with `npm run admin:seed-team` (from `backend/`).
 
 | Field | Value |
 |-------|-------|
-| **Venue** | Brasserie Lindenstraße (KYC **verified**, onboarding marked complete) |
-| **Extra staff (optional)** | `anna.staff.demo@caretip.de`, Sam, Jordan, Luca, Sofia, Emma, Tom, Lina, Marco — same password |
+| **Primary venue** | Brasserie Lindenstraße — onboarding **approved**, KYC **verified**, **premium** |
+| **Other demo businesses** | Harbor Spa (enterprise), City Salon (submitted / pending review), Alpine Chalet (draft), Riverside Café (rejected) — managers: `harbor.demo@`, `salon.demo@`, `alpine.demo@`, `riverside.demo@` (same password) |
+| **Staff (primary venue)** | Mina Schmidt (`employee@`), Maria, Sam, Jordan, Luca — `*.staff.demo@caretip.de`, same password |
 
-Amber ribbons on the **business**, **employee**, and **platform admin** shells mark walkthrough accounts. Demo business rows are isolated to that venue; the admin shell still reads the real database (see ribbon copy on `/platform-admin/*`).
+Amber ribbons on the **business**, **employee**, and **platform admin** shells mark walkthrough accounts. The admin shell reads all five demo businesses from the database.
 
 ### 4. Run locally
 
@@ -366,6 +371,25 @@ npm run admin:create -- you@example.com 'strong-unique-password'
 ```
 
 From repo root you can also use `node scripts/createAdmin.js` (wrapper sets `cwd` to `backend`). In **production**, the script refuses unless **`ALLOW_ADMIN_SEED_IN_PRODUCTION=true`**. By default only **one** `SUPER_ADMIN` exists unless you allow multiples (see `backend/README.md`).
+
+### Additional platform admins (shared dashboard, separate logins)
+
+Internal team members each get their own `SUPER_ADMIN` account (`isPlatformAdmin: true`) — **no** new tenant, organization, or duplicated data. MFA (Google Authenticator) is configured **per account** on first sign-in at `/platform-admin/login`.
+
+```bash
+cd backend
+# ADMIN_SEED_SECRET required (≥ 8 characters)
+npm run admin:seed-team
+```
+
+Idempotent: creates missing accounts, updates role flags, never duplicates users. Existing passwords and MFA secrets are **preserved** on re-run. To force new temporary passwords: `npm run admin:seed-team -- --reset-passwords`.
+
+| Name | Email | Temporary password |
+|------|-------|------------------|
+| Albertina | `albertina@caretip.de` | `caretip@2026!` |
+| Fanny | `fanny@caretip.de` | `caretip@2026!` |
+
+Override via `ALBERTINA_ADMIN_TEMP_PASSWORD` / `FANNY_ADMIN_TEMP_PASSWORD` (min. 12 characters). Verify: `npm run admin:verify -- albertina@caretip.de 'caretip@2026!'`.
 
 ### Security measures (summary)
 
