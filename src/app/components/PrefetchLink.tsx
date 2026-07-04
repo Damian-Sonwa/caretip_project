@@ -1,4 +1,6 @@
 import { Link, type LinkProps } from "react-router";
+import { prefetchAuthenticatedRoute } from "../lib/prefetchAuthenticatedRoutes";
+import { prefetchCustomerFlowRoute } from "../lib/prefetchCustomerRoutes";
 import { prefetchPublicRoute } from "../lib/prefetchPublicRoutes";
 
 type PrefetchLinkProps = LinkProps;
@@ -11,10 +13,16 @@ function routePathFromTo(to: LinkProps["to"]): string {
   return "";
 }
 
+function warmRoute(path: string): void {
+  if (!path.startsWith("/")) return;
+  prefetchPublicRoute(path);
+  prefetchAuthenticatedRoute(path);
+  prefetchCustomerFlowRoute(path);
+}
+
 export function PrefetchLink({ to, onMouseEnter, onFocus, onTouchStart, ...rest }: PrefetchLinkProps) {
   const warm = () => {
-    const path = routePathFromTo(to);
-    if (path.startsWith("/")) prefetchPublicRoute(path);
+    warmRoute(routePathFromTo(to));
   };
 
   return (

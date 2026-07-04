@@ -30,12 +30,14 @@ export type EmployeeDashboardEarningsChartProps = {
   showChartLoading: boolean;
   chartData: Array<{ time: string; amount: number }>;
   analyticsPeriodRefreshing: boolean;
+  chartRenderKey?: string | number;
 };
 
 export function EmployeeDashboardEarningsChart({
   showChartLoading,
   chartData,
   analyticsPeriodRefreshing,
+  chartRenderKey = "employee-earnings",
 }: EmployeeDashboardEarningsChartProps) {
   const { t } = useTranslation();
 
@@ -76,7 +78,7 @@ export function EmployeeDashboardEarningsChart({
                   "dashboard-hero-metric-value--live flex h-[220px] w-full min-w-0 items-center justify-center sm:h-[260px] lg:h-[280px]",
                 )}
               >
-                <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} key={chartRenderKey}>
                   <AreaChart data={chartData} margin={{ top: 12, right: 12, left: 4, bottom: 4 }}>
                     <CartesianGrid strokeDasharray="4 6" stroke={DASHBOARD_CHART_GRID} vertical={false} />
                     <XAxis

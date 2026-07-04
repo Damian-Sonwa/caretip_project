@@ -1,9 +1,14 @@
+import { lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
 import { useRequireAuth } from "../../../hooks/useRequireAuth";
 import { useSubscriptionEntitlements } from "../../../hooks/useSubscriptionEntitlements";
 import { useBusinessQrAnalytics } from "../../../hooks/useBusinessQrAnalytics";
 import type { BusinessQrAnalytics, BusinessQrAnalyticsTimeframe } from "../../../lib/api";
-import { QrAnalyticsLivePanel } from "./QrAnalyticsLivePanel";
+import { DashboardChartSkeleton } from "../../dashboard/DashboardAnalyticsLoader";
+
+const QrAnalyticsLivePanel = lazy(() =>
+  import("./QrAnalyticsLivePanel").then((mod) => ({ default: mod.QrAnalyticsLivePanel })),
+);
 
 type QrAnalyticsSectionProps = {
   loading?: boolean;
@@ -42,7 +47,9 @@ export function QrAnalyticsSection({
           {t("business.team.performance.bi.qrTitle")}
         </h2>
       ) : null}
-      <QrAnalyticsLivePanel data={data} loading={loading} />
+      <Suspense fallback={<DashboardChartSkeleton minHeightClass="min-h-[220px]" />}>
+        <QrAnalyticsLivePanel data={data} loading={loading} />
+      </Suspense>
     </section>
   );
 }

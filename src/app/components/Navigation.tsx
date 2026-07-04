@@ -11,6 +11,7 @@ import { useTheme } from "../context/ThemeContext";
 import { LanguageSwitcher } from "@/components/i18n/LanguageSwitcher";
 import { ThemeQuickToggle } from "@/app/components/theme/ThemeQuickToggle";
 import { PrefetchLink } from "./PrefetchLink";
+import { prefetchDashboardRoutes } from "../lib/prefetchAuthenticatedRoutes";
 import { prefetchPrimaryNavRoutes } from "../lib/prefetchPublicRoutes";
 import { usePublicMountProbe } from "@/lib/publicMountProbe";
 
@@ -37,9 +38,12 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
   useEffect(() => {
     if (primaryNavPrefetchScheduled) return;
     primaryNavPrefetchScheduled = true;
-    const schedule = () => prefetchPrimaryNavRoutes();
+    const schedule = () => {
+      prefetchPrimaryNavRoutes();
+      prefetchDashboardRoutes();
+    };
     if (typeof requestIdleCallback === "function") {
-      const id = requestIdleCallback(schedule, { timeout: 5000 });
+      const id = requestIdleCallback(schedule, { timeout: 3500 });
       return () => cancelIdleCallback(id);
     }
     const id = window.setTimeout(schedule, 2500);

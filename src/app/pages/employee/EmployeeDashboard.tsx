@@ -111,6 +111,7 @@ export function EmployeeDashboard() {
     error: analyticsError,
     refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
+    dataRevision,
   } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId, advancedAnalyticsEnabled);
 
   const showMetricsLoading = showMetricsSkeleton;
@@ -628,11 +629,16 @@ export function EmployeeDashboard() {
           />
 
           <FeatureGate featureKey="advancedAnalytics" role="employee" enabled={dashboardEnabled}>
-          <DashboardChartsIdleMount whenVisible fallback={<EmployeeDashboardEarningsChartFallback />}>
+          <DashboardChartsIdleMount
+            whenVisible
+            mountSignal={`${analyticsTimeframe}-${dataRevision}`}
+            fallback={<EmployeeDashboardEarningsChartFallback />}
+          >
             <EmployeeDashboardEarningsChart
               showChartLoading={showChartLoading}
               chartData={chartData}
               analyticsPeriodRefreshing={analyticsPeriodRefreshing}
+              chartRenderKey={`${analyticsTimeframe}-${dataRevision}-${chartData.length}`}
             />
           </DashboardChartsIdleMount>
           </FeatureGate>

@@ -703,7 +703,11 @@ export function BusinessDashboard() {
               className="business-dashboard-block business-dashboard-block--primary"
             >
               <FeatureGate featureKey="advancedAnalytics" role="business" enabled={isBusiness}>
-                <DashboardChartsIdleMount whenVisible fallback={<BusinessDashboardChartsFallback />}>
+                <DashboardChartsIdleMount
+                  whenVisible
+                  mountSignal={`${analyticsTimeframe}-${dataRevision}`}
+                  fallback={<BusinessDashboardChartsFallback />}
+                >
                   <BusinessDashboardAnalyticsCharts
                     showChartsLoading={showChartsLoading}
                     useDevDemo={useDevDemo}
@@ -713,6 +717,7 @@ export function BusinessDashboard() {
                     employeePerformance={employeePerformance}
                     employeeCount={activeRosterCount}
                     analyticsTimeframe={analyticsTimeframe}
+                    chartRenderKey={`${analyticsTimeframe}-${dataRevision}-${tipDistributionChartData.length}`}
                   />
                 </DashboardChartsIdleMount>
               </FeatureGate>

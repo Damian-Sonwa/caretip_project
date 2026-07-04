@@ -15,7 +15,7 @@ import {
   YAxis,
 } from "recharts";
 import { CareIcon } from "@/components/icons";
-import { dashboardBlockMotion } from "@/lib/motionPerf";
+import { useDashboardBlockMotion } from "@/lib/motionPerf";
 import { formatEur } from "../../lib/formatEur";
 import { cn } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
@@ -48,6 +48,7 @@ export type BusinessDashboardAnalyticsChartsProps = {
   employeePerformance: EmployeePerformanceChartRow[];
   employeeCount: number;
   analyticsTimeframe: "week" | "month" | "year";
+  chartRenderKey?: string | number;
 };
 
 const CHART_SLOT_MIN_HEIGHT = "min-h-[260px] sm:min-h-[290px]";
@@ -62,8 +63,11 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
   employeePerformance,
   employeeCount,
   analyticsTimeframe,
+  chartRenderKey = "business-analytics",
 }: BusinessDashboardAnalyticsChartsProps) {
   const { t } = useTranslation();
+  const tipsChartMotion = useDashboardBlockMotion(0.12);
+  const employeeChartMotion = useDashboardBlockMotion(0.18);
 
   const tipsPerformanceDescKey =
     analyticsTimeframe === "week"
@@ -84,8 +88,7 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
   return (
     <div className={businessUi.analyticsChartsGrid}>
       <motion.div
-        {...dashboardBlockMotion}
-        transition={{ delay: 0.4 }}
+        {...tipsChartMotion}
         className="flex h-full min-h-0 w-full"
       >
         <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
@@ -113,7 +116,7 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
               ) : (
                 <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                   <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} key={`${chartRenderKey}-tips`}>
                       <AreaChart
                         data={tipDistributionChartData}
                         margin={{ top: 12, right: 12, left: 4, bottom: 4 }}
@@ -165,8 +168,7 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
       </motion.div>
 
       <motion.div
-        {...dashboardBlockMotion}
-        transition={{ delay: 0.5 }}
+        {...employeeChartMotion}
         className="flex h-full min-h-0 w-full"
       >
         <Card className={cn(businessUi.cardStatic, "business-dashboard-chart-card business-dashboard-panel-card w-full")}>
@@ -205,7 +207,7 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
               ) : (
                 <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                   <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0}>
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} key={`${chartRenderKey}-team`}>
                       <BarChart
                         data={employeePerformance}
                         layout="vertical"

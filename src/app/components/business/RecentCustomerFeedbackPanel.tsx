@@ -14,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { logClientError } from "@/app/lib/clientLog";
 import { isApiPendingVerificationError, isApiSubscriptionRequiredError } from "@/app/lib/apiError";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
+import { useInViewActive } from "@/lib/motionPerf";
 import { useSubscriptionEntitlements } from "@/app/hooks/useSubscriptionEntitlements";
 
 export const DASHBOARD_CUSTOMER_FEEDBACK_TEASER_LIMIT = 3;
@@ -28,6 +29,9 @@ export function RecentCustomerFeedbackPanel({
   className,
 }: RecentCustomerFeedbackPanelProps) {
   const { t } = useTranslation();
+  const { ref: panelRef, active: panelVisible } = useInViewActive<HTMLDivElement>({
+    rootMargin: "160px 0px",
+  });
   const { ready, hasFeature, hasActiveEntitlements } = useSubscriptionEntitlements({
     enabled,
     role: "business",
@@ -77,13 +81,17 @@ export function RecentCustomerFeedbackPanel({
       setSummary(null);
       return;
     }
+    if (!panelVisible) return;
     scheduleIdleWork(() => {
       void load();
-    }, 1400);
-  }, [enabled, entitled, load, ready]);
+    }, 0);
+  }, [enabled, entitled, load, panelVisible, ready]);
 
   return (
-    <Card className={cn(businessUi.cardStatic, "business-dashboard-panel-card business-dashboard-panel-card--secondary w-full", className)}>
+    <Card
+      ref={panelRef}
+      className={cn(businessUi.cardStatic, "business-dashboard-panel-card business-dashboard-panel-card--secondary w-full", className)}
+    >
       <CardHeader className="business-dashboard-panel-card__header flex flex-row items-start justify-between gap-4 space-y-0">
         <div className="min-w-0 space-y-1">
           <CardTitle className="text-base font-semibold">{t("business.customerFeedback.recentTitle")}</CardTitle>

@@ -25,6 +25,7 @@ import {
   hasBusinessAnalyticsPayload,
   isBusinessGoalsPayloadSettled,
 } from "../lib/dashboardVisibleContent";
+import { shouldRefetchOnAnalyticsCapabilityUpgrade } from "../lib/dashboardAnalyticsLifecycle";
 import {
   getBusinessAnalyticsBundle,
   invalidateBusinessAnalytics,
@@ -118,6 +119,7 @@ export function useBusinessDashboardStats(
   /** Avoid clearing settled UI on bootstrap before first enable (prevents load→content→load flicker). */
   const wasDashboardEnabledRef = useRef(false);
   const scheduleInactivePrefetchRef = useRef<(activeTf: AnalyticsTimeframe) => void>(() => {});
+  const prevAdvancedAnalyticsRef = useRef<boolean | null>(null);
 
   const persistSwr = useCallback((tf: AnalyticsTimeframe) => {
     const summary = summaryPartialRef.current.get(tf);
@@ -242,11 +244,11 @@ export function useBusinessDashboardStats(
   const loadStatsFor = useCallback(
     async (
       tf: AnalyticsTimeframe,
-      opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean },
+      opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean },
     ): Promise<void> => {
       if (!sessionValidated || !enabled) return;
 
-      const revalidate = opts?.soft === true;
+      const revalidate = opts?.soft === true || opts?.forceNetwork === true;
 
       const kpisVisibleOnScreen = () =>
         hasBusinessKpiValues(statsRef.current) ||
@@ -439,11 +441,6 @@ export function useBusinessDashboardStats(
       const stillActive = () =>
         !controller.signal.aborted && (!affectsUi || (tf === tfRef.current && uiRequestSeqRef.current === seq));
 
-      let analyticsDeferred = false;
-      // If we schedule deferred analytics, this token lets us detect later cancellation/supersession
-      // and avoid leaving `analyticsLoading` stuck on.
-      const deferredToken = { tf, seq };
-
       const handlePendingVerification = (msg: string) => {
         if (!msg.toLowerCase().includes("pending verification")) return false;
         if (affectsUi && uiRequestSeqRef.current === seq) {
@@ -476,7 +473,7 @@ export function useBusinessDashboardStats(
           /** Sprint 8.1 — single scope=full fetch via unified analytics pipeline. */
           const needsPeriodNetwork = !summarySettled || (!analyticsSettled && advancedAnalyticsEnabledRef.current);
 
-          if (needsPeriodNetwork && (!summaryFromMemory || (!analyticsInMemory && advancedAnalyticsEnabledRef.current))) {
+          if (needsPeriodNetwork && (!summaryFromMemory || !analyticsSettled)) {
             const periodStats = await fetchBusinessPeriodStats(tf, {
               silent,
               signal: controller.signal,
@@ -518,22 +515,10 @@ export function useBusinessDashboardStats(
                 devSetHydrationPhase("goals", "ready");
                 commitUiStats(tf, seq, true);
               }
-            } else if (affectsUi) {
-              analyticsDeferred = true;
-              requestAnimationFrame(() => {
-                analyticsDeferTimerRef.current = window.setTimeout(() => {
-                  analyticsDeferTimerRef.current = null;
-                  if (!stillActive() || analyticsSettled) return;
-                  setAnalyticsLoading(false);
-                  devSetHydrationPhase("charts", "ready");
-                  devSetHydrationPhase("goals", "ready");
-                  commitUiStats(tf, seq, true);
-                  applyHeroFromMonth(tf);
-                  if (stillActive() && uiRequestSeqRef.current === seq) {
-                    setIsRevalidating(false);
-                  }
-                }, 0);
-              });
+            } else if (affectsUi && stillActive()) {
+              setAnalyticsLoading(true);
+              devSetHydrationPhase("charts", "loading");
+              devSetHydrationPhase("goals", "loading");
             }
           } else if (affectsUi && advancedAnalyticsEnabledRef.current) {
             setAnalyticsLoading(false);
@@ -571,23 +556,8 @@ export function useBusinessDashboardStats(
       } finally {
         if (affectsUi && uiRequestSeqRef.current === seq) {
           if (!summarySettled) setSummaryLoading(false);
-          if (!analyticsSettled) {
-            // Normal path: no deferred analytics => clear loading here.
-            if (!analyticsDeferred) {
-              setAnalyticsLoading(false);
-            } else {
-              // Deferred analytics was intended, but if it was cancelled (timer cleared) or the request
-              // is no longer current, ensure we don't leave charts/goals stuck loading.
-              const deferredCancelled = analyticsDeferTimerRef.current == null;
-              if (controller.signal.aborted || !stillActive() || deferredCancelled) {
-                setAnalyticsLoading(false);
-                devSetHydrationPhase("charts", "idle");
-                devSetHydrationPhase("goals", "idle");
-              }
-            }
-          }
-          // Deferred analytics clears `isRevalidating` in runAnalytics.finally.
-          if (!analyticsDeferred) setIsRevalidating(false);
+          if (!analyticsSettled) setAnalyticsLoading(false);
+          setIsRevalidating(false);
         }
         if (abortByTfRef.current.get(tf) === controller) {
           abortByTfRef.current.delete(tf);
@@ -844,6 +814,33 @@ export function useBusinessDashboardStats(
 
   useEffect(() => {
     if (!enabled || !sessionValidated) return;
+
+    const prev = prevAdvancedAnalyticsRef.current;
+    prevAdvancedAnalyticsRef.current = advancedAnalyticsEnabled;
+
+    if (!shouldRefetchOnAnalyticsCapabilityUpgrade(prev, advancedAnalyticsEnabled)) return;
+
+    const tf = tfRef.current;
+    const analyticsSlice = analyticsPartialRef.current.get(tf);
+    if (hasBusinessAnalyticsPayload(analyticsSlice)) return;
+
+    cancelDeferredAnalytics();
+    invalidateBusinessAnalytics(tf);
+    analyticsPartialRef.current.delete(tf);
+    businessSwrStore.delete(swrKey(tf));
+    setAnalyticsLoading(true);
+    devSetHydrationPhase("charts", "loading");
+    devSetHydrationPhase("goals", "loading");
+    void loadStatsForRef.current(tf, {
+      affectsUi: true,
+      soft: false,
+      silent: false,
+      forceNetwork: true,
+    });
+  }, [advancedAnalyticsEnabled, enabled, sessionValidated, cancelDeferredAnalytics]);
+
+  useEffect(() => {
+    if (!enabled || !sessionValidated) return;
     return subscribeBusinessAnalyticsRefresh(() => {
       void loadStatsForRef.current(tfRef.current, {
         affectsUi: true,
@@ -1011,8 +1008,11 @@ export function useBusinessDashboardStats(
     hasBusinessKpiValues(stats) ||
     Boolean(lastKnownGoodMetrics);
 
-  const hasVisibleSecondaryOnScreen =
-    hasBusinessSecondaryContent(displayStats) || hasBusinessSecondaryContent(stats);
+  const chartsPayloadPending =
+    advancedAnalyticsEnabled &&
+    valuesMatchAnalyticsPeriod &&
+    !hasBusinessAnalyticsPayload(displayStats) &&
+    !hasBusinessAnalyticsPayload(stats);
 
   const isMetricsInitialLoad =
     enabled &&
@@ -1026,9 +1026,8 @@ export function useBusinessDashboardStats(
     enabled &&
     sessionValidated &&
     !pendingVerification &&
-    analyticsLoading &&
-    !hasVisibleSecondaryOnScreen &&
-    !isRevalidating;
+    !isRevalidating &&
+    (analyticsLoading || chartsPayloadPending);
 
   /** Status strip: stay on Updating until KPIs, charts/goals, and period alignment have all settled. */
   const isPeriodRefreshing =
@@ -1039,6 +1038,7 @@ export function useBusinessDashboardStats(
     (isRevalidating ||
       summaryLoading ||
       analyticsLoading ||
+      chartsPayloadPending ||
       !valuesMatchAnalyticsPeriod);
 
   const isGoalsInitialLoad =

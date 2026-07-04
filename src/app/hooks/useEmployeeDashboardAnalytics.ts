@@ -31,6 +31,7 @@ import {
   hasEmployeeChartOrTipsContent,
   hasEmployeePayloadVisibleContent,
 } from "../lib/dashboardVisibleContent";
+import { shouldRefetchOnAnalyticsCapabilityUpgrade } from "../lib/dashboardAnalyticsLifecycle";
 
 export type EmployeeAnalyticsTimeframe = "today" | "week" | "month";
 
@@ -158,7 +159,7 @@ export function useEmployeeDashboardAnalytics(
   const hasSettledLiveUiRef = useRef(false);
   const analyticsDeferTimerRef = useRef<number | null>(null);
   const loadForRef = useRef<
-    (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
+    (tf: EmployeeAnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean }) => Promise<void>
   >(async () => {});
   const advancedAnalyticsEnabledRef = useRef(advancedAnalyticsEnabled);
   advancedAnalyticsEnabledRef.current = advancedAnalyticsEnabled;
@@ -167,6 +168,7 @@ export function useEmployeeDashboardAnalytics(
   const wasDashboardEnabledRef = useRef(false);
   const prefetchQueueRef = useRef<number | null>(null);
   const scheduleInactivePrefetchRef = useRef<(activeTf: EmployeeAnalyticsTimeframe) => void>(() => {});
+  const prevAdvancedAnalyticsRef = useRef<boolean | null>(null);
 
   const abortInactiveTimeframes = useCallback((activeTf: EmployeeAnalyticsTimeframe) => {
     for (const [tf, controller] of abortRef.current) {
@@ -326,7 +328,7 @@ export function useEmployeeDashboardAnalytics(
   const loadFor = useCallback(
     async (
       tf: EmployeeAnalyticsTimeframe,
-      opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean },
+      opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean },
     ): Promise<void> => {
       if (!enabled) return;
 
@@ -334,7 +336,7 @@ export function useEmployeeDashboardAnalytics(
 
       const affectsUi = opts?.affectsUi === true && tf === tfRef.current;
       const seq = affectsUi ? ++uiRequestSeqRef.current : 0;
-      const revalidate = opts?.soft === true;
+      const revalidate = opts?.soft === true || opts?.forceNetwork === true;
       const periodSessionReady = isPeriodSessionReady(tf);
 
       const payloadVisibleOnScreen = () =>
@@ -628,6 +630,29 @@ export function useEmployeeDashboardAnalytics(
     };
   }, [enabled, analyticsTimeframe]);
 
+  useEffect(() => {
+    if (!enabled) return;
+
+    const prev = prevAdvancedAnalyticsRef.current;
+    prevAdvancedAnalyticsRef.current = advancedAnalyticsEnabled;
+
+    if (!shouldRefetchOnAnalyticsCapabilityUpgrade(prev, advancedAnalyticsEnabled)) return;
+
+    const tf = tfRef.current;
+    const analyticsSlice = analyticsPartialRef.current.get(tf);
+    if (analyticsSlice?.chartSeries !== undefined) return;
+
+    if (analyticsDeferTimerRef.current != null) {
+      window.clearTimeout(analyticsDeferTimerRef.current);
+      analyticsDeferTimerRef.current = null;
+    }
+    analyticsPartialRef.current.delete(tf);
+    employeePeriodSwrStore.delete(swrKey(tf));
+    setAnalyticsLoading(true);
+    devSetHydrationPhase("charts", "loading");
+    void loadForRef.current(tf, { affectsUi: true, soft: false, silent: false, forceNetwork: true });
+  }, [advancedAnalyticsEnabled, enabled]);
+
   const refetchLive = useCallback(() => {
     clearEmployeeTipsClientCache(tfRef.current);
     void loadFor(tfRef.current, { affectsUi: true, soft: true, silent: true });
@@ -775,14 +800,19 @@ export function useEmployeeDashboardAnalytics(
     hasEmployeeChartOrTipsContent(displayPayloadOrLatest) ||
     hasEmployeeChartOrTipsContent(payload);
 
+  const chartPayloadPending =
+    advancedAnalyticsEnabled &&
+    valuesMatchAnalyticsPeriod &&
+    displayPayload?.chartSeries === undefined &&
+    payload?.chartSeries === undefined;
+
   const isMetricsInitialLoad =
     enabled && !hasVisibleKpisOnScreen && (summaryLoading || isRevalidating);
 
   const isAnalyticsInitialLoad =
     enabled &&
-    analyticsLoading &&
-    !hasVisibleSecondaryOnScreen &&
-    !isRevalidating;
+    !isRevalidating &&
+    (analyticsLoading || chartPayloadPending);
 
   const isMetricsPeriodLoading =
     enabled &&
@@ -798,7 +828,8 @@ export function useEmployeeDashboardAnalytics(
     (isRevalidating ||
       !valuesMatchAnalyticsPeriod ||
       summaryLoading ||
-      analyticsLoading);
+      analyticsLoading ||
+      chartPayloadPending);
 
   const analyticsTimeframeLoading =
     isPeriodRefreshing && !isMetricsInitialLoad ? analyticsTimeframe : null;

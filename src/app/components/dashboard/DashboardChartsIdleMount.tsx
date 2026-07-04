@@ -1,4 +1,5 @@
-import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
+import { Suspense, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import { isDashboardChartSlotNearViewport } from "@/app/lib/dashboardAnalyticsLifecycle";
 import { scheduleIdleWork } from "@/lib/publicRouteDefer";
 
 type DashboardChartsIdleMountProps = {
@@ -11,6 +12,13 @@ type DashboardChartsIdleMountProps = {
   rootMargin?: string;
   /** Fires once when idle + visibility gates pass — use to start deferred data fetches. */
   onReady?: () => void;
+  /**
+   * Bumps when chart data becomes ready — re-checks viewport so charts mount after async fetch
+   * even if the observer attached before layout settled.
+   */
+  mountSignal?: number | string;
+  /** Safety net: mount charts even if IntersectionObserver never fires (default 2.5s). */
+  maxWaitMs?: number;
 };
 
 /** Mount chart children after idle so Recharts is not on the dashboard shell parse path. */
@@ -21,37 +29,79 @@ export function DashboardChartsIdleMount({
   whenVisible = false,
   rootMargin = "120px",
   onReady,
+  mountSignal,
+  maxWaitMs = 2500,
 }: DashboardChartsIdleMountProps) {
-  const [idleReady, setIdleReady] = useState(false);
+  const [idleReady, setIdleReady] = useState(!whenVisible);
   const [visible, setVisible] = useState(!whenVisible);
   const slotRef = useRef<HTMLDivElement | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const markVisible = useCallback(() => {
+    setVisible(true);
+    observerRef.current?.disconnect();
+    observerRef.current = null;
+  }, []);
 
   useEffect(() => {
+    if (whenVisible) {
+      setIdleReady(true);
+      return;
+    }
     scheduleIdleWork(() => setIdleReady(true), timeoutMs);
-  }, [timeoutMs]);
+  }, [timeoutMs, whenVisible]);
+
+  const bindSlotRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      slotRef.current = node;
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+
+      if (!whenVisible || !node) return;
+
+      if (isDashboardChartSlotNearViewport(node, rootMargin)) {
+        markVisible();
+        return;
+      }
+
+      if (typeof IntersectionObserver === "undefined") {
+        markVisible();
+        return;
+      }
+
+      const obs = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            markVisible();
+          }
+        },
+        { rootMargin },
+      );
+      observerRef.current = obs;
+      obs.observe(node);
+    },
+    [markVisible, rootMargin, whenVisible],
+  );
 
   useEffect(() => {
-    if (!whenVisible) {
-      setVisible(true);
-      return;
+    return () => {
+      observerRef.current?.disconnect();
+      observerRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!whenVisible || visible) return;
+    if (isDashboardChartSlotNearViewport(slotRef.current, rootMargin)) {
+      markVisible();
     }
-    const node = slotRef.current;
-    if (!node || typeof IntersectionObserver === "undefined") {
-      setVisible(true);
-      return;
-    }
-    const obs = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((e) => e.isIntersecting)) {
-          setVisible(true);
-          obs.disconnect();
-        }
-      },
-      { rootMargin },
-    );
-    obs.observe(node);
-    return () => obs.disconnect();
-  }, [whenVisible, rootMargin]);
+  }, [markVisible, mountSignal, rootMargin, visible, whenVisible]);
+
+  useEffect(() => {
+    if (!whenVisible || visible || maxWaitMs <= 0) return;
+    const timer = window.setTimeout(() => markVisible(), maxWaitMs);
+    return () => window.clearTimeout(timer);
+  }, [markVisible, maxWaitMs, visible, whenVisible]);
 
   const ready = idleReady && visible;
   const onReadyFiredRef = useRef(false);
@@ -64,14 +114,14 @@ export function DashboardChartsIdleMount({
 
   if (!ready) {
     return (
-      <div ref={whenVisible ? slotRef : undefined} aria-hidden={whenVisible ? true : undefined}>
+      <div ref={bindSlotRef} aria-hidden={whenVisible ? true : undefined}>
         {fallback}
       </div>
     );
   }
 
   return (
-    <div ref={whenVisible ? slotRef : undefined}>
+    <div ref={bindSlotRef}>
       <Suspense fallback={fallback}>{children}</Suspense>
     </div>
   );

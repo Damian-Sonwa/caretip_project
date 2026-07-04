@@ -42,12 +42,12 @@ export function DashboardAnalyticsPeriodToggle<T extends string>({
               active ? dashboardPeriodUi.periodBtnActive : dashboardPeriodUi.periodBtnIdle,
             )}
           >
-            <span className="min-w-0 truncate text-center">{opt.label}</span>
-            <span className={dashboardPeriodUi.periodBtnLoadingSlot} aria-hidden>
-              {opt.loading ? (
-                <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-current/70" />
-              ) : null}
-            </span>
+            <span className={dashboardPeriodUi.periodBtnLabel}>{opt.label}</span>
+            {opt.loading ? (
+              <span className={dashboardPeriodUi.periodBtnLoadingDot} aria-hidden>
+                <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-current/70" />
+              </span>
+            ) : null}
           </button>
         );
       })}

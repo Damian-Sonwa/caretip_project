@@ -50,6 +50,8 @@ import {
   saveValidatedInviteContext,
   type ValidatedInviteContext,
 } from '../lib/inviteContextStore';
+import { scheduleIdleWork } from "@/lib/publicRouteDefer";
+import { prefetchDashboardRoutes } from "../lib/prefetchAuthenticatedRoutes";
 
 const ROLE_MISMATCH_TOAST_STYLE = { background: '#000000', color: '#ffffff' } as const;
 
@@ -148,6 +150,10 @@ export function AuthPage() {
       setIsLogin(true);
     }
   }, [location.pathname, location.search]);
+
+  useEffect(() => {
+    scheduleIdleWork(() => prefetchDashboardRoutes(), 1500);
+  }, []);
 
   /** Business signup must not accept employee invite params — send to /join. */
   useEffect(() => {

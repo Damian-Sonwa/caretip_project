@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useReducedMotion } from "motion/react";
 
 /** @deprecated Use LandingReveal — kept for non-landing dashboard code if referenced. */
 export const landingSectionViewport = { once: true, amount: 0.15, margin: "0px 0px -5% 0px" };
@@ -20,6 +21,27 @@ export const dashboardBlockMotion = {
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.35, ease: [0.22, 1, 0.36, 1] as const },
 } as const;
+
+/** Respects reduced motion; optional stagger delay for chart blocks. */
+export function useDashboardBlockMotion(extraDelay = 0) {
+  const reduceMotion = useReducedMotion();
+  return React.useMemo(() => {
+    if (reduceMotion) {
+      return {
+        initial: false as const,
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0 },
+      };
+    }
+    return {
+      ...dashboardBlockMotion,
+      transition: {
+        ...dashboardBlockMotion.transition,
+        ...(extraDelay > 0 ? { delay: extraDelay } : {}),
+      },
+    };
+  }, [extraDelay, reduceMotion]);
+}
 
 /** Pause timers / CSS loops when off-screen. */
 export function useInViewActive<T extends HTMLElement = HTMLDivElement>(options?: IntersectionObserverInit) {

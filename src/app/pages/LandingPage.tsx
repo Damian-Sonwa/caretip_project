@@ -4,7 +4,7 @@ import { isAiAssistantEnabled } from "../lib/featureFlags";
 import { Navigation } from "../components/Navigation";
 import { CareTipLandingHero } from "@/components/landing/CareTipLandingHero";
 import { Footer } from "../components/Footer";
-import { scheduleIdleWork, ViewportDeferred } from "@/lib/publicRouteDefer";
+import { DeferredBelowFold, scheduleIdleWork, ViewportDeferred } from "@/lib/publicRouteDefer";
 
 const LandingPageBelowFold = lazy(() =>
   import("./LandingPageBelowFold").then((mod) => ({ default: mod.LandingPageBelowFold })),
@@ -14,11 +14,12 @@ const LandingPageBelowFold = lazy(() =>
 export function LandingPage() {
   const { t, i18n } = useTranslation();
   const [landingRoot, setLandingRoot] = useState<HTMLDivElement | null>(null);
-  const [belowFoldReady, setBelowFoldReady] = useState(false);
   const isDe = i18n.language?.toLowerCase().startsWith("de");
 
   useEffect(() => {
-    scheduleIdleWork(() => setBelowFoldReady(true), 900);
+    scheduleIdleWork(() => {
+      void import("./LandingPageBelowFold");
+    }, 600);
   }, []);
 
   return (
@@ -40,11 +41,11 @@ export function LandingPage() {
             imageAlt={t("landing.showcase.tabQrAlt")}
             isDe={isDe}
           />
-          {belowFoldReady ? (
+          <DeferredBelowFold rootMargin="520px 0px" minHeight="1px">
             <Suspense fallback={null}>
               <LandingPageBelowFold />
             </Suspense>
-          ) : null}
+          </DeferredBelowFold>
         </main>
         <ViewportDeferred minHeight="14rem" rootMargin="320px 0px">
           <Footer className="caretip-landing-footer" />
