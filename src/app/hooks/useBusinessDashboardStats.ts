@@ -102,7 +102,10 @@ export function useBusinessDashboardStats(
   const analyticsPartialRef = useRef(new Map<AnalyticsTimeframe, Partial<BusinessDashboardStats>>());
   const hasSettledLiveUiRef = useRef(false);
   const loadStatsForRef = useRef<
-    (tf: AnalyticsTimeframe, opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean }) => Promise<void>
+    (
+      tf: AnalyticsTimeframe,
+      opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean },
+    ) => Promise<void>
   >(async () => {});
   const loadHeroMonthSummaryRef = useRef<() => Promise<void>>(async () => {});
   const heroDeferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
