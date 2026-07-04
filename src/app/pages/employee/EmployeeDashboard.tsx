@@ -85,16 +85,18 @@ interface NewTipPayload {
 
 export function EmployeeDashboard() {
   const { t, i18n } = useTranslation();
-  const { user, authHydrated, sessionValidated, updateUser } = useRequireAuth();
+  const { user, authHydrated, sessionValidated, authReady, updateUser } = useRequireAuth();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const dashboardEnabled = isProtectedApiReady() && user?.role === "employee";
+  const dashboardEnabled = user?.role === "employee" && authReady;
 
   const { advancedAnalyticsEnabled, hasFeature, ready: entitlementsReady } = useSubscriptionEntitlements({
     enabled: dashboardEnabled,
     role: user?.role === "employee" ? "employee" : null,
   });
+
+  const dashboardDataReady = dashboardEnabled && entitlementsReady && sessionValidated && Boolean(user?.employeeId);
 
   const {
     analyticsTimeframe,
@@ -112,7 +114,12 @@ export function EmployeeDashboard() {
     refreshQuiet: refreshDashboardQuiet,
     applyLiveTip,
     dataRevision,
-  } = useEmployeeDashboardAnalytics(dashboardEnabled, user?.employeeId, advancedAnalyticsEnabled);
+  } = useEmployeeDashboardAnalytics(
+    dashboardDataReady,
+    user?.employeeId,
+    sessionValidated,
+    advancedAnalyticsEnabled,
+  );
 
   const showMetricsLoading = showMetricsSkeleton;
   const showChartLoading = isAnalyticsInitialLoad;
@@ -136,7 +143,7 @@ export function EmployeeDashboard() {
   const { socket, connected, connectionStatus } = useSocket(socketReady);
 
   useRealtimeFallback(connected, refreshDashboardQuiet);
-  useDashboardTabRefocus(refreshDashboardQuiet, dashboardEnabled);
+  useDashboardTabRefocus(refreshDashboardQuiet, dashboardDataReady);
 
   useEffect(() => {
     if (!authHydrated || !sessionValidated || !user || user.role !== "employee") return;

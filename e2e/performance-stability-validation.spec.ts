@@ -347,6 +347,7 @@ test.describe("Performance change stability validation", () => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto("/employee/dashboard");
     await expect(page.locator(".employee-dashboard-hero").first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByText(/€\s*24|24\s*€/)).toBeVisible({ timeout: 15_000 });
 
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight * 0.45));
     await expect(page.locator(".recharts-surface").first()).toBeVisible({ timeout: 15_000 });

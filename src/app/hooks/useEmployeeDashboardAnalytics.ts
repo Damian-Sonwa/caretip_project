@@ -28,7 +28,9 @@ import { isWalkthroughDemoEmployee } from "../lib/walkthroughDemo";
 import { devSetHydrationPhase } from "../lib/dashboardDevDebug";
 import { primeEmployeeAccountSnapshot } from "./useEmployeeAccountSummary";
 import {
+  hasEmployeeAnalyticsPayload,
   hasEmployeeChartOrTipsContent,
+  hasEmployeeMetricValues,
   hasEmployeePayloadVisibleContent,
 } from "../lib/dashboardVisibleContent";
 import { shouldRefetchOnAnalyticsCapabilityUpgrade } from "../lib/dashboardAnalyticsLifecycle";
@@ -125,6 +127,7 @@ function payloadFromResponse(data: EmployeeTipsResponse): AnalyticsPayload {
 export function useEmployeeDashboardAnalytics(
   enabled: boolean,
   employeeId: string | undefined,
+  sessionValidated: boolean,
   advancedAnalyticsEnabled = true,
 ) {
   const [analyticsTimeframe, setAnalyticsTimeframe] = useState<EmployeeAnalyticsTimeframe>("today");
@@ -169,6 +172,10 @@ export function useEmployeeDashboardAnalytics(
   const prefetchQueueRef = useRef<number | null>(null);
   const scheduleInactivePrefetchRef = useRef<(activeTf: EmployeeAnalyticsTimeframe) => void>(() => {});
   const prevAdvancedAnalyticsRef = useRef<boolean | null>(null);
+
+  const isActive = enabled && sessionValidated && Boolean(employeeId);
+  const isActiveRef = useRef(isActive);
+  isActiveRef.current = isActive;
 
   const abortInactiveTimeframes = useCallback((activeTf: EmployeeAnalyticsTimeframe) => {
     for (const [tf, controller] of abortRef.current) {
@@ -224,14 +231,15 @@ export function useEmployeeDashboardAnalytics(
   );
 
   const isPeriodSessionReady = useCallback((tf: EmployeeAnalyticsTimeframe): boolean => {
+    if (!canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) return false;
     const summaryPartial = summaryPartialRef.current.get(tf);
-    if (!summaryPartial || typeof summaryPartial.periodAmountEur !== "number") {
+    if (!hasEmployeeMetricValues(summaryPartial)) {
       return false;
     }
     if (!advancedAnalyticsEnabledRef.current) return true;
     return (
-      summaryPartial.analyticsBundled === true ||
-      Boolean(analyticsPartialRef.current.get(tf))
+      summaryPartial?.analyticsBundled === true ||
+      hasEmployeeAnalyticsPayload(analyticsPartialRef.current.get(tf))
     );
   }, []);
 
@@ -290,13 +298,16 @@ export function useEmployeeDashboardAnalytics(
         markDashboardLiveSettled(hasSettledLiveUiRef);
       } else {
         const summaryPartial = summaryPartialRef.current.get(tf);
-        if (summaryPartial && typeof summaryPartial.periodAmountEur === "number") {
+        if (
+          canUsePeriodSwitchCache(hasSettledLiveUiRef.current) &&
+          hasEmployeeMetricValues(summaryPartial)
+        ) {
           const seq = uiRequestSeqRef.current;
           setSummaryLoading(false);
           devSetHydrationPhase("metrics", "ready");
           const chartsReady =
             !advancedAnalyticsEnabledRef.current ||
-            summaryPartial.analyticsBundled === true ||
+            summaryPartial?.analyticsBundled === true ||
             Boolean(analyticsPartialRef.current.get(tf));
           setAnalyticsLoading(!chartsReady);
           if (chartsReady) {
@@ -330,7 +341,7 @@ export function useEmployeeDashboardAnalytics(
       tf: EmployeeAnalyticsTimeframe,
       opts?: { affectsUi?: boolean; silent?: boolean; soft?: boolean; forceNetwork?: boolean },
     ): Promise<void> => {
-      if (!enabled) return;
+      if (!isActiveRef.current) return;
 
       hydratePeriodSessionCache(tf);
 
@@ -361,7 +372,7 @@ export function useEmployeeDashboardAnalytics(
 
       if (affectsUi) {
         setError(null);
-        if (periodSessionReady && !revalidate) {
+        if (periodSessionReady && !revalidate && canUsePeriodSwitchCache(hasSettledLiveUiRef.current)) {
           setSummaryLoading(false);
           setAnalyticsLoading(false);
           setIsRevalidating(false);
@@ -523,23 +534,39 @@ export function useEmployeeDashboardAnalytics(
         }
       } catch (e) {
         if (isAbortError(e) || controller.signal.aborted) return;
-        if (affectsUi && stillActive() && !summarySettled) {
-          setError(toUserFriendlyMessage(e));
-          devSetHydrationPhase("metrics", "error");
+        if (affectsUi && stillActive()) {
+          if (!summarySettled) {
+            setError(toUserFriendlyMessage(e));
+            devSetHydrationPhase("metrics", "error");
+          } else if (!analyticsSettled) {
+            devSetHydrationPhase("charts", "error");
+          }
         }
       } finally {
-        if (affectsUi && uiRequestSeqRef.current === seq) {
+        const isCurrentRequest = affectsUi && uiRequestSeqRef.current === seq;
+
+        if (isCurrentRequest) {
+          if (summarySettled) {
+            commitUiPayload(tf, seq, true);
+          }
           if (!summarySettled) setSummaryLoading(false);
           if (!analyticsSettled) setAnalyticsLoading(false);
           setIsRevalidating(false);
+        } else if (affectsUi && controller.signal.aborted) {
+          const inflight = abortRef.current.get(tf);
+          if (inflight == null || inflight === controller) {
+            setIsRevalidating(false);
+            if (!summarySettled) setSummaryLoading(false);
+            if (!analyticsSettled) setAnalyticsLoading(false);
+          }
         }
+
         if (abortRef.current.get(tf) === controller) {
           abortRef.current.delete(tf);
         }
       }
     },
     [
-      enabled,
       commitUiPayload,
       syncTipsFromResponse,
       hydratePeriodSessionCache,
@@ -570,19 +597,19 @@ export function useEmployeeDashboardAnalytics(
       };
       prefetchQueueRef.current = window.setTimeout(() => {
         prefetchQueueRef.current = null;
-        if (!enabled) return;
+        if (!isActiveRef.current) return;
         step();
       }, DASHBOARD_INACTIVE_PREFETCH_DELAY_MS);
     },
-    [enabled, loadFor],
+    [loadFor],
   );
   scheduleInactivePrefetchRef.current = scheduleInactivePrefetch;
 
   useEffect(() => {
     const wasActive = wasDashboardEnabledRef.current;
-    wasDashboardEnabledRef.current = enabled;
+    wasDashboardEnabledRef.current = isActive;
 
-    if (enabled) return;
+    if (isActive) return;
     if (!wasActive) return;
 
     if (analyticsDeferTimerRef.current != null) {
@@ -606,10 +633,10 @@ export function useEmployeeDashboardAnalytics(
     devSetHydrationPhase("metrics", "idle");
     devSetHydrationPhase("charts", "idle");
     devSetHydrationPhase("goals", "idle");
-  }, [enabled]);
+  }, [isActive]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!isActive) return;
     const generation = ++mountGenerationRef.current;
     const tf = analyticsTimeframe;
     const timer = window.setTimeout(() => {
@@ -621,17 +648,17 @@ export function useEmployeeDashboardAnalytics(
         affectsUi: true,
         soft: warmMount,
         silent: warmMount,
+        forceNetwork: !hasSettledLiveUiRef.current,
       });
     }, 0);
     return () => {
       window.clearTimeout(timer);
-      abortRef.current.get(tf)?.abort();
-      abortRef.current.delete(tf);
+      mountGenerationRef.current += 1;
     };
-  }, [enabled, analyticsTimeframe]);
+  }, [isActive, analyticsTimeframe, isPeriodSessionReady]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!isActive) return;
 
     const prev = prevAdvancedAnalyticsRef.current;
     prevAdvancedAnalyticsRef.current = advancedAnalyticsEnabled;
@@ -640,7 +667,7 @@ export function useEmployeeDashboardAnalytics(
 
     const tf = tfRef.current;
     const analyticsSlice = analyticsPartialRef.current.get(tf);
-    if (analyticsSlice?.chartSeries !== undefined) return;
+    if (hasEmployeeAnalyticsPayload(analyticsSlice)) return;
 
     if (analyticsDeferTimerRef.current != null) {
       window.clearTimeout(analyticsDeferTimerRef.current);
@@ -651,7 +678,7 @@ export function useEmployeeDashboardAnalytics(
     setAnalyticsLoading(true);
     devSetHydrationPhase("charts", "loading");
     void loadForRef.current(tf, { affectsUi: true, soft: false, silent: false, forceNetwork: true });
-  }, [advancedAnalyticsEnabled, enabled]);
+  }, [advancedAnalyticsEnabled, isActive]);
 
   const refetchLive = useCallback(() => {
     clearEmployeeTipsClientCache(tfRef.current);
@@ -659,7 +686,7 @@ export function useEmployeeDashboardAnalytics(
   }, [loadFor]);
 
   const refreshQuiet = useCallback(async () => {
-    if (!enabled) return;
+    if (!isActiveRef.current) return;
     const tf = tfRef.current;
     const seq = ++uiRequestSeqRef.current;
     setIsRevalidating(true);
@@ -699,11 +726,11 @@ export function useEmployeeDashboardAnalytics(
     } finally {
       if (uiRequestSeqRef.current === seq) setIsRevalidating(false);
     }
-  }, [enabled, commitUiPayload, syncTipsFromResponse]);
+  }, [commitUiPayload, syncTipsFromResponse]);
 
   const applyLiveTip = useCallback(
     (p: LiveNewTipPayload) => {
-      if (!enabled) return;
+      if (!isActiveRef.current) return;
       if (!employeeId || p.employeeId !== employeeId) return;
 
       // Only reconcile the *currently visible* period immediately.
@@ -730,10 +757,12 @@ export function useEmployeeDashboardAnalytics(
       summaryPartialRef.current.set(tf, summaryNext);
       commitUiPayload(tf, uiRequestSeqRef.current, false);
     },
-    [enabled, employeeId, commitUiPayload],
+    [employeeId, commitUiPayload],
   );
 
   const valuesMatchAnalyticsPeriod = dataTimeframe === analyticsTimeframe;
+  const hasLivePeriodSnapshot =
+    lastUpdatedAt != null && valuesMatchAnalyticsPeriod && Boolean(dataTimeframe);
 
   /** Period-aligned payload only — avoids binding KPI cards to a prior timeframe. */
   const displayPayload = useMemo(() => {
@@ -744,10 +773,10 @@ export function useEmployeeDashboardAnalytics(
   /** Hero + charts may reuse the latest payload while the active period fetch is in flight. */
   const displayPayloadOrLatest = useMemo(() => {
     if (displayPayload) return displayPayload;
-    if (!payload) return null;
+    if (!payload || !hasLivePeriodSnapshot) return null;
     if (hasEmployeePayloadVisibleContent(payload)) return payload;
     return null;
-  }, [displayPayload, payload]);
+  }, [displayPayload, hasLivePeriodSnapshot, payload]);
 
   const displayMetrics = useMemo(() => {
     if (!displayPayload) return null;
@@ -772,10 +801,10 @@ export function useEmployeeDashboardAnalytics(
 
   const displayMetricsStable = useMemo(() => {
     if (displayMetrics) return displayMetrics;
-    if (!enabled) return null;
+    if (!isActive) return null;
     // Preserve tip totals during soft refresh for the same period (avoid zero flashes).
     if (
-      valuesMatchAnalyticsPeriod &&
+      hasLivePeriodSnapshot &&
       (summaryLoading || analyticsLoading || isRevalidating)
     ) {
       return lastKnownGoodMetrics;
@@ -784,17 +813,18 @@ export function useEmployeeDashboardAnalytics(
   }, [
     analyticsLoading,
     displayMetrics,
-    enabled,
+    hasLivePeriodSnapshot,
+    isActive,
     isRevalidating,
     lastKnownGoodMetrics,
     summaryLoading,
-    valuesMatchAnalyticsPeriod,
   ]);
 
   const hasVisibleKpisOnScreen =
-    Boolean(displayMetricsStable) ||
-    hasEmployeePayloadVisibleContent(payload) ||
-    Boolean(lastKnownGoodMetrics);
+    hasLivePeriodSnapshot &&
+    (Boolean(displayMetricsStable) ||
+      hasEmployeePayloadVisibleContent(displayPayload) ||
+      Boolean(lastKnownGoodMetrics));
 
   const hasVisibleSecondaryOnScreen =
     hasEmployeeChartOrTipsContent(displayPayloadOrLatest) ||
@@ -803,33 +833,32 @@ export function useEmployeeDashboardAnalytics(
   const chartPayloadPending =
     advancedAnalyticsEnabled &&
     valuesMatchAnalyticsPeriod &&
-    displayPayload?.chartSeries === undefined &&
-    payload?.chartSeries === undefined;
+    !hasEmployeeAnalyticsPayload(displayPayload) &&
+    !hasEmployeeAnalyticsPayload(payload);
 
   const isMetricsInitialLoad =
-    enabled && !hasVisibleKpisOnScreen && (summaryLoading || isRevalidating);
+    isActive && !hasVisibleKpisOnScreen && (summaryLoading || isRevalidating);
 
   const isAnalyticsInitialLoad =
-    enabled &&
+    isActive &&
     !isRevalidating &&
     (analyticsLoading || chartPayloadPending);
 
   const isMetricsPeriodLoading =
-    enabled &&
+    isActive &&
     !valuesMatchAnalyticsPeriod &&
     (summaryLoading || analyticsLoading || isRevalidating);
 
+  const hasActivePeriodFetch =
+    isRevalidating || summaryLoading || analyticsLoading;
+
   /**
-   * Status strip + subtle revalidate styling — aligned with business dashboard.
+   * Status strip — only during active fetch or pending analytics payload (not stale period drift).
    */
   const isPeriodRefreshing =
-    enabled &&
+    isActive &&
     !isMetricsInitialLoad &&
-    (isRevalidating ||
-      !valuesMatchAnalyticsPeriod ||
-      summaryLoading ||
-      analyticsLoading ||
-      chartPayloadPending);
+    (chartPayloadPending || hasActivePeriodFetch);
 
   const analyticsTimeframeLoading =
     isPeriodRefreshing && !isMetricsInitialLoad ? analyticsTimeframe : null;

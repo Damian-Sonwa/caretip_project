@@ -8,6 +8,24 @@ type EmployeeVisiblePayload = {
   monthlyGoal?: number | null;
 };
 
+type EmployeeMetricSlice = {
+  periodTipCount?: number;
+  periodAmountEur?: number;
+  totalEarningsEur?: number;
+};
+
+/** Summary scope returned at least one KPI field (0 is valid fetched data). */
+export function hasEmployeeMetricValues(
+  data: EmployeeMetricSlice | null | undefined,
+): boolean {
+  if (!data) return false;
+  return (
+    typeof data.periodTipCount === "number" ||
+    typeof data.periodAmountEur === "number" ||
+    typeof data.totalEarningsEur === "number"
+  );
+}
+
 /** KPI fields on business dashboard stats. */
 export function hasBusinessKpiValues(data: BusinessDashboardStats | null | undefined): boolean {
   if (!data) return false;
@@ -66,4 +84,12 @@ export function hasEmployeeChartOrTipsContent(
 ): boolean {
   if (!payload) return false;
   return Boolean(payload.chartSeries?.length) || Boolean(payload.tips?.length);
+}
+
+/** Analytics scope has returned (empty chart arrays still count as settled). */
+export function hasEmployeeAnalyticsPayload(
+  payload: EmployeeVisiblePayload | null | undefined,
+): boolean {
+  if (!payload) return false;
+  return payload.chartSeries !== undefined;
 }

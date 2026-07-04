@@ -13,7 +13,7 @@ export const dashboardSidebarNavLinkBase =
   "flex items-center gap-3 px-3 py-2.5 text-sm font-medium";
 
 export const dashboardSidebarNavLinkIdle =
-  "text-sidebar-foreground/85 hover:bg-sidebar-accent hover:text-sidebar-foreground";
+  "text-sidebar-foreground/90 hover:bg-sidebar-accent hover:text-sidebar-foreground";
 
 export const dashboardSidebarNavLinkActive =
   "bg-primary font-semibold text-primary-foreground";
