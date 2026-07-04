@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo, useRef, lazy } from "react";
 import { Link, Navigate } from "react-router";
 import type { ImgHTMLAttributes } from "react";
 import {
-  Users,
   Star,
   Sparkles,
   HelpCircle,
@@ -59,7 +58,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BusinessDashboardMetricsGrid } from "../../components/business/BusinessDashboardMetricsGrid";
 import { RecentCustomerFeedbackPanel } from "../../components/business/RecentCustomerFeedbackPanel";
 import { TopPerformersTeaser, TOP_PERFORMERS_PAGE_PATH, DASHBOARD_EMPLOYEE_TEASER_LIMIT } from "../../components/business/insights/TopPerformersTeaser";
-import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
+import { BusinessDashboardAnalyticsEmpty } from "../../components/business/BusinessDashboardAnalyticsEmpty";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import { BusinessResponsiveData } from "../../components/business/BusinessResponsiveData";
 import { DashboardViewAllLink } from "../../components/dashboard/DashboardViewAllLink";
@@ -74,6 +73,7 @@ import {
 } from "../../lib/devAnalyticsMocks";
 import {
   buildEmployeePerformanceChartRows,
+  buildFallbackTipPerformanceChartData,
   buildTipPerformanceChartData,
   hasTipPerformanceChartActivity,
   resolveBusinessDashboardChartStats,
@@ -93,6 +93,7 @@ import { isWalkthroughDemoManager } from "../../lib/walkthroughDemo";
 import { getBusinessVerificationNoticeLabels } from "../../lib/businessVerificationNotice";
 import businessHeroImage from "../../../../images/bizzy001.png";
 import { BusinessDashboardMobileHero } from "../../components/business/BusinessDashboardMobileHero";
+import { BusinessDashboardHeroActions } from "../../components/business/BusinessDashboardHeroActions";
 
 const TOAST_OK = { style: { background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))" } } as const;
 
@@ -270,10 +271,23 @@ export function BusinessDashboard() {
     return chartPeriodStats?.dailyTipDistribution ?? [];
   }, [useDevDemo, analyticsTimeframe, chartPeriodStats?.dailyTipDistribution]);
 
-  const tipDistributionChartData = useMemo(
-    () => buildTipPerformanceChartData(dailyTipRows, analyticsTimeframe, t),
-    [dailyTipRows, analyticsTimeframe, t],
-  );
+  const tipDistributionChartData = useMemo(() => {
+    const built = buildTipPerformanceChartData(dailyTipRows, analyticsTimeframe, t);
+    if (built.length > 0) return built;
+    const periodTotal =
+      chartPeriodStats?.totalTips ?? displayMetrics?.totalTips ?? displayStats?.totalTips;
+    if ((periodTotal ?? 0) > 0) {
+      return buildFallbackTipPerformanceChartData(analyticsTimeframe, t);
+    }
+    return built;
+  }, [
+    dailyTipRows,
+    analyticsTimeframe,
+    t,
+    chartPeriodStats?.totalTips,
+    displayMetrics?.totalTips,
+    displayStats?.totalTips,
+  ]);
 
   const tipDistributionTotal = useMemo(
     () => sumTipPerformanceTotal(dailyTipRows),
@@ -287,15 +301,16 @@ export function BusinessDashboard() {
   const employeePerformance = useMemo(() => {
     if (useDevDemo) {
       return devMockBusinessEmployeePerformance(
-        Array.from({ length: 5 }, (_, index) => dashboardChartBarFill(index, 5)),
+        Array.from({ length: 3 }, (_, index) => dashboardChartBarFill(index, 3)),
       );
     }
-    return buildEmployeePerformanceChartRows(chartPeriodStats?.employees ?? displayStats?.employees);
+    return buildEmployeePerformanceChartRows(chartPeriodStats?.employees ?? displayStats?.employees, 3);
   }, [useDevDemo, chartPeriodStats?.employees, displayStats?.employees]);
 
   const showChartsLoading = isAnalyticsSectionLoading && !useDevDemo;
 
-  const employeeGoalsList = displayStats?.employeeGoals ?? [];
+  const employeeGoalsList =
+    chartPeriodStats?.employeeGoals ?? displayStats?.employeeGoals ?? [];
   const employeeGoalsTeaser = useMemo(
     () =>
       [...employeeGoalsList]
@@ -495,38 +510,11 @@ export function BusinessDashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4, delay: 0.08, ease: "easeOut" }}
             >
-              <div className="business-hero-cta-row">
-                {isPreviewMode ? (
-                  <>
-                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 w-full max-lg:w-full")} asChild>
-                      <Link to="/dashboard/billing/subscription" className={businessUi.heroCtaLink}>
-                        <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
-                        {t("business.dashboard.preview.viewPlans")}
-                      </Link>
-                    </Button>
-                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 w-full max-lg:w-full")} asChild>
-                      <Link to="#dashboard-premium-features" className={businessUi.heroCtaLink}>
-                        {t("business.dashboard.preview.exploreFeatures")}
-                      </Link>
-                    </Button>
-                  </>
-                ) : (
-                  <>
-                    <Button type="button" className={cn(businessUi.btnPrimary, "min-w-0 w-full max-lg:w-full")} asChild>
-                      <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
-                        <CareIcon name="tableQr" size="sm" className="shrink-0" />
-                        {t("business.hero.manageQr")}
-                      </Link>
-                    </Button>
-                    <Button type="button" variant="outline" className={cn(businessUi.btnSecondary, "min-w-0 w-full max-lg:w-full")} asChild>
-                      <Link to="/dashboard/team/employees" className={businessUi.heroCtaLink}>
-                        <Users className="h-4 w-4 shrink-0" aria-hidden />
-                        {t("business.hero.manageTeam")}
-                      </Link>
-                    </Button>
-                  </>
-                )}
-              </div>
+              <BusinessDashboardHeroActions
+                isPreviewMode={isPreviewMode}
+                buttonClassName="min-w-0 w-full max-lg:w-full"
+                secondaryButtonClassName="min-w-0 w-full max-lg:w-full"
+              />
               <dl
                 className={cn(
                   "business-hero-account-stats dashboard-swr-swap",
@@ -791,6 +779,9 @@ export function BusinessDashboard() {
                   <DashboardStableChartSlot
                     loading={showGoalsLoading && !useDevDemo}
                     minHeightClass="min-h-[280px]"
+                    contentMinHeightClass={
+                      !showGoalsLoading && employeeGoalsList.length === 0 ? "min-h-0" : "min-h-[280px]"
+                    }
                     skeleton={
                       <GoalsTableLoadingShell
                         label={t("dashboard.loading.goals")}
@@ -799,14 +790,12 @@ export function BusinessDashboard() {
                     }
                   >
                     {showGoalsLoading && !useDevDemo ? null : employeeGoalsList.length === 0 ? (
-                      <div className={cn(businessUi.cardPad)}>
-                        <EmployeeEmptyState
-                          className="py-10 sm:py-12"
-                          icon={<CareIcon name="goals" size="lg" className="text-muted-foreground" />}
-                          title={t("business.dashboard.noStaffGoals")}
-                          description={t("business.dashboard.noStaffGoalsHint")}
-                        />
-                      </div>
+                      <BusinessDashboardAnalyticsEmpty
+                        variant="panel"
+                        icon={<CareIcon name="goals" size="lg" className="text-muted-foreground" />}
+                        title={t("business.dashboard.noStaffGoals")}
+                        description={t("business.dashboard.noStaffGoalsHint")}
+                      />
                     ) : (
                       <>
                         {hasMoreGoals ? (

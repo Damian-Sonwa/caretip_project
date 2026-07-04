@@ -407,15 +407,17 @@ export function useBusinessDashboardStats(
             devSetHydrationPhase("charts", "loading");
           }
         } else if (!opts?.soft) {
-          setStats(null);
-          setStatsTimeframe(null);
-          summaryPartialRef.current.delete(tf);
-          analyticsPartialRef.current.delete(tf);
-          setSummaryLoading(true);
-          setAnalyticsLoading(true);
-          devSetHydrationPhase("metrics", "loading");
-          devSetHydrationPhase("charts", "loading");
-          devSetHydrationPhase("goals", "loading");
+          setSummaryLoadingUi(!kpisVisibleOnScreen());
+          setAnalyticsLoadingUi(
+            !chartsVisibleOnScreen() && advancedAnalyticsEnabledRef.current,
+          );
+          if (!hasMetricValues(statsRef.current) && !(revalidate && kpisVisibleOnScreen())) {
+            devSetHydrationPhase("metrics", "loading");
+          }
+          if (!chartsVisibleOnScreen() && !(revalidate && chartsVisibleOnScreen())) {
+            devSetHydrationPhase("charts", "loading");
+            devSetHydrationPhase("goals", "loading");
+          }
         } else {
           setSummaryLoadingUi(!hasMetricValues(statsRef.current));
           setAnalyticsLoadingUi(!analyticsSettled && advancedAnalyticsEnabledRef.current);
@@ -727,6 +729,12 @@ export function useBusinessDashboardStats(
       cancelDeferredAnalytics();
       tfRef.current = tf;
       setAnalyticsTimeframeState(tf);
+
+      const bundle = getBusinessAnalyticsBundle(tf);
+      if (bundle?.periodStats) {
+        summaryPartialRef.current.set(tf, bundle.periodStats);
+        analyticsPartialRef.current.set(tf, bundle.periodStats);
+      }
       hydratePeriodSessionCache(tf);
 
       if (isPeriodSessionReady(tf)) {
@@ -764,7 +772,10 @@ export function useBusinessDashboardStats(
         }
       }
 
-      void loadStatsForRef.current(tf, { affectsUi: true });
+      void loadStatsForRef.current(tf, {
+        affectsUi: true,
+        soft: canUsePeriodSwitchCache(hasSettledLiveUiRef.current),
+      });
     },
     [
       abortInactiveTimeframes,
@@ -941,11 +952,25 @@ export function useBusinessDashboardStats(
     statsTimeframe === analyticsTimeframe && !pendingVerification;
 
   const displayStats = useMemo(() => {
-    if (pendingVerification || !stats) return null;
-    if (valuesMatchAnalyticsPeriod) return stats;
+    if (pendingVerification) return null;
+
+    if (stats && statsTimeframe === analyticsTimeframe) {
+      return stats;
+    }
+
+    const cached = getBusinessAnalyticsBundle(analyticsTimeframe)?.periodStats;
+    if (
+      cached &&
+      (hasBusinessDashboardVisibleContent(cached) || hasMetricValues(cached))
+    ) {
+      return cached as BusinessDashboardStats;
+    }
+
+    if (!stats) return null;
     if (hasBusinessDashboardVisibleContent(stats)) return stats;
+    if (hasMetricValues(stats)) return stats;
     return null;
-  }, [pendingVerification, stats, valuesMatchAnalyticsPeriod]);
+  }, [pendingVerification, stats, statsTimeframe, analyticsTimeframe, dataRevision]);
 
   const displayMetrics = useMemo(() => {
     if (!displayStats || !hasMetricValues(displayStats)) return null;

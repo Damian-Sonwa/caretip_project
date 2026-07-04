@@ -7,6 +7,7 @@ import { CareTipLogo, DASHBOARD_SIDEBAR_MOBILE_BRAND_CLASS, DASHBOARD_SIDEBAR_NA
 import { CareIcon } from "@/components/icons";
 import { dashboardShellNavItems } from "./dashboardShellNav";
 import { MobileDrawer } from "./ui/MobileDrawer";
+import { dashboardSidebarIconButtonIdle } from "@/lib/theme/dashboardSidebarUi";
 
 interface DashboardMobileSidebarProps {
   isOpen: boolean;
@@ -35,7 +36,10 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
         <button
           type="button"
           onClick={onClose}
-          className="touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-stone-100"
+          className={cn(
+            "touch-manipulation inline-flex min-h-[44px] min-w-[44px] items-center justify-center rounded-xl p-2.5",
+            dashboardSidebarIconButtonIdle,
+          )}
         >
           <X className="h-5 w-5 text-sidebar-foreground" />
         </button>
@@ -66,7 +70,7 @@ export function DashboardMobileSidebar({ isOpen, onClose }: DashboardMobileSideb
         </ul>
       </nav>
 
-      <div className="border-t border-neutral-200/70 p-4">
+      <div className="shrink-0 border-t border-sidebar-border p-4">
         <Link
           to="/dashboard/settings"
           onClick={onClose}

@@ -62,7 +62,7 @@
   max-width: none;
   text-align: inherit;
   font-size: clamp(1rem, 0.2vw + 0.96rem, 1.0625rem);
-  line-height: 1.68;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
 }
 
 /* Intro copy — punch line (subtitle1) strongest; following paragraphs slightly bolder than body */
@@ -82,7 +82,7 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-intro-cop
 @media (min-width: 1024px) {
   .caretip-landing #built-for-hospitality .caretip-hospitality-subtitle {
     font-size: clamp(1.03125rem, 0.12vw + 0.98rem, 1.125rem);
-    line-height: 1.7;
+    line-height: var(--caretip-landing-lead-lh, 1.62);
   }
 }
 
@@ -100,7 +100,7 @@ html.dark .caretip-landing #built-for-hospitality .caretip-hospitality-intro-cop
   .caretip-landing #built-for-hospitality .caretip-hospitality-intro-copy {
     margin-inline: 0;
     max-width: min(100%, 44rem);
-    gap: 1.125rem;
+    gap: var(--caretip-narrative-gap-lead-lines, 0.5625rem);
   }
 }
 

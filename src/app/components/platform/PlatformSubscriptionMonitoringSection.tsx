@@ -87,22 +87,22 @@ function paymentStatusBadge(
   > = {
     succeeded: {
       emoji: "🟢",
-      className: "bg-emerald-50 text-emerald-800 ring-emerald-600/20",
+      className: "bg-emerald-50 text-emerald-800 ring-emerald-600/20 dark:bg-emerald-950/40 dark:text-emerald-200 dark:ring-emerald-500/30",
       labelKey: "admin.subscriptions.paymentStatus.succeeded",
     },
     failed: {
       emoji: "🔴",
-      className: "bg-red-50 text-red-800 ring-red-600/20",
+      className: "bg-red-50 text-red-800 ring-red-600/20 dark:bg-red-950/40 dark:text-red-200 dark:ring-red-500/30",
       labelKey: "admin.subscriptions.paymentStatus.failed",
     },
     pending: {
       emoji: "🟡",
-      className: "bg-sky-50 text-sky-800 ring-sky-600/20",
+      className: "bg-sky-50 text-sky-800 ring-sky-600/20 dark:bg-sky-950/40 dark:text-sky-200 dark:ring-sky-500/30",
       labelKey: "admin.subscriptions.paymentStatus.pending",
     },
     none: {
       emoji: "⚪",
-      className: "bg-neutral-100 text-neutral-700 ring-neutral-500/20",
+      className: "bg-muted text-muted-foreground ring-border/40",
       labelKey: "admin.subscriptions.paymentStatus.none",
     },
   };

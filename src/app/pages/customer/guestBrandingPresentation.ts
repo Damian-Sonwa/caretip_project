@@ -12,11 +12,18 @@ export function guestCompletionIconStyle(
   };
 }
 
+/** Premium completion page canvas — accent wash via CSS; base canvas from `.customer-flow-success-page`. */
+export function guestSuccessPageStyle(branding?: PublicGuestBranding | null): CSSProperties {
+  const accent = guestBrandAccentColor(branding);
+  return {
+    ["--success-accent" as string]: accent,
+  };
+}
+
 export function guestCompletionCardStyle(branding?: PublicGuestBranding | null): CSSProperties {
   const accent = guestBrandAccentColor(branding);
   return {
     borderColor: `${accent}26`,
-    background: `linear-gradient(180deg, white 0%, white 55%, ${accent}0a 100%)`,
   };
 }
 
@@ -25,14 +32,6 @@ export function guestPrimaryButtonStyle(branding?: PublicGuestBranding | null): 
   return {
     backgroundColor: accent,
     borderColor: accent,
-  };
-}
-
-/** Premium completion page canvas — warm gradient with brand accent wash. */
-export function guestSuccessPageStyle(branding?: PublicGuestBranding | null): CSSProperties {
-  const accent = guestBrandAccentColor(branding);
-  return {
-    background: `linear-gradient(165deg, #faf8f5 0%, #f3efe8 38%, ${accent}0f 100%)`,
   };
 }
 

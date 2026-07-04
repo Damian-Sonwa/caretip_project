@@ -8,18 +8,25 @@ import { cn } from "@/lib/utils";
 export function DashboardStableChartSlot({
   loading,
   minHeightClass = "min-h-[220px] sm:min-h-[260px]",
+  contentMinHeightClass,
   className,
   skeleton,
   children,
 }: {
   loading: boolean;
   minHeightClass?: string;
+  /** Settled content height — use `min-h-0` for compact empty states. Defaults to minHeightClass. */
+  contentMinHeightClass?: string;
   className?: string;
   skeleton: ReactNode;
   children: ReactNode;
 }) {
+  const settledMinHeight = loading
+    ? minHeightClass
+    : (contentMinHeightClass ?? minHeightClass);
+
   return (
-    <div className={cn("relative isolate h-full w-full min-h-0", minHeightClass, className)}>
+    <div className={cn("relative isolate h-full w-full min-h-0", settledMinHeight, className)}>
       <div
         className={cn(
           "h-full w-full min-h-0",

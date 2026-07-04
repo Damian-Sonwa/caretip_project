@@ -193,7 +193,7 @@ html.dark .caretip-landing .caretip-final-cta-button {
 }
 
 .caretip-landing .caretip-landing-footer .caretip-site-footer-blurb {
-  line-height: 1.68;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
   color: rgba(212, 212, 212, 0.82);
 }
 

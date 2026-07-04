@@ -29,28 +29,77 @@ export function resolveBusinessDashboardChartStats(
   }
 
   const cached = getBusinessAnalyticsBundle(analyticsTimeframe)?.periodStats;
-  if (cached?.dailyTipDistribution !== undefined) {
+  if (cached) {
     return {
       ...(displayStats ?? {}),
       ...cached,
+      totalTips: cached.totalTips ?? displayStats?.totalTips,
+      tipCount: cached.tipCount ?? displayStats?.tipCount,
+      employeeCount: cached.employeeCount ?? displayStats?.employeeCount,
       employees: cached.employees ?? displayStats?.employees,
       employeeGoals: cached.employeeGoals ?? displayStats?.employeeGoals,
       dailyTipDistribution: cached.dailyTipDistribution ?? [],
     } as BusinessDashboardStats;
   }
 
-  return displayStats;
+  // Never paint a different period's analytics under the active toggle.
+  return null;
+}
+
+function isMonthDayOfMonthLabel(day: string): boolean {
+  return /^\d{1,2}$/.test(day.trim());
 }
 
 function normalizeMonthDistributionRows(
   rows: Array<{ day: string; amount: number }>,
 ): Array<{ day: string; amount: number }> {
   const todayDom = new Date().getDate();
-  const elapsed = rows.filter((row) => {
-    const dayNum = Number.parseInt(row.day, 10);
-    return !Number.isFinite(dayNum) || dayNum <= todayDom;
+  const monthDomRows = rows.filter((row) => isMonthDayOfMonthLabel(row.day));
+  if (monthDomRows.length === 0) return rows;
+  return monthDomRows.filter((row) => Number.parseInt(row.day, 10) <= todayDom);
+}
+
+const YEAR_CHART_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+] as const;
+
+const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+
+/** Zero scaffold when KPIs show activity but distribution rows are still loading. */
+export function buildFallbackTipPerformanceChartData(
+  timeframe: AnalyticsTimeframe,
+  t: TFunction,
+): TipPerformanceChartRow[] {
+  if (timeframe === "week") {
+    return WEEKDAY_LABELS.map((day) => ({
+      day,
+      dayLabel: translateChartWeekdayLabel(day, t),
+      amount: 0,
+    }));
+  }
+  if (timeframe === "year") {
+    return YEAR_CHART_LABELS.map((day) => ({
+      day,
+      dayLabel: translateChartMonthLabel(day, t),
+      amount: 0,
+    }));
+  }
+  const todayDom = new Date().getDate();
+  return Array.from({ length: todayDom }, (_, index) => {
+    const day = String(index + 1);
+    return { day, dayLabel: day, amount: 0 };
   });
-  return elapsed.length > 0 ? elapsed : rows;
 }
 
 /** Map API daily tip buckets to labeled chart rows for the active period toggle. */

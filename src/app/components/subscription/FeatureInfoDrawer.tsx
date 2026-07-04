@@ -47,7 +47,7 @@ export function FeatureInfoDrawer({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="flex w-full flex-col gap-0 p-0 sm:max-w-md">
-        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.06] via-background to-stone-50/80 px-6 py-5 pr-12">
+        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.06] via-background to-muted/40 px-6 py-5 pr-12">
           <SheetHeader className="space-y-2 text-left">
             <div className="flex items-center gap-2 text-primary">
               <Lock className="h-4 w-4 shrink-0" aria-hidden />

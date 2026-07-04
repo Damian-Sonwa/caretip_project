@@ -144,7 +144,8 @@ export function DashboardHero({
       <TabsList
         className={cn(
           "grid h-11 w-full grid-cols-2 gap-1 p-1",
-          stackHeroOnMobile ? "rounded-full bg-neutral-100" : "rounded-md bg-muted",
+          stackHeroOnMobile && mobileAlign === "center" && "mx-auto",
+          stackHeroOnMobile ? "rounded-full bg-muted" : "rounded-md bg-muted",
         )}
       >
         <TabsTrigger
@@ -211,7 +212,7 @@ export function DashboardHero({
       "dashboard-hero-media relative w-full min-w-0",
       opts.forStackedMobile && stackHeroOnMobile
         ? cn(
-            "max-lg:overflow-visible max-lg:rounded-3xl max-lg:bg-[#FFFFFF] max-lg:p-0 max-lg:shadow-none",
+            "max-lg:overflow-visible max-lg:rounded-3xl max-lg:bg-transparent max-lg:p-0 max-lg:shadow-none",
             mobileAlign === "center" &&
               // Business Dashboard (stacked + centered): keep media perfectly straight, centered, and symmetrical.
               "max-lg:transform-none max-lg:flex max-lg:items-center max-lg:justify-center",
@@ -284,7 +285,7 @@ export function DashboardHero({
               className={cn(
                 "relative min-h-0 flex-1 bg-muted lg:bg-muted",
                 opts.stackedLayout && !stackHeroOnMobile && "max-lg:bg-transparent",
-                opts.stackedLayout && stackHeroOnMobile && "max-lg:h-auto max-lg:flex-none max-lg:bg-[#FFFFFF]",
+                opts.stackedLayout && stackHeroOnMobile && "max-lg:h-auto max-lg:flex-none max-lg:bg-transparent",
               )}
             >
               <img
@@ -327,7 +328,7 @@ export function DashboardHero({
       <div
         className={cn(
           stackHeroOnMobile &&
-            "max-lg:bg-[#FFFFFF] max-lg:px-4 max-lg:py-3 sm:max-lg:px-5 sm:max-lg:py-4",
+            "max-lg:bg-transparent max-lg:px-4 max-lg:py-3 sm:max-lg:px-5 sm:max-lg:py-4",
         )}
       >
         <Card

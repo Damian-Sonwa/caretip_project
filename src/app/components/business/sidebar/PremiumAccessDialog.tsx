@@ -43,7 +43,7 @@ export function PremiumAccessDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.05] via-background to-stone-50/80 px-6 py-5">
+        <div className="border-b border-border/60 bg-gradient-to-br from-primary/[0.05] via-background to-muted/40 px-6 py-5">
           <DialogHeader className="space-y-2 text-left">
             <div className="flex items-center gap-2 text-primary">
               <Lock className="h-4 w-4 shrink-0" aria-hidden />

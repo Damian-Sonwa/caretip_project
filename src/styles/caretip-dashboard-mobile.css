@@ -28,19 +28,38 @@
     max-width: 100%;
   }
 
+  .caretip-dashboard-header-bar .caretip-dashboard-header-row {
+    min-width: 0;
+  }
+
   .caretip-dashboard-header-bar .caretip-dashboard-header-leading {
     min-width: 0;
     flex: 1 1 0%;
+    gap: 0.5rem;
   }
 
   .caretip-dashboard-header-bar .caretip-dashboard-header-trailing {
     flex-shrink: 0;
+    gap: 0.375rem;
+  }
+
+  .caretip-dashboard-header-bar .caretip-dashboard-header-icon-btn {
+    min-height: 2.25rem;
+    min-width: 2.25rem;
+  }
+
+  .caretip-dashboard-header-bar .caretip-dashboard-header-search-panel {
+    width: 100%;
+  }
+
+  .caretip-dashboard-header-bar .caretip-dashboard-header-profile-trigger {
+    padding: 0.125rem;
   }
 
   .caretip-dashboard-header-search {
     min-width: 0;
-    flex: 1 1 0%;
-    max-width: 100%;
+    flex: 0 0 auto;
+    max-width: none;
   }
 
   .caretip-mobile-drawer-panel {

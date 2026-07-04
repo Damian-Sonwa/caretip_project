@@ -3,13 +3,35 @@
  * No copy changes; pairs with LandingCopySentences for existing i18n strings.
  *
  * Narrative spacing tokens live in caretip-landing-hero-layout.css
- * (--caretip-narrative-gap-*).
+ * (--caretip-narrative-gap-*). Lead line-height / paragraph gaps are tuned here.
  */
+
+.caretip-landing {
+  --caretip-landing-lead-lh: 1.62;
+  --caretip-narrative-gap-lead-lines: 0.4375rem;
+}
+
+@media (min-width: 640px) {
+  .caretip-landing {
+    --caretip-narrative-gap-lead-lines: 0.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-landing {
+    --caretip-narrative-gap-lead-lines: 0.5625rem;
+  }
+}
 
 .caretip-landing-copy-paragraphs {
   display: flex;
   flex-direction: column;
-  gap: var(--caretip-narrative-gap-lead-lines, 0.5rem);
+  gap: var(--caretip-narrative-gap-lead-lines, 0.4375rem);
+}
+
+.caretip-landing .caretip-landing-copy-paragraphs > p {
+  line-height: var(--caretip-landing-lead-lh, 1.62);
+  text-wrap: pretty;
 }
 
 /* Section / split intros — headline to lead block */
@@ -33,7 +55,7 @@
 .caretip-landing-copy-scan-list {
   display: flex;
   flex-direction: column;
-  gap: 0.875rem;
+  gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -59,7 +81,7 @@
 .caretip-landing-density-lead {
   max-width: var(--caretip-marketing-measure, min(100%, 36rem));
   margin-inline: auto;
-  line-height: 1.72;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
   text-wrap: pretty;
 }
 
@@ -82,12 +104,12 @@
 
 .caretip-landing .caretip-hospitality-feature-desc,
 .caretip-landing .caretip-split-showcase-content-panel [class*="bodyCopyMuted"] {
-  line-height: 1.62;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
   text-wrap: pretty;
 }
 
 .caretip-landing .caretip-payments-trust-item__body {
-  line-height: 1.62;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
   text-wrap: pretty;
 }
 
@@ -100,8 +122,8 @@
 }
 
 .caretip-landing .caretip-site-footer-blurb.caretip-landing-copy-paragraphs {
-  gap: 0.625rem;
-  line-height: 1.65;
+  gap: 0.5rem;
+  line-height: 1.6;
 }
 
 .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list {
@@ -117,7 +139,7 @@ html.dark .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-
 
 .caretip-landing .caretip-expandable-info-card__detail-inner .caretip-expandable-info-card__detail-list-item {
   font-size: 0.875rem;
-  line-height: 1.65;
+  line-height: 1.58;
   color: rgb(82 82 82);
   text-wrap: pretty;
 }
@@ -177,4 +199,34 @@ html.dark .caretip-expandable-info-card__image-label {
     max-width: min(100%, 34ch);
     margin-inline: auto;
   }
+}
+
+/* Narrative sections — Title → lead → points → CTA rhythm */
+.caretip-landing .caretip-showcase-action-cluster,
+.caretip-landing .caretip-motivation-after {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--caretip-narrative-gap-points-action, 1rem);
+}
+
+.caretip-landing #for-employees .caretip-showcase-action-cluster .caretip-landing-section-cta,
+.caretip-landing #business-section .caretip-showcase-action-cluster .caretip-landing-section-cta,
+.caretip-landing #recognition .caretip-motivation-after .caretip-landing-section-cta,
+.caretip-landing #recognition .caretip-motivation-cta {
+  margin-top: 0 !important;
+}
+
+.caretip-landing #for-employees .caretip-landing-section-cta,
+.caretip-landing #business-section .caretip-landing-section-cta,
+.caretip-landing #recognition .caretip-landing-section-cta,
+.caretip-landing #recognition .caretip-motivation-cta {
+  justify-content: flex-start;
+}
+
+.caretip-landing #for-employees .caretip-landing-cta-unit--section,
+.caretip-landing #business-section .caretip-landing-cta-unit--section,
+.caretip-landing #recognition .caretip-landing-cta-unit--section {
+  margin-inline: 0;
+  align-items: stretch;
 }

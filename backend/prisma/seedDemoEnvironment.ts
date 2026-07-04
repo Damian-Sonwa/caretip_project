@@ -3,6 +3,7 @@
  * Idempotent upserts; safe to re-run via `npm run db:seed`.
  */
 import bcrypt from "bcrypt";
+import { DateTime } from "luxon";
 import {
   BillingCycle,
   type BusinessSubscriptionTier,
@@ -260,20 +261,72 @@ function recentTipDate(minutesAgo: number): Date {
   return d;
 }
 
-function tipDateForIndex(businessKey: string, i: number, isPrimary: boolean): Date {
-  if (isPrimary) {
+function tipDateForIndex(
+  _businessKey: string,
+  i: number,
+  isPrimary: boolean,
+  totalTips: number,
+  businessTimezone = "Europe/Berlin",
+): Date {
+  const tz = businessTimezone;
+  const now = DateTime.utc().setZone(tz);
+  const nowJs = now.toJSDate();
+
+  if (isPrimary && i < 8) {
     const recentMinutes = [42, 18, 5, 28, 12, 2, 8, 35];
-    if (i < recentMinutes.length) return recentTipDate(recentMinutes[i]!);
+    return recentTipDate(recentMinutes[i]!);
   }
 
-  const now = new Date();
-  const monthOffset =
-    businessKey === "alpine" ? 1 : businessKey === "riverside" ? 2 : businessKey === "salon" ? 0 : 0;
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1 - monthOffset, 0).getDate();
-  const dayInMonth = (i % daysInMonth) + 1;
-  const d = new Date(now.getFullYear(), now.getMonth() - monthOffset, dayInMonth);
-  d.setHours(10 + ((i * 3) % 10), (i * 11) % 60, 0, 0);
-  return d;
+  const base = isPrimary ? i - 8 : i;
+  const span = isPrimary ? Math.max(1, totalTips - 8) : Math.max(1, totalTips);
+  const weekBucket = Math.max(7, Math.round(span * 0.18));
+  const monthBucket = Math.max(10, Math.round(span * 0.52));
+  const todayDom = now.day;
+
+  if (base < weekBucket) {
+    const monday = now.startOf("day").minus({ days: (now.weekday + 6) % 7 });
+    const target = monday.plus({ days: base % 7 }).set({
+      hour: 11 + (base % 8),
+      minute: (base * 17) % 60,
+      second: 0,
+      millisecond: 0,
+    });
+    return (target > now ? target.minus({ days: 7 }) : target).toJSDate();
+  }
+
+  if (base < weekBucket + monthBucket) {
+    const monthIdx = base - weekBucket;
+    const dayInMonth = (monthIdx % Math.max(todayDom, 1)) + 1;
+    const target = now.startOf("month").plus({ days: dayInMonth - 1 }).set({
+      hour: 10 + ((monthIdx * 3) % 9),
+      minute: (monthIdx * 11) % 60,
+      second: 0,
+      millisecond: 0,
+    });
+    return target > now ? nowJs : target.toJSDate();
+  }
+
+  const yearIdx = base - weekBucket - monthBucket;
+  const monthIndex = yearIdx % Math.max(1, now.month);
+  const monthStart = now.startOf("year").plus({ months: monthIndex });
+  const daysInMonth = monthStart.daysInMonth ?? 28;
+  const day = (yearIdx % daysInMonth) + 1;
+  const target = monthStart.plus({ days: day - 1 }).set({
+    hour: 14,
+    minute: (yearIdx * 7) % 60,
+    second: 0,
+    millisecond: 0,
+  });
+  if (target > now) {
+    const fallbackMonth = Math.max(1, now.month - (yearIdx % 3));
+    const fallbackStart = now.startOf("year").plus({ months: fallbackMonth - 1 });
+    const fallbackDay = Math.min(day, fallbackStart.daysInMonth ?? day);
+    return fallbackStart
+      .plus({ days: fallbackDay - 1 })
+      .set({ hour: 14, minute: (yearIdx * 7) % 60, second: 0, millisecond: 0 })
+      .toJSDate();
+  }
+  return target.toJSDate();
 }
 
 function tipIdForBusiness(config: DemoBusinessConfig, index: number): string {
@@ -475,7 +528,7 @@ async function seedTipsAndFeedback(
         businessId,
         locationId: locationIds[locIdx] ?? null,
         tableId: tableIds[locIdx] ?? null,
-        createdAt: tipDateForIndex(config.key, i, Boolean(config.isPrimary)),
+        createdAt: tipDateForIndex(config.key, i, Boolean(config.isPrimary), config.tipCount),
       },
       create: {
         id,
@@ -486,7 +539,7 @@ async function seedTipsAndFeedback(
         businessId,
         locationId: locationIds[locIdx] ?? null,
         tableId: tableIds[locIdx] ?? null,
-        createdAt: tipDateForIndex(config.key, i, Boolean(config.isPrimary)),
+        createdAt: tipDateForIndex(config.key, i, Boolean(config.isPrimary), config.tipCount),
       },
     });
     tipCount++;
@@ -511,7 +564,7 @@ async function seedTipsAndFeedback(
         comment: FEEDBACK_COMMENTS[i % FEEDBACK_COMMENTS.length] ?? null,
         tags: [FEEDBACK_TAGS[i % FEEDBACK_TAGS.length]!],
         customerName: GUEST_NAMES[i % GUEST_NAMES.length] ?? null,
-        createdAt: tipDateForIndex(config.key, tipIndex, Boolean(config.isPrimary)),
+        createdAt: tipDateForIndex(config.key, tipIndex, Boolean(config.isPrimary), config.tipCount),
       },
       create: {
         transactionId: txId,
@@ -523,7 +576,7 @@ async function seedTipsAndFeedback(
         comment: FEEDBACK_COMMENTS[i % FEEDBACK_COMMENTS.length] ?? null,
         tags: [FEEDBACK_TAGS[i % FEEDBACK_TAGS.length]!],
         customerName: GUEST_NAMES[i % GUEST_NAMES.length] ?? null,
-        createdAt: tipDateForIndex(config.key, tipIndex, Boolean(config.isPrimary)),
+        createdAt: tipDateForIndex(config.key, tipIndex, Boolean(config.isPrimary), config.tipCount),
       },
     });
     feedbackCount++;
@@ -802,7 +855,7 @@ export async function seedDemoEnvironment(prisma: PrismaClient): Promise<void> {
     totalTips += counts.tipCount;
     totalFeedback += counts.feedbackCount;
 
-    for (const row of employeeRows) {
+    for (const row of employeeRows.slice(0, 3)) {
       await ensureActiveEmployeeGoal(prisma, row.id, {
         goalAmount: row.monthlyGoal,
         goalPeriod: "monthly",

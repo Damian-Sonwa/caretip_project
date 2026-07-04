@@ -27,8 +27,6 @@ export function HospitalityTeamsUnifiedSection() {
         { title: t("landing.hospitality.f1Title"), text: t("landing.hospitality.f1Text") },
         { title: t("landing.hospitality.f2Title"), text: t("landing.hospitality.f2Text") },
         { title: t("landing.hospitality.f3Title"), text: t("landing.hospitality.f3Text") },
-        { title: t("landing.hospitality.f4Title"), text: t("landing.hospitality.f4Text") },
-        { title: t("landing.hospitality.f5Title"), text: t("landing.hospitality.f5Text") },
       ].filter((f) => landingCopyVisible(f.title) && landingCopyVisible(f.text)),
     [t, i18n.language],
   );

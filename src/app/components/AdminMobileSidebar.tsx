@@ -66,13 +66,13 @@ export function AdminMobileSidebar({ isOpen, onClose }: AdminMobileSidebarProps)
       </div>
 
       <div className="border-t border-sidebar-border p-3 sm:p-4">
-        <div className="flex items-center gap-3 rounded-lg border border-border bg-muted px-3 py-2.5">
+        <div className="flex items-center gap-3 rounded-lg border border-sidebar-border bg-sidebar-accent/70 px-3 py-2.5">
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary font-medium text-primary-foreground">
             {displayName.charAt(0)}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-foreground">{displayName}</p>
-            <p className="truncate text-xs text-muted-foreground">{user?.email || 'admin@example.com'}</p>
+            <p className="truncate text-sm font-medium text-sidebar-foreground">{displayName}</p>
+            <p className="truncate text-xs text-sidebar-foreground/65">{user?.email || 'admin@example.com'}</p>
           </div>
         </div>
       </div>

@@ -24,7 +24,7 @@ import {
   DashboardStableChartSlot,
   DeferredContentFade,
 } from "../../components/dashboard/DashboardSectionLoading";
-import { EmployeeEmptyState } from "../../components/employee/EmployeeEmptyState";
+import { BusinessDashboardAnalyticsEmpty } from "../../components/business/BusinessDashboardAnalyticsEmpty";
 import { businessUi } from "../../components/business/businessDashboardUi";
 import {
   BUSINESS_CHART_AXIS,
@@ -50,6 +50,9 @@ export type BusinessDashboardAnalyticsChartsProps = {
   analyticsTimeframe: "week" | "month" | "year";
 };
 
+const CHART_SLOT_MIN_HEIGHT = "min-h-[260px] sm:min-h-[290px]";
+const CHART_SLOT_EMPTY_MIN_HEIGHT = "min-h-0";
+
 export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardAnalyticsCharts({
   showChartsLoading,
   useDevDemo,
@@ -74,6 +77,10 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
       ? Math.max(1, Math.floor(tipDistributionChartData.length / 6))
       : 0;
 
+  const tipsChartEmpty = !hasTipActivityInPeriod;
+  const employeeChartEmpty =
+    employeeCount === 0 || !hasTipActivityInPeriod || employeePerformance.length === 0;
+
   return (
     <div className={businessUi.analyticsChartsGrid}>
       <motion.div
@@ -93,18 +100,16 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
           >
             <DashboardStableChartSlot
               loading={showChartsLoading && !useDevDemo}
-              minHeightClass="min-h-[260px] sm:min-h-[290px]"
+              minHeightClass={CHART_SLOT_MIN_HEIGHT}
+              contentMinHeightClass={tipsChartEmpty ? CHART_SLOT_EMPTY_MIN_HEIGHT : CHART_SLOT_MIN_HEIGHT}
               skeleton={<DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />}
             >
-              {!hasTipActivityInPeriod || tipDistributionChartData.length === 0 ? (
-                <div className={cn(businessUi.cardPad, "business-dashboard-chart-empty")}>
-                  <EmployeeEmptyState
-                    className="relative z-[1] py-10 sm:py-12"
-                    icon={<CareIcon name="analytics" size="lg" className="text-muted-foreground" />}
-                    title={t("emptyState.chart.title")}
-                    description={t("emptyState.chart.description")}
-                  />
-                </div>
+              {tipsChartEmpty ? (
+                <BusinessDashboardAnalyticsEmpty
+                  icon={<CareIcon name="analytics" size="lg" className="text-muted-foreground" />}
+                  title={t("emptyState.chart.title")}
+                  description={t("emptyState.chart.description")}
+                />
               ) : (
                 <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                   <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">
@@ -175,36 +180,28 @@ export const BusinessDashboardAnalyticsCharts = memo(function BusinessDashboardA
           >
             <DashboardStableChartSlot
               loading={showChartsLoading && !useDevDemo}
-              minHeightClass="min-h-[260px] sm:min-h-[290px]"
+              minHeightClass={CHART_SLOT_MIN_HEIGHT}
+              contentMinHeightClass={employeeChartEmpty ? CHART_SLOT_EMPTY_MIN_HEIGHT : CHART_SLOT_MIN_HEIGHT}
               skeleton={<DashboardChartSkeleton minHeightClass="h-full min-h-0" className="h-full" />}
             >
               {employeeCount === 0 ? (
-                <div className={cn(businessUi.cardPad)}>
-                  <EmployeeEmptyState
-                    className="py-10 sm:py-12"
-                    icon={<Users className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                    title={t("business.dashboard.noEmployees")}
-                    description={t("business.dashboard.noEmployeesChartHint")}
-                  />
-                </div>
+                <BusinessDashboardAnalyticsEmpty
+                  icon={<Users className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                  title={t("business.dashboard.noEmployees")}
+                  description={t("business.dashboard.noEmployeesChartHint")}
+                />
               ) : !hasTipActivityInPeriod ? (
-                <div className={cn(businessUi.cardPad)}>
-                  <EmployeeEmptyState
-                    className="py-10 sm:py-12"
-                    icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                    title={t("emptyState.chart.title")}
-                    description={t("emptyState.chart.description")}
-                  />
-                </div>
+                <BusinessDashboardAnalyticsEmpty
+                  icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                  title={t("emptyState.chart.title")}
+                  description={t("emptyState.chart.description")}
+                />
               ) : employeePerformance.length === 0 ? (
-                <div className={cn(businessUi.cardPad)}>
-                  <EmployeeEmptyState
-                    className="py-10 sm:py-12"
-                    icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
-                    title={t("emptyState.chart.title")}
-                    description={t("emptyState.chart.description")}
-                  />
-                </div>
+                <BusinessDashboardAnalyticsEmpty
+                  icon={<TrendingUp className="h-6 w-6 text-muted-foreground" aria-hidden />}
+                  title={t("emptyState.chart.title")}
+                  description={t("emptyState.chart.description")}
+                />
               ) : (
                 <DeferredContentFade show={!showChartsLoading || useDevDemo}>
                   <div className="business-dashboard-chart-frame flex h-[260px] w-full min-w-0 items-center justify-center sm:h-[290px]">

@@ -10,7 +10,7 @@
   --caretip-hero-line-gap: 0.28rem;
   --caretip-hero-rotating-stack-gap: 0.22rem;
   --caretip-hero-body-size: clamp(0.9375rem, 0.32vw + 0.86rem, 1rem);
-  --caretip-hero-body-lh: 1.65;
+  --caretip-hero-body-lh: var(--caretip-landing-lead-lh, 1.62);
   --caretip-hero-body-color: rgb(45 45 45);
   --caretip-hero-body-color-secondary: rgb(64 64 64);
 }
@@ -187,7 +187,7 @@ html.dark .caretip-landing .caretip-hero-subtitle:not(.caretip-hero-description-
   .caretip-landing .caretip-hero-grid {
     --caretip-hero-headline-size: clamp(2.375rem, 4.8vw + 0.95rem, 2.9375rem);
     --caretip-hero-body-size: 1rem;
-    --caretip-hero-body-lh: 1.68;
+    --caretip-hero-body-lh: var(--caretip-landing-lead-lh, 1.62);
   }
 }
 
@@ -198,7 +198,7 @@ html.dark .caretip-landing .caretip-hero-subtitle:not(.caretip-hero-description-
     --caretip-hero-headline-track: -0.04em;
     --caretip-hero-animated-slot: 1.08em;
     --caretip-hero-body-size: clamp(1rem, 0.32cqw + 0.84rem, 1.0625rem);
-    --caretip-hero-body-lh: 1.7;
+    --caretip-hero-body-lh: var(--caretip-landing-lead-lh, 1.62);
   }
 
   .caretip-landing .caretip-hero-headline-desktop {
@@ -231,7 +231,7 @@ html.dark .caretip-landing .caretip-hero-subtitle:not(.caretip-hero-description-
     --caretip-hero-headline-lh: 1;
     --caretip-hero-headline-track: -0.042em;
     --caretip-hero-body-size: clamp(1.03125rem, 0.38cqw + 0.86rem, 1.125rem);
-    --caretip-hero-body-lh: 1.72;
+    --caretip-hero-body-lh: var(--caretip-landing-lead-lh, 1.62);
     --caretip-hero-animated-slot: 1.06em;
   }
 

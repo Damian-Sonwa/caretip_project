@@ -125,7 +125,7 @@ export function EmployeeQRCodeModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="rounded-2xl border-neutral-200/80 sm:max-w-md">
+      <DialogContent className="rounded-2xl border-border sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{t("employee.qrModal.title")}</DialogTitle>
           <DialogDescription>
@@ -133,7 +133,7 @@ export function EmployeeQRCodeModal({
           </DialogDescription>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-2">
-          <div className="flex min-h-[400px] w-full items-center justify-center rounded-2xl border border-neutral-200/80 bg-stone-50/80 p-4">
+          <div className="flex min-h-[400px] w-full items-center justify-center rounded-2xl border border-border bg-muted/35 p-4">
             {imgLoading ? (
               <div className="w-full max-w-[340px]">
                 <div className="h-[360px] w-full animate-pulse rounded-xl bg-muted" />

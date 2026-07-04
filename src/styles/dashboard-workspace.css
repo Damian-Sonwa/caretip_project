@@ -72,6 +72,15 @@
 }
 
 .caretip-dashboard-shell .business-module-workspace-header .caretip-premium-backdrop,
+.caretip-dashboard-shell .premium-workspace-header {
+  border: none !important;
+  border-bottom: 1px solid hsl(var(--border)) !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+}
+
 .caretip-dashboard-shell .premium-workspace-header .caretip-premium-backdrop {
   display: none !important;
 }
@@ -208,6 +217,13 @@
     border: 1px solid hsl(var(--border)) !important;
     box-shadow: var(--dash-card-shadow) !important;
     backdrop-filter: none !important;
+  }
+
+  .caretip-dashboard-shell .employee-dashboard-hero .employee-hero-chart-frame--photo {
+    border: 1px solid hsl(var(--border) / 0.88);
+    background: hsl(var(--card));
+    border-radius: 1rem;
+    overflow: hidden;
   }
 
   .caretip-dashboard-shell .business-hero-pulse-card__value {
@@ -413,6 +429,11 @@
 .caretip-dashboard-shell .premium-summary-card__inner,
 .caretip-dashboard-shell .premium-summary-card__metric {
   color: inherit !important;
+}
+
+.caretip-dashboard-shell .premium-summary-card__metric {
+  border: 1px solid hsl(var(--border) / 0.72) !important;
+  background: hsl(var(--muted) / 0.35) !important;
 }
 
 .caretip-dashboard-shell .premium-summary-card__metric-value,

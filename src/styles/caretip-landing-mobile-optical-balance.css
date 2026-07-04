@@ -64,12 +64,12 @@
 
   .caretip-landing #for-employees .caretip-mobile-stack-after .caretip-landing-section-cta,
   .caretip-landing #business-section .caretip-mobile-stack-after .caretip-landing-section-cta {
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .caretip-landing #for-employees .caretip-mobile-stack-after .caretip-landing-cta-unit,
   .caretip-landing #business-section .caretip-mobile-stack-after .caretip-landing-cta-unit {
-    margin-inline: auto;
+    margin-inline: 0;
   }
 
   .caretip-landing #payments-trust .caretip-payments-trust-visual {
@@ -104,7 +104,7 @@
   .caretip-landing .caretip-hero-subtitle,
   .caretip-landing .caretip-hero-description-block {
     text-wrap: pretty;
-    line-height: 1.68;
+    line-height: var(--caretip-landing-lead-lh, 1.62);
   }
 
   .caretip-landing .caretip-mobile-section-headline,
@@ -170,11 +170,11 @@
 
 @media (max-width: 767px) {
   .caretip-landing .caretip-landing-section-cta {
-    margin-top: 0.875rem;
+    margin-top: 0;
   }
 
   .caretip-landing .caretip-split-showcase-content-panel--mobile .caretip-landing-section-cta {
-    margin-top: 0.75rem;
+    margin-top: 0;
   }
 }
 

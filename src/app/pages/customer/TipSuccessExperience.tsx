@@ -210,11 +210,11 @@ export function TipSuccessExperience({
               ) : null}
               <ul className="customer-flow-success-summary__meta">
                 <li>
-                  <ShieldCheck className="size-4 shrink-0 text-emerald-600/80" aria-hidden />
+                  <ShieldCheck className="size-4 shrink-0 text-emerald-600/80 dark:text-emerald-400/90" aria-hidden />
                   {t("tipFlow.success.paymentCompleted")}
                 </li>
                 <li>
-                  <Lock className="size-4 shrink-0 text-emerald-600/80" aria-hidden />
+                  <Lock className="size-4 shrink-0 text-emerald-600/80 dark:text-emerald-400/90" aria-hidden />
                   {t("tipFlow.success.secureTransaction")}
                 </li>
                 {transactionId ? (

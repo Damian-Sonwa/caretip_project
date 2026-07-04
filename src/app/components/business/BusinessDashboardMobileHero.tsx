@@ -1,15 +1,14 @@
 import { motion } from "motion/react";
-import { Link } from "react-router";
-import { Sparkles, Users } from "lucide-react";
+import type { ImgHTMLAttributes } from "react";
+import { Sparkles } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { CareIcon } from "@/components/icons";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { businessUi } from "./businessDashboardUi";
+import businessHeroImage from "../../../../images/bizzy001.png";
 import {
   BusinessHeroPulseMetrics,
   type BusinessHeroOperationalPulse,
 } from "./BusinessHeroPulseMetrics";
+import { BusinessDashboardHeroActions } from "./BusinessDashboardHeroActions";
 
 type BusinessDashboardMobileHeroProps = {
   welcomeName?: string;
@@ -52,66 +51,38 @@ export function BusinessDashboardMobileHero({
 
         <p className="business-dashboard-mobile-hero__description">{t("business.hero.sub")}</p>
 
+        <div className="business-dashboard-mobile-hero__visual" aria-hidden>
+          <div className="business-dashboard-mobile-hero__visual-frame">
+            <img
+              src={businessHeroImage}
+              alt=""
+              className="business-dashboard-mobile-hero__visual-img"
+              loading="eager"
+              decoding="async"
+              {...({ fetchpriority: "high" } as unknown as ImgHTMLAttributes<HTMLImageElement>)}
+            />
+          </div>
+        </div>
+
         <motion.div
           className="business-dashboard-mobile-hero__actions"
           initial={{ opacity: 0, y: 6 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.35, ease: "easeOut" }}
         >
-          {isPreviewMode ? (
-            <>
-              <Button
-                type="button"
-                className={cn(businessUi.btnPrimary, "business-dashboard-mobile-hero__btn")}
-                asChild
-              >
-                <Link to="/dashboard/billing/subscription" className={businessUi.heroCtaLink}>
-                  <Sparkles className="business-dashboard-mobile-hero__btn-icon" aria-hidden />
-                  {t("business.dashboard.preview.viewPlans")}
-                </Link>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className={cn(businessUi.btnSecondary, "business-dashboard-mobile-hero__btn business-dashboard-mobile-hero__btn--secondary")}
-                asChild
-              >
-                <Link to="#dashboard-premium-features" className={businessUi.heroCtaLink}>
-                  {t("business.dashboard.preview.exploreFeatures")}
-                </Link>
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button
-                type="button"
-                className={cn(businessUi.btnPrimary, "business-dashboard-mobile-hero__btn")}
-                asChild
-              >
-                <Link to="/dashboard/qr-studio/employees" className={businessUi.heroCtaLink}>
-                  <CareIcon name="tableQr" size="sm" className="business-dashboard-mobile-hero__btn-icon" />
-                  {t("business.hero.manageQr")}
-                </Link>
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                className={cn(businessUi.btnSecondary, "business-dashboard-mobile-hero__btn business-dashboard-mobile-hero__btn--secondary")}
-                asChild
-              >
-                <Link to="/dashboard/team/employees" className={businessUi.heroCtaLink}>
-                  <Users className="business-dashboard-mobile-hero__btn-icon" aria-hidden />
-                  {t("business.hero.manageTeam")}
-                </Link>
-              </Button>
-            </>
-          )}
+          <BusinessDashboardHeroActions
+            isPreviewMode={isPreviewMode}
+            className="business-dashboard-mobile-hero__cta-row"
+            buttonClassName="business-dashboard-mobile-hero__btn"
+            secondaryButtonClassName="business-dashboard-mobile-hero__btn business-dashboard-mobile-hero__btn--secondary"
+          />
         </motion.div>
 
         <BusinessHeroPulseMetrics
           loading={heroPulseLoading}
           pulse={operationalPulse}
           isRefreshing={isPeriodRefreshing}
+          className="business-dashboard-mobile-hero__metrics"
         />
       </div>
     </section>

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useEffect, useRef, useState } from "react";
 import { useReducedMotion } from "motion/react";
 import { cn } from "@/lib/utils";
+import { DASHBOARD_MOBILE_DRAWER_PANEL_CLASS } from "@/lib/theme/dashboardSidebarUi";
 import {
   MOBILE_MENU_DISMISS_GUARD_MS,
   canDismissMobileMenuOverlay,
@@ -94,9 +95,11 @@ export function MobileDrawer({
         className={cn(
           "caretip-mobile-drawer-panel fixed z-50 flex touch-manipulation flex-col overflow-x-clip overscroll-contain lg:hidden",
           side === "left"
-            ? "inset-y-0 left-0 w-[min(100%,18rem)] max-w-[85vw] border-r border-neutral-200/80 shadow-xl"
-            : "left-0 right-0 top-full border-b border-border/50 shadow-lg",
-          "bg-gradient-to-b from-white to-stone-50/95 text-sidebar-foreground",
+            ? cn(
+                "inset-y-0 left-0 w-[min(100%,18rem)] max-w-[85vw] border-r",
+                DASHBOARD_MOBILE_DRAWER_PANEL_CLASS,
+              )
+            : cn("left-0 right-0 top-full border-b shadow-lg", DASHBOARD_MOBILE_DRAWER_PANEL_CLASS),
           panelMotionClass,
           className,
         )}

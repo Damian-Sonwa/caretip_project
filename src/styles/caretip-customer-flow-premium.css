@@ -40,7 +40,7 @@
   align-items: center;
   gap: 1rem;
   padding: 1.125rem 1.25rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid hsl(var(--border) / 0.72);
 }
 
 .customer-flow-payment-summary .customer-flow-payment-summary__amount {
@@ -49,7 +49,11 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.125rem 1.25rem 1.25rem;
-  background: linear-gradient(180deg, rgba(233, 120, 28, 0.04) 0%, transparent 100%);
+  background: linear-gradient(
+    180deg,
+    hsl(var(--primary) / 0.06) 0%,
+    transparent 100%
+  );
 }
 
 @media (min-width: 640px) {
@@ -161,6 +165,26 @@
 .customer-flow-success-page {
   position: relative;
   overflow: hidden;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+}
+
+:root:not(.dark) .customer-flow-success-page {
+  background: linear-gradient(
+    165deg,
+    #faf8f5 0%,
+    #f3efe8 38%,
+    color-mix(in srgb, var(--success-accent, #e9781c) 6%, #f3efe8) 100%
+  );
+}
+
+.dark .customer-flow-success-page {
+  background: linear-gradient(
+    165deg,
+    hsl(var(--background)) 0%,
+    hsl(var(--card)) 40%,
+    color-mix(in srgb, var(--success-accent, #e9781c) 10%, hsl(var(--background))) 100%
+  );
 }
 
 .customer-flow-success-ambient::before,
@@ -186,13 +210,25 @@
   height: min(18rem, 48vw);
   bottom: -5rem;
   left: -3rem;
-  background: color-mix(in srgb, var(--success-accent, #e9781c) 18%, #f5f0e8);
+  background: color-mix(in srgb, var(--success-accent, #e9781c) 18%, hsl(var(--muted) / 0.35));
+}
+
+.dark .customer-flow-success-ambient::after {
+  background: color-mix(in srgb, var(--success-accent, #e9781c) 14%, hsl(var(--background)));
+  opacity: 0.35;
 }
 
 .customer-flow-success-card {
   position: relative;
   overflow: hidden;
   border-radius: 1.5rem;
+  border: 1px solid hsl(var(--border) / 0.88);
+  background: hsl(var(--card));
+  box-shadow: 0 24px 64px -32px rgb(0 0 0 / 0.22);
+  padding: 1.75rem 1.5rem 1.5rem;
+}
+
+:root:not(.dark) .customer-flow-success-card {
   border: 1px solid color-mix(in srgb, var(--success-accent, #e9781c) 14%, rgba(0, 0, 0, 0.06));
   background: linear-gradient(
     180deg,
@@ -203,8 +239,14 @@
   box-shadow:
     0 24px 64px -32px rgba(15, 23, 42, 0.22),
     0 0 0 1px rgba(255, 255, 255, 0.65) inset;
-  padding: 1.75rem 1.5rem 1.5rem;
   backdrop-filter: blur(12px);
+}
+
+.dark .customer-flow-success-card {
+  border-color: color-mix(in srgb, var(--success-accent, #e9781c) 16%, hsl(var(--border)));
+  box-shadow:
+    0 24px 64px -32px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 hsl(var(--foreground) / 0.04);
 }
 
 @media (min-width: 640px) {
@@ -218,14 +260,14 @@
   font-weight: 700;
   letter-spacing: -0.02em;
   line-height: 1.2;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 .customer-flow-success-card__welcome {
   margin-top: 0.5rem;
   font-size: 0.9375rem;
   line-height: 1.55;
-  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-card__headline {
@@ -233,14 +275,14 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 .customer-flow-success-card__thankyou {
   margin-top: 0.875rem;
   font-size: clamp(1rem, 2.8vw, 1.125rem);
   line-height: 1.6;
-  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-hero__glow {
@@ -294,10 +336,15 @@
 
 .customer-flow-success-appreciation {
   border-radius: 1.125rem;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid hsl(var(--border) / 0.72);
+  background: hsl(var(--muted) / 0.35);
   padding: 1.25rem 1rem 1.125rem;
   text-align: center;
+}
+
+:root:not(.dark) .customer-flow-success-appreciation {
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .customer-flow-success-appreciation__label {
@@ -305,7 +352,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--success-accent, #e9781c) 72%, #6b7280);
+  color: color-mix(in srgb, var(--success-accent, #e9781c) 72%, hsl(var(--muted-foreground)));
 }
 
 .customer-flow-success-appreciation__avatar {
@@ -316,13 +363,13 @@
   font-size: 1.125rem;
   font-weight: 700;
   letter-spacing: -0.01em;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 .customer-flow-success-appreciation__role {
   margin-top: 0.125rem;
   font-size: 0.8125rem;
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-appreciation__quote {
@@ -330,14 +377,20 @@
   font-size: 0.9375rem;
   font-style: italic;
   line-height: 1.55;
-  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-summary {
   border-radius: 1.125rem;
+  border: 1px solid hsl(var(--border) / 0.72);
+  background: hsl(var(--muted) / 0.3);
+  padding: 1.125rem 1.25rem;
+  box-shadow: 0 10px 28px -22px rgb(0 0 0 / 0.35);
+}
+
+:root:not(.dark) .customer-flow-success-summary {
   border: 1px solid rgba(0, 0, 0, 0.06);
   background: linear-gradient(180deg, #fcfcfb 0%, #f8f7f4 100%);
-  padding: 1.125rem 1.25rem;
   box-shadow: 0 10px 28px -22px rgba(15, 23, 42, 0.35);
 }
 
@@ -347,13 +400,13 @@
   justify-content: space-between;
   gap: 1rem;
   padding-bottom: 0.875rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid hsl(var(--border) / 0.72);
 }
 
 .customer-flow-success-summary__amount-label {
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-summary__amount {
@@ -361,7 +414,7 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   font-variant-numeric: tabular-nums;
-  color: var(--foreground);
+  color: hsl(var(--foreground));
 }
 
 .customer-flow-success-summary__meta {
@@ -377,7 +430,7 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.8125rem;
-  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-actions {
@@ -428,13 +481,24 @@
 }
 
 .customer-flow-success-secondary-btn {
-  border: 1.5px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.85);
-  color: var(--foreground);
+  border: 1.5px solid hsl(var(--border));
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
 }
 
 .customer-flow-success-secondary-btn:hover {
   transform: translateY(-1px);
+  border-color: hsl(var(--border));
+  background: hsl(var(--muted) / 0.45);
+  box-shadow: 0 8px 20px -16px rgb(0 0 0 / 0.35);
+}
+
+:root:not(.dark) .customer-flow-success-secondary-btn {
+  border: 1.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+:root:not(.dark) .customer-flow-success-secondary-btn:hover {
   border-color: rgba(0, 0, 0, 0.16);
   background: #fff;
   box-shadow: 0 8px 20px -16px rgba(15, 23, 42, 0.35);
@@ -443,11 +507,26 @@
 .customer-flow-success-trust {
   font-size: 0.75rem;
   line-height: 1.55;
-  color: var(--muted-foreground);
+  color: hsl(var(--muted-foreground));
 }
 
 .customer-flow-success-trust p + p {
   margin-top: 0.25rem;
+}
+
+/* —— Guest flow dark mode — theme surfaces for legacy light utilities —— */
+.dark .customer-flow [class*="bg-[#fafaf8]"],
+.dark .customer-flow [class*="bg-[#fcfcfb]"],
+.dark .customer-flow [class*="bg-[#fff8f2]"] {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark .customer-flow [class*="border-black/"] {
+  border-color: hsl(var(--border) / 0.72) !important;
+}
+
+.dark .customer-flow-trust {
+  border-color: hsl(var(--border) / 0.72) !important;
 }
 
 /* —— Mobile touch polish —— */

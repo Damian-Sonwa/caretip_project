@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { DashboardViewAllLink } from "@/app/components/dashboard/DashboardViewAllLink";
 import { listBusinessCustomerFeedback, type CustomerFeedbackSummary } from "@/app/lib/api";
-import { EmployeeEmptyState } from "@/app/components/employee/EmployeeEmptyState";
+import { BusinessDashboardAnalyticsEmpty } from "@/app/components/business/BusinessDashboardAnalyticsEmpty";
 import { DashboardListSkeleton } from "@/app/components/dashboard/DashboardSectionLoading";
 import { CustomerFeedbackListItem } from "@/app/components/business/CustomerFeedbackListItem";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
@@ -103,8 +103,8 @@ export function RecentCustomerFeedbackPanel({
         {loading ? (
           <DashboardListSkeleton minHeightClass="min-h-[200px]" />
         ) : error ? (
-          <EmployeeEmptyState
-            className="py-8"
+          <BusinessDashboardAnalyticsEmpty
+            variant="panel"
             icon={<MessageSquare className="h-6 w-6 text-muted-foreground" aria-hidden />}
             title={t("business.customerFeedback.loadErrorTitle")}
             description={error}
@@ -115,8 +115,8 @@ export function RecentCustomerFeedbackPanel({
             }
           />
         ) : items.length === 0 ? (
-          <EmployeeEmptyState
-            className="py-8"
+          <BusinessDashboardAnalyticsEmpty
+            variant="panel"
             icon={<Star className="h-6 w-6 text-muted-foreground" aria-hidden />}
             title={t("emptyState.ratings.title")}
             description={t("emptyState.ratings.description")}

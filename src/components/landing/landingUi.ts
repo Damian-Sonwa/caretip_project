@@ -36,7 +36,7 @@ function cnHeroHeadline(layout: string) {
 }
 /** Shared intro/lead copy — hero subtitle + section taglines. */
 const landingLeadCopy =
-  "font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] leading-[1.72] text-muted-foreground";
+  "font-sans text-body-copy font-normal text-pretty tracking-[-0.01em] leading-[1.62] text-muted-foreground";
 function cnHeroSubtitle(layout: string) {
   return `${landingLeadCopy} ${layout}`;
 }
@@ -64,7 +64,7 @@ const sectionIntroChildRhythm =
   "[&>[data-landing-accent]]:mb-0 [&>h2]:mt-3.5 [&>h2:first-child]:mt-0 [&>div~h2]:mt-4 [&>motion.div]:mt-7 sm:[&>motion.div]:mt-8 [&>motion.div~*]:mt-0 [&>div.flex]:mt-7 sm:[&>div.flex]:mt-8";
 /** Narrower centered body copy — ~55–65 character measure for effortless scanning. */
 const sectionLeadReadable =
-  "mx-auto w-full max-w-[min(100%,36rem)] max-lg:leading-[1.72] sm:max-w-[min(100%,38rem)]";
+  "mx-auto w-full max-w-[min(100%,36rem)] sm:max-w-[min(100%,38rem)]";
 function cnBodyLead(layout: string) {
   return `${landingType.bodyLead} ${layout}`;
 }
@@ -199,7 +199,7 @@ export const landingUi = {
     `caretip-mobile-stack-tagline ${sectionLeadReadable} text-center max-lg:px-0 lg:mx-0 lg:max-w-md lg:text-left`,
   ),
   showcaseActionCluster:
-    "mt-5 flex w-full min-w-0 flex-col gap-0 max-lg:items-start lg:mx-0 lg:max-w-none",
+    "caretip-showcase-action-cluster mt-5 flex w-full min-w-0 flex-col max-lg:items-start lg:mx-0 lg:max-w-none",
   showcaseBenefitsPanel:
     "caretip-hospitality-feature-panel caretip-landing-feature-rhythm w-full flex flex-col gap-7 sm:gap-9",
   showcaseBenefits: "mt-0 w-full max-lg:self-start",
@@ -261,9 +261,9 @@ export const landingUi = {
   heroCtaHint:
     "caretip-hero-cta-hint caretip-landing-cta-hint w-full text-center text-[10px] font-medium leading-[1.25] tracking-[0.02em] text-muted-foreground sm:text-[11px] sm:leading-[1.3]",
   sectionCtaCluster:
-    "caretip-landing-section-cta flex w-full justify-center",
+    "caretip-landing-section-cta flex w-full justify-start",
   sectionCtaUnit:
-    "caretip-landing-cta-unit caretip-landing-cta-unit--section flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch mx-auto sm:min-w-[16.25rem] sm:max-w-[18.75rem] sm:w-[17.5rem] sm:items-center",
+    "caretip-landing-cta-unit caretip-landing-cta-unit--section flex w-full max-w-[min(100%,17.5rem)] flex-col items-stretch sm:min-w-[16.25rem] sm:max-w-[18.75rem] sm:w-[17.5rem]",
   sectionCtaPrimary: cnCtaPrimary(
     `${caretipBtnPrimary} caretip-section-cta-button inline-flex items-center justify-center text-center no-underline ${sectionCtaSize} ${sectionCtaWidth}`,
   ),

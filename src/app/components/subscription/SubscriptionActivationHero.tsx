@@ -11,7 +11,7 @@ export function SubscriptionActivationHero({ className }: { className?: string }
   return (
     <section
       className={cn(
-        "relative mx-auto w-full max-w-4xl overflow-hidden rounded-[1.75rem] border border-primary/12 bg-gradient-to-br from-primary/[0.07] via-card to-stone-50/80 p-8 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.14)] sm:p-10 lg:p-12",
+        "relative mx-auto w-full max-w-4xl overflow-hidden rounded-[1.75rem] border border-primary/12 bg-gradient-to-br from-primary/[0.07] via-card to-muted/35 p-8 shadow-[0_12px_40px_-16px_rgba(15,23,42,0.14)] sm:p-10 lg:p-12",
         className,
       )}
       aria-labelledby="dashboard-activation-hero-title"

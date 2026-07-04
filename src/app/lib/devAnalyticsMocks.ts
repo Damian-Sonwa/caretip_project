@@ -53,13 +53,12 @@ export function devMockBusinessTipDistribution(
     return months.map((m, i) => ({ day: m, amount: amounts[i] }));
   }
 
-  // month: 28–31 buckets → render a “current month” style curve.
-  const days = 30;
+  // month: elapsed days in the current month (matches dashboard chart trim).
+  const todayDom = new Date().getDate();
   const points: Array<{ day: string; amount: number }> = [];
-  for (let d = 1; d <= days; d++) {
-    // Mid-month pickup + weekend spikes.
+  for (let d = 1; d <= todayDom; d++) {
     const weekendBoost = d % 7 === 6 || d % 7 === 0 ? 1.35 : 1.0;
-    const mid = 1 + Math.sin(((d - 8) / days) * Math.PI) * 0.35;
+    const mid = 1 + Math.sin(((d - 8) / Math.max(todayDom, 1)) * Math.PI) * 0.35;
     const amt = Math.round(clamp(42 * mid * weekendBoost + (d % 5) * 2, 8, 120));
     points.push({ day: String(d), amount: amt });
   }
@@ -121,12 +120,11 @@ export function devMockBusinessEmployeePerformance(
     { name: "Maya C.", tips: 420, rating: 4.9 },
     { name: "James O.", tips: 355, rating: 4.7 },
     { name: "Sofia R.", tips: 310, rating: 4.8 },
-    { name: "Alex K.", tips: 245, rating: 4.6 },
-    { name: "Front desk", tips: 510, rating: 4.5 },
   ];
   return employees
     .slice()
     .sort((a, b) => b.tips - a.tips)
+    .slice(0, 3)
     .map((e, i) => ({
       name: e.name,
       tips: e.tips,

@@ -5,6 +5,10 @@
 export const DASHBOARD_SIDEBAR_SHELL_CLASS =
   "hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-64 lg:flex-col lg:border-r lg:border-sidebar-border lg:bg-sidebar lg:text-sidebar-foreground";
 
+/** Mobile drawer panel — matches desktop sidebar surfaces (light gradient + dark tokens). */
+export const DASHBOARD_MOBILE_DRAWER_PANEL_CLASS =
+  "border-sidebar-border bg-gradient-to-b from-sidebar to-sidebar-accent/35 text-sidebar-foreground shadow-xl";
+
 export const dashboardSidebarNavLinkBase =
   "flex items-center gap-3 px-3 py-2.5 text-sm font-medium";
 

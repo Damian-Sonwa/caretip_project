@@ -18,7 +18,7 @@
 
   --caretip-narrative-gap-eyebrow-headline: 0.75rem;
   --caretip-narrative-gap-headline-lead: 1rem;
-  --caretip-narrative-gap-lead-lines: 0.625rem;
+  --caretip-narrative-gap-lead-lines: 0.4375rem;
   --caretip-narrative-gap-lead-action: 1.375rem;
 }
 
@@ -26,7 +26,7 @@
   .caretip-landing.caretip-landing--premium {
     --caretip-narrative-gap-eyebrow-headline: 0.875rem;
     --caretip-narrative-gap-headline-lead: 1.125rem;
-    --caretip-narrative-gap-lead-lines: 0.6875rem;
+    --caretip-narrative-gap-lead-lines: 0.5rem;
     --caretip-narrative-gap-lead-action: 1.5rem;
   }
 }
@@ -35,6 +35,12 @@
   .caretip-landing.caretip-landing--premium {
     --caretip-narrative-gap-headline-lead: 1.25rem;
     --caretip-narrative-gap-lead-action: 1.625rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .caretip-landing.caretip-landing--premium {
+    --caretip-narrative-gap-lead-lines: 0.5625rem;
   }
 }
 
@@ -49,7 +55,7 @@
   --caretip-hero-headline-size: clamp(2.25rem, 8.6vw + 0.4rem, 2.875rem);
   --caretip-hero-body-measure: min(100%, 34rem);
   --caretip-hero-body-size: clamp(0.96875rem, 0.35vw + 0.88rem, 1.0625rem);
-  --caretip-hero-body-lh: 1.68;
+  --caretip-hero-body-lh: 1.62;
 }
 
 @media (min-width: 640px) {
@@ -64,7 +70,7 @@
     --caretip-hero-headline-size: clamp(2.625rem, 1.75cqw + 1.75rem, 3.5rem);
     --caretip-hero-body-measure: min(100%, 36rem);
     --caretip-hero-body-size: clamp(1.03125rem, 0.35cqw + 0.88rem, 1.125rem);
-    --caretip-hero-body-lh: 1.72;
+    --caretip-hero-body-lh: var(--caretip-landing-lead-lh, 1.62);
   }
 }
 
@@ -97,7 +103,7 @@
 .caretip-landing.caretip-landing--premium .caretip-showcase-subtitle,
 .caretip-landing.caretip-landing--premium .caretip-mobile-stack-tagline {
   max-width: min(100%, 38ch);
-  line-height: 1.72;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
 }
 
 /* —— Section backgrounds — soft cream + radial glow (lightweight) —— */

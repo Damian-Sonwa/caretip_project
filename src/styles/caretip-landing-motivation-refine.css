@@ -628,7 +628,7 @@ html.dark .caretip-motivation-activity-feed-mobile__dot.caretip-motivation-activ
   }
 
   .caretip-landing #recognition .caretip-motivation-cta {
-    margin-top: 1rem !important;
+    margin-top: 0 !important;
   }
 
   .caretip-landing #recognition .caretip-motivation-activity__live {

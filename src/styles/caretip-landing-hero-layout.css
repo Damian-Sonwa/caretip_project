@@ -9,6 +9,7 @@
   --caretip-narrative-gap-headline-lead: 1.125rem;
   --caretip-narrative-gap-lead-lines: 0.625rem;
   --caretip-narrative-gap-lead-action: 1.5rem;
+  --caretip-narrative-gap-points-action: 1rem;
   --caretip-narrative-gap-intro-content: 2.75rem;
 }
 
@@ -19,6 +20,7 @@
     --caretip-narrative-gap-headline-lead: 1.25rem;
     --caretip-narrative-gap-lead-lines: 0.6875rem;
     --caretip-narrative-gap-lead-action: 1.625rem;
+    --caretip-narrative-gap-points-action: 1.125rem;
     --caretip-narrative-gap-intro-content: 3.25rem;
   }
 }
@@ -38,6 +40,7 @@
   .caretip-public-page {
     --caretip-narrative-gap-headline-lead: 1.5rem;
     --caretip-narrative-gap-lead-action: 1.875rem;
+    --caretip-narrative-gap-points-action: 1.25rem;
     --caretip-narrative-gap-intro-content: 4rem;
   }
 }

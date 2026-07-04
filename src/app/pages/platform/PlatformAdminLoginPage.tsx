@@ -220,7 +220,7 @@ export function PlatformAdminLoginPage() {
           ) : null}
 
           <div className="caretip-auth-card-wrap caretip-auth-enter relative z-10">
-            <AuthBackToHomeNav className="caretip-auth-back-home--standalone" />
+            <AuthBackToHomeNav className="caretip-auth-back-home--standalone" showLogo={false} />
             <div className="caretip-auth-card">
               <div className="caretip-auth-header !mb-5">
                 <div

@@ -16,7 +16,6 @@ export function BusinessLandingSection() {
       { title: t("landing.businessSection.b1Title"), description: t("landing.businessSection.b1Text") },
       { title: t("landing.businessSection.b2Title"), description: t("landing.businessSection.b2Text") },
       { title: t("landing.businessSection.b3Title"), description: t("landing.businessSection.b3Text") },
-      { title: t("landing.businessSection.b4Title"), description: t("landing.businessSection.b4Text") },
     ],
     [t, i18n.language],
   );

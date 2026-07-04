@@ -41,7 +41,7 @@ function formatEur(value: number): string {
 }
 
 const iconBtn =
-  "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-neutral-200/80 bg-white text-foreground transition-colors hover:bg-muted/60";
+  "inline-flex h-9 w-9 items-center justify-center rounded-xl border border-border bg-card text-foreground transition-colors hover:bg-muted/60";
 
 export function EmployeeTipGoalsPage() {
   const { t } = useTranslation();
@@ -205,7 +205,7 @@ export function EmployeeTipGoalsPage() {
             <EmployeeGoalListSkeleton rows={4} />
           ) : loadError ? (
             <div className="px-5 py-8 sm:px-6">
-              <div className="rounded-2xl border border-neutral-200/80 bg-stone-50/80 p-5">
+              <div className="rounded-2xl border border-border bg-muted/35 p-5">
                 <p className="text-sm font-semibold text-foreground">{t("employee.tipGoals.couldNotLoad")}</p>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{loadError}</p>
                 <div className="mt-4 flex gap-2">
@@ -225,7 +225,7 @@ export function EmployeeTipGoalsPage() {
             <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse text-sm">
                 <thead>
-                  <tr className="border-b border-neutral-100 bg-stone-50/80 text-left">
+                  <tr className="border-b border-border bg-muted/35 text-left">
                     <th className="whitespace-nowrap px-5 py-3 text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:px-6">
                       {t("employee.tipGoals.colName")}
                     </th>
@@ -242,7 +242,7 @@ export function EmployeeTipGoalsPage() {
                 </thead>
                 <tbody>
                   {sortedGoals.map((g) => (
-                    <tr key={g.id} className="border-t border-neutral-100/90">
+                    <tr key={g.id} className="border-t border-border/90">
                       <td className="px-5 py-4 font-medium text-foreground sm:px-6">
                         <div className="flex items-center gap-2">
                           <span className="truncate">{g.name}</span>
@@ -328,7 +328,7 @@ export function EmployeeTipGoalsPage() {
         </Card>
 
         <Dialog open={open} onOpenChange={setOpen}>
-          <DialogContent className="rounded-2xl border-neutral-200/80 sm:max-w-md">
+          <DialogContent className="rounded-2xl border-border sm:max-w-md">
             <DialogHeader>
               <DialogTitle>{editing ? t("employee.tipGoals.dialogEdit") : t("employee.tipGoals.dialogCreate")}</DialogTitle>
               <DialogDescription>{t("employee.tipGoals.dialogDesc")}</DialogDescription>

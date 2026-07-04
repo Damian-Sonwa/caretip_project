@@ -11,7 +11,7 @@ export function TeamGrowthUpgradeNotice({ className }: { className?: string }) {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.05] via-white to-stone-50/90 p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.1)] sm:p-6",
+        "relative overflow-hidden rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.05] via-card to-muted/35 p-5 shadow-[0_8px_30px_-12px_rgba(15,23,42,0.1)] sm:p-6",
         className,
       )}
       aria-labelledby="team-growth-notice-title"

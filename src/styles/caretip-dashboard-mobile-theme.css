@@ -1,0 +1,166 @@
+/**
+ * Dashboard mobile theme fixes — Employee, Business, Platform Admin shells.
+ * Scoped to `.caretip-dashboard-shell` below lg only. Desktop (lg+) unchanged.
+ */
+
+@media (max-width: 1023px) {
+  /* ── Remap legacy light utilities inside authenticated dashboards (dark mode) ── */
+  .dark .caretip-dashboard-shell [class*="border-neutral-100"],
+  .dark .caretip-dashboard-shell [class*="border-neutral-200"] {
+    border-color: hsl(var(--border) / 0.88) !important;
+  }
+
+  .dark .caretip-dashboard-shell [class*="bg-stone-50"],
+  .dark .caretip-dashboard-shell [class*="bg-neutral-100"]:not([class*="bg-neutral-100/"]) {
+    background-color: hsl(var(--muted) / 0.45) !important;
+  }
+
+  .dark .caretip-dashboard-shell .bg-white:not([class*="bg-white/"]) {
+    background-color: hsl(var(--card)) !important;
+  }
+
+  .dark .caretip-dashboard-shell .text-neutral-700,
+  .dark .caretip-dashboard-shell .text-neutral-900 {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* ── Flat heroes on mobile (no premium card band) ── */
+  .caretip-dashboard-shell .premium-page-hero,
+  .caretip-dashboard-shell .premium-page-hero__content {
+    min-height: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .caretip-dashboard-shell .employee-dashboard-hero.premium-page-hero,
+  .caretip-dashboard-shell .business-dashboard-hero.premium-page-hero {
+    margin-bottom: clamp(1rem, 2.5vw, 1.5rem) !important;
+  }
+
+  /* ── Employee + business hero metric tiles ── */
+  .caretip-dashboard-shell .employee-hero-account-stats,
+  .caretip-dashboard-shell .business-hero-account-stats {
+    border-top-color: hsl(var(--border)) !important;
+  }
+
+  .caretip-dashboard-shell .employee-hero-account-stats dt,
+  .caretip-dashboard-shell .business-hero-account-stats dt {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  .caretip-dashboard-shell .employee-hero-account-stats dd,
+  .caretip-dashboard-shell .business-hero-account-stats dd,
+  .caretip-dashboard-shell .employee-hero-account-stats dd span,
+  .caretip-dashboard-shell .business-hero-account-stats dd span {
+    color: hsl(var(--foreground)) !important;
+  }
+
+  .caretip-dashboard-shell .employee-hero-account-stats > div,
+  .caretip-dashboard-shell .business-hero-account-stats > div {
+    background: hsl(var(--card)) !important;
+    border-color: hsl(var(--border) / 0.72) !important;
+    box-shadow: var(--dash-card-shadow, 0 1px 2px rgb(0 0 0 / 0.04)) !important;
+  }
+
+  .dark .caretip-dashboard-shell .employee-hero-account-stats > div,
+  .dark .caretip-dashboard-shell .business-hero-account-stats > div,
+  .dark .caretip-dashboard-shell .business-hero-pulse-card {
+    box-shadow: 0 1px 2px rgb(0 0 0 / 0.22) !important;
+  }
+
+  .caretip-dashboard-shell .employee-dashboard-hero .employee-hero-chart-frame--photo {
+    border-color: hsl(var(--border) / 0.88) !important;
+    background: hsl(var(--card)) !important;
+  }
+
+  /* ── Chart / panel shells ── */
+  .caretip-dashboard-shell .business-dashboard-chart-card,
+  .caretip-dashboard-shell .employee-card,
+  .caretip-dashboard-shell .business-card,
+  .caretip-dashboard-shell .dashboard-table-panel,
+  .caretip-dashboard-shell .dashboard-filter-panel,
+  .caretip-dashboard-shell .dashboard-surface-panel,
+  .caretip-dashboard-shell .dashboard-settings-panel {
+    background: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: inherit;
+  }
+
+  .caretip-dashboard-shell .business-dashboard-panel-card__header[class*="border-neutral"],
+  .caretip-dashboard-shell [class*="CardHeader"][class*="border-neutral"] {
+    border-color: hsl(var(--border) / 0.88) !important;
+  }
+
+  /* ── Period toggle + action tiles ── */
+  .caretip-dashboard-shell .dashboard-period-toggle {
+    background: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .caretip-dashboard-shell .dashboard-action-tile {
+    background: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--foreground)) !important;
+  }
+
+  /* ── Tables ── */
+  .caretip-dashboard-shell .dashboard-table-panel thead th,
+  .caretip-dashboard-shell table thead th {
+    background: hsl(var(--muted) / 0.35) !important;
+    color: hsl(var(--muted-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  .caretip-dashboard-shell .dashboard-table-panel tbody tr {
+    border-color: hsl(var(--border) / 0.72) !important;
+  }
+
+  /* ── Mobile drawer footer / profile ── */
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel .border-neutral-200,
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel [class*="border-neutral-200"] {
+    border-color: hsl(var(--sidebar-border)) !important;
+  }
+
+  /* ── Platform admin stat badges ── */
+  .dark .caretip-dashboard-shell.platform-dashboard [class*="bg-neutral-100"][class*="text-neutral-700"] {
+    background: hsl(var(--muted)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* ── Empty states ── */
+  .caretip-dashboard-shell .employee-empty,
+  .caretip-dashboard-shell .dashboard-chart-empty,
+  .caretip-dashboard-shell .business-dashboard-chart-empty,
+  .caretip-dashboard-shell .business-dashboard-analytics-empty,
+  .caretip-dashboard-shell .premium-empty-state {
+    color: hsl(var(--muted-foreground));
+    background: hsl(var(--card)) !important;
+  }
+
+  .caretip-dashboard-shell .employee-empty [class*="rounded-lg"][class*="bg-muted"],
+  .caretip-dashboard-shell .premium-empty-state__icon {
+    background: hsl(var(--muted)) !important;
+    color: hsl(var(--muted-foreground)) !important;
+  }
+}
+
+/* Portaled dashboard overlays — Radix renders outside `.caretip-dashboard-shell` */
+.dark [data-slot="sheet-content"] [class*="stone-50"],
+.dark [data-slot="dialog-content"] [class*="stone-50"],
+.dark [data-slot="sheet-content"] [class*="via-white"],
+.dark [data-slot="dialog-content"] [class*="via-white"] {
+  --tw-gradient-to: hsl(var(--muted) / 0.35) var(--tw-gradient-to-position);
+  --tw-gradient-from: hsl(var(--background)) var(--tw-gradient-from-position);
+  --tw-gradient-stops: var(--tw-gradient-from), hsl(var(--card)) var(--tw-gradient-via-position), var(--tw-gradient-to);
+}
+
+.dark [data-slot="sheet-content"] [class*="bg-white"]:not([class*="bg-white/"]),
+.dark [data-slot="dialog-content"] [class*="bg-white"]:not([class*="bg-white/"]) {
+  background-color: hsl(var(--card)) !important;
+}
+
+.dark [data-slot="sheet-content"] [class*="border-neutral-200"],
+.dark [data-slot="dialog-content"] [class*="border-neutral-200"] {
+  border-color: hsl(var(--border)) !important;
+}

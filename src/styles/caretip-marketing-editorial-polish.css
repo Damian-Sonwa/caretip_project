@@ -91,13 +91,32 @@
 .caretip-pricing-plans-intro__subtitle,
 .caretip-how-hero-v2__subtitle {
   max-width: var(--caretip-marketing-measure);
-  line-height: 1.72;
   text-wrap: pretty;
+}
+
+.caretip-landing .caretip-mobile-stack-tagline,
+.caretip-landing .caretip-section-intro > p,
+.caretip-landing .caretip-hospitality-subtitle,
+.caretip-landing .caretip-split-showcase-content-panel > p,
+.caretip-landing .caretip-motivation-copy p,
+.caretip-landing .caretip-final-cta-subtitle,
+.caretip-marketing-lead {
+  line-height: var(--caretip-landing-lead-lh, 1.62);
+}
+
+.caretip-public-page .caretip-public-page-hero > p,
+.caretip-public-page .caretip-public-marketing-section-subtitle,
+.caretip-features-hero-v2__lead,
+.caretip-features-hero-v2__body,
+.caretip-pricing-hero-v2__subtitle,
+.caretip-pricing-plans-intro__subtitle,
+.caretip-how-hero-v2__subtitle {
+  line-height: 1.72;
 }
 
 .caretip-landing-density-lead {
   max-width: var(--caretip-marketing-measure);
-  line-height: 1.72;
+  line-height: var(--caretip-landing-lead-lh, 1.62);
 }
 
 /* —— Split layouts: copy aligns with visual top —— */

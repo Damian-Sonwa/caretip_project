@@ -45,3 +45,33 @@
     transition: none !important;
   }
 }
+
+/* Mobile drawer — align with desktop sidebar tokens in dark mode (lg:hidden panel only). */
+@media (max-width: 1023px) {
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel {
+    background: linear-gradient(
+      to bottom,
+      hsl(var(--sidebar)),
+      hsl(var(--sidebar-accent) / 0.35)
+    );
+    color: hsl(var(--sidebar-foreground));
+    border-color: hsl(var(--sidebar-border));
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel .text-muted-foreground {
+    color: hsl(var(--sidebar-foreground) / 0.62);
+  }
+
+  .caretip-dashboard-shell .caretip-mobile-drawer-panel .text-foreground {
+    color: hsl(var(--sidebar-foreground));
+  }
+
+  .caretip-dashboard-shell.business-dashboard .caretip-mobile-drawer-panel .business-sidebar-child-link:hover {
+    background: hsl(var(--sidebar-accent) / 0.65);
+  }
+
+  .caretip-dashboard-shell.business-dashboard .caretip-mobile-drawer-panel .business-sidebar-group .business-dash-nav-link:not(.business-dash-nav-link--active):hover {
+    background: hsl(var(--sidebar-accent));
+    color: hsl(var(--sidebar-accent-foreground));
+  }
+}
