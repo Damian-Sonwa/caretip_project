@@ -22,7 +22,7 @@ export function BusinessSidebar() {
       className={cn("business-sidebar", DASHBOARD_SIDEBAR_SHELL_CLASS)}
     >
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
-        <CareTipLogo size="sm" />
+        <CareTipLogo size="sidebar" />
       </div>
 
       <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, "min-h-0 flex-1 overflow-y-auto overscroll-contain px-0")}>

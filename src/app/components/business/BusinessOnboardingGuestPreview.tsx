@@ -292,7 +292,7 @@ export function BusinessOnboardingGuestPreview({
           >
             <div className="business-onboarding-guest-preview__chrome-header">
               <CareTipLogo
-                size="xs"
+                size="customer"
                 className="business-onboarding-guest-preview__chrome-caretip-logo shrink-0"
               />
               <div className="business-onboarding-guest-preview__chrome-titles">

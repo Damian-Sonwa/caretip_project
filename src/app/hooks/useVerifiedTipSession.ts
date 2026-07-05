@@ -62,6 +62,7 @@ export function useVerifiedTipSession(
         sessionId: DEV_MOCK.sessionId,
         paymentIntentId: null,
         transactionId: "dev_tx_001",
+        receiptNumber: "CT-2026-00001",
         employee: { id: DEV_MOCK.employeeId, name: DEV_MOCK.employeeName, avatar: null },
         businessId: DEV_MOCK.businessId,
         locationId: DEV_MOCK.venue.locationId,

@@ -29,6 +29,7 @@ test.describe("Landing hero spacing polish", () => {
         const headline = document.querySelector(".caretip-hero-headline");
         const subtitle = document.querySelector(".caretip-hero-subtitle.caretip-landing-copy-paragraphs");
         const cta = document.querySelector(".caretip-hero-cta-cluster");
+        const showcase = document.querySelector(".caretip-hero-grid__showcase");
         const paras = subtitle?.querySelectorAll("p") ?? [];
 
         const rect = (el: Element | null) => el?.getBoundingClientRect();
@@ -36,6 +37,7 @@ test.describe("Landing hero spacing polish", () => {
         const h = rect(headline);
         const s = rect(subtitle);
         const c = rect(cta);
+        const v = rect(showcase);
         const p0 = rect(paras[0] ?? null);
         const p1 = rect(paras[1] ?? null);
 
@@ -44,12 +46,17 @@ test.describe("Landing hero spacing polish", () => {
           paragraphGapPx:
             p0 && p1 ? Math.round(p1.top - p0.bottom) : null,
           bodyToCtaPx: s && c ? Math.round(c.top - s.bottom) : null,
+          ctaToVisualPx: c && v ? Math.round(v.top - c.bottom) : null,
           bodyMaxWidthPx: subtitle ? Math.round(subtitle.getBoundingClientRect().width) : null,
         };
       });
 
       expect(spacing.headlineToBodyPx).toBeGreaterThanOrEqual(22);
       expect(spacing.bodyToCtaPx).toBeGreaterThanOrEqual(26);
+      if (viewport.width < 1024) {
+        expect(spacing.ctaToVisualPx).toBeGreaterThanOrEqual(28);
+        expect(spacing.ctaToVisualPx).toBeLessThanOrEqual(48);
+      }
       if (spacing.paragraphGapPx != null) {
         expect(spacing.paragraphGapPx).toBeGreaterThanOrEqual(18);
         expect(spacing.paragraphGapPx).toBeLessThanOrEqual(24);

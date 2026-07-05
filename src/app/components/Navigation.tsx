@@ -123,7 +123,7 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
                   onClick={() => closeMobileMenu("navigate")}
                   className="flex min-h-11 min-w-0 items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 >
-                  <CareTipLogo size="header" layoutIsolatedDouble />
+                  <CareTipLogo size="nav" />
                 </Link>
                 <button
                   type="button"
@@ -137,10 +137,7 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
 
               <div className="shrink-0 px-5 pb-4 space-y-3">
                 <LanguageSwitcher variant="drawer" />
-                <div className="flex items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 px-3 py-2">
-                  <span className="text-sm font-medium text-foreground">{t("theme.appearance.title")}</span>
-                  <ThemeQuickToggle />
-                </div>
+                <ThemeQuickToggle variant="drawer" />
               </div>
 
               <div className="mx-5 shrink-0 border-t border-border/60" />
@@ -242,7 +239,7 @@ export const Navigation = memo(function Navigation({ variant = "default" }: { va
                 isDark && "rounded-xl bg-card px-2 py-1 shadow-sm ring-1 ring-border/60",
               )}
             >
-              <CareTipLogo size="header" layoutIsolatedDouble />
+              <CareTipLogo size="nav" />
             </Link>
 
             <div

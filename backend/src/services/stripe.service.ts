@@ -11,6 +11,7 @@ import {
 } from "./tipPaymentEligibility.service.js";
 import { recordCheckoutFunnelEvent } from "./checkoutFunnelMetrics.service.js";
 import { QR_FUNNEL_EVENT_TYPES, recordQrFunnelEvent } from "./qr/qrFunnelEvent.service.js";
+import { allocateTipReceiptNumber } from "./tipReceipt.service.js";
 
 let stripeSingleton: Stripe | null = null;
 
@@ -497,9 +498,12 @@ export async function handlePaymentSuccess(paymentIntentId: string): Promise<voi
     data.amount = confirmedEur;
   }
 
-  await prisma.transaction.update({
-    where: { id: pending.id },
-    data,
+  await prisma.$transaction(async (tx) => {
+    const receiptNumber = await allocateTipReceiptNumber(tx, pending.createdAt);
+    await tx.transaction.update({
+      where: { id: pending.id },
+      data: { ...data, receiptNumber },
+    });
   });
 
   const emitSnapshot = await loadTipEmitSnapshot(pending.employeeId, pending.businessId);
@@ -691,8 +695,11 @@ export async function handleSuccessfulTipPayment(session: Stripe.Checkout.Sessio
   console.log("ATTEMPTING TIP INSERT", payload);
 
   try {
-    const tip = await prisma.transaction.create({
-      data: payload,
+    const tip = await prisma.$transaction(async (tx) => {
+      const receiptNumber = await allocateTipReceiptNumber(tx);
+      return tx.transaction.create({
+        data: { ...payload, receiptNumber },
+      });
     });
 
     console.log("TIP CREATED", tip.id);

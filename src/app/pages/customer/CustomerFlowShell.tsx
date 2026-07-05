@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { LoadingSpinner } from "@/app/components/ui/loading-spinner";
 import { cn } from "@/lib/utils";
 import { customerFlowUi as cf } from "./customerFlowUi";
-import { CustomerVenueBanner } from "../../components/customer/CustomerVenueBanner";
 import { CustomerJourneyHeader } from "./CustomerJourneyHeader";
 import { CustomerJourneyCareTipAttribution } from "./CustomerJourneyCareTipAttribution";
 import type { CustomerJourneyEmployeeIdentity, CustomerJourneyVenueBrand } from "./customerJourneyBrand";
@@ -48,7 +47,6 @@ export function CustomerFlowShell({
 
   return (
     <div className={cn(withBottomCta ? cf.pageWithBottomCta : cf.page, className)}>
-      {venue.branding?.premium ? <CustomerVenueBanner branding={venue.branding} /> : null}
       <CustomerJourneyHeader
         leading={headerLeading}
         trailing={headerTrailing}

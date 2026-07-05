@@ -961,11 +961,9 @@
 }
 
 .business-onboarding-guest-preview__chrome-caretip-logo {
-  height: 2rem;
-  max-height: 2rem;
-  min-height: 2rem;
-  width: auto;
-  max-width: 4.75rem;
+  width: 90px;
+  max-width: 90px;
+  height: auto;
 }
 
 .business-onboarding-guest-preview__meta-row {

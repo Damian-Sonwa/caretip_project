@@ -314,7 +314,7 @@ export const landingUi = {
   heroCopyDesktop:
     "max-lg:items-start max-lg:text-left max-lg:pb-0 max-lg:pt-0 lg:min-w-0 lg:px-0",
   heroShowcaseColDesktop:
-    "relative z-0 w-full max-lg:mt-1 max-lg:pb-0 sm:max-lg:mt-1.5 lg:mt-0 lg:min-w-0 lg:flex-1 lg:px-0",
+    "relative z-0 w-full max-lg:mt-0 max-lg:pb-0 lg:mt-0 lg:min-w-0 lg:flex-1 lg:px-0",
   heroPhoneFrame:
     "relative mx-auto aspect-[2/3] w-full max-w-[min(92vw,360px)] overflow-hidden rounded-[clamp(18px,3.8vw,26px)] border border-neutral-200/95 bg-white py-0 shadow-[0_16px_40px_-24px_rgba(15,23,42,0.14),0_6px_20px_-12px_rgba(15,23,42,0.08),inset_0_1px_0_rgba(255,255,255,0.94)] ring-1 ring-black/[0.04] max-md:aspect-[3/4] dark:border-neutral-600/90 dark:bg-neutral-900 dark:shadow-[0_22px_52px_-20px_rgba(0,0,0,0.4)] dark:ring-white/[0.06] sm:max-w-[380px] sm:rounded-[clamp(22px,4.5vw,40px)] md:aspect-[2/3] md:max-w-full md:rounded-[clamp(22px,4.5vw,40px)]",
   /** 1:1 frame for square hero art (German glassy mockup) — cover fills without crop. */

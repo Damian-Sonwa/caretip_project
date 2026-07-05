@@ -112,6 +112,37 @@ test.describe("Mobile hamburger menu", () => {
     await firstMobileNavLink(page).click();
     await expectMenuClosed(page);
   });
+
+  test("appearance toggle switches theme from mobile drawer", async ({ page }) => {
+    await openMobileMenu(page);
+    const panel = mobileNavPanel(page);
+    const themePill = panel.getByRole("button", { name: /^(Theme|Design)$/i });
+    await expect(themePill).toBeVisible();
+
+    const html = page.locator("html");
+    const wasDark = await html.evaluate((el) => el.classList.contains("dark"));
+
+    await themePill.click();
+    await expect
+      .poll(async () => html.evaluate((el) => el.classList.contains("dark")))
+      .not.toBe(wasDark);
+
+    await themePill.click();
+    await expect
+      .poll(async () => html.evaluate((el) => el.classList.contains("dark")))
+      .toBe(wasDark);
+  });
+
+  test("appearance row expands and selects system theme", async ({ page }) => {
+    await openMobileMenu(page);
+    const panel = mobileNavPanel(page);
+    const appearanceRow = panel.locator(".caretip-public-mobile-nav-drawer__theme-trigger");
+    await appearanceRow.click();
+    const systemOption = panel.getByRole("option", { name: /^System$/i });
+    await expect(systemOption).toBeVisible();
+    await systemOption.click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", /light|dark/);
+  });
 });
 
 test.describe("Mobile landing load (P0 performance)", () => {

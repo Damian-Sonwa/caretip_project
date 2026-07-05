@@ -10,6 +10,7 @@ import {
   type BusinessBrandingSettings,
 } from "../../../lib/api";
 import {
+  brandingFromSettings,
   DEFAULT_BRAND_PRIMARY_COLOR,
   DEFAULT_BRAND_SECONDARY_COLOR,
   isValidBrandHex,
@@ -43,6 +44,7 @@ import { Textarea } from "@/app/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { businessUi } from "@/app/components/business/businessDashboardUi";
 import { QrReliabilityScore } from "../QrReliabilityScore";
+import { BrandedGuestSuccessPreview } from "./BrandedGuestSuccessPreview";
 import { isQrExportAllowed, type QrReliabilityReport } from "../../../lib/qrBranded";
 import { isQrModuleContrastSafe } from "../../../lib/qrReliability";
 import { QR_TEMPLATE_PRESETS } from "../../../lib/qrTemplateStyles";
@@ -80,6 +82,43 @@ export function BusinessBrandingSettingsPanel({ businessName, canEdit }: Busines
   const [qrAccentColor, setQrAccentColor] = useState(DEFAULT_BRAND_PRIMARY_COLOR);
   const [qrBackgroundColor, setQrBackgroundColor] = useState(DEFAULT_QR_BACKGROUND_COLOR);
   const [reliabilityReport, setReliabilityReport] = useState<QrReliabilityReport | null>(null);
+
+  const previewGuestBranding = useMemo(() => {
+    if (!settings) return null;
+    return brandingFromSettings(
+      {
+        ...settings,
+        brandPrimaryColor: primaryColor,
+        brandSecondaryColor: secondaryColor,
+        welcomeMessage: welcomeMessage.trim() || null,
+        thankYouMessage: thankYouMessage.trim() || null,
+        brandDisplayName: brandDisplayName.trim() || null,
+        brandTagline: brandTagline.trim() || null,
+        qrTemplate,
+        qrBorderStyle,
+        qrShape,
+        qrAccentColor,
+        qrBackgroundColor,
+      },
+      brandDisplayName.trim() || businessName,
+      canEdit,
+    );
+  }, [
+    settings,
+    primaryColor,
+    secondaryColor,
+    welcomeMessage,
+    thankYouMessage,
+    brandDisplayName,
+    brandTagline,
+    qrTemplate,
+    qrBorderStyle,
+    qrShape,
+    qrAccentColor,
+    qrBackgroundColor,
+    businessName,
+    canEdit,
+  ]);
 
   const previewBranding = useMemo(() => {
     const opts = qrOptionsFromBrandingFields(
@@ -590,6 +629,21 @@ export function BusinessBrandingSettingsPanel({ businessName, canEdit }: Busines
               />
               <p className="text-xs text-muted-foreground">{thankYouMessage.length}/250</p>
             </div>
+
+            {previewGuestBranding ? (
+              <div className="space-y-3 border-t border-border/70 pt-6">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">{t("business.branding.successPreviewTitle")}</p>
+                  <p className="text-xs text-muted-foreground">{t("business.branding.successPreviewDesc")}</p>
+                </div>
+                <BrandedGuestSuccessPreview
+                  businessName={brandDisplayName.trim() || businessName}
+                  logoPath={settings?.logoPath ?? null}
+                  branding={previewGuestBranding}
+                  thankYouMessage={thankYouMessage.trim() || null}
+                />
+              </div>
+            ) : null}
           </CardContent>
         </Card>
 

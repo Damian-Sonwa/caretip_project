@@ -3154,6 +3154,7 @@ export type TipSessionContextResponse =
       sessionId: string;
       paymentIntentId: string | null;
       transactionId: string;
+      receiptNumber: string | null;
       employee: { id: string; name: string; avatar: string | null } | null;
       businessId: string;
       locationId: string | null;

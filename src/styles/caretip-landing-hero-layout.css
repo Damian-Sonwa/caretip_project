@@ -215,9 +215,11 @@ html.dark .caretip-landing .caretip-hero-section[data-hero-art="en"] .caretip-he
   .caretip-landing .caretip-hero-grid {
     /* ~12.5% above 0.75rem — mobile/tablet only; desktop stays on --caretip-tagline-size */
     --caretip-hero-tagline-size: 0.84375rem;
+    /* CTA cluster → hero art / float metrics (28–40px) */
+    --caretip-hero-gap-cta-visual: clamp(1.75rem, 5.5vw, 2.5rem);
   }
 
   .caretip-landing .caretip-hero-grid__showcase {
-    margin-top: 0.5rem;
+    margin-top: var(--caretip-hero-gap-cta-visual);
   }
 }

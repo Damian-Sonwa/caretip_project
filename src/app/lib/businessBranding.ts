@@ -50,6 +50,18 @@ export function resolveGuestThankYouMessage(
   return fallbackMessage.trim() || DEFAULT_GUEST_THANK_YOU_MESSAGE;
 }
 
+/** Completion-screen line under the venue name — never the QR landing welcome message. */
+export function resolveGuestCompletionSupportingText(
+  branding: Pick<PublicGuestBranding, "premium" | "brandTagline"> | null | undefined,
+  fallbackMessage: string,
+): string {
+  if (branding?.premium) {
+    const tagline = branding.brandTagline?.trim();
+    if (tagline) return tagline;
+  }
+  return fallbackMessage.trim();
+}
+
 /** Primary accent for guest journey UI (completion CTA, icon ring). */
 export function guestBrandAccentColor(
   branding: Pick<PublicGuestBranding, "premium" | "brandPrimaryColor" | "qrAccentColor"> | null | undefined,

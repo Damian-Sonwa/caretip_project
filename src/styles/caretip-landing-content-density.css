@@ -213,7 +213,7 @@ html.dark .caretip-expandable-info-card__image-label {
 @media (max-width: 1023px) {
   .caretip-landing .caretip-showcase-action-cluster,
   .caretip-landing .caretip-motivation-after {
-    gap: 0.75rem;
+    gap: max(1.125rem, var(--caretip-narrative-gap-points-action, 1rem));
     align-items: stretch;
   }
 

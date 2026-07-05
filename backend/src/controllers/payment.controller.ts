@@ -10,6 +10,7 @@ import { TipPaymentEligibilityError } from "../services/tipPaymentEligibility.se
 import { absolutizePublicMediaPath } from "../utils/publicMediaUrl.js";
 import { resolveScanSessionId } from "../services/qr/qrScanRequestContext.js";
 import { QR_FUNNEL_EVENT_TYPES, recordQrFunnelEvent } from "../services/qr/qrFunnelEvent.service.js";
+import { ensureTransactionReceiptNumber } from "../services/tipReceipt.service.js";
 
 /**
  * POST /api/payments/create-tip-session
@@ -128,7 +129,14 @@ export async function getTipSessionContext(req: Request, res: Response) {
     const tx = piId
       ? await prisma.transaction.findFirst({
           where: { stripePaymentIntentId: piId, status: "success" },
-          select: { id: true, employeeId: true, businessId: true, locationId: true, tableId: true },
+          select: {
+            id: true,
+            employeeId: true,
+            businessId: true,
+            locationId: true,
+            tableId: true,
+            receiptNumber: true,
+          },
         })
       : null;
 
@@ -138,11 +146,15 @@ export async function getTipSessionContext(req: Request, res: Response) {
         select: { id: true, name: true, avatar: true },
       });
 
+      const receiptNumber =
+        tx.receiptNumber?.trim() || (await ensureTransactionReceiptNumber(tx.id));
+
       return res.json({
         status: "ready",
         sessionId: ctx.sessionId,
         paymentIntentId: ctx.paymentIntentId,
         transactionId: tx.id,
+        receiptNumber: receiptNumber ?? null,
         employee: employee
           ? {
               id: employee.id,

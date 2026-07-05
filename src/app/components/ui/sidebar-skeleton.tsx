@@ -20,7 +20,12 @@ export function SidebarSkeleton({ className, variant = "desktop" }: SidebarSkele
   return (
     <aside className={cn(shell, className)} aria-label="Loading navigation" aria-busy="true">
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
-        <div className="h-10 w-[min(100%,7.5rem)] max-w-[7.5rem] rounded-md bg-muted animate-pulse" />
+        <div
+          className={cn(
+            "rounded-md bg-muted animate-pulse",
+            variant === "desktop" ? "h-[45px] w-[120px]" : "h-9 w-[96px]",
+          )}
+        />
       </div>
 
       <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, variant === "desktop" ? "" : "px-4")}>

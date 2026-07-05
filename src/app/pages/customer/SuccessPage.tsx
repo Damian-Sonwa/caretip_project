@@ -39,10 +39,6 @@ export function SuccessPage() {
   const businessIdForVenue =
     verification.phase === "ready" ? verification.context.businessId : null;
   const venueBrand = useCustomerVenueBrand(businessIdForVenue, t("tipFlow.common.venue"));
-  const thankYouMessage = resolveGuestThankYouMessage(
-    venueBrand.branding,
-    t("tipFlow.completion.defaultThankYou"),
-  );
   const employeeFallback = useMemo(
     () => ({
       name: displayEmployeeName ?? t("tipFlow.common.theTeamMember"),
@@ -110,10 +106,13 @@ export function SuccessPage() {
     <TipSuccessExperience
       venue={venueBrand}
       employee={employee}
-      thankYouMessage={thankYouMessage}
-      headline={t("tipFlow.success.celebrationHeadlineSent")}
+      thankYouMessage={resolveGuestThankYouMessage(
+        venueBrand.branding,
+        t("tipFlow.success.tipSentConfirmation"),
+      )}
+      headline={t("tipFlow.success.celebrationHeadline")}
       tipAmount={tipAmount}
-      transactionId={verification.context.transactionId}
+      receiptNumber={verification.context.receiptNumber}
       primaryLabel={t("tipFlow.success.leaveFeedback")}
       secondaryLabel={t("tipFlow.success.backHome")}
       onPrimary={goToRating}

@@ -26,7 +26,7 @@ export function CustomerJourneyCareTipAttribution({
       role="contentinfo"
       aria-label={label}
     >
-      <CareTipLogo size="customerHeader" className="shrink-0" />
+      <CareTipLogo size="badge" className="shrink-0" />
       <span className={cf.customerJourneyAttributionLabel}>{label}</span>
     </div>
   );

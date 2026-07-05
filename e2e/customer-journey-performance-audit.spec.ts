@@ -266,6 +266,7 @@ async function installMocks(page: import("@playwright/test").Page) {
         sessionId: MOCK.sessionId,
         paymentIntentId: "pi_audit",
         transactionId: "tx_audit_001",
+        receiptNumber: "CT-2026-00042",
         employee: { id: MOCK.employeeId, name: MOCK.employeeName, avatar: null },
         businessId: MOCK.businessId,
         locationId: null,

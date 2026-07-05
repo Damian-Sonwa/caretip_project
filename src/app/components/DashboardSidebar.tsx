@@ -28,7 +28,7 @@ export function DashboardSidebar() {
       className="hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:z-40 lg:w-64 lg:border-r lg:border-border lg:bg-card/50 lg:backdrop-blur-xl"
     >
       <div className={DASHBOARD_SIDEBAR_BRAND_CLASS}>
-        <CareTipLogo size="sm" />
+        <CareTipLogo size="sidebar" />
       </div>
 
       <nav className={cn(DASHBOARD_SIDEBAR_NAV_CLASS, "px-4")}>

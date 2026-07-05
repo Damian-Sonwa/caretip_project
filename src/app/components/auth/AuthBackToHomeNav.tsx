@@ -39,10 +39,7 @@ export function AuthBackToHomeNav({
           )}
           aria-label={label}
         >
-          <CareTipLogo
-            size="xs"
-            className="!h-9 !max-h-9 !min-h-9 !max-w-[7.5rem] sm:!max-w-[8.5rem]"
-          />
+          <CareTipLogo size="auth" />
         </Link>
       ) : null}
       <Link
